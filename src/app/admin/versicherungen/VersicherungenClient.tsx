@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { SearchIcon, PhoneIcon, MailIcon, GlobeIcon, PlusIcon, XIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
 import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
 
 type Versicherung = {
   id: string
@@ -140,37 +141,35 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
       </div>
 
       {/* Create-Modal */}
-      {creating && (
-        <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setCreating(false)}>
-          <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
-              <h2 className="text-base font-semibold text-claimondo-navy">Neue Versicherung</h2>
-              <button onClick={() => setCreating(false)} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
-            </div>
-            <div className="p-5 space-y-3">
-              {(['name', 'schaden_telefon', 'schaden_email', 'hotline_telefon', 'webseite', 'adresse', 'plz', 'stadt', 'bafin_nummer'] as const).map(key => (
-                <div key={key}>
-                  <label className="text-xs text-claimondo-ondo mb-0.5 block">{key === 'name' ? 'Name *' : key.replace(/_/g, ' ')}</label>
-                  <input value={(form as Record<string, string | null>)[key] ?? ''} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value || null }))}
-                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
-                </div>
-              ))}
-              <div className="flex gap-2 pt-2">
-                <button onClick={handleCreate} disabled={saving || !form.name?.trim()}
-                  className="flex-1 py-2 bg-[#4573A2] text-white rounded-lg text-sm font-medium hover:bg-[#1E3A5F] disabled:opacity-50">
-                  {saving ? 'Speichert...' : 'Erstellen'}
-                </button>
-                <button onClick={() => setCreating(false)} className="px-4 py-2 bg-[#f8f9fb] text-claimondo-navy rounded-lg text-sm">Abbrechen</button>
+      <Modal open={creating} onClose={() => setCreating(false)} noPadding hideCloseButton maxWidth={512} ariaLabel="Neue Versicherung">
+        <div className="max-h-[80vh] overflow-y-auto">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
+            <h2 className="text-base font-semibold text-claimondo-navy">Neue Versicherung</h2>
+            <button onClick={() => setCreating(false)} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
+          </div>
+          <div className="p-5 space-y-3">
+            {(['name', 'schaden_telefon', 'schaden_email', 'hotline_telefon', 'webseite', 'adresse', 'plz', 'stadt', 'bafin_nummer'] as const).map(key => (
+              <div key={key}>
+                <label className="text-xs text-claimondo-ondo mb-0.5 block">{key === 'name' ? 'Name *' : key.replace(/_/g, ' ')}</label>
+                <input value={(form as Record<string, string | null>)[key] ?? ''} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value || null }))}
+                  className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]" />
               </div>
+            ))}
+            <div className="flex gap-2 pt-2">
+              <button onClick={handleCreate} disabled={saving || !form.name?.trim()}
+                className="flex-1 py-2 bg-[#4573A2] text-white rounded-lg text-sm font-medium hover:bg-[#1E3A5F] disabled:opacity-50">
+                {saving ? 'Speichert...' : 'Erstellen'}
+              </button>
+              <button onClick={() => setCreating(false)} className="px-4 py-2 bg-[#f8f9fb] text-claimondo-navy rounded-lg text-sm">Abbrechen</button>
             </div>
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* Detail-Panel */}
-      {selected && (
-        <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div className="glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <Modal open={selected !== null} onClose={() => setSelected(null)} noPadding hideCloseButton maxWidth={512} ariaLabel="Versicherer-Detail">
+        {selected && (
+          <div className="max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
               <h2 className="text-base font-semibold text-claimondo-navy">{selected.name}</h2>
               <button onClick={() => setSelected(null)} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
@@ -213,8 +212,8 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
               )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   )
 }
