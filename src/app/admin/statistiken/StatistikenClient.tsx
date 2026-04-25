@@ -6,6 +6,7 @@ import {
   LineChart, Line,
 } from 'recharts'
 import DrillDownModal from '@/components/admin/DrillDownModal'
+import PageHeader from '@/components/shared/PageHeader'
 import type { DrillDownItem } from '@/lib/analytics'
 import type {
   UserStatistikRolle,
@@ -470,7 +471,7 @@ export default function StatistikenClient({
       <header className="sticky top-0 z-10 bg-white border-b border-claimondo-border shadow-sm px-4 py-3">
         <div className="max-w-[1600px] mx-auto space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h1 className="text-xl font-semibold text-claimondo-navy">Statistiken</h1>
+            <PageHeader title="Statistiken" />
             <div className="flex items-center gap-3 flex-wrap">
               {/* Zeitraum */}
               <div className="flex bg-[#f8f9fb] rounded-lg p-0.5">

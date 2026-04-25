@@ -12,6 +12,7 @@ import {
   ChevronLeftIcon, ChevronRightIcon,
   VideoIcon, HardHatIcon, PhoneIcon,
 } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 export type TerminRow = {
   id: string
@@ -116,34 +117,35 @@ export default function KundeTermineClient({
   return (
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-5">
       {/* Header + View-Toggle */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0D1B3E]">Meine Termine</h1>
-          <p className="text-sm text-claimondo-ondo mt-1">Alle Gutachter-Termine zu deinen Fällen.</p>
-        </div>
-        <div className="flex items-center rounded-xl border border-claimondo-border bg-white p-0.5 gap-0.5 shrink-0 mt-1">
-          <button
-            type="button"
-            onClick={() => setView('liste')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              view === 'liste' ? 'bg-[#0D1B3E] text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
-            }`}
-          >
-            <ListIcon className="w-3.5 h-3.5" />
-            Liste
-          </button>
-          <button
-            type="button"
-            onClick={() => setView('kalender')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-              view === 'kalender' ? 'bg-[#0D1B3E] text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
-            }`}
-          >
-            <CalendarIcon className="w-3.5 h-3.5" />
-            Kalender
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Meine Termine"
+        description="Alle Gutachter-Termine zu deinen Fällen."
+        size="lg"
+        actions={
+          <div className="flex items-center rounded-xl border border-claimondo-border bg-white p-0.5 gap-0.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setView('liste')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                view === 'liste' ? 'bg-[#0D1B3E] text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
+              }`}
+            >
+              <ListIcon className="w-3.5 h-3.5" />
+              Liste
+            </button>
+            <button
+              type="button"
+              onClick={() => setView('kalender')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                view === 'kalender' ? 'bg-[#0D1B3E] text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
+              }`}
+            >
+              <CalendarIcon className="w-3.5 h-3.5" />
+              Kalender
+            </button>
+          </div>
+        }
+      />
 
       {termine.length === 0 && (
         <div className="bg-white rounded-2xl border border-claimondo-border p-10 text-center">
