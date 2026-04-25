@@ -8,6 +8,7 @@ import WichtigeUpdatesWidget from './_components/WichtigeUpdatesWidget'
 import DashboardStats from './_components/DashboardStats'
 import TageskalenderWidget from './_components/TageskalenderWidget'
 import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
+import PageHeader from '@/components/shared/PageHeader'
 
 // KFZ-155: Admin-Dashboard Rework — komplett überarbeitet.
 // AAR-414: WidgetSkeleton auf <LoadingSkeleton variant="block" /> migriert
@@ -34,11 +35,8 @@ export default async function AdminDashboardPage() {
     <div className="h-full overflow-y-auto bg-[#f8f9fb]">
       <div className="py-5 space-y-4 min-h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between flex-shrink-0">
-          <div>
-            <h1 className="text-xl font-semibold text-claimondo-navy">Dashboard</h1>
-            <p className="text-xs text-claimondo-ondo">Live-Steuerung &amp; Tagesueberblick</p>
-          </div>
+        <div className="flex-shrink-0">
+          <PageHeader title="Dashboard" description="Live-Steuerung & Tagesüberblick" />
         </div>
 
         {/* Row 1: Kritische Updates (conditional, voll-breit) */}

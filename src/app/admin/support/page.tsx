@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
+import PageHeader from '@/components/shared/PageHeader'
 
 const STATUS_COLOR: Record<string, string> = {
   neu: 'bg-[#4573A2]/5 text-[#4573A2]',
@@ -27,11 +27,8 @@ export default async function SupportPage() {
   return (
     <div className="py-6 overflow-y-auto" style={{ height: '100%' }}>
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-lg font-semibold text-claimondo-navy">Support-Tickets</h1>
-            <p className="text-claimondo-ondo text-xs">{(probleme ?? []).length} gemeldete Probleme</p>
-          </div>
+        <div className="mb-4">
+          <PageHeader title="Support-Tickets" description={`${(probleme ?? []).length} gemeldete Probleme`} />
         </div>
 
         {(probleme ?? []).length === 0 ? (

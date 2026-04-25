@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { FINANCE } from '@/lib/finance/constants'
+import PageHeader from '@/components/shared/PageHeader'
 import FinanceClient from './FinanceClient'
 import AbrechnungenSection from './AbrechnungenSection'
 import AusstehendeZahlungenTable from '../../_components/AusstehendeZahlungenTable'
@@ -691,18 +692,20 @@ export default async function FinancePage() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Sticky Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-claimondo-border flex-shrink-0">
-        <div>
-          <h1 className="text-lg font-semibold text-claimondo-navy">Finanzen</h1>
-          <p className="text-xs text-claimondo-ondo">Umsatz, Provision & Kennzahlen</p>
-        </div>
-        <div className="flex items-center gap-2 text-[10px] font-medium">
-          <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">MRR {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(mrr)}</span>
-          <span className="bg-[#4573A2]/5 text-[#4573A2] px-2 py-0.5 rounded-full">{(aktiveSvs ?? []).length} SVs</span>
-          {kanzleiVollmachtenDiesenMonat > 0 && (
-            <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Vollmachten</span>
-          )}
-        </div>
+      <div className="px-4 py-3 bg-white border-b border-claimondo-border flex-shrink-0">
+        <PageHeader
+          title="Finanzen"
+          description="Umsatz, Provision & Kennzahlen"
+          actions={
+            <div className="flex items-center gap-2 text-[10px] font-medium">
+              <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">MRR {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(mrr)}</span>
+              <span className="bg-[#4573A2]/5 text-[#4573A2] px-2 py-0.5 rounded-full">{(aktiveSvs ?? []).length} SVs</span>
+              {kanzleiVollmachtenDiesenMonat > 0 && (
+                <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Vollmachten</span>
+              )}
+            </div>
+          }
+        />
       </div>
       {/* Scrollbarer Content */}
       <div className="flex-1 overflow-y-auto">
