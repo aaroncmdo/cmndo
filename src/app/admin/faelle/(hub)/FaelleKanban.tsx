@@ -53,16 +53,31 @@ const COLUMNS = [
   { key: 'abgeschlossen', label: 'Fertig', color: 'text-emerald-700', bg: 'bg-emerald-600' },
 ]
 
-function mapStatus(status: string): string {
+function mapStatus(status: string, aktuellePhase?: string | null): string {
   if (COLUMNS.some(c => c.key === status)) return status
+  // Welle-6 Aliase
   if (status === 'qc-pruefung') return 'filmcheck'
   if (status === 'regulierung') return 'regulierung-laeuft'
   if (status === 'begutachtung-laeuft') return 'besichtigung'
-  if (status === 'nachbesichtigung-laeuft') return 'regulierung-laeuft'
-  if (status === 'vs-abgelehnt') return 'regulierung-laeuft'
-  if (status === 'regulierung-laeuft') return 'regulierung'
-  if (status === 'vs-abgelehnt') return 'regulierung'
   if (status === 'zahlung-eingegangen') return 'abgeschlossen'
+  // Welle-7 claims.status-Werte (via AAR-854 Trigger)
+  if (status === 'onboarding') {
+    // Feinmapping via aktuelle_phase wenn vorhanden
+    if (aktuellePhase?.includes('sv_unterwegs') || aktuellePhase === 'sv_vor_ort' || aktuellePhase === 'begutachtung_abgeschlossen') return 'besichtigung'
+    if (aktuellePhase?.includes('gutachten') || aktuellePhase === 'qc_bestanden') return 'gutachten-eingegangen'
+    if (aktuellePhase === 'termin_bestaetigt') return 'sv-termin'
+    return 'ersterfassung'
+  }
+  if (status === 'in_bearbeitung') {
+    if (aktuellePhase?.includes('sv_unterwegs') || aktuellePhase === 'sv_vor_ort' || aktuellePhase === 'begutachtung_abgeschlossen') return 'besichtigung'
+    if (aktuellePhase?.includes('gutachten') || aktuellePhase === 'qc_bestanden') return 'gutachten-eingegangen'
+    if (aktuellePhase === 'termin_bestaetigt') return 'sv-termin'
+    return 'sv-zugewiesen'
+  }
+  if (status === 'vs_kontakt') return 'regulierung-laeuft'
+  if (status === 'reguliert') return 'abgeschlossen'
+  if (status === 'abgelehnt') return 'abgeschlossen'
+  if (status === 'kanzlei') return 'kanzlei-uebergeben'
   return 'ersterfassung'
 }
 
@@ -102,7 +117,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
   const byColumn = useMemo(() => {
     const map: Record<string, Fall[]> = {}
     for (const col of COLUMNS) {
-      map[col.key] = filtered.filter(f => mapStatus(f.status) === col.key)
+      map[col.key] = filtered.filter(f => mapStatus(f.status, f.aktuelle_phase) === col.key)
         .sort((a, b) => (b.ungelesene_nachrichten ?? 0) - (a.ungelesene_nachrichten ?? 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     }
     return map

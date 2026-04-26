@@ -184,8 +184,8 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
       } catch { /* */ }
     }
 
-    // Phase 2c: Kanzlei-Email wenn schon uebergeben
-    const KANZLEI_RELEVANT = ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'regulierung-laeuft', 'nachbesichtigung-laeuft']
+    // Phase 2c: Kanzlei-Email wenn schon übergeben
+    const KANZLEI_RELEVANT = ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'regulierung-laeuft', 'kanzlei', 'vs_kontakt']
     if (fallInfo?.status && KANZLEI_RELEVANT.includes(fallInfo.status)) {
       const { data: kanzleiUsers } = await serviceClient.from('profiles').select('email').eq('rolle', 'kanzlei')
       for (const k of kanzleiUsers ?? []) {

@@ -24,22 +24,17 @@ export type KanbanKarte = {
   updated_at: string | null
 }
 
-// Phasen laut Notion Design & Daten Philosophie (§12 PHASE_META)
+// Phasen 0–6 laut Welle-7 (AAR-839: Phase 7+8+10 entfernt, Endzustände manuell)
 const PHASEN: Array<{ nr: number; name: string }> = [
   { nr: 1, name: 'Ersterfassung & Termin' },
   { nr: 2, name: 'Begutachtung' },
   { nr: 3, name: 'Gutachten & QC' },
   { nr: 4, name: 'Kanzlei-Übergabe' },
   { nr: 5, name: 'Anschlussschreiben' },
-  { nr: 6, name: 'VS-Reaktion' },
-  { nr: 7, name: 'Ablehnung & Klage' },
-  { nr: 8, name: 'Nachbesichtigung' },
-  { nr: 9, name: 'Regulierung & Zahlung' },
-  { nr: 10, name: 'Auszahlung & Abschluss' },
+  { nr: 6, name: 'VS-Kommunikation' },
+  { nr: 9, name: 'Reguliert / Abgeschlossen' },
 ]
 
-// Spalten-Akzentfarben laut §12 (status-pill-Farben verdichtet auf Phasen).
-// Spalten mit Aktionsbedarf für die Kanzlei heller, inaktive Phasen gedeckt.
 const PHASE_ACCENT: Record<number, string> = {
   1: '#eef4fb',
   2: '#fffbeb',
@@ -47,10 +42,7 @@ const PHASE_ACCENT: Record<number, string> = {
   4: '#f5f3ff',
   5: '#f5f3ff',
   6: '#fef2f2',
-  7: '#fef2f2',
-  8: '#fff7ed',
   9: '#ecfdf5',
-  10: '#f0fdf4',
 }
 
 function formatDate(iso: string | null): string {

@@ -32,7 +32,15 @@ interface Props {
 }
 
 const STATUS_LABEL: Record<FallStatusValue, string> = {
-  onboarding: 'Onboarding',
+  // Welle-7
+  onboarding: 'Onboarding (W7)',
+  in_bearbeitung: 'In Bearbeitung (W7)',
+  vs_kontakt: 'VS-Kontakt (W7)',
+  reguliert: 'Reguliert (W7)',
+  abgelehnt: 'Abgelehnt (W7)',
+  kanzlei: 'An Kanzlei (W7)',
+  storniert: 'Storniert',
+  // Welle-6 Backward-Compat
   ersterfassung: 'Ersterfassung',
   'sv-gesucht': 'SV gesucht',
   'sv-zugewiesen': 'SV zugewiesen',
@@ -46,13 +54,8 @@ const STATUS_LABEL: Record<FallStatusValue, string> = {
   anschlussschreiben: 'Anschlussschreiben',
   regulierung: 'Regulierung',
   'regulierung-laeuft': 'Regulierung läuft',
-  'vs-kuerzt': 'VS kürzt',
-  'vs-abgelehnt': 'VS abgelehnt',
-  'nachbesichtigung-laeuft': 'Nachbesichtigung läuft',
-  klage: 'Klage',
   'zahlung-eingegangen': 'Zahlung eingegangen',
   abgeschlossen: 'Abgeschlossen',
-  storniert: 'Storniert',
 }
 
 export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentStatus }: Props) {

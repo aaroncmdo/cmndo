@@ -12,7 +12,15 @@
 // Client-Modal als auch von der Server-Action importiert.
 
 export const ALLOWED_STATUS_VALUES = [
+  // Welle-7 Werte (claims.status via AAR-854 Trigger)
   'onboarding',
+  'in_bearbeitung',
+  'vs_kontakt',
+  'reguliert',
+  'abgelehnt',
+  'kanzlei',
+  'storniert',
+  // Welle-6 Werte (Backward-Compat für ältere Fälle)
   'ersterfassung',
   'sv-gesucht',
   'sv-zugewiesen',
@@ -26,13 +34,8 @@ export const ALLOWED_STATUS_VALUES = [
   'anschlussschreiben',
   'regulierung',
   'regulierung-laeuft',
-  'vs-kuerzt',
-  'vs-abgelehnt',
-  'nachbesichtigung-laeuft',
-  'klage',
   'zahlung-eingegangen',
   'abgeschlossen',
-  'storniert',
 ] as const
 
 export type FallStatusValue = (typeof ALLOWED_STATUS_VALUES)[number]
