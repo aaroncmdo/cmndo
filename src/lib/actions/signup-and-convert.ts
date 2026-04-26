@@ -21,7 +21,7 @@ import {
 // Single Source of Truth für Lead→Fall-Feldkopie.
 
 type Result =
-  | { success: true; fallId: string }
+  | { success: true; fallId: string; claimId: string | null }
   | { success: false; error: string; code?: 'EMAIL_EXISTS' }
 
 export async function signupAndConvertLead(input: {
@@ -208,7 +208,22 @@ export async function signupAndConvertLead(input: {
     }
   }
 
-  return { success: true, fallId: fall.id }
+  // AAR-841: claim_id aus faelle nachladen für Caller (KanzleiWunschModal).
+  // createClaimForFall (oben) ist non-blocking — wenn es failed, ist
+  // claim_id NULL und der Modal-Caller skippt die Frage gracefully.
+  let claimId: string | null = null
+  try {
+    const { data: fallRow } = await admin
+      .from('faelle')
+      .select('claim_id')
+      .eq('id', fall.id)
+      .maybeSingle()
+    claimId = (fallRow?.claim_id as string | null) ?? null
+  } catch (err) {
+    console.error('[AAR-841] claim_id-Lookup fehlgeschlagen:', err)
+  }
+
+  return { success: true, fallId: fall.id, claimId }
 }
 
 // AAR-476 Helper: Lädt die Daten die der SignupClient für die Render-

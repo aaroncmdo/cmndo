@@ -23,6 +23,11 @@ export {
 // AAR-842: Kanzlei-Ansprechpartner-Block (zwei Variants)
 export { KanzleiAnsprechpartnerBlock } from './KanzleiAnsprechpartnerBlock'
 
+// AAR-841 Frontend: Kanzlei-Wunsch-Form + Modal-Wrapper + Override-Dropdown (KB)
+export { KanzleiWunschForm } from './KanzleiWunschForm'
+export { KanzleiWunschModal } from './KanzleiWunschModal'
+export { KanzleiWunschDropdown } from './KanzleiWunschDropdown'
+
 // AAR-843: Timeline-Components + Display-Mappings
 export { TimelineView, TimelineEventCard, TimelineFutureSection } from './timeline'
 export {

@@ -16,6 +16,8 @@ import { PasswordInput } from '@/components/ui/PasswordInput'
 import { useFlowStore } from '@/lib/flow/flow-store'
 import { schritt4Schema, type Schritt4FormValues } from '@/lib/flow/schemas/schritt4'
 import { signupAndConvertLead } from '@/lib/actions/signup-and-convert'
+// AAR-841 Frontend: Kanzlei-Frage als Modal direkt nach erfolgreicher Konversion
+import { KanzleiWunschModal } from '@/components/shared/claims'
 
 // AAR-476 C10: Signup + optionale zweistufige Makler-Consent-Box.
 //
@@ -59,6 +61,11 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
     formState: { errors },
   } = form
 
+  // AAR-841: Modal nach Convert-Success vor Redirect. claimId wird aus
+  // signupAndConvertLead-Return geholt; Redirect läuft über onClose.
+  const [kanzleiModalOpen, setKanzleiModalOpen] = useState(false)
+  const [convertedClaimId, setConvertedClaimId] = useState<string | null>(null)
+
   async function onSubmit(values: Schritt4FormValues) {
     setSubmitting(true)
     try {
@@ -82,11 +89,22 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
         return
       }
       resetFlow()
-      toast.success('Account erstellt. Leite weiter …')
-      router.push('/kunde')
+      toast.success('Account erstellt.')
+      // AAR-841: Wenn claimId verfügbar, Modal öffnen — sonst direkt redirect
+      if (result.claimId) {
+        setConvertedClaimId(result.claimId)
+        setKanzleiModalOpen(true)
+      } else {
+        router.push('/kunde')
+      }
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function handleKanzleiModalClose() {
+    setKanzleiModalOpen(false)
+    router.push('/kunde')
   }
 
   const showMaklerBox = lead.hasPromotionCode && !!lead.maklerFirma
@@ -272,6 +290,16 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
           'Account erstellen & Fall absenden'
         )}
       </Button>
+
+      {/* AAR-841: Kanzlei-Frage als Modal direkt nach Convert-Success */}
+      {convertedClaimId && (
+        <KanzleiWunschModal
+          open={kanzleiModalOpen}
+          claimId={convertedClaimId}
+          gefragtInPhase="lead_konvertierung"
+          onClose={handleKanzleiModalClose}
+        />
+      )}
     </form>
   )
 }

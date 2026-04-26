@@ -35,6 +35,8 @@ import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 // AAR-651: Zentrale Fall-Loader-Lib — FALL_SELECT_KUNDE ist die shared
 // Spalten-Liste (52 Felder ohne Brutto-Beträge, AAR-558 C9 Leak-Fix).
 import { getFallById, FALL_SELECT_KUNDE } from '@/lib/fall/queries'
+// AAR-841 Frontend Phase C/3: Re-Frage-Modal nach Phase 4
+import { ReFrageKanzleiClient } from './_components/ReFrageKanzleiClient'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -405,6 +407,25 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     const gutachtenVerfuegbar = !!(fall as Record<string, unknown>).gutachten_eingegangen_am
 
+    // AAR-841 Frontend Phase C/3: Re-Frage-Modal-Trigger.
+    // Bedingungen: kanzlei_wunsch='noch_unentschieden' UND phase >=4 UND
+    // wir haben den Kunden in dieser Phase noch nicht erneut gefragt.
+    const claimId = (fall as Record<string, unknown>).claim_id as string | null
+    let showReFrageKanzlei = false
+    if (claimId) {
+      const { data: claimRow } = await supabase
+        .from('claims')
+        .select('kanzlei_wunsch, phase, kanzlei_wunsch_gefragt_in_phase')
+        .eq('id', claimId)
+        .maybeSingle()
+      const RE_FRAGE_PHASEN = new Set(['4_gutachten_fertig', '5_in_reparatur', '6_kommunikation_versicherung'])
+      showReFrageKanzlei =
+        claimRow?.kanzlei_wunsch === 'noch_unentschieden' &&
+        typeof claimRow?.phase === 'string' &&
+        RE_FRAGE_PHASEN.has(claimRow.phase) &&
+        claimRow?.kanzlei_wunsch_gefragt_in_phase !== 'phase_4_re_frage'
+    }
+
     const kennzeichen = (fall.kennzeichen as string) ?? ''
     const fahrzeug = [(fall.fahrzeug_hersteller as string), (fall.fahrzeug_modell as string)].filter(Boolean).join(' ')
     const adresse = (fall.besichtigungsort_adresse as string) || (fall.unfallort as string) || [(fall.schadens_adresse as string), (fall.schadens_plz as string), (fall.schadens_ort as string)].filter(Boolean).join(', ') || ''
@@ -422,6 +443,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* AAR-770: Mitteilungs-Banner — ganz oben mit Quick-Action */}
         <FallMitteilungenBanner fallId={fall.id as string} rolle="kunde" />
+
+        {/* AAR-841 Frontend Phase C/3: Re-Frage-Modal nach Phase 4 wenn
+            Kunde bei Lead-Konversion "noch unentschieden" gewählt hatte. */}
+        {showReFrageKanzlei && claimId && (
+          <ReFrageKanzleiClient claimId={claimId} />
+        )}
 
         {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
         <KundeJetztZuTunCard aktion={aktion} />

@@ -66,7 +66,7 @@ export async function setKanzleiWunsch(input: {
   claim_id: string
   wunsch: KanzleiWunsch
   eigene_kanzlei?: EigeneKanzleiInput
-  gefragt_in_phase: 'lead_konvertierung' | 'phase_4_re_frage'
+  gefragt_in_phase: 'lead_konvertierung' | 'phase_4_re_frage' | 'kb_override'
 }): Promise<ActionResult> {
   const auth = await requireRole(['admin', 'kundenbetreuer', 'kunde', 'dispatch'])
   if (!auth.success) return { ok: false, error: auth.error }
@@ -78,6 +78,25 @@ export async function setKanzleiWunsch(input: {
     }
     if (!k.email?.trim() && !k.telefon?.trim()) {
       return { ok: false, error: 'Bei eigener Kanzlei ist Email oder Telefon Pflicht' }
+    }
+  }
+
+  // Aaron-Anpassung 3: KB-Override darf bei bereits versendetem Paket nicht
+  // mehr ändern — Daten-Konsistenz mit kanzlei_pakete + UI-Block. Edge-Case
+  // (Kunde widerruft nach Paket-Versand) wird über Admin-Eskalation gelöst.
+  if (input.gefragt_in_phase === 'kb_override') {
+    const adminClient = createAdminClient()
+    const { data: aktivesPaket } = await adminClient
+      .from('kanzlei_pakete')
+      .select('id, status')
+      .eq('claim_id', input.claim_id)
+      .in('status', ['versendet', 'bestaetigt'])
+      .maybeSingle()
+    if (aktivesPaket) {
+      return {
+        ok: false,
+        error: 'Kanzlei-Paket bereits versendet — Wunsch nicht mehr änderbar. Bitte Admin kontaktieren.',
+      }
     }
   }
 
