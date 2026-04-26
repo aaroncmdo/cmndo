@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClipboardListIcon } from 'lucide-react'
+import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClipboardListIcon, WrenchIcon } from 'lucide-react'
 import { TabDropContent } from '@/components/ui/TabDropContent'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
@@ -20,6 +20,9 @@ import DokumenteTab from './_tabs/DokumenteTab'
 // AAR-834: Gutachten-Tab
 import GutachtenTab from './_tabs/GutachtenTab'
 import type { GutachtenMitSv } from '@/lib/gutachten/queries'
+// AAR-836: Reparatur-Tab
+import ReparaturTab from './_tabs/ReparaturTab'
+import type { RepairMitWerkstatt } from '@/lib/repairs/queries'
 import FallSidebar from './_sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
@@ -48,7 +51,7 @@ function toPhasenRolle(r: FallakteRolle): PhasenRolle {
 // AAR-544 (C7): unified Event-Stream für den Timeline-Tab
 import type { FallEvent } from '@/lib/fall/event-stream'
 
-type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline' | 'gutachten'
+type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline' | 'gutachten' | 'reparatur'
 
 const TABS: { id: TabId; label: string; icon: typeof ListIcon }[] = [
   { id: 'uebersicht',    label: 'Übersicht',    icon: ListIcon },
@@ -56,6 +59,7 @@ const TABS: { id: TabId; label: string; icon: typeof ListIcon }[] = [
   { id: 'kommunikation', label: 'Kommunikation', icon: MessageCircleIcon },
   { id: 'prozess',       label: 'Prozess',       icon: GitBranchIcon },
   { id: 'gutachten',     label: 'Gutachten',     icon: ClipboardListIcon },
+  { id: 'reparatur',     label: 'Reparatur',     icon: WrenchIcon },
   { id: 'timeline',      label: 'Timeline',      icon: ActivityIcon },
 ]
 
@@ -93,6 +97,8 @@ type ShellProps = {
   teilnehmer: FallTeilnehmer[]
   // AAR-834: Gutachten für den Gutachten-Tab
   gutachten: GutachtenMitSv[]
+  // AAR-836: Repairs für den Reparatur-Tab
+  repairs: RepairMitWerkstatt[]
   claimId: string | null
 }
 
@@ -108,6 +114,7 @@ export default function FallakteShell({
   currentUserId,
   teilnehmer,
   gutachten,
+  repairs,
   claimId,
 }: ShellProps) {
   const router = useRouter()
@@ -193,6 +200,9 @@ export default function FallakteShell({
             {activeTab === 'prozess' && <ProzessTab subphase={subphase} />}
             {activeTab === 'gutachten' && (
               <GutachtenTab fallId={fall.id} claimId={claimId} gutachten={gutachten} />
+            )}
+            {activeTab === 'reparatur' && (
+              <ReparaturTab fallId={fall.id} claimId={claimId} repairs={repairs} />
             )}
             {activeTab === 'timeline' && <TimelineTab events={events} />}
           </TabDropContent>

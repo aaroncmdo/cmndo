@@ -35,6 +35,8 @@ import { listBelegeZumReview } from '@/lib/beleg-review/actions'
 import { getFallById } from '@/lib/fall/queries'
 // AAR-834: Gutachten-Queries für den Gutachten-Tab
 import { getGutachtenForClaim } from '@/lib/gutachten/queries'
+// AAR-836: Repairs-Queries für den Reparatur-Tab
+import { getRepairsForClaim } from '@/lib/repairs/queries'
 
 export default async function FallaktePage({
   params,
@@ -461,9 +463,12 @@ export default async function FallaktePage({
     }>,
   })
 
-  // AAR-834: Gutachten für den Gutachten-Tab laden (claim_id aus fall)
+  // AAR-834/836: Gutachten + Repairs parallel laden (claim_id aus fall)
   const claimId = (fall as Record<string, unknown>).claim_id as string | null
-  const gutachten = claimId ? await getGutachtenForClaim(claimId) : []
+  const [gutachten, repairs] = await Promise.all([
+    claimId ? getGutachtenForClaim(claimId) : Promise.resolve([]),
+    claimId ? getRepairsForClaim(claimId)   : Promise.resolve([]),
+  ])
 
   // AAR-538 (C1): Subphase + next_hint berechnen (pure function)
   const subphase = resolveSubphase({
@@ -507,6 +512,7 @@ export default async function FallaktePage({
         currentUserId={user.id}
         teilnehmer={teilnehmer}
         gutachten={gutachten}
+        repairs={repairs}
         claimId={claimId}
         dokumenteTabProps={{
           fallId: id,
