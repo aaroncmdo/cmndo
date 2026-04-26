@@ -595,6 +595,148 @@ export type Database = {
           },
         ]
       }
+      airdrop_invitations: {
+        Row: {
+          abgelaufen_am: string | null
+          claim_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          invited_at: string
+          invited_by_party_id: string | null
+          invited_by_user_id: string | null
+          invited_via: string
+          ip_address_open: string | null
+          konvertiert_zu_voll_am: string | null
+          opened_at: string | null
+          responded_at: string | null
+          resulting_party_id: string | null
+          resulting_user_id: string | null
+          status: string
+          token_hash: string
+          token_lookup_prefix: string
+          updated_at: string
+          user_agent_open: string | null
+          withdrawn_at: string | null
+          withdrawn_by_user_id: string | null
+          withdrawn_grund: string | null
+        }
+        Insert: {
+          abgelaufen_am?: string | null
+          claim_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          invited_at?: string
+          invited_by_party_id?: string | null
+          invited_by_user_id?: string | null
+          invited_via: string
+          ip_address_open?: string | null
+          konvertiert_zu_voll_am?: string | null
+          opened_at?: string | null
+          responded_at?: string | null
+          resulting_party_id?: string | null
+          resulting_user_id?: string | null
+          status?: string
+          token_hash: string
+          token_lookup_prefix: string
+          updated_at?: string
+          user_agent_open?: string | null
+          withdrawn_at?: string | null
+          withdrawn_by_user_id?: string | null
+          withdrawn_grund?: string | null
+        }
+        Update: {
+          abgelaufen_am?: string | null
+          claim_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invited_at?: string
+          invited_by_party_id?: string | null
+          invited_by_user_id?: string | null
+          invited_via?: string
+          ip_address_open?: string | null
+          konvertiert_zu_voll_am?: string | null
+          opened_at?: string | null
+          responded_at?: string | null
+          resulting_party_id?: string | null
+          resulting_user_id?: string | null
+          status?: string
+          token_hash?: string
+          token_lookup_prefix?: string
+          updated_at?: string
+          user_agent_open?: string | null
+          withdrawn_at?: string | null
+          withdrawn_by_user_id?: string | null
+          withdrawn_grund?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "airdrop_invitations_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airdrop_invitations_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airdrop_invitations_invited_by_party_id_fkey"
+            columns: ["invited_by_party_id"]
+            isOneToOne: false
+            referencedRelation: "claim_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airdrop_invitations_invited_by_party_id_fkey"
+            columns: ["invited_by_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_parties_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airdrop_invitations_invited_by_user_id_fkey"
+            columns: ["invited_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airdrop_invitations_resulting_party_id_fkey"
+            columns: ["resulting_party_id"]
+            isOneToOne: false
+            referencedRelation: "claim_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airdrop_invitations_resulting_party_id_fkey"
+            columns: ["resulting_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_parties_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airdrop_invitations_resulting_user_id_fkey"
+            columns: ["resulting_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airdrop_invitations_withdrawn_by_user_id_fkey"
+            columns: ["withdrawn_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auth_remember_tokens: {
         Row: {
           created_at: string
@@ -962,6 +1104,726 @@ export type Database = {
           },
         ]
       }
+      claim_mietwagen: {
+        Row: {
+          anbieter: string | null
+          beginn_datum: string | null
+          claim_id: string
+          created_at: string
+          created_by_user_id: string | null
+          ende_datum: string | null
+          erstattbar_max_tage: number | null
+          erstattet_durch_vs: boolean | null
+          erstattung_am: string | null
+          erstattungsbetrag: number | null
+          fahrzeugklasse: string | null
+          gesamtkosten_netto: number | null
+          id: string
+          mietvertrag_nr: string | null
+          notiz: string | null
+          rechnung_url: string | null
+          status: string
+          tage_gesamt: number | null
+          tagespreis_netto: number | null
+          tatsaechliches_ende: string | null
+          updated_at: string
+        }
+        Insert: {
+          anbieter?: string | null
+          beginn_datum?: string | null
+          claim_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          ende_datum?: string | null
+          erstattbar_max_tage?: number | null
+          erstattet_durch_vs?: boolean | null
+          erstattung_am?: string | null
+          erstattungsbetrag?: number | null
+          fahrzeugklasse?: string | null
+          gesamtkosten_netto?: number | null
+          id?: string
+          mietvertrag_nr?: string | null
+          notiz?: string | null
+          rechnung_url?: string | null
+          status?: string
+          tage_gesamt?: number | null
+          tagespreis_netto?: number | null
+          tatsaechliches_ende?: string | null
+          updated_at?: string
+        }
+        Update: {
+          anbieter?: string | null
+          beginn_datum?: string | null
+          claim_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          ende_datum?: string | null
+          erstattbar_max_tage?: number | null
+          erstattet_durch_vs?: boolean | null
+          erstattung_am?: string | null
+          erstattungsbetrag?: number | null
+          fahrzeugklasse?: string | null
+          gesamtkosten_netto?: number | null
+          id?: string
+          mietvertrag_nr?: string | null
+          notiz?: string | null
+          rechnung_url?: string | null
+          status?: string
+          tage_gesamt?: number | null
+          tagespreis_netto?: number | null
+          tatsaechliches_ende?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_mietwagen_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_mietwagen_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_mietwagen_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      claim_parties: {
+        Row: {
+          adresse_land: string
+          adresse_ort: string | null
+          adresse_plz: string | null
+          adresse_strasse: string | null
+          airdrop_eingeladen_am: string | null
+          airdrop_response_am: string | null
+          airdrop_token: string | null
+          anonymisiert_am: string | null
+          anrede: string | null
+          arbeitsunfaehig_bis: string | null
+          arbeitsunfaehig_seit: string | null
+          claim_id: string
+          created_at: string
+          created_by_user_id: string | null
+          email: string | null
+          fahrzeugtyp_klartext: string | null
+          firma: string | null
+          fuehrerscheinklassen: string[] | null
+          fuehrerscheinnummer: string | null
+          geburtsdatum: string | null
+          hat_personenschaden: boolean
+          id: string
+          ist_aktiv: boolean
+          ist_anonymisiert: boolean
+          ist_eingeladen_via_airdrop: boolean
+          ist_fahrer: boolean
+          ist_fahrzeuginsasse: boolean | null
+          ist_gewerbe: boolean
+          ist_halter: boolean
+          kennzeichen: string | null
+          krankenhaus_name: string | null
+          mobil: string | null
+          nachname: string | null
+          notiz: string | null
+          quelle: string
+          reihenfolge: number | null
+          rolle: string
+          telefon: string | null
+          titel: string | null
+          updated_at: string
+          user_id: string | null
+          ust_id: string | null
+          vehicle_id: string | null
+          verletzungsart: string | null
+          versicherung_id: string | null
+          versicherung_klartext: string | null
+          versicherungs_aktenzeichen: string | null
+          versicherungsnummer: string | null
+          vorname: string | null
+        }
+        Insert: {
+          adresse_land?: string
+          adresse_ort?: string | null
+          adresse_plz?: string | null
+          adresse_strasse?: string | null
+          airdrop_eingeladen_am?: string | null
+          airdrop_response_am?: string | null
+          airdrop_token?: string | null
+          anonymisiert_am?: string | null
+          anrede?: string | null
+          arbeitsunfaehig_bis?: string | null
+          arbeitsunfaehig_seit?: string | null
+          claim_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          email?: string | null
+          fahrzeugtyp_klartext?: string | null
+          firma?: string | null
+          fuehrerscheinklassen?: string[] | null
+          fuehrerscheinnummer?: string | null
+          geburtsdatum?: string | null
+          hat_personenschaden?: boolean
+          id?: string
+          ist_aktiv?: boolean
+          ist_anonymisiert?: boolean
+          ist_eingeladen_via_airdrop?: boolean
+          ist_fahrer?: boolean
+          ist_fahrzeuginsasse?: boolean | null
+          ist_gewerbe?: boolean
+          ist_halter?: boolean
+          kennzeichen?: string | null
+          krankenhaus_name?: string | null
+          mobil?: string | null
+          nachname?: string | null
+          notiz?: string | null
+          quelle: string
+          reihenfolge?: number | null
+          rolle: string
+          telefon?: string | null
+          titel?: string | null
+          updated_at?: string
+          user_id?: string | null
+          ust_id?: string | null
+          vehicle_id?: string | null
+          verletzungsart?: string | null
+          versicherung_id?: string | null
+          versicherung_klartext?: string | null
+          versicherungs_aktenzeichen?: string | null
+          versicherungsnummer?: string | null
+          vorname?: string | null
+        }
+        Update: {
+          adresse_land?: string
+          adresse_ort?: string | null
+          adresse_plz?: string | null
+          adresse_strasse?: string | null
+          airdrop_eingeladen_am?: string | null
+          airdrop_response_am?: string | null
+          airdrop_token?: string | null
+          anonymisiert_am?: string | null
+          anrede?: string | null
+          arbeitsunfaehig_bis?: string | null
+          arbeitsunfaehig_seit?: string | null
+          claim_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          email?: string | null
+          fahrzeugtyp_klartext?: string | null
+          firma?: string | null
+          fuehrerscheinklassen?: string[] | null
+          fuehrerscheinnummer?: string | null
+          geburtsdatum?: string | null
+          hat_personenschaden?: boolean
+          id?: string
+          ist_aktiv?: boolean
+          ist_anonymisiert?: boolean
+          ist_eingeladen_via_airdrop?: boolean
+          ist_fahrer?: boolean
+          ist_fahrzeuginsasse?: boolean | null
+          ist_gewerbe?: boolean
+          ist_halter?: boolean
+          kennzeichen?: string | null
+          krankenhaus_name?: string | null
+          mobil?: string | null
+          nachname?: string | null
+          notiz?: string | null
+          quelle?: string
+          reihenfolge?: number | null
+          rolle?: string
+          telefon?: string | null
+          titel?: string | null
+          updated_at?: string
+          user_id?: string | null
+          ust_id?: string | null
+          vehicle_id?: string | null
+          verletzungsart?: string | null
+          versicherung_id?: string | null
+          versicherung_klartext?: string | null
+          versicherungs_aktenzeichen?: string | null
+          versicherungsnummer?: string | null
+          vorname?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_parties_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_versicherung_id_fkey"
+            columns: ["versicherung_id"]
+            isOneToOne: false
+            referencedRelation: "versicherungen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      claim_payments: {
+        Row: {
+          claim_id: string
+          created_at: string
+          created_by_user_id: string | null
+          differenz_betrag: number | null
+          erhaltener_betrag: number | null
+          forderungsbetrag: number | null
+          id: string
+          notiz: string | null
+          status: string
+          updated_at: string
+          zahlungseingang_am: string | null
+          zahlungsreferenz: string | null
+          zahlungsweg: string | null
+        }
+        Insert: {
+          claim_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          differenz_betrag?: number | null
+          erhaltener_betrag?: number | null
+          forderungsbetrag?: number | null
+          id?: string
+          notiz?: string | null
+          status?: string
+          updated_at?: string
+          zahlungseingang_am?: string | null
+          zahlungsreferenz?: string | null
+          zahlungsweg?: string | null
+        }
+        Update: {
+          claim_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          differenz_betrag?: number | null
+          erhaltener_betrag?: number | null
+          forderungsbetrag?: number | null
+          id?: string
+          notiz?: string | null
+          status?: string
+          updated_at?: string
+          zahlungseingang_am?: string | null
+          zahlungsreferenz?: string | null
+          zahlungsweg?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_payments_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_payments_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_payments_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      claim_vehicle_involvements: {
+        Row: {
+          beschaedigung_grad: string | null
+          claim_id: string
+          created_at: string
+          id: string
+          notiz: string | null
+          reihenfolge: number | null
+          rolle: string
+          vehicle_id: string
+        }
+        Insert: {
+          beschaedigung_grad?: string | null
+          claim_id: string
+          created_at?: string
+          id?: string
+          notiz?: string | null
+          reihenfolge?: number | null
+          rolle: string
+          vehicle_id: string
+        }
+        Update: {
+          beschaedigung_grad?: string | null
+          claim_id?: string
+          created_at?: string
+          id?: string
+          notiz?: string | null
+          reihenfolge?: number | null
+          rolle?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_vehicle_involvements_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_vehicle_involvements_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_vehicle_involvements_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      claims: {
+        Row: {
+          abgeschlossen_am: string | null
+          anzahl_beteiligte_total: number
+          auslandskennzeichen: boolean | null
+          bkat_unfallart: string | null
+          claim_nummer: string | null
+          created_at: string
+          created_by_user_id: string | null
+          created_via: string
+          endzustand_gesetzt_am: string | null
+          endzustand_gesetzt_durch_user_id: string | null
+          endzustand_grund: string | null
+          entdeckt_am: string | null
+          fahrerflucht: boolean | null
+          fall_typ: string | null
+          gegner_aktenzeichen: string | null
+          gegner_bekannt: boolean
+          gegner_versicherung_id: string | null
+          gegner_versicherungsnummer: string | null
+          gegnerisches_vehicle_id: string | null
+          geschaedigter_party_id: string | null
+          geschaedigter_user_id: string | null
+          halter_ungleich_fahrer: boolean
+          hat_abschleppung: boolean
+          hat_mietwagen: boolean
+          hat_nutzungsausfall: boolean
+          hat_personenschaden: boolean
+          hat_sachschaden: boolean
+          hergang_kunde_text: string | null
+          hergang_sv_text: string | null
+          id: string
+          kanzlei_wunsch: string
+          kanzlei_wunsch_gefragt_am: string | null
+          kanzlei_wunsch_gefragt_in_phase: string | null
+          kunden_konstellation: string | null
+          kundenbetreuer_id: string | null
+          lead_id: string | null
+          phase: string
+          polizei_aktenzeichen: string | null
+          polizei_bericht_vorhanden: boolean
+          polizei_vor_ort: boolean
+          polizeibericht_status: string | null
+          regulierungs_betrag: number | null
+          sachschaden_beschreibung: string | null
+          schadenart: string
+          schadenort_adresse: string | null
+          schadenort_kategorie: string | null
+          schadenort_land: string
+          schadenort_lat: number | null
+          schadenort_lng: number | null
+          schadenort_ort: string | null
+          schadenort_plz: string | null
+          schadentag: string
+          schadenzeit: string | null
+          status: string
+          unfall_konstellation: string | null
+          unfallskizze_ablehnung_grund: string | null
+          unfallskizze_bestaetigt: boolean | null
+          unfallskizze_generiert_am: string | null
+          unfallskizze_svg: string | null
+          unfallskizze_url: string | null
+          updated_at: string
+          ursache: string | null
+          vehicle_id: string | null
+          verjaehrt_am: string | null
+          verursacher_party_id: string | null
+          verursacher_user_id: string | null
+          vs_ablehnungs_grund: string | null
+        }
+        Insert: {
+          abgeschlossen_am?: string | null
+          anzahl_beteiligte_total?: number
+          auslandskennzeichen?: boolean | null
+          bkat_unfallart?: string | null
+          claim_nummer?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          created_via?: string
+          endzustand_gesetzt_am?: string | null
+          endzustand_gesetzt_durch_user_id?: string | null
+          endzustand_grund?: string | null
+          entdeckt_am?: string | null
+          fahrerflucht?: boolean | null
+          fall_typ?: string | null
+          gegner_aktenzeichen?: string | null
+          gegner_bekannt?: boolean
+          gegner_versicherung_id?: string | null
+          gegner_versicherungsnummer?: string | null
+          gegnerisches_vehicle_id?: string | null
+          geschaedigter_party_id?: string | null
+          geschaedigter_user_id?: string | null
+          halter_ungleich_fahrer?: boolean
+          hat_abschleppung?: boolean
+          hat_mietwagen?: boolean
+          hat_nutzungsausfall?: boolean
+          hat_personenschaden?: boolean
+          hat_sachschaden?: boolean
+          hergang_kunde_text?: string | null
+          hergang_sv_text?: string | null
+          id?: string
+          kanzlei_wunsch?: string
+          kanzlei_wunsch_gefragt_am?: string | null
+          kanzlei_wunsch_gefragt_in_phase?: string | null
+          kunden_konstellation?: string | null
+          kundenbetreuer_id?: string | null
+          lead_id?: string | null
+          phase?: string
+          polizei_aktenzeichen?: string | null
+          polizei_bericht_vorhanden?: boolean
+          polizei_vor_ort?: boolean
+          polizeibericht_status?: string | null
+          regulierungs_betrag?: number | null
+          sachschaden_beschreibung?: string | null
+          schadenart?: string
+          schadenort_adresse?: string | null
+          schadenort_kategorie?: string | null
+          schadenort_land?: string
+          schadenort_lat?: number | null
+          schadenort_lng?: number | null
+          schadenort_ort?: string | null
+          schadenort_plz?: string | null
+          schadentag: string
+          schadenzeit?: string | null
+          status?: string
+          unfall_konstellation?: string | null
+          unfallskizze_ablehnung_grund?: string | null
+          unfallskizze_bestaetigt?: boolean | null
+          unfallskizze_generiert_am?: string | null
+          unfallskizze_svg?: string | null
+          unfallskizze_url?: string | null
+          updated_at?: string
+          ursache?: string | null
+          vehicle_id?: string | null
+          verjaehrt_am?: string | null
+          verursacher_party_id?: string | null
+          verursacher_user_id?: string | null
+          vs_ablehnungs_grund?: string | null
+        }
+        Update: {
+          abgeschlossen_am?: string | null
+          anzahl_beteiligte_total?: number
+          auslandskennzeichen?: boolean | null
+          bkat_unfallart?: string | null
+          claim_nummer?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          created_via?: string
+          endzustand_gesetzt_am?: string | null
+          endzustand_gesetzt_durch_user_id?: string | null
+          endzustand_grund?: string | null
+          entdeckt_am?: string | null
+          fahrerflucht?: boolean | null
+          fall_typ?: string | null
+          gegner_aktenzeichen?: string | null
+          gegner_bekannt?: boolean
+          gegner_versicherung_id?: string | null
+          gegner_versicherungsnummer?: string | null
+          gegnerisches_vehicle_id?: string | null
+          geschaedigter_party_id?: string | null
+          geschaedigter_user_id?: string | null
+          halter_ungleich_fahrer?: boolean
+          hat_abschleppung?: boolean
+          hat_mietwagen?: boolean
+          hat_nutzungsausfall?: boolean
+          hat_personenschaden?: boolean
+          hat_sachschaden?: boolean
+          hergang_kunde_text?: string | null
+          hergang_sv_text?: string | null
+          id?: string
+          kanzlei_wunsch?: string
+          kanzlei_wunsch_gefragt_am?: string | null
+          kanzlei_wunsch_gefragt_in_phase?: string | null
+          kunden_konstellation?: string | null
+          kundenbetreuer_id?: string | null
+          lead_id?: string | null
+          phase?: string
+          polizei_aktenzeichen?: string | null
+          polizei_bericht_vorhanden?: boolean
+          polizei_vor_ort?: boolean
+          polizeibericht_status?: string | null
+          regulierungs_betrag?: number | null
+          sachschaden_beschreibung?: string | null
+          schadenart?: string
+          schadenort_adresse?: string | null
+          schadenort_kategorie?: string | null
+          schadenort_land?: string
+          schadenort_lat?: number | null
+          schadenort_lng?: number | null
+          schadenort_ort?: string | null
+          schadenort_plz?: string | null
+          schadentag?: string
+          schadenzeit?: string | null
+          status?: string
+          unfall_konstellation?: string | null
+          unfallskizze_ablehnung_grund?: string | null
+          unfallskizze_bestaetigt?: boolean | null
+          unfallskizze_generiert_am?: string | null
+          unfallskizze_svg?: string | null
+          unfallskizze_url?: string | null
+          updated_at?: string
+          ursache?: string | null
+          vehicle_id?: string | null
+          verjaehrt_am?: string | null
+          verursacher_party_id?: string | null
+          verursacher_user_id?: string | null
+          vs_ablehnungs_grund?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_endzustand_gesetzt_durch_user_id_fkey"
+            columns: ["endzustand_gesetzt_durch_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_gegner_versicherung_id_fkey"
+            columns: ["gegner_versicherung_id"]
+            isOneToOne: false
+            referencedRelation: "versicherungen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_gegnerisches_vehicle_id_fkey"
+            columns: ["gegnerisches_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_geschaedigter_user_id_fkey"
+            columns: ["geschaedigter_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_kundenbetreuer_id_fkey"
+            columns: ["kundenbetreuer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_verursacher_user_id_fkey"
+            columns: ["verursacher_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_claims_geschaedigter_party"
+            columns: ["geschaedigter_party_id"]
+            isOneToOne: false
+            referencedRelation: "claim_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_claims_geschaedigter_party"
+            columns: ["geschaedigter_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_parties_safe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_claims_verursacher_party"
+            columns: ["verursacher_party_id"]
+            isOneToOne: false
+            referencedRelation: "claim_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_claims_verursacher_party"
+            columns: ["verursacher_party_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_parties_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       communities: {
         Row: {
           beschreibung: string | null
@@ -1119,6 +1981,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cron_jobs_audit: {
+        Row: {
+          duration_ms: number | null
+          ended_at: string | null
+          error_message: string | null
+          id: string
+          job_name: string
+          metadata_jsonb: Json | null
+          rows_processed: number | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          duration_ms?: number | null
+          ended_at?: string | null
+          error_message?: string | null
+          id?: string
+          job_name: string
+          metadata_jsonb?: Json | null
+          rows_processed?: number | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          duration_ms?: number | null
+          ended_at?: string | null
+          error_message?: string | null
+          id?: string
+          job_name?: string
+          metadata_jsonb?: Json | null
+          rows_processed?: number | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
       }
       dokument_katalog: {
         Row: {
@@ -1402,6 +2300,7 @@ export type Database = {
           cardentity_abfrage_am: string | null
           cardentity_enriched_at: string | null
           cardentity_report: Json | null
+          claim_id: string
           created_at: string | null
           datenschutz_akzeptiert: boolean | null
           datenschutz_akzeptiert_am: string | null
@@ -1653,6 +2552,7 @@ export type Database = {
           unfallskizze_url: string | null
           updated_at: string | null
           ust_id: string | null
+          vehicle_id: string | null
           vollmacht_geprueft_am: string | null
           vollmacht_geprueft_von: string | null
           vollmacht_pdf: string | null
@@ -1732,6 +2632,7 @@ export type Database = {
           cardentity_abfrage_am?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
+          claim_id: string
           created_at?: string | null
           datenschutz_akzeptiert?: boolean | null
           datenschutz_akzeptiert_am?: string | null
@@ -1983,6 +2884,7 @@ export type Database = {
           unfallskizze_url?: string | null
           updated_at?: string | null
           ust_id?: string | null
+          vehicle_id?: string | null
           vollmacht_geprueft_am?: string | null
           vollmacht_geprueft_von?: string | null
           vollmacht_pdf?: string | null
@@ -2062,6 +2964,7 @@ export type Database = {
           cardentity_abfrage_am?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
+          claim_id?: string
           created_at?: string | null
           datenschutz_akzeptiert?: boolean | null
           datenschutz_akzeptiert_am?: string | null
@@ -2313,6 +3216,7 @@ export type Database = {
           unfallskizze_url?: string | null
           updated_at?: string | null
           ust_id?: string | null
+          vehicle_id?: string | null
           vollmacht_geprueft_am?: string | null
           vollmacht_geprueft_von?: string | null
           vollmacht_pdf?: string | null
@@ -2353,6 +3257,20 @@ export type Database = {
           zeugen_vorhanden?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "faelle_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faelle_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "faelle_dispatch_id_fkey"
             columns: ["dispatch_id"]
@@ -2442,6 +3360,13 @@ export type Database = {
             columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faelle_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -3028,6 +3953,320 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisationen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gutachten: {
+        Row: {
+          auftragsnummer: string | null
+          bericht_pdf_url: string | null
+          besichtigt_am: string | null
+          besichtigungstermin: string | null
+          claim_id: string
+          created_at: string
+          created_by_user_id: string | null
+          editable_for_kb: boolean
+          editable_for_sv: boolean
+          felder_quelle_jsonb: Json | null
+          fertiggestellt_am: string | null
+          gesamt_schadensbetrag: number | null
+          gutachter_anbieter: string | null
+          id: string
+          laeufer_report_id: string | null
+          notiz: string | null
+          ocr_confidence: number | null
+          ocr_engine: string | null
+          ocr_engine_version: string | null
+          ocr_error_jsonb: Json | null
+          ocr_finished_at: string | null
+          ocr_run_id: string | null
+          ocr_started_at: string | null
+          ocr_status: string
+          pdf_seiten_count: number | null
+          pdf_size_bytes: number | null
+          pdf_uploaded_at: string | null
+          pdf_uploaded_by_user_id: string | null
+          status: string
+          sv_id: string
+          unterschrieben_am: string | null
+          unterschrift_sv_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          auftragsnummer?: string | null
+          bericht_pdf_url?: string | null
+          besichtigt_am?: string | null
+          besichtigungstermin?: string | null
+          claim_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          editable_for_kb?: boolean
+          editable_for_sv?: boolean
+          felder_quelle_jsonb?: Json | null
+          fertiggestellt_am?: string | null
+          gesamt_schadensbetrag?: number | null
+          gutachter_anbieter?: string | null
+          id?: string
+          laeufer_report_id?: string | null
+          notiz?: string | null
+          ocr_confidence?: number | null
+          ocr_engine?: string | null
+          ocr_engine_version?: string | null
+          ocr_error_jsonb?: Json | null
+          ocr_finished_at?: string | null
+          ocr_run_id?: string | null
+          ocr_started_at?: string | null
+          ocr_status?: string
+          pdf_seiten_count?: number | null
+          pdf_size_bytes?: number | null
+          pdf_uploaded_at?: string | null
+          pdf_uploaded_by_user_id?: string | null
+          status?: string
+          sv_id: string
+          unterschrieben_am?: string | null
+          unterschrift_sv_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          auftragsnummer?: string | null
+          bericht_pdf_url?: string | null
+          besichtigt_am?: string | null
+          besichtigungstermin?: string | null
+          claim_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          editable_for_kb?: boolean
+          editable_for_sv?: boolean
+          felder_quelle_jsonb?: Json | null
+          fertiggestellt_am?: string | null
+          gesamt_schadensbetrag?: number | null
+          gutachter_anbieter?: string | null
+          id?: string
+          laeufer_report_id?: string | null
+          notiz?: string | null
+          ocr_confidence?: number | null
+          ocr_engine?: string | null
+          ocr_engine_version?: string | null
+          ocr_error_jsonb?: Json | null
+          ocr_finished_at?: string | null
+          ocr_run_id?: string | null
+          ocr_started_at?: string | null
+          ocr_status?: string
+          pdf_seiten_count?: number | null
+          pdf_size_bytes?: number | null
+          pdf_uploaded_at?: string | null
+          pdf_uploaded_by_user_id?: string | null
+          status?: string
+          sv_id?: string
+          unterschrieben_am?: string | null
+          unterschrift_sv_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_gutachten_ocr_run"
+            columns: ["ocr_run_id"]
+            isOneToOne: false
+            referencedRelation: "ocr_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_laeufer_report_id_fkey"
+            columns: ["laeufer_report_id"]
+            isOneToOne: false
+            referencedRelation: "sv_organisation_laeufer_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_pdf_uploaded_by_user_id_fkey"
+            columns: ["pdf_uploaded_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gutachten_fotos: {
+        Row: {
+          aufnahme_zeitpunkt: string | null
+          beschreibung: string | null
+          claim_id: string
+          created_at: string
+          exif_processed: boolean
+          file_size_bytes: number | null
+          gutachten_id: string
+          id: string
+          kategorie: string | null
+          mime_type: string | null
+          original_filename: string | null
+          position_nr: number | null
+          storage_path: string
+          upload_quelle: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          aufnahme_zeitpunkt?: string | null
+          beschreibung?: string | null
+          claim_id: string
+          created_at?: string
+          exif_processed?: boolean
+          file_size_bytes?: number | null
+          gutachten_id: string
+          id?: string
+          kategorie?: string | null
+          mime_type?: string | null
+          original_filename?: string | null
+          position_nr?: number | null
+          storage_path: string
+          upload_quelle: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          aufnahme_zeitpunkt?: string | null
+          beschreibung?: string | null
+          claim_id?: string
+          created_at?: string
+          exif_processed?: boolean
+          file_size_bytes?: number | null
+          gutachten_id?: string
+          id?: string
+          kategorie?: string | null
+          mime_type?: string | null
+          original_filename?: string | null
+          position_nr?: number | null
+          storage_path?: string
+          upload_quelle?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gutachten_fotos_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_fotos_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_fotos_gutachten_id_fkey"
+            columns: ["gutachten_id"]
+            isOneToOne: false
+            referencedRelation: "gutachten"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_fotos_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gutachten_positionen: {
+        Row: {
+          arbeitszeit_aw: number | null
+          bezeichnung: string
+          claim_id: string
+          created_at: string
+          ersatzteil_nr: string | null
+          gutachten_id: string
+          id: string
+          kategorie: string | null
+          mwst_satz: number | null
+          position_nr: number
+          reparaturart: string | null
+          schadensbetrag_brutto: number | null
+          schadensbetrag_netto: number | null
+          updated_at: string
+        }
+        Insert: {
+          arbeitszeit_aw?: number | null
+          bezeichnung: string
+          claim_id: string
+          created_at?: string
+          ersatzteil_nr?: string | null
+          gutachten_id: string
+          id?: string
+          kategorie?: string | null
+          mwst_satz?: number | null
+          position_nr: number
+          reparaturart?: string | null
+          schadensbetrag_brutto?: number | null
+          schadensbetrag_netto?: number | null
+          updated_at?: string
+        }
+        Update: {
+          arbeitszeit_aw?: number | null
+          bezeichnung?: string
+          claim_id?: string
+          created_at?: string
+          ersatzteil_nr?: string | null
+          gutachten_id?: string
+          id?: string
+          kategorie?: string | null
+          mwst_satz?: number | null
+          position_nr?: number
+          reparaturart?: string | null
+          schadensbetrag_brutto?: number | null
+          schadensbetrag_netto?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gutachten_positionen_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_positionen_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_positionen_gutachten_id_fkey"
+            columns: ["gutachten_id"]
+            isOneToOne: false
+            referencedRelation: "gutachten"
             referencedColumns: ["id"]
           },
         ]
@@ -4094,6 +5333,88 @@ export type Database = {
           },
         ]
       }
+      kanzlei_pakete: {
+        Row: {
+          bestaetigt_am: string | null
+          claim_id: string
+          created_at: string
+          empfaenger_kanzlei_email: string | null
+          empfaenger_kanzlei_kontaktperson: string | null
+          empfaenger_kanzlei_name: string
+          empfaenger_kanzlei_telefon: string | null
+          empfaenger_typ: string
+          id: string
+          inhalt_dokumente_jsonb: Json
+          notiz: string | null
+          status: string
+          updated_at: string
+          versand_external_id: string | null
+          versand_methode: string | null
+          versendet_am: string | null
+          versendet_durch_user_id: string | null
+        }
+        Insert: {
+          bestaetigt_am?: string | null
+          claim_id: string
+          created_at?: string
+          empfaenger_kanzlei_email?: string | null
+          empfaenger_kanzlei_kontaktperson?: string | null
+          empfaenger_kanzlei_name: string
+          empfaenger_kanzlei_telefon?: string | null
+          empfaenger_typ: string
+          id?: string
+          inhalt_dokumente_jsonb?: Json
+          notiz?: string | null
+          status?: string
+          updated_at?: string
+          versand_external_id?: string | null
+          versand_methode?: string | null
+          versendet_am?: string | null
+          versendet_durch_user_id?: string | null
+        }
+        Update: {
+          bestaetigt_am?: string | null
+          claim_id?: string
+          created_at?: string
+          empfaenger_kanzlei_email?: string | null
+          empfaenger_kanzlei_kontaktperson?: string | null
+          empfaenger_kanzlei_name?: string
+          empfaenger_kanzlei_telefon?: string | null
+          empfaenger_typ?: string
+          id?: string
+          inhalt_dokumente_jsonb?: Json
+          notiz?: string | null
+          status?: string
+          updated_at?: string
+          versand_external_id?: string | null
+          versand_methode?: string | null
+          versendet_am?: string | null
+          versendet_durch_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kanzlei_pakete_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kanzlei_pakete_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kanzlei_pakete_versendet_durch_user_id_fkey"
+            columns: ["versendet_durch_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kanzleien: {
         Row: {
           adresse: string | null
@@ -4407,6 +5728,7 @@ export type Database = {
           fahrzeug_standort_place_id: string | null
           fahrzeug_standort_plz: string | null
           fahrzeugschaden_beschreibung: string | null
+          fehlende_felder_jsonb: Json | null
           fin: string | null
           finanzierung_bank: string | null
           finanzierung_leasing: string | null
@@ -4450,6 +5772,9 @@ export type Database = {
           kennzeichen: string | null
           kilometerstand: number | null
           kontaktversuche: number | null
+          konvertiert_am: string | null
+          konvertiert_durch_user_id: string | null
+          konvertiert_zu_claim_id: string | null
           konvertiert_zu_fall_id: string | null
           kunde_adresse: string | null
           kunde_lat: number | null
@@ -4458,6 +5783,7 @@ export type Database = {
           kunde_stadt: string | null
           kunde_strasse: string | null
           kunden_konstellation: string | null
+          lead_nummer: string | null
           leasing_geber: string | null
           letzter_anruf_am: string | null
           letzter_anruf_status: string | null
@@ -4524,6 +5850,7 @@ export type Database = {
           unfallskizze_svg: string | null
           unfallskizze_url: string | null
           updated_at: string | null
+          vehicle_id: string | null
           verpasste_anrufe: number | null
           voice_input_quelle: boolean
           vollmacht_datum: string | null
@@ -4591,6 +5918,7 @@ export type Database = {
           fahrzeug_standort_place_id?: string | null
           fahrzeug_standort_plz?: string | null
           fahrzeugschaden_beschreibung?: string | null
+          fehlende_felder_jsonb?: Json | null
           fin?: string | null
           finanzierung_bank?: string | null
           finanzierung_leasing?: string | null
@@ -4634,6 +5962,9 @@ export type Database = {
           kennzeichen?: string | null
           kilometerstand?: number | null
           kontaktversuche?: number | null
+          konvertiert_am?: string | null
+          konvertiert_durch_user_id?: string | null
+          konvertiert_zu_claim_id?: string | null
           konvertiert_zu_fall_id?: string | null
           kunde_adresse?: string | null
           kunde_lat?: number | null
@@ -4642,6 +5973,7 @@ export type Database = {
           kunde_stadt?: string | null
           kunde_strasse?: string | null
           kunden_konstellation?: string | null
+          lead_nummer?: string | null
           leasing_geber?: string | null
           letzter_anruf_am?: string | null
           letzter_anruf_status?: string | null
@@ -4708,6 +6040,7 @@ export type Database = {
           unfallskizze_svg?: string | null
           unfallskizze_url?: string | null
           updated_at?: string | null
+          vehicle_id?: string | null
           verpasste_anrufe?: number | null
           voice_input_quelle?: boolean
           vollmacht_datum?: string | null
@@ -4775,6 +6108,7 @@ export type Database = {
           fahrzeug_standort_place_id?: string | null
           fahrzeug_standort_plz?: string | null
           fahrzeugschaden_beschreibung?: string | null
+          fehlende_felder_jsonb?: Json | null
           fin?: string | null
           finanzierung_bank?: string | null
           finanzierung_leasing?: string | null
@@ -4818,6 +6152,9 @@ export type Database = {
           kennzeichen?: string | null
           kilometerstand?: number | null
           kontaktversuche?: number | null
+          konvertiert_am?: string | null
+          konvertiert_durch_user_id?: string | null
+          konvertiert_zu_claim_id?: string | null
           konvertiert_zu_fall_id?: string | null
           kunde_adresse?: string | null
           kunde_lat?: number | null
@@ -4826,6 +6163,7 @@ export type Database = {
           kunde_stadt?: string | null
           kunde_strasse?: string | null
           kunden_konstellation?: string | null
+          lead_nummer?: string | null
           leasing_geber?: string | null
           letzter_anruf_am?: string | null
           letzter_anruf_status?: string | null
@@ -4892,6 +6230,7 @@ export type Database = {
           unfallskizze_svg?: string | null
           unfallskizze_url?: string | null
           updated_at?: string | null
+          vehicle_id?: string | null
           verpasste_anrufe?: number | null
           voice_input_quelle?: boolean
           vollmacht_datum?: string | null
@@ -4929,6 +6268,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "leads_konvertiert_durch_user_id_fkey"
+            columns: ["konvertiert_durch_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_konvertiert_zu_claim_id_fkey"
+            columns: ["konvertiert_zu_claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_konvertiert_zu_claim_id_fkey"
+            columns: ["konvertiert_zu_claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "leads_konvertiert_zu_fall_id_fkey"
             columns: ["konvertiert_zu_fall_id"]
             isOneToOne: false
@@ -4961,6 +6321,13 @@ export type Database = {
             columns: ["promotion_code_id"]
             isOneToOne: false
             referencedRelation: "promotion_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
           {
@@ -5615,6 +6982,93 @@ export type Database = {
         }
         Relationships: []
       }
+      ocr_runs: {
+        Row: {
+          ai_usage_log_id: string | null
+          confidence_per_field_jsonb: Json | null
+          cost_usd: number | null
+          created_at: string
+          engine: string
+          engine_version: string
+          error_jsonb: Json | null
+          finished_at: string | null
+          gutachten_id: string
+          id: string
+          overall_confidence: number | null
+          parsed_fields_jsonb: Json | null
+          prompt_hash: string | null
+          raw_response_jsonb: Json | null
+          run_nummer: number
+          started_at: string
+          status: string
+          triggered_by: string
+          triggered_by_user_id: string | null
+          validation_errors_jsonb: Json | null
+          validation_passed: boolean | null
+        }
+        Insert: {
+          ai_usage_log_id?: string | null
+          confidence_per_field_jsonb?: Json | null
+          cost_usd?: number | null
+          created_at?: string
+          engine: string
+          engine_version: string
+          error_jsonb?: Json | null
+          finished_at?: string | null
+          gutachten_id: string
+          id?: string
+          overall_confidence?: number | null
+          parsed_fields_jsonb?: Json | null
+          prompt_hash?: string | null
+          raw_response_jsonb?: Json | null
+          run_nummer: number
+          started_at?: string
+          status?: string
+          triggered_by: string
+          triggered_by_user_id?: string | null
+          validation_errors_jsonb?: Json | null
+          validation_passed?: boolean | null
+        }
+        Update: {
+          ai_usage_log_id?: string | null
+          confidence_per_field_jsonb?: Json | null
+          cost_usd?: number | null
+          created_at?: string
+          engine?: string
+          engine_version?: string
+          error_jsonb?: Json | null
+          finished_at?: string | null
+          gutachten_id?: string
+          id?: string
+          overall_confidence?: number | null
+          parsed_fields_jsonb?: Json | null
+          prompt_hash?: string | null
+          raw_response_jsonb?: Json | null
+          run_nummer?: number
+          started_at?: string
+          status?: string
+          triggered_by?: string
+          triggered_by_user_id?: string | null
+          validation_errors_jsonb?: Json | null
+          validation_passed?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ocr_runs_gutachten_id_fkey"
+            columns: ["gutachten_id"]
+            isOneToOne: false
+            referencedRelation: "gutachten"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_runs_triggered_by_user_id_fkey"
+            columns: ["triggered_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organisationen: {
         Row: {
           akademie_erst_anzahlung_eur: number | null
@@ -6165,6 +7619,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_typ: string
           adresse: string | null
           aircall_email: string | null
           aircall_user_id: string | null
@@ -6178,6 +7633,9 @@ export type Database = {
           created_at: string | null
           eingestellt_am: string | null
           email: string
+          entstanden_aus_airdrop_id: string | null
+          entstanden_aus_claim_id: string | null
+          entstanden_via: string | null
           firma: string | null
           force_password_change: boolean | null
           gehalt_brutto: number | null
@@ -6209,11 +7667,13 @@ export type Database = {
           twofa_telefon: string | null
           twofa_telefon_verifiziert_am: string | null
           updated_at: string | null
+          upgrade_to_voll_at: string | null
           vorname: string | null
           working_hours: Json | null
           zweit_email: string | null
         }
         Insert: {
+          account_typ?: string
           adresse?: string | null
           aircall_email?: string | null
           aircall_user_id?: string | null
@@ -6227,6 +7687,9 @@ export type Database = {
           created_at?: string | null
           eingestellt_am?: string | null
           email: string
+          entstanden_aus_airdrop_id?: string | null
+          entstanden_aus_claim_id?: string | null
+          entstanden_via?: string | null
           firma?: string | null
           force_password_change?: boolean | null
           gehalt_brutto?: number | null
@@ -6258,11 +7721,13 @@ export type Database = {
           twofa_telefon?: string | null
           twofa_telefon_verifiziert_am?: string | null
           updated_at?: string | null
+          upgrade_to_voll_at?: string | null
           vorname?: string | null
           working_hours?: Json | null
           zweit_email?: string | null
         }
         Update: {
+          account_typ?: string
           adresse?: string | null
           aircall_email?: string | null
           aircall_user_id?: string | null
@@ -6276,6 +7741,9 @@ export type Database = {
           created_at?: string | null
           eingestellt_am?: string | null
           email?: string
+          entstanden_aus_airdrop_id?: string | null
+          entstanden_aus_claim_id?: string | null
+          entstanden_via?: string | null
           firma?: string | null
           force_password_change?: boolean | null
           gehalt_brutto?: number | null
@@ -6307,6 +7775,7 @@ export type Database = {
           twofa_telefon?: string | null
           twofa_telefon_verifiziert_am?: string | null
           updated_at?: string | null
+          upgrade_to_voll_at?: string | null
           vorname?: string | null
           working_hours?: Json | null
           zweit_email?: string | null
@@ -6317,6 +7786,27 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_entstanden_aus_airdrop_id_fkey"
+            columns: ["entstanden_aus_airdrop_id"]
+            isOneToOne: false
+            referencedRelation: "airdrop_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_entstanden_aus_claim_id_fkey"
+            columns: ["entstanden_aus_claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_entstanden_aus_claim_id_fkey"
+            columns: ["entstanden_aus_claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
             referencedColumns: ["id"]
           },
         ]
@@ -6821,6 +8311,96 @@ export type Database = {
           },
         ]
       }
+      repairs: {
+        Row: {
+          abgeschlossen_am: string | null
+          auftragsnummer: string | null
+          claim_id: string
+          created_at: string
+          created_by_user_id: string | null
+          geplanter_beginn: string | null
+          gutachten_id: string | null
+          id: string
+          kostenvoranschlag: number | null
+          notiz: string | null
+          status: string
+          tatsaechliche_kosten: number | null
+          tatsaechlicher_beginn: string | null
+          updated_at: string
+          werkstatt_id: string | null
+        }
+        Insert: {
+          abgeschlossen_am?: string | null
+          auftragsnummer?: string | null
+          claim_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          geplanter_beginn?: string | null
+          gutachten_id?: string | null
+          id?: string
+          kostenvoranschlag?: number | null
+          notiz?: string | null
+          status?: string
+          tatsaechliche_kosten?: number | null
+          tatsaechlicher_beginn?: string | null
+          updated_at?: string
+          werkstatt_id?: string | null
+        }
+        Update: {
+          abgeschlossen_am?: string | null
+          auftragsnummer?: string | null
+          claim_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          geplanter_beginn?: string | null
+          gutachten_id?: string | null
+          id?: string
+          kostenvoranschlag?: number | null
+          notiz?: string | null
+          status?: string
+          tatsaechliche_kosten?: number | null
+          tatsaechlicher_beginn?: string | null
+          updated_at?: string
+          werkstatt_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "repairs_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repairs_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repairs_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repairs_gutachten_id_fkey"
+            columns: ["gutachten_id"]
+            isOneToOne: false
+            referencedRelation: "gutachten"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repairs_werkstatt_id_fkey"
+            columns: ["werkstatt_id"]
+            isOneToOne: false
+            referencedRelation: "werkstaetten"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       routing_cache: {
         Row: {
           cached_at: string
@@ -6848,6 +8428,8 @@ export type Database = {
           anzahlung_betrag: number | null
           anzahlung_faellig: number | null
           anzahlung_status: string | null
+          arbeitet_eigenstaendig: boolean
+          bestellungs_kammer: string | null
           brand_accent: string | null
           brand_extracted_at: string | null
           brand_primary: string | null
@@ -6880,10 +8462,12 @@ export type Database = {
           kalender_sync_aktiv: boolean | null
           kalender_sync_letzte: string | null
           kalender_typ: string | null
+          kapazitaeten_jsonb: Json | null
           live_tracking_enabled: boolean | null
           logo_url: string | null
           notizen: string | null
           oebuv_bestellungsnummer: string | null
+          oeffentlich_bestellt: boolean
           offene_faelle: number
           onboarding_anzahlung_betrag: number | null
           onboarding_anzahlung_faellig_am: string | null
@@ -6943,6 +8527,8 @@ export type Database = {
           anzahlung_betrag?: number | null
           anzahlung_faellig?: number | null
           anzahlung_status?: string | null
+          arbeitet_eigenstaendig?: boolean
+          bestellungs_kammer?: string | null
           brand_accent?: string | null
           brand_extracted_at?: string | null
           brand_primary?: string | null
@@ -6975,10 +8561,12 @@ export type Database = {
           kalender_sync_aktiv?: boolean | null
           kalender_sync_letzte?: string | null
           kalender_typ?: string | null
+          kapazitaeten_jsonb?: Json | null
           live_tracking_enabled?: boolean | null
           logo_url?: string | null
           notizen?: string | null
           oebuv_bestellungsnummer?: string | null
+          oeffentlich_bestellt?: boolean
           offene_faelle?: number
           onboarding_anzahlung_betrag?: number | null
           onboarding_anzahlung_faellig_am?: string | null
@@ -7038,6 +8626,8 @@ export type Database = {
           anzahlung_betrag?: number | null
           anzahlung_faellig?: number | null
           anzahlung_status?: string | null
+          arbeitet_eigenstaendig?: boolean
+          bestellungs_kammer?: string | null
           brand_accent?: string | null
           brand_extracted_at?: string | null
           brand_primary?: string | null
@@ -7070,10 +8660,12 @@ export type Database = {
           kalender_sync_aktiv?: boolean | null
           kalender_sync_letzte?: string | null
           kalender_typ?: string | null
+          kapazitaeten_jsonb?: Json | null
           live_tracking_enabled?: boolean | null
           logo_url?: string | null
           notizen?: string | null
           oebuv_bestellungsnummer?: string | null
+          oeffentlich_bestellt?: boolean
           offene_faelle?: number
           onboarding_anzahlung_betrag?: number | null
           onboarding_anzahlung_faellig_am?: string | null
@@ -7443,6 +9035,138 @@ export type Database = {
         }
         Relationships: []
       }
+      sv_buero: {
+        Row: {
+          adresse_land: string
+          adresse_ort: string | null
+          adresse_plz: string | null
+          adresse_strasse: string | null
+          aggregierte_rechnungsstellung: boolean
+          created_at: string
+          email: string | null
+          geo_lat: number | null
+          geo_lng: number | null
+          id: string
+          name: string
+          notiz: string | null
+          rechtsform: string | null
+          status: string
+          telefon: string | null
+          updated_at: string
+          ust_id: string | null
+        }
+        Insert: {
+          adresse_land?: string
+          adresse_ort?: string | null
+          adresse_plz?: string | null
+          adresse_strasse?: string | null
+          aggregierte_rechnungsstellung?: boolean
+          created_at?: string
+          email?: string | null
+          geo_lat?: number | null
+          geo_lng?: number | null
+          id?: string
+          name: string
+          notiz?: string | null
+          rechtsform?: string | null
+          status?: string
+          telefon?: string | null
+          updated_at?: string
+          ust_id?: string | null
+        }
+        Update: {
+          adresse_land?: string
+          adresse_ort?: string | null
+          adresse_plz?: string | null
+          adresse_strasse?: string | null
+          aggregierte_rechnungsstellung?: boolean
+          created_at?: string
+          email?: string | null
+          geo_lat?: number | null
+          geo_lng?: number | null
+          id?: string
+          name?: string
+          notiz?: string | null
+          rechtsform?: string | null
+          status?: string
+          telefon?: string | null
+          updated_at?: string
+          ust_id?: string | null
+        }
+        Relationships: []
+      }
+      sv_buero_memberships: {
+        Row: {
+          buero_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          rolle: string
+          start_date: string
+          sv_id: string
+        }
+        Insert: {
+          buero_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          rolle: string
+          start_date?: string
+          sv_id: string
+        }
+        Update: {
+          buero_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          rolle?: string
+          start_date?: string
+          sv_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sv_buero_memberships_buero_id_fkey"
+            columns: ["buero_id"]
+            isOneToOne: false
+            referencedRelation: "sv_buero"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_buero_memberships_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sv_community: {
+        Row: {
+          beschreibung: string | null
+          created_at: string
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          beschreibung?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          beschreibung?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sv_kalender_verbindungen: {
         Row: {
           calendar_display_name: string | null
@@ -7658,6 +9382,190 @@ export type Database = {
             columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sv_organisation: {
+        Row: {
+          adresse_land: string
+          adresse_ort: string | null
+          adresse_plz: string | null
+          adresse_strasse: string | null
+          created_at: string
+          email: string | null
+          geo_lat: number | null
+          geo_lng: number | null
+          id: string
+          inhaber_sv_id: string
+          name: string
+          notiz: string | null
+          rechtsform: string | null
+          status: string
+          telefon: string | null
+          updated_at: string
+          ust_id: string | null
+        }
+        Insert: {
+          adresse_land?: string
+          adresse_ort?: string | null
+          adresse_plz?: string | null
+          adresse_strasse?: string | null
+          created_at?: string
+          email?: string | null
+          geo_lat?: number | null
+          geo_lng?: number | null
+          id?: string
+          inhaber_sv_id: string
+          name: string
+          notiz?: string | null
+          rechtsform?: string | null
+          status?: string
+          telefon?: string | null
+          updated_at?: string
+          ust_id?: string | null
+        }
+        Update: {
+          adresse_land?: string
+          adresse_ort?: string | null
+          adresse_plz?: string | null
+          adresse_strasse?: string | null
+          created_at?: string
+          email?: string | null
+          geo_lat?: number | null
+          geo_lng?: number | null
+          id?: string
+          inhaber_sv_id?: string
+          name?: string
+          notiz?: string | null
+          rechtsform?: string | null
+          status?: string
+          telefon?: string | null
+          updated_at?: string
+          ust_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sv_organisation_inhaber_sv_id_fkey"
+            columns: ["inhaber_sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sv_organisation_laeufer_reports: {
+        Row: {
+          claim_id: string
+          created_at: string
+          daten_jsonb: Json | null
+          fotos_count: number
+          id: string
+          laeufer_user_id: string
+          notiz: string | null
+          organisation_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          claim_id: string
+          created_at?: string
+          daten_jsonb?: Json | null
+          fotos_count?: number
+          id?: string
+          laeufer_user_id: string
+          notiz?: string | null
+          organisation_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          claim_id?: string
+          created_at?: string
+          daten_jsonb?: Json | null
+          fotos_count?: number
+          id?: string
+          laeufer_user_id?: string
+          notiz?: string | null
+          organisation_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sv_organisation_laeufer_reports_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_organisation_laeufer_reports_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_organisation_laeufer_reports_laeufer_user_id_fkey"
+            columns: ["laeufer_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_organisation_laeufer_reports_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "sv_organisation"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sv_organisation_memberships: {
+        Row: {
+          created_at: string
+          einsatzgebiet_geo: Json | null
+          end_date: string | null
+          id: string
+          organisation_id: string
+          rolle: string
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          einsatzgebiet_geo?: Json | null
+          end_date?: string | null
+          id?: string
+          organisation_id: string
+          rolle: string
+          start_date?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          einsatzgebiet_geo?: Json | null
+          end_date?: string | null
+          id?: string
+          organisation_id?: string
+          rolle?: string
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sv_organisation_memberships_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "sv_organisation"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_organisation_memberships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -8250,6 +10158,222 @@ export type Database = {
           },
         ]
       }
+      vehicle_ownership_history: {
+        Row: {
+          bis: string | null
+          created_at: string
+          erwerbsart: string | null
+          halter_label_anon: string | null
+          id: string
+          kilometerstand_bei_uebernahme: number | null
+          notiz: string | null
+          quelle: string | null
+          user_id: string | null
+          vehicle_id: string
+          von: string
+        }
+        Insert: {
+          bis?: string | null
+          created_at?: string
+          erwerbsart?: string | null
+          halter_label_anon?: string | null
+          id?: string
+          kilometerstand_bei_uebernahme?: number | null
+          notiz?: string | null
+          quelle?: string | null
+          user_id?: string | null
+          vehicle_id: string
+          von: string
+        }
+        Update: {
+          bis?: string | null
+          created_at?: string
+          erwerbsart?: string | null
+          halter_label_anon?: string | null
+          id?: string
+          kilometerstand_bei_uebernahme?: number | null
+          notiz?: string | null
+          quelle?: string | null
+          user_id?: string | null
+          vehicle_id?: string
+          von?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_ownership_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_ownership_history_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          abgasnorm: string | null
+          achsen: number | null
+          aktueller_kilometerstand: number | null
+          aktueller_kilometerstand_at: string | null
+          antriebsart: string | null
+          aufbau: string | null
+          bauart: string | null
+          baujahr_monat: string | null
+          breite_mm: number | null
+          cardentity_letzter_pull: string | null
+          co2_g_km: number | null
+          created_at: string
+          current_owner_id: string | null
+          data_completeness_score: number | null
+          erstzulassung: string | null
+          farbcode: string | null
+          farbe_klartext: string | null
+          fin: string
+          getriebe: string | null
+          hersteller: string
+          hoehe_mm: number | null
+          hsn: string | null
+          hubraum_ccm: number | null
+          id: string
+          ist_metallic: boolean | null
+          kennzeichen_aktuell: string | null
+          kraftstoff: string | null
+          laenge_mm: number | null
+          leermasse_kg: number | null
+          leistung_kw: number | null
+          modell_haupttyp: string | null
+          modell_untertyp: string | null
+          produktionszeit_bis: string | null
+          produktionszeit_von: string | null
+          radstand_mm: number | null
+          sitze: number | null
+          status: string
+          tankvolumen_l: number | null
+          tsn: string | null
+          tuerzahl: number | null
+          updated_at: string
+          variante: string | null
+          zb1_dokument_id: string | null
+          zul_gesamtmasse_kg: number | null
+          zylinder: number | null
+        }
+        Insert: {
+          abgasnorm?: string | null
+          achsen?: number | null
+          aktueller_kilometerstand?: number | null
+          aktueller_kilometerstand_at?: string | null
+          antriebsart?: string | null
+          aufbau?: string | null
+          bauart?: string | null
+          baujahr_monat?: string | null
+          breite_mm?: number | null
+          cardentity_letzter_pull?: string | null
+          co2_g_km?: number | null
+          created_at?: string
+          current_owner_id?: string | null
+          data_completeness_score?: number | null
+          erstzulassung?: string | null
+          farbcode?: string | null
+          farbe_klartext?: string | null
+          fin: string
+          getriebe?: string | null
+          hersteller: string
+          hoehe_mm?: number | null
+          hsn?: string | null
+          hubraum_ccm?: number | null
+          id?: string
+          ist_metallic?: boolean | null
+          kennzeichen_aktuell?: string | null
+          kraftstoff?: string | null
+          laenge_mm?: number | null
+          leermasse_kg?: number | null
+          leistung_kw?: number | null
+          modell_haupttyp?: string | null
+          modell_untertyp?: string | null
+          produktionszeit_bis?: string | null
+          produktionszeit_von?: string | null
+          radstand_mm?: number | null
+          sitze?: number | null
+          status?: string
+          tankvolumen_l?: number | null
+          tsn?: string | null
+          tuerzahl?: number | null
+          updated_at?: string
+          variante?: string | null
+          zb1_dokument_id?: string | null
+          zul_gesamtmasse_kg?: number | null
+          zylinder?: number | null
+        }
+        Update: {
+          abgasnorm?: string | null
+          achsen?: number | null
+          aktueller_kilometerstand?: number | null
+          aktueller_kilometerstand_at?: string | null
+          antriebsart?: string | null
+          aufbau?: string | null
+          bauart?: string | null
+          baujahr_monat?: string | null
+          breite_mm?: number | null
+          cardentity_letzter_pull?: string | null
+          co2_g_km?: number | null
+          created_at?: string
+          current_owner_id?: string | null
+          data_completeness_score?: number | null
+          erstzulassung?: string | null
+          farbcode?: string | null
+          farbe_klartext?: string | null
+          fin?: string
+          getriebe?: string | null
+          hersteller?: string
+          hoehe_mm?: number | null
+          hsn?: string | null
+          hubraum_ccm?: number | null
+          id?: string
+          ist_metallic?: boolean | null
+          kennzeichen_aktuell?: string | null
+          kraftstoff?: string | null
+          laenge_mm?: number | null
+          leermasse_kg?: number | null
+          leistung_kw?: number | null
+          modell_haupttyp?: string | null
+          modell_untertyp?: string | null
+          produktionszeit_bis?: string | null
+          produktionszeit_von?: string | null
+          radstand_mm?: number | null
+          sitze?: number | null
+          status?: string
+          tankvolumen_l?: number | null
+          tsn?: string | null
+          tuerzahl?: number | null
+          updated_at?: string
+          variante?: string | null
+          zb1_dokument_id?: string | null
+          zul_gesamtmasse_kg?: number | null
+          zylinder?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_current_owner_id_fkey"
+            columns: ["current_owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_zb1_dokument_id_fkey"
+            columns: ["zb1_dokument_id"]
+            isOneToOne: false
+            referencedRelation: "fall_dokumente"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       versicherungen: {
         Row: {
           adresse: string | null
@@ -8413,6 +10537,82 @@ export type Database = {
         }
         Relationships: []
       }
+      vs_korrespondenz: {
+        Row: {
+          aktenzeichen: string | null
+          attachment_url: string | null
+          betreff: string | null
+          claim_id: string
+          created_at: string
+          created_by_user_id: string | null
+          datum: string
+          id: string
+          kanal: string
+          notiz: string | null
+          richtung: string
+          status: string
+          typ: string | null
+          versicherung: string | null
+          wartet_auf_antwort_bis: string | null
+        }
+        Insert: {
+          aktenzeichen?: string | null
+          attachment_url?: string | null
+          betreff?: string | null
+          claim_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          datum?: string
+          id?: string
+          kanal: string
+          notiz?: string | null
+          richtung: string
+          status?: string
+          typ?: string | null
+          versicherung?: string | null
+          wartet_auf_antwort_bis?: string | null
+        }
+        Update: {
+          aktenzeichen?: string | null
+          attachment_url?: string | null
+          betreff?: string | null
+          claim_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          datum?: string
+          id?: string
+          kanal?: string
+          notiz?: string | null
+          richtung?: string
+          status?: string
+          typ?: string | null
+          versicherung?: string | null
+          wartet_auf_antwort_bis?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vs_korrespondenz_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vs_korrespondenz_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vs_korrespondenz_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       webhook_events: {
         Row: {
           created_at: string | null
@@ -8493,6 +10693,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      werkstaetten: {
+        Row: {
+          adresse_ort: string | null
+          adresse_plz: string | null
+          adresse_strasse: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          partner: boolean
+          telefon: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          adresse_ort?: string | null
+          adresse_plz?: string | null
+          adresse_strasse?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          partner?: boolean
+          telefon?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          adresse_ort?: string | null
+          adresse_plz?: string | null
+          adresse_strasse?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          partner?: boolean
+          telefon?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
       }
       whatsapp_inbound_messages: {
         Row: {
@@ -8998,6 +11240,226 @@ export type Database = {
           },
         ]
       }
+      v_claim_for_gast: {
+        Row: {
+          bkat_unfallart: string | null
+          created_at: string | null
+          fahrerflucht: boolean | null
+          gegner_versicherung_id: string | null
+          hat_mietwagen: boolean | null
+          hat_personenschaden: boolean | null
+          hergang_kunde_text: string | null
+          id: string | null
+          polizei_aktenzeichen: string | null
+          polizei_bericht_vorhanden: boolean | null
+          schadenart: string | null
+          schadenort_kategorie: string | null
+          schadenort_land: string | null
+          schadenort_ort: string | null
+          schadenort_plz: string | null
+          schadentag: string | null
+          schadenzeit: string | null
+          status: string | null
+          unfall_konstellation: string | null
+          unfallskizze_svg: string | null
+          unfallskizze_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bkat_unfallart?: string | null
+          created_at?: string | null
+          fahrerflucht?: boolean | null
+          gegner_versicherung_id?: string | null
+          hat_mietwagen?: boolean | null
+          hat_personenschaden?: boolean | null
+          hergang_kunde_text?: string | null
+          id?: string | null
+          polizei_aktenzeichen?: string | null
+          polizei_bericht_vorhanden?: boolean | null
+          schadenart?: string | null
+          schadenort_kategorie?: string | null
+          schadenort_land?: string | null
+          schadenort_ort?: string | null
+          schadenort_plz?: string | null
+          schadentag?: string | null
+          schadenzeit?: string | null
+          status?: string | null
+          unfall_konstellation?: string | null
+          unfallskizze_svg?: string | null
+          unfallskizze_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bkat_unfallart?: string | null
+          created_at?: string | null
+          fahrerflucht?: boolean | null
+          gegner_versicherung_id?: string | null
+          hat_mietwagen?: boolean | null
+          hat_personenschaden?: boolean | null
+          hergang_kunde_text?: string | null
+          id?: string | null
+          polizei_aktenzeichen?: string | null
+          polizei_bericht_vorhanden?: boolean | null
+          schadenart?: string | null
+          schadenort_kategorie?: string | null
+          schadenort_land?: string | null
+          schadenort_ort?: string | null
+          schadenort_plz?: string | null
+          schadentag?: string | null
+          schadenzeit?: string | null
+          status?: string | null
+          unfall_konstellation?: string | null
+          unfallskizze_svg?: string | null
+          unfallskizze_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_gegner_versicherung_id_fkey"
+            columns: ["gegner_versicherung_id"]
+            isOneToOne: false
+            referencedRelation: "versicherungen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_claim_parties_safe: {
+        Row: {
+          adresse_strasse: string | null
+          claim_id: string | null
+          created_at: string | null
+          email: string | null
+          fahrzeugtyp_klartext: string | null
+          firma: string | null
+          geburtsdatum: string | null
+          id: string | null
+          ist_aktiv: boolean | null
+          ist_anonymisiert: boolean | null
+          ist_fahrer: boolean | null
+          ist_gewerbe: boolean | null
+          ist_halter: boolean | null
+          kennzeichen: string | null
+          nachname: string | null
+          quelle: string | null
+          reihenfolge: number | null
+          rolle: string | null
+          telefon: string | null
+          updated_at: string | null
+          user_id: string | null
+          vehicle_id: string | null
+          versicherung_id: string | null
+          versicherungsnummer: string | null
+          vorname: string | null
+        }
+        Insert: {
+          adresse_strasse?: never
+          claim_id?: string | null
+          created_at?: string | null
+          email?: never
+          fahrzeugtyp_klartext?: string | null
+          firma?: string | null
+          geburtsdatum?: never
+          id?: string | null
+          ist_aktiv?: boolean | null
+          ist_anonymisiert?: boolean | null
+          ist_fahrer?: boolean | null
+          ist_gewerbe?: boolean | null
+          ist_halter?: boolean | null
+          kennzeichen?: string | null
+          nachname?: never
+          quelle?: string | null
+          reihenfolge?: number | null
+          rolle?: string | null
+          telefon?: never
+          updated_at?: string | null
+          user_id?: string | null
+          vehicle_id?: string | null
+          versicherung_id?: string | null
+          versicherungsnummer?: never
+          vorname?: string | null
+        }
+        Update: {
+          adresse_strasse?: never
+          claim_id?: string | null
+          created_at?: string | null
+          email?: never
+          fahrzeugtyp_klartext?: string | null
+          firma?: string | null
+          geburtsdatum?: never
+          id?: string | null
+          ist_aktiv?: boolean | null
+          ist_anonymisiert?: boolean | null
+          ist_fahrer?: boolean | null
+          ist_gewerbe?: boolean | null
+          ist_halter?: boolean | null
+          kennzeichen?: string | null
+          nachname?: never
+          quelle?: string | null
+          reihenfolge?: number | null
+          rolle?: string | null
+          telefon?: never
+          updated_at?: string | null
+          user_id?: string | null
+          vehicle_id?: string | null
+          versicherung_id?: string | null
+          versicherungsnummer?: never
+          vorname?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claim_parties_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_versicherung_id_fkey"
+            columns: ["versicherung_id"]
+            isOneToOne: false
+            referencedRelation: "versicherungen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_claim_timeline: {
+        Row: {
+          actor_rolle: string | null
+          actor_user_id: string | null
+          claim_id: string | null
+          detail_url_path: string | null
+          event_at: string | null
+          event_id: string | null
+          event_kategorie: string | null
+          event_typ: string | null
+          fall_id: string | null
+          payload_jsonb: Json | null
+          sichtbar_fuer_kunde: boolean | null
+          sichtbar_fuer_sv: boolean | null
+        }
+        Relationships: []
+      }
       v_faelle_mit_aktuellem_termin: {
         Row: {
           abgeschlossen_am: string | null
@@ -9366,17 +11828,40 @@ export type Database = {
       }
     }
     Functions: {
+      calc_claims_phase: {
+        Args: { p_claim_id: string; p_kb_id: string; p_status: string }
+        Returns: string
+      }
       can_access_fall: { Args: { p_fall_id: string }; Returns: boolean }
       count_unread_updates: {
         Args: { p_fall_id: string; p_since: string }
         Returns: number
       }
+      cron_airdrop_token_cleanup: { Args: never; Returns: undefined }
+      cron_airdrop_token_expiry: { Args: never; Returns: undefined }
+      cron_dsgvo_hard_delete: { Args: never; Returns: undefined }
+      cron_gutachten_ocr_recovery: { Args: never; Returns: undefined }
+      cron_kanzlei_paket_pending_check: { Args: never; Returns: undefined }
+      cron_konsistenz_check: { Args: never; Returns: undefined }
+      cron_mietwagen_lange_anmietung: { Args: never; Returns: undefined }
+      cron_mietwagen_sla_tracking: { Args: never; Returns: undefined }
+      cron_pflicht_foto_validation: { Args: never; Returns: undefined }
+      cron_rate_limit_reset: { Args: never; Returns: undefined }
+      cron_trigger_exif_worker: { Args: never; Returns: undefined }
+      cron_trigger_salesforce_sync: { Args: never; Returns: undefined }
+      cron_verjaehrungs_warner: { Args: never; Returns: undefined }
+      cron_vs_frist_reminder: { Args: never; Returns: undefined }
+      cron_vs_frist_tick: { Args: never; Returns: undefined }
       delete_fall_komplett: { Args: { p_fall_id: string }; Returns: undefined }
       delete_gutachter_komplett: {
         Args: { p_sv_id: string }
         Returns: undefined
       }
       delete_lead_komplett: { Args: { p_lead_id: string }; Returns: undefined }
+      dsgvo_anonymize_user_data: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       get_sichtbare_qualifikationen: {
         Args: { p_sv_id: string }
         Returns: string[]
@@ -9400,6 +11885,24 @@ export type Database = {
         Args: { p_fall_id: string; p_lead_id: string }
         Returns: Json
       }
+      log_cron_job_run: {
+        Args: {
+          p_error?: string
+          p_job_name: string
+          p_metadata?: Json
+          p_rows?: number
+          p_status?: string
+        }
+        Returns: string
+      }
+      map_claim_phase_to_faelle_phase: {
+        Args: {
+          p_claim_id: string
+          p_claim_phase: string
+          p_claim_status: string
+        }
+        Returns: string
+      }
       mark_expired_leads: { Args: never; Returns: undefined }
       next_rechnungs_nr: {
         Args: { p_jahr: number; p_serie: string }
@@ -9408,6 +11911,22 @@ export type Database = {
       notify_admins: {
         Args: { p_link?: string; p_nachricht?: string; p_titel: string }
         Returns: undefined
+      }
+      safe_to_date: { Args: { p_text: string }; Returns: string }
+      safe_to_time: { Args: { p_text: string }; Returns: string }
+      upsert_vehicle_by_fin: {
+        Args: {
+          p_fin: string
+          p_hersteller?: string
+          p_hsn?: string
+          p_kennzeichen?: string
+          p_kilometerstand?: number
+          p_modell?: string
+          p_owner_id?: string
+          p_quelle?: string
+          p_tsn?: string
+        }
+        Returns: string
       }
     }
     Enums: {
