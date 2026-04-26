@@ -215,7 +215,7 @@ Jede Phase = ein PR, grün durch Build + Smoke-Test, mergebar einzeln.
 - [ ] `src/lib/claims/get-claim-for-role.ts` Loader-Lib (alle 5 Rollen-Whitelists)
 - [ ] DB-View `v_claim_full` (Migration)
 - [ ] DB-View `v_claim_listing` (Migration)
-- [ ] Test-Route `/admin/_debug/claim/[id]` zeigt rohen Loader-Output je Rolle
+- [ ] Test-Route `/admin/debug/claim/[id]` zeigt rohen Loader-Output je Rolle
 
 ### Phase 1 — Kunde-Portal vollständig migrieren (2 Tage)
 - [ ] `ClaimStatusHero` + `ClaimPhaseTimeline` rollenneutral
