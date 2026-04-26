@@ -163,6 +163,18 @@
     {
       "path": "/api/cron/mietwagen-tracking",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/cardentity-recheck",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/gast-conversion-reminder",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/notification-worker",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
