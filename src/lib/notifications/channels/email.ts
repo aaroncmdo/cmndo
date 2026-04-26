@@ -103,6 +103,46 @@ function buildTemplate(
         html: `${greet}<p>Ihre Provision${betrag ? ` von ${betrag.toFixed(2)} €` : ''} wurde <strong>${status === 'freigegeben' ? 'freigegeben' : 'storniert'}</strong>.</p><p><a href="${base}/makler">Im Makler-Portal ansehen</a></p>${footer}`,
       }
     }
+    // AAR-840: Manuelle Endzustände
+    case 'claim.in_kommunikation_vs':
+      return {
+        subject: 'Wir kommunizieren jetzt mit Ihrer Versicherung',
+        html: `${greet}<p>Wir haben die Kommunikation mit Ihrer Versicherung aufgenommen und vertreten Ihre Forderung. Sie hören von uns, sobald es Neuigkeiten gibt.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    case 'claim.reguliert': {
+      const betrag = payload.betragEur as number | undefined
+      return {
+        subject: 'Ihr Schadensfall wurde reguliert',
+        html: `${greet}<p>Gute Nachrichten: Ihr Schadensfall wurde reguliert${betrag ? ` mit einem Betrag von <strong>${betrag.toFixed(2)} €</strong>` : ''}. Die Auszahlung wird nun veranlasst.</p><p><a href="${fallLink}">Details im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    case 'claim.abgelehnt': {
+      const grundMap: Record<string, string> = {
+        verjaehrung: 'Verjährung',
+        haftung_strittig: 'strittiger Haftungsfrage',
+        fahrzeug_bereits_repariert: 'bereits durchgeführter Reparatur',
+        vollmacht_fehlt: 'fehlender Vollmacht',
+        sonstiges: 'sonstigen Gründen',
+      }
+      const grundKey = payload.vsAblehnungsGrund as string | undefined
+      const grundLabel = grundMap[grundKey ?? ''] ?? grundKey ?? 'einem Sachgrund'
+      return {
+        subject: 'Ihr Schadensfall wurde abgelehnt',
+        html: `${greet}<p>Leider wurde Ihr Schadensfall aufgrund von <strong>${grundLabel}</strong> abgelehnt. Bei Fragen oder zur Prüfung weiterer Schritte melden Sie sich gern bei uns.</p><p><a href="${fallLink}">Details im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    case 'claim.storniert':
+      return {
+        subject: 'Ihr Schadensfall wurde storniert',
+        html: `${greet}<p>Ihr Schadensfall wurde storniert. Bei Rückfragen wenden Sie sich bitte an unser Team.</p><p><a href="${base}/kontakt">Kontakt aufnehmen</a></p>${footer}`,
+      }
+    case 'claim.an_externe_kanzlei_uebergeben': {
+      const kanzlei = payload.kanzleiName as string | undefined
+      return {
+        subject: 'Ihr Schadensfall wurde an eine Kanzlei übergeben',
+        html: `${greet}<p>Ihr Schadensfall wurde${kanzlei ? ` an die Kanzlei <strong>${kanzlei}</strong>` : ' an eine externe Kanzlei'} übergeben, die nun die rechtliche Vertretung übernimmt. Wir bleiben weiterhin Ihr Ansprechpartner für Rückfragen.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    }
     default:
       return {
         subject: 'Neue Benachrichtigung von Claimondo',

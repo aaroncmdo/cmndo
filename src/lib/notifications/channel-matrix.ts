@@ -286,6 +286,47 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
     priority: 'low',
     channels: { kunde: ['in_app'], kundenbetreuer: ['in_app'] },
   },
+  // 5.14 Manuelle Endzustände (AAR-840)
+  'claim.in_kommunikation_vs': {
+    priority: 'normal',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.reguliert': {
+    priority: 'urgent',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.abgelehnt': {
+    priority: 'urgent',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.storniert': {
+    priority: 'normal',
+    channels: {
+      kunde: ['in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.an_externe_kanzlei_uebergeben': {
+    priority: 'urgent',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
 }
 
 export function getEventConfig(eventType: EventType): EventConfig {

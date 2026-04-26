@@ -68,6 +68,12 @@ export type EventType =
   | 'claim.gegner_hat_geantwortet'
   | 'claim.gegner_konvertiert_zu_voll'
   | 'claim.einladung_abgelaufen'
+  // 5.14 Manuelle Endzustände (AAR-840) — KB/Admin-getriggerte Phase-9-Übergänge
+  | 'claim.in_kommunikation_vs'
+  | 'claim.reguliert'
+  | 'claim.abgelehnt'
+  | 'claim.storniert'
+  | 'claim.an_externe_kanzlei_uebergeben'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -124,6 +130,12 @@ export interface EventPayloads {
   'claim.gegner_hat_geantwortet': { claimId: string; partyId: string; responseAt: string }
   'claim.gegner_konvertiert_zu_voll': { claimId: string; partyId: string; userId: string; konvertiertAm: string }
   'claim.einladung_abgelaufen': { claimId: string; invitationId: string; ablaufGrund: string }
+  // 5.14 Manuelle Endzustände (AAR-840)
+  'claim.in_kommunikation_vs': { claimId: string; fallId: string; grund: string }
+  'claim.reguliert': { claimId: string; fallId: string; betragEur: number; grund?: string }
+  'claim.abgelehnt': { claimId: string; fallId: string; vsAblehnungsGrund: string; grundFreitext?: string }
+  'claim.storniert': { claimId: string; fallId: string; grund: string }
+  'claim.an_externe_kanzlei_uebergeben': { claimId: string; fallId: string; kanzleiName: string; uebergabeDatum: string; grund?: string }
 }
 
 // ── DB-Row-Shapes ─────────────────────────────────────────────────────────
