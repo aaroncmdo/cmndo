@@ -264,6 +264,21 @@ export function buildPushPayload(event: NotificationEvent, role: Role): PushPayl
         priority: 'urgent',
       }
     }
+    // AAR-841: Kanzlei-Workflow
+    case 'claim.kanzlei_paket_versendet': {
+      const kanzlei = payload.kanzleiName as string | undefined
+      return {
+        title: 'Kanzlei-Paket versendet',
+        body: kanzlei ? `Paket an ${kanzlei} unterwegs.` : 'Kanzlei-Paket unterwegs.',
+        url, tag, priority: 'normal',
+      }
+    }
+    case 'claim.kanzlei_re_frage_due':
+      return {
+        title: 'Kanzlei einbinden?',
+        body:  'Dein Gutachten ist da — möchtest du eine Kanzlei einbinden?',
+        url, tag, priority: 'normal',
+      }
     case 'sa.flow_sent':
     case 'termin.sv_abgeschlossen':
     default:

@@ -327,6 +327,21 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       admin: ['in_app'],
     },
   },
+  // 5.15 Kanzlei-Workflow (AAR-841)
+  'claim.kanzlei_paket_versendet': {
+    priority: 'normal',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.kanzlei_re_frage_due': {
+    priority: 'normal',
+    channels: {
+      kunde: ['in_app'],
+    },
+  },
 }
 
 export function getEventConfig(eventType: EventType): EventConfig {

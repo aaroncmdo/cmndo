@@ -74,6 +74,9 @@ export type EventType =
   | 'claim.abgelehnt'
   | 'claim.storniert'
   | 'claim.an_externe_kanzlei_uebergeben'
+  // 5.15 Kanzlei-Workflow (AAR-841)
+  | 'claim.kanzlei_paket_versendet'
+  | 'claim.kanzlei_re_frage_due'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -136,6 +139,9 @@ export interface EventPayloads {
   'claim.abgelehnt': { claimId: string; fallId: string; vsAblehnungsGrund: string; grundFreitext?: string }
   'claim.storniert': { claimId: string; fallId: string; grund: string }
   'claim.an_externe_kanzlei_uebergeben': { claimId: string; fallId: string; kanzleiName: string; uebergabeDatum: string; grund?: string }
+  // 5.15 Kanzlei-Workflow (AAR-841)
+  'claim.kanzlei_paket_versendet': { claimId: string; fallId: string; empfaengerTyp: 'partnerkanzlei' | 'eigene_kanzlei'; kanzleiName: string }
+  'claim.kanzlei_re_frage_due':    { claimId: string; fallId: string }
 }
 
 // ── DB-Row-Shapes ─────────────────────────────────────────────────────────

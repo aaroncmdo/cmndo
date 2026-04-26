@@ -143,6 +143,21 @@ function buildTemplate(
         html: `${greet}<p>Ihr Schadensfall wurde${kanzlei ? ` an die Kanzlei <strong>${kanzlei}</strong>` : ' an eine externe Kanzlei'} übergeben, die nun die rechtliche Vertretung übernimmt. Wir bleiben weiterhin Ihr Ansprechpartner für Rückfragen.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
       }
     }
+    case 'claim.kanzlei_re_frage_due':
+      return {
+        subject: 'Möchten Sie eine Kanzlei einbinden?',
+        html: `${greet}<p>Ihr Gutachten ist erstellt. Möchten Sie eine Kanzlei für Ihren Schadenfall einbinden? Eine Kanzlei vertritt Ihre Ansprüche gegenüber der Versicherung.</p><p><a href="${fallLink}">Im Portal entscheiden</a></p>${footer}`,
+      }
+    // AAR-841: Kanzlei-Workflow
+    case 'claim.kanzlei_paket_versendet': {
+      const kanzlei = payload.kanzleiName as string | undefined
+      const typ = payload.empfaengerTyp as string | undefined
+      const subjectExtra = typ === 'partnerkanzlei' ? ' (Partnerkanzlei)' : ''
+      return {
+        subject: `Kanzlei-Paket versendet${subjectExtra}`,
+        html: `${greet}<p>Wir haben Ihr Kanzlei-Paket${kanzlei ? ` an <strong>${kanzlei}</strong>` : ''} versendet. Die Kanzlei meldet sich in Kürze bei Ihnen.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    }
     default:
       return {
         subject: 'Neue Benachrichtigung von Claimondo',
