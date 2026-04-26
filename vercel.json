@@ -171,10 +171,6 @@
     {
       "path": "/api/cron/gast-conversion-reminder",
       "schedule": "0 10 * * *"
-    },
-    {
-      "path": "/api/cron/notification-worker",
-      "schedule": "*/5 * * * *"
     }
   ]
 }
