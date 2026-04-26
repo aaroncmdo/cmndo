@@ -61,14 +61,16 @@ export default async function FallaktePage({
   const claimId = (fall as Record<string, unknown>).claim_id as string | null
   let claimStatus: string | null = null
   let claimPhase: string | null = null
+  let claimKanzleiWunsch: string | null = null
   if (claimId) {
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, phase')
+      .select('status, phase, kanzlei_wunsch')
       .eq('id', claimId)
       .maybeSingle()
-    claimStatus = (claimRow?.status as string | null) ?? null
-    claimPhase  = (claimRow?.phase  as string | null) ?? null
+    claimStatus        = (claimRow?.status         as string | null) ?? null
+    claimPhase         = (claimRow?.phase          as string | null) ?? null
+    claimKanzleiWunsch = (claimRow?.kanzlei_wunsch as string | null) ?? null
   }
   // userRolle für Timeline-Rolle und viele andere Stellen (Auth + RLS),
   // wird unten erneut für FallakteRolle-Cast verwendet.
@@ -589,6 +591,7 @@ export default async function FallaktePage({
         teilnehmer={teilnehmer}
         claimId={claimId}
         claimStatus={claimStatus}
+        claimKanzleiWunsch={claimKanzleiWunsch}
         timelineEvents={timelineEvents}
         futureEvents={futureEvents}
         dokumenteTabProps={{

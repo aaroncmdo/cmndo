@@ -27,7 +27,7 @@ import type { Rolle as PhasenRolle } from '@/components/shared/fall-phases'
 import { FallActionBar } from '@/components/admin/fallakte/FallActionBar'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 // AAR-840: Endzustand-Dropdown + Claim-Status-Badge im Header
-import { EndzustandDropdown, ClaimStatusBadge } from '@/components/shared/claims'
+import { EndzustandDropdown, ClaimStatusBadge, KanzleiWunschDropdown } from '@/components/shared/claims'
 // AAR-843: Timeline-View für den Verlaufs-Tab
 import { TimelineView } from '@/components/shared/claims'
 import type { ClaimTimelineEvent } from '@/lib/claims/timeline-queries'
@@ -97,6 +97,8 @@ type ShellProps = {
   // AAR-840: claim_id + claims.status für Endzustand-Dropdown im Header
   claimId: string | null
   claimStatus: string | null
+  // AAR-841: claims.kanzlei_wunsch für KB-Sidebar-Override-Dropdown
+  claimKanzleiWunsch: string | null
   // AAR-843: Timeline-Daten für den Verlaufs-Tab (server-seitig geladen)
   timelineEvents: ClaimTimelineEvent[]
   futureEvents: ProjectedEvent[]
@@ -115,6 +117,7 @@ export default function FallakteShell({
   teilnehmer,
   claimId,
   claimStatus,
+  claimKanzleiWunsch,
   timelineEvents,
   futureEvents,
 }: ShellProps) {
@@ -189,6 +192,16 @@ export default function FallakteShell({
               <EndzustandDropdown
                 claimId={claimId}
                 currentStatus={claimStatus ?? 'dispatch_done'}
+                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
+              />
+            )}
+            {/* AAR-841 Self-Review-Fix: KanzleiWunschDropdown war als shared
+                Component gebaut aber nicht eingebunden. KB sieht jetzt den
+                aktuellen Wunsch + kann Override triggern. */}
+            {claimId && (
+              <KanzleiWunschDropdown
+                claimId={claimId}
+                currentWunsch={claimKanzleiWunsch}
                 viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
               />
             )}
