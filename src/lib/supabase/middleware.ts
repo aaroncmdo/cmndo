@@ -135,6 +135,8 @@ function isPublicPath(pathname: string): boolean {
     '/nutzungsbedingungen',
     '/datenschutz',
     '/impressum',
+    // AAR-815: Gast-Mini-Dashboard — Token-validierter Gegner-Onboarding-Flow
+    '/gegner',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
