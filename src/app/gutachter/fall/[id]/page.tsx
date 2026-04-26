@@ -7,6 +7,8 @@ import FallDetailClient from './FallDetailClient'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-651: Zentrale Fall-Loader-Lib
 import { getFallForSv } from '@/lib/fall/queries'
+// AAR-834: Gutachten-Queries für SV-Fallakte
+import { getGutachtenForClaim } from '@/lib/gutachten/queries'
 
 export default async function GutachterFallPage({
   params,
@@ -147,6 +149,10 @@ export default async function GutachterFallPage({
       .single()
     kundenbetreuer = kbProfile
   }
+
+  // AAR-834: Gutachten-Aufträge für diesen SV + Claim laden
+  const svClaimId = (fall as Record<string, unknown>).claim_id as string | null
+  const gutachtenAuftraege = svClaimId ? await getGutachtenForClaim(svClaimId) : []
 
   // Attach leadpreis to fall object for display
   const fallWithAbrechnung = {
@@ -371,6 +377,7 @@ export default async function GutachterFallPage({
       konfrontationGewuenscht={konfrontationGewuenscht}
       konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
       konfrontationTerminVorschlaege={terminVorschlaege}
+      gutachtenAuftraege={gutachtenAuftraege}
     />
   )
 }

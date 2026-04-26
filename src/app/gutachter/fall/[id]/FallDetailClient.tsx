@@ -27,6 +27,9 @@ import { JetztZuTunCard } from './_components/JetztZuTunCard'
 import { StammdatenCard } from './_components/StammdatenCard'
 import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
+// AAR-834: Neue Card für gutachten-Claim-Datensätze (getrennt von Dokument-Upload-Card)
+import { GutachtenAuftragCard } from './_components/GutachtenAuftragCard'
+import type { GutachtenMitSv } from '@/lib/gutachten/queries'
 import { DokumenteUebersichtCard } from './_components/DokumenteUebersichtCard'
 import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
 import { KanzleiRegulierungsStepperCard } from './_components/KanzleiRegulierungsStepperCard'
@@ -136,6 +139,8 @@ type Props = {
   konfrontationGewuenscht?: boolean
   konfrontationTerminVereinbartAm?: string | null
   konfrontationTerminVorschlaege?: Array<{ datum: string; uhrzeit: string }> | null
+  /** AAR-834: Gutachten-Aufträge aus dem neuen gutachten-Table (Claim-basiert) */
+  gutachtenAuftraege?: GutachtenMitSv[]
 }
 
 /** AAR-399: Lokaler Typ, passt zu DokumentenListe.SlotRow */
@@ -518,6 +523,10 @@ export default function FallDetailClient(props: Props) {
                 }))
             }
           />
+          {/* AAR-834: Gutachten-Aufträge aus dem neuen gutachten-Table */}
+          {props.gutachtenAuftraege && props.gutachtenAuftraege.length > 0 && (
+            <GutachtenAuftragCard gutachten={props.gutachtenAuftraege} />
+          )}
           <DokumenteUebersichtCard
             fallId={fall.id as string}
             svSlots={props.svSlots ?? []}

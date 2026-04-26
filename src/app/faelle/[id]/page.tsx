@@ -33,6 +33,8 @@ import { listAdHocAnforderungen } from '@/lib/dokumente/ad-hoc-anforderung'
 import { listBelegeZumReview } from '@/lib/beleg-review/actions'
 // AAR-651: Zentrale Fall-Loader-Lib (Single Source of Truth pro Rolle)
 import { getFallById } from '@/lib/fall/queries'
+// AAR-834: Gutachten-Queries für den Gutachten-Tab
+import { getGutachtenForClaim } from '@/lib/gutachten/queries'
 
 export default async function FallaktePage({
   params,
@@ -459,6 +461,10 @@ export default async function FallaktePage({
     }>,
   })
 
+  // AAR-834: Gutachten für den Gutachten-Tab laden (claim_id aus fall)
+  const claimId = (fall as Record<string, unknown>).claim_id as string | null
+  const gutachten = claimId ? await getGutachtenForClaim(claimId) : []
+
   // AAR-538 (C1): Subphase + next_hint berechnen (pure function)
   const subphase = resolveSubphase({
     fall: fall as unknown as FallRow,
@@ -500,6 +506,8 @@ export default async function FallaktePage({
         subphase={subphase}
         currentUserId={user.id}
         teilnehmer={teilnehmer}
+        gutachten={gutachten}
+        claimId={claimId}
         dokumenteTabProps={{
           fallId: id,
           pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],

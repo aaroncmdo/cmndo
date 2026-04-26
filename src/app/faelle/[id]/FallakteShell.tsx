@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon } from 'lucide-react'
+import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClipboardListIcon } from 'lucide-react'
 import { TabDropContent } from '@/components/ui/TabDropContent'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
@@ -17,6 +17,9 @@ import KommunikationTab, { type FallTeilnehmer } from './_tabs/KommunikationTab'
 import TimelineTab from './_tabs/TimelineTab'
 import ProzessTab from './_tabs/ProzessTab'
 import DokumenteTab from './_tabs/DokumenteTab'
+// AAR-834: Gutachten-Tab
+import GutachtenTab from './_tabs/GutachtenTab'
+import type { GutachtenMitSv } from '@/lib/gutachten/queries'
 import FallSidebar from './_sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
@@ -45,14 +48,15 @@ function toPhasenRolle(r: FallakteRolle): PhasenRolle {
 // AAR-544 (C7): unified Event-Stream für den Timeline-Tab
 import type { FallEvent } from '@/lib/fall/event-stream'
 
-type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline'
+type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline' | 'gutachten'
 
 const TABS: { id: TabId; label: string; icon: typeof ListIcon }[] = [
-  { id: 'uebersicht', label: 'Übersicht', icon: ListIcon },
-  { id: 'dokumente', label: 'Dokumente', icon: FolderOpenIcon },
+  { id: 'uebersicht',    label: 'Übersicht',    icon: ListIcon },
+  { id: 'dokumente',     label: 'Dokumente',    icon: FolderOpenIcon },
   { id: 'kommunikation', label: 'Kommunikation', icon: MessageCircleIcon },
-  { id: 'prozess', label: 'Prozess', icon: GitBranchIcon },
-  { id: 'timeline', label: 'Timeline', icon: ActivityIcon },
+  { id: 'prozess',       label: 'Prozess',       icon: GitBranchIcon },
+  { id: 'gutachten',     label: 'Gutachten',     icon: ClipboardListIcon },
+  { id: 'timeline',      label: 'Timeline',      icon: ActivityIcon },
 ]
 
 // DokumenteTab erwartet eine große Menge Props aus dem alten Monolithen.
@@ -87,6 +91,9 @@ type ShellProps = {
   // AAR-541 (C4): Kommunikations-Tab Props (currentUserId + Teilnehmer)
   currentUserId: string | null
   teilnehmer: FallTeilnehmer[]
+  // AAR-834: Gutachten für den Gutachten-Tab
+  gutachten: GutachtenMitSv[]
+  claimId: string | null
 }
 
 export default function FallakteShell({
@@ -100,6 +107,8 @@ export default function FallakteShell({
   subphase,
   currentUserId,
   teilnehmer,
+  gutachten,
+  claimId,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -182,6 +191,9 @@ export default function FallakteShell({
               <KommunikationTab currentUserId={currentUserId} teilnehmer={teilnehmer} />
             )}
             {activeTab === 'prozess' && <ProzessTab subphase={subphase} />}
+            {activeTab === 'gutachten' && (
+              <GutachtenTab fallId={fall.id} claimId={claimId} gutachten={gutachten} />
+            )}
             {activeTab === 'timeline' && <TimelineTab events={events} />}
           </TabDropContent>
         </main>
