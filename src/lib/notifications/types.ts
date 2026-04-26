@@ -68,6 +68,20 @@ export type EventType =
   | 'claim.gegner_hat_geantwortet'
   | 'claim.gegner_konvertiert_zu_voll'
   | 'claim.einladung_abgelaufen'
+  // 5.14 Manuelle Endzustände (AAR-840) — KB/Admin-getriggerte Phase-9-Übergänge
+  | 'claim.in_kommunikation_vs'
+  | 'claim.reguliert'
+  | 'claim.abgelehnt'
+  | 'claim.storniert'
+  | 'claim.an_externe_kanzlei_uebergeben'
+  // 5.15 Kanzlei-Workflow (AAR-841)
+  | 'claim.kanzlei_paket_versendet'
+  | 'claim.kanzlei_re_frage_due'
+  // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844)
+  | 'claim.kanzlei_paket_pending'
+  // 5.17 Gutachten-OCR-Pipeline (AAR-838)
+  | 'gutachten.ocr_succeeded'
+  | 'gutachten.ocr_failed'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -124,6 +138,20 @@ export interface EventPayloads {
   'claim.gegner_hat_geantwortet': { claimId: string; partyId: string; responseAt: string }
   'claim.gegner_konvertiert_zu_voll': { claimId: string; partyId: string; userId: string; konvertiertAm: string }
   'claim.einladung_abgelaufen': { claimId: string; invitationId: string; ablaufGrund: string }
+  // 5.14 Manuelle Endzustände (AAR-840)
+  'claim.in_kommunikation_vs': { claimId: string; fallId: string; grund: string }
+  'claim.reguliert': { claimId: string; fallId: string; betragEur: number; grund?: string }
+  'claim.abgelehnt': { claimId: string; fallId: string; vsAblehnungsGrund: string; grundFreitext?: string }
+  'claim.storniert': { claimId: string; fallId: string; grund: string }
+  'claim.an_externe_kanzlei_uebergeben': { claimId: string; fallId: string; kanzleiName: string; uebergabeDatum: string; grund?: string }
+  // 5.15 Kanzlei-Workflow (AAR-841)
+  'claim.kanzlei_paket_versendet': { claimId: string; fallId: string; empfaengerTyp: 'partnerkanzlei' | 'eigene_kanzlei'; kanzleiName: string }
+  'claim.kanzlei_re_frage_due':    { claimId: string; fallId: string }
+  // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844)
+  'claim.kanzlei_paket_pending':   { claimId: string; fallId: string; kanzleiWunsch: string; phase: string; kundenbetreuerId: string | null }
+  // 5.17 Gutachten-OCR-Pipeline (AAR-838)
+  'gutachten.ocr_succeeded':       { fallId: string; gutachtenId: string; engine: string; confidence: number }
+  'gutachten.ocr_failed':          { fallId: string; gutachtenId: string; runNummer: number; reason: string }
 }
 
 // ── DB-Row-Shapes ─────────────────────────────────────────────────────────

@@ -33,6 +33,14 @@ import { listAdHocAnforderungen } from '@/lib/dokumente/ad-hoc-anforderung'
 import { listBelegeZumReview } from '@/lib/beleg-review/actions'
 // AAR-651: Zentrale Fall-Loader-Lib (Single Source of Truth pro Rolle)
 import { getFallById } from '@/lib/fall/queries'
+// AAR-843: Timeline-Queries für den Verlaufs-Tab
+import { getClaimTimeline } from '@/lib/claims/timeline-queries'
+import { projectNextEvents } from '@/lib/claims/timeline-projection'
+// AAR-842: Kanzlei-Block — aktives Paket + Partnerkanzlei-Settings + QR-Codes
+// AAR-844: isKanzleiPaketPending für KB-Dropdown-Quick-Action
+import { getActiveKanzleiPaket, getPartnerKanzleiSettings, isKanzleiPaketPending } from '@/lib/kanzlei/queries'
+import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
+import { KanzleiAnsprechpartnerBlock } from '@/components/shared/claims'
 
 export default async function FallaktePage({
   params,
@@ -48,6 +56,26 @@ export default async function FallaktePage({
   const fall = await getFallById(supabase, id)
   if (!fall) notFound()
 
+  // AAR-840: claim_id + claims.status für Endzustand-Dropdown im Header.
+  // claim_id ist seit AAR-816 NOT NULL auf faelle. Status laden wir separat
+  // damit der Endzustand-Dropdown den aktuellen Stand zeigt.
+  const claimId = (fall as Record<string, unknown>).claim_id as string | null
+  let claimStatus: string | null = null
+  let claimPhase: string | null = null
+  let claimKanzleiWunsch: string | null = null
+  if (claimId) {
+    const { data: claimRow } = await supabase
+      .from('claims')
+      .select('status, phase, kanzlei_wunsch')
+      .eq('id', claimId)
+      .maybeSingle()
+    claimStatus        = (claimRow?.status         as string | null) ?? null
+    claimPhase         = (claimRow?.phase          as string | null) ?? null
+    claimKanzleiWunsch = (claimRow?.kanzlei_wunsch as string | null) ?? null
+  }
+  // userRolle für Timeline-Rolle und viele andere Stellen (Auth + RLS),
+  // wird unten erneut für FallakteRolle-Cast verwendet.
+
   // Rolle des eingeloggten Users für field-permissions
   const { data: profile } = await supabase
     .from('profiles')
@@ -55,6 +83,65 @@ export default async function FallaktePage({
     .eq('id', user.id)
     .single()
   const userRolle = ((profile?.rolle as FallakteRolle | null) ?? 'kunde') as FallakteRolle
+
+  // AAR-843: Timeline + Future-Projection laden (nach userRolle-Auflösung,
+  // weil RLS via security_invoker auf der View die Auth braucht).
+  const viewerRoleForTimeline =
+    userRolle === 'kundenbetreuer'    ? 'kb'    :
+    userRolle === 'admin'             ? 'admin' :
+    userRolle === 'sachverstaendiger' ? 'sv'    : 'kunde'
+  const timelineEvents = claimId
+    ? await getClaimTimeline(claimId, viewerRoleForTimeline)
+    : []
+  const futureEvents = projectNextEvents({ phase: claimPhase })
+
+  // AAR-844: Pre-Check für KB-Dropdown — zeigt "Paket jetzt versenden" wenn
+  // Wunsch + Phase passen aber kein Paket existiert.
+  const kanzleiPaketPending = claimId ? await isKanzleiPaketPending(claimId) : false
+
+  // AAR-842: Kanzlei-Block-Daten — nur laden wenn ein versendetes Paket existiert.
+  // Bei Partnerkanzlei zusätzlich Settings + QR-SVGs für WhatsApp + Termin.
+  // variant='prominent' wenn phase=9_abgelehnt (Master-Doc 9.3).
+  const kanzleiPaket = claimId ? await getActiveKanzleiPaket(claimId) : null
+  let kanzleiBlockData: {
+    kanzleiName: string
+    kontaktperson: string | null
+    telefon: string | null
+    email: string | null
+    whatsappUrl: string | null
+    terminUrl: string | null
+    whatsappQrSvg: string | null
+    terminQrSvg: string | null
+    variant: 'normal' | 'prominent'
+  } | null = null
+  if (kanzleiPaket) {
+    let whatsappUrl: string | null = null
+    let terminUrl: string | null = null
+    let whatsappQrSvg: string | null = null
+    let terminQrSvg: string | null = null
+    if (kanzleiPaket.empfaenger_typ === 'partnerkanzlei') {
+      const settings = await getPartnerKanzleiSettings()
+      if (settings) {
+        whatsappUrl = settings.whatsappUrl || null
+        terminUrl   = settings.terminUrl   || null
+        ;[whatsappQrSvg, terminQrSvg] = await Promise.all([
+          whatsappUrl ? generateQrCodeSvg(whatsappUrl) : Promise.resolve(''),
+          terminUrl   ? generateQrCodeSvg(terminUrl)   : Promise.resolve(''),
+        ])
+      }
+    }
+    kanzleiBlockData = {
+      kanzleiName:   kanzleiPaket.empfaenger_kanzlei_name,
+      kontaktperson: kanzleiPaket.empfaenger_kanzlei_kontaktperson,
+      telefon:       kanzleiPaket.empfaenger_kanzlei_telefon,
+      email:         kanzleiPaket.empfaenger_kanzlei_email,
+      whatsappUrl,
+      terminUrl,
+      whatsappQrSvg: whatsappQrSvg || null,
+      terminQrSvg:   terminQrSvg   || null,
+      variant:       claimPhase === '9_abgelehnt' ? 'prominent' : 'normal',
+    }
+  }
 
   // Die schweren Abhängigkeits-Queries (Timeline, Dokumente, Parteien, etc.)
   // werden weiterhin hier geladen und als Props an die Tabs durchgereicht.
@@ -471,6 +558,13 @@ export default async function FallaktePage({
     <>
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
+      {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
+          Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}
+      {kanzleiBlockData && (
+        <div className={kanzleiBlockData.variant === 'prominent' ? 'mb-4' : 'mb-4 max-w-md'}>
+          <KanzleiAnsprechpartnerBlock {...kanzleiBlockData} />
+        </div>
+      )}
       {otherKundeFaelle.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm flex-wrap gap-2">
           <span className="text-amber-900">
@@ -500,6 +594,12 @@ export default async function FallaktePage({
         subphase={subphase}
         currentUserId={user.id}
         teilnehmer={teilnehmer}
+        claimId={claimId}
+        claimStatus={claimStatus}
+        claimKanzleiWunsch={claimKanzleiWunsch}
+        kanzleiPaketPending={kanzleiPaketPending}
+        timelineEvents={timelineEvents}
+        futureEvents={futureEvents}
         dokumenteTabProps={{
           fallId: id,
           pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],

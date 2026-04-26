@@ -103,6 +103,82 @@ function buildTemplate(
         html: `${greet}<p>Ihre Provision${betrag ? ` von ${betrag.toFixed(2)} €` : ''} wurde <strong>${status === 'freigegeben' ? 'freigegeben' : 'storniert'}</strong>.</p><p><a href="${base}/makler">Im Makler-Portal ansehen</a></p>${footer}`,
       }
     }
+    // AAR-840: Manuelle Endzustände
+    case 'claim.in_kommunikation_vs':
+      return {
+        subject: 'Wir kommunizieren jetzt mit Ihrer Versicherung',
+        html: `${greet}<p>Wir haben die Kommunikation mit Ihrer Versicherung aufgenommen und vertreten Ihre Forderung. Sie hören von uns, sobald es Neuigkeiten gibt.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    case 'claim.reguliert': {
+      const betrag = payload.betragEur as number | undefined
+      return {
+        subject: 'Ihr Schadensfall wurde reguliert',
+        html: `${greet}<p>Gute Nachrichten: Ihr Schadensfall wurde reguliert${betrag ? ` mit einem Betrag von <strong>${betrag.toFixed(2)} €</strong>` : ''}. Die Auszahlung wird nun veranlasst.</p><p><a href="${fallLink}">Details im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    case 'claim.abgelehnt': {
+      const grundMap: Record<string, string> = {
+        verjaehrung: 'Verjährung',
+        haftung_strittig: 'strittiger Haftungsfrage',
+        fahrzeug_bereits_repariert: 'bereits durchgeführter Reparatur',
+        vollmacht_fehlt: 'fehlender Vollmacht',
+        sonstiges: 'sonstigen Gründen',
+      }
+      const grundKey = payload.vsAblehnungsGrund as string | undefined
+      const grundLabel = grundMap[grundKey ?? ''] ?? grundKey ?? 'einem Sachgrund'
+      return {
+        subject: 'Ihr Schadensfall wurde abgelehnt',
+        html: `${greet}<p>Leider wurde Ihr Schadensfall aufgrund von <strong>${grundLabel}</strong> abgelehnt. Bei Fragen oder zur Prüfung weiterer Schritte melden Sie sich gern bei uns.</p><p><a href="${fallLink}">Details im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    case 'claim.storniert':
+      return {
+        subject: 'Ihr Schadensfall wurde storniert',
+        html: `${greet}<p>Ihr Schadensfall wurde storniert. Bei Rückfragen wenden Sie sich bitte an unser Team.</p><p><a href="${base}/kontakt">Kontakt aufnehmen</a></p>${footer}`,
+      }
+    case 'claim.an_externe_kanzlei_uebergeben': {
+      const kanzlei = payload.kanzleiName as string | undefined
+      return {
+        subject: 'Ihr Schadensfall wurde an eine Kanzlei übergeben',
+        html: `${greet}<p>Ihr Schadensfall wurde${kanzlei ? ` an die Kanzlei <strong>${kanzlei}</strong>` : ' an eine externe Kanzlei'} übergeben, die nun die rechtliche Vertretung übernimmt. Wir bleiben weiterhin Ihr Ansprechpartner für Rückfragen.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    // AAR-838: Gutachten-OCR-Pipeline
+    case 'gutachten.ocr_succeeded':
+      return {
+        subject: 'Gutachten ist da',
+        html: `${greet}<p>Das Gutachten zu Ihrem Schadensfall wurde erfolgreich ausgelesen und steht im Portal zur Verfügung.</p><p><a href="${fallLink}">Gutachten ansehen</a></p>${footer}`,
+      }
+    case 'gutachten.ocr_failed': {
+      const reason = payload.reason as string | undefined
+      return {
+        subject: 'Gutachten-OCR fehlgeschlagen — manuelle Prüfung nötig',
+        html: `${greet}<p>Die automatische Auslese eines Gutachtens ist fehlgeschlagen${reason ? ` (Grund: ${reason})` : ''}. Bitte manuell prüfen oder Re-Run starten.</p><p><a href="${fallLink}">Fall öffnen</a></p>${footer}`,
+      }
+    }
+    // AAR-844: KB-Notification für Auto-Paket-Trigger
+    case 'claim.kanzlei_paket_pending': {
+      const wunsch = payload.kanzleiWunsch as string | undefined
+      return {
+        subject: `Kanzlei-Paket bereit zum Versand`,
+        html: `${greet}<p>Ein Schadenfall hat den Kanzlei-Wunsch <strong>${wunsch ?? 'gesetzt'}</strong> und ist in einer Phase wo das Paket versendet werden kann. Bitte im Admin-Portal prüfen und versenden.</p><p><a href="${fallLink}">Fall öffnen</a></p>${footer}`,
+      }
+    }
+    case 'claim.kanzlei_re_frage_due':
+      return {
+        subject: 'Möchten Sie eine Kanzlei einbinden?',
+        html: `${greet}<p>Ihr Gutachten ist erstellt. Möchten Sie eine Kanzlei für Ihren Schadenfall einbinden? Eine Kanzlei vertritt Ihre Ansprüche gegenüber der Versicherung.</p><p><a href="${fallLink}">Im Portal entscheiden</a></p>${footer}`,
+      }
+    // AAR-841: Kanzlei-Workflow
+    case 'claim.kanzlei_paket_versendet': {
+      const kanzlei = payload.kanzleiName as string | undefined
+      const typ = payload.empfaengerTyp as string | undefined
+      const subjectExtra = typ === 'partnerkanzlei' ? ' (Partnerkanzlei)' : ''
+      return {
+        subject: `Kanzlei-Paket versendet${subjectExtra}`,
+        html: `${greet}<p>Wir haben Ihr Kanzlei-Paket${kanzlei ? ` an <strong>${kanzlei}</strong>` : ''} versendet. Die Kanzlei meldet sich in Kürze bei Ihnen.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    }
     default:
       return {
         subject: 'Neue Benachrichtigung von Claimondo',

@@ -237,6 +237,60 @@ export function buildPushPayload(event: NotificationEvent, role: Role): PushPayl
         url,
         tag,
       }
+    // AAR-840: Manuelle Endzustände
+    case 'claim.in_kommunikation_vs':
+      return { title: 'In Kommunikation mit VS', body: 'Wir vertreten gerade Ihre Forderung.', url, tag, priority: 'normal' }
+    case 'claim.reguliert': {
+      const betrag = payload.betragEur as number | undefined
+      return {
+        title: 'Schaden reguliert',
+        body: betrag ? `Ihr Anspruch von ${betrag.toFixed(2)} € wurde reguliert.` : 'Ihr Anspruch wurde reguliert.',
+        url,
+        tag,
+        priority: 'urgent',
+      }
+    }
+    case 'claim.abgelehnt':
+      return { title: 'Schaden abgelehnt', body: 'Bitte öffnen Sie das Portal für Details.', url, tag, priority: 'urgent' }
+    case 'claim.storniert':
+      return { title: 'Schaden storniert', body: 'Ihr Schadensfall wurde storniert.', url, tag, priority: 'normal' }
+    case 'claim.an_externe_kanzlei_uebergeben': {
+      const kanzlei = payload.kanzleiName as string | undefined
+      return {
+        title: 'An Kanzlei übergeben',
+        body: kanzlei ? `Ihr Fall liegt jetzt bei ${kanzlei}.` : 'Ihr Fall liegt jetzt bei einer Kanzlei.',
+        url,
+        tag,
+        priority: 'urgent',
+      }
+    }
+    // AAR-841: Kanzlei-Workflow
+    case 'claim.kanzlei_paket_versendet': {
+      const kanzlei = payload.kanzleiName as string | undefined
+      return {
+        title: 'Kanzlei-Paket versendet',
+        body: kanzlei ? `Paket an ${kanzlei} unterwegs.` : 'Kanzlei-Paket unterwegs.',
+        url, tag, priority: 'normal',
+      }
+    }
+    // AAR-838: Gutachten-OCR-Pipeline
+    case 'gutachten.ocr_succeeded':
+      return { title: 'Gutachten ausgelesen', body: 'Das Gutachten ist im Portal verfügbar.', url, tag, priority: 'normal' }
+    case 'gutachten.ocr_failed':
+      return { title: 'OCR fehlgeschlagen', body: 'Manuelle Prüfung erforderlich.', url, tag, priority: 'urgent' }
+    // AAR-844: KB-Notification für Auto-Paket-Trigger
+    case 'claim.kanzlei_paket_pending':
+      return {
+        title: 'Kanzlei-Paket bereit',
+        body:  'Schadenfall mit Kanzlei-Wunsch ist in versandbereiter Phase.',
+        url, tag, priority: 'normal',
+      }
+    case 'claim.kanzlei_re_frage_due':
+      return {
+        title: 'Kanzlei einbinden?',
+        body:  'Dein Gutachten ist da — möchtest du eine Kanzlei einbinden?',
+        url, tag, priority: 'normal',
+      }
     case 'sa.flow_sent':
     case 'termin.sv_abgeschlossen':
     default:

@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon } from 'lucide-react'
+import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClockIcon } from 'lucide-react'
 import { TabDropContent } from '@/components/ui/TabDropContent'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
@@ -26,6 +26,12 @@ import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import type { Rolle as PhasenRolle } from '@/components/shared/fall-phases'
 import { FallActionBar } from '@/components/admin/fallakte/FallActionBar'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
+// AAR-840: Endzustand-Dropdown + Claim-Status-Badge im Header
+import { EndzustandDropdown, ClaimStatusBadge, KanzleiWunschDropdown } from '@/components/shared/claims'
+// AAR-843: Timeline-View für den Verlaufs-Tab
+import { TimelineView } from '@/components/shared/claims'
+import type { ClaimTimelineEvent } from '@/lib/claims/timeline-queries'
+import type { ProjectedEvent } from '@/lib/claims/timeline-projection'
 // AAR-746 (Phase B): Shared Identity-Header — neu auch im Admin-Portal.
 import { FallIdentityHeader } from '@/components/shared/fall-header'
 // AAR-770: Mitteilungs-Banner ganz oben in der Fallakte
@@ -45,13 +51,14 @@ function toPhasenRolle(r: FallakteRolle): PhasenRolle {
 // AAR-544 (C7): unified Event-Stream für den Timeline-Tab
 import type { FallEvent } from '@/lib/fall/event-stream'
 
-type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline'
+type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline' | 'verlauf'
 
 const TABS: { id: TabId; label: string; icon: typeof ListIcon }[] = [
   { id: 'uebersicht', label: 'Übersicht', icon: ListIcon },
   { id: 'dokumente', label: 'Dokumente', icon: FolderOpenIcon },
   { id: 'kommunikation', label: 'Kommunikation', icon: MessageCircleIcon },
   { id: 'prozess', label: 'Prozess', icon: GitBranchIcon },
+  { id: 'verlauf', label: 'Verlauf', icon: ClockIcon },
   { id: 'timeline', label: 'Timeline', icon: ActivityIcon },
 ]
 
@@ -87,6 +94,16 @@ type ShellProps = {
   // AAR-541 (C4): Kommunikations-Tab Props (currentUserId + Teilnehmer)
   currentUserId: string | null
   teilnehmer: FallTeilnehmer[]
+  // AAR-840: claim_id + claims.status für Endzustand-Dropdown im Header
+  claimId: string | null
+  claimStatus: string | null
+  // AAR-841: claims.kanzlei_wunsch für KB-Sidebar-Override-Dropdown
+  claimKanzleiWunsch: string | null
+  // AAR-844: "Paket jetzt versenden"-Quick-Action im Dropdown conditional
+  kanzleiPaketPending: boolean
+  // AAR-843: Timeline-Daten für den Verlaufs-Tab (server-seitig geladen)
+  timelineEvents: ClaimTimelineEvent[]
+  futureEvents: ProjectedEvent[]
 }
 
 export default function FallakteShell({
@@ -100,6 +117,12 @@ export default function FallakteShell({
   subphase,
   currentUserId,
   teilnehmer,
+  claimId,
+  claimStatus,
+  claimKanzleiWunsch,
+  kanzleiPaketPending,
+  timelineEvents,
+  futureEvents,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -162,6 +185,30 @@ export default function FallakteShell({
             ort={(fall.schadens_ort as string | null) ?? null}
           >
             <FallActionBar result={subphase} fallId={fall.id} compact />
+            {/* AAR-840: Status-Badge + Endzustand-Dropdown rechts im Header.
+                Sichtbar für Admin (immer) und KB (durch EndzustandDropdown
+                rolle-intern guarded). claimId-Guard: ohne Claim kein Dropdown. */}
+            {claimStatus && (
+              <ClaimStatusBadge status={claimStatus} viewerRole="admin" size="sm" withIcon />
+            )}
+            {claimId && (
+              <EndzustandDropdown
+                claimId={claimId}
+                currentStatus={claimStatus ?? 'dispatch_done'}
+                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
+              />
+            )}
+            {/* AAR-841 Self-Review-Fix: KanzleiWunschDropdown war als shared
+                Component gebaut aber nicht eingebunden. KB sieht jetzt den
+                aktuellen Wunsch + kann Override triggern. */}
+            {claimId && (
+              <KanzleiWunschDropdown
+                claimId={claimId}
+                currentWunsch={claimKanzleiWunsch}
+                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
+                paketVersandPending={kanzleiPaketPending}
+              />
+            )}
           </FallIdentityHeader>
           {/* AAR-776: Tab-Bar als shared Component (FallakteTabs) — gleiches
               Component wie SV-Fallakte und Kunde-Fallakte. */}
@@ -182,6 +229,15 @@ export default function FallakteShell({
               <KommunikationTab currentUserId={currentUserId} teilnehmer={teilnehmer} />
             )}
             {activeTab === 'prozess' && <ProzessTab subphase={subphase} />}
+            {activeTab === 'verlauf' && (
+              <TimelineView
+                events={timelineEvents}
+                futureEvents={futureEvents}
+                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : userRolle === 'sachverstaendiger' ? 'sv' : 'kunde'}
+                variant="full"
+                showKategorieBadge
+              />
+            )}
             {activeTab === 'timeline' && <TimelineTab events={events} />}
           </TabDropContent>
         </main>
