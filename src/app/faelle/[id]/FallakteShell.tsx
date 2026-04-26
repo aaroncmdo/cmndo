@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClipboardListIcon, WrenchIcon, MailIcon } from 'lucide-react'
+import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClipboardListIcon, WrenchIcon, MailIcon, CarIcon } from 'lucide-react'
 import { TabDropContent } from '@/components/ui/TabDropContent'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
@@ -27,6 +27,9 @@ import type { RepairMitWerkstatt } from '@/lib/repairs/queries'
 import VsKorrespondenzTab from './_tabs/VsKorrespondenzTab'
 import type { VsKorrespondenz } from '@/lib/vs-korrespondenz/queries'
 import type { ClaimPayment } from '@/lib/claim-payments/queries'
+// AAR-838: Mietwagen-Tab
+import MietwagenTab from './_tabs/MietwagenTab'
+import type { ClaimMietwagen } from '@/lib/claim-mietwagen/queries'
 import FallSidebar from './_sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
@@ -55,7 +58,7 @@ function toPhasenRolle(r: FallakteRolle): PhasenRolle {
 // AAR-544 (C7): unified Event-Stream für den Timeline-Tab
 import type { FallEvent } from '@/lib/fall/event-stream'
 
-type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline' | 'gutachten' | 'reparatur' | 'vs-korrespondenz'
+type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline' | 'gutachten' | 'reparatur' | 'vs-korrespondenz' | 'mietwagen'
 
 const TABS: { id: TabId; label: string; icon: typeof ListIcon }[] = [
   { id: 'uebersicht',       label: 'Übersicht',        icon: ListIcon },
@@ -64,6 +67,7 @@ const TABS: { id: TabId; label: string; icon: typeof ListIcon }[] = [
   { id: 'prozess',          label: 'Prozess',          icon: GitBranchIcon },
   { id: 'gutachten',        label: 'Gutachten',        icon: ClipboardListIcon },
   { id: 'reparatur',        label: 'Reparatur',        icon: WrenchIcon },
+  { id: 'mietwagen',        label: 'Mietwagen',        icon: CarIcon },
   { id: 'vs-korrespondenz', label: 'VS-Korrespondenz', icon: MailIcon },
   { id: 'timeline',         label: 'Timeline',         icon: ActivityIcon },
 ]
@@ -108,6 +112,8 @@ type ShellProps = {
   // AAR-837: VS-Korrespondenz + Claim-Payments
   korrespondenz: VsKorrespondenz[]
   payments: ClaimPayment[]
+  // AAR-838: Mietwagen
+  mietwagen: ClaimMietwagen[]
 }
 
 export default function FallakteShell({
@@ -126,6 +132,7 @@ export default function FallakteShell({
   claimId,
   korrespondenz,
   payments,
+  mietwagen,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -216,6 +223,9 @@ export default function FallakteShell({
             )}
             {activeTab === 'vs-korrespondenz' && (
               <VsKorrespondenzTab fallId={fall.id} claimId={claimId} korrespondenz={korrespondenz} payments={payments} />
+            )}
+            {activeTab === 'mietwagen' && (
+              <MietwagenTab fallId={fall.id} claimId={claimId} mietwagen={mietwagen} />
             )}
             {activeTab === 'timeline' && <TimelineTab events={events} />}
           </TabDropContent>
