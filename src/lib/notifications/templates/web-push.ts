@@ -273,6 +273,13 @@ export function buildPushPayload(event: NotificationEvent, role: Role): PushPayl
         url, tag, priority: 'normal',
       }
     }
+    // AAR-844: KB-Notification für Auto-Paket-Trigger
+    case 'claim.kanzlei_paket_pending':
+      return {
+        title: 'Kanzlei-Paket bereit',
+        body:  'Schadenfall mit Kanzlei-Wunsch ist in versandbereiter Phase.',
+        url, tag, priority: 'normal',
+      }
     case 'claim.kanzlei_re_frage_due':
       return {
         title: 'Kanzlei einbinden?',

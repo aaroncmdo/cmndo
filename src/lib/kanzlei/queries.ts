@@ -33,6 +33,39 @@ export type PartnerKanzleiSettings = {
 }
 
 /**
+ * AAR-844: Pre-Check für KB-UI — gibt true zurück wenn der KB den
+ * "Paket jetzt versenden"-Button anzeigen soll. Bedingungen:
+ *   - kanzlei_wunsch IN ('partnerkanzlei','eigene_kanzlei')
+ *   - phase IN (4_*, 5_*, 6_*)
+ *   - Kein aktives Paket
+ *
+ * Server-side aufgerufen aus FallakteShell-Page um den Dropdown-Quick-Action
+ * conditional zu rendern.
+ */
+export async function isKanzleiPaketPending(claimId: string): Promise<boolean> {
+  const supabase = await createClient()
+
+  const { data: claim } = await supabase
+    .from('claims')
+    .select('kanzlei_wunsch, phase')
+    .eq('id', claimId)
+    .maybeSingle()
+
+  if (!claim) return false
+
+  const wunsch = claim.kanzlei_wunsch as string | null
+  const phase  = claim.phase          as string | null
+
+  if (wunsch !== 'partnerkanzlei' && wunsch !== 'eigene_kanzlei') return false
+  if (!phase || !['4_gutachten_fertig', '5_in_reparatur', '6_kommunikation_versicherung'].includes(phase)) {
+    return false
+  }
+
+  const aktivesPaket = await getActiveKanzleiPaket(claimId)
+  return aktivesPaket === null
+}
+
+/**
  * AAR-842: Helper für Kanzlei-Block-UI. Gibt das aktuell aktive Paket pro
  * Claim zurück (status=versendet oder bestaetigt, neuestes zuerst). Wird auch
  * von AAR-840 (markClaimAsAnExterneKanzlei-Pre-Check) und AAR-843 (Timeline-

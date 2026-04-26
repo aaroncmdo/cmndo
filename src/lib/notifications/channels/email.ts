@@ -143,6 +143,14 @@ function buildTemplate(
         html: `${greet}<p>Ihr Schadensfall wurde${kanzlei ? ` an die Kanzlei <strong>${kanzlei}</strong>` : ' an eine externe Kanzlei'} übergeben, die nun die rechtliche Vertretung übernimmt. Wir bleiben weiterhin Ihr Ansprechpartner für Rückfragen.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
       }
     }
+    // AAR-844: KB-Notification für Auto-Paket-Trigger
+    case 'claim.kanzlei_paket_pending': {
+      const wunsch = payload.kanzleiWunsch as string | undefined
+      return {
+        subject: `Kanzlei-Paket bereit zum Versand`,
+        html: `${greet}<p>Ein Schadenfall hat den Kanzlei-Wunsch <strong>${wunsch ?? 'gesetzt'}</strong> und ist in einer Phase wo das Paket versendet werden kann. Bitte im Admin-Portal prüfen und versenden.</p><p><a href="${fallLink}">Fall öffnen</a></p>${footer}`,
+      }
+    }
     case 'claim.kanzlei_re_frage_due':
       return {
         subject: 'Möchten Sie eine Kanzlei einbinden?',

@@ -77,6 +77,8 @@ export type EventType =
   // 5.15 Kanzlei-Workflow (AAR-841)
   | 'claim.kanzlei_paket_versendet'
   | 'claim.kanzlei_re_frage_due'
+  // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844)
+  | 'claim.kanzlei_paket_pending'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -142,6 +144,8 @@ export interface EventPayloads {
   // 5.15 Kanzlei-Workflow (AAR-841)
   'claim.kanzlei_paket_versendet': { claimId: string; fallId: string; empfaengerTyp: 'partnerkanzlei' | 'eigene_kanzlei'; kanzleiName: string }
   'claim.kanzlei_re_frage_due':    { claimId: string; fallId: string }
+  // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844)
+  'claim.kanzlei_paket_pending':   { claimId: string; fallId: string; kanzleiWunsch: string; phase: string; kundenbetreuerId: string | null }
 }
 
 // ── DB-Row-Shapes ─────────────────────────────────────────────────────────

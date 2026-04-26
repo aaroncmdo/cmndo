@@ -37,7 +37,8 @@ import { getFallById } from '@/lib/fall/queries'
 import { getClaimTimeline } from '@/lib/claims/timeline-queries'
 import { projectNextEvents } from '@/lib/claims/timeline-projection'
 // AAR-842: Kanzlei-Block — aktives Paket + Partnerkanzlei-Settings + QR-Codes
-import { getActiveKanzleiPaket, getPartnerKanzleiSettings } from '@/lib/kanzlei/queries'
+// AAR-844: isKanzleiPaketPending für KB-Dropdown-Quick-Action
+import { getActiveKanzleiPaket, getPartnerKanzleiSettings, isKanzleiPaketPending } from '@/lib/kanzlei/queries'
 import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
 import { KanzleiAnsprechpartnerBlock } from '@/components/shared/claims'
 
@@ -93,6 +94,10 @@ export default async function FallaktePage({
     ? await getClaimTimeline(claimId, viewerRoleForTimeline)
     : []
   const futureEvents = projectNextEvents({ phase: claimPhase })
+
+  // AAR-844: Pre-Check für KB-Dropdown — zeigt "Paket jetzt versenden" wenn
+  // Wunsch + Phase passen aber kein Paket existiert.
+  const kanzleiPaketPending = claimId ? await isKanzleiPaketPending(claimId) : false
 
   // AAR-842: Kanzlei-Block-Daten — nur laden wenn ein versendetes Paket existiert.
   // Bei Partnerkanzlei zusätzlich Settings + QR-SVGs für WhatsApp + Termin.
@@ -592,6 +597,7 @@ export default async function FallaktePage({
         claimId={claimId}
         claimStatus={claimStatus}
         claimKanzleiWunsch={claimKanzleiWunsch}
+        kanzleiPaketPending={kanzleiPaketPending}
         timelineEvents={timelineEvents}
         futureEvents={futureEvents}
         dokumenteTabProps={{

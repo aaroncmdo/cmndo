@@ -99,6 +99,8 @@ type ShellProps = {
   claimStatus: string | null
   // AAR-841: claims.kanzlei_wunsch für KB-Sidebar-Override-Dropdown
   claimKanzleiWunsch: string | null
+  // AAR-844: "Paket jetzt versenden"-Quick-Action im Dropdown conditional
+  kanzleiPaketPending: boolean
   // AAR-843: Timeline-Daten für den Verlaufs-Tab (server-seitig geladen)
   timelineEvents: ClaimTimelineEvent[]
   futureEvents: ProjectedEvent[]
@@ -118,6 +120,7 @@ export default function FallakteShell({
   claimId,
   claimStatus,
   claimKanzleiWunsch,
+  kanzleiPaketPending,
   timelineEvents,
   futureEvents,
 }: ShellProps) {
@@ -203,6 +206,7 @@ export default function FallakteShell({
                 claimId={claimId}
                 currentWunsch={claimKanzleiWunsch}
                 viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
+                paketVersandPending={kanzleiPaketPending}
               />
             )}
           </FallIdentityHeader>

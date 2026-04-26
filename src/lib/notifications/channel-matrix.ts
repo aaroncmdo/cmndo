@@ -342,6 +342,14 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kunde: ['in_app'],
     },
   },
+  // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844) — KB-only, keine Kunde-Notification
+  'claim.kanzlei_paket_pending': {
+    priority: 'normal',
+    channels: {
+      kundenbetreuer: ['email', 'in_app'],
+      admin:          ['in_app'],
+    },
+  },
 }
 
 export function getEventConfig(eventType: EventType): EventConfig {

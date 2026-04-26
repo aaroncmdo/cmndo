@@ -13,15 +13,18 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { ChevronDownIcon, ScaleIcon, BuildingIcon, XIcon, HelpCircleIcon } from 'lucide-react'
+import { ChevronDownIcon, ScaleIcon, BuildingIcon, XIcon, HelpCircleIcon, PackageIcon } from 'lucide-react'
 import { Modal } from '@/components/primitives'
-import { setKanzleiWunsch } from '@/lib/kanzlei/actions'
+import { setKanzleiWunsch, sendKanzleiPaket } from '@/lib/kanzlei/actions'
 import { KanzleiWunschForm } from './KanzleiWunschForm'
 
 type Props = {
   claimId: string
   currentWunsch: string | null
   viewerRole: 'admin' | 'kb' | 'sv' | 'kunde'
+  /** AAR-844: Wenn true, zeigt zusätzlich "Paket jetzt versenden"-Quick-Action.
+   *  Server-side via isKanzleiPaketPending(claimId) berechnet. */
+  paketVersandPending?: boolean
 }
 
 const QUICK_ACTIONS: {
@@ -35,7 +38,7 @@ const QUICK_ACTIONS: {
   { wunsch: 'noch_unentschieden', label: 'Auf "noch unentschieden" zurücksetzen', icon: HelpCircleIcon, tone: 'text-[#7BA3CC]' },
 ]
 
-export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole }: Props) {
+export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole, paketVersandPending = false }: Props) {
   const [open, setOpen]     = useState(false)
   const [eigeneOpen, setEigeneOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -53,6 +56,23 @@ export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole }: Pr
   }, [open])
 
   if (!isAuthorized) return null
+
+  // AAR-844: "Paket jetzt versenden" — nutzt persistierten Wunsch aus claim
+  function handlePaketJetztVersenden() {
+    setOpen(false)
+    if (currentWunsch !== 'partnerkanzlei' && currentWunsch !== 'eigene_kanzlei') {
+      toast.error('Kein versendbarer Kanzlei-Wunsch gesetzt')
+      return
+    }
+    startTransition(async () => {
+      const res = await sendKanzleiPaket({
+        claim_id:       claimId,
+        empfaenger_typ: currentWunsch as 'partnerkanzlei' | 'eigene_kanzlei',
+      })
+      if (res.ok) toast.success('Kanzlei-Paket versendet')
+      else        toast.error(res.error)
+    })
+  }
 
   function handleQuickAction(wunsch: 'partnerkanzlei' | 'keine_kanzlei' | 'noch_unentschieden') {
     setOpen(false)
@@ -96,6 +116,20 @@ export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole }: Pr
 
         {open && (
           <div className="absolute right-0 top-full mt-1 w-72 bg-white border border-[#E2E8F3] rounded-xl shadow-lg z-20 py-1">
+            {/* AAR-844: Auto-Paket-Trigger — prominent oben wenn Pending */}
+            {paketVersandPending && (
+              <>
+                <button
+                  type="button"
+                  onClick={handlePaketJetztVersenden}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-emerald-800 bg-emerald-50 hover:bg-emerald-100 text-left font-medium"
+                >
+                  <PackageIcon className="w-4 h-4" />
+                  Paket jetzt versenden
+                </button>
+                <div className="border-t border-[#E2E8F3] my-1" />
+              </>
+            )}
             {QUICK_ACTIONS.map((a) => (
               <button
                 key={a.wunsch}
