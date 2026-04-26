@@ -1,6 +1,13 @@
 'use server'
 
 // AAR-837: Claim-Payments Server Actions
+//
+// AAR-839-Hinweis: claim_payments dokumentiert nur Buchhaltung — KEINE
+// Phase-Wirkung. Phase 8_auszahlung fällt in AAR-839 weg, claim_payments
+// triggert nach AAR-839-Migration keinen Phase-Wechsel mehr. KB sieht die
+// Zahlungs-Liste und entscheidet manuell über markClaimAsReguliert()
+// (AAR-840). Daher: KEIN Phase-Trigger-Code in dieser Datei, kein
+// status-basiertes Routing das auf Phase abzielt.
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'

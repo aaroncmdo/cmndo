@@ -1,11 +1,19 @@
 'use server'
 
 // AAR-837: VS-Korrespondenz Server Actions
+//
+// AAR-839-Hinweis: typ + status werden beim INSERT parallel gepflegt.
+// `typ` bestimmt Phase-Routing in calc_claims_phase() (forderung →
+// 6_vs_forderung, mahnung_*/klage_androhung → 7_vs_eskalation). Nach
+// AAR-839 wird die Function so umgeschrieben dass jede vs_korrespondenz-
+// Row Phase 6 triggert; `typ` bleibt für Detail-UI/Eskalations-Visualisierung
+// erhalten.
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export type VskStatus = 'gesendet' | 'wartet_auf_antwort' | 'ohne_antwort_abgelaufen' | 'beantwortet' | 'archiviert'
+export type VskTyp    = 'forderung' | 'mahnung_1' | 'mahnung_2' | 'klage_androhung' | 'sonstige'
 
 export async function legeKorrespondenzAn(
   claimId: string,
@@ -18,7 +26,7 @@ export async function legeKorrespondenzAn(
     notiz?: string | null
     attachmentUrl?: string | null
     datum?: string | null
-    typ?: string | null
+    typ?: VskTyp | null
     wartetAufAntwortBis?: string | null
     createdByUserId?: string | null
   },
