@@ -48,6 +48,20 @@ export default async function FallaktePage({
   const fall = await getFallById(supabase, id)
   if (!fall) notFound()
 
+  // AAR-840: claim_id + claims.status für Endzustand-Dropdown im Header.
+  // claim_id ist seit AAR-816 NOT NULL auf faelle. Status laden wir separat
+  // damit der Endzustand-Dropdown den aktuellen Stand zeigt.
+  const claimId = (fall as Record<string, unknown>).claim_id as string | null
+  let claimStatus: string | null = null
+  if (claimId) {
+    const { data: claimRow } = await supabase
+      .from('claims')
+      .select('status')
+      .eq('id', claimId)
+      .maybeSingle()
+    claimStatus = (claimRow?.status as string | null) ?? null
+  }
+
   // Rolle des eingeloggten Users für field-permissions
   const { data: profile } = await supabase
     .from('profiles')
@@ -500,6 +514,8 @@ export default async function FallaktePage({
         subphase={subphase}
         currentUserId={user.id}
         teilnehmer={teilnehmer}
+        claimId={claimId}
+        claimStatus={claimStatus}
         dokumenteTabProps={{
           fallId: id,
           pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],

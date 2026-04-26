@@ -26,6 +26,8 @@ import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import type { Rolle as PhasenRolle } from '@/components/shared/fall-phases'
 import { FallActionBar } from '@/components/admin/fallakte/FallActionBar'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
+// AAR-840: Endzustand-Dropdown + Claim-Status-Badge im Header
+import { EndzustandDropdown, ClaimStatusBadge } from '@/components/shared/claims'
 // AAR-746 (Phase B): Shared Identity-Header — neu auch im Admin-Portal.
 import { FallIdentityHeader } from '@/components/shared/fall-header'
 // AAR-770: Mitteilungs-Banner ganz oben in der Fallakte
@@ -87,6 +89,9 @@ type ShellProps = {
   // AAR-541 (C4): Kommunikations-Tab Props (currentUserId + Teilnehmer)
   currentUserId: string | null
   teilnehmer: FallTeilnehmer[]
+  // AAR-840: claim_id + claims.status für Endzustand-Dropdown im Header
+  claimId: string | null
+  claimStatus: string | null
 }
 
 export default function FallakteShell({
@@ -100,6 +105,8 @@ export default function FallakteShell({
   subphase,
   currentUserId,
   teilnehmer,
+  claimId,
+  claimStatus,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -162,6 +169,19 @@ export default function FallakteShell({
             ort={(fall.schadens_ort as string | null) ?? null}
           >
             <FallActionBar result={subphase} fallId={fall.id} compact />
+            {/* AAR-840: Status-Badge + Endzustand-Dropdown rechts im Header.
+                Sichtbar für Admin (immer) und KB (durch EndzustandDropdown
+                rolle-intern guarded). claimId-Guard: ohne Claim kein Dropdown. */}
+            {claimStatus && (
+              <ClaimStatusBadge status={claimStatus} viewerRole="admin" size="sm" withIcon />
+            )}
+            {claimId && (
+              <EndzustandDropdown
+                claimId={claimId}
+                currentStatus={claimStatus ?? 'dispatch_done'}
+                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
+              />
+            )}
           </FallIdentityHeader>
           {/* AAR-776: Tab-Bar als shared Component (FallakteTabs) — gleiches
               Component wie SV-Fallakte und Kunde-Fallakte. */}
