@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClipboardListIcon, WrenchIcon } from 'lucide-react'
+import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClipboardListIcon, WrenchIcon, MailIcon } from 'lucide-react'
 import { TabDropContent } from '@/components/ui/TabDropContent'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
@@ -23,6 +23,10 @@ import type { GutachtenMitSv } from '@/lib/gutachten/queries'
 // AAR-836: Reparatur-Tab
 import ReparaturTab from './_tabs/ReparaturTab'
 import type { RepairMitWerkstatt } from '@/lib/repairs/queries'
+// AAR-837: VS-Korrespondenz + Payments Tab
+import VsKorrespondenzTab from './_tabs/VsKorrespondenzTab'
+import type { VsKorrespondenz } from '@/lib/vs-korrespondenz/queries'
+import type { ClaimPayment } from '@/lib/claim-payments/queries'
 import FallSidebar from './_sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
@@ -51,16 +55,17 @@ function toPhasenRolle(r: FallakteRolle): PhasenRolle {
 // AAR-544 (C7): unified Event-Stream für den Timeline-Tab
 import type { FallEvent } from '@/lib/fall/event-stream'
 
-type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline' | 'gutachten' | 'reparatur'
+type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline' | 'gutachten' | 'reparatur' | 'vs-korrespondenz'
 
 const TABS: { id: TabId; label: string; icon: typeof ListIcon }[] = [
-  { id: 'uebersicht',    label: 'Übersicht',    icon: ListIcon },
-  { id: 'dokumente',     label: 'Dokumente',    icon: FolderOpenIcon },
-  { id: 'kommunikation', label: 'Kommunikation', icon: MessageCircleIcon },
-  { id: 'prozess',       label: 'Prozess',       icon: GitBranchIcon },
-  { id: 'gutachten',     label: 'Gutachten',     icon: ClipboardListIcon },
-  { id: 'reparatur',     label: 'Reparatur',     icon: WrenchIcon },
-  { id: 'timeline',      label: 'Timeline',      icon: ActivityIcon },
+  { id: 'uebersicht',       label: 'Übersicht',        icon: ListIcon },
+  { id: 'dokumente',        label: 'Dokumente',        icon: FolderOpenIcon },
+  { id: 'kommunikation',    label: 'Kommunikation',    icon: MessageCircleIcon },
+  { id: 'prozess',          label: 'Prozess',          icon: GitBranchIcon },
+  { id: 'gutachten',        label: 'Gutachten',        icon: ClipboardListIcon },
+  { id: 'reparatur',        label: 'Reparatur',        icon: WrenchIcon },
+  { id: 'vs-korrespondenz', label: 'VS-Korrespondenz', icon: MailIcon },
+  { id: 'timeline',         label: 'Timeline',         icon: ActivityIcon },
 ]
 
 // DokumenteTab erwartet eine große Menge Props aus dem alten Monolithen.
@@ -100,6 +105,9 @@ type ShellProps = {
   // AAR-836: Repairs für den Reparatur-Tab
   repairs: RepairMitWerkstatt[]
   claimId: string | null
+  // AAR-837: VS-Korrespondenz + Claim-Payments
+  korrespondenz: VsKorrespondenz[]
+  payments: ClaimPayment[]
 }
 
 export default function FallakteShell({
@@ -116,6 +124,8 @@ export default function FallakteShell({
   gutachten,
   repairs,
   claimId,
+  korrespondenz,
+  payments,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -203,6 +213,9 @@ export default function FallakteShell({
             )}
             {activeTab === 'reparatur' && (
               <ReparaturTab fallId={fall.id} claimId={claimId} repairs={repairs} />
+            )}
+            {activeTab === 'vs-korrespondenz' && (
+              <VsKorrespondenzTab fallId={fall.id} claimId={claimId} korrespondenz={korrespondenz} payments={payments} />
             )}
             {activeTab === 'timeline' && <TimelineTab events={events} />}
           </TabDropContent>

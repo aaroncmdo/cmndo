@@ -37,6 +37,9 @@ import { getFallById } from '@/lib/fall/queries'
 import { getGutachtenForClaim } from '@/lib/gutachten/queries'
 // AAR-836: Repairs-Queries für den Reparatur-Tab
 import { getRepairsForClaim } from '@/lib/repairs/queries'
+// AAR-837: VS-Korrespondenz + Claim-Payments für den VS-Tab
+import { getKorrespondenzForClaim } from '@/lib/vs-korrespondenz/queries'
+import { getPaymentsForClaim } from '@/lib/claim-payments/queries'
 
 export default async function FallaktePage({
   params,
@@ -463,11 +466,13 @@ export default async function FallaktePage({
     }>,
   })
 
-  // AAR-834/836: Gutachten + Repairs parallel laden (claim_id aus fall)
+  // AAR-834/836/837: Gutachten + Repairs + VS-Korrespondenz + Payments parallel laden
   const claimId = (fall as Record<string, unknown>).claim_id as string | null
-  const [gutachten, repairs] = await Promise.all([
-    claimId ? getGutachtenForClaim(claimId) : Promise.resolve([]),
-    claimId ? getRepairsForClaim(claimId)   : Promise.resolve([]),
+  const [gutachten, repairs, korrespondenz, payments] = await Promise.all([
+    claimId ? getGutachtenForClaim(claimId)    : Promise.resolve([]),
+    claimId ? getRepairsForClaim(claimId)      : Promise.resolve([]),
+    claimId ? getKorrespondenzForClaim(claimId) : Promise.resolve([]),
+    claimId ? getPaymentsForClaim(claimId)     : Promise.resolve([]),
   ])
 
   // AAR-538 (C1): Subphase + next_hint berechnen (pure function)
@@ -514,6 +519,8 @@ export default async function FallaktePage({
         gutachten={gutachten}
         repairs={repairs}
         claimId={claimId}
+        korrespondenz={korrespondenz}
+        payments={payments}
         dokumenteTabProps={{
           fallId: id,
           pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],
