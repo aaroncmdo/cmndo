@@ -1,6 +1,14 @@
 // AAR-811: Dual-Write Helper — erstellt claims-Row für einen neuen fall
 // und schreibt claim_id zurück auf faelle. Idempotent: falls claim_id
 // bereits gesetzt, wird nichts überschrieben.
+//
+// CMM-3 (Phase 0.5): DEPRECATED für den Lead-Konvertierungs-Pfad.
+// Die Lead → Claim Konvertierung läuft jetzt ÜBER `convertLeadToClaim`
+// (src/lib/leads/convert-lead-to-claim.ts), die claims direkt vor dem
+// faelle-Insert anlegt — ohne Drift-Quelle. Diese Funktion bleibt nur
+// noch für Admin-manuelle-Fall-Anlage (/admin/faelle/anlegen) erhalten,
+// wo es keinen Lead gibt. In Phase 6 wird auch dieser Pfad refactored
+// und die Funktion gelöscht.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
