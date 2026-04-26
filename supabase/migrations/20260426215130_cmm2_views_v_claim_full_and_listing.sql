@@ -17,7 +17,11 @@
 -- ════════════════════════════════════════════════════════════════════════
 -- v_claim_listing — schmal
 -- ════════════════════════════════════════════════════════════════════════
-CREATE OR REPLACE VIEW v_claim_listing AS
+-- security_invoker = true: View nutzt RLS-Policies des aufrufenden Users,
+-- nicht des View-Owners. Verhindert RLS-Bypass durch jsonb_agg-Subqueries.
+-- Postgres ≥ 15 erforderlich (Supabase ist auf 15.x).
+CREATE OR REPLACE VIEW v_claim_listing
+WITH (security_invoker = true) AS
 SELECT
   c.id                              AS claim_id,
   c.claim_nummer,
@@ -51,7 +55,10 @@ COMMENT ON VIEW v_claim_listing IS
 -- ════════════════════════════════════════════════════════════════════════
 -- v_claim_full — breit, mit Sub-Entities als jsonb-Arrays
 -- ════════════════════════════════════════════════════════════════════════
-CREATE OR REPLACE VIEW v_claim_full AS
+-- security_invoker = true wie oben: kritisch wegen jsonb_agg auf
+-- Sub-Entity-Tabellen — sonst würde RLS auf z.B. claim_payments umgangen.
+CREATE OR REPLACE VIEW v_claim_full
+WITH (security_invoker = true) AS
 SELECT
   c.*,
   -- Assignment aus faelle (parallele Row, gleiche id)

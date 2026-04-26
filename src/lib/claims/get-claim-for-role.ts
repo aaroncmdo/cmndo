@@ -162,16 +162,12 @@ const COLUMN_PROFILES: Record<Rolle, string> = {
 }
 
 // ─── getClaimForRole ────────────────────────────────────────────────────────
-// Note: `v_claim_full` und `v_claim_listing` sind erst nach Migration
-// `20260426215130_cmm2_views_v_claim_full_and_listing.sql` in den Generated
-// Types als View-Typen verfügbar. Bis dahin nutzen wir kontrollierte Casts.
 export async function getClaimForRole(
   supabase: DbClient,
   claimId: string,
   rolle: Rolle,
 ): Promise<ClaimFull | null> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('v_claim_full')
     .select(COLUMN_PROFILES[rolle])
     .eq('id', claimId)
@@ -204,8 +200,7 @@ export async function getClaimListing(
   _rolle: Rolle,
   filter: ClaimListingFilter = {},
 ): Promise<ClaimListing[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase as any)
+  let query = supabase
     .from('v_claim_listing')
     .select('*')
     .order('updated_at', { ascending: false })
