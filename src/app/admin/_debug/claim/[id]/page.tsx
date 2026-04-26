@@ -6,7 +6,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { requireRole } from '@/lib/auth/guards'
-import { getClaimForRole } from '@/lib/claims/get-claim-for-role'
+import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { ROLLEN } from '@/lib/claims/types'
 
 export const dynamic = 'force-dynamic'
@@ -19,28 +19,45 @@ export default async function DebugClaimPage({ params }: PageProps) {
   const guard = await requireRole(['admin'])
   if (!guard.success) redirect('/login')
 
-  const { id } = await params
-  if (!id) notFound()
+  const { id: rawId } = await params
+  if (!rawId) notFound()
 
   const supabase = await createClient()
 
-  const results = await Promise.all(
-    ROLLEN.map(async (rolle) => ({
-      rolle,
-      claim: await getClaimForRole(supabase, id, rolle),
-    })),
-  )
+  // ID kann claims.id oder faelle.id sein — auflösen
+  const claimId = await resolveClaimId(supabase, rawId)
+  const idResolved = claimId !== null && claimId !== rawId
+
+  const results = claimId
+    ? await Promise.all(
+        ROLLEN.map(async (rolle) => ({
+          rolle,
+          claim: await getClaimForRole(supabase, claimId, rolle),
+        })),
+      )
+    : []
 
   return (
     <div className="p-6 space-y-4">
       <div>
         <h1 className="text-lg font-semibold text-claimondo-navy">
-          Claim-Loader Debug · {id}
+          Claim-Loader Debug · {claimId ?? rawId}
         </h1>
         <p className="text-xs text-claimondo-ondo">
           CMM-2: roher getClaimForRole-Output je Rolle. Felder die je Rolle
           fehlen sind absichtlich nicht selektiert (Need-to-know).
         </p>
+        {idResolved && (
+          <p className="mt-1 text-xs text-amber-700">
+            URL enthielt eine <code className="font-mono">faelle.id</code> —
+            wurde zu <code className="font-mono">claims.id = {claimId}</code> aufgelöst.
+          </p>
+        )}
+        {!claimId && (
+          <p className="mt-1 text-xs text-red-700">
+            Keine Claim-ID gefunden — weder in <code>claims</code> noch in <code>faelle</code>.
+          </p>
+        )}
       </div>
 
       {results.map(({ rolle, claim }) => (

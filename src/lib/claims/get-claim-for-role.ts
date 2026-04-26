@@ -181,6 +181,34 @@ export async function getClaimForRole(
   return (data as ClaimFull | null) ?? null
 }
 
+// ─── resolveClaimId ─────────────────────────────────────────────────────────
+// Übergangs-Helper: nimmt entweder eine `claims.id` oder eine `faelle.id`
+// und liefert die zugehörige `claims.id` zurück. Wird benötigt, solange
+// alte Routen `/faelle/[id]` mit `faelle.id` operieren. Nach Phase 6 ist
+// `faelle.id = claims.id` (1:1 nach Cleanup) und dieser Helper kann weg.
+export async function resolveClaimId(
+  supabase: DbClient,
+  maybeId: string,
+): Promise<string | null> {
+  // 1) direkter Treffer in claims
+  const { data: direct } = await supabase
+    .from('claims')
+    .select('id')
+    .eq('id', maybeId)
+    .maybeSingle()
+  if (direct?.id) return direct.id
+
+  // 2) Fallback: faelle.id → faelle.claim_id
+  const { data: viaFall } = await supabase
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', maybeId)
+    .maybeSingle()
+  if (viaFall?.claim_id) return viaFall.claim_id as string
+
+  return null
+}
+
 // ─── getClaimListing ────────────────────────────────────────────────────────
 // Liefert die Listen-Repräsentation. RLS filtert auf Tabellen-Ebene was
 // die Rolle sehen darf. Optionale Zusatz-Filter:
