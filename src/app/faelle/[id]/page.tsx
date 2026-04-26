@@ -33,6 +33,9 @@ import { listAdHocAnforderungen } from '@/lib/dokumente/ad-hoc-anforderung'
 import { listBelegeZumReview } from '@/lib/beleg-review/actions'
 // AAR-651: Zentrale Fall-Loader-Lib (Single Source of Truth pro Rolle)
 import { getFallById } from '@/lib/fall/queries'
+// AAR-843: Timeline-Queries für den Verlaufs-Tab
+import { getClaimTimeline } from '@/lib/claims/timeline-queries'
+import { projectNextEvents } from '@/lib/claims/timeline-projection'
 
 export default async function FallaktePage({
   params,
@@ -53,14 +56,18 @@ export default async function FallaktePage({
   // damit der Endzustand-Dropdown den aktuellen Stand zeigt.
   const claimId = (fall as Record<string, unknown>).claim_id as string | null
   let claimStatus: string | null = null
+  let claimPhase: string | null = null
   if (claimId) {
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status')
+      .select('status, phase')
       .eq('id', claimId)
       .maybeSingle()
     claimStatus = (claimRow?.status as string | null) ?? null
+    claimPhase  = (claimRow?.phase  as string | null) ?? null
   }
+  // userRolle für Timeline-Rolle und viele andere Stellen (Auth + RLS),
+  // wird unten erneut für FallakteRolle-Cast verwendet.
 
   // Rolle des eingeloggten Users für field-permissions
   const { data: profile } = await supabase
@@ -69,6 +76,17 @@ export default async function FallaktePage({
     .eq('id', user.id)
     .single()
   const userRolle = ((profile?.rolle as FallakteRolle | null) ?? 'kunde') as FallakteRolle
+
+  // AAR-843: Timeline + Future-Projection laden (nach userRolle-Auflösung,
+  // weil RLS via security_invoker auf der View die Auth braucht).
+  const viewerRoleForTimeline =
+    userRolle === 'kundenbetreuer'    ? 'kb'    :
+    userRolle === 'admin'             ? 'admin' :
+    userRolle === 'sachverstaendiger' ? 'sv'    : 'kunde'
+  const timelineEvents = claimId
+    ? await getClaimTimeline(claimId, viewerRoleForTimeline)
+    : []
+  const futureEvents = projectNextEvents({ phase: claimPhase })
 
   // Die schweren Abhängigkeits-Queries (Timeline, Dokumente, Parteien, etc.)
   // werden weiterhin hier geladen und als Props an die Tabs durchgereicht.
@@ -516,6 +534,8 @@ export default async function FallaktePage({
         teilnehmer={teilnehmer}
         claimId={claimId}
         claimStatus={claimStatus}
+        timelineEvents={timelineEvents}
+        futureEvents={futureEvents}
         dokumenteTabProps={{
           fallId: id,
           pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],

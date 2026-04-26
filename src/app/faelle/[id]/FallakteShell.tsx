@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon } from 'lucide-react'
+import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClockIcon } from 'lucide-react'
 import { TabDropContent } from '@/components/ui/TabDropContent'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
@@ -28,6 +28,10 @@ import { FallActionBar } from '@/components/admin/fallakte/FallActionBar'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 // AAR-840: Endzustand-Dropdown + Claim-Status-Badge im Header
 import { EndzustandDropdown, ClaimStatusBadge } from '@/components/shared/claims'
+// AAR-843: Timeline-View für den Verlaufs-Tab
+import { TimelineView } from '@/components/shared/claims'
+import type { ClaimTimelineEvent } from '@/lib/claims/timeline-queries'
+import type { ProjectedEvent } from '@/lib/claims/timeline-projection'
 // AAR-746 (Phase B): Shared Identity-Header — neu auch im Admin-Portal.
 import { FallIdentityHeader } from '@/components/shared/fall-header'
 // AAR-770: Mitteilungs-Banner ganz oben in der Fallakte
@@ -47,13 +51,14 @@ function toPhasenRolle(r: FallakteRolle): PhasenRolle {
 // AAR-544 (C7): unified Event-Stream für den Timeline-Tab
 import type { FallEvent } from '@/lib/fall/event-stream'
 
-type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline'
+type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline' | 'verlauf'
 
 const TABS: { id: TabId; label: string; icon: typeof ListIcon }[] = [
   { id: 'uebersicht', label: 'Übersicht', icon: ListIcon },
   { id: 'dokumente', label: 'Dokumente', icon: FolderOpenIcon },
   { id: 'kommunikation', label: 'Kommunikation', icon: MessageCircleIcon },
   { id: 'prozess', label: 'Prozess', icon: GitBranchIcon },
+  { id: 'verlauf', label: 'Verlauf', icon: ClockIcon },
   { id: 'timeline', label: 'Timeline', icon: ActivityIcon },
 ]
 
@@ -92,6 +97,9 @@ type ShellProps = {
   // AAR-840: claim_id + claims.status für Endzustand-Dropdown im Header
   claimId: string | null
   claimStatus: string | null
+  // AAR-843: Timeline-Daten für den Verlaufs-Tab (server-seitig geladen)
+  timelineEvents: ClaimTimelineEvent[]
+  futureEvents: ProjectedEvent[]
 }
 
 export default function FallakteShell({
@@ -107,6 +115,8 @@ export default function FallakteShell({
   teilnehmer,
   claimId,
   claimStatus,
+  timelineEvents,
+  futureEvents,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -202,6 +212,15 @@ export default function FallakteShell({
               <KommunikationTab currentUserId={currentUserId} teilnehmer={teilnehmer} />
             )}
             {activeTab === 'prozess' && <ProzessTab subphase={subphase} />}
+            {activeTab === 'verlauf' && (
+              <TimelineView
+                events={timelineEvents}
+                futureEvents={futureEvents}
+                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : userRolle === 'sachverstaendiger' ? 'sv' : 'kunde'}
+                variant="full"
+                showKategorieBadge
+              />
+            )}
             {activeTab === 'timeline' && <TimelineTab events={events} />}
           </TabDropContent>
         </main>

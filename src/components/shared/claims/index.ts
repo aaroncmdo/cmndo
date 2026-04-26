@@ -19,3 +19,13 @@ export {
   getPhaseMapping,
   type ClaimPhase,
 } from './phase-mappings'
+
+// AAR-843: Timeline-Components + Display-Mappings
+export { TimelineView, TimelineEventCard, TimelineFutureSection } from './timeline'
+export {
+  TIMELINE_EVENT_DISPLAY,
+  KATEGORIE_LABEL,
+  getEventDisplay,
+  eventLabel,
+  type TimelineEventKategorie,
+} from './timeline-event-mappings'
