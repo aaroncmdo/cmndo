@@ -32,6 +32,33 @@ export type PartnerKanzleiSettings = {
   kontaktperson: string
 }
 
+/**
+ * AAR-842: Helper für Kanzlei-Block-UI. Gibt das aktuell aktive Paket pro
+ * Claim zurück (status=versendet oder bestaetigt, neuestes zuerst). Wird auch
+ * von AAR-840 (markClaimAsAnExterneKanzlei-Pre-Check) und AAR-843 (Timeline-
+ * Render) konsumiert. NULL wenn kein aktives Paket existiert.
+ */
+export async function getActiveKanzleiPaket(claimId: string): Promise<KanzleiPaket | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('kanzlei_pakete')
+    .select(
+      'id, claim_id, empfaenger_typ, empfaenger_kanzlei_name, empfaenger_kanzlei_email, empfaenger_kanzlei_telefon, empfaenger_kanzlei_kontaktperson, inhalt_dokumente_jsonb, status, versendet_am, versendet_durch_user_id, versand_methode, versand_external_id, bestaetigt_am, created_at, updated_at, notiz',
+    )
+    .eq('claim_id', claimId)
+    .in('status', ['versendet', 'bestaetigt'])
+    .order('versendet_am', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[AAR-842] getActiveKanzleiPaket:', error.message)
+    return null
+  }
+
+  return (data as KanzleiPaket | null) ?? null
+}
+
 export async function getKanzleiPaketeForClaim(claimId: string): Promise<KanzleiPaket[]> {
   const supabase = await createClient()
   const { data, error } = await supabase

@@ -20,6 +20,9 @@ export {
   type ClaimPhase,
 } from './phase-mappings'
 
+// AAR-842: Kanzlei-Ansprechpartner-Block (zwei Variants)
+export { KanzleiAnsprechpartnerBlock } from './KanzleiAnsprechpartnerBlock'
+
 // AAR-843: Timeline-Components + Display-Mappings
 export { TimelineView, TimelineEventCard, TimelineFutureSection } from './timeline'
 export {

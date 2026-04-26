@@ -36,6 +36,10 @@ import { getFallById } from '@/lib/fall/queries'
 // AAR-843: Timeline-Queries für den Verlaufs-Tab
 import { getClaimTimeline } from '@/lib/claims/timeline-queries'
 import { projectNextEvents } from '@/lib/claims/timeline-projection'
+// AAR-842: Kanzlei-Block — aktives Paket + Partnerkanzlei-Settings + QR-Codes
+import { getActiveKanzleiPaket, getPartnerKanzleiSettings } from '@/lib/kanzlei/queries'
+import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
+import { KanzleiAnsprechpartnerBlock } from '@/components/shared/claims'
 
 export default async function FallaktePage({
   params,
@@ -87,6 +91,50 @@ export default async function FallaktePage({
     ? await getClaimTimeline(claimId, viewerRoleForTimeline)
     : []
   const futureEvents = projectNextEvents({ phase: claimPhase })
+
+  // AAR-842: Kanzlei-Block-Daten — nur laden wenn ein versendetes Paket existiert.
+  // Bei Partnerkanzlei zusätzlich Settings + QR-SVGs für WhatsApp + Termin.
+  // variant='prominent' wenn phase=9_abgelehnt (Master-Doc 9.3).
+  const kanzleiPaket = claimId ? await getActiveKanzleiPaket(claimId) : null
+  let kanzleiBlockData: {
+    kanzleiName: string
+    kontaktperson: string | null
+    telefon: string | null
+    email: string | null
+    whatsappUrl: string | null
+    terminUrl: string | null
+    whatsappQrSvg: string | null
+    terminQrSvg: string | null
+    variant: 'normal' | 'prominent'
+  } | null = null
+  if (kanzleiPaket) {
+    let whatsappUrl: string | null = null
+    let terminUrl: string | null = null
+    let whatsappQrSvg: string | null = null
+    let terminQrSvg: string | null = null
+    if (kanzleiPaket.empfaenger_typ === 'partnerkanzlei') {
+      const settings = await getPartnerKanzleiSettings()
+      if (settings) {
+        whatsappUrl = settings.whatsappUrl || null
+        terminUrl   = settings.terminUrl   || null
+        ;[whatsappQrSvg, terminQrSvg] = await Promise.all([
+          whatsappUrl ? generateQrCodeSvg(whatsappUrl) : Promise.resolve(''),
+          terminUrl   ? generateQrCodeSvg(terminUrl)   : Promise.resolve(''),
+        ])
+      }
+    }
+    kanzleiBlockData = {
+      kanzleiName:   kanzleiPaket.empfaenger_kanzlei_name,
+      kontaktperson: kanzleiPaket.empfaenger_kanzlei_kontaktperson,
+      telefon:       kanzleiPaket.empfaenger_kanzlei_telefon,
+      email:         kanzleiPaket.empfaenger_kanzlei_email,
+      whatsappUrl,
+      terminUrl,
+      whatsappQrSvg: whatsappQrSvg || null,
+      terminQrSvg:   terminQrSvg   || null,
+      variant:       claimPhase === '9_abgelehnt' ? 'prominent' : 'normal',
+    }
+  }
 
   // Die schweren Abhängigkeits-Queries (Timeline, Dokumente, Parteien, etc.)
   // werden weiterhin hier geladen und als Props an die Tabs durchgereicht.
@@ -503,6 +551,13 @@ export default async function FallaktePage({
     <>
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
+      {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
+          Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}
+      {kanzleiBlockData && (
+        <div className={kanzleiBlockData.variant === 'prominent' ? 'mb-4' : 'mb-4 max-w-md'}>
+          <KanzleiAnsprechpartnerBlock {...kanzleiBlockData} />
+        </div>
+      )}
       {otherKundeFaelle.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm flex-wrap gap-2">
           <span className="text-amber-900">
