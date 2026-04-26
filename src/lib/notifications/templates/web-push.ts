@@ -273,6 +273,11 @@ export function buildPushPayload(event: NotificationEvent, role: Role): PushPayl
         url, tag, priority: 'normal',
       }
     }
+    // AAR-838: Gutachten-OCR-Pipeline
+    case 'gutachten.ocr_succeeded':
+      return { title: 'Gutachten ausgelesen', body: 'Das Gutachten ist im Portal verfügbar.', url, tag, priority: 'normal' }
+    case 'gutachten.ocr_failed':
+      return { title: 'OCR fehlgeschlagen', body: 'Manuelle Prüfung erforderlich.', url, tag, priority: 'urgent' }
     // AAR-844: KB-Notification für Auto-Paket-Trigger
     case 'claim.kanzlei_paket_pending':
       return {

@@ -350,6 +350,22 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       admin:          ['in_app'],
     },
   },
+  // 5.17 Gutachten-OCR-Pipeline (AAR-838)
+  'gutachten.ocr_succeeded': {
+    priority: 'normal',
+    channels: {
+      kundenbetreuer: ['in_app'],
+      kunde:          ['whatsapp', 'email', 'in_app'],
+      admin:          ['in_app'],
+    },
+  },
+  'gutachten.ocr_failed': {
+    priority: 'urgent',
+    channels: {
+      kundenbetreuer: ['email', 'in_app'],
+      admin:          ['in_app'],
+    },
+  },
 }
 
 export function getEventConfig(eventType: EventType): EventConfig {

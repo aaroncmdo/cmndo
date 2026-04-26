@@ -79,6 +79,9 @@ export type EventType =
   | 'claim.kanzlei_re_frage_due'
   // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844)
   | 'claim.kanzlei_paket_pending'
+  // 5.17 Gutachten-OCR-Pipeline (AAR-838)
+  | 'gutachten.ocr_succeeded'
+  | 'gutachten.ocr_failed'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -146,6 +149,9 @@ export interface EventPayloads {
   'claim.kanzlei_re_frage_due':    { claimId: string; fallId: string }
   // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844)
   'claim.kanzlei_paket_pending':   { claimId: string; fallId: string; kanzleiWunsch: string; phase: string; kundenbetreuerId: string | null }
+  // 5.17 Gutachten-OCR-Pipeline (AAR-838)
+  'gutachten.ocr_succeeded':       { fallId: string; gutachtenId: string; engine: string; confidence: number }
+  'gutachten.ocr_failed':          { fallId: string; gutachtenId: string; runNummer: number; reason: string }
 }
 
 // ── DB-Row-Shapes ─────────────────────────────────────────────────────────

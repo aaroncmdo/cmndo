@@ -143,6 +143,19 @@ function buildTemplate(
         html: `${greet}<p>Ihr Schadensfall wurde${kanzlei ? ` an die Kanzlei <strong>${kanzlei}</strong>` : ' an eine externe Kanzlei'} übergeben, die nun die rechtliche Vertretung übernimmt. Wir bleiben weiterhin Ihr Ansprechpartner für Rückfragen.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
       }
     }
+    // AAR-838: Gutachten-OCR-Pipeline
+    case 'gutachten.ocr_succeeded':
+      return {
+        subject: 'Gutachten ist da',
+        html: `${greet}<p>Das Gutachten zu Ihrem Schadensfall wurde erfolgreich ausgelesen und steht im Portal zur Verfügung.</p><p><a href="${fallLink}">Gutachten ansehen</a></p>${footer}`,
+      }
+    case 'gutachten.ocr_failed': {
+      const reason = payload.reason as string | undefined
+      return {
+        subject: 'Gutachten-OCR fehlgeschlagen — manuelle Prüfung nötig',
+        html: `${greet}<p>Die automatische Auslese eines Gutachtens ist fehlgeschlagen${reason ? ` (Grund: ${reason})` : ''}. Bitte manuell prüfen oder Re-Run starten.</p><p><a href="${fallLink}">Fall öffnen</a></p>${footer}`,
+      }
+    }
     // AAR-844: KB-Notification für Auto-Paket-Trigger
     case 'claim.kanzlei_paket_pending': {
       const wunsch = payload.kanzleiWunsch as string | undefined
