@@ -207,6 +207,26 @@ export default function FlowWizardKfz({
       setAccountPassword(result.password)
       setMagicLink(result.magicLink)
       setAccountCreated(true)
+
+      // CMM-14: Direkter Browser-Login mit dem frisch gesetzten Passwort —
+      // robuster als der Magic-Link-Redirect, der durch Domain-Mismatch
+      // (Preview vs. NEXT_PUBLIC_APP_URL) auf die /login-Seite umleiten kann.
+      // Magic-Link bleibt in der Welcome-Mail als Fallback.
+      try {
+        const supabase = createClient()
+        const { error: loginErr } = await supabase.auth.signInWithPassword({
+          email: accountEmail,
+          password: result.password,
+        })
+        if (loginErr) {
+          console.warn('[handleCreateAccount] Auto-Login fehlgeschlagen, Fallback auf Button:', loginErr.message)
+        } else {
+          // Erfolgreich eingeloggt → direkt ins Onboarding
+          window.location.href = '/kunde/onboarding'
+        }
+      } catch (err) {
+        console.warn('[handleCreateAccount] Auto-Login Exception:', err)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Konto konnte nicht erstellt werden')
     } finally {
@@ -215,8 +235,8 @@ export default function FlowWizardKfz({
   }
 
   // CMM-14: Account-Anlage automatisch beim Erreichen des Account-Steps,
-  // damit der Kunde keinen weiteren Klick mehr macht und direkt zum Magic-Link
-  // -Button kommt.
+  // damit der Kunde keinen weiteren Klick mehr macht und direkt im Onboarding
+  // landet (Auto-Login + Redirect zu /kunde/onboarding).
   useEffect(() => {
     if (currentStep.id === 'account' && fallId && !accountCreated && !creatingAccount && !error) {
       handleCreateAccount()
@@ -491,10 +511,14 @@ export default function FlowWizardKfz({
                   </div>
                 )}
 
-                {creatingAccount && !accountCreated && (
+                {(creatingAccount || (accountCreated && !error)) && (
                   <div className="rounded-2xl border border-claimondo-border bg-white p-6 text-center">
                     <div className="inline-block w-6 h-6 border-2 border-[#4573A2] border-t-transparent rounded-full animate-spin mb-3" />
-                    <p className="text-sm text-claimondo-ondo">Wir richten Ihr Portal ein …</p>
+                    <p className="text-sm text-claimondo-ondo">
+                      {creatingAccount
+                        ? 'Wir richten Ihr Portal ein …'
+                        : 'Sie werden eingeloggt …'}
+                    </p>
                   </div>
                 )}
 
@@ -504,12 +528,16 @@ export default function FlowWizardKfz({
                   </p>
                 )}
 
-                {accountCreated && (
-                  <div className="space-y-4">
+                {/* Fallback: Wenn Account angelegt ist aber das Auto-Login
+                    nicht weitergeleitet hat (z.B. Browser-Block), bietet der
+                    Button einen manuellen Eintritt — Magic-Link primär,
+                    /kunde als letzter Fallback. */}
+                {accountCreated && error && (
+                  <div className="space-y-4 mt-4">
                     <div className="rounded-2xl bg-[#f8f9fb] border border-claimondo-border p-4 text-sm text-claimondo-ondo">
                       Wir haben Ihnen die Zugangsdaten an{' '}
                       <span className="font-medium text-claimondo-navy">{accountEmail}</span>{' '}
-                      gesendet. Mit dem Button unten kommen Sie direkt in Ihr persönliches Portal.
+                      gesendet.
                     </div>
                     <a
                       href={magicLink ?? '/kunde/onboarding'}
@@ -517,8 +545,6 @@ export default function FlowWizardKfz({
                     >
                       Zu meinem Portal
                     </a>
-                    {/* Passwort verstecken wir bewusst — der Magic-Link ist
-                        der primäre Eintritt. Passwort steht in der Mail. */}
                   </div>
                 )}
               </div>
