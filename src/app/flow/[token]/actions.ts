@@ -184,7 +184,7 @@ export type CreateKundeAccountResult =
 export async function loginAfterFlow(
   email: string,
   password: string,
-): Promise<{ ok: false; error: string } | never> {
+): Promise<{ ok: true; redirectTo: string } | { ok: false; error: string }> {
   const supabase = await createClient()
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email,
@@ -206,17 +206,17 @@ export async function loginAfterFlow(
     .eq('id', user.id)
     .maybeSingle()
 
+  // CMM-14: revalidatePath('/', 'layout') invalidiert den Server-Cache
+  // damit der nächste Page-Render die neue Auth-Cookie sicher liest.
+  // Wichtig gegen die Cookie-Race wo der erste Page-Hit nach Login keine
+  // Session sah und die Page anonym rendered (weiße Seite, Reload-fix).
+  revalidatePath('/', 'layout')
+
   const authProvider = (profile?.auth_provider as string | null) ?? 'email'
-  // CMM-14: Server-side redirect() — wirft NEXT_REDIRECT, Cookies sind in
-  // der Response sicher gesetzt BEVOR der Browser den nächsten Request
-  // schickt. Ohne diesen Hard-Server-Redirect rennt der Browser in eine
-  // Cookie-Race-Condition (`window.location.replace` triggert sofort einen
-  // GET-Request bevor die Set-Cookie-Header verarbeitet wurden) und die
-  // Folgeseite rendert anonym → weiße Seite, Reload behebt es.
   if (profile?.force_password_change && authProvider === 'email') {
-    redirect('/passwort-aendern')
+    return { ok: true, redirectTo: '/passwort-aendern' }
   }
-  redirect('/kunde/onboarding')
+  return { ok: true, redirectTo: '/kunde/onboarding' }
 }
 
 /**

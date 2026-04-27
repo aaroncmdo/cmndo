@@ -212,39 +212,27 @@ export default function FlowWizardKfz({
       setMagicLink(result.magicLink)
       setAccountCreated(true)
 
-      // CMM-14: loginAfterFlow ist eine Server-Action die bei Erfolg
-      // mittels next/navigation `redirect()` selbst weiterleitet.
-      // Wir kommen NUR hier weiter wenn die Action ein {ok:false} zurückgibt
-      // (oder wenn fetch crasht). Ein erfolgreicher redirect() wirft
-      // NEXT_REDIRECT, das Next.js client-side abfängt und die Navigation
-      // hart durchführt — Cookies sind dann garantiert im Browser.
+      // CMM-14: Server-Action signt ein + setzt Cookies + revalidiert Cache.
+      // Wir geben dem Browser eine kurze Pause damit Set-Cookie-Header
+      // zuverlässig in den Cookie-Jar geschrieben sind, bevor wir den
+      // nächsten Request rausschicken. Ohne diese Pause sah der erste Hit
+      // auf /kunde/onboarding keine Session → weiße Seite, Reload-fix.
       try {
         const login = await loginAfterFlow(accountEmail, result.password)
-        // Wenn wir hier ankommen: Login fehlgeschlagen (kein Throw)
-        const errMsg = (login as { error?: string }).error ?? 'unbekannt'
-        const msg = `Auto-Login fehlgeschlagen: ${errMsg}`
-        console.warn('[handleCreateAccount]', msg)
-        if (typeof window !== 'undefined') {
-          window.alert(msg)
+        if (!login.ok) {
+          const msg = `Auto-Login fehlgeschlagen: ${login.error}`
+          console.warn('[handleCreateAccount]', msg)
+          if (typeof window !== 'undefined') window.alert(msg)
+          setError(msg)
+          return
         }
-        setError(msg)
+        // 250 ms warten damit Set-Cookie-Header sicher persistiert ist
+        await new Promise((r) => setTimeout(r, 250))
+        window.location.assign(login.redirectTo)
       } catch (err) {
-        // NEXT_REDIRECT-Exception ist erwartetes Verhalten — Next.js
-        // navigiert. Anderer Fehler → User informieren.
-        if (
-          err instanceof Error &&
-          'digest' in err &&
-          typeof (err as { digest: unknown }).digest === 'string' &&
-          (err as { digest: string }).digest.startsWith('NEXT_REDIRECT')
-        ) {
-          // Re-throw damit Next.js die Navigation durchzieht
-          throw err
-        }
         const msg = err instanceof Error ? err.message : String(err)
         console.warn('[handleCreateAccount] loginAfterFlow Exception:', msg)
-        if (typeof window !== 'undefined') {
-          window.alert(`Login-Exception: ${msg}`)
-        }
+        if (typeof window !== 'undefined') window.alert(`Login-Exception: ${msg}`)
         setError(`Login fehlgeschlagen: ${msg}`)
       }
     } catch (err) {
