@@ -661,6 +661,24 @@ export default function FlowWizardKfz({
                   <p className="text-sm text-emerald-700">Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.</p>
                 </div>
 
+                {/* CMM-14: Bei Komplett-Mandat juristischen Ansprechpartner
+                    anzeigen. LexDrive meldet sich proaktiv beim Kunden via
+                    Edge-Function — hier nur die Visitenkarte. */}
+                {lead.service_typ === 'komplett' && (
+                  <div className="mb-5 rounded-2xl border border-[#4573A2]/20 bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 p-5">
+                    <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">
+                      Ihr juristischer Ansprechpartner
+                    </p>
+                    <p className="text-base font-semibold text-[#0D1B3E] mb-1">
+                      LexDrive
+                    </p>
+                    <p className="text-xs text-claimondo-ondo">
+                      Unsere Partnerkanzlei. Sie wird sich in den nächsten
+                      Werktagen direkt bei Ihnen melden.
+                    </p>
+                  </div>
+                )}
+
                 {accountCreated ? (
                   <div className="space-y-4">
                     <div className="bg-[#f8f9fb] border border-claimondo-border rounded-2xl p-5 text-center">
