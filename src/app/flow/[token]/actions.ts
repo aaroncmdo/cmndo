@@ -206,12 +206,6 @@ export async function loginAfterFlow(
     .eq('id', user.id)
     .maybeSingle()
 
-  // CMM-14: revalidatePath('/', 'layout') invalidiert den Server-Cache
-  // damit der nächste Page-Render die neue Auth-Cookie sicher liest.
-  // Wichtig gegen die Cookie-Race wo der erste Page-Hit nach Login keine
-  // Session sah und die Page anonym rendered (weiße Seite, Reload-fix).
-  revalidatePath('/', 'layout')
-
   const authProvider = (profile?.auth_provider as string | null) ?? 'email'
   if (profile?.force_password_change && authProvider === 'email') {
     return { ok: true, redirectTo: '/passwort-aendern' }
