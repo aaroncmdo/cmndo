@@ -88,8 +88,16 @@ export default function NeuLeadDrawer() {
             <label className="block text-xs text-claimondo-ondo mb-1.5">Adresse</label>
             <GooglePlaceAutocomplete
               defaultValue={data.kunde_adresse}
-              placeholder="Strasse, PLZ, Stadt"
+              placeholder="Straße, PLZ, Stadt"
               onSelect={handlePlaceSelect}
+              // CMM-23: Auch Freitext-Eingaben übernehmen — wenn der User
+              // tippt aber keine Maps-Suggestion klickt, bekam die Action
+              // sonst kunde_adresse=null. Geocoding später beim Lead-Update.
+              onBlur={(text) => {
+                if (text && text !== data.kunde_adresse) {
+                  setData((d) => ({ ...d, kunde_adresse: text }))
+                }
+              }}
               className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
             />
             {data.kunde_lat && data.kunde_lng && (
