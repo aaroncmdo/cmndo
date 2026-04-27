@@ -544,13 +544,30 @@ export async function signSAandCreateFall(
 
       // Fall-Status spiegelt die View aus gutachter_termine
     } else {
-      // komplett: SA unterschrieben → Termin bleibt 'reserviert', wartet auf Vollmacht.
-      // fall_id setzen damit der Termin in der Fallakte sichtbar wird.
-      const { data: updatedTermine } = await admin.from('gutachter_termine')
-        .update({ fall_id: fall.id })
+      // CMM-21: komplett — SA unterschrieben = Termin verbindlich bestätigt.
+      // Vorher blieb der Termin auf 'reserviert' bis zur Vollmacht; das hat
+      // dazu geführt dass der Kunde im Onboarding nichts Verbindliches sah.
+      // Aaron-Spec: SA-Unterschrift ist die Termin-Bestätigung, Vollmacht ist
+      // davon entkoppelt. fall_id muss in jedem Fall gesetzt werden.
+      const { data: updatedTermine, error: upErr } = await admin.from('gutachter_termine')
+        .update({ status: 'bestaetigt', fall_id: fall.id })
         .eq('lead_id', leadId)
         .eq('status', 'reserviert')
         .select('id')
+
+      if (upErr) console.error('[CMM-21] Termin-Upgrade (komplett):', upErr.message)
+
+      // bestaetigeTermin setzt final_verbindlich_ab + Timeline-Eintrag
+      try {
+        const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
+        for (const t of updatedTermine ?? []) { await bestaetigeTermin(t.id) }
+      } catch (err) { console.error('[CMM-21] bestaetigeTermin (komplett):', err) }
+
+      // Reminder generieren (24h vorher Push/WhatsApp)
+      try {
+        const { generateReminderForTermin } = await import('@/lib/reminders/generate')
+        for (const t of updatedTermine ?? []) { await generateReminderForTermin(t.id) }
+      } catch (err) { console.error('[CMM-21] Reminder-Gen (komplett):', err) }
 
       // AAR-713: SV-Bestätigungs-Email feuert jetzt erst hier (vorher schon
       // bei der Dispatcher-Vorreservierung — das war die verwirrende
@@ -939,7 +956,7 @@ export async function signSAandCreateFall(
   if (lead.gutachter_termin && lead.telefon) {
     try {
       const { data: terminRow } = await admin.from('gutachter_termine')
-        .select('id, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
+        .select('id, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname))')
         .eq('fall_id', fall.id)
         .in('status', ['bestaetigt', 'reserviert'])
         .limit(1)
@@ -954,13 +971,16 @@ export async function signSAandCreateFall(
           .eq('status', 'reserviert')
       }
 
+      // CMM-21: nur Vorname an den Kunden — Vor-/Nachname zusammen würde
+      // dem Kunden ermöglichen den Sachverständigen direkt zu identifizieren
+      // und an Claimondo vorbei zu beauftragen.
       const svRel = (terminRow as { sachverstaendige: unknown } | null)?.sachverstaendige
       const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
       const profileRel = sv?.profiles
       const profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
-        | { vorname: string | null; nachname: string | null }
+        | { vorname: string | null }
         | null
-      const svName = `${profile?.vorname ?? ''} ${profile?.nachname ?? ''}`.trim() || 'Ihrem Gutachter'
+      const svName = (profile?.vorname ?? '').trim() || 'Ihrem Gutachter'
       const terminDate = new Date(lead.gutachter_termin)
       const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
       const { sendCommunication } = await import('@/lib/communications/send')

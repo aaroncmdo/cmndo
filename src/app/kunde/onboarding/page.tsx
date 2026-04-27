@@ -63,12 +63,13 @@ export default async function OnboardingPage({
     personenschaden_flag: boolean | null
     hat_vorschaeden: boolean | null
     lead_id: string | null
+    besichtigungsort_adresse: string | null
   } | null
   let fall: FallRow = null
   try {
     const { data, error } = await supabase
       .from('v_faelle_mit_aktuellem_termin')
-      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id')
+      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse')
       .eq('kunde_id', user.id)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -77,20 +78,6 @@ export default async function OnboardingPage({
     fall = data as FallRow
   } catch (err) {
     return <DiagPage stage="fall-load" error={err} />
-  }
-
-  let zb1StatusLead: string | null = null
-  if (fall?.lead_id) {
-    try {
-      const { data: zb1Row } = await supabase
-        .from('leads')
-        .select('zb1_status')
-        .eq('id', fall.lead_id)
-        .single()
-      zb1StatusLead = (zb1Row?.zb1_status as string | null) ?? null
-    } catch (err) {
-      return <DiagPage stage="zb1-status" error={err} />
-    }
   }
 
   let svName: string | null = null
@@ -149,29 +136,15 @@ export default async function OnboardingPage({
     }
   }
 
-  const zb1Hochgeladen =
-    zb1StatusLead === 'bestaetigt' ||
-    pflichtDocs.some(d => d.slot_id === 'fahrzeugschein' && !!d.dokument_url)
-  const polizeiberichtHochgeladen = pflichtDocs.some(d => d.slot_id === 'polizeibericht' && !!d.dokument_url)
-  const attestHochgeladen = pflichtDocs.some(d => d.slot_id === 'aerztliches_attest' && !!d.dokument_url)
-
   try {
     return (
       <OnboardingWizard
         vorname={profile?.vorname ?? ''}
         fall={fall ? { id: fall.id, fall_nummer: fall.fall_nummer, kennzeichen: fall.kennzeichen, fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') } : null}
         claim={claim}
-        termin={terminDatum ? { datum: terminDatum, svName } : null}
+        termin={terminDatum ? { datum: terminDatum, svName, ort: fall?.besichtigungsort_adresse ?? null } : null}
         pflichtDocs={pflichtDocs}
         freieSlots={freieSlots}
-        vorbereitung={{
-          zb1Hochgeladen,
-          polizeiVorOrt: !!fall?.polizei_vor_ort,
-          polizeiberichtHochgeladen,
-          personenschaden: !!fall?.personenschaden_flag,
-          attestHochgeladen,
-          hatVorschaeden: !!fall?.hat_vorschaeden,
-        }}
       />
     )
   } catch (err) {

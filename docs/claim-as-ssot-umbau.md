@@ -1,8 +1,25 @@
 # Claim als SSoT — Vollständiger Umbau-Plan
 
-**Status:** Draft v1 · 2026-04-26
+**Status:** Living Doc · zuletzt 2026-04-27
 **Owner:** Aaron + Claude
-**Linear-Epic:** AAR-9XX (anlegen)
+**Linear-Strecke:** CMM-1 bis CMM-26 (Team AAR)
+
+## Strecken-Status (2026-04-27)
+
+| Ticket | Scope | Status |
+|---|---|---|
+| CMM-1 | Master + dieses Dokument | live |
+| CMM-2 | Phase 0 Foundation (Loader, Views, Types) | gemerged |
+| CMM-3 | Phase 0.5 Lead→Claim Conversion | gemerged |
+| CMM-4..11 | Phase 1-7 Migration | pending |
+| CMM-12 | Outgoing Communication + Vertragswerk | pending |
+| CMM-13 | Termin-Auto-Expiry 30min | pending |
+| CMM-14 | Flow-Wizard Magic-Link + LexDrive-Karte | PR #393 in Review |
+| CMM-16 | Kunden-Onboarding + Pflichtdaten-Banner-System | active (Parent) |
+| CMM-19 | Onboarding Step 1 navy-Cards | gemerged |
+| CMM-21 | Dokumente-Tab + Smart-Hochladen + Multi-File | PR #395 grün, mergeable |
+| CMM-22 | Pflichtdaten-Banner-System (Re-Engagement) | active |
+| AAR-858 | SV-Anonymität Customer-Sweep | offen (High) |
 
 ---
 
