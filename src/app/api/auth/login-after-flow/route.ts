@@ -11,18 +11,39 @@
 // redirected mit Status 303 zu /passwort-aendern oder /kunde/onboarding.
 // Browser macht eine echte Hard-Navigation — kein RSC-Stream, keine Race.
 
-import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+
+// CMM-14: Statt 303-Redirect rendert der Endpoint eine Mini-HTML-Page mit
+// `<meta http-equiv="refresh">`. Hintergrund: Next.js fängt 303-Responses
+// nach Form-Action ab und versucht eine Soft-Navigation via RSC-Stream —
+// das geht beim ersten Page-Load schief (Whitescreen, Reload-fix). Mit
+// einem echten HTML-Body + meta-refresh macht der Browser eine voll
+// ausgehandelte Navigation, exakt wie ein normaler Reload — keine
+// Stream-Race-Condition mehr möglich.
+
+function htmlRedirect(target: string, label = 'Weiterleitung'): Response {
+  const safe = target.replace(/"/g, '&quot;')
+  const body = `<!DOCTYPE html><html lang="de"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0;url=${safe}" />
+  <title>${label}</title>
+  <style>body{margin:0;background:#f8f9fb;font-family:system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh;color:#0D1B3E}</style>
+</head><body><p>${label} ...</p>
+<script>window.location.replace(${JSON.stringify(target)})</script>
+</body></html>`
+  return new Response(body, {
+    status: 200,
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  })
+}
 
 export async function POST(request: Request) {
   const formData = await request.formData()
   const email = String(formData.get('email') ?? '')
   const password = String(formData.get('password') ?? '')
 
-  const origin = new URL(request.url).origin
-
   if (!email || !password) {
-    return NextResponse.redirect(`${origin}/login?error=Login-Daten+fehlen`, 303)
+    return htmlRedirect('/login?error=Login-Daten+fehlen', 'Anmeldung fehlgeschlagen')
   }
 
   const supabase = await createClient()
@@ -31,9 +52,9 @@ export async function POST(request: Request) {
     password,
   })
   if (signInError) {
-    return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent(signInError.message)}`,
-      303,
+    return htmlRedirect(
+      `/login?error=${encodeURIComponent(signInError.message)}`,
+      'Anmeldung fehlgeschlagen',
     )
   }
 
@@ -41,7 +62,7 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) {
-    return NextResponse.redirect(`${origin}/login?error=Auth-User+nicht+gefunden`, 303)
+    return htmlRedirect('/login?error=Auth-User+nicht+gefunden', 'Anmeldung fehlgeschlagen')
   }
 
   const { data: profile } = await supabase
@@ -52,7 +73,7 @@ export async function POST(request: Request) {
 
   const authProvider = (profile?.auth_provider as string | null) ?? 'email'
   if (profile?.force_password_change && authProvider === 'email') {
-    return NextResponse.redirect(`${origin}/passwort-aendern`, 303)
+    return htmlRedirect('/passwort-aendern', 'Passwort ändern')
   }
-  return NextResponse.redirect(`${origin}/kunde/onboarding`, 303)
+  return htmlRedirect('/kunde/onboarding', 'Willkommen')
 }
