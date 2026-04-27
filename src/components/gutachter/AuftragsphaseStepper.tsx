@@ -1,3 +1,5 @@
+'use client'
+
 // CMM-23: 3-Phasen-Stepper im SV-Fall-Header. Zeigt Termin → Besichtigung
 // → Gutachten mit Marker auf der aktuellen Phase. Mit Gutachten-Upload =
 // Auftrag durch, Stepper switched auf "Abgeschlossen"-State.

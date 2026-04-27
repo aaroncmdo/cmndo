@@ -6,9 +6,8 @@ import FallDetailClient from './FallDetailClient'
 // CMM-24: Auftrags-Banner mit den vom Kunden noch nicht eingereichten
 // Doku-Anforderungen — der SV soll die Liste vor dem Termin sehen.
 import AuftragDokumenteBanner from '@/components/gutachter/AuftragDokumenteBanner'
-// CMM-23: 3-Phasen-Stepper Termin → Besichtigung → Gutachten + post-
-// Auftrag MeinFallStatusCard für die Fall-Phasen.
-import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
+// CMM-23: post-Auftrag MeinFallStatusCard für die Fall-Phasen.
+// Der Stepper rendert in der linken Sidebar (FallDetailClient).
 import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
 import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
@@ -363,10 +362,17 @@ export default async function GutachterFallPage({
     fallStatus: (fall.status as string | null) ?? null,
   })
 
-  // CMM-23: Top-Server-Blocks für FallDetailClient. Aaron-Reihenfolge:
-  // Header → Banner (Kunde-Anforderungen) → SV-Briefing → 3-Phasen-Stepper
-  // → MeinFallStatusCard (wenn Fall-Phase). FallDetailClient rendert die
-  // Blocks direkt nach dem FallHeader.
+  // CMM-23: Top-Server-Blocks. Aaron-Reihenfolge: Header → gelber Banner
+  // (Kunde-Anforderungen) → SV-Briefing → MeinFallStatusCard (wenn Fall-
+  // Phase). Stepper wandert in die linke Sidebar.
+  // Mitteilungen für SV: NUR Stellungnahme + Nachbesichtigung sind
+  // tagesgeschäft-relevant — die rendern wir hier oben mit (wenn
+  // angefordert), alles andere ist KB/Admin-only.
+  const stellungnahmeAktiv = (fall.technische_stellungnahme_status as string | null) === 'angefordert'
+  const nachbesichtigungAktiv =
+    (fall.nachbesichtigung_status as string | null) === 'angefordert' ||
+    (fall.nachbesichtigung_status as string | null) === 'termin-eingereicht'
+
   const topServerBlocks = (
     <>
       <AuftragDokumenteBanner
@@ -382,7 +388,23 @@ export default async function GutachterFallPage({
         version={(fall.sv_briefing_version as number | null) ?? null}
         canRegenerate={false}
       />
-      <AuftragsphaseStepper phase={svPhase} />
+      {stellungnahmeAktiv && (
+        <div className="rounded-2xl border-2 border-orange-300 bg-orange-50 p-4">
+          <p className="text-sm font-semibold text-orange-900">Stellungnahme angefordert</p>
+          <p className="text-xs text-orange-800 mt-1">
+            Der Kundenbetreuer bittet um eine technische Stellungnahme zu diesem Fall.
+            Bitte über den Chat mit dem Betreuer abstimmen.
+          </p>
+        </div>
+      )}
+      {nachbesichtigungAktiv && (
+        <div className="rounded-2xl border-2 border-violet-300 bg-violet-50 p-4">
+          <p className="text-sm font-semibold text-violet-900">Nachbesichtigung mit dem Kunden</p>
+          <p className="text-xs text-violet-800 mt-1">
+            Eine erneute Besichtigung ist angefordert. Termin wird mit dem Kunden gemeinsam geplant.
+          </p>
+        </div>
+      )}
       {isFallPhase(svPhase) && (
         <MeinFallStatusCard
           phase={svPhase}
@@ -400,6 +422,7 @@ export default async function GutachterFallPage({
   return (
     <FallDetailClient
       topServerBlocks={topServerBlocks}
+      svPhase={svPhase}
       fall={fallWithAbrechnung}
       lead={lead}
       dokumente={dokumenteLegacy}

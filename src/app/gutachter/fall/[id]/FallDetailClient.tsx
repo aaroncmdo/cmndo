@@ -30,14 +30,17 @@ import type { TeamMitglied } from './_components/FallakteDrawer'
 // SvHonorarCard wurden aus der SV-FallDetail-View entfernt — sind KB/Admin-
 // Tools oder werden durch den AuftragsphaseStepper + MeinFallStatusCard
 // (page.tsx) ersetzt. Eine Karte = eine Funktion (Aaron-Spec).
-import { JetztZuTunCard } from './_components/JetztZuTunCard'
+// CMM-23 Aaron-Layout-Spec: Sidebar links = Stepper + Stammdaten;
+// Section rechts = Termin + Gutachten + hochgeladene Dokumente. Keine
+// Briefing-Sidebar, keine JetztZuTunCard, keine Timeline-Vorschau,
+// keine SvTools (FIN/ZB1 hat der SV in seiner Gutachten-Software),
+// kein Activity-Feed. Stellungnahme/Nachbesichtigung/Konfrontation
+// rendern als Mitteilungs-Banner oben (topServerBlocks aus page.tsx).
 import { StammdatenCard } from './_components/StammdatenCard'
 import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
-import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
-import { StellungnahmeCard } from './_components/StellungnahmeCard'
-import { NachbesichtigungCard } from './_components/NachbesichtigungCard'
-import { KonfrontationsTerminCard } from '@/components/gutachter/KonfrontationsTerminCard'
+import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
+import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
 // AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
 import { TerminActionsPanel } from './_components/TerminActionsPanel'
 import { SvToolsCard } from './_components/SvToolsCard'
@@ -132,9 +135,12 @@ type Props = {
   konfrontationGewuenscht?: boolean
   konfrontationTerminVereinbartAm?: string | null
   konfrontationTerminVorschlaege?: Array<{ datum: string; uhrzeit: string }> | null
-  /** CMM-23: Server-rendered Top-Blocks (Banner, Briefing, Stepper, MeinFallStatusCard).
-      Wird direkt nach dem FallHeader gerendert. */
+  /** CMM-23: Server-rendered Top-Blocks (gelber Banner, Briefing, Stellungnahme/
+      Nachbesichtigung/Konfrontation als Mitteilung wenn aktiv, MeinFallStatusCard).
+      Wird direkt nach dem FallHeader vor dem 2-Spalten-Layout gerendert. */
   topServerBlocks?: React.ReactNode
+  /** CMM-23: Auftrags-Phase für den Stepper in der linken Sidebar. */
+  svPhase?: SvLifecyclePhase
 }
 
 /** AAR-399: Lokaler Typ, passt zu DokumentenListe.SlotRow */
@@ -313,102 +319,18 @@ export default function FallDetailClient(props: Props) {
         )}
       </div>
 
-      {/* 2-Spalten-Layout: Desktop ≥1024px sticky-links, Mobile stacked */}
+      {/* CMM-23 Aaron-Layout: links Stepper + Stammdaten; rechts Termin +
+          Gutachten + hochgeladene Dokumente. Keine JetztZuTun, keine
+          Timeline-Vorschau, keine SvTools, kein Activity-Feed.
+          Stellungnahme/Nachbesichtigung/Konfrontation rendern als
+          Mitteilungs-Banner oben (topServerBlocks). */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
-          {/* CMM-23: BriefingCard aus der Sidebar nach oben in topServerBlocks
-              verschoben (direkt unter dem gelben Banner). */}
-          <JetztZuTunCard
-            fallId={fall.id as string}
-            initialTasks={props.tasks ?? []}
-            subphase={subphase}
-            aktiverTermin={
-              props.aktiverTermin
-                ? {
-                    id: props.aktiverTermin.id,
-                    status: props.aktiverTermin.status,
-                    start_zeit: props.aktiverTermin.start_zeit ?? null,
-                    vorgeschlagenes_datum:
-                      props.aktiverTermin.vorgeschlagenes_datum ?? null,
-                    gegenvorschlag_von:
-                      (props.aktiverTermin.gegenvorschlag_von as
-                        | 'sv'
-                        | 'kunde'
-                        | null) ?? null,
-                  }
-                : null
-            }
-            fall={{
-              status: (fall.status as string | null) ?? null,
-              technische_stellungnahme_status:
-                (fall.technische_stellungnahme_status as string | null) ?? null,
-              gutachten_final_freigegeben:
-                (fall.gutachten_final_freigegeben as boolean | null) ?? null,
-              gutachten_eingegangen_am:
-                (fall.gutachten_eingegangen_am as string | null) ?? null,
-              zahlung_eingegangen_am:
-                (fall.zahlung_eingegangen_am as string | null) ?? null,
-            }}
-          />
-          {/* CMM-23: ReklamationsCard entfernt (KB-Tool — SV nicht relevant).
-              Stellungnahme + Nachbesichtigung bleiben als Edge-Cases. */}
-          {visibleSections.includes('stellungnahme') && (
-            <StellungnahmeCard
-              fall={{
-                id: fall.id as string,
-                technische_stellungnahme_status:
-                  (fall.technische_stellungnahme_status as string | null) ?? null,
-                technische_stellungnahme_beauftragt_am:
-                  (fall.technische_stellungnahme_beauftragt_am as string | null) ?? null,
-                technische_stellungnahme_hochgeladen_am:
-                  (fall.technische_stellungnahme_hochgeladen_am as string | null) ?? null,
-                technische_stellungnahme_freigabe_am:
-                  (fall.technische_stellungnahme_freigabe_am as string | null) ?? null,
-              }}
-              id="stellungnahme-card"
-            />
-          )}
-          {visibleSections.includes('nachbesichtigung') && (
-            <NachbesichtigungCard
-              fall={{
-                id: fall.id as string,
-                nachbesichtigung_status:
-                  (fall.nachbesichtigung_status as string | null) ?? null,
-                nachbesichtigung_angefordert_am:
-                  (fall.nachbesichtigung_angefordert_am as string | null) ?? null,
-                nachbesichtigung_termin_datum:
-                  (fall.nachbesichtigung_termin_datum as string | null) ?? null,
-                nachbesichtigung_ergebnis:
-                  (fall.nachbesichtigung_ergebnis as string | null) ?? null,
-              }}
-              id="nachbesichtigung-card"
-            />
-          )}
-          {/* AAR-559 (C10): Konfrontations-Termin-Annahme/Ablehnung, wenn
-              der Kunde im Kunde-Portal (C9) SV-Präsenz gewünscht hat. */}
-          <KonfrontationsTerminCard
-            fallId={fall.id as string}
-            konfrontationGewuenscht={props.konfrontationGewuenscht ?? false}
-            terminVereinbartAm={props.konfrontationTerminVereinbartAm ?? null}
-            terminVorschlaege={props.konfrontationTerminVorschlaege ?? null}
-          />
-          {/* CMM-23: Folgende Cards aus der SV-FallDetail-View entfernt —
-              sie waren KB/Admin-Tools oder werden durch Stepper/MeinFallStatusCard
-              (siehe page.tsx) ersetzt:
-              - AktuellePhaseCard       → AuftragsphaseStepper im Header
-              - AbrechnungsartCard      → KB-Tool
-              - KanzleiRegulierungsStepperCard → KB-Tool
-              - KanzleiStatusCard       → ersetzt durch MeinFallStatusCard
-                                          (zeigt LexDrive-Deep-Link statt
-                                          Regulierungs-Details)
-              - AbrechnungsCard         → KB-Tool */}
-          {/* CMM-23: SvHonorarCard hier entfernt — Auszahlungs-Status zeigt
-              die MeinFallStatusCard in der page.tsx (Phase 'auszahlung'). */}
+          {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
+          <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
         </aside>
 
         <section className="space-y-4 min-w-0">
-          <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
-          {/* AAR-397: Read-only Termin-Card zwischen Stammdaten und Dokumenten. */}
           <TerminCard
             termin={
               props.aktiverTermin
@@ -433,7 +355,6 @@ export default function FallDetailClient(props: Props) {
               schadens_ort: (fall.schadens_ort as string | null) ?? null,
             }}
           />
-          {/* AAR-404: Gutachten prominent zwischen Termin und Dokumenten-Übersicht. */}
           <GutachtenCard
             fallId={fall.id as string}
             fallNummer={fallNummer}
@@ -450,44 +371,12 @@ export default function FallDetailClient(props: Props) {
                 }))
             }
           />
-          {/* CMM-23: DokumenteUebersichtCard und AnforderungenListe entfernt.
-              Aaron-Spec: im Auftrag soll nur stehen was der Kunde uns geben
-              soll — der AuftragDokumenteBanner (page.tsx) ist die einzige
-              Anforderungs-Anzeige. SV-eigene Slots (Gutachten/Befund) leben
-              im SvToolsCard-Block; SV-Anfordere-Tool ist raus weil SV bei
-              Bedarf via Chat mit dem KB kommuniziert (AAR-861). */}
-          <TimelineVorschauCard events={timeline} />
-
-          {/* AAR-757: SV-Tools-Card (FIN + ZB1 + Gutachten + Datei-Upload)
-              bündelt die Flows die früher über die VollClient-Tabs verstreut waren. */}
-          <SvToolsCard
+          <FallDokumenteSidebar
             fallId={fall.id as string}
-            fallFin={(fall.fin_vin as string | null) ?? null}
-            finQuelle={(fall.fin_quelle as string | null) ?? null}
-            vorschadenGeprueft={!!fall.vorschaden_geprueft}
-            hatVorschaeden={!!fall.hat_vorschaeden}
-            vorschadenAnzahl={(fall.vorschaden_anzahl as number | null) ?? null}
-            hasGutachten={hatGutachten}
+            aktuellePhase={fall.aktuelle_phase as string | null}
+            szenario={fall.szenario as string | null}
+            dokumente={props.fallDokumente ?? []}
           />
-
-          {/* AAR-757: Activity-Feed + Dokumente-Sidebar als Reihen-Paar unten */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-            <FallActivityFeed
-              fallId={fall.id as string}
-              events={buildActivityEvents(
-                timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; lead_id?: string | null; created_at: string }[],
-                [],
-                nachrichten as { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; lead_id?: string | null; created_at: string }[],
-              )}
-              maxItems={8}
-            />
-            <FallDokumenteSidebar
-              fallId={fall.id as string}
-              aktuellePhase={fall.aktuelle_phase as string | null}
-              szenario={fall.szenario as string | null}
-              dokumente={props.fallDokumente ?? []}
-            />
-          </div>
         </section>
       </div>
 
