@@ -5,11 +5,11 @@
 // final. SV kann nur per TerminActionsPanel in der Fallakte den Termin
 // ablehnen oder einen Gegenvorschlag senden.
 //
-// Card-Zustände:
-//   • reserviert  → „Geblockt am X – wartet auf SA-Unterschrift" (Fall öffnen)
-//   • bestaetigt  → „Fest am X" (Fall öffnen)
-//   • kein Termin → sollte selten sein (Dispatcher hat noch nicht zugewiesen);
-//                   Fallback „Fall öffnen"
+// CMM-25 Follow-Up: Action-Zone (Tile mit „Fall öffnen"-Pfeil + read-only
+// Status-Tiles) entfernt — Card-Click öffnet die Fallakte über den
+// Stretched-Link. Termin-Status wandert als gefärbte Meta-Zeile in den
+// Body, damit der SV auf einen Blick sieht, ob ein Termin geblockt /
+// bestätigt ist, ohne sichtbaren Button.
 
 import Link from 'next/link'
 import {
@@ -19,7 +19,6 @@ import {
   ClockIcon,
   CheckCircle2Icon,
   AlertCircleIcon,
-  ChevronRightIcon,
   FileTextIcon,
 } from 'lucide-react'
 import { formatDatum } from '@/lib/format'
@@ -50,49 +49,24 @@ export type AuftragCardProps = {
   offeneDokumente?: number
 }
 
-type PrimaryAction =
-  | { type: 'geblockt'; datum: string; href: string }
-  | { type: 'bestaetigt'; datum: string; href: string }
-  | { type: 'sv-gegenvorschlag-offen'; datum: string; href: string }
-  | { type: 'offen'; label: string; href: string }
+type TerminMeta =
+  | { kind: 'geblockt'; datum: string }
+  | { kind: 'bestaetigt'; datum: string }
+  | { kind: 'sv-gegenvorschlag'; datum: string }
+  | null
 
-function derivePrimary(props: AuftragCardProps): PrimaryAction {
-  const t = props.aktiverTermin
-  const href = `/gutachter/fall/${props.fall.id}`
-
-  // CMM-25: Kein Termin oder Termin abgelehnt/storniert → SV soll keinen
-  // Erstvorschlag mehr machen. Dispatcher muss neu zuweisen. Card öffnet
-  // nur den Fall — die Fallakte zeigt dann den passenden Hinweis.
-  if (!t || t.status === 'storniert' || t.status === 'abgelehnt') {
-    return { type: 'offen', label: 'Fall öffnen', href }
-  }
-
-  // CMM-25: SV hat selber einen Gegenvorschlag rausgeschickt → wartet auf
-  // Dispatcher-Antwort. Card zeigt Status, Fallakte hat die Details.
+function deriveTerminMeta(t: AuftragCardProps['aktiverTermin']): TerminMeta {
+  if (!t || t.status === 'storniert' || t.status === 'abgelehnt') return null
   if (t.status === 'gegenvorschlag' && t.gegenvorschlag_von === 'sv') {
-    return {
-      type: 'sv-gegenvorschlag-offen',
-      datum: t.vorgeschlagenes_datum ?? t.start_zeit ?? '',
-      href,
-    }
+    return { kind: 'sv-gegenvorschlag', datum: t.vorgeschlagenes_datum ?? t.start_zeit ?? '' }
   }
-
-  // CMM-25: Reserviert = Dispatcher hat geblockt, SA-Unterschrift steht aus.
-  // Auch alte 'gegenvorschlag'-Rows vom Kunden landen hier (Kunden-Gegenvorschlag-
-  // Pfad ist mit CMM-25 abgeschafft, Dispatcher kümmert sich um Klärung).
   if (t.status === 'reserviert' || t.status === 'gegenvorschlag') {
-    return {
-      type: 'geblockt',
-      datum: t.start_zeit ?? '',
-      href,
-    }
+    return { kind: 'geblockt', datum: t.start_zeit ?? '' }
   }
-
   if (t.status === 'bestaetigt') {
-    return { type: 'bestaetigt', datum: t.start_zeit ?? '', href }
+    return { kind: 'bestaetigt', datum: t.start_zeit ?? '' }
   }
-
-  return { type: 'offen', label: 'Fall öffnen', href }
+  return null
 }
 
 function fmtDateShort(iso: string | null | undefined): string {
@@ -116,13 +90,12 @@ export default function AuftragCard(props: AuftragCardProps) {
       ? `${props.kunde.vorname ?? ''} ${props.kunde.nachname ?? ''}`.trim()
       : '—'
 
-  const action = derivePrimary(props)
+  const terminMeta = deriveTerminMeta(props.aktiverTermin)
 
   return (
     <div className="relative bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-ondo transition-colors group">
-      {/* CMM-24: Stretched-Link über die ganze Card. Action-Buttons + interne
-          Links bekommen relative z-10, damit sie ihre eigenen Klick-Handler
-          behalten. */}
+      {/* CMM-25: Stretched-Link über die ganze Card. Card-Click ist die
+          einzige Aktion — der SV öffnet seinen Auftrag, sonst nichts. */}
       <Link
         href={`/gutachter/fall/${props.fall.id}`}
         aria-label={`Fall ${props.fall.fall_nummer ?? ''} öffnen`}
@@ -174,59 +147,29 @@ export default function AuftragCard(props: AuftragCardProps) {
             <span>Schaden: {formatDatum(props.fall.schadens_datum)}</span>
           </div>
         )}
-      </div>
 
-      {/* Action Zone — CMM-25: nur read-only Termin-Status + Fall-öffnen-Link.
-          Der Stretched-Link auf der ganzen Card öffnet bereits den Fall, der
-          sichtbare Pfeil hier ist nur visuell affordance. */}
-      <div className="relative z-10 pt-2 border-t border-claimondo-border">
-        {action.type === 'geblockt' && (
-          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs pointer-events-none">
-            <div className="flex items-center gap-2 min-w-0">
-              <ClockIcon className="w-4 h-4 text-amber-700 shrink-0" />
-              <div className="min-w-0">
-                <p className="font-medium">Termin geblockt</p>
-                <p className="mt-0.5 truncate">
-                  {fmtDateShort(action.datum)} — wartet auf Sicherungsabtretung
-                </p>
-              </div>
-            </div>
-            <ChevronRightIcon className="w-4 h-4 shrink-0" />
+        {/* CMM-25: Termin als gefärbte Meta-Zeile, kein Button. Klickfläche
+            ist die ganze Card. */}
+        {terminMeta?.kind === 'geblockt' && (
+          <div className="flex items-center gap-1.5 text-amber-800">
+            <ClockIcon className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span className="truncate">
+              Termin geblockt: {fmtDateShort(terminMeta.datum)} — wartet auf SA-Unterschrift
+            </span>
           </div>
         )}
-
-        {action.type === 'sv-gegenvorschlag-offen' && (
-          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-xs pointer-events-none">
-            <div className="flex items-center gap-2 min-w-0">
-              <AlertCircleIcon className="w-4 h-4 text-claimondo-ondo shrink-0" />
-              <div className="min-w-0">
-                <p className="font-medium">Gegenvorschlag gesendet</p>
-                <p className="mt-0.5 truncate">
-                  {fmtDateShort(action.datum)} — wartet auf Dispatch
-                </p>
-              </div>
-            </div>
-            <ChevronRightIcon className="w-4 h-4 shrink-0" />
+        {terminMeta?.kind === 'bestaetigt' && (
+          <div className="flex items-center gap-1.5 text-emerald-700">
+            <CheckCircle2Icon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span className="truncate">Termin: {fmtDateShort(terminMeta.datum)}</span>
           </div>
         )}
-
-        {action.type === 'bestaetigt' && (
-          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs pointer-events-none">
-            <div className="flex items-center gap-2 min-w-0">
-              <CheckCircle2Icon className="w-4 h-4 text-emerald-600 shrink-0" />
-              <div className="min-w-0">
-                <p className="font-medium">Fest bestätigt</p>
-                <p className="mt-0.5 truncate">{fmtDateShort(action.datum)}</p>
-              </div>
-            </div>
-            <ChevronRightIcon className="w-4 h-4 shrink-0" />
-          </div>
-        )}
-
-        {action.type === 'offen' && (
-          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-claimondo-border text-claimondo-navy text-sm font-medium pointer-events-none">
-            <span>{action.label}</span>
-            <ChevronRightIcon className="w-4 h-4" />
+        {terminMeta?.kind === 'sv-gegenvorschlag' && (
+          <div className="flex items-center gap-1.5 text-claimondo-navy">
+            <AlertCircleIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
+            <span className="truncate">
+              Gegenvorschlag gesendet: {fmtDateShort(terminMeta.datum)}
+            </span>
           </div>
         )}
       </div>
