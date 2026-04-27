@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import OnboardingWizard from './OnboardingWizard'
 import { getPflichtdokumenteStand, getFreieSlotsFuerKunde } from './actions'
+import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import type { ClaimFull } from '@/lib/claims/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -116,6 +118,19 @@ export default async function OnboardingPage({
     }
   }
 
+  // ─── CMM-19: Claim-Daten via SSoT-Loader für Step 1 navy-Cards ────────
+  let claim: ClaimFull | null = null
+  if (fall?.id) {
+    try {
+      const claimId = await resolveClaimId(supabase, fall.id)
+      if (claimId) {
+        claim = await getClaimForRole(supabase, claimId, 'kunde')
+      }
+    } catch (err) {
+      return <DiagPage stage="claim-load" error={err} />
+    }
+  }
+
   let pflichtDocs: Awaited<ReturnType<typeof getPflichtdokumenteStand>> = []
   if (fall?.id) {
     try {
@@ -145,6 +160,7 @@ export default async function OnboardingPage({
       <OnboardingWizard
         vorname={profile?.vorname ?? ''}
         fall={fall ? { id: fall.id, fall_nummer: fall.fall_nummer, kennzeichen: fall.kennzeichen, fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') } : null}
+        claim={claim}
         termin={terminDatum ? { datum: terminDatum, svName } : null}
         pflichtDocs={pflichtDocs}
         freieSlots={freieSlots}

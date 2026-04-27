@@ -17,6 +17,7 @@ import {
   type PflichtdokumentStand,
   type FreierSlot,
 } from './actions'
+import type { ClaimFull } from '@/lib/claims/types'
 
 type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
 type Termin = { datum: string; svName: string | null }
@@ -156,10 +157,11 @@ type VorbereitungsInfo = {
 }
 
 export default function OnboardingWizard({
-  vorname, fall, termin, pflichtDocs, freieSlots, vorbereitung,
+  vorname, fall, claim, termin, pflichtDocs, freieSlots, vorbereitung,
 }: {
   vorname: string
   fall: Fall | null
+  claim: ClaimFull | null
   termin: Termin | null
   pflichtDocs: PflichtDoc[]
   freieSlots: FreierSlot[]
@@ -373,33 +375,92 @@ export default function OnboardingWizard({
             {currentStep.id === 'fall' && (
               <div>
                 <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-claimondo-ondo" /></div>
-                <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Fall</h1>
-                {fall ? (
-                  <div className="mt-4 bg-gradient-to-br from-claimondo-ondo/10 to-claimondo-shield/5 border border-claimondo-ondo/20 rounded-2xl p-5">
-                    <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">Fall-Nummer</p>
-                    <p className="text-xl font-bold text-claimondo-navy">{fall.fall_nummer ?? fall.id.slice(0, 8)}</p>
-                    {fall.kennzeichen && <p className="text-sm text-claimondo-ondo mt-1">{fall.kennzeichen}</p>}
-                    {fall.fahrzeug && <p className="text-xs text-claimondo-ondo">{fall.fahrzeug}</p>}
+                <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Schadenfall</h1>
+                <p className="mt-2 text-sm text-claimondo-ondo">
+                  Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie kurz und bestätigen Sie unten.
+                </p>
+
+                {/* CMM-19: Fall-Header mit Fall-Nummer + Kennzeichen + Fahrzeug */}
+                {fall && (
+                  <div className="mt-5 rounded-2xl bg-claimondo-navy text-white p-5">
+                    <p className="text-[11px] uppercase tracking-wider text-white/60 mb-1">Fall-Nummer</p>
+                    <p className="text-xl font-bold">{fall.fall_nummer ?? fall.id.slice(0, 8)}</p>
+                    {(fall.kennzeichen || fall.fahrzeug) && (
+                      <p className="text-sm text-white/80 mt-2">
+                        {[fall.fahrzeug, fall.kennzeichen].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
                   </div>
-                ) : (
-                  <p className="mt-4 text-sm text-claimondo-ondo">Ihr Fall wird gerade angelegt — Sie sehen ihn in wenigen Minuten.</p>
                 )}
-                <div className="mt-6 space-y-2">
-                  <p className="text-sm font-medium text-claimondo-navy">So laeuft es weiter:</p>
-                  {STATUS_PHASES.map((phase, i) => (
-                    <div key={phase.key} className="flex items-start gap-3 py-2">
-                      <div className="w-6 h-6 rounded-full bg-claimondo-ondo/10 text-claimondo-ondo flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</div>
-                      <div>
-                        <p className="text-sm font-medium text-claimondo-navy">{phase.label}</p>
-                        <p className="text-xs text-claimondo-ondo">{phase.description}</p>
-                      </div>
-                    </div>
-                  ))}
+
+                {/* CMM-19: Navy-Cards mit Schadensdaten aus Claim-SSoT */}
+                {claim && (
+                  <div className="mt-4 space-y-3">
+                    <ClaimDataCard title="Schadensereignis">
+                      {claim.schadentag && (
+                        <DataRow label="Datum" value={new Date(claim.schadentag).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })} />
+                      )}
+                      {claim.schadenzeit && <DataRow label="Uhrzeit" value={String(claim.schadenzeit).slice(0, 5)} />}
+                      {claim.schadenort_adresse && (
+                        <DataRow label="Ort" value={formatOrt(claim.schadenort_adresse, claim.schadenort_plz, claim.schadenort_ort)} />
+                      )}
+                      {claim.schadenart && <DataRow label="Schadenart" value={prettyEnum(String(claim.schadenart))} />}
+                      {claim.unfall_konstellation && <DataRow label="Konstellation" value={prettyEnum(String(claim.unfall_konstellation))} />}
+                      {claim.hergang_kunde_text && <DataRow label="Hergang" value={String(claim.hergang_kunde_text)} multiline />}
+                    </ClaimDataCard>
+
+                    {(claim.hat_personenschaden || claim.hat_sachschaden || claim.hat_mietwagen || claim.hat_nutzungsausfall) && (
+                      <ClaimDataCard title="Schadens-Umfang">
+                        {claim.hat_personenschaden && <DataRow label="Personenschaden" value="ja" />}
+                        {claim.hat_sachschaden && <DataRow label="Sachschaden" value="ja" />}
+                        {claim.hat_mietwagen && <DataRow label="Mietwagen-Bedarf" value="ja" />}
+                        {claim.hat_nutzungsausfall && <DataRow label="Nutzungsausfall" value="ja" />}
+                        {claim.sachschaden_beschreibung && <DataRow label="Sachschaden-Detail" value={String(claim.sachschaden_beschreibung)} multiline />}
+                      </ClaimDataCard>
+                    )}
+
+                    {claim.gegner_bekannt && (() => {
+                      const verursacher = (claim.parties ?? []).find(p => p.rolle === 'verursacher')
+                      const gegnerName = verursacher
+                        ? [verursacher.vorname, verursacher.nachname].filter(Boolean).join(' ').trim() || verursacher.nachname
+                        : null
+                      const gegnerVs = verursacher?.versicherung_klartext ?? null
+                      const gegnerKz = verursacher?.kennzeichen ?? null
+                      return (
+                        <ClaimDataCard title="Unfallgegner">
+                          {gegnerName && <DataRow label="Name" value={gegnerName} />}
+                          {gegnerVs && <DataRow label="Versicherung" value={gegnerVs} />}
+                          {gegnerKz && <DataRow label="Kennzeichen" value={gegnerKz} />}
+                          {claim.gegner_versicherungsnummer && <DataRow label="VS-Nummer" value={String(claim.gegner_versicherungsnummer)} />}
+                          {claim.gegner_aktenzeichen && <DataRow label="Schaden-Nr (Gegner)" value={String(claim.gegner_aktenzeichen)} />}
+                          {claim.anzahl_beteiligte_total > 1 && (
+                            <DataRow label="Beteiligte" value={String(claim.anzahl_beteiligte_total)} />
+                          )}
+                        </ClaimDataCard>
+                      )
+                    })()}
+
+                    {(claim.polizei_vor_ort || claim.polizei_aktenzeichen) && (
+                      <ClaimDataCard title="Polizei">
+                        {claim.polizei_vor_ort && <DataRow label="Vor Ort gewesen" value="ja" />}
+                        {claim.polizei_aktenzeichen && <DataRow label="Aktenzeichen" value={String(claim.polizei_aktenzeichen)} />}
+                      </ClaimDataCard>
+                    )}
+                  </div>
+                )}
+
+                {/* Korrekturhinweis */}
+                <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
+                  Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer
+                  zurück — wir tragen Korrekturen für Sie ein.
                 </div>
+
                 <button
                   onClick={() => setStepIndex(2)}
-                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
-                >Weiter</button>
+                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-navy hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
+                >
+                  Daten bestätigen und weiter
+                </button>
               </div>
             )}
 
@@ -1024,6 +1085,45 @@ function DokumentInfoOverlay({
 // AAR-231 / AAR-365: Checkliste-Item im Termin-Step.
 // done=true → grüner Haken, done=false → Warn-Variante mit prominentem
 // Upload-Button statt dem alten kleinen blauen Textlink (Nicolas-Feedback).
+// CMM-19: Pretty-Format für Enum-Werte (auffahrunfall → Auffahrunfall, haftpflicht → Haftpflicht)
+function prettyEnum(value: string): string {
+  if (!value) return value
+  return value
+    .replace(/[_-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+// CMM-19: Schadensort-Format ohne doppelte PLZ (Lead-Free-Text enthält oft schon PLZ)
+function formatOrt(adresse: string | null, plz: string | null, ort: string | null): string {
+  const parts: string[] = []
+  if (adresse) parts.push(adresse)
+  // PLZ + Ort nur wenn die Adresse die PLZ nicht schon enthält
+  const plzOrt = [plz, ort].filter(Boolean).join(' ').trim()
+  if (plzOrt && !(plz && adresse?.includes(plz))) parts.push(plzOrt)
+  return parts.join(', ')
+}
+
+// CMM-19: Navy-Card für Step 1 — pre-filled Claim-Daten Read-only.
+function ClaimDataCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl bg-claimondo-navy/5 border border-claimondo-navy/20 p-4">
+      <p className="text-[11px] uppercase tracking-wider text-claimondo-navy/70 font-semibold mb-2">{title}</p>
+      <div className="space-y-1.5">{children}</div>
+    </div>
+  )
+}
+
+function DataRow({ label, value, multiline }: { label: string; value: string; multiline?: boolean }) {
+  return (
+    <div className={multiline ? 'flex flex-col gap-0.5' : 'flex items-baseline gap-2'}>
+      <span className="text-[11px] text-claimondo-ondo">{label}:</span>
+      <span className={`text-sm text-claimondo-navy ${multiline ? 'leading-snug' : 'font-medium'}`}>{value}</span>
+    </div>
+  )
+}
+
 function CheckItem({
   emoji, text, done, action,
 }: {
