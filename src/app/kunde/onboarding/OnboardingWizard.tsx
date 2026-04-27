@@ -21,7 +21,7 @@ import type { ClaimFull } from '@/lib/claims/types'
 import { getOffeneDokumentAnforderungen, countOffenePflicht } from '@/lib/claims/data-requirements'
 
 type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
-type Termin = { datum: string; svName: string | null }
+type Termin = { datum: string; svName: string | null; ort: string | null }
 // AAR-323: PflichtDoc ist jetzt der Katalog-angereicherte Stand (siehe actions.ts).
 type PflichtDoc = PflichtdokumentStand
 
@@ -148,18 +148,8 @@ const STATUS_PHASES = [
   { key: 'regulierung', label: 'Regulierung', description: 'Versicherung zahlt' },
 ]
 
-// AAR-231: Vorbereitungs-Flags für Termin-Step
-type VorbereitungsInfo = {
-  zb1Hochgeladen: boolean
-  polizeiVorOrt: boolean
-  polizeiberichtHochgeladen: boolean
-  personenschaden: boolean
-  attestHochgeladen: boolean
-  hatVorschaeden: boolean
-}
-
 export default function OnboardingWizard({
-  vorname, fall, claim, termin, pflichtDocs, freieSlots, vorbereitung,
+  vorname, fall, claim, termin, pflichtDocs, freieSlots,
 }: {
   vorname: string
   fall: Fall | null
@@ -167,7 +157,6 @@ export default function OnboardingWizard({
   termin: Termin | null
   pflichtDocs: PflichtDoc[]
   freieSlots: FreierSlot[]
-  vorbereitung?: VorbereitungsInfo
 }) {
   const router = useRouter()
   // AAR-125: Deep-Link aus Banner ("Polizeibericht hochladen") springt direkt in Step 3
@@ -488,68 +477,37 @@ export default function OnboardingWizard({
                 <div className="mb-4"><CalendarIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Termin</h1>
                 {termin ? (
-                  <>
-                    <div className="mt-4 bg-gradient-to-br from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-2xl p-5">
-                      <p className="text-xs uppercase tracking-wider text-emerald-700 mb-1">✓ Termin verbindlich bestätigt</p>
-                      <p className="text-lg font-bold text-claimondo-navy">
-                        {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
-                      </p>
-                      <p className="text-sm text-claimondo-navy">
-                        {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
-                      </p>
-                      {termin.svName && <p className="mt-3 text-sm text-claimondo-ondo">Sachverständiger: <strong>{termin.svName}</strong></p>}
-                      <p className="mt-3 text-xs text-claimondo-ondo">Wir erinnern Sie 24h vorher per WhatsApp.</p>
+                  <div className="mt-4 bg-gradient-to-br from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-2xl p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                        <CheckIcon className="w-4 h-4" />
+                      </div>
+                      <p className="text-xs uppercase tracking-wider text-emerald-700 font-semibold">Termin verbindlich bestätigt</p>
                     </div>
-
-                    {/* AAR-231: Vorbereitungs-Checkliste
-                        AAR-390: Auf kleinen Screens kann der Block durch die
-                        conditional CheckItems (Vorschaeden/Polizei/Attest)
-                        schnell länger werden als der Viewport und den Weiter-
-                        Button nach unten drücken. max-h + overflow-y + Sticky-
-                        Header sorgen für einen stabilen, scrollbaren Block
-                        ohne die Step-Höhe zu sprengen. */}
-                    <div className="mt-5 bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-2xl p-5 space-y-3 max-h-[60vh] overflow-y-auto">
-                      <p className="sticky top-0 -mx-5 -mt-5 px-5 pt-5 pb-2 bg-[#eef2f8] text-sm font-semibold text-claimondo-navy z-10">
-                        Bitte vor dem Termin vorbereiten:
+                    <p className="text-lg font-bold text-claimondo-navy">
+                      {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                    </p>
+                    <p className="text-sm font-medium text-claimondo-navy">
+                      {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                    </p>
+                    {termin.ort && (
+                      <p className="mt-3 text-sm text-claimondo-navy flex items-start gap-1.5">
+                        <span className="mt-0.5">📍</span>
+                        <span>{termin.ort}</span>
                       </p>
-                      <CheckItem emoji="📍" text="Fahrzeug an der Besichtigungsadresse bereitstellen" done />
-                      <CheckItem emoji="🔑" text="Fahrzeugschlüssel + Fahrzeugpapiere bereithalten" done />
-                      <CheckItem emoji="📞" text="Unter Ihrer Telefonnummer erreichbar sein" done />
-
-                      {vorbereitung && !vorbereitung.zb1Hochgeladen && (
-                        <CheckItem
-                          emoji="📄"
-                          text="Fahrzeugschein noch nicht hochgeladen — bitte vor dem Termin hochladen."
-                          done={false}
-                          action={() => setStepIndex(3)}
-                        />
-                      )}
-                      {vorbereitung?.polizeiVorOrt && !vorbereitung.polizeiberichtHochgeladen && (
-                        <CheckItem
-                          emoji="🚔"
-                          text="Polizeibericht hochladen (falls schon vorhanden)."
-                          done={false}
-                          action={() => setStepIndex(3)}
-                        />
-                      )}
-                      {vorbereitung?.personenschaden && !vorbereitung.attestHochgeladen && (
-                        <CheckItem
-                          emoji="🏥"
-                          text="Ärztliches Attest hochladen (falls vorhanden)."
-                          done={false}
-                          action={() => setStepIndex(3)}
-                        />
-                      )}
-                      {vorbereitung?.hatVorschaeden && (
-                        <CheckItem
-                          emoji="⚠️"
-                          text="Reparaturrechnungen für Vorschäden bereithalten."
-                          done={false}
-                          action={() => setStepIndex(3)}
-                        />
-                      )}
+                    )}
+                    {termin.svName && (
+                      <p className="mt-2 text-sm text-claimondo-navy flex items-center gap-1.5">
+                        <span>👤</span>
+                        <span>Sachverständiger: <strong>{termin.svName}</strong></span>
+                      </p>
+                    )}
+                    <div className="mt-4 pt-4 border-t border-emerald-200">
+                      <p className="text-xs text-claimondo-ondo leading-relaxed">
+                        💡 Bitte tragen Sie sich den Termin in Ihren Kalender ein. Wir erinnern Sie zusätzlich 24 Stunden vorher per WhatsApp.
+                      </p>
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <p className="mt-4 text-sm text-claimondo-ondo">Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.</p>
                 )}
@@ -983,45 +941,3 @@ function DataRow({ label, value, multiline }: { label: string; value: string; mu
   )
 }
 
-function CheckItem({
-  emoji, text, done, action,
-}: {
-  emoji: string
-  text: string
-  done: boolean
-  action?: () => void
-}) {
-  if (done) {
-    return (
-      <div className="flex items-start gap-2.5">
-        <span className="text-base shrink-0 mt-0.5">✅</span>
-        <p className="text-sm text-claimondo-ondo flex-1 min-w-0">{text}</p>
-      </div>
-    )
-  }
-  // Offener Punkt mit Action → hervorgehobene Zeile mit CTA-Button
-  if (action) {
-    return (
-      <div className="flex items-start gap-3 rounded-xl border-2 border-amber-300 bg-amber-50 p-3">
-        <span className="text-lg shrink-0 mt-0.5">{emoji}</span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-amber-900">{text}</p>
-          <button
-            type="button"
-            onClick={action}
-            className="mt-2 inline-flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 active:scale-[0.98] transition-all"
-          >
-            Jetzt hochladen
-          </button>
-        </div>
-      </div>
-    )
-  }
-  // Offener Punkt ohne Action (z. B. „bereithalten")
-  return (
-    <div className="flex items-start gap-2.5">
-      <span className="text-base shrink-0 mt-0.5">{emoji}</span>
-      <p className="text-sm text-claimondo-navy font-medium flex-1 min-w-0">{text}</p>
-    </div>
-  )
-}
