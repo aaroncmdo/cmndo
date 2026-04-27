@@ -28,6 +28,8 @@ export type PflichtdokumentStand = {
   max_mb: number
   akzeptierte_mime_types: string[]
   sort_order: number
+  /** CMM-21: Anzahl bereits hochgeladener Files (pro Slot via FK aggregiert). */
+  hochgeladene_anzahl: number
 }
 
 /**
@@ -81,6 +83,21 @@ export async function getPflichtdokumenteStand(
   // in die Kunden-Upload-Maske. Legacy-Slots (gewerbenachweis, halter_*,
   // gf_vollmacht) sind nicht im Katalog und werden durchgelassen, da sie
   // Kunden-Pflichtdokumente sind.
+  // CMM-21: File-Counter pro Slot über fall_dokumente.pflichtdokument_id
+  const pflichtIds = docs.map((d) => d.id)
+  const fileCountMap = new Map<string, number>()
+  if (pflichtIds.length > 0) {
+    const { data: files } = await admin
+      .from('fall_dokumente')
+      .select('pflichtdokument_id')
+      .in('pflichtdokument_id', pflichtIds)
+    for (const f of files ?? []) {
+      const pid = f.pflichtdokument_id as string | null
+      if (!pid) continue
+      fileCountMap.set(pid, (fileCountMap.get(pid) ?? 0) + 1)
+    }
+  }
+
   const mapped: PflichtdokumentStand[] = docs
     .filter((d) => {
       const k = byId.get(d.dokument_typ)
@@ -106,6 +123,7 @@ export async function getPflichtdokumenteStand(
         max_mb: k?.max_mb ?? 10,
         akzeptierte_mime_types: k?.akzeptierte_mime_types ?? ['image/jpeg', 'image/png', 'application/pdf'],
         sort_order: d.sort_order ?? k?.sort_order ?? 999,
+        hochgeladene_anzahl: fileCountMap.get(d.id) ?? 0,
       }
     })
 
@@ -502,27 +520,25 @@ export async function uploadPflichtdokument(
     // fall_dokumente-Eintrag den korrekten dokument_typ bekommt.
     const { data: pd } = await admin
       .from('pflichtdokumente')
-      .select('dokument_typ, status')
+      .select('dokument_typ, status, dokument_url')
       .eq('id', pflichtdokumentId)
       .single()
     const slotTyp = pd?.dokument_typ ?? 'kunde-nachreichung'
 
-    // Pflichtdokument aktualisieren — Replace setzt status=hochgeladen
-    // auch wenn vorher 'abgelehnt'. Alter fall_dokumente-Eintrag bleibt als
-    // Audit-Trail bestehen (wir insert'en immer neu, überschreiben nie).
+    // CMM-21: Multi-File-Upload — bei bereits gesetzter dokument_url die
+    // bestehende behalten (sie zeigt aufs erste hochgeladene File als
+    // "Cover"). Status auf 'hochgeladen' setzen ist idempotent.
     await admin.from('pflichtdokumente').update({
       status: 'hochgeladen',
-      dokument_url: publicUrl,
-      hochgeladen_am: new Date().toISOString(),
+      dokument_url: pd?.dokument_url ?? publicUrl,
+      hochgeladen_am: pd?.dokument_url ? undefined : new Date().toISOString(),
     }).eq('id', pflichtdokumentId)
 
-    // AAR-323 + AAR-325: fall_dokumente-Eintrag mit echten Tabellen-Spalten
-    // (storage_path, original_filename, uploaded_by_kunde). Vorher waren hier
-    // Spalten aus der alten `dokumente`-Tabelle gemischt → Insert schlug still
-    // fehl und fall_dokumente blieb leer. AAR-325-Trigger feuert auf
-    // uploaded_by_kunde=true und erzeugt den KB-Task automatisch.
+    // CMM-21: pflichtdokument_id direkt verlinken — eine fall_dokumente-Row
+    // pro hochgeladenem File, der Slot wird über die FK aggregiert.
     await admin.from('fall_dokumente').insert({
       fall_id: fallId,
+      pflichtdokument_id: pflichtdokumentId,
       dokument_typ: slotTyp,
       storage_path: path,
       original_filename: fileName,

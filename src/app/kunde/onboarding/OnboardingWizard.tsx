@@ -217,6 +217,24 @@ export default function OnboardingWizard({
     fieldsFound: number
   } | null>(null)
 
+  // CMM-21: lokaler File-Counter pro Slot — wird optimistisch nach jedem
+  // erfolgreichen Upload hochgezählt damit der Kunde direktes Feedback hat,
+  // ohne page-refresh zu brauchen.
+  const [fileCountOverride, setFileCountOverride] = useState<Record<string, number>>({})
+
+  // CMM-21: Multi-File-Upload — Datei-Picker erlaubt jetzt N Files,
+  // wir loopen sequentiell durch die FileList und feuern handleFileUpload
+  // pro Datei. Bei multi_file=false greift nur die erste Datei (Replace-
+  // Semantik bleibt für Slots wie Fahrzeugschein erhalten).
+  function handleFilesUpload(dokId: string, files: FileList | File[]) {
+    const list = Array.from(files)
+    if (list.length === 0) return
+    const doc = pflichtDocs.find((d) => d.id === dokId)
+    const isMulti = !!doc?.multi_file
+    const toUpload = isMulti ? list : list.slice(0, 1)
+    for (const f of toUpload) handleFileUpload(dokId, f)
+  }
+
   function handleFileUpload(dokId: string, file: File) {
     if (!fall?.id) return
     setUploadingId(dokId)
@@ -227,7 +245,14 @@ export default function OnboardingWizard({
       const base64 = typeof reader.result === 'string' ? reader.result : ''
       startTransition(async () => {
         const res = await uploadPflichtdokument(dokId, fall.id, base64, file.name, file.type)
-        if (res.success) setDocStatus((prev) => ({ ...prev, [dokId]: 'hochgeladen' }))
+        if (res.success) {
+          setDocStatus((prev) => ({ ...prev, [dokId]: 'hochgeladen' }))
+          // CMM-21: optimistisch File-Counter hochzählen
+          setFileCountOverride((prev) => ({
+            ...prev,
+            [dokId]: (prev[dokId] ?? pflichtDocs.find((d) => d.id === dokId)?.hochgeladene_anzahl ?? 0) + 1,
+          }))
+        }
         // AAR-166: wenn ZB1 → OCR triggern und Ergebnis inline anzeigen
         if (res.success && istFahrzeugschein) {
           setZb1Result(null)
@@ -609,56 +634,75 @@ export default function OnboardingWizard({
                           </div>
                         </div>
 
-                        {/* Action-Buttons — ausstehend/abgelehnt: Upload; hochgeladen: Ersetzen */}
-                        <div className="mt-3 flex gap-2">
-                          {!istHochgeladen && (
-                            <>
-                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-claimondo-navy text-white hover:bg-claimondo-shield active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
-                                {loading ? 'Lädt...' : <><span>📷</span> Foto aufnehmen</>}
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  capture="environment"
-                                  className="hidden"
-                                  disabled={loading}
-                                  onChange={e => {
-                                    const f = e.target.files?.[0]
-                                    if (f) handleFileUpload(doc.id, f)
-                                  }}
-                                />
-                              </label>
-                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-claimondo-navy text-claimondo-navy hover:bg-[#f8f9fb] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
-                                <span>📁</span> Datei wählen
-                                <input
-                                  type="file"
-                                  accept={acceptString}
-                                  className="hidden"
-                                  disabled={loading}
-                                  onChange={e => {
-                                    const f = e.target.files?.[0]
-                                    if (f) handleFileUpload(doc.id, f)
-                                  }}
-                                />
-                              </label>
-                            </>
-                          )}
-                          {istHochgeladen && (
-                            <label className="text-xs font-medium px-3 py-2 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer inline-flex items-center gap-1.5">
-                              <RefreshCwIcon className="w-3 h-3" />
-                              {loading ? 'Lädt...' : 'Ersetzen'}
-                              <input
-                                type="file"
-                                accept={acceptString}
-                                className="hidden"
-                                disabled={loading}
-                                onChange={e => {
-                                  const f = e.target.files?.[0]
-                                  if (f) handleFileUpload(doc.id, f)
-                                }}
-                              />
-                            </label>
-                          )}
-                        </div>
+                        {/* CMM-21: Action-Buttons — Multi-File via doc.multi_file.
+                            Datei wählen erlaubt jetzt N Files; Foto aufnehmen
+                            bleibt single-shot (Kamera nimmt ohnehin nur ein
+                            Bild pro Klick auf, der Kunde kann mehrfach klicken). */}
+                        {(() => {
+                          const fileCount = fileCountOverride[doc.id] ?? doc.hochgeladene_anzahl ?? (istHochgeladen ? 1 : 0)
+                          const isMulti = doc.multi_file
+                          const replaceMode = !isMulti && istHochgeladen
+                          return (
+                            <div className="mt-3">
+                              {fileCount > 0 && (
+                                <p className="text-xs text-emerald-700 font-medium mb-2">
+                                  {fileCount} {fileCount === 1 ? 'Datei' : 'Dateien'} hochgeladen
+                                  {isMulti && ' — weitere Dateien können Sie unten anhängen'}
+                                </p>
+                              )}
+                              {replaceMode ? (
+                                <label className="text-xs font-medium px-3 py-2 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer inline-flex items-center gap-1.5">
+                                  <RefreshCwIcon className="w-3 h-3" />
+                                  {loading ? 'Lädt...' : 'Ersetzen'}
+                                  <input
+                                    type="file"
+                                    accept={acceptString}
+                                    className="hidden"
+                                    disabled={loading}
+                                    onChange={e => {
+                                      const f = e.target.files?.[0]
+                                      if (f) handleFileUpload(doc.id, f)
+                                    }}
+                                  />
+                                </label>
+                              ) : (
+                                <div className="flex gap-2">
+                                  <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-claimondo-navy text-white hover:bg-claimondo-shield active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
+                                    {loading ? 'Lädt...' : <><span>📷</span> {fileCount > 0 ? 'Weiteres Foto' : 'Foto aufnehmen'}</>}
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      capture="environment"
+                                      className="hidden"
+                                      disabled={loading}
+                                      onChange={e => {
+                                        const f = e.target.files?.[0]
+                                        if (f) handleFileUpload(doc.id, f)
+                                        e.target.value = ''
+                                      }}
+                                    />
+                                  </label>
+                                  <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-claimondo-navy text-claimondo-navy hover:bg-[#f8f9fb] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
+                                    <span>📁</span> {fileCount > 0 ? 'Weitere Dateien' : (isMulti ? 'Dateien wählen' : 'Datei wählen')}
+                                    <input
+                                      type="file"
+                                      accept={acceptString}
+                                      multiple={isMulti}
+                                      className="hidden"
+                                      disabled={loading}
+                                      onChange={e => {
+                                        if (e.target.files && e.target.files.length > 0) {
+                                          handleFilesUpload(doc.id, e.target.files)
+                                        }
+                                        e.target.value = ''
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })()}
 
                         {/* AAR-390: „Später nachreichen"-Link pro offenem Pflicht-Slot.
                             Nicht bei hochgeladenen Slots — und Text wechselt sobald markiert. */}
