@@ -31,7 +31,11 @@ export async function enrichFlowLeadByFin(token: string, fin: string): Promise<{
 }
 
 /**
- * KFZ-117: Kunde kann Stammdaten korrigieren (Step 1 FlowLink)
+ * KFZ-117: Kunde kann Stammdaten korrigieren (Step 1 FlowLink).
+ *
+ * CMM-14: NICHT MEHR vom Dispatcher-Flow benutzt — der Wizard ist
+ * read-only. Die Funktion bleibt als Endpunkt für den künftigen
+ * Self-Service-Flow (CMM-15) erhalten.
  */
 export async function updateLeadStammdaten(
   leadId: string,
