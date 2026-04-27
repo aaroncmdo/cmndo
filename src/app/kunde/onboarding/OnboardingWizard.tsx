@@ -814,25 +814,69 @@ export default function OnboardingWizard({
             {/* CMM-21: weitere-dokumente-Step entfernt — Optional-Slots wandern in das Pop-over auf dem dokumente-Step. */}
 
             {/* Fertig */}
-            {currentStep.id === 'fertig' && (
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5">
-                  <CheckIcon className="w-8 h-8 text-emerald-500" />
+            {currentStep.id === 'fertig' && (() => {
+              // CMM-22: zwei Endings basierend auf offenen Pflicht-Slots.
+              // Grün = alles erfüllt; Gelb = der Kunde hat geskippt (oder
+              // Pflicht-Slots existieren noch). Im gelben Fall schiebt der
+              // Banner im Layout das Re-Engagement.
+              //
+              // CMM-22 Bugfix: gleiche Smart-Filter-Sicht wie der Banner
+              // (relevanteSlotIds), Pflicht aus der DB-Row, optimistische
+              // docStatus-Override für sofortiges Feedback nach einem Upload.
+              // Vorher zählte das Ende ungefiltert über pflichtDocs und
+              // ignorierte den Smart-Filter — dadurch tauchten Slots wie
+              // gewerbenachweis/freigabe_bank auf die der Banner gar nicht
+              // anzeigt (3 vs 4-Diskrepanz).
+              const offenePflicht = pflichtDocs.filter(
+                (d) => relevanteSlotIds.has(d.slot_id)
+                  && d.pflicht
+                  && (docStatus[d.id] ?? d.status) !== 'hochgeladen',
+              ).length
+              const allesErfuellt = offenePflicht === 0
+              return (
+                <div className="text-center">
+                  {allesErfuellt ? (
+                    <>
+                      <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5">
+                        <CheckIcon className="w-8 h-8 text-emerald-500" />
+                      </div>
+                      <h1 className="text-2xl font-semibold text-claimondo-navy">Sie sind startklar!</h1>
+                      <p className="mt-3 text-sm text-claimondo-ondo">
+                        Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine.
+                        Wir melden uns bei wichtigen Updates per WhatsApp.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-5">
+                        <AlertCircleIcon className="w-8 h-8 text-amber-500" />
+                      </div>
+                      <h1 className="text-2xl font-semibold text-claimondo-navy">Alles klar</h1>
+                      <p className="mt-3 text-sm text-claimondo-ondo">
+                        Bitte reichen Sie schnellstmöglich die noch fehlenden{' '}
+                        <span className="font-semibold text-claimondo-navy">
+                          {offenePflicht}{' '}
+                          {offenePflicht === 1 ? 'Unterlage' : 'Unterlagen'}
+                        </span>{' '}
+                        nach. Sie sehen den Hinweis oben in Ihrem Portal — ein Klick
+                        bringt Sie direkt zurück in den Upload-Bereich.
+                      </p>
+                    </>
+                  )}
+                  <button
+                    onClick={handleFinish}
+                    disabled={pending}
+                    className={`mt-6 w-full min-h-14 py-4 rounded-2xl text-white font-semibold text-base disabled:opacity-50 active:scale-[0.98] transition-all ${
+                      allesErfuellt
+                        ? 'bg-claimondo-shield hover:bg-claimondo-ondo'
+                        : 'bg-amber-500 hover:bg-amber-600'
+                    }`}
+                  >
+                    {pending ? 'Moment...' : 'Zum Dashboard'}
+                  </button>
                 </div>
-                <h1 className="text-2xl font-semibold text-claimondo-navy">Sie sind startklar!</h1>
-                <p className="mt-3 text-sm text-claimondo-ondo">
-                  Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine.
-                  Wir melden uns bei wichtigen Updates per WhatsApp.
-                </p>
-                <button
-                  onClick={handleFinish}
-                  disabled={pending}
-                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-50 active:scale-[0.98] transition-all"
-                >
-                  {pending ? 'Moment...' : 'Zum Dashboard'}
-                </button>
-              </div>
-            )}
+              )
+            })()}
           </div>
         </div>
 
