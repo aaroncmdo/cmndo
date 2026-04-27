@@ -19,37 +19,39 @@ import { getVisibleFallSections } from '@/lib/fall/section-visibility'
 // AAR-568 (V2) / AAR-727: Pipeline-Daten baut FallPhasenPanel intern — der
 // FallHeader reicht nur fallId + aktuelle_phase + abgeschlossen_am durch.
 import { FallHeader } from './_components/FallHeader'
-// AAR-770: Mitteilungs-Banner ganz oben in der Fallakte (shared)
-import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
+// CMM-23: FallMitteilungenBanner aus der SV-View entfernt — Aaron-Spec
+// "der SV braucht erstmal die Mitteilungen nicht". Mitteilungen wie
+// "Kunde hat SA unterschrieben" sind für SV irrelevant; was er wissen
+// muss steht im AuftragDokumenteBanner + Stepper. Falls später eine
+// gefilterte SV-Mitteilungs-Sicht gebraucht wird, kommt sie zurück.
 import type { TeamMitglied } from './_components/FallakteDrawer'
-import { AktuellePhaseCard } from './_components/AktuellePhaseCard'
-import { JetztZuTunCard } from './_components/JetztZuTunCard'
+// CMM-23: AktuellePhaseCard, KanzleiRegulierungsStepperCard,
+// KanzleiStatusCard, AbrechnungsCard, AbrechnungsartCard, ReklamationsCard,
+// SvHonorarCard wurden aus der SV-FallDetail-View entfernt — sind KB/Admin-
+// Tools oder werden durch den AuftragsphaseStepper + MeinFallStatusCard
+// (page.tsx) ersetzt. Eine Karte = eine Funktion (Aaron-Spec).
+// CMM-23 Aaron-Layout-Spec: Sidebar links = Stepper + Stammdaten;
+// Section rechts = Termin + Gutachten + hochgeladene Dokumente. Keine
+// Briefing-Sidebar, keine JetztZuTunCard, keine Timeline-Vorschau,
+// keine SvTools (FIN/ZB1 hat der SV in seiner Gutachten-Software),
+// kein Activity-Feed. Stellungnahme/Nachbesichtigung/Konfrontation
+// rendern als Mitteilungs-Banner oben (topServerBlocks aus page.tsx).
 import { StammdatenCard } from './_components/StammdatenCard'
 import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
-import { DokumenteUebersichtCard } from './_components/DokumenteUebersichtCard'
-import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
-import { KanzleiRegulierungsStepperCard } from './_components/KanzleiRegulierungsStepperCard'
-import {
-  KanzleiStatusCard,
-  type KuerzungsPosition,
-} from './_components/KanzleiStatusCard'
-import { AbrechnungsCard } from './_components/AbrechnungsCard'
-import { StellungnahmeCard } from './_components/StellungnahmeCard'
-import { NachbesichtigungCard } from './_components/NachbesichtigungCard'
-// AAR-559 (C10): SV-Honorar-Card (nur SV-Anteil) + Konfrontations-Termin-Card
-import { SvHonorarCard } from '@/components/gutachter/SvHonorarCard'
-import { KonfrontationsTerminCard } from '@/components/gutachter/KonfrontationsTerminCard'
-import { ReklamationsCard } from './_components/ReklamationsCard'
-import { AbrechnungsartCard } from './_components/AbrechnungsartCard'
+import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
+import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
+import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
 // AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
 import { TerminActionsPanel } from './_components/TerminActionsPanel'
 import { SvToolsCard } from './_components/SvToolsCard'
 import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
-import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
-import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
-// AAR-377: Shared BriefingCard — in der SV-Fallakte read-only (kein Regenerate).
-import BriefingCard from '@/components/fall/BriefingCard'
+// CMM-23: FallActivityFeed + FallDokumenteSidebar raus (Activity-Feed
+// ohne Tagesgeschäfts-Use-Case; Dokumente-Sidebar war phase-/szenario-
+// gebunden und zeigte oft "Phase nicht gesetzt"). Ersetzt durch die
+// schlanke WeitereDokumenteCard rechts.
+import type { FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
+// CMM-23: BriefingCard wandert nach page.tsx (topServerBlocks).
 import type { GutachterTask } from '@/hooks/useGutachterTasks'
 import type { SvAbrechnungInput } from '@/lib/gutachter/abrechnung'
 // AAR-327: Dokument-Anforderungs-UI (Modal + Liste, wiederverwendbar)
@@ -125,8 +127,9 @@ type Props = {
   anforderbareSlots?: AnforderbarerSlot[]
   /** AAR-327: Anforderungen die der eingeloggte SV bereits gestellt hat */
   anforderungenVonMir?: AnforderungsItem[]
-  /** AAR-403: Kürzungs-Positionen (forderungspositionen) für KanzleiStatusCard */
-  kuerzungen?: KuerzungsPosition[]
+  /** AAR-403: Kürzungs-Positionen — CMM-23: nicht mehr in der SV-View
+      gerendert; bleibt in den Props für Aufwärtskompatibilität, wird ignoriert. */
+  kuerzungen?: Array<{ id: string; typ: string | null; bezeichnung: string | null; betrag_gefordert: number | null; betrag_reguliert: number | null; betrag_gekuerzt: number | null }>
   /** AAR-399: Katalog-Slots für SV-Upload (merged mit pflichtdokumente-Status) */
   svSlots?: SvSlotRow[]
   /** AAR-559 (C10): SV-Honorar (nur SV-Anteil, nie Brutto) */
@@ -136,6 +139,12 @@ type Props = {
   konfrontationGewuenscht?: boolean
   konfrontationTerminVereinbartAm?: string | null
   konfrontationTerminVorschlaege?: Array<{ datum: string; uhrzeit: string }> | null
+  /** CMM-23: Server-rendered Top-Blocks (gelber Banner, Briefing, Stellungnahme/
+      Nachbesichtigung/Konfrontation als Mitteilung wenn aktiv, MeinFallStatusCard).
+      Wird direkt nach dem FallHeader vor dem 2-Spalten-Layout gerendert. */
+  topServerBlocks?: React.ReactNode
+  /** CMM-23: Auftrags-Phase für den Stepper in der linken Sidebar. */
+  svPhase?: SvLifecyclePhase
 }
 
 /** AAR-399: Lokaler Typ, passt zu DokumentenListe.SlotRow */
@@ -289,10 +298,15 @@ export default function FallDetailClient(props: Props) {
         abgeschlossenAm={abgeschlossenAm}
       />
 
-      {/* AAR-770: Mitteilungs-Banner — direkt unter dem Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
-        <FallMitteilungenBanner fallId={fall.id as string} rolle="sachverstaendiger" />
-      </div>
+      {/* CMM-23: Server-rendered Top-Blocks (Banner, Briefing, Stepper,
+          MeinFallStatusCard) — die kommen aus page.tsx mit den Server-Daten. */}
+      {props.topServerBlocks && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
+          {props.topServerBlocks}
+        </div>
+      )}
+
+      {/* CMM-23: FallMitteilungenBanner für SV entfernt. */}
 
       {/* AAR-757: Phase-gated Banner unter dem Header (vorher in VollClient) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
@@ -309,174 +323,53 @@ export default function FallDetailClient(props: Props) {
         )}
       </div>
 
-      {/* 2-Spalten-Layout: Desktop ≥1024px sticky-links, Mobile stacked */}
+      {/* CMM-23 Aaron-Layout: links Stepper + Stammdaten; rechts Termin +
+          Gutachten + hochgeladene Dokumente. Keine JetztZuTun, keine
+          Timeline-Vorschau, keine SvTools, kein Activity-Feed.
+          Stellungnahme/Nachbesichtigung/Konfrontation rendern als
+          Mitteilungs-Banner oben (topServerBlocks). */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
-          {/* AAR-377 / AAR-772: SV-Briefing oben in der Sidebar — Plain-Text,
-              read-only für SV. Struktur-Briefing zeigen wir dem SV NICHT
-              (das ist Onboarding-Material für uns intern). Wird auto-
-              generiert beim Öffnen der Page (siehe page.tsx). */}
-          <BriefingCard
-            fallId={fall.id as string}
-            briefing={(fall.sv_briefing_text as string | null) ?? null}
-            generatedAt={(fall.sv_briefing_generated_at as string | null) ?? null}
-            model={(fall.sv_briefing_model as string | null) ?? null}
-            version={(fall.sv_briefing_version as number | null) ?? null}
-            canRegenerate={false}
-          />
-          <JetztZuTunCard
-            fallId={fall.id as string}
-            initialTasks={props.tasks ?? []}
-            subphase={subphase}
-            aktiverTermin={
-              props.aktiverTermin
-                ? {
-                    id: props.aktiverTermin.id,
-                    status: props.aktiverTermin.status,
-                    start_zeit: props.aktiverTermin.start_zeit ?? null,
-                    vorgeschlagenes_datum:
-                      props.aktiverTermin.vorgeschlagenes_datum ?? null,
-                    gegenvorschlag_von:
-                      (props.aktiverTermin.gegenvorschlag_von as
-                        | 'sv'
-                        | 'kunde'
-                        | null) ?? null,
-                  }
-                : null
-            }
-            fall={{
-              status: (fall.status as string | null) ?? null,
-              technische_stellungnahme_status:
-                (fall.technische_stellungnahme_status as string | null) ?? null,
-              gutachten_final_freigegeben:
-                (fall.gutachten_final_freigegeben as boolean | null) ?? null,
-              gutachten_eingegangen_am:
-                (fall.gutachten_eingegangen_am as string | null) ?? null,
-              zahlung_eingegangen_am:
-                (fall.zahlung_eingegangen_am as string | null) ?? null,
-            }}
-          />
-          {/* AAR-294 + AAR-745: Conditional Cards. Outer-Gate via Visibility-Map,
-              Cards self-gaten zusätzlich intern (Defense-in-Depth). */}
-          <ReklamationsCard
-            fall={{
-              id: fall.id as string,
-              status: (fall.status as string | null) ?? null,
-            }}
-            id="reklamation-card"
-          />
-          {visibleSections.includes('stellungnahme') && (
-            <StellungnahmeCard
-              fall={{
-                id: fall.id as string,
-                technische_stellungnahme_status:
-                  (fall.technische_stellungnahme_status as string | null) ?? null,
-                technische_stellungnahme_beauftragt_am:
-                  (fall.technische_stellungnahme_beauftragt_am as string | null) ?? null,
-                technische_stellungnahme_hochgeladen_am:
-                  (fall.technische_stellungnahme_hochgeladen_am as string | null) ?? null,
-                technische_stellungnahme_freigabe_am:
-                  (fall.technische_stellungnahme_freigabe_am as string | null) ?? null,
-              }}
-              id="stellungnahme-card"
-            />
-          )}
-          {visibleSections.includes('nachbesichtigung') && (
-            <NachbesichtigungCard
-              fall={{
-                id: fall.id as string,
-                nachbesichtigung_status:
-                  (fall.nachbesichtigung_status as string | null) ?? null,
-                nachbesichtigung_angefordert_am:
-                  (fall.nachbesichtigung_angefordert_am as string | null) ?? null,
-                nachbesichtigung_termin_datum:
-                  (fall.nachbesichtigung_termin_datum as string | null) ?? null,
-                nachbesichtigung_ergebnis:
-                  (fall.nachbesichtigung_ergebnis as string | null) ?? null,
-              }}
-              id="nachbesichtigung-card"
-            />
-          )}
-          {/* AAR-559 (C10): Konfrontations-Termin-Annahme/Ablehnung, wenn
-              der Kunde im Kunde-Portal (C9) SV-Präsenz gewünscht hat. */}
-          <KonfrontationsTerminCard
-            fallId={fall.id as string}
-            konfrontationGewuenscht={props.konfrontationGewuenscht ?? false}
-            terminVereinbartAm={props.konfrontationTerminVereinbartAm ?? null}
-            terminVorschlaege={props.konfrontationTerminVorschlaege ?? null}
-          />
-          <AktuellePhaseCard
-            subphase={subphase}
-            fallId={fall.id as string}
-            hatTermin={!!(fall.sv_termin as string | null)}
-          />
-          {/* AAR-315: SV-Post-Termin-Block — self-gating ab Subphase 'vor-ort' */}
-          <AbrechnungsartCard
-            fall={{
-              id: fall.id as string,
-              abrechnungsart_besprochen:
-                (fall.abrechnungsart_besprochen as 'fiktiv' | 'konkret' | 'noch-offen' | null) ?? null,
-              abrechnungsart_notiz: (fall.abrechnungsart_notiz as string | null) ?? null,
-              abrechnungsart_besprochen_am:
-                (fall.abrechnungsart_besprochen_am as string | null) ?? null,
-            }}
-            subphase={subphase}
-          />
-          {/* AAR-293: Kanzlei-Stepper in Phase 5.x */}
-          {subphase.phase === 5 && (
-            <KanzleiRegulierungsStepperCard
-              fall={{
-                status: (fall.status as string | null) ?? null,
-                kanzlei_uebergeben_am: (fall.kanzlei_uebergeben_am as string | null) ?? null,
-              }}
-              subphase={subphase}
-            />
-          )}
-          {/* AAR-403: Honorar-Transparenz ab Phase 5 — Kürzungen + SV-Honorar */}
-          <KanzleiStatusCard
-            subphase={subphase}
-            fall={{
-              kanzlei_uebergeben_am:
-                (fall.kanzlei_uebergeben_am as string | null) ?? null,
-              anschlussschreiben_sendedatum:
-                (fall.anschlussschreiben_sendedatum as string | null) ?? null,
-              vs_reaktion_am: (fall.vs_reaktion_am as string | null) ?? null,
-              vs_kuerzung_grund:
-                (fall.vs_kuerzung_grund as string | null) ?? null,
-              zahlung_eingegangen_am:
-                (fall.zahlung_eingegangen_am as string | null) ?? null,
-              zahlung_betrag:
-                fall.zahlung_betrag != null
-                  ? Number(fall.zahlung_betrag as number)
-                  : null,
-              kuerzungs_betrag:
-                fall.kuerzungs_betrag != null
-                  ? Number(fall.kuerzungs_betrag as number)
-                  : null,
-              gutachten_betrag:
-                fall.gutachten_betrag != null
-                  ? Number(fall.gutachten_betrag as number)
-                  : null,
-            }}
-            abrechnung={props.abrechnung ?? null}
-            kuerzungen={props.kuerzungen ?? []}
-          />
-          {/* AAR-293: Abrechnungs-Card ab Phase 6.x */}
-          {subphase.phase === 6 && (
-            <AbrechnungsCard abrechnung={props.abrechnung ?? null} subphase={subphase} />
-          )}
-          {/* AAR-559 (C10): SV-Honorar-Anteil (nur gutachter_betrag/eingegangen_am,
-              nie auszahlung_kunde_betrag oder regulierung_betrag). Rendert
-              sich selbst nur wenn Betrag > 0 oder bereits eingegangen. */}
-          <SvHonorarCard
-            betrag={props.svHonorarBetrag ?? null}
-            eingegangenAm={props.svHonorarEingegangenAm ?? null}
-          />
+          {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
+          <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
+          {/* CMM-23: Unfallgegner-Card — Verursacher aus claim_parties /
+              parteien (Name + Versicherung + Kennzeichen). Self-gating wenn
+              keine Verursacher-Partei vorhanden. */}
+          {(() => {
+            const verursacher = (props.parteien ?? []).find(
+              (p) => (p.rolle as string | null) === 'verursacher',
+            )
+            if (!verursacher) return null
+            const name = (verursacher.name as string | null) ?? null
+            const vs = (verursacher.versicherung_name as string | null) ?? null
+            const vsNr = (verursacher.versicherung_nr as string | null) ?? null
+            if (!name && !vs) return null
+            return (
+              <div className="rounded-2xl bg-white border border-claimondo-border p-4">
+                <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo mb-2">
+                  Unfallgegner
+                </p>
+                <div className="space-y-1.5 text-sm text-claimondo-navy">
+                  {name && <p className="font-medium">{name}</p>}
+                  {vs && (
+                    <p className="text-claimondo-ondo">
+                      <span className="text-xs">Versicherung:</span>{' '}
+                      <span className="text-claimondo-navy">{vs}</span>
+                    </p>
+                  )}
+                  {vsNr && (
+                    <p className="text-claimondo-ondo">
+                      <span className="text-xs">VS-Nummer:</span>{' '}
+                      <span className="text-claimondo-navy font-mono text-xs">{vsNr}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
         </aside>
 
         <section className="space-y-4 min-w-0">
-          <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
-          {/* AAR-397: Read-only Termin-Card zwischen Stammdaten und Dokumenten. */}
           <TerminCard
             termin={
               props.aktiverTermin
@@ -501,7 +394,33 @@ export default function FallDetailClient(props: Props) {
               schadens_ort: (fall.schadens_ort as string | null) ?? null,
             }}
           />
-          {/* AAR-404: Gutachten prominent zwischen Termin und Dokumenten-Übersicht. */}
+          {/* CMM-23: Vorschäden-Hinweis — wenn der Kunde im Lead/Claim
+              Vorschäden gemeldet hat, weiß der SV das vor dem Termin und
+              kann die nachgereichten Reparaturrechnungen direkt sehen. */}
+          {!!fall.hat_vorschaeden && (
+            <div className="rounded-2xl bg-amber-50/40 border border-amber-200 p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">⚠️</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-claimondo-navy">
+                    Vorschäden gemeldet
+                  </p>
+                  <p className="text-xs text-claimondo-ondo mt-1">
+                    Der Kunde hat{' '}
+                    <span className="font-medium text-claimondo-navy">
+                      {fall.vorschaden_anzahl != null
+                        ? `${String(fall.vorschaden_anzahl)} Vorschäden`
+                        : 'Vorschäden'}
+                    </span>{' '}
+                    am Fahrzeug angegeben. Reparaturrechnungen werden — falls
+                    vorhanden — über den gelben Banner mit nachgereicht.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           <GutachtenCard
             fallId={fall.id as string}
             fallNummer={fallNummer}
@@ -518,53 +437,21 @@ export default function FallDetailClient(props: Props) {
                 }))
             }
           />
-          <DokumenteUebersichtCard
+          {/* CMM-23: WeitereDokumenteCard ersetzt FallDokumenteSidebar —
+              keine Phase/Szenario-Abhängigkeit mehr; einfach die hochgeladenen
+              Dokumente + ein Datei-Picker der via uploadDatei den Fall
+              (= Claim) erweitert. */}
+          <WeitereDokumenteCard
             fallId={fall.id as string}
-            svSlots={props.svSlots ?? []}
-            totalDokumente={sichtbarDokumente.length + (sichtbarFallDokumente?.length ?? 0)}
+            dokumente={(props.dokumente ?? []).map((d) => ({
+              id: String(d.id),
+              dokument_typ: (d.typ as string | null) ?? null,
+              datei_url: (d.datei_url as string | null) ?? null,
+              datei_name: (d.datei_name as string | null) ?? null,
+              hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
+              created_at: (d.created_at as string | null) ?? null,
+            }))}
           />
-          {/* AAR-327: SV kann gezielt Dokumente beim Kunden anfordern
-              (z. B. Reparaturrechnungen-Vorschäden, zusätzliche Schadensfotos) */}
-          {props.anforderbareSlots && props.anforderbareSlots.length > 0 && (
-            <AnforderungenListe
-              fallId={fall.id as string}
-              rolleLabel="Gutachter"
-              slotsVerfuegbar={props.anforderbareSlots}
-              anforderungen={props.anforderungenVonMir ?? []}
-            />
-          )}
-          <TimelineVorschauCard events={timeline} />
-
-          {/* AAR-757: SV-Tools-Card (FIN + ZB1 + Gutachten + Datei-Upload)
-              bündelt die Flows die früher über die VollClient-Tabs verstreut waren. */}
-          <SvToolsCard
-            fallId={fall.id as string}
-            fallFin={(fall.fin_vin as string | null) ?? null}
-            finQuelle={(fall.fin_quelle as string | null) ?? null}
-            vorschadenGeprueft={!!fall.vorschaden_geprueft}
-            hatVorschaeden={!!fall.hat_vorschaeden}
-            vorschadenAnzahl={(fall.vorschaden_anzahl as number | null) ?? null}
-            hasGutachten={hatGutachten}
-          />
-
-          {/* AAR-757: Activity-Feed + Dokumente-Sidebar als Reihen-Paar unten */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-            <FallActivityFeed
-              fallId={fall.id as string}
-              events={buildActivityEvents(
-                timeline as { id: string; typ: string; titel: string; beschreibung?: string | null; erstellt_von?: string | null; lead_id?: string | null; created_at: string }[],
-                [],
-                nachrichten as { id: string; kanal: string; sender_rolle?: string | null; nachricht: string; lead_id?: string | null; created_at: string }[],
-              )}
-              maxItems={8}
-            />
-            <FallDokumenteSidebar
-              fallId={fall.id as string}
-              aktuellePhase={fall.aktuelle_phase as string | null}
-              szenario={fall.szenario as string | null}
-              dokumente={props.fallDokumente ?? []}
-            />
-          </div>
         </section>
       </div>
 

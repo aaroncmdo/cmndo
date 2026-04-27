@@ -17,7 +17,9 @@ const INITIAL: CreateManualLeadInput = {
   telefon: '',
   email: '',
   kunde_adresse: '',
+  kunde_strasse: '',
   kunde_plz: '',
+  kunde_stadt: '',
   kunde_lat: null,
   kunde_lng: null,
   source_channel: 'manuell',
@@ -49,7 +51,9 @@ export default function NeuLeadDrawer() {
     setData((d) => ({
       ...d,
       kunde_adresse: p.adresse,
+      kunde_strasse: p.strasse || d.kunde_strasse,
       kunde_plz: p.plz || d.kunde_plz,
+      kunde_stadt: p.stadt || d.kunde_stadt,
       kunde_lat: p.lat,
       kunde_lng: p.lng,
     }))
@@ -88,8 +92,13 @@ export default function NeuLeadDrawer() {
             <label className="block text-xs text-claimondo-ondo mb-1.5">Adresse</label>
             <GooglePlaceAutocomplete
               defaultValue={data.kunde_adresse}
-              placeholder="Strasse, PLZ, Stadt"
+              placeholder="Straße, PLZ, Stadt"
               onSelect={handlePlaceSelect}
+              // CMM-23: onChange synchron — wenn User tippt aber direkt
+              // auf "Lead anlegen" klickt (ohne Maps-Suggestion zu wählen
+              // und ohne blur durchlaufen zu lassen), bleibt der Wert
+              // permanent im Parent-State.
+              onChange={(text) => setData((d) => ({ ...d, kunde_adresse: text }))}
               className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
             />
             {data.kunde_lat && data.kunde_lng && (

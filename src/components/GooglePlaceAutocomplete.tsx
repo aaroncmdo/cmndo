@@ -5,6 +5,10 @@ import { useEffect, useRef, useState } from 'react'
 export type PlaceResult = {
   adresse: string
   plz: string
+  /** CMM-23: Straße + Hausnummer (z.B. "Bernhard-Feilchenfeld-Straße 7") */
+  strasse: string
+  /** CMM-23: Stadt / Ort (z.B. "Köln") */
+  stadt: string
   lat: number
   lng: number
   place_id: string
@@ -74,6 +78,7 @@ export default function GooglePlaceAutocomplete({
   placeholder,
   onSelect,
   onBlur,
+  onChange,
   className,
 }: {
   defaultValue?: string
@@ -82,6 +87,10 @@ export default function GooglePlaceAutocomplete({
   // AAR-262: Optionaler Blur-Handler für Server-Side-Geocoding-Fallback
   // wenn der User Freitext eingibt statt Dropdown-Auswahl.
   onBlur?: (currentValue: string) => void
+  // CMM-23: Live-onChange — Parent kann Eingaben sofort übernehmen
+  // (verhindert Race wenn der User direkt auf Submit klickt ohne dass
+  // blur durchläuft).
+  onChange?: (currentValue: string) => void
   className?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -122,13 +131,23 @@ export default function GooglePlaceAutocomplete({
         const placeId = place.place_id ?? ''
         const formattedAddress = place.formatted_address ?? ''
 
+        // CMM-23: alle Adress-Komponenten extrahieren — Straße, Hausnummer,
+        // PLZ, Stadt — damit der Lead-Insert die separate Spalten füllt.
         let plz = ''
+        let route = ''
+        let streetNumber = ''
+        let stadt = ''
         for (const comp of place.address_components ?? []) {
-          if (comp.types.includes('postal_code')) { plz = comp.long_name; break }
+          if (comp.types.includes('postal_code')) plz = comp.long_name
+          else if (comp.types.includes('route')) route = comp.long_name
+          else if (comp.types.includes('street_number')) streetNumber = comp.long_name
+          else if (comp.types.includes('locality')) stadt = comp.long_name
+          else if (!stadt && comp.types.includes('postal_town')) stadt = comp.long_name
         }
+        const strasse = [route, streetNumber].filter(Boolean).join(' ').trim()
 
         setValue(formattedAddress)
-        onSelectRef.current({ adresse: formattedAddress, plz, lat, lng, place_id: placeId })
+        onSelectRef.current({ adresse: formattedAddress, plz, strasse, stadt, lat, lng, place_id: placeId })
       })
 
       autocompleteRef.current = autocomplete
@@ -162,7 +181,10 @@ export default function GooglePlaceAutocomplete({
         ref={inputRef}
         type="text"
         value={value}
-        onChange={e => setValue(e.target.value)}
+        onChange={e => {
+          setValue(e.target.value)
+          onChange?.(e.target.value)
+        }}
         // AAR-237: Enter im Autocomplete-Feld würde sonst das umgebende
         // Formular submitten und die Wizard-State resetten. Enter
         // abfangen — Google-Autocomplete-Auswahl läuft nicht über Enter

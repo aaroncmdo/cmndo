@@ -40,24 +40,17 @@ type SlotConfig = {
   condition: (claim: ClaimFull, leadZb1Status?: string | null) => boolean
 }
 
+// CMM-23 Aaron-Spec (final): 8 Pflicht-Slots, alle bei matchender Bedingung
+// Pflicht. Single Source mit dokument_katalog (siehe Migration
+// cmm23_pflichtdokumente_katalog_fix). Render-seitig hier gespiegelt für
+// die Banner/Liste-Logik solange wir noch nicht 1:1 auf den DB-Katalog
+// umgestellt haben (eigenes Konsolidierungs-Ticket).
 const DOC_DEFINITIONS: Record<string, SlotConfig> = {
   fahrzeugschein: {
     label: 'Fahrzeugschein (ZB1)',
     beschreibung: 'Vorder- und Rückseite. Bestätigt Halter und Fahrzeugdaten.',
     pflicht: true,
     condition: (_claim, leadZb1Status) => leadZb1Status !== 'bestaetigt',
-  },
-  polizeibericht: {
-    label: 'Polizeibericht',
-    beschreibung: 'Polizeiliche Unfallmitteilung — beschleunigt die Regulierung deutlich.',
-    pflicht: true,
-    condition: (claim) => claim.polizei_vor_ort === true,
-  },
-  aerztliches_attest: {
-    label: 'Ärztliches Attest',
-    beschreibung: 'Bei Personenschaden — dokumentiert Verletzungen und Behandlungsdauer.',
-    pflicht: true,
-    condition: (claim) => claim.hat_personenschaden === true,
   },
   schadensfotos: {
     label: 'Fotos vom Fahrzeugschaden',
@@ -68,13 +61,37 @@ const DOC_DEFINITIONS: Record<string, SlotConfig> = {
   unfallfotos: {
     label: 'Fotos vom Unfall-Ort',
     beschreibung: 'Übersicht der Unfallstelle, Endpositionen der Fahrzeuge.',
-    pflicht: false,
+    pflicht: true,
     condition: () => true,
+  },
+  polizeibericht: {
+    label: 'Polizeibericht',
+    beschreibung: 'Foto der polizeilichen Unfallmitteilung — beschleunigt die Regulierung.',
+    pflicht: true,
+    condition: (claim) => claim.polizei_vor_ort === true,
+  },
+  aerztliches_attest: {
+    label: 'Ärztliches Attest',
+    beschreibung: 'Bei Personenschaden — dokumentiert Verletzungen und Behandlungsdauer.',
+    pflicht: true,
+    condition: (claim) => claim.hat_personenschaden === true,
+  },
+  diagnosebericht: {
+    label: 'Diagnosebericht',
+    beschreibung: 'Bei Personenschaden — ärztliche Diagnose mit Heilungsverlauf.',
+    pflicht: true,
+    condition: (claim) => claim.hat_personenschaden === true,
+  },
+  sachschaden_foto: {
+    label: 'Foto Sachschaden',
+    beschreibung: 'Bei beschädigten Gegenständen — Foto des Schadens.',
+    pflicht: true,
+    condition: (claim) => claim.hat_sachschaden === true,
   },
   sachschaden_rechnung: {
     label: 'Rechnung Sachschaden',
-    beschreibung: 'Wenn Gegenstände beschädigt wurden (z.B. Kindersitz, Gepäck).',
-    pflicht: false,
+    beschreibung: 'Bei beschädigten Gegenständen — Reparatur- oder Neukauf-Rechnung.',
+    pflicht: true,
     condition: (claim) => claim.hat_sachschaden === true,
   },
 }
@@ -85,6 +102,8 @@ const SLOT_REIHENFOLGE = [
   'unfallfotos',
   'polizeibericht',
   'aerztliches_attest',
+  'diagnosebericht',
+  'sachschaden_foto',
   'sachschaden_rechnung',
 ] as const
 
@@ -104,7 +123,17 @@ export function getOffeneDokumentAnforderungen(
   pflichtDocs: PflichtdokumentStand[],
   leadZb1Status?: string | null,
 ): DokumentAnforderung[] {
+  // CMM-23: zwei Iterationen — alle bekannten Smart-Filter-Slots
+  // (DOC_DEFINITIONS) die conditional matchen + alle DB-Slots die NICHT
+  // in DOC_DEFINITIONS sind (Legacy / KB-Anforderungen). Damit zeigen
+  // wir auch Slots an, für die die DB-Row noch nicht angelegt wurde
+  // (häufig wenn createPflichtdokumenteFromKatalog Slots übersprungen
+  // hat) — Status fällt dann auf 'offen', sobald File hochgeladen wird,
+  // legt der Upload-Pfad die Row an.
   const result: DokumentAnforderung[] = []
+  const seen = new Set<string>()
+
+  // 1. Bekannte Smart-Filter-Slots in fester Reihenfolge.
   for (const slotId of SLOT_REIHENFOLGE) {
     const config = DOC_DEFINITIONS[slotId]
     if (!config) continue
@@ -125,13 +154,53 @@ export function getOffeneDokumentAnforderungen(
       slot_id: slotId,
       label: config.label,
       beschreibung: config.beschreibung,
-      // CMM-22 Bugfix: DB-Pflicht-Flag bevorzugen — KB kann Slots vom
-      // Katalog-optional zur Pflicht hochstufen.
-      pflicht: pflichtdoc?.pflicht ?? config.pflicht,
+      // OR-Logic: Katalog-Default oder DB-Pflicht-Flag — kein Override
+      // nach unten. KB kann hochstufen, kann aber nicht entpflichten.
+      pflicht: !!(pflichtdoc?.pflicht || config.pflicht),
+      status,
+      pflichtdoc,
+    })
+    seen.add(slotId)
+  }
+
+  // 2. Legacy- und KB-Slots aus DB die NICHT in DOC_DEFINITIONS sind.
+  for (const pflichtdoc of pflichtDocs) {
+    if (seen.has(pflichtdoc.slot_id)) continue
+    if (DOC_DEFINITIONS[pflichtdoc.slot_id]) continue // schon behandelt
+
+    let status: DokumentStatus
+    if (pflichtdoc.dokument_url) {
+      status = 'erfuellt'
+    } else if (pflichtdoc.status === 'spaeter') {
+      status = 'spaeter'
+    } else {
+      status = 'offen'
+    }
+
+    result.push({
+      slot_id: pflichtdoc.slot_id,
+      label: pflichtdoc.label ?? pflichtdoc.slot_id ?? '',
+      beschreibung: pflichtdoc.beschreibung ?? '',
+      pflicht: !!pflichtdoc.pflicht,
       status,
       pflichtdoc,
     })
   }
+
+  // Stabiles Sort nach SLOT_REIHENFOLGE für bekannte Slots, dann Rest
+  // alphabetisch — damit Kunde und SV identische Reihenfolge sehen.
+  const reihenfolgeIdx = (slotId: string) => {
+    const idx = (SLOT_REIHENFOLGE as readonly string[]).indexOf(slotId)
+    return idx === -1 ? 999 : idx
+  }
+  result.sort((a, b) => {
+    const da = reihenfolgeIdx(a.slot_id)
+    const db = reihenfolgeIdx(b.slot_id)
+    if (da !== db) return da - db
+    // Defensive localeCompare — auch wenn label leer/null ist nicht crashen.
+    return (a.label ?? '').localeCompare(b.label ?? '', 'de')
+  })
+
   return result
 }
 

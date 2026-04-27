@@ -87,6 +87,17 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   // Sonstige Kategorien (aus Webhook-Logik)
   kundendokument: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   zulassung: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+
+  // CMM-23 Aaron-Spec: ein Doku-Pool, alle Auftragspartien sehen + uploaden
+  // an gleicher Stelle. Catch-All-Slots werden für ALLE Akten-Beteiligten
+  // sichtbar — nicht mehr Admin-only-Fallback. Internal-only-Slots (ki_*,
+  // kanzlei_paket, abrechnung_intern, filmcheck_notizen) bleiben oben
+  // explizit eingeschränkt.
+  sonstiges: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  'kunde-nachreichung': ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  'gutachter-foto': ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  unfallfotos: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  sachschaden_rechnung: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
 }
 
 type WithTypKategorie = {

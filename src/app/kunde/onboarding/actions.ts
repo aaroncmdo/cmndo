@@ -326,6 +326,8 @@ export async function uploadKundenDokument(
       uploaded_by_kunde: true,
       beschreibung: beschreibung && beschreibung.trim().length > 0 ? beschreibung.trim() : null,
       hochgeladen_am: new Date().toISOString(),
+      // CMM-23: ein Doku-Pool für alle Akten-Beteiligten.
+      sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
     })
 
     revalidatePath('/kunde/onboarding')
@@ -496,7 +498,7 @@ export async function uploadPflichtdokument(
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   // Ownership-Check: gehoert der Fall diesem Kunden?
-  const { data: fall } = await supabase.from('faelle').select('id, kunde_id').eq('id', fallId).single()
+  const { data: fall } = await supabase.from('faelle').select('id, kunde_id, lead_id').eq('id', fallId).single()
   if (!fall || fall.kunde_id !== user.id) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
@@ -547,9 +549,28 @@ export async function uploadPflichtdokument(
       hochgeladen_von_user_id: user.id,
       uploaded_by_kunde: true,
       hochgeladen_am: new Date().toISOString(),
+      // CMM-23: ein Doku-Pool für alle Akten-Beteiligten.
+      sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
     })
 
+    // CMM-23: Polizeibericht-Upload triggert automatisch BKat-OCR (fire-and-forget).
+    // Läuft asynchron, blockiert den Upload-Response nicht. Ergebnis landet auf
+    // leads.bkat_unfallart und wird in Phase 4 (Stammdaten) im BkatAnalysePanel
+    // angezeigt — der Dispatcher braucht die Klassifikation für die Datenanfrage.
+    if (slotTyp === 'polizeibericht' && fall.lead_id) {
+      const leadId = fall.lead_id
+      import('@/lib/bkat/auto-trigger').then(({ triggerAutoBkatOcr }) =>
+        triggerAutoBkatOcr(admin, leadId, publicUrl).catch((err) =>
+          console.warn('[uploadPflichtdokument] triggerAutoBkatOcr:', err instanceof Error ? err.message : err),
+        ),
+      )
+    }
+
     revalidatePath('/kunde/onboarding')
+    revalidatePath('/kunde')
+    // CMM-24: SV-Fall-Page revalidieren damit der Auftrags-Banner beim
+    // Gutachter sich automatisch verkürzt sobald der Kunde was hochlädt.
+    revalidatePath(`/gutachter/fall/${fallId}`)
     return { success: true, url: publicUrl }
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : String(err) }

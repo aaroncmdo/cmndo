@@ -75,12 +75,15 @@ export default async function GutachterFaellePage({
   const activeFilter = normalizeFilter(filter)
   const searchTerm = (q ?? '').trim()
 
+  // CMM-25: SV sieht nur Fälle ab Sicherungsabtretungs-Unterschrift —
+  // Dispatcher-Slot-Blocks sind reine Kalender-Reservierungen.
   let query = supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(
       'id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, sv_termin, gutachten_eingegangen_am, created_at, lead_id',
     )
     .eq('sv_id', sv.id)
+    .eq('sa_unterschrieben', true)
     .order('created_at', { ascending: false })
 
   if (activeFilter === 'stellungnahme') {

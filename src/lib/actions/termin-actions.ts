@@ -9,8 +9,46 @@ import { generateReminderForTermin, cancelRemindersForTermin } from '@/lib/remin
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
+import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
+import { checkSvFreeBusy } from '@/lib/google-calendar/freebusy'
 
 type ActionResult = { success: boolean; error?: string }
+
+// CMM-23: Termin-Dauer in ms aus zentraler Konstante (45 Min). Vorher
+// hardcoded 90 Min an drei Stellen — fließte als 1,5h-Block in den Kalender.
+const TERMIN_DAUER_MS = TERMIN_DAUER_MIN * 60 * 1000
+
+/**
+ * CMM-23: Free/Busy-Check vor Termin-Bestätigung. Aaron-Spec: muss auch
+ * über CalDAV laufen — wird via checkSvFreeBusy geleistet (Google-First mit
+ * CalDAV-Fallback, AAR-717).
+ *
+ * Returns:
+ *   - null = frei oder Status unbekannt (kein Token / API-Timeout) → weiter
+ *   - ActionResult-Error = belegt → buchen abbrechen
+ */
+async function assertSvKalenderFrei(
+  admin: ReturnType<typeof createAdminClient>,
+  svId: string,
+  slotIso: string,
+): Promise<ActionResult | null> {
+  const { data: sv } = await admin
+    .from('sachverstaendige')
+    .select('profile_id')
+    .eq('id', svId)
+    .maybeSingle()
+  if (!sv?.profile_id) return null // ohne profile_id kein Calendar-Check möglich
+
+  const status = await checkSvFreeBusy(sv.profile_id as string, slotIso)
+  if (status === 'belegt') {
+    return {
+      success: false,
+      error: 'Sachverständiger ist zu diesem Zeitpunkt anderweitig gebucht (Kalender). Bitte einen anderen Slot wählen.',
+    }
+  }
+  // 'frei' oder 'unbekannt' (Token / API down) → fail-open, weiter buchen.
+  return null
+}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -315,7 +353,7 @@ export async function terminGegenvorschlag({
   if (!neuesDatum || Number.isNaN(neueStartZeit.getTime())) {
     return { success: false, error: 'Bitte einen gültigen Termin angeben.' }
   }
-  const neueEndZeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000)
+  const neueEndZeit = new Date(neueStartZeit.getTime() + TERMIN_DAUER_MS)
 
   // 1. DB Update
   const { error: updateErr } = await admin.from('gutachter_termine').update({
@@ -544,13 +582,18 @@ export async function terminAnnehmen({
 
     // start_zeit = vorgeschlagenes_datum
     const neueStartZeit = termin.vorgeschlagenes_datum ? new Date(termin.vorgeschlagenes_datum) : null
+    // CMM-23: Kalender-Check vor Bestätigung
+    if (neueStartZeit && svId) {
+      const conflict = await assertSvKalenderFrei(admin, svId, neueStartZeit.toISOString())
+      if (conflict) return conflict
+    }
     const updateData: Record<string, unknown> = {
       status: 'bestaetigt',
       gegenvorschlag_von: null,
     }
     if (neueStartZeit) {
       updateData.start_zeit = neueStartZeit.toISOString()
-      updateData.end_zeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000).toISOString()
+      updateData.end_zeit = new Date(neueStartZeit.getTime() + TERMIN_DAUER_MS).toISOString()
     }
     const { error: updateErr } = await admin.from('gutachter_termine').update(updateData).eq('id', tId)
     if (updateErr) return { success: false, error: updateErr.message }
@@ -571,13 +614,18 @@ export async function terminAnnehmen({
     tId = termin.id
 
     const neueStartZeit = termin.vorgeschlagenes_datum ? new Date(termin.vorgeschlagenes_datum) : null
+    // CMM-23: Kalender-Check vor Bestätigung
+    if (neueStartZeit && svId) {
+      const conflict = await assertSvKalenderFrei(admin, svId, neueStartZeit.toISOString())
+      if (conflict) return conflict
+    }
     const updateData: Record<string, unknown> = {
       status: 'bestaetigt',
       gegenvorschlag_von: null,
     }
     if (neueStartZeit) {
       updateData.start_zeit = neueStartZeit.toISOString()
-      updateData.end_zeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000).toISOString()
+      updateData.end_zeit = new Date(neueStartZeit.getTime() + TERMIN_DAUER_MS).toISOString()
     }
     const { error: updateErr } = await admin.from('gutachter_termine').update(updateData).eq('id', tId)
     if (updateErr) return { success: false, error: updateErr.message }
@@ -731,7 +779,13 @@ export async function terminBuchen({
   if (!termin) return { success: false, error: 'Kein aktiver Termin gefunden' }
 
   const slotDate = new Date(slot)
-  const endDate = new Date(slotDate.getTime() + 90 * 60 * 1000)
+  const endDate = new Date(slotDate.getTime() + TERMIN_DAUER_MS)
+
+  // CMM-23: Kalender-Check (Google + CalDAV) gegen Doppelbuchung
+  if (svId) {
+    const conflict = await assertSvKalenderFrei(admin, svId, slotDate.toISOString())
+    if (conflict) return conflict
+  }
 
   // 1. DB Update
   const { error: updateErr } = await admin.from('gutachter_termine').update({

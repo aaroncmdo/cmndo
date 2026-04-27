@@ -3,6 +3,20 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
+// CMM-24: Auftrags-Banner mit den vom Kunden noch nicht eingereichten
+// Doku-Anforderungen — der SV soll die Liste vor dem Termin sehen.
+// CMM-23: AuftragDokumenteBanner ersetzt durch PflichtdokumenteListe
+// (vollständige Slot-Sicht mit Download-Links).
+// CMM-23: post-Auftrag MeinFallStatusCard für die Fall-Phasen.
+// Der Stepper rendert in der linken Sidebar (FallDetailClient).
+import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
+import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
+// SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
+import BriefingCard from '@/components/fall/BriefingCard'
+// CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
+// gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
+import PflichtdokumenteListe from '@/components/fall/PflichtdokumenteListe'
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-651: Zentrale Fall-Loader-Lib
@@ -27,6 +41,13 @@ export default async function GutachterFallPage({
   // AAR-651: Zentrale Lib — sv_id-Filter als Defense-in-Depth über RLS hinaus
   const fall = await getFallForSv(supabase, id, (sv as { id: string }).id)
   if (!fall) notFound()
+
+  // CMM-25: Auftragslebenszyklus beim SV beginnt erst mit der Sicherungs-
+  // abtretungs-Unterschrift. Vorher ist der vom Dispatcher reservierte Slot
+  // ein reiner Kalenderblock (Google/CalDAV) — die Fallakte ist gesperrt.
+  if (!(fall as { sa_unterschrieben?: boolean | null }).sa_unterschrieben) {
+    notFound()
+  }
 
   // AAR-772: SV-Briefing automatisch generieren wenn noch nicht vorhanden.
   // Best-effort, blockiert nicht den Page-Render. Bei nächstem Refresh
@@ -211,12 +232,14 @@ export default async function GutachterFallPage({
     .order('faellig_am', { ascending: true, nullsFirst: false })
 
   // KFZ-134: Aktiven gutachter_termine Eintrag laden (admin-client bereits oben)
+  // CMM-23: zusätzlich kunde_losgefahren_am, kunde_angekommen_am und
+  // durchgefuehrt_am für die Phasen-Bestimmung.
   const { data: aktiverTermin } = await admin
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund')
+    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, kunde_losgefahren_am, kunde_angekommen_am, durchgefuehrt_am')
     .eq('fall_id', id)
     .eq('sv_id', sv.id)
-    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
+    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'durchgefuehrt'])
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -335,8 +358,86 @@ export default async function GutachterFallPage({
       )
     : null
 
+  // CMM-23: SV-Lifecycle-Phase aus Auftrag + Fall-State ableiten.
+  const svPhase = getSvLifecyclePhase({
+    terminStart: (aktiverTermin?.start_zeit as string | null) ?? null,
+    terminStatus: (aktiverTermin?.status as string | null) ?? null,
+    svUnterwegsSeit: (aktiverTermin?.kunde_losgefahren_am as string | null) ?? null,
+    svAngekommenAm: (aktiverTermin?.kunde_angekommen_am as string | null) ?? null,
+    terminDurchgefuehrtAm: (aktiverTermin?.durchgefuehrt_am as string | null) ?? null,
+    gutachtenEingegangenAm: (fall.gutachten_eingegangen_am as string | null) ?? null,
+    gutachtenFinalFreigegeben: (fall.gutachten_final_freigegeben as boolean | null) ?? null,
+    lexdriveCaseId: (fall.lexdrive_case_id as string | null) ?? null,
+    technischeStellungnahmeStatus: (fall.technische_stellungnahme_status as string | null) ?? null,
+    nachbesichtigungStatus: (fall.nachbesichtigung_status as string | null) ?? null,
+    svHonorarEingegangenAm,
+    fallStatus: (fall.status as string | null) ?? null,
+  })
+
+  // CMM-23: Pflichtdokumente-Liste laden — 1:1 das was der Kunde im
+  // Onboarding sieht, mit Download-Links für hochgeladene Files.
+  const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'sv')
+
+  // CMM-23: Top-Server-Blocks. Aaron-Reihenfolge: Header → gelber Banner
+  // (Kunde-Anforderungen) → SV-Briefing → MeinFallStatusCard (wenn Fall-
+  // Phase). Stepper wandert in die linke Sidebar.
+  // Mitteilungen für SV: NUR Stellungnahme + Nachbesichtigung sind
+  // tagesgeschäft-relevant — die rendern wir hier oben mit (wenn
+  // angefordert), alles andere ist KB/Admin-only.
+  const stellungnahmeAktiv = (fall.technische_stellungnahme_status as string | null) === 'angefordert'
+  const nachbesichtigungAktiv =
+    (fall.nachbesichtigung_status as string | null) === 'angefordert' ||
+    (fall.nachbesichtigung_status as string | null) === 'termin-eingereicht'
+
+  const topServerBlocks = (
+    <>
+      {/* CMM-23: Pflichtdokumente-Liste statt nur "noch einzuholen"-Banner —
+          zeigt alle relevanten Slots mit Status + Download bei erfüllten Files.
+          Verschwindet automatisch wenn keine Pflicht-Slots existieren. */}
+      <PflichtdokumenteListe slots={pflichtSlots} />
+      <BriefingCard
+        fallId={id}
+        briefing={(fall.sv_briefing_text as string | null) ?? null}
+        generatedAt={(fall.sv_briefing_generated_at as string | null) ?? null}
+        model={(fall.sv_briefing_model as string | null) ?? null}
+        version={(fall.sv_briefing_version as number | null) ?? null}
+        canRegenerate={false}
+      />
+      {stellungnahmeAktiv && (
+        <div className="rounded-2xl border-2 border-orange-300 bg-orange-50 p-4">
+          <p className="text-sm font-semibold text-orange-900">Stellungnahme angefordert</p>
+          <p className="text-xs text-orange-800 mt-1">
+            Der Kundenbetreuer bittet um eine technische Stellungnahme zu diesem Fall.
+            Bitte über den Chat mit dem Betreuer abstimmen.
+          </p>
+        </div>
+      )}
+      {nachbesichtigungAktiv && (
+        <div className="rounded-2xl border-2 border-violet-300 bg-violet-50 p-4">
+          <p className="text-sm font-semibold text-violet-900">Nachbesichtigung mit dem Kunden</p>
+          <p className="text-xs text-violet-800 mt-1">
+            Eine erneute Besichtigung ist angefordert. Termin wird mit dem Kunden gemeinsam geplant.
+          </p>
+        </div>
+      )}
+      {isFallPhase(svPhase) && (
+        <MeinFallStatusCard
+          phase={svPhase}
+          geforderterBetrag={(fall.gutachten_betrag as number | null) ?? null}
+          gutachtenUrl={(fall.gutachten_url as string | null) ?? null}
+          gutachtenFreigegebenAm={(fall.gutachten_freigabe_am as string | null) ?? (fall.gutachten_eingegangen_am as string | null) ?? null}
+          lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
+          svHonorarBetrag={svHonorarBetrag}
+          svHonorarEingegangenAm={svHonorarEingegangenAm}
+        />
+      )}
+    </>
+  )
+
   return (
     <FallDetailClient
+      topServerBlocks={topServerBlocks}
+      svPhase={svPhase}
       fall={fallWithAbrechnung}
       lead={lead}
       dokumente={dokumenteLegacy}

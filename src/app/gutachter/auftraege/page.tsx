@@ -46,12 +46,17 @@ export default async function AuftraegePage({
     )
   }
 
+  // CMM-25: Auftrag erscheint erst beim SV, sobald der Kunde die
+  // Sicherungsabtretung unterschrieben hat (`sa_unterschrieben = true`).
+  // Vom Dispatcher geblockte Slots ohne SA bleiben reine Kalender-Blocker
+  // und tauchen weder in der Auftragsliste noch in der Fallakte des SV auf.
   let query = supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(
       'id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, sv_termin, gutachten_eingegangen_am, created_at, lead_id',
     )
     .eq('sv_id', sv.id)
+    .eq('sa_unterschrieben', true)
     .order('created_at', { ascending: false })
 
   if (filter === 'neu') {
@@ -69,6 +74,39 @@ export default async function AuftraegePage({
   const fallIds = fallList.map((f) => f.id)
 
   const admin = createAdminClient()
+
+  // CMM-24: Anzahl offener Pflicht-Dokumente pro Fall — gelber Badge in der
+  // Auftrags-Card. Wichtig: SV-eigene Onboarding-Slots (sv_*) werden pro Fall
+  // mit angelegt (Architektur-Spuk) und müssen rausgefiltert werden, sonst
+  // zeigt der Badge 20 statt 4-5. Filter: nur Slots wo "kunde" in
+  // dokument_katalog.uploadbar_von steht. Legacy-Slots ohne Katalog-Eintrag
+  // (gewerbenachweis, halter_*) werden mit gezählt — die sind vom Kunden.
+  const offeneDokuMap: Record<string, number> = {}
+  if (fallIds.length > 0) {
+    const { data: katalog } = await admin
+      .from('dokument_katalog')
+      .select('slot_id, uploadbar_von')
+    const kundeSlots = new Set(
+      (katalog ?? [])
+        .filter((k) => Array.isArray(k.uploadbar_von) && (k.uploadbar_von as string[]).includes('kunde'))
+        .map((k) => k.slot_id as string),
+    )
+    const katalogSlots = new Set((katalog ?? []).map((k) => k.slot_id as string))
+
+    const { data: offen } = await admin
+      .from('pflichtdokumente')
+      .select('fall_id, dokument_typ')
+      .in('fall_id', fallIds)
+      .neq('status', 'hochgeladen')
+    for (const row of offen ?? []) {
+      const slot = row.dokument_typ as string
+      // kundeSlots aus Katalog ODER Legacy-Slot ohne Katalog-Eintrag
+      const istKundeSlot = kundeSlots.has(slot) || !katalogSlots.has(slot)
+      if (!istKundeSlot) continue
+      const id = row.fall_id as string
+      offeneDokuMap[id] = (offeneDokuMap[id] ?? 0) + 1
+    }
+  }
 
   const [leadsRes, termineRes] = await Promise.all([
     leadIds.length
@@ -198,6 +236,7 @@ export default async function AuftraegePage({
                     FALL_STATUS_LABELS[fall.status] ??
                     fall.status
                   }
+                  offeneDokumente={offeneDokuMap[fall.id] ?? 0}
                 />
               )
             })}
