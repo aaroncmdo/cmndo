@@ -48,6 +48,8 @@ export type AuftragCardProps = {
   } | null
   ursacheLabel: string
   statusLabel: string
+  /** CMM-24: Anzahl offener Pflicht-Dokumente — gelber Badge wenn >0. */
+  offeneDokumente?: number
 }
 
 type PrimaryAction =
@@ -150,16 +152,22 @@ export default function AuftragCard(props: AuftragCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-border transition-colors">
+    <div className="relative bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-ondo transition-colors group">
+      {/* CMM-24: Stretched-Link über die ganze Card. Action-Buttons + interne
+          Links bekommen relative z-10, damit sie ihre eigenen Klick-Handler
+          behalten. */}
+      <Link
+        href={`/gutachter/fall/${props.fall.id}`}
+        aria-label={`Fall ${props.fall.fall_nummer ?? ''} öffnen`}
+        className="absolute inset-0 z-0 rounded-2xl"
+      />
+
       {/* Header */}
-      <div className="flex items-start justify-between gap-2">
+      <div className="relative z-10 flex items-start justify-between gap-2 pointer-events-none">
         <div className="min-w-0 flex-1">
-          <Link
-            href={`/gutachter/fall/${props.fall.id}`}
-            className="text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] font-mono text-xs"
-          >
+          <span className="text-[var(--brand-secondary)] font-mono text-xs">
             {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
-          </Link>
+          </span>
           <p className="text-sm font-semibold text-[var(--brand-primary)] mt-0.5 flex items-center gap-1.5">
             <UserIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
             <span className="truncate">{kundeName}</span>
@@ -170,8 +178,19 @@ export default function AuftragCard(props: AuftragCardProps) {
         </span>
       </div>
 
+      {/* CMM-24: Mitteilungs-Slot — gelber Badge bei offenen Doku-Anforderungen */}
+      {(props.offeneDokumente ?? 0) > 0 && (
+        <div className="relative z-10 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium pointer-events-none">
+          <AlertCircleIcon className="w-3.5 h-3.5 text-amber-600" />
+          <span>
+            {props.offeneDokumente}{' '}
+            {props.offeneDokumente === 1 ? 'Dokument fehlt' : 'Dokumente fehlen'}
+          </span>
+        </div>
+      )}
+
       {/* Meta */}
-      <div className="text-xs text-claimondo-ondo space-y-1">
+      <div className="relative z-10 text-xs text-claimondo-ondo space-y-1 pointer-events-none">
         <div className="flex items-center gap-1.5">
           <FileTextIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
           <span>{props.ursacheLabel}</span>
@@ -190,8 +209,8 @@ export default function AuftragCard(props: AuftragCardProps) {
         )}
       </div>
 
-      {/* Action Zone */}
-      <div className="pt-2 border-t border-claimondo-border">
+      {/* Action Zone — relative z-10 damit Buttons den Stretched-Link überlagern */}
+      <div className="relative z-10 pt-2 border-t border-claimondo-border">
         {action.type === 'vorschlagen' && (
           <button
             type="button"

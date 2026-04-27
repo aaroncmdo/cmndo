@@ -70,6 +70,22 @@ export default async function AuftraegePage({
 
   const admin = createAdminClient()
 
+  // CMM-24: Anzahl offener Pflicht-Dokumente pro Fall — Quick-Counter für
+  // den gelben Badge in der Auftrags-Card. Smart-Filter macht der Banner
+  // im Fall-Detail; Card-Liste reicht der Roh-Counter aus pflichtdokumente.
+  const offeneDokuMap: Record<string, number> = {}
+  if (fallIds.length > 0) {
+    const { data: offen } = await admin
+      .from('pflichtdokumente')
+      .select('fall_id')
+      .in('fall_id', fallIds)
+      .neq('status', 'hochgeladen')
+    for (const row of offen ?? []) {
+      const id = row.fall_id as string
+      offeneDokuMap[id] = (offeneDokuMap[id] ?? 0) + 1
+    }
+  }
+
   const [leadsRes, termineRes] = await Promise.all([
     leadIds.length
       ? supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
@@ -198,6 +214,7 @@ export default async function AuftraegePage({
                     FALL_STATUS_LABELS[fall.status] ??
                     fall.status
                   }
+                  offeneDokumente={offeneDokuMap[fall.id] ?? 0}
                 />
               )
             })}
