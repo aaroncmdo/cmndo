@@ -19,68 +19,58 @@ const PHASES: { key: AuftragsPhase; icon: typeof CalendarIcon }[] = [
 ]
 
 export default function AuftragsphaseStepper({ phase }: { phase: SvLifecyclePhase }) {
-  // Fall-Phasen bedeuten: Auftrag durch — alle 3 Step grün, sub-label
-  // zeigt die Fall-Phase.
   const fallPhase = isFallPhase(phase) ? phase : null
   const auftragsPhaseKey: AuftragsPhase = fallPhase ? 'abgeschlossen' : (phase as AuftragsPhase)
   const aktuellIdx = AUFTRAGS_PHASE_INDEX[auftragsPhaseKey]
   const abgeschlossen = auftragsPhaseKey === 'abgeschlossen'
 
   return (
-    <div className="rounded-2xl bg-white border border-claimondo-border p-4">
-      <div className="flex items-center justify-between gap-2">
+    <div className="rounded-2xl bg-white border border-claimondo-border px-3 py-2.5">
+      <div className="flex items-center gap-2">
         {PHASES.map((p, i) => {
           const isCurrent = !abgeschlossen && i === aktuellIdx
           const isDone = abgeschlossen || i < aktuellIdx
           const Icon = p.icon
           return (
-            <div key={p.key} className="flex-1 flex items-center gap-2 min-w-0">
+            <div key={p.key} className="flex items-center gap-2 min-w-0">
               <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
                   isDone
                     ? 'bg-emerald-500 text-white'
                     : isCurrent
-                      ? 'bg-claimondo-navy text-white'
-                      : 'bg-claimondo-border/40 text-claimondo-ondo'
+                      ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                      : 'bg-claimondo-border/40 text-claimondo-ondo/60'
                 }`}
               >
-                {isDone ? <CheckIcon className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+                {isDone ? <CheckIcon className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
               </div>
-              <div className="min-w-0">
-                <p
-                  className={`text-xs font-semibold truncate ${
-                    isCurrent ? 'text-claimondo-navy' : isDone ? 'text-emerald-700' : 'text-claimondo-ondo'
-                  }`}
-                >
-                  {AUFTRAGS_PHASE_LABEL[p.key]}
-                </p>
-                <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
-                  {isCurrent ? 'Aktuell' : isDone ? 'Erledigt' : 'Offen'}
-                </p>
-              </div>
+              <p
+                className={`text-xs font-semibold truncate ${
+                  isCurrent
+                    ? 'text-claimondo-navy'
+                    : isDone
+                      ? 'text-emerald-700'
+                      : 'text-claimondo-ondo/60'
+                }`}
+              >
+                {AUFTRAGS_PHASE_LABEL[p.key]}
+              </p>
               {i < PHASES.length - 1 && (
                 <div
-                  className={`hidden sm:block flex-1 h-px mx-1 ${
-                    isDone || (isCurrent && i + 1 <= aktuellIdx)
-                      ? 'bg-emerald-300'
-                      : 'bg-claimondo-border'
+                  className={`flex-1 h-px min-w-4 mx-1 ${
+                    isDone ? 'bg-emerald-300' : 'bg-claimondo-border'
                   }`}
                 />
               )}
             </div>
           )
         })}
+        {fallPhase && (
+          <span className="ml-auto text-[10px] uppercase tracking-wider font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-1 whitespace-nowrap">
+            {FALL_PHASE_LABEL[fallPhase]}
+          </span>
+        )}
       </div>
-      {abgeschlossen && (
-        <p className="mt-3 text-xs text-emerald-700 font-medium">
-          ✓ Auftrag abgeschlossen
-          {fallPhase && (
-            <span className="text-claimondo-ondo font-normal">
-              {' '}— Fall-Status: <span className="text-claimondo-navy font-medium">{FALL_PHASE_LABEL[fallPhase]}</span>
-            </span>
-          )}
-        </p>
-      )}
     </div>
   )
 }

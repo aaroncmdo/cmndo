@@ -11,8 +11,6 @@
 // als Composition drunter, das ist SV-spezifisch.
 
 import { FallakteDrawer } from './FallakteDrawer'
-// AAR-307: Ad-hoc Task-Anlegen aus dem FallHeader
-import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
 // AAR-746: Shared Identity-Header.
 import { FallIdentityHeader } from '@/components/shared/fall-header'
@@ -21,13 +19,9 @@ type DrawerData = Parameters<typeof FallakteDrawer>[0]
 
 export function FallHeader({
   fallNummer,
-  fallId,
   kundenName,
   ort,
-  subphase,
   drawer,
-  aktuellePhaseSnake,
-  abgeschlossenAm = null,
 }: {
   fallNummer: string
   fallId: string
@@ -36,31 +30,22 @@ export function FallHeader({
   subphase: SvSubphase
   drawer: DrawerData
   aktuellePhaseSnake: string | null
-  /** Optional: abgeschlossen_am für korrekte Phase-10-Markierung im Panel. */
   abgeschlossenAm?: string | null
 }) {
-  const terminal: 'storniert' | null =
-    subphase.code === 'storniert' ? 'storniert' : null
-
-  const subphaseLabel = `Phase ${subphase.phase} ${subphase.phaseLabel} · ${subphase.label}`
-
+  // CMM-23: TaskAnlegenButton + Subphasen-Label entfernt — der SV
+  // braucht keine eigene Task-Erstellung (KB-Pfad läuft via Chat,
+  // AAR-861) und der Auftrags-Lifecycle steckt im 3-Phasen-Stepper
+  // direkt darunter. FallakteDrawer bleibt als alternative Akten-Sicht.
   return (
-    <div>
-      <FallIdentityHeader
-        rolle="sv"
-        fallNummer={fallNummer}
-        kundenName={kundenName}
-        ort={ort}
-        subphaseLabel={subphaseLabel}
-        backHref="/gutachter/faelle"
-        backLabel="Zurück zu Fällen"
-      >
-        <TaskAnlegenButton fallId={fallId} rolle="sachverstaendiger" label="Task" />
-        <FallakteDrawer {...drawer} />
-      </FallIdentityHeader>
-
-      {/* CMM-23: 10-Phasen-FallPhasenPanel raus — der AuftragsphaseStepper
-          (3 Phasen) in page.tsx übernimmt den Lifecycle für den SV. */}
-    </div>
+    <FallIdentityHeader
+      rolle="sv"
+      fallNummer={fallNummer}
+      kundenName={kundenName}
+      ort={ort}
+      backHref="/gutachter/faelle"
+      backLabel="Zurück zu Fällen"
+    >
+      <FallakteDrawer {...drawer} />
+    </FallIdentityHeader>
   )
 }

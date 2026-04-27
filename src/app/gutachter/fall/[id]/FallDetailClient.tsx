@@ -41,8 +41,7 @@ import { SvToolsCard } from './_components/SvToolsCard'
 import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
 import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
 import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
-// AAR-377: Shared BriefingCard — in der SV-Fallakte read-only (kein Regenerate).
-import BriefingCard from '@/components/fall/BriefingCard'
+// CMM-23: BriefingCard wandert nach page.tsx (topServerBlocks).
 import type { GutachterTask } from '@/hooks/useGutachterTasks'
 import type { SvAbrechnungInput } from '@/lib/gutachter/abrechnung'
 // AAR-327: Dokument-Anforderungs-UI (Modal + Liste, wiederverwendbar)
@@ -130,6 +129,9 @@ type Props = {
   konfrontationGewuenscht?: boolean
   konfrontationTerminVereinbartAm?: string | null
   konfrontationTerminVorschlaege?: Array<{ datum: string; uhrzeit: string }> | null
+  /** CMM-23: Server-rendered Top-Blocks (Banner, Briefing, Stepper, MeinFallStatusCard).
+      Wird direkt nach dem FallHeader gerendert. */
+  topServerBlocks?: React.ReactNode
 }
 
 /** AAR-399: Lokaler Typ, passt zu DokumentenListe.SlotRow */
@@ -283,7 +285,15 @@ export default function FallDetailClient(props: Props) {
         abgeschlossenAm={abgeschlossenAm}
       />
 
-      {/* AAR-770: Mitteilungs-Banner — direkt unter dem Header */}
+      {/* CMM-23: Server-rendered Top-Blocks (Banner, Briefing, Stepper,
+          MeinFallStatusCard) — die kommen aus page.tsx mit den Server-Daten. */}
+      {props.topServerBlocks && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
+          {props.topServerBlocks}
+        </div>
+      )}
+
+      {/* AAR-770: Mitteilungs-Banner */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
         <FallMitteilungenBanner fallId={fall.id as string} rolle="sachverstaendiger" />
       </div>
@@ -306,18 +316,8 @@ export default function FallDetailClient(props: Props) {
       {/* 2-Spalten-Layout: Desktop ≥1024px sticky-links, Mobile stacked */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
-          {/* AAR-377 / AAR-772: SV-Briefing oben in der Sidebar — Plain-Text,
-              read-only für SV. Struktur-Briefing zeigen wir dem SV NICHT
-              (das ist Onboarding-Material für uns intern). Wird auto-
-              generiert beim Öffnen der Page (siehe page.tsx). */}
-          <BriefingCard
-            fallId={fall.id as string}
-            briefing={(fall.sv_briefing_text as string | null) ?? null}
-            generatedAt={(fall.sv_briefing_generated_at as string | null) ?? null}
-            model={(fall.sv_briefing_model as string | null) ?? null}
-            version={(fall.sv_briefing_version as number | null) ?? null}
-            canRegenerate={false}
-          />
+          {/* CMM-23: BriefingCard aus der Sidebar nach oben in topServerBlocks
+              verschoben (direkt unter dem gelben Banner). */}
           <JetztZuTunCard
             fallId={fall.id as string}
             initialTasks={props.tasks ?? []}

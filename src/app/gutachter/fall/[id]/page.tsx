@@ -11,6 +11,8 @@ import AuftragDokumenteBanner from '@/components/gutachter/AuftragDokumenteBanne
 import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
 import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
 import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
+// SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
+import BriefingCard from '@/components/fall/BriefingCard'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-651: Zentrale Fall-Loader-Lib
@@ -361,31 +363,43 @@ export default async function GutachterFallPage({
     fallStatus: (fall.status as string | null) ?? null,
   })
 
-  return (
+  // CMM-23: Top-Server-Blocks für FallDetailClient. Aaron-Reihenfolge:
+  // Header → Banner (Kunde-Anforderungen) → SV-Briefing → 3-Phasen-Stepper
+  // → MeinFallStatusCard (wenn Fall-Phase). FallDetailClient rendert die
+  // Blocks direkt nach dem FallHeader.
+  const topServerBlocks = (
     <>
-      {/* CMM-23: Banner ganz oben — was vom Kunden noch einzuholen ist.
-          Darunter der 3-Phasen-Stepper. MeinFallStatusCard erst wenn der
-          Auftrag durch ist (Gutachten freigegeben). */}
-      <div className="px-4 pt-4 md:px-6 md:pt-6 space-y-3">
-        <AuftragDokumenteBanner
-          fallId={id}
-          pflichtRows={(pflichtdokumente ?? []) as unknown as Parameters<typeof AuftragDokumenteBanner>[0]['pflichtRows']}
-          gutachtenEingegangen={!!(fall.gutachten_eingegangen_am as string | null)}
+      <AuftragDokumenteBanner
+        fallId={id}
+        pflichtRows={(pflichtdokumente ?? []) as unknown as Parameters<typeof AuftragDokumenteBanner>[0]['pflichtRows']}
+        gutachtenEingegangen={!!(fall.gutachten_eingegangen_am as string | null)}
+      />
+      <BriefingCard
+        fallId={id}
+        briefing={(fall.sv_briefing_text as string | null) ?? null}
+        generatedAt={(fall.sv_briefing_generated_at as string | null) ?? null}
+        model={(fall.sv_briefing_model as string | null) ?? null}
+        version={(fall.sv_briefing_version as number | null) ?? null}
+        canRegenerate={false}
+      />
+      <AuftragsphaseStepper phase={svPhase} />
+      {isFallPhase(svPhase) && (
+        <MeinFallStatusCard
+          phase={svPhase}
+          geforderterBetrag={(fall.gutachten_betrag as number | null) ?? null}
+          gutachtenUrl={(fall.gutachten_url as string | null) ?? null}
+          gutachtenFreigegebenAm={(fall.gutachten_freigabe_am as string | null) ?? (fall.gutachten_eingegangen_am as string | null) ?? null}
+          lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
+          svHonorarBetrag={svHonorarBetrag}
+          svHonorarEingegangenAm={svHonorarEingegangenAm}
         />
-        <AuftragsphaseStepper phase={svPhase} />
-        {isFallPhase(svPhase) && (
-          <MeinFallStatusCard
-            phase={svPhase}
-            geforderterBetrag={(fall.gutachten_betrag as number | null) ?? null}
-            gutachtenUrl={(fall.gutachten_url as string | null) ?? null}
-            gutachtenFreigegebenAm={(fall.gutachten_freigabe_am as string | null) ?? (fall.gutachten_eingegangen_am as string | null) ?? null}
-            lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
-            svHonorarBetrag={svHonorarBetrag}
-            svHonorarEingegangenAm={svHonorarEingegangenAm}
-          />
-        )}
-      </div>
+      )}
+    </>
+  )
+
+  return (
     <FallDetailClient
+      topServerBlocks={topServerBlocks}
       fall={fallWithAbrechnung}
       lead={lead}
       dokumente={dokumenteLegacy}
@@ -421,6 +435,5 @@ export default async function GutachterFallPage({
       konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
       konfrontationTerminVorschlaege={terminVorschlaege}
     />
-    </>
   )
 }
