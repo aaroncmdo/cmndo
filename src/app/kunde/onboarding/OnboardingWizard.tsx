@@ -12,7 +12,6 @@ import {
   completeOnboarding,
   uploadPflichtdokument,
   uploadKundenDokument,
-  markiereSpaeterNachreichen,
   markiereAlleSpaeterNachreichen,
   type PflichtdokumentStand,
   type FreierSlot,
@@ -190,8 +189,6 @@ export default function OnboardingWizard({
   // AAR-390: Slot-IDs die der Kunde auf „später nachreichen" gesetzt hat.
   // Server-Action setzt spaeter_nachreichen_markiert_am; UI markiert sie
   // lokal sofort, damit der Kunde visuell Feedback bekommt ohne Reload.
-  const [spaeterSlots, setSpaeterSlots] = useState<Set<string>>(new Set())
-  const [spaeterLoading, setSpaeterLoading] = useState<string | null>(null)
   const [spaeterAlleLoading, setSpaeterAlleLoading] = useState(false)
 
   const currentStep = STEPS[stepIndex]
@@ -314,34 +311,12 @@ export default function OnboardingWizard({
     reader.readAsDataURL(file)
   }
 
-  // AAR-390: Kunde verschiebt einen einzelnen Pflicht-Slot auf später.
-  // Status bleibt 'ausstehend' (pflichtBlocked bleibt gesetzt), Reminder-Crons
-  // überspringen den Slot aber für 48h.
-  function handleSpaeterNachreichen(pflichtdokumentId: string) {
-    if (!fall?.id) return
-    setSpaeterLoading(pflichtdokumentId)
-    startTransition(async () => {
-      const res = await markiereSpaeterNachreichen(fall.id, pflichtdokumentId)
-      if (res.success) {
-        setSpaeterSlots(prev => new Set(prev).add(pflichtdokumentId))
-      }
-      setSpaeterLoading(null)
-    })
-  }
-
   function handleAlleSpaeterNachreichen() {
     if (!fall?.id) return
     setSpaeterAlleLoading(true)
     startTransition(async () => {
       const res = await markiereAlleSpaeterNachreichen(fall.id)
-      if (res.success) {
-        const next = new Set<string>(spaeterSlots)
-        for (const d of pflichtDocs) {
-          if (docStatus[d.id] !== 'hochgeladen') next.add(d.id)
-        }
-        setSpaeterSlots(next)
-        setStepIndex(4)
-      }
+      if (res.success) setStepIndex(4)
       setSpaeterAlleLoading(false)
     })
   }
@@ -704,31 +679,81 @@ export default function OnboardingWizard({
                           )
                         })()}
 
-                        {/* AAR-390: „Später nachreichen"-Link pro offenem Pflicht-Slot.
-                            Nicht bei hochgeladenen Slots — und Text wechselt sobald markiert. */}
-                        {!istHochgeladen && (
-                          <div className="mt-2.5 text-right">
-                            {spaeterSlots.has(doc.id) ? (
-                              <span className="text-[11px] text-claimondo-ondo italic">
-                                ✓ Auf später verschoben — wir erinnern Sie später.
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => handleSpaeterNachreichen(doc.id)}
-                                disabled={spaeterLoading === doc.id}
-                                className="text-[11px] text-claimondo-ondo hover:text-claimondo-navy underline decoration-dotted underline-offset-2 disabled:opacity-50"
-                              >
-                                {spaeterLoading === doc.id ? 'Wird gespeichert…' : 'Später nachreichen'}
-                              </button>
-                            )}
-                          </div>
-                        )}
                       </div>
                     )
                   })}
                   </div>
                 )}
+
+                {/* CMM-21: "Weitere Dokumente" — Freier Slot für alles was
+                    keine direkte Kategorisierung hat. Mehrfachauswahl an,
+                    optionale Beschreibung. Geht via uploadKundenDokument
+                    → kunde-nachreichung in fall_dokumente. */}
+                <div className="mt-5 rounded-2xl border-2 border-dashed border-claimondo-border bg-white p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-claimondo-ondo/15 text-claimondo-ondo">
+                      <FolderOpenIcon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-base font-semibold text-claimondo-navy">Weitere Dokumente</p>
+                      <p className="text-xs text-claimondo-ondo mt-0.5">
+                        Alles was keiner der Kategorien oben passt — Werkstattrechnungen,
+                        Korrespondenz, Belege, Sonstiges.
+                      </p>
+                      {sonstigesCount > 0 && (
+                        <p className="mt-2 text-xs text-emerald-700 font-medium flex items-center gap-1">
+                          <CheckIcon className="w-3.5 h-3.5" />
+                          {sonstigesCount} {sonstigesCount === 1 ? 'Datei' : 'Dateien'} hochgeladen
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    value={sonstigesBeschreibung}
+                    onChange={(e) => setSonstigesBeschreibung(e.target.value)}
+                    placeholder="Kurze Beschreibung (optional, z. B. Werkstattrechnung)"
+                    className="mt-3 w-full text-sm rounded-xl border border-claimondo-border bg-[#f8f9fb] px-3 py-2.5 text-claimondo-navy placeholder:text-claimondo-ondo/60 focus:border-claimondo-ondo focus:outline-none"
+                  />
+                  <div className="mt-3 flex gap-2">
+                    <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-claimondo-navy text-white hover:bg-claimondo-shield active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
+                      {uploadingSlot === '__sonstiges__' ? 'Lädt...' : <><span>📷</span> Foto aufnehmen</>}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        disabled={uploadingSlot === '__sonstiges__'}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0]
+                          if (f) handleFreiUpload(null, f, sonstigesBeschreibung || undefined)
+                          e.target.value = ''
+                        }}
+                      />
+                    </label>
+                    <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-claimondo-navy text-claimondo-navy hover:bg-[#f8f9fb] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
+                      <span>📁</span> Dateien wählen
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        multiple
+                        className="hidden"
+                        disabled={uploadingSlot === '__sonstiges__'}
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            for (const f of Array.from(e.target.files)) {
+                              handleFreiUpload(null, f, sonstigesBeschreibung || undefined)
+                            }
+                          }
+                          e.target.value = ''
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {sonstigesError && (
+                    <p className="mt-2 text-xs text-rose-700">{sonstigesError}</p>
+                  )}
+                </div>
 
                 {/* AAR-166: ZB1-OCR-Ergebnis inline anzeigen nach Fahrzeugschein-Upload */}
                 {zb1Result && (
