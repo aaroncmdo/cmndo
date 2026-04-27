@@ -956,7 +956,7 @@ export async function signSAandCreateFall(
   if (lead.gutachter_termin && lead.telefon) {
     try {
       const { data: terminRow } = await admin.from('gutachter_termine')
-        .select('id, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
+        .select('id, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname))')
         .eq('fall_id', fall.id)
         .in('status', ['bestaetigt', 'reserviert'])
         .limit(1)
@@ -971,13 +971,16 @@ export async function signSAandCreateFall(
           .eq('status', 'reserviert')
       }
 
+      // CMM-21: nur Vorname an den Kunden — Vor-/Nachname zusammen würde
+      // dem Kunden ermöglichen den Sachverständigen direkt zu identifizieren
+      // und an Claimondo vorbei zu beauftragen.
       const svRel = (terminRow as { sachverstaendige: unknown } | null)?.sachverstaendige
       const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
       const profileRel = sv?.profiles
       const profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
-        | { vorname: string | null; nachname: string | null }
+        | { vorname: string | null }
         | null
-      const svName = `${profile?.vorname ?? ''} ${profile?.nachname ?? ''}`.trim() || 'Ihrem Gutachter'
+      const svName = (profile?.vorname ?? '').trim() || 'Ihrem Gutachter'
       const terminDate = new Date(lead.gutachter_termin)
       const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
       const { sendCommunication } = await import('@/lib/communications/send')
