@@ -104,20 +104,50 @@ export function getOffeneDokumentAnforderungen(
   pflichtDocs: PflichtdokumentStand[],
   leadZb1Status?: string | null,
 ): DokumentAnforderung[] {
-  // CMM-23 Aaron-Spec: SSoT für „was der Kunde uns geben soll" sind die
-  // pflichtdokumente-Rows mit `uploadbar_von` enthält 'kunde'. Hardcoded
-  // SLOT_REIHENFOLGE-Liste ist raus — wir iterieren über die übergebenen
-  // pflichtDocs (Caller hat den uploadbar_von-Filter bereits angewendet).
-  // Smart-Filter conditions (polizei_vor_ort etc.) bleiben pro bekanntem
-  // Slot. Slots ohne DOC_DEFINITIONS-Eintrag werden durchgelassen — das
-  // sind Legacy-Slots oder explizite KB-Anforderungen.
+  // CMM-23: zwei Iterationen — alle bekannten Smart-Filter-Slots
+  // (DOC_DEFINITIONS) die conditional matchen + alle DB-Slots die NICHT
+  // in DOC_DEFINITIONS sind (Legacy / KB-Anforderungen). Damit zeigen
+  // wir auch Slots an, für die die DB-Row noch nicht angelegt wurde
+  // (häufig wenn createPflichtdokumenteFromKatalog Slots übersprungen
+  // hat) — Status fällt dann auf 'offen', sobald File hochgeladen wird,
+  // legt der Upload-Pfad die Row an.
   const result: DokumentAnforderung[] = []
-  for (const pflichtdoc of pflichtDocs) {
-    const config = DOC_DEFINITIONS[pflichtdoc.slot_id]
+  const seen = new Set<string>()
 
-    // Smart-Filter: wenn DOC_DEFINITIONS einen Slot kennt + condition ist
-    // false → Slot ist für diesen Claim nicht relevant, raus.
-    if (config && !config.condition(claim, leadZb1Status)) continue
+  // 1. Bekannte Smart-Filter-Slots in fester Reihenfolge.
+  for (const slotId of SLOT_REIHENFOLGE) {
+    const config = DOC_DEFINITIONS[slotId]
+    if (!config) continue
+    if (!config.condition(claim, leadZb1Status)) continue
+
+    const pflichtdoc = pflichtDocs.find((d) => d.slot_id === slotId)
+
+    let status: DokumentStatus
+    if (pflichtdoc?.dokument_url) {
+      status = 'erfuellt'
+    } else if (pflichtdoc?.status === 'spaeter') {
+      status = 'spaeter'
+    } else {
+      status = 'offen'
+    }
+
+    result.push({
+      slot_id: slotId,
+      label: config.label,
+      beschreibung: config.beschreibung,
+      // OR-Logic: Katalog-Default oder DB-Pflicht-Flag — kein Override
+      // nach unten. KB kann hochstufen, kann aber nicht entpflichten.
+      pflicht: !!(pflichtdoc?.pflicht || config.pflicht),
+      status,
+      pflichtdoc,
+    })
+    seen.add(slotId)
+  }
+
+  // 2. Legacy- und KB-Slots aus DB die NICHT in DOC_DEFINITIONS sind.
+  for (const pflichtdoc of pflichtDocs) {
+    if (seen.has(pflichtdoc.slot_id)) continue
+    if (DOC_DEFINITIONS[pflichtdoc.slot_id]) continue // schon behandelt
 
     let status: DokumentStatus
     if (pflichtdoc.dokument_url) {
@@ -130,13 +160,9 @@ export function getOffeneDokumentAnforderungen(
 
     result.push({
       slot_id: pflichtdoc.slot_id,
-      // Defensive: label/beschreibung/pflicht können theoretisch null sein
-      // (DB-Constraints können sich ändern). Immer auf string/boolean fallen.
-      label: config?.label ?? pflichtdoc.label ?? pflichtdoc.slot_id ?? '',
-      beschreibung: config?.beschreibung ?? pflichtdoc.beschreibung ?? '',
-      // CMM-22 Bugfix: DB-Pflicht-Flag bevorzugen — KB kann Slots vom
-      // Katalog-optional zur Pflicht hochstufen.
-      pflicht: pflichtdoc.pflicht ?? config?.pflicht ?? false,
+      label: pflichtdoc.label ?? pflichtdoc.slot_id ?? '',
+      beschreibung: pflichtdoc.beschreibung ?? '',
+      pflicht: !!pflichtdoc.pflicht,
       status,
       pflichtdoc,
     })
