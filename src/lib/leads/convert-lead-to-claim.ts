@@ -211,7 +211,8 @@ export async function convertLeadToClaim(
     phase: '1_neu',
     status: 'dispatch_done',
     kundenbetreuer_id: kundenbetreuerId,
-    kanzlei_wunsch: 'unentschieden',
+    // kanzlei_wunsch: NICHT setzen → DB-Default 'nicht_gefragt'.
+    // Wird im Kunden-Portal später aktiv abgefragt.
   }
 
   const { data: claim, error: claimErr } = await admin
