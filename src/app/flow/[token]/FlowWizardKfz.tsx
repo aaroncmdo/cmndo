@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf, loginAfterFlowFormAction } from './actions'
+import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
 import {
   CheckIcon,
   FileTextIcon,
@@ -254,9 +254,15 @@ export default function FlowWizardKfz({
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* CMM-14: Verstecktes Login-Form für den Auto-Login nach Account-
-          Anlage. Wird programmatisch submitted — die Server-Action setzt
-          Cookies + redirected, Next.js handled das ohne Cookie-Race. */}
-      <form ref={loginFormRef} action={loginAfterFlowFormAction} style={{ display: 'none' }}>
+          Anlage. Submit zu Route-Handler /api/auth/login-after-flow — der
+          macht signInWithPassword + Set-Cookie + 303-Redirect. Browser
+          folgt mit einer echten Hard-Navigation, kein RSC-Stream. */}
+      <form
+        ref={loginFormRef}
+        method="POST"
+        action="/api/auth/login-after-flow"
+        style={{ display: 'none' }}
+      >
         <input type="hidden" name="email" defaultValue="" />
         <input type="hidden" name="password" defaultValue="" />
       </form>
