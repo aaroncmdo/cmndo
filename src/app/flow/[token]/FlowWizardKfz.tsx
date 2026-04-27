@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { signSAandCreateFall, createKundeAccount, generateSAPdf } from './actions'
+import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
 // AAR-305: Werkstatt-Angaben + Schadensfotos-Upload
 import { saveWerkstattAngaben, saveSchadensfotoUrls } from './onboarding-extra-actions'
 import {
@@ -137,16 +137,15 @@ export default function FlowWizardKfz({
   const [fallId, setFallId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // CMM-14: Stammdaten sind read-only — der Dispatcher hat sie am Telefon
-  // bereits eingeholt. Korrekturen laufen über Telefonat zum KB.
-  const kundeVorname = lead.vorname ?? ''
-  const kundeNachname = lead.nachname ?? ''
-  const kundeTelefon = lead.telefon ?? ''
-  const kundeEmail = lead.email ?? ''
+  // Editierbare Stammdaten (KFZ-117: Kunde kann korrigieren)
+  const [editVorname, setEditVorname] = useState(lead.vorname)
+  const [editNachname, setEditNachname] = useState(lead.nachname)
+  const [editTelefon, setEditTelefon] = useState(lead.telefon)
+  const [editEmail, setEditEmail] = useState(lead.email)
 
   // Account step
   const [accountPassword, setAccountPassword] = useState('')
-  const [accountEmail, setAccountEmail] = useState(kundeEmail)
+  const [accountEmail, setAccountEmail] = useState(editEmail)
   const [showPw, setShowPw] = useState(false)
   const [creatingAccount, setCreatingAccount] = useState(false)
   const [accountCreated, setAccountCreated] = useState(false)
@@ -162,7 +161,7 @@ export default function FlowWizardKfz({
   const currentStep = STEPS[stepIndex]
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
   const fahrzeug = [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ')
-  const kundenName = [kundeVorname, kundeNachname].filter(Boolean).join(' ')
+  const kundenName = [editVorname, editNachname].filter(Boolean).join(' ')
 
   // ─── SA unterzeichnen + Fall erstellen ─────────────────────────────────────
 
@@ -207,7 +206,7 @@ export default function FlowWizardKfz({
     setError(null)
     try {
       // AAR-308/309: createKundeAccount wirft NIE — sauberes Result-Object.
-      const result = await createKundeAccount(fallId, accountEmail, kundeVorname, kundeNachname, kundeTelefon || null)
+      const result = await createKundeAccount(fallId, accountEmail, editVorname || lead.vorname, editNachname || lead.nachname, editTelefon || lead.telefon || null)
       if (!result.success) {
         setError(result.error)
         return
@@ -259,23 +258,27 @@ export default function FlowWizardKfz({
             {currentStep.id === 'zusammenfassung' && (
               <div>
                 <StepHeader
-                  question={`Hallo ${kundeVorname || 'dort'}!`}
-                  sub="Bitte prüfen Sie Ihre Daten und bestätigen Sie unten, dass alles korrekt ist."
+                  question={`Hallo ${editVorname || 'dort'}!`}
+                  sub="Bitte prüfen und korrigieren Sie Ihre Daten."
                   icon={<CarIcon className="w-8 h-8 text-[#4573A2]" />}
                 />
 
-                {/* CMM-14: Alle Stammdaten sind read-only. Der Dispatcher hat
-                    sie am Telefon eingeholt. Korrekturen laufen ausschließlich
-                    über Telefonat zum Kundenbetreuer. */}
-                <div className="space-y-2 mb-6">
-                  {/* Kontaktdaten */}
-                  {kundeVorname || kundeNachname ? (
-                    <SummaryRow label="Name" value={[kundeVorname, kundeNachname].filter(Boolean).join(' ')} />
-                  ) : null}
-                  {kundeTelefon && <SummaryRow label="Telefon" value={kundeTelefon} />}
-                  {kundeEmail && <SummaryRow label="E-Mail" value={kundeEmail} />}
+                {/* Editierbare Kontaktdaten */}
+                <div className="space-y-3 mb-5">
+                  <div className="grid grid-cols-2 gap-3">
+                    <EditableInput label="Vorname" value={editVorname} onChange={setEditVorname} />
+                    <EditableInput label="Nachname" value={editNachname} onChange={setEditNachname} />
+                  </div>
+                  <EditableInput label="Telefon" value={editTelefon} onChange={setEditTelefon} type="tel" />
+                  <EditableInput label="E-Mail" value={editEmail} onChange={setEditEmail} type="email" />
+                </div>
 
-                  {/* Schaden + Fahrzeug */}
+                {/* AAR-336: Nicht-editierbare Infos (aus Dispatch-Qualifizierung) —
+                    Review-Ansicht. Alle Felder readonly, leere Felder werden
+                    unterdrückt. Korrekturen laufen über Telefonat zum KB.
+                    Vorher hatte dieser Schritt leere Dropdowns die den Kunden
+                    zur Neu-Eingabe bereits erfasster Werte zwangen. */}
+                <div className="space-y-2 mb-6">
                   {(lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz) && (
                     <SummaryRow label="Standort" value={[lead.fahrzeug_standort_adresse, lead.fahrzeug_standort_plz].filter(Boolean).join(', ')} />
                   )}
@@ -301,12 +304,6 @@ export default function FlowWizardKfz({
                     />
                   )}
                   {lead.unfallhergang && <SummaryRow label="Unfallhergang" value={lead.unfallhergang} />}
-                </div>
-
-                {/* CMM-14: Hinweis bei falschen Daten */}
-                <div className="mb-5 rounded-xl bg-[#fffbeb] border border-amber-200 p-4 text-xs text-amber-900">
-                  Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer
-                  zurück — wir tragen Korrekturen für Sie ein.
                 </div>
 
                 {/* Datenschutz */}
@@ -730,17 +727,24 @@ export default function FlowWizardKfz({
           </div>
         </div>
 
-        {/* CMM-14: Navigation — Schritt 1 (Bestätigung). Kein Save mehr,
-            der Dispatcher hat alle Stammdaten am Telefon eingeholt. Wir
-            warten nur auf die Datenschutz-Zustimmung. */}
+        {/* Navigation — Schritt 1 (Zusammenfassung) hat Weiter-Button */}
         {currentStep.id === 'zusammenfassung' && (
           <div className="pt-4">
             <button
-              onClick={() => setStepIndex(stepIndexById('gutachter'))}
-              disabled={!datenschutz}
+              onClick={async () => {
+                // Korrigierte Stammdaten speichern
+                if (editVorname !== lead.vorname || editNachname !== lead.nachname || editTelefon !== lead.telefon || editEmail !== lead.email) {
+                  try {
+                    await updateLeadStammdaten(lead.id, { vorname: editVorname, nachname: editNachname, telefon: editTelefon, email: editEmail })
+                    setAccountEmail(editEmail)
+                  } catch { /* weiter trotzdem */ }
+                }
+                setStepIndex(1) // → gutachter
+              }}
+              disabled={!datenschutz || !editVorname || !editNachname}
               className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
             >
-              Daten bestätigen und weiter
+              Weiter
             </button>
           </div>
         )}
@@ -771,6 +775,20 @@ function StepHeader({ question, sub, icon }: { question: string; sub?: string; i
       {icon && <div className="mb-3">{icon}</div>}
       <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">{question}</h1>
       {sub && <p className="mt-2 text-sm text-claimondo-ondo">{sub}</p>}
+    </div>
+  )
+}
+
+function EditableInput({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
+  return (
+    <div>
+      <label className="block text-xs text-claimondo-ondo mb-1">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-sm text-claimondo-navy focus:outline-none focus:border-[#4573A2] focus:bg-white transition-colors"
+      />
     </div>
   )
 }

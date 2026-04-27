@@ -211,8 +211,15 @@ export async function convertLeadToClaim(
     phase: '1_neu',
     status: 'dispatch_done',
     kundenbetreuer_id: kundenbetreuerId,
-    // kanzlei_wunsch: NICHT setzen → DB-Default 'nicht_gefragt'.
-    // Wird im Kunden-Portal später aktiv abgefragt.
+    // Explizit setzen statt auf DB-Default zu vertrauen — Supabase-JS-
+    // Insert kann undefined-Felder als null serialisieren, was dann
+    // den CHECK-Constraint verletzt. Erlaubte Werte:
+    //   partnerkanzlei | eigene_kanzlei | keine_kanzlei |
+    //   noch_unentschieden | nicht_gefragt
+    // 'nicht_gefragt' ist der korrekte Initial-Wert — der Wunsch wird
+    // später vom Dispatcher (am Telefon) oder vom Kunden im Portal
+    // (KanzleiWunschModal) gesetzt.
+    kanzlei_wunsch: 'nicht_gefragt',
   }
 
   const { data: claim, error: claimErr } = await admin
