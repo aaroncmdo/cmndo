@@ -22,26 +22,20 @@ import { FallHeader } from './_components/FallHeader'
 // AAR-770: Mitteilungs-Banner ganz oben in der Fallakte (shared)
 import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 import type { TeamMitglied } from './_components/FallakteDrawer'
-import { AktuellePhaseCard } from './_components/AktuellePhaseCard'
+// CMM-23: AktuellePhaseCard, KanzleiRegulierungsStepperCard,
+// KanzleiStatusCard, AbrechnungsCard, AbrechnungsartCard, ReklamationsCard,
+// SvHonorarCard wurden aus der SV-FallDetail-View entfernt — sind KB/Admin-
+// Tools oder werden durch den AuftragsphaseStepper + MeinFallStatusCard
+// (page.tsx) ersetzt. Eine Karte = eine Funktion (Aaron-Spec).
 import { JetztZuTunCard } from './_components/JetztZuTunCard'
 import { StammdatenCard } from './_components/StammdatenCard'
 import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
 import { DokumenteUebersichtCard } from './_components/DokumenteUebersichtCard'
 import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
-import { KanzleiRegulierungsStepperCard } from './_components/KanzleiRegulierungsStepperCard'
-import {
-  KanzleiStatusCard,
-  type KuerzungsPosition,
-} from './_components/KanzleiStatusCard'
-import { AbrechnungsCard } from './_components/AbrechnungsCard'
 import { StellungnahmeCard } from './_components/StellungnahmeCard'
 import { NachbesichtigungCard } from './_components/NachbesichtigungCard'
-// AAR-559 (C10): SV-Honorar-Card (nur SV-Anteil) + Konfrontations-Termin-Card
-import { SvHonorarCard } from '@/components/gutachter/SvHonorarCard'
 import { KonfrontationsTerminCard } from '@/components/gutachter/KonfrontationsTerminCard'
-import { ReklamationsCard } from './_components/ReklamationsCard'
-import { AbrechnungsartCard } from './_components/AbrechnungsartCard'
 // AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
 import { TerminActionsPanel } from './_components/TerminActionsPanel'
 import { SvToolsCard } from './_components/SvToolsCard'
@@ -125,8 +119,9 @@ type Props = {
   anforderbareSlots?: AnforderbarerSlot[]
   /** AAR-327: Anforderungen die der eingeloggte SV bereits gestellt hat */
   anforderungenVonMir?: AnforderungsItem[]
-  /** AAR-403: Kürzungs-Positionen (forderungspositionen) für KanzleiStatusCard */
-  kuerzungen?: KuerzungsPosition[]
+  /** AAR-403: Kürzungs-Positionen — CMM-23: nicht mehr in der SV-View
+      gerendert; bleibt in den Props für Aufwärtskompatibilität, wird ignoriert. */
+  kuerzungen?: Array<{ id: string; typ: string | null; bezeichnung: string | null; betrag_gefordert: number | null; betrag_reguliert: number | null; betrag_gekuerzt: number | null }>
   /** AAR-399: Katalog-Slots für SV-Upload (merged mit pflichtdokumente-Status) */
   svSlots?: SvSlotRow[]
   /** AAR-559 (C10): SV-Honorar (nur SV-Anteil, nie Brutto) */
@@ -356,15 +351,8 @@ export default function FallDetailClient(props: Props) {
                 (fall.zahlung_eingegangen_am as string | null) ?? null,
             }}
           />
-          {/* AAR-294 + AAR-745: Conditional Cards. Outer-Gate via Visibility-Map,
-              Cards self-gaten zusätzlich intern (Defense-in-Depth). */}
-          <ReklamationsCard
-            fall={{
-              id: fall.id as string,
-              status: (fall.status as string | null) ?? null,
-            }}
-            id="reklamation-card"
-          />
+          {/* CMM-23: ReklamationsCard entfernt (KB-Tool — SV nicht relevant).
+              Stellungnahme + Nachbesichtigung bleiben als Edge-Cases. */}
           {visibleSections.includes('stellungnahme') && (
             <StellungnahmeCard
               fall={{
@@ -405,73 +393,18 @@ export default function FallDetailClient(props: Props) {
             terminVereinbartAm={props.konfrontationTerminVereinbartAm ?? null}
             terminVorschlaege={props.konfrontationTerminVorschlaege ?? null}
           />
-          <AktuellePhaseCard
-            subphase={subphase}
-            fallId={fall.id as string}
-            hatTermin={!!(fall.sv_termin as string | null)}
-          />
-          {/* AAR-315: SV-Post-Termin-Block — self-gating ab Subphase 'vor-ort' */}
-          <AbrechnungsartCard
-            fall={{
-              id: fall.id as string,
-              abrechnungsart_besprochen:
-                (fall.abrechnungsart_besprochen as 'fiktiv' | 'konkret' | 'noch-offen' | null) ?? null,
-              abrechnungsart_notiz: (fall.abrechnungsart_notiz as string | null) ?? null,
-              abrechnungsart_besprochen_am:
-                (fall.abrechnungsart_besprochen_am as string | null) ?? null,
-            }}
-            subphase={subphase}
-          />
-          {/* AAR-293: Kanzlei-Stepper in Phase 5.x */}
-          {subphase.phase === 5 && (
-            <KanzleiRegulierungsStepperCard
-              fall={{
-                status: (fall.status as string | null) ?? null,
-                kanzlei_uebergeben_am: (fall.kanzlei_uebergeben_am as string | null) ?? null,
-              }}
-              subphase={subphase}
-            />
-          )}
-          {/* AAR-403: Honorar-Transparenz ab Phase 5 — Kürzungen + SV-Honorar */}
-          <KanzleiStatusCard
-            subphase={subphase}
-            fall={{
-              kanzlei_uebergeben_am:
-                (fall.kanzlei_uebergeben_am as string | null) ?? null,
-              anschlussschreiben_sendedatum:
-                (fall.anschlussschreiben_sendedatum as string | null) ?? null,
-              vs_reaktion_am: (fall.vs_reaktion_am as string | null) ?? null,
-              vs_kuerzung_grund:
-                (fall.vs_kuerzung_grund as string | null) ?? null,
-              zahlung_eingegangen_am:
-                (fall.zahlung_eingegangen_am as string | null) ?? null,
-              zahlung_betrag:
-                fall.zahlung_betrag != null
-                  ? Number(fall.zahlung_betrag as number)
-                  : null,
-              kuerzungs_betrag:
-                fall.kuerzungs_betrag != null
-                  ? Number(fall.kuerzungs_betrag as number)
-                  : null,
-              gutachten_betrag:
-                fall.gutachten_betrag != null
-                  ? Number(fall.gutachten_betrag as number)
-                  : null,
-            }}
-            abrechnung={props.abrechnung ?? null}
-            kuerzungen={props.kuerzungen ?? []}
-          />
-          {/* AAR-293: Abrechnungs-Card ab Phase 6.x */}
-          {subphase.phase === 6 && (
-            <AbrechnungsCard abrechnung={props.abrechnung ?? null} subphase={subphase} />
-          )}
-          {/* AAR-559 (C10): SV-Honorar-Anteil (nur gutachter_betrag/eingegangen_am,
-              nie auszahlung_kunde_betrag oder regulierung_betrag). Rendert
-              sich selbst nur wenn Betrag > 0 oder bereits eingegangen. */}
-          <SvHonorarCard
-            betrag={props.svHonorarBetrag ?? null}
-            eingegangenAm={props.svHonorarEingegangenAm ?? null}
-          />
+          {/* CMM-23: Folgende Cards aus der SV-FallDetail-View entfernt —
+              sie waren KB/Admin-Tools oder werden durch Stepper/MeinFallStatusCard
+              (siehe page.tsx) ersetzt:
+              - AktuellePhaseCard       → AuftragsphaseStepper im Header
+              - AbrechnungsartCard      → KB-Tool
+              - KanzleiRegulierungsStepperCard → KB-Tool
+              - KanzleiStatusCard       → ersetzt durch MeinFallStatusCard
+                                          (zeigt LexDrive-Deep-Link statt
+                                          Regulierungs-Details)
+              - AbrechnungsCard         → KB-Tool */}
+          {/* CMM-23: SvHonorarCard hier entfernt — Auszahlungs-Status zeigt
+              die MeinFallStatusCard in der page.tsx (Phase 'auszahlung'). */}
         </aside>
 
         <section className="space-y-4 min-w-0">
