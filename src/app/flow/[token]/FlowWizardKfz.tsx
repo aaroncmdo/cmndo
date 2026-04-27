@@ -219,13 +219,15 @@ export default function FlowWizardKfz({
           password: result.password,
         })
         if (loginErr) {
-          console.warn('[handleCreateAccount] Auto-Login fehlgeschlagen, Fallback auf Button:', loginErr.message)
-        } else {
-          // Erfolgreich eingeloggt → direkt ins Onboarding
-          window.location.href = '/kunde/onboarding'
+          console.warn('[handleCreateAccount] Auto-Login fehlgeschlagen:', loginErr.message)
+          setError('Wir konnten Sie nicht automatisch einloggen. Bitte nutzen Sie den Button unten.')
+          return
         }
+        // Erfolgreich eingeloggt → direkt ins Onboarding (selber Tab)
+        window.location.replace('/kunde/onboarding')
       } catch (err) {
         console.warn('[handleCreateAccount] Auto-Login Exception:', err)
+        setError('Login fehlgeschlagen. Bitte nutzen Sie den Button unten.')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Konto konnte nicht erstellt werden')
