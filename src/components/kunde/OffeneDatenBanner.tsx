@@ -6,6 +6,10 @@
 // Sichtbarkeit: nur wenn mindestens ein offener Pflicht-Slot existiert
 // (countOffenePflicht > 0). Sobald alles erfüllt ist → return null,
 // Banner verschwindet automatisch.
+//
+// CMM-23: alle Loader in try/catch — wenn IRGENDWAS in dieser Component
+// crashed (RLS-Edge-Case, Schema-Drift, etc.), darf das nicht den ganzen
+// Server-Render der Layout-Page killen.
 
 import Link from 'next/link'
 import { AlertCircleIcon } from 'lucide-react'
@@ -14,36 +18,39 @@ import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role
 import { getOffeneDokumentAnforderungen, countOffenePflicht } from '@/lib/claims/data-requirements'
 import { getPflichtdokumenteStand } from '@/app/kunde/onboarding/actions'
 
-export default async function OffeneDatenBanner() {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return null
-
-  // Aktuellsten Fall des Kunden ermitteln (Layout kennt keinen claimId direkt)
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id')
-    .eq('kunde_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  if (!fall?.id) return null
-
-  // Claim laden via SSoT-Loader; pflichtDocs aus der gleichen Pipeline wie
-  // der Onboarding-Wizard, damit wir 1:1 dieselbe Smart-Filter-Sicht haben.
-  let claimId: string | null = null
+async function loadOffenCount(): Promise<number | null> {
   try {
-    claimId = await resolveClaimId(supabase, fall.id)
-  } catch { return null }
-  if (!claimId) return null
+    const supabase = await createClient()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    if (!user) return null
 
-  const claim = await getClaimForRole(supabase, claimId, 'kunde')
-  if (!claim) return null
+    const { data: fall } = await supabase
+      .from('faelle')
+      .select('id')
+      .eq('kunde_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (!fall?.id) return null
 
-  const pflichtDocs = await getPflichtdokumenteStand(fall.id)
-  const anforderungen = getOffeneDokumentAnforderungen(claim, pflichtDocs)
-  const offen = countOffenePflicht(anforderungen)
-  if (offen === 0) return null
+    const claimId = await resolveClaimId(supabase, fall.id)
+    if (!claimId) return null
+
+    const claim = await getClaimForRole(supabase, claimId, 'kunde')
+    if (!claim) return null
+
+    const pflichtDocs = await getPflichtdokumenteStand(fall.id)
+    const anforderungen = getOffeneDokumentAnforderungen(claim, pflichtDocs)
+    return countOffenePflicht(anforderungen)
+  } catch (err) {
+    console.error('[OffeneDatenBanner] crashed, hiding banner:', err)
+    return null
+  }
+}
+
+export default async function OffeneDatenBanner() {
+  const offen = await loadOffenCount()
+  if (offen == null || offen === 0) return null
 
   return (
     <div className="border-b border-amber-200 bg-amber-50">

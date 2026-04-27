@@ -130,7 +130,9 @@ export function getOffeneDokumentAnforderungen(
 
     result.push({
       slot_id: pflichtdoc.slot_id,
-      label: config?.label ?? pflichtdoc.label,
+      // Defensive: label/beschreibung/pflicht können theoretisch null sein
+      // (DB-Constraints können sich ändern). Immer auf string/boolean fallen.
+      label: config?.label ?? pflichtdoc.label ?? pflichtdoc.slot_id ?? '',
       beschreibung: config?.beschreibung ?? pflichtdoc.beschreibung ?? '',
       // CMM-22 Bugfix: DB-Pflicht-Flag bevorzugen — KB kann Slots vom
       // Katalog-optional zur Pflicht hochstufen.
@@ -143,14 +145,15 @@ export function getOffeneDokumentAnforderungen(
   // Stabiles Sort nach SLOT_REIHENFOLGE für bekannte Slots, dann Rest
   // alphabetisch — damit Kunde und SV identische Reihenfolge sehen.
   const reihenfolgeIdx = (slotId: string) => {
-    const idx = SLOT_REIHENFOLGE.indexOf(slotId as typeof SLOT_REIHENFOLGE[number])
+    const idx = (SLOT_REIHENFOLGE as readonly string[]).indexOf(slotId)
     return idx === -1 ? 999 : idx
   }
   result.sort((a, b) => {
     const da = reihenfolgeIdx(a.slot_id)
     const db = reihenfolgeIdx(b.slot_id)
     if (da !== db) return da - db
-    return a.label.localeCompare(b.label, 'de')
+    // Defensive localeCompare — auch wenn label leer/null ist nicht crashen.
+    return (a.label ?? '').localeCompare(b.label ?? '', 'de')
   })
 
   return result
