@@ -363,17 +363,16 @@ export default async function GutachterFallPage({
 
   return (
     <>
-      {/* CMM-23: Auftrags-Phasen-Stepper + Fall-Phase-Sublabel.
-          CMM-24: AuftragDokumenteBanner solange Kunde Anforderungen offen hat
-                 (verschwindet automatisch sobald 0).
-          Mein-Fall-Status-Card ist sichtbar sobald Auftrag durch ist. */}
+      {/* CMM-23: Banner ganz oben — was vom Kunden noch einzuholen ist.
+          Darunter der 3-Phasen-Stepper. MeinFallStatusCard erst wenn der
+          Auftrag durch ist (Gutachten freigegeben). */}
       <div className="px-4 pt-4 md:px-6 md:pt-6 space-y-3">
-        <AuftragsphaseStepper phase={svPhase} />
         <AuftragDokumenteBanner
           fallId={id}
           pflichtRows={(pflichtdokumente ?? []) as unknown as Parameters<typeof AuftragDokumenteBanner>[0]['pflichtRows']}
           gutachtenEingegangen={!!(fall.gutachten_eingegangen_am as string | null)}
         />
+        <AuftragsphaseStepper phase={svPhase} />
         {isFallPhase(svPhase) && (
           <MeinFallStatusCard
             phase={svPhase}

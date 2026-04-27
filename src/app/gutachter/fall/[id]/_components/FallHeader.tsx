@@ -14,8 +14,6 @@ import { FallakteDrawer } from './FallakteDrawer'
 // AAR-307: Ad-hoc Task-Anlegen aus dem FallHeader
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
-// AAR-727: Shared Glass-Panel — ersetzt direkte PhasePipeline + terminal-Pill.
-import { FallPhasenPanel } from '@/components/shared/fall-phases'
 // AAR-746: Shared Identity-Header.
 import { FallIdentityHeader } from '@/components/shared/fall-header'
 
@@ -61,19 +59,8 @@ export function FallHeader({
         <FallakteDrawer {...drawer} />
       </FallIdentityHeader>
 
-      <div className="px-4 sm:px-6 pb-3 border-b border-claimondo-border">
-        <FallPhasenPanel
-          fall={{
-            id: fallId,
-            aktuelle_phase: aktuellePhaseSnake,
-            phase_nummer: subphase.phase,
-            abgeschlossen_am: abgeschlossenAm,
-          }}
-          rolle="sv"
-          variant="header-strip"
-          terminal={terminal}
-        />
-      </div>
+      {/* CMM-23: 10-Phasen-FallPhasenPanel raus — der AuftragsphaseStepper
+          (3 Phasen) in page.tsx übernimmt den Lifecycle für den SV. */}
     </div>
   )
 }
