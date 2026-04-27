@@ -104,34 +104,55 @@ export function getOffeneDokumentAnforderungen(
   pflichtDocs: PflichtdokumentStand[],
   leadZb1Status?: string | null,
 ): DokumentAnforderung[] {
+  // CMM-23 Aaron-Spec: SSoT für „was der Kunde uns geben soll" sind die
+  // pflichtdokumente-Rows mit `uploadbar_von` enthält 'kunde'. Hardcoded
+  // SLOT_REIHENFOLGE-Liste ist raus — wir iterieren über die übergebenen
+  // pflichtDocs (Caller hat den uploadbar_von-Filter bereits angewendet).
+  // Smart-Filter conditions (polizei_vor_ort etc.) bleiben pro bekanntem
+  // Slot. Slots ohne DOC_DEFINITIONS-Eintrag werden durchgelassen — das
+  // sind Legacy-Slots oder explizite KB-Anforderungen.
   const result: DokumentAnforderung[] = []
-  for (const slotId of SLOT_REIHENFOLGE) {
-    const config = DOC_DEFINITIONS[slotId]
-    if (!config) continue
-    if (!config.condition(claim, leadZb1Status)) continue
+  for (const pflichtdoc of pflichtDocs) {
+    const config = DOC_DEFINITIONS[pflichtdoc.slot_id]
 
-    const pflichtdoc = pflichtDocs.find((d) => d.slot_id === slotId)
+    // Smart-Filter: wenn DOC_DEFINITIONS einen Slot kennt + condition ist
+    // false → Slot ist für diesen Claim nicht relevant, raus.
+    if (config && !config.condition(claim, leadZb1Status)) continue
 
     let status: DokumentStatus
-    if (pflichtdoc?.dokument_url) {
+    if (pflichtdoc.dokument_url) {
       status = 'erfuellt'
-    } else if (pflichtdoc?.status === 'spaeter') {
+    } else if (pflichtdoc.status === 'spaeter') {
       status = 'spaeter'
     } else {
       status = 'offen'
     }
 
     result.push({
-      slot_id: slotId,
-      label: config.label,
-      beschreibung: config.beschreibung,
+      slot_id: pflichtdoc.slot_id,
+      label: config?.label ?? pflichtdoc.label,
+      beschreibung: config?.beschreibung ?? pflichtdoc.beschreibung ?? '',
       // CMM-22 Bugfix: DB-Pflicht-Flag bevorzugen — KB kann Slots vom
       // Katalog-optional zur Pflicht hochstufen.
-      pflicht: pflichtdoc?.pflicht ?? config.pflicht,
+      pflicht: pflichtdoc.pflicht ?? config?.pflicht ?? false,
       status,
       pflichtdoc,
     })
   }
+
+  // Stabiles Sort nach SLOT_REIHENFOLGE für bekannte Slots, dann Rest
+  // alphabetisch — damit Kunde und SV identische Reihenfolge sehen.
+  const reihenfolgeIdx = (slotId: string) => {
+    const idx = SLOT_REIHENFOLGE.indexOf(slotId as typeof SLOT_REIHENFOLGE[number])
+    return idx === -1 ? 999 : idx
+  }
+  result.sort((a, b) => {
+    const da = reihenfolgeIdx(a.slot_id)
+    const db = reihenfolgeIdx(b.slot_id)
+    if (da !== db) return da - db
+    return a.label.localeCompare(b.label, 'de')
+  })
+
   return result
 }
 

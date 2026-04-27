@@ -11,6 +11,7 @@
 
 import { AlertTriangleIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 import type { PflichtdokumentStand } from '@/app/kunde/onboarding/actions'
@@ -54,29 +55,57 @@ export default async function AuftragDokumenteBanner({
   const claim = await getClaimForRole(supabase, claimId, 'sv')
   if (!claim) return null
 
-  // CMM-24: pflichtdokumente in den PflichtdokumentStand-Shape übersetzen
-  // den getOffeneDokumentAnforderungen erwartet. Katalog-Felder sind hier
-  // nicht erforderlich — Smart-Filter nutzt nur slot_id + status + pflicht
-  // + dokument_url.
-  const pflichtDocs: PflichtdokumentStand[] = pflichtRows.map((r) => ({
-    id: r.id,
-    slot_id: r.dokument_typ ?? '',
-    label: '',
-    beschreibung: null,
-    status: r.status ?? 'ausstehend',
-    pflicht: !!r.pflicht,
-    dokument_url: r.dokument_url ?? null,
-    hochgeladen_am: r.hochgeladen_am ?? null,
-    frist: r.frist ?? null,
-    begruendung: r.begruendung ?? null,
-    angefordert_von_rolle: r.angefordert_von_rolle ?? null,
-    angefordert_am: r.angefordert_am ?? null,
-    multi_file: false,
-    max_mb: 10,
-    akzeptierte_mime_types: [],
-    sort_order: r.sort_order ?? 999,
-    hochgeladene_anzahl: 0,
-  }))
+  // CMM-23 Aaron-Spec: Banner soll 1:1 dieselben Slots zeigen die der Kunde
+  // im Onboarding sieht. Filter: nur Slots wo `uploadbar_von` enthält 'kunde'.
+  // Legacy-Slots (gewerbenachweis, halter_*) sind nicht im Katalog → sind
+  // historische Kunde-Pflicht-Slots → durchlassen. Identische Logik wie
+  // getPflichtdokumenteStand (AAR-362).
+  const admin = createAdminClient()
+  const { data: katalog } = await admin
+    .from('dokument_katalog')
+    .select('slot_id, label, beschreibung, uploadbar_von')
+  const katalogMap = new Map(
+    (katalog ?? []).map((k) => [
+      k.slot_id as string,
+      {
+        label: k.label as string,
+        beschreibung: (k.beschreibung as string | null) ?? null,
+        uploadbar_von: ((k.uploadbar_von as string[] | null) ?? []) as string[],
+      },
+    ]),
+  )
+
+  const pflichtDocs: PflichtdokumentStand[] = pflichtRows
+    .filter((r) => {
+      const slot = r.dokument_typ ?? ''
+      const k = katalogMap.get(slot)
+      // Legacy-Slot (nicht im Katalog) → durchlassen
+      if (!k) return true
+      // Im Katalog → nur wenn Kunde uploaden kann
+      return k.uploadbar_von.includes('kunde')
+    })
+    .map((r) => {
+      const k = katalogMap.get(r.dokument_typ ?? '')
+      return {
+        id: r.id,
+        slot_id: r.dokument_typ ?? '',
+        label: k?.label ?? r.dokument_typ ?? '',
+        beschreibung: k?.beschreibung ?? null,
+        status: r.status ?? 'ausstehend',
+        pflicht: !!r.pflicht,
+        dokument_url: r.dokument_url ?? null,
+        hochgeladen_am: r.hochgeladen_am ?? null,
+        frist: r.frist ?? null,
+        begruendung: r.begruendung ?? null,
+        angefordert_von_rolle: r.angefordert_von_rolle ?? null,
+        angefordert_am: r.angefordert_am ?? null,
+        multi_file: false,
+        max_mb: 10,
+        akzeptierte_mime_types: [],
+        sort_order: r.sort_order ?? 999,
+        hochgeladene_anzahl: 0,
+      }
+    })
 
   const anforderungen = getOffeneDokumentAnforderungen(claim, pflichtDocs)
   const offen = anforderungen.filter((a) => a.status !== 'erfuellt')
