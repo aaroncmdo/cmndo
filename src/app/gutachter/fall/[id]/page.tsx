@@ -372,6 +372,7 @@ export default async function GutachterFallPage({
         <AuftragDokumenteBanner
           fallId={id}
           pflichtRows={(pflichtdokumente ?? []) as unknown as Parameters<typeof AuftragDokumenteBanner>[0]['pflichtRows']}
+          gutachtenEingegangen={!!(fall.gutachten_eingegangen_am as string | null)}
         />
         {isFallPhase(svPhase) && (
           <MeinFallStatusCard

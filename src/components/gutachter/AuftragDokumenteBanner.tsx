@@ -32,10 +32,17 @@ type DbRow = {
 export default async function AuftragDokumenteBanner({
   fallId,
   pflichtRows,
+  gutachtenEingegangen,
 }: {
   fallId: string
   pflichtRows: DbRow[]
+  /** CMM-23 Aaron-Spec: Banner verschwindet sobald Gutachten da ist —
+      "so lange bis das Gutachten da ist". Kunde kann zwar danach noch
+      nachreichen, aber für den SV ist die Anforderungsliste nicht mehr
+      relevant. */
+  gutachtenEingegangen?: boolean
 }) {
+  if (gutachtenEingegangen) return null
   const supabase = await createClient()
 
   let claimId: string | null = null
@@ -83,11 +90,11 @@ export default async function AuftragDokumenteBanner({
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-amber-900">
-            Vor-Ort beim Termin dokumentieren
+            Noch einzuholen
           </p>
           <p className="mt-1 text-xs text-amber-800">
-            Folgende Unterlagen konnten wir vorab nicht vom Kunden einsammeln
-            — bitte beim Termin selbst aufnehmen und ins Gutachten einbauen.
+            Folgende Unterlagen reicht der Kunde noch nach. Solange das
+            Gutachten nicht hochgeladen ist, kann er weiter ergänzen.
           </p>
           <ul className="mt-3 space-y-1.5">
             {offen.map((a) => (

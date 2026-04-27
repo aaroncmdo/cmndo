@@ -31,7 +31,6 @@ import { JetztZuTunCard } from './_components/JetztZuTunCard'
 import { StammdatenCard } from './_components/StammdatenCard'
 import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
-import { DokumenteUebersichtCard } from './_components/DokumenteUebersichtCard'
 import { TimelineVorschauCard } from './_components/TimelineVorschauCard'
 import { StellungnahmeCard } from './_components/StellungnahmeCard'
 import { NachbesichtigungCard } from './_components/NachbesichtigungCard'
@@ -451,21 +450,12 @@ export default function FallDetailClient(props: Props) {
                 }))
             }
           />
-          <DokumenteUebersichtCard
-            fallId={fall.id as string}
-            svSlots={props.svSlots ?? []}
-            totalDokumente={sichtbarDokumente.length + (sichtbarFallDokumente?.length ?? 0)}
-          />
-          {/* AAR-327: SV kann gezielt Dokumente beim Kunden anfordern
-              (z. B. Reparaturrechnungen-Vorschäden, zusätzliche Schadensfotos) */}
-          {props.anforderbareSlots && props.anforderbareSlots.length > 0 && (
-            <AnforderungenListe
-              fallId={fall.id as string}
-              rolleLabel="Gutachter"
-              slotsVerfuegbar={props.anforderbareSlots}
-              anforderungen={props.anforderungenVonMir ?? []}
-            />
-          )}
+          {/* CMM-23: DokumenteUebersichtCard und AnforderungenListe entfernt.
+              Aaron-Spec: im Auftrag soll nur stehen was der Kunde uns geben
+              soll — der AuftragDokumenteBanner (page.tsx) ist die einzige
+              Anforderungs-Anzeige. SV-eigene Slots (Gutachten/Befund) leben
+              im SvToolsCard-Block; SV-Anfordere-Tool ist raus weil SV bei
+              Bedarf via Chat mit dem KB kommuniziert (AAR-861). */}
           <TimelineVorschauCard events={timeline} />
 
           {/* AAR-757: SV-Tools-Card (FIN + ZB1 + Gutachten + Datei-Upload)
