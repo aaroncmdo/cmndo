@@ -5,13 +5,18 @@ import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
 // CMM-24: Auftrags-Banner mit den vom Kunden noch nicht eingereichten
 // Doku-Anforderungen — der SV soll die Liste vor dem Termin sehen.
-import AuftragDokumenteBanner from '@/components/gutachter/AuftragDokumenteBanner'
+// CMM-23: AuftragDokumenteBanner ersetzt durch PflichtdokumenteListe
+// (vollständige Slot-Sicht mit Download-Links).
 // CMM-23: post-Auftrag MeinFallStatusCard für die Fall-Phasen.
 // Der Stepper rendert in der linken Sidebar (FallDetailClient).
 import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
 import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
 import BriefingCard from '@/components/fall/BriefingCard'
+// CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
+// gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
+import PflichtdokumenteListe from '@/components/fall/PflichtdokumenteListe'
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-651: Zentrale Fall-Loader-Lib
@@ -362,6 +367,10 @@ export default async function GutachterFallPage({
     fallStatus: (fall.status as string | null) ?? null,
   })
 
+  // CMM-23: Pflichtdokumente-Liste laden — 1:1 das was der Kunde im
+  // Onboarding sieht, mit Download-Links für hochgeladene Files.
+  const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'sv')
+
   // CMM-23: Top-Server-Blocks. Aaron-Reihenfolge: Header → gelber Banner
   // (Kunde-Anforderungen) → SV-Briefing → MeinFallStatusCard (wenn Fall-
   // Phase). Stepper wandert in die linke Sidebar.
@@ -375,11 +384,10 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
-      <AuftragDokumenteBanner
-        fallId={id}
-        pflichtRows={(pflichtdokumente ?? []) as unknown as Parameters<typeof AuftragDokumenteBanner>[0]['pflichtRows']}
-        gutachtenEingegangen={!!(fall.gutachten_eingegangen_am as string | null)}
-      />
+      {/* CMM-23: Pflichtdokumente-Liste statt nur "noch einzuholen"-Banner —
+          zeigt alle relevanten Slots mit Status + Download bei erfüllten Files.
+          Verschwindet automatisch wenn keine Pflicht-Slots existieren. */}
+      <PflichtdokumenteListe slots={pflichtSlots} />
       <BriefingCard
         fallId={id}
         briefing={(fall.sv_briefing_text as string | null) ?? null}
