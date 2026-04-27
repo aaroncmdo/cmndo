@@ -544,13 +544,30 @@ export async function signSAandCreateFall(
 
       // Fall-Status spiegelt die View aus gutachter_termine
     } else {
-      // komplett: SA unterschrieben → Termin bleibt 'reserviert', wartet auf Vollmacht.
-      // fall_id setzen damit der Termin in der Fallakte sichtbar wird.
-      const { data: updatedTermine } = await admin.from('gutachter_termine')
-        .update({ fall_id: fall.id })
+      // CMM-21: komplett — SA unterschrieben = Termin verbindlich bestätigt.
+      // Vorher blieb der Termin auf 'reserviert' bis zur Vollmacht; das hat
+      // dazu geführt dass der Kunde im Onboarding nichts Verbindliches sah.
+      // Aaron-Spec: SA-Unterschrift ist die Termin-Bestätigung, Vollmacht ist
+      // davon entkoppelt. fall_id muss in jedem Fall gesetzt werden.
+      const { data: updatedTermine, error: upErr } = await admin.from('gutachter_termine')
+        .update({ status: 'bestaetigt', fall_id: fall.id })
         .eq('lead_id', leadId)
         .eq('status', 'reserviert')
         .select('id')
+
+      if (upErr) console.error('[CMM-21] Termin-Upgrade (komplett):', upErr.message)
+
+      // bestaetigeTermin setzt final_verbindlich_ab + Timeline-Eintrag
+      try {
+        const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
+        for (const t of updatedTermine ?? []) { await bestaetigeTermin(t.id) }
+      } catch (err) { console.error('[CMM-21] bestaetigeTermin (komplett):', err) }
+
+      // Reminder generieren (24h vorher Push/WhatsApp)
+      try {
+        const { generateReminderForTermin } = await import('@/lib/reminders/generate')
+        for (const t of updatedTermine ?? []) { await generateReminderForTermin(t.id) }
+      } catch (err) { console.error('[CMM-21] Reminder-Gen (komplett):', err) }
 
       // AAR-713: SV-Bestätigungs-Email feuert jetzt erst hier (vorher schon
       // bei der Dispatcher-Vorreservierung — das war die verwirrende

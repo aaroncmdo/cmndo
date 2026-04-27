@@ -198,8 +198,6 @@ export default function OnboardingWizard({
   const [sonstigesError, setSonstigesError] = useState<string | null>(null)
   // AAR-365: Aktuell offenes Info-Overlay — { slotId, label } oder null.
   const [infoOverlay, setInfoOverlay] = useState<{ slotId: string; label: string } | null>(null)
-  // CMM-21: Pop-over für die Dokumenten-Upload-Liste (Aaron-Spec)
-  const [showDokumentePopover, setShowDokumentePopover] = useState(false)
   // AAR-390: Slot-IDs die der Kunde auf „später nachreichen" gesetzt hat.
   // Server-Action setzt spaeter_nachreichen_markiert_am; UI markiert sie
   // lokal sofort, damit der Kunde visuell Feedback bekommt ohne Reload.
@@ -492,7 +490,7 @@ export default function OnboardingWizard({
                 {termin ? (
                   <>
                     <div className="mt-4 bg-gradient-to-br from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-2xl p-5">
-                      <p className="text-xs uppercase tracking-wider text-emerald-700 mb-1">Termin reserviert</p>
+                      <p className="text-xs uppercase tracking-wider text-emerald-700 mb-1">✓ Termin verbindlich bestätigt</p>
                       <p className="text-lg font-bold text-claimondo-navy">
                         {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                       </p>
@@ -615,41 +613,11 @@ export default function OnboardingWizard({
                   ))}
                 </div>
 
-                {/* CMM-21: Hochladen-Button öffnet Pop-over Modal */}
-                {dokAnforderungen.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowDokumentePopover(true)}
-                    className="mt-4 w-full min-h-14 py-4 rounded-2xl bg-claimondo-navy hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
-                  >
-                    Dokumente hochladen
-                  </button>
-                )}
-
-                {/* CMM-21: Pop-over Modal mit den Upload-Slots */}
-                {showDokumentePopover && (
-                  <div className="fixed inset-0 z-[100] bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-                    <div
-                      className="absolute inset-0"
-                      onClick={() => setShowDokumentePopover(false)}
-                      aria-label="Schließen"
-                    />
-                    <div className="relative bg-[#f8f9fb] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-                      <div className="sticky top-0 z-10 bg-[#f8f9fb] border-b border-claimondo-border px-5 py-4 flex items-center justify-between">
-                        <div>
-                          <h2 className="text-lg font-semibold text-claimondo-navy">Dokumente hochladen</h2>
-                          <p className="text-xs text-claimondo-ondo">{relevantePflichtDocs.length} Slot{relevantePflichtDocs.length === 1 ? '' : 's'} — alle aus Ihrem Schadenfall abgeleitet</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setShowDokumentePopover(false)}
-                          className="w-9 h-9 rounded-full bg-white border border-claimondo-border text-claimondo-ondo hover:text-claimondo-navy flex items-center justify-center"
-                          aria-label="Schließen"
-                        >
-                          <XIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="px-5 py-4 space-y-3">
+                {/* CMM-21: Upload-Cards inline (keine Modal mehr) — Modal-
+                    Component bleibt für später (Banner-Re-Engagement +
+                    SV-Side Claim-Contribution). */}
+                {relevantePflichtDocs.length > 0 && (
+                  <div className="mt-5 space-y-3">
                   {relevantePflichtDocs.map(doc => {
                     const status = docStatus[doc.id] ?? 'ausstehend'
                     const istHochgeladen = status === 'hochgeladen'
@@ -794,8 +762,6 @@ export default function OnboardingWizard({
                       </div>
                     )
                   })}
-                      </div>
-                    </div>
                   </div>
                 )}
 
