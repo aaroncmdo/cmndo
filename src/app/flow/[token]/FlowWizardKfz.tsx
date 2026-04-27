@@ -52,6 +52,9 @@ export type LeadData = {
   unfall_konstellation?: string | null
   gegner_anzahl_beteiligte?: number | string | null
   gegner_fahrzeugtyp?: string | null
+  // CMM-14: Service-Typ entscheidet ob auf der Erfolgsseite die LexDrive-
+  // Visitenkarte erscheint (komplett) oder nicht (nur_gutachter).
+  service_typ?: string | null
 }
 
 // AAR-336: deutsche Labels für Dispatch-Werte
