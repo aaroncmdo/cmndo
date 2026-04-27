@@ -70,17 +70,34 @@ export default async function AuftraegePage({
 
   const admin = createAdminClient()
 
-  // CMM-24: Anzahl offener Pflicht-Dokumente pro Fall — Quick-Counter für
-  // den gelben Badge in der Auftrags-Card. Smart-Filter macht der Banner
-  // im Fall-Detail; Card-Liste reicht der Roh-Counter aus pflichtdokumente.
+  // CMM-24: Anzahl offener Pflicht-Dokumente pro Fall — gelber Badge in der
+  // Auftrags-Card. Wichtig: SV-eigene Onboarding-Slots (sv_*) werden pro Fall
+  // mit angelegt (Architektur-Spuk) und müssen rausgefiltert werden, sonst
+  // zeigt der Badge 20 statt 4-5. Filter: nur Slots wo "kunde" in
+  // dokument_katalog.uploadbar_von steht. Legacy-Slots ohne Katalog-Eintrag
+  // (gewerbenachweis, halter_*) werden mit gezählt — die sind vom Kunden.
   const offeneDokuMap: Record<string, number> = {}
   if (fallIds.length > 0) {
+    const { data: katalog } = await admin
+      .from('dokument_katalog')
+      .select('slot_id, uploadbar_von')
+    const kundeSlots = new Set(
+      (katalog ?? [])
+        .filter((k) => Array.isArray(k.uploadbar_von) && (k.uploadbar_von as string[]).includes('kunde'))
+        .map((k) => k.slot_id as string),
+    )
+    const katalogSlots = new Set((katalog ?? []).map((k) => k.slot_id as string))
+
     const { data: offen } = await admin
       .from('pflichtdokumente')
-      .select('fall_id')
+      .select('fall_id, dokument_typ')
       .in('fall_id', fallIds)
       .neq('status', 'hochgeladen')
     for (const row of offen ?? []) {
+      const slot = row.dokument_typ as string
+      // kundeSlots aus Katalog ODER Legacy-Slot ohne Katalog-Eintrag
+      const istKundeSlot = kundeSlots.has(slot) || !katalogSlots.has(slot)
+      if (!istKundeSlot) continue
       const id = row.fall_id as string
       offeneDokuMap[id] = (offeneDokuMap[id] ?? 0) + 1
     }
