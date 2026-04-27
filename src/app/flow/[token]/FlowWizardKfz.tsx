@@ -212,27 +212,34 @@ export default function FlowWizardKfz({
       setMagicLink(result.magicLink)
       setAccountCreated(true)
 
-      // CMM-14: Server-side Login via loginAfterFlow — setzt HttpOnly-Cookies
-      // zuverlässig auf jeder Domain. Browser-side signInWithPassword hatte
-      // Cookie-Propagation-Probleme auf Vercel-Preview-Domains.
+      // CMM-14: loginAfterFlow ist eine Server-Action die bei Erfolg
+      // mittels next/navigation `redirect()` selbst weiterleitet.
+      // Wir kommen NUR hier weiter wenn die Action ein {ok:false} zurückgibt
+      // (oder wenn fetch crasht). Ein erfolgreicher redirect() wirft
+      // NEXT_REDIRECT, das Next.js client-side abfängt und die Navigation
+      // hart durchführt — Cookies sind dann garantiert im Browser.
       try {
         const login = await loginAfterFlow(accountEmail, result.password)
-        if (!login.ok) {
-          // CMM-14 Debug: Error sowohl in setState als auch alert,
-          // damit der User die Meldung sicher sieht (auch wenn die Page
-          // gleich darauf navigiert wird).
-          const msg = `Auto-Login fehlgeschlagen: ${login.error}`
-          console.warn('[handleCreateAccount]', msg)
-          if (typeof window !== 'undefined') {
-            window.alert(msg)
-          }
-          setError(msg)
-          return
+        // Wenn wir hier ankommen: Login fehlgeschlagen (kein Throw)
+        const errMsg = (login as { error?: string }).error ?? 'unbekannt'
+        const msg = `Auto-Login fehlgeschlagen: ${errMsg}`
+        console.warn('[handleCreateAccount]', msg)
+        if (typeof window !== 'undefined') {
+          window.alert(msg)
         }
-        // Erfolgreich eingeloggt + redirectTo (entweder /passwort-aendern
-        // bei force_password_change oder /kunde/onboarding)
-        window.location.replace(login.redirectTo)
+        setError(msg)
       } catch (err) {
+        // NEXT_REDIRECT-Exception ist erwartetes Verhalten — Next.js
+        // navigiert. Anderer Fehler → User informieren.
+        if (
+          err instanceof Error &&
+          'digest' in err &&
+          typeof (err as { digest: unknown }).digest === 'string' &&
+          (err as { digest: string }).digest.startsWith('NEXT_REDIRECT')
+        ) {
+          // Re-throw damit Next.js die Navigation durchzieht
+          throw err
+        }
         const msg = err instanceof Error ? err.message : String(err)
         console.warn('[handleCreateAccount] loginAfterFlow Exception:', msg)
         if (typeof window !== 'undefined') {

@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -183,7 +184,7 @@ export type CreateKundeAccountResult =
 export async function loginAfterFlow(
   email: string,
   password: string,
-): Promise<{ ok: true; redirectTo: string } | { ok: false; error: string }> {
+): Promise<{ ok: false; error: string } | never> {
   const supabase = await createClient()
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email,
@@ -206,11 +207,16 @@ export async function loginAfterFlow(
     .maybeSingle()
 
   const authProvider = (profile?.auth_provider as string | null) ?? 'email'
+  // CMM-14: Server-side redirect() — wirft NEXT_REDIRECT, Cookies sind in
+  // der Response sicher gesetzt BEVOR der Browser den nächsten Request
+  // schickt. Ohne diesen Hard-Server-Redirect rennt der Browser in eine
+  // Cookie-Race-Condition (`window.location.replace` triggert sofort einen
+  // GET-Request bevor die Set-Cookie-Header verarbeitet wurden) und die
+  // Folgeseite rendert anonym → weiße Seite, Reload behebt es.
   if (profile?.force_password_change && authProvider === 'email') {
-    return { ok: true, redirectTo: '/passwort-aendern' }
+    redirect('/passwort-aendern')
   }
-
-  return { ok: true, redirectTo: '/kunde/onboarding' }
+  redirect('/kunde/onboarding')
 }
 
 /**
