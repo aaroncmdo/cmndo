@@ -16,7 +16,9 @@ export interface CreateManualLeadInput {
   telefon: string
   email: string
   kunde_adresse: string
+  kunde_strasse: string
   kunde_plz: string
+  kunde_stadt: string
   kunde_lat: number | null
   kunde_lng: number | null
   source_channel: string
@@ -48,7 +50,9 @@ export async function createManualLead(
     telefon: data.telefon,
     email: data.email || null,
     kunde_adresse: data.kunde_adresse || null,
+    kunde_strasse: data.kunde_strasse || null,
     kunde_plz: data.kunde_plz || null,
+    kunde_stadt: data.kunde_stadt || null,
     kunde_lat: data.kunde_lat,
     kunde_lng: data.kunde_lng,
     // AAR-216: schadentyp NICHT mehr beim Anlegen — wird in Phase 2 gesetzt.

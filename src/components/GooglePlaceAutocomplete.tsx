@@ -5,6 +5,10 @@ import { useEffect, useRef, useState } from 'react'
 export type PlaceResult = {
   adresse: string
   plz: string
+  /** CMM-23: Straße + Hausnummer (z.B. "Bernhard-Feilchenfeld-Straße 7") */
+  strasse: string
+  /** CMM-23: Stadt / Ort (z.B. "Köln") */
+  stadt: string
   lat: number
   lng: number
   place_id: string
@@ -127,13 +131,23 @@ export default function GooglePlaceAutocomplete({
         const placeId = place.place_id ?? ''
         const formattedAddress = place.formatted_address ?? ''
 
+        // CMM-23: alle Adress-Komponenten extrahieren — Straße, Hausnummer,
+        // PLZ, Stadt — damit der Lead-Insert die separate Spalten füllt.
         let plz = ''
+        let route = ''
+        let streetNumber = ''
+        let stadt = ''
         for (const comp of place.address_components ?? []) {
-          if (comp.types.includes('postal_code')) { plz = comp.long_name; break }
+          if (comp.types.includes('postal_code')) plz = comp.long_name
+          else if (comp.types.includes('route')) route = comp.long_name
+          else if (comp.types.includes('street_number')) streetNumber = comp.long_name
+          else if (comp.types.includes('locality')) stadt = comp.long_name
+          else if (!stadt && comp.types.includes('postal_town')) stadt = comp.long_name
         }
+        const strasse = [route, streetNumber].filter(Boolean).join(' ').trim()
 
         setValue(formattedAddress)
-        onSelectRef.current({ adresse: formattedAddress, plz, lat, lng, place_id: placeId })
+        onSelectRef.current({ adresse: formattedAddress, plz, strasse, stadt, lat, lng, place_id: placeId })
       })
 
       autocompleteRef.current = autocomplete

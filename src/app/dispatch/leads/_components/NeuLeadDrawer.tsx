@@ -17,7 +17,9 @@ const INITIAL: CreateManualLeadInput = {
   telefon: '',
   email: '',
   kunde_adresse: '',
+  kunde_strasse: '',
   kunde_plz: '',
+  kunde_stadt: '',
   kunde_lat: null,
   kunde_lng: null,
   source_channel: 'manuell',
@@ -49,7 +51,9 @@ export default function NeuLeadDrawer() {
     setData((d) => ({
       ...d,
       kunde_adresse: p.adresse,
+      kunde_strasse: p.strasse || d.kunde_strasse,
       kunde_plz: p.plz || d.kunde_plz,
+      kunde_stadt: p.stadt || d.kunde_stadt,
       kunde_lat: p.lat,
       kunde_lng: p.lng,
     }))
