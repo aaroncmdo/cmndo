@@ -18,6 +18,7 @@ import {
   type FreierSlot,
 } from './actions'
 import type { ClaimFull } from '@/lib/claims/types'
+import { getOffeneDokumentAnforderungen, countOffenePflicht } from '@/lib/claims/data-requirements'
 
 type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
 type Termin = { datum: string; svName: string | null }
@@ -204,6 +205,20 @@ export default function OnboardingWizard({
   const [spaeterAlleLoading, setSpaeterAlleLoading] = useState(false)
 
   const currentStep = STEPS[stepIndex]
+
+  // CMM-21: Smart-Filter — Pflichtdokumente nur zeigen wenn die Bedingung
+  // im Claim erfüllt ist (Polizeibericht nur wenn polizei_vor_ort=true,
+  // Attest nur bei Personenschaden, etc.). Die Anforderungs-Liste mappt
+  // 1:1 auf bestehende pflichtDocs — Slots die nicht relevant sind werden
+  // nicht angezeigt.
+  const dokAnforderungen = claim
+    ? getOffeneDokumentAnforderungen(claim, pflichtDocs)
+    : []
+  const offenePflichtCount = countOffenePflicht(dokAnforderungen)
+  const relevanteSlotIds = new Set(dokAnforderungen.map((a) => a.slot_id))
+  const relevantePflichtDocs = claim
+    ? pflichtDocs.filter((d) => relevanteSlotIds.has(d.slot_id))
+    : pflichtDocs
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
 
   // AAR-166: ZB1-OCR-Ergebnis pro Dokument anzeigen (derzeit nur fahrzeugschein)
@@ -325,7 +340,9 @@ export default function OnboardingWizard({
     })
   }
 
-  const pflichtBlocked = pflichtDocs.filter(d => d.pflicht && docStatus[d.id] !== 'hochgeladen')
+  // CMM-21: Block-Logik nutzt nur die für den Claim relevanten Slots —
+  // ein Polizeibericht ist kein Blocker wenn polizei_vor_ort=false.
+  const pflichtBlocked = relevantePflichtDocs.filter(d => d.pflicht && docStatus[d.id] !== 'hochgeladen')
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
@@ -546,15 +563,31 @@ export default function OnboardingWizard({
             {currentStep.id === 'dokumente' && (
               <div>
                 <div className="mb-4"><FileTextIcon className="w-10 h-10 text-claimondo-ondo" /></div>
-                <h1 className="text-2xl font-semibold text-claimondo-navy">Pflichtdokumente</h1>
-                <p className="mt-2 text-sm text-claimondo-ondo">
-                  Laden Sie Ihre Unterlagen hoch. Sie können das auch später im Dashboard nachholen.
-                </p>
+                <h1 className="text-2xl font-semibold text-claimondo-navy">Dokumente</h1>
+                {/* CMM-21: Header zeigt was wir aus dem Telefonat schon
+                    wissen — wir fragen nur die Dokumente an die für diesen
+                    konkreten Schadenfall relevant sind. */}
+                {claim && offenePflichtCount > 0 ? (
+                  <p className="mt-2 text-sm text-claimondo-ondo">
+                    Aus Ihrem Schadenfall benötigen wir noch{' '}
+                    <span className="font-semibold text-claimondo-navy">
+                      {offenePflichtCount}{' '}
+                      {offenePflichtCount === 1 ? 'Dokument' : 'Dokumente'}
+                    </span>
+                    . Sie können auch alles später im Portal nachreichen.
+                  </p>
+                ) : (
+                  <p className="mt-2 text-sm text-claimondo-ondo">
+                    Laden Sie Ihre Unterlagen hoch oder reichen Sie sie später nach.
+                  </p>
+                )}
                 <div className="mt-5 space-y-3">
-                  {pflichtDocs.length === 0 && (
-                    <p className="text-sm text-claimondo-ondo/70 text-center py-4">Keine Pflichtdokumente erforderlich.</p>
+                  {relevantePflichtDocs.length === 0 && (
+                    <p className="text-sm text-claimondo-ondo/70 text-center py-4">
+                      Keine Dokumente erforderlich. Sie sind fertig — weiter geht&apos;s.
+                    </p>
                   )}
-                  {pflichtDocs.map(doc => {
+                  {relevantePflichtDocs.map(doc => {
                     const status = docStatus[doc.id] ?? 'ausstehend'
                     const istHochgeladen = status === 'hochgeladen'
                     const istAbgelehnt = status === 'abgelehnt'
