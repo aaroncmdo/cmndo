@@ -287,7 +287,7 @@ export default function FlowWizardKfz({
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col px-5 pt-16 pb-8 max-w-lg mx-auto w-full">
+      <div className="flex-1 flex flex-col px-5 pt-16 pb-40 sm:pb-32 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
           <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
 
@@ -366,8 +366,8 @@ export default function FlowWizardKfz({
             {currentStep.id === 'gutachter' && (
               <div>
                 <StepHeader
-                  question="Ihr persoenlicher Gutachter"
-                  sub="Dieser Sachverstaendige wird Ihren Schaden begutachten."
+                  question="Ihr persönlicher Gutachter"
+                  sub="Dieser Sachverständige wird Ihren Schaden begutachten."
                   icon={<UserIcon className="w-8 h-8 text-[#4573A2]" />}
                 />
 
@@ -385,7 +385,7 @@ export default function FlowWizardKfz({
                         {gutachter.vorname.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">Ihr Sachverstaendiger</p>
+                    <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">Ihr Sachverständiger</p>
                     <h2 className="text-2xl font-bold text-[#0D1B3E] mb-2">{gutachter.vorname}</h2>
                     <p className="text-sm text-claimondo-ondo">Wird sich bei Ihnen melden</p>
                     {gutachter.terminDatum && (
@@ -414,7 +414,7 @@ export default function FlowWizardKfz({
                   </div>
                 ) : (
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6 text-sm text-amber-800">
-                    Wir suchen gerade einen passenden Sachverstaendigen fuer Sie. Sie erhalten in Kuerze eine Bestaetigung.
+                    Wir suchen gerade einen passenden Sachverständigen für Sie. Sie erhalten in Kürze eine Bestätigung.
                   </div>
                 )}
 
@@ -597,7 +597,7 @@ export default function FlowWizardKfz({
               onClick={() => setStepIndex(stepIndex - 1)}
               className="w-full py-3 text-sm text-claimondo-ondo hover:text-claimondo-navy transition-colors"
             >
-              Zurueck
+              Zurück
             </button>
           </div>
         )}
