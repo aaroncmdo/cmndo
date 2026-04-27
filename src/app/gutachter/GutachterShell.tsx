@@ -78,7 +78,8 @@ const NAV_SECTIONS_BASE: NavSection[] = [
   {
     title: 'Verwaltung',
     items: [
-      { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
+      // CMM-17: 'Mein Gebiet' aus Nav entfernt — Aaron-Spec, kommt später als
+      // eigenes Feature-Ticket zurück.
       { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
       { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
       { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
