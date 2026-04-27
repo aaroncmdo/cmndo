@@ -13,6 +13,10 @@ import BankdatenBanner from '@/components/kunde/BankdatenBanner'
 // (src/components/kunde/OffeneDatenBanner.tsx) übernimmt das. Vorher waren zwei
 // Banner (AAR-710 PflichtdokumenteBanner + jetzt-zu-tun "Pflichtdokumente
 // nachreichen"-Card) gleichzeitig sichtbar.
+// CMM-23: Zusätzlich PflichtdokumenteListe in der Fallakte — identische
+// Slot-Sicht wie SV/KB, mit Download-Links für hochgeladene Files.
+import PflichtdokumenteListe from '@/components/fall/PflichtdokumenteListe'
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
 // AAR-765: Richtige „Meine Kanzlei"-Card mit echten Kontaktdaten
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
@@ -153,6 +157,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       datei_name: (d.original_filename as string | null) ?? null,
       created_at: d.hochgeladen_am as string,
     }))
+
+    // CMM-23: Pflichtdokumente-Liste laden — identische Filter-Logik wie
+    // beim SV im Auftrag, nur aus Kunden-Sicht.
+    const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'kunde')
 
     // Nachrichten laden (alle Kanaele inkl. Gruppe)
     const { data: nachrichten } = await admin.from('nachrichten')
@@ -514,8 +522,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
         <KundeJetztZuTunCard aktion={aktion} />
 
-        {/* CMM-22: PflichtdokumenteBanner hier entfernt — global im Layout
-            via OffeneDatenBanner. */}
+        {/* CMM-23: Pflichtdokumente-Liste mit Status + Download — identische
+            Sicht wie der SV/KB im Auftrag, damit der Kunde aus demselben Pool
+            konsumiert und an gleicher Stelle nachreichen kann. */}
+        <PflichtdokumenteListe slots={pflichtSlots} title="Pflichtdokumente" />
 
         {/* AAR-448: Termin-Detail-Card(s) — SV- und KB-Termine mit Quick-Actions */}
         {terminCards.length > 0 && (

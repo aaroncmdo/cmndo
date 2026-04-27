@@ -448,13 +448,17 @@ export async function uploadDatei(fallId: string, formData: FormData) {
 
   if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
 
-  // Determine sichtbar_fuer based on kategorie
+  // CMM-23 Aaron-Spec: ein Doku-Pool für alle Akten-Beteiligten. SV-Uploads
+  // sind standardmäßig auch für den Kunden sichtbar — er soll an gleicher
+  // Stelle konsumieren wo der SV hochlädt. Internal-only-Kategorien gibt es
+  // beim SV ohnehin nicht; Filmcheck-Notizen / KI-Kalkulation kommen über
+  // andere Server-Actions.
   const sichtbarMap: Record<string, string[]> = {
-    'gutachter-foto': ['admin', 'kundenbetreuer', 'sachverstaendiger'],
+    'gutachter-foto': ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
     'gutachten': ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-    'sonstiges': ['admin', 'kundenbetreuer', 'sachverstaendiger'],
+    'sonstiges': ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   }
-  const sichtbar_fuer = sichtbarMap[kategorie] ?? ['admin', 'kundenbetreuer', 'sachverstaendiger']
+  const sichtbar_fuer = sichtbarMap[kategorie] ?? ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei']
 
   // AAR-553: fall_dokumente statt dokumente
   const { error: insertErr } = await supabase.from('fall_dokumente').insert({

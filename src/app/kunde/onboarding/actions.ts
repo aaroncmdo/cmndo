@@ -326,6 +326,8 @@ export async function uploadKundenDokument(
       uploaded_by_kunde: true,
       beschreibung: beschreibung && beschreibung.trim().length > 0 ? beschreibung.trim() : null,
       hochgeladen_am: new Date().toISOString(),
+      // CMM-23: ein Doku-Pool für alle Akten-Beteiligten.
+      sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
     })
 
     revalidatePath('/kunde/onboarding')
@@ -547,6 +549,8 @@ export async function uploadPflichtdokument(
       hochgeladen_von_user_id: user.id,
       uploaded_by_kunde: true,
       hochgeladen_am: new Date().toISOString(),
+      // CMM-23: ein Doku-Pool für alle Akten-Beteiligten.
+      sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
     })
 
     revalidatePath('/kunde/onboarding')
