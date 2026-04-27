@@ -40,13 +40,17 @@ import { StammdatenCard } from './_components/StammdatenCard'
 import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
+import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
 // AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
 import { TerminActionsPanel } from './_components/TerminActionsPanel'
 import { SvToolsCard } from './_components/SvToolsCard'
 import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
-import FallActivityFeed, { buildActivityEvents } from '@/components/faelle/FallActivityFeed'
-import FallDokumenteSidebar, { type FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
+// CMM-23: FallActivityFeed + FallDokumenteSidebar raus (Activity-Feed
+// ohne Tagesgeschäfts-Use-Case; Dokumente-Sidebar war phase-/szenario-
+// gebunden und zeigte oft "Phase nicht gesetzt"). Ersetzt durch die
+// schlanke WeitereDokumenteCard rechts.
+import type { FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
 // CMM-23: BriefingCard wandert nach page.tsx (topServerBlocks).
 import type { GutachterTask } from '@/hooks/useGutachterTasks'
 import type { SvAbrechnungInput } from '@/lib/gutachter/abrechnung'
@@ -433,11 +437,20 @@ export default function FallDetailClient(props: Props) {
                 }))
             }
           />
-          <FallDokumenteSidebar
+          {/* CMM-23: WeitereDokumenteCard ersetzt FallDokumenteSidebar —
+              keine Phase/Szenario-Abhängigkeit mehr; einfach die hochgeladenen
+              Dokumente + ein Datei-Picker der via uploadDatei den Fall
+              (= Claim) erweitert. */}
+          <WeitereDokumenteCard
             fallId={fall.id as string}
-            aktuellePhase={fall.aktuelle_phase as string | null}
-            szenario={fall.szenario as string | null}
-            dokumente={props.fallDokumente ?? []}
+            dokumente={(props.dokumente ?? []).map((d) => ({
+              id: String(d.id),
+              dokument_typ: (d.typ as string | null) ?? null,
+              datei_url: (d.datei_url as string | null) ?? null,
+              datei_name: (d.datei_name as string | null) ?? null,
+              hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
+              created_at: (d.created_at as string | null) ?? null,
+            }))}
           />
         </section>
       </div>
