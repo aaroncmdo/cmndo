@@ -97,20 +97,26 @@ export default async function OnboardingPage({
   const attestHochgeladen = pflichtDocs.some(d => d.slot_id === 'aerztliches_attest' && !!d.dokument_url)
 
   return (
-    <OnboardingWizard
-      vorname={profile?.vorname ?? ''}
-      fall={fall ? { id: fall.id, fall_nummer: fall.fall_nummer, kennzeichen: fall.kennzeichen, fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') } : null}
-      termin={terminDatum ? { datum: terminDatum, svName } : null}
-      pflichtDocs={pflichtDocs}
-      freieSlots={freieSlots}
-      vorbereitung={{
-        zb1Hochgeladen,
-        polizeiVorOrt: !!fall?.polizei_vor_ort,
-        polizeiberichtHochgeladen,
-        personenschaden: !!fall?.personenschaden_flag,
-        attestHochgeladen,
-        hatVorschaeden: !!fall?.hat_vorschaeden,
-      }}
-    />
+    <>
+      {/* CMM-14 Debug: harter Marker damit wir sehen ob page.tsx rendert */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 99999, background: '#ff0066', color: 'white', padding: '8px 16px', fontFamily: 'monospace', fontSize: 12 }}>
+        ONBOARDING DEBUG · user={user.id.slice(0,8)} · fall={fall?.id?.slice(0,8) ?? 'null'} · pflichtDocs={pflichtDocs.length} · freieSlots={freieSlots.length} · termin={terminDatum ? 'ja' : 'nein'}
+      </div>
+      <OnboardingWizard
+        vorname={profile?.vorname ?? ''}
+        fall={fall ? { id: fall.id, fall_nummer: fall.fall_nummer, kennzeichen: fall.kennzeichen, fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') } : null}
+        termin={terminDatum ? { datum: terminDatum, svName } : null}
+        pflichtDocs={pflichtDocs}
+        freieSlots={freieSlots}
+        vorbereitung={{
+          zb1Hochgeladen,
+          polizeiVorOrt: !!fall?.polizei_vor_ort,
+          polizeiberichtHochgeladen,
+          personenschaden: !!fall?.personenschaden_flag,
+          attestHochgeladen,
+          hatVorschaeden: !!fall?.hat_vorschaeden,
+        }}
+      />
+    </>
   )
 }
