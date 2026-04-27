@@ -6,6 +6,9 @@ import FallDetailClient from './FallDetailClient'
 // CMM-24: Auftrags-Banner mit den vom Kunden noch nicht eingereichten
 // Doku-Anforderungen — der SV soll die Liste vor dem Termin sehen.
 import AuftragDokumenteBanner from '@/components/gutachter/AuftragDokumenteBanner'
+// CMM-23: 3-Phasen-Stepper Termin → Besichtigung → Gutachten
+import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
+import { getAuftragsPhase } from '@/lib/auftrag/phase'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-651: Zentrale Fall-Loader-Lib
@@ -214,12 +217,14 @@ export default async function GutachterFallPage({
     .order('faellig_am', { ascending: true, nullsFirst: false })
 
   // KFZ-134: Aktiven gutachter_termine Eintrag laden (admin-client bereits oben)
+  // CMM-23: zusätzlich kunde_losgefahren_am, kunde_angekommen_am und
+  // durchgefuehrt_am für die Phasen-Bestimmung.
   const { data: aktiverTermin } = await admin
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund')
+    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, kunde_losgefahren_am, kunde_angekommen_am, durchgefuehrt_am')
     .eq('fall_id', id)
     .eq('sv_id', sv.id)
-    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
+    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'durchgefuehrt'])
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -338,12 +343,24 @@ export default async function GutachterFallPage({
       )
     : null
 
+  // CMM-23: Auftrags-Phase aus Termin + Fall-State ableiten.
+  const auftragsPhase = getAuftragsPhase({
+    terminStart: (aktiverTermin?.start_zeit as string | null) ?? null,
+    terminStatus: (aktiverTermin?.status as string | null) ?? null,
+    svUnterwegsSeit: (aktiverTermin?.kunde_losgefahren_am as string | null) ?? null,
+    svAngekommenAm: (aktiverTermin?.kunde_angekommen_am as string | null) ?? null,
+    terminDurchgefuehrtAm: (aktiverTermin?.durchgefuehrt_am as string | null) ?? null,
+    gutachtenEingegangenAm: (fall.gutachten_eingegangen_am as string | null) ?? null,
+    gutachtenFinalFreigegeben: (fall.gutachten_final_freigegeben as boolean | null) ?? null,
+  })
+
   return (
     <>
-      {/* CMM-24: Banner sichtbar solange offene Doku-Anforderungen vom
-          Kunden bestehen. Liste verkürzt sich automatisch sobald der Kunde
-          im Onboarding nachreicht (revalidatePath in uploadPflichtdokument). */}
-      <div className="px-4 pt-4 md:px-6 md:pt-6">
+      {/* CMM-23: Auftrags-Phasen-Stepper + CMM-24: Banner mit offenen Doku-
+          Anforderungen vom Kunden. Stepper zeigt wo der SV gerade steht;
+          Banner verschwindet sobald keine Doku mehr offen. */}
+      <div className="px-4 pt-4 md:px-6 md:pt-6 space-y-3">
+        <AuftragsphaseStepper phase={auftragsPhase} />
         <AuftragDokumenteBanner
           fallId={id}
           pflichtRows={(pflichtdokumente ?? []) as unknown as Parameters<typeof AuftragDokumenteBanner>[0]['pflichtRows']}
