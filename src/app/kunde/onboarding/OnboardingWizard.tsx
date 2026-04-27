@@ -402,10 +402,10 @@ export default function OnboardingWizard({
                       )}
                       {claim.schadenzeit && <DataRow label="Uhrzeit" value={String(claim.schadenzeit).slice(0, 5)} />}
                       {claim.schadenort_adresse && (
-                        <DataRow label="Ort" value={[claim.schadenort_adresse, claim.schadenort_plz, claim.schadenort_ort].filter(Boolean).join(', ')} />
+                        <DataRow label="Ort" value={formatOrt(claim.schadenort_adresse, claim.schadenort_plz, claim.schadenort_ort)} />
                       )}
-                      {claim.schadenart && <DataRow label="Schadenart" value={String(claim.schadenart)} />}
-                      {claim.unfall_konstellation && <DataRow label="Konstellation" value={String(claim.unfall_konstellation)} />}
+                      {claim.schadenart && <DataRow label="Schadenart" value={prettyEnum(String(claim.schadenart))} />}
+                      {claim.unfall_konstellation && <DataRow label="Konstellation" value={prettyEnum(String(claim.unfall_konstellation))} />}
                       {claim.hergang_kunde_text && <DataRow label="Hergang" value={String(claim.hergang_kunde_text)} multiline />}
                     </ClaimDataCard>
 
@@ -419,15 +419,26 @@ export default function OnboardingWizard({
                       </ClaimDataCard>
                     )}
 
-                    {claim.gegner_bekannt && (
-                      <ClaimDataCard title="Unfallgegner">
-                        {claim.gegner_versicherungsnummer && <DataRow label="VS-Nummer" value={String(claim.gegner_versicherungsnummer)} />}
-                        {claim.gegner_aktenzeichen && <DataRow label="Schaden-Nr (Gegner)" value={String(claim.gegner_aktenzeichen)} />}
-                        {claim.anzahl_beteiligte_total > 1 && (
-                          <DataRow label="Beteiligte" value={String(claim.anzahl_beteiligte_total)} />
-                        )}
-                      </ClaimDataCard>
-                    )}
+                    {claim.gegner_bekannt && (() => {
+                      const verursacher = (claim.parties ?? []).find(p => p.rolle === 'verursacher')
+                      const gegnerName = verursacher
+                        ? [verursacher.vorname, verursacher.nachname].filter(Boolean).join(' ').trim() || verursacher.nachname
+                        : null
+                      const gegnerVs = verursacher?.versicherung_klartext ?? null
+                      const gegnerKz = verursacher?.kennzeichen ?? null
+                      return (
+                        <ClaimDataCard title="Unfallgegner">
+                          {gegnerName && <DataRow label="Name" value={gegnerName} />}
+                          {gegnerVs && <DataRow label="Versicherung" value={gegnerVs} />}
+                          {gegnerKz && <DataRow label="Kennzeichen" value={gegnerKz} />}
+                          {claim.gegner_versicherungsnummer && <DataRow label="VS-Nummer" value={String(claim.gegner_versicherungsnummer)} />}
+                          {claim.gegner_aktenzeichen && <DataRow label="Schaden-Nr (Gegner)" value={String(claim.gegner_aktenzeichen)} />}
+                          {claim.anzahl_beteiligte_total > 1 && (
+                            <DataRow label="Beteiligte" value={String(claim.anzahl_beteiligte_total)} />
+                          )}
+                        </ClaimDataCard>
+                      )
+                    })()}
 
                     {(claim.polizei_vor_ort || claim.polizei_aktenzeichen) && (
                       <ClaimDataCard title="Polizei">
@@ -1074,6 +1085,26 @@ function DokumentInfoOverlay({
 // AAR-231 / AAR-365: Checkliste-Item im Termin-Step.
 // done=true → grüner Haken, done=false → Warn-Variante mit prominentem
 // Upload-Button statt dem alten kleinen blauen Textlink (Nicolas-Feedback).
+// CMM-19: Pretty-Format für Enum-Werte (auffahrunfall → Auffahrunfall, haftpflicht → Haftpflicht)
+function prettyEnum(value: string): string {
+  if (!value) return value
+  return value
+    .replace(/[_-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+// CMM-19: Schadensort-Format ohne doppelte PLZ (Lead-Free-Text enthält oft schon PLZ)
+function formatOrt(adresse: string | null, plz: string | null, ort: string | null): string {
+  const parts: string[] = []
+  if (adresse) parts.push(adresse)
+  // PLZ + Ort nur wenn die Adresse die PLZ nicht schon enthält
+  const plzOrt = [plz, ort].filter(Boolean).join(' ').trim()
+  if (plzOrt && !(plz && adresse?.includes(plz))) parts.push(plzOrt)
+  return parts.join(', ')
+}
+
 // CMM-19: Navy-Card für Step 1 — pre-filled Claim-Daten Read-only.
 function ClaimDataCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
