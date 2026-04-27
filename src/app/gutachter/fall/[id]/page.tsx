@@ -3,6 +3,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
+// CMM-24: Auftrags-Banner mit den vom Kunden noch nicht eingereichten
+// Doku-Anforderungen — der SV soll die Liste vor dem Termin sehen.
+import AuftragDokumenteBanner from '@/components/gutachter/AuftragDokumenteBanner'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-651: Zentrale Fall-Loader-Lib
@@ -336,6 +339,16 @@ export default async function GutachterFallPage({
     : null
 
   return (
+    <>
+      {/* CMM-24: Banner sichtbar solange offene Doku-Anforderungen vom
+          Kunden bestehen. Liste verkürzt sich automatisch sobald der Kunde
+          im Onboarding nachreicht (revalidatePath in uploadPflichtdokument). */}
+      <div className="px-4 pt-4 md:px-6 md:pt-6">
+        <AuftragDokumenteBanner
+          fallId={id}
+          pflichtRows={(pflichtdokumente ?? []) as unknown as Parameters<typeof AuftragDokumenteBanner>[0]['pflichtRows']}
+        />
+      </div>
     <FallDetailClient
       fall={fallWithAbrechnung}
       lead={lead}
@@ -372,5 +385,6 @@ export default async function GutachterFallPage({
       konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
       konfrontationTerminVorschlaege={terminVorschlaege}
     />
+    </>
   )
 }

@@ -550,6 +550,10 @@ export async function uploadPflichtdokument(
     })
 
     revalidatePath('/kunde/onboarding')
+    revalidatePath('/kunde')
+    // CMM-24: SV-Fall-Page revalidieren damit der Auftrags-Banner beim
+    // Gutachter sich automatisch verkürzt sobald der Kunde was hochlädt.
+    revalidatePath(`/gutachter/fall/${fallId}`)
     return { success: true, url: publicUrl }
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : String(err) }
