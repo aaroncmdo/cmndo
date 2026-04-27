@@ -201,6 +201,10 @@ export default function FlowWizardKfz({
       // AAR-308/309: createKundeAccount wirft NIE — sauberes Result-Object.
       const result = await createKundeAccount(fallId, accountEmail, editVorname || lead.vorname, editNachname || lead.nachname, editTelefon || lead.telefon || null)
       if (!result.success) {
+        // CMM-14 Debug: alert damit der User die Meldung sicher sieht.
+        if (typeof window !== 'undefined') {
+          window.alert(`Account-Anlage fehlgeschlagen: ${result.error}`)
+        }
         setError(result.error)
         return
       }
@@ -214,16 +218,27 @@ export default function FlowWizardKfz({
       try {
         const login = await loginAfterFlow(accountEmail, result.password)
         if (!login.ok) {
-          console.warn('[handleCreateAccount] loginAfterFlow fehlgeschlagen:', login.error)
-          setError('Wir konnten Sie nicht automatisch einloggen. Bitte nutzen Sie den Button unten.')
+          // CMM-14 Debug: Error sowohl in setState als auch alert,
+          // damit der User die Meldung sicher sieht (auch wenn die Page
+          // gleich darauf navigiert wird).
+          const msg = `Auto-Login fehlgeschlagen: ${login.error}`
+          console.warn('[handleCreateAccount]', msg)
+          if (typeof window !== 'undefined') {
+            window.alert(msg)
+          }
+          setError(msg)
           return
         }
         // Erfolgreich eingeloggt + redirectTo (entweder /passwort-aendern
         // bei force_password_change oder /kunde/onboarding)
         window.location.replace(login.redirectTo)
       } catch (err) {
-        console.warn('[handleCreateAccount] loginAfterFlow Exception:', err)
-        setError('Login fehlgeschlagen. Bitte nutzen Sie den Button unten.')
+        const msg = err instanceof Error ? err.message : String(err)
+        console.warn('[handleCreateAccount] loginAfterFlow Exception:', msg)
+        if (typeof window !== 'undefined') {
+          window.alert(`Login-Exception: ${msg}`)
+        }
+        setError(`Login fehlgeschlagen: ${msg}`)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Konto konnte nicht erstellt werden')
