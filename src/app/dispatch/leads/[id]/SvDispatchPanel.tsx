@@ -88,7 +88,10 @@ export default function SvDispatchPanel({
   const [showManual, setShowManual] = useState(false)
   const [startDatum, setStartDatum] = useState('')
   const [startZeit, setStartZeit] = useState('09:00')
-  const [dauerMin, setDauerMin] = useState(120)
+  // CMM-23: Termin-Dauer fix auf 45 Min — Aaron-Spec ein Termin = 45 Min.
+  // Selector raus; falls Sondertermine länger laufen müssen, kommt das als
+  // separates Feature dazu (z.B. Konfrontations-Termin via eigene Action).
+  const dauerMin = 45
   const [toast, setToast] = useState('')
   // AAR-195: Vorgeschlagene Slots für den manuell aus Extra-Liste gewählten SV
   const [freeSlots, setFreeSlots] = useState<SlotCandidate[]>([])
@@ -672,18 +675,7 @@ export default function SvDispatchPanel({
                       className="px-3 py-2 border border-claimondo-border rounded-lg text-sm"
                       step={900}
                     />
-                    <select
-                      value={dauerMin}
-                      onChange={(e) => setDauerMin(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm appearance-none bg-white"
-                    >
-                      <option value={60}>60 min</option>
-                      <option value={90}>90 min</option>
-                      <option value={120}>120 min</option>
-                      <option value={150}>150 min</option>
-                      <option value={180}>180 min</option>
-                      <option value={240}>240 min</option>
-                    </select>
+                    {/* CMM-23: Dauer-Selector raus — Termin = fix 45 Min. */}
                   </div>
                   <button
                     type="button"
