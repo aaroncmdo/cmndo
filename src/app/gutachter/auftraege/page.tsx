@@ -46,12 +46,17 @@ export default async function AuftraegePage({
     )
   }
 
+  // CMM-25: Auftrag erscheint erst beim SV, sobald der Kunde die
+  // Sicherungsabtretung unterschrieben hat (`sa_unterschrieben = true`).
+  // Vom Dispatcher geblockte Slots ohne SA bleiben reine Kalender-Blocker
+  // und tauchen weder in der Auftragsliste noch in der Fallakte des SV auf.
   let query = supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(
       'id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, sv_termin, gutachten_eingegangen_am, created_at, lead_id',
     )
     .eq('sv_id', sv.id)
+    .eq('sa_unterschrieben', true)
     .order('created_at', { ascending: false })
 
   if (filter === 'neu') {

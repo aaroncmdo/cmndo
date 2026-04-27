@@ -42,6 +42,13 @@ export default async function GutachterFallPage({
   const fall = await getFallForSv(supabase, id, (sv as { id: string }).id)
   if (!fall) notFound()
 
+  // CMM-25: Auftragslebenszyklus beim SV beginnt erst mit der Sicherungs-
+  // abtretungs-Unterschrift. Vorher ist der vom Dispatcher reservierte Slot
+  // ein reiner Kalenderblock (Google/CalDAV) — die Fallakte ist gesperrt.
+  if (!(fall as { sa_unterschrieben?: boolean | null }).sa_unterschrieben) {
+    notFound()
+  }
+
   // AAR-772: SV-Briefing automatisch generieren wenn noch nicht vorhanden.
   // Best-effort, blockiert nicht den Page-Render. Bei nächstem Refresh
   // ist der Text dann da. Cache-Logik (24h) lebt in generateSvBriefing.
