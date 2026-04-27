@@ -80,3 +80,83 @@ export const AUFTRAGS_PHASE_INDEX: Record<AuftragsPhase, number> = {
   gutachten: 2,
   abgeschlossen: 3,
 }
+
+// ─── CMM-23 Fall-Lifecycle ────────────────────────────────────────────────
+//
+// Post-Auftrag-Phasen für die SV-"Mein Fall"-View. Aaron-Spec:
+//
+//   gutachten-freigegeben — KB hat das Gutachten freigegeben, geht raus zur
+//                           Kanzlei. SV sieht Freigabe-Status + Gutachten.
+//   bei-kanzlei            — Mandat liegt bei der Kanzlei. SV sieht den
+//                           LexDrive-Deep-Link zum konkreten Vorgang.
+//   stellungnahme          — Edge-Case: KB hat eine technische Stellungnahme
+//                           angefordert. SV muss reagieren.
+//   nachbesichtigung       — Edge-Case: Kunde / Kanzlei verlangt Nach-
+//                           besichtigung mit dem SV.
+//   auszahlung             — Honorar-Auszahlung läuft / ist eingegangen.
+//   abgeschlossen-fall     — Fall ist final, SV sieht read-only.
+
+export type FallPhase =
+  | 'gutachten-freigegeben'
+  | 'bei-kanzlei'
+  | 'stellungnahme'
+  | 'nachbesichtigung'
+  | 'auszahlung'
+  | 'abgeschlossen-fall'
+
+export type SvLifecyclePhase = AuftragsPhase | FallPhase
+
+export type FallPhaseInput = AuftragPhaseInput & {
+  /** KB hat das Gutachten freigegeben. */
+  gutachtenFinalFreigegeben: boolean | null
+  /** Mandat ist bei der Kanzlei (Webhook von LexDrive oder manuell vom KB). */
+  lexdriveCaseId: string | null
+  /** Technische Stellungnahme angefordert. */
+  technischeStellungnahmeStatus: string | null
+  /** Nachbesichtigung angefordert oder läuft. */
+  nachbesichtigungStatus: string | null
+  /** SV-Honorar wurde ausgezahlt. */
+  svHonorarEingegangenAm: string | null
+  /** Fall final geschlossen. */
+  fallStatus: string | null
+}
+
+export function getSvLifecyclePhase(input: FallPhaseInput): SvLifecyclePhase {
+  // Wenn Auftrag noch nicht durch ist, normaler Auftrags-Phase.
+  if (!input.gutachtenFinalFreigegeben) {
+    return getAuftragsPhase(input)
+  }
+
+  // Edge-Cases haben Vorrang vor "normaler" Fall-Phase
+  if (input.technischeStellungnahmeStatus === 'angefordert') return 'stellungnahme'
+  if (input.nachbesichtigungStatus === 'angefordert' || input.nachbesichtigungStatus === 'termin-eingereicht') {
+    return 'nachbesichtigung'
+  }
+
+  // Fall-Phasen
+  if (input.svHonorarEingegangenAm) return 'auszahlung'
+  if (input.lexdriveCaseId) return 'bei-kanzlei'
+  if (input.fallStatus === 'abgeschlossen') return 'abgeschlossen-fall'
+
+  return 'gutachten-freigegeben'
+}
+
+export function isFallPhase(phase: SvLifecyclePhase): phase is FallPhase {
+  return (
+    phase === 'gutachten-freigegeben' ||
+    phase === 'bei-kanzlei' ||
+    phase === 'stellungnahme' ||
+    phase === 'nachbesichtigung' ||
+    phase === 'auszahlung' ||
+    phase === 'abgeschlossen-fall'
+  )
+}
+
+export const FALL_PHASE_LABEL: Record<FallPhase, string> = {
+  'gutachten-freigegeben': 'Gutachten freigegeben',
+  'bei-kanzlei': 'Liegt bei Kanzlei',
+  stellungnahme: 'Stellungnahme angefordert',
+  nachbesichtigung: 'Nachbesichtigung',
+  auszahlung: 'Auszahlung',
+  'abgeschlossen-fall': 'Abgeschlossen',
+}

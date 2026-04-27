@@ -6,9 +6,11 @@ import FallDetailClient from './FallDetailClient'
 // CMM-24: Auftrags-Banner mit den vom Kunden noch nicht eingereichten
 // Doku-Anforderungen — der SV soll die Liste vor dem Termin sehen.
 import AuftragDokumenteBanner from '@/components/gutachter/AuftragDokumenteBanner'
-// CMM-23: 3-Phasen-Stepper Termin → Besichtigung → Gutachten
+// CMM-23: 3-Phasen-Stepper Termin → Besichtigung → Gutachten + post-
+// Auftrag MeinFallStatusCard für die Fall-Phasen.
 import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
-import { getAuftragsPhase } from '@/lib/auftrag/phase'
+import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
+import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-651: Zentrale Fall-Loader-Lib
@@ -343,8 +345,8 @@ export default async function GutachterFallPage({
       )
     : null
 
-  // CMM-23: Auftrags-Phase aus Termin + Fall-State ableiten.
-  const auftragsPhase = getAuftragsPhase({
+  // CMM-23: SV-Lifecycle-Phase aus Auftrag + Fall-State ableiten.
+  const svPhase = getSvLifecyclePhase({
     terminStart: (aktiverTermin?.start_zeit as string | null) ?? null,
     terminStatus: (aktiverTermin?.status as string | null) ?? null,
     svUnterwegsSeit: (aktiverTermin?.kunde_losgefahren_am as string | null) ?? null,
@@ -352,19 +354,36 @@ export default async function GutachterFallPage({
     terminDurchgefuehrtAm: (aktiverTermin?.durchgefuehrt_am as string | null) ?? null,
     gutachtenEingegangenAm: (fall.gutachten_eingegangen_am as string | null) ?? null,
     gutachtenFinalFreigegeben: (fall.gutachten_final_freigegeben as boolean | null) ?? null,
+    lexdriveCaseId: (fall.lexdrive_case_id as string | null) ?? null,
+    technischeStellungnahmeStatus: (fall.technische_stellungnahme_status as string | null) ?? null,
+    nachbesichtigungStatus: (fall.nachbesichtigung_status as string | null) ?? null,
+    svHonorarEingegangenAm,
+    fallStatus: (fall.status as string | null) ?? null,
   })
 
   return (
     <>
-      {/* CMM-23: Auftrags-Phasen-Stepper + CMM-24: Banner mit offenen Doku-
-          Anforderungen vom Kunden. Stepper zeigt wo der SV gerade steht;
-          Banner verschwindet sobald keine Doku mehr offen. */}
+      {/* CMM-23: Auftrags-Phasen-Stepper + Fall-Phase-Sublabel.
+          CMM-24: AuftragDokumenteBanner solange Kunde Anforderungen offen hat
+                 (verschwindet automatisch sobald 0).
+          Mein-Fall-Status-Card ist sichtbar sobald Auftrag durch ist. */}
       <div className="px-4 pt-4 md:px-6 md:pt-6 space-y-3">
-        <AuftragsphaseStepper phase={auftragsPhase} />
+        <AuftragsphaseStepper phase={svPhase} />
         <AuftragDokumenteBanner
           fallId={id}
           pflichtRows={(pflichtdokumente ?? []) as unknown as Parameters<typeof AuftragDokumenteBanner>[0]['pflichtRows']}
         />
+        {isFallPhase(svPhase) && (
+          <MeinFallStatusCard
+            phase={svPhase}
+            geforderterBetrag={(fall.gutachten_betrag as number | null) ?? null}
+            gutachtenUrl={(fall.gutachten_url as string | null) ?? null}
+            gutachtenFreigegebenAm={(fall.gutachten_freigabe_am as string | null) ?? (fall.gutachten_eingegangen_am as string | null) ?? null}
+            lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
+            svHonorarBetrag={svHonorarBetrag}
+            svHonorarEingegangenAm={svHonorarEingegangenAm}
+          />
+        )}
       </div>
     <FallDetailClient
       fall={fallWithAbrechnung}

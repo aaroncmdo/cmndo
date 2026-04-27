@@ -6,7 +6,10 @@ import { CheckIcon, CalendarIcon, MapPinIcon, FileTextIcon } from 'lucide-react'
 import {
   AUFTRAGS_PHASE_INDEX,
   AUFTRAGS_PHASE_LABEL,
+  FALL_PHASE_LABEL,
+  isFallPhase,
   type AuftragsPhase,
+  type SvLifecyclePhase,
 } from '@/lib/auftrag/phase'
 
 const PHASES: { key: AuftragsPhase; icon: typeof CalendarIcon }[] = [
@@ -15,9 +18,13 @@ const PHASES: { key: AuftragsPhase; icon: typeof CalendarIcon }[] = [
   { key: 'gutachten', icon: FileTextIcon },
 ]
 
-export default function AuftragsphaseStepper({ phase }: { phase: AuftragsPhase }) {
-  const aktuellIdx = AUFTRAGS_PHASE_INDEX[phase]
-  const abgeschlossen = phase === 'abgeschlossen'
+export default function AuftragsphaseStepper({ phase }: { phase: SvLifecyclePhase }) {
+  // Fall-Phasen bedeuten: Auftrag durch — alle 3 Step grün, sub-label
+  // zeigt die Fall-Phase.
+  const fallPhase = isFallPhase(phase) ? phase : null
+  const auftragsPhaseKey: AuftragsPhase = fallPhase ? 'abgeschlossen' : (phase as AuftragsPhase)
+  const aktuellIdx = AUFTRAGS_PHASE_INDEX[auftragsPhaseKey]
+  const abgeschlossen = auftragsPhaseKey === 'abgeschlossen'
 
   return (
     <div className="rounded-2xl bg-white border border-claimondo-border p-4">
@@ -66,7 +73,12 @@ export default function AuftragsphaseStepper({ phase }: { phase: AuftragsPhase }
       </div>
       {abgeschlossen && (
         <p className="mt-3 text-xs text-emerald-700 font-medium">
-          ✓ Auftrag abgeschlossen — der Fall liegt jetzt beim Kundenbetreuer.
+          ✓ Auftrag abgeschlossen
+          {fallPhase && (
+            <span className="text-claimondo-ondo font-normal">
+              {' '}— Fall-Status: <span className="text-claimondo-navy font-medium">{FALL_PHASE_LABEL[fallPhase]}</span>
+            </span>
+          )}
         </p>
       )}
     </div>
