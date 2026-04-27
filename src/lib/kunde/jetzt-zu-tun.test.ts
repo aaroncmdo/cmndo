@@ -36,25 +36,9 @@ describe('getKundenJetztZuTun — 11 States', () => {
     expect(a?.cta?.href).toBe('/kunde/onboarding')
   })
 
-  it('2. pflichtdokumente-offen: wenn hat_offene_nachreichung=true', () => {
-    const a = getKundenJetztZuTun(makeFall({ hat_offene_nachreichung: true }))
-    expect(a?.state).toBe('pflichtdokumente-offen')
-    expect(a?.prioritaet).toBe('hoch')
-  })
-
-  it('3. polizeibericht-fehlt: polizei_vor_ort=true und kein Upload', () => {
-    const a = getKundenJetztZuTun(
-      makeFall({ polizei_vor_ort: true, polizeibericht_uploaded: false }),
-    )
-    expect(a?.state).toBe('polizeibericht-fehlt')
-  })
-
-  it('3b. polizeibericht-fehlt NICHT wenn Upload vorhanden', () => {
-    const a = getKundenJetztZuTun(
-      makeFall({ polizei_vor_ort: true, polizeibericht_uploaded: true }),
-    )
-    expect(a?.state).not.toBe('polizeibericht-fehlt')
-  })
+  // CMM-22: Tests "pflichtdokumente-offen" + "polizeibericht-fehlt" entfernt.
+  // Diese Branches wurden aus getKundenJetztZuTun gestrichen, weil der globale
+  // OffeneDatenBanner im Kunden-Layout die Doku-Re-Engagement-Logik übernimmt.
 
   it('4. daten-an-kanzlei: SLA-Breach mit blocker_rolle=kunde', () => {
     const sla: KundeSlaRecord[] = [
@@ -184,13 +168,6 @@ describe('getKundenJetztZuTun — 11 States', () => {
     )
     expect(a?.state).toBe('kein-aktionsbedarf')
     expect(a?.variant).toBe('info')
-  })
-
-  it('Priority: onboarding-offen schlägt pflichtdokumente-offen', () => {
-    const a = getKundenJetztZuTun(
-      makeFall({ onboarding_complete: false, hat_offene_nachreichung: true }),
-    )
-    expect(a?.state).toBe('onboarding-offen')
   })
 
   it('Priority: SLA-Breach schlägt Vollmacht', () => {

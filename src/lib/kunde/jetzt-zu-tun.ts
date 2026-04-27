@@ -160,33 +160,11 @@ export function getKundenJetztZuTun(
     }
   }
 
-  // 2. Pflichtdokumente nachreichen (vom KB angefordert)
-  if (fall.hat_offene_nachreichung) {
-    return {
-      state: 'pflichtdokumente-offen',
-      prioritaet: 'hoch',
-      titel: 'Pflichtdokumente nachreichen',
-      beschreibung:
-        'Ihr Betreuer bittet um weitere Dokumente. Bitte laden Sie diese jetzt hoch, damit wir Ihren Fall zügig abschließen können.',
-      cta: { label: 'Dokumente hochladen', href: '/kunde/onboarding?step=dokumente' },
-      variant: 'default',
-      severity: 'warning',
-    }
-  }
-
-  // 3. Polizeibericht fehlt (polizei_vor_ort=true, aber kein Upload)
-  if (fall.polizei_vor_ort && !fall.polizeibericht_uploaded) {
-    return {
-      state: 'polizeibericht-fehlt',
-      prioritaet: 'mittel',
-      titel: 'Polizeibericht hochladen',
-      beschreibung:
-        'Die Polizei war bei Ihrem Unfall vor Ort. Sobald Sie den Bericht haben, laden Sie ihn bitte hoch. Falls nicht rechtzeitig verfügbar, nimmt der Gutachter die Daten vor Ort auf.',
-      cta: { label: 'Jetzt hochladen', href: '/kunde/onboarding?step=dokumente' },
-      variant: 'default',
-      severity: 'warning',
-    }
-  }
+  // CMM-22: Branches "pflichtdokumente-offen" und "polizeibericht-fehlt"
+  // entfernt — der globale OffeneDatenBanner im Kunden-Layout übernimmt das
+  // mit der Smart-Filter-Logik (claim-driven, getOffeneDokumentAnforderungen).
+  // Die JetztZuTunCard bleibt frei für nicht-dokumenten-Themen
+  // (Bankdaten, Kanzlei-Daten, etc.).
 
   // 4. Daten an Kanzlei (SLA-Breach mit blocker_rolle=kunde)
   if (kundeSlaBreach) {

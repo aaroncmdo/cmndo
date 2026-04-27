@@ -125,7 +125,9 @@ export function getOffeneDokumentAnforderungen(
       slot_id: slotId,
       label: config.label,
       beschreibung: config.beschreibung,
-      pflicht: config.pflicht,
+      // CMM-22 Bugfix: DB-Pflicht-Flag bevorzugen — KB kann Slots vom
+      // Katalog-optional zur Pflicht hochstufen.
+      pflicht: pflichtdoc?.pflicht ?? config.pflicht,
       status,
       pflichtdoc,
     })
@@ -133,7 +135,14 @@ export function getOffeneDokumentAnforderungen(
   return result
 }
 
-/** Anzahl noch offener Pflicht-Punkte (für Banner-Counter). */
+/**
+ * Anzahl noch offener Pflicht-Punkte (für Banner-Counter + Onboarding-Ende).
+ * CMM-22 Bugfix: vorher zählte nur status==='offen' und ignorierte 'spaeter'-
+ * Slots → Banner und Onboarding-Ende haben verschiedene Zahlen ausgegeben.
+ * Jetzt: alles was nicht 'erfuellt' ist zählt als offen — der Kunde muss es
+ * eh noch hochladen, egal ob er "später" geklickt hat oder noch nicht
+ * interagiert hat.
+ */
 export function countOffenePflicht(anforderungen: DokumentAnforderung[]): number {
-  return anforderungen.filter((a) => a.pflicht && a.status === 'offen').length
+  return anforderungen.filter((a) => a.pflicht && a.status !== 'erfuellt').length
 }

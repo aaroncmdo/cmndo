@@ -9,9 +9,10 @@ import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
 import FallStatusCard from '@/components/kunde/FallStatusCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
-// AAR-710: Pflichtdokumente-Banner pro Fall (vorher global im Layout).
-import { PflichtdokumenteBanner } from '@/components/kunde/PflichtdokumenteBanner'
-// AAR-Banner-Doppelung: DokumenteSection-Import entfernt; PflichtdokumenteBanner ist Single Source.
+// CMM-22: PflichtdokumenteBanner entfernt — der layout-globale OffeneDatenBanner
+// (src/components/kunde/OffeneDatenBanner.tsx) übernimmt das. Vorher waren zwei
+// Banner (AAR-710 PflichtdokumenteBanner + jetzt-zu-tun "Pflichtdokumente
+// nachreichen"-Card) gleichzeitig sichtbar.
 import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
 // AAR-765: Richtige „Meine Kanzlei"-Card mit echten Kontaktdaten
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
@@ -513,8 +514,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
         <KundeJetztZuTunCard aktion={aktion} />
 
-        {/* AAR-710: Pflichtdokumente-Banner — pro Fall, oben im Detail. */}
-        <PflichtdokumenteBanner fallId={fall.id as string} />
+        {/* CMM-22: PflichtdokumenteBanner hier entfernt — global im Layout
+            via OffeneDatenBanner. */}
 
         {/* AAR-448: Termin-Detail-Card(s) — SV- und KB-Termine mit Quick-Actions */}
         {terminCards.length > 0 && (
