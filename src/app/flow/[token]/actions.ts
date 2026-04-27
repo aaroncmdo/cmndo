@@ -360,6 +360,28 @@ async function finalizeKundeSetup(
 
   await admin.from('faelle').update({ kunde_id: userId }).eq('id', fallId)
 
+  // CMM-19: claims.geschaedigter_user_id auch nachziehen — beim Initial-
+  // Convert via signSAandCreateFall ist lead.kunde_id noch null (Account
+  // wird ja erst HIER nach SA angelegt). Ohne dieses Update bleibt
+  // claims.geschaedigter_user_id null und die RLS-Policy lässt den Kunden
+  // seinen eigenen Claim nicht sehen.
+  try {
+    const { data: fallRow } = await admin
+      .from('faelle')
+      .select('claim_id')
+      .eq('id', fallId)
+      .maybeSingle()
+    const claimId = (fallRow?.claim_id as string | null) ?? null
+    if (claimId) {
+      await admin
+        .from('claims')
+        .update({ geschaedigter_user_id: userId })
+        .eq('id', claimId)
+    }
+  } catch (err) {
+    console.warn('[CMM-19] claims.geschaedigter_user_id Update fehlgeschlagen:', err)
+  }
+
   // AAR-125: Lead laden für conditional Polizeibericht
   // AAR-607 A3: .single() throwed bei 0 Rows + leadDocs=null Propagation zu
   // createPflichtdokumenteFromKatalog war Silent-Fail-Pfad.
