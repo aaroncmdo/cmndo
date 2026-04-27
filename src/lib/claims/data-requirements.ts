@@ -40,24 +40,17 @@ type SlotConfig = {
   condition: (claim: ClaimFull, leadZb1Status?: string | null) => boolean
 }
 
+// CMM-23 Aaron-Spec (final): 8 Pflicht-Slots, alle bei matchender Bedingung
+// Pflicht. Single Source mit dokument_katalog (siehe Migration
+// cmm23_pflichtdokumente_katalog_fix). Render-seitig hier gespiegelt für
+// die Banner/Liste-Logik solange wir noch nicht 1:1 auf den DB-Katalog
+// umgestellt haben (eigenes Konsolidierungs-Ticket).
 const DOC_DEFINITIONS: Record<string, SlotConfig> = {
   fahrzeugschein: {
     label: 'Fahrzeugschein (ZB1)',
     beschreibung: 'Vorder- und Rückseite. Bestätigt Halter und Fahrzeugdaten.',
     pflicht: true,
     condition: (_claim, leadZb1Status) => leadZb1Status !== 'bestaetigt',
-  },
-  polizeibericht: {
-    label: 'Polizeibericht',
-    beschreibung: 'Polizeiliche Unfallmitteilung — beschleunigt die Regulierung deutlich.',
-    pflicht: true,
-    condition: (claim) => claim.polizei_vor_ort === true,
-  },
-  aerztliches_attest: {
-    label: 'Ärztliches Attest',
-    beschreibung: 'Bei Personenschaden — dokumentiert Verletzungen und Behandlungsdauer.',
-    pflicht: true,
-    condition: (claim) => claim.hat_personenschaden === true,
   },
   schadensfotos: {
     label: 'Fotos vom Fahrzeugschaden',
@@ -68,13 +61,37 @@ const DOC_DEFINITIONS: Record<string, SlotConfig> = {
   unfallfotos: {
     label: 'Fotos vom Unfall-Ort',
     beschreibung: 'Übersicht der Unfallstelle, Endpositionen der Fahrzeuge.',
-    pflicht: false,
+    pflicht: true,
     condition: () => true,
+  },
+  polizeibericht: {
+    label: 'Polizeibericht',
+    beschreibung: 'Foto der polizeilichen Unfallmitteilung — beschleunigt die Regulierung.',
+    pflicht: true,
+    condition: (claim) => claim.polizei_vor_ort === true,
+  },
+  aerztliches_attest: {
+    label: 'Ärztliches Attest',
+    beschreibung: 'Bei Personenschaden — dokumentiert Verletzungen und Behandlungsdauer.',
+    pflicht: true,
+    condition: (claim) => claim.hat_personenschaden === true,
+  },
+  diagnosebericht: {
+    label: 'Diagnosebericht',
+    beschreibung: 'Bei Personenschaden — ärztliche Diagnose mit Heilungsverlauf.',
+    pflicht: true,
+    condition: (claim) => claim.hat_personenschaden === true,
+  },
+  sachschaden_foto: {
+    label: 'Foto Sachschaden',
+    beschreibung: 'Bei beschädigten Gegenständen — Foto des Schadens.',
+    pflicht: true,
+    condition: (claim) => claim.hat_sachschaden === true,
   },
   sachschaden_rechnung: {
     label: 'Rechnung Sachschaden',
-    beschreibung: 'Wenn Gegenstände beschädigt wurden (z.B. Kindersitz, Gepäck).',
-    pflicht: false,
+    beschreibung: 'Bei beschädigten Gegenständen — Reparatur- oder Neukauf-Rechnung.',
+    pflicht: true,
     condition: (claim) => claim.hat_sachschaden === true,
   },
 }
@@ -85,6 +102,8 @@ const SLOT_REIHENFOLGE = [
   'unfallfotos',
   'polizeibericht',
   'aerztliches_attest',
+  'diagnosebericht',
+  'sachschaden_foto',
   'sachschaden_rechnung',
 ] as const
 

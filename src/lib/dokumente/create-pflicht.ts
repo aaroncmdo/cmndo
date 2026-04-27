@@ -36,23 +36,31 @@ export async function createPflichtdokumenteFromKatalog(
   lead: Record<string, unknown> | null | undefined,
   fall?: Record<string, unknown> | null,
 ): Promise<void> {
-  // Idempotenz zuerst — spart unnötige Katalog-Queries
-  const { data: existing } = await supabase
+  // CMM-23: pro-Slot-Idempotenz statt all-or-none. Die alte all-or-none-
+  // Logik hat verhindert dass nachträglich relevante Slots angelegt werden
+  // (z.B. wenn KB im Lead personenschaden_flag=true setzt nach Conversion,
+  // oder wenn Conversion nur einen Slot anlegen konnte). Jetzt: bestehende
+  // Slots holen, nur die nachlegen die fehlen.
+  const { data: existingRows } = await supabase
     .from('pflichtdokumente')
-    .select('id')
+    .select('dokument_typ')
     .eq('fall_id', fallId)
-    .limit(1)
-  if (existing && existing.length > 0) return
+  const existingSlots = new Set(
+    (existingRows ?? []).map((r) => r.dokument_typ as string),
+  )
 
   const ctx = buildKatalogContext({ lead, fall })
   const alleSlots = await getAlleSlots(supabase)
   const docs: PflichtdokumenteInsert[] = []
   const seen = new Set<string>()
 
-  // 1. Katalog-basiert: Jeder freigeschaltete Slot wird als pflichtdokumente-Zeile
-  //    angelegt. pflicht=true nur wenn pflicht_wenn gesetzt und evaluates true.
+  // 1. Katalog-basiert: Jeder freigeschaltete Slot wird als pflichtdokumente-
+  //    Zeile angelegt — nur wenn er noch nicht existiert (CMM-23: pro-Slot-
+  //    Idempotenz). pflicht=true nur wenn pflicht_wenn gesetzt und evaluates
+  //    true.
   for (const slot of alleSlots) {
     if (slot.slot_id === 'kunde-nachreichung') continue // Sammelslot, nie initial
+    if (existingSlots.has(slot.slot_id)) continue // schon angelegt
     if (!evaluateKatalogRule(slot.freigeschaltet_wenn, ctx)) continue
     const istPflicht = slot.pflicht_wenn != null && evaluateKatalogRule(slot.pflicht_wenn, ctx)
     docs.push({
@@ -69,6 +77,7 @@ export async function createPflichtdokumenteFromKatalog(
   // Werden zu einem späteren Zeitpunkt in den Katalog wandern (AAR-320 Folge-Tickets).
   const add = (typ: string, pflicht: boolean) => {
     if (seen.has(typ)) return
+    if (existingSlots.has(typ)) return // CMM-23: nicht doppelt anlegen
     docs.push({ fall_id: fallId, dokument_typ: typ, pflicht, status: 'ausstehend', quelle: 'system' })
     seen.add(typ)
   }
