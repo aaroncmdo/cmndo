@@ -29,12 +29,13 @@ type PflichtDoc = PflichtdokumentStand
 // alle katalog-gefilterten, conditional freigeschalteten Slots (Attest bei
 // Personenschaden, Zeugenbericht bei zeugen_vorhanden, Mietwagenrechnung bei
 // mietwagen_flag etc.) — alle optional.
+// CMM-21: Step 'weitere-dokumente' entfernt — alle Dokumenten-Anforderungen
+// (Pflicht + optional) sammeln wir in einem Pop-over auf dem 'dokumente'-Step.
 const STEPS = [
   { id: 'welcome', label: 'Willkommen' },
   { id: 'fall', label: 'Ihr Fall' },
   { id: 'termin', label: 'Termin' },
   { id: 'dokumente', label: 'Dokumente' },
-  { id: 'weitere-dokumente', label: 'Weitere Dokumente' },
   { id: 'fertig', label: 'Fertig' },
 ] as const
 
@@ -197,6 +198,8 @@ export default function OnboardingWizard({
   const [sonstigesError, setSonstigesError] = useState<string | null>(null)
   // AAR-365: Aktuell offenes Info-Overlay — { slotId, label } oder null.
   const [infoOverlay, setInfoOverlay] = useState<{ slotId: string; label: string } | null>(null)
+  // CMM-21: Pop-over für die Dokumenten-Upload-Liste (Aaron-Spec)
+  const [showDokumentePopover, setShowDokumentePopover] = useState(false)
   // AAR-390: Slot-IDs die der Kunde auf „später nachreichen" gesetzt hat.
   // Server-Action setzt spaeter_nachreichen_markiert_am; UI markiert sie
   // lokal sofort, damit der Kunde visuell Feedback bekommt ohne Reload.
@@ -564,9 +567,6 @@ export default function OnboardingWizard({
               <div>
                 <div className="mb-4"><FileTextIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy">Dokumente</h1>
-                {/* CMM-21: Header zeigt was wir aus dem Telefonat schon
-                    wissen — wir fragen nur die Dokumente an die für diesen
-                    konkreten Schadenfall relevant sind. */}
                 {claim && offenePflichtCount > 0 ? (
                   <p className="mt-2 text-sm text-claimondo-ondo">
                     Aus Ihrem Schadenfall benötigen wir noch{' '}
@@ -581,12 +581,75 @@ export default function OnboardingWizard({
                     Laden Sie Ihre Unterlagen hoch oder reichen Sie sie später nach.
                   </p>
                 )}
-                <div className="mt-5 space-y-3">
-                  {relevantePflichtDocs.length === 0 && (
+
+                {/* CMM-21: Kompakte Übersicht — pro relevanter Slot ein Status-Pill */}
+                <div className="mt-5 space-y-2">
+                  {dokAnforderungen.length === 0 && (
                     <p className="text-sm text-claimondo-ondo/70 text-center py-4">
                       Keine Dokumente erforderlich. Sie sind fertig — weiter geht&apos;s.
                     </p>
                   )}
+                  {dokAnforderungen.map((a) => (
+                    <div
+                      key={a.slot_id}
+                      className="flex items-center gap-3 rounded-xl border border-claimondo-border bg-white p-3"
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        a.status === 'erfuellt' ? 'bg-emerald-500 text-white'
+                        : a.status === 'spaeter' ? 'bg-claimondo-ondo/20 text-claimondo-ondo'
+                        : 'bg-amber-500 text-white'
+                      }`}>
+                        {a.status === 'erfuellt' ? <CheckIcon className="w-4 h-4" />
+                          : a.status === 'spaeter' ? <ClockIcon className="w-4 h-4" />
+                          : <UploadCloudIcon className="w-4 h-4" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-claimondo-navy">{a.label}</p>
+                        <p className="text-[11px] text-claimondo-ondo">
+                          {a.status === 'erfuellt' ? '✓ Hochgeladen'
+                            : a.status === 'spaeter' ? 'Auf später verschoben'
+                            : a.pflicht ? 'Pflicht — bitte hochladen' : 'Optional'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CMM-21: Hochladen-Button öffnet Pop-over Modal */}
+                {dokAnforderungen.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowDokumentePopover(true)}
+                    className="mt-4 w-full min-h-14 py-4 rounded-2xl bg-claimondo-navy hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  >
+                    Dokumente hochladen
+                  </button>
+                )}
+
+                {/* CMM-21: Pop-over Modal mit den Upload-Slots */}
+                {showDokumentePopover && (
+                  <div className="fixed inset-0 z-[100] bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+                    <div
+                      className="absolute inset-0"
+                      onClick={() => setShowDokumentePopover(false)}
+                      aria-label="Schließen"
+                    />
+                    <div className="relative bg-[#f8f9fb] rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+                      <div className="sticky top-0 z-10 bg-[#f8f9fb] border-b border-claimondo-border px-5 py-4 flex items-center justify-between">
+                        <div>
+                          <h2 className="text-lg font-semibold text-claimondo-navy">Dokumente hochladen</h2>
+                          <p className="text-xs text-claimondo-ondo">{relevantePflichtDocs.length} Slot{relevantePflichtDocs.length === 1 ? '' : 's'} — alle aus Ihrem Schadenfall abgeleitet</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowDokumentePopover(false)}
+                          className="w-9 h-9 rounded-full bg-white border border-claimondo-border text-claimondo-ondo hover:text-claimondo-navy flex items-center justify-center"
+                          aria-label="Schließen"
+                        >
+                          <XIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="px-5 py-4 space-y-3">
                   {relevantePflichtDocs.map(doc => {
                     const status = docStatus[doc.id] ?? 'ausstehend'
                     const istHochgeladen = status === 'hochgeladen'
@@ -731,7 +794,11 @@ export default function OnboardingWizard({
                       </div>
                     )
                   })}
-                </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* AAR-166: ZB1-OCR-Ergebnis inline anzeigen nach Fahrzeugschein-Upload */}
                 {zb1Result && (
                   <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
@@ -794,214 +861,7 @@ export default function OnboardingWizard({
               </div>
             )}
 
-            {/* Weitere Dokumente — AAR-324: conditional Slots aus dokument_katalog */}
-            {currentStep.id === 'weitere-dokumente' && (
-              <div>
-                <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-claimondo-ondo" /></div>
-                <h1 className="text-2xl font-semibold text-claimondo-navy">Weitere Dokumente</h1>
-                <p className="mt-2 text-sm text-claimondo-ondo">
-                  Optional — laden Sie weitere Dokumente oder Fotos hoch, die zu Ihrem Fall passen.
-                  Sie können diesen Schritt auch überspringen und später im Dashboard nachreichen.
-                </p>
-
-                {/* Katalog-Slots nach Kategorie gruppiert */}
-                <div className="mt-5 space-y-5">
-                  {KATEGORIE_REIHENFOLGE.map(kat => {
-                    const slotsInKat = freieSlots.filter(s => s.kategorie === kat)
-                    if (slotsInKat.length === 0) return null
-                    const katMeta = KATEGORIE_LABELS[kat]
-                    return (
-                      <div key={kat}>
-                        <p className="text-xs font-semibold text-claimondo-navy uppercase tracking-wider mb-2">
-                          {katMeta.emoji} {katMeta.label}
-                        </p>
-                        <div className="space-y-2.5">
-                          {slotsInKat.map(slot => {
-                            const count = slotCounts[slot.slot_id] ?? 0
-                            const hochgeladen = count > 0
-                            const loading = uploadingSlot === slot.slot_id
-                            // multi_file=false + bereits 1 hochgeladen → Upload-Button wird zu "Ersetzen"
-                            const kannMehr = slot.multi_file || count === 0
-                            const acceptString = slot.akzeptierte_mime_types.join(',')
-                            // AAR-365: Auch Optional-Slots mit ⓘ Info-Button ausstatten.
-                            const hasInfo = !!DOC_INFO[slot.slot_id]
-                            return (
-                              <div
-                                key={slot.slot_id}
-                                className={`relative rounded-xl border p-3 ${
-                                  hochgeladen ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-claimondo-border'
-                                }`}
-                              >
-                                {hasInfo && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setInfoOverlay({ slotId: slot.slot_id, label: slot.label })}
-                                    aria-label={`Info zu ${slot.label}`}
-                                    className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/80 border border-claimondo-border text-claimondo-ondo hover:text-claimondo-navy hover:border-claimondo-ondo flex items-center justify-center transition-colors"
-                                  >
-                                    <InfoIcon className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                                <div className={`flex items-start gap-3 ${hasInfo ? 'pr-8' : ''}`}>
-                                  <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    hochgeladen ? 'bg-emerald-500 text-white' : 'bg-[#f8f9fb] text-claimondo-ondo/70'
-                                  }`}>
-                                    {hochgeladen ? <CheckIcon className="w-4 h-4" /> : <UploadCloudIcon className="w-4 h-4" />}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <p className="text-sm font-medium text-claimondo-navy">{slot.label}</p>
-                                      {hochgeladen && (
-                                        <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                                          {slot.multi_file ? `${count} hochgeladen` : 'Hochgeladen'}
-                                        </span>
-                                      )}
-                                    </div>
-                                    {slot.beschreibung && (
-                                      <p className="text-xs text-claimondo-ondo mt-0.5">{slot.beschreibung}</p>
-                                    )}
-                                  </div>
-                                </div>
-
-                                <div className="mt-2.5 flex gap-2">
-                                  {kannMehr && (
-                                    <>
-                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-claimondo-navy text-white hover:bg-claimondo-shield cursor-pointer text-center">
-                                        {loading ? 'Lädt...' : '📷 Foto aufnehmen'}
-                                        <input
-                                          type="file"
-                                          accept="image/*"
-                                          capture="environment"
-                                          className="hidden"
-                                          disabled={loading}
-                                          onChange={e => {
-                                            const f = e.target.files?.[0]
-                                            if (f) handleFreiUpload(slot.slot_id, f)
-                                            e.target.value = ''
-                                          }}
-                                        />
-                                      </label>
-                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-claimondo-navy text-claimondo-navy hover:bg-[#f8f9fb] cursor-pointer text-center">
-                                        {loading ? 'Lädt...' : '📁 Datei wählen'}
-                                        <input
-                                          type="file"
-                                          accept={acceptString}
-                                          className="hidden"
-                                          disabled={loading}
-                                          onChange={e => {
-                                            const f = e.target.files?.[0]
-                                            if (f) handleFreiUpload(slot.slot_id, f)
-                                            e.target.value = ''
-                                          }}
-                                        />
-                                      </label>
-                                    </>
-                                  )}
-                                  {!kannMehr && (
-                                    <label className="text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer inline-flex items-center gap-1.5">
-                                      <RefreshCwIcon className="w-3 h-3" />
-                                      {loading ? 'Lädt...' : 'Ersetzen'}
-                                      <input
-                                        type="file"
-                                        accept={acceptString}
-                                        className="hidden"
-                                        disabled={loading}
-                                        onChange={e => {
-                                          const f = e.target.files?.[0]
-                                          if (f) handleFreiUpload(slot.slot_id, f)
-                                          e.target.value = ''
-                                        }}
-                                      />
-                                    </label>
-                                  )}
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )
-                  })}
-
-                  {/* Sonstiges — immer sichtbar, nutzt kunde-nachreichung Slot */}
-                  <div>
-                    <p className="text-xs font-semibold text-claimondo-navy uppercase tracking-wider mb-2">
-                      📎 Sonstiges
-                    </p>
-                    <div className="rounded-xl border border-claimondo-border bg-white p-3">
-                      <p className="text-sm font-medium text-claimondo-navy">Andere Datei hochladen</p>
-                      <p className="text-xs text-claimondo-ondo mt-0.5">
-                        Alles was zu Ihrem Fall gehört und oben nicht auftaucht — z.B. Rechnungen, Berichte, Fotos.
-                        Ihr Betreuer ordnet die Datei anschließend zu.
-                      </p>
-                      <div className="mt-2.5">
-                        <label className="block text-[11px] font-medium text-claimondo-ondo mb-1">
-                          Worum geht es? (optional)
-                        </label>
-                        <textarea
-                          value={sonstigesBeschreibung}
-                          onChange={e => setSonstigesBeschreibung(e.target.value)}
-                          rows={2}
-                          placeholder="z.B. 'Attest vom Hausarzt, erhalten am 15.04.'"
-                          className="w-full text-xs rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-claimondo-ondo"
-                          maxLength={500}
-                        />
-                      </div>
-                      {sonstigesCount > 0 && (
-                        <p className="mt-2 text-[11px] text-emerald-700 flex items-center gap-1">
-                          <CheckIcon className="w-3 h-3" /> {sonstigesCount} Datei{sonstigesCount === 1 ? '' : 'en'} hochgeladen
-                        </p>
-                      )}
-                      {sonstigesError && (
-                        <p className="mt-2 text-[11px] text-rose-700 flex items-center gap-1">
-                          <AlertCircleIcon className="w-3 h-3" /> {sonstigesError}
-                        </p>
-                      )}
-                      <div className="mt-2.5 flex gap-2">
-                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-claimondo-navy text-white hover:bg-claimondo-shield cursor-pointer text-center">
-                          {uploadingSlot === '__sonstiges__' ? 'Lädt...' : '📷 Foto aufnehmen'}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            className="hidden"
-                            disabled={uploadingSlot === '__sonstiges__'}
-                            onChange={e => {
-                              const f = e.target.files?.[0]
-                              if (f) handleFreiUpload(null, f, sonstigesBeschreibung)
-                              e.target.value = ''
-                            }}
-                          />
-                        </label>
-                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-claimondo-navy text-claimondo-navy hover:bg-[#f8f9fb] cursor-pointer text-center">
-                          {uploadingSlot === '__sonstiges__' ? 'Lädt...' : '📁 Datei wählen'}
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/heic,application/pdf"
-                            className="hidden"
-                            disabled={uploadingSlot === '__sonstiges__'}
-                            onChange={e => {
-                              const f = e.target.files?.[0]
-                              if (f) handleFreiUpload(null, f, sonstigesBeschreibung)
-                              e.target.value = ''
-                            }}
-                          />
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setStepIndex(5)}
-                  className="mt-5 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
-                >Weiter</button>
-                <button
-                  onClick={() => setStepIndex(5)}
-                  className="mt-2 w-full py-3 text-xs text-claimondo-ondo hover:text-claimondo-navy"
-                >Überspringen</button>
-              </div>
-            )}
+            {/* CMM-21: weitere-dokumente-Step entfernt — Optional-Slots wandern in das Pop-over auf dem dokumente-Step. */}
 
             {/* Fertig */}
             {currentStep.id === 'fertig' && (
