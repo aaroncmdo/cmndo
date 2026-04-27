@@ -90,14 +90,11 @@ export default function NeuLeadDrawer() {
               defaultValue={data.kunde_adresse}
               placeholder="Straße, PLZ, Stadt"
               onSelect={handlePlaceSelect}
-              // CMM-23: Auch Freitext-Eingaben übernehmen — wenn der User
-              // tippt aber keine Maps-Suggestion klickt, bekam die Action
-              // sonst kunde_adresse=null. Geocoding später beim Lead-Update.
-              onBlur={(text) => {
-                if (text && text !== data.kunde_adresse) {
-                  setData((d) => ({ ...d, kunde_adresse: text }))
-                }
-              }}
+              // CMM-23: onChange synchron — wenn User tippt aber direkt
+              // auf "Lead anlegen" klickt (ohne Maps-Suggestion zu wählen
+              // und ohne blur durchlaufen zu lassen), bleibt der Wert
+              // permanent im Parent-State.
+              onChange={(text) => setData((d) => ({ ...d, kunde_adresse: text }))}
               className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
             />
             {data.kunde_lat && data.kunde_lng && (

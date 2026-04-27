@@ -74,6 +74,7 @@ export default function GooglePlaceAutocomplete({
   placeholder,
   onSelect,
   onBlur,
+  onChange,
   className,
 }: {
   defaultValue?: string
@@ -82,6 +83,10 @@ export default function GooglePlaceAutocomplete({
   // AAR-262: Optionaler Blur-Handler für Server-Side-Geocoding-Fallback
   // wenn der User Freitext eingibt statt Dropdown-Auswahl.
   onBlur?: (currentValue: string) => void
+  // CMM-23: Live-onChange — Parent kann Eingaben sofort übernehmen
+  // (verhindert Race wenn der User direkt auf Submit klickt ohne dass
+  // blur durchläuft).
+  onChange?: (currentValue: string) => void
   className?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -162,7 +167,10 @@ export default function GooglePlaceAutocomplete({
         ref={inputRef}
         type="text"
         value={value}
-        onChange={e => setValue(e.target.value)}
+        onChange={e => {
+          setValue(e.target.value)
+          onChange?.(e.target.value)
+        }}
         // AAR-237: Enter im Autocomplete-Feld würde sonst das umgebende
         // Formular submitten und die Wizard-State resetten. Enter
         // abfangen — Google-Autocomplete-Auswahl läuft nicht über Enter
