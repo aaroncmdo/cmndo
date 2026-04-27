@@ -168,6 +168,52 @@ export type CreateKundeAccountResult =
   | { success: false; error: string }
 
 /**
+ * CMM-14: Post-Flow-Login.
+ *
+ * Browser-side `signInWithPassword` schreibt die Auth-Cookies nicht
+ * zuverlässig auf Vercel-Preview-Domains — ein anschließender Server-
+ * Component-Render (`/kunde/onboarding`) sieht keine Session und der
+ * Middleware-Guard schickt den Kunden nach `/login`.
+ *
+ * Diese Server-Action nutzt `createClient` von `@/lib/supabase/server`,
+ * der via `@supabase/ssr` HttpOnly-Cookies in der Action-Response setzt.
+ * Browser muss danach nur noch `window.location.replace(redirectTo)`
+ * machen — die Cookies sind sicher gesetzt.
+ */
+export async function loginAfterFlow(
+  email: string,
+  password: string,
+): Promise<{ ok: true; redirectTo: string } | { ok: false; error: string }> {
+  const supabase = await createClient()
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+  if (signInError) {
+    return { ok: false, error: signInError.message }
+  }
+
+  // force_password_change prüfen — wenn gesetzt, zuerst Passwort-Änderung
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Auth-User nicht gefunden' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('force_password_change, auth_provider')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const authProvider = (profile?.auth_provider as string | null) ?? 'email'
+  if (profile?.force_password_change && authProvider === 'email') {
+    return { ok: true, redirectTo: '/passwort-aendern' }
+  }
+
+  return { ok: true, redirectTo: '/kunde/onboarding' }
+}
+
+/**
  * AAR-308/309: Erstellt einen Supabase-Auth-Account für den Kunden nach
  * Flow-Abschluss, setzt kunde_id auf den Fall und legt Pflichtdokumente an.
  *

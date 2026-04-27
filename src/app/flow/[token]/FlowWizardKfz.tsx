@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
+import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf, loginAfterFlow } from './actions'
 import {
   CheckIcon,
   FileTextIcon,
@@ -208,25 +208,21 @@ export default function FlowWizardKfz({
       setMagicLink(result.magicLink)
       setAccountCreated(true)
 
-      // CMM-14: Direkter Browser-Login mit dem frisch gesetzten Passwort —
-      // robuster als der Magic-Link-Redirect, der durch Domain-Mismatch
-      // (Preview vs. NEXT_PUBLIC_APP_URL) auf die /login-Seite umleiten kann.
-      // Magic-Link bleibt in der Welcome-Mail als Fallback.
+      // CMM-14: Server-side Login via loginAfterFlow — setzt HttpOnly-Cookies
+      // zuverlässig auf jeder Domain. Browser-side signInWithPassword hatte
+      // Cookie-Propagation-Probleme auf Vercel-Preview-Domains.
       try {
-        const supabase = createClient()
-        const { error: loginErr } = await supabase.auth.signInWithPassword({
-          email: accountEmail,
-          password: result.password,
-        })
-        if (loginErr) {
-          console.warn('[handleCreateAccount] Auto-Login fehlgeschlagen:', loginErr.message)
+        const login = await loginAfterFlow(accountEmail, result.password)
+        if (!login.ok) {
+          console.warn('[handleCreateAccount] loginAfterFlow fehlgeschlagen:', login.error)
           setError('Wir konnten Sie nicht automatisch einloggen. Bitte nutzen Sie den Button unten.')
           return
         }
-        // Erfolgreich eingeloggt → direkt ins Onboarding (selber Tab)
-        window.location.replace('/kunde/onboarding')
+        // Erfolgreich eingeloggt + redirectTo (entweder /passwort-aendern
+        // bei force_password_change oder /kunde/onboarding)
+        window.location.replace(login.redirectTo)
       } catch (err) {
-        console.warn('[handleCreateAccount] Auto-Login Exception:', err)
+        console.warn('[handleCreateAccount] loginAfterFlow Exception:', err)
         setError('Login fehlgeschlagen. Bitte nutzen Sie den Button unten.')
       }
     } catch (err) {
