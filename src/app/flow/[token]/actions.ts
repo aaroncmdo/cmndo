@@ -3,7 +3,6 @@
 import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { buildFallInsertFromLead, resolveFallEntityFks } from '@/lib/lead-fall-mapping'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
@@ -374,7 +373,9 @@ export async function signSAandCreateFall(
   try {
   const admin = createAdminClient()
 
-  // 1. Lead-Daten laden
+  // 1. Lead minimal laden — wir brauchen ihn für die Termin-/Pflichtdoc-/
+  // Mitteilungs-Logik unten. Der eigentliche Schadens-Daten-Übertrag in
+  // den Claim macht convertLeadToClaim.
   const { data: lead, error: leadErr } = await admin
     .from('leads')
     .select('*')
@@ -382,38 +383,7 @@ export async function signSAandCreateFall(
     .single()
   if (leadErr || !lead) return { ok: false, error: 'Lead nicht gefunden' }
 
-  // 2. Fallnummer generieren (CLM-YYYYMMDD-NNN)
-  const today = new Date()
-  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-  const { count } = await admin
-    .from('faelle')
-    .select('id', { count: 'exact', head: true })
-    .like('fall_nummer', `CLM-${dateStr}-%`)
-  const nr = String((count ?? 0) + 1).padStart(3, '0')
-  const fallNummer = `CLM-${dateStr}-${nr}`
-
-  // 3. Kundenbetreuer per Round-Robin zuweisen
-  let kundenbetreuerId: string | null = null
-  const { data: betreuer } = await admin
-    .from('profiles')
-    .select('id')
-    .in('rolle', ['kundenbetreuer', 'admin'])
-    .limit(10)
-  if (betreuer && betreuer.length > 0) {
-    const counts: Record<string, number> = {}
-    for (const b of betreuer) {
-      const { count: c } = await admin
-        .from('faelle')
-        .select('id', { count: 'exact', head: true })
-        .eq('kundenbetreuer_id', b.id)
-        .not('status', 'in', '("abgeschlossen","storniert")')
-      counts[b.id] = c ?? 0
-    }
-    const min = betreuer.reduce((m, b) => (counts[b.id] ?? 0) < (counts[m.id] ?? 0) ? b : m, betreuer[0])
-    kundenbetreuerId = min.id
-  }
-
-  // 4a. AAR-345: SV-Zuweisung aus gutachter_termine laden — direkt über
+  // 2. AAR-345: SV-Zuweisung aus gutachter_termine laden — direkt über
   // gutachter_termine.lead_id statt via Legacy-Feld leads.gutachter_termin
   // (der Dispatcher kann den Termin-Eintrag anlegen ohne das Timestamp-Feld
   // auf leads zu pflegen). Vorher wurde in diesem Fall sv_id=NULL gesetzt
@@ -432,34 +402,22 @@ export async function signSAandCreateFall(
     aktiverTerminId = existingTermin?.id ?? null
   }
 
-  // 4aa. AAR-155: Entity-FKs auflösen (versicherung/kanzlei/organisation/
-  // dispatch) — siehe resolveFallEntityFks JSDoc. Non-blocking:
-  // Misses landen als NULL in faelle, kein Fehler.
-  const entityFks = await resolveFallEntityFks(admin, lead, svIdFromTermin)
-
-  // 4b. Fall erstellen
-  // AAR-128: ~80-Zeilen Inline-Mapping ersetzt durch zentrale buildFallInsertFromLead.
-  // Single Source of Truth für Lead→Fall-Field-Kopie liegt jetzt in
-  // src/lib/lead-fall-mapping.ts — neue Felder dort hinzufügen, nicht hier.
-  const fallInsert = buildFallInsertFromLead(lead, {
-    fallNummer,
-    kundenbetreuerId,
+  // 3. CMM-3: Lead → Claim direkt konvertieren. convertLeadToClaim macht
+  // claims insert + claim_parties + claim_vehicle_involvements + faelle
+  // (vollständig, bis Phase 6 frontend-relevant) + leads-Status auf
+  // "umgewandelt" + alle Konvertierungs-Tags.
+  const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')
+  const conv = await convertLeadToClaim({
+    leadId,
     svIdFromTermin,
     signatureUrl,
-    ...entityFks,
   })
-  const { data: fall, error: fallErr } = await admin
-    .from('faelle')
-    .insert(fallInsert)
-    .select('id')
-    .single()
-  if (fallErr || !fall) return { ok: false, error: `Fall-Erstellung fehlgeschlagen: ${fallErr?.message}` }
-
-  // AAR-811: Dual-Write claims (non-blocking — fall ist bereits angelegt)
-  try {
-    const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
-    await createClaimForFall(admin, fall.id, lead, 'lead_konvertierung')
-  } catch (err) { console.error('[AAR-811] createClaimForFall (flow):', err) }
+  if (!conv.ok) {
+    return { ok: false, error: `Konvertierung fehlgeschlagen: ${conv.error}` }
+  }
+  const fall: { id: string } = { id: conv.fallId }
+  const fallNummer = conv.fallNummer
+  const kundenbetreuerId = conv.kundenbetreuerId
 
   // 5. KFZ-192 + AAR-345: Termin-State-Machine basierend auf service_typ.
   // Guard auf aktiverTerminId statt Legacy-Feld lead.gutachter_termin —

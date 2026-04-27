@@ -1,5 +1,13 @@
 // AAR-128: Zentrales Mapping von Lead-Feldern zu Fall-Feldern.
 //
+// CMM-3 (Phase 0.5): TEILWEISE DEPRECATED. Die Lead → Fall Mapping-Logik
+// wird intern von `convertLeadToClaim` (src/lib/leads/convert-lead-to-claim.ts)
+// noch wiederverwendet, weil die `faelle`-Tabelle bis Phase 6 weiterhin mit
+// allen Schadensdaten gefüllt werden muss (das Frontend liest sie noch).
+// In Phase 6 wird diese Datei zusammen mit allen `faelle`-Schadensdaten-
+// Spalten gelöscht und die Mapping-Logik bleibt nur in convertLeadToClaim
+// für `claims` und Sub-Entities übrig.
+//
 // Single Source of Truth für das Lead→Fall-Mapping in signSAandCreateFall.
 // Wenn du ein neues Feld in `leads` hinzufügst das beim Fall-Erzeugen
 // kopiert werden soll, ergänze es HIER — nicht inline in actions.ts.
