@@ -18,7 +18,7 @@ import {
   type FreierSlot,
 } from './actions'
 import type { ClaimFull } from '@/lib/claims/types'
-import { getOffeneDokumentAnforderungen, countOffenePflicht } from '@/lib/claims/data-requirements'
+import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 
 type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
 type Termin = { datum: string; svName: string | null; ort: string | null }
@@ -204,7 +204,6 @@ export default function OnboardingWizard({
   const dokAnforderungen = claim
     ? getOffeneDokumentAnforderungen(claim, pflichtDocs)
     : []
-  const offenePflichtCount = countOffenePflicht(dokAnforderungen)
   const relevanteSlotIds = new Set(dokAnforderungen.map((a) => a.slot_id))
   const relevantePflichtDocs = claim
     ? pflichtDocs.filter((d) => relevanteSlotIds.has(d.slot_id))
@@ -518,58 +517,22 @@ export default function OnboardingWizard({
               </div>
             )}
 
-            {/* Dokumente — AAR-323: Katalog-driven Status-Übersicht */}
+            {/* Dokumente — CMM-21: Smart-gefilterte Pflicht-Cards */}
             {currentStep.id === 'dokumente' && (
               <div>
                 <div className="mb-4"><FileTextIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy">Dokumente</h1>
-                {claim && offenePflichtCount > 0 ? (
-                  <p className="mt-2 text-sm text-claimondo-ondo">
-                    Aus Ihrem Schadenfall benötigen wir noch{' '}
-                    <span className="font-semibold text-claimondo-navy">
-                      {offenePflichtCount}{' '}
-                      {offenePflichtCount === 1 ? 'Dokument' : 'Dokumente'}
-                    </span>
-                    . Sie können auch alles später im Portal nachreichen.
-                  </p>
-                ) : (
-                  <p className="mt-2 text-sm text-claimondo-ondo">
-                    Laden Sie Ihre Unterlagen hoch oder reichen Sie sie später nach.
+                <p className="mt-2 text-sm text-claimondo-ondo">
+                  Aus Ihrem Schadenfall haben wir die folgenden Unterlagen vorbereitet.
+                  Sie können jetzt hochladen oder den Schritt überspringen und alles
+                  später im Portal nachreichen.
+                </p>
+
+                {relevantePflichtDocs.length === 0 && (
+                  <p className="mt-5 text-sm text-claimondo-ondo/70 text-center py-4 rounded-xl bg-claimondo-border/30">
+                    Keine Dokumente erforderlich — Sie sind fertig.
                   </p>
                 )}
-
-                {/* CMM-21: Kompakte Übersicht — pro relevanter Slot ein Status-Pill */}
-                <div className="mt-5 space-y-2">
-                  {dokAnforderungen.length === 0 && (
-                    <p className="text-sm text-claimondo-ondo/70 text-center py-4">
-                      Keine Dokumente erforderlich. Sie sind fertig — weiter geht&apos;s.
-                    </p>
-                  )}
-                  {dokAnforderungen.map((a) => (
-                    <div
-                      key={a.slot_id}
-                      className="flex items-center gap-3 rounded-xl border border-claimondo-border bg-white p-3"
-                    >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        a.status === 'erfuellt' ? 'bg-emerald-500 text-white'
-                        : a.status === 'spaeter' ? 'bg-claimondo-ondo/20 text-claimondo-ondo'
-                        : 'bg-amber-500 text-white'
-                      }`}>
-                        {a.status === 'erfuellt' ? <CheckIcon className="w-4 h-4" />
-                          : a.status === 'spaeter' ? <ClockIcon className="w-4 h-4" />
-                          : <UploadCloudIcon className="w-4 h-4" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-claimondo-navy">{a.label}</p>
-                        <p className="text-[11px] text-claimondo-ondo">
-                          {a.status === 'erfuellt' ? '✓ Hochgeladen'
-                            : a.status === 'spaeter' ? 'Auf später verschoben'
-                            : a.pflicht ? 'Pflicht — bitte hochladen' : 'Optional'}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
 
                 {/* CMM-21: Upload-Cards inline (keine Modal mehr) — Modal-
                     Component bleibt für später (Banner-Re-Engagement +
@@ -757,29 +720,23 @@ export default function OnboardingWizard({
                     </p>
                   </div>
                 )}
-                {pflichtBlocked.length > 0 && (
-                  <p className="mt-4 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-2">
-                    Sie koennen jetzt fortfahren — fehlende Pflicht-Dokumente ({pflichtBlocked.length}) koennen Sie im Dashboard nachreichen.
-                  </p>
-                )}
+                {/* CMM-21: zwei gleichwertige Buttons — Weiter, oder den Step
+                    skippen. handleAlleSpaeterNachreichen markiert alle offenen
+                    Pflicht-Slots als "später nachreichen" (dedupe Reminder-Welle
+                    48h) UND springt nach fertig. Wenn nichts offen ist, reicht
+                    "Weiter". */}
                 <button
                   onClick={() => setStepIndex(4)}
-                  className="mt-4 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="mt-5 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
-                {/* AAR-390: Shortcut für Kunden ohne Dokumente zur Hand — markiert
-                    alle offenen Pflicht-Slots als „später nachreichen" und springt
-                    direkt in den optionalen Step 4. pflicht bleibt pflicht, W2-Gate
-                    bleibt zu — wir dedupe nur die Reminder-Welle für 48h. */}
                 {pflichtBlocked.length > 0 && (
                   <button
                     type="button"
                     onClick={handleAlleSpaeterNachreichen}
                     disabled={spaeterAlleLoading}
-                    className="mt-2 w-full min-h-11 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo hover:text-claimondo-navy text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
+                    className="mt-2 w-full min-h-12 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo hover:text-claimondo-navy text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
                   >
-                    {spaeterAlleLoading
-                      ? 'Wird gespeichert…'
-                      : `Alle Pflichtdokumente (${pflichtBlocked.length}) später nachreichen`}
+                    {spaeterAlleLoading ? 'Wird gespeichert…' : 'Alle später nachreichen'}
                   </button>
                 )}
               </div>
