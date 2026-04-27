@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
+import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 
 type Result = { success: true; terminId: string } | { success: false; error: string }
 
@@ -15,7 +16,8 @@ export async function svTerminErstvorschlag(
   fallId: string,
   startZeit: string, // ISO-Datum
   grund?: string | null,
-  dauerMinuten: number = 90,
+  // CMM-23: Default auf zentrale Konstante (45 Min). Vorher 90 hardcoded.
+  dauerMinuten: number = TERMIN_DAUER_MIN,
 ): Promise<Result> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null

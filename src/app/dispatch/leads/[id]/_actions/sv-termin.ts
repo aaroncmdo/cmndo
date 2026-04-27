@@ -8,6 +8,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { SvSuggestion } from './types'
+import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 
 export async function listSvSuggestionsForLead(leadId: string): Promise<{
   success: boolean
@@ -63,7 +64,7 @@ export async function reserveSvTerminForLead(
   leadId: string,
   svId: string,
   startIso: string,
-  durationMin: number = 120,
+  durationMin: number = TERMIN_DAUER_MIN,
 ): Promise<{ success: boolean; terminId?: string; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -287,7 +288,7 @@ export type NextFreeSlotsOpts = {
 export async function getNextFreeSlotsForSv(
   svId: string,
   count: number = 3,
-  slotDauerMin: number = 120,
+  slotDauerMin: number = TERMIN_DAUER_MIN,
   opts?: NextFreeSlotsOpts,
 ): Promise<{ success: boolean; slots?: SlotCandidate[]; error?: string }> {
   const supabase = await createClient()
@@ -410,7 +411,7 @@ export async function getSvSuggestionsWithSlots(
 }> {
   const slotsPerSv = opts?.slotsPerSv ?? 3
   const maxSvs = opts?.maxSvs ?? 3
-  const slotDauer = opts?.slotDauerMin ?? 120
+  const slotDauer = opts?.slotDauerMin ?? TERMIN_DAUER_MIN
 
   const basisResult = await listSvSuggestionsForLead(leadId)
   if (!basisResult.success) {
