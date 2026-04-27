@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -164,8 +165,62 @@ const ROLLE_LABEL: Record<string, string> = {
 }
 
 export type CreateKundeAccountResult =
-  | { success: true; password: string }
+  | { success: true; password: string; magicLink: string | null }
   | { success: false; error: string }
+
+/**
+ * CMM-14: Post-Flow-Login.
+ *
+ * Browser-side `signInWithPassword` schreibt die Auth-Cookies nicht
+ * zuverlässig auf Vercel-Preview-Domains — ein anschließender Server-
+ * Component-Render (`/kunde/onboarding`) sieht keine Session und der
+ * Middleware-Guard schickt den Kunden nach `/login`.
+ *
+ * Diese Server-Action nutzt `createClient` von `@/lib/supabase/server`,
+ * der via `@supabase/ssr` HttpOnly-Cookies in der Action-Response setzt.
+ * Browser muss danach nur noch `window.location.replace(redirectTo)`
+ * machen — die Cookies sind sicher gesetzt.
+ */
+/**
+ * CMM-14: Form-Action für Auto-Login nach SA-Unterschrift.
+ * Wird via Form-Submit aufgerufen — Next.js setzt die Auth-Cookies aus der
+ * Server-Action-Response korrekt vor dem `redirect()`. Das vermeidet die
+ * Cookie-Race-Condition die mit `await action() + window.location.assign`
+ * auftritt (Set-Cookie-Header ist im Response, Browser folgt aber sofort
+ * mit einem GET der die noch nicht persistierten Cookies nicht enthält).
+ */
+export async function loginAfterFlowFormAction(formData: FormData) {
+  const email = String(formData.get('email') ?? '')
+  const password = String(formData.get('password') ?? '')
+
+  if (!email || !password) {
+    redirect('/login?error=Login-Daten+fehlen')
+  }
+
+  const supabase = await createClient()
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+  if (signInError) {
+    redirect(`/login?error=${encodeURIComponent(signInError.message)}`)
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login?error=Auth-User+nicht+gefunden')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('force_password_change, auth_provider')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const authProvider = (profile?.auth_provider as string | null) ?? 'email'
+  if (profile?.force_password_change && authProvider === 'email') {
+    redirect('/passwort-aendern')
+  }
+  redirect('/kunde/onboarding')
+}
 
 /**
  * AAR-308/309: Erstellt einen Supabase-Auth-Account für den Kunden nach
@@ -209,7 +264,10 @@ export async function createKundeAccount(
         .from('profiles').select('rolle').eq('id', existingFall.kunde_id).maybeSingle()
       if (linkedProfile?.rolle === 'kunde' || linkedProfile?.rolle == null) {
         await admin.auth.admin.updateUserById(existingFall.kunde_id, { password })
-        return { success: true, password }
+        // CMM-14: Browser-Reload-Pfad — neuen Magic-Link generieren damit der
+        // Kunde auch beim 2. Aufruf direkt ins Portal kann.
+        const { magicLink } = await sendWelcomeWithLogin(admin, fallId, normalizedEmail, password)
+        return { success: true, password, magicLink }
       }
       // kunde_id zeigt auf einen Nicht-Kunden — Account-Hijack-Verdacht, abbrechen
       return {
@@ -233,8 +291,8 @@ export async function createKundeAccount(
       }
       // 2b. Existierender Kunden-Account (oder Profile ohne Rolle): verknüpfen + Passwort refreshen
       await admin.auth.admin.updateUserById(existingProfile.id, { password })
-      await finalizeKundeSetup(admin, fallId, existingProfile.id, normalizedEmail, vorname, nachname, telefon, password)
-      return { success: true, password }
+      const finRes = await finalizeKundeSetup(admin, fallId, existingProfile.id, normalizedEmail, vorname, nachname, telefon, password)
+      return { success: true, password, magicLink: finRes.magicLink }
     }
 
     // 3. Neuer User
@@ -253,8 +311,8 @@ export async function createKundeAccount(
       }
     }
 
-    await finalizeKundeSetup(admin, fallId, authUser.user.id, normalizedEmail, vorname, nachname, telefon, password)
-    return { success: true, password }
+    const finRes = await finalizeKundeSetup(admin, fallId, authUser.user.id, normalizedEmail, vorname, nachname, telefon, password)
+    return { success: true, password, magicLink: finRes.magicLink }
   } catch (err) {
     console.error('[createKundeAccount] unerwarteter Fehler:', err)
     return {
@@ -277,7 +335,7 @@ async function finalizeKundeSetup(
   nachname: string,
   telefon: string | null,
   password: string,
-): Promise<void> {
+): Promise<{ magicLink: string | null }> {
   await admin.from('profiles').upsert({
     id: userId,
     rolle: 'kunde',
@@ -321,7 +379,9 @@ async function finalizeKundeSetup(
   // (kein chat_teilnehmer-Sync mehr nötig — siehe lib/chatGruppe.ts).
 
   // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
-  await sendWelcomeWithLogin(admin, fallId, email, password)
+  // CMM-14: Magic-Link weiterreichen damit der Wizard direkt einen
+  // "Zu meinem Portal"-Button anbieten kann.
+  return await sendWelcomeWithLogin(admin, fallId, email, password)
 }
 
 // AAR-127: Helper — generiert Magic-Link via Supabase Auth Admin API
@@ -333,7 +393,7 @@ async function sendWelcomeWithLogin(
   fallId: string,
   email: string,
   password: string,
-): Promise<void> {
+): Promise<{ magicLink: string | null }> {
   let magicLink: string | null = null
   try {
     const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/kunde/onboarding`
@@ -357,6 +417,8 @@ async function sendWelcomeWithLogin(
   } catch (err) {
     console.error('[AAR-127] Welcome-Mail-Versand fehlgeschlagen:', err)
   }
+
+  return { magicLink }
 }
 
 /**

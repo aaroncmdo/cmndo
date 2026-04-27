@@ -28,11 +28,9 @@ export default function PwaInstallBanner() {
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
-  // Register Service Worker
-  useEffect(() => {
-    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
-    navigator.serviceWorker.register('/sw.js').catch(() => {})
-  }, [])
+  // CMM-14: SW-Registration zentral in ServiceWorkerBoot mit Delay.
+  // Hier nicht mehr doppelt registrieren — vermeidet Install-Lifecycle-
+  // Races wenn beide Mount-Points kollidieren.
 
   async function handleInstall() {
     if (!promptRef.current) return
