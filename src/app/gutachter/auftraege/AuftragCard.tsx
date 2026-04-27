@@ -1,14 +1,17 @@
 'use client'
 
-// AAR-408: Eine Card pro SV-Auftrag mit Kunden-/Schadens-Info, Termin-Status
-// und Primär-Aktion (Termin vorschlagen, Gegenvorschlag entscheiden, Termin
-// öffnen). Termin-Actions werden über das geteilte TerminVorschlagModal
-// (Phase 0.6) + terminAnnehmen abgewickelt.
+// AAR-408 / CMM-25: Eine Card pro SV-Auftrag. CMM-25 hat den Erstvorschlag-
+// Pfad entfernt — Dispatcher blockt den Slot, SA-Unterschrift bestätigt
+// final. SV kann nur per TerminActionsPanel in der Fallakte den Termin
+// ablehnen oder einen Gegenvorschlag senden.
+//
+// Card-Zustände:
+//   • reserviert  → „Geblockt am X – wartet auf SA-Unterschrift" (Fall öffnen)
+//   • bestaetigt  → „Fest am X" (Fall öffnen)
+//   • kein Termin → sollte selten sein (Dispatcher hat noch nicht zugewiesen);
+//                   Fallback „Fall öffnen"
 
-import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
 import {
   CalendarIcon,
   MapPinIcon,
@@ -17,13 +20,8 @@ import {
   CheckCircle2Icon,
   AlertCircleIcon,
   ChevronRightIcon,
-  Loader2Icon,
   FileTextIcon,
 } from 'lucide-react'
-import TerminVorschlagModal, {
-  type TerminVorschlagMode,
-} from '@/components/fall/TerminVorschlagModal'
-import { terminAnnehmen } from '@/lib/actions/termin-actions'
 import { formatDatum } from '@/lib/format'
 
 export type AuftragCardProps = {
@@ -53,60 +51,48 @@ export type AuftragCardProps = {
 }
 
 type PrimaryAction =
-  | { type: 'vorschlagen'; label: string; mode: 'erstvorschlag' }
-  | {
-      type: 'gegenvorschlag-vom-kunden'
-      label: string
-      mode: 'gegenvorschlag'
-      datum: string
-    }
-  | { type: 'warten'; label: string; subLabel: string }
-  | { type: 'bestaetigt'; label: string; datum: string }
+  | { type: 'geblockt'; datum: string; href: string }
+  | { type: 'bestaetigt'; datum: string; href: string }
+  | { type: 'sv-gegenvorschlag-offen'; datum: string; href: string }
   | { type: 'offen'; label: string; href: string }
 
 function derivePrimary(props: AuftragCardProps): PrimaryAction {
   const t = props.aktiverTermin
+  const href = `/gutachter/fall/${props.fall.id}`
+
+  // CMM-25: Kein Termin oder Termin abgelehnt/storniert → SV soll keinen
+  // Erstvorschlag mehr machen. Dispatcher muss neu zuweisen. Card öffnet
+  // nur den Fall — die Fallakte zeigt dann den passenden Hinweis.
   if (!t || t.status === 'storniert' || t.status === 'abgelehnt') {
-    if (props.fall.status === 'sv-zugewiesen') {
-      return {
-        type: 'vorschlagen',
-        label: 'Termin vorschlagen',
-        mode: 'erstvorschlag',
-      }
-    }
-    return {
-      type: 'offen',
-      label: 'Fall öffnen',
-      href: `/gutachter/fall/${props.fall.id}`,
-    }
+    return { type: 'offen', label: 'Fall öffnen', href }
   }
-  if (t.status === 'gegenvorschlag' && t.gegenvorschlag_von === 'kunde') {
+
+  // CMM-25: SV hat selber einen Gegenvorschlag rausgeschickt → wartet auf
+  // Dispatcher-Antwort. Card zeigt Status, Fallakte hat die Details.
+  if (t.status === 'gegenvorschlag' && t.gegenvorschlag_von === 'sv') {
     return {
-      type: 'gegenvorschlag-vom-kunden',
-      label: 'Der Kunde hat einen anderen Termin vorgeschlagen',
-      mode: 'gegenvorschlag',
+      type: 'sv-gegenvorschlag-offen',
       datum: t.vorgeschlagenes_datum ?? t.start_zeit ?? '',
+      href,
     }
   }
+
+  // CMM-25: Reserviert = Dispatcher hat geblockt, SA-Unterschrift steht aus.
+  // Auch alte 'gegenvorschlag'-Rows vom Kunden landen hier (Kunden-Gegenvorschlag-
+  // Pfad ist mit CMM-25 abgeschafft, Dispatcher kümmert sich um Klärung).
   if (t.status === 'reserviert' || t.status === 'gegenvorschlag') {
     return {
-      type: 'warten',
-      label: 'Termin-Vorschlag gesendet',
-      subLabel: 'Wartet auf Bestätigung des Kunden.',
-    }
-  }
-  if (t.status === 'bestaetigt') {
-    return {
-      type: 'bestaetigt',
-      label: 'Termin bestätigt',
+      type: 'geblockt',
       datum: t.start_zeit ?? '',
+      href,
     }
   }
-  return {
-    type: 'offen',
-    label: 'Fall öffnen',
-    href: `/gutachter/fall/${props.fall.id}`,
+
+  if (t.status === 'bestaetigt') {
+    return { type: 'bestaetigt', datum: t.start_zeit ?? '', href }
   }
+
+  return { type: 'offen', label: 'Fall öffnen', href }
 }
 
 function fmtDateShort(iso: string | null | undefined): string {
@@ -125,31 +111,12 @@ function fmtDateShort(iso: string | null | undefined): string {
 }
 
 export default function AuftragCard(props: AuftragCardProps) {
-  const router = useRouter()
-  const [modal, setModal] = useState<{ open: boolean; mode: TerminVorschlagMode }>({
-    open: false,
-    mode: 'erstvorschlag',
-  })
-  const [isPending, startTransition] = useTransition()
-
   const kundeName =
     props.kunde?.vorname || props.kunde?.nachname
       ? `${props.kunde.vorname ?? ''} ${props.kunde.nachname ?? ''}`.trim()
       : '—'
 
   const action = derivePrimary(props)
-
-  function handleAcceptKunde() {
-    startTransition(async () => {
-      const r = await terminAnnehmen({ source: 'sv_portal', fallId: props.fall.id })
-      if (r.success) {
-        toast.success('Termin angenommen')
-        router.refresh()
-      } else {
-        toast.error(r.error ?? 'Fehler')
-      }
-    })
-  }
 
   return (
     <div className="relative bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-ondo transition-colors group">
@@ -209,96 +176,60 @@ export default function AuftragCard(props: AuftragCardProps) {
         )}
       </div>
 
-      {/* Action Zone — relative z-10 damit Buttons den Stretched-Link überlagern */}
+      {/* Action Zone — CMM-25: nur read-only Termin-Status + Fall-öffnen-Link.
+          Der Stretched-Link auf der ganzen Card öffnet bereits den Fall, der
+          sichtbare Pfeil hier ist nur visuell affordance. */}
       <div className="relative z-10 pt-2 border-t border-claimondo-border">
-        {action.type === 'vorschlagen' && (
-          <button
-            type="button"
-            onClick={() => setModal({ open: true, mode: 'erstvorschlag' })}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold"
-          >
-            <CalendarIcon className="w-4 h-4" />
-            {action.label}
-          </button>
-        )}
-
-        {action.type === 'gegenvorschlag-vom-kunden' && (
-          <div className="space-y-2">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
-              <div className="flex items-start gap-2">
-                <AlertCircleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                <div className="text-xs text-amber-900">
-                  <p className="font-medium">{action.label}</p>
-                  <p className="mt-0.5">{fmtDateShort(action.datum)}</p>
-                </div>
+        {action.type === 'geblockt' && (
+          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs pointer-events-none">
+            <div className="flex items-center gap-2 min-w-0">
+              <ClockIcon className="w-4 h-4 text-amber-700 shrink-0" />
+              <div className="min-w-0">
+                <p className="font-medium">Termin geblockt</p>
+                <p className="mt-0.5 truncate">
+                  {fmtDateShort(action.datum)} — wartet auf Sicherungsabtretung
+                </p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleAcceptKunde}
-                disabled={isPending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold disabled:opacity-50"
-              >
-                {isPending && <Loader2Icon className="w-3.5 h-3.5 animate-spin" />}
-                Annehmen
-              </button>
-              <button
-                type="button"
-                onClick={() => setModal({ open: true, mode: 'gegenvorschlag' })}
-                disabled={isPending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--brand-secondary)] text-[var(--brand-secondary)] hover:bg-[var(--brand-secondary)]/5 text-xs font-semibold disabled:opacity-50"
-              >
-                Gegenvorschlag
-              </button>
-            </div>
+            <ChevronRightIcon className="w-4 h-4 shrink-0" />
           </div>
         )}
 
-        {action.type === 'warten' && (
-          <div className="flex items-start gap-2 text-xs text-claimondo-ondo">
-            <ClockIcon className="w-4 h-4 text-claimondo-ondo/70 shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-medium text-claimondo-navy">{action.label}</p>
-              <p className="mt-0.5">{action.subLabel}</p>
+        {action.type === 'sv-gegenvorschlag-offen' && (
+          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-xs pointer-events-none">
+            <div className="flex items-center gap-2 min-w-0">
+              <AlertCircleIcon className="w-4 h-4 text-claimondo-ondo shrink-0" />
+              <div className="min-w-0">
+                <p className="font-medium">Gegenvorschlag gesendet</p>
+                <p className="mt-0.5 truncate">
+                  {fmtDateShort(action.datum)} — wartet auf Dispatch
+                </p>
+              </div>
             </div>
+            <ChevronRightIcon className="w-4 h-4 shrink-0" />
           </div>
         )}
 
         {action.type === 'bestaetigt' && (
-          <Link
-            href={`/gutachter/fall/${props.fall.id}`}
-            className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-800 text-xs"
-          >
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs pointer-events-none">
+            <div className="flex items-center gap-2 min-w-0">
               <CheckCircle2Icon className="w-4 h-4 text-emerald-600 shrink-0" />
-              <div>
-                <p className="font-medium">{action.label}</p>
-                <p className="mt-0.5">{fmtDateShort(action.datum)}</p>
+              <div className="min-w-0">
+                <p className="font-medium">Fest bestätigt</p>
+                <p className="mt-0.5 truncate">{fmtDateShort(action.datum)}</p>
               </div>
             </div>
-            <ChevronRightIcon className="w-4 h-4" />
-          </Link>
+            <ChevronRightIcon className="w-4 h-4 shrink-0" />
+          </div>
         )}
 
         {action.type === 'offen' && (
-          <Link
-            href={action.href}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-claimondo-border hover:bg-[#f8f9fb] text-claimondo-navy text-sm font-medium"
-          >
-            {action.label}
+          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-claimondo-border text-claimondo-navy text-sm font-medium pointer-events-none">
+            <span>{action.label}</span>
             <ChevronRightIcon className="w-4 h-4" />
-          </Link>
+          </div>
         )}
       </div>
-
-      <TerminVorschlagModal
-        fallId={props.fall.id}
-        mode={modal.mode}
-        open={modal.open}
-        onClose={() => setModal((s) => ({ ...s, open: false }))}
-        existingTermin={props.aktiverTermin}
-      />
     </div>
   )
 }

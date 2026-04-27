@@ -7,7 +7,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SchadentypPicker from '../SchadentypPicker'
-import BkatAnalysePanel from './BkatAnalysePanel'
 import { useDispatchPhase } from '../_lib/phase-context'
 
 export default function Phase3Schadentyp() {
@@ -27,17 +26,10 @@ export default function Phase3Schadentyp() {
 
   return (
     <div className="space-y-3">
-      {/* AAR-504/505: KI-Analyse (OCR first, LLM-Fallback auf unfallhergang).
-         Zeigt Unfallart-Vorschlag + TBNR-Kandidaten. TBNRs werden nur
-         gespeichert wenn Polizei vor Ort war + OCR-Quelle. */}
-      <BkatAnalysePanel
-        leadId={lead.id}
-        polizeiVorOrt={l.polizei_vor_ort ?? null}
-        onSchadentypGesetzt={() => {
-          setShowWeiter(true)
-          router.refresh()
-        }}
-      />
+      {/* CMM-23: BkatAnalysePanel ist nach Phase 4 (Stammdaten) gewandert,
+         da der Kunde-Polizeibericht-Upload den Auto-OCR-Trigger jetzt im
+         Onboarding feuert (uploadPflichtdokument). Phase 3 fokussiert sich
+         auf Schadentyp-Auswahl. */}
       <SchadentypPicker
         leadId={lead.id}
         initialTyp={l.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}

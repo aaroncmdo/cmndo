@@ -7,6 +7,7 @@
 // gegner-kz-flags.ts berechnet und mitgespeichert.
 
 import { useState, useTransition, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { saveStammdaten } from '../actions'
 import { checkKZFlags } from '../_lib/gegner-kz-flags'
 import { useDispatchPhase } from '../_lib/phase-context'
@@ -18,6 +19,7 @@ import { useCarQuery } from '../_hooks/useCarQuery'
 // AAR-352: Zb1UploadCard + PolizeiberichtUploadCard ersetzt durch
 // DokumenteAnfordernCard (kombinierte Multi-Slot-Anfrage in einem Link).
 import DokumenteAnfordernCard from './DokumenteAnfordernCard'
+import BkatAnalysePanel from './BkatAnalysePanel'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
 import { requestCardentityTypBForLead } from '../_actions/cardentity'
 // AAR-314: Auslandskennzeichen — Anfrage an Deutsches Büro Grüne Karte mit Reminder
@@ -443,6 +445,7 @@ function Card({
 
 export default function Phase4Stammdaten() {
   const { lead, qualification, setPhase, patchLead } = useDispatchPhase()
+  const router = useRouter()
   const l = lead as unknown as LeadFields
   const leadId = lead.id
   const [gegnerKzDraft, setGegnerKzDraft] = useState(l.gegner_kennzeichen ?? '')
@@ -554,6 +557,17 @@ export default function Phase4Stammdaten() {
 
   return (
     <div className="space-y-4">
+      {/* CMM-23: KI-Analyse (OCR first, LLM-Fallback). Hier in Phase 4 statt
+         Phase 3 — der Kunden-Polizeibericht-Upload triggert den Auto-OCR
+         schon im Onboarding (uploadPflichtdokument), die Daten-Anfrage an
+         den Kunden läuft erst in Phase 4. Dispatcher sieht Klassifikation
+         vor Bestätigung der Stammdaten + manuellem LLM-Fallback. */}
+      <BkatAnalysePanel
+        leadId={lead.id}
+        polizeiVorOrt={l.polizei_vor_ort ?? null}
+        onSchadentypGesetzt={() => router.refresh()}
+      />
+
       {/* AAR-665-Follow: Schadenbeschreibungs-Card (WAS am Auto kaputt).
           Optional, kein Hard-Gate. Mit „Kunde hat Unfallfotos"-Checkmark
           für Bulk-Anforderung via DokumenteAnfordernCard. */}

@@ -498,7 +498,7 @@ export async function uploadPflichtdokument(
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   // Ownership-Check: gehoert der Fall diesem Kunden?
-  const { data: fall } = await supabase.from('faelle').select('id, kunde_id').eq('id', fallId).single()
+  const { data: fall } = await supabase.from('faelle').select('id, kunde_id, lead_id').eq('id', fallId).single()
   if (!fall || fall.kunde_id !== user.id) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
@@ -552,6 +552,19 @@ export async function uploadPflichtdokument(
       // CMM-23: ein Doku-Pool für alle Akten-Beteiligten.
       sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
     })
+
+    // CMM-23: Polizeibericht-Upload triggert automatisch BKat-OCR (fire-and-forget).
+    // Läuft asynchron, blockiert den Upload-Response nicht. Ergebnis landet auf
+    // leads.bkat_unfallart und wird in Phase 4 (Stammdaten) im BkatAnalysePanel
+    // angezeigt — der Dispatcher braucht die Klassifikation für die Datenanfrage.
+    if (slotTyp === 'polizeibericht' && fall.lead_id) {
+      const leadId = fall.lead_id
+      import('@/lib/bkat/auto-trigger').then(({ triggerAutoBkatOcr }) =>
+        triggerAutoBkatOcr(admin, leadId, publicUrl).catch((err) =>
+          console.warn('[uploadPflichtdokument] triggerAutoBkatOcr:', err instanceof Error ? err.message : err),
+        ),
+      )
+    }
 
     revalidatePath('/kunde/onboarding')
     revalidatePath('/kunde')

@@ -247,10 +247,10 @@ export default function SvDispatchPanel({
   }
 
   function handleCancel() {
-    if (!confirm('Termin wirklich stornieren? Der Lead verliert den SV-Slot.')) return
+    if (!confirm('Slot wirklich freigeben? Der Lead verliert den SV-Block.')) return
     startTransition(async () => {
       const r = await cancelSvTerminForLead(leadId)
-      setToast(r.success ? 'Termin storniert' : r.error ?? 'Fehler')
+      setToast(r.success ? 'Slot freigegeben' : r.error ?? 'Fehler')
       setTimeout(() => setToast(''), 2500)
     })
   }
@@ -350,23 +350,26 @@ export default function SvDispatchPanel({
     const ende = new Date(aktiverTermin.end_zeit)
     const svName = [aktiverTermin.sv_vorname, aktiverTermin.sv_nachname].filter(Boolean).join(' ') || 'SV'
     return (
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 space-y-3">
+      <div className={`${aktiverTermin.status === 'bestaetigt' ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'} border rounded-xl p-5 space-y-3`}>
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-emerald-900 flex items-center gap-2">
-            <CalendarCheckIcon className="w-4 h-4" /> SV-Termin reserviert
+          <h2 className={`text-sm font-semibold flex items-center gap-2 ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>
+            <CalendarCheckIcon className="w-4 h-4" />
+            {aktiverTermin.status === 'bestaetigt'
+              ? 'Termin bestätigt (SA unterschrieben)'
+              : 'Slot geblockt — wartet auf SA-Unterschrift'}
           </h2>
           <StatusBadge tone={aktiverTermin.status === 'bestaetigt' ? 'success' : 'warning'}>
-            {aktiverTermin.status === 'bestaetigt' ? 'Bestätigt' : 'Reserviert'}
+            {aktiverTermin.status === 'bestaetigt' ? 'Bestätigt' : 'Geblockt'}
           </StatusBadge>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-[10px] text-emerald-700 uppercase">Sachverständiger</p>
-            <p className="font-medium text-emerald-900">{svName}</p>
+            <p className={`text-[10px] uppercase ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-700' : 'text-amber-700'}`}>Sachverständiger</p>
+            <p className={`font-medium ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>{svName}</p>
           </div>
           <div>
-            <p className="text-[10px] text-emerald-700 uppercase">Termin</p>
-            <p className="font-medium text-emerald-900">
+            <p className={`text-[10px] uppercase ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-700' : 'text-amber-700'}`}>Termin</p>
+            <p className={`font-medium ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>
               {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
               {' · '}
               {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
@@ -375,14 +378,24 @@ export default function SvDispatchPanel({
             </p>
           </div>
         </div>
+        {/* CMM-25: Hinweis auf Auto-Expire bei reservierten (=geblockten) Slots
+           ohne SA-Unterschrift. Bei `bestaetigt` greift der Cron-Job nicht mehr,
+           daher nur dort den Hinweis ausblenden. */}
+        {aktiverTermin.status === 'reserviert' && (
+          <p className="text-[11px] text-amber-800 bg-white/60 border border-amber-100 rounded-md px-2.5 py-1.5">
+            Auto-Expire: ohne SA-Unterschrift wird der Slot nach 1h automatisch freigegeben.
+            Manuell sofort freigeben mit dem Button unten.
+          </p>
+        )}
         <button
           disabled={pending}
           onClick={handleCancel}
           className="w-full text-xs font-medium text-red-700 hover:text-red-800 hover:bg-red-50 py-2 rounded-lg border border-red-200 flex items-center justify-center gap-2"
         >
-          <XIcon className="w-3.5 h-3.5" /> Reservierung stornieren
+          <XIcon className="w-3.5 h-3.5" />
+          {aktiverTermin.status === 'bestaetigt' ? 'Termin stornieren' : 'Slot freigeben'}
         </button>
-        {toast && <p className="text-xs text-emerald-800 text-center">{toast}</p>}
+        {toast && <p className={`text-xs text-center ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-800' : 'text-amber-800'}`}>{toast}</p>}
       </div>
     )
   }

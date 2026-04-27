@@ -1,9 +1,11 @@
 'use client'
 
-// AAR-757 (VollClient-Auflösung): aus `FallakteVollClient.tsx` extrahiert.
-// Zeigt Termin-Aktionen (Ablehnen, Gegenvorschlag, Annehmen) für
-// reservierte oder gegenvorschlag-Termine. Banner zeigt Kunden-
-// Gegenvorschlag explizit; reserviert-Status gibt Eingreif-Buttons.
+// AAR-757 / CMM-25: Termin-Aktionen für SV. CMM-25 hat den Erstvorschlag-
+// und den Annehmen-Pfad entfernt — der Termin gilt mit der Sicherungs-
+// abtretungs-Unterschrift als final, der SV kann nur ablehnen oder einen
+// Gegenvorschlag senden. Kunden-Gegenvorschlag-Banner ist ebenfalls weg
+// (Kunden-Gegenvorschlag-Flow existiert in CMM-25 nicht mehr — Dispatcher
+// klärt direkt mit dem Kunden).
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -12,7 +14,6 @@ import { Modal } from '@/components/primitives/Modal'
 import {
   terminAblehnen,
   terminGegenvorschlag,
-  terminAnnehmen,
 } from '@/lib/actions/termin-actions'
 
 export type TerminActionsPanelInfo = {
@@ -37,9 +38,6 @@ export function TerminActionsPanel({
   const [grund, setGrund] = useState('')
   const [neuerTermin, setNeuerTermin] = useState('')
   const [loading, setLoading] = useState(false)
-
-  const isKundenGegenvorschlag =
-    termin.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'kunde'
 
   async function handleAblehnen() {
     setLoading(true)
@@ -67,68 +65,46 @@ export function TerminActionsPanel({
     }
   }
 
-  async function handleAnnehmen() {
-    setLoading(true)
-    const result = await terminAnnehmen({ source: 'sv_portal', fallId })
-    setLoading(false)
-    if (result.success) router.refresh()
-  }
+  // CMM-25: Eigener offener Gegenvorschlag des SVs → Hinweis ohne Buttons,
+  // Dispatcher entscheidet. Reservierte Slots bekommen die zwei Eingriffs-
+  // Buttons (Ablehnen / Gegenvorschlag).
+  const istEigenerGegenvorschlag =
+    termin.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'sv'
 
   return (
     <div className="mb-4 space-y-3">
-      {/* Kunden-Gegenvorschlag Banner */}
-      {isKundenGegenvorschlag && termin.vorgeschlagenes_datum && (
-        <div className="bg-amber-50 border border-amber-200 rounded-ios-md p-4">
-          <p className="text-sm font-medium text-amber-800 mb-1">
-            Der Kunde hat einen Gegenvorschlag gemacht
+      {istEigenerGegenvorschlag && (
+        <div className="bg-[#f8f9fb] border border-claimondo-border rounded-ios-md px-4 py-3">
+          <p className="text-xs text-claimondo-navy">
+            Gegenvorschlag gesendet — wartet auf den Dispatcher.
+            {termin.vorgeschlagenes_datum && (
+              <>
+                {' '}
+                Vorgeschlagen:{' '}
+                {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', {
+                  weekday: 'long',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </>
+            )}
           </p>
-          <p className="text-sm text-amber-700">
-            Neues Datum:{' '}
-            {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', {
-              weekday: 'long',
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </p>
-          {termin.gegenvorschlag_grund && (
-            <p className="text-xs text-amber-600 mt-1">Grund: {termin.gegenvorschlag_grund}</p>
-          )}
-          <div className="flex gap-2 mt-3">
-            <button
-              onClick={handleAnnehmen}
-              disabled={loading}
-              className="flex-1 py-2 rounded-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-ondo transition-colors disabled:opacity-50"
-            >
-              {loading ? '…' : 'Annehmen'}
-            </button>
-            <button
-              onClick={() => setModal('gegenvorschlag')}
-              disabled={loading}
-              className="flex-1 py-2 rounded-lg text-sm font-medium text-claimondo-navy bg-white border border-claimondo-navy hover:bg-[#f8f9fb] transition-colors disabled:opacity-50"
-            >
-              Erneut gegenvorschlagen
-            </button>
-            <button
-              onClick={() => setModal('ablehnen')}
-              disabled={loading}
-              className="py-2 px-3 rounded-lg text-sm font-medium text-red-600 bg-white border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50"
-            >
-              Ablehnen
-            </button>
-          </div>
         </div>
       )}
 
-      {/* Hinweistext + Buttons (nur bei reserviert) */}
+      {/* CMM-25: Reservierter Slot — vom Dispatcher geblockt, SA-Unterschrift
+          steht aus oder Termin gilt als final bestätigt. SV kann nur
+          ablehnen (Auftrag zurückgeben) oder einen Gegenvorschlag senden. */}
       {termin.status === 'reserviert' && (
         <>
           <div className="bg-claimondo-ondo/10 border border-claimondo-ondo/30 rounded-ios-md px-4 py-3">
             <p className="text-xs text-claimondo-navy">
-              Termin ist standardmäßig bestätigt. Hier nur eingreifen wenn Sie ablehnen oder
-              verschieben möchten.
+              Termin geblockt — wartet auf Sicherungsabtretungs-Unterschrift des Kunden.
+              Hier nur eingreifen, wenn Sie den Auftrag ablehnen oder einen anderen
+              Termin vorschlagen möchten.
             </p>
           </div>
           <div className="flex gap-2">
@@ -136,7 +112,7 @@ export function TerminActionsPanel({
               onClick={() => setModal('ablehnen')}
               className="flex-1 flex items-center justify-center gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 text-sm py-2.5 rounded-lg transition-colors border border-red-200"
             >
-              <XCircleIcon className="w-4 h-4" /> Termin ablehnen
+              <XCircleIcon className="w-4 h-4" /> Auftrag ablehnen
             </button>
             <button
               onClick={() => setModal('gegenvorschlag')}
