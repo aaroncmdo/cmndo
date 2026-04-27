@@ -19,30 +19,22 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-5">
-      <div className="text-center max-w-md">
-        <div className="text-red-500 text-5xl mb-4">!</div>
-        <h1 className="text-xl font-semibold text-claimondo-navy mb-2">
-          Etwas ist schiefgelaufen
-        </h1>
-        <p className="text-claimondo-ondo text-sm mb-4">
-          Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.
-        </p>
-        <p className="text-claimondo-ondo text-xs mb-2 font-mono bg-white border border-claimondo-border rounded-lg px-4 py-3 text-left break-all">
-          {error.message || 'Unbekannter Fehler'}
-        </p>
-        {error.digest && (
-          <p className="text-claimondo-ondo/70 text-xs mb-4 font-mono">
-            Fehler-ID: {error.digest}
-          </p>
-        )}
-        <button
-          onClick={() => window.location.reload()}
-          className="px-5 py-2.5 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
-        >
-          Seite neu laden
-        </button>
-      </div>
+    <div className="min-h-screen bg-white p-6 font-mono text-xs text-black">
+      <h1 className="text-red-700 text-sm font-bold mb-2">
+        /app root crash — CMM-14 diagnose
+      </h1>
+      <div className="mb-2"><strong>Message:</strong> {error.message || '(leer)'}</div>
+      <div className="mb-2"><strong>Digest:</strong> {error.digest || '(keiner)'}</div>
+      <div className="mb-2"><strong>Name:</strong> {error.name}</div>
+      <pre className="bg-gray-100 p-3 rounded overflow-auto max-h-[400px] whitespace-pre-wrap break-all text-[10px]">
+        {error.stack || '(kein Stack)'}
+      </pre>
+      <button
+        onClick={() => window.location.reload()}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded text-xs"
+      >
+        Seite neu laden
+      </button>
     </div>
   )
 }
