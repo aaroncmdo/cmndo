@@ -328,6 +328,41 @@ export default function FallDetailClient(props: Props) {
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
           {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
           <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
+          {/* CMM-23: Unfallgegner-Card — Verursacher aus claim_parties /
+              parteien (Name + Versicherung + Kennzeichen). Self-gating wenn
+              keine Verursacher-Partei vorhanden. */}
+          {(() => {
+            const verursacher = (props.parteien ?? []).find(
+              (p) => (p.rolle as string | null) === 'verursacher',
+            )
+            if (!verursacher) return null
+            const name = (verursacher.name as string | null) ?? null
+            const vs = (verursacher.versicherung_name as string | null) ?? null
+            const vsNr = (verursacher.versicherung_nr as string | null) ?? null
+            if (!name && !vs) return null
+            return (
+              <div className="rounded-2xl bg-white border border-claimondo-border p-4">
+                <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo mb-2">
+                  Unfallgegner
+                </p>
+                <div className="space-y-1.5 text-sm text-claimondo-navy">
+                  {name && <p className="font-medium">{name}</p>}
+                  {vs && (
+                    <p className="text-claimondo-ondo">
+                      <span className="text-xs">Versicherung:</span>{' '}
+                      <span className="text-claimondo-navy">{vs}</span>
+                    </p>
+                  )}
+                  {vsNr && (
+                    <p className="text-claimondo-ondo">
+                      <span className="text-xs">VS-Nummer:</span>{' '}
+                      <span className="text-claimondo-navy font-mono text-xs">{vsNr}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
         </aside>
 
         <section className="space-y-4 min-w-0">
@@ -355,6 +390,33 @@ export default function FallDetailClient(props: Props) {
               schadens_ort: (fall.schadens_ort as string | null) ?? null,
             }}
           />
+          {/* CMM-23: Vorschäden-Hinweis — wenn der Kunde im Lead/Claim
+              Vorschäden gemeldet hat, weiß der SV das vor dem Termin und
+              kann die nachgereichten Reparaturrechnungen direkt sehen. */}
+          {!!fall.hat_vorschaeden && (
+            <div className="rounded-2xl bg-amber-50/40 border border-amber-200 p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg">⚠️</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-claimondo-navy">
+                    Vorschäden gemeldet
+                  </p>
+                  <p className="text-xs text-claimondo-ondo mt-1">
+                    Der Kunde hat{' '}
+                    <span className="font-medium text-claimondo-navy">
+                      {fall.vorschaden_anzahl != null
+                        ? `${String(fall.vorschaden_anzahl)} Vorschäden`
+                        : 'Vorschäden'}
+                    </span>{' '}
+                    am Fahrzeug angegeben. Reparaturrechnungen werden — falls
+                    vorhanden — über den gelben Banner mit nachgereicht.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           <GutachtenCard
             fallId={fall.id as string}
             fallNummer={fallNummer}
