@@ -181,24 +181,33 @@ export type CreateKundeAccountResult =
  * Browser muss danach nur noch `window.location.replace(redirectTo)`
  * machen — die Cookies sind sicher gesetzt.
  */
-export async function loginAfterFlow(
-  email: string,
-  password: string,
-): Promise<{ ok: true; redirectTo: string } | { ok: false; error: string }> {
+/**
+ * CMM-14: Form-Action für Auto-Login nach SA-Unterschrift.
+ * Wird via Form-Submit aufgerufen — Next.js setzt die Auth-Cookies aus der
+ * Server-Action-Response korrekt vor dem `redirect()`. Das vermeidet die
+ * Cookie-Race-Condition die mit `await action() + window.location.assign`
+ * auftritt (Set-Cookie-Header ist im Response, Browser folgt aber sofort
+ * mit einem GET der die noch nicht persistierten Cookies nicht enthält).
+ */
+export async function loginAfterFlowFormAction(formData: FormData) {
+  const email = String(formData.get('email') ?? '')
+  const password = String(formData.get('password') ?? '')
+
+  if (!email || !password) {
+    redirect('/login?error=Login-Daten+fehlen')
+  }
+
   const supabase = await createClient()
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
   if (signInError) {
-    return { ok: false, error: signInError.message }
+    redirect(`/login?error=${encodeURIComponent(signInError.message)}`)
   }
 
-  // force_password_change prüfen — wenn gesetzt, zuerst Passwort-Änderung
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, error: 'Auth-User nicht gefunden' }
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login?error=Auth-User+nicht+gefunden')
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -208,9 +217,9 @@ export async function loginAfterFlow(
 
   const authProvider = (profile?.auth_provider as string | null) ?? 'email'
   if (profile?.force_password_change && authProvider === 'email') {
-    return { ok: true, redirectTo: '/passwort-aendern' }
+    redirect('/passwort-aendern')
   }
-  return { ok: true, redirectTo: '/kunde/onboarding' }
+  redirect('/kunde/onboarding')
 }
 
 /**

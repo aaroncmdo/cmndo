@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf, loginAfterFlow } from './actions'
+import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf, loginAfterFlowFormAction } from './actions'
 import {
   CheckIcon,
   FileTextIcon,
@@ -146,6 +146,10 @@ export default function FlowWizardKfz({
   const [creatingAccount, setCreatingAccount] = useState(false)
   const [accountCreated, setAccountCreated] = useState(false)
   const [magicLink, setMagicLink] = useState<string | null>(null)
+  // CMM-14: Ref auf das versteckte Login-Form. Wird nach Account-Anlage
+  // programmatisch submitted — Form-Submit ist der Cookie-sichere Weg
+  // gegen die Race-Condition mit `window.location.assign`.
+  const loginFormRef = useRef<HTMLFormElement>(null)
 
   // CMM-14: Werkstatt + Schadensfotos State entfernt — Step 'weitere-angaben'
   // wurde aus dem Wizard rausgenommen, der Foto-Upload erfolgt jetzt im
@@ -212,28 +216,19 @@ export default function FlowWizardKfz({
       setMagicLink(result.magicLink)
       setAccountCreated(true)
 
-      // CMM-14: Server-Action signt ein + setzt Cookies + revalidiert Cache.
-      // Wir geben dem Browser eine kurze Pause damit Set-Cookie-Header
-      // zuverlässig in den Cookie-Jar geschrieben sind, bevor wir den
-      // nächsten Request rausschicken. Ohne diese Pause sah der erste Hit
-      // auf /kunde/onboarding keine Session → weiße Seite, Reload-fix.
-      try {
-        const login = await loginAfterFlow(accountEmail, result.password)
-        if (!login.ok) {
-          const msg = `Auto-Login fehlgeschlagen: ${login.error}`
-          console.warn('[handleCreateAccount]', msg)
-          if (typeof window !== 'undefined') window.alert(msg)
-          setError(msg)
-          return
-        }
-        // 250 ms warten damit Set-Cookie-Header sicher persistiert ist
-        await new Promise((r) => setTimeout(r, 250))
-        window.location.assign(login.redirectTo)
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err)
-        console.warn('[handleCreateAccount] loginAfterFlow Exception:', msg)
-        if (typeof window !== 'undefined') window.alert(`Login-Exception: ${msg}`)
-        setError(`Login fehlgeschlagen: ${msg}`)
+      // CMM-14: Form-Submit zur loginAfterFlowFormAction. Das ist der einzige
+      // zuverlässige Weg gegen den Cookie-Race — Next.js handled die
+      // Set-Cookie-Header der Server-Action-Response korrekt VOR dem
+      // redirect(), beim window.location.assign nach manuell-await ist der
+      // Cookie noch nicht persistiert wenn der nächste Request rausgeht.
+      // Das Form ist im JSX gerendert und wird hier programmatisch submitted.
+      const form = loginFormRef.current
+      if (form) {
+        const emailInput = form.elements.namedItem('email') as HTMLInputElement | null
+        const passwordInput = form.elements.namedItem('password') as HTMLInputElement | null
+        if (emailInput) emailInput.value = accountEmail
+        if (passwordInput) passwordInput.value = result.password
+        form.requestSubmit()
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Konto konnte nicht erstellt werden')
@@ -258,6 +253,13 @@ export default function FlowWizardKfz({
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
+      {/* CMM-14: Verstecktes Login-Form für den Auto-Login nach Account-
+          Anlage. Wird programmatisch submitted — die Server-Action setzt
+          Cookies + redirected, Next.js handled das ohne Cookie-Race. */}
+      <form ref={loginFormRef} action={loginAfterFlowFormAction} style={{ display: 'none' }}>
+        <input type="hidden" name="email" defaultValue="" />
+        <input type="hidden" name="password" defaultValue="" />
+      </form>
       {/* Progress bar */}
       <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-[#f8f9fb]">
         <div className="h-full bg-[#4573A2] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
