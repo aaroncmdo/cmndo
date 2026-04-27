@@ -164,7 +164,7 @@ const ROLLE_LABEL: Record<string, string> = {
 }
 
 export type CreateKundeAccountResult =
-  | { success: true; password: string }
+  | { success: true; password: string; magicLink: string | null }
   | { success: false; error: string }
 
 /**
@@ -209,7 +209,10 @@ export async function createKundeAccount(
         .from('profiles').select('rolle').eq('id', existingFall.kunde_id).maybeSingle()
       if (linkedProfile?.rolle === 'kunde' || linkedProfile?.rolle == null) {
         await admin.auth.admin.updateUserById(existingFall.kunde_id, { password })
-        return { success: true, password }
+        // CMM-14: Browser-Reload-Pfad — neuen Magic-Link generieren damit der
+        // Kunde auch beim 2. Aufruf direkt ins Portal kann.
+        const { magicLink } = await sendWelcomeWithLogin(admin, fallId, normalizedEmail, password)
+        return { success: true, password, magicLink }
       }
       // kunde_id zeigt auf einen Nicht-Kunden — Account-Hijack-Verdacht, abbrechen
       return {
@@ -233,8 +236,8 @@ export async function createKundeAccount(
       }
       // 2b. Existierender Kunden-Account (oder Profile ohne Rolle): verknüpfen + Passwort refreshen
       await admin.auth.admin.updateUserById(existingProfile.id, { password })
-      await finalizeKundeSetup(admin, fallId, existingProfile.id, normalizedEmail, vorname, nachname, telefon, password)
-      return { success: true, password }
+      const finRes = await finalizeKundeSetup(admin, fallId, existingProfile.id, normalizedEmail, vorname, nachname, telefon, password)
+      return { success: true, password, magicLink: finRes.magicLink }
     }
 
     // 3. Neuer User
@@ -253,8 +256,8 @@ export async function createKundeAccount(
       }
     }
 
-    await finalizeKundeSetup(admin, fallId, authUser.user.id, normalizedEmail, vorname, nachname, telefon, password)
-    return { success: true, password }
+    const finRes = await finalizeKundeSetup(admin, fallId, authUser.user.id, normalizedEmail, vorname, nachname, telefon, password)
+    return { success: true, password, magicLink: finRes.magicLink }
   } catch (err) {
     console.error('[createKundeAccount] unerwarteter Fehler:', err)
     return {
@@ -277,7 +280,7 @@ async function finalizeKundeSetup(
   nachname: string,
   telefon: string | null,
   password: string,
-): Promise<void> {
+): Promise<{ magicLink: string | null }> {
   await admin.from('profiles').upsert({
     id: userId,
     rolle: 'kunde',
@@ -321,7 +324,9 @@ async function finalizeKundeSetup(
   // (kein chat_teilnehmer-Sync mehr nötig — siehe lib/chatGruppe.ts).
 
   // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
-  await sendWelcomeWithLogin(admin, fallId, email, password)
+  // CMM-14: Magic-Link weiterreichen damit der Wizard direkt einen
+  // "Zu meinem Portal"-Button anbieten kann.
+  return await sendWelcomeWithLogin(admin, fallId, email, password)
 }
 
 // AAR-127: Helper — generiert Magic-Link via Supabase Auth Admin API
@@ -333,7 +338,7 @@ async function sendWelcomeWithLogin(
   fallId: string,
   email: string,
   password: string,
-): Promise<void> {
+): Promise<{ magicLink: string | null }> {
   let magicLink: string | null = null
   try {
     const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/kunde/onboarding`
@@ -357,6 +362,8 @@ async function sendWelcomeWithLogin(
   } catch (err) {
     console.error('[AAR-127] Welcome-Mail-Versand fehlgeschlagen:', err)
   }
+
+  return { magicLink }
 }
 
 /**

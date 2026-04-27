@@ -143,12 +143,13 @@ export default function FlowWizardKfz({
   const [editTelefon, setEditTelefon] = useState(lead.telefon)
   const [editEmail, setEditEmail] = useState(lead.email)
 
-  // Account step
+  // Account step — CMM-14: Account-Anlage läuft automatisch direkt nach SA.
+  // Kein Edit-Form mehr — der Kunde sieht nur das Erfolgsergebnis.
   const [accountPassword, setAccountPassword] = useState('')
   const [accountEmail, setAccountEmail] = useState(editEmail)
-  const [showPw, setShowPw] = useState(false)
   const [creatingAccount, setCreatingAccount] = useState(false)
   const [accountCreated, setAccountCreated] = useState(false)
+  const [magicLink, setMagicLink] = useState<string | null>(null)
 
   // AAR-305: Weitere-Angaben-Step — Werkstatt-Frage + Schadensfotos-Upload
   const [werkstattJa, setWerkstattJa] = useState<boolean | null>(null)
@@ -212,6 +213,7 @@ export default function FlowWizardKfz({
         return
       }
       setAccountPassword(result.password)
+      setMagicLink(result.magicLink)
       setAccountCreated(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Konto konnte nicht erstellt werden')
@@ -219,6 +221,16 @@ export default function FlowWizardKfz({
       setCreatingAccount(false)
     }
   }
+
+  // CMM-14: Account-Anlage automatisch beim Erreichen des Account-Steps,
+  // damit der Kunde keinen weiteren Klick mehr macht und direkt zum Magic-Link
+  // -Button kommt.
+  useEffect(() => {
+    if (currentStep.id === 'account' && fallId && !accountCreated && !creatingAccount && !error) {
+      handleCreateAccount()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep.id, fallId])
 
   // AAR-99: Kein Skip-Button mehr — Account ist Pflicht
 
@@ -647,18 +659,21 @@ export default function FlowWizardKfz({
               </div>
             )}
 
-            {/* ═══ SCHRITT 4: ACCOUNT ERSTELLEN (AAR-99: Pflicht, kein Skip) ═══ */}
+            {/* ═══ SCHRITT 4: ABSCHLUSS — Account-Anlage läuft automatisch,
+                Magic-Link führt direkt ins Onboarding (CMM-14) ═══ */}
             {currentStep.id === 'account' && (
               <div>
                 <StepHeader
-                  question="Kundenportal-Zugang"
-                  sub="Erstellen Sie Ihr Konto, um Ihren Fall online zu verfolgen."
+                  question="Geschafft!"
+                  sub="Ihr Fall wurde erfolgreich erstellt."
                   icon={<UserPlusIcon className="w-8 h-8 text-[#4573A2]" />}
                 />
 
                 <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
                   <CheckIcon className="w-5 h-5 text-emerald-500 shrink-0" />
-                  <p className="text-sm text-emerald-700">Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.</p>
+                  <p className="text-sm text-emerald-700">
+                    Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.
+                  </p>
                 </div>
 
                 {/* CMM-14: Bei Komplett-Mandat juristischen Ansprechpartner
@@ -679,45 +694,34 @@ export default function FlowWizardKfz({
                   </div>
                 )}
 
-                {accountCreated ? (
-                  <div className="space-y-4">
-                    <div className="bg-[#f8f9fb] border border-claimondo-border rounded-2xl p-5 text-center">
-                      <p className="text-sm text-claimondo-ondo mb-2">Ihre Zugangsdaten:</p>
-                      <p className="text-sm text-claimondo-navy"><strong>E-Mail:</strong> {accountEmail}</p>
-                      <p className="text-sm text-claimondo-navy"><strong>Passwort:</strong> {accountPassword}</p>
-                      <p className="text-xs text-claimondo-ondo/70 mt-3">Bitte aendern Sie Ihr Passwort nach dem ersten Login.</p>
-                    </div>
-                    <button
-                      onClick={() => { window.location.href = '/kunde' }}
-                      className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
-                    >
-                      Weiter zum Portal
-                    </button>
+                {creatingAccount && !accountCreated && (
+                  <div className="rounded-2xl border border-claimondo-border bg-white p-6 text-center">
+                    <div className="inline-block w-6 h-6 border-2 border-[#4573A2] border-t-transparent rounded-full animate-spin mb-3" />
+                    <p className="text-sm text-claimondo-ondo">Wir richten Ihr Portal ein …</p>
                   </div>
-                ) : (
+                )}
+
+                {error && (
+                  <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
+                    {error}
+                  </p>
+                )}
+
+                {accountCreated && (
                   <div className="space-y-4">
-                    <div>
-                      <label className="text-xs text-claimondo-ondo mb-1.5 block">E-Mail</label>
-                      <div className="relative">
-                        <MailIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-claimondo-ondo/70" />
-                        <input
-                          type="email"
-                          value={accountEmail}
-                          onChange={e => setAccountEmail(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-claimondo-border bg-[#f8f9fb] text-sm text-claimondo-navy focus:outline-none focus:border-[#4573A2]"
-                        />
-                      </div>
+                    <div className="rounded-2xl bg-[#f8f9fb] border border-claimondo-border p-4 text-sm text-claimondo-ondo">
+                      Wir haben Ihnen die Zugangsdaten an{' '}
+                      <span className="font-medium text-claimondo-navy">{accountEmail}</span>{' '}
+                      gesendet. Mit dem Button unten kommen Sie direkt in Ihr persönliches Portal.
                     </div>
-
-                    {error && <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>}
-
-                    <button
-                      onClick={handleCreateAccount}
-                      disabled={!accountEmail || creatingAccount}
-                      className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+                    <a
+                      href={magicLink ?? '/kunde/onboarding'}
+                      className="block w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base text-center active:scale-[0.98] transition-all"
                     >
-                      {creatingAccount ? 'Wird erstellt ...' : 'Konto erstellen'}
-                    </button>
+                      Zu meinem Portal
+                    </a>
+                    {/* Passwort verstecken wir bewusst — der Magic-Link ist
+                        der primäre Eintritt. Passwort steht in der Mail. */}
                   </div>
                 )}
               </div>
