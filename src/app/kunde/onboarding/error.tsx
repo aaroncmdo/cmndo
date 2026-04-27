@@ -1,10 +1,6 @@
 'use client'
 
-// CMM-14 Diagnose: dedizierte Error-Page für /kunde/onboarding mit
-// vollständigem Stack-Trace-Output. Wird in Production normalerweise
-// vom darüberliegenden /kunde/error.tsx maskiert — diese Boundary fängt
-// genauer und zeigt mehr Details, damit wir den Server-Crash auf dem
-// Onboarding-Pfad lokalisieren können.
+import { useEffect } from 'react'
 
 export default function OnboardingError({
   error,
@@ -13,27 +9,24 @@ export default function OnboardingError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    // CMM-14: voller Error in der Console damit auch ohne Page-Render
+    // diagnostizierbar.
+    console.error('[CMM-14 ONBOARDING ERROR BOUNDARY]', error)
+  }, [error])
+
   return (
-    <div className="min-h-screen bg-white p-6 font-mono text-xs text-black">
-      <h1 className="text-red-700 text-sm font-bold mb-2">
-        Onboarding crash — CMM-14 diagnose
+    <div style={{ minHeight: '100vh', background: '#ff0066', color: 'white', padding: 24, fontFamily: 'monospace', fontSize: 12 }}>
+      <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>
+        🚨 ONBOARDING CRASH (CMM-14 diag)
       </h1>
-      <div className="mb-2">
-        <strong>Message:</strong> {error.message || '(leer)'}
-      </div>
-      <div className="mb-2">
-        <strong>Digest:</strong> {error.digest || '(keiner)'}
-      </div>
-      <div className="mb-2">
-        <strong>Name:</strong> {error.name}
-      </div>
-      <pre className="bg-gray-100 p-3 rounded overflow-auto max-h-[400px] whitespace-pre-wrap break-all text-[10px]">
+      <div style={{ marginBottom: 8 }}><strong>Message:</strong> {error.message || '(leer)'}</div>
+      <div style={{ marginBottom: 8 }}><strong>Digest:</strong> {error.digest || '(keiner)'}</div>
+      <div style={{ marginBottom: 8 }}><strong>Name:</strong> {error.name}</div>
+      <pre style={{ background: 'rgba(0,0,0,0.4)', padding: 12, borderRadius: 6, overflow: 'auto', maxHeight: 400, whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: 10 }}>
         {error.stack || '(kein Stack)'}
       </pre>
-      <button
-        onClick={reset}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded text-xs"
-      >
+      <button onClick={reset} style={{ marginTop: 16, padding: '8px 16px', background: 'white', color: '#ff0066', border: 'none', borderRadius: 4, fontWeight: 700 }}>
         Erneut versuchen
       </button>
     </div>
