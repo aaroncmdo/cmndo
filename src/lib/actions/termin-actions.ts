@@ -9,8 +9,13 @@ import { generateReminderForTermin, cancelRemindersForTermin } from '@/lib/remin
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
+import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 
 type ActionResult = { success: boolean; error?: string }
+
+// CMM-23: Termin-Dauer in ms aus zentraler Konstante (45 Min). Vorher
+// hardcoded 90 Min an drei Stellen — fließte als 1,5h-Block in den Kalender.
+const TERMIN_DAUER_MS = TERMIN_DAUER_MIN * 60 * 1000
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -315,7 +320,7 @@ export async function terminGegenvorschlag({
   if (!neuesDatum || Number.isNaN(neueStartZeit.getTime())) {
     return { success: false, error: 'Bitte einen gültigen Termin angeben.' }
   }
-  const neueEndZeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000)
+  const neueEndZeit = new Date(neueStartZeit.getTime() + TERMIN_DAUER_MS)
 
   // 1. DB Update
   const { error: updateErr } = await admin.from('gutachter_termine').update({
@@ -550,7 +555,7 @@ export async function terminAnnehmen({
     }
     if (neueStartZeit) {
       updateData.start_zeit = neueStartZeit.toISOString()
-      updateData.end_zeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000).toISOString()
+      updateData.end_zeit = new Date(neueStartZeit.getTime() + TERMIN_DAUER_MS).toISOString()
     }
     const { error: updateErr } = await admin.from('gutachter_termine').update(updateData).eq('id', tId)
     if (updateErr) return { success: false, error: updateErr.message }
@@ -577,7 +582,7 @@ export async function terminAnnehmen({
     }
     if (neueStartZeit) {
       updateData.start_zeit = neueStartZeit.toISOString()
-      updateData.end_zeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000).toISOString()
+      updateData.end_zeit = new Date(neueStartZeit.getTime() + TERMIN_DAUER_MS).toISOString()
     }
     const { error: updateErr } = await admin.from('gutachter_termine').update(updateData).eq('id', tId)
     if (updateErr) return { success: false, error: updateErr.message }
@@ -731,7 +736,7 @@ export async function terminBuchen({
   if (!termin) return { success: false, error: 'Kein aktiver Termin gefunden' }
 
   const slotDate = new Date(slot)
-  const endDate = new Date(slotDate.getTime() + 90 * 60 * 1000)
+  const endDate = new Date(slotDate.getTime() + TERMIN_DAUER_MS)
 
   // 1. DB Update
   const { error: updateErr } = await admin.from('gutachter_termine').update({
