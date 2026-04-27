@@ -19,8 +19,11 @@ import { getVisibleFallSections } from '@/lib/fall/section-visibility'
 // AAR-568 (V2) / AAR-727: Pipeline-Daten baut FallPhasenPanel intern — der
 // FallHeader reicht nur fallId + aktuelle_phase + abgeschlossen_am durch.
 import { FallHeader } from './_components/FallHeader'
-// AAR-770: Mitteilungs-Banner ganz oben in der Fallakte (shared)
-import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
+// CMM-23: FallMitteilungenBanner aus der SV-View entfernt — Aaron-Spec
+// "der SV braucht erstmal die Mitteilungen nicht". Mitteilungen wie
+// "Kunde hat SA unterschrieben" sind für SV irrelevant; was er wissen
+// muss steht im AuftragDokumenteBanner + Stepper. Falls später eine
+// gefilterte SV-Mitteilungs-Sicht gebraucht wird, kommt sie zurück.
 import type { TeamMitglied } from './_components/FallakteDrawer'
 // CMM-23: AktuellePhaseCard, KanzleiRegulierungsStepperCard,
 // KanzleiStatusCard, AbrechnungsCard, AbrechnungsartCard, ReklamationsCard,
@@ -293,10 +296,7 @@ export default function FallDetailClient(props: Props) {
         </div>
       )}
 
-      {/* AAR-770: Mitteilungs-Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
-        <FallMitteilungenBanner fallId={fall.id as string} rolle="sachverstaendiger" />
-      </div>
+      {/* CMM-23: FallMitteilungenBanner für SV entfernt. */}
 
       {/* AAR-757: Phase-gated Banner unter dem Header (vorher in VollClient) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
