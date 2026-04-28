@@ -38,6 +38,7 @@ import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import { getKundenJetztZuTun, type KundeSlaRecord } from '@/lib/kunde/jetzt-zu-tun'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
+import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -391,6 +392,20 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             description={adresse || undefined}
           />
         </div>
+
+        {/* CMM-36: SV-Live-Banner ganz oben — navy/grün, mit Realtime-ETA. */}
+        {svTermin?.id && (
+          <KundeSvLiveBanner
+            terminId={svTermin.id as string}
+            svName={svName}
+            initial={{
+              sv_unterwegs_seit: (svTermin.sv_unterwegs_seit as string | null) ?? null,
+              sv_angekommen_am: (svTermin.sv_angekommen_am as string | null) ?? null,
+              sv_eta_minuten: (svTermin.sv_eta_minuten as number | null) ?? null,
+              durchgefuehrt_am: null,
+            }}
+          />
+        )}
 
         {/* AAR-770: Mitteilungs-Banner — ganz oben mit Quick-Action */}
         <FallMitteilungenBanner fallId={fall.id as string} rolle="kunde" />

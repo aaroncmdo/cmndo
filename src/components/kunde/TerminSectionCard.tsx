@@ -242,19 +242,9 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
         </div>
       )}
 
-      {/* Live-Info (ETA) — CMM-36 Realtime: tickt sobald sv_eta_minuten/_*-Felder
-          auf gutachter_termine geändert werden. */}
-      {liveTermin.sv_unterwegs_seit && !liveTermin.sv_angekommen_am && (
-        <p className="mt-2 text-xs font-medium text-claimondo-ondo">
-          {gegenueber?.name ? `${gegenueber.name.split(' ')[0]} ist unterwegs` : 'Ihr Gutachter ist unterwegs'}
-          {liveTermin.sv_eta_minuten != null && ` — Ankunft in ca. ${liveTermin.sv_eta_minuten} Min.`}
-        </p>
-      )}
-      {liveTermin.sv_angekommen_am && (
-        <p className="mt-2 text-xs font-medium text-emerald-700">
-          {gegenueber?.name ? `${gegenueber.name.split(' ')[0]} ist vor Ort.` : 'Ihr Gutachter ist vor Ort.'}
-        </p>
-      )}
+      {/* CMM-36: Inline-Live-Info entfernt — der KundeSvLiveBanner ganz oben
+          auf der Fallseite ist die einzige Stelle für SV-Anfahrt + Ankunft.
+          Der grüne Live-Punkt rechts oben (isLive) bleibt als Mini-Indikator. */}
 
       {/* Ort oder Video-Link */}
       {isVideo && termin.video_link ? (
