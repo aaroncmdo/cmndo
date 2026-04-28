@@ -26,7 +26,7 @@ import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
 import FallStatusCard from '@/components/kunde/FallStatusCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
-import PflichtdokumenteUploadBanner from '@/components/kunde/PflichtdokumenteUploadBanner'
+import PflichtdokumenteSection from '@/components/fall/PflichtdokumenteSection'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
 import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
@@ -395,10 +395,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* AAR-770: Mitteilungs-Banner — ganz oben mit Quick-Action */}
         <FallMitteilungenBanner fallId={fall.id as string} rolle="kunde" />
 
-        {/* CMM-29: Upload-Banner für offene Pflichtdokumente — direkt aus
-            dem Banner hochladen, ohne Onboarding-Re-Entry. Verschwindet
-            automatisch wenn alle Pflicht-Slots erfüllt sind. */}
-        <PflichtdokumenteUploadBanner slots={pflichtSlots} fallId={fall.id as string} />
+        {/* CMM-33: Zentrale Pflichtdokumente-Section — Banner-Variante zeigt
+            nur offene Slots mit Upload-Button. Verschwindet wenn alle
+            erfüllt sind. */}
+        <PflichtdokumenteSection
+          slots={pflichtSlots}
+          fallId={fall.id as string}
+          rolle="kunde"
+          variant="banner"
+        />
 
         {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
         <KundeJetztZuTunCard aktion={aktion} />

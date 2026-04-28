@@ -5,7 +5,7 @@ import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
 // CMM-24: Auftrags-Banner mit den vom Kunden noch nicht eingereichten
 // Doku-Anforderungen — der SV soll die Liste vor dem Termin sehen.
-// CMM-23: AuftragDokumenteBanner ersetzt durch PflichtdokumenteListe
+// CMM-23/33: AuftragDokumenteBanner ersetzt durch PflichtdokumenteSection (read-only für SV)
 // (vollständige Slot-Sicht mit Download-Links).
 // CMM-23: post-Auftrag MeinFallStatusCard für die Fall-Phasen.
 // Der Stepper rendert in der linken Sidebar (FallDetailClient).
@@ -15,7 +15,7 @@ import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 import BriefingCard from '@/components/fall/BriefingCard'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
-import PflichtdokumenteListe from '@/components/fall/PflichtdokumenteListe'
+import PflichtdokumenteSection from '@/components/fall/PflichtdokumenteSection'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
@@ -394,7 +394,7 @@ export default async function GutachterFallPage({
       {/* CMM-23: Pflichtdokumente-Liste statt nur "noch einzuholen"-Banner —
           zeigt alle relevanten Slots mit Status + Download bei erfüllten Files.
           Verschwindet automatisch wenn keine Pflicht-Slots existieren. */}
-      <PflichtdokumenteListe slots={pflichtSlots} />
+      <PflichtdokumenteSection slots={pflichtSlots} fallId={id} rolle="sv" variant="card" />
       <BriefingCard
         fallId={id}
         briefing={(fall.sv_briefing_text as string | null) ?? null}
