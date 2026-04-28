@@ -1,9 +1,12 @@
 // AAR-103: Kunden-Faelle-Liste (Multi-Fall Trennung)
 // AAR-449: Karten-Upgrade mit nächstem Termin, Action-Hint, „zuletzt aktualisiert"
+// CMM-28: claim-zentrierter Loader ersetzt direkten View-Read.
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import FallKarte from '@/components/kunde/FallKarte'
 import { ladeFallKartenMeta } from '@/lib/kunde/fall-karte-loader'
+import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,14 +15,9 @@ export default async function KundeFaelleListe() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  const { data: faelle } = await supabase
-    .from('v_faelle_mit_aktuellem_termin')
-    .select(
-      // AAR-711: gutachter_termin_bestaetigt_am via View-Alias auf final_verbindlich_ab.
-      'id, fall_nummer, status, schadens_datum, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, gutachter_termin_status, gutachter_termin_bestaetigt_am:aktueller_termin_final_verbindlich_ab, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am, anschlussschreiben_am, regulierung_am, polizei_vor_ort, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, created_at',
-    )
-    .eq('kunde_id', user.id)
-    .order('created_at', { ascending: false })
+  const admin = createAdminClient()
+  const faelleTyped = await getKundeFaelle(admin, user.id, user.email ?? null)
+  const faelle = faelleTyped as unknown as Record<string, unknown>[]
 
   // Auto-Redirect bei nur 1 Fall
   if (faelle && faelle.length === 1) redirect(`/kunde/faelle/${faelle[0].id}`)
