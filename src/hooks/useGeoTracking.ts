@@ -3,6 +3,13 @@
 // CMM-36: Liest die Live-Position des SVs aus sv_live_location (Realtime)
 // und berechnet ETA zur Schadens-Adresse via Mapbox. Wird in FallDetailClient
 // verwendet. Die Position selbst schreibt useGeoPosition im Layout.
+//
+// Sichtbarkeit ist termin-fenstergesteuert: das Banner erscheint nur zwischen
+//   (start_zeit - max(geschaetzte_fahrtzeit_min, 90) - 15 min Puffer)
+// und
+//   (kunde_angekommen_am ?? start_zeit + 60 min).
+// Dadurch flackert das Banner nicht den ganzen Tag, nur weil der SV die App
+// offen hat, sondern realistisch im Anfahrts-Fenster zum konkreten Termin.
 
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -17,12 +24,40 @@ export type GeoTrackingState = {
 }
 
 const ETA_REFRESH_INTERVALL_MS = 30_000
+const FENSTER_PUFFER_MIN = 15
+const FENSTER_FALLBACK_MIN = 90
+
+function imAnfahrtsFenster(opts: {
+  terminStartIso: string | null
+  geschaetzteFahrtzeitMin: number | null
+  kundeAngekommenAm: string | null
+}): boolean {
+  if (opts.terminStartIso == null) return true // kein Termin gesetzt → wie gehabt
+  const start = new Date(opts.terminStartIso).getTime()
+  if (Number.isNaN(start)) return false
+  const fahrtzeit = Math.max(opts.geschaetzteFahrtzeitMin ?? FENSTER_FALLBACK_MIN, FENSTER_FALLBACK_MIN)
+  const fensterStart = start - (fahrtzeit + FENSTER_PUFFER_MIN) * 60_000
+  const fensterEnde = opts.kundeAngekommenAm
+    ? new Date(opts.kundeAngekommenAm).getTime()
+    : start + 60 * 60_000
+  const now = Date.now()
+  return now >= fensterStart && now <= fensterEnde
+}
 
 export function useGeoTracking(opts: {
   svId: string | null
   zielAdresse: string | null
+  terminStartIso?: string | null
+  geschaetzteFahrtzeitMin?: number | null
+  kundeAngekommenAm?: string | null
 }): GeoTrackingState {
-  const { svId, zielAdresse } = opts
+  const {
+    svId,
+    zielAdresse,
+    terminStartIso = null,
+    geschaetzteFahrtzeitMin = null,
+    kundeAngekommenAm = null,
+  } = opts
 
   const [state, setState] = useState<GeoTrackingState>({
     isTracking: false,
@@ -33,6 +68,7 @@ export function useGeoTracking(opts: {
   })
 
   const etaTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const fensterTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const letztePositionRef = useRef<{ lat: number; lng: number } | null>(null)
   const supabase = createClient()
 
@@ -42,6 +78,10 @@ export function useGeoTracking(opts: {
     if (eta) {
       setState((s) => ({ ...s, etaMinuten: eta.etaMinuten, etaAnkunftzeit: eta.etaAnkunftzeit }))
     }
+  }
+
+  function fensterAktiv(): boolean {
+    return imAnfahrtsFenster({ terminStartIso, geschaetzteFahrtzeitMin, kundeAngekommenAm })
   }
 
   useEffect(() => {
@@ -59,8 +99,8 @@ export function useGeoTracking(opts: {
         if (!aktuell) return
         const { lat, lng } = data as { lat: number; lng: number }
         letztePositionRef.current = { lat, lng }
-        setState((s) => ({ ...s, isTracking: true, lat, lng }))
-        aktualisiereEta(lat, lng)
+        setState((s) => ({ ...s, isTracking: fensterAktiv(), lat, lng }))
+        if (fensterAktiv()) aktualisiereEta(lat, lng)
       })
 
     // Realtime: neue Position → ETA neu berechnen
@@ -73,8 +113,8 @@ export function useGeoTracking(opts: {
           const row = payload.new as { lat: number; lng: number } | null
           if (!row) return
           letztePositionRef.current = { lat: row.lat, lng: row.lng }
-          setState((s) => ({ ...s, isTracking: true, lat: row.lat, lng: row.lng }))
-          aktualisiereEta(row.lat, row.lng)
+          setState((s) => ({ ...s, isTracking: fensterAktiv(), lat: row.lat, lng: row.lng }))
+          if (fensterAktiv()) aktualisiereEta(row.lat, row.lng)
         },
       )
       .subscribe()
@@ -82,14 +122,24 @@ export function useGeoTracking(opts: {
     // ETA periodisch auffrischen (Stau-Updates etc.)
     etaTimerRef.current = setInterval(() => {
       const pos = letztePositionRef.current
-      if (pos) aktualisiereEta(pos.lat, pos.lng)
+      if (pos && fensterAktiv()) aktualisiereEta(pos.lat, pos.lng)
+    }, ETA_REFRESH_INTERVALL_MS)
+
+    // Fenster-Status alle 30s neu evaluieren (für Banner-Auf/Zu rund um die Termin-Zeit)
+    fensterTimerRef.current = setInterval(() => {
+      setState((s) => {
+        const aktiv = fensterAktiv() && letztePositionRef.current != null
+        if (s.isTracking === aktiv) return s
+        return { ...s, isTracking: aktiv }
+      })
     }, ETA_REFRESH_INTERVALL_MS)
 
     return () => {
       supabase.removeChannel(channel)
       if (etaTimerRef.current) clearInterval(etaTimerRef.current)
+      if (fensterTimerRef.current) clearInterval(fensterTimerRef.current)
     }
-  }, [svId, zielAdresse]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [svId, zielAdresse, terminStartIso, geschaetzteFahrtzeitMin, kundeAngekommenAm]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return state
 }

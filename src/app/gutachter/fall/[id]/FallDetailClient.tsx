@@ -86,6 +86,8 @@ type TerminInfo = {
   vorgeschlagenes_datum: string | null
   gegenvorschlag_von: string | null
   gegenvorschlag_grund: string | null
+  geschaetzte_fahrtzeit_min?: number | null
+  kunde_angekommen_am?: string | null
 }
 
 type Pflichtdoc = {
@@ -294,6 +296,9 @@ export default function FallDetailClient(props: Props) {
   const geoTracking = useGeoTracking({
     svId: props.svId ?? null,
     zielAdresse: hatGutachten ? null : schadensAdresseTracking,
+    terminStartIso: aktiverTermin?.start_zeit ?? null,
+    geschaetzteFahrtzeitMin: aktiverTermin?.geschaetzte_fahrtzeit_min ?? null,
+    kundeAngekommenAm: aktiverTermin?.kunde_angekommen_am ?? null,
   })
 
   return (

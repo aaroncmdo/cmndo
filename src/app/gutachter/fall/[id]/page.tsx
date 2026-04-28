@@ -237,7 +237,7 @@ export default async function GutachterFallPage({
   // durchgefuehrt_am für die Phasen-Bestimmung.
   const { data: aktiverTermin } = await admin
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, kunde_losgefahren_am, kunde_angekommen_am, durchgefuehrt_am')
+    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, kunde_losgefahren_am, kunde_angekommen_am, durchgefuehrt_am, geschaetzte_fahrtzeit_min')
     .eq('fall_id', id)
     .eq('sv_id', sv.id)
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'durchgefuehrt'])
