@@ -410,7 +410,7 @@ export default async function GutachterFallPage({
           version={(fall.sv_briefing_version as number | null) ?? null}
           canRegenerate={false}
         />
-        <div className="space-y-3">
+        <div className="flex flex-col h-full gap-3">
           {zeigeVorOrt && (
             <VorOrtTriggerCard
               fallId={id}
@@ -420,7 +420,9 @@ export default async function GutachterFallPage({
               compact
             />
           )}
-          <SvEinzuholenBanner slots={pflichtSlots} />
+          <div className="flex-1">
+            <SvEinzuholenBanner slots={pflichtSlots} />
+          </div>
         </div>
       </div>
       {stellungnahmeAktiv && (

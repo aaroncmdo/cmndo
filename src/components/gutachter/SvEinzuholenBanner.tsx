@@ -23,7 +23,7 @@ export default function SvEinzuholenBanner({
   if (offenePflicht.length === 0) return null
 
   return (
-    <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+    <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 h-full">
       <div className="flex items-start gap-3">
         <ClipboardListIcon className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
