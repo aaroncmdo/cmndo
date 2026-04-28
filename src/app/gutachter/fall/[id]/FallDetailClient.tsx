@@ -89,6 +89,7 @@ type TerminInfo = {
   geschaetzte_fahrtzeit_min?: number | null
   sv_angekommen_am?: string | null
   sv_unterwegs_seit?: string | null
+  sv_eta_minuten?: number | null
 }
 
 type Pflichtdoc = {
@@ -303,6 +304,7 @@ export default function FallDetailClient(props: Props) {
     terminId: aktiverTermin?.id ?? null,
     zielLat: (fall.besichtigungsort_lat as number | null) ?? null,
     zielLng: (fall.besichtigungsort_lng as number | null) ?? null,
+    initialEtaMinuten: aktiverTermin?.sv_eta_minuten ?? null,
   })
 
   return (
