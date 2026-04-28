@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { roleToPath } from '@/lib/auth/role-redirect'
@@ -7,6 +8,8 @@ import Link from 'next/link'
 import UpdatesNav from '@/components/shared/updates'
 import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
+// CMM-28: Loader für singleFallId-Resolution in der Nav.
+import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
 import OutboxBadge from '@/components/offline/OutboxBadge'
 // AAR-316 W3: Sprach-Banner mit Google-Translate-Fallback
@@ -55,6 +58,14 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     .maybeSingle()
   const kundenSprache = ((fallSprache?.sprache as string | null) ?? 'de') as SpracheCode
 
+  // CMM-28: Fall-Anzahl für die Nav. Bei Single-Fall-Kunden zeigt KundeNav
+  // „Mein Fall" + linked direkt zur Detail-Page (kein Listen-Zwischenschritt).
+  // Loader nutzt claim_parties + faelle.kunde_id + lead.email — derselbe Pfad
+  // den Dashboard und Listen-Page nutzen, also einmalige Wahrheit.
+  const adminForNav = createAdminClient()
+  const navFaelle = await getKundeFaelle(adminForNav, user.id, user.email ?? null)
+  const singleFallId = navFaelle.length === 1 ? navFaelle[0].id : null
+
   // AAR-536 (K4): SV-Branding aufgelöst. `useBrand=true` nur wenn zugewiesener
   // SV verifiziert + use_custom_branding aktiv + Theme vorhanden.
   const branding = await resolveKundenTheme(user.id)
@@ -93,7 +104,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           </Link>
         </div>
 
-        <KundeNav />
+        <KundeNav singleFallId={singleFallId} />
 
         {/* Profil + Notification unten */}
         <div className="mt-auto px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
@@ -167,7 +178,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
         }}
       >
-        <KundeNav mobile />
+        <KundeNav mobile singleFallId={singleFallId} />
       </nav>
     </div>
   )

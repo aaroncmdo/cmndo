@@ -1,10 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
 // AAR-449: Neue FallKarte + Shared-Loader für Termin/Aktion/LastUpdate
 import FallKarte from '@/components/kunde/FallKarte'
 import { ladeFallKartenMeta, type FallKarteMetaInput } from '@/lib/kunde/fall-karte-loader'
 import { type KundeAktion } from '@/lib/kunde/jetzt-zu-tun'
+// CMM-28: claim-zentrierter Loader ersetzt direkten v_faelle_mit_aktuellem_termin-Read
+import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 
 const AKTION_PRIO: Record<KundeAktion['prioritaet'], number> = { hoch: 3, mittel: 2, niedrig: 1 }
 
@@ -30,38 +34,14 @@ export default async function KundeStartseite() {
     .eq('id', user.id)
     .single()
 
-  // Alle Faelle des Kunden — inkl. der Felder, die FallKarte + getKundenJetztZuTun benötigen.
-  // AAR-711: gutachter_termin_bestaetigt_am gibt's nur als View-Computed
-  // (final_verbindlich_ab) — Alias auf Query-Ebene + Bare-faelle-Fallback ohne.
-  const FALL_SELECT_VIEW =
-    'id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_datum, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, gutachter_termin_bestaetigt_am:aktueller_termin_final_verbindlich_ab, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, polizei_vor_ort, vollmacht_status, vollmacht_signiert_am, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, nachbesichtigung_status, created_at'
-  const FALL_SELECT_BARE =
-    'id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_datum, sa_unterschrieben, sv_id, gutachten_eingegangen_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, polizei_vor_ort, vollmacht_status, vollmacht_signiert_am, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, nachbesichtigung_status, created_at'
-
-  let faelle: Record<string, unknown>[] = []
-
-  const { data: directFaelle } = await supabase
-    .from('v_faelle_mit_aktuellem_termin')
-    .select(FALL_SELECT_VIEW)
-    .eq('kunde_id', user.id)
-    .order('created_at', { ascending: false })
-
-  faelle = directFaelle ?? []
-
-  // Fallback via Lead-Email — Bare faelle hat sv_termin/gutachter_termin_*
-  // nicht (View-only Felder). Termin wird im Loader unten via Meta nachgeladen.
-  if (faelle.length === 0) {
-    const { data: leads } = await supabase.from('leads').select('id').eq('email', user.email!)
-    const leadIds = (leads ?? []).map((l) => l.id)
-    if (leadIds.length) {
-      const { data } = await supabase
-        .from('faelle')
-        .select(FALL_SELECT_BARE)
-        .in('lead_id', leadIds)
-        .order('created_at', { ascending: false })
-      faelle = data ?? []
-    }
-  }
+  // CMM-28: Zentraler claim-Loader. Macht intern die drei-stufige Ownership-
+  // Resolution (claim_parties.user_id ODER faelle.kunde_id ODER lead.email)
+  // + lädt faelle als Lifecycle-Bridge + Termin-Snippet aus gutachter_termine
+  // + Vehicle-Snapshot. Output ist KundeFallView[] mit den Feldern die
+  // FallKarte + ladeFallKartenMeta brauchen.
+  const adminClient = createAdminClient()
+  const faelleTyped = await getKundeFaelle(adminClient, user.id, user.email ?? null)
+  const faelle: Record<string, unknown>[] = faelleTyped as unknown as Record<string, unknown>[]
 
   // KFZ-207: Auto-Reaktivierung kalt-Lead wenn Kunde Portal öffnet
   try {
@@ -103,6 +83,12 @@ export default async function KundeStartseite() {
   // Onboarding-Redirect
   const needsOnboarding = faelle.find((f) => f.onboarding_complete === false)
   if (needsOnboarding) redirect('/kunde/onboarding')
+
+  // CMM-28: Single-Fall-Kunde landet direkt auf der Detail-Page statt auf
+  // dem Liste-Dashboard. Dasselbe Verhalten wie der Sidebar-Nav-Klick.
+  if (faelle.length === 1) {
+    redirect(`/kunde/faelle/${faelle[0].id as string}`)
+  }
 
   // KFZ-128: Ungelesene Nachrichten pro Fall zählen (non-critical)
   const ungeleseneByFall = new Map<string, number>()
@@ -235,6 +221,10 @@ export default async function KundeStartseite() {
     </div>
   )
   } catch (err) {
+    // CMM-28: Next.js's `redirect()` wirft einen NEXT_REDIRECT-Error den
+    // der generic Catch sonst schluckt → Onboarding-Redirect + Single-Fall-
+    // Redirect feuern dann nicht. Special-Error explizit re-throw.
+    if (isRedirectError(err)) throw err
     console.error('[KundeStartseite] Error:', err)
     return (
       <div className="w-full px-4 md:px-8 py-6">

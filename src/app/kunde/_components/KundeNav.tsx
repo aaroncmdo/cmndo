@@ -4,30 +4,43 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon } from 'lucide-react'
 
-// AAR-710: „Alle Fälle" entfernt — `/kunde` zeigt schon alle Fälle als
-// FallKarten. Doppelte Nav-Items waren verwirrend. Klick auf Fall-Karte
-// landet weiter direkt in `/kunde/faelle/<id>` (Fallakte mit Phase-Resolver).
-const NAV_ITEMS = [
-  { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true },
-  { href: '/kunde/termine', label: 'Termine', icon: CalendarIcon },
-  { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon },
-  { href: '/kunde/chat', label: 'Nachrichten', icon: MessageSquareIcon },
-  { href: '/kunde/profil', label: 'Profil', icon: UserIcon },
-]
+// CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
+// und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
+function buildNavItems(singleFallId: string | null) {
+  const fallItem = singleFallId
+    ? { href: `/kunde/faelle/${singleFallId}`, label: 'Mein Fall', icon: HomeIcon, exact: false }
+    : { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true }
+  return [
+    fallItem,
+    { href: '/kunde/termine', label: 'Termine', icon: CalendarIcon, exact: false },
+    { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon, exact: false },
+    { href: '/kunde/chat', label: 'Nachrichten', icon: MessageSquareIcon, exact: false },
+    { href: '/kunde/profil', label: 'Profil', icon: UserIcon, exact: false },
+  ]
+}
 
-// Mobile-Bottom-Nav — 4 Items
-const MOBILE_ITEMS = [
-  NAV_ITEMS.find(i => i.href === '/kunde')!,
-  NAV_ITEMS.find(i => i.href === '/kunde/termine')!,
-  NAV_ITEMS.find(i => i.href === '/kunde/chat')!,
-  NAV_ITEMS.find(i => i.href === '/kunde/profil')!,
-]
-
-export default function KundeNav({ mobile }: { mobile?: boolean }) {
+export default function KundeNav({
+  mobile,
+  singleFallId = null,
+}: {
+  mobile?: boolean
+  /** Wenn der Kunde nur einen Fall hat: faelle.id direkt durchreichen, damit
+   *  die Nav direkt zur Detail-Page linkt statt zum Dashboard mit Liste. */
+  singleFallId?: string | null
+}) {
   const pathname = usePathname()
+  const NAV_ITEMS = buildNavItems(singleFallId)
+  const MOBILE_ITEMS = [
+    NAV_ITEMS[0]!,
+    NAV_ITEMS.find((i) => i.href === '/kunde/termine')!,
+    NAV_ITEMS.find((i) => i.href === '/kunde/chat')!,
+    NAV_ITEMS.find((i) => i.href === '/kunde/profil')!,
+  ]
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href
+    // Bei Single-Fall-Href (`/kunde/faelle/[id]`) ist active wenn der User
+    // auf der Detail-Page ODER einer Sub-Page (kalender etc.) ist.
     return pathname === href || pathname?.startsWith(href + '/')
   }
 
