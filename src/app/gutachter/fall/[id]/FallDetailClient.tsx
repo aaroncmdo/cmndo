@@ -311,8 +311,8 @@ export default function FallDetailClient(props: Props) {
 
       {/* Stepper + Unterwegs-Info + TerminActionsPanel ganz oben — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
-        {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
         <SvUnterwegsInfo tracking={geoTracking} svVorname={props.svVorname ?? null} />
+        {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
         {zeigeTerminActions && aktiverTermin && (
           <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
         )}
