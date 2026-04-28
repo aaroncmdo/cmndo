@@ -27,16 +27,16 @@ export default function AuftragsphaseStepper({ phase }: { phase: SvLifecyclePhas
   const abgeschlossen = auftragsPhaseKey === 'abgeschlossen'
 
   return (
-    <div className="rounded-2xl bg-white border border-claimondo-border px-3 py-2.5">
-      <div className="flex items-center gap-2">
+    <div className="rounded-2xl bg-white border border-claimondo-border px-6 py-4">
+      <div className="flex items-center gap-3">
         {PHASES.map((p, i) => {
           const isCurrent = !abgeschlossen && i === aktuellIdx
           const isDone = abgeschlossen || i < aktuellIdx
           const Icon = p.icon
           return (
-            <div key={p.key} className="flex items-center gap-2 min-w-0">
+            <div key={p.key} className="flex items-center gap-3 min-w-0">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
                   isDone
                     ? 'bg-emerald-500 text-white'
                     : isCurrent
@@ -44,10 +44,10 @@ export default function AuftragsphaseStepper({ phase }: { phase: SvLifecyclePhas
                       : 'bg-claimondo-border/40 text-claimondo-ondo/60'
                 }`}
               >
-                {isDone ? <CheckIcon className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
+                {isDone ? <CheckIcon className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
               </div>
               <p
-                className={`text-xs font-semibold truncate ${
+                className={`text-sm font-semibold truncate ${
                   isCurrent
                     ? 'text-claimondo-navy'
                     : isDone
@@ -59,7 +59,7 @@ export default function AuftragsphaseStepper({ phase }: { phase: SvLifecyclePhas
               </p>
               {i < PHASES.length - 1 && (
                 <div
-                  className={`flex-1 h-px min-w-4 mx-1 ${
+                  className={`flex-1 h-px min-w-8 mx-2 ${
                     isDone ? 'bg-emerald-300' : 'bg-claimondo-border'
                   }`}
                 />
@@ -68,7 +68,7 @@ export default function AuftragsphaseStepper({ phase }: { phase: SvLifecyclePhas
           )
         })}
         {fallPhase && (
-          <span className="ml-auto text-[10px] uppercase tracking-wider font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-1 whitespace-nowrap">
+          <span className="ml-auto text-xs uppercase tracking-wider font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1.5 whitespace-nowrap">
             {FALL_PHASE_LABEL[fallPhase]}
           </span>
         )}
