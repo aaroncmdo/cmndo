@@ -26,7 +26,6 @@ import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
 import FallStatusCard from '@/components/kunde/FallStatusCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
-import PflichtdokumenteListe from '@/components/fall/PflichtdokumenteListe'
 import PflichtdokumenteUploadBanner from '@/components/kunde/PflichtdokumenteUploadBanner'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
@@ -403,10 +402,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
         <KundeJetztZuTunCard aktion={aktion} />
-
-        {/* CMM-23: Pflichtdokumente-Liste mit Status + Download (vollständige
-            Sicht inklusive bereits hochgeladener Slots) */}
-        <PflichtdokumenteListe slots={pflichtSlots} title="Pflichtdokumente" />
 
         {/* AAR-448: Termin-Detail-Card(s) — SV- und KB-Termine mit Quick-Actions */}
         {terminCards.length > 0 && (
