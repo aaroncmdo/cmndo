@@ -36,7 +36,7 @@ export default async function GutachterLayout({
   // AAR-359 W5: sa_vorlage_* + verifizierung_* + gesperrt_* Felder für
   // den Verifizierungs-Banner und die Sidebar-Sichtbarkeit.
   // AAR-512: `gcal_connected` für den generalisierten Onboarding-Banner ergänzt.
-  const svSelect = 'logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, sa_vorlage_status, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund, gcal_connected'
+  const svSelect = 'id, logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, sa_vorlage_status, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund, gcal_connected'
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -111,6 +111,7 @@ export default async function GutachterLayout({
       showTeam={showTeam}
       showCommunity={showCommunity}
       showVerifizierung={showVerifizierung}
+      svId={sv?.id ? String(sv.id) : null}
     >
       {/* Deaktiviert-Banner */}
       {isDeactivated && (

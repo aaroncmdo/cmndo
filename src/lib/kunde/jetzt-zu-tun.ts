@@ -182,43 +182,9 @@ export function getKundenJetztZuTun(
     }
   }
 
-  // 5. + 6. Live-Termin (SV vor Ort oder unterwegs) — basierend auf sv_angekommen_am /
-  // sv_unterwegs_seit Flags ODER auf sv_termin-Zeitfenster.
-  if (fall.sv_angekommen_am) {
-    return {
-      state: 'termin-vor-ort',
-      prioritaet: 'hoch',
-      titel: 'Ihr Gutachter ist vor Ort',
-      beschreibung: fall.sv_name
-        ? `${fall.sv_name} führt gerade die Begutachtung durch.`
-        : 'Die Begutachtung wird gerade durchgeführt.',
-      variant: 'live',
-      severity: 'success',
-      cta: null,
-      live_data: {
-        sv_name: fall.sv_name ?? undefined,
-        angekommen_seit: fall.sv_angekommen_am,
-      },
-    }
-  }
-
-  if (fall.sv_unterwegs_seit) {
-    return {
-      state: 'termin-unterwegs',
-      prioritaet: 'hoch',
-      titel: 'Ihr Gutachter ist unterwegs',
-      beschreibung: fall.sv_name
-        ? `${fall.sv_name} ist auf dem Weg zu Ihnen${fall.sv_eta_minuten ? ` — Ankunft in ca. ${fall.sv_eta_minuten} Min.` : '.'}`
-        : `Ihr Gutachter ist auf dem Weg${fall.sv_eta_minuten ? ` — Ankunft in ca. ${fall.sv_eta_minuten} Min.` : '.'}`,
-      variant: 'live',
-      severity: 'neutral',
-      cta: null,
-      live_data: {
-        sv_name: fall.sv_name ?? undefined,
-        eta_minuten: fall.sv_eta_minuten ?? null,
-      },
-    }
-  }
+  // CMM-36: 'termin-vor-ort' und 'termin-unterwegs'-States hier ausgelagert.
+  // Der Live-Status wird vom KundeSvLiveBanner ganz oben auf der Seite gezeigt
+  // (Realtime, navy/grün) — JetztZuTun zeigt nicht das gleiche dreimal.
 
   // 5b. Fallback aus sv_termin: Termin läuft gerade (±Fenster)
   if (fall.sv_termin) {

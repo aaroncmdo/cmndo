@@ -60,6 +60,9 @@ import AnforderungenListe, {
   type AnforderungsItem,
 } from '@/components/dokumente/AnforderungenListe'
 import type { AnforderbarerSlot } from '@/components/dokumente/AnforderungsModal'
+// CMM-36: Geo-Tracking
+import { useGeoTracking } from '@/hooks/useGeoTracking'
+import { SvUnterwegsInfo } from '@/components/gutachter/SvUnterwegsInfo'
 
 type Lead = {
   vorname: string | null
@@ -83,6 +86,10 @@ type TerminInfo = {
   vorgeschlagenes_datum: string | null
   gegenvorschlag_von: string | null
   gegenvorschlag_grund: string | null
+  geschaetzte_fahrtzeit_min?: number | null
+  sv_angekommen_am?: string | null
+  sv_unterwegs_seit?: string | null
+  sv_eta_minuten?: number | null
 }
 
 type Pflichtdoc = {
@@ -148,6 +155,9 @@ type Props = {
   pflichtSlots?: PflichtSlotForView[]
   /** CMM-23: Auftrags-Phase für den Stepper in der linken Sidebar. */
   svPhase?: SvLifecyclePhase
+  /** CMM-36: Geo-Tracking — ID + Vorname des SVs für ETA-Anzeige */
+  svId?: string | null
+  svVorname?: string | null
 }
 
 /** AAR-399: Lokaler Typ, passt zu DokumentenListe.SlotRow */
@@ -280,6 +290,23 @@ export default function FallDetailClient(props: Props) {
     aktiverTermin?.status === 'reserviert' || aktiverTermin?.status === 'gegenvorschlag'
   const hatGutachten = !!fall.gutachten_eingegangen_am
 
+  // CMM-36: ETA-Anzeige — liest Position aus sv_live_location (Realtime)
+  const schadensAdresseTracking =
+    [(fall.schadens_adresse as string | null), (fall.schadens_plz as string | null), (fall.schadens_ort as string | null)]
+      .filter(Boolean)
+      .join(', ') || null
+  const geoTracking = useGeoTracking({
+    svId: props.svId ?? null,
+    zielAdresse: hatGutachten ? null : schadensAdresseTracking,
+    terminStartIso: aktiverTermin?.start_zeit ?? null,
+    geschaetzteFahrtzeitMin: aktiverTermin?.geschaetzte_fahrtzeit_min ?? null,
+    kundeAngekommenAm: aktiverTermin?.sv_angekommen_am ?? null,
+    terminId: aktiverTermin?.id ?? null,
+    zielLat: (fall.besichtigungsort_lat as number | null) ?? null,
+    zielLng: (fall.besichtigungsort_lng as number | null) ?? null,
+    initialEtaMinuten: aktiverTermin?.sv_eta_minuten ?? null,
+  })
+
   return (
     <div className="min-h-full bg-[#f8f9fb]">
       <FallHeader
@@ -293,8 +320,9 @@ export default function FallDetailClient(props: Props) {
         abgeschlossenAm={abgeschlossenAm}
       />
 
-      {/* Stepper + TerminActionsPanel ganz oben — volle Breite */}
+      {/* Stepper + Unterwegs-Info + TerminActionsPanel ganz oben — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
+        <SvUnterwegsInfo tracking={geoTracking} svVorname={props.svVorname ?? null} />
         {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
         {zeigeTerminActions && aktiverTermin && (
           <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />

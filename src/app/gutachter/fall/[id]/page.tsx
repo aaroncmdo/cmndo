@@ -237,7 +237,7 @@ export default async function GutachterFallPage({
   // durchgefuehrt_am für die Phasen-Bestimmung.
   const { data: aktiverTermin } = await admin
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, kunde_losgefahren_am, kunde_angekommen_am, durchgefuehrt_am')
+    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_unterwegs_seit, sv_angekommen_am, durchgefuehrt_am, geschaetzte_fahrtzeit_min, sv_eta_minuten')
     .eq('fall_id', id)
     .eq('sv_id', sv.id)
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'durchgefuehrt'])
@@ -363,8 +363,8 @@ export default async function GutachterFallPage({
   const svPhase = getSvLifecyclePhase({
     terminStart: (aktiverTermin?.start_zeit as string | null) ?? null,
     terminStatus: (aktiverTermin?.status as string | null) ?? null,
-    svUnterwegsSeit: (aktiverTermin?.kunde_losgefahren_am as string | null) ?? null,
-    svAngekommenAm: (aktiverTermin?.kunde_angekommen_am as string | null) ?? null,
+    svUnterwegsSeit: (aktiverTermin?.sv_unterwegs_seit as string | null) ?? null,
+    svAngekommenAm: (aktiverTermin?.sv_angekommen_am as string | null) ?? null,
     terminDurchgefuehrtAm: (aktiverTermin?.durchgefuehrt_am as string | null) ?? null,
     gutachtenEingegangenAm: (fall.gutachten_eingegangen_am as string | null) ?? null,
     gutachtenFinalFreigegeben: (fall.gutachten_final_freigegeben as boolean | null) ?? null,
@@ -378,6 +378,14 @@ export default async function GutachterFallPage({
   // CMM-23: Pflichtdokumente-Liste laden — 1:1 das was der Kunde im
   // Onboarding sieht, mit Download-Links für hochgeladene Files.
   const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'sv')
+
+  // SV-Vorname für Unterwegs-Banner — kommt aus profiles, nicht aus sachverstaendige
+  const { data: svProfile } = await supabase
+    .from('profiles')
+    .select('vorname')
+    .eq('id', user.id)
+    .single()
+  const svVorname = (svProfile?.vorname as string | null) ?? null
 
   // Vor-Ort-Card: phase-gated (nur wenn Termin da, noch kein Gutachten, richtiger Status)
   const hatGutachten = !!(fall.gutachten_eingegangen_am as string | null)
@@ -499,6 +507,8 @@ export default async function GutachterFallPage({
       konfrontationGewuenscht={konfrontationGewuenscht}
       konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
       konfrontationTerminVorschlaege={terminVorschlaege}
+      svId={(sv as { id: string }).id}
+      svVorname={svVorname}
     />
   )
 }

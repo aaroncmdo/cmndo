@@ -112,6 +112,12 @@ export async function reserveSvTerminForLead(
 
   if (error || !inserted) return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
 
+  // CMM-36: Baseline-Fahrtzeit (SV-Standort → Kunde) einmalig cachen.
+  // Fire-and-forget — Mapbox-Fehler dürfen die Reservation nicht brechen.
+  void import('@/lib/termine/baseline-fahrtzeit').then(({ speichereBaselineFahrtzeit }) =>
+    speichereBaselineFahrtzeit(supabase, inserted.id as string, svId, leadId, null),
+  )
+
   // SV-Benachrichtigung (non-blocking)
   try {
     const { data: leadData } = await supabase

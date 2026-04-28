@@ -4,9 +4,10 @@
 
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import TerminReschedulingModal from './TerminReschedulingModal'
 import { toInitials } from '@/components/shared/KundeAvatar'
+import { createClient } from '@/lib/supabase/client'
 
 export type TerminSectionProps = {
   termin: {
@@ -115,6 +116,42 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
   const [localStatus, setLocalStatus] = useState(termin.status)
   const [localError, setLocalError] = useState<string | null>(null)
   const [copyLinkOk, setCopyLinkOk] = useState(false)
+  // CMM-36: Live-Tracking-Felder spiegeln, damit das Banner ohne Page-Refresh
+  // tickt sobald der SV losfährt / ETA neu rechnet / ankommt.
+  const [liveTracking, setLiveTracking] = useState({
+    sv_unterwegs_seit: termin.sv_unterwegs_seit,
+    sv_angekommen_am: termin.sv_angekommen_am,
+    sv_eta_minuten: termin.sv_eta_minuten,
+  })
+
+  useEffect(() => {
+    if (termin.typ !== 'sv_begutachtung') return
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`termin-live-${termin.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'gutachter_termine', filter: `id=eq.${termin.id}` },
+        (payload) => {
+          const row = payload.new as {
+            sv_unterwegs_seit: string | null
+            sv_angekommen_am: string | null
+            sv_eta_minuten: number | null
+          }
+          setLiveTracking({
+            sv_unterwegs_seit: row.sv_unterwegs_seit,
+            sv_angekommen_am: row.sv_angekommen_am,
+            sv_eta_minuten: row.sv_eta_minuten,
+          })
+        },
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [termin.id, termin.typ])
+
+  const liveTermin = { ...termin, ...liveTracking }
 
   const isVideo = termin.typ === 'kb_beratung' || termin.kanal === 'video'
   const headerTitel = isVideo ? 'Videoberatungstermin' : 'SV-Termin'
@@ -161,8 +198,8 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
   }
 
   const relativ = fmtRelativ(termin.start_zeit)
-  const isLive = !!termin.sv_angekommen_am || !!termin.sv_unterwegs_seit
-  const { label: statusLabel, cls: statusCls } = getStatusConfig({ ...termin, status: localStatus })
+  const isLive = !!liveTermin.sv_angekommen_am || !!liveTermin.sv_unterwegs_seit
+  const { label: statusLabel, cls: statusCls } = getStatusConfig({ ...liveTermin, status: localStatus })
 
   return (
     <section
@@ -205,18 +242,9 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
         </div>
       )}
 
-      {/* Live-Info (ETA) */}
-      {termin.sv_unterwegs_seit && !termin.sv_angekommen_am && (
-        <p className="mt-2 text-xs font-medium text-claimondo-ondo">
-          Ihr Gutachter ist unterwegs
-          {termin.sv_eta_minuten != null && ` — Ankunft in ca. ${termin.sv_eta_minuten} Min.`}
-        </p>
-      )}
-      {termin.sv_angekommen_am && (
-        <p className="mt-2 text-xs font-medium text-emerald-700">
-          Ihr Gutachter ist vor Ort.
-        </p>
-      )}
+      {/* CMM-36: Inline-Live-Info entfernt — der KundeSvLiveBanner ganz oben
+          auf der Fallseite ist die einzige Stelle für SV-Anfahrt + Ankunft.
+          Der grüne Live-Punkt rechts oben (isLive) bleibt als Mini-Indikator. */}
 
       {/* Ort oder Video-Link */}
       {isVideo && termin.video_link ? (
