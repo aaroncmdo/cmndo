@@ -29,6 +29,12 @@ export type HardGateData = {
   unfallort_kategorie?: UnfallortKategorie
   unfallort_lat?: number | null
   unfallort_lng?: number | null
+  // CMM-26: Datum + Uhrzeit wandern aus Phase 4 nach Phase 1 — sie gehören
+  // zum Erstkontakt-Block, nicht zu den Stammdaten. `unfall_uhrzeit` kommt als
+  // freie Eingabe („14 uhr", „ca. 14:30") rein und wird im Save zu HH:MM:SS
+  // normalisiert (`parseUhrzeit`); ungültige Eingaben werden auf null gesetzt.
+  unfalldatum?: string | null
+  unfall_uhrzeit?: string | null
   polizei_vor_ort?: boolean
   polizei_aktenzeichen?: string | null
   polizeibericht_pflicht?: boolean

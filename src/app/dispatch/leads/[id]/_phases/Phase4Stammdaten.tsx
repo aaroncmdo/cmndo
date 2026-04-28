@@ -24,7 +24,6 @@ import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButt
 import { requestCardentityTypBForLead } from '../_actions/cardentity'
 // AAR-314: Auslandskennzeichen — Anfrage an Deutsches Büro Grüne Karte mit Reminder
 import { setGrueneKarteAngefragt } from '../_actions/gruene-karte'
-import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
 import {
   CarIcon,
@@ -1211,39 +1210,10 @@ export default function Phase4Stammdaten() {
             fieldName="gegner_schadennummer"
             leadId={leadId}
           />
-          <InlineField
-            label="Unfalldatum"
-            value={l.unfalldatum ? l.unfalldatum.slice(0, 10) : null}
-            fieldName="unfalldatum"
-            leadId={leadId}
-            type="date"
-          />
-          <InlineField
-            label="Unfall-Uhrzeit (ca.)"
-            value={l.unfall_uhrzeit}
-            fieldName="unfall_uhrzeit"
-            leadId={leadId}
-            placeholder="z.B. 14:30 oder ca. 14 Uhr"
-          />
-
-          {/* Unfallort Google Places */}
-          <div className="space-y-0.5 sm:col-span-2">
-            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider">Unfallort</label>
-            <GooglePlaceAutocomplete
-              defaultValue={l.unfallort ?? ''}
-              placeholder="Adresse wählen ..."
-              onSelect={(r) =>
-                startTransition(async () => {
-                  await saveStammdaten(leadId, {
-                    unfallort: r.adresse,
-                    unfallort_lat: r.lat,
-                    unfallort_lng: r.lng,
-                  })
-                })
-              }
-              className="w-full px-3 py-1.5 border border-claimondo-border rounded-lg text-sm"
-            />
-          </div>
+          {/* CMM-26: Unfalldatum, Unfall-Uhrzeit und Unfallort sind in Phase 1
+              (Erstkontakt) Owner. Phase 4 bezieht sich nur noch auf Gegner +
+              Versicherung. Wenn Korrekturen am Unfall-Block nötig werden, geht
+              der Dispatcher in Phase 1 zurück. */}
         </div>
       </Card>
 

@@ -34,6 +34,7 @@ import {
   buildFallInsertFromLead,
   resolveFallEntityFks,
 } from '@/lib/lead-fall-mapping'
+import { parseUhrzeit } from '@/lib/format/zeit'
 import type { ClaimInsert } from '@/lib/claims/types'
 
 export type ConvertLeadToClaimInput = {
@@ -135,7 +136,10 @@ export async function convertLeadToClaim(
 
     // — Schadensereignis
     schadentag,
-    schadenzeit: (lead.unfall_uhrzeit as string | null) ?? null,
+    // CMM-26: schadenzeit ist eine `time`-Spalte, lead.unfall_uhrzeit kann aber
+    // freier Text sein („14 uhr"). Defensive Normalisierung — bei ungültigem
+    // Format wird null gespeichert statt den Insert zu sprengen.
+    schadenzeit: parseUhrzeit(lead.unfall_uhrzeit as string | null),
     schadenart,
     fall_typ: (lead.schadens_fall_typ as string | null) ?? null,
     ursache: (lead.schadensursache as string | null) ?? null,
@@ -190,7 +194,9 @@ export async function convertLeadToClaim(
     gegner_bekannt: (lead.gegner_bekannt as boolean | null) ?? true,
     gegner_versicherung_id: (lead.gegner_versicherung_id as string | null) ?? null,
     gegner_versicherungsnummer: null, // Lead hat heute keine separate Spalte
-    gegner_aktenzeichen: null,
+    // CMM-26: gegner_aktenzeichen = Schadennummer der gegnerischen
+    // Versicherung. Lead-Spalte heißt `gegner_schadennummer` (UI-Wording).
+    gegner_aktenzeichen: (lead.gegner_schadennummer as string | null) ?? null,
     anzahl_beteiligte_total:
       ((lead.gegner_anzahl_beteiligte as number | null) ?? 0) + 1,
 
@@ -276,18 +282,35 @@ export async function convertLeadToClaim(
     },
   ]
 
-  // Zweite Party: Verursacher (wenn bekannt)
-  if (lead.gegner_bekannt && lead.gegner_name) {
+  // CMM-26: Verursacher-Party — Bedingung gelockert. Bisher war
+  // `gegner_name` Pflicht, aber der Dispatcher erfasst den Gegner üblicherweise
+  // per Kennzeichen + Versicherung (Name kommt erst im Kanzlei-Mandat). Das
+  // hat dazu geführt, dass die Verursacher-Party nie angelegt und der
+  // FlowLink/Kunde keinen Gegner zu sehen bekam. Jetzt: anlegen sobald
+  // `gegner_bekannt !== false` UND irgendein Identifier (KZ / Versicherung /
+  // Name / Fahrzeugtyp / Schadennummer) gesetzt ist.
+  const istGegnerBekannt = lead.gegner_bekannt !== false
+  const hatGegnerInfo =
+    !!(lead.gegner_kennzeichen as string | null) ||
+    !!(lead.gegner_name as string | null) ||
+    !!(lead.gegner_versicherung as string | null) ||
+    !!(lead.gegner_versicherung_id as string | null) ||
+    !!(lead.gegner_fahrzeugtyp as string | null) ||
+    !!(lead.gegner_schadennummer as string | null)
+  if (istGegnerBekannt && hatGegnerInfo) {
     partyInserts.push({
       claim_id: claimId,
       rolle: 'verursacher',
       reihenfolge: 2,
-      // gegner_name ist freitext — wir packen den ganzen String in nachname
+      // gegner_name ist freitext — wir packen den ganzen String in nachname.
+      // Kann null sein, wenn der Gegner nur per KZ/Versicherung erfasst wurde.
       nachname: (lead.gegner_name as string | null) ?? null,
       kennzeichen: (lead.gegner_kennzeichen as string | null) ?? null,
       fahrzeugtyp_klartext: (lead.gegner_fahrzeugtyp as string | null) ?? null,
       versicherung_id: (lead.gegner_versicherung_id as string | null) ?? null,
       versicherung_klartext: (lead.gegner_versicherung as string | null) ?? null,
+      // CMM-26: Schadennummer wird in claims.gegner_aktenzeichen abgelegt
+      // (siehe claimsInsert oben), claim_parties hat keine eigene Spalte.
       adresse_land: 'DE',
       ist_halter: false,
       ist_fahrer: false,
