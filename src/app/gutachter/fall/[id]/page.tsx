@@ -34,7 +34,7 @@ export default async function GutachterFallPage({
   if (!user) redirect('/login')
 
   // Verify this gutachter has an SV profile
-  const sv = await getGutachterForUser(supabase, user.id, 'id, vorname')
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
 
   if (!sv) notFound()
 
@@ -379,8 +379,13 @@ export default async function GutachterFallPage({
   // Onboarding sieht, mit Download-Links für hochgeladene Files.
   const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'sv')
 
-  // SV-Vorname für Unterwegs-Banner
-  const svVorname = (sv as { vorname?: string | null } | null)?.vorname ?? null
+  // SV-Vorname für Unterwegs-Banner — kommt aus profiles, nicht aus sachverstaendige
+  const { data: svProfile } = await supabase
+    .from('profiles')
+    .select('vorname')
+    .eq('id', user.id)
+    .single()
+  const svVorname = (svProfile?.vorname as string | null) ?? null
 
   // Vor-Ort-Card: phase-gated (nur wenn Termin da, noch kein Gutachten, richtiger Status)
   const hatGutachten = !!(fall.gutachten_eingegangen_am as string | null)
