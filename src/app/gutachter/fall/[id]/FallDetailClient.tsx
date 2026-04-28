@@ -398,15 +398,10 @@ export default function FallDetailClient(props: Props) {
               schadens_ort: (fall.schadens_ort as string | null) ?? null,
             }}
           />
-          {/* CMM-33: Read-only Banner mit „vor Ort einzusammeln"-Liste.
-              Zeigt nur die offenen Pflicht-Slots als Bullet-Points; kein
-              Download, kein Status-Pill, kein Upload. Verschwindet wenn
-              alle Pflicht-Slots erfüllt sind. Hochgeladene Files (auch
-              Pflichtdokumente vom Kunden) liegen alle in der Dokumente-
-              Sektion unten (WeitereDokumenteCard). */}
-          {props.pflichtSlots && props.pflichtSlots.length > 0 && (
-            <SvEinzuholenBanner slots={props.pflichtSlots} />
-          )}
+          {/* CMM-33: SvEinzuholenBanner wandert nach oben in die topServer-
+              Blocks (page.tsx) — der SV sieht die „vor Ort einzusammeln"-
+              Liste auf einen Blick beim Öffnen. Files unten in der
+              Dokumente-Sektion (WeitereDokumenteCard). */}
           {/* CMM-23: Vorschäden-Hinweis — wenn der Kunde im Lead/Claim
               Vorschäden gemeldet hat, weiß der SV das vor dem Termin und
               kann die nachgereichten Reparaturrechnungen direkt sehen. */}

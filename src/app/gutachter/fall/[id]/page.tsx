@@ -13,6 +13,7 @@ import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
 import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
 import BriefingCard from '@/components/fall/BriefingCard'
+import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
@@ -390,9 +391,9 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
-      {/* CMM-33: PflichtdokumenteSection wandert nach unten rechts in die
-         „zentrale Dokumente-Sektion" (siehe FallDetailClient) — oben bleibt
-         nur Briefing + Phase-/Mitteilungs-Banner. */}
+      {/* CMM-33: SvEinzuholenBanner ganz oben — read-only Liste der
+         Pflichtdokumente die der SV beim Termin einsammeln muss. */}
+      <SvEinzuholenBanner slots={pflichtSlots} />
       <BriefingCard
         fallId={id}
         briefing={(fall.sv_briefing_text as string | null) ?? null}

@@ -34,20 +34,14 @@ export default function SvEinzuholenBanner({
           </p>
           <ul className="mt-3 space-y-1.5">
             {offenePflicht.map((slot) => (
-              <li
-                key={slot.slot_id}
-                className="text-sm text-claimondo-navy flex items-baseline gap-2"
-              >
-                <span className="text-amber-700 shrink-0">•</span>
-                <div className="min-w-0">
-                  <span className="font-medium">{slot.label}</span>
-                  {slot.beschreibung && (
-                    <span className="text-xs text-claimondo-ondo">
-                      {' — '}
-                      {slot.beschreibung}
-                    </span>
-                  )}
-                </div>
+              <li key={slot.slot_id} className="text-sm text-claimondo-navy">
+                <span className="font-medium">{slot.label}</span>
+                {slot.beschreibung && (
+                  <span className="text-xs text-claimondo-ondo">
+                    {' — '}
+                    {slot.beschreibung}
+                  </span>
+                )}
               </li>
             ))}
           </ul>
