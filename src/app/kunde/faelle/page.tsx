@@ -19,16 +19,9 @@ export default async function KundeFaelleListe() {
   const faelleTyped = await getKundeFaelle(admin, user.id, user.email ?? null)
   const faelle = faelleTyped as unknown as Record<string, unknown>[]
 
-  // CMM-28 Debug: Loader-Output protokollieren bis der Single-Fall-Redirect-
-  // Bug eingegrenzt ist.
-  console.info('[CMM-28 /kunde/faelle]', {
-    user_id: user.id,
-    user_email: user.email,
-    loader_count: faelle.length,
-    fall_ids: faelle.map((f) => f.id as string),
-  })
-
-  // Auto-Redirect bei nur 1 Fall
+  // CMM-28: Auto-Redirect bei Single-Fall — wird in der Praxis selten
+  // erreicht, weil KundeNav bei Single-Fall direkt auf die Detail-Page linkt.
+  // Bleibt als Fallback für Bookmarks / direkte URL-Eingabe.
   if (faelle && faelle.length === 1) {
     redirect(`/kunde/faelle/${faelle[0].id}`)
   }
