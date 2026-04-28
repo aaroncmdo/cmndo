@@ -4,6 +4,7 @@
 // → Gutachten mit Marker auf der aktuellen Phase. Mit Gutachten-Upload =
 // Auftrag durch, Stepper switched auf "Abgeschlossen"-State.
 
+import React from 'react'
 import { CheckIcon, CalendarIcon, MapPinIcon, FileTextIcon } from 'lucide-react'
 import {
   AUFTRAGS_PHASE_INDEX,
@@ -28,47 +29,49 @@ export default function AuftragsphaseStepper({ phase }: { phase: SvLifecyclePhas
 
   return (
     <div className="rounded-2xl bg-white border border-claimondo-border px-6 py-4">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center w-full">
         {PHASES.map((p, i) => {
           const isCurrent = !abgeschlossen && i === aktuellIdx
           const isDone = abgeschlossen || i < aktuellIdx
           const Icon = p.icon
           return (
-            <div key={p.key} className="flex items-center gap-3 min-w-0">
-              <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-                  isDone
-                    ? 'bg-emerald-500 text-white'
-                    : isCurrent
-                      ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                      : 'bg-claimondo-border/40 text-claimondo-ondo/60'
-                }`}
-              >
-                {isDone ? <CheckIcon className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+            <React.Fragment key={p.key}>
+              {/* Schritt: Icon + Label */}
+              <div className="flex items-center gap-3 shrink-0">
+                <div
+                  className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
+                    isDone
+                      ? 'bg-emerald-500 text-white'
+                      : isCurrent
+                        ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                        : 'bg-claimondo-border/40 text-claimondo-ondo/60'
+                  }`}
+                >
+                  {isDone ? <CheckIcon className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+                </div>
+                <p
+                  className={`text-sm font-semibold whitespace-nowrap ${
+                    isCurrent
+                      ? 'text-claimondo-navy'
+                      : isDone
+                        ? 'text-emerald-700'
+                        : 'text-claimondo-ondo/60'
+                  }`}
+                >
+                  {AUFTRAGS_PHASE_LABEL[p.key]}
+                </p>
               </div>
-              <p
-                className={`text-sm font-semibold truncate ${
-                  isCurrent
-                    ? 'text-claimondo-navy'
-                    : isDone
-                      ? 'text-emerald-700'
-                      : 'text-claimondo-ondo/60'
-                }`}
-              >
-                {AUFTRAGS_PHASE_LABEL[p.key]}
-              </p>
+              {/* Verbindungslinie wächst auf verfügbare Breite */}
               {i < PHASES.length - 1 && (
                 <div
-                  className={`flex-1 h-px min-w-8 mx-2 ${
-                    isDone ? 'bg-emerald-300' : 'bg-claimondo-border'
-                  }`}
+                  className={`flex-1 h-px mx-4 ${isDone ? 'bg-emerald-300' : 'bg-claimondo-border'}`}
                 />
               )}
-            </div>
+            </React.Fragment>
           )
         })}
         {fallPhase && (
-          <span className="ml-auto text-xs uppercase tracking-wider font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1.5 whitespace-nowrap">
+          <span className="ml-auto pl-4 text-xs uppercase tracking-wider font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1.5 whitespace-nowrap">
             {FALL_PHASE_LABEL[fallPhase]}
           </span>
         )}
