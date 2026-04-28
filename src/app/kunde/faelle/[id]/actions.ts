@@ -1,9 +1,18 @@
 'use server'
 
+// CMM-29 (Phase 1b): Schreibpfade nutzen den zentralen Ownership-Helper
+// `assertKundeOwnsFall` (claim_parties → faelle.kunde_id → leads.email).
+// Vorher: jede Action hatte ihren eigenen `fall.kunde_id !== user.id`-Check,
+// der den claim-Pfad + Lead-Email-Fallback nicht kannte.
+//
+// Writes auf faelle bleiben — die Lifecycle-Spalten (iban, zahlungsweg,
+// bankdaten_hinterlegt_am) wandern in Phase 6 nach claims/auftraege.
+
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { bestaetigeTermin } from '@/lib/termine/bestaetigung'
+import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 
 export async function sendNachricht(
   fallId: string,
@@ -17,17 +26,22 @@ export async function sendNachricht(
   if (!user) throw new Error('Nicht angemeldet')
   if (!nachricht.trim()) throw new Error('Nachricht darf nicht leer sein')
 
+  const admin = createAdminClient()
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) throw new Error('Nicht autorisiert')
+
   // KFZ-127: Chat-Routing — empfaenger_id auf den zugewiesenen KB setzen
   let empfaengerId: string | null = null
   try {
-    const admin = createAdminClient()
-    const { data: fall } = await admin.from('faelle').select('kundenbetreuer_id, sv_id').eq('id', fallId).single()
-
-    if (kanal === 'chat_kb_kunde' && fall?.kundenbetreuer_id) {
-      empfaengerId = fall.kundenbetreuer_id
-    } else if (kanal === 'chat_kunde_sv' && fall?.sv_id) {
+    if (kanal === 'chat_kb_kunde' && ownership.kundenbetreuerId) {
+      empfaengerId = ownership.kundenbetreuerId
+    } else if (kanal === 'chat_kunde_sv' && ownership.svId) {
       // SV profile_id als empfaenger
-      const { data: sv } = await admin.from('sachverstaendige').select('profile_id').eq('id', fall.sv_id).single()
+      const { data: sv } = await admin
+        .from('sachverstaendige')
+        .select('profile_id')
+        .eq('id', ownership.svId)
+        .single()
       empfaengerId = sv?.profile_id ?? null
     }
   } catch { /* Fallback: kein empfaenger — Admin sieht alles */ }
@@ -44,11 +58,8 @@ export async function sendNachricht(
   if (error) throw new Error(error.message)
 
   // KFZ-129 / AAR-310: Benachrichtigung an empfaenger (KB oder SV).
-  // Vorher: Lookup über chat_gruppen/chat_teilnehmer (Tabellen existieren nicht
-  // mehr, immer Fallback). Jetzt direkt empfaenger benachrichtigen.
   if (empfaengerId) {
     try {
-      const admin = createAdminClient()
       await admin.from('benachrichtigungen').insert({
         user_id: empfaengerId,
         typ: 'nachricht',
@@ -68,10 +79,11 @@ export async function saveBankdaten(fallId: string, iban: string, bic: string, k
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
-  const { data: fall } = await supabase.from('faelle').select('id, kunde_id').eq('id', fallId).single()
-  if (!fall || fall.kunde_id !== user.id) throw new Error('Nicht autorisiert')
+  const admin = createAdminClient()
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) throw new Error('Nicht autorisiert')
 
-  const { error } = await supabase.from('faelle').update({
+  const { error } = await admin.from('faelle').update({
     iban, bic: bic || null, kontoinhaber,
     bankdaten_hinterlegt_am: new Date().toISOString(),
   }).eq('id', fallId)
@@ -94,8 +106,9 @@ export async function uploadPflichtdokumentKunde(fallId: string, pflichtdokument
   const file = formData.get('file') as File
   if (!file || file.size === 0) throw new Error('Keine Datei')
 
-  const { data: fall } = await supabase.from('faelle').select('id, kunde_id').eq('id', fallId).single()
-  if (!fall || fall.kunde_id !== user.id) throw new Error('Nicht autorisiert')
+  const admin = createAdminClient()
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) throw new Error('Nicht autorisiert')
 
   const ext = file.name.split('.').pop() ?? 'bin'
   const path = `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
@@ -142,10 +155,8 @@ export async function waehleGegenvorschlagSlot(
     if (!user) return { success: false, error: 'Nicht angemeldet' }
 
     const admin = createAdminClient()
-
-    // Ownership prüfen
-    const { data: fall } = await admin.from('faelle').select('id, lead_id, service_typ').eq('id', fallId).single()
-    if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+    const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+    if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
     // Termin neu setzen
     const startZeit = `${slot.datum}T${slot.uhrzeit}:00`
@@ -166,15 +177,15 @@ export async function waehleGegenvorschlagSlot(
     // Termin bestätigen (setzt status='bestaetigt' + final_verbindlich_ab)
     await bestaetigeTermin(terminId)
 
-    // Fall touchen + Lead-Termin updaten — Termin-Datum + Status spiegelt die View aus gutachter_termine
+    // Fall touchen + Lead-Termin updaten
     await admin.from('faelle')
       .update({ updated_at: new Date().toISOString() })
       .eq('id', fallId)
 
-    if (fall.lead_id) {
+    if (ownership.leadId) {
       await admin.from('leads')
         .update({ gutachter_termin: startZeit, updated_at: new Date().toISOString() })
-        .eq('id', fall.lead_id as string)
+        .eq('id', ownership.leadId)
     }
 
     // KFZ-136: Reminder generieren
@@ -201,8 +212,8 @@ export async function updateZahlungsweg(
   if (!user) return { success: false }
 
   const admin = createAdminClient()
-  const { data: fall } = await admin.from('faelle').select('id, kunde_id').eq('id', fallId).single()
-  if (!fall || fall.kunde_id !== user.id) return { success: false }
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) return { success: false }
 
   await admin.from('faelle').update({ zahlungsweg }).eq('id', fallId)
   await admin.from('timeline').insert({
