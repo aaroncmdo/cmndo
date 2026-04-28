@@ -14,9 +14,10 @@ type Props = {
   kundeName: string
   kennzeichen: string | null
   adresse: string | null
+  compact?: boolean
 }
 
-export function VorOrtTriggerCard({ fallId, kundeName, kennzeichen, adresse }: Props) {
+export function VorOrtTriggerCard({ fallId, kundeName, kennzeichen, adresse, compact }: Props) {
   const [showPanel, setShowPanel] = useState(false)
   const router = useRouter()
   const mapsLink = adresse
@@ -25,19 +26,24 @@ export function VorOrtTriggerCard({ fallId, kundeName, kennzeichen, adresse }: P
 
   return (
     <>
-      <div className="flex gap-2">
+      <div className={`flex gap-2 ${compact ? 'h-full' : ''}`}>
         <button
           onClick={() => setShowPanel(true)}
-          className="flex-1 bg-claimondo-navy hover:bg-claimondo-ondo text-white text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+          className={`flex-1 bg-claimondo-navy hover:bg-claimondo-ondo text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
+            compact ? 'text-xs px-3 h-full' : 'text-sm py-2.5'
+          }`}
         >
-          <CameraIcon className="w-4 h-4" /> Bin angekommen — Vor-Ort Erfassung
+          <CameraIcon className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
+          {compact ? 'Bin angekommen' : 'Bin angekommen — Vor-Ort Erfassung'}
         </button>
         {mapsLink && (
           <a
             href={mapsLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2"
+            className={`bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
+              compact ? 'text-xs px-3 h-full' : 'text-sm px-4 py-2.5'
+            }`}
           >
             Navigieren
           </a>

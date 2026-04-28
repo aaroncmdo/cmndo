@@ -7,6 +7,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import FallakteShell from './FallakteShell'
+// CMM-33: Zentrale Pflichtdokumente-Section für Admin/KB im DokumenteTab.
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
 // AAR-327: Katalog-driven Slot-Liste für „Dokument anfordern"-Modal
 import { getAlleSlots } from '@/lib/dokumente/katalog'
@@ -602,6 +604,10 @@ export default async function FallaktePage({
         futureEvents={futureEvents}
         dokumenteTabProps={{
           fallId: id,
+          // CMM-33: Smart-Filter Slots als Übersichts-Section oben im Tab.
+          // Rolle bestimmt Permission (Admin/KB upload, SV/Kanzlei read-only).
+          pflichtSlots: await getPflichtdokumenteForFall(supabase, id, viewerRoleForTimeline),
+          viewerRolle: viewerRoleForTimeline,
           pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],
           dokumente: dokumenteLegacy as unknown as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['dokumente'],
           fallAS: {

@@ -10,7 +10,7 @@ import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role
 import type { Rolle } from '@/lib/claims/types'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 import type { PflichtdokumentStand } from '@/app/kunde/onboarding/actions'
-import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteListe'
+import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 
 type PflichtRow = {
   id: string

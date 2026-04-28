@@ -41,11 +41,12 @@ import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
+import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
+import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
 // AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
 import { TerminActionsPanel } from './_components/TerminActionsPanel'
 import { SvToolsCard } from './_components/SvToolsCard'
-import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
 // CMM-23: FallActivityFeed + FallDokumenteSidebar raus (Activity-Feed
 // ohne Tagesgeschäfts-Use-Case; Dokumente-Sidebar war phase-/szenario-
 // gebunden und zeigte oft "Phase nicht gesetzt"). Ersetzt durch die
@@ -143,6 +144,8 @@ type Props = {
       Nachbesichtigung/Konfrontation als Mitteilung wenn aktiv, MeinFallStatusCard).
       Wird direkt nach dem FallHeader vor dem 2-Spalten-Layout gerendert. */
   topServerBlocks?: React.ReactNode
+  /** CMM-33: Pflicht-Slots für die zentrale Dokumente-Sektion unten rechts. */
+  pflichtSlots?: PflichtSlotForView[]
   /** CMM-23: Auftrags-Phase für den Stepper in der linken Sidebar. */
   svPhase?: SvLifecyclePhase
 }
@@ -276,14 +279,6 @@ export default function FallDetailClient(props: Props) {
   const zeigeTerminActions =
     aktiverTermin?.status === 'reserviert' || aktiverTermin?.status === 'gegenvorschlag'
   const hatGutachten = !!fall.gutachten_eingegangen_am
-  const zeigeVorOrt =
-    !!fall.sv_termin &&
-    !hatGutachten &&
-    (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen')
-  const schadensAdresse =
-    [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]
-      .filter(Boolean)
-      .join(', ') || null
 
   return (
     <div className="min-h-full bg-[#f8f9fb]">
@@ -298,39 +293,26 @@ export default function FallDetailClient(props: Props) {
         abgeschlossenAm={abgeschlossenAm}
       />
 
-      {/* CMM-23: Server-rendered Top-Blocks (Banner, Briefing, Stepper,
-          MeinFallStatusCard) — die kommen aus page.tsx mit den Server-Daten. */}
+      {/* Stepper + TerminActionsPanel ganz oben — volle Breite */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
+        {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
+        {zeigeTerminActions && aktiverTermin && (
+          <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
+        )}
+      </div>
+
+      {/* CMM-23: Server-rendered Top-Blocks (Briefing + Einzuholen-Banner,
+          Stellungnahme/Nachbesichtigung, MeinFallStatusCard) */}
       {props.topServerBlocks && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3 space-y-3">
           {props.topServerBlocks}
         </div>
       )}
 
-      {/* CMM-23: FallMitteilungenBanner für SV entfernt. */}
-
-      {/* AAR-757: Phase-gated Banner unter dem Header (vorher in VollClient) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
-        {zeigeTerminActions && aktiverTermin && (
-          <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
-        )}
-        {zeigeVorOrt && (
-          <VorOrtTriggerCard
-            fallId={fall.id as string}
-            kundeName={kundenName}
-            kennzeichen={(fall.kennzeichen as string | null) ?? null}
-            adresse={schadensAdresse}
-          />
-        )}
-      </div>
-
-      {/* CMM-23 Aaron-Layout: links Stepper + Stammdaten; rechts Termin +
-          Gutachten + hochgeladene Dokumente. Keine JetztZuTun, keine
-          Timeline-Vorschau, keine SvTools, kein Activity-Feed.
-          Stellungnahme/Nachbesichtigung/Konfrontation rendern als
-          Mitteilungs-Banner oben (topServerBlocks). */}
+      {/* CMM-23 Aaron-Layout: links Stammdaten; rechts Termin +
+          Gutachten + hochgeladene Dokumente. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
-          {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
           <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
           {/* CMM-23: Unfallgegner-Card — Verursacher aus claim_parties /
               parteien (Name + Versicherung + Kennzeichen). Self-gating wenn
@@ -394,6 +376,10 @@ export default function FallDetailClient(props: Props) {
               schadens_ort: (fall.schadens_ort as string | null) ?? null,
             }}
           />
+          {/* CMM-33: SvEinzuholenBanner wandert nach oben in die topServer-
+              Blocks (page.tsx) — der SV sieht die „vor Ort einzusammeln"-
+              Liste auf einen Blick beim Öffnen. Files unten in der
+              Dokumente-Sektion (WeitereDokumenteCard). */}
           {/* CMM-23: Vorschäden-Hinweis — wenn der Kunde im Lead/Claim
               Vorschäden gemeldet hat, weiß der SV das vor dem Termin und
               kann die nachgereichten Reparaturrechnungen direkt sehen. */}

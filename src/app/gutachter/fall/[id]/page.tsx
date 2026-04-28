@@ -5,7 +5,7 @@ import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
 // CMM-24: Auftrags-Banner mit den vom Kunden noch nicht eingereichten
 // Doku-Anforderungen — der SV soll die Liste vor dem Termin sehen.
-// CMM-23: AuftragDokumenteBanner ersetzt durch PflichtdokumenteListe
+// CMM-23/33: AuftragDokumenteBanner ersetzt durch PflichtdokumenteSection (read-only für SV)
 // (vollständige Slot-Sicht mit Download-Links).
 // CMM-23: post-Auftrag MeinFallStatusCard für die Fall-Phasen.
 // Der Stepper rendert in der linken Sidebar (FallDetailClient).
@@ -13,9 +13,10 @@ import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
 import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
 import BriefingCard from '@/components/fall/BriefingCard'
+import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
+import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
-import PflichtdokumenteListe from '@/components/fall/PflichtdokumenteListe'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
@@ -378,12 +379,20 @@ export default async function GutachterFallPage({
   // Onboarding sieht, mit Download-Links für hochgeladene Files.
   const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'sv')
 
-  // CMM-23: Top-Server-Blocks. Aaron-Reihenfolge: Header → gelber Banner
-  // (Kunde-Anforderungen) → SV-Briefing → MeinFallStatusCard (wenn Fall-
-  // Phase). Stepper wandert in die linke Sidebar.
-  // Mitteilungen für SV: NUR Stellungnahme + Nachbesichtigung sind
-  // tagesgeschäft-relevant — die rendern wir hier oben mit (wenn
-  // angefordert), alles andere ist KB/Admin-only.
+  // Vor-Ort-Card: phase-gated (nur wenn Termin da, noch kein Gutachten, richtiger Status)
+  const hatGutachten = !!(fall.gutachten_eingegangen_am as string | null)
+  const zeigeVorOrt =
+    !!(fall.sv_termin as string | null) &&
+    !hatGutachten &&
+    ((fall.status as string | null) === 'sv-termin' || (fall.status as string | null) === 'sv-zugewiesen')
+  const kundenName = lead
+    ? `${(lead.vorname as string | null) ?? ''} ${(lead.nachname as string | null) ?? ''}`.trim()
+    : '—'
+  const schadensAdresse =
+    [(fall.schadens_adresse as string | null), (fall.schadens_plz as string | null), (fall.schadens_ort as string | null)]
+      .filter(Boolean)
+      .join(', ') || null
+
   const stellungnahmeAktiv = (fall.technische_stellungnahme_status as string | null) === 'angefordert'
   const nachbesichtigungAktiv =
     (fall.nachbesichtigung_status as string | null) === 'angefordert' ||
@@ -391,18 +400,35 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
-      {/* CMM-23: Pflichtdokumente-Liste statt nur "noch einzuholen"-Banner —
-          zeigt alle relevanten Slots mit Status + Download bei erfüllten Files.
-          Verschwindet automatisch wenn keine Pflicht-Slots existieren. */}
-      <PflichtdokumenteListe slots={pflichtSlots} />
-      <BriefingCard
-        fallId={id}
-        briefing={(fall.sv_briefing_text as string | null) ?? null}
-        generatedAt={(fall.sv_briefing_generated_at as string | null) ?? null}
-        model={(fall.sv_briefing_model as string | null) ?? null}
-        version={(fall.sv_briefing_version as number | null) ?? null}
-        canRegenerate={false}
-      />
+      {/* Briefing links — rechts: Vor-Ort-Buttons (compact) oben + Einzuholen-Dokumente darunter */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <BriefingCard
+          fallId={id}
+          briefing={(fall.sv_briefing_text as string | null) ?? null}
+          generatedAt={(fall.sv_briefing_generated_at as string | null) ?? null}
+          model={(fall.sv_briefing_model as string | null) ?? null}
+          version={(fall.sv_briefing_version as number | null) ?? null}
+          canRegenerate={false}
+        />
+        <div className="flex flex-col h-full">
+          {zeigeVorOrt && (
+            <div className="h-[30%] pb-3 flex flex-col">
+              <div className="flex-1 flex flex-col">
+                <VorOrtTriggerCard
+                  fallId={id}
+                  kundeName={kundenName}
+                  kennzeichen={(fall.kennzeichen as string | null) ?? null}
+                  adresse={schadensAdresse}
+                  compact
+                />
+              </div>
+            </div>
+          )}
+          <div className={zeigeVorOrt ? 'h-[70%]' : 'h-full'}>
+            <SvEinzuholenBanner slots={pflichtSlots} />
+          </div>
+        </div>
+      </div>
       {stellungnahmeAktiv && (
         <div className="rounded-2xl border-2 border-orange-300 bg-orange-50 p-4">
           <p className="text-sm font-semibold text-orange-900">Stellungnahme angefordert</p>
@@ -437,6 +463,7 @@ export default async function GutachterFallPage({
   return (
     <FallDetailClient
       topServerBlocks={topServerBlocks}
+      pflichtSlots={pflichtSlots}
       svPhase={svPhase}
       fall={fallWithAbrechnung}
       lead={lead}

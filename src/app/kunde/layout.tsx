@@ -15,9 +15,9 @@ import OutboxBadge from '@/components/offline/OutboxBadge'
 // AAR-316 W3: Sprach-Banner mit Google-Translate-Fallback
 import { SprachBanner } from '@/components/i18n/SprachBanner'
 import type { SpracheCode } from '@/lib/i18n/sprach-banner'
-// CMM-22: Persistenter Pflichtdaten-Banner — sichtbar solange offene
-// Pflicht-Slots existieren, klick führt zurück in den Dokumente-Step.
-import OffeneDatenBanner from '@/components/kunde/OffeneDatenBanner'
+// CMM-22 / CMM-33: Globaler OffeneDatenBanner ist raus — Pflichtdokumente
+// haben jetzt einen dedizierten Banner-Click-Tile in der Fall-Detail-Page,
+// das Pop-over übernimmt den Upload-Flow.
 // AAR-536 (K4): SV-Branding im Kunde-Portal — nur bei verifiziertem SV.
 import { resolveKundenTheme } from '@/lib/branding/kunden-theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
@@ -159,13 +159,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       <main className="flex-1 md:ml-64 pt-14 md:pt-0 pb-20 md:pb-6">
         {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
         <SprachBanner sprache={kundenSprache} />
-        {/* CMM-22: Pflichtdaten-Banner — verschwindet automatisch wenn alle
-            Pflicht-Slots erfüllt sind. Re-Engagement-Pfad in den Dokumente-
-            Step zurück, dort liegt die Upload-Logik aus CMM-21.
-            (AAR-710 hatte den alten Banner aus dem Layout entfernt — der war
-            an pflichtdokumente-Status gebunden ohne Smart-Filter. CMM-22 nutzt
-            jetzt die Claim-driven Logik aus data-requirements.ts.) */}
-        <OffeneDatenBanner />
+        {/* CMM-33: Globaler Pflichtdaten-Banner ist raus — die Detail-Page
+            hat einen eigenen Banner-Click-Tile mit Pop-over (PflichtdokumenteSection
+            variant=banner). Doppel-Banner war redundant. */}
         {children}
       </main>
 
