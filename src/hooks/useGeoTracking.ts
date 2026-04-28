@@ -10,6 +10,7 @@
 // und (kunde_angekommen_am ?? start_zeit + 60 min).
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export type GeoTrackingState = {
@@ -73,6 +74,11 @@ export function useGeoTracking(opts: {
 
   const fensterTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const supabase = createClient()
+  const router = useRouter()
+  // Letzten beobachteten Phase-Marker merken — damit wir router.refresh() nur
+  // bei echten Phasen-Übergängen (termin → besichtigung) feuern, nicht auf
+  // jedem ETA-Tick.
+  const phaseSignaturRef = useRef<string>(`${kundeAngekommenAm ?? 'no_arr'}|${'no_unterwegs'}`)
 
   function fensterAktiv(): boolean {
     return imAnfahrtsFenster({ terminStartIso, geschaetzteFahrtzeitMin, kundeAngekommenAm })
@@ -126,7 +132,11 @@ export function useGeoTracking(opts: {
             'postgres_changes',
             { event: 'UPDATE', schema: 'public', table: 'gutachter_termine', filter: `id=eq.${terminId}` },
             (payload) => {
-              const row = payload.new as { sv_eta_minuten: number | null; sv_angekommen_am: string | null }
+              const row = payload.new as {
+                sv_eta_minuten: number | null
+                sv_angekommen_am: string | null
+                sv_unterwegs_seit: string | null
+              }
               setState((s) => ({
                 ...s,
                 etaMinuten: row.sv_eta_minuten ?? null,
@@ -136,6 +146,12 @@ export function useGeoTracking(opts: {
                     : null,
                 isTracking: !row.sv_angekommen_am && fensterAktiv(),
               }))
+              // Bei Phase-Übergang Stepper neu rechnen lassen
+              const sig = `${row.sv_angekommen_am ?? 'no_arr'}|${row.sv_unterwegs_seit ?? 'no_unterwegs'}`
+              if (sig !== phaseSignaturRef.current) {
+                phaseSignaturRef.current = sig
+                router.refresh()
+              }
             },
           )
           .subscribe()
