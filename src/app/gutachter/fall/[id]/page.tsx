@@ -34,7 +34,7 @@ export default async function GutachterFallPage({
   if (!user) redirect('/login')
 
   // Verify this gutachter has an SV profile
-  const sv = await getGutachterForUser(supabase, user.id, 'id')
+  const sv = await getGutachterForUser(supabase, user.id, 'id, vorname')
 
   if (!sv) notFound()
 
@@ -379,6 +379,17 @@ export default async function GutachterFallPage({
   // Onboarding sieht, mit Download-Links für hochgeladene Files.
   const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'sv')
 
+  // CMM-36: Termin heute aktiv — Tracking nur am Termintag (±12h)
+  const terminHeuteAktiv = (() => {
+    const start = (aktiverTermin?.start_zeit as string | null) ?? null
+    if (!start) return false
+    const diff = Math.abs(Date.now() - new Date(start).getTime())
+    return diff < 12 * 60 * 60 * 1000
+  })()
+
+  // SV-Vorname aus sachverstaendige-Profil (sv-Objekt hat id, profile für Namen via admin)
+  const svVorname = (sv as { vorname?: string | null } | null)?.vorname ?? null
+
   // Vor-Ort-Card: phase-gated (nur wenn Termin da, noch kein Gutachten, richtiger Status)
   const hatGutachten = !!(fall.gutachten_eingegangen_am as string | null)
   const zeigeVorOrt =
@@ -499,6 +510,9 @@ export default async function GutachterFallPage({
       konfrontationGewuenscht={konfrontationGewuenscht}
       konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
       konfrontationTerminVorschlaege={terminVorschlaege}
+      svId={(sv as { id: string }).id}
+      svVorname={svVorname}
+      terminHeuteAktiv={terminHeuteAktiv}
     />
   )
 }

@@ -60,6 +60,9 @@ import AnforderungenListe, {
   type AnforderungsItem,
 } from '@/components/dokumente/AnforderungenListe'
 import type { AnforderbarerSlot } from '@/components/dokumente/AnforderungsModal'
+// CMM-36: Geo-Tracking
+import { useGeoTracking } from '@/hooks/useGeoTracking'
+import { SvUnterwegsInfo } from '@/components/gutachter/SvUnterwegsInfo'
 
 type Lead = {
   vorname: string | null
@@ -148,6 +151,10 @@ type Props = {
   pflichtSlots?: PflichtSlotForView[]
   /** CMM-23: Auftrags-Phase für den Stepper in der linken Sidebar. */
   svPhase?: SvLifecyclePhase
+  /** CMM-36: Geo-Tracking — ID + Vorname des SVs + ob Termin heute aktiv */
+  svId?: string | null
+  svVorname?: string | null
+  terminHeuteAktiv?: boolean
 }
 
 /** AAR-399: Lokaler Typ, passt zu DokumentenListe.SlotRow */
@@ -280,6 +287,18 @@ export default function FallDetailClient(props: Props) {
     aktiverTermin?.status === 'reserviert' || aktiverTermin?.status === 'gegenvorschlag'
   const hatGutachten = !!fall.gutachten_eingegangen_am
 
+  // CMM-36: Geo-Tracking — läuft wenn Termin heute aktiv und noch kein Gutachten
+  const schadensAdresseTracking =
+    [(fall.schadens_adresse as string | null), (fall.schadens_plz as string | null), (fall.schadens_ort as string | null)]
+      .filter(Boolean)
+      .join(', ') || null
+  const geoTracking = useGeoTracking({
+    svId: props.svId ?? null,
+    fallId: (fall.id as string) ?? null,
+    zielAdresse: schadensAdresseTracking,
+    aktiv: !!(props.terminHeuteAktiv && !hatGutachten),
+  })
+
   return (
     <div className="min-h-full bg-[#f8f9fb]">
       <FallHeader
@@ -293,9 +312,10 @@ export default function FallDetailClient(props: Props) {
         abgeschlossenAm={abgeschlossenAm}
       />
 
-      {/* Stepper + TerminActionsPanel ganz oben — volle Breite */}
+      {/* Stepper + Unterwegs-Info + TerminActionsPanel ganz oben — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
         {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
+        <SvUnterwegsInfo tracking={geoTracking} svVorname={props.svVorname ?? null} />
         {zeigeTerminActions && aktiverTermin && (
           <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
         )}
