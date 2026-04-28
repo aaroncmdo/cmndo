@@ -391,17 +391,18 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
-      {/* CMM-33: SvEinzuholenBanner ganz oben — read-only Liste der
-         Pflichtdokumente die der SV beim Termin einsammeln muss. */}
-      <SvEinzuholenBanner slots={pflichtSlots} />
-      <BriefingCard
-        fallId={id}
-        briefing={(fall.sv_briefing_text as string | null) ?? null}
-        generatedAt={(fall.sv_briefing_generated_at as string | null) ?? null}
-        model={(fall.sv_briefing_model as string | null) ?? null}
-        version={(fall.sv_briefing_version as number | null) ?? null}
-        canRegenerate={false}
-      />
+      {/* CMM-33: Briefing links + Einzuholen-Dokumente rechts — 2-Spalten-Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <BriefingCard
+          fallId={id}
+          briefing={(fall.sv_briefing_text as string | null) ?? null}
+          generatedAt={(fall.sv_briefing_generated_at as string | null) ?? null}
+          model={(fall.sv_briefing_model as string | null) ?? null}
+          version={(fall.sv_briefing_version as number | null) ?? null}
+          canRegenerate={false}
+        />
+        <SvEinzuholenBanner slots={pflichtSlots} />
+      </div>
       {stellungnahmeAktiv && (
         <div className="rounded-2xl border-2 border-orange-300 bg-orange-50 p-4">
           <p className="text-sm font-semibold text-orange-900">Stellungnahme angefordert</p>
