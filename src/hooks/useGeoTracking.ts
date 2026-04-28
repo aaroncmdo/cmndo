@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { berechneEta } from '@/lib/mapbox/eta'
 import { haversineMeters } from '@/lib/gps/geofence'
-import { arrived } from '@/lib/termine/actions'
+import { arrived, updateAuftragLive } from '@/lib/termine/actions'
 
 export type GeoTrackingState = {
   isTracking: boolean
@@ -90,6 +90,13 @@ export function useGeoTracking(opts: {
     const eta = await berechneEta(lat, lng, zielAdresse)
     if (eta) {
       setState((s) => ({ ...s, etaMinuten: eta.etaMinuten, etaAnkunftzeit: eta.etaAnkunftzeit }))
+      // CMM-36: ETA + sv_unterwegs_seit auf den Termin spiegeln, damit der
+      // Kunde live "Gutachter ist unterwegs · Ankunft in X Min." sieht.
+      if (terminId && fensterAktiv()) {
+        updateAuftragLive(terminId, eta.etaMinuten).catch((err) =>
+          console.warn('[CMM-36] updateAuftragLive fehlgeschlagen:', err),
+        )
+      }
     }
   }
 
