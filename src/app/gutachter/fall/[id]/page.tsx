@@ -15,7 +15,6 @@ import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 import BriefingCard from '@/components/fall/BriefingCard'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
-import PflichtdokumenteSection from '@/components/fall/PflichtdokumenteSection'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
@@ -391,10 +390,9 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
-      {/* CMM-23: Pflichtdokumente-Liste statt nur "noch einzuholen"-Banner —
-          zeigt alle relevanten Slots mit Status + Download bei erfüllten Files.
-          Verschwindet automatisch wenn keine Pflicht-Slots existieren. */}
-      <PflichtdokumenteSection slots={pflichtSlots} fallId={id} rolle="sv" variant="card" />
+      {/* CMM-33: PflichtdokumenteSection wandert nach unten rechts in die
+         „zentrale Dokumente-Sektion" (siehe FallDetailClient) — oben bleibt
+         nur Briefing + Phase-/Mitteilungs-Banner. */}
       <BriefingCard
         fallId={id}
         briefing={(fall.sv_briefing_text as string | null) ?? null}
@@ -437,6 +435,7 @@ export default async function GutachterFallPage({
   return (
     <FallDetailClient
       topServerBlocks={topServerBlocks}
+      pflichtSlots={pflichtSlots}
       svPhase={svPhase}
       fall={fallWithAbrechnung}
       lead={lead}

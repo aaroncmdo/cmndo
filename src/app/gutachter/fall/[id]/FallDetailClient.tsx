@@ -41,6 +41,7 @@ import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
+import PflichtdokumenteSection, { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
 // AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
 import { TerminActionsPanel } from './_components/TerminActionsPanel'
@@ -143,6 +144,8 @@ type Props = {
       Nachbesichtigung/Konfrontation als Mitteilung wenn aktiv, MeinFallStatusCard).
       Wird direkt nach dem FallHeader vor dem 2-Spalten-Layout gerendert. */
   topServerBlocks?: React.ReactNode
+  /** CMM-33: Pflicht-Slots für die zentrale Dokumente-Sektion unten rechts. */
+  pflichtSlots?: PflichtSlotForView[]
   /** CMM-23: Auftrags-Phase für den Stepper in der linken Sidebar. */
   svPhase?: SvLifecyclePhase
 }
@@ -437,6 +440,19 @@ export default function FallDetailClient(props: Props) {
                 }))
             }
           />
+          {/* CMM-33: Zentrale Dokumente-Sektion unten rechts — Pflicht-Slots
+              read-only mit Download-Links + WeitereDokumenteCard für Sonstige.
+              SV sammelt Pflicht-Dokumente vor Ort und reicht sie mit dem
+              Gutachten zusammen ein (Auftrag → Claim-Merge in CMM-32). */}
+          {props.pflichtSlots && props.pflichtSlots.length > 0 && (
+            <PflichtdokumenteSection
+              slots={props.pflichtSlots}
+              fallId={fall.id as string}
+              rolle="sv"
+              variant="card"
+              title="Pflichtdokumente vom Kunden"
+            />
+          )}
           {/* CMM-23: WeitereDokumenteCard ersetzt FallDokumenteSidebar —
               keine Phase/Szenario-Abhängigkeit mehr; einfach die hochgeladenen
               Dokumente + ein Datei-Picker der via uploadDatei den Fall
