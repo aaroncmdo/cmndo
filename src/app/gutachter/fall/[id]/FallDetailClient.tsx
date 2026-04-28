@@ -397,6 +397,18 @@ export default function FallDetailClient(props: Props) {
               schadens_ort: (fall.schadens_ort as string | null) ?? null,
             }}
           />
+          {/* CMM-33: Pflichtdokumente vom Kunden direkt nach dem Termin —
+              SV sieht beim Öffnen sofort welche Slots schon erfüllt sind
+              und welche fehlen, ohne in den Dokumente-Block runterzuscrollen. */}
+          {props.pflichtSlots && props.pflichtSlots.length > 0 && (
+            <PflichtdokumenteSection
+              slots={props.pflichtSlots}
+              fallId={fall.id as string}
+              rolle="sv"
+              variant="card"
+              title="Pflichtdokumente vom Kunden"
+            />
+          )}
           {/* CMM-23: Vorschäden-Hinweis — wenn der Kunde im Lead/Claim
               Vorschäden gemeldet hat, weiß der SV das vor dem Termin und
               kann die nachgereichten Reparaturrechnungen direkt sehen. */}
@@ -440,19 +452,6 @@ export default function FallDetailClient(props: Props) {
                 }))
             }
           />
-          {/* CMM-33: Zentrale Dokumente-Sektion unten rechts — Pflicht-Slots
-              read-only mit Download-Links + WeitereDokumenteCard für Sonstige.
-              SV sammelt Pflicht-Dokumente vor Ort und reicht sie mit dem
-              Gutachten zusammen ein (Auftrag → Claim-Merge in CMM-32). */}
-          {props.pflichtSlots && props.pflichtSlots.length > 0 && (
-            <PflichtdokumenteSection
-              slots={props.pflichtSlots}
-              fallId={fall.id as string}
-              rolle="sv"
-              variant="card"
-              title="Pflichtdokumente vom Kunden"
-            />
-          )}
           {/* CMM-23: WeitereDokumenteCard ersetzt FallDokumenteSidebar —
               keine Phase/Szenario-Abhängigkeit mehr; einfach die hochgeladenen
               Dokumente + ein Datei-Picker der via uploadDatei den Fall
