@@ -12,8 +12,11 @@
 // offen hat, sondern realistisch im Anfahrts-Fenster zum konkreten Termin.
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { berechneEta } from '@/lib/mapbox/eta'
+import { haversineMeters } from '@/lib/gps/geofence'
+import { arrived } from '@/lib/termine/actions'
 
 export type GeoTrackingState = {
   isTracking: boolean
@@ -26,6 +29,7 @@ export type GeoTrackingState = {
 const ETA_REFRESH_INTERVALL_MS = 30_000
 const FENSTER_PUFFER_MIN = 15
 const FENSTER_FALLBACK_MIN = 90
+const ANKUNFT_RADIUS_M = 100
 
 function imAnfahrtsFenster(opts: {
   terminStartIso: string | null
@@ -50,6 +54,10 @@ export function useGeoTracking(opts: {
   terminStartIso?: string | null
   geschaetzteFahrtzeitMin?: number | null
   kundeAngekommenAm?: string | null
+  /** Termin-ID — wenn gesetzt zusammen mit zielLat/zielLng wird Auto-Ankunft gefeuert. */
+  terminId?: string | null
+  zielLat?: number | null
+  zielLng?: number | null
 }): GeoTrackingState {
   const {
     svId,
@@ -57,7 +65,12 @@ export function useGeoTracking(opts: {
     terminStartIso = null,
     geschaetzteFahrtzeitMin = null,
     kundeAngekommenAm = null,
+    terminId = null,
+    zielLat = null,
+    zielLng = null,
   } = opts
+  const router = useRouter()
+  const ankunftGefeuertRef = useRef<boolean>(!!kundeAngekommenAm)
 
   const [state, setState] = useState<GeoTrackingState>({
     isTracking: false,
@@ -84,6 +97,28 @@ export function useGeoTracking(opts: {
     return imAnfahrtsFenster({ terminStartIso, geschaetzteFahrtzeitMin, kundeAngekommenAm })
   }
 
+  function pruefeAnkunft(lat: number, lng: number) {
+    if (
+      !terminId ||
+      zielLat == null ||
+      zielLng == null ||
+      ankunftGefeuertRef.current ||
+      kundeAngekommenAm
+    ) return
+    const distanz = haversineMeters(lat, lng, zielLat, zielLng)
+    if (distanz > ANKUNFT_RADIUS_M) return
+    ankunftGefeuertRef.current = true
+    arrived(terminId).then((r) => {
+      if (r?.error) {
+        console.warn('[CMM-36] Auto-Ankunft fehlgeschlagen:', r.error)
+        ankunftGefeuertRef.current = false
+        return
+      }
+      setState((s) => ({ ...s, isTracking: false }))
+      router.refresh()
+    })
+  }
+
   useEffect(() => {
     if (!svId) return
 
@@ -100,7 +135,10 @@ export function useGeoTracking(opts: {
         const { lat, lng } = data as { lat: number; lng: number }
         letztePositionRef.current = { lat, lng }
         setState((s) => ({ ...s, isTracking: fensterAktiv(), lat, lng }))
-        if (fensterAktiv()) aktualisiereEta(lat, lng)
+        if (fensterAktiv()) {
+          aktualisiereEta(lat, lng)
+          pruefeAnkunft(lat, lng)
+        }
       })
 
     // Realtime: neue Position → ETA neu berechnen
@@ -114,7 +152,10 @@ export function useGeoTracking(opts: {
           if (!row) return
           letztePositionRef.current = { lat: row.lat, lng: row.lng }
           setState((s) => ({ ...s, isTracking: fensterAktiv(), lat: row.lat, lng: row.lng }))
-          if (fensterAktiv()) aktualisiereEta(row.lat, row.lng)
+          if (fensterAktiv()) {
+            aktualisiereEta(row.lat, row.lng)
+            pruefeAnkunft(row.lat, row.lng)
+          }
         },
       )
       .subscribe()
@@ -139,7 +180,7 @@ export function useGeoTracking(opts: {
       if (etaTimerRef.current) clearInterval(etaTimerRef.current)
       if (fensterTimerRef.current) clearInterval(fensterTimerRef.current)
     }
-  }, [svId, zielAdresse, terminStartIso, geschaetzteFahrtzeitMin, kundeAngekommenAm]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [svId, zielAdresse, terminStartIso, geschaetzteFahrtzeitMin, kundeAngekommenAm, terminId, zielLat, zielLng]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return state
 }
