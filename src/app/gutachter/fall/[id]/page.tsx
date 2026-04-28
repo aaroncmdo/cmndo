@@ -412,14 +412,16 @@ export default async function GutachterFallPage({
         />
         <div className="flex flex-col h-full">
           {zeigeVorOrt && (
-            <div className="h-[30%] pb-3 flex flex-col justify-center">
-              <VorOrtTriggerCard
-                fallId={id}
-                kundeName={kundenName}
-                kennzeichen={(fall.kennzeichen as string | null) ?? null}
-                adresse={schadensAdresse}
-                compact
-              />
+            <div className="h-[30%] pb-3 flex flex-col">
+              <div className="flex-1 flex flex-col">
+                <VorOrtTriggerCard
+                  fallId={id}
+                  kundeName={kundenName}
+                  kennzeichen={(fall.kennzeichen as string | null) ?? null}
+                  adresse={schadensAdresse}
+                  compact
+                />
+              </div>
             </div>
           )}
           <div className={zeigeVorOrt ? 'h-[70%]' : 'h-full'}>
