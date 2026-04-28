@@ -54,6 +54,11 @@ import {
   type FallAS,
   type QcCheckliste,
 } from '@/components/admin/fallakte/dokumente'
+// CMM-33: Zentrale Pflichtdokumente-Section als Übersicht oben im Tab.
+import PflichtdokumenteSection, {
+  type PflichtSlotForView,
+  type PflichtSectionRolle,
+} from '@/components/fall/PflichtdokumenteSection'
 
 type Pflichtdok = {
   id: string
@@ -106,6 +111,10 @@ const KAT_COLORS: Record<string, string> = {
 
 type DokumenteTabProps = {
   fallId: string
+  /** CMM-33: Smart-Filter Slots für die Übersichts-Section oben. */
+  pflichtSlots?: PflichtSlotForView[]
+  /** CMM-33: Rolle des betrachtenden Users — bestimmt Upload-Permission. */
+  viewerRolle: PflichtSectionRolle
   pflichtdokumente: Pflichtdok[]
   dokumente: Dokument[]
   fallAS: FallAS
@@ -126,6 +135,8 @@ type DokumenteTabProps = {
 
 export default function DokumenteTab({
   fallId,
+  pflichtSlots,
+  viewerRolle,
   pflichtdokumente,
   dokumente,
   fallAS,
@@ -212,6 +223,19 @@ export default function DokumenteTab({
 
   return (
     <div className="space-y-6">
+      {/* CMM-33: Zentrale Pflichtdokumente-Übersicht — Smart-Filter Slots
+          mit Status + Download (+ Upload für Admin/KB). Die alte Drag&Drop-
+          Verwaltungs-UI bleibt darunter erhalten. */}
+      {pflichtSlots && pflichtSlots.length > 0 && (
+        <PflichtdokumenteSection
+          slots={pflichtSlots}
+          fallId={fallId}
+          rolle={viewerRolle}
+          variant="card"
+          title="Pflichtdokumente vom Kunden"
+        />
+      )}
+
       {/* Fortschritt */}
       <div className="flex items-center gap-3">
         <div className="flex-1">
