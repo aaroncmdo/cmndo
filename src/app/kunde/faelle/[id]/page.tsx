@@ -34,9 +34,7 @@ import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
-import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
-import { getKundenJetztZuTun, type KundeSlaRecord } from '@/lib/kunde/jetzt-zu-tun'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
@@ -179,53 +177,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const aktuellePhaseSnake = (fall.aktuelle_phase as string | null | undefined) ?? null
     const abgeschlossenAmKunde = (fall.abgeschlossen_am as string | null | undefined) ?? null
 
-    // Jetzt-zu-tun-Aktion für diesen Fall berechnen
-    const { data: polizeiDocs } = await admin
-      .from('pflichtdokumente')
-      .select('dokument_typ, dokument_url, status')
-      .eq('fall_id', id)
-    const polizeiberichtUploaded = !!(polizeiDocs ?? []).find(
-      (d) => d.dokument_typ === 'polizeibericht' && !!d.dokument_url,
-    )
-    const hatOffeneNachreichung = !!(polizeiDocs ?? []).find(
-      (d) => d.status === 'nachgereicht_angefordert',
-    )
-    let kundeSlasDetail: KundeSlaRecord[] = []
-    try {
-      const { data: slas } = await admin
-        .from('sla_tracking')
-        .select('fall_id, blocker_rolle, blocker_grund, status, breach_at')
-        .eq('fall_id', id)
-        .eq('blocker_rolle', 'kunde')
-        .eq('status', 'breached')
-      kundeSlasDetail = (slas ?? []) as KundeSlaRecord[]
-    } catch { /* non-critical */ }
-
-    // SV-Live-Status für diesen Fall (sv_unterwegs/sv_angekommen)
-    let svLive: { unterwegs: boolean; vorOrt: boolean; eta: number | null } = {
-      unterwegs: false,
-      vorOrt: false,
-      eta: null,
-    }
-    try {
-      const { data: termine } = await admin
-        .from('gutachter_termine')
-        .select('sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am')
-        .eq('fall_id', id)
-        .eq('typ', 'sv_begutachtung')
-        .is('durchgefuehrt_am', null)
-        .not('sv_unterwegs_seit', 'is', null)
-        .order('sv_unterwegs_seit', { ascending: false })
-        .limit(1)
-      const t = termine?.[0]
-      if (t) {
-        svLive = {
-          unterwegs: !t.sv_angekommen_am,
-          vorOrt: !!t.sv_angekommen_am,
-          eta: t.sv_eta_minuten ? Number(t.sv_eta_minuten) : null,
-        }
-      }
-    } catch { /* non-critical */ }
+    // CMM-36: polizeiDocs/SLAs/svLive-Berechnung für KundeJetztZuTunCard
+    // entfernt — die Card existiert nicht mehr auf dieser Seite. Live-Tracking
+    // läuft über KundeSvLiveBanner (Realtime), Pflichtdokumente über
+    // PflichtdokumenteSection.
 
     // Termin-Daten für die Detail-Card (SV + KB)
     const aktiveStatus = ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben']
@@ -348,32 +303,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       return ta - tb
     })
 
-    const aktion = getKundenJetztZuTun(
-      {
-        id: fall.id as string,
-        onboarding_complete: (fall.onboarding_complete as boolean | null) ?? null,
-        sa_unterschrieben: (fall.sa_unterschrieben as boolean | null) ?? null,
-        vollmacht_signiert_am: fall.vollmacht_signiert_am as string | null,
-        vollmacht_status: fall.vollmacht_status as string | null,
-        gutachter_termin_status: (fall.gutachter_termin_status as string | null) ?? null,
-        sv_termin: (fall.sv_termin as string | null) ?? null,
-        gutachter_termin_bestaetigt_am: fall.gutachter_termin_bestaetigt_am as string | null,
-        anschlussschreiben_am: (fall.anschlussschreiben_am as string | null) ?? null,
-        regulierung_am: (fall.regulierung_am as string | null) ?? null,
-        polizei_vor_ort: (fall.polizei_vor_ort as boolean | null) ?? null,
-        polizeibericht_uploaded: polizeiberichtUploaded,
-        hat_offene_nachreichung: hatOffeneNachreichung,
-        sv_unterwegs_seit: svLive.unterwegs ? new Date().toISOString() : null,
-        sv_angekommen_am: svLive.vorOrt ? new Date().toISOString() : null,
-        sv_name: svName,
-        sv_eta_minuten: svLive.eta,
-        status: (fall.status as string | null) ?? null,
-        abgeschlossen_am: fall.abgeschlossen_am as string | null,
-        nachbesichtigung_status: fall.nachbesichtigung_status as string | null,
-      },
-      kundeSlasDetail,
-    )
-
     const gutachtenVerfuegbar = !!fall.gutachten_eingegangen_am
 
     const kennzeichen = (fall.kennzeichen as string) ?? ''
@@ -420,8 +349,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           variant="banner"
         />
 
-        {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
-        <KundeJetztZuTunCard aktion={aktion} />
+        {/* CMM-36: KundeJetztZuTunCard entfernt — die Kanzlei-Flow-Aktionen
+            sind nicht mehr relevant, Live-Tracking läuft via SV-Live-Banner
+            ganz oben, Pflichtdokumente via PflichtdokumenteSection. */}
 
         {/* AAR-448: Termin-Detail-Card(s) — SV- und KB-Termine mit Quick-Actions */}
         {terminCards.length > 0 && (
