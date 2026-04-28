@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
 // AAR-449: Neue FallKarte + Shared-Loader für Termin/Aktion/LastUpdate
 import FallKarte from '@/components/kunde/FallKarte'
@@ -82,6 +83,12 @@ export default async function KundeStartseite() {
   // Onboarding-Redirect
   const needsOnboarding = faelle.find((f) => f.onboarding_complete === false)
   if (needsOnboarding) redirect('/kunde/onboarding')
+
+  // CMM-28: Single-Fall-Kunde landet direkt auf der Detail-Page statt auf
+  // dem Liste-Dashboard. Dasselbe Verhalten wie der Sidebar-Nav-Klick.
+  if (faelle.length === 1) {
+    redirect(`/kunde/faelle/${faelle[0].id as string}`)
+  }
 
   // KFZ-128: Ungelesene Nachrichten pro Fall zählen (non-critical)
   const ungeleseneByFall = new Map<string, number>()
@@ -214,6 +221,10 @@ export default async function KundeStartseite() {
     </div>
   )
   } catch (err) {
+    // CMM-28: Next.js's `redirect()` wirft einen NEXT_REDIRECT-Error den
+    // der generic Catch sonst schluckt → Onboarding-Redirect + Single-Fall-
+    // Redirect feuern dann nicht. Special-Error explizit re-throw.
+    if (isRedirectError(err)) throw err
     console.error('[KundeStartseite] Error:', err)
     return (
       <div className="w-full px-4 md:px-8 py-6">

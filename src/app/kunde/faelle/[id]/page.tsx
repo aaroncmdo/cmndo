@@ -38,7 +38,8 @@ import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import { getKundenJetztZuTun, type KundeSlaRecord } from '@/lib/kunde/jetzt-zu-tun'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
-import { getKundeFallDetailRecord } from '@/lib/claims/get-kunde-faelle'
+import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -54,6 +55,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // (claim_parties.user_id ODER faelle.kunde_id ODER lead.email).
     const fall = await getKundeFallDetailRecord(admin, user.id, user.email ?? null, id)
     if (!fall) notFound()
+
+    // CMM-28: Zurück-Link „← Meine Fälle" nur sinnvoll wenn der Kunde
+    // mehrere Fälle hat. Bei Single-Fall existiert keine Liste-Seite zum
+    // zurückkehren (Layout-Nav heißt „Mein Fall" + linked direkt hierher).
+    const allFaelle = await getKundeFaelle(admin, user.id, user.email ?? null)
+    const hatMehrereFaelle = allFaelle.length > 1
 
     // Kanzlei-Daten laden (Name, Adresse, Email aus kanzleien-Tabelle)
     let kanzleiRow: { name: string | null; email: string | null; adresse: string | null } | null = null
@@ -374,9 +381,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
-        {/* Header */}
+        {/* Header — CMM-28: Zurück-Link nur bei Multi-Fall-Kunden */}
         <div>
-          <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; Meine Fälle</Link>
+          {hatMehrereFaelle && (
+            <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; Meine Fälle</Link>
+          )}
           <PageHeader
             title={`${kennzeichen || (fall.fall_nummer as string | null) || 'Schadensfall'}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
             description={adresse || undefined}
@@ -580,6 +589,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       </div>
     )
   } catch (err) {
+    if (isRedirectError(err)) throw err
     console.error('[KundeFallDetail] Error:', err)
     return (
       <div className="p-8 text-center">
