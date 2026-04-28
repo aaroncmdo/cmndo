@@ -72,6 +72,10 @@ type LeadFields = {
   unfallort?: string | null
   unfallort_lat?: number | null
   unfallort_lng?: number | null
+  // CMM-26: Datum + Uhrzeit aus Phase 4 nach Phase 1 gezogen — sie gehören
+  // zum Erstkontakt, nicht zu den Stammdaten.
+  unfalldatum?: string | null
+  unfall_uhrzeit?: string | null
   polizei_vor_ort?: boolean | null
   polizei_aktenzeichen?: string | null
   polizeibericht_pflicht?: boolean | null
@@ -183,6 +187,8 @@ export default function Phase1Qualifizierung() {
     unfallort: l.unfallort ?? '',
     unfallort_lat: l.unfallort_lat ?? null,
     unfallort_lng: l.unfallort_lng ?? null,
+    unfalldatum: l.unfalldatum ?? '',
+    unfall_uhrzeit: l.unfall_uhrzeit ?? '',
     polizei_vor_ort: l.polizei_vor_ort ?? undefined,
     polizei_aktenzeichen: l.polizei_aktenzeichen ?? '',
     polizeibericht_pflicht: l.polizeibericht_pflicht ?? undefined,
@@ -260,6 +266,9 @@ export default function Phase1Qualifizierung() {
     // unfallort bewusst NICHT im Hash — Phase 2 ist Owner des Unfallorts.
     // Beide Phases zu includen führte zu Überschreib-Race wenn Phase1 Unmount-
     // Flush feuert nachdem Phase2 bereits eine neue Adresse gespeichert hat.
+    // CMM-26: Datum + Uhrzeit hingegen sind reine Phase-1-Felder.
+    unfalldatum: draft.unfalldatum,
+    unfall_uhrzeit: draft.unfall_uhrzeit,
   })
   const autoSavedHashRef = useRef<string>(draftHash)
   const draftRef = useRef(draft)
@@ -299,6 +308,9 @@ export default function Phase1Qualifizierung() {
         polizei_vor_ort: currentDraft.polizei_vor_ort,
         polizei_aktenzeichen: currentDraft.polizei_aktenzeichen,
         polizeibericht_vorhanden: currentDraft.polizeibericht_vorhanden,
+        // CMM-26: Datum + Uhrzeit auch im Unmount-Flush mitschreiben.
+        unfalldatum: currentDraft.unfalldatum,
+        unfall_uhrzeit: currentDraft.unfall_uhrzeit,
       })
       if (autoSavedHashRef.current === currentHash) return
       const { polizeibericht_vorhanden, ...toSave } = currentDraft
@@ -661,6 +673,36 @@ export default function Phase1Qualifizierung() {
             Koordinaten fehlen — SV-Dispatch nutzt Kunden-Adresse als Fallback. Bitte einen Autocomplete-Vorschlag wählen.
           </p>
         )}
+
+        {/* CMM-26: Datum + Uhrzeit gehören zum Erstkontakt — wandern aus
+            Phase 4 hier hin. Uhrzeit ist Freitext (Dispatcher tippt mit, was
+            der Kunde sagt: „14 Uhr", „ca. 14:30"); die Normalisierung zu
+            HH:MM:SS passiert in saveHardGate / convertLeadToClaim. */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-0.5">
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">
+              Unfalldatum
+            </label>
+            <input
+              type="date"
+              value={(draft.unfalldatum ?? '').slice(0, 10)}
+              onChange={(e) => setDraft((d) => ({ ...d, unfalldatum: e.target.value || null }))}
+              className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-claimondo-ondo"
+            />
+          </div>
+          <div className="space-y-0.5">
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">
+              Unfall-Uhrzeit (ca.)
+            </label>
+            <input
+              type="text"
+              value={draft.unfall_uhrzeit ?? ''}
+              onChange={(e) => setDraft((d) => ({ ...d, unfall_uhrzeit: e.target.value }))}
+              placeholder="z.B. 14:30, 14 Uhr, ca. 8:15"
+              className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-claimondo-ondo"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Q3 — Polizei vor Ort (KOMPLETT NEU, Spec §3 Q3) */}

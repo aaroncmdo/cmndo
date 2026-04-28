@@ -34,6 +34,7 @@ import {
   buildFallInsertFromLead,
   resolveFallEntityFks,
 } from '@/lib/lead-fall-mapping'
+import { parseUhrzeit } from '@/lib/format/zeit'
 import type { ClaimInsert } from '@/lib/claims/types'
 
 export type ConvertLeadToClaimInput = {
@@ -135,7 +136,10 @@ export async function convertLeadToClaim(
 
     // — Schadensereignis
     schadentag,
-    schadenzeit: (lead.unfall_uhrzeit as string | null) ?? null,
+    // CMM-26: schadenzeit ist eine `time`-Spalte, lead.unfall_uhrzeit kann aber
+    // freier Text sein („14 uhr"). Defensive Normalisierung — bei ungültigem
+    // Format wird null gespeichert statt den Insert zu sprengen.
+    schadenzeit: parseUhrzeit(lead.unfall_uhrzeit as string | null),
     schadenart,
     fall_typ: (lead.schadens_fall_typ as string | null) ?? null,
     ursache: (lead.schadensursache as string | null) ?? null,
