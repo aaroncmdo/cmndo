@@ -302,21 +302,9 @@ export default function FallDetailClient(props: Props) {
         abgeschlossenAm={abgeschlossenAm}
       />
 
-      {/* CMM-23: Server-rendered Top-Blocks (Banner, Briefing, Stepper,
-          MeinFallStatusCard) — die kommen aus page.tsx mit den Server-Daten. */}
-      {props.topServerBlocks && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
-          {props.topServerBlocks}
-        </div>
-      )}
-
-      {/* CMM-23: FallMitteilungenBanner für SV entfernt. */}
-
-      {/* AAR-757: Phase-gated Banner unter dem Header (vorher in VollClient) */}
+      {/* Stepper + Vor-Ort-Aktionen ganz oben — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
-        {zeigeTerminActions && aktiverTermin && (
-          <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
-        )}
+        {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
         {zeigeVorOrt && (
           <VorOrtTriggerCard
             fallId={fall.id as string}
@@ -325,16 +313,23 @@ export default function FallDetailClient(props: Props) {
             adresse={schadensAdresse}
           />
         )}
+        {zeigeTerminActions && aktiverTermin && (
+          <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
+        )}
       </div>
 
-      {/* CMM-23 Aaron-Layout: links Stepper + Stammdaten; rechts Termin +
-          Gutachten + hochgeladene Dokumente. Keine JetztZuTun, keine
-          Timeline-Vorschau, keine SvTools, kein Activity-Feed.
-          Stellungnahme/Nachbesichtigung/Konfrontation rendern als
-          Mitteilungs-Banner oben (topServerBlocks). */}
+      {/* CMM-23: Server-rendered Top-Blocks (Briefing + Einzuholen-Banner,
+          Stellungnahme/Nachbesichtigung, MeinFallStatusCard) */}
+      {props.topServerBlocks && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3 space-y-3">
+          {props.topServerBlocks}
+        </div>
+      )}
+
+      {/* CMM-23 Aaron-Layout: links Stammdaten; rechts Termin +
+          Gutachten + hochgeladene Dokumente. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
-          {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
           <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
           {/* CMM-23: Unfallgegner-Card — Verursacher aus claim_parties /
               parteien (Name + Versicherung + Kennzeichen). Self-gating wenn
