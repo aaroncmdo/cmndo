@@ -47,7 +47,6 @@ import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
 // AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
 import { TerminActionsPanel } from './_components/TerminActionsPanel'
 import { SvToolsCard } from './_components/SvToolsCard'
-import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
 // CMM-23: FallActivityFeed + FallDokumenteSidebar raus (Activity-Feed
 // ohne Tagesgeschäfts-Use-Case; Dokumente-Sidebar war phase-/szenario-
 // gebunden und zeigte oft "Phase nicht gesetzt"). Ersetzt durch die
@@ -280,14 +279,6 @@ export default function FallDetailClient(props: Props) {
   const zeigeTerminActions =
     aktiverTermin?.status === 'reserviert' || aktiverTermin?.status === 'gegenvorschlag'
   const hatGutachten = !!fall.gutachten_eingegangen_am
-  const zeigeVorOrt =
-    !!fall.sv_termin &&
-    !hatGutachten &&
-    (fall.status === 'sv-termin' || fall.status === 'sv-zugewiesen')
-  const schadensAdresse =
-    [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]
-      .filter(Boolean)
-      .join(', ') || null
 
   return (
     <div className="min-h-full bg-[#f8f9fb]">
@@ -302,17 +293,9 @@ export default function FallDetailClient(props: Props) {
         abgeschlossenAm={abgeschlossenAm}
       />
 
-      {/* Stepper + Vor-Ort-Aktionen ganz oben — volle Breite */}
+      {/* Stepper + TerminActionsPanel ganz oben — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
         {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
-        {zeigeVorOrt && (
-          <VorOrtTriggerCard
-            fallId={fall.id as string}
-            kundeName={kundenName}
-            kennzeichen={(fall.kennzeichen as string | null) ?? null}
-            adresse={schadensAdresse}
-          />
-        )}
         {zeigeTerminActions && aktiverTermin && (
           <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
         )}
