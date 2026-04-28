@@ -19,8 +19,19 @@ export default async function KundeFaelleListe() {
   const faelleTyped = await getKundeFaelle(admin, user.id, user.email ?? null)
   const faelle = faelleTyped as unknown as Record<string, unknown>[]
 
+  // CMM-28 Debug: Loader-Output protokollieren bis der Single-Fall-Redirect-
+  // Bug eingegrenzt ist.
+  console.info('[CMM-28 /kunde/faelle]', {
+    user_id: user.id,
+    user_email: user.email,
+    loader_count: faelle.length,
+    fall_ids: faelle.map((f) => f.id as string),
+  })
+
   // Auto-Redirect bei nur 1 Fall
-  if (faelle && faelle.length === 1) redirect(`/kunde/faelle/${faelle[0].id}`)
+  if (faelle && faelle.length === 1) {
+    redirect(`/kunde/faelle/${faelle[0].id}`)
+  }
 
   if (!faelle || faelle.length === 0) {
     return (
