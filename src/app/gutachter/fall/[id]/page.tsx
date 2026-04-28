@@ -410,17 +410,19 @@ export default async function GutachterFallPage({
           version={(fall.sv_briefing_version as number | null) ?? null}
           canRegenerate={false}
         />
-        <div className="flex flex-col h-full gap-3">
+        <div className="flex flex-col h-full">
           {zeigeVorOrt && (
-            <VorOrtTriggerCard
-              fallId={id}
-              kundeName={kundenName}
-              kennzeichen={(fall.kennzeichen as string | null) ?? null}
-              adresse={schadensAdresse}
-              compact
-            />
+            <div className="h-[30%] pb-3 flex flex-col justify-center">
+              <VorOrtTriggerCard
+                fallId={id}
+                kundeName={kundenName}
+                kennzeichen={(fall.kennzeichen as string | null) ?? null}
+                adresse={schadensAdresse}
+                compact
+              />
+            </div>
           )}
-          <div className="flex-1">
+          <div className={zeigeVorOrt ? 'h-[70%]' : 'h-full'}>
             <SvEinzuholenBanner slots={pflichtSlots} />
           </div>
         </div>
