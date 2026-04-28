@@ -33,6 +33,8 @@ import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 import SVSpotlight from './_components/SVSpotlight'
 import WeatherBanner from '@/components/shared/WeatherBanner'
 import { toInitials } from '@/components/shared/KundeAvatar'
+// CMM-36: Geo-Tracking startet beim App-Öffnen
+import { useGeoPosition } from '@/hooks/useGeoPosition'
 
 // AAR-222: Sidebar-Refactor von 18 flachen Items auf 10 in 4 Sektionen.
 // Removed Items (Dashboard, Mitteilungen, Tasks, Stellungnahmen, Termine,
@@ -101,6 +103,7 @@ export default function GutachterShell({
   showTeam,
   showCommunity,
   showVerifizierung,
+  svId,
 }: {
   displayName: string
   userId: string
@@ -118,9 +121,13 @@ export default function GutachterShell({
   showCommunity?: boolean
   // AAR-359 W5: conditional Verifizierungs-Link solange Verifizierung offen.
   showVerifizierung?: boolean
+  // CMM-36: SV-ID für Geo-Tracking
+  svId?: string | null
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  // CMM-36: Geo-Tracking beim App-Öffnen starten
+  useGeoPosition(svId ?? null)
   // AAR-245: Verwaltung nicht mehr collapsible — alle Sektionen flach +
   // direkt sichtbar, konsistent zu Tagesgeschäft/Kommunikation/Finanzen.
   // AAR-222: Sektions-basierte Nav. Team/Community werden conditional in

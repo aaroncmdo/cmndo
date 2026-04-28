@@ -32,9 +32,6 @@ export function SvUnterwegsInfo({
             {tracking.etaMinuten && ` (${tracking.etaMinuten} Min.)`}
           </span>
         )}
-        {!ankunft && tracking.fehler && (
-          <span className="text-xs text-amber-300 ml-2">· GPS: {tracking.fehler}</span>
-        )}
       </div>
     </div>
   )

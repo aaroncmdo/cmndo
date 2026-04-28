@@ -379,15 +379,7 @@ export default async function GutachterFallPage({
   // Onboarding sieht, mit Download-Links für hochgeladene Files.
   const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'sv')
 
-  // CMM-36: Termin heute aktiv — Tracking nur am Termintag (±12h)
-  const terminHeuteAktiv = (() => {
-    const start = (aktiverTermin?.start_zeit as string | null) ?? null
-    if (!start) return false
-    const diff = Math.abs(Date.now() - new Date(start).getTime())
-    return diff < 12 * 60 * 60 * 1000
-  })()
-
-  // SV-Vorname aus sachverstaendige-Profil (sv-Objekt hat id, profile für Namen via admin)
+  // SV-Vorname für Unterwegs-Banner
   const svVorname = (sv as { vorname?: string | null } | null)?.vorname ?? null
 
   // Vor-Ort-Card: phase-gated (nur wenn Termin da, noch kein Gutachten, richtiger Status)
@@ -512,7 +504,6 @@ export default async function GutachterFallPage({
       konfrontationTerminVorschlaege={terminVorschlaege}
       svId={(sv as { id: string }).id}
       svVorname={svVorname}
-      terminHeuteAktiv={terminHeuteAktiv}
     />
   )
 }
