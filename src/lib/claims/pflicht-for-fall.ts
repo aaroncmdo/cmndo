@@ -149,6 +149,7 @@ export async function getPflichtdokumenteForFall(
       const files = filesByFK.length > 0 ? filesByFK : filesByType
       return {
         slot_id: a.slot_id,
+        pflichtdokument_id: pflichtId,
         label: a.label,
         beschreibung: a.beschreibung,
         pflicht: a.pflicht,

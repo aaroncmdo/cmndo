@@ -17,6 +17,10 @@ import {
 
 export type PflichtSlotForView = {
   slot_id: string
+  /** CMM-29: pflichtdokumente.id — wird vom Kunde-Upload-Banner für die
+   *  uploadPflichtdokument-Action gebraucht. Null wenn der Slot über
+   *  Smart-Filter sichtbar ist aber noch keine pflichtdokumente-Row hat. */
+  pflichtdokument_id: string | null
   label: string
   beschreibung: string
   pflicht: boolean
