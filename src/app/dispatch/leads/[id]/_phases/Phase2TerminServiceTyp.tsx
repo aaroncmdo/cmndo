@@ -11,7 +11,6 @@ import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../_lib/phase-context'
 import { setServiceTyp, saveStammdaten } from '../actions'
-import { geocodeAndSaveUnfallort } from '../_actions/geocode'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
 
@@ -19,6 +18,8 @@ export default function Phase2TerminServiceTyp() {
   const router = useRouter()
   const { lead, aktiverTermin, qualification, setPhase, patchLead } = useDispatchPhase()
   const l = lead as unknown as {
+    // CMM-26: Unfallort gehört zu Phase 1 (Schadenereignis) und wird hier
+    // nur noch als Fallback-Lat/Lng fürs SV-Matching gelesen.
     unfallort?: string | null
     unfallort_lat?: number | null
     unfallort_lng?: number | null
@@ -33,9 +34,6 @@ export default function Phase2TerminServiceTyp() {
     wunschtermin_wochentage?: number[] | null
   }
   const [pending, startTransition] = useTransition()
-  const [unfallortDraft, setUnfallortDraft] = useState(l.unfallort ?? '')
-  const [unfallortLat, setUnfallortLat] = useState<number | null>(l.unfallort_lat ?? null)
-  const [unfallortLng, setUnfallortLng] = useState<number | null>(l.unfallort_lng ?? null)
   const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState<string>(
     l.besichtigungsort_adresse ?? '',
   )
@@ -81,56 +79,13 @@ export default function Phase2TerminServiceTyp() {
   const hardGateOk =
     qualification.q1_schuldfrage && qualification.q2_schaden && qualification.q3_polizei
 
-  const hasKoordinaten = unfallortLat != null && unfallortLng != null
-
-  // AAR-176 P2-C: Auto-Save direkt im onSelect — kein Speichern-Button mehr
-  // AAR-221: router.refresh() nach Save — sonst liest SvDispatchPanel weiterhin
-  // den alten Server-State (lead.unfallort_lat=null) und zeigt fälschlich
-  // „Lead hat keine Koordinaten", obwohl der lokale Badge schon „Koordinaten ok"
-  // anzeigt. Nach dem Refresh werden die DB-Koordinaten überall sichtbar.
-  function autoSaveAdresse(adresse: string, lat: number, lng: number) {
-    setUnfallortDraft(adresse)
-    setUnfallortLat(lat)
-    setUnfallortLng(lng)
-    // AAR-realtime: Provider sofort patchen
-    patchLead({ unfallort: adresse, unfallort_lat: lat, unfallort_lng: lng } as Partial<typeof lead>)
-    startTransition(async () => {
-      const r = await saveStammdaten(lead.id, {
-        unfallort: adresse,
-        unfallort_lat: lat,
-        unfallort_lng: lng,
-      })
-      if (r.success) {
-        setToast('Adresse gespeichert')
-        router.refresh()
-      } else {
-        setToast(r.error ?? 'Fehler')
-      }
-      setTimeout(() => setToast(''), 2000)
-    })
-  }
-
-  // AAR-262: Wenn der Dispatcher die Adresse manuell tippt (kein Google-
-  // Places-Dropdown), fehlen lat/lng → SV-Vorschläge sind blockiert.
-  // onBlur löst Server-Side-Geocoding via Google Maps Geocoding API aus.
-  function geocodeOnBlur(currentValue: string) {
-    const trimmed = currentValue.trim()
-    // Nur wenn Text vorhanden, anders als gespeicherte Adresse, und keine
-    // Koordinaten via Dropdown gesetzt.
-    if (!trimmed || trimmed === (l.unfallort ?? '') || hasKoordinaten) return
-    startTransition(async () => {
-      const r = await geocodeAndSaveUnfallort(lead.id, trimmed)
-      if (r.success && r.lat != null && r.lng != null) {
-        setUnfallortLat(r.lat)
-        setUnfallortLng(r.lng)
-        setToast('Adresse geocoded + gespeichert')
-        router.refresh()
-      } else {
-        setToast(r.error ?? 'Geocoding fehlgeschlagen')
-      }
-      setTimeout(() => setToast(''), 3000)
-    })
-  }
+  // CMM-26: SV-Dispatch braucht Koordinaten. Quelle = Besichtigungsort (Phase
+  // 2) wenn gesetzt, sonst Unfallort (Phase 1) als Fallback. Phase 2 editiert
+  // den Unfallort nicht mehr — der gehört zum Schadenereignis und wird in
+  // Phase 1 erfasst, hier nur read-only für den Geometrie-Check.
+  const hasKoordinaten =
+    (l.besichtigungsort_lat != null && l.besichtigungsort_lng != null) ||
+    (l.unfallort_lat != null && l.unfallort_lng != null)
 
   function saveBesichtigungsort(place: PlaceResult) {
     setBesichtigungsortAdresse(place.adresse)
@@ -296,7 +251,12 @@ export default function Phase2TerminServiceTyp() {
         )}
       </div>
 
-      {/* Besichtigungsadresse für SV-Dispatch */}
+      {/* Besichtigungsadresse für SV-Dispatch — CMM-26: nur EIN Picker, der
+         in besichtigungsort_* schreibt. Der Unfallort gehört zu Phase 1
+         (Schadenereignis) und wird hier nicht mehr editiert. Wenn kein
+         expliziter Besichtigungsort gesetzt ist, fällt SV-Matching auf
+         unfallort_lat/lng (Phase 1) bzw. kunde_lat/lng zurück
+         (siehe listSvSuggestionsForLead). */}
       <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-3">
         <div className="flex items-center gap-2">
           <MapPinIcon className="w-4 h-4 text-claimondo-ondo" />
@@ -308,41 +268,24 @@ export default function Phase2TerminServiceTyp() {
           )}
         </div>
         <p className="text-[11px] text-claimondo-ondo">
-          Wo soll der Gutachter das Fahrzeug besichtigen? SV-Vorschläge werden anhand dieser
-          Adresse gerankt. Standard = Unfallort aus Phase 1.
+          Wo soll der Gutachter das Fahrzeug besichtigen? Leer lassen = SV fährt
+          zum Unfallort aus Phase 1. Bei abweichender Werkstatt / Halter-Adresse
+          hier eintragen — SV-Vorschläge werden anhand dieser Adresse gerankt.
         </p>
         <GooglePlaceAutocomplete
-          defaultValue={unfallortDraft}
-          placeholder="Adresse wählen ..."
-          onSelect={(r) => autoSaveAdresse(r.adresse, r.lat, r.lng)}
-          onBlur={(currentValue) => {
-            // AAR-262: Wenn der User getippt aber NICHTS aus dem Dropdown
-            // gewählt hat, läuft Server-Side-Geocoding als Fallback —
-            // damit SV-Vorschläge nicht blockiert sind. currentValue wird
-            // als Parameter übergeben, weil setUnfallortDraft async ist
-            // und der State sonst stale bleibt.
-            setUnfallortDraft(currentValue)
-            geocodeOnBlur(currentValue)
+          defaultValue={besichtigungsortAdresse}
+          placeholder='z. B. „Werkstatt Müller, Musterstr. 1, 80331 München" oder leer = Unfallort'
+          onSelect={saveBesichtigungsort}
+          onBlur={(current) => {
+            if (!current.trim()) clearBesichtigungsort()
           }}
           className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
         />
-        {/* AAR-581 (N4): Strukturierter SV-Besichtigungsort — Autocomplete
-            liefert Adresse + Koordinaten + place_id. Pflichtfeld wenn der
-            Besichtigungsort vom Unfallort abweicht. */}
-        <div className="space-y-1">
-          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo block">
-            SV-Besichtigungsort (optional, wenn abweichend vom Unfallort)
-          </label>
-          <GooglePlaceAutocomplete
-            defaultValue={besichtigungsortAdresse}
-            placeholder='z. B. „Werkstatt Müller, Musterstr. 1, 80331 München"'
-            onSelect={saveBesichtigungsort}
-            onBlur={(current) => {
-              if (!current.trim()) clearBesichtigungsort()
-            }}
-            className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
-          />
-        </div>
+        {l.unfallort && !besichtigungsortAdresse && (
+          <p className="text-[10px] text-claimondo-ondo italic">
+            Fallback aktiv: SV-Matching nutzt Unfallort aus Phase 1 ({l.unfallort}).
+          </p>
+        )}
       </div>
 
       {/* SV + Termin */}
