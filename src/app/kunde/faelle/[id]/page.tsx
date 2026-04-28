@@ -24,7 +24,6 @@ import Link from 'next/link'
 import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
-import FallStatusCard from '@/components/kunde/FallStatusCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
 import PflichtdokumenteSection from '@/components/fall/PflichtdokumenteSection'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
@@ -362,23 +361,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </div>
         )}
 
-        {/* Status-Card */}
-        <FallStatusCard
-          fall={{
-            id: fall.id as string,
-            status: (fall.status as string) ?? '',
-            fall_nummer: fall.fall_nummer as string | null,
-            sv_termin: fall.sv_termin as string | null,
-            anschlussschreiben_am: fall.anschlussschreiben_am as string | null,
-            vs_ablehnungsgrund: fall.vs_ablehnungsgrund as string | null,
-            storno_grund: fall.storno_grund as string | null,
-            abgeschlossen_am: fall.abgeschlossen_am as string | null,
-            google_review_gesendet: fall.google_review_gesendet as boolean | null,
-            gegner_versicherung: fall.gegner_versicherung as string | null,
-            kanzlei_ansprechpartner_name: fall.kanzlei_ansprechpartner_name as string | null,
-          }}
-          svName={svName ?? undefined}
-        />
+        {/* CMM-36: FallStatusCard entfernt — bei laufender Anfahrt redundant zum
+            KundeSvLiveBanner, ansonsten nicht aussagekräftig genug. */}
 
         {/* Nachbesichtigung Soft-Blocker */}
         {((fall.status as string) === 'nachbesichtigung-laeuft' ||
