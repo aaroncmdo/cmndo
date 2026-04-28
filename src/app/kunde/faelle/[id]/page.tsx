@@ -395,14 +395,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* AAR-770: Mitteilungs-Banner — ganz oben mit Quick-Action */}
         <FallMitteilungenBanner fallId={fall.id as string} rolle="kunde" />
 
-        {/* CMM-33: Zentrale Pflichtdokumente-Section — Banner-Variante zeigt
-            nur offene Slots mit Upload-Button. Verschwindet wenn alle
-            erfüllt sind. */}
+        {/* CMM-33: Zentrale Pflichtdokumente-Section inline — Slot-Cards
+            mit eigener Drag&Drop-Zone pro Slot. Kein Banner-Click-Tile
+            davor; der Kunde sieht den Status auf einen Blick und kann
+            direkt droppen. */}
         <PflichtdokumenteSection
           slots={pflichtSlots}
           fallId={fall.id as string}
           rolle="kunde"
-          variant="banner"
+          variant="card"
         />
 
         {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}

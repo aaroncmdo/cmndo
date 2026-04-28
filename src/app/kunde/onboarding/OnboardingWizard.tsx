@@ -18,6 +18,10 @@ import {
 } from './actions'
 import type { ClaimFull } from '@/lib/claims/types'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
+// CMM-33: Zentrale PflichtdokumenteSection — gleicher Bucket / Component
+// wie Detail-Page + Banner. Ersetzt die alte Per-Slot-Upload-UI im
+// Wizard-Step.
+import PflichtdokumenteSection, { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 
 type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
 type Termin = { datum: string; svName: string | null; ort: string | null }
@@ -148,13 +152,16 @@ const STATUS_PHASES = [
 ]
 
 export default function OnboardingWizard({
-  vorname, fall, claim, termin, pflichtDocs, freieSlots,
+  vorname, fall, claim, termin, pflichtDocs, pflichtSlots = [], freieSlots,
 }: {
   vorname: string
   fall: Fall | null
   claim: ClaimFull | null
   termin: Termin | null
   pflichtDocs: PflichtDoc[]
+  /** CMM-33: Slot-Sicht (PflichtSlotForView[]) — wird für die zentrale
+   *  PflichtdokumenteSection genutzt. */
+  pflichtSlots?: PflichtSlotForView[]
   freieSlots: FreierSlot[]
 }) {
   const router = useRouter()
@@ -332,6 +339,11 @@ export default function OnboardingWizard({
   // CMM-21: Block-Logik nutzt nur die für den Claim relevanten Slots —
   // ein Polizeibericht ist kein Blocker wenn polizei_vor_ort=false.
   const pflichtBlocked = relevantePflichtDocs.filter(d => d.pflicht && docStatus[d.id] !== 'hochgeladen')
+
+  // CMM-33: Block-Logik auf Basis der zentralen Slot-Sicht (PflichtSlotForView).
+  // Wird parallel zur alten relevantePflichtDocs-Logik geführt; sobald CMM-35
+  // den Wizard komplett auf die Section migriert, fällt die alte Berechnung weg.
+  const pflichtBlockedSlots = pflichtSlots.filter((s) => s.pflicht && s.status !== 'erfuellt')
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
@@ -528,267 +540,37 @@ export default function OnboardingWizard({
                   später im Portal nachreichen.
                 </p>
 
-                {relevantePflichtDocs.length === 0 && (
-                  <p className="mt-5 text-sm text-claimondo-ondo/70 text-center py-4 rounded-xl bg-claimondo-border/30">
-                    Keine Dokumente erforderlich — Sie sind fertig.
-                  </p>
-                )}
-
-                {/* CMM-21: Upload-Cards inline (keine Modal mehr) — Modal-
-                    Component bleibt für später (Banner-Re-Engagement +
-                    SV-Side Claim-Contribution). */}
-                {relevantePflichtDocs.length > 0 && (
-                  <div className="mt-5 space-y-3">
-                  {relevantePflichtDocs.map(doc => {
-                    const status = docStatus[doc.id] ?? 'ausstehend'
-                    const istHochgeladen = status === 'hochgeladen'
-                    const istAbgelehnt = status === 'abgelehnt'
-                    const loading = uploadingId === doc.id
-                    const label = doc.label || LEGACY_DOKTYP_LABELS[doc.slot_id] || doc.slot_id
-                    const acceptString = doc.akzeptierte_mime_types.join(',')
-                    const fristText = doc.frist ? new Date(doc.frist).toLocaleDateString('de-DE', {
-                      day: '2-digit', month: '2-digit', year: 'numeric',
-                    }) : null
-                    // AAR-365: Card-Style prominenter — Amber-Border wenn offen,
-                    // Grün wenn hochgeladen, Rose wenn abgelehnt. ⓘ oben rechts
-                    // öffnet Info-Overlay mit "Warum?" + "Wo finde ich das?".
-                    return (
-                      <div
-                        key={doc.id}
-                        className={`relative rounded-2xl border-2 p-4 transition-colors ${
-                          istHochgeladen ? 'bg-emerald-50 border-emerald-300'
-                          : istAbgelehnt ? 'bg-rose-50 border-rose-300'
-                          : 'bg-amber-50/60 border-amber-300'
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setInfoOverlay({ slotId: doc.slot_id, label })}
-                          aria-label={`Info zu ${label}`}
-                          className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/80 border border-claimondo-border text-claimondo-ondo hover:text-claimondo-navy hover:border-claimondo-ondo flex items-center justify-center transition-colors"
-                        >
-                          <InfoIcon className="w-4 h-4" />
-                        </button>
-                        <div className="flex items-start gap-3 pr-9">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            istHochgeladen ? 'bg-emerald-500 text-white'
-                            : istAbgelehnt ? 'bg-rose-500 text-white'
-                            : 'bg-amber-500 text-white'
-                          }`}>
-                            {istHochgeladen ? <CheckIcon className="w-5 h-5" />
-                              : istAbgelehnt ? <AlertCircleIcon className="w-5 h-5" />
-                              : <UploadCloudIcon className="w-5 h-5" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-base font-semibold text-claimondo-navy">{label}</p>
-                              {doc.pflicht && !istHochgeladen && (
-                                <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">Pflicht</span>
-                              )}
-                            </div>
-                            <p className={`text-xs mt-0.5 font-medium ${
-                              istHochgeladen ? 'text-emerald-700'
-                              : istAbgelehnt ? 'text-rose-700'
-                              : 'text-amber-700'
-                            }`}>
-                              {istHochgeladen ? '✓ Hochgeladen'
-                                : istAbgelehnt ? '✗ Abgelehnt — bitte neu hochladen'
-                                : 'Noch nicht hochgeladen'}
-                            </p>
-                            {doc.beschreibung && (
-                              <p className="text-xs text-claimondo-ondo mt-1">{doc.beschreibung}</p>
-                            )}
-                            {doc.begruendung && (
-                              <p className="text-xs text-claimondo-navy mt-1 italic">„{doc.begruendung}"</p>
-                            )}
-                            {fristText && (
-                              <p className="text-xs text-amber-800 mt-1 flex items-center gap-1 font-medium">
-                                <ClockIcon className="w-3 h-3" /> Frist: {fristText}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* CMM-21: Action-Buttons — Multi-File via doc.multi_file.
-                            Datei wählen erlaubt jetzt N Files; Foto aufnehmen
-                            bleibt single-shot (Kamera nimmt ohnehin nur ein
-                            Bild pro Klick auf, der Kunde kann mehrfach klicken). */}
-                        {(() => {
-                          const fileCount = fileCountOverride[doc.id] ?? doc.hochgeladene_anzahl ?? (istHochgeladen ? 1 : 0)
-                          const isMulti = doc.multi_file
-                          const replaceMode = !isMulti && istHochgeladen
-                          return (
-                            <div className="mt-3">
-                              {fileCount > 0 && (
-                                <p className="text-xs text-emerald-700 font-medium mb-2">
-                                  {fileCount} {fileCount === 1 ? 'Datei' : 'Dateien'} hochgeladen
-                                  {isMulti && ' — weitere Dateien können Sie unten anhängen'}
-                                </p>
-                              )}
-                              {replaceMode ? (
-                                <label className="text-xs font-medium px-3 py-2 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer inline-flex items-center gap-1.5">
-                                  <RefreshCwIcon className="w-3 h-3" />
-                                  {loading ? 'Lädt...' : 'Ersetzen'}
-                                  <input
-                                    type="file"
-                                    accept={acceptString}
-                                    className="hidden"
-                                    disabled={loading}
-                                    onChange={e => {
-                                      const f = e.target.files?.[0]
-                                      if (f) handleFileUpload(doc.id, f)
-                                    }}
-                                  />
-                                </label>
-                              ) : (
-                                <div className="flex gap-2">
-                                  <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-claimondo-navy text-white hover:bg-claimondo-shield active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
-                                    {loading ? 'Lädt...' : <><span>📷</span> {fileCount > 0 ? 'Weiteres Foto' : 'Foto aufnehmen'}</>}
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      capture="environment"
-                                      className="hidden"
-                                      disabled={loading}
-                                      onChange={e => {
-                                        const f = e.target.files?.[0]
-                                        if (f) handleFileUpload(doc.id, f)
-                                        e.target.value = ''
-                                      }}
-                                    />
-                                  </label>
-                                  <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-claimondo-navy text-claimondo-navy hover:bg-[#f8f9fb] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
-                                    <span>📁</span> {fileCount > 0 ? 'Weitere Dateien' : (isMulti ? 'Dateien wählen' : 'Datei wählen')}
-                                    <input
-                                      type="file"
-                                      accept={acceptString}
-                                      multiple={isMulti}
-                                      className="hidden"
-                                      disabled={loading}
-                                      onChange={e => {
-                                        if (e.target.files && e.target.files.length > 0) {
-                                          handleFilesUpload(doc.id, e.target.files)
-                                        }
-                                        e.target.value = ''
-                                      }}
-                                    />
-                                  </label>
-                                </div>
-                              )}
-                            </div>
-                          )
-                        })()}
-
-                      </div>
-                    )
-                  })}
-                  </div>
-                )}
-
-                {/* CMM-21: "Weitere Dokumente" — Freier Slot für alles was
-                    keine direkte Kategorisierung hat. Mehrfachauswahl an,
-                    optionale Beschreibung. Geht via uploadKundenDokument
-                    → kunde-nachreichung in fall_dokumente. */}
-                <div className="mt-5 rounded-2xl border-2 border-dashed border-claimondo-border bg-white p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-claimondo-ondo/15 text-claimondo-ondo">
-                      <FolderOpenIcon className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base font-semibold text-claimondo-navy">Weitere Dokumente</p>
-                      <p className="text-xs text-claimondo-ondo mt-0.5">
-                        Alles was keiner der Kategorien oben passt — Werkstattrechnungen,
-                        Korrespondenz, Belege, Sonstiges.
+                {/* CMM-33: Zentrale PflichtdokumenteSection — gleiche
+                    Drag&Drop-Slot-Cards wie Detail-Page und Banner-Pop-over.
+                    Liest und schreibt aus dem gleichen Bucket. */}
+                <div className="mt-5">
+                  {fall?.id ? (
+                    pflichtSlots.length === 0 ? (
+                      <p className="text-sm text-claimondo-ondo/70 text-center py-4 rounded-xl bg-claimondo-border/30">
+                        Keine Dokumente erforderlich — Sie sind fertig.
                       </p>
-                      {sonstigesCount > 0 && (
-                        <p className="mt-2 text-xs text-emerald-700 font-medium flex items-center gap-1">
-                          <CheckIcon className="w-3.5 h-3.5" />
-                          {sonstigesCount} {sonstigesCount === 1 ? 'Datei' : 'Dateien'} hochgeladen
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <input
-                    type="text"
-                    value={sonstigesBeschreibung}
-                    onChange={(e) => setSonstigesBeschreibung(e.target.value)}
-                    placeholder="Kurze Beschreibung (optional, z. B. Werkstattrechnung)"
-                    className="mt-3 w-full text-sm rounded-xl border border-claimondo-border bg-[#f8f9fb] px-3 py-2.5 text-claimondo-navy placeholder:text-claimondo-ondo/60 focus:border-claimondo-ondo focus:outline-none"
-                  />
-                  <div className="mt-3 flex gap-2">
-                    <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-claimondo-navy text-white hover:bg-claimondo-shield active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
-                      {uploadingSlot === '__sonstiges__' ? 'Lädt...' : <><span>📷</span> Foto aufnehmen</>}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        className="hidden"
-                        disabled={uploadingSlot === '__sonstiges__'}
-                        onChange={(e) => {
-                          const f = e.target.files?.[0]
-                          if (f) handleFreiUpload(null, f, sonstigesBeschreibung || undefined)
-                          e.target.value = ''
-                        }}
+                    ) : (
+                      <PflichtdokumenteSection
+                        slots={pflichtSlots}
+                        fallId={fall.id}
+                        rolle="kunde"
+                        variant="card"
                       />
-                    </label>
-                    <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-claimondo-navy text-claimondo-navy hover:bg-[#f8f9fb] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
-                      <span>📁</span> Dateien wählen
-                      <input
-                        type="file"
-                        accept="image/*,application/pdf"
-                        multiple
-                        className="hidden"
-                        disabled={uploadingSlot === '__sonstiges__'}
-                        onChange={(e) => {
-                          if (e.target.files) {
-                            for (const f of Array.from(e.target.files)) {
-                              handleFreiUpload(null, f, sonstigesBeschreibung || undefined)
-                            }
-                          }
-                          e.target.value = ''
-                        }}
-                      />
-                    </label>
-                  </div>
-                  {sonstigesError && (
-                    <p className="mt-2 text-xs text-rose-700">{sonstigesError}</p>
+                    )
+                  ) : (
+                    <p className="text-sm text-amber-700 text-center py-4 rounded-xl bg-amber-50 border border-amber-200">
+                      Fall wird vorbereitet — bitte einen Moment.
+                    </p>
                   )}
                 </div>
 
-                {/* AAR-166: ZB1-OCR-Ergebnis inline anzeigen nach Fahrzeugschein-Upload */}
-                {zb1Result && (
-                  <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                    <div className="flex items-center gap-2">
-                      <SparklesIcon className="w-4 h-4 text-emerald-600" />
-                      <p className="text-sm font-semibold text-emerald-900">
-                        Fahrzeugschein automatisch ausgelesen
-                      </p>
-                    </div>
-                    <p className="text-[11px] text-emerald-800 mt-1">
-                      {zb1Result.fieldsFound} Felder erkannt
-                    </p>
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-                      {zb1Result.extracted.kennzeichen && (
-                        <div><span className="text-emerald-700 block">Kennzeichen</span><span className="font-medium text-claimondo-navy">{zb1Result.extracted.kennzeichen}</span></div>
-                      )}
-                      {zb1Result.extracted.fin_vin && (
-                        <div><span className="text-emerald-700 block">FIN</span><span className="font-mono font-medium text-claimondo-navy">{zb1Result.extracted.fin_vin}</span></div>
-                      )}
-                      {zb1Result.extracted.fahrzeug_hersteller && (
-                        <div><span className="text-emerald-700 block">Marke</span><span className="font-medium text-claimondo-navy">{zb1Result.extracted.fahrzeug_hersteller}</span></div>
-                      )}
-                      {zb1Result.extracted.fahrzeug_modell && (
-                        <div><span className="text-emerald-700 block">Modell</span><span className="font-medium text-claimondo-navy">{zb1Result.extracted.fahrzeug_modell}</span></div>
-                      )}
-                      {zb1Result.extracted.halter_nachname && (
-                        <div className="col-span-2"><span className="text-emerald-700 block">Halter</span><span className="font-medium text-claimondo-navy">{zb1Result.extracted.halter_vorname} {zb1Result.extracted.halter_nachname}</span></div>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-emerald-700 mt-3 italic">
-                      Daten wurden gespeichert. Falsche Werte? Einfach über die Betreuung melden.
-                    </p>
-                  </div>
-                )}
+                {/* CMM-35: Reste der alten Per-Slot-UI (ZB1-OCR-Result,
+                    Foto-Aufnehmen, Info-Overlay, Optional-Slots-Section,
+                    Sonstiges-Upload, später-nachreichen pro Slot) ist
+                    auskommentiert in dieser Welle und kommt mit dem
+                    vollständigen Wizard-Refactor zurück. */}
+                {false && relevantePflichtDocs.length === 0 && null}
+
                 {/* CMM-21: zwei gleichwertige Buttons — Weiter, oder den Step
                     skippen. handleAlleSpaeterNachreichen markiert alle offenen
                     Pflicht-Slots als "später nachreichen" (dedupe Reminder-Welle

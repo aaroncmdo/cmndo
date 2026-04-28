@@ -8,6 +8,9 @@ import OnboardingWizard from './OnboardingWizard'
 import { getPflichtdokumenteStand, getFreieSlotsFuerKunde } from './actions'
 import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import type { ClaimFull } from '@/lib/claims/types'
+// CMM-33: Zentrale PflichtdokumenteSection liest dieselben Slots wie
+// Detail-Page + Banner — gleicher Bucket, identisches Verhalten.
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 
 export const dynamic = 'force-dynamic'
 
@@ -127,6 +130,16 @@ export default async function OnboardingPage({
     }
   }
 
+  // CMM-33: parallel die zentrale Slot-Sicht für PflichtdokumenteSection laden.
+  let pflichtSlots: Awaited<ReturnType<typeof getPflichtdokumenteForFall>> = []
+  if (fall?.id) {
+    try {
+      pflichtSlots = await getPflichtdokumenteForFall(supabase, fall.id, 'kunde')
+    } catch (err) {
+      return <DiagPage stage="pflicht-slots" error={err} />
+    }
+  }
+
   let freieSlots: Awaited<ReturnType<typeof getFreieSlotsFuerKunde>> = []
   if (fall?.id) {
     try {
@@ -144,6 +157,7 @@ export default async function OnboardingPage({
         claim={claim}
         termin={terminDatum ? { datum: terminDatum, svName, ort: fall?.besichtigungsort_adresse ?? null } : null}
         pflichtDocs={pflichtDocs}
+        pflichtSlots={pflichtSlots}
         freieSlots={freieSlots}
       />
     )
