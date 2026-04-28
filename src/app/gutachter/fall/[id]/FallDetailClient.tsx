@@ -41,7 +41,8 @@ import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
-import PflichtdokumenteSection, { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
+import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
+import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
 // AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
 import { TerminActionsPanel } from './_components/TerminActionsPanel'
@@ -397,17 +398,14 @@ export default function FallDetailClient(props: Props) {
               schadens_ort: (fall.schadens_ort as string | null) ?? null,
             }}
           />
-          {/* CMM-33: Pflichtdokumente vom Kunden direkt nach dem Termin —
-              SV sieht beim Öffnen sofort welche Slots schon erfüllt sind
-              und welche fehlen, ohne in den Dokumente-Block runterzuscrollen. */}
+          {/* CMM-33: Read-only Banner mit „vor Ort einzusammeln"-Liste.
+              Zeigt nur die offenen Pflicht-Slots als Bullet-Points; kein
+              Download, kein Status-Pill, kein Upload. Verschwindet wenn
+              alle Pflicht-Slots erfüllt sind. Hochgeladene Files (auch
+              Pflichtdokumente vom Kunden) liegen alle in der Dokumente-
+              Sektion unten (WeitereDokumenteCard). */}
           {props.pflichtSlots && props.pflichtSlots.length > 0 && (
-            <PflichtdokumenteSection
-              slots={props.pflichtSlots}
-              fallId={fall.id as string}
-              rolle="sv"
-              variant="card"
-              title="Pflichtdokumente vom Kunden"
-            />
+            <SvEinzuholenBanner slots={props.pflichtSlots} />
           )}
           {/* CMM-23: Vorschäden-Hinweis — wenn der Kunde im Lead/Claim
               Vorschäden gemeldet hat, weiß der SV das vor dem Termin und
