@@ -14,7 +14,9 @@ import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
 import BriefingCard from '@/components/fall/BriefingCard'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
+import GutachtenUploadBanner from '@/components/gutachter/GutachtenUploadBanner'
 import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
+import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
@@ -406,8 +408,20 @@ export default async function GutachterFallPage({
     (fall.nachbesichtigung_status as string | null) === 'angefordert' ||
     (fall.nachbesichtigung_status as string | null) === 'termin-eingereicht'
 
+  // CMM-32: aktiven Auftrag laden für Gutachten-Upload-Banner
+  const auftraegeOfFall = await getAlleAuftraege(supabase, id)
+  const erstgutachtenAuftrag = auftraegeOfFall.find((a) => a.typ === 'erstgutachten') ?? null
+  const zeigeGutachtenUpload =
+    !!erstgutachtenAuftrag &&
+    !!(aktiverTermin?.durchgefuehrt_am as string | null) &&
+    !erstgutachtenAuftrag.gutachten_url
+
   const topServerBlocks = (
     <>
+      {/* CMM-32: Gutachten-Upload-Banner — sichtbar nach Besichtigung, vor QC */}
+      {zeigeGutachtenUpload && erstgutachtenAuftrag && (
+        <GutachtenUploadBanner auftragId={erstgutachtenAuftrag.id} hatGutachten={false} />
+      )}
       {/* Briefing links — rechts: Vor-Ort-Buttons (compact) oben + Einzuholen-Dokumente darunter */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <BriefingCard

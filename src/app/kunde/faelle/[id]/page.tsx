@@ -189,11 +189,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const aktiveStatus = ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben']
     const { data: svKandidaten } = await admin
       .from('gutachter_termine')
-      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, sv_id, kb_id, created_at')
+      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am, sv_id, kb_id, created_at')
       .eq('fall_id', id)
       .eq('typ', 'sv_begutachtung')
       .in('status', aktiveStatus)
-      .is('durchgefuehrt_am', null)
       .is('cancelled_at', null)
       .order('created_at', { ascending: false })
     const STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3, verschoben: 4 }
@@ -358,16 +357,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase. */}
         <ClaimStepper lifecycle={claimLifecycle} />
 
-        {/* CMM-36: SV-Live-Banner — navy/grün, mit Realtime-ETA. */}
+        {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
         {svTermin?.id && (
           <KundeSvLiveBanner
             terminId={svTermin.id as string}
             svName={svName}
+            gutachtenHochgeladen={!!auftraege.find((a) => a.typ === 'erstgutachten')?.gutachten_url}
             initial={{
               sv_unterwegs_seit: (svTermin.sv_unterwegs_seit as string | null) ?? null,
               sv_angekommen_am: (svTermin.sv_angekommen_am as string | null) ?? null,
               sv_eta_minuten: (svTermin.sv_eta_minuten as number | null) ?? null,
-              durchgefuehrt_am: null,
+              durchgefuehrt_am: (svTermin.durchgefuehrt_am as string | null) ?? null,
             }}
           />
         )}

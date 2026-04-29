@@ -7,12 +7,14 @@
 // nicht durchgeführt wurde.
 
 import { useEffect, useState } from 'react'
-import { NavigationIcon, MapPinCheckIcon } from 'lucide-react'
+import { NavigationIcon, MapPinCheckIcon, FileTextIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 type Props = {
   terminId: string
   svName: string | null
+  /** Wenn true: Auftrag hat bereits ein Gutachten — Banner verschwindet komplett. */
+  gutachtenHochgeladen?: boolean
   initial: {
     sv_unterwegs_seit: string | null
     sv_angekommen_am: string | null
@@ -21,7 +23,7 @@ type Props = {
   }
 }
 
-export default function KundeSvLiveBanner({ terminId, svName, initial }: Props) {
+export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgeladen, initial }: Props) {
   const [state, setState] = useState(initial)
 
   useEffect(() => {
@@ -52,10 +54,26 @@ export default function KundeSvLiveBanner({ terminId, svName, initial }: Props) 
     }
   }, [terminId])
 
-  if (state.durchgefuehrt_am) return null
-  if (!state.sv_unterwegs_seit && !state.sv_angekommen_am) return null
+  // Wenn Gutachten schon hochgeladen ist, Banner ganz weg (QC läuft separat).
+  if (gutachtenHochgeladen) return null
+
+  // Gar nichts gestartet → kein Banner.
+  if (!state.sv_unterwegs_seit && !state.sv_angekommen_am && !state.durchgefuehrt_am) return null
 
   const vorname = svName ? svName.split(' ')[0] : 'Ihr Gutachter'
+
+  // Termin durchgeführt, Gutachten noch nicht da → gelber „Gutachten wird erstellt"-Status.
+  if (state.durchgefuehrt_am) {
+    return (
+      <div className="rounded-2xl bg-amber-500 text-white px-4 py-3 flex items-center gap-3">
+        <FileTextIcon className="w-4 h-4 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <span className="text-sm font-semibold">Gutachten wird erstellt</span>
+          <span className="text-sm text-amber-50 ml-2">· {vorname} arbeitet daran</span>
+        </div>
+      </div>
+    )
+  }
 
   if (state.sv_angekommen_am) {
     return (
