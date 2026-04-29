@@ -12,10 +12,13 @@ import { createManualLead, type CreateManualLeadInput } from '../actions'
 import { Drawer } from '@/components/primitives/Drawer'
 
 const INITIAL: CreateManualLeadInput = {
+  anrede: null,
   vorname: '',
   nachname: '',
   telefon: '',
   email: '',
+  lackfarbe_code: null,
+  fahrzeug_farbe: '',
   kunde_adresse: '',
   kunde_strasse: '',
   kunde_plz: '',
@@ -78,12 +81,65 @@ export default function NeuLeadDrawer() {
         </div>
 
         <div className="p-6 space-y-4">
+          {/* CMM-32: Anrede-Dropdown für saubere WhatsApp/Email-Anrede */}
+          <div>
+            <label className="block text-xs text-claimondo-ondo mb-1.5">Anrede</label>
+            <select
+              value={data.anrede ?? ''}
+              onChange={(e) =>
+                setData({ ...data, anrede: (e.target.value || null) as 'herr' | 'frau' | 'divers' | null })
+              }
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm bg-white focus:outline-none focus:border-claimondo-ondo"
+            >
+              <option value="">— bitte wählen —</option>
+              <option value="herr">Herr</option>
+              <option value="frau">Frau</option>
+              <option value="divers">Divers</option>
+            </select>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <InputField label="Vorname" value={data.vorname} onChange={v => setData({ ...data, vorname: v })} />
             <InputField label="Nachname" value={data.nachname} onChange={v => setData({ ...data, nachname: v })} />
           </div>
           <InputField label="Telefon *" value={data.telefon} onChange={v => setData({ ...data, telefon: v })} type="tel" placeholder="+49..." />
           <InputField label="E-Mail" value={data.email} onChange={v => setData({ ...data, email: v })} type="email" />
+          {/* CMM-32: Strukturierter Lackfarbe-Code für das Imagin-Render-Bild
+              im SV-Banner. Freitext daneben für Detail-Bezeichnungen. */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-claimondo-ondo mb-1.5">Lackfarbe</label>
+              <select
+                value={data.lackfarbe_code ?? ''}
+                onChange={(e) =>
+                  setData({
+                    ...data,
+                    lackfarbe_code: (e.target.value || null) as typeof data.lackfarbe_code,
+                  })
+                }
+                className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm bg-white focus:outline-none focus:border-claimondo-ondo"
+              >
+                <option value="">— bitte wählen —</option>
+                <option value="schwarz">Schwarz</option>
+                <option value="weiss">Weiß</option>
+                <option value="silber">Silber</option>
+                <option value="grau">Grau</option>
+                <option value="blau">Blau</option>
+                <option value="rot">Rot</option>
+                <option value="gruen">Grün</option>
+                <option value="gelb">Gelb</option>
+                <option value="orange">Orange</option>
+                <option value="braun">Braun</option>
+                <option value="beige">Beige</option>
+                <option value="sonstige">Sonstige</option>
+              </select>
+            </div>
+            <InputField
+              label="Lack-Detail (optional)"
+              value={data.fahrzeug_farbe ?? ''}
+              onChange={(v) => setData({ ...data, fahrzeug_farbe: v })}
+              placeholder="z. B. Saphirschwarz Metallic"
+            />
+          </div>
 
           {/* AAR-695: Google-Maps-Autocomplete für die Kunden-Adresse.
               Liefert direkt Adresse + PLZ + Lat/Lng — wird in Phase 1 ohnehin

@@ -37,6 +37,10 @@ import type { TeamMitglied } from './_components/FallakteDrawer'
 // kein Activity-Feed. Stellungnahme/Nachbesichtigung/Konfrontation
 // rendern als Mitteilungs-Banner oben (topServerBlocks aus page.tsx).
 import { StammdatenCard } from './_components/StammdatenCard'
+// CMM-32: Master-Detail-Stammdaten — links klickbare Tabelle, rechts Detail-Block.
+import StammdatenAccordion, { type StammdatenCategory } from '@/components/fall/StammdatenAccordion'
+import StammdatenDetail from '@/components/fall/StammdatenDetail'
+import { useState } from 'react'
 import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
@@ -235,6 +239,11 @@ export default function FallDetailClient(props: Props) {
       .filter(Boolean)
       .join(' ') || null
 
+  // CMM-32 Stammdaten-Master-Detail: ausgewählte Kategorie steuert was im
+  // rechten Detail-Slot gerendert wird. null = Default-Layout (Dokumente).
+  const [stammdatenSelected, setStammdatenSelected] =
+    useState<StammdatenCategory | null>(null)
+
   // AAR-405: Team-Tab befüllen — Kundenbetreuer + Kunde; Kanzlei folgt mit
   // eigener Daten-Ladung, sobald Phase 5 (Kanzlei-Integration) live ist.
   const team: TeamMitglied[] = []
@@ -366,42 +375,24 @@ export default function FallDetailClient(props: Props) {
           Gutachten + hochgeladene Dokumente. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
-          <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
-          {/* CMM-23: Unfallgegner-Card — Verursacher aus claim_parties /
-              parteien (Name + Versicherung + Kennzeichen). Self-gating wenn
-              keine Verursacher-Partei vorhanden. */}
-          {(() => {
-            const verursacher = (props.parteien ?? []).find(
-              (p) => (p.rolle as string | null) === 'verursacher',
-            )
-            if (!verursacher) return null
-            const name = (verursacher.name as string | null) ?? null
-            const vs = (verursacher.versicherung_name as string | null) ?? null
-            const vsNr = (verursacher.versicherung_nr as string | null) ?? null
-            if (!name && !vs) return null
-            return (
-              <div className="rounded-2xl bg-white border border-claimondo-border p-4">
-                <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo mb-2">
-                  Unfallgegner
-                </p>
-                <div className="space-y-1.5 text-sm text-claimondo-navy">
-                  {name && <p className="font-medium">{name}</p>}
-                  {vs && (
-                    <p className="text-claimondo-ondo">
-                      <span className="text-xs">Versicherung:</span>{' '}
-                      <span className="text-claimondo-navy">{vs}</span>
-                    </p>
-                  )}
-                  {vsNr && (
-                    <p className="text-claimondo-ondo">
-                      <span className="text-xs">VS-Nummer:</span>{' '}
-                      <span className="text-claimondo-navy font-mono text-xs">{vsNr}</span>
-                    </p>
-                  )}
-                </div>
-              </div>
-            )
-          })()}
+          {/* CMM-32: Master-Detail — kompakte klickbare Tabelle.
+              Detail-Block rendert in der rechten Section (siehe unten). */}
+          <StammdatenAccordion
+            data={{
+              fall,
+              lead,
+              parteien: props.parteien,
+              dokumenteAnzahl: (props.dokumente ?? []).length,
+            }}
+            selected={stammdatenSelected}
+            onSelect={setStammdatenSelected}
+          />
+          {/* CMM-32: StammdatenCard alte Variante als Fallback nur wenn
+              man explizit alle Daten auf einen Blick will (read-only Cardentity-
+              Footer). Vorerst raus — der Detail-Block ersetzt sie. */}
+          {false && (
+            <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
+          )}
         </aside>
 
         <section className="space-y-4 min-w-0">
@@ -450,22 +441,48 @@ export default function FallDetailClient(props: Props) {
                 }))
             }
           />
-          {/* CMM-23: WeitereDokumenteCard ersetzt FallDokumenteSidebar —
-              keine Phase/Szenario-Abhängigkeit mehr; einfach die hochgeladenen
-              Dokumente + ein Datei-Picker der via uploadDatei den Fall
-              (= Claim) erweitert. */}
-          <WeitereDokumenteCard
-            fallId={fall.id as string}
-            dokumente={(props.dokumente ?? []).map((d) => ({
-              id: String(d.id),
-              dokument_typ: (d.typ as string | null) ?? null,
-              datei_url: (d.datei_url as string | null) ?? null,
-              datei_name: (d.datei_name as string | null) ?? null,
-              hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
-              created_at: (d.created_at as string | null) ?? null,
-              storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
-            }))}
-          />
+          {/* CMM-32: Master-Detail — wenn der SV in der Stammdaten-Tabelle
+              eine Kategorie wählt, ersetzt der Detail-Block hier die
+              WeitereDokumenteCard. Standard: WeitereDokumenteCard sichtbar. */}
+          {stammdatenSelected ? (
+            <StammdatenDetail
+              category={stammdatenSelected}
+              data={{
+                fall,
+                lead,
+                parteien: props.parteien,
+                dokumenteAnzahl: (props.dokumente ?? []).length,
+              }}
+              onClose={() => setStammdatenSelected(null)}
+              dokumenteSlot={
+                <WeitereDokumenteCard
+                  fallId={fall.id as string}
+                  dokumente={(props.dokumente ?? []).map((d) => ({
+                    id: String(d.id),
+                    dokument_typ: (d.typ as string | null) ?? null,
+                    datei_url: (d.datei_url as string | null) ?? null,
+                    datei_name: (d.datei_name as string | null) ?? null,
+                    hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
+                    created_at: (d.created_at as string | null) ?? null,
+                    storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
+                  }))}
+                />
+              }
+            />
+          ) : (
+            <WeitereDokumenteCard
+              fallId={fall.id as string}
+              dokumente={(props.dokumente ?? []).map((d) => ({
+                id: String(d.id),
+                dokument_typ: (d.typ as string | null) ?? null,
+                datei_url: (d.datei_url as string | null) ?? null,
+                datei_name: (d.datei_name as string | null) ?? null,
+                hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
+                created_at: (d.created_at as string | null) ?? null,
+                storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
+              }))}
+            />
+          )}
         </section>
       </div>
 

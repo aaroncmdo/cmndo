@@ -259,6 +259,8 @@ export async function convertLeadToClaim(
       rolle: 'geschaedigter',
       reihenfolge: 1,
       user_id: kundeUserId,
+      // CMM-32: Anrede vom Lead vererben für saubere Anrede in Templates.
+      anrede: (lead as { anrede?: string | null }).anrede ?? null,
       vorname: (lead.vorname as string | null) ?? null,
       nachname: (lead.nachname as string | null) ?? null,
       email: (lead.email as string | null) ?? null,
