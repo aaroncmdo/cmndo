@@ -605,14 +605,14 @@ export default async function FallaktePage({
 
   return (
     <>
-      {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
-      {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
-      {/* CMM-32e: Vollständigkeits-Check für KB / Admin sobald Gutachten hochgeladen */}
+      {/* CMM-32e: Vollständigkeits-Check ganz oben, Handlungsbedarf-Banner */}
       {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && qcCardProps && (
-        <div className="mb-4">
+        <div className="mb-4 sticky top-0 z-30">
           <VollstaendigkeitsCheckCard {...qcCardProps} />
         </div>
       )}
+      {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
+      {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
       {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
           Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}
       {kanzleiBlockData && (
