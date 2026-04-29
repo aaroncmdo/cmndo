@@ -420,7 +420,11 @@ export default async function GutachterFallPage({
     <>
       {/* CMM-32: Gutachten-Upload-Banner — sichtbar nach Besichtigung, vor QC */}
       {zeigeGutachtenUpload && erstgutachtenAuftrag && (
-        <GutachtenUploadBanner auftragId={erstgutachtenAuftrag.id} hatGutachten={false} />
+        <GutachtenUploadBanner
+          auftragId={erstgutachtenAuftrag.id}
+          claimId={(fall.claim_id as string) ?? ''}
+          hatGutachten={false}
+        />
       )}
       {/* Briefing links — rechts: Vor-Ort-Buttons (compact) oben + Einzuholen-Dokumente darunter */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

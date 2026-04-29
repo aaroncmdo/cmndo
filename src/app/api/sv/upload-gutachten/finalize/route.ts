@@ -33,14 +33,18 @@ export async function POST(req: NextRequest) {
 
     const { data: auftrag } = await db
       .from('auftraege')
-      .select('id, fall_id, sv_id, gutachten_url, status')
+      .select('id, fall_id, sv_id, gutachten_url, status, faelle!inner(claim_id)')
       .eq('id', body.auftragId)
       .eq('sv_id', sv.id)
       .single()
     if (!auftrag) return NextResponse.json({ error: 'Auftrag nicht gefunden' }, { status: 404 })
 
-    // Pfad-Whitelist: muss unter auftrag/<auftragId>/ liegen
-    if (!body.storagePath.startsWith(`auftrag/${body.auftragId}/`)) {
+    const claimId = (auftrag as unknown as { faelle: { claim_id: string | null } }).faelle?.claim_id
+    if (!claimId) return NextResponse.json({ error: 'Claim nicht gefunden' }, { status: 400 })
+
+    // Pfad-Whitelist: muss unter claim/<claimId>/gutachten/<auftragId>/ liegen
+    const expectedPrefix = `claim/${claimId}/gutachten/${body.auftragId}/`
+    if (!body.storagePath.startsWith(expectedPrefix)) {
       return NextResponse.json({ error: 'Ungültiger Storage-Pfad' }, { status: 400 })
     }
 

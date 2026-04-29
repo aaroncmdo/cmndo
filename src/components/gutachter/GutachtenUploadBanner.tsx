@@ -12,13 +12,14 @@ import { createClient } from '@/lib/supabase/client'
 
 type Props = {
   auftragId: string
+  claimId: string
   hatGutachten: boolean
 }
 
 type UploadStatus = 'idle' | 'uploading' | 'done' | 'error'
 type UploadFile = { name: string; status: UploadStatus; error?: string; istHaupt: boolean }
 
-export default function GutachtenUploadBanner({ auftragId, hatGutachten }: Props) {
+export default function GutachtenUploadBanner({ auftragId, claimId, hatGutachten }: Props) {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [dragOver, setDragOver] = useState(false)
   const [pending, startTransition] = useTransition()
@@ -37,7 +38,8 @@ export default function GutachtenUploadBanner({ auftragId, hatGutachten }: Props
   async function uploadEine(file: File, istHaupt: boolean): Promise<{ ok: boolean; error?: string }> {
     const supabase = createClient()
     const safeName = file.name.replace(/[^a-z0-9._-]/gi, '_')
-    const storagePath = `auftrag/${auftragId}/${Date.now()}-${safeName}`
+    // CMM-32: Storage am Claim verankern, Auftrag-Bezug bleibt im Pfad
+    const storagePath = `claim/${claimId}/gutachten/${auftragId}/${Date.now()}-${safeName}`
     // Direktupload — kein API-Body, umgeht Vercel-413-Limit
     const { error: upErr } = await supabase.storage
       .from('fall-dokumente')
