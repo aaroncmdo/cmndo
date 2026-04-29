@@ -324,7 +324,13 @@ export default function FallDetailClient(props: Props) {
       {/* Stepper + Unterwegs-Info + TerminActionsPanel ganz oben — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
         <SvUnterwegsInfo tracking={geoTracking} svVorname={props.svVorname ?? null} />
-        {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} gutachtenInQc={props.gutachtenInQc} />}
+        {/* CMM-32e: Auftrag-Stepper nur während aktivem Auftrag (termin/besichtigung/gutachten/abgeschlossen).
+            Sobald in einer FallPhase (Regulierung/Auszahlung/Kanzlei), zeigen wir den Stepper nicht mehr —
+            der Auftrag ist abgeschlossen und der SV sieht nur noch die schlanke „Mein Fall"-Card unten. */}
+        {props.svPhase &&
+          !['gutachten-freigegeben', 'bei-kanzlei', 'stellungnahme', 'nachbesichtigung', 'auszahlung', 'abgeschlossen-fall'].includes(props.svPhase) && (
+            <AuftragsphaseStepper phase={props.svPhase} gutachtenInQc={props.gutachtenInQc} />
+          )}
         {zeigeTerminActions && aktiverTermin && (
           <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
         )}
