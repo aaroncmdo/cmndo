@@ -196,13 +196,15 @@ export default function GutachterShell({
     const svIds = (svs ?? []).map(s => s.id)
     if (svIds.length === 0) return
 
-    // Aufträge: Fälle mit status='sv-zugewiesen' (neue Zuweisungen, noch nicht
-    // bestätigt/terminiert) — über alle SV-Rows des Users.
+    // CMM-32f: Aufträge-Badge zählt aktive Aufträge bis QC-Freigabe — auf
+    // auftraege-Sub-Entity migriert. Sobald gutachten_final_freigegeben=true
+    // wandert der Fall in /gutachter/faelle (Regulierungs-Phase).
     const { count: auftraegeCount } = await supabase
-      .from('faelle')
+      .from('auftraege')
       .select('id', { count: 'exact', head: true })
       .in('sv_id', svIds)
-      .eq('status', 'sv-zugewiesen')
+      .eq('gutachten_final_freigegeben', false)
+      .eq('status', 'termin')
 
     // Posteingang Tab 1: ungelesene System-Mitteilungen über alle SV-Rows.
     const { count: mitteilungenCount } = await supabase
@@ -238,7 +240,7 @@ export default function GutachterShell({
     const supabase = createClient()
     const channel = supabase
       .channel('gutachter-sidebar-badges')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'faelle' }, () => loadBadges())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'auftraege' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_mitteilungen' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_termine' }, () => loadBadges())
