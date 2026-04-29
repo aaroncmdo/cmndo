@@ -140,8 +140,8 @@ export default function AuftragHeaderPanel({
 
   return (
     <div className="rounded-2xl bg-claimondo-navy/[0.06] border border-claimondo-navy/15 backdrop-blur-sm overflow-hidden">
-      {/* Sektion 1 — Stepper */}
-      <div className="px-6 py-4">
+      {/* Sektion 1 — Stepper (weiß, Aaron lässt Platz für künftige Inhalte) */}
+      <div className="bg-white px-6 py-4">
         <div className="flex items-center w-full">
           {PHASES.map((p, i) => {
             const isCurrent = !abgeschlossen && i === aktuellIdx
