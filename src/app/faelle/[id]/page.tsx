@@ -15,6 +15,7 @@ import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-433 (Child 4 AAR-429): KB Phase-State-Audit oberhalb der Tabs
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
 import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
+import RegulierungCard from '@/components/kb/RegulierungCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
 import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
@@ -625,6 +626,31 @@ export default async function FallaktePage({
     }
   }
 
+  // CMM-32i: Kanzlei-Fall-Lifecycle-Daten für RegulierungCard. Existiert nur
+  // nach KB-Freigabe (gibKanzleipaketFrei legt den Eintrag an).
+  let regulierungCardProps: {
+    fallId: string
+    status: 'versicherungskontakt' | 'auszahlung'
+    vsKontaktAm: string | null
+    ausgezahltAm: string | null
+  } | null = null
+  if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
+    const adminCli = createAdminClient()
+    const { data: kf } = await adminCli
+      .from('kanzlei_faelle')
+      .select('status, vs_kontakt_am, ausgezahlt_am')
+      .eq('fall_id', id)
+      .maybeSingle()
+    if (kf) {
+      regulierungCardProps = {
+        fallId: id,
+        status: (kf.status as 'versicherungskontakt' | 'auszahlung') ?? 'versicherungskontakt',
+        vsKontaktAm: (kf.vs_kontakt_am as string | null) ?? null,
+        ausgezahltAm: (kf.ausgezahlt_am as string | null) ?? null,
+      }
+    }
+  }
+
   // AAR-538 (C1): Subphase + next_hint berechnen (pure function)
   const subphase = resolveSubphase({
     fall: fall as unknown as FallRow,
@@ -639,6 +665,12 @@ export default async function FallaktePage({
       {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && qcCardProps && (
         <div className="mb-4 sticky top-0 z-30">
           <VollstaendigkeitsCheckCard {...qcCardProps} />
+        </div>
+      )}
+      {/* CMM-32i: Regulierungs-Lifecycle direkt unter QC-Card. */}
+      {regulierungCardProps && (
+        <div className="mb-4">
+          <RegulierungCard {...regulierungCardProps} />
         </div>
       )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
