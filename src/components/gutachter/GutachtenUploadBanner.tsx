@@ -8,6 +8,7 @@
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { UploadCloudIcon, FileTextIcon, CheckIcon } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 type Props = {
   auftragId: string
@@ -34,11 +35,28 @@ export default function GutachtenUploadBanner({ auftragId, hatGutachten }: Props
   }
 
   async function uploadEine(file: File, istHaupt: boolean): Promise<{ ok: boolean; error?: string }> {
-    const fd = new FormData()
-    fd.append('file', file)
-    fd.append('auftragId', auftragId)
-    fd.append('istHauptgutachten', istHaupt ? 'true' : 'false')
-    const res = await fetch('/api/sv/upload-gutachten', { method: 'POST', body: fd })
+    const supabase = createClient()
+    const safeName = file.name.replace(/[^a-z0-9._-]/gi, '_')
+    const storagePath = `auftrag/${auftragId}/${Date.now()}-${safeName}`
+    // Direktupload — kein API-Body, umgeht Vercel-413-Limit
+    const { error: upErr } = await supabase.storage
+      .from('fall-dokumente')
+      .upload(storagePath, file, { contentType: file.type || 'application/octet-stream', upsert: false })
+    if (upErr) return { ok: false, error: upErr.message }
+
+    // Metadaten + Auftrag-Update via Finalize-API
+    const res = await fetch('/api/sv/upload-gutachten/finalize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        auftragId,
+        storagePath,
+        filename: file.name,
+        sizeBytes: file.size,
+        mimeType: file.type,
+        istHauptgutachten: istHaupt,
+      }),
+    })
     if (!res.ok) {
       const j = await res.json().catch(() => ({}))
       return { ok: false, error: (j as { error?: string }).error ?? `HTTP ${res.status}` }
