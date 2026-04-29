@@ -71,6 +71,28 @@ export default function VollstaendigkeitsCheckCard({
     )
   }
 
+  // CMM-32e: Reject-Zustand — KB hat Nachbesserung gefordert, wartet auf SV.
+  if (zurueckgewiesenAm) {
+    return (
+      <div className="rounded-2xl bg-amber-50 border border-amber-300 px-4 sm:px-6 py-4 space-y-2">
+        <div className="flex items-start gap-3">
+          <ArrowLeftCircleIcon className="w-5 h-5 shrink-0 text-amber-700 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-amber-900">Nachbesserung angefordert</p>
+            <p className="text-xs text-amber-800 mt-0.5">
+              Wartet auf korrigiertes Gutachten vom SV. Sobald die neue Version eintrifft, taucht hier wieder der Freigabe-Button auf.
+            </p>
+            {zurueckweisungGrund && (
+              <p className="text-xs text-amber-900 mt-2 bg-white/60 border border-amber-200 rounded-lg px-3 py-2 whitespace-pre-line">
+                <strong>Begründung:</strong> {zurueckweisungGrund}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const fehlende = pflichtItems.filter((p) => p.pflicht && !p.vorhanden)
 
   function handleFreigeben() {
@@ -183,17 +205,7 @@ export default function VollstaendigkeitsCheckCard({
         ))}
       </div>
 
-      {/* Bisherige Zurückweisung-Hinweis (falls aktiv) */}
-      {zurueckgewiesenAm && (
-        <div className="border-t border-claimondo-border pt-3 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
-          <p className="text-xs font-semibold text-amber-900 mb-0.5">Nachbesserung läuft</p>
-          {zurueckweisungGrund && (
-            <p className="text-xs text-amber-800">{zurueckweisungGrund}</p>
-          )}
-        </div>
-      )}
-
-      {/* Buttons */}
+      {/* Buttons (nur wenn nicht in Reject-Wartemodus) */}
       {!rejectMode ? (
         <div className="border-t border-claimondo-border pt-3 flex items-center justify-between gap-3 flex-wrap">
           {fehlende.length > 0 ? (
