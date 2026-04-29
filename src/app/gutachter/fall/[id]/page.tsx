@@ -482,35 +482,17 @@ export default async function GutachterFallPage({
           abgelehnteDocsInfo={abgelehnteDocsInfo}
         />
       )}
-      {/* Briefing links — rechts: Vor-Ort-Buttons (compact) oben + Einzuholen-Dokumente darunter */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <BriefingCard
+      {/* CMM-32 Walkthrough: Briefing + Einzuholen sind jetzt im
+          AuftragHeaderPanel verschmolzen. Hier bleibt nur die entkoppelte
+          „Bin angekommen"-Card als eigenständiger Vor-Ort-Trigger. */}
+      {zeigeVorOrt && (
+        <VorOrtTriggerCard
           fallId={id}
-          briefing={(fall.sv_briefing_text as string | null) ?? null}
-          generatedAt={(fall.sv_briefing_generated_at as string | null) ?? null}
-          model={(fall.sv_briefing_model as string | null) ?? null}
-          version={(fall.sv_briefing_version as number | null) ?? null}
-          canRegenerate={false}
+          kundeName={kundenName}
+          kennzeichen={(fall.kennzeichen as string | null) ?? null}
+          adresse={schadensAdresse}
         />
-        <div className="flex flex-col h-full">
-          {zeigeVorOrt && (
-            <div className="h-[30%] pb-3 flex flex-col">
-              <div className="flex-1 flex flex-col">
-                <VorOrtTriggerCard
-                  fallId={id}
-                  kundeName={kundenName}
-                  kennzeichen={(fall.kennzeichen as string | null) ?? null}
-                  adresse={schadensAdresse}
-                  compact
-                />
-              </div>
-            </div>
-          )}
-          <div className={zeigeVorOrt ? 'h-[70%]' : 'h-full'}>
-            <SvEinzuholenBanner slots={pflichtSlots} />
-          </div>
-        </div>
-      </div>
+      )}
       {stellungnahmeAktiv && (
         <div className="rounded-2xl border-2 border-orange-300 bg-orange-50 p-4">
           <p className="text-sm font-semibold text-orange-900">Stellungnahme angefordert</p>

@@ -1,12 +1,11 @@
 'use client'
 
-// CMM-32 Walkthrough: Kombinierter Header für die SV-Fallakte. Vereint den
-// 3-Phasen-Stepper (Termin → Besichtigung → Gutachten) mit der Termin-
-// Anzeige als visuell verschmolzener Banner. Termin-Sektion „entspringt"
-// dem Stepper — gleicher Container, divider als einziger Trenner.
-//
-// Gestaltung analog zum KB-QC-Banner: rounded-2xl Wrapper, weißer Stepper
-// oben, navy-getönte Termin-Sektion unten mit Datum/Adresse/Aktions-Buttons.
+// CMM-32 Walkthrough: SV-Header-Banner — kombiniert Stepper, Termin-Daten,
+// Navigation, SV-Briefing und „vor Ort einzusammeln"-Liste in einem
+// blau-transparenten Banner. Visuelle Anker-Karte für die ganze Phase
+// „Termin → Besichtigung". „Bin angekommen" bleibt bewusst eine eigene
+// Card daneben (Aaron-Spec: entkoppeln vom Briefing-Banner, weil man
+// nicht jedes Mal scrollen will um den Vor-Ort-Trigger zu sehen).
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -18,6 +17,8 @@ import {
   NavigationIcon,
   ClockIcon,
   XCircleIcon,
+  SparklesIcon,
+  ClipboardListIcon,
 } from 'lucide-react'
 import { Modal } from '@/components/primitives/Modal'
 import {
@@ -32,6 +33,7 @@ import {
   terminAblehnen,
   terminGegenvorschlag,
 } from '@/lib/actions/termin-actions'
+import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 
 const PHASES: { key: AuftragsPhase; icon: typeof CalendarIcon }[] = [
   { key: 'termin', icon: CalendarIcon },
@@ -55,6 +57,10 @@ type Props = {
   /** Adresse für Navigation + Anzeige. */
   adresse: string | null
   fallId: string
+  /** SV-Briefing aus claims.sv_briefing_text (CMM-32-Walkthrough). */
+  briefingText: string | null
+  /** Pflicht-Slots für „vor Ort einzusammeln". */
+  pflichtSlots: PflichtSlotForView[]
 }
 
 function fmtTermin(iso: string | null): { datum: string; uhrzeit: string } | null {
@@ -81,6 +87,8 @@ export default function AuftragHeaderPanel({
   termin,
   adresse,
   fallId,
+  briefingText,
+  pflichtSlots,
 }: Props) {
   const router = useRouter()
   const [modal, setModal] = useState<'ablehnen' | 'gegenvorschlag' | null>(null)
@@ -101,26 +109,8 @@ export default function AuftragHeaderPanel({
   const fmt = fmtTermin(termin?.start_zeit ?? null)
   const fmtVorgeschlag = fmtTermin(termin?.vorgeschlagenes_datum ?? null)
 
-  // Termin-Banner nur während der Auftrags-Phase (Termin/Besichtigung/Gutachten),
-  // nicht mehr nach Abschluss.
-  const zeigeBanner = termin && !abgeschlossen && (istReserviert || istBestaetigt || istEigenerGegenvorschlag)
-
-  // Banner-Farbschema je Status
-  const bannerCls = istReserviert
-    ? 'bg-amber-50 border-t border-amber-200'
-    : istEigenerGegenvorschlag
-      ? 'bg-violet-50 border-t border-violet-200'
-      : 'bg-claimondo-navy/[0.04] border-t border-claimondo-border'
-  const bannerTextCls = istReserviert
-    ? 'text-amber-900'
-    : istEigenerGegenvorschlag
-      ? 'text-violet-900'
-      : 'text-claimondo-navy'
-  const bannerSubCls = istReserviert
-    ? 'text-amber-800'
-    : istEigenerGegenvorschlag
-      ? 'text-violet-700'
-      : 'text-claimondo-ondo'
+  const offenePflicht = pflichtSlots.filter((s) => s.pflicht && s.status !== 'erfuellt')
+  const hatBriefing = !!briefingText && briefingText.trim().length > 0
 
   async function handleAblehnen() {
     setLoading(true)
@@ -149,8 +139,8 @@ export default function AuftragHeaderPanel({
   }
 
   return (
-    <div className="rounded-2xl border border-claimondo-border bg-white overflow-hidden">
-      {/* Stepper-Sektion */}
+    <div className="rounded-2xl bg-claimondo-navy/[0.06] border border-claimondo-navy/15 backdrop-blur-sm overflow-hidden">
+      {/* Sektion 1 — Stepper */}
       <div className="px-6 py-4">
         <div className="flex items-center w-full">
           {PHASES.map((p, i) => {
@@ -169,7 +159,7 @@ export default function AuftragHeaderPanel({
                           ? 'bg-violet-600 text-white ring-2 ring-violet-300'
                           : isCurrent
                             ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                            : 'bg-claimondo-border/40 text-claimondo-ondo/60'
+                            : 'bg-white/60 text-claimondo-ondo/60 border border-claimondo-border'
                     }`}
                   >
                     {isDone ? <CheckIcon className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
@@ -189,7 +179,7 @@ export default function AuftragHeaderPanel({
                   </p>
                 </div>
                 {i < PHASES.length - 1 && (
-                  <div className={`flex-1 h-px mx-4 ${isDone ? 'bg-emerald-300' : 'bg-claimondo-border'}`} />
+                  <div className={`flex-1 h-px mx-4 ${isDone ? 'bg-emerald-300' : 'bg-claimondo-navy/15'}`} />
                 )}
               </React.Fragment>
             )
@@ -202,35 +192,35 @@ export default function AuftragHeaderPanel({
         </div>
       </div>
 
-      {/* Termin-Banner — visuell verschmolzen mit Stepper */}
-      {zeigeBanner && (
-        <div className={`${bannerCls} px-6 py-3.5`}>
+      {/* Sektion 2 — Termin + Navi */}
+      {termin && !abgeschlossen && (istBestaetigt || istReserviert || istEigenerGegenvorschlag) && (
+        <div className="border-t border-claimondo-navy/10 px-6 py-3.5">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-2.5 min-w-0">
-              <CalendarIcon className={`w-4 h-4 shrink-0 ${bannerTextCls}`} />
+              <CalendarIcon className="w-4 h-4 shrink-0 text-claimondo-navy" />
               <div className="min-w-0">
                 {istEigenerGegenvorschlag && fmtVorgeschlag ? (
                   <>
-                    <p className={`text-sm font-semibold ${bannerTextCls}`}>
+                    <p className="text-sm font-semibold text-violet-900">
                       Gegenvorschlag gesendet — {fmtVorgeschlag.datum}
                     </p>
-                    <p className={`text-xs ${bannerSubCls}`}>
+                    <p className="text-xs text-violet-700">
                       {fmtVorgeschlag.uhrzeit} Uhr · wartet auf Dispatcher-Entscheidung
                     </p>
                   </>
                 ) : fmt ? (
                   <>
-                    <p className={`text-sm font-semibold ${bannerTextCls}`}>
+                    <p className="text-sm font-semibold text-claimondo-navy">
                       {fmt.datum}, {fmt.uhrzeit} Uhr
                     </p>
-                    {adresse && <p className={`text-xs ${bannerSubCls} truncate`}>{adresse}</p>}
+                    {adresse && <p className="text-xs text-claimondo-ondo truncate">{adresse}</p>}
                   </>
                 ) : null}
               </div>
             </div>
 
             <div className="flex items-center gap-2 ml-auto">
-              {adresse && istBestaetigt && (
+              {adresse && (istBestaetigt || istReserviert) && (
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(adresse)}`}
                   target="_blank"
@@ -245,14 +235,14 @@ export default function AuftragHeaderPanel({
                 <>
                   <button
                     onClick={() => setModal('ablehnen')}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium px-3 py-1.5 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 text-sm font-medium px-3 py-1.5 transition-colors"
                   >
                     <XCircleIcon className="w-3.5 h-3.5" />
                     Ablehnen
                   </button>
                   <button
                     onClick={() => setModal('gegenvorschlag')}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-claimondo-border text-claimondo-navy hover:bg-white text-sm font-medium px-3 py-1.5 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-claimondo-border bg-white text-claimondo-navy hover:bg-claimondo-navy/5 text-sm font-medium px-3 py-1.5 transition-colors"
                   >
                     <ClockIcon className="w-3.5 h-3.5" />
                     Gegenvorschlag
@@ -263,9 +253,54 @@ export default function AuftragHeaderPanel({
           </div>
 
           {istReserviert && (
-            <p className={`text-[11px] ${bannerSubCls} mt-2`}>
+            <p className="text-[11px] text-claimondo-ondo mt-2">
               Termin geblockt — wartet auf Sicherungsabtretungs-Unterschrift des Kunden.
             </p>
+          )}
+        </div>
+      )}
+
+      {/* Sektion 3 — Briefing + Einzusammeln (zwei Spalten) */}
+      {(hatBriefing || offenePflicht.length > 0) && (
+        <div className="border-t border-claimondo-navy/10 px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Briefing */}
+          {hatBriefing && (
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <SparklesIcon className="w-4 h-4 text-claimondo-navy" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-navy">
+                  SV-Briefing
+                </p>
+              </div>
+              <p className="text-sm leading-relaxed text-claimondo-navy whitespace-pre-wrap">
+                {briefingText}
+              </p>
+            </div>
+          )}
+
+          {/* Vor Ort einzusammeln */}
+          {offenePflicht.length > 0 && (
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <ClipboardListIcon className="w-4 h-4 text-amber-700" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-amber-900">
+                  Vor Ort einzusammeln
+                </p>
+              </div>
+              <ul className="space-y-1.5">
+                {offenePflicht.map((slot) => (
+                  <li key={slot.slot_id} className="text-sm text-claimondo-navy">
+                    <span className="font-medium">{slot.label}</span>
+                    {slot.beschreibung && (
+                      <span className="text-xs text-claimondo-ondo">
+                        {' — '}
+                        {slot.beschreibung}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       )}

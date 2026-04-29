@@ -333,6 +333,8 @@ export default function FallDetailClient(props: Props) {
               termin={aktiverTermin}
               adresse={schadensAdresseTracking}
               fallId={fall.id as string}
+              briefingText={(fall.sv_briefing_text as string | null) ?? null}
+              pflichtSlots={props.pflichtSlots ?? []}
             />
           )}
       </div>
