@@ -17,6 +17,7 @@ const INITIAL: CreateManualLeadInput = {
   nachname: '',
   telefon: '',
   email: '',
+  fahrzeug_farbe: '',
   kunde_adresse: '',
   kunde_strasse: '',
   kunde_plz: '',
@@ -101,6 +102,10 @@ export default function NeuLeadDrawer() {
           </div>
           <InputField label="Telefon *" value={data.telefon} onChange={v => setData({ ...data, telefon: v })} type="tel" placeholder="+49..." />
           <InputField label="E-Mail" value={data.email} onChange={v => setData({ ...data, email: v })} type="email" />
+          {/* CMM-32: Lackfarbe vom Dispatcher direkt erfasst — SV identifiziert
+              das Fahrzeug vor Ort visuell, und die Farbe kommt mit Hersteller +
+              Modell auf den Banner-Header der Fallakte. */}
+          <InputField label="Lackfarbe" value={data.fahrzeug_farbe ?? ''} onChange={v => setData({ ...data, fahrzeug_farbe: v })} placeholder="z. B. Saphirschwarz Metallic" />
 
           {/* AAR-695: Google-Maps-Autocomplete für die Kunden-Adresse.
               Liefert direkt Adresse + PLZ + Lat/Lng — wird in Phase 1 ohnehin

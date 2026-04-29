@@ -18,6 +18,9 @@ export interface CreateManualLeadInput {
   nachname: string
   telefon: string
   email: string
+  /** CMM-32: Lackfarbe vom Dispatcher direkt am Telefon erfasst — der SV
+      braucht's beim Vor-Ort-Termin zur eindeutigen Fahrzeug-Identifikation. */
+  fahrzeug_farbe?: string | null
   kunde_adresse: string
   kunde_strasse: string
   kunde_plz: string
@@ -53,6 +56,7 @@ export async function createManualLead(
     nachname: data.nachname || null,
     telefon: data.telefon,
     email: data.email || null,
+    fahrzeug_farbe: data.fahrzeug_farbe?.trim() || null,
     kunde_adresse: data.kunde_adresse || null,
     kunde_strasse: data.kunde_strasse || null,
     kunde_plz: data.kunde_plz || null,
