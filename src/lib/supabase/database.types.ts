@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       abrechnung_positionen: {
@@ -803,6 +778,108 @@ export type Database = {
             columns: ["withdrawn_by_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auftraege: {
+        Row: {
+          abgeschlossen_am: string | null
+          erstellt_am: string
+          fall_id: string
+          gutachten_final_freigegeben: boolean
+          gutachten_url: string | null
+          id: string
+          reihenfolge: number
+          status: string
+          sv_id: string
+          typ: string
+          updated_at: string
+          vorheriger_auftrag_id: string | null
+        }
+        Insert: {
+          abgeschlossen_am?: string | null
+          erstellt_am?: string
+          fall_id: string
+          gutachten_final_freigegeben?: boolean
+          gutachten_url?: string | null
+          id?: string
+          reihenfolge?: number
+          status: string
+          sv_id: string
+          typ: string
+          updated_at?: string
+          vorheriger_auftrag_id?: string | null
+        }
+        Update: {
+          abgeschlossen_am?: string | null
+          erstellt_am?: string
+          fall_id?: string
+          gutachten_final_freigegeben?: boolean
+          gutachten_url?: string | null
+          id?: string
+          reihenfolge?: number
+          status?: string
+          sv_id?: string
+          typ?: string
+          updated_at?: string
+          vorheriger_auftrag_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auftraege_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auftraege_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_kunde_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auftraege_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_sv_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auftraege_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_full"
+            referencedColumns: ["fall_id"]
+          },
+          {
+            foreignKeyName: "auftraege_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_listing"
+            referencedColumns: ["fall_id"]
+          },
+          {
+            foreignKeyName: "auftraege_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auftraege_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auftraege_vorheriger_auftrag_id_fkey"
+            columns: ["vorheriger_auftrag_id"]
+            isOneToOne: false
+            referencedRelation: "auftraege"
             referencedColumns: ["id"]
           },
         ]
@@ -3561,6 +3638,7 @@ export type Database = {
           ocr_result: Json | null
           ocr_status: string | null
           original_filename: string | null
+          pflichtdokument_id: string | null
           position_id: string | null
           quelle: string | null
           schaden_position: string | null
@@ -3590,6 +3668,7 @@ export type Database = {
           ocr_result?: Json | null
           ocr_status?: string | null
           original_filename?: string | null
+          pflichtdokument_id?: string | null
           position_id?: string | null
           quelle?: string | null
           schaden_position?: string | null
@@ -3619,6 +3698,7 @@ export type Database = {
           ocr_result?: Json | null
           ocr_status?: string | null
           original_filename?: string | null
+          pflichtdokument_id?: string | null
           position_id?: string | null
           quelle?: string | null
           schaden_position?: string | null
@@ -3675,6 +3755,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fall_dokumente_pflichtdokument_id_fkey"
+            columns: ["pflichtdokument_id"]
+            isOneToOne: false
+            referencedRelation: "pflichtdokumente"
             referencedColumns: ["id"]
           },
           {
@@ -4916,6 +5003,7 @@ export type Database = {
           abschluss_zeit: string | null
           ankunft_via: string | null
           ankunft_zeit: string | null
+          auftrag_id: string | null
           bezahlt: boolean
           cancelled_at: string | null
           created_at: string | null
@@ -4930,6 +5018,7 @@ export type Database = {
           gegenvorschlag_grund: string | null
           gegenvorschlag_von: string | null
           gegenvorschlag_zeit: string | null
+          geschaetzte_fahrtzeit_min: number | null
           gesehen_am: string | null
           google_calendar_id: string | null
           google_event_id: string | null
@@ -4988,6 +5077,7 @@ export type Database = {
           abschluss_zeit?: string | null
           ankunft_via?: string | null
           ankunft_zeit?: string | null
+          auftrag_id?: string | null
           bezahlt?: boolean
           cancelled_at?: string | null
           created_at?: string | null
@@ -5002,6 +5092,7 @@ export type Database = {
           gegenvorschlag_grund?: string | null
           gegenvorschlag_von?: string | null
           gegenvorschlag_zeit?: string | null
+          geschaetzte_fahrtzeit_min?: number | null
           gesehen_am?: string | null
           google_calendar_id?: string | null
           google_event_id?: string | null
@@ -5060,6 +5151,7 @@ export type Database = {
           abschluss_zeit?: string | null
           ankunft_via?: string | null
           ankunft_zeit?: string | null
+          auftrag_id?: string | null
           bezahlt?: boolean
           cancelled_at?: string | null
           created_at?: string | null
@@ -5074,6 +5166,7 @@ export type Database = {
           gegenvorschlag_grund?: string | null
           gegenvorschlag_von?: string | null
           gegenvorschlag_zeit?: string | null
+          geschaetzte_fahrtzeit_min?: number | null
           gesehen_am?: string | null
           google_calendar_id?: string | null
           google_event_id?: string | null
@@ -5124,6 +5217,13 @@ export type Database = {
           vorgeschlagenes_datum?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "gutachter_termine_auftrag_id_fkey"
+            columns: ["auftrag_id"]
+            isOneToOne: false
+            referencedRelation: "auftraege"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "gutachter_termine_fall_id_fkey"
             columns: ["fall_id"]
@@ -5706,6 +5806,79 @@ export type Database = {
             foreignKeyName: "kanzlei_admin_termine_fall_id_fkey"
             columns: ["fall_id"]
             isOneToOne: false
+            referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kanzlei_faelle: {
+        Row: {
+          ausgezahlt_am: string | null
+          erstellt_am: string
+          fall_id: string
+          id: string
+          status: string
+          updated_at: string
+          vs_kontakt_am: string | null
+        }
+        Insert: {
+          ausgezahlt_am?: string | null
+          erstellt_am?: string
+          fall_id: string
+          id?: string
+          status: string
+          updated_at?: string
+          vs_kontakt_am?: string | null
+        }
+        Update: {
+          ausgezahlt_am?: string | null
+          erstellt_am?: string
+          fall_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          vs_kontakt_am?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kanzlei_faelle_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: true
+            referencedRelation: "faelle"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kanzlei_faelle_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: true
+            referencedRelation: "faelle_kunde_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kanzlei_faelle_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: true
+            referencedRelation: "faelle_sv_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kanzlei_faelle_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_full"
+            referencedColumns: ["fall_id"]
+          },
+          {
+            foreignKeyName: "kanzlei_faelle_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_listing"
+            referencedColumns: ["fall_id"]
+          },
+          {
+            foreignKeyName: "kanzlei_faelle_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: true
             referencedRelation: "v_faelle_mit_aktuellem_termin"
             referencedColumns: ["id"]
           },
@@ -9897,6 +10070,86 @@ export type Database = {
           },
         ]
       }
+      sv_live_location: {
+        Row: {
+          accuracy: number | null
+          eta_minuten: number | null
+          fall_id: string | null
+          lat: number
+          lng: number
+          sv_id: string
+          updated_at: string
+        }
+        Insert: {
+          accuracy?: number | null
+          eta_minuten?: number | null
+          fall_id?: string | null
+          lat: number
+          lng: number
+          sv_id: string
+          updated_at?: string
+        }
+        Update: {
+          accuracy?: number | null
+          eta_minuten?: number | null
+          fall_id?: string | null
+          lat?: number
+          lng?: number
+          sv_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sv_live_location_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_live_location_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_kunde_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_live_location_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_sv_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_live_location_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_full"
+            referencedColumns: ["fall_id"]
+          },
+          {
+            foreignKeyName: "sv_live_location_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_listing"
+            referencedColumns: ["fall_id"]
+          },
+          {
+            foreignKeyName: "sv_live_location_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_live_location_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: true
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sv_live_position: {
         Row: {
           accuracy_m: number | null
@@ -12896,10 +13149,12 @@ export type Database = {
         Returns: undefined
       }
       delete_lead_komplett: { Args: { p_lead_id: string }; Returns: undefined }
+      dispatcher_owns_lead: { Args: { p_lead_id: string }; Returns: boolean }
       dsgvo_anonymize_user_data: {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      expire_geblockte_termine_ohne_sa: { Args: never; Returns: number }
       get_sichtbare_qualifikationen: {
         Args: { p_sv_id: string }
         Returns: string[]
@@ -12915,10 +13170,14 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      is_claim_user_party: { Args: { p_claim_id: string }; Returns: boolean }
       is_dat_badge_sichtbar: { Args: { p_sv_id: string }; Returns: boolean }
+      is_dispatcher: { Args: never; Returns: boolean }
       is_kanzlei: { Args: never; Returns: boolean }
+      is_kundenbetreuer: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
       is_sv: { Args: never; Returns: boolean }
+      is_sv_for_claim: { Args: { p_claim_id: string }; Returns: boolean }
       link_lead_data_to_fall: {
         Args: { p_fall_id: string; p_lead_id: string }
         Returns: Json
@@ -13247,9 +13506,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       betreuungspaket: ["vollservice", "sv-only"],
