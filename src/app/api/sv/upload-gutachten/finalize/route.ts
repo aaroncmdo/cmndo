@@ -65,10 +65,36 @@ export async function POST(req: NextRequest) {
     })
 
     if (body.istHauptgutachten || (!auftrag.gutachten_url && (body.mimeType === 'application/pdf' || body.filename.toLowerCase().endsWith('.pdf')))) {
+      // CMM-32e: Bei Re-Upload Reject-Marker zurücksetzen (Grund bleibt für Audit)
       await db
         .from('auftraege')
-        .update({ gutachten_url: publicUrl, status: 'gutachten' })
+        .update({
+          gutachten_url: publicUrl,
+          status: 'gutachten',
+          zurueckgewiesen_am: null,
+        })
         .eq('id', body.auftragId)
+
+      // Wenn das ein Re-Upload nach Reject war: KB benachrichtigen + Timeline
+      const { data: auftragMitClaim } = await db
+        .from('auftraege')
+        .select('id, fall_id, zurueckweisung_grund, faelle!inner(kundenbetreuer_id)')
+        .eq('id', body.auftragId)
+        .single()
+      const kbId = (auftragMitClaim as unknown as { faelle: { kundenbetreuer_id: string | null } } | null)?.faelle?.kundenbetreuer_id
+      if (auftrag.gutachten_url && auftragMitClaim?.zurueckweisung_grund) {
+        try {
+          await db.from('timeline').insert({
+            fall_id: auftragMitClaim.fall_id,
+            typ: 'gutachten_korrigiert',
+            titel: 'Korrigiertes Gutachten eingereicht',
+            beschreibung: 'SV hat eine korrigierte Version hochgeladen.',
+            erstellt_von: user.id,
+          })
+        } catch { /* non-critical */ }
+        // TODO: KB-Mitteilung wenn createKbMitteilung-Helper existiert (CMM-32 Folge-PR).
+        void kbId
+      }
     }
 
     return NextResponse.json({ ok: true, publicUrl })

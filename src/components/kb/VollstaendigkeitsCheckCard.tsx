@@ -6,8 +6,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircleIcon, AlertCircleIcon, FileTextIcon, DownloadIcon } from 'lucide-react'
-import { gibKanzleipaketFrei } from '@/lib/auftrag/qc'
+import { CheckCircleIcon, AlertCircleIcon, FileTextIcon, DownloadIcon, ArrowLeftCircleIcon } from 'lucide-react'
+import { gibKanzleipaketFrei, weiseGutachtenZurueck } from '@/lib/auftrag/qc'
 
 type AnlageRow = {
   id: string
@@ -30,6 +30,9 @@ type Props = {
   hauptgutachten: AnlageRow | null
   anlagen: AnlageRow[]
   pflichtItems: PflichtItem[]
+  /** CMM-32e: gesetzt wenn KB schon mal Nachbesserung gefordert hat. */
+  zurueckgewiesenAm?: string | null
+  zurueckweisungGrund?: string | null
 }
 
 export default function VollstaendigkeitsCheckCard({
@@ -39,9 +42,13 @@ export default function VollstaendigkeitsCheckCard({
   hauptgutachten,
   anlagen,
   pflichtItems,
+  zurueckgewiesenAm,
+  zurueckweisungGrund,
 }: Props) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [rejectMode, setRejectMode] = useState(false)
+  const [rejectGrund, setRejectGrund] = useState('')
   const router = useRouter()
 
   if (bereitsFreigegeben) {
@@ -72,6 +79,23 @@ export default function VollstaendigkeitsCheckCard({
       const r = await gibKanzleipaketFrei(auftragId)
       if (!r.ok) setError(r.error ?? 'Freigabe fehlgeschlagen')
       else router.refresh()
+    })
+  }
+
+  function handleZurueckweisen() {
+    if (!rejectGrund.trim()) {
+      setError('Bitte Begründung eingeben.')
+      return
+    }
+    setError(null)
+    startTransition(async () => {
+      const r = await weiseGutachtenZurueck(auftragId, rejectGrund.trim())
+      if (!r.ok) setError(r.error ?? 'Zurückweisung fehlgeschlagen')
+      else {
+        setRejectMode(false)
+        setRejectGrund('')
+        router.refresh()
+      }
     })
   }
 
@@ -159,24 +183,75 @@ export default function VollstaendigkeitsCheckCard({
         ))}
       </div>
 
-      {/* Freigabe-Button */}
-      <div className="border-t border-claimondo-border pt-3 flex items-center justify-between gap-3">
-        {fehlende.length > 0 ? (
-          <p className="text-xs text-amber-700 flex-1">
-            {fehlende.length} Pflichtdokument{fehlende.length === 1 ? '' : 'e'} fehl
-            {fehlende.length === 1 ? 't' : 'en'} — Freigabe trotzdem möglich (Nachreichung wird beim Kunden angefordert).
-          </p>
-        ) : (
-          <p className="text-xs text-emerald-700 flex-1">Alles vollständig.</p>
-        )}
-        <button
-          onClick={handleFreigeben}
-          disabled={pending}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
-        >
-          {pending ? 'Wird freigegeben…' : 'Kanzleipaket freigeben'}
-        </button>
-      </div>
+      {/* Bisherige Zurückweisung-Hinweis (falls aktiv) */}
+      {zurueckgewiesenAm && (
+        <div className="border-t border-claimondo-border pt-3 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+          <p className="text-xs font-semibold text-amber-900 mb-0.5">Nachbesserung läuft</p>
+          {zurueckweisungGrund && (
+            <p className="text-xs text-amber-800">{zurueckweisungGrund}</p>
+          )}
+        </div>
+      )}
+
+      {/* Buttons */}
+      {!rejectMode ? (
+        <div className="border-t border-claimondo-border pt-3 flex items-center justify-between gap-3 flex-wrap">
+          {fehlende.length > 0 ? (
+            <p className="text-xs text-amber-700 flex-1 min-w-[160px]">
+              {fehlende.length} Pflichtdokument{fehlende.length === 1 ? '' : 'e'} fehl
+              {fehlende.length === 1 ? 't' : 'en'} — Freigabe trotzdem möglich (Nachreichung wird beim Kunden angefordert).
+            </p>
+          ) : (
+            <p className="text-xs text-emerald-700 flex-1 min-w-[160px]">Alles vollständig.</p>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setRejectMode(true)}
+              disabled={pending}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-claimondo-border hover:bg-[#f8f9fb] text-claimondo-navy text-sm font-semibold px-4 py-2 transition-colors"
+            >
+              <ArrowLeftCircleIcon className="w-4 h-4" />
+              Nachbesserung anfordern
+            </button>
+            <button
+              onClick={handleFreigeben}
+              disabled={pending}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
+            >
+              {pending ? 'Wird freigegeben…' : 'Kanzleipaket freigeben'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="border-t border-claimondo-border pt-3 space-y-2">
+          <label className="text-xs font-semibold text-claimondo-navy">
+            Was muss der Gutachter korrigieren?
+          </label>
+          <textarea
+            value={rejectGrund}
+            onChange={(e) => setRejectGrund(e.target.value)}
+            rows={3}
+            placeholder="z.B. Kostenposition X fehlt, Foto Y unscharf …"
+            className="w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm placeholder:text-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30"
+          />
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={() => { setRejectMode(false); setRejectGrund(''); setError(null) }}
+              disabled={pending}
+              className="text-sm text-claimondo-ondo hover:text-claimondo-navy px-3 py-2"
+            >
+              Abbrechen
+            </button>
+            <button
+              onClick={handleZurueckweisen}
+              disabled={pending || !rejectGrund.trim()}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
+            >
+              {pending ? 'Wird gesendet…' : 'Nachbesserung anfordern'}
+            </button>
+          </div>
+        </div>
+      )}
       {error && <p className="text-xs text-red-700">{error}</p>}
     </div>
   )

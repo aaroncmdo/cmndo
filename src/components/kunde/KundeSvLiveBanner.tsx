@@ -17,6 +17,8 @@ type Props = {
   gutachtenHochgeladen?: boolean
   /** QC freigegeben — Banner verschwindet, ClaimStepper wechselt auf Regulierung. */
   qcFreigegeben?: boolean
+  /** KB hat Nachbesserung gefordert — Banner-Text wechselt auf „wird überarbeitet". */
+  inUeberarbeitung?: boolean
   initial: {
     sv_unterwegs_seit: string | null
     sv_angekommen_am: string | null
@@ -25,7 +27,7 @@ type Props = {
   }
 }
 
-export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgeladen, qcFreigegeben, initial }: Props) {
+export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgeladen, qcFreigegeben, inUeberarbeitung, initial }: Props) {
   const [state, setState] = useState(initial)
 
   useEffect(() => {
@@ -66,12 +68,14 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
 
   // Gutachten hochgeladen, QC läuft.
   if (gutachtenHochgeladen) {
+    const titel = inUeberarbeitung ? 'Gutachten wird überarbeitet' : 'Qualitätsprüfung & Kanzlei-Übergabe'
+    const sub = inUeberarbeitung ? '· Wir warten auf die korrigierte Version' : '· Ihr Gutachten wird geprüft'
     return (
       <div className="rounded-2xl bg-amber-500 text-white px-4 py-3 flex items-center gap-3">
         <FileTextIcon className="w-4 h-4 shrink-0" />
         <div className="flex-1 min-w-0">
-          <span className="text-sm font-semibold">Qualitätsprüfung & Kanzlei-Übergabe</span>
-          <span className="text-sm text-amber-50 ml-2">· Ihr Gutachten wird geprüft</span>
+          <span className="text-sm font-semibold">{titel}</span>
+          <span className="text-sm text-amber-50 ml-2">{sub}</span>
         </div>
       </div>
     )

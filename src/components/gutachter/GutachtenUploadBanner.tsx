@@ -14,19 +14,32 @@ type Props = {
   auftragId: string
   claimId: string
   hatGutachten: boolean
+  /** CMM-32e: KB hat Nachbesserung angefordert. Banner wird lila + zeigt Grund + öffnet Re-Upload. */
+  zurueckgewiesenAm?: string | null
+  zurueckweisungGrund?: string | null
 }
 
 type UploadStatus = 'idle' | 'uploading' | 'done' | 'error'
 type UploadFile = { name: string; status: UploadStatus; error?: string; istHaupt: boolean }
 
-export default function GutachtenUploadBanner({ auftragId, claimId, hatGutachten }: Props) {
+export default function GutachtenUploadBanner({
+  auftragId,
+  claimId,
+  hatGutachten,
+  zurueckgewiesenAm,
+  zurueckweisungGrund,
+}: Props) {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [dragOver, setDragOver] = useState(false)
   const [pending, startTransition] = useTransition()
   const inputRef = useRef<HTMLInputElement | null>(null)
   const router = useRouter()
 
-  if (hatGutachten && files.length === 0) {
+  // CMM-32e: Reject-Modus — KB hat Nachbesserung gefordert.
+  // SV sieht lila Banner mit Grund + Re-Upload-Zone.
+  const istReject = !!zurueckgewiesenAm
+
+  if (hatGutachten && !istReject && files.length === 0) {
     return (
       <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 flex items-center gap-3">
         <CheckIcon className="w-4 h-4 shrink-0 text-emerald-700" />
@@ -94,14 +107,32 @@ export default function GutachtenUploadBanner({ auftragId, claimId, hatGutachten
     })
   }
 
+  const colorBg = istReject ? 'bg-violet-50' : 'bg-amber-50'
+  const colorBorder = istReject ? 'border-violet-300' : 'border-amber-300'
+  const colorText = istReject ? 'text-violet-900' : 'text-amber-900'
+  const colorTextSub = istReject ? 'text-violet-800' : 'text-amber-800'
+  const colorIcon = istReject ? 'text-violet-700' : 'text-amber-700'
+  const colorDropBorder = istReject ? 'border-violet-300' : 'border-amber-300'
+  const colorDropHover = istReject ? 'hover:bg-violet-50' : 'hover:bg-amber-50'
+  const colorDropDragOver = istReject ? 'bg-violet-100 border-violet-400' : 'bg-amber-100 border-amber-400'
+
   return (
-    <div className="rounded-2xl bg-amber-50 border-2 border-dashed border-amber-300 px-4 py-5 space-y-3">
+    <div className={`rounded-2xl ${colorBg} border-2 border-dashed ${colorBorder} px-4 py-5 space-y-3`}>
       <div className="flex items-start gap-3">
-        <FileTextIcon className="w-5 h-5 shrink-0 text-amber-700 mt-0.5" />
+        <FileTextIcon className={`w-5 h-5 shrink-0 ${colorIcon} mt-0.5`} />
         <div className="flex-1">
-          <p className="text-sm font-semibold text-amber-900">Gutachten hochladen</p>
-          <p className="text-xs text-amber-800 mt-0.5">
-            Lade hier dein Gutachten + zugehörige Fotos und Dokumente hoch. Die erste PDF gilt als Hauptgutachten und startet den QC-Prozess.
+          <p className={`text-sm font-semibold ${colorText}`}>
+            {istReject ? 'Nachbesserung erforderlich' : 'Gutachten hochladen'}
+          </p>
+          {istReject && zurueckweisungGrund ? (
+            <p className={`text-xs ${colorTextSub} mt-0.5 whitespace-pre-line`}>
+              <strong>Grund:</strong> {zurueckweisungGrund}
+            </p>
+          ) : null}
+          <p className={`text-xs ${colorTextSub} mt-0.5`}>
+            {istReject
+              ? 'Lade die korrigierte Version hoch. Beim nächsten Upload startet der QC-Prozess automatisch neu.'
+              : 'Lade hier dein Gutachten + zugehörige Fotos und Dokumente hoch. Die erste PDF gilt als Hauptgutachten und startet den QC-Prozess.'}
           </p>
         </div>
       </div>
@@ -119,14 +150,14 @@ export default function GutachtenUploadBanner({ auftragId, claimId, hatGutachten
         }}
         onClick={() => inputRef.current?.click()}
         className={`rounded-xl border border-dashed cursor-pointer transition-colors px-4 py-6 text-center ${
-          dragOver ? 'bg-amber-100 border-amber-400' : 'bg-white border-amber-300 hover:bg-amber-50'
+          dragOver ? colorDropDragOver : `bg-white ${colorDropBorder} ${colorDropHover}`
         }`}
       >
-        <UploadCloudIcon className="w-6 h-6 mx-auto text-amber-600 mb-2" />
-        <p className="text-sm font-medium text-amber-900">
+        <UploadCloudIcon className={`w-6 h-6 mx-auto mb-2 ${istReject ? 'text-violet-600' : 'text-amber-600'}`} />
+        <p className={`text-sm font-medium ${colorText}`}>
           Dateien hierher ziehen oder klicken zum Auswählen
         </p>
-        <p className="text-xs text-amber-700 mt-1">PDF, JPG, PNG · Mehrere Dateien möglich</p>
+        <p className={`text-xs mt-1 ${colorIcon}`}>PDF, JPG, PNG · Mehrere Dateien möglich</p>
         <input
           ref={inputRef}
           type="file"

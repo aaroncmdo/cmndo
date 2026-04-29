@@ -591,6 +591,8 @@ export default async function FallaktePage({
         hauptgutachten: haupt,
         anlagen,
         pflichtItems: pflichtItemsList,
+        zurueckgewiesenAm: (erstgutachten as { zurueckgewiesen_am?: string | null }).zurueckgewiesen_am ?? null,
+        zurueckweisungGrund: (erstgutachten as { zurueckweisung_grund?: string | null }).zurueckweisung_grund ?? null,
       }
     }
   }

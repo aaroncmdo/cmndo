@@ -361,6 +361,11 @@ export default async function GutachterFallPage({
       )
     : null
 
+  // CMM-32: aktive Auftraege bereits hier laden, damit der Phase-Resolver
+  // gutachten_final_freigegeben aus auftraege ziehen kann.
+  const auftraegeOfFall = await getAlleAuftraege(supabase, id)
+  const erstgutachtenAuftrag = auftraegeOfFall.find((a) => a.typ === 'erstgutachten') ?? null
+
   // CMM-23: SV-Lifecycle-Phase aus Auftrag + Fall-State ableiten.
   const svPhase = getSvLifecyclePhase({
     terminStart: (aktiverTermin?.start_zeit as string | null) ?? null,
@@ -369,7 +374,8 @@ export default async function GutachterFallPage({
     svAngekommenAm: (aktiverTermin?.sv_angekommen_am as string | null) ?? null,
     terminDurchgefuehrtAm: (aktiverTermin?.durchgefuehrt_am as string | null) ?? null,
     gutachtenEingegangenAm: (fall.gutachten_eingegangen_am as string | null) ?? null,
-    gutachtenFinalFreigegeben: (fall.gutachten_final_freigegeben as boolean | null) ?? null,
+    // CMM-32: Wahrheit ist auftraege.gutachten_final_freigegeben (faelle hat die Spalte nicht).
+    gutachtenFinalFreigegeben: erstgutachtenAuftrag?.gutachten_final_freigegeben ?? null,
     lexdriveCaseId: (fall.lexdrive_case_id as string | null) ?? null,
     technischeStellungnahmeStatus: (fall.technische_stellungnahme_status as string | null) ?? null,
     nachbesichtigungStatus: (fall.nachbesichtigung_status as string | null) ?? null,
@@ -408,13 +414,14 @@ export default async function GutachterFallPage({
     (fall.nachbesichtigung_status as string | null) === 'angefordert' ||
     (fall.nachbesichtigung_status as string | null) === 'termin-eingereicht'
 
-  // CMM-32: aktiven Auftrag laden für Gutachten-Upload-Banner
-  const auftraegeOfFall = await getAlleAuftraege(supabase, id)
-  const erstgutachtenAuftrag = auftraegeOfFall.find((a) => a.typ === 'erstgutachten') ?? null
+  // CMM-32: Banner sichtbar wenn Termin durchgeführt + (kein Gutachten ODER Reject offen).
+  const erstgutachtenReject = (erstgutachtenAuftrag as { zurueckgewiesen_am?: string | null } | null)?.zurueckgewiesen_am ?? null
+  const erstgutachtenRejectGrund = (erstgutachtenAuftrag as { zurueckweisung_grund?: string | null } | null)?.zurueckweisung_grund ?? null
   const zeigeGutachtenUpload =
     !!erstgutachtenAuftrag &&
     !!(aktiverTermin?.durchgefuehrt_am as string | null) &&
-    !erstgutachtenAuftrag.gutachten_url
+    !erstgutachtenAuftrag.gutachten_final_freigegeben &&
+    (!erstgutachtenAuftrag.gutachten_url || !!erstgutachtenReject)
 
   const topServerBlocks = (
     <>
@@ -423,7 +430,9 @@ export default async function GutachterFallPage({
         <GutachtenUploadBanner
           auftragId={erstgutachtenAuftrag.id}
           claimId={(fall.claim_id as string) ?? ''}
-          hatGutachten={false}
+          hatGutachten={!!erstgutachtenAuftrag.gutachten_url}
+          zurueckgewiesenAm={erstgutachtenReject}
+          zurueckweisungGrund={erstgutachtenRejectGrund}
         />
       )}
       {/* Briefing links — rechts: Vor-Ort-Buttons (compact) oben + Einzuholen-Dokumente darunter */}
