@@ -36,6 +36,10 @@ import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
+import ClaimStepper from '@/components/kunde/ClaimStepper'
+import { getAlleAuftraege } from '@/lib/auftrag/queries'
+import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
+import { getClaimLifecycle } from '@/lib/claims/lifecycle'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -113,11 +117,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
-    // Dokumente laden
+    // Dokumente laden — abgelehnte Iterationen (KB-Reject-Loop) werden
+    // dem Kunden nicht gezeigt; er sieht nur die aktive Version.
     const { data: dokumenteRaw } = await admin.from('fall_dokumente')
       .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am')
       .eq('fall_id', id)
       .is('geloescht_am', null)
+      .is('abgelehnt_am', null)
       .order('hochgeladen_am')
     const dokumente = (dokumenteRaw ?? []).map(d => ({
       id: d.id as string,
@@ -185,11 +191,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const aktiveStatus = ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben']
     const { data: svKandidaten } = await admin
       .from('gutachter_termine')
-      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, sv_id, kb_id, created_at')
+      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am, sv_id, kb_id, created_at')
       .eq('fall_id', id)
       .eq('typ', 'sv_begutachtung')
       .in('status', aktiveStatus)
-      .is('durchgefuehrt_am', null)
       .is('cancelled_at', null)
       .order('created_at', { ascending: false })
     const STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3, verschoben: 4 }
@@ -304,6 +309,36 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     const gutachtenVerfuegbar = !!fall.gutachten_eingegangen_am
 
+    // CMM-32f: Claim-Lifecycle-Resolver für den kombinierten Stepper
+    const [auftraege, kanzleiFall] = await Promise.all([
+      getAlleAuftraege(admin, fall.id as string),
+      getKanzleiFall(admin, fall.id as string),
+    ])
+    let leadInputForLifecycle: {
+      sa_unterschrieben: boolean | null
+      vollmacht_signiert_am: string | null
+      onboarding_complete: boolean | null
+    } | null = null
+    if (fall.lead_id) {
+      const { data: leadRow } = await admin
+        .from('leads')
+        .select('sa_unterschrieben, vollmacht_signiert_am, onboarding_complete')
+        .eq('id', fall.lead_id as string)
+        .maybeSingle()
+      if (leadRow) {
+        leadInputForLifecycle = {
+          sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
+          vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
+          onboarding_complete: (leadRow.onboarding_complete as boolean | null) ?? null,
+        }
+      }
+    }
+    const claimLifecycle = getClaimLifecycle({
+      lead: leadInputForLifecycle,
+      auftraege,
+      kanzleiFall,
+    })
+
     const kennzeichen = (fall.kennzeichen as string) ?? ''
     const fahrzeug = [(fall.fahrzeug_hersteller as string), (fall.fahrzeug_modell as string)].filter(Boolean).join(' ')
     const adresse = (fall.besichtigungsort_adresse as string) || (fall.unfallort as string) || [(fall.schadens_adresse as string), (fall.schadens_plz as string), (fall.schadens_ort as string)].filter(Boolean).join(', ') || ''
@@ -321,16 +356,22 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
-        {/* CMM-36: SV-Live-Banner ganz oben — navy/grün, mit Realtime-ETA. */}
+        {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase. */}
+        <ClaimStepper lifecycle={claimLifecycle} />
+
+        {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
         {svTermin?.id && (
           <KundeSvLiveBanner
             terminId={svTermin.id as string}
             svName={svName}
+            gutachtenHochgeladen={!!auftraege.find((a) => a.typ === 'erstgutachten')?.gutachten_url}
+            qcFreigegeben={!!auftraege.find((a) => a.typ === 'erstgutachten')?.gutachten_final_freigegeben}
+            inUeberarbeitung={!!(auftraege.find((a) => a.typ === 'erstgutachten') as { zurueckgewiesen_am?: string | null } | undefined)?.zurueckgewiesen_am}
             initial={{
               sv_unterwegs_seit: (svTermin.sv_unterwegs_seit as string | null) ?? null,
               sv_angekommen_am: (svTermin.sv_angekommen_am as string | null) ?? null,
               sv_eta_minuten: (svTermin.sv_eta_minuten as number | null) ?? null,
-              durchgefuehrt_am: null,
+              durchgefuehrt_am: (svTermin.durchgefuehrt_am as string | null) ?? null,
             }}
           />
         )}
@@ -340,13 +381,27 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* CMM-33: Banner-Click-Tile → öffnet Pop-over mit allen Slot-
             Drag&Drop-Cards. Kompakt in der Detail-Page, voller Upload-
-            Workflow im Pop-over. */}
-        <PflichtdokumenteSection
-          slots={pflichtSlots}
-          fallId={fall.id as string}
-          rolle="kunde"
-          variant="banner"
-        />
+            Workflow im Pop-over.
+            CMM-32e: Während Besichtigung + Vollständigkeits-Check
+            (Auftrag-Status besichtigung/gutachten + nicht freigegeben)
+            ist der Banner ausgeblendet — der Kunde soll währenddessen
+            keine neuen Dokumente nachladen. Nach QC-Freigabe erscheint
+            er wieder für Nachreichungen. */}
+        {(() => {
+          const erst = auftraege.find((a) => a.typ === 'erstgutachten')
+          const qcLaeuft =
+            !!erst && (erst.status === 'besichtigung' || erst.status === 'gutachten') &&
+            !erst.gutachten_final_freigegeben
+          if (qcLaeuft) return null
+          return (
+            <PflichtdokumenteSection
+              slots={pflichtSlots}
+              fallId={fall.id as string}
+              rolle="kunde"
+              variant="banner"
+            />
+          )
+        })()}
 
         {/* CMM-36: KundeJetztZuTunCard entfernt — die Kanzlei-Flow-Aktionen
             sind nicht mehr relevant, Live-Tracking läuft via SV-Live-Banner

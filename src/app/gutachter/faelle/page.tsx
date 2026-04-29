@@ -1,52 +1,27 @@
-// AAR-409: SV-Fälle-Archiv. Single-Screen-Ansicht (keine Tabs mehr — Stellungnahme
-// lebt inline in der Fallakte via AAR-400, Tasks werden mit AAR-370 aus der
-// SV-Nav entfernt). Filter + Freitext-Suche kommen aus der URL (<FaelleFilterBar>).
+// CMM-32f: SV-Fälle-Liste zeigt nur noch Regulierungs-Phase (kanzlei_faelle).
+// Aktive Aufträge bis QC-Freigabe leben in /gutachter/auftraege. Sobald der KB
+// das Gutachten freigibt (gutachten_final_freigegeben = true), wird ein
+// kanzlei_faelle-Eintrag angelegt — ab da erscheint der Fall hier.
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { StatusBadge } from '@/components/shared/StatusBadge'
-import { CalendarIcon, NavigationIcon, PhoneIcon } from 'lucide-react'
-import FaelleFilterBar from './FaelleFilterBar'
-import PhoneButton from '@/components/shared/PhoneButton'
-import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import SchadensUrsacheBadge from '@/components/shared/SchadensUrsacheBadge'
 import EmptyState from '@/components/shared/EmptyState'
+import PageHeader from '@/components/shared/PageHeader'
+import { FolderIcon } from 'lucide-react'
 
-// AAR-370: Filter um „stellungnahme" (offene technische Stellungnahme) +
-// „tasks" (mind. 1 offener Task auf diesem Fall, zugewiesen an diesen SV)
-// erweitert — ersetzt den früheren Sidebar-Einstieg /gutachter/tasks.
-type FilterKey =
-  | 'alle'
-  | 'neue'
-  | 'bearbeitung'
-  | 'gutachten'
-  | 'abgeschlossen'
-  | 'stellungnahme'
-  | 'tasks'
+type FilterKey = 'alle' | 'versicherungskontakt' | 'auszahlung'
 
-// Reine Status-Mapping-Filter. „stellungnahme" und „tasks" laufen über
-// separate Abfragen (eigenes Spalten-Filter bzw. tasks-Tabelle).
-const FILTER_TO_STATUSES: Record<'neue' | 'bearbeitung' | 'gutachten' | 'abgeschlossen', string[]> = {
-  neue: ['sv-zugewiesen'],
-  bearbeitung: ['sv-termin', 'besichtigung'],
-  gutachten: ['gutachten-eingegangen'],
-  abgeschlossen: ['abgeschlossen'],
+const KANZLEI_STATUS_LABEL: Record<string, string> = {
+  versicherungskontakt: 'In Regulierung',
+  auszahlung: 'Auszahlung',
 }
 
 function normalizeFilter(raw: string | undefined): FilterKey {
-  if (
-    raw === 'neue' ||
-    raw === 'bearbeitung' ||
-    raw === 'gutachten' ||
-    raw === 'abgeschlossen' ||
-    raw === 'stellungnahme' ||
-    raw === 'tasks'
-  ) {
-    return raw
-  }
+  if (raw === 'versicherungskontakt' || raw === 'auszahlung') return raw
   return 'alle'
 }
 
@@ -61,337 +36,206 @@ export default async function GutachterFaellePage({
   if (!user) redirect('/login')
 
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
-
   if (!sv) {
     return (
       <div className="h-full flex flex-col">
-        <div className="w-full">
-          <EmptyState title="Kein Sachverständigen-Profil gefunden." />
-        </div>
+        <EmptyState title="Kein Sachverständigen-Profil gefunden." />
       </div>
     )
   }
 
   const activeFilter = normalizeFilter(filter)
   const searchTerm = (q ?? '').trim()
-
-  // CMM-25: SV sieht nur Fälle ab Sicherungsabtretungs-Unterschrift —
-  // Dispatcher-Slot-Blocks sind reine Kalender-Reservierungen.
-  let query = supabase
-    .from('v_faelle_mit_aktuellem_termin')
-    .select(
-      'id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, sv_termin, gutachten_eingegangen_am, created_at, lead_id',
-    )
-    .eq('sv_id', sv.id)
-    .eq('sa_unterschrieben', true)
-    .order('created_at', { ascending: false })
-
-  if (activeFilter === 'stellungnahme') {
-    // AAR-370: Fälle mit offener technischer Stellungnahme (Status beauftragt —
-    // noch nicht hochgeladen).
-    query = query.eq('technische_stellungnahme_status', 'beauftragt')
-  } else if (activeFilter === 'tasks') {
-    // AAR-370: Fälle mit mindestens 1 offenen Task der diesem SV zugewiesen
-    // ist. task-Tabelle vorab abfragen, fall_ids einschränken.
-    const { data: offeneTasks } = await supabase
-      .from('tasks')
-      .select('fall_id')
-      .or(`zugewiesen_an.eq.${user.id},empfaenger_user_id.eq.${user.id}`)
-      .in('status', ['offen', 'in-bearbeitung'])
-      .not('fall_id', 'is', null)
-    const taskFallIds = Array.from(new Set((offeneTasks ?? []).map(t => t.fall_id).filter(Boolean) as string[]))
-    if (taskFallIds.length === 0) {
-      // Kein Fall hat offene Tasks → leere Ergebnisliste
-      query = query.eq('id', '00000000-0000-0000-0000-000000000000')
-    } else {
-      query = query.in('id', taskFallIds)
-    }
-  } else if (activeFilter !== 'alle') {
-    query = query.in('status', FILTER_TO_STATUSES[activeFilter])
-  }
-
-  const { data: rawFaelle } = await query
-
   const admin = createAdminClient()
-  const allRaw = rawFaelle ?? []
-  const fallIds = allRaw.map((f) => f.id)
 
-  const { data: unreadMsgs } = fallIds.length > 0
-    ? await admin
-        .from('nachrichten')
-        .select('fall_id')
-        .eq('gelesen', false)
-        .eq('sender_rolle', 'kunde')
-        .in('fall_id', fallIds)
-    : { data: [] as { fall_id: string }[] }
-  const unreadMap: Record<string, number> = {}
-  for (const msg of unreadMsgs ?? []) {
-    unreadMap[msg.fall_id] = (unreadMap[msg.fall_id] ?? 0) + 1
+  // CMM-32f: Schritt 1 — alle abgeschlossenen Aufträge des SV finden.
+  const { data: meineAuftraege } = await admin
+    .from('auftraege')
+    .select('fall_id')
+    .eq('sv_id', sv.id)
+    .eq('gutachten_final_freigegeben', true)
+
+  const meineFallIds = Array.from(
+    new Set((meineAuftraege ?? []).map((a) => a.fall_id as string).filter(Boolean)),
+  )
+
+  if (meineFallIds.length === 0) {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="w-full space-y-6">
+          <PageHeader title="Meine Fälle" description="0 Fälle in Regulierung" icon={FolderIcon} />
+          <EmptyState title="Noch keine Fälle in Regulierung." />
+        </div>
+      </div>
+    )
   }
 
-  const leadIds = allRaw.map((f) => f.lead_id).filter(Boolean) as string[]
+  // CMM-32f: Schritt 2 — kanzlei_faelle für genau diese Fälle.
+  let kanzleiQuery = admin
+    .from('kanzlei_faelle')
+    .select('id, fall_id, status, vs_kontakt_am, ausgezahlt_am, erstellt_am')
+    .in('fall_id', meineFallIds)
+    .order('erstellt_am', { ascending: false })
+
+  if (activeFilter !== 'alle') {
+    kanzleiQuery = kanzleiQuery.eq('status', activeFilter)
+  }
+
+  const { data: kanzleiFaelle } = await kanzleiQuery
+  const kanzleiList = kanzleiFaelle ?? []
+  const fallIds = kanzleiList.map((k) => k.fall_id as string)
+
+  if (fallIds.length === 0) {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="w-full space-y-6">
+          <PageHeader title="Meine Fälle" description="0 Fälle in Regulierung" icon={FolderIcon} />
+          <FilterTabs activeFilter={activeFilter} />
+          <EmptyState title="Keine Fälle für diesen Filter." />
+        </div>
+      </div>
+    )
+  }
+
+  const [faelleRes, leadsRes] = await Promise.all([
+    admin
+      .from('faelle')
+      .select('id, fall_nummer, schadens_ursache, schadens_datum, schadens_ort, lead_id')
+      .in('id', fallIds),
+    Promise.resolve(null), // placeholder, leads kommen unten via leadIds
+  ])
+  void leadsRes
+
+  const fallMap = Object.fromEntries((faelleRes.data ?? []).map((f) => [f.id, f]))
+  const leadIds = (faelleRes.data ?? []).map((f) => f.lead_id).filter(Boolean) as string[]
   const { data: leads } = leadIds.length
-    ? await supabase
-        .from('leads')
-        .select('id, vorname, nachname, telefon')
-        .in('id', leadIds)
-    : { data: [] as { id: string; vorname: string | null; nachname: string | null; telefon: string | null }[] }
+    ? await admin.from('leads').select('id, vorname, nachname').in('id', leadIds)
+    : { data: [] as { id: string; vorname: string | null; nachname: string | null }[] }
   const leadMap = Object.fromEntries((leads ?? []).map((l) => [l.id, l]))
 
-  // Freitext-Filter läuft nach dem Hauptquery, da er Felder aus faelle + leads
-  // kombiniert (Fall-Nr. + Kunden-Name + Ort).
+  // Freitextsuche über Fall-Nr / Kunde / Ort
   const needle = searchTerm.toLowerCase()
-  const filteredByText = needle
-    ? allRaw.filter((f) => {
-        const lead = f.lead_id ? leadMap[f.lead_id] : null
-        const name = lead
-          ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim().toLowerCase()
-          : ''
+  const filtered = needle
+    ? kanzleiList.filter((k) => {
+        const f = fallMap[k.fall_id as string]
+        if (!f) return false
+        const lead = f.lead_id ? leadMap[f.lead_id as string] : null
+        const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim().toLowerCase() : ''
         return (
-          (f.fall_nummer ?? '').toLowerCase().includes(needle) ||
+          ((f.fall_nummer as string | null) ?? '').toLowerCase().includes(needle) ||
           name.includes(needle) ||
-          (f.schadens_ort ?? '').toLowerCase().includes(needle)
+          ((f.schadens_ort as string | null) ?? '').toLowerCase().includes(needle)
         )
       })
-    : allRaw
-
-  const faelleWithUnread = filteredByText.map((f) => ({
-    ...f,
-    ungelesene_nachrichten: unreadMap[f.id] ?? 0,
-  }))
-
-  faelleWithUnread.sort(
-    (a, b) =>
-      b.ungelesene_nachrichten - a.ungelesene_nachrichten ||
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-  )
-  const faelle = faelleWithUnread
+    : kanzleiList
 
   return (
     <div className="h-full flex flex-col">
-      <FaelleFilterBar
-        faelleCount={faelle.length}
-        initialFilter={activeFilter}
-        initialQuery={searchTerm}
-      />
+      <div className="w-full space-y-6">
+        <PageHeader
+          title="Meine Fälle"
+          description={`${filtered.length} ${filtered.length === 1 ? 'Fall' : 'Fälle'} in Regulierung`}
+          icon={FolderIcon}
+        />
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-4">
-        {/* XL-Karten für anstehende Termine (nächste 7 Tage) */}
-        {(() => {
-          const now = new Date()
-          const in7d = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-          const xlFaelle = faelle
-            .filter((f) => {
-              if (!f.sv_termin) return false
-              const t = new Date(f.sv_termin)
-              return t >= now && t <= in7d
-            })
-            .sort(
-              (a, b) =>
-                new Date(a.sv_termin!).getTime() -
-                new Date(b.sv_termin!).getTime(),
-            )
-          if (xlFaelle.length === 0) return null
-          return (
-            <div className="mb-4 space-y-3">
-              <h2 className="text-xs font-semibold text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1.5">
-                <CalendarIcon className="w-3.5 h-3.5" /> Nächste Termine
-              </h2>
-              {xlFaelle.map((fall) => {
-                const lead = fall.lead_id ? leadMap[fall.lead_id] : null
-                const name = lead
-                  ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
-                  : '—'
-                const termin = new Date(fall.sv_termin!)
-                const isHeute = termin.toDateString() === now.toDateString()
-                const adresse = fall.schadens_ort ?? '—'
-                return (
-                  <div
-                    key={fall.id}
-                    className={`rounded-2xl border-2 p-5 ${isHeute ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5' : 'border-claimondo-border bg-white'}`}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`text-lg font-bold ${isHeute ? 'text-[var(--brand-primary)]' : 'text-claimondo-navy'}`}
-                          >
-                            {termin.toLocaleTimeString('de-DE', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}{' '}
-                            Uhr
-                          </span>
-                          <StatusBadge colorCls={isHeute ? 'bg-[var(--brand-secondary)] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}>
-                            {isHeute
-                              ? 'HEUTE'
-                              : termin.toLocaleDateString('de-DE', {
-                                  weekday: 'short',
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                })}
-                          </StatusBadge>
-                        </div>
-                        <p className="text-sm text-claimondo-navy mt-1">{name}</p>
-                        <p className="text-xs text-claimondo-ondo">{adresse}</p>
-                      </div>
-                      <Link
-                        href={`/gutachter/fall/${fall.id}`}
-                        className="text-[10px] text-[var(--brand-secondary)] hover:underline"
-                      >
-                        {fall.fall_nummer ?? fall.id.slice(0, 8)}
-                      </Link>
-                    </div>
-                    <div className="flex gap-2">
-                      <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(adresse)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white rounded-xl py-2.5 text-sm font-semibold transition-colors"
-                      >
-                        <NavigationIcon className="w-4 h-4" /> Navigation starten
-                      </a>
-                      {lead?.telefon && (
-                        <PhoneButton
-                          nummer={lead.telefon}
-                          variant="card"
-                          label="Anrufen"
-                          className="justify-center !bg-white !border !border-claimondo-border hover:!bg-[#f8f9fb] !text-claimondo-navy !rounded-xl !px-4 !py-2.5 text-sm"
-                        />
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )
-        })()}
+        <FilterTabs activeFilter={activeFilter} />
 
-        {faelle.length === 0 ? (
-          <EmptyState
-            title={
-              searchTerm
-                ? `Keine Fälle passen zu „${searchTerm}".`
-                : 'Keine Fälle gefunden.'
-            }
-          />
+        {filtered.length === 0 ? (
+          <EmptyState title={searchTerm ? `Keine Fälle passen zu „${searchTerm}".` : 'Keine Fälle gefunden.'} />
         ) : (
-          <div className="space-y-3 sm:space-y-0">
-            {/* Desktop-Tabelle */}
-            <div className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-claimondo-border">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-claimondo-border">
-                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">
-                        Fall-Nr.
-                      </th>
-                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Kunde</th>
-                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Schadentyp</th>
-                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Ort</th>
-                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">SV-Termin</th>
-                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Status</th>
-                      <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Chat</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {faelle.map((fall) => {
-                      const lead = fall.lead_id ? leadMap[fall.lead_id] : null
-                      const name = lead
-                        ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
-                        : '—'
-                      return (
-                        <tr
-                          key={fall.id}
-                          className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors"
-                        >
-                          <td className="px-4 py-3">
-                            <Link
-                              href={`/gutachter/fall/${fall.id}`}
-                              className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] font-mono text-xs"
-                            >
-                              {fall.fall_nummer ?? fall.id.slice(0, 8)}
-                            </Link>
-                          </td>
-                          <td className="px-4 py-3 text-claimondo-navy">{name}</td>
-                          <td className="px-4 py-3 text-claimondo-navy whitespace-nowrap">
-                            <SchadensUrsacheBadge ursache={fall.schadens_ursache} plain />
-                          </td>
-                          <td className="px-4 py-3 text-claimondo-ondo text-xs">
-                            {fall.schadens_ort ?? '—'}
-                          </td>
-                          <td className="px-4 py-3 text-claimondo-navy text-xs whitespace-nowrap">
-                            {fall.sv_termin
-                              ? new Date(fall.sv_termin).toLocaleDateString('de-DE', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric',
-                                })
-                              : '—'}
-                          </td>
-                          <td className="px-4 py-3">
-                            <FallStatusBadge status={fall.status} size="md" />
-                          </td>
-                          <td className="px-4 py-3">
-                            {fall.ungelesene_nachrichten > 0 && (
-                              <span className="inline-flex items-center gap-0.5 bg-[var(--brand-secondary)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                                {fall.ungelesene_nachrichten}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Mobile-Cards */}
-            <div className="sm:hidden space-y-3">
-              {faelle.map((fall) => {
-                const lead = fall.lead_id ? leadMap[fall.lead_id] : null
-                const name = lead
-                  ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
-                  : '—'
-                return (
-                  <Link
-                    key={fall.id}
-                    href={`/gutachter/fall/${fall.id}`}
-                    className="block bg-white rounded-2xl p-4 border border-claimondo-border hover:border-claimondo-border transition-colors relative"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <span className="text-[var(--brand-accent)] font-mono text-xs">
-                          {fall.fall_nummer ?? fall.id.slice(0, 8)}
-                        </span>
-                        <p className="text-claimondo-navy text-sm font-medium mt-0.5">{name}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {fall.ungelesene_nachrichten > 0 && (
-                          <span className="inline-flex items-center gap-0.5 bg-[var(--brand-secondary)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                            {fall.ungelesene_nachrichten}
+          <div className="bg-white rounded-2xl overflow-hidden border border-claimondo-border">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-claimondo-border">
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Fall-Nr.</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Kunde</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Schadentyp</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Ort</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Status</th>
+                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Seit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((k) => {
+                    const f = fallMap[k.fall_id as string]
+                    if (!f) return null
+                    const lead = f.lead_id ? leadMap[f.lead_id as string] : null
+                    const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
+                    return (
+                      <tr
+                        key={k.id}
+                        className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors"
+                      >
+                        <td className="px-4 py-3">
+                          <Link
+                            href={`/gutachter/fall/${f.id}`}
+                            className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] font-mono text-xs"
+                          >
+                            {(f.fall_nummer as string | null) ?? (f.id as string).slice(0, 8)}
+                          </Link>
+                        </td>
+                        <td className="px-4 py-3 text-claimondo-navy">{name}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <SchadensUrsacheBadge ursache={f.schadens_ursache as string | null} plain />
+                        </td>
+                        <td className="px-4 py-3 text-claimondo-ondo text-xs">
+                          {(f.schadens_ort as string | null) ?? '—'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                              k.status === 'auszahlung'
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                : 'bg-violet-50 text-violet-800 border border-violet-200'
+                            }`}
+                          >
+                            {KANZLEI_STATUS_LABEL[k.status as string] ?? (k.status as string)}
                           </span>
-                        )}
-                        <FallStatusBadge status={fall.status} size="md" />
-                      </div>
-                    </div>
-                    <div className="flex gap-4 text-xs text-claimondo-ondo">
-                      <SchadensUrsacheBadge ursache={fall.schadens_ursache} plain />
-                      <span>{fall.schadens_ort ?? '—'}</span>
-                      {fall.sv_termin && (
-                        <span>
-                          Termin: {new Date(fall.sv_termin).toLocaleDateString('de-DE')}
-                        </span>
-                      )}
-                    </div>
-                  </Link>
-                )
-              })}
+                        </td>
+                        <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">
+                          {k.erstellt_am
+                            ? new Date(k.erstellt_am as string).toLocaleDateString('de-DE', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                              })
+                            : '—'}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function FilterTabs({ activeFilter }: { activeFilter: FilterKey }) {
+  const tabs: [FilterKey, string][] = [
+    ['alle', 'Alle'],
+    ['versicherungskontakt', 'In Regulierung'],
+    ['auszahlung', 'Auszahlung'],
+  ]
+  return (
+    <div className="flex gap-2 overflow-x-auto">
+      {tabs.map(([key, label]) => (
+        <Link
+          key={key}
+          href={key === 'alle' ? '/gutachter/faelle' : `/gutachter/faelle?filter=${key}`}
+          className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
+            activeFilter === key
+              ? 'bg-[var(--brand-primary)] text-white'
+              : 'bg-white text-claimondo-ondo hover:text-claimondo-navy border border-claimondo-border'
+          }`}
+        >
+          {label}
+        </Link>
+      ))}
     </div>
   )
 }

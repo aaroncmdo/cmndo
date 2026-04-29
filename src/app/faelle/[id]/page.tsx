@@ -14,6 +14,9 @@ import type { FallakteRolle } from '@/lib/fall/field-permissions'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-433 (Child 4 AAR-429): KB Phase-State-Audit oberhalb der Tabs
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
+import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
+import RegulierungCard from '@/components/kb/RegulierungCard'
+import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
 import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
 import {
@@ -548,6 +551,106 @@ export default async function FallaktePage({
     }>,
   })
 
+  // CMM-32e: Vollständigkeits-Check-Card-Daten für KB/Admin
+  let qcCardProps: React.ComponentProps<typeof VollstaendigkeitsCheckCard> | null = null
+  if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
+    const adminCli = createAdminClient()
+    const auftraegeFall = await getAlleAuftraege(supabase, id)
+    const erstgutachten = auftraegeFall.find((a) => a.typ === 'erstgutachten')
+    if (erstgutachten) {
+      if (erstgutachten.gutachten_final_freigegeben) {
+        // Bereits freigegeben — keine Doc-Queries nötig, Banner zeigt nur den Erfolgs-State.
+        qcCardProps = {
+          auftragId: erstgutachten.id,
+          hatGutachten: true,
+          bereitsFreigegeben: true,
+          hauptgutachten: null,
+          anlagen: [],
+          pflichtItems: [],
+        }
+      } else {
+      // Aktive Dokumente (nicht abgelehnt)
+      const { data: dokRows } = await adminCli
+        .from('fall_dokumente')
+        .select('id, dokument_typ, original_filename, storage_path')
+        .eq('fall_id', id)
+        .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
+        .is('geloescht_am', null)
+        .is('abgelehnt_am', null)
+        .order('hochgeladen_am', { ascending: true })
+      // Abgelehnte Dokumente (KB-Reject-Audit) — nur für KB/Admin sichtbar
+      const { data: abgelehnteRows } = await adminCli
+        .from('fall_dokumente')
+        .select('id, dokument_typ, original_filename, storage_path, abgelehnt_am')
+        .eq('fall_id', id)
+        .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
+        .is('geloescht_am', null)
+        .not('abgelehnt_am', 'is', null)
+        .order('abgelehnt_am', { ascending: false })
+      type DocRow = { id: string; dokument_typ: string; original_filename: string | null; storage_path: string }
+      const docList = ((dokRows ?? []) as DocRow[]).map((d) => ({
+        id: d.id,
+        filename: d.original_filename ?? 'Datei',
+        url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
+        istHaupt: d.dokument_typ === 'gutachten' && !d.storage_path.includes('/nachbesserung/'),
+        istNachbesserung: d.storage_path.includes('/nachbesserung/'),
+      }))
+      const abgelehnteDocList = ((abgelehnteRows ?? []) as DocRow[]).map((d) => ({
+        id: d.id,
+        filename: d.original_filename ?? 'Datei',
+        url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
+        istHaupt: false,
+        istNachbesserung: false,
+      }))
+      const haupt = docList.find((d) => d.istHaupt) ?? null
+      const anlagen = docList.filter((d) => !d.istHaupt)
+      const slotLabels = new Map(katalogAlleSlots.map((s) => [s.slot_id, s.label]))
+      const pflichtItemsList = (pflichtdokumente ?? []).map((p) => ({
+        slot_id: p.dokument_typ as string,
+        label: slotLabels.get(p.dokument_typ as string) ?? (p.dokument_typ as string),
+        vorhanden: p.status === 'hochgeladen' || p.status === 'geprueft',
+        pflicht: !!p.pflicht,
+      }))
+      qcCardProps = {
+        auftragId: erstgutachten.id,
+        hatGutachten: !!erstgutachten.gutachten_url,
+        bereitsFreigegeben: false,
+        hauptgutachten: haupt,
+        anlagen,
+        pflichtItems: pflichtItemsList,
+        zurueckgewiesenAm: (erstgutachten as { zurueckgewiesen_am?: string | null }).zurueckgewiesen_am ?? null,
+        zurueckweisungGrund: (erstgutachten as { zurueckweisung_grund?: string | null }).zurueckweisung_grund ?? null,
+        abgelehnteAnlagen: abgelehnteDocList,
+      }
+      }
+    }
+  }
+
+  // CMM-32i: Kanzlei-Fall-Lifecycle-Daten für RegulierungCard. Existiert nur
+  // nach KB-Freigabe (gibKanzleipaketFrei legt den Eintrag an).
+  let regulierungCardProps: {
+    fallId: string
+    status: 'versicherungskontakt' | 'auszahlung'
+    vsKontaktAm: string | null
+    ausgezahltAm: string | null
+  } | null = null
+  if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
+    const adminCli = createAdminClient()
+    const { data: kf } = await adminCli
+      .from('kanzlei_faelle')
+      .select('status, vs_kontakt_am, ausgezahlt_am')
+      .eq('fall_id', id)
+      .maybeSingle()
+    if (kf) {
+      regulierungCardProps = {
+        fallId: id,
+        status: (kf.status as 'versicherungskontakt' | 'auszahlung') ?? 'versicherungskontakt',
+        vsKontaktAm: (kf.vs_kontakt_am as string | null) ?? null,
+        ausgezahltAm: (kf.ausgezahlt_am as string | null) ?? null,
+      }
+    }
+  }
+
   // AAR-538 (C1): Subphase + next_hint berechnen (pure function)
   const subphase = resolveSubphase({
     fall: fall as unknown as FallRow,
@@ -558,6 +661,18 @@ export default async function FallaktePage({
 
   return (
     <>
+      {/* CMM-32e: Vollständigkeits-Check ganz oben, Handlungsbedarf-Banner */}
+      {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && qcCardProps && (
+        <div className="mb-4 sticky top-0 z-30">
+          <VollstaendigkeitsCheckCard {...qcCardProps} />
+        </div>
+      )}
+      {/* CMM-32i: Regulierungs-Lifecycle direkt unter QC-Card. */}
+      {regulierungCardProps && (
+        <div className="mb-4">
+          <RegulierungCard {...regulierungCardProps} />
+        </div>
+      )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
       {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.

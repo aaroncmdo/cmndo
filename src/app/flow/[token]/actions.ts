@@ -530,6 +530,28 @@ export async function signSAandCreateFall(
 
       if (upErr) console.error('[KFZ-192] Termin-Upgrade (nur_gutachter):', upErr.message)
 
+      // CMM-32d / CMM-32i: Auftrag anlegen — robust gegen den Fall, dass der
+      // Termin schon vor SA-Signatur auf bestaetigt stand (UPDATE liefert dann
+      // 0 Rows, ohne Härtung würde kein Auftrag entstehen).
+      if (svIdFromTermin) {
+        try {
+          let terminIdsForAuftrag = (upgradedTermine ?? []).map((t) => t.id as string)
+          if (terminIdsForAuftrag.length === 0) {
+            const { data: existingTermine } = await admin
+              .from('gutachter_termine')
+              .select('id')
+              .eq('fall_id', fall.id)
+              .eq('sv_id', svIdFromTermin)
+              .in('status', ['bestaetigt', 'reserviert'])
+            terminIdsForAuftrag = (existingTermine ?? []).map((t) => t.id as string)
+          }
+          const { createErstgutachtenAuftragWennNoetig } = await import('@/lib/auftrag/create')
+          await createErstgutachtenAuftragWennNoetig(
+            admin, fall.id as string, svIdFromTermin, terminIdsForAuftrag,
+          )
+        } catch (err) { console.error('[CMM-32d] Auftrag-Anlage fehlgeschlagen:', err) }
+      }
+
       // KFZ-192: bestaetigeTermin aufrufen (setzt final_verbindlich_ab + Timeline)
       try {
         const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
@@ -556,6 +578,30 @@ export async function signSAandCreateFall(
         .select('id')
 
       if (upErr) console.error('[CMM-21] Termin-Upgrade (komplett):', upErr.message)
+
+      // CMM-32d / CMM-32i: Erstgutachten-Auftrag anlegen. Auch wenn das obige
+      // UPDATE 0 Rows liefert (Termin war bereits bestaetigt), müssen wir den
+      // Auftrag anlegen — sonst hängt der Fall ohne Sub-Entity-Eintrag und
+      // der Kunde sieht keine Status-Bar. Termine fresh aus der DB lesen
+      // damit auftrag_id zugeordnet werden kann.
+      if (svIdFromTermin) {
+        try {
+          let terminIdsForAuftrag = (updatedTermine ?? []).map((t) => t.id as string)
+          if (terminIdsForAuftrag.length === 0) {
+            const { data: existingTermine } = await admin
+              .from('gutachter_termine')
+              .select('id')
+              .eq('fall_id', fall.id)
+              .eq('sv_id', svIdFromTermin)
+              .in('status', ['bestaetigt', 'reserviert'])
+            terminIdsForAuftrag = (existingTermine ?? []).map((t) => t.id as string)
+          }
+          const { createErstgutachtenAuftragWennNoetig } = await import('@/lib/auftrag/create')
+          await createErstgutachtenAuftragWennNoetig(
+            admin, fall.id as string, svIdFromTermin, terminIdsForAuftrag,
+          )
+        } catch (err) { console.error('[CMM-32d] Auftrag-Anlage fehlgeschlagen:', err) }
+      }
 
       // bestaetigeTermin setzt final_verbindlich_ab + Timeline-Eintrag
       try {

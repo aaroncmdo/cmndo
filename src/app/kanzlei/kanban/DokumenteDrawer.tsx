@@ -101,6 +101,8 @@ export default function DokumenteDrawer({
         )
         .eq('fall_id', fallId)
         .is('geloescht_am', null)
+        // CMM-32e: KB-abgelehnte Iterationen sind nur intern für Audit relevant.
+        .is('abgelehnt_am', null)
         .order('hochgeladen_am', { ascending: false })
       if (cancelled) return
       if (qErr) {

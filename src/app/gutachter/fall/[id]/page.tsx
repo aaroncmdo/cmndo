@@ -14,7 +14,9 @@ import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
 import BriefingCard from '@/components/fall/BriefingCard'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
+import GutachtenUploadBanner from '@/components/gutachter/GutachtenUploadBanner'
 import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
+import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
@@ -111,6 +113,7 @@ export default async function GutachterFallPage({
       .select('id, dokument_typ, storage_path, original_filename, groesse_bytes, kategorie, quelle, sichtbar_fuer, uploaded_by_sv, uploaded_by_kunde, hochgeladen_am')
       .eq('fall_id', id)
       .is('geloescht_am', null)
+      .is('abgelehnt_am', null)
       .contains('sichtbar_fuer', ['sachverstaendiger'])
       .order('hochgeladen_am'),
     supabase
@@ -341,6 +344,7 @@ export default async function GutachterFallPage({
         ? 'kunde'
         : null,
     created_at: (d.hochgeladen_am as string | null) ?? null,
+    storage_path: (d.storage_path as string | null) ?? null,
   }))
 
   // AAR-559 (C10): SV-View-Felder für SvHonorarCard + KonfrontationsTerminCard.
@@ -359,6 +363,55 @@ export default async function GutachterFallPage({
       )
     : null
 
+  // CMM-32: aktive Auftraege bereits hier laden, damit der Phase-Resolver
+  // gutachten_final_freigegeben aus auftraege ziehen kann.
+  const auftraegeOfFall = await getAlleAuftraege(supabase, id)
+  const erstgutachtenAuftrag = auftraegeOfFall.find((a) => a.typ === 'erstgutachten') ?? null
+
+  // CMM-32: claim_id ist nicht in der v_faelle_mit_aktuellem_termin-View
+  // enthalten — separat aus faelle laden für den Storage-Pfad.
+  const { data: fallClaim } = await admin
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', id)
+    .maybeSingle()
+  const claimIdForStorage = (fallClaim?.claim_id as string | null) ?? ''
+
+  // CMM-32e: Abgelehnte Docs mit Kommentar für den SV — nur im Reject-Zustand laden.
+  // SV sieht welche Dateien konkret beanstandet wurden + warum.
+  let abgelehnteDocsInfo: { filename: string; kommentar: string | null }[] = []
+  const erstgutachtenRejectCheck = (erstgutachtenAuftrag as { zurueckgewiesen_am?: string | null } | null)?.zurueckgewiesen_am ?? null
+  if (erstgutachtenAuftrag && claimIdForStorage && erstgutachtenRejectCheck) {
+    const { data: abgelehnteRows } = await admin
+      .from('fall_dokumente')
+      .select('original_filename, zurueckweisung_kommentar')
+      .eq('fall_id', id)
+      .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
+      .not('abgelehnt_am', 'is', null)
+      .is('geloescht_am', null)
+      .order('abgelehnt_am', { ascending: false })
+    abgelehnteDocsInfo = (abgelehnteRows ?? []).map((r) => ({
+      filename: (r.original_filename as string | null) ?? 'Datei',
+      kommentar: (r.zurueckweisung_kommentar as string | null) ?? null,
+    }))
+  }
+
+  // CMM-32e: Abgebbare Hauptgutachten — neuere fall_dokumente als die aktuell
+  // verlinkte gutachten_url. Triggert den „Abgeben"-Button im Banner.
+  let abgebbareDokumenteAnzahl = 0
+  if (erstgutachtenAuftrag && claimIdForStorage) {
+    const cutoff = (erstgutachtenAuftrag as { updated_at?: string | null }).updated_at ?? null
+    const { count } = await admin
+      .from('fall_dokumente')
+      .select('id', { count: 'exact', head: true })
+      .eq('fall_id', id)
+      .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
+      .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
+      .is('geloescht_am', null)
+      .gt('hochgeladen_am', cutoff ?? '1970-01-01')
+    abgebbareDokumenteAnzahl = count ?? 0
+  }
+
   // CMM-23: SV-Lifecycle-Phase aus Auftrag + Fall-State ableiten.
   const svPhase = getSvLifecyclePhase({
     terminStart: (aktiverTermin?.start_zeit as string | null) ?? null,
@@ -367,7 +420,8 @@ export default async function GutachterFallPage({
     svAngekommenAm: (aktiverTermin?.sv_angekommen_am as string | null) ?? null,
     terminDurchgefuehrtAm: (aktiverTermin?.durchgefuehrt_am as string | null) ?? null,
     gutachtenEingegangenAm: (fall.gutachten_eingegangen_am as string | null) ?? null,
-    gutachtenFinalFreigegeben: (fall.gutachten_final_freigegeben as boolean | null) ?? null,
+    // CMM-32: Wahrheit ist auftraege.gutachten_final_freigegeben (faelle hat die Spalte nicht).
+    gutachtenFinalFreigegeben: erstgutachtenAuftrag?.gutachten_final_freigegeben ?? null,
     lexdriveCaseId: (fall.lexdrive_case_id as string | null) ?? null,
     technischeStellungnahmeStatus: (fall.technische_stellungnahme_status as string | null) ?? null,
     nachbesichtigungStatus: (fall.nachbesichtigung_status as string | null) ?? null,
@@ -406,8 +460,28 @@ export default async function GutachterFallPage({
     (fall.nachbesichtigung_status as string | null) === 'angefordert' ||
     (fall.nachbesichtigung_status as string | null) === 'termin-eingereicht'
 
+  // CMM-32: Banner sichtbar wenn Termin durchgeführt + (kein Gutachten ODER Reject offen).
+  const erstgutachtenReject = (erstgutachtenAuftrag as { zurueckgewiesen_am?: string | null } | null)?.zurueckgewiesen_am ?? null
+  const erstgutachtenRejectGrund = (erstgutachtenAuftrag as { zurueckweisung_grund?: string | null } | null)?.zurueckweisung_grund ?? null
+  const zeigeGutachtenUpload =
+    !!erstgutachtenAuftrag &&
+    !!(aktiverTermin?.durchgefuehrt_am as string | null) &&
+    !erstgutachtenAuftrag.gutachten_final_freigegeben
+
   const topServerBlocks = (
     <>
+      {/* CMM-32: Gutachten-Upload-Banner — sichtbar nach Besichtigung, vor QC */}
+      {zeigeGutachtenUpload && erstgutachtenAuftrag && (
+        <GutachtenUploadBanner
+          auftragId={erstgutachtenAuftrag.id}
+          claimId={claimIdForStorage}
+          hatGutachten={!!erstgutachtenAuftrag.gutachten_url}
+          zurueckgewiesenAm={erstgutachtenReject}
+          zurueckweisungGrund={erstgutachtenRejectGrund}
+          abgebbareDokumenteAnzahl={abgebbareDokumenteAnzahl}
+          abgelehnteDocsInfo={abgelehnteDocsInfo}
+        />
+      )}
       {/* Briefing links — rechts: Vor-Ort-Buttons (compact) oben + Einzuholen-Dokumente darunter */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <BriefingCard
@@ -473,6 +547,7 @@ export default async function GutachterFallPage({
       topServerBlocks={topServerBlocks}
       pflichtSlots={pflichtSlots}
       svPhase={svPhase}
+      gutachtenInQc={!!erstgutachtenAuftrag?.gutachten_url && !erstgutachtenAuftrag?.gutachten_final_freigegeben && !erstgutachtenReject}
       fall={fallWithAbrechnung}
       lead={lead}
       dokumente={dokumenteLegacy}

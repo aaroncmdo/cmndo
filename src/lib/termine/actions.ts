@@ -327,6 +327,40 @@ export async function updateAuftragLive(
   return { ok: true }
 }
 
+// ─── markTerminDurchgefuehrt (CMM-32) ─────────────────────────────────────────
+//
+// Geofence-Out-Detection vom GPS-Hook: SV ist >2 km vom Ziel weg → Termin
+// gilt als durchgeführt. Idempotent.
+
+export async function markTerminDurchgefuehrt(
+  terminId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'unauthorized' }
+
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  if (!sv) return { ok: false, error: 'no_sv' }
+
+  const db = createAdminClient()
+  const { data: termin } = await db
+    .from('gutachter_termine')
+    .select('id, sv_id, sv_angekommen_am, durchgefuehrt_am')
+    .eq('id', terminId)
+    .eq('sv_id', sv.id)
+    .single()
+
+  if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
+  if (termin.durchgefuehrt_am) return { ok: true }
+  if (!termin.sv_angekommen_am) return { ok: false, error: 'SV war noch nicht angekommen' }
+
+  await db
+    .from('gutachter_termine')
+    .update({ durchgefuehrt_am: new Date().toISOString() })
+    .eq('id', terminId)
+  return { ok: true }
+}
+
 // ─── completeBegutachtung ─────────────────────────────────────────────────────
 
 export async function completeBegutachtung(

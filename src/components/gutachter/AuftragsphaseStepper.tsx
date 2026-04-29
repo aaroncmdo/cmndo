@@ -21,7 +21,14 @@ const PHASES: { key: AuftragsPhase; icon: typeof CalendarIcon }[] = [
   { key: 'gutachten', icon: FileTextIcon },
 ]
 
-export default function AuftragsphaseStepper({ phase }: { phase: SvLifecyclePhase }) {
+export default function AuftragsphaseStepper({
+  phase,
+  gutachtenInQc = false,
+}: {
+  phase: SvLifecyclePhase
+  /** CMM-32: Gutachten ist hochgeladen, QC läuft → Phase „gutachten" wird lila + Label „Vollständigkeits-Check". */
+  gutachtenInQc?: boolean
+}) {
   const fallPhase = isFallPhase(phase) ? phase : null
   const auftragsPhaseKey: AuftragsPhase = fallPhase ? 'abgeschlossen' : (phase as AuftragsPhase)
   const aktuellIdx = AUFTRAGS_PHASE_INDEX[auftragsPhaseKey]
@@ -33,6 +40,7 @@ export default function AuftragsphaseStepper({ phase }: { phase: SvLifecyclePhas
         {PHASES.map((p, i) => {
           const isCurrent = !abgeschlossen && i === aktuellIdx
           const isDone = abgeschlossen || i < aktuellIdx
+          const istQc = isCurrent && p.key === 'gutachten' && gutachtenInQc
           const Icon = p.icon
           return (
             <React.Fragment key={p.key}>
@@ -42,23 +50,27 @@ export default function AuftragsphaseStepper({ phase }: { phase: SvLifecyclePhas
                   className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
                     isDone
                       ? 'bg-emerald-500 text-white'
-                      : isCurrent
-                        ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                        : 'bg-claimondo-border/40 text-claimondo-ondo/60'
+                      : istQc
+                        ? 'bg-violet-600 text-white ring-2 ring-violet-300'
+                        : isCurrent
+                          ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                          : 'bg-claimondo-border/40 text-claimondo-ondo/60'
                   }`}
                 >
                   {isDone ? <CheckIcon className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
                 </div>
                 <p
                   className={`text-sm font-semibold whitespace-nowrap ${
-                    isCurrent
-                      ? 'text-claimondo-navy'
-                      : isDone
-                        ? 'text-emerald-700'
-                        : 'text-claimondo-ondo/60'
+                    istQc
+                      ? 'text-violet-700'
+                      : isCurrent
+                        ? 'text-claimondo-navy'
+                        : isDone
+                          ? 'text-emerald-700'
+                          : 'text-claimondo-ondo/60'
                   }`}
                 >
-                  {AUFTRAGS_PHASE_LABEL[p.key]}
+                  {istQc ? 'Vollständigkeits-Check' : AUFTRAGS_PHASE_LABEL[p.key]}
                 </p>
               </div>
               {/* Verbindungslinie wächst auf verfügbare Breite */}
