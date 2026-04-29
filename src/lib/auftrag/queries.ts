@@ -79,18 +79,50 @@ export async function getAuftrag(
 }
 
 /**
- * Nächster aktiver Auftrag für einen SV (für CMM-36-Tracking-Hook).
- * Bestätigte/reservierte Termine, im Tagesfenster, noch nicht angekommen.
+ * Aktiver Tracking-Termin für einen SV (für CMM-36-Hook).
+ *
+ * Zwei Modi:
+ *   - 'anfahrt'  → Termin steht an, SV noch nicht angekommen (Anfahrts-ETA + Auto-Ankunft).
+ *   - 'vor-ort'  → SV ist angekommen, Termin nicht abgeschlossen (Geofence-Out-Detection: >2 km
+ *                  vom Ziel = Termin durchgeführt).
  */
 export async function getNaechsterAktivenAuftragForSv(
   supabase: SupabaseClient,
   svId: string,
 ): Promise<{
+  modus: 'anfahrt' | 'vor-ort'
   auftrag: AuftragRow
   terminId: string
   startZeit: string
   geschaetzteFahrtzeitMin: number | null
 } | null> {
+  // 1) Vor-Ort-Modus zuerst prüfen — angekommen-aber-noch-nicht-durch hat Vorrang
+  const { data: vorOrtTermin } = await supabase
+    .from('gutachter_termine')
+    .select('id, start_zeit, geschaetzte_fahrtzeit_min, auftrag_id')
+    .eq('sv_id', svId)
+    .eq('typ', 'sv_begutachtung')
+    .not('sv_angekommen_am', 'is', null)
+    .is('durchgefuehrt_am', null)
+    .not('auftrag_id', 'is', null)
+    .order('sv_angekommen_am', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (vorOrtTermin?.auftrag_id) {
+    const auftrag = await getAuftrag(supabase, vorOrtTermin.auftrag_id as string)
+    if (auftrag) {
+      return {
+        modus: 'vor-ort',
+        auftrag,
+        terminId: vorOrtTermin.id as string,
+        startZeit: vorOrtTermin.start_zeit as string,
+        geschaetzteFahrtzeitMin: (vorOrtTermin.geschaetzte_fahrtzeit_min as number | null) ?? null,
+      }
+    }
+  }
+
+  // 2) Anfahrts-Modus — nächster bestätigter/reservierter Termin im Tagesfenster
   const von = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
   const bis = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString()
   const { data: termin } = await supabase
@@ -112,6 +144,7 @@ export async function getNaechsterAktivenAuftragForSv(
   if (!auftrag) return null
 
   return {
+    modus: 'anfahrt',
     auftrag,
     terminId: termin.id as string,
     startZeit: termin.start_zeit as string,

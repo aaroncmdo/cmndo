@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getNaechsterAktivenAuftragForSv } from '@/lib/auftrag/queries'
 
 export type AktiverAuftrag = {
+  modus: 'anfahrt' | 'vor-ort'
   terminId: string
   fallId: string
   startZeit: string
@@ -33,6 +34,7 @@ export async function getAktiverAuftrag(svId: string): Promise<AktiverAuftrag> {
     [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort].filter(Boolean).join(', ') || null
 
   return {
+    modus: result.modus,
     terminId: result.terminId,
     fallId: result.auftrag.fall_id,
     startZeit: result.startZeit,

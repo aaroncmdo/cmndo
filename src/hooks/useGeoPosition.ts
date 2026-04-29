@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { berechneEta } from '@/lib/mapbox/eta'
 import { haversineMeters } from '@/lib/gps/geofence'
-import { arrived, updateAuftragLive } from '@/lib/termine/actions'
+import { arrived, markTerminDurchgefuehrt, updateAuftragLive } from '@/lib/termine/actions'
 import { getAktiverAuftrag, type AktiverAuftrag } from '@/lib/auftrag/aktiver-auftrag'
 
 const AKTIVER_AUFTRAG_REFRESH_MS = 5 * 60 * 1000  // alle 5 min Termin-Liste neu prüfen
@@ -23,6 +23,7 @@ const ETA_RECALC_MIN_INTERVAL_MS = 30_000           // nicht häufiger als alle 
 const FENSTER_PUFFER_MIN = 15
 const FENSTER_FALLBACK_MIN = 90
 const ANKUNFT_RADIUS_M = 100
+const ABFAHRT_RADIUS_M = 2000  // >2 km weg vom Ziel = Termin durchgeführt
 
 function imAnfahrtsFenster(auftrag: NonNullable<AktiverAuftrag>): boolean {
   const start = new Date(auftrag.startZeit).getTime()
@@ -90,6 +91,23 @@ export function useGeoPosition(svId: string | null) {
 
         const auftrag = auftragRef.current
         if (!auftrag) return
+
+        // ── Vor-Ort-Modus: SV ist angekommen, prüfe Geofence-Out (>2 km) ──────
+        if (auftrag.modus === 'vor-ort') {
+          if (auftrag.zielLat == null || auftrag.zielLng == null) return
+          const dist = haversineMeters(lat, lng, auftrag.zielLat, auftrag.zielLng)
+          if (dist >= ABFAHRT_RADIUS_M) {
+            try {
+              await markTerminDurchgefuehrt(auftrag.terminId)
+              auftragRef.current = null
+            } catch (err) {
+              console.warn('[CMM-32] markTerminDurchgefuehrt failed:', err)
+            }
+          }
+          return
+        }
+
+        // ── Anfahrts-Modus: ETA + Auto-Ankunft ────────────────────────────────
         if (!imAnfahrtsFenster(auftrag)) return
 
         // Auto-Ankunft wenn nahe genug
