@@ -363,6 +363,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             terminId={svTermin.id as string}
             svName={svName}
             gutachtenHochgeladen={!!auftraege.find((a) => a.typ === 'erstgutachten')?.gutachten_url}
+            qcFreigegeben={!!auftraege.find((a) => a.typ === 'erstgutachten')?.gutachten_final_freigegeben}
             initial={{
               sv_unterwegs_seit: (svTermin.sv_unterwegs_seit as string | null) ?? null,
               sv_angekommen_am: (svTermin.sv_angekommen_am as string | null) ?? null,

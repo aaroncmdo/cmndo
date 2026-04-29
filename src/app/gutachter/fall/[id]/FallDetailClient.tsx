@@ -155,6 +155,7 @@ type Props = {
   pflichtSlots?: PflichtSlotForView[]
   /** CMM-23: Auftrags-Phase für den Stepper in der linken Sidebar. */
   svPhase?: SvLifecyclePhase
+  gutachtenInQc?: boolean
   /** CMM-36: Geo-Tracking — ID + Vorname des SVs für ETA-Anzeige */
   svId?: string | null
   svVorname?: string | null
@@ -323,7 +324,7 @@ export default function FallDetailClient(props: Props) {
       {/* Stepper + Unterwegs-Info + TerminActionsPanel ganz oben — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
         <SvUnterwegsInfo tracking={geoTracking} svVorname={props.svVorname ?? null} />
-        {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} />}
+        {props.svPhase && <AuftragsphaseStepper phase={props.svPhase} gutachtenInQc={props.gutachtenInQc} />}
         {zeigeTerminActions && aktiverTermin && (
           <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
         )}

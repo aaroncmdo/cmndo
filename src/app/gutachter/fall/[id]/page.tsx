@@ -487,6 +487,7 @@ export default async function GutachterFallPage({
       topServerBlocks={topServerBlocks}
       pflichtSlots={pflichtSlots}
       svPhase={svPhase}
+      gutachtenInQc={zeigeGutachtenUpload === false && !!erstgutachtenAuftrag?.gutachten_url && !erstgutachtenAuftrag?.gutachten_final_freigegeben}
       fall={fallWithAbrechnung}
       lead={lead}
       dokumente={dokumenteLegacy}
