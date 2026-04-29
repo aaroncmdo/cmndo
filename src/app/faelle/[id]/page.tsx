@@ -14,6 +14,8 @@ import type { FallakteRolle } from '@/lib/fall/field-permissions'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-433 (Child 4 AAR-429): KB Phase-State-Audit oberhalb der Tabs
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
+import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
+import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
 import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
 import {
@@ -548,6 +550,51 @@ export default async function FallaktePage({
     }>,
   })
 
+  // CMM-32e: Vollständigkeits-Check-Card-Daten für KB/Admin
+  let qcCardProps: React.ComponentProps<typeof VollstaendigkeitsCheckCard> | null = null
+  if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
+    const adminCli = createAdminClient()
+    const auftraegeFall = await getAlleAuftraege(supabase, id)
+    const erstgutachten = auftraegeFall.find((a) => a.typ === 'erstgutachten')
+    if (erstgutachten) {
+      const { data: dokRows } = await adminCli
+        .from('fall_dokumente')
+        .select('id, dokument_typ, original_filename, storage_path')
+        .eq('fall_id', id)
+        .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
+        .is('geloescht_am', null)
+        .order('hochgeladen_am', { ascending: true })
+      const docList = ((dokRows ?? []) as Array<{
+        id: string
+        dokument_typ: string
+        original_filename: string | null
+        storage_path: string
+      }>).map((d) => ({
+        id: d.id,
+        filename: d.original_filename ?? 'Datei',
+        url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
+        istHaupt: d.dokument_typ === 'gutachten',
+      }))
+      const haupt = docList.find((d) => d.istHaupt) ?? null
+      const anlagen = docList.filter((d) => !d.istHaupt)
+      const slotLabels = new Map(katalogAlleSlots.map((s) => [s.slot_id, s.label]))
+      const pflichtItemsList = (pflichtdokumente ?? []).map((p) => ({
+        slot_id: p.dokument_typ as string,
+        label: slotLabels.get(p.dokument_typ as string) ?? (p.dokument_typ as string),
+        vorhanden: p.status === 'hochgeladen' || p.status === 'geprueft',
+        pflicht: !!p.pflicht,
+      }))
+      qcCardProps = {
+        auftragId: erstgutachten.id,
+        hatGutachten: !!erstgutachten.gutachten_url,
+        bereitsFreigegeben: erstgutachten.gutachten_final_freigegeben,
+        hauptgutachten: haupt,
+        anlagen,
+        pflichtItems: pflichtItemsList,
+      }
+    }
+  }
+
   // AAR-538 (C1): Subphase + next_hint berechnen (pure function)
   const subphase = resolveSubphase({
     fall: fall as unknown as FallRow,
@@ -560,6 +607,12 @@ export default async function FallaktePage({
     <>
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
+      {/* CMM-32e: Vollständigkeits-Check für KB / Admin sobald Gutachten hochgeladen */}
+      {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && qcCardProps && (
+        <div className="mb-4">
+          <VollstaendigkeitsCheckCard {...qcCardProps} />
+        </div>
+      )}
       {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
           Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}
       {kanzleiBlockData && (

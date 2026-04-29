@@ -378,13 +378,27 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* CMM-33: Banner-Click-Tile → öffnet Pop-over mit allen Slot-
             Drag&Drop-Cards. Kompakt in der Detail-Page, voller Upload-
-            Workflow im Pop-over. */}
-        <PflichtdokumenteSection
-          slots={pflichtSlots}
-          fallId={fall.id as string}
-          rolle="kunde"
-          variant="banner"
-        />
+            Workflow im Pop-over.
+            CMM-32e: Während Besichtigung + Vollständigkeits-Check
+            (Auftrag-Status besichtigung/gutachten + nicht freigegeben)
+            ist der Banner ausgeblendet — der Kunde soll währenddessen
+            keine neuen Dokumente nachladen. Nach QC-Freigabe erscheint
+            er wieder für Nachreichungen. */}
+        {(() => {
+          const erst = auftraege.find((a) => a.typ === 'erstgutachten')
+          const qcLaeuft =
+            !!erst && (erst.status === 'besichtigung' || erst.status === 'gutachten') &&
+            !erst.gutachten_final_freigegeben
+          if (qcLaeuft) return null
+          return (
+            <PflichtdokumenteSection
+              slots={pflichtSlots}
+              fallId={fall.id as string}
+              rolle="kunde"
+              variant="banner"
+            />
+          )
+        })()}
 
         {/* CMM-36: KundeJetztZuTunCard entfernt — die Kanzlei-Flow-Aktionen
             sind nicht mehr relevant, Live-Tracking läuft via SV-Live-Banner
