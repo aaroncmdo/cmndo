@@ -188,6 +188,48 @@ export async function gutachtenAbgeben(
   return { ok: true }
 }
 
+// ─── loescheGutachtenDokument ─────────────────────────────────────────────────
+//
+// SV löscht ein soeben (falsch) hochgeladenes Dokument wieder aus dem
+// Storage + der fall_dokumente-Tabelle (Soft-Delete via geloescht_am).
+// Nur für noch nicht freigegebene Aufträge erlaubt.
+
+export async function loescheGutachtenDokument(
+  auftragId: string,
+  storagePath: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'unauthorized' }
+
+  const db = createAdminClient()
+
+  const { data: auftrag } = await db
+    .from('auftraege')
+    .select('id, fall_id, gutachten_final_freigegeben')
+    .eq('id', auftragId)
+    .maybeSingle()
+  if (!auftrag) return { ok: false, error: 'Auftrag nicht gefunden' }
+  if (auftrag.gutachten_final_freigegeben) {
+    return { ok: false, error: 'Auftrag ist bereits freigegeben' }
+  }
+
+  const { error: storageErr } = await db.storage
+    .from('fall-dokumente')
+    .remove([storagePath])
+  if (storageErr) return { ok: false, error: storageErr.message }
+
+  const now = new Date().toISOString()
+  await db
+    .from('fall_dokumente')
+    .update({ geloescht_am: now })
+    .eq('storage_path', storagePath)
+    .is('geloescht_am', null)
+
+  revalidatePath(`/gutachter/fall/${auftrag.fall_id}`)
+  return { ok: true }
+}
+
 // ─── weiseGutachtenZurueck ────────────────────────────────────────────────────
 //
 // KB lehnt das eingereichte Gutachten ab und fordert Nachbesserung.

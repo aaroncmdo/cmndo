@@ -7,9 +7,9 @@
 
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { UploadCloudIcon, FileTextIcon, CheckIcon, SendIcon } from 'lucide-react'
+import { UploadCloudIcon, FileTextIcon, CheckIcon, SendIcon, Trash2Icon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { gutachtenAbgeben } from '@/lib/auftrag/qc'
+import { gutachtenAbgeben, loescheGutachtenDokument } from '@/lib/auftrag/qc'
 
 type Props = {
   auftragId: string
@@ -22,8 +22,8 @@ type Props = {
   abgebbareDokumenteAnzahl?: number
 }
 
-type UploadStatus = 'idle' | 'uploading' | 'done' | 'error'
-type UploadFile = { name: string; status: UploadStatus; error?: string; istHaupt: boolean }
+type UploadStatus = 'idle' | 'uploading' | 'done' | 'error' | 'deleting'
+type UploadFile = { name: string; status: UploadStatus; error?: string; istHaupt: boolean; storagePath?: string }
 
 export default function GutachtenUploadBanner({
   auftragId,
@@ -35,6 +35,7 @@ export default function GutachtenUploadBanner({
 }: Props) {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [dragOver, setDragOver] = useState(false)
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null)
   const [pending, startTransition] = useTransition()
   const [submitPending, startSubmit] = useTransition()
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -43,6 +44,19 @@ export default function GutachtenUploadBanner({
 
   const erfolgreicheUploads = files.filter((f) => f.status === 'done').length
   const abgebbar = abgebbareDokumenteAnzahl + erfolgreicheUploads > 0
+
+  function handleLoeschen(idx: number) {
+    const f = files[idx]
+    if (!f.storagePath || f.status === 'deleting') return
+    setFiles((s) => s.map((x, i) => i === idx ? { ...x, status: 'deleting' } : x))
+    loescheGutachtenDokument(auftragId, f.storagePath).then((r) => {
+      if (r.ok) {
+        setFiles((s) => s.filter((_, i) => i !== idx))
+      } else {
+        setFiles((s) => s.map((x, i) => i === idx ? { ...x, status: 'error', error: r.error } : x))
+      }
+    })
+  }
 
   function handleAbgeben() {
     setSubmitError(null)
@@ -84,7 +98,7 @@ export default function GutachtenUploadBanner({
     )
   }
 
-  async function uploadEine(file: File, istHaupt: boolean): Promise<{ ok: boolean; error?: string }> {
+  async function uploadEine(file: File, istHaupt: boolean): Promise<{ ok: boolean; storagePath?: string; error?: string }> {
     const supabase = createClient()
     const safeName = file.name.replace(/[^a-z0-9._-]/gi, '_')
     // CMM-32: Storage am Claim verankern, Auftrag-Bezug bleibt im Pfad.
@@ -115,7 +129,7 @@ export default function GutachtenUploadBanner({
       const j = await res.json().catch(() => ({}))
       return { ok: false, error: (j as { error?: string }).error ?? `HTTP ${res.status}` }
     }
-    return { ok: true }
+    return { ok: true, storagePath }
   }
 
   function handleFiles(filesIn: FileList | File[]) {
@@ -139,7 +153,7 @@ export default function GutachtenUploadBanner({
         setFiles((s) =>
           s.map((f) =>
             f.name === file.name && f.status === 'uploading'
-              ? { ...f, status: r.ok ? 'done' : 'error', error: r.error }
+              ? { ...f, status: r.ok ? 'done' : 'error', error: r.error, storagePath: r.storagePath }
               : f,
           ),
         )
@@ -216,22 +230,45 @@ export default function GutachtenUploadBanner({
       {files.length > 0 && (
         <ul className="space-y-1.5">
           {files.map((f, i) => (
-            <li key={`${f.name}-${i}`} className="flex items-center gap-2 text-xs">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  f.status === 'done'
-                    ? 'bg-emerald-500'
-                    : f.status === 'error'
+            <li
+              key={`${f.name}-${i}`}
+              className="flex items-center gap-2 text-xs"
+              onMouseEnter={() => setHoverIdx(i)}
+              onMouseLeave={() => setHoverIdx(null)}
+            >
+              {/* Grüner Punkt → Mülleimer on hover (nur wenn done + storagePath bekannt) */}
+              {f.status === 'done' && f.storagePath ? (
+                <button
+                  type="button"
+                  onClick={() => handleLoeschen(i)}
+                  className="w-4 h-4 shrink-0 flex items-center justify-center"
+                  title="Datei löschen"
+                >
+                  {hoverIdx === i ? (
+                    <Trash2Icon className="w-3.5 h-3.5 text-red-500 hover:text-red-700 transition-colors" />
+                  ) : (
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 block" />
+                  )}
+                </button>
+              ) : (
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 ${
+                    f.status === 'error'
                       ? 'bg-red-500'
-                      : 'bg-amber-500 animate-pulse'
-                }`}
-              />
-              <span className="font-medium text-claimondo-navy truncate flex-1">{f.name}</span>
-              {f.istHaupt && (
+                      : f.status === 'deleting'
+                        ? 'bg-gray-400 animate-pulse'
+                        : 'bg-amber-500 animate-pulse'
+                  }`}
+                />
+              )}
+              <span className={`font-medium truncate flex-1 ${f.status === 'deleting' ? 'text-claimondo-ondo/50 line-through' : 'text-claimondo-navy'}`}>
+                {f.name}
+              </span>
+              {f.istHaupt && f.status !== 'deleting' && (
                 <span className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold">Hauptgutachten</span>
               )}
               {f.status === 'error' && <span className="text-red-700">{f.error ?? 'Fehler'}</span>}
-              {f.status === 'done' && <CheckIcon className="w-3 h-3 text-emerald-600" />}
+              {f.status === 'done' && !f.storagePath && <CheckIcon className="w-3 h-3 text-emerald-600" />}
             </li>
           ))}
         </ul>
