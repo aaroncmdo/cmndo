@@ -429,8 +429,7 @@ export default async function GutachterFallPage({
   const zeigeGutachtenUpload =
     !!erstgutachtenAuftrag &&
     !!(aktiverTermin?.durchgefuehrt_am as string | null) &&
-    !erstgutachtenAuftrag.gutachten_final_freigegeben &&
-    (!erstgutachtenAuftrag.gutachten_url || !!erstgutachtenReject)
+    !erstgutachtenAuftrag.gutachten_final_freigegeben
 
   const topServerBlocks = (
     <>

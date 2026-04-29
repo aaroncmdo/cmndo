@@ -38,6 +38,21 @@ export default function GutachtenUploadBanner({
   // CMM-32e: Reject-Modus — KB hat Nachbesserung gefordert.
   // SV sieht lila Banner mit Grund + Re-Upload-Zone.
   const istReject = !!zurueckgewiesenAm
+  // CMM-32e: Korrektur eingereicht — grund bleibt für Audit, _am ist null.
+  // Banner zeigt "Vielen Dank — Prüfung läuft", kein Drag&Drop mehr.
+  const istKorrekturEingereicht = !!zurueckweisungGrund && !zurueckgewiesenAm
+
+  if (istKorrekturEingereicht && files.length === 0) {
+    return (
+      <div className="rounded-2xl bg-violet-50 border border-violet-200 px-4 py-3 flex items-center gap-3">
+        <CheckIcon className="w-4 h-4 shrink-0 text-violet-700" />
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-violet-900">Vielen Dank!</p>
+          <p className="text-xs text-violet-800">Wir werden die Dokumente schnellstmöglich überprüfen.</p>
+        </div>
+      </div>
+    )
+  }
 
   if (hatGutachten && !istReject && files.length === 0) {
     return (
@@ -51,8 +66,11 @@ export default function GutachtenUploadBanner({
   async function uploadEine(file: File, istHaupt: boolean): Promise<{ ok: boolean; error?: string }> {
     const supabase = createClient()
     const safeName = file.name.replace(/[^a-z0-9._-]/gi, '_')
-    // CMM-32: Storage am Claim verankern, Auftrag-Bezug bleibt im Pfad
-    const storagePath = `claim/${claimId}/gutachten/${auftragId}/${Date.now()}-${safeName}`
+    // CMM-32: Storage am Claim verankern, Auftrag-Bezug bleibt im Pfad.
+    // CMM-32e: bei aktivem Reject landet jede Datei in einem
+    // nachbesserung/-Subfolder — sauber abgegrenzt, mehrfach-iterierbar.
+    const subfolder = istReject ? 'nachbesserung/' : ''
+    const storagePath = `claim/${claimId}/gutachten/${auftragId}/${subfolder}${Date.now()}-${safeName}`
     // Direktupload — kein API-Body, umgeht Vercel-413-Limit
     const { error: upErr } = await supabase.storage
       .from('fall-dokumente')

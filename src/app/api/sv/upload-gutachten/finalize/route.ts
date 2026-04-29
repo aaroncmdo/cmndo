@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const claimId = (auftrag as unknown as { faelle: { claim_id: string | null } }).faelle?.claim_id
     if (!claimId) return NextResponse.json({ error: 'Claim nicht gefunden' }, { status: 400 })
 
-    // Pfad-Whitelist: muss unter claim/<claimId>/gutachten/<auftragId>/ liegen
+    // Pfad-Whitelist: muss unter claim/<claimId>/gutachten/<auftragId>/[nachbesserung/]
     const expectedPrefix = `claim/${claimId}/gutachten/${body.auftragId}/`
     if (!body.storagePath.startsWith(expectedPrefix)) {
       return NextResponse.json({ error: 'Ungültiger Storage-Pfad' }, { status: 400 })

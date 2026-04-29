@@ -94,6 +94,8 @@ export default function VollstaendigkeitsCheckCard({
   }
 
   const fehlende = pflichtItems.filter((p) => p.pflicht && !p.vorhanden)
+  // CMM-32e: Korrektur eingereicht — grund bleibt für Audit, _am ist null.
+  const istKorrekturEingereicht = !!zurueckweisungGrund && !zurueckgewiesenAm
 
   function handleFreigeben() {
     setError(null)
@@ -125,11 +127,20 @@ export default function VollstaendigkeitsCheckCard({
     <div className="rounded-2xl bg-white border border-violet-200 px-4 sm:px-6 py-5 space-y-4">
       <div className="flex items-start gap-3">
         <FileTextIcon className="w-5 h-5 shrink-0 text-violet-600 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-violet-900">Vollständigkeits-Check</p>
-          <p className="text-xs text-violet-700 mt-0.5">
-            Prüfe ob das Gutachten + alle Pflichtdokumente vorliegen, dann gib das Kanzleipaket frei.
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-violet-900">
+            {istKorrekturEingereicht ? 'Korrigierte Version eingereicht' : 'Vollständigkeits-Check'}
           </p>
+          <p className="text-xs text-violet-700 mt-0.5">
+            {istKorrekturEingereicht
+              ? 'SV hat das Gutachten überarbeitet. Prüfe die neue Version und gib das Kanzleipaket frei oder fordere erneut Nachbesserung an.'
+              : 'Prüfe ob das Gutachten + alle Pflichtdokumente vorliegen, dann gib das Kanzleipaket frei.'}
+          </p>
+          {istKorrekturEingereicht && zurueckweisungGrund && (
+            <p className="text-[11px] text-violet-700/80 mt-1 italic">
+              Vorherige Begründung: „{zurueckweisungGrund}"
+            </p>
+          )}
         </div>
       </div>
 
