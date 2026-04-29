@@ -14,7 +14,6 @@
 import Link from 'next/link'
 import {
   CalendarIcon,
-  MapPinIcon,
   UserIcon,
   ClockIcon,
   CheckCircle2Icon,
@@ -31,6 +30,10 @@ export type AuftragCardProps = {
     schadens_ursache: string | null
     schadens_ort: string | null
     schadens_datum: string | null
+    /** CMM-32 Walkthrough: SV-Identifikation über Kennzeichen + Fahrzeug. */
+    kennzeichen?: string | null
+    fahrzeug_hersteller?: string | null
+    fahrzeug_modell?: string | null
   }
   kunde: {
     vorname: string | null
@@ -92,6 +95,11 @@ export default function AuftragCard(props: AuftragCardProps) {
 
   const terminMeta = deriveTerminMeta(props.aktiverTermin)
 
+  const fahrzeug = [props.fall.fahrzeug_hersteller, props.fall.fahrzeug_modell]
+    .filter(Boolean)
+    .join(' ')
+    .trim() || null
+
   return (
     <div className="relative bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-ondo transition-colors group">
       {/* CMM-25: Stretched-Link über die ganze Card. Card-Click ist die
@@ -102,15 +110,26 @@ export default function AuftragCard(props: AuftragCardProps) {
         className="absolute inset-0 z-0 rounded-2xl"
       />
 
-      {/* Header */}
+      {/* Header — CMM-32 Walkthrough: Kennzeichen prominent + Kunde, Fall-Nr klein */}
       <div className="relative z-10 flex items-start justify-between gap-2 pointer-events-none">
         <div className="min-w-0 flex-1">
-          <span className="text-[var(--brand-secondary)] font-mono text-xs">
-            {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
-          </span>
-          <p className="text-sm font-semibold text-[var(--brand-primary)] mt-0.5 flex items-center gap-1.5">
-            <UserIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
-            <span className="truncate">{kundeName}</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            {props.fall.kennzeichen && (
+              <span className="inline-flex items-center rounded-md border-2 border-claimondo-navy bg-white px-1.5 py-0.5 font-mono text-xs tracking-wide text-claimondo-navy">
+                {props.fall.kennzeichen}
+              </span>
+            )}
+            <p className="text-sm font-semibold text-[var(--brand-primary)] flex items-center gap-1.5 min-w-0">
+              <UserIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
+              <span className="truncate">{kundeName}</span>
+            </p>
+          </div>
+          <p className="text-[11px] text-claimondo-ondo mt-1 truncate">
+            {fahrzeug && <span>{fahrzeug}</span>}
+            {fahrzeug && <span className="mx-1.5">·</span>}
+            <span className="font-mono text-[var(--brand-secondary)]">
+              {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
+            </span>
           </p>
         </div>
         <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo whitespace-nowrap">
@@ -129,18 +148,12 @@ export default function AuftragCard(props: AuftragCardProps) {
         </div>
       )}
 
-      {/* Meta */}
+      {/* Meta — CMM-32 Walkthrough: Unfallort raus, Schadensursache + Datum bleiben */}
       <div className="relative z-10 text-xs text-claimondo-ondo space-y-1 pointer-events-none">
         <div className="flex items-center gap-1.5">
           <FileTextIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
           <span>{props.ursacheLabel}</span>
         </div>
-        {props.fall.schadens_ort && (
-          <div className="flex items-center gap-1.5">
-            <MapPinIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
-            <span className="truncate">{props.fall.schadens_ort}</span>
-          </div>
-        )}
         {props.fall.schadens_datum && (
           <div className="flex items-center gap-1.5">
             <CalendarIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />

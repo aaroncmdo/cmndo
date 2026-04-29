@@ -228,6 +228,12 @@ export default function FallDetailClient(props: Props) {
   const fallNummer = (fall.fall_nummer as string | null) ?? (fall.id as string).slice(0, 8)
   const kundenName = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
   const ort = (fall.schadens_ort as string | null) ?? ''
+  // CMM-32 Walkthrough: SV-Header ergänzt um Kennzeichen + Marke/Modell.
+  const kennzeichen = (fall.kennzeichen as string | null) ?? null
+  const fahrzeug =
+    [(fall.fahrzeug_hersteller as string | null), (fall.fahrzeug_modell as string | null)]
+      .filter(Boolean)
+      .join(' ') || null
 
   // AAR-405: Team-Tab befüllen — Kundenbetreuer + Kunde; Kanzlei folgt mit
   // eigener Daten-Ladung, sobald Phase 5 (Kanzlei-Integration) live ist.
@@ -320,6 +326,8 @@ export default function FallDetailClient(props: Props) {
         fallId={fall.id as string}
         kundenName={kundenName}
         ort={ort}
+        kennzeichen={kennzeichen}
+        fahrzeug={fahrzeug}
         subphase={subphase}
         drawer={drawerData}
         aktuellePhaseSnake={aktuellePhaseSnake}

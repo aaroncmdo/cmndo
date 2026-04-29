@@ -21,27 +21,31 @@ export function FallHeader({
   fallNummer,
   kundenName,
   ort,
+  kennzeichen,
+  fahrzeug,
   drawer,
 }: {
   fallNummer: string
   fallId: string
   kundenName: string
   ort: string
+  /** CMM-32 Walkthrough: Kennzeichen prominent statt Unfallort. */
+  kennzeichen?: string | null
+  /** CMM-32 Walkthrough: Marke + Modell als Subline (z.B. „BMW 320i"). */
+  fahrzeug?: string | null
   subphase: SvSubphase
   drawer: DrawerData
   aktuellePhaseSnake: string | null
   abgeschlossenAm?: string | null
 }) {
-  // CMM-23: TaskAnlegenButton + Subphasen-Label entfernt — der SV
-  // braucht keine eigene Task-Erstellung (KB-Pfad läuft via Chat,
-  // AAR-861) und der Auftrags-Lifecycle steckt im 3-Phasen-Stepper
-  // direkt darunter. FallakteDrawer bleibt als alternative Akten-Sicht.
+  void ort // CMM-32 Walkthrough: Unfallort wandert aus dem Header in Stammdaten/Briefing.
   return (
     <FallIdentityHeader
       rolle="sv"
       fallNummer={fallNummer}
       kundenName={kundenName}
-      ort={ort}
+      kennzeichen={kennzeichen ?? null}
+      fahrzeug={fahrzeug ?? null}
       backHref="/gutachter/faelle"
       backLabel="Zurück zu Fällen"
     >

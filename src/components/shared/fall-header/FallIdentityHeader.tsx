@@ -1,13 +1,9 @@
 'use client'
 
 // AAR-746 (Phase B): Shared Fall-Identity-Header für Admin / SV / Kunde / KB.
-// Ersetzt den SV-eigenen FallHeader + die handgerollte Kunde-"Aktueller-Status"-
-// Section. Admin bekommt diesen Header neu (war vorher nur in der FallActionBar
-// implizit). Claimondo-Tokens only — keine Tailwind-Default-Farben.
-//
-// Bewusst KEIN FallPhasenPanel-Strip eingebaut: das bleibt separat, weil SV
-// den Strip drunter rendert, Admin ihn in der Aside hat und Kunde ihn gar
-// nicht braucht. Komposition entscheidet der Aufrufer.
+// CMM-32 Walkthrough: SV-Variant zeigt jetzt Kennzeichen prominent + Kunde
+// + Marke/Modell statt Unfallort — der SV identifiziert den Fall vor Ort
+// über Kennzeichen, nicht über die Schaden-Adresse.
 
 import Link from 'next/link'
 import { ChevronLeftIcon } from 'lucide-react'
@@ -21,6 +17,10 @@ type FallIdentityHeaderProps = {
   /** Optional: "Phase 5 Kanzlei-Bearbeitung · Anspruchsschreiben" oder "In Regulierung" */
   subphaseLabel?: string | null
   rolle: FallIdentityRolle
+  /** CMM-32 Walkthrough: Kennzeichen (z.B. „K-AB 1234"). Für SV-Variante zentral. */
+  kennzeichen?: string | null
+  /** CMM-32 Walkthrough: Marke + Modell zusammen, z.B. „BMW 320i". */
+  fahrzeug?: string | null
   /** Back-Breadcrumb links (z.B. SV: /gutachter/faelle). Weglassen = kein Link. */
   backHref?: string
   backLabel?: string
@@ -35,13 +35,16 @@ export function FallIdentityHeader({
   kundenName,
   ort,
   subphaseLabel,
-  rolle: _rolle,
+  rolle,
+  kennzeichen,
+  fahrzeug,
   backHref,
   backLabel = 'Zurück',
   children,
   className = '',
 }: FallIdentityHeaderProps) {
   const hasBack = Boolean(backHref)
+  const istSv = rolle === 'sv'
 
   return (
     <div
@@ -60,17 +63,45 @@ export function FallIdentityHeader({
             </Link>
           )}
           <div className="min-w-0">
-            <h1 className="text-base sm:text-lg font-semibold text-claimondo-navy truncate">
-              {fallNummer}
-              {kundenName && (
-                <span className="text-claimondo-ondo"> · {kundenName}</span>
-              )}
-              {ort && <span className="text-claimondo-ondo"> · {ort}</span>}
-            </h1>
-            {subphaseLabel && (
-              <p className="text-xs text-claimondo-ondo mt-0.5 truncate">
-                {subphaseLabel}
-              </p>
+            {istSv ? (
+              // SV-Variante: Kennzeichen + Kunde prominent, Marke/Modell als Subline
+              <>
+                <h1 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base sm:text-lg font-semibold text-claimondo-navy">
+                  {kennzeichen && (
+                    <span className="inline-flex items-center rounded-md border-2 border-claimondo-navy bg-white px-2 py-0.5 font-mono text-sm tracking-wide text-claimondo-navy">
+                      {kennzeichen}
+                    </span>
+                  )}
+                  {kundenName && <span className="truncate">{kundenName}</span>}
+                </h1>
+                <p className="text-xs text-claimondo-ondo mt-1 truncate">
+                  {fahrzeug && <span>{fahrzeug}</span>}
+                  {fahrzeug && fallNummer && <span className="mx-1.5">·</span>}
+                  <span className="font-mono">{fallNummer}</span>
+                  {subphaseLabel && (
+                    <>
+                      <span className="mx-1.5">·</span>
+                      <span>{subphaseLabel}</span>
+                    </>
+                  )}
+                </p>
+              </>
+            ) : (
+              // Default-Variante (Admin/Kunde/KB): Fall-Nr + Kunde + Ort
+              <>
+                <h1 className="text-base sm:text-lg font-semibold text-claimondo-navy truncate">
+                  {fallNummer}
+                  {kundenName && (
+                    <span className="text-claimondo-ondo"> · {kundenName}</span>
+                  )}
+                  {ort && <span className="text-claimondo-ondo"> · {ort}</span>}
+                </h1>
+                {subphaseLabel && (
+                  <p className="text-xs text-claimondo-ondo mt-0.5 truncate">
+                    {subphaseLabel}
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
