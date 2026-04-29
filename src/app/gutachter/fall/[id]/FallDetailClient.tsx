@@ -371,7 +371,7 @@ export default function FallDetailClient(props: Props) {
       {/* CMM-23 Aaron-Layout: links Stammdaten; rechts Termin +
           Gutachten + hochgeladene Dokumente. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
-        <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
+        <aside className="w-full space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
           {/* CMM-32: Master-Detail — kompakte klickbare Tabelle.
               Detail-Block rendert in der rechten Section (siehe unten). */}
           <StammdatenAccordion
@@ -450,18 +450,8 @@ export default function FallDetailClient(props: Props) {
                 }))
             }
           />
-          <WeitereDokumenteCard
-            fallId={fall.id as string}
-            dokumente={(props.dokumente ?? []).map((d) => ({
-              id: String(d.id),
-              dokument_typ: (d.typ as string | null) ?? null,
-              datei_url: (d.datei_url as string | null) ?? null,
-              datei_name: (d.datei_name as string | null) ?? null,
-              hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
-              created_at: (d.created_at as string | null) ?? null,
-              storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
-            }))}
-          />
+          {/* CMM-32: WeitereDokumenteCard wandert in den Dokumente-Tab
+              der StammdatenAccordion (links) — siehe dokumenteSlot. */}
         </section>
       </div>
 

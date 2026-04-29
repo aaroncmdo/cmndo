@@ -88,7 +88,7 @@ export default function StammdatenAccordion({
 
   return (
     <div
-      className={`rounded-2xl bg-white border border-claimondo-border overflow-hidden ${className}`}
+      className={`w-full rounded-2xl bg-white border border-claimondo-border overflow-hidden ${className}`}
     >
       <div className="flex flex-col sm:flex-row min-h-0">
 
