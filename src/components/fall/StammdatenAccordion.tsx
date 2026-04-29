@@ -1,9 +1,8 @@
 'use client'
 
-// CMM-32: Master-Detail-Layout für die Fall-Stammdaten. Links eine kompakte
-// klickbare Tabelle mit 6 Kategorien, rechts (im Parent-Layout-Slot) der
-// passende Detail-Block. Der Caller hält den Selection-State und rendert
-// <StammdatenDetail> in seinem Detail-Slot.
+// CMM-32: Stammdaten-Accordion — 6 Kategorien, inline aufklappend.
+// Klick auf eine Zeile expandiert das Detail direkt darunter (Tab-Stil).
+// Der Pfeil verschwindet wenn eine Zeile ausgewählt ist.
 
 import { useState } from 'react'
 import {
@@ -17,6 +16,7 @@ import {
 } from 'lucide-react'
 import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import { LACKFARBE_LABEL, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
+import StammdatenDetail from './StammdatenDetail'
 
 export type StammdatenCategory =
   | 'fahrzeug'
@@ -123,18 +123,22 @@ function buildSummary(
 
 type Props = {
   data: StammdatenAccordionData
-  selected: StammdatenCategory | null
-  onSelect: (cat: StammdatenCategory | null) => void
+  /** Optionaler Slot für den Dokumente-Tab (WeitereDokumenteCard o. ä.) */
+  dokumenteSlot?: React.ReactNode
   className?: string
 }
 
 export default function StammdatenAccordion({
   data,
-  selected,
-  onSelect,
+  dokumenteSlot,
   className = '',
 }: Props) {
+  const [selected, setSelected] = useState<StammdatenCategory | null>(null)
   const [hovered, setHovered] = useState<StammdatenCategory | null>(null)
+
+  function handleSelect(cat: StammdatenCategory) {
+    setSelected((prev) => (prev === cat ? null : cat))
+  }
   const fall = data.fall
   const hersteller = str(fall.fahrzeug_hersteller)
   const modell = str(fall.fahrzeug_modell)
@@ -171,7 +175,7 @@ export default function StammdatenAccordion({
         </div>
       )}
 
-      {/* Klickbare Tabellen-Zeilen */}
+      {/* Klickbare Tabellen-Zeilen mit Inline-Expansion */}
       <ul className="divide-y divide-claimondo-border/60">
         {ROWS.map(({ key, label, icon: Icon }) => {
           const isSelected = selected === key
@@ -180,7 +184,7 @@ export default function StammdatenAccordion({
             <li key={key}>
               <button
                 type="button"
-                onClick={() => onSelect(isSelected ? null : key)}
+                onClick={() => handleSelect(key)}
                 onMouseEnter={() => setHovered(key)}
                 onMouseLeave={() => setHovered(null)}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
@@ -197,25 +201,29 @@ export default function StammdatenAccordion({
                   }`}
                 />
                 <div className="flex-1 min-w-0">
-                  <p
-                    className={`text-sm font-semibold ${
-                      isSelected ? 'text-claimondo-navy' : 'text-claimondo-navy'
-                    }`}
-                  >
-                    {label}
-                  </p>
+                  <p className="text-sm font-semibold text-claimondo-navy">{label}</p>
                   <p className="text-xs text-claimondo-ondo truncate">
                     {buildSummary(key, data)}
                   </p>
                 </div>
-                <ChevronRightIcon
-                  className={`w-4 h-4 shrink-0 transition-transform ${
-                    isSelected
-                      ? 'rotate-90 text-claimondo-navy'
-                      : 'text-claimondo-ondo/50'
-                  }`}
-                />
+                {/* Pfeil nur wenn nicht ausgewählt */}
+                {!isSelected && (
+                  <ChevronRightIcon className="w-4 h-4 shrink-0 text-claimondo-ondo/50" />
+                )}
               </button>
+
+              {/* Inline-Detail direkt unter der Zeile */}
+              {isSelected && (
+                <div className="border-t border-claimondo-border/60">
+                  <StammdatenDetail
+                    category={key}
+                    data={data}
+                    onClose={() => setSelected(null)}
+                    dokumenteSlot={dokumenteSlot}
+                    inline
+                  />
+                </div>
+              )}
             </li>
           )
         })}

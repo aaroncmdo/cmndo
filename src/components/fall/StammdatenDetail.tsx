@@ -33,6 +33,9 @@ type Props = {
       (WeitereDokumenteCard etc — bleibt im Parent damit der Loader-Pfad
       gleich bleibt). */
   dokumenteSlot?: React.ReactNode
+  /** Wenn true: kein Card-Wrapper, kein Header mit Schließen-Button —
+      für Inline-Expansion direkt unter der Accordion-Zeile. */
+  inline?: boolean
 }
 
 function str(v: unknown): string | null {
@@ -71,8 +74,28 @@ export default function StammdatenDetail({
   onClose,
   historieFooter,
   dokumenteSlot,
+  inline = false,
 }: Props) {
   const Icon = ICONS[category]
+
+  const content = (
+    <div className="px-4 py-4">
+      {category === 'fahrzeug' && <FahrzeugDetail data={data} />}
+      {category === 'historie' && (
+        <HistorieDetail data={data} footer={historieFooter} />
+      )}
+      {category === 'dokumente' &&
+        (dokumenteSlot ?? <p className="text-sm text-claimondo-ondo">Keine Dokumente</p>)}
+      {category === 'kunde' && <KundeDetail data={data} />}
+      {category === 'gegner' && <GegnerDetail data={data} />}
+      {category === 'schaden' && <SchadenDetail data={data} />}
+    </div>
+  )
+
+  if (inline) {
+    return <div className="bg-white">{content}</div>
+  }
+
   return (
     <div className="rounded-2xl bg-white border border-claimondo-border overflow-hidden">
       <div className="flex items-center justify-between border-b border-claimondo-border px-4 py-3">
@@ -91,18 +114,7 @@ export default function StammdatenDetail({
           <XIcon className="w-4 h-4" />
         </button>
       </div>
-
-      <div className="px-4 py-4">
-        {category === 'fahrzeug' && <FahrzeugDetail data={data} />}
-        {category === 'historie' && (
-          <HistorieDetail data={data} footer={historieFooter} />
-        )}
-        {category === 'dokumente' &&
-          (dokumenteSlot ?? <p className="text-sm text-claimondo-ondo">Keine Dokumente</p>)}
-        {category === 'kunde' && <KundeDetail data={data} />}
-        {category === 'gegner' && <GegnerDetail data={data} />}
-        {category === 'schaden' && <SchadenDetail data={data} />}
-      </div>
+      {content}
     </div>
   )
 }
