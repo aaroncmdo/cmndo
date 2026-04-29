@@ -39,13 +39,12 @@ import type { TeamMitglied } from './_components/FallakteDrawer'
 import { StammdatenCard } from './_components/StammdatenCard'
 import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
-import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
+import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
 // AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
-import { TerminActionsPanel } from './_components/TerminActionsPanel'
 import { SvToolsCard } from './_components/SvToolsCard'
 // CMM-23: FallActivityFeed + FallDokumenteSidebar raus (Activity-Feed
 // ohne Tagesgeschäfts-Use-Case; Dokumente-Sidebar war phase-/szenario-
@@ -285,10 +284,9 @@ export default function FallDetailClient(props: Props) {
     })),
   }
 
-  // AAR-757: Termin-Actions + Vor-Ort + ActivityFeed-Eingaben
+  // CMM-32 Walkthrough: Termin-Actions sind in AuftragHeaderPanel integriert,
+  // zeigeTerminActions wird dort intern berechnet.
   const aktiverTermin = props.aktiverTermin ?? null
-  const zeigeTerminActions =
-    aktiverTermin?.status === 'reserviert' || aktiverTermin?.status === 'gegenvorschlag'
   const hatGutachten = !!fall.gutachten_eingegangen_am
 
   // CMM-36: ETA-Anzeige — liest Position aus sv_live_location (Realtime)
@@ -321,19 +319,22 @@ export default function FallDetailClient(props: Props) {
         abgeschlossenAm={abgeschlossenAm}
       />
 
-      {/* Stepper + Unterwegs-Info + TerminActionsPanel ganz oben — volle Breite */}
+      {/* Stepper + Termin-Banner als verschmolzener Header — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
         <SvUnterwegsInfo tracking={geoTracking} svVorname={props.svVorname ?? null} />
-        {/* CMM-32e: Auftrag-Stepper nur während aktivem Auftrag (termin/besichtigung/gutachten/abgeschlossen).
-            Sobald in einer FallPhase (Regulierung/Auszahlung/Kanzlei), zeigen wir den Stepper nicht mehr —
-            der Auftrag ist abgeschlossen und der SV sieht nur noch die schlanke „Mein Fall"-Card unten. */}
+        {/* CMM-32 Walkthrough: AuftragHeaderPanel verschmilzt Stepper +
+            Termin-Banner zu einem Block. Termin-Sektion zeigt sich nur
+            solange der Auftrag aktiv ist (vor Regulierungs-Phase). */}
         {props.svPhase &&
           !['gutachten-freigegeben', 'bei-kanzlei', 'stellungnahme', 'nachbesichtigung', 'auszahlung', 'abgeschlossen-fall'].includes(props.svPhase) && (
-            <AuftragsphaseStepper phase={props.svPhase} gutachtenInQc={props.gutachtenInQc} />
+            <AuftragHeaderPanel
+              phase={props.svPhase}
+              gutachtenInQc={props.gutachtenInQc}
+              termin={aktiverTermin}
+              adresse={schadensAdresseTracking}
+              fallId={fall.id as string}
+            />
           )}
-        {zeigeTerminActions && aktiverTermin && (
-          <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
-        )}
       </div>
 
       {/* CMM-23: Server-rendered Top-Blocks (Briefing + Einzuholen-Banner,
