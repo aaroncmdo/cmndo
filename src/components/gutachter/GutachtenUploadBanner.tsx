@@ -264,9 +264,6 @@ export default function GutachtenUploadBanner({
               <span className={`font-medium truncate flex-1 ${f.status === 'deleting' ? 'text-claimondo-ondo/50 line-through' : 'text-claimondo-navy'}`}>
                 {f.name}
               </span>
-              {f.istHaupt && f.status !== 'deleting' && (
-                <span className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold">Hauptgutachten</span>
-              )}
               {f.status === 'error' && <span className="text-red-700">{f.error ?? 'Fehler'}</span>}
               {f.status === 'done' && !f.storagePath && <CheckIcon className="w-3 h-3 text-emerald-600" />}
             </li>
