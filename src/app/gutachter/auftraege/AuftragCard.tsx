@@ -21,6 +21,8 @@ import {
   FileTextIcon,
 } from 'lucide-react'
 import { formatDatum } from '@/lib/format'
+import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
+import type { LackfarbeCode } from '@/lib/fahrzeug/imagin'
 
 export type AuftragCardProps = {
   fall: {
@@ -34,6 +36,7 @@ export type AuftragCardProps = {
     kennzeichen?: string | null
     fahrzeug_hersteller?: string | null
     fahrzeug_modell?: string | null
+    lackfarbe_code?: string | null
   }
   kunde: {
     vorname: string | null
@@ -136,6 +139,18 @@ export default function AuftragCard(props: AuftragCardProps) {
           {props.statusLabel}
         </span>
       </div>
+
+      {/* CMM-32: Fahrzeug-Render-Vorschau */}
+      {props.fall.fahrzeug_hersteller && (
+        <div className="relative z-10 flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/10 py-2 pointer-events-none">
+          <FahrzeugRenderImage
+            hersteller={props.fall.fahrzeug_hersteller}
+            modell={props.fall.fahrzeug_modell ?? null}
+            lackfarbe={(props.fall.lackfarbe_code as LackfarbeCode | null) ?? null}
+            width={180}
+          />
+        </div>
+      )}
 
       {/* CMM-24: Mitteilungs-Slot — gelber Badge bei offenen Doku-Anforderungen */}
       {(props.offeneDokumente ?? 0) > 0 && (

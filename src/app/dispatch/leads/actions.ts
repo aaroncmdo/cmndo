@@ -18,6 +18,11 @@ export interface CreateManualLeadInput {
   nachname: string
   telefon: string
   email: string
+  /** CMM-32: Hersteller/Modell direkt beim Anlegen erfassen — sonst hängt
+      die Imagin-Render-Card im Lead-Detail leer. Werden in convertLeadToFall
+      auf faelle.fahrzeug_hersteller/modell vererbt. */
+  fahrzeug_hersteller?: string | null
+  fahrzeug_modell?: string | null
   /** CMM-32: Lackfarbe vom Dispatcher direkt am Telefon erfasst — der SV
       braucht's beim Vor-Ort-Termin zur eindeutigen Fahrzeug-Identifikation.
       lackfarbe_code mappt auf Imagin-paintIds für das Render-Bild;
@@ -27,6 +32,9 @@ export interface CreateManualLeadInput {
     | 'gruen' | 'gelb' | 'orange' | 'braun' | 'beige' | 'sonstige'
     | null
   fahrzeug_farbe?: string | null
+  /** CMM-32: Kennzeichen direkt erfassen — der SV identifiziert vor Ort
+      über Kennzeichen, ergänzt das Render-Bild im Header. */
+  kennzeichen?: string | null
   kunde_adresse: string
   kunde_strasse: string
   kunde_plz: string
@@ -62,6 +70,9 @@ export async function createManualLead(
     nachname: data.nachname || null,
     telefon: data.telefon,
     email: data.email || null,
+    fahrzeug_hersteller: data.fahrzeug_hersteller?.trim() || null,
+    fahrzeug_modell: data.fahrzeug_modell?.trim() || null,
+    kennzeichen: data.kennzeichen?.trim() || null,
     lackfarbe_code: data.lackfarbe_code ?? null,
     fahrzeug_farbe: data.fahrzeug_farbe?.trim() || null,
     kunde_adresse: data.kunde_adresse || null,
