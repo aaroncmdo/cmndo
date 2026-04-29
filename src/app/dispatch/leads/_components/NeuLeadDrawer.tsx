@@ -12,6 +12,7 @@ import { createManualLead, type CreateManualLeadInput } from '../actions'
 import { Drawer } from '@/components/primitives/Drawer'
 
 const INITIAL: CreateManualLeadInput = {
+  anrede: null,
   vorname: '',
   nachname: '',
   telefon: '',
@@ -78,6 +79,22 @@ export default function NeuLeadDrawer() {
         </div>
 
         <div className="p-6 space-y-4">
+          {/* CMM-32: Anrede-Dropdown für saubere WhatsApp/Email-Anrede */}
+          <div>
+            <label className="block text-xs text-claimondo-ondo mb-1.5">Anrede</label>
+            <select
+              value={data.anrede ?? ''}
+              onChange={(e) =>
+                setData({ ...data, anrede: (e.target.value || null) as 'herr' | 'frau' | 'divers' | null })
+              }
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm bg-white focus:outline-none focus:border-claimondo-ondo"
+            >
+              <option value="">— bitte wählen —</option>
+              <option value="herr">Herr</option>
+              <option value="frau">Frau</option>
+              <option value="divers">Divers</option>
+            </select>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <InputField label="Vorname" value={data.vorname} onChange={v => setData({ ...data, vorname: v })} />
             <InputField label="Nachname" value={data.nachname} onChange={v => setData({ ...data, nachname: v })} />

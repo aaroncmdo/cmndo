@@ -11,6 +11,9 @@ import { revalidatePath } from 'next/cache'
 // für die Kanzlei). PLZ-Freitext durch Google-Maps-Auswahl ersetzt
 // (Adresse + PLZ + Lat/Lng als Bundle).
 export interface CreateManualLeadInput {
+  /** CMM-32: 'herr' | 'frau' | 'divers' | null. Optional — wenn unbekannt
+      bleibt's leer und Templates fallen auf "Hallo Vorname" zurück. */
+  anrede?: 'herr' | 'frau' | 'divers' | null
   vorname: string
   nachname: string
   telefon: string
@@ -45,6 +48,7 @@ export async function createManualLead(
 
   const admin = createAdminClient()
   const { data: lead, error } = await admin.from('leads').insert({
+    anrede: data.anrede ?? null,
     vorname: data.vorname || null,
     nachname: data.nachname || null,
     telefon: data.telefon,
