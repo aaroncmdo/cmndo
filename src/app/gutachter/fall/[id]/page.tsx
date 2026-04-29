@@ -366,6 +366,15 @@ export default async function GutachterFallPage({
   const auftraegeOfFall = await getAlleAuftraege(supabase, id)
   const erstgutachtenAuftrag = auftraegeOfFall.find((a) => a.typ === 'erstgutachten') ?? null
 
+  // CMM-32: claim_id ist nicht in der v_faelle_mit_aktuellem_termin-View
+  // enthalten — separat aus faelle laden für den Storage-Pfad.
+  const { data: fallClaim } = await admin
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', id)
+    .maybeSingle()
+  const claimIdForStorage = (fallClaim?.claim_id as string | null) ?? ''
+
   // CMM-23: SV-Lifecycle-Phase aus Auftrag + Fall-State ableiten.
   const svPhase = getSvLifecyclePhase({
     terminStart: (aktiverTermin?.start_zeit as string | null) ?? null,
@@ -429,7 +438,7 @@ export default async function GutachterFallPage({
       {zeigeGutachtenUpload && erstgutachtenAuftrag && (
         <GutachtenUploadBanner
           auftragId={erstgutachtenAuftrag.id}
-          claimId={(fall.claim_id as string) ?? ''}
+          claimId={claimIdForStorage}
           hatGutachten={!!erstgutachtenAuftrag.gutachten_url}
           zurueckgewiesenAm={erstgutachtenReject}
           zurueckweisungGrund={erstgutachtenRejectGrund}
