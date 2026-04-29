@@ -36,6 +36,10 @@ import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
+import ClaimStepper from '@/components/kunde/ClaimStepper'
+import { getAlleAuftraege } from '@/lib/auftrag/queries'
+import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
+import { getClaimLifecycle } from '@/lib/claims/lifecycle'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -304,6 +308,36 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     const gutachtenVerfuegbar = !!fall.gutachten_eingegangen_am
 
+    // CMM-32f: Claim-Lifecycle-Resolver für den kombinierten Stepper
+    const [auftraege, kanzleiFall] = await Promise.all([
+      getAlleAuftraege(admin, fall.id as string),
+      getKanzleiFall(admin, fall.id as string),
+    ])
+    let leadInputForLifecycle: {
+      sa_unterschrieben: boolean | null
+      vollmacht_signiert_am: string | null
+      onboarding_complete: boolean | null
+    } | null = null
+    if (fall.lead_id) {
+      const { data: leadRow } = await admin
+        .from('leads')
+        .select('sa_unterschrieben, vollmacht_signiert_am, onboarding_complete')
+        .eq('id', fall.lead_id as string)
+        .maybeSingle()
+      if (leadRow) {
+        leadInputForLifecycle = {
+          sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
+          vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
+          onboarding_complete: (leadRow.onboarding_complete as boolean | null) ?? null,
+        }
+      }
+    }
+    const claimLifecycle = getClaimLifecycle({
+      lead: leadInputForLifecycle,
+      auftraege,
+      kanzleiFall,
+    })
+
     const kennzeichen = (fall.kennzeichen as string) ?? ''
     const fahrzeug = [(fall.fahrzeug_hersteller as string), (fall.fahrzeug_modell as string)].filter(Boolean).join(' ')
     const adresse = (fall.besichtigungsort_adresse as string) || (fall.unfallort as string) || [(fall.schadens_adresse as string), (fall.schadens_plz as string), (fall.schadens_ort as string)].filter(Boolean).join(', ') || ''
@@ -321,7 +355,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
-        {/* CMM-36: SV-Live-Banner ganz oben — navy/grün, mit Realtime-ETA. */}
+        {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase. */}
+        <ClaimStepper lifecycle={claimLifecycle} />
+
+        {/* CMM-36: SV-Live-Banner — navy/grün, mit Realtime-ETA. */}
         {svTermin?.id && (
           <KundeSvLiveBanner
             terminId={svTermin.id as string}
