@@ -385,7 +385,7 @@ export default async function GutachterFallPage({
       .from('fall_dokumente')
       .select('id', { count: 'exact', head: true })
       .eq('fall_id', id)
-      .eq('dokument_typ', 'gutachten')
+      .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
       .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
       .is('geloescht_am', null)
       .gt('hochgeladen_am', cutoff ?? '1970-01-01')

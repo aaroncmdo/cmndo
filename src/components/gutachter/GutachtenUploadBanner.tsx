@@ -250,10 +250,10 @@ export default function GutachtenUploadBanner({
           <button
             onClick={handleAbgeben}
             disabled={submitPending || pending}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-ondo disabled:bg-claimondo-navy/40 text-white text-sm font-semibold px-4 py-2 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
           >
             <SendIcon className="w-4 h-4" />
-            {submitPending ? 'Wird abgegeben…' : 'Gutachten abgeben'}
+            {submitPending ? 'Wird abgegeben…' : 'Abgeben'}
           </button>
         </div>
       )}

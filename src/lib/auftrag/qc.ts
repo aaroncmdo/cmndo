@@ -126,18 +126,21 @@ export async function gutachtenAbgeben(
   const claimId = fall?.claim_id as string | null
   if (!claimId) return { ok: false, error: 'Claim nicht gefunden' }
 
-  // Jüngstes Hauptgutachten-Dokument für diesen Auftrag
+  // CMM-32e: Pick die jüngste Datei für diesen Auftrag (egal ob als
+  // 'gutachten' oder 'gutachten_anlage' markiert). Bei reinen Bilder-
+  // Nachbesserungen ist das Hauptdokument oft kein PDF — der KB sieht
+  // im QC-Card alle Files und entscheidet ob's reicht.
   const { data: docs } = await db
     .from('fall_dokumente')
-    .select('id, storage_path, hochgeladen_am')
+    .select('id, storage_path, hochgeladen_am, dokument_typ')
     .eq('fall_id', auftrag.fall_id)
-    .eq('dokument_typ', 'gutachten')
+    .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
     .like('storage_path', `claim/${claimId}/gutachten/${auftragId}/%`)
     .is('geloescht_am', null)
     .order('hochgeladen_am', { ascending: false })
     .limit(1)
   const haupt = docs?.[0]
-  if (!haupt) return { ok: false, error: 'Kein Hauptgutachten zur Abgabe gefunden' }
+  if (!haupt) return { ok: false, error: 'Keine Dokumente zur Abgabe gefunden — bitte zuerst hochladen' }
 
   const publicUrl = db.storage
     .from('fall-dokumente')
