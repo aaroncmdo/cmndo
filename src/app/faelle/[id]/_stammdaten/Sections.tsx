@@ -113,7 +113,28 @@ export function FahrzeugdatenSection() {
       <InlineEditField label="HSN" fieldName="hsn" value={hsn} hint="AAR-576: DAT-API" />
       <InlineEditField label="TSN" fieldName="tsn" value={tsn} hint="AAR-576: DAT-API" />
       <InlineEditField label="Baujahr *" fieldName="fahrzeug_baujahr" value={f(fall, 'fahrzeug_baujahr')} type="number" hint="AAR-181: Pflichtfeld" />
-      <InlineEditField label="Farbe" fieldName="fahrzeug_farbe" value={f(fall, 'fahrzeug_farbe')} />
+      <InlineEditField
+        label="Lackfarbe"
+        fieldName="lackfarbe_code"
+        type="select"
+        value={f(fall, 'lackfarbe_code')}
+        options={[
+          { value: 'schwarz', label: 'Schwarz' },
+          { value: 'weiss', label: 'Weiß' },
+          { value: 'silber', label: 'Silber' },
+          { value: 'grau', label: 'Grau' },
+          { value: 'blau', label: 'Blau' },
+          { value: 'rot', label: 'Rot' },
+          { value: 'gruen', label: 'Grün' },
+          { value: 'gelb', label: 'Gelb' },
+          { value: 'orange', label: 'Orange' },
+          { value: 'braun', label: 'Braun' },
+          { value: 'beige', label: 'Beige' },
+          { value: 'sonstige', label: 'Sonstige' },
+        ]}
+        hint="CMM-32: Steuert das Imagin-Render-Bild. Detail-Bezeichnung im Feld darunter."
+      />
+      <InlineEditField label="Farb-Detail (Freitext)" fieldName="fahrzeug_farbe" value={f(fall, 'fahrzeug_farbe')} placeholder="z.B. Saphirschwarz Metallic" />
       <InlineEditField label="Karosserie-Typ" fieldName="fahrzeug_typ" value={f(fall, 'fahrzeug_typ')} hint="PKW, Transporter, Motorrad …" />
       <InlineEditField label="Erstzulassung" fieldName="erstzulassung" value={f(fall, 'erstzulassung')} type="date" />
       <InlineEditField label="Kilometerstand" fieldName="kilometerstand" value={f(fall, 'kilometerstand')} type="number" />

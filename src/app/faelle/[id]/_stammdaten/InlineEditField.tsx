@@ -13,7 +13,9 @@ type Props = {
   label: string
   fieldName: string
   value: string | number | boolean | null | undefined
-  type?: 'text' | 'email' | 'tel' | 'date' | 'time' | 'number' | 'textarea'
+  type?: 'text' | 'email' | 'tel' | 'date' | 'time' | 'number' | 'textarea' | 'select'
+  /** CMM-32: Bei type='select' nötig — rendert ein Dropdown statt Input. */
+  options?: { value: string; label: string }[]
   placeholder?: string
   hint?: string
   transform?: (raw: string) => string
@@ -24,6 +26,7 @@ export default function InlineEditField({
   fieldName,
   value,
   type = 'text',
+  options,
   placeholder,
   hint,
   transform,
@@ -83,8 +86,23 @@ export default function InlineEditField({
       </label>
       {type === 'textarea' ? (
         <textarea {...common} rows={2} />
+      ) : type === 'select' && options ? (
+        <select
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={handleBlur}
+          disabled={!editable}
+          className={`text-sm font-medium bg-transparent border-b w-full py-0.5 outline-none transition-colors disabled:cursor-default disabled:text-claimondo-navy ${borderCls}`}
+        >
+          <option value="">— bitte wählen —</option>
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
       ) : (
-        <input type={type} {...common} />
+        <input type={type as Exclude<Props['type'], 'select' | 'textarea'>} {...common} />
       )}
       {hint && <p className="text-[10px] text-claimondo-ondo/70">{hint}</p>}
     </div>
