@@ -557,6 +557,17 @@ export default async function FallaktePage({
     const auftraegeFall = await getAlleAuftraege(supabase, id)
     const erstgutachten = auftraegeFall.find((a) => a.typ === 'erstgutachten')
     if (erstgutachten) {
+      if (erstgutachten.gutachten_final_freigegeben) {
+        // Bereits freigegeben — keine Doc-Queries nötig, Banner zeigt nur den Erfolgs-State.
+        qcCardProps = {
+          auftragId: erstgutachten.id,
+          hatGutachten: true,
+          bereitsFreigegeben: true,
+          hauptgutachten: null,
+          anlagen: [],
+          pflichtItems: [],
+        }
+      } else {
       // Aktive Dokumente (nicht abgelehnt)
       const { data: dokRows } = await adminCli
         .from('fall_dokumente')
@@ -602,13 +613,14 @@ export default async function FallaktePage({
       qcCardProps = {
         auftragId: erstgutachten.id,
         hatGutachten: !!erstgutachten.gutachten_url,
-        bereitsFreigegeben: erstgutachten.gutachten_final_freigegeben,
+        bereitsFreigegeben: false,
         hauptgutachten: haupt,
         anlagen,
         pflichtItems: pflichtItemsList,
         zurueckgewiesenAm: (erstgutachten as { zurueckgewiesen_am?: string | null }).zurueckgewiesen_am ?? null,
         zurueckweisungGrund: (erstgutachten as { zurueckweisung_grund?: string | null }).zurueckweisung_grund ?? null,
         abgelehnteAnlagen: abgelehnteDocList,
+      }
       }
     }
   }
