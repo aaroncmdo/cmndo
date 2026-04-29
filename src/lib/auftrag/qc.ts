@@ -232,6 +232,24 @@ export async function weiseGutachtenZurueck(
     .eq('id', auftragId)
   if (aErr) return { ok: false, error: aErr.message }
 
+  // CMM-32e: alle aktuell aktiven Files dieses Auftrags als abgelehnt
+  // markieren — sie verschwinden aus SV/Kunde-Listen, KB sieht sie weiter
+  // als „Abgelehnt"-Bucket im Audit.
+  const { data: fall } = await db
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', auftrag.fall_id)
+    .maybeSingle()
+  const claimId = fall?.claim_id as string | null
+  if (claimId) {
+    await db
+      .from('fall_dokumente')
+      .update({ abgelehnt_am: now })
+      .like('storage_path', `claim/${claimId}/gutachten/${auftragId}/%`)
+      .is('abgelehnt_am', null)
+      .is('geloescht_am', null)
+  }
+
   // Mitteilung an den SV
   try {
     const { createGutachterMitteilung } = await import('@/lib/mitteilungen')

@@ -113,6 +113,7 @@ export default async function GutachterFallPage({
       .select('id, dokument_typ, storage_path, original_filename, groesse_bytes, kategorie, quelle, sichtbar_fuer, uploaded_by_sv, uploaded_by_kunde, hochgeladen_am')
       .eq('fall_id', id)
       .is('geloescht_am', null)
+      .is('abgelehnt_am', null)
       .contains('sichtbar_fuer', ['sachverstaendiger'])
       .order('hochgeladen_am'),
     supabase

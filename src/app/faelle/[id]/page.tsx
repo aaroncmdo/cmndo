@@ -557,24 +557,38 @@ export default async function FallaktePage({
     const auftraegeFall = await getAlleAuftraege(supabase, id)
     const erstgutachten = auftraegeFall.find((a) => a.typ === 'erstgutachten')
     if (erstgutachten) {
+      // Aktive Dokumente (nicht abgelehnt)
       const { data: dokRows } = await adminCli
         .from('fall_dokumente')
         .select('id, dokument_typ, original_filename, storage_path')
         .eq('fall_id', id)
         .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
         .is('geloescht_am', null)
+        .is('abgelehnt_am', null)
         .order('hochgeladen_am', { ascending: true })
-      const docList = ((dokRows ?? []) as Array<{
-        id: string
-        dokument_typ: string
-        original_filename: string | null
-        storage_path: string
-      }>).map((d) => ({
+      // Abgelehnte Dokumente (KB-Reject-Audit) — nur für KB/Admin sichtbar
+      const { data: abgelehnteRows } = await adminCli
+        .from('fall_dokumente')
+        .select('id, dokument_typ, original_filename, storage_path, abgelehnt_am')
+        .eq('fall_id', id)
+        .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
+        .is('geloescht_am', null)
+        .not('abgelehnt_am', 'is', null)
+        .order('abgelehnt_am', { ascending: false })
+      type DocRow = { id: string; dokument_typ: string; original_filename: string | null; storage_path: string }
+      const docList = ((dokRows ?? []) as DocRow[]).map((d) => ({
         id: d.id,
         filename: d.original_filename ?? 'Datei',
         url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
         istHaupt: d.dokument_typ === 'gutachten' && !d.storage_path.includes('/nachbesserung/'),
         istNachbesserung: d.storage_path.includes('/nachbesserung/'),
+      }))
+      const abgelehnteDocList = ((abgelehnteRows ?? []) as DocRow[]).map((d) => ({
+        id: d.id,
+        filename: d.original_filename ?? 'Datei',
+        url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
+        istHaupt: false,
+        istNachbesserung: false,
       }))
       const haupt = docList.find((d) => d.istHaupt) ?? null
       const anlagen = docList.filter((d) => !d.istHaupt)
@@ -594,6 +608,7 @@ export default async function FallaktePage({
         pflichtItems: pflichtItemsList,
         zurueckgewiesenAm: (erstgutachten as { zurueckgewiesen_am?: string | null }).zurueckgewiesen_am ?? null,
         zurueckweisungGrund: (erstgutachten as { zurueckweisung_grund?: string | null }).zurueckweisung_grund ?? null,
+        abgelehnteAnlagen: abgelehnteDocList,
       }
     }
   }

@@ -117,11 +117,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
-    // Dokumente laden
+    // Dokumente laden — abgelehnte Iterationen (KB-Reject-Loop) werden
+    // dem Kunden nicht gezeigt; er sieht nur die aktive Version.
     const { data: dokumenteRaw } = await admin.from('fall_dokumente')
       .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am')
       .eq('fall_id', id)
       .is('geloescht_am', null)
+      .is('abgelehnt_am', null)
       .order('hochgeladen_am')
     const dokumente = (dokumenteRaw ?? []).map(d => ({
       id: d.id as string,
