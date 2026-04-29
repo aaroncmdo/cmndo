@@ -278,9 +278,9 @@ export default function AuftragHeaderPanel({
             </div>
           )}
 
-          {/* Vor Ort einzusammeln */}
+          {/* Vor Ort einzusammeln — gelb eingefasst zur Hervorhebung */}
           {offenePflicht.length > 0 && (
-            <div className="flex flex-col">
+            <div className="flex flex-col rounded-xl border border-amber-300 bg-amber-50 p-3">
               <div className="flex items-center gap-2 mb-2">
                 <ClipboardListIcon className="w-4 h-4 text-amber-700" />
                 <p className="text-xs font-semibold uppercase tracking-wider text-amber-900">
