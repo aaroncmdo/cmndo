@@ -37,7 +37,6 @@ import type { TeamMitglied } from './_components/FallakteDrawer'
 // kein Activity-Feed. Stellungnahme/Nachbesichtigung/Konfrontation
 // rendern als Mitteilungs-Banner oben (topServerBlocks aus page.tsx).
 import { StammdatenCard } from './_components/StammdatenCard'
-import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
@@ -390,34 +389,8 @@ export default function FallDetailClient(props: Props) {
         </aside>
 
         <section className="space-y-4 min-w-0">
-          <TerminCard
-            termin={
-              props.aktiverTermin
-                ? {
-                    id: props.aktiverTermin.id,
-                    status: props.aktiverTermin.status,
-                    start_zeit: props.aktiverTermin.start_zeit ?? null,
-                    end_zeit: props.aktiverTermin.end_zeit ?? null,
-                    vorgeschlagenes_datum:
-                      props.aktiverTermin.vorgeschlagenes_datum ?? null,
-                    gegenvorschlag_von:
-                      props.aktiverTermin.gegenvorschlag_von ?? null,
-                    gegenvorschlag_grund:
-                      props.aktiverTermin.gegenvorschlag_grund ?? null,
-                  }
-                : null
-            }
-            fall={{
-              id: fall.id as string,
-              schadens_adresse: (fall.schadens_adresse as string | null) ?? null,
-              schadens_plz: (fall.schadens_plz as string | null) ?? null,
-              schadens_ort: (fall.schadens_ort as string | null) ?? null,
-            }}
-          />
-          {/* CMM-33: SvEinzuholenBanner wandert nach oben in die topServer-
-              Blocks (page.tsx) — der SV sieht die „vor Ort einzusammeln"-
-              Liste auf einen Blick beim Öffnen. Files unten in der
-              Dokumente-Sektion (WeitereDokumenteCard). */}
+          {/* CMM-32 Walkthrough: TerminCard rausgenommen — Termin-Info lebt
+              jetzt im AuftragHeaderPanel oben (Banner-Sektion 2). */}
           {/* CMM-23: Vorschäden-Hinweis — wenn der Kunde im Lead/Claim
               Vorschäden gemeldet hat, weiß der SV das vor dem Termin und
               kann die nachgereichten Reparaturrechnungen direkt sehen. */}
