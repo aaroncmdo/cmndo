@@ -7,8 +7,9 @@
 
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { UploadCloudIcon, FileTextIcon, CheckIcon } from 'lucide-react'
+import { UploadCloudIcon, FileTextIcon, CheckIcon, SendIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { gutachtenAbgeben } from '@/lib/auftrag/qc'
 
 type Props = {
   auftragId: string
@@ -17,6 +18,8 @@ type Props = {
   /** CMM-32e: KB hat Nachbesserung angefordert. Banner wird lila + zeigt Grund + öffnet Re-Upload. */
   zurueckgewiesenAm?: string | null
   zurueckweisungGrund?: string | null
+  /** CMM-32e: Anzahl Hauptgutachten-PDFs die seit dem letzten Submit hochgeladen wurden. */
+  abgebbareDokumenteAnzahl?: number
 }
 
 type UploadStatus = 'idle' | 'uploading' | 'done' | 'error'
@@ -28,12 +31,30 @@ export default function GutachtenUploadBanner({
   hatGutachten,
   zurueckgewiesenAm,
   zurueckweisungGrund,
+  abgebbareDokumenteAnzahl = 0,
 }: Props) {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [dragOver, setDragOver] = useState(false)
   const [pending, startTransition] = useTransition()
+  const [submitPending, startSubmit] = useTransition()
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const router = useRouter()
+
+  const erfolgreicheUploads = files.filter((f) => f.status === 'done').length
+  const abgebbar = abgebbareDokumenteAnzahl + erfolgreicheUploads > 0
+
+  function handleAbgeben() {
+    setSubmitError(null)
+    startSubmit(async () => {
+      const r = await gutachtenAbgeben(auftragId)
+      if (!r.ok) setSubmitError(r.error ?? 'Abgabe fehlgeschlagen')
+      else {
+        setFiles([])
+        router.refresh()
+      }
+    })
+  }
 
   // CMM-32e: Reject-Modus — KB hat Nachbesserung gefordert.
   // SV sieht lila Banner mit Grund + Re-Upload-Zone.
@@ -123,7 +144,8 @@ export default function GutachtenUploadBanner({
           ),
         )
       }
-      router.refresh()
+      // CMM-32e: Kein router.refresh mehr nach Upload — der explizite
+      // Abgeben-Button triggert die finale QC-Submission.
     })
   }
 
@@ -215,7 +237,27 @@ export default function GutachtenUploadBanner({
         </ul>
       )}
 
-      {pending && <p className="text-xs text-amber-700">Wird hochgeladen…</p>}
+      {pending && <p className={`text-xs ${colorIcon}`}>Wird hochgeladen…</p>}
+
+      {/* CMM-32e: Abgeben-Button — finalisiert die Submission an die KB-QC. */}
+      {abgebbar && (
+        <div className="border-t border-claimondo-border/60 pt-3 flex items-center justify-between gap-3">
+          <p className={`text-xs ${colorTextSub}`}>
+            {istReject
+              ? 'Korrigierte Version bereit zur Abgabe.'
+              : 'Bereit zur Abgabe — der KB beginnt mit dem Vollständigkeits-Check.'}
+          </p>
+          <button
+            onClick={handleAbgeben}
+            disabled={submitPending || pending}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-ondo disabled:bg-claimondo-navy/40 text-white text-sm font-semibold px-4 py-2 transition-colors"
+          >
+            <SendIcon className="w-4 h-4" />
+            {submitPending ? 'Wird abgegeben…' : 'Gutachten abgeben'}
+          </button>
+        </div>
+      )}
+      {submitError && <p className="text-xs text-red-700">{submitError}</p>}
     </div>
   )
 }

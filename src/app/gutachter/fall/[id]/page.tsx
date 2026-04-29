@@ -376,6 +376,22 @@ export default async function GutachterFallPage({
     .maybeSingle()
   const claimIdForStorage = (fallClaim?.claim_id as string | null) ?? ''
 
+  // CMM-32e: Abgebbare Hauptgutachten — neuere fall_dokumente als die aktuell
+  // verlinkte gutachten_url. Triggert den „Abgeben"-Button im Banner.
+  let abgebbareDokumenteAnzahl = 0
+  if (erstgutachtenAuftrag && claimIdForStorage) {
+    const cutoff = (erstgutachtenAuftrag as { updated_at?: string | null }).updated_at ?? null
+    const { count } = await admin
+      .from('fall_dokumente')
+      .select('id', { count: 'exact', head: true })
+      .eq('fall_id', id)
+      .eq('dokument_typ', 'gutachten')
+      .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
+      .is('geloescht_am', null)
+      .gt('hochgeladen_am', cutoff ?? '1970-01-01')
+    abgebbareDokumenteAnzahl = count ?? 0
+  }
+
   // CMM-23: SV-Lifecycle-Phase aus Auftrag + Fall-State ableiten.
   const svPhase = getSvLifecyclePhase({
     terminStart: (aktiverTermin?.start_zeit as string | null) ?? null,
@@ -442,6 +458,7 @@ export default async function GutachterFallPage({
           hatGutachten={!!erstgutachtenAuftrag.gutachten_url}
           zurueckgewiesenAm={erstgutachtenReject}
           zurueckweisungGrund={erstgutachtenRejectGrund}
+          abgebbareDokumenteAnzahl={abgebbareDokumenteAnzahl}
         />
       )}
       {/* Briefing links — rechts: Vor-Ort-Buttons (compact) oben + Einzuholen-Dokumente darunter */}

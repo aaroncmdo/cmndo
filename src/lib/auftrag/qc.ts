@@ -92,6 +92,99 @@ export async function gibKanzleipaketFrei(
   return { ok: true }
 }
 
+// ─── gutachtenAbgeben ─────────────────────────────────────────────────────────
+//
+// SV drückt nach Upload(s) explizit „Gutachten abgeben" — finalisiert den
+// Submit zur QC-Pipeline. Picked das jüngste Haupt-Gutachten-Dokument für
+// diesen Auftrag, setzt auftraege.gutachten_url + status + reset reject.
+
+export async function gutachtenAbgeben(
+  auftragId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'unauthorized' }
+
+  const db = createAdminClient()
+
+  const { data: auftrag } = await db
+    .from('auftraege')
+    .select('id, fall_id, sv_id, gutachten_url, gutachten_final_freigegeben, zurueckweisung_grund')
+    .eq('id', auftragId)
+    .maybeSingle()
+  if (!auftrag) return { ok: false, error: 'Auftrag nicht gefunden' }
+  if (auftrag.gutachten_final_freigegeben) {
+    return { ok: false, error: 'Auftrag ist bereits final freigegeben' }
+  }
+
+  // Auftrag-zu-Claim-Pfad ermitteln
+  const { data: fall } = await db
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', auftrag.fall_id)
+    .maybeSingle()
+  const claimId = fall?.claim_id as string | null
+  if (!claimId) return { ok: false, error: 'Claim nicht gefunden' }
+
+  // Jüngstes Hauptgutachten-Dokument für diesen Auftrag
+  const { data: docs } = await db
+    .from('fall_dokumente')
+    .select('id, storage_path, hochgeladen_am')
+    .eq('fall_id', auftrag.fall_id)
+    .eq('dokument_typ', 'gutachten')
+    .like('storage_path', `claim/${claimId}/gutachten/${auftragId}/%`)
+    .is('geloescht_am', null)
+    .order('hochgeladen_am', { ascending: false })
+    .limit(1)
+  const haupt = docs?.[0]
+  if (!haupt) return { ok: false, error: 'Kein Hauptgutachten zur Abgabe gefunden' }
+
+  const publicUrl = db.storage
+    .from('fall-dokumente')
+    .getPublicUrl(haupt.storage_path as string).data.publicUrl
+
+  const warReject = !!auftrag.zurueckweisung_grund && !!(await db
+    .from('auftraege').select('zurueckgewiesen_am').eq('id', auftragId).single()).data?.zurueckgewiesen_am
+
+  const { error: aErr } = await db
+    .from('auftraege')
+    .update({
+      gutachten_url: publicUrl,
+      status: 'gutachten',
+      zurueckgewiesen_am: null,
+    })
+    .eq('id', auftragId)
+  if (aErr) return { ok: false, error: aErr.message }
+
+  // Timeline-Eintrag + KB-Mitteilung wenn Re-Submit nach Reject
+  if (warReject) {
+    try {
+      await db.from('timeline').insert({
+        fall_id: auftrag.fall_id,
+        typ: 'gutachten_korrigiert',
+        titel: 'Korrigiertes Gutachten eingereicht',
+        beschreibung: 'SV hat eine korrigierte Version abgegeben.',
+        erstellt_von: user.id,
+      })
+    } catch { /* non-critical */ }
+  } else {
+    try {
+      await db.from('timeline').insert({
+        fall_id: auftrag.fall_id,
+        typ: 'gutachten_eingereicht',
+        titel: 'Gutachten eingereicht',
+        beschreibung: 'SV hat das Gutachten zur Prüfung abgegeben.',
+        erstellt_von: user.id,
+      })
+    } catch { /* non-critical */ }
+  }
+
+  revalidatePath(`/faelle/${auftrag.fall_id}`)
+  revalidatePath(`/gutachter/fall/${auftrag.fall_id}`)
+  revalidatePath(`/kunde/faelle/${auftrag.fall_id}`)
+  return { ok: true }
+}
+
 // ─── weiseGutachtenZurueck ────────────────────────────────────────────────────
 //
 // KB lehnt das eingereichte Gutachten ab und fordert Nachbesserung.
