@@ -1,18 +1,18 @@
 'use client'
 
-// CMM-32: Stammdaten-Accordion — 6 Kategorien, inline aufklappend.
-// Klick auf eine Zeile expandiert das Detail direkt darunter (Tab-Stil).
-// Der Pfeil verschwindet wenn eine Zeile ausgewählt ist.
+// CMM-32: Stammdaten-Block — links Fahrzeug-Panel, rechts Tabs (Historie /
+// Dokumente / Kunde / Gegner / Schaden). Ein einziger Card-Block mit
+// vertikalem Trenner zwischen den beiden Hälften.
 
 import { useState } from 'react'
 import {
-  CarIcon,
   ClockIcon,
   FileTextIcon,
   UserIcon,
   ShieldIcon,
   AlertTriangleIcon,
-  ChevronRightIcon,
+  CheckCircle2Icon,
+  XCircleIcon,
 } from 'lucide-react'
 import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import { LACKFARBE_LABEL, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
@@ -36,89 +36,24 @@ export type StammdatenAccordionData = {
     hat_vorschaeden?: boolean | null
   } | null
   parteien?: Array<Record<string, unknown>>
-  /** Anzahl Dokumente am Fall — wird in der Zeilen-Summary gezeigt. */
+  /** Anzahl Dokumente am Fall — wird in der Tab-Summary gezeigt. */
   dokumenteAnzahl?: number
 }
 
-type RowConfig = {
-  key: StammdatenCategory
-  label: string
-  icon: typeof CarIcon
-}
+type TabKey = Exclude<StammdatenCategory, 'fahrzeug'>
 
-const ROWS: RowConfig[] = [
-  { key: 'fahrzeug', label: 'Fahrzeug', icon: CarIcon },
-  { key: 'historie', label: 'Historie', icon: ClockIcon },
-  { key: 'dokumente', label: 'Dokumente', icon: FileTextIcon },
-  { key: 'kunde', label: 'Kunde', icon: UserIcon },
-  { key: 'gegner', label: 'Gegner', icon: ShieldIcon },
-  { key: 'schaden', label: 'Schaden', icon: AlertTriangleIcon },
+const TABS: { key: TabKey; label: string }[] = [
+  { key: 'historie',  label: 'Historie'  },
+  { key: 'dokumente', label: 'Dokumente' },
+  { key: 'kunde',     label: 'Kunde'     },
+  { key: 'gegner',    label: 'Gegner'    },
+  { key: 'schaden',   label: 'Schaden'   },
 ]
 
 function str(v: unknown): string | null {
   if (v === null || v === undefined) return null
   const s = String(v).trim()
   return s.length > 0 ? s : null
-}
-
-function buildSummary(
-  category: StammdatenCategory,
-  data: StammdatenAccordionData,
-): string {
-  const { fall, lead, parteien, dokumenteAnzahl = 0 } = data
-  switch (category) {
-    case 'fahrzeug': {
-      const hersteller = str(fall.fahrzeug_hersteller)
-      const modell = str(fall.fahrzeug_modell)
-      const lack = str(fall.lackfarbe_code) as LackfarbeCode | null
-      const lackLabel = lack ? LACKFARBE_LABEL[lack] : null
-      const parts = [
-        [hersteller, modell].filter(Boolean).join(' ') || null,
-        lackLabel,
-        str(fall.kennzeichen),
-      ].filter(Boolean)
-      return parts.join(' · ') || '—'
-    }
-    case 'historie': {
-      const vorschaedenAnzahl = (fall.vorschaden_anzahl as number | null) ?? null
-      const hatVorschaeden = lead?.hat_vorschaeden ?? null
-      if (vorschaedenAnzahl != null && vorschaedenAnzahl > 0) {
-        return `${vorschaedenAnzahl} Vorschäden`
-      }
-      if (hatVorschaeden === true) return 'Vorschäden gemeldet'
-      if (hatVorschaeden === false) return 'Keine Vorschäden'
-      return 'Noch keine Angabe'
-    }
-    case 'dokumente':
-      return dokumenteAnzahl === 0
-        ? 'Keine Dokumente'
-        : `${dokumenteAnzahl} ${dokumenteAnzahl === 1 ? 'Dokument' : 'Dokumente'}`
-    case 'kunde': {
-      const name = lead
-        ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || null
-        : null
-      return name ?? '—'
-    }
-    case 'gegner': {
-      const verursacher = (parteien ?? []).find(
-        (p) => (p.rolle as string | null) === 'verursacher',
-      )
-      if (!verursacher) return 'Nicht erfasst'
-      return (
-        (verursacher.name as string | null) ??
-        (verursacher.versicherung_name as string | null) ??
-        '—'
-      )
-    }
-    case 'schaden': {
-      const datum = str(fall.schadens_datum)
-      const ort = str(fall.schadens_ort)
-      const ursache = str(fall.schadens_ursache)
-      return [ursache, ort, datum && new Date(datum).toLocaleDateString('de-DE')]
-        .filter(Boolean)
-        .join(' · ') || '—'
-    }
-  }
 }
 
 type Props = {
@@ -133,101 +68,131 @@ export default function StammdatenAccordion({
   dokumenteSlot,
   className = '',
 }: Props) {
-  const [selected, setSelected] = useState<StammdatenCategory | null>(null)
-  const [hovered, setHovered] = useState<StammdatenCategory | null>(null)
+  const [activeTab, setActiveTab] = useState<TabKey>('historie')
 
-  function handleSelect(cat: StammdatenCategory) {
-    setSelected((prev) => (prev === cat ? null : cat))
-  }
-  const fall = data.fall
+  const { fall } = data
   const hersteller = str(fall.fahrzeug_hersteller)
-  const modell = str(fall.fahrzeug_modell)
-  const lack = (str(fall.lackfarbe_code) as LackfarbeCode | null) ?? null
+  const modell     = str(fall.fahrzeug_modell)
+  const lack       = (str(fall.lackfarbe_code) as LackfarbeCode | null) ?? null
   const kennzeichen = str(fall.kennzeichen)
+  const baujahr    = str(fall.fahrzeug_baujahr)
+  const fin        = str(fall.fin_vin)
+  const fahrbereit =
+    fall.fahrzeug_fahrbereit === true
+      ? true
+      : fall.fahrzeug_fahrbereit === false
+        ? false
+        : null
+
+  const hasFahrzeugDetails = baujahr || fin || fahrbereit !== null
 
   return (
     <div
       className={`rounded-2xl bg-white border border-claimondo-border overflow-hidden ${className}`}
     >
-      {/* Header mit Mini-Render-Bild oben */}
-      {hersteller && (
-        <div className="bg-claimondo-navy/[0.04] border-b border-claimondo-border px-4 py-3 flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row min-h-0">
+
+        {/* ── Links: Fahrzeug-Panel ── */}
+        <div className="sm:w-[168px] shrink-0 flex flex-col items-center gap-3 px-4 py-5 border-b sm:border-b-0 sm:border-r border-claimondo-border/60 bg-claimondo-navy/[0.025]">
           <FahrzeugRenderImage
             hersteller={hersteller}
             modell={modell}
             lackfarbe={lack}
-            width={96}
-            className="shrink-0"
+            width={136}
           />
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-claimondo-navy truncate">
-              {[hersteller, modell].filter(Boolean).join(' ')}
-            </p>
+
+          {/* Modell + Kennzeichen + Farbe */}
+          <div className="w-full text-center space-y-1.5">
+            {(hersteller || modell) && (
+              <p className="text-xs font-semibold text-claimondo-navy leading-snug">
+                {[hersteller, modell].filter(Boolean).join(' ')}
+              </p>
+            )}
             {kennzeichen && (
-              <span className="inline-flex items-center mt-1 rounded-md border-2 border-claimondo-navy bg-white px-1.5 py-0.5 font-mono text-xs tracking-wide text-claimondo-navy">
-                {kennzeichen}
-              </span>
+              <div className="flex justify-center">
+                <span className="inline-flex items-center rounded-md border-2 border-claimondo-navy bg-white px-1.5 py-0.5 font-mono text-[11px] tracking-wide text-claimondo-navy">
+                  {kennzeichen}
+                </span>
+              </div>
             )}
             {lack && (
-              <p className="text-xs text-claimondo-ondo mt-1">{LACKFARBE_LABEL[lack]}</p>
+              <p className="text-[11px] text-claimondo-ondo">{LACKFARBE_LABEL[lack]}</p>
             )}
           </div>
-        </div>
-      )}
 
-      {/* Klickbare Tabellen-Zeilen mit Inline-Expansion */}
-      <ul className="divide-y divide-claimondo-border/60">
-        {ROWS.map(({ key, label, icon: Icon }) => {
-          const isSelected = selected === key
-          const isHovered = hovered === key
-          return (
-            <li key={key}>
-              <button
-                type="button"
-                onClick={() => handleSelect(key)}
-                onMouseEnter={() => setHovered(key)}
-                onMouseLeave={() => setHovered(null)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                  isSelected
-                    ? 'bg-claimondo-navy/[0.06]'
-                    : isHovered
-                      ? 'bg-[#f8f9fb]'
-                      : 'bg-white'
-                }`}
-              >
-                <Icon
-                  className={`w-4 h-4 shrink-0 ${
-                    isSelected ? 'text-claimondo-navy' : 'text-claimondo-ondo/70'
-                  }`}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-claimondo-navy">{label}</p>
-                  <p className="text-xs text-claimondo-ondo truncate">
-                    {buildSummary(key, data)}
-                  </p>
-                </div>
-                {/* Pfeil nur wenn nicht ausgewählt */}
-                {!isSelected && (
-                  <ChevronRightIcon className="w-4 h-4 shrink-0 text-claimondo-ondo/50" />
-                )}
-              </button>
-
-              {/* Inline-Detail direkt unter der Zeile */}
-              {isSelected && (
-                <div className="border-t border-claimondo-border/60">
-                  <StammdatenDetail
-                    category={key}
-                    data={data}
-                    onClose={() => setSelected(null)}
-                    dokumenteSlot={dokumenteSlot}
-                    inline
-                  />
+          {/* Baujahr · FIN · Fahrbereit */}
+          {hasFahrzeugDetails && (
+            <div className="w-full space-y-1.5 pt-2.5 border-t border-claimondo-border/50">
+              {baujahr && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 shrink-0">
+                    Baujahr
+                  </span>
+                  <span className="text-[11px] font-medium text-claimondo-navy">{baujahr}</span>
                 </div>
               )}
-            </li>
-          )
-        })}
-      </ul>
+              {fin && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 shrink-0">
+                    FIN
+                  </span>
+                  <span className="text-[10px] font-mono text-claimondo-navy truncate">{fin}</span>
+                </div>
+              )}
+              {fahrbereit !== null && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 shrink-0">
+                    Fahrbereit
+                  </span>
+                  {fahrbereit ? (
+                    <span className="inline-flex items-center gap-0.5 text-[11px] text-emerald-700">
+                      <CheckCircle2Icon className="w-3 h-3" /> Ja
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-0.5 text-[11px] text-rose-700">
+                      <XCircleIcon className="w-3 h-3" /> Nein
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* ── Rechts: Tabs + Detail ── */}
+        <div className="flex-1 flex flex-col min-w-0">
+
+          {/* Tab-Leiste */}
+          <div className="flex border-b border-claimondo-border/60 overflow-x-auto">
+            {TABS.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setActiveTab(key)}
+                className={`px-3 py-2.5 text-[11px] font-medium whitespace-nowrap transition-colors border-b-2 -mb-px shrink-0 ${
+                  activeTab === key
+                    ? 'border-claimondo-navy text-claimondo-navy'
+                    : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab-Inhalt */}
+          <div className="flex-1 min-h-0">
+            <StammdatenDetail
+              category={activeTab}
+              data={data}
+              onClose={() => {}}
+              dokumenteSlot={dokumenteSlot}
+              inline
+            />
+          </div>
+        </div>
+
+      </div>
     </div>
   )
 }
