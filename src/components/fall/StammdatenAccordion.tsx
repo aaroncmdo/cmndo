@@ -139,6 +139,7 @@ export default function StammdatenAccordion({
   const hersteller = str(fall.fahrzeug_hersteller)
   const modell = str(fall.fahrzeug_modell)
   const lack = (str(fall.lackfarbe_code) as LackfarbeCode | null) ?? null
+  const kennzeichen = str(fall.kennzeichen)
 
   return (
     <div
@@ -158,8 +159,13 @@ export default function StammdatenAccordion({
             <p className="text-sm font-semibold text-claimondo-navy truncate">
               {[hersteller, modell].filter(Boolean).join(' ')}
             </p>
+            {kennzeichen && (
+              <span className="inline-flex items-center mt-1 rounded-md border-2 border-claimondo-navy bg-white px-1.5 py-0.5 font-mono text-xs tracking-wide text-claimondo-navy">
+                {kennzeichen}
+              </span>
+            )}
             {lack && (
-              <p className="text-xs text-claimondo-ondo">{LACKFARBE_LABEL[lack]}</p>
+              <p className="text-xs text-claimondo-ondo mt-1">{LACKFARBE_LABEL[lack]}</p>
             )}
           </div>
         </div>
