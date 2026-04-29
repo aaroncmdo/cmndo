@@ -573,7 +573,8 @@ export default async function FallaktePage({
         id: d.id,
         filename: d.original_filename ?? 'Datei',
         url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
-        istHaupt: d.dokument_typ === 'gutachten',
+        istHaupt: d.dokument_typ === 'gutachten' && !d.storage_path.includes('/nachbesserung/'),
+        istNachbesserung: d.storage_path.includes('/nachbesserung/'),
       }))
       const haupt = docList.find((d) => d.istHaupt) ?? null
       const anlagen = docList.filter((d) => !d.istHaupt)

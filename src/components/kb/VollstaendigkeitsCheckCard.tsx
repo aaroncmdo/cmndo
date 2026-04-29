@@ -14,6 +14,7 @@ type AnlageRow = {
   filename: string
   url: string
   istHaupt: boolean
+  istNachbesserung?: boolean
 }
 
 type PflichtItem = {
@@ -162,13 +163,36 @@ export default function VollstaendigkeitsCheckCard({
         </div>
       )}
 
-      {/* Anlagen */}
-      {anlagen.length > 0 && (
+      {/* Nachbesserung — neu eingereichte Dateien aus dem Reject-Loop */}
+      {anlagen.filter((a) => a.istNachbesserung).length > 0 && (
+        <div className="space-y-1.5 rounded-lg bg-violet-50 border border-violet-200 px-3 py-2.5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">
+            Nachbesserung ({anlagen.filter((a) => a.istNachbesserung).length})
+          </p>
+          {anlagen.filter((a) => a.istNachbesserung).map((a) => (
+            <div key={a.id} className="flex items-center gap-2 text-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+              <span className="text-violet-900 flex-1 truncate">{a.filename}</span>
+              <a
+                href={a.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-violet-700 hover:text-violet-900"
+              >
+                <DownloadIcon className="w-3 h-3" />
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Anlagen — original aus dem Erst-Upload */}
+      {anlagen.filter((a) => !a.istNachbesserung).length > 0 && (
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
-            Anlagen ({anlagen.length})
+            Anlagen ({anlagen.filter((a) => !a.istNachbesserung).length})
           </p>
-          {anlagen.map((a) => (
+          {anlagen.filter((a) => !a.istNachbesserung).map((a) => (
             <div key={a.id} className="flex items-center gap-2 text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-claimondo-ondo/40" />
               <span className="text-claimondo-navy flex-1 truncate">{a.filename}</span>
