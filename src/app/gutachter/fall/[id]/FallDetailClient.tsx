@@ -37,15 +37,13 @@ import type { TeamMitglied } from './_components/FallakteDrawer'
 // kein Activity-Feed. Stellungnahme/Nachbesichtigung/Konfrontation
 // rendern als Mitteilungs-Banner oben (topServerBlocks aus page.tsx).
 import { StammdatenCard } from './_components/StammdatenCard'
-import { TerminCard } from './_components/TerminCard'
 import { GutachtenCard } from './_components/GutachtenCard'
-import AuftragsphaseStepper from '@/components/gutachter/AuftragsphaseStepper'
+import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
 // AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
-import { TerminActionsPanel } from './_components/TerminActionsPanel'
 import { SvToolsCard } from './_components/SvToolsCard'
 // CMM-23: FallActivityFeed + FallDokumenteSidebar raus (Activity-Feed
 // ohne Tagesgeschäfts-Use-Case; Dokumente-Sidebar war phase-/szenario-
@@ -230,6 +228,12 @@ export default function FallDetailClient(props: Props) {
   const fallNummer = (fall.fall_nummer as string | null) ?? (fall.id as string).slice(0, 8)
   const kundenName = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
   const ort = (fall.schadens_ort as string | null) ?? ''
+  // CMM-32 Walkthrough: SV-Header ergänzt um Kennzeichen + Marke/Modell.
+  const kennzeichen = (fall.kennzeichen as string | null) ?? null
+  const fahrzeug =
+    [(fall.fahrzeug_hersteller as string | null), (fall.fahrzeug_modell as string | null)]
+      .filter(Boolean)
+      .join(' ') || null
 
   // AAR-405: Team-Tab befüllen — Kundenbetreuer + Kunde; Kanzlei folgt mit
   // eigener Daten-Ladung, sobald Phase 5 (Kanzlei-Integration) live ist.
@@ -285,20 +289,27 @@ export default function FallDetailClient(props: Props) {
     })),
   }
 
-  // AAR-757: Termin-Actions + Vor-Ort + ActivityFeed-Eingaben
+  // CMM-32 Walkthrough: Termin-Actions sind in AuftragHeaderPanel integriert,
+  // zeigeTerminActions wird dort intern berechnet.
   const aktiverTermin = props.aktiverTermin ?? null
-  const zeigeTerminActions =
-    aktiverTermin?.status === 'reserviert' || aktiverTermin?.status === 'gegenvorschlag'
   const hatGutachten = !!fall.gutachten_eingegangen_am
 
-  // CMM-36: ETA-Anzeige — liest Position aus sv_live_location (Realtime)
-  const schadensAdresseTracking =
-    [(fall.schadens_adresse as string | null), (fall.schadens_plz as string | null), (fall.schadens_ort as string | null)]
+  // CMM-32 Walkthrough: Klare Trennung der drei Ortsangaben:
+  //   - besichtigungsort = wo der SV hinfährt (Termin-Banner + Geo-Tracking)
+  //   - unfallort/schadens_ort = wo der Unfall passiert ist (Stammdaten)
+  //   - lead.adresse = Wohnadresse des Kunden (Stammdaten / Lead)
+  // Banner + Tracking ziehen ausschließlich besichtigungsort.
+  const besichtigungsAdresse = (fall.besichtigungsort_adresse as string | null) ?? null
+  const unfallAdresse =
+    (fall.unfallort as string | null) ??
+    ([(fall.schadens_adresse as string | null), (fall.schadens_plz as string | null), (fall.schadens_ort as string | null)]
       .filter(Boolean)
-      .join(', ') || null
+      .join(', ') || null)
+  void unfallAdresse // wird unten in der rechten Spalte / Stammdaten konsumiert
+
   const geoTracking = useGeoTracking({
     svId: props.svId ?? null,
-    zielAdresse: hatGutachten ? null : schadensAdresseTracking,
+    zielAdresse: hatGutachten ? null : besichtigungsAdresse,
     terminStartIso: aktiverTermin?.start_zeit ?? null,
     geschaetzteFahrtzeitMin: aktiverTermin?.geschaetzte_fahrtzeit_min ?? null,
     kundeAngekommenAm: aktiverTermin?.sv_angekommen_am ?? null,
@@ -315,25 +326,32 @@ export default function FallDetailClient(props: Props) {
         fallId={fall.id as string}
         kundenName={kundenName}
         ort={ort}
+        kennzeichen={kennzeichen}
+        fahrzeug={fahrzeug}
         subphase={subphase}
         drawer={drawerData}
         aktuellePhaseSnake={aktuellePhaseSnake}
         abgeschlossenAm={abgeschlossenAm}
       />
 
-      {/* Stepper + Unterwegs-Info + TerminActionsPanel ganz oben — volle Breite */}
+      {/* Stepper + Termin-Banner als verschmolzener Header — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
         <SvUnterwegsInfo tracking={geoTracking} svVorname={props.svVorname ?? null} />
-        {/* CMM-32e: Auftrag-Stepper nur während aktivem Auftrag (termin/besichtigung/gutachten/abgeschlossen).
-            Sobald in einer FallPhase (Regulierung/Auszahlung/Kanzlei), zeigen wir den Stepper nicht mehr —
-            der Auftrag ist abgeschlossen und der SV sieht nur noch die schlanke „Mein Fall"-Card unten. */}
+        {/* CMM-32 Walkthrough: AuftragHeaderPanel verschmilzt Stepper +
+            Termin-Banner zu einem Block. Termin-Sektion zeigt sich nur
+            solange der Auftrag aktiv ist (vor Regulierungs-Phase). */}
         {props.svPhase &&
           !['gutachten-freigegeben', 'bei-kanzlei', 'stellungnahme', 'nachbesichtigung', 'auszahlung', 'abgeschlossen-fall'].includes(props.svPhase) && (
-            <AuftragsphaseStepper phase={props.svPhase} gutachtenInQc={props.gutachtenInQc} />
+            <AuftragHeaderPanel
+              phase={props.svPhase}
+              gutachtenInQc={props.gutachtenInQc}
+              termin={aktiverTermin}
+              adresse={besichtigungsAdresse}
+              fallId={fall.id as string}
+              briefingText={(fall.sv_briefing_text as string | null) ?? null}
+              pflichtSlots={props.pflichtSlots ?? []}
+            />
           )}
-        {zeigeTerminActions && aktiverTermin && (
-          <TerminActionsPanel fallId={fall.id as string} termin={aktiverTermin} />
-        )}
       </div>
 
       {/* CMM-23: Server-rendered Top-Blocks (Briefing + Einzuholen-Banner,
@@ -387,34 +405,8 @@ export default function FallDetailClient(props: Props) {
         </aside>
 
         <section className="space-y-4 min-w-0">
-          <TerminCard
-            termin={
-              props.aktiverTermin
-                ? {
-                    id: props.aktiverTermin.id,
-                    status: props.aktiverTermin.status,
-                    start_zeit: props.aktiverTermin.start_zeit ?? null,
-                    end_zeit: props.aktiverTermin.end_zeit ?? null,
-                    vorgeschlagenes_datum:
-                      props.aktiverTermin.vorgeschlagenes_datum ?? null,
-                    gegenvorschlag_von:
-                      props.aktiverTermin.gegenvorschlag_von ?? null,
-                    gegenvorschlag_grund:
-                      props.aktiverTermin.gegenvorschlag_grund ?? null,
-                  }
-                : null
-            }
-            fall={{
-              id: fall.id as string,
-              schadens_adresse: (fall.schadens_adresse as string | null) ?? null,
-              schadens_plz: (fall.schadens_plz as string | null) ?? null,
-              schadens_ort: (fall.schadens_ort as string | null) ?? null,
-            }}
-          />
-          {/* CMM-33: SvEinzuholenBanner wandert nach oben in die topServer-
-              Blocks (page.tsx) — der SV sieht die „vor Ort einzusammeln"-
-              Liste auf einen Blick beim Öffnen. Files unten in der
-              Dokumente-Sektion (WeitereDokumenteCard). */}
+          {/* CMM-32 Walkthrough: TerminCard rausgenommen — Termin-Info lebt
+              jetzt im AuftragHeaderPanel oben (Banner-Sektion 2). */}
           {/* CMM-23: Vorschäden-Hinweis — wenn der Kunde im Lead/Claim
               Vorschäden gemeldet hat, weiß der SV das vor dem Termin und
               kann die nachgereichten Reparaturrechnungen direkt sehen. */}

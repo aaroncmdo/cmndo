@@ -78,7 +78,7 @@ export default async function AuftraegePage({
   const [faelleRes, katalogRes, offenRes, termineRes] = await Promise.all([
     admin
       .from('faelle')
-      .select('id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, lead_id, sa_unterschrieben')
+      .select('id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, sa_unterschrieben')
       .in('id', fallIds),
     admin.from('dokument_katalog').select('slot_id, uploadbar_von'),
     admin
@@ -190,6 +190,9 @@ export default async function AuftraegePage({
                     schadens_ursache: fall.schadens_ursache as string | null,
                     schadens_ort: fall.schadens_ort as string | null,
                     schadens_datum: fall.schadens_datum as string | null,
+                    kennzeichen: (fall.kennzeichen as string | null) ?? null,
+                    fahrzeug_hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
+                    fahrzeug_modell: (fall.fahrzeug_modell as string | null) ?? null,
                   }}
                   kunde={kunde ? { vorname: kunde.vorname, nachname: kunde.nachname } : null}
                   aktiverTermin={
