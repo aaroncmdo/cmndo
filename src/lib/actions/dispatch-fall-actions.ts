@@ -604,6 +604,8 @@ async function convertLeadToFall(
       // Kein manueller Write mehr — lead.halter_name wandert via halter_vorname/halter_nachname.
       // KFZ-146: Erweiterte Fahrzeugdaten
       fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
+      // CMM-32: Strukturierter Lackfarbe-Code für Imagin-Render-Mapping.
+      lackfarbe_code: (lead as { lackfarbe_code?: string | null }).lackfarbe_code ?? null,
       erstzulassung: lead.erstzulassung ?? null,
       fin_vin: lead.fin ?? null,
       kilometerstand: lead.kilometerstand ?? null,

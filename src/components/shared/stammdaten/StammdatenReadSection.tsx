@@ -28,6 +28,9 @@ import {
   FileTextIcon,
 } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
+// CMM-32: Imagin-Render-Bild des Fahrzeugs in passender Lackfarbe.
+import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
+import type { LackfarbeCode } from '@/lib/fahrzeug/imagin'
 
 export type StammdatenRolle = 'sv' | 'kunde' | 'makler'
 
@@ -171,7 +174,18 @@ export function StammdatenReadSection({
 
       {/* Fahrzeug */}
       <div className={`flex items-start gap-3 ${zeigeKunde ? 'pt-3 border-t border-claimondo-border' : ''}`}>
-        <CarIcon className="w-4 h-4 text-claimondo-ondo/70 mt-0.5 shrink-0" />
+        {/* CMM-32: Render-Bild ersetzt das CarIcon wenn Hersteller bekannt ist */}
+        {hersteller ? (
+          <FahrzeugRenderImage
+            hersteller={hersteller}
+            modell={modell}
+            lackfarbe={(str(fall.lackfarbe_code) as LackfarbeCode | null) ?? null}
+            width={120}
+            className="shrink-0 -mt-1"
+          />
+        ) : (
+          <CarIcon className="w-4 h-4 text-claimondo-ondo/70 mt-0.5 shrink-0" />
+        )}
         <div className="flex-1 min-w-0 text-xs space-y-2">
           <div>
             {fahrzeugZeile && (
