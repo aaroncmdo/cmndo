@@ -530,6 +530,17 @@ export async function signSAandCreateFall(
 
       if (upErr) console.error('[KFZ-192] Termin-Upgrade (nur_gutachter):', upErr.message)
 
+      // CMM-32d: Erstgutachten-Auftrag anlegen + Termine zuordnen
+      if (svIdFromTermin && (upgradedTermine?.length ?? 0) > 0) {
+        try {
+          const { createErstgutachtenAuftragWennNoetig } = await import('@/lib/auftrag/create')
+          await createErstgutachtenAuftragWennNoetig(
+            admin, fall.id as string, svIdFromTermin,
+            (upgradedTermine ?? []).map((t) => t.id as string),
+          )
+        } catch (err) { console.error('[CMM-32d] Auftrag-Anlage fehlgeschlagen:', err) }
+      }
+
       // KFZ-192: bestaetigeTermin aufrufen (setzt final_verbindlich_ab + Timeline)
       try {
         const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
@@ -556,6 +567,17 @@ export async function signSAandCreateFall(
         .select('id')
 
       if (upErr) console.error('[CMM-21] Termin-Upgrade (komplett):', upErr.message)
+
+      // CMM-32d: Erstgutachten-Auftrag anlegen + Termine zuordnen
+      if (svIdFromTermin && (updatedTermine?.length ?? 0) > 0) {
+        try {
+          const { createErstgutachtenAuftragWennNoetig } = await import('@/lib/auftrag/create')
+          await createErstgutachtenAuftragWennNoetig(
+            admin, fall.id as string, svIdFromTermin,
+            (updatedTermine ?? []).map((t) => t.id as string),
+          )
+        } catch (err) { console.error('[CMM-32d] Auftrag-Anlage fehlgeschlagen:', err) }
+      }
 
       // bestaetigeTermin setzt final_verbindlich_ab + Timeline-Eintrag
       try {
