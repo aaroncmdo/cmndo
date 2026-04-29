@@ -242,6 +242,7 @@ export async function loescheGutachtenDokument(
 export async function weiseGutachtenZurueck(
   auftragId: string,
   grund: string,
+  abgelehnteDoks?: { id: string; kommentar?: string }[],
 ): Promise<{ ok: boolean; error?: string }> {
   if (!grund?.trim()) return { ok: false, error: 'Begründung ist Pflicht' }
 
@@ -274,22 +275,20 @@ export async function weiseGutachtenZurueck(
     .eq('id', auftragId)
   if (aErr) return { ok: false, error: aErr.message }
 
-  // CMM-32e: alle aktuell aktiven Files dieses Auftrags als abgelehnt
-  // markieren — sie verschwinden aus SV/Kunde-Listen, KB sieht sie weiter
-  // als „Abgelehnt"-Bucket im Audit.
-  const { data: fall } = await db
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', auftrag.fall_id)
-    .maybeSingle()
-  const claimId = fall?.claim_id as string | null
-  if (claimId) {
-    await db
-      .from('fall_dokumente')
-      .update({ abgelehnt_am: now })
-      .like('storage_path', `claim/${claimId}/gutachten/${auftragId}/%`)
-      .is('abgelehnt_am', null)
-      .is('geloescht_am', null)
+  // CMM-32e: Nur die explizit markierten Dokumente als abgelehnt kennzeichnen.
+  // Ohne Auswahl (abgelehnteDoks leer/undefined) bleibt kein Dokument versteckt —
+  // der allgemeine Grund reicht dann als Hinweis an den SV.
+  if (abgelehnteDoks && abgelehnteDoks.length > 0) {
+    for (const dok of abgelehnteDoks) {
+      await db
+        .from('fall_dokumente')
+        .update({
+          abgelehnt_am: now,
+          zurueckweisung_kommentar: dok.kommentar?.trim() || null,
+        })
+        .eq('id', dok.id)
+        .is('geloescht_am', null)
+    }
   }
 
   // Mitteilung an den SV

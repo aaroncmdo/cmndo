@@ -3,6 +3,10 @@
 // CMM-32e: KB-QC-Card. Zeigt Hauptgutachten + Anlagen + Pflichtdokumente-
 // Status. „Kanzleipaket freigeben"-Button setzt den Auftrag final ab und
 // startet den Regulierungs-Lifecycle.
+//
+// Reject-Formular: KB gibt allgemeinen Grund an + kann optional einzelne
+// Dokumente als fehlerhaft markieren (mit Kommentar). Ohne Auswahl bleiben
+// alle Docs sichtbar — nur der allgemeine Grund geht an den SV.
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -53,7 +57,36 @@ export default function VollstaendigkeitsCheckCard({
   const [error, setError] = useState<string | null>(null)
   const [rejectMode, setRejectMode] = useState(false)
   const [rejectGrund, setRejectGrund] = useState('')
+  // Pro-Doc-State: flagged + optionaler Kommentar
+  const [rejectDoks, setRejectDoks] = useState<Record<string, { flagged: boolean; kommentar: string }>>({})
   const router = useRouter()
+
+  // Alle Docs die KB auswählen kann (Haupt + aktive Anlagen)
+  const auswaehlbareDocs: AnlageRow[] = [
+    ...(hauptgutachten ? [hauptgutachten] : []),
+    ...anlagen,
+  ]
+
+  function toggleDok(id: string) {
+    setRejectDoks((prev) => ({
+      ...prev,
+      [id]: { flagged: !prev[id]?.flagged, kommentar: prev[id]?.kommentar ?? '' },
+    }))
+  }
+
+  function setDokKommentar(id: string, kommentar: string) {
+    setRejectDoks((prev) => ({
+      ...prev,
+      [id]: { flagged: prev[id]?.flagged ?? true, kommentar },
+    }))
+  }
+
+  function resetRejectForm() {
+    setRejectMode(false)
+    setRejectGrund('')
+    setRejectDoks({})
+    setError(null)
+  }
 
   if (bereitsFreigegeben) {
     return (
@@ -98,7 +131,6 @@ export default function VollstaendigkeitsCheckCard({
   }
 
   const fehlende = pflichtItems.filter((p) => p.pflicht && !p.vorhanden)
-  // CMM-32e: Korrektur eingereicht — grund bleibt für Audit, _am ist null.
   const istKorrekturEingereicht = !!zurueckweisungGrund && !zurueckgewiesenAm
 
   function handleFreigeben() {
@@ -116,12 +148,15 @@ export default function VollstaendigkeitsCheckCard({
       return
     }
     setError(null)
+    const flaggedDoks = auswaehlbareDocs
+      .filter((d) => rejectDoks[d.id]?.flagged)
+      .map((d) => ({ id: d.id, kommentar: rejectDoks[d.id]?.kommentar?.trim() || undefined }))
+
     startTransition(async () => {
-      const r = await weiseGutachtenZurueck(auftragId, rejectGrund.trim())
+      const r = await weiseGutachtenZurueck(auftragId, rejectGrund.trim(), flaggedDoks.length > 0 ? flaggedDoks : undefined)
       if (!r.ok) setError(r.error ?? 'Zurückweisung fehlgeschlagen')
       else {
-        setRejectMode(false)
-        setRejectGrund('')
+        resetRejectForm()
         router.refresh()
       }
     })
@@ -149,25 +184,19 @@ export default function VollstaendigkeitsCheckCard({
       </div>
 
       {/* Hauptgutachten */}
-      {hauptgutachten && (
+      {hauptgutachten && !rejectMode && (
         <div className="flex items-center gap-2 text-sm border-t border-claimondo-border pt-3">
           <FileTextIcon className="w-4 h-4 text-claimondo-navy shrink-0" />
           <span className="font-medium text-claimondo-navy flex-1 truncate">{hauptgutachten.filename}</span>
           <span className="text-[10px] uppercase tracking-wider text-violet-700 font-semibold">Hauptgutachten</span>
-          <a
-            href={hauptgutachten.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-claimondo-ondo hover:text-claimondo-navy"
-            title="Öffnen"
-          >
+          <a href={hauptgutachten.url} target="_blank" rel="noopener noreferrer" className="text-claimondo-ondo hover:text-claimondo-navy" title="Öffnen">
             <DownloadIcon className="w-4 h-4" />
           </a>
         </div>
       )}
 
       {/* Nachbesserung — neu eingereichte Dateien aus dem Reject-Loop */}
-      {anlagen.filter((a) => a.istNachbesserung).length > 0 && (
+      {!rejectMode && anlagen.filter((a) => a.istNachbesserung).length > 0 && (
         <div className="space-y-1.5 rounded-lg bg-violet-50 border border-violet-200 px-3 py-2.5">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">
             Nachbesserung ({anlagen.filter((a) => a.istNachbesserung).length})
@@ -176,12 +205,7 @@ export default function VollstaendigkeitsCheckCard({
             <div key={a.id} className="flex items-center gap-2 text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
               <span className="text-violet-900 flex-1 truncate">{a.filename}</span>
-              <a
-                href={a.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-violet-700 hover:text-violet-900"
-              >
+              <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-violet-700 hover:text-violet-900">
                 <DownloadIcon className="w-3 h-3" />
               </a>
             </div>
@@ -190,7 +214,7 @@ export default function VollstaendigkeitsCheckCard({
       )}
 
       {/* Anlagen — original aus dem Erst-Upload */}
-      {anlagen.filter((a) => !a.istNachbesserung).length > 0 && (
+      {!rejectMode && anlagen.filter((a) => !a.istNachbesserung).length > 0 && (
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
             Anlagen ({anlagen.filter((a) => !a.istNachbesserung).length})
@@ -199,12 +223,7 @@ export default function VollstaendigkeitsCheckCard({
             <div key={a.id} className="flex items-center gap-2 text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-claimondo-ondo/40" />
               <span className="text-claimondo-navy flex-1 truncate">{a.filename}</span>
-              <a
-                href={a.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-claimondo-ondo hover:text-claimondo-navy"
-              >
+              <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-claimondo-ondo hover:text-claimondo-navy">
                 <DownloadIcon className="w-3 h-3" />
               </a>
             </div>
@@ -213,7 +232,7 @@ export default function VollstaendigkeitsCheckCard({
       )}
 
       {/* Abgelehnte Dokumente — Audit-Bucket, nur KB/Admin sichtbar */}
-      {abgelehnteAnlagen.length > 0 && (
+      {!rejectMode && abgelehnteAnlagen.length > 0 && (
         <div className="space-y-1.5 rounded-lg bg-red-50 border border-red-200 px-3 py-2.5">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-red-700 flex items-center gap-1.5">
             <XCircleIcon className="w-3.5 h-3.5" />
@@ -223,13 +242,7 @@ export default function VollstaendigkeitsCheckCard({
             <div key={a.id} className="flex items-center gap-2 text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
               <span className="text-red-900 flex-1 truncate line-through opacity-70">{a.filename}</span>
-              <a
-                href={a.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-red-600 hover:text-red-800"
-                title="Trotzdem öffnen (Audit)"
-              >
+              <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-800" title="Trotzdem öffnen (Audit)">
                 <DownloadIcon className="w-3 h-3" />
               </a>
             </div>
@@ -238,43 +251,37 @@ export default function VollstaendigkeitsCheckCard({
       )}
 
       {/* Pflichtdokumente */}
-      <div className="space-y-1.5 border-t border-claimondo-border pt-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
-          Pflichtdokumente
-        </p>
-        {pflichtItems.length === 0 && (
-          <p className="text-xs text-claimondo-ondo/70">Keine Pflichtdokumente konfiguriert.</p>
-        )}
-        {pflichtItems.map((p) => (
-          <div key={p.slot_id} className="flex items-center gap-2 text-xs">
-            {p.vorhanden ? (
-              <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            ) : (
-              <AlertCircleIcon className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            )}
-            <span
-              className={
-                p.vorhanden
-                  ? 'text-claimondo-navy'
-                  : p.pflicht
-                    ? 'text-amber-700 font-medium'
-                    : 'text-claimondo-ondo/70'
-              }
-            >
-              {p.label}
-            </span>
-            {!p.pflicht && <span className="text-[10px] text-claimondo-ondo/60">(optional)</span>}
-          </div>
-        ))}
-      </div>
+      {!rejectMode && (
+        <div className="space-y-1.5 border-t border-claimondo-border pt-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
+            Pflichtdokumente
+          </p>
+          {pflichtItems.length === 0 && (
+            <p className="text-xs text-claimondo-ondo/70">Keine Pflichtdokumente konfiguriert.</p>
+          )}
+          {pflichtItems.map((p) => (
+            <div key={p.slot_id} className="flex items-center gap-2 text-xs">
+              {p.vorhanden ? (
+                <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertCircleIcon className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              )}
+              <span className={p.vorhanden ? 'text-claimondo-navy' : p.pflicht ? 'text-amber-700 font-medium' : 'text-claimondo-ondo/70'}>
+                {p.label}
+              </span>
+              {!p.pflicht && <span className="text-[10px] text-claimondo-ondo/60">(optional)</span>}
+            </div>
+          ))}
+        </div>
+      )}
 
-      {/* Buttons (nur wenn nicht in Reject-Wartemodus) */}
+      {/* Aktions-Buttons */}
       {!rejectMode ? (
         <div className="border-t border-claimondo-border pt-3 flex items-center justify-between gap-3 flex-wrap">
           {fehlende.length > 0 ? (
             <p className="text-xs text-amber-700 flex-1 min-w-[160px]">
               {fehlende.length} Pflichtdokument{fehlende.length === 1 ? '' : 'e'} fehl
-              {fehlende.length === 1 ? 't' : 'en'} — Freigabe trotzdem möglich (Nachreichung wird beim Kunden angefordert).
+              {fehlende.length === 1 ? 't' : 'en'} — Freigabe trotzdem möglich.
             </p>
           ) : (
             <p className="text-xs text-emerald-700 flex-1 min-w-[160px]">Alles vollständig.</p>
@@ -298,20 +305,70 @@ export default function VollstaendigkeitsCheckCard({
           </div>
         </div>
       ) : (
-        <div className="border-t border-claimondo-border pt-3 space-y-2">
-          <label className="text-xs font-semibold text-claimondo-navy">
-            Was muss der Gutachter korrigieren?
-          </label>
-          <textarea
-            value={rejectGrund}
-            onChange={(e) => setRejectGrund(e.target.value)}
-            rows={3}
-            placeholder="z.B. Kostenposition X fehlt, Foto Y unscharf …"
-            className="w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm placeholder:text-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30"
-          />
+        <div className="border-t border-claimondo-border pt-3 space-y-4">
+          {/* Allgemeine Begründung — Pflicht */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-claimondo-navy">
+              Was muss der Gutachter korrigieren? <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={rejectGrund}
+              onChange={(e) => setRejectGrund(e.target.value)}
+              rows={2}
+              placeholder="z.B. Kostenposition X fehlt, Foto Y unscharf …"
+              className="w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm placeholder:text-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30"
+            />
+          </div>
+
+          {/* Optionale Dokument-Auswahl */}
+          {auswaehlbareDocs.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-claimondo-navy">
+                Welche Dokumente müssen neu geliefert werden? <span className="text-claimondo-ondo/60 font-normal">(optional)</span>
+              </p>
+              <div className="space-y-2">
+                {auswaehlbareDocs.map((doc) => {
+                  const state = rejectDoks[doc.id]
+                  const flagged = !!state?.flagged
+                  return (
+                    <div key={doc.id} className="rounded-lg border border-claimondo-border bg-[#f8f9fb] p-2.5 space-y-2">
+                      <label className="flex items-center gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={flagged}
+                          onChange={() => toggleDok(doc.id)}
+                          className="w-3.5 h-3.5 rounded accent-red-600"
+                        />
+                        <FileTextIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
+                        <span className={`text-xs flex-1 truncate ${flagged ? 'text-red-800 font-medium' : 'text-claimondo-navy'}`}>
+                          {doc.filename}
+                        </span>
+                        {doc.istHaupt && (
+                          <span className="text-[10px] uppercase tracking-wider text-violet-700 font-semibold shrink-0">Haupt</span>
+                        )}
+                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-claimondo-ondo hover:text-claimondo-navy shrink-0" onClick={(e) => e.stopPropagation()}>
+                          <DownloadIcon className="w-3 h-3" />
+                        </a>
+                      </label>
+                      {flagged && (
+                        <input
+                          type="text"
+                          value={state?.kommentar ?? ''}
+                          onChange={(e) => setDokKommentar(doc.id, e.target.value)}
+                          placeholder="Kommentar zum Dokument (optional)"
+                          className="w-full rounded-md border border-red-200 bg-white px-2.5 py-1.5 text-xs placeholder:text-claimondo-ondo/50 focus:outline-none focus:ring-2 focus:ring-red-300"
+                        />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-2 justify-end">
             <button
-              onClick={() => { setRejectMode(false); setRejectGrund(''); setError(null) }}
+              onClick={resetRejectForm}
               disabled={pending}
               className="text-sm text-claimondo-ondo hover:text-claimondo-navy px-3 py-2"
             >

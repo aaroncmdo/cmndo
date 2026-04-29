@@ -20,6 +20,8 @@ type Props = {
   zurueckweisungGrund?: string | null
   /** CMM-32e: Anzahl Hauptgutachten-PDFs die seit dem letzten Submit hochgeladen wurden. */
   abgebbareDokumenteAnzahl?: number
+  /** CMM-32e: Granulare Dok-Beanstandungen — welche Dateien konkret abgelehnt wurden + warum. */
+  abgelehnteDocsInfo?: { filename: string; kommentar: string | null }[]
 }
 
 type UploadStatus = 'idle' | 'uploading' | 'done' | 'error' | 'deleting'
@@ -32,6 +34,7 @@ export default function GutachtenUploadBanner({
   zurueckgewiesenAm,
   zurueckweisungGrund,
   abgebbareDokumenteAnzahl = 0,
+  abgelehnteDocsInfo = [],
 }: Props) {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [dragOver, setDragOver] = useState(false)
@@ -190,6 +193,20 @@ export default function GutachtenUploadBanner({
               ? 'Lade die korrigierte Version hoch. Beim nächsten Upload startet der QC-Prozess automatisch neu.'
               : 'Lade hier dein Gutachten + zugehörige Fotos und Dokumente hoch. Die erste PDF gilt als Hauptgutachten und startet den QC-Prozess.'}
           </p>
+          {/* CMM-32e: Konkret beanstandete Dokumente mit optionalem KB-Kommentar */}
+          {istReject && abgelehnteDocsInfo.length > 0 && (
+            <div className="mt-2 space-y-1.5">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">Beanstandete Dateien</p>
+              {abgelehnteDocsInfo.map((d, i) => (
+                <div key={i} className="rounded-md bg-white/70 border border-violet-200 px-2.5 py-1.5">
+                  <p className="text-xs font-medium text-violet-900 truncate">{d.filename}</p>
+                  {d.kommentar && (
+                    <p className="text-[11px] text-violet-800 mt-0.5">{d.kommentar}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

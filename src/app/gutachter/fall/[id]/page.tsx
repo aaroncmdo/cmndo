@@ -377,6 +377,25 @@ export default async function GutachterFallPage({
     .maybeSingle()
   const claimIdForStorage = (fallClaim?.claim_id as string | null) ?? ''
 
+  // CMM-32e: Abgelehnte Docs mit Kommentar für den SV — nur im Reject-Zustand laden.
+  // SV sieht welche Dateien konkret beanstandet wurden + warum.
+  let abgelehnteDocsInfo: { filename: string; kommentar: string | null }[] = []
+  const erstgutachtenRejectCheck = (erstgutachtenAuftrag as { zurueckgewiesen_am?: string | null } | null)?.zurueckgewiesen_am ?? null
+  if (erstgutachtenAuftrag && claimIdForStorage && erstgutachtenRejectCheck) {
+    const { data: abgelehnteRows } = await admin
+      .from('fall_dokumente')
+      .select('original_filename, zurueckweisung_kommentar')
+      .eq('fall_id', id)
+      .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
+      .not('abgelehnt_am', 'is', null)
+      .is('geloescht_am', null)
+      .order('abgelehnt_am', { ascending: false })
+    abgelehnteDocsInfo = (abgelehnteRows ?? []).map((r) => ({
+      filename: (r.original_filename as string | null) ?? 'Datei',
+      kommentar: (r.zurueckweisung_kommentar as string | null) ?? null,
+    }))
+  }
+
   // CMM-32e: Abgebbare Hauptgutachten — neuere fall_dokumente als die aktuell
   // verlinkte gutachten_url. Triggert den „Abgeben"-Button im Banner.
   let abgebbareDokumenteAnzahl = 0
@@ -460,6 +479,7 @@ export default async function GutachterFallPage({
           zurueckgewiesenAm={erstgutachtenReject}
           zurueckweisungGrund={erstgutachtenRejectGrund}
           abgebbareDokumenteAnzahl={abgebbareDokumenteAnzahl}
+          abgelehnteDocsInfo={abgelehnteDocsInfo}
         />
       )}
       {/* Briefing links — rechts: Vor-Ort-Buttons (compact) oben + Einzuholen-Dokumente darunter */}
