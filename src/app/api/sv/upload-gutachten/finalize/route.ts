@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       groesse_bytes: body.sizeBytes ?? null,
       kategorie: 'gutachten',
       quelle: 'sv-upload',
-      sichtbar_fuer: ['kundenbetreuer', 'kanzlei', 'admin'],
+      sichtbar_fuer: ['sachverstaendiger', 'kundenbetreuer', 'kanzlei', 'admin'],
       uploaded_by_sv: true,
       hochgeladen_am: new Date().toISOString(),
     })

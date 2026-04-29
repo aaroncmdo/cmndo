@@ -100,7 +100,9 @@ export default function GutachtenUploadBanner({
   function handleFiles(filesIn: FileList | File[]) {
     const arr = Array.from(filesIn)
     if (!arr.length) return
-    const istErsterPDF = !hatGutachten && files.length === 0
+    // CMM-32e: Bei Re-Upload nach Reject behandeln wir die erste PDF auch als
+    // Haupt — sonst würde finalize den alten gutachten_url-Wert behalten.
+    const istErsterPDF = (!hatGutachten || istReject) && files.length === 0
     const initial: UploadFile[] = arr.map((f, i) => ({
       name: f.name,
       status: 'uploading' as UploadStatus,

@@ -471,6 +471,7 @@ export default function FallDetailClient(props: Props) {
               datei_name: (d.datei_name as string | null) ?? null,
               hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
               created_at: (d.created_at as string | null) ?? null,
+              storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
             }))}
           />
         </section>

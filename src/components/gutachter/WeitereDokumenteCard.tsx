@@ -1,13 +1,8 @@
 'use client'
 
-// CMM-23: Schlanke Dokumente-Card im SV-Auftrag — alle hochgeladenen Files
-// (kunde + sv) auflisten + Upload-Button für SV. Ersetzt FallDokumenteSidebar
-// die phasen-/szenario-abhängig war und in vielen Fällen nur "Phase/Szenario
-// nicht gesetzt" gezeigt hat.
-//
-// Aaron-Spec: muss einen Upload haben und in den Claim landen — geht via
-// uploadDatei (gutachter actions) → fall_dokumente mit dokument_typ='sonstiges'
-// und uploaded_by_sv=true.
+// CMM-23 / CMM-32: Vollständige Dokumenten-Liste am SV-Auftrag.
+// Kategorisiert: Hauptgutachten, Nachbesserung, Anlagen, Pflichtdokumente,
+// Weitere. Plus „Weiteres Dokument hochladen"-Button.
 
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -27,6 +22,7 @@ export type WeiteresDokument = {
   datei_name: string | null
   hochgeladen_von_rolle: string | null
   created_at: string | null
+  storage_path?: string | null
 }
 
 function fmtDate(iso: string | null): string {
@@ -46,6 +42,42 @@ function rolleLabel(rolle: string | null): string {
   return ''
 }
 
+type Kategorie = 'gutachten' | 'nachbesserung' | 'anlagen' | 'pflichtdokumente' | 'sonstiges'
+
+const KATEGORIE_LABEL: Record<Kategorie, string> = {
+  gutachten: 'Gutachten',
+  nachbesserung: 'Nachbesserung',
+  anlagen: 'Anlagen',
+  pflichtdokumente: 'Pflichtdokumente',
+  sonstiges: 'Weitere',
+}
+
+const PFLICHT_TYPEN = new Set([
+  'fahrzeugschein',
+  'fahrzeugschein_rueck',
+  'kfz_schein',
+  'polizeibericht',
+  'kostenvoranschlag',
+  'rechnung',
+  'mietwagen_rechnung',
+  'reparaturrechnung',
+])
+
+function kategorisieren(d: WeiteresDokument): Kategorie {
+  const typ = (d.dokument_typ ?? '').toLowerCase()
+  const pfad = (d.storage_path ?? '').toLowerCase()
+  if (typ === 'gutachten') {
+    return pfad.includes('/nachbesserung/') ? 'nachbesserung' : 'gutachten'
+  }
+  if (typ === 'gutachten_anlage') {
+    return pfad.includes('/nachbesserung/') ? 'nachbesserung' : 'anlagen'
+  }
+  if (PFLICHT_TYPEN.has(typ)) return 'pflichtdokumente'
+  if (typ === 'sonstiges' || typ === '' || typ === null) return 'sonstiges'
+  // Unbekannte slot-IDs → Pflicht-Bucket
+  return 'pflichtdokumente'
+}
+
 export default function WeitereDokumenteCard({
   fallId,
   dokumente,
@@ -58,8 +90,18 @@ export default function WeitereDokumenteCard({
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Gutachten separat in der GutachtenCard — hier alles andere.
-  const sonstige = dokumente.filter((d) => d.dokument_typ !== 'gutachten')
+  const gruppen: Record<Kategorie, WeiteresDokument[]> = {
+    gutachten: [],
+    nachbesserung: [],
+    anlagen: [],
+    pflichtdokumente: [],
+    sonstiges: [],
+  }
+  for (const d of dokumente) {
+    gruppen[kategorisieren(d)].push(d)
+  }
+  const reihenfolge: Kategorie[] = ['gutachten', 'nachbesserung', 'anlagen', 'pflichtdokumente', 'sonstiges']
+  const total = dokumente.length
 
   function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -83,53 +125,66 @@ export default function WeitereDokumenteCard({
     <div className="rounded-2xl bg-white border border-claimondo-border p-4">
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm font-semibold text-claimondo-navy">
-          Hochgeladene Dokumente
+          Dokumente am Fall
         </p>
-        <span className="text-xs text-claimondo-ondo">{sonstige.length}</span>
+        <span className="text-xs text-claimondo-ondo">{total}</span>
       </div>
 
-      {sonstige.length === 0 ? (
+      {total === 0 ? (
         <p className="text-xs text-claimondo-ondo/70 text-center py-3">
           Noch keine Dokumente am Fall.
         </p>
       ) : (
-        <ul className="space-y-2 mb-3">
-          {sonstige.map((d) => {
-            const isImage = (d.datei_name ?? '').match(/\.(jpe?g|png|heic|webp)$/i)
-            const Icon = isImage ? ImageIcon : FileTextIcon
+        <div className="space-y-3 mb-3">
+          {reihenfolge.map((kat) => {
+            const items = gruppen[kat]
+            if (items.length === 0) return null
             return (
-              <li
-                key={d.id}
-                className="flex items-center gap-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] p-2.5"
-              >
-                <div className="w-8 h-8 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-claimondo-navy truncate">
-                    {d.datei_name ?? d.dokument_typ ?? 'Unbenannt'}
-                  </p>
-                  <p className="text-[11px] text-claimondo-ondo">
-                    {rolleLabel(d.hochgeladen_von_rolle)}
-                    {d.hochgeladen_von_rolle && ' · '}
-                    {fmtDate(d.created_at)}
-                  </p>
-                </div>
-                {d.datei_url && (
-                  <a
-                    href={d.datei_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-claimondo-ondo hover:text-claimondo-navy"
-                    aria-label="Datei öffnen"
-                  >
-                    <ExternalLinkIcon className="w-4 h-4" />
-                  </a>
-                )}
-              </li>
+              <div key={kat}>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1.5">
+                  {KATEGORIE_LABEL[kat]} <span className="text-claimondo-ondo/60">· {items.length}</span>
+                </p>
+                <ul className="space-y-1.5">
+                  {items.map((d) => {
+                    const isImage = (d.datei_name ?? '').match(/\.(jpe?g|png|heic|webp)$/i)
+                    const Icon = isImage ? ImageIcon : FileTextIcon
+                    return (
+                      <li
+                        key={d.id}
+                        className="flex items-center gap-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] p-2.5"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-claimondo-navy truncate">
+                            {d.datei_name ?? d.dokument_typ ?? 'Unbenannt'}
+                          </p>
+                          <p className="text-[11px] text-claimondo-ondo">
+                            {rolleLabel(d.hochgeladen_von_rolle)}
+                            {d.hochgeladen_von_rolle && ' · '}
+                            {fmtDate(d.created_at)}
+                          </p>
+                        </div>
+                        {d.datei_url && (
+                          <a
+                            href={d.datei_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-claimondo-ondo hover:text-claimondo-navy"
+                            aria-label="Datei öffnen"
+                          >
+                            <ExternalLinkIcon className="w-4 h-4" />
+                          </a>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
             )
           })}
-        </ul>
+        </div>
       )}
 
       <label

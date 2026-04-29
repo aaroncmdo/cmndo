@@ -343,6 +343,7 @@ export default async function GutachterFallPage({
         ? 'kunde'
         : null,
     created_at: (d.hochgeladen_am as string | null) ?? null,
+    storage_path: (d.storage_path as string | null) ?? null,
   }))
 
   // AAR-559 (C10): SV-View-Felder für SvHonorarCard + KonfrontationsTerminCard.
