@@ -450,10 +450,10 @@ export default async function GutachterFallPage({
   const kundenName = lead
     ? `${(lead.vorname as string | null) ?? ''} ${(lead.nachname as string | null) ?? ''}`.trim()
     : '—'
-  const schadensAdresse =
-    [(fall.schadens_adresse as string | null), (fall.schadens_plz as string | null), (fall.schadens_ort as string | null)]
-      .filter(Boolean)
-      .join(', ') || null
+  // CMM-32 Walkthrough: VorOrtTriggerCard fährt zum besichtigungsort.
+  // schadens_*-Felder beschreiben den Unfallort (separat in Stammdaten),
+  // lead.adresse die Wohnadresse — drei klar getrennte Bedeutungen.
+  const besichtigungsAdresse = (fall.besichtigungsort_adresse as string | null) ?? null
 
   const stellungnahmeAktiv = (fall.technische_stellungnahme_status as string | null) === 'angefordert'
   const nachbesichtigungAktiv =
@@ -490,7 +490,7 @@ export default async function GutachterFallPage({
           fallId={id}
           kundeName={kundenName}
           kennzeichen={(fall.kennzeichen as string | null) ?? null}
-          adresse={schadensAdresse}
+          adresse={besichtigungsAdresse}
         />
       )}
       {stellungnahmeAktiv && (

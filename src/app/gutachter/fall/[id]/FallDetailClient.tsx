@@ -288,14 +288,22 @@ export default function FallDetailClient(props: Props) {
   const aktiverTermin = props.aktiverTermin ?? null
   const hatGutachten = !!fall.gutachten_eingegangen_am
 
-  // CMM-36: ETA-Anzeige — liest Position aus sv_live_location (Realtime)
-  const schadensAdresseTracking =
-    [(fall.schadens_adresse as string | null), (fall.schadens_plz as string | null), (fall.schadens_ort as string | null)]
+  // CMM-32 Walkthrough: Klare Trennung der drei Ortsangaben:
+  //   - besichtigungsort = wo der SV hinfährt (Termin-Banner + Geo-Tracking)
+  //   - unfallort/schadens_ort = wo der Unfall passiert ist (Stammdaten)
+  //   - lead.adresse = Wohnadresse des Kunden (Stammdaten / Lead)
+  // Banner + Tracking ziehen ausschließlich besichtigungsort.
+  const besichtigungsAdresse = (fall.besichtigungsort_adresse as string | null) ?? null
+  const unfallAdresse =
+    (fall.unfallort as string | null) ??
+    ([(fall.schadens_adresse as string | null), (fall.schadens_plz as string | null), (fall.schadens_ort as string | null)]
       .filter(Boolean)
-      .join(', ') || null
+      .join(', ') || null)
+  void unfallAdresse // wird unten in der rechten Spalte / Stammdaten konsumiert
+
   const geoTracking = useGeoTracking({
     svId: props.svId ?? null,
-    zielAdresse: hatGutachten ? null : schadensAdresseTracking,
+    zielAdresse: hatGutachten ? null : besichtigungsAdresse,
     terminStartIso: aktiverTermin?.start_zeit ?? null,
     geschaetzteFahrtzeitMin: aktiverTermin?.geschaetzte_fahrtzeit_min ?? null,
     kundeAngekommenAm: aktiverTermin?.sv_angekommen_am ?? null,
@@ -330,7 +338,7 @@ export default function FallDetailClient(props: Props) {
               phase={props.svPhase}
               gutachtenInQc={props.gutachtenInQc}
               termin={aktiverTermin}
-              adresse={schadensAdresseTracking}
+              adresse={besichtigungsAdresse}
               fallId={fall.id as string}
               briefingText={(fall.sv_briefing_text as string | null) ?? null}
               pflichtSlots={props.pflichtSlots ?? []}
