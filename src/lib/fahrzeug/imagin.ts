@@ -30,21 +30,22 @@ export type LackfarbeCode =
   | 'beige'
   | 'sonstige'
 
-/** Mapping unsere Codes → Imagin paintIds. Generische Imagin-IDs decken
- *  die meisten Hersteller ab; bei Bedarf spaeter pro Marke ueberschreiben. */
+/** Mapping unsere Codes → Imagin paintDescription (Plain-English).
+ *  paintDescription ist robuster als paintId weil Imagin damit dann das
+ *  passende Hersteller-spezifische Asset wählt. */
 const PAINT_MAP: Record<LackfarbeCode, string> = {
-  schwarz:  'pspc0001',  // generic black
-  weiss:    'pspc0002',  // generic white
-  silber:   'pspc0004',  // generic silver
-  grau:     'pspc0005',  // generic grey
-  blau:     'pspc0008',  // generic blue
-  rot:      'pspc0006',  // generic red
-  gruen:    'pspc0009',  // generic green
-  gelb:     'pspc0007',  // generic yellow
-  orange:   'pspc0010',  // generic orange
-  braun:    'pspc0011',  // generic brown
-  beige:    'pspc0003',  // generic beige
-  sonstige: 'pspc0004',  // fallback silber
+  schwarz:  'black',
+  weiss:    'white',
+  silber:   'silver',
+  grau:     'grey',
+  blau:     'blue',
+  rot:      'red',
+  gruen:    'green',
+  gelb:     'yellow',
+  orange:   'orange',
+  braun:    'brown',
+  beige:    'beige',
+  sonstige: 'silver',
 }
 
 export const LACKFARBE_LABEL: Record<LackfarbeCode, string> = {
@@ -96,6 +97,6 @@ export function buildImaginUrl({
     countryCode: 'de',
   })
   if (modell?.trim()) params.set('modelFamily', modell.trim())
-  if (lackfarbe) params.set('paintId', PAINT_MAP[lackfarbe])
+  if (lackfarbe) params.set('paintDescription', PAINT_MAP[lackfarbe])
   return `${IMAGIN_BASE}?${params.toString()}`
 }
