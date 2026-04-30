@@ -91,7 +91,7 @@ export default function AuftragHeaderPanel({
   pflichtSlots,
 }: Props) {
   const router = useRouter()
-  const [modal, setModal] = useState<'ablehnen' | 'gegenvorschlag' | null>(null)
+  const [modal, setModal] = useState<'ablehnen' | 'gegenvorschlag' | 'verlegen' | null>(null)
   const [grund, setGrund] = useState('')
   const [neuerTermin, setNeuerTermin] = useState('')
   const [loading, setLoading] = useState(false)
@@ -231,6 +231,15 @@ export default function AuftragHeaderPanel({
                   Navigation
                 </a>
               )}
+              {istBestaetigt && (
+                <button
+                  onClick={() => setModal('verlegen')}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-claimondo-border bg-white text-claimondo-navy hover:bg-claimondo-navy/5 text-sm font-medium px-3 py-1.5 transition-colors"
+                >
+                  <ClockIcon className="w-3.5 h-3.5" />
+                  Termin verlegen
+                </button>
+              )}
               {istReserviert && (
                 <>
                   <button
@@ -280,7 +289,7 @@ export default function AuftragHeaderPanel({
 
           {/* Vor Ort einzusammeln — gelb eingefasst zur Hervorhebung */}
           {offenePflicht.length > 0 && (
-            <div className="flex flex-col rounded-xl border border-amber-300 bg-amber-50 p-3">
+            <div className="flex flex-col rounded-xl border border-dashed border-amber-300 bg-amber-50 p-3">
               <div className="flex items-center gap-2 mb-2">
                 <ClipboardListIcon className="w-4 h-4 text-amber-700" />
                 <p className="text-xs font-semibold uppercase tracking-wider text-amber-900">
@@ -292,7 +301,7 @@ export default function AuftragHeaderPanel({
                   <li key={slot.slot_id} className="text-sm text-claimondo-navy">
                     <span className="font-medium">{slot.label}</span>
                     {slot.beschreibung && (
-                      <span className="text-xs text-claimondo-ondo">
+                      <span className="text-xs text-amber-900">
                         {' — '}
                         {slot.beschreibung}
                       </span>
@@ -333,9 +342,20 @@ export default function AuftragHeaderPanel({
         </div>
       </Modal>
 
-      <Modal open={modal === 'gegenvorschlag'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Gegenvorschlag">
-        <h3 className="text-lg font-semibold text-claimondo-navy mb-2">Gegenvorschlag</h3>
-        <p className="text-sm text-claimondo-ondo mb-4">Schlagen Sie einen alternativen Termin vor:</p>
+      <Modal
+        open={modal === 'gegenvorschlag' || modal === 'verlegen'}
+        onClose={() => setModal(null)}
+        maxWidth={384}
+        ariaLabel={modal === 'verlegen' ? 'Termin verlegen' : 'Gegenvorschlag'}
+      >
+        <h3 className="text-lg font-semibold text-claimondo-navy mb-2">
+          {modal === 'verlegen' ? 'Termin verlegen' : 'Gegenvorschlag'}
+        </h3>
+        <p className="text-sm text-claimondo-ondo mb-4">
+          {modal === 'verlegen'
+            ? 'Neuen Termin vorschlagen — der Kunde wird über die Verlegung informiert.'
+            : 'Schlagen Sie einen alternativen Termin vor:'}
+        </p>
         <input
           type="datetime-local"
           value={neuerTermin}
