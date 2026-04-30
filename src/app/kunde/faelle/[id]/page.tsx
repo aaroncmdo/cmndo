@@ -44,6 +44,11 @@ import { getClaimLifecycle } from '@/lib/claims/lifecycle'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
+// AAR-864: force-dynamic, damit der Verlegungs-Banner direkt nach dem
+// SV-Submit ohne Hard-Reload erscheint (revalidatePath alleine reicht
+// nicht zuverlässig wenn der Kunde gerade auf der Page ist).
+export const dynamic = 'force-dynamic'
+
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 
