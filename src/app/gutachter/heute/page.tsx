@@ -83,7 +83,15 @@ export default async function HeutePage() {
     .from('gutachter_termine')
     .select('id, fall_id, lead_id, start_zeit, end_zeit, status, gesehen_am')
     .eq('sv_id', sv.id)
-    .in('status', ['reserviert', 'bestaetigt', 'vorschlag', 'abgeschlossen'])
+    .in('status', [
+      'reserviert',
+      'bestaetigt',
+      'vorschlag',
+      'abgeschlossen',
+      // AAR-864: Verlegungs-Slots auch in Tagesansicht zeigen
+      'verlegung_pending',
+      'verlegt',
+    ])
     .gte('start_zeit', todayStart.toISOString())
     .lt('start_zeit', tomorrowStart.toISOString())
     .order('start_zeit', { ascending: true })

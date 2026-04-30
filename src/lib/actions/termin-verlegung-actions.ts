@@ -86,40 +86,61 @@ type LoaderResult =
 
 /**
  * Lädt Top-3 Vorschläge für die Verlegung eines bestätigten Termins.
- * Authoritative SV-Auflösung über die Session; nutzt RLS-Client (SV
- * sieht nur seine eigenen Termine über die existierenden Policies).
+ * Nutzt Admin-Client für alle Loads — SV-RLS auf `faelle` (Schaden-
+ * Adresse, Besichtigungsort) und `sachverstaendige` ist nicht garantiert
+ * vollständig, und die Engine braucht zudem fall-übergreifende Termin-
+ * Adressen für die Routen-Berechnung. Auth-Guard prüft dass der eingelogte
+ * User der SV des Termins ist (oder Admin/Staff).
  */
 export async function getVerlegungsVorschlaegeAction(input: {
   terminId: string
   fallId: string
 }): Promise<LoaderResult> {
   const supabase = await createClient()
+  const admin = createAdminClient()
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
 
-  // Termin laden — wir brauchen Adresse + Dauer + sv_id zum Filtern
-  const { data: termin, error: terminErr } = await supabase
+  // Termin laden über Admin-Client
+  const { data: termin, error: terminErr } = await admin
     .from('gutachter_termine')
     .select('id, sv_id, start_zeit, end_zeit, status, fall_id')
     .eq('id', input.terminId)
     .maybeSingle()
   if (terminErr || !termin) return { ok: false, error: 'Termin nicht gefunden.' }
 
-  // Fall + Adresse laden
-  const { data: fall } = await supabase
+  // Auth-Guard: User muss der SV des Termins sein, oder Admin/Staff
+  if (termin.sv_id) {
+    const { data: sv } = await admin
+      .from('sachverstaendige')
+      .select('profile_id')
+      .eq('id', termin.sv_id as string)
+      .maybeSingle()
+    const istEigenerTermin = sv?.profile_id === user.id
+    if (!istEigenerTermin) {
+      const rolle = await lookupUserRolle(user.id)
+      if (rolle !== 'admin') {
+        return { ok: false, error: 'Keine Berechtigung für diesen Termin.' }
+      }
+    }
+  }
+
+  // Fall + Adresse laden — Admin damit garantiert alle Spalten sichtbar
+  const { data: fall } = await admin
     .from('faelle')
-    .select('id, besichtigungsort_adresse, besichtigungsort_plz')
+    .select('id, besichtigungsort_adresse, besichtigungsort_plz, schadens_adresse, schadens_plz, schadens_ort')
     .eq('id', input.fallId)
     .maybeSingle()
   if (!fall) return { ok: false, error: 'Fall nicht gefunden.' }
 
-  const adresse = [fall.besichtigungsort_adresse, fall.besichtigungsort_plz]
-    .filter(Boolean)
-    .join(', ')
-  if (!adresse) return { ok: false, error: 'Besichtigungsort-Adresse fehlt am Fall.' }
+  // Bevorzugt besichtigungsort_*, Fallback schadens_*
+  const adresse =
+    [fall.besichtigungsort_adresse, fall.besichtigungsort_plz].filter(Boolean).join(', ') ||
+    [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ')
+  if (!adresse) return { ok: false, error: 'Keine Adresse am Fall hinterlegt.' }
 
   // Slot-Dauer aus altem Termin (default 45 wenn unplausibel)
   const dauerMin = Math.round(
@@ -129,10 +150,10 @@ export async function getVerlegungsVorschlaegeAction(input: {
   )
   const slotDauerMin = dauerMin >= 30 && dauerMin <= 240 ? dauerMin : 45
 
-  // AAR-864: SV-Standort als Fallback wenn an einem Tag kein Vor-Termin existiert
+  // SV-Standort als Fallback wenn an einem Tag kein Vor-Termin existiert
   let svStandortAdresse: string | null = null
   if (termin.sv_id) {
-    const { data: sv } = await supabase
+    const { data: sv } = await admin
       .from('sachverstaendige')
       .select('standort_adresse, standort_plz')
       .eq('id', termin.sv_id as string)
@@ -141,7 +162,9 @@ export async function getVerlegungsVorschlaegeAction(input: {
     if (teile.length) svStandortAdresse = teile.join(', ')
   }
 
-  const vorschlaege = await findVerlegungsVorschlaege(supabase, termin.sv_id as string, {
+  // Engine bekommt Admin-Client damit der Tagesplan-Loader fall-übergreifend
+  // alle Adressen für die Routen-Berechnung sieht
+  const vorschlaege = await findVerlegungsVorschlaege(admin, termin.sv_id as string, {
     besichtigungsortAdresse: adresse,
     slotDauerMin,
     exkludiereTerminId: termin.id as string,
