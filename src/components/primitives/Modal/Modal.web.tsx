@@ -1,5 +1,6 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { tokens } from '@/lib/design-tokens'
 import { CloseButton } from '../CloseButton/CloseButton.web'
 import type { ModalProps } from './Modal.types'
@@ -16,6 +17,13 @@ export function Modal({
   ariaLabel,
   placement = 'center',
 }: ModalProps) {
+  // SSR-safe: Portal-Target erst nach Mount setzen, sonst kracht
+  // document.body in der Server-Render-Phase.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     if (!open || !closeOnEsc) return
     function onKey(e: KeyboardEvent) {
@@ -25,7 +33,7 @@ export function Modal({
     return () => document.removeEventListener('keydown', onKey)
   }, [open, closeOnEsc, onClose])
 
-  if (!open) return null
+  if (!open || !mounted) return null
 
   // Outer-Container: bottom-sheet rutscht auf Mobile von unten ein,
   // ab md+ verhält er sich wie ein normales centered Modal.
@@ -41,7 +49,10 @@ export function Modal({
       ? 'relative w-full overflow-auto rounded-t-2xl md:rounded-2xl border border-claimondo-border bg-white shadow-ios-lg'
       : 'relative w-full overflow-auto rounded-2xl border border-claimondo-border bg-white shadow-ios-lg'
 
-  return (
+  // Portal nach document.body — sonst ankern fixed-Children an
+  // Wrapper-Containing-Blocks (backdrop-filter, transform etc.) und
+  // werden in deren Layout eingesperrt.
+  return createPortal(
     <div className={outerClassName} role="dialog" aria-modal="true" aria-label={ariaLabel}>
       {/* Backdrop */}
       <div
@@ -65,6 +76,7 @@ export function Modal({
         {!hideCloseButton && <CloseButton onPress={onClose} offset={12} />}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
