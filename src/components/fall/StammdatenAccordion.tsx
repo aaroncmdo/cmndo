@@ -93,64 +93,64 @@ export default function StammdatenAccordion({
       <div className="flex flex-col sm:flex-row min-h-0">
 
         {/* ── Links: Fahrzeug-Panel ── */}
-        <div className="sm:w-[168px] shrink-0 flex flex-col items-center gap-3 px-4 py-5 border-b sm:border-b-0 sm:border-r border-claimondo-border/60 bg-claimondo-navy/[0.025]">
+        <div className="sm:w-[300px] shrink-0 flex flex-col items-center gap-4 px-6 py-6 border-b sm:border-b-0 sm:border-r border-claimondo-border/60 bg-claimondo-navy/[0.025]">
           <FahrzeugRenderImage
             hersteller={hersteller}
             modell={modell}
             lackfarbe={lack}
-            width={136}
+            width={260}
           />
 
           {/* Modell + Kennzeichen + Farbe */}
-          <div className="w-full text-center space-y-1.5">
+          <div className="w-full text-center space-y-2">
             {(hersteller || modell) && (
-              <p className="text-xs font-semibold text-claimondo-navy leading-snug">
+              <p className="text-base font-semibold text-claimondo-navy leading-snug">
                 {[hersteller, modell].filter(Boolean).join(' ')}
               </p>
             )}
             {kennzeichen && (
               <div className="flex justify-center">
-                <span className="inline-flex items-center rounded-md border-2 border-claimondo-navy bg-white px-1.5 py-0.5 font-mono text-[11px] tracking-wide text-claimondo-navy">
+                <span className="inline-flex items-center rounded-md border-2 border-claimondo-navy bg-white px-2.5 py-1 font-mono text-sm tracking-wide text-claimondo-navy">
                   {kennzeichen}
                 </span>
               </div>
             )}
             {lack && (
-              <p className="text-[11px] text-claimondo-ondo">{LACKFARBE_LABEL[lack]}</p>
+              <p className="text-sm text-claimondo-ondo">{LACKFARBE_LABEL[lack]}</p>
             )}
           </div>
 
           {/* Baujahr · FIN · Fahrbereit */}
           {hasFahrzeugDetails && (
-            <div className="w-full space-y-1.5 pt-2.5 border-t border-claimondo-border/50">
+            <div className="w-full space-y-2.5 pt-4 border-t border-claimondo-border/50">
               {baujahr && (
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 shrink-0">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70 shrink-0">
                     Baujahr
                   </span>
-                  <span className="text-[11px] font-medium text-claimondo-navy">{baujahr}</span>
+                  <span className="text-sm font-medium text-claimondo-navy">{baujahr}</span>
                 </div>
               )}
               {fin && (
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 shrink-0">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70 shrink-0">
                     FIN
                   </span>
-                  <span className="text-[10px] font-mono text-claimondo-navy truncate">{fin}</span>
+                  <span className="text-xs font-mono text-claimondo-navy truncate">{fin}</span>
                 </div>
               )}
               {fahrbereit !== null && (
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 shrink-0">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70 shrink-0">
                     Fahrbereit
                   </span>
                   {fahrbereit ? (
-                    <span className="inline-flex items-center gap-0.5 text-[11px] text-emerald-700">
-                      <CheckCircle2Icon className="w-3 h-3" /> Ja
+                    <span className="inline-flex items-center gap-1 text-sm text-emerald-700">
+                      <CheckCircle2Icon className="w-3.5 h-3.5" /> Ja
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-0.5 text-[11px] text-rose-700">
-                      <XCircleIcon className="w-3 h-3" /> Nein
+                    <span className="inline-flex items-center gap-1 text-sm text-rose-700">
+                      <XCircleIcon className="w-3.5 h-3.5" /> Nein
                     </span>
                   )}
                 </div>
@@ -169,7 +169,7 @@ export default function StammdatenAccordion({
                 key={key}
                 type="button"
                 onClick={() => setActiveTab(key)}
-                className={`px-3 py-2.5 text-[11px] font-medium whitespace-nowrap transition-colors border-b-2 -mb-px shrink-0 ${
+                className={`px-5 py-4 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px shrink-0 ${
                   activeTab === key
                     ? 'border-claimondo-navy text-claimondo-navy'
                     : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
