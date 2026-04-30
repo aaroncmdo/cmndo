@@ -118,7 +118,9 @@ export default function FahrzeugRenderImage({
   const key = lookupKey(hersteller)
   const imaginUrl = buildImaginProxyUrl({ hersteller, modell, lackfarbe, baujahr })
   const siSlug = key in SI_SLUG ? SI_SLUG[key] : null
-  const siUrl = siSlug ? `https://cdn.simpleicons.org/${siSlug}` : null
+  // Claimondo-Navy als Logo-Farbe — SimpleIcons rendert sonst in der
+  // Brand-Color (z.B. Audi-Rot), das passt nicht ins CI.
+  const siUrl = siSlug ? `https://cdn.simpleicons.org/${siSlug}/0D1B3E` : null
   const clearbitDomain = CLEARBIT_DOMAIN[key] ?? null
   const clearbitUrl = clearbitDomain ? `https://logo.clearbit.com/${clearbitDomain}` : null
 
@@ -148,12 +150,12 @@ export default function FahrzeugRenderImage({
     )
   }
 
-  // Stage 2 — SimpleIcons (Marken-Logo in Original-Brandfarbe)
+  // Stage 2 — SimpleIcons (Marken-Logo in Claimondo-Navy, ohne Hintergrund)
   if (stage === 'simpleicons' && siUrl) {
-    const logoSize = Math.round(width * 0.45)
+    const logoSize = Math.round(width * 0.6)
     return (
       <div
-        className={`flex items-center justify-center rounded-xl bg-claimondo-border/20 ${className}`}
+        className={`flex items-center justify-center ${className}`}
         style={{ width, height }}
       >
         <Image
@@ -169,12 +171,12 @@ export default function FahrzeugRenderImage({
     )
   }
 
-  // Stage 3 — Clearbit (für Marken ohne SimpleIcons-Eintrag)
+  // Stage 3 — Clearbit (für Marken ohne SimpleIcons-Eintrag) — ohne Hintergrund
   if (stage === 'clearbit' && clearbitUrl) {
-    const logoSize = Math.round(width * 0.4)
+    const logoSize = Math.round(width * 0.55)
     return (
       <div
-        className={`flex items-center justify-center rounded-xl bg-claimondo-border/20 ${className}`}
+        className={`flex items-center justify-center ${className}`}
         style={{ width, height }}
       >
         <Image
@@ -183,7 +185,7 @@ export default function FahrzeugRenderImage({
           width={logoSize}
           height={logoSize}
           unoptimized
-          className="object-contain opacity-90"
+          className="object-contain"
           onError={() => next('clearbit')}
         />
       </div>
