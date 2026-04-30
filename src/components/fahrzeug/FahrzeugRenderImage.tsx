@@ -1,14 +1,24 @@
 'use client'
 
-// CMM-32: Render-Bild eines Fahrzeugs in der richtigen Lackfarbe via Imagin
-// Studio. Fallback-Kette: Imagin-Render → Hersteller-Logo → CarIcon.
+// CMM-32: 4-stufige Fallback-Kaskade für Fahrzeug-Vorschau:
+//   1) Imagin-Studio-Render (parametrisch, mit Lackfarbe) via Server-Proxy
+//      — der Proxy filtert den X-Imaginstudio-Error-Header raus, damit
+//      onError zuverlässig feuert wenn kein echtes Asset verfügbar ist
+//   2) Wikipedia-Thumbnail (über Server-Proxy mit OpenSearch-Lookup)
+//      — kostenlos, deckt fast alle Modelle, aber keine Lackfarbe
+//   3) Hersteller-Logo via Clearbit Logo CDN
+//   4) Hersteller-Logo via Google-Favicon-CDN (immer-up Backup)
+//   5) Generischer CarIcon (letzter Fallback)
 
 import Image from 'next/image'
 import { CarIcon } from 'lucide-react'
-import { buildImaginUrl, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
+import {
+  buildImaginProxyUrl,
+  buildWikiProxyUrl,
+  type LackfarbeCode,
+} from '@/lib/fahrzeug/imagin'
 import { useState } from 'react'
 
-// Bekannte Marken → Clearbit-Logo-Domain
 const BRAND_LOGO_DOMAINS: Record<string, string> = {
   audi:              'audi.com',
   bmw:               'bmw.com',
@@ -50,25 +60,24 @@ const BRAND_LOGO_DOMAINS: Record<string, string> = {
   cupra:             'cupraofficial.com',
 }
 
-function getLogoUrl(hersteller: string): string | null {
+function getDomain(hersteller: string): string | null {
   const key = hersteller.toLowerCase().trim()
-  const domain = BRAND_LOGO_DOMAINS[key]
-  if (!domain) return null
-  return `https://logo.clearbit.com/${domain}`
+  return BRAND_LOGO_DOMAINS[key] ?? null
 }
 
 type Props = {
   hersteller: string | null
   modell: string | null
   lackfarbe: LackfarbeCode | null
-  /** Pixel — Imagin liefert hochaufgelöste PNGs, das `width` steuert
-   *  die Render-Pixel-Breite. */
+  /** Pixel — Renderbreite. */
   width?: number
   /** Tailwind-Klassen am Wrapper. */
   className?: string
   /** Optionaler Alt-Text-Override. */
   alt?: string
 }
+
+type Stage = 'imagin' | 'wiki' | 'clearbit' | 'google' | 'icon'
 
 export default function FahrzeugRenderImage({
   hersteller,
@@ -78,11 +87,16 @@ export default function FahrzeugRenderImage({
   className = '',
   alt,
 }: Props) {
-  const [imaginFailed, setImaginFailed] = useState(false)
-  const [logoFailed, setLogoFailed] = useState(false)
+  const [stage, setStage] = useState<Stage>('imagin')
 
-  const imaginUrl = buildImaginUrl({ hersteller, modell, lackfarbe, angle: 21 })
-  const logoUrl = hersteller ? getLogoUrl(hersteller) : null
+  const imaginUrl = buildImaginProxyUrl({ hersteller, modell, lackfarbe })
+  const wikiUrl = buildWikiProxyUrl({ hersteller, modell })
+  const domain = hersteller ? getDomain(hersteller) : null
+  const clearbitUrl = domain ? `https://logo.clearbit.com/${domain}` : null
+  const googleUrl = domain
+    ? `https://www.google.com/s2/favicons?sz=128&domain=${domain}`
+    : null
+
   const altText = alt ?? `${hersteller ?? 'Fahrzeug'} ${modell ?? ''}`.trim()
   const height = Math.round(width * 0.6)
 
@@ -98,8 +112,15 @@ export default function FahrzeugRenderImage({
     )
   }
 
-  // Imagin-Render (primär)
-  if (imaginUrl && !imaginFailed) {
+  function next(from: Stage) {
+    if (from === 'imagin') setStage(wikiUrl ? 'wiki' : clearbitUrl ? 'clearbit' : googleUrl ? 'google' : 'icon')
+    else if (from === 'wiki') setStage(clearbitUrl ? 'clearbit' : googleUrl ? 'google' : 'icon')
+    else if (from === 'clearbit') setStage(googleUrl ? 'google' : 'icon')
+    else setStage('icon')
+  }
+
+  // Stage 1 — Imagin
+  if (stage === 'imagin' && imaginUrl) {
     return (
       <div className={`relative ${className}`} style={{ width, height }}>
         <Image
@@ -109,14 +130,31 @@ export default function FahrzeugRenderImage({
           sizes={`${width}px`}
           unoptimized
           className="object-contain"
-          onError={() => setImaginFailed(true)}
+          onError={() => next('imagin')}
         />
       </div>
     )
   }
 
-  // Hersteller-Logo (erster Fallback)
-  if (logoUrl && !logoFailed) {
+  // Stage 2 — Wikipedia
+  if (stage === 'wiki' && wikiUrl) {
+    return (
+      <div className={`relative ${className}`} style={{ width, height }}>
+        <Image
+          src={wikiUrl}
+          alt={altText}
+          fill
+          sizes={`${width}px`}
+          unoptimized
+          className="object-contain"
+          onError={() => next('wiki')}
+        />
+      </div>
+    )
+  }
+
+  // Stage 3 — Clearbit-Logo
+  if (stage === 'clearbit' && clearbitUrl) {
     const logoSize = Math.round(width * 0.4)
     return (
       <div
@@ -124,19 +162,40 @@ export default function FahrzeugRenderImage({
         style={{ width, height }}
       >
         <Image
-          src={logoUrl}
+          src={clearbitUrl}
           alt={`${hersteller} Logo`}
           width={logoSize}
           height={logoSize}
           unoptimized
-          className="object-contain opacity-70"
-          onError={() => setLogoFailed(true)}
+          className="object-contain opacity-80"
+          onError={() => next('clearbit')}
         />
       </div>
     )
   }
 
-  // CarIcon (letzter Fallback)
+  // Stage 4 — Google-Favicon
+  if (stage === 'google' && googleUrl) {
+    const logoSize = Math.round(width * 0.4)
+    return (
+      <div
+        className={`flex items-center justify-center rounded-xl bg-claimondo-border/30 ${className}`}
+        style={{ width, height }}
+      >
+        <Image
+          src={googleUrl}
+          alt={`${hersteller} Logo`}
+          width={logoSize}
+          height={logoSize}
+          unoptimized
+          className="object-contain opacity-80"
+          onError={() => next('google')}
+        />
+      </div>
+    )
+  }
+
+  // Stage 5 — CarIcon
   return (
     <div
       className={`flex items-center justify-center rounded-xl bg-claimondo-border/30 text-claimondo-ondo ${className}`}

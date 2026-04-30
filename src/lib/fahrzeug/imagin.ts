@@ -78,16 +78,11 @@ export type ImaginParams = {
   zoomType?: 'fullscreen' | 'cabin'
 }
 
-/** Baut die Imagin-URL. Returnt null wenn weder Hersteller noch Modell
- *  bekannt sind (kein nutzbares Asset).
- *
- *  WICHTIG: Der `demo`-Customer liefert für nicht-lizenzierte Marken
- *  HTTP 200 mit Header `X-Imaginstudio-Error: Access error` und einem
- *  Platzhalter-PNG zurück — das triggert `<img onError>` NICHT, das
- *  Frontend würde also einen leeren/roten Mantel anzeigen statt zum
- *  Logo-Fallback zu wechseln. Solange kein Production-Customer in
- *  `NEXT_PUBLIC_IMAGIN_CUSTOMER` gesetzt ist, skippen wir Imagin
- *  komplett und gehen direkt aufs Hersteller-Logo. */
+/** Baut die Imagin-Direkt-URL. Returnt null wenn kein Hersteller bekannt
+ *  ist. Wird ausschließlich vom Proxy-Route `/api/fahrzeug/imagin`
+ *  konsumiert — der filtert den `X-Imaginstudio-Error`-Header raus,
+ *  damit `<img onError>` im Browser zuverlässig feuert. Das Frontend
+ *  ruft NICHT diese URL direkt auf. */
 export function buildImaginUrl({
   hersteller,
   modell,
@@ -96,7 +91,6 @@ export function buildImaginUrl({
   zoomType = 'fullscreen',
 }: ImaginParams): string | null {
   if (!hersteller?.trim()) return null
-  if (CUSTOMER === 'demo') return null
   const params = new URLSearchParams({
     customer: CUSTOMER,
     make: hersteller.trim(),
@@ -107,4 +101,35 @@ export function buildImaginUrl({
   if (modell?.trim()) params.set('modelFamily', modell.trim())
   if (lackfarbe) params.set('paintDescription', PAINT_MAP[lackfarbe])
   return `${IMAGIN_BASE}?${params.toString()}`
+}
+
+/** Browser-seitige URL — geht durch unseren Proxy. */
+export function buildImaginProxyUrl({
+  hersteller,
+  modell,
+  lackfarbe,
+}: {
+  hersteller: string | null
+  modell: string | null
+  lackfarbe: LackfarbeCode | null
+}): string | null {
+  if (!hersteller?.trim()) return null
+  const params = new URLSearchParams({ make: hersteller.trim() })
+  if (modell?.trim()) params.set('model', modell.trim())
+  if (lackfarbe) params.set('paint', lackfarbe)
+  return `/api/fahrzeug/imagin?${params.toString()}`
+}
+
+/** Wikipedia-Proxy für Auto-Thumbnails (zweite Fallback-Stufe). */
+export function buildWikiProxyUrl({
+  hersteller,
+  modell,
+}: {
+  hersteller: string | null
+  modell: string | null
+}): string | null {
+  if (!hersteller?.trim()) return null
+  const params = new URLSearchParams({ make: hersteller.trim() })
+  if (modell?.trim()) params.set('model', modell.trim())
+  return `/api/fahrzeug/wiki?${params.toString()}`
 }
