@@ -327,7 +327,7 @@ export default function FallDetailClient(props: Props) {
   })
 
   return (
-    <div className="min-h-full bg-[#f8f9fb]">
+    <div className="min-h-full bg-[#f8f9fb] -m-2 sm:-m-3 lg:-m-4">
       <FallWindowDropzone fallId={fall.id as string} />
       <FallHeader
         fallNummer={fallNummer}
@@ -370,9 +370,9 @@ export default function FallDetailClient(props: Props) {
         </div>
       )}
 
-      {/* CMM-32 Walkthrough: Stammdaten-Block edge-to-edge volle Breite,
-          darunter Vorschäden-Hinweis + Gutachten-Card im normalen Container. */}
-      <div className="pt-4">
+      {/* CMM-32 Walkthrough: Stammdaten-Block volle Breite im Container,
+          darunter Vorschäden-Hinweis + Gutachten-Card. */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-4 sm:space-y-6">
         <StammdatenAccordion
           data={{
             fall,
@@ -400,9 +400,7 @@ export default function FallDetailClient(props: Props) {
         {false && (
           <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
         )}
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-4 sm:space-y-6">
         {!!fall.hat_vorschaeden && (
           <div className="rounded-2xl bg-amber-50/40 border border-amber-200 p-4">
             <div className="flex items-start gap-3">
