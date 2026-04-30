@@ -370,32 +370,33 @@ export default function FallDetailClient(props: Props) {
         </div>
       )}
 
-      {/* CMM-32 Walkthrough: Stammdaten-Block volle Breite im Container,
-          darunter Vorschäden-Hinweis + Gutachten-Card. */}
+      {/* CMM-32 Walkthrough: Stammdaten-Block links, Dokumente rechts
+          daneben. Aaron 2026-04-30: Dokumente waren als Tab kontra-
+          intuitiv — jetzt eigene Spalte. Mobile: stacked. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-4 sm:space-y-6">
-        <StammdatenAccordion
-          data={{
-            fall,
-            lead,
-            parteien: props.parteien,
-            dokumenteAnzahl: (props.dokumente ?? []).length,
-          }}
-          dokumenteSlot={
-            <WeitereDokumenteCard
-              fallId={fall.id as string}
-              inline
-              dokumente={(props.dokumente ?? []).map((d) => ({
-                id: String(d.id),
-                dokument_typ: (d.typ as string | null) ?? null,
-                datei_url: (d.datei_url as string | null) ?? null,
-                datei_name: (d.datei_name as string | null) ?? null,
-                hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
-                created_at: (d.created_at as string | null) ?? null,
-                storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
-              }))}
-            />
-          }
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4 sm:gap-6">
+          <StammdatenAccordion
+            data={{
+              fall,
+              lead,
+              parteien: props.parteien,
+              dokumenteAnzahl: (props.dokumente ?? []).length,
+            }}
+          />
+          <WeitereDokumenteCard
+            fallId={fall.id as string}
+            dokumente={(props.dokumente ?? []).map((d) => ({
+              id: String(d.id),
+              dokument_typ: (d.typ as string | null) ?? null,
+              datei_url: (d.datei_url as string | null) ?? null,
+              datei_name: (d.datei_name as string | null) ?? null,
+              hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
+              created_at: (d.created_at as string | null) ?? null,
+              storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
+            }))}
+          />
+        </div>
+
         {/* CMM-32: alte StammdatenCard-Fallback — vorerst raus */}
         {false && (
           <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />

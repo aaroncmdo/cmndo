@@ -43,13 +43,15 @@ export type StammdatenAccordionData = {
   dokumenteAnzahl?: number
 }
 
-type TabKey = Exclude<StammdatenCategory, 'fahrzeug'>
+type TabKey = Exclude<StammdatenCategory, 'fahrzeug' | 'dokumente'>
 
+// Aaron 2026-04-30: Dokumente raus aus den Tabs — die rendern jetzt
+// rechts daneben als eigene Card. Tab-Position für Dokumente war
+// kontraintuitiv (Aaron-Spec).
 const TABS: { key: TabKey; label: string; icon: typeof ClockIcon }[] = [
   { key: 'historie',  label: 'Historie',  icon: ClockIcon            },
   { key: 'unfall',    label: 'Unfall',    icon: CarFrontIcon         },
   { key: 'schaden',   label: 'Schaden',   icon: WrenchIcon           },
-  { key: 'dokumente', label: 'Dokumente', icon: FileTextIcon         },
   { key: 'kunde',     label: 'Kunde',     icon: UserIcon             },
   { key: 'gegner',    label: 'Gegner',    icon: ShieldIcon           },
 ]
