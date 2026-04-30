@@ -79,8 +79,15 @@ export type ImaginParams = {
 }
 
 /** Baut die Imagin-URL. Returnt null wenn weder Hersteller noch Modell
- *  bekannt sind (kein nutzbares Asset). Imagin selbst macht graceful
- *  fallback auf generische Renderings wenn das exakte Modell fehlt. */
+ *  bekannt sind (kein nutzbares Asset).
+ *
+ *  WICHTIG: Der `demo`-Customer liefert für nicht-lizenzierte Marken
+ *  HTTP 200 mit Header `X-Imaginstudio-Error: Access error` und einem
+ *  Platzhalter-PNG zurück — das triggert `<img onError>` NICHT, das
+ *  Frontend würde also einen leeren/roten Mantel anzeigen statt zum
+ *  Logo-Fallback zu wechseln. Solange kein Production-Customer in
+ *  `NEXT_PUBLIC_IMAGIN_CUSTOMER` gesetzt ist, skippen wir Imagin
+ *  komplett und gehen direkt aufs Hersteller-Logo. */
 export function buildImaginUrl({
   hersteller,
   modell,
@@ -89,6 +96,7 @@ export function buildImaginUrl({
   zoomType = 'fullscreen',
 }: ImaginParams): string | null {
   if (!hersteller?.trim()) return null
+  if (CUSTOMER === 'demo') return null
   const params = new URLSearchParams({
     customer: CUSTOMER,
     make: hersteller.trim(),
