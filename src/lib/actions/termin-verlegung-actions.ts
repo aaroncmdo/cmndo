@@ -158,3 +158,152 @@ export async function terminVerlegungVorschlagen(input: {
 
   return { ok: true, neuerTerminId: neu.id as string }
 }
+
+type DecisionResult = { ok: true } | { ok: false; error: string }
+
+function revalidateFallPaths(fallId: string | null) {
+  if (fallId) {
+    revalidatePath(`/gutachter/fall/${fallId}`)
+    revalidatePath(`/faelle/${fallId}`)
+    revalidatePath(`/kunde/faelle/${fallId}`)
+    revalidatePath(`/mitarbeiter/faelle/${fallId}`)
+  }
+  revalidatePath('/gutachter/auftraege')
+  revalidatePath('/gutachter/heute')
+  revalidatePath('/kunde')
+  revalidatePath('/mitarbeiter/faelle')
+  revalidatePath('/admin/faelle')
+}
+
+/**
+ * Bestätigt die Verlegung. Aufrufbar durch Kunde, KB oder Admin.
+ * Auth läuft über die existierenden RLS-Policies — wenn der UPDATE
+ * fehlschlägt, kommt Supabase-Error zurück.
+ *
+ * State-Transition:
+ *   alter Termin: 'verlegt' → 'verschoben' (terminal) + cancelled_at
+ *   neuer Slot:   'verlegung_pending' → 'bestaetigt'
+ *
+ * Idempotent: wenn der Pending-Slot schon nicht mehr 'verlegung_pending'
+ * ist (z.B. weil schon abgelehnt oder doppelt bestätigt), Abbruch.
+ */
+export async function terminVerlegungBestaetigen(input: {
+  neuerTerminId: string
+}): Promise<DecisionResult> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
+
+  const { data: neu, error: neuErr } = await supabase
+    .from('gutachter_termine')
+    .select('id, status, verlegung_quelle_id, fall_id')
+    .eq('id', input.neuerTerminId)
+    .maybeSingle()
+  if (neuErr || !neu) return { ok: false, error: 'Verlegungs-Slot nicht gefunden.' }
+  if (neu.status !== 'verlegung_pending') {
+    return {
+      ok: false,
+      error: `Slot ist nicht im Status 'verlegung_pending' (aktuell: ${neu.status}).`,
+    }
+  }
+  if (!neu.verlegung_quelle_id) {
+    return { ok: false, error: 'Kein verlegung_quelle_id auf dem Pending-Slot.' }
+  }
+
+  // 1) Neuer Slot → bestaetigt
+  const { error: bestErr } = await supabase
+    .from('gutachter_termine')
+    .update({ status: 'bestaetigt' })
+    .eq('id', neu.id)
+    .eq('status', 'verlegung_pending')
+  if (bestErr) return { ok: false, error: `Bestätigen fehlgeschlagen: ${bestErr.message}` }
+
+  // 2) Alter Termin → verschoben (terminal)
+  const { error: altErr } = await supabase
+    .from('gutachter_termine')
+    .update({
+      status: 'verschoben',
+      cancelled_at: new Date().toISOString(),
+    })
+    .eq('id', neu.verlegung_quelle_id)
+    .eq('status', 'verlegt')
+  if (altErr) {
+    // Rollback: neuer Slot zurück auf pending
+    await supabase
+      .from('gutachter_termine')
+      .update({ status: 'verlegung_pending' })
+      .eq('id', neu.id)
+    return { ok: false, error: `Alten Termin schließen fehlgeschlagen: ${altErr.message}` }
+  }
+
+  revalidateFallPaths(neu.fall_id as string | null)
+  return { ok: true }
+}
+
+/**
+ * Lehnt die Verlegung ab. Aufrufbar durch Kunde, KB oder Admin.
+ * State-Transition:
+ *   alter Termin: 'verlegt' → 'bestaetigt' (Rollback)
+ *   neuer Slot:   'verlegung_pending' → 'storniert'
+ *
+ * Optional: Grund wird in verlegung_grund des storno-Slots persistiert
+ * (überschreibt den SV-Grund — die Ablehnung ist die finale Wahrheit).
+ */
+export async function terminVerlegungAblehnen(input: {
+  neuerTerminId: string
+  grund?: string
+}): Promise<DecisionResult> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
+
+  const { data: neu, error: neuErr } = await supabase
+    .from('gutachter_termine')
+    .select('id, status, verlegung_quelle_id, fall_id')
+    .eq('id', input.neuerTerminId)
+    .maybeSingle()
+  if (neuErr || !neu) return { ok: false, error: 'Verlegungs-Slot nicht gefunden.' }
+  if (neu.status !== 'verlegung_pending') {
+    return {
+      ok: false,
+      error: `Slot ist nicht im Status 'verlegung_pending' (aktuell: ${neu.status}).`,
+    }
+  }
+  if (!neu.verlegung_quelle_id) {
+    return { ok: false, error: 'Kein verlegung_quelle_id auf dem Pending-Slot.' }
+  }
+
+  // 1) Neuer Slot → storniert
+  const { error: stoErr } = await supabase
+    .from('gutachter_termine')
+    .update({
+      status: 'storniert',
+      cancelled_at: new Date().toISOString(),
+      verlegung_grund: input.grund?.trim() || null,
+    })
+    .eq('id', neu.id)
+    .eq('status', 'verlegung_pending')
+  if (stoErr) return { ok: false, error: `Stornieren fehlgeschlagen: ${stoErr.message}` }
+
+  // 2) Alter Termin → bestaetigt (Rollback)
+  const { error: rbErr } = await supabase
+    .from('gutachter_termine')
+    .update({ status: 'bestaetigt' })
+    .eq('id', neu.verlegung_quelle_id)
+    .eq('status', 'verlegt')
+  if (rbErr) {
+    // Rollback des Rollbacks: neuer Slot zurück auf pending
+    await supabase
+      .from('gutachter_termine')
+      .update({ status: 'verlegung_pending', cancelled_at: null })
+      .eq('id', neu.id)
+    return { ok: false, error: `Alter Termin Rollback fehlgeschlagen: ${rbErr.message}` }
+  }
+
+  revalidateFallPaths(neu.fall_id as string | null)
+  return { ok: true }
+}
