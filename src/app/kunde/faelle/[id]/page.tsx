@@ -35,6 +35,7 @@ import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
+import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
@@ -156,6 +157,63 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
+
+    // AAR-864: Pending Verlegungs-Slot + alter Termin (für Banner)
+    const { data: verlegungPendingRow } = await admin
+      .from('gutachter_termine')
+      .select('id, start_zeit, verlegung_quelle_id, verlegung_grund, sv_id')
+      .eq('fall_id', id)
+      .eq('status', 'verlegung_pending')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    let verlegungBannerProps: React.ComponentProps<typeof TerminVerlegungBanner> | null = null
+    if (verlegungPendingRow?.verlegung_quelle_id) {
+      const { data: alterTermin } = await admin
+        .from('gutachter_termine')
+        .select('start_zeit')
+        .eq('id', verlegungPendingRow.verlegung_quelle_id as string)
+        .maybeSingle()
+      // SV-Vorname aus profiles
+      let svVorname = ''
+      if (verlegungPendingRow.sv_id) {
+        const { data: sv } = await admin
+          .from('sachverstaendige')
+          .select('profile_id')
+          .eq('id', verlegungPendingRow.sv_id as string)
+          .maybeSingle()
+        if (sv?.profile_id) {
+          const { data: p } = await admin
+            .from('profiles')
+            .select('vorname, anzeigename')
+            .eq('id', sv.profile_id as string)
+            .maybeSingle()
+          svVorname = ((p?.vorname as string | null) ?? (p?.anzeigename as string | null) ?? '') as string
+        }
+      }
+      const fmtD = (iso: string | null) =>
+        iso
+          ? new Date(iso).toLocaleDateString('de-DE', {
+              weekday: 'long',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })
+          : ''
+      const fmtT = (iso: string | null) =>
+        iso
+          ? new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+          : ''
+      verlegungBannerProps = {
+        pendingTerminId: verlegungPendingRow.id as string,
+        alterDatum: fmtD(alterTermin?.start_zeit as string | null),
+        alterUhrzeit: fmtT(alterTermin?.start_zeit as string | null),
+        neuesDatum: fmtD(verlegungPendingRow.start_zeit as string | null),
+        neuesUhrzeit: fmtT(verlegungPendingRow.start_zeit as string | null),
+        svVorname,
+        grund: (verlegungPendingRow.verlegung_grund as string | null) ?? null,
+      }
+    }
 
     // AAR-558 (C9): Kunden-sichere Felder aus faelle_kunde_view laden.
     // Nur noch für AuszahlungCard genutzt — Eskalations-Tag-Felder kommen
@@ -375,6 +433,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             }}
           />
         )}
+
+        {/* AAR-864: Verlegungs-Banner mit Bestätigen/Ablehnen — sichtbar wenn
+            der SV eine Verlegung beantragt hat und der Kunde noch nicht
+            entschieden hat. */}
+        {verlegungBannerProps && <TerminVerlegungBanner {...verlegungBannerProps} />}
 
         {/* AAR-770: Mitteilungs-Banner — ganz oben mit Quick-Action */}
         <FallMitteilungenBanner fallId={fall.id as string} rolle="kunde" />
