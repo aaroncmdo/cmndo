@@ -13,65 +13,120 @@ export const runtime = 'edge'
 type OpenSearchResponse = [string, string[], string[], string[]]
 
 type SummaryResponse = {
+  extract?: string
+  description?: string
   thumbnail?: { source?: string }
   originalimage?: { source?: string }
 }
 
 const UA = 'Claimondo/1.0 (https://claimondo.de; support@claimondo.de)'
 
+const SUMMARY_BASE = 'https://de.wikipedia.org/api/rest_v1/page/summary/'
+
+async function fetchSummary(title: string): Promise<SummaryResponse | null> {
+  try {
+    const r = await fetch(SUMMARY_BASE + encodeURIComponent(title), {
+      headers: { 'User-Agent': UA },
+    })
+    if (!r.ok) return null
+    return (await r.json()) as SummaryResponse
+  } catch {
+    return null
+  }
+}
+
+/** Sucht im Summary-Text nach einer Baujahr-Range (z.B. "2015 bis 2024"
+ *  oder "2007–2015") und prüft ob das gewünschte Baujahr drin liegt. */
+function summaryMatchesYear(
+  summary: SummaryResponse,
+  year: number,
+): boolean {
+  const blob = `${summary.extract ?? ''} ${summary.description ?? ''}`
+  const range = blob.match(
+    /(19|20)(\d{2})\s*(?:bis|–|—|-)\s*(19|20)(\d{2})/,
+  )
+  if (range) {
+    const from = Number(range[1] + range[2])
+    const to = Number(range[3] + range[4])
+    return year >= from && year <= to
+  }
+  // Offene Range "seit 2024"
+  const since = blob.match(/seit\s+(19|20)(\d{2})/i)
+  if (since) {
+    const from = Number(since[1] + since[2])
+    return year >= from
+  }
+  return false
+}
+
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams
   const make = sp.get('make')?.trim()
   const model = sp.get('model')?.trim()
+  const yearStr = sp.get('year')
+  const year = yearStr ? Number(yearStr.match(/\d{4}/)?.[0] ?? '') : null
   if (!make) return new Response('missing-make', { status: 404 })
 
   const query = [make, model].filter(Boolean).join(' ')
 
-  // 1. OpenSearch — finde besten Wikipedia-Artikel
+  // 1. OpenSearch — bis zu 10 Kandidaten holen damit wir Generationen
+  // (z.B. „Audi A4 B8", „Audi A4 B9") matchen können
   const searchUrl =
     `https://de.wikipedia.org/w/api.php?action=opensearch&format=json` +
-    `&limit=1&namespace=0&search=${encodeURIComponent(query)}`
+    `&limit=10&namespace=0&search=${encodeURIComponent(query)}`
 
-  let title: string | null = null
+  let candidates: string[] = []
   try {
     const sr = await fetch(searchUrl, { headers: { 'User-Agent': UA } })
     if (sr.ok) {
       const data = (await sr.json()) as OpenSearchResponse
-      title = data[1]?.[0] ?? null
+      candidates = data[1] ?? []
     }
   } catch {
-    /* fall-through, title bleibt null */
+    /* fall-through, leer */
   }
 
   // Fallback nur Hersteller wenn Modell nichts brachte
-  if (!title && model) {
+  if (candidates.length === 0 && model) {
     try {
       const sr2 = await fetch(
-        `https://de.wikipedia.org/w/api.php?action=opensearch&format=json&limit=1&namespace=0&search=${encodeURIComponent(make)}`,
+        `https://de.wikipedia.org/w/api.php?action=opensearch&format=json&limit=5&namespace=0&search=${encodeURIComponent(make)}`,
         { headers: { 'User-Agent': UA } },
       )
       if (sr2.ok) {
         const data = (await sr2.json()) as OpenSearchResponse
-        title = data[1]?.[0] ?? null
+        candidates = data[1] ?? []
       }
     } catch {
       /* ignore */
     }
   }
 
-  if (!title) return new Response('no-wiki-page', { status: 404 })
-
-  // 2. REST-Summary — Thumbnail-URL
-  const summaryUrl = `https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`
-  let imageUrl: string | null = null
-  try {
-    const sr = await fetch(summaryUrl, { headers: { 'User-Agent': UA } })
-    if (!sr.ok) return new Response('summary-failed', { status: 404 })
-    const data = (await sr.json()) as SummaryResponse
-    imageUrl = data.originalimage?.source ?? data.thumbnail?.source ?? null
-  } catch {
-    return new Response('summary-fetch-error', { status: 502 })
+  if (candidates.length === 0) {
+    return new Response('no-wiki-page', { status: 404 })
   }
+
+  // 2. Summary-Suche — bei mehreren Kandidaten + Baujahr versuchen wir,
+  // den Generations-Artikel zu finden dessen Baujahr-Range das gesuchte
+  // Jahr enthält. Wenn nichts matcht → ersten Kandidaten als Fallback.
+  let chosenSummary: SummaryResponse | null = null
+  if (year && candidates.length > 1) {
+    for (const cand of candidates) {
+      const sum = await fetchSummary(cand)
+      if (!sum) continue
+      if (summaryMatchesYear(sum, year)) {
+        chosenSummary = sum
+        break
+      }
+    }
+  }
+  if (!chosenSummary) {
+    chosenSummary = await fetchSummary(candidates[0])
+  }
+  if (!chosenSummary) return new Response('summary-failed', { status: 404 })
+
+  const imageUrl =
+    chosenSummary.originalimage?.source ?? chosenSummary.thumbnail?.source ?? null
 
   if (!imageUrl) return new Response('no-image', { status: 404 })
 

@@ -95,7 +95,7 @@ export default function FahrzeugRenderImage({
   const [stage, setStage] = useState<Stage>('imagin')
 
   const imaginUrl = buildImaginProxyUrl({ hersteller, modell, lackfarbe, baujahr })
-  const wikiUrl = buildWikiProxyUrl({ hersteller, modell })
+  const wikiUrl = buildWikiProxyUrl({ hersteller, modell, baujahr })
   const domain = hersteller ? getDomain(hersteller) : null
   const clearbitUrl = domain ? `https://logo.clearbit.com/${domain}` : null
   const googleUrl = domain

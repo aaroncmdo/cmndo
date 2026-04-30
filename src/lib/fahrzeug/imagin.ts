@@ -139,12 +139,18 @@ export function buildImaginProxyUrl({
 export function buildWikiProxyUrl({
   hersteller,
   modell,
+  baujahr,
 }: {
   hersteller: string | null
   modell: string | null
+  baujahr?: number | string | null
 }): string | null {
   if (!hersteller?.trim()) return null
   const params = new URLSearchParams({ make: hersteller.trim() })
   if (modell?.trim()) params.set('model', modell.trim())
+  if (baujahr != null) {
+    const yr = String(baujahr).match(/\d{4}/)?.[0]
+    if (yr) params.set('year', yr)
+  }
   return `/api/fahrzeug/wiki?${params.toString()}`
 }
