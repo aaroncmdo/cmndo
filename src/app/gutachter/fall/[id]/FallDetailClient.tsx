@@ -42,6 +42,7 @@ import StammdatenAccordion from '@/components/fall/StammdatenAccordion'
 import { useState } from 'react'
 import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
+import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
 import FallWindowDropzone from '@/components/gutachter/FallWindowDropzone'
 import AnsprechpartnerCard from './_components/AnsprechpartnerCard'
@@ -329,6 +330,7 @@ export default function FallDetailClient(props: Props) {
 
   return (
     <div className="min-h-full bg-[#f8f9fb] -m-2 sm:-m-3 lg:-m-4">
+      <FallRealtimeRefresh fallId={fall.id as string} />
       <FallWindowDropzone fallId={fall.id as string} />
       <FallHeader
         fallNummer={fallNummer}

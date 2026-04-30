@@ -36,6 +36,7 @@ import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
+import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
@@ -411,6 +412,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
+        {/* AAR-864: Live-Aktualisierung — abonniert gutachter_termine,
+            auftraege und faelle für diesen Fall, refresht die Page bei
+            jedem Event. */}
+        <FallRealtimeRefresh fallId={fall.id as string} />
         {/* Header — CMM-28: Zurück-Link nur bei Multi-Fall-Kunden */}
         <div>
           {hatMehrereFaelle && (
