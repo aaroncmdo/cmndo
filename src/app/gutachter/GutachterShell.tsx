@@ -462,30 +462,29 @@ export default function GutachterShell({
           <UpdatesNav variant="dark" />
         </header>
 
-        {/* AAR-809: Wetter-Banner — auf allen Gutachter-Seiten sichtbar.
-            Trailing-Slot zeigt Outbox + Notifications-Glocke (Mobile + Desktop). */}
-        <WeatherBanner
-          standortLat={standortLat ?? null}
-          standortLng={standortLng ?? null}
-          trailingSlot={
-            <>
-              <OutboxBadge />
-              <UpdatesNav variant="dark" />
-            </>
-          }
-        />
+        {/* AAR-864 Polish: beide Wrapper (Wetter + Content) öffnen sich nach
+            rechts (rounded-r-none, kein right-padding) und schließen links
+            bündig zur Sidebar mit gleichem Abstand ab (pl-2 sm:pl-3 lg:pl-4
+            + rounded-l-2xl). Der navy-Hintergrund des Outer-Containers zieht
+            sich rechts durch. */}
+        <div className="pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4">
+          <WeatherBanner
+            standortLat={standortLat ?? null}
+            standortLng={standortLng ?? null}
+            trailingSlot={
+              <>
+                <OutboxBadge />
+                <UpdatesNav variant="dark" />
+              </>
+            }
+          />
+        </div>
 
-        {/* AAR-864 Polish: Content rechts in einem weißen rounded Wrapper —
-            der dunkle App-Hintergrund (Sidebar-Navy) zieht sich durch und
-            der Content sitzt als „Card" mittendrin.
-            AAR-457 Begründung gilt weiter: overflow-y-auto auf dem inneren
-            <main> damit Seiten ohne eigenen Scroll-Container nicht abgeschnitten
-            werden. */}
-        <div className="flex-1 p-2 sm:p-3 lg:p-4 overflow-hidden">
+        <div className="flex-1 pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4 overflow-hidden">
           <main
             id="main-content"
             role="main"
-            className="h-full overflow-y-auto rounded-2xl bg-[#f8f9fb] shadow-sm p-2 sm:p-3 lg:p-4"
+            className="h-full overflow-y-auto rounded-l-2xl rounded-r-none bg-[#f8f9fb] shadow-sm p-2 sm:p-3 lg:p-4"
           >
             {children}
           </main>

@@ -184,7 +184,7 @@ export default function WeatherBanner({ standortLat, standortLng, trailingSlot, 
 
   return (
     <div
-      className={`relative flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white rounded-2xl overflow-hidden shadow-sm`}
+      className={`relative flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white rounded-l-2xl rounded-r-none overflow-hidden shadow-sm`}
       style={{ minHeight: 64 }}
     >
       <WeatherEffect code={weather.code} />
