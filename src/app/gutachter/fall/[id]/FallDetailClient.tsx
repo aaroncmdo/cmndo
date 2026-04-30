@@ -44,6 +44,7 @@ import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
 import FallWindowDropzone from '@/components/gutachter/FallWindowDropzone'
+import AnsprechpartnerCard from './_components/AnsprechpartnerCard'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
@@ -383,18 +384,21 @@ export default function FallDetailClient(props: Props) {
               dokumenteAnzahl: (props.dokumente ?? []).length,
             }}
           />
-          <WeitereDokumenteCard
-            fallId={fall.id as string}
-            dokumente={(props.dokumente ?? []).map((d) => ({
-              id: String(d.id),
-              dokument_typ: (d.typ as string | null) ?? null,
-              datei_url: (d.datei_url as string | null) ?? null,
-              datei_name: (d.datei_name as string | null) ?? null,
-              hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
-              created_at: (d.created_at as string | null) ?? null,
-              storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
-            }))}
-          />
+          <div className="space-y-4">
+            <WeitereDokumenteCard
+              fallId={fall.id as string}
+              dokumente={(props.dokumente ?? []).map((d) => ({
+                id: String(d.id),
+                dokument_typ: (d.typ as string | null) ?? null,
+                datei_url: (d.datei_url as string | null) ?? null,
+                datei_name: (d.datei_name as string | null) ?? null,
+                hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
+                created_at: (d.created_at as string | null) ?? null,
+                storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
+              }))}
+            />
+            <AnsprechpartnerCard team={team} />
+          </div>
         </div>
 
         {/* CMM-32: alte StammdatenCard-Fallback — vorerst raus */}
