@@ -154,16 +154,17 @@ export default function GutachterShell({
   // der Shell zur Verfügung ohne dass einzelne Consumer das Theme re-importieren.
   const themeVars = generateCssVars(theme, 'full')
 
-  // CMM-32 P2: --app-sidebar-width auf <html> setzen, damit portal-rendered
-  // Modals (Modal.web.tsx) ihren Backdrop nur über den Content-Bereich legen
-  // und die Sidebar nicht mit einschließen. Auf Mobile (< lg) = 0.
+  // CMM-32 P2 / AAR-864: --app-sidebar-width = Sidebar-Breite + lg-Padding
+  // (256px Sidebar + 16px pl-4 = 272px). Damit startet ein portal-rendered
+  // Modal (Modal.web.tsx) bündig am inneren Wrapper-Rand und überdeckt nur
+  // den Content-Bereich rechts. Auf Mobile (< lg) ist die Sidebar weg → 0.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const mql = window.matchMedia('(min-width: 1024px)')
     const apply = () => {
       document.documentElement.style.setProperty(
         '--app-sidebar-width',
-        mql.matches ? '256px' : '0px',
+        mql.matches ? '272px' : '0px',
       )
     }
     apply()
