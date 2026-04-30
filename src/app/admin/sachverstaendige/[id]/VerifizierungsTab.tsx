@@ -11,6 +11,8 @@ import {
   UnlockIcon,
   PlusIcon,
   ShieldCheckIcon,
+  UploadIcon,
+  Loader2Icon,
 } from 'lucide-react'
 import {
   saVorlageFreigeben,
@@ -22,7 +24,9 @@ import {
   pflichtdokumentFreigeben,
   pflichtdokumentZurueckweisen,
   dokumenteAlleFreigeben,
+  uploadAdminPflichtdokument,
 } from './verifizierung-actions'
+import { useRef } from 'react'
 
 // AAR-359 W6: Admin-Verifizierungs-Tab.
 //
@@ -297,30 +301,40 @@ function PflichtdokumenteCard({
                 </div>
               )}
             </div>
-            {d.pflichtdokId && d.status !== 'geprueft' && rejectingSlot !== d.slotId && (
-              <div className="flex gap-1 flex-shrink-0">
-                {(d.status === 'hochgeladen' || d.status === 'abgelehnt') && (
-                  <button
-                    type="button"
-                    onClick={() => handleFreigeben(d.slotId)}
-                    disabled={pending}
-                    className="px-2 py-1 text-[11px] rounded-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40"
-                  >
-                    Freigeben
-                  </button>
-                )}
-                {d.status === 'hochgeladen' && (
-                  <button
-                    type="button"
-                    onClick={() => setRejectingSlot(d.slotId)}
-                    disabled={pending}
-                    className="px-2 py-1 text-[11px] rounded-md border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40"
-                  >
-                    Ablehnen
-                  </button>
-                )}
-              </div>
-            )}
+            <div className="flex flex-col gap-1 flex-shrink-0 items-end">
+              {d.pflichtdokId && d.status !== 'geprueft' && rejectingSlot !== d.slotId && (
+                <div className="flex gap-1">
+                  {(d.status === 'hochgeladen' || d.status === 'abgelehnt') && (
+                    <button
+                      type="button"
+                      onClick={() => handleFreigeben(d.slotId)}
+                      disabled={pending}
+                      className="px-2 py-1 text-[11px] rounded-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40"
+                    >
+                      Freigeben
+                    </button>
+                  )}
+                  {d.status === 'hochgeladen' && (
+                    <button
+                      type="button"
+                      onClick={() => setRejectingSlot(d.slotId)}
+                      disabled={pending}
+                      className="px-2 py-1 text-[11px] rounded-md border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40"
+                    >
+                      Ablehnen
+                    </button>
+                  )}
+                </div>
+              )}
+              {/* Aaron 2026-04-30: Admin kann jederzeit selbst (re-)uploaden.
+                  Schreibt auf den GLEICHEN Storage-Pfad wie der SV-Onboarding-
+                  Upload — keine Duplikate, keine doppelte Datenpflege. */}
+              <AdminSlotUpload
+                svId={svId}
+                slotId={d.slotId}
+                hasFile={!!d.dokumentUrl}
+              />
+            </div>
           </div>
         ))}
       </div>
@@ -834,5 +848,68 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
 
       {fehler && <p className="text-xs text-red-600 mt-2">{fehler}</p>}
     </section>
+  )
+}
+
+// ─── Admin-Slot-Upload (Aaron 2026-04-30) ────────────────────────────
+//
+// Pro Pflichtdok-Slot ein einzelner Upload-Button. Schreibt auf den
+// IDENTISCHEN Storage-Pfad wie der SV-Onboarding-Upload, damit der
+// Admin den SV nicht auffordern muss wenn er das PDF schon hat.
+
+function AdminSlotUpload({
+  svId,
+  slotId,
+  hasFile,
+}: {
+  svId: string
+  slotId: string
+  hasFile: boolean
+}) {
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setError(null)
+    const fd = new FormData()
+    fd.append('slot_id', slotId)
+    fd.append('datei', file)
+    startTransition(async () => {
+      const res = await uploadAdminPflichtdokument(svId, fd)
+      if (!res.ok) setError(res.error ?? 'Upload fehlgeschlagen')
+      if (inputRef.current) inputRef.current.value = ''
+    })
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={pending}
+        className="inline-flex items-center gap-1 px-2 py-1 text-[11px] rounded-md border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] disabled:opacity-40"
+        title={hasFile ? 'Bestehendes Dokument ersetzen' : 'Dokument hochladen'}
+      >
+        {pending ? (
+          <Loader2Icon className="w-3 h-3 animate-spin" />
+        ) : (
+          <UploadIcon className="w-3 h-3" />
+        )}
+        {hasFile ? 'Ersetzen' : 'Hochladen'}
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="application/pdf,image/*"
+        className="hidden"
+        onChange={onChange}
+      />
+      {error && (
+        <span className="text-[10px] text-red-700 max-w-[200px]">{error}</span>
+      )}
+    </>
   )
 }
