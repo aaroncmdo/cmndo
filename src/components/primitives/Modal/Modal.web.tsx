@@ -38,10 +38,16 @@ export function Modal({
   // Outer-Container: bottom-sheet rutscht auf Mobile von unten ein,
   // ab md+ verhält er sich wie ein normales centered Modal.
   // Inline-styles können keine Media-Queries — daher Tailwind-Klassen.
+  // CMM-32 P2: left = var(--app-sidebar-width) damit Backdrop + Body
+  // mittig im Content sitzen und die Sidebar nicht einschließen. Shells
+  // setzen die Var auf 256px (lg+) bzw. 0 (mobile).
   const outerClassName =
     placement === 'bottom-sheet'
-      ? 'fixed inset-0 z-[1000] flex items-end md:items-center justify-center p-0 md:p-4'
-      : 'fixed inset-0 z-[1000] flex items-center justify-center p-4'
+      ? 'fixed inset-y-0 right-0 z-[1000] flex items-end md:items-center justify-center p-0 md:p-4'
+      : 'fixed inset-y-0 right-0 z-[1000] flex items-center justify-center p-4'
+  const outerStyle: React.CSSProperties = {
+    left: 'var(--app-sidebar-width, 0px)',
+  }
 
   // Body-Radius: auf Mobile bottom-sheet rounded-top-only, ab md voller Radius
   const bodyClassName =
@@ -53,7 +59,7 @@ export function Modal({
   // Wrapper-Containing-Blocks (backdrop-filter, transform etc.) und
   // werden in deren Layout eingesperrt.
   return createPortal(
-    <div className={outerClassName} role="dialog" aria-modal="true" aria-label={ariaLabel}>
+    <div className={outerClassName} style={outerStyle} role="dialog" aria-modal="true" aria-label={ariaLabel}>
       {/* Backdrop */}
       <div
         onClick={closeOnBackdrop ? onClose : undefined}

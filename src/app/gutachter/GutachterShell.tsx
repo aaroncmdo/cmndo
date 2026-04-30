@@ -154,6 +154,26 @@ export default function GutachterShell({
   // der Shell zur Verfügung ohne dass einzelne Consumer das Theme re-importieren.
   const themeVars = generateCssVars(theme, 'full')
 
+  // CMM-32 P2: --app-sidebar-width auf <html> setzen, damit portal-rendered
+  // Modals (Modal.web.tsx) ihren Backdrop nur über den Content-Bereich legen
+  // und die Sidebar nicht mit einschließen. Auf Mobile (< lg) = 0.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mql = window.matchMedia('(min-width: 1024px)')
+    const apply = () => {
+      document.documentElement.style.setProperty(
+        '--app-sidebar-width',
+        mql.matches ? '256px' : '0px',
+      )
+    }
+    apply()
+    mql.addEventListener('change', apply)
+    return () => {
+      mql.removeEventListener('change', apply)
+      document.documentElement.style.removeProperty('--app-sidebar-width')
+    }
+  }, [])
+
   // AAR-220 Fix 5: Einmalige 2s-Transition nach Logo-Upload.
   const [brandTransitioning, setBrandTransitioning] = useState(false)
   useEffect(() => {
