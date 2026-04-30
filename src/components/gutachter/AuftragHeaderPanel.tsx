@@ -33,6 +33,7 @@ import {
   terminAblehnen,
   terminGegenvorschlag,
 } from '@/lib/actions/termin-actions'
+import TerminVerlegenModal from './TerminVerlegenModal'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 
 const PHASES: { key: AuftragsPhase; icon: typeof CalendarIcon }[] = [
@@ -342,19 +343,23 @@ export default function AuftragHeaderPanel({
         </div>
       </Modal>
 
+      {/* AAR-864: Verlegen-Modal mit Top-3-Vorschlägen + Routen-Check */}
+      <TerminVerlegenModal
+        open={modal === 'verlegen'}
+        onClose={() => setModal(null)}
+        terminId={termin?.id ?? ''}
+        fallId={fallId}
+      />
+
       <Modal
-        open={modal === 'gegenvorschlag' || modal === 'verlegen'}
+        open={modal === 'gegenvorschlag'}
         onClose={() => setModal(null)}
         maxWidth={384}
-        ariaLabel={modal === 'verlegen' ? 'Termin verlegen' : 'Gegenvorschlag'}
+        ariaLabel="Gegenvorschlag"
       >
-        <h3 className="text-lg font-semibold text-claimondo-navy mb-2">
-          {modal === 'verlegen' ? 'Termin verlegen' : 'Gegenvorschlag'}
-        </h3>
+        <h3 className="text-lg font-semibold text-claimondo-navy mb-2">Gegenvorschlag</h3>
         <p className="text-sm text-claimondo-ondo mb-4">
-          {modal === 'verlegen'
-            ? 'Neuen Termin vorschlagen — der Kunde wird über die Verlegung informiert.'
-            : 'Schlagen Sie einen alternativen Termin vor:'}
+          Schlagen Sie einen alternativen Termin vor:
         </p>
         <input
           type="datetime-local"
