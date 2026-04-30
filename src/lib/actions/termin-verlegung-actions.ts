@@ -334,6 +334,91 @@ export async function terminVerlegungVorschlagen(input: {
 
 type DecisionResult = { ok: true } | { ok: false; error: string }
 
+type KundeVorschlaegeResult =
+  | { ok: true; vorschlaege: Array<{ start: string; end: string; datum: string }>; slotDauerMin: number }
+  | { ok: false; error: string }
+
+/**
+ * Lädt Route-aware Top-3-Vorschläge für die Kunden-seitige Termin-Verlegung.
+ * Gibt NUR start/end/datum zurück — keine Routen-Details (SV-Privatsphäre).
+ * Auth-Guard: User muss Kunde/KB/Admin des Falls sein.
+ */
+export async function getKundeTerminVorschlaegeAction(
+  terminId: string,
+): Promise<KundeVorschlaegeResult> {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
+
+  const { data: termin } = await admin
+    .from('gutachter_termine')
+    .select('id, sv_id, fall_id, start_zeit, end_zeit, status')
+    .eq('id', terminId)
+    .maybeSingle()
+  if (!termin) return { ok: false, error: 'Termin nicht gefunden.' }
+  if (termin.status !== 'bestaetigt') {
+    return { ok: false, error: 'Termin ist nicht mehr bestätigt.' }
+  }
+  if (!termin.fall_id) return { ok: false, error: 'Termin ohne Fall-Verknüpfung.' }
+
+  const guardErr = await assertDarfVerlegungEntscheiden(user.id, termin.fall_id as string)
+  if (guardErr) return { ok: false, error: guardErr }
+
+  const { data: fall } = await admin
+    .from('faelle')
+    .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort')
+    .eq('id', termin.fall_id as string)
+    .maybeSingle()
+  if (!fall) return { ok: false, error: 'Fall nicht gefunden.' }
+
+  const zielLat = (fall.besichtigungsort_lat as number | null) ?? null
+  const zielLng = (fall.besichtigungsort_lng as number | null) ?? null
+  if (zielLat === null || zielLng === null) {
+    return { ok: false, error: 'Besichtigungsort ohne Koordinaten — Routen-Check nicht möglich.' }
+  }
+  const zielLabel =
+    (fall.besichtigungsort_adresse as string | null) ||
+    [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') ||
+    'Besichtigungsort'
+
+  const dauerMin = Math.round(
+    (new Date(termin.end_zeit as string).getTime() -
+      new Date(termin.start_zeit as string).getTime()) / 60_000,
+  )
+  const slotDauerMin = dauerMin >= 30 && dauerMin <= 240 ? dauerMin : 45
+
+  let svStandort: { lat: number; lng: number; label: string } | null = null
+  if (termin.sv_id) {
+    const { data: sv } = await admin
+      .from('sachverstaendige')
+      .select('standort_adresse, standort_lat, standort_lng')
+      .eq('id', termin.sv_id as string)
+      .maybeSingle()
+    const lat = sv?.standort_lat as number | null
+    const lng = sv?.standort_lng as number | null
+    if (lat != null && lng != null) {
+      svStandort = { lat: Number(lat), lng: Number(lng), label: (sv?.standort_adresse as string | null) ?? 'SV-Standort' }
+    }
+  }
+
+  const vorschlaegeRaw = await findVerlegungsVorschlaege(admin, termin.sv_id as string, {
+    besichtigungsortLat: Number(zielLat),
+    besichtigungsortLng: Number(zielLng),
+    besichtigungsortLabel: zielLabel,
+    slotDauerMin,
+    exkludiereTerminId: termin.id as string,
+    svStandort,
+  })
+
+  // Routen-Details rausfiltern — Kunde sieht nur Datum + Uhrzeit (SV-Privatsphäre)
+  const vorschlaege = vorschlaegeRaw.map((v) => ({ start: v.start, end: v.end, datum: v.datum }))
+  return { ok: true, vorschlaege, slotDauerMin }
+}
+
 /**
  * AAR-864: Kunde schlägt Verlegung vor.
  * Output:

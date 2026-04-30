@@ -491,6 +491,19 @@ export default function GutachterShell({
           </main>
         </div>
       </div>
+      {/* AAR-864: Portal-Root für Modals im SV-Portal. position:fixed mit
+          left=256px (Sidebar-Breite) damit der Backdrop nur den Content-
+          Bereich überdeckt und die Sidebar nie einschließt. Modals
+          portalieren hierhin (absolute inset-0) statt nach document.body —
+          zuverlässiger als das CSS-Var-Pattern. pointer-events-none damit
+          das leere Div keine Klicks abfängt; Backdrop-Kinder überschreiben
+          das mit pointer-events-auto. */}
+      <div
+        id="sv-modal-root"
+        aria-hidden="true"
+        className="fixed inset-y-0 right-0 z-[1000] pointer-events-none"
+        style={{ left: '256px' }}
+      />
       <GlobalPosteingangFab currentUserId={userId} />
       <SVSpotlight />
     </div>
