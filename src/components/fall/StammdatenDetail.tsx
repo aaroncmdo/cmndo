@@ -6,6 +6,8 @@
 
 import {
   CarIcon,
+  CarFrontIcon,
+  WrenchIcon,
   ClockIcon,
   FileTextIcon,
   UserIcon,
@@ -53,6 +55,7 @@ function bool(v: unknown): boolean | null {
 const TITLES: Record<StammdatenCategory, string> = {
   fahrzeug: 'Fahrzeug',
   historie: 'Historie',
+  unfall: 'Unfall',
   dokumente: 'Dokumente',
   kunde: 'Kunde',
   gegner: 'Gegner',
@@ -62,10 +65,11 @@ const TITLES: Record<StammdatenCategory, string> = {
 const ICONS: Record<StammdatenCategory, typeof CarIcon> = {
   fahrzeug: CarIcon,
   historie: ClockIcon,
+  unfall: CarFrontIcon,
   dokumente: FileTextIcon,
   kunde: UserIcon,
   gegner: ShieldIcon,
-  schaden: AlertTriangleIcon,
+  schaden: WrenchIcon,
 }
 
 export default function StammdatenDetail({
@@ -84,6 +88,7 @@ export default function StammdatenDetail({
       {category === 'historie' && (
         <HistorieDetail data={data} footer={historieFooter} />
       )}
+      {category === 'unfall' && <UnfallDetail data={data} />}
       {category === 'dokumente' &&
         (dokumenteSlot ?? <p className="text-sm text-claimondo-ondo">Keine Dokumente</p>)}
       {category === 'kunde' && <KundeDetail data={data} />}
@@ -311,7 +316,7 @@ function GegnerDetail({ data }: { data: StammdatenAccordionData }) {
   )
 }
 
-function SchadenDetail({ data }: { data: StammdatenAccordionData }) {
+function UnfallDetail({ data }: { data: StammdatenAccordionData }) {
   const { fall } = data
   const adresse =
     str(fall.unfallort) ??
@@ -319,7 +324,11 @@ function SchadenDetail({ data }: { data: StammdatenAccordionData }) {
       .filter(Boolean)
       .join(', ') || null)
   const datum = str(fall.schadens_datum)
-  const beschreibung = str(fall.schadens_beschreibung) ?? str(fall.fahrzeugschaden_beschreibung)
+  const uhrzeit = str(fall.schadens_uhrzeit)
+  const hergang = str(fall.unfallhergang) ?? str(fall.schadens_beschreibung)
+  const polizei = bool(fall.polizei_aufgenommen)
+  const dienststelle = str(fall.polizei_dienststelle)
+  const aktenzeichen = str(fall.polizei_aktenzeichen)
 
   return (
     <div>
@@ -331,6 +340,7 @@ function SchadenDetail({ data }: { data: StammdatenAccordionData }) {
             <span className="inline-flex items-center gap-1.5">
               <CalendarIcon className="w-3.5 h-3.5 text-claimondo-ondo/70" />
               {new Date(datum).toLocaleDateString('de-DE')}
+              {uhrzeit && <span className="text-claimondo-ondo">· {uhrzeit}</span>}
             </span>
           )
         }
@@ -346,7 +356,71 @@ function SchadenDetail({ data }: { data: StammdatenAccordionData }) {
           )
         }
       />
-      <Field label="Beschreibung" value={beschreibung} />
+      <Field label="Hergang" value={hergang} />
+      <Field
+        label="Polizei"
+        value={
+          polizei === true ? (
+            <span className="inline-flex items-center gap-1 text-emerald-700">
+              <CheckCircle2Icon className="w-3.5 h-3.5" /> Aufgenommen
+            </span>
+          ) : polizei === false ? (
+            <span className="inline-flex items-center gap-1 text-claimondo-ondo">
+              <XCircleIcon className="w-3.5 h-3.5" /> Nicht aufgenommen
+            </span>
+          ) : null
+        }
+      />
+      {dienststelle && <Field label="Dienststelle" value={dienststelle} />}
+      {aktenzeichen && (
+        <Field
+          label="Aktenzeichen"
+          value={<span className="font-mono text-xs">{aktenzeichen}</span>}
+        />
+      )}
+    </div>
+  )
+}
+
+function SchadenDetail({ data }: { data: StammdatenAccordionData }) {
+  const { fall } = data
+  const beschreibung =
+    str(fall.fahrzeugschaden_beschreibung) ?? str(fall.schadens_beschreibung)
+  const fahrbereit = bool(fall.fahrzeug_fahrbereit)
+  const wbw = str(fall.wiederbeschaffungswert)
+  const repkosten = str(fall.reparaturkosten)
+  const schadensumfang = str(fall.schadensumfang)
+
+  return (
+    <div>
+      <Field label="Schadensumfang" value={schadensumfang} />
+      <Field label="Fahrzeugschaden" value={beschreibung} />
+      <Field
+        label="Fahrbereit"
+        value={
+          fahrbereit === true ? (
+            <span className="inline-flex items-center gap-1 text-emerald-700">
+              <CheckCircle2Icon className="w-3.5 h-3.5" /> Ja
+            </span>
+          ) : fahrbereit === false ? (
+            <span className="inline-flex items-center gap-1 text-rose-700">
+              <XCircleIcon className="w-3.5 h-3.5" /> Nein
+            </span>
+          ) : null
+        }
+      />
+      {repkosten && (
+        <Field
+          label="Reparaturkosten"
+          value={`${Number(repkosten).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
+        />
+      )}
+      {wbw && (
+        <Field
+          label="Wiederbeschaffungswert"
+          value={`${Number(wbw).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`}
+        />
+      )}
     </div>
   )
 }

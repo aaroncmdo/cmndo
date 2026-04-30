@@ -13,6 +13,8 @@ import {
   AlertTriangleIcon,
   CheckCircle2Icon,
   XCircleIcon,
+  CarFrontIcon,
+  WrenchIcon,
 } from 'lucide-react'
 import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import { LACKFARBE_LABEL, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
@@ -21,6 +23,7 @@ import StammdatenDetail from './StammdatenDetail'
 export type StammdatenCategory =
   | 'fahrzeug'
   | 'historie'
+  | 'unfall'
   | 'dokumente'
   | 'kunde'
   | 'gegner'
@@ -44,7 +47,8 @@ type TabKey = Exclude<StammdatenCategory, 'fahrzeug'>
 
 const TABS: { key: TabKey; label: string; icon: typeof ClockIcon }[] = [
   { key: 'historie',  label: 'Historie',  icon: ClockIcon            },
-  { key: 'schaden',   label: 'Schaden',   icon: AlertTriangleIcon    },
+  { key: 'unfall',    label: 'Unfall',    icon: CarFrontIcon         },
+  { key: 'schaden',   label: 'Schaden',   icon: WrenchIcon           },
   { key: 'dokumente', label: 'Dokumente', icon: FileTextIcon         },
   { key: 'kunde',     label: 'Kunde',     icon: UserIcon             },
   { key: 'gegner',    label: 'Gegner',    icon: ShieldIcon           },
