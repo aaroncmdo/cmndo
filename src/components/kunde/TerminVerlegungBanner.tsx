@@ -53,29 +53,39 @@ export default function TerminVerlegungBanner({
   async function bestaetigen() {
     setBusy('bestaetigen')
     setFehler(null)
-    const r = await terminVerlegungBestaetigen({ neuerTerminId: pendingTerminId })
-    setBusy(null)
-    if (!r.ok) {
-      setFehler(r.error)
-      return
+    try {
+      const r = await terminVerlegungBestaetigen({ neuerTerminId: pendingTerminId })
+      if (!r.ok) {
+        setFehler(r.error)
+        return
+      }
+      router.refresh()
+    } catch (e) {
+      setFehler(e instanceof Error ? e.message : 'Unbekannter Fehler')
+    } finally {
+      setBusy(null)
     }
-    router.refresh()
   }
 
   async function ablehnen() {
     setBusy('ablehnen')
     setFehler(null)
-    const r = await terminVerlegungAblehnen({
-      neuerTerminId: pendingTerminId,
-      grund: grundAblehnen.trim() || undefined,
-    })
-    setBusy(null)
-    if (!r.ok) {
-      setFehler(r.error)
-      return
+    try {
+      const r = await terminVerlegungAblehnen({
+        neuerTerminId: pendingTerminId,
+        grund: grundAblehnen.trim() || undefined,
+      })
+      if (!r.ok) {
+        setFehler(r.error)
+        return
+      }
+      setModal(null)
+      router.refresh()
+    } catch (e) {
+      setFehler(e instanceof Error ? e.message : 'Unbekannter Fehler')
+    } finally {
+      setBusy(null)
     }
-    setModal(null)
-    router.refresh()
   }
 
   return (

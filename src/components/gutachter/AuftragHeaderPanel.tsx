@@ -106,6 +106,8 @@ export default function AuftragHeaderPanel({
   const istBestaetigt = termin?.status === 'bestaetigt'
   const istEigenerGegenvorschlag =
     termin?.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'sv'
+  // AAR-864: SV hat eine Verlegung beantragt — wartet auf Kunden-Antwort
+  const istVerlegungPending = termin?.status === 'verlegung_pending'
 
   const fmt = fmtTermin(termin?.start_zeit ?? null)
   const fmtVorgeschlag = fmtTermin(termin?.vorgeschlagenes_datum ?? null)
@@ -192,6 +194,30 @@ export default function AuftragHeaderPanel({
           )}
         </div>
       </div>
+
+      {/* AAR-864: Verlegungs-Pending-Hinweis — direkt unter dem Stepper.
+          Sichtbar nur wenn der SV einen Verlegungs-Vorschlag gemacht hat
+          und auf die Antwort des Kunden wartet. */}
+      {termin && istVerlegungPending && (
+        <div className="border-t-2 border-amber-400 bg-amber-50 px-6 py-3.5">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
+              <ClockIcon className="w-4 h-4 text-amber-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-900">
+                Verlegung beantragt — Bestätigung ausstehend
+              </p>
+              <p className="text-xs text-amber-800 mt-0.5">
+                Der Kunde wurde benachrichtigt. Sobald er bestätigt, wird der
+                Termin auf {fmt ? `${fmt.datum}, ${fmt.uhrzeit} Uhr` : 'das neue Datum'}{' '}
+                gelegt. Bei Nicht-Reaktion eskalieren wir 48h vor dem Original-
+                Termin automatisch an den Kundenbetreuer.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Sektion 2 — Termin + Navi */}
       {termin && !abgeschlossen && (istBestaetigt || istReserviert || istEigenerGegenvorschlag) && (

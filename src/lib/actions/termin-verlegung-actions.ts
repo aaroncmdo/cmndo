@@ -267,9 +267,39 @@ function revalidateFallPaths(fallId: string | null) {
 }
 
 /**
+ * Prüft ob der eingeloggte User die Verlegung für diesen Fall entscheiden
+ * darf: Kunde des Falls, KB des Falls, oder Admin/Staff.
+ * Liefert null wenn ok, sonst Fehler-String.
+ */
+async function assertDarfVerlegungEntscheiden(
+  userId: string,
+  fallId: string,
+): Promise<string | null> {
+  const admin = createAdminClient()
+  const { data: prof } = await admin
+    .from('profiles')
+    .select('rolle')
+    .eq('id', userId)
+    .maybeSingle()
+  const rolle = (prof?.rolle as string | undefined) ?? ''
+  if (rolle === 'admin' || rolle === 'staff' || rolle === 'dispatch') return null
+
+  const { data: fall } = await admin
+    .from('faelle')
+    .select('kunde_id, kundenbetreuer_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  if (!fall) return 'Fall nicht gefunden.'
+  if (fall.kunde_id === userId) return null
+  if (fall.kundenbetreuer_id === userId) return null
+  return 'Keine Berechtigung für diese Verlegung.'
+}
+
+/**
  * Bestätigt die Verlegung. Aufrufbar durch Kunde, KB oder Admin.
- * Auth läuft über die existierenden RLS-Policies — wenn der UPDATE
- * fehlschlägt, kommt Supabase-Error zurück.
+ * Nutzt Admin-Client für UPDATE — der Kunde hat nur SELECT-RLS auf
+ * gutachter_termine. Auth-Guard wird vorher manuell geprüft
+ * (assertDarfVerlegungEntscheiden).
  *
  * State-Transition:
  *   alter Termin: 'verlegt' → 'verschoben' (terminal) + cancelled_at
@@ -282,12 +312,13 @@ export async function terminVerlegungBestaetigen(input: {
   neuerTerminId: string
 }): Promise<DecisionResult> {
   const supabase = await createClient()
+  const admin = createAdminClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
 
-  const { data: neu, error: neuErr } = await supabase
+  const { data: neu, error: neuErr } = await admin
     .from('gutachter_termine')
     .select('id, status, verlegung_quelle_id, fall_id, start_zeit')
     .eq('id', input.neuerTerminId)
@@ -302,9 +333,15 @@ export async function terminVerlegungBestaetigen(input: {
   if (!neu.verlegung_quelle_id) {
     return { ok: false, error: 'Kein verlegung_quelle_id auf dem Pending-Slot.' }
   }
+  if (!neu.fall_id) {
+    return { ok: false, error: 'Pending-Slot hat keine fall_id.' }
+  }
 
-  // 1) Neuer Slot → bestaetigt
-  const { error: bestErr } = await supabase
+  const guardErr = await assertDarfVerlegungEntscheiden(user.id, neu.fall_id as string)
+  if (guardErr) return { ok: false, error: guardErr }
+
+  // 1) Neuer Slot → bestaetigt (Admin-Client, weil Kunde nur SELECT hat)
+  const { error: bestErr } = await admin
     .from('gutachter_termine')
     .update({ status: 'bestaetigt' })
     .eq('id', neu.id)
@@ -312,7 +349,7 @@ export async function terminVerlegungBestaetigen(input: {
   if (bestErr) return { ok: false, error: `Bestätigen fehlgeschlagen: ${bestErr.message}` }
 
   // 2) Alter Termin → verschoben (terminal)
-  const { error: altErr } = await supabase
+  const { error: altErr } = await admin
     .from('gutachter_termine')
     .update({
       status: 'verschoben',
@@ -322,7 +359,7 @@ export async function terminVerlegungBestaetigen(input: {
     .eq('status', 'verlegt')
   if (altErr) {
     // Rollback: neuer Slot zurück auf pending
-    await supabase
+    await admin
       .from('gutachter_termine')
       .update({ status: 'verlegung_pending' })
       .eq('id', neu.id)
@@ -333,7 +370,6 @@ export async function terminVerlegungBestaetigen(input: {
 
   // Notifikation an SV
   if (neu.fall_id) {
-    const admin = createAdminClient()
     const { data: fall } = await admin
       .from('faelle')
       .select('kunde_id')
@@ -376,12 +412,13 @@ export async function terminVerlegungAblehnen(input: {
   grund?: string
 }): Promise<DecisionResult> {
   const supabase = await createClient()
+  const admin = createAdminClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
 
-  const { data: neu, error: neuErr } = await supabase
+  const { data: neu, error: neuErr } = await admin
     .from('gutachter_termine')
     .select('id, status, verlegung_quelle_id, fall_id')
     .eq('id', input.neuerTerminId)
@@ -396,9 +433,15 @@ export async function terminVerlegungAblehnen(input: {
   if (!neu.verlegung_quelle_id) {
     return { ok: false, error: 'Kein verlegung_quelle_id auf dem Pending-Slot.' }
   }
+  if (!neu.fall_id) {
+    return { ok: false, error: 'Pending-Slot hat keine fall_id.' }
+  }
 
-  // 1) Neuer Slot → storniert
-  const { error: stoErr } = await supabase
+  const guardErr = await assertDarfVerlegungEntscheiden(user.id, neu.fall_id as string)
+  if (guardErr) return { ok: false, error: guardErr }
+
+  // 1) Neuer Slot → storniert (Admin-Client)
+  const { error: stoErr } = await admin
     .from('gutachter_termine')
     .update({
       status: 'storniert',
@@ -410,14 +453,14 @@ export async function terminVerlegungAblehnen(input: {
   if (stoErr) return { ok: false, error: `Stornieren fehlgeschlagen: ${stoErr.message}` }
 
   // 2) Alter Termin → bestaetigt (Rollback)
-  const { error: rbErr } = await supabase
+  const { error: rbErr } = await admin
     .from('gutachter_termine')
     .update({ status: 'bestaetigt' })
     .eq('id', neu.verlegung_quelle_id)
     .eq('status', 'verlegt')
   if (rbErr) {
     // Rollback des Rollbacks: neuer Slot zurück auf pending
-    await supabase
+    await admin
       .from('gutachter_termine')
       .update({ status: 'verlegung_pending', cancelled_at: null })
       .eq('id', neu.id)
@@ -428,7 +471,6 @@ export async function terminVerlegungAblehnen(input: {
 
   // Notifikation an SV (mit Grund)
   if (neu.fall_id) {
-    const admin = createAdminClient()
     const { data: fall } = await admin
       .from('faelle')
       .select('kunde_id')
