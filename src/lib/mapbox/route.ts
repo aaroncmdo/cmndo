@@ -44,8 +44,48 @@ async function geocode(adresse: string, cache: RouteCache): Promise<LngLat | nul
 }
 
 /**
+ * AAR-864: Fahrtzeit zwischen zwei Lat/Lng-Punkten in Minuten — ohne
+ * Geocoding-Call, direkt an Mapbox Directions. Wird genutzt wenn beide
+ * Endpunkte schon Koordinaten haben (Termine + Besichtigungsort sind
+ * via faelle.besichtigungsort_lat/lng + sachverstaendige.standort_lat/lng
+ * in der DB vorhanden).
+ */
+export async function fahrtMinutenLatLng(
+  vonLat: number,
+  vonLng: number,
+  nachLat: number,
+  nachLng: number,
+  cache: RouteCache,
+): Promise<number | null> {
+  if (!MAPBOX_TOKEN) return null
+  const key = `${vonLat.toFixed(5)},${vonLng.toFixed(5)}|${nachLat.toFixed(5)},${nachLng.toFixed(5)}`
+  if (cache.routes.has(key)) return cache.routes.get(key) ?? null
+  try {
+    const url =
+      `https://api.mapbox.com/directions/v5/mapbox/driving/` +
+      `${vonLng},${vonLat};${nachLng},${nachLat}` +
+      `?overview=false&access_token=${MAPBOX_TOKEN}`
+    const res = await fetch(url)
+    const data = await res.json()
+    const dauerSek = data?.routes?.[0]?.duration as number | undefined
+    if (!dauerSek) {
+      cache.routes.set(key, null)
+      return null
+    }
+    const min = Math.ceil(dauerSek / 60)
+    cache.routes.set(key, min)
+    return min
+  } catch {
+    cache.routes.set(key, null)
+    return null
+  }
+}
+
+/**
  * Fahrtzeit von Adresse A zu Adresse B in Minuten. null bei Fehler.
  * Beide Geocodings + die Route werden über den Cache memoized.
+ * Fallback wenn Lat/Lng nicht vorhanden — siehe fahrtMinutenLatLng als
+ * bevorzugten Weg.
  */
 export async function fahrtMinuten(
   vonAdresse: string,

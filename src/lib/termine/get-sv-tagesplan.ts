@@ -10,7 +10,11 @@ export type TagesplanTermin = {
   start_zeit: string
   end_zeit: string
   status: string
+  /** Anzeige-Adresse (Geocoded String). */
   adresse: string
+  /** Lat/Lng des Besichtigungsorts für Routen-Berechnung (Mapbox direkt). */
+  lat: number | null
+  lng: number | null
 }
 
 /**
@@ -38,7 +42,11 @@ export async function getSvTagesplan(
       status,
       faelle!gutachter_termine_fall_id_fkey (
         besichtigungsort_adresse,
-        besichtigungsort_plz
+        besichtigungsort_lat,
+        besichtigungsort_lng,
+        schadens_adresse,
+        schadens_plz,
+        schadens_ort
       )
     `,
     )
@@ -55,9 +63,12 @@ export async function getSvTagesplan(
 
   return (data ?? []).map((row) => {
     const fall = Array.isArray(row.faelle) ? row.faelle[0] : row.faelle
-    const adresse = [fall?.besichtigungsort_adresse, fall?.besichtigungsort_plz]
-      .filter(Boolean)
-      .join(', ')
+    // Anzeige-Adresse (für UI). Routen-Berechnung läuft separat über lat/lng.
+    const adresse =
+      (fall?.besichtigungsort_adresse as string | null) ||
+      [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort]
+        .filter(Boolean)
+        .join(', ')
     return {
       id: row.id as string,
       fall_id: row.fall_id as string | null,
@@ -65,6 +76,8 @@ export async function getSvTagesplan(
       end_zeit: row.end_zeit as string,
       status: row.status as string,
       adresse,
+      lat: (fall?.besichtigungsort_lat as number | null) ?? null,
+      lng: (fall?.besichtigungsort_lng as number | null) ?? null,
     }
   })
 }

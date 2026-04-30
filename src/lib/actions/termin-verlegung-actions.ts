@@ -154,19 +154,31 @@ export async function getVerlegungsVorschlaegeAction(input: {
     return { ok: false, error: 'Termin ist nicht mit einem Fall verknüpft (weder fall_id noch auftrag_id auflösbar).' }
   }
 
-  // Fall + Adresse laden — Admin damit garantiert alle Spalten sichtbar
+  // Fall laden mit Koordinaten + Anzeige-Adresse. Aaron-Spec: ein
+  // Besichtigungsort wird via Lat/Lng zugeordnet (Isochron-Mapping im
+  // Dispatch), nicht via PLZ. Daher nutzen wir besichtigungsort_lat/lng
+  // direkt für die Routen-Berechnung.
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, besichtigungsort_adresse, besichtigungsort_plz, schadens_adresse, schadens_plz, schadens_ort')
+    .select(
+      'id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort',
+    )
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return { ok: false, error: `Fall ${fallId} nicht gefunden.` }
 
-  // Bevorzugt besichtigungsort_*, Fallback schadens_*
-  const adresse =
-    [fall.besichtigungsort_adresse, fall.besichtigungsort_plz].filter(Boolean).join(', ') ||
-    [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ')
-  if (!adresse) return { ok: false, error: 'Keine Adresse am Fall hinterlegt.' }
+  const zielLat = (fall.besichtigungsort_lat as number | null) ?? null
+  const zielLng = (fall.besichtigungsort_lng as number | null) ?? null
+  if (zielLat === null || zielLng === null) {
+    return {
+      ok: false,
+      error: 'Besichtigungsort hat keine Koordinaten — bitte im Dispatch nachpflegen.',
+    }
+  }
+  const zielLabel =
+    (fall.besichtigungsort_adresse as string | null) ||
+    [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') ||
+    'Besichtigungsort'
 
   // Slot-Dauer aus altem Termin (default 45 wenn unplausibel)
   const dauerMin = Math.round(
@@ -176,25 +188,33 @@ export async function getVerlegungsVorschlaegeAction(input: {
   )
   const slotDauerMin = dauerMin >= 30 && dauerMin <= 240 ? dauerMin : 45
 
-  // SV-Standort als Fallback wenn an einem Tag kein Vor-Termin existiert
-  let svStandortAdresse: string | null = null
+  // SV-Standort als Fallback wenn an einem Tag kein Vor-Termin existiert.
+  // Lat/Lng aus sachverstaendige.standort_lat/lng (Isochron-Anker).
+  let svStandort: { lat: number; lng: number; label: string } | null = null
   if (termin.sv_id) {
     const { data: sv } = await admin
       .from('sachverstaendige')
-      .select('standort_adresse, standort_plz')
+      .select('standort_adresse, standort_lat, standort_lng')
       .eq('id', termin.sv_id as string)
       .maybeSingle()
-    const teile = [sv?.standort_adresse, sv?.standort_plz].filter(Boolean)
-    if (teile.length) svStandortAdresse = teile.join(', ')
+    const lat = sv?.standort_lat as number | null
+    const lng = sv?.standort_lng as number | null
+    if (lat !== null && lat !== undefined && lng !== null && lng !== undefined) {
+      svStandort = {
+        lat: Number(lat),
+        lng: Number(lng),
+        label: (sv?.standort_adresse as string | null) ?? 'SV-Standort',
+      }
+    }
   }
 
-  // Engine bekommt Admin-Client damit der Tagesplan-Loader fall-übergreifend
-  // alle Adressen für die Routen-Berechnung sieht
   const vorschlaege = await findVerlegungsVorschlaege(admin, termin.sv_id as string, {
-    besichtigungsortAdresse: adresse,
+    besichtigungsortLat: Number(zielLat),
+    besichtigungsortLng: Number(zielLng),
+    besichtigungsortLabel: zielLabel,
     slotDauerMin,
     exkludiereTerminId: termin.id as string,
-    svStandortAdresse,
+    svStandort,
   })
 
   return { ok: true, vorschlaege, slotDauerMin }

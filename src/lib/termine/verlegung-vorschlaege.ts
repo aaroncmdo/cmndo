@@ -11,7 +11,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSvTagesplan, type TagesplanTermin } from './get-sv-tagesplan'
-import { fahrtMinuten, createRouteCache, type RouteCache } from '../mapbox/route'
+import { fahrtMinutenLatLng, createRouteCache, type RouteCache } from '../mapbox/route'
 
 export const DEFAULT_SLOT_MIN = 45
 const ARBEITSTAG_VON_STUNDE = 8
@@ -53,17 +53,22 @@ export type VerlegungsVorschlag = {
 }
 
 type Optionen = {
-  /** Adresse des verschobenen Falls (= unverändert beim Verlegen). */
-  besichtigungsortAdresse: string
+  /** Lat/Lng des Besichtigungsorts (verschobener Fall). Aaron-Spec:
+   *  Besichtigungsort wird im Dispatch via Koordinate zugeordnet, daher
+   *  Routen-Berechnung direkt über lat/lng (kein Geocoding nötig). */
+  besichtigungsortLat: number
+  besichtigungsortLng: number
+  /** Anzeige-Label für die UI (formatierte Adresse). */
+  besichtigungsortLabel: string
   /** Dauer des neuen Slots in Minuten. Default 45 (Aaron-Spec). */
   slotDauerMin?: number
   /** Tagesfenster ab heute. Default 14 Tage. */
   fensterTage?: number
   /** ID des zu verschiebenden Termins — wird im Tagesplan ignoriert. */
   exkludiereTerminId?: string
-  /** SV-Standort (Büro) als Fallback, wenn an einem Tag kein Vor-Termin
-   *  existiert. Aaron-Spec: dann muss die Anfahrt vom Büro berechnet werden. */
-  svStandortAdresse?: string | null
+  /** SV-Standort als Fallback, wenn an einem Tag kein Vor-Termin existiert.
+   *  Lat/Lng + Anzeige-Label. */
+  svStandort?: { lat: number; lng: number; label: string } | null
 }
 
 function ymd(d: Date): string {
@@ -124,8 +129,10 @@ export async function findVerlegungsVorschlaege(
         slotEnd: new Date(luecke.fruehesterStart.getTime() + slotDauer * 60_000),
         vorTermin: luecke.vor,
         nachTermin: luecke.nach,
-        besichtigungsort: optionen.besichtigungsortAdresse,
-        svStandortAdresse: optionen.svStandortAdresse ?? null,
+        zielLat: optionen.besichtigungsortLat,
+        zielLng: optionen.besichtigungsortLng,
+        zielLabel: optionen.besichtigungsortLabel,
+        svStandort: optionen.svStandort ?? null,
         cache,
         tagOffset,
       })
@@ -223,8 +230,10 @@ type BewerteParams = {
   slotEnd: Date
   vorTermin: TagesplanTermin | null
   nachTermin: TagesplanTermin | null
-  besichtigungsort: string
-  svStandortAdresse: string | null
+  zielLat: number
+  zielLng: number
+  zielLabel: string
+  svStandort: { lat: number; lng: number; label: string } | null
   cache: RouteCache
   tagOffset: number
 }
@@ -234,8 +243,9 @@ async function bewerteSlot({
   slotEnd,
   vorTermin,
   nachTermin,
-  besichtigungsort,
-  svStandortAdresse,
+  zielLat,
+  zielLng,
+  svStandort,
   cache,
   tagOffset,
 }: BewerteParams): Promise<VerlegungsVorschlag | null> {
@@ -246,9 +256,15 @@ async function bewerteSlot({
   let fahrtVor = 0
   let fahrtNach = 0
 
-  if (vorTermin) {
-    const min = await fahrtMinuten(vorTermin.adresse, besichtigungsort, cache)
-    if (min === null) return null // Adresse-Pflicht: wenn Mapbox-Fail, Slot droppen
+  if (vorTermin && vorTermin.lat != null && vorTermin.lng != null) {
+    const min = await fahrtMinutenLatLng(
+      vorTermin.lat,
+      vorTermin.lng,
+      zielLat,
+      zielLng,
+      cache,
+    )
+    if (min === null) return null
     fahrtVor = min
     const ankunft = new Date(new Date(vorTermin.end_zeit).getTime() + min * 60_000)
     pufferVorMin = Math.round((slotStart.getTime() - ankunft.getTime()) / 60_000)
@@ -260,26 +276,36 @@ async function bewerteSlot({
       fahrtMin: min,
       pufferMin: pufferVorMin,
     }
-  } else if (svStandortAdresse) {
+  } else if (!vorTermin && svStandort) {
     // AAR-864: Kein Vor-Termin → Anfahrt vom SV-Büro berechnen
-    const min = await fahrtMinuten(svStandortAdresse, besichtigungsort, cache)
+    const min = await fahrtMinutenLatLng(
+      svStandort.lat,
+      svStandort.lng,
+      zielLat,
+      zielLng,
+      cache,
+    )
     if (min !== null) {
       fahrtVor = min
       vor = {
         quelle: 'buero',
         terminId: null,
         end: null,
-        adresse: svStandortAdresse,
+        adresse: svStandort.label,
         fahrtMin: min,
-        pufferMin: null, // Kein Puffer-Konzept beim Büro-Start
+        pufferMin: null,
       }
     }
-    // Wenn null: Slot bleibt ohne vor-Info, kein blocker — SV kommt
-    // morgens irgendwann los.
   }
 
-  if (nachTermin) {
-    const min = await fahrtMinuten(besichtigungsort, nachTermin.adresse, cache)
+  if (nachTermin && nachTermin.lat != null && nachTermin.lng != null) {
+    const min = await fahrtMinutenLatLng(
+      zielLat,
+      zielLng,
+      nachTermin.lat,
+      nachTermin.lng,
+      cache,
+    )
     if (min === null) return null
     fahrtNach = min
     const abfahrtNoetig = new Date(slotEnd.getTime() + min * 60_000)
