@@ -163,13 +163,13 @@ export default function StammdatenAccordion({
         <div className="flex-1 flex flex-col min-w-0">
 
           {/* Tab-Leiste */}
-          <div className="flex border-b border-claimondo-border/60 overflow-x-auto">
+          <div className="flex border-b border-claimondo-border/60">
             {TABS.map(({ key, label }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setActiveTab(key)}
-                className={`px-5 py-4 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px shrink-0 ${
+                className={`flex-1 px-3 py-4 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px ${
                   activeTab === key
                     ? 'border-claimondo-navy text-claimondo-navy'
                     : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
