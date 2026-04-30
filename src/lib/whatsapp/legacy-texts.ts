@@ -133,6 +133,26 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   sv_konfrontation_bestaetigt_kunde: (v) =>
     `Hallo ${v['1'] ?? ''}, Ihr Gutachter ${v['2'] ?? ''} begleitet Sie am ${v['3'] ?? ''} zur Nachbesichtigung mit dem VS-Gutachter. Details: ${v['4'] ?? ''}`,
 
+  // AAR-864 T31: SV bittet um Verlegung — 1=Vorname, 2=alterDatum, 3=alterUhrzeit,
+  //   4=neuesDatum, 5=neuesUhrzeit, 6=SV-Vorname, 7=Portal-Link
+  termin_verlegung_request: (v) =>
+    `Hallo ${v['1'] ?? ''}, Ihr Gutachter ${v['6'] ?? ''} bittet um eine Terminverlegung. Statt ${v['2'] ?? ''} um ${v['3'] ?? ''} Uhr soll der Termin auf ${v['4'] ?? ''} um ${v['5'] ?? ''} Uhr verschoben werden. Bitte bestätigen oder ablehnen: ${v['7'] ?? ''}`,
+
+  // AAR-864 T32: Kunde hat Verlegung bestätigt — 1=SV-Vorname, 2=neuesDatum,
+  //   3=neuesUhrzeit, 4=Kunden-Vorname
+  termin_verlegung_bestaetigt: (v) =>
+    `Hallo ${v['1'] ?? ''}, ${v['4'] ?? ''} hat die Verlegung bestätigt. Neuer Termin: ${v['2'] ?? ''} um ${v['3'] ?? ''} Uhr.`,
+
+  // AAR-864 T33: Kunde hat Verlegung abgelehnt — 1=SV-Vorname, 2=Kunden-Vorname,
+  //   3=Grund/leer
+  termin_verlegung_abgelehnt: (v) =>
+    `Hallo ${v['1'] ?? ''}, ${v['2'] ?? ''} hat die Verlegung abgelehnt${v['3'] ? ` (Grund: ${v['3']})` : ''}. Der ursprüngliche Termin bleibt bestehen.`,
+
+  // AAR-864 T34: KB-Eskalation 48h vor altem Termin — 1=Vorname, 2=alterDatum,
+  //   3=alterUhrzeit, 4=Portal-Link
+  termin_verlegung_eskalation: (v) =>
+    `Wichtig, ${v['1'] ?? ''}: Ihr Gutachter hat eine Terminverlegung beantragt, der ursprüngliche Termin am ${v['2'] ?? ''} um ${v['3'] ?? ''} Uhr steht aber bevor. Bitte JETZT entscheiden, sonst fährt der Gutachter umsonst zu Ihnen: ${v['4'] ?? ''}`,
+
 }
 // KFZ-200 → KFZ-201: SV-Navigation Templates (sv_nav_unterwegs, sv_nav_15min,
 // sv_nav_5min, sv_nav_angekommen, sv_begutachtung_fertig) wurden konsolidiert:

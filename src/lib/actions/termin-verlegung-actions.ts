@@ -7,7 +7,78 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { findVerlegungsVorschlaege, type VerlegungsVorschlag } from '@/lib/termine/verlegung-vorschlaege'
+import { emitEvent } from '@/lib/notifications/emit'
+
+// Datum/Uhrzeit-Formatter für Notifikations-Payloads (de-DE)
+function fmtDatum(iso: string): string {
+  return new Date(iso).toLocaleDateString('de-DE', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+function fmtUhrzeit(iso: string): string {
+  return new Date(iso).toLocaleTimeString('de-DE', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+async function lookupSvVorname(svId: string): Promise<string> {
+  try {
+    const admin = createAdminClient()
+    const { data: sv } = await admin
+      .from('sachverstaendige')
+      .select('profile_id')
+      .eq('id', svId)
+      .maybeSingle()
+    if (!sv?.profile_id) return ''
+    const { data: prof } = await admin
+      .from('profiles')
+      .select('vorname, anzeigename')
+      .eq('id', sv.profile_id)
+      .maybeSingle()
+    return (prof?.vorname ?? prof?.anzeigename ?? '') as string
+  } catch {
+    return ''
+  }
+}
+
+async function lookupKundenVorname(kundeUserId: string | null): Promise<string> {
+  if (!kundeUserId) return ''
+  try {
+    const admin = createAdminClient()
+    const { data: prof } = await admin
+      .from('profiles')
+      .select('vorname, anzeigename')
+      .eq('id', kundeUserId)
+      .maybeSingle()
+    return (prof?.vorname ?? prof?.anzeigename ?? '') as string
+  } catch {
+    return ''
+  }
+}
+
+async function lookupUserRolle(userId: string): Promise<'kunde' | 'kundenbetreuer' | 'admin' | 'unknown'> {
+  try {
+    const admin = createAdminClient()
+    const { data: prof } = await admin
+      .from('profiles')
+      .select('rolle')
+      .eq('id', userId)
+      .maybeSingle()
+    const r = (prof?.rolle as string | undefined) ?? ''
+    if (r === 'admin' || r === 'staff') return 'admin'
+    if (r === 'kundenbetreuer') return 'kundenbetreuer'
+    if (r === 'kunde') return 'kunde'
+    return 'unknown'
+  } catch {
+    return 'unknown'
+  }
+}
 
 type LoaderResult =
   | { ok: true; vorschlaege: VerlegungsVorschlag[]; slotDauerMin: number }
@@ -96,7 +167,7 @@ export async function terminVerlegungVorschlagen(input: {
   // Alter Termin laden — muss bestaetigt sein und dem SV gehören
   const { data: alt, error: altErr } = await supabase
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, kb_id, kanal, typ, status')
+    .select('id, sv_id, fall_id, kb_id, kanal, typ, status, start_zeit')
     .eq('id', input.terminId)
     .maybeSingle()
   if (altErr || !alt) return { ok: false, error: 'Termin nicht gefunden.' }
@@ -156,6 +227,26 @@ export async function terminVerlegungVorschlagen(input: {
   revalidatePath('/gutachter/auftraege')
   revalidatePath('/gutachter/heute')
 
+  // Notifikation fire-and-forget — Worker nimmt's auf, Caller wird nicht blockiert
+  if (alt.fall_id && alt.sv_id) {
+    const svVorname = await lookupSvVorname(alt.sv_id as string)
+    emitEvent(
+      'termin.verlegung_vorgeschlagen',
+      {
+        fallId: alt.fall_id as string,
+        terminId: neu.id as string,
+        alterTerminId: alt.id as string,
+        alterDatum: fmtDatum(alt.start_zeit as string),
+        alterUhrzeit: fmtUhrzeit(alt.start_zeit as string),
+        neuesDatum: fmtDatum(input.neuesStartIso),
+        neuesUhrzeit: fmtUhrzeit(input.neuesStartIso),
+        svVorname,
+        grund: input.grund?.trim() || undefined,
+      },
+      { fallId: alt.fall_id as string, triggeredBy: user.id },
+    ).catch((e) => console.error('[AAR-864] emit verlegung_vorgeschlagen failed', e))
+  }
+
   return { ok: true, neuerTerminId: neu.id as string }
 }
 
@@ -198,7 +289,7 @@ export async function terminVerlegungBestaetigen(input: {
 
   const { data: neu, error: neuErr } = await supabase
     .from('gutachter_termine')
-    .select('id, status, verlegung_quelle_id, fall_id')
+    .select('id, status, verlegung_quelle_id, fall_id, start_zeit')
     .eq('id', input.neuerTerminId)
     .maybeSingle()
   if (neuErr || !neu) return { ok: false, error: 'Verlegungs-Slot nicht gefunden.' }
@@ -239,6 +330,35 @@ export async function terminVerlegungBestaetigen(input: {
   }
 
   revalidateFallPaths(neu.fall_id as string | null)
+
+  // Notifikation an SV
+  if (neu.fall_id) {
+    const admin = createAdminClient()
+    const { data: fall } = await admin
+      .from('faelle')
+      .select('kunde_id')
+      .eq('id', neu.fall_id as string)
+      .maybeSingle()
+    const kundenVorname = await lookupKundenVorname((fall?.kunde_id as string | null) ?? null)
+    const von_wem = await lookupUserRolle(user.id)
+    const von_wem_safe: 'kunde' | 'kundenbetreuer' | 'admin' =
+      von_wem === 'unknown' ? 'kunde' : von_wem
+
+    emitEvent(
+      'termin.verlegung_bestaetigt',
+      {
+        fallId: neu.fall_id as string,
+        terminId: neu.id as string,
+        alterTerminId: neu.verlegung_quelle_id as string,
+        neuesDatum: fmtDatum(neu.start_zeit as string),
+        neuesUhrzeit: fmtUhrzeit(neu.start_zeit as string),
+        kundenVorname,
+        von_wem: von_wem_safe,
+      },
+      { fallId: neu.fall_id as string, triggeredBy: user.id },
+    ).catch((e) => console.error('[AAR-864] emit verlegung_bestaetigt failed', e))
+  }
+
   return { ok: true }
 }
 
@@ -305,5 +425,33 @@ export async function terminVerlegungAblehnen(input: {
   }
 
   revalidateFallPaths(neu.fall_id as string | null)
+
+  // Notifikation an SV (mit Grund)
+  if (neu.fall_id) {
+    const admin = createAdminClient()
+    const { data: fall } = await admin
+      .from('faelle')
+      .select('kunde_id')
+      .eq('id', neu.fall_id as string)
+      .maybeSingle()
+    const kundenVorname = await lookupKundenVorname((fall?.kunde_id as string | null) ?? null)
+    const von_wem = await lookupUserRolle(user.id)
+    const von_wem_safe: 'kunde' | 'kundenbetreuer' | 'admin' =
+      von_wem === 'unknown' ? 'kunde' : von_wem
+
+    emitEvent(
+      'termin.verlegung_abgelehnt',
+      {
+        fallId: neu.fall_id as string,
+        terminId: neu.id as string,
+        alterTerminId: neu.verlegung_quelle_id as string,
+        kundenVorname,
+        grund: input.grund?.trim() || undefined,
+        von_wem: von_wem_safe,
+      },
+      { fallId: neu.fall_id as string, triggeredBy: user.id },
+    ).catch((e) => console.error('[AAR-864] emit verlegung_abgelehnt failed', e))
+  }
+
   return { ok: true }
 }
