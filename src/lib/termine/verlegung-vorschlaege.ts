@@ -143,6 +143,8 @@ export async function findVerlegungsVorschlaege(
     }
   }
 
+  console.log('[AAR-864] findVerlegungsVorschlaege: tagesplan =', tagesplan.length, '| gefiltert =', tagesplanGefiltert.length, '| kandidaten =', kandidaten.length)
+
   // Sortieren: erst Ampel (green > yellow > red), dann Score asc
   kandidaten.sort((a, b) => {
     const ampelRank: Record<Ampel, number> = { green: 0, yellow: 1, red: 2 }

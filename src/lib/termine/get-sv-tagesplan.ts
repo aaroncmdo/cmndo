@@ -57,9 +57,10 @@ export async function getSvTagesplan(
     .order('start_zeit', { ascending: true })
 
   if (error) {
-    console.warn('[AAR-864] getSvTagesplan failed', error)
+    console.error('[AAR-864] getSvTagesplan failed', error)
     return []
   }
+  console.log('[AAR-864] getSvTagesplan: svId =', svId, '| Rows =', (data ?? []).length)
 
   return (data ?? []).map((row) => {
     const fall = Array.isArray(row.faelle) ? row.faelle[0] : row.faelle

@@ -405,14 +405,22 @@ export async function getKundeTerminVorschlaegeAction(
     }
   }
 
-  const vorschlaegeRaw = await findVerlegungsVorschlaege(admin, termin.sv_id as string, {
-    besichtigungsortLat: Number(zielLat),
-    besichtigungsortLng: Number(zielLng),
-    besichtigungsortLabel: zielLabel,
-    slotDauerMin,
-    exkludiereTerminId: termin.id as string,
-    svStandort,
-  })
+  let vorschlaegeRaw: import('@/lib/termine/verlegung-vorschlaege').VerlegungsVorschlag[] = []
+  try {
+    vorschlaegeRaw = await findVerlegungsVorschlaege(admin, termin.sv_id as string, {
+      besichtigungsortLat: Number(zielLat),
+      besichtigungsortLng: Number(zielLng),
+      besichtigungsortLabel: zielLabel,
+      slotDauerMin,
+      exkludiereTerminId: termin.id as string,
+      svStandort,
+    })
+  } catch (e) {
+    console.error('[AAR-864] getKundeTerminVorschlaegeAction: findVerlegungsVorschlaege threw', e)
+    return { ok: false, error: `Engine-Fehler: ${e instanceof Error ? e.message : String(e)}` }
+  }
+
+  console.log('[AAR-864] getKundeTerminVorschlaegeAction: vorschlaegeRaw.length =', vorschlaegeRaw.length, '| svId =', termin.sv_id, '| fallId =', termin.fall_id, '| zielLat =', zielLat, '| zielLng =', zielLng)
 
   // Routen-Details rausfiltern — Kunde sieht nur Datum + Uhrzeit (SV-Privatsphäre)
   const vorschlaege = vorschlaegeRaw.map((v) => ({ start: v.start, end: v.end, datum: v.datum }))

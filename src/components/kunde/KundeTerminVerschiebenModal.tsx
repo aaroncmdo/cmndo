@@ -81,14 +81,21 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
     setLadeVorschlaege(true)
     setVorschlaegeErr(null)
     setVorschlaege([])
-    getKundeTerminVorschlaegeAction(terminId).then((r) => {
-      if (r.ok) {
-        setVorschlaege(r.vorschlaege)
-      } else {
-        setVorschlaegeErr(r.error)
-      }
-      setLadeVorschlaege(false)
-    })
+    getKundeTerminVorschlaegeAction(terminId)
+      .then((r) => {
+        if (r.ok) {
+          setVorschlaege(r.vorschlaege)
+        } else {
+          setVorschlaegeErr(r.error)
+        }
+        setLadeVorschlaege(false)
+      })
+      .catch((e: unknown) => {
+        const msg = e instanceof Error ? e.message : String(e)
+        console.error('[AAR-864] getKundeTerminVorschlaegeAction rejected:', msg)
+        setVorschlaegeErr(`Unerwarteter Fehler: ${msg}`)
+        setLadeVorschlaege(false)
+      })
   }, [open, terminId])
 
   async function submitSlot(neuesStartIso: string) {
