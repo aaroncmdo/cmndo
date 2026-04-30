@@ -330,10 +330,12 @@ export default function FallDetailClient(props: Props) {
   })
 
   return (
-    <div className="min-h-full bg-[#f8f9fb] -m-2 sm:-m-3 lg:-m-4 [&_.rounded-2xl]:shadow-sm">
+    <div className="min-h-full bg-[#f8f9fb] -mx-2 sm:-mx-3 lg:-mx-4 -mb-2 sm:-mb-3 lg:-mb-4 -mt-2 sm:-mt-3 lg:-mt-4 [&_.rounded-2xl]:shadow-sm">
       <FallRealtimeRefresh fallId={fall.id as string} />
       <FallWindowDropzone fallId={fall.id as string} />
-      {/* AAR-864 Polish: Akten-Header sticky + dezenter Schatten beim Scrollen */}
+      {/* AAR-864 Polish: Akten-Header sticky direkt am Wrapper-Oberrand —
+          top-0 klebt am main-Padding-Inside, das durch -mt-* aufgehoben wurde,
+          damit der Header bündig am rounded-2xl-Wrapper-Top hängt. */}
       <div className="sticky top-0 z-30 bg-[#f8f9fb] shadow-sm">
         <FallHeader
           fallNummer={fallNummer}
