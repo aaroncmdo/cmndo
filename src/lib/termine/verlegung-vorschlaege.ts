@@ -19,6 +19,9 @@ const ARBEITSTAG_BIS_STUNDE = 18
 const FENSTER_TAGE_DEFAULT = 14
 const PUFFER_GRUEN_MIN = 10
 
+const KUNDE_ALTERNATIVE_OFFSET_MIN = 30
+const KUNDE_ALTERNATIVE_MAX_TAGE_VORWAERTS = 7
+
 export type Ampel = 'green' | 'yellow' | 'red'
 
 export type VerlegungsVorschlag = {
@@ -343,4 +346,156 @@ async function bewerteSlot({
     nach,
     score,
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// AAR-864 Kunde-Verlegung: Free-Busy-Check + Alternativen-Suche
+// ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Prüft ob der SV im gewünschten Zeitfenster einen blockierenden Termin hat.
+ * Aktiv = bestaetigt | reserviert | verlegt | verlegung_pending.
+ */
+export async function istSlotFrei(
+  supabase: SupabaseClient,
+  svId: string,
+  startIso: string,
+  endIso: string,
+  exkludiereTerminId?: string,
+): Promise<boolean> {
+  let q = supabase
+    .from('gutachter_termine')
+    .select('id', { count: 'exact', head: true })
+    .eq('sv_id', svId)
+    .in('status', ['bestaetigt', 'reserviert', 'verlegt', 'verlegung_pending'])
+    .lt('start_zeit', endIso)
+    .gt('end_zeit', startIso)
+  if (exkludiereTerminId) q = q.neq('id', exkludiereTerminId)
+  const { count, error } = await q
+  if (error) {
+    console.warn('[AAR-864] istSlotFrei Query-Fehler', error)
+    return false
+  }
+  return (count ?? 0) === 0
+}
+
+export type KundenAlternative = {
+  /** Slot-Start-ISO. */
+  start: string
+  /** Slot-Ende-ISO. */
+  end: string
+  /** Beschriftung für UI ('Früher heute', 'Später heute', 'Morgen', '+ 2 Tage', …). */
+  label: string
+  /** Datum als YYYY-MM-DD für Gruppierung. */
+  datum: string
+  /** Diff zum Wunschslot in Tagen + Minuten — für UI „X Tage später". */
+  diffTage: number
+  diffMinuten: number
+}
+
+/**
+ * Findet bis zu drei nahe Alternativen wenn der Kunden-Wunschslot belegt ist:
+ *  1. „Früher heute"   — frühster freier Slot vor dem Wunschstart am gleichen Tag
+ *  2. „Später heute"   — frühster freier Slot nach dem Wunschende am gleichen Tag
+ *  3. „Anderer Tag"    — gleiche Uhrzeit am nächsten freien Tag (bis +7 Tage)
+ *
+ * Aaron-Spec: Kunde sieht NICHT den vollständigen SV-Kalender — nur Frei/Belegt
+ * pro Kandidat, und nur drei Alternativen werden zurückgegeben.
+ */
+export async function findAlternativenZuWunschslot(
+  supabase: SupabaseClient,
+  svId: string,
+  wunschStartIso: string,
+  slotDauerMin: number,
+  exkludiereTerminId?: string,
+): Promise<KundenAlternative[]> {
+  const wunschStart = new Date(wunschStartIso)
+  const out: KundenAlternative[] = []
+
+  function fmtTag(d: Date): string {
+    return d.toISOString().slice(0, 10)
+  }
+
+  function diffMin(target: Date): number {
+    return Math.round((target.getTime() - wunschStart.getTime()) / 60_000)
+  }
+
+  function diffTage(target: Date): number {
+    const a = new Date(wunschStart)
+    a.setHours(0, 0, 0, 0)
+    const b = new Date(target)
+    b.setHours(0, 0, 0, 0)
+    return Math.round((b.getTime() - a.getTime()) / 86_400_000)
+  }
+
+  // ── 1. Früher heute ──────────────────────────────────────────────
+  const heuteStart = new Date(wunschStart)
+  heuteStart.setHours(ARBEITSTAG_VON_STUNDE, 0, 0, 0)
+  for (
+    let probe = new Date(wunschStart);
+    probe.getTime() > heuteStart.getTime();
+    probe.setMinutes(probe.getMinutes() - KUNDE_ALTERNATIVE_OFFSET_MIN)
+  ) {
+    const candStart = new Date(probe.getTime() - KUNDE_ALTERNATIVE_OFFSET_MIN * 60_000)
+    if (candStart.getTime() < heuteStart.getTime()) break
+    const candEnd = new Date(candStart.getTime() + slotDauerMin * 60_000)
+    if (await istSlotFrei(supabase, svId, candStart.toISOString(), candEnd.toISOString(), exkludiereTerminId)) {
+      out.push({
+        start: candStart.toISOString(),
+        end: candEnd.toISOString(),
+        label: 'Früher heute',
+        datum: fmtTag(candStart),
+        diffTage: 0,
+        diffMinuten: diffMin(candStart),
+      })
+      break
+    }
+  }
+
+  // ── 2. Später heute ──────────────────────────────────────────────
+  const heuteEnde = new Date(wunschStart)
+  heuteEnde.setHours(ARBEITSTAG_BIS_STUNDE, 0, 0, 0)
+  for (
+    let probe = new Date(wunschStart.getTime() + slotDauerMin * 60_000);
+    probe.getTime() < heuteEnde.getTime();
+    probe.setMinutes(probe.getMinutes() + KUNDE_ALTERNATIVE_OFFSET_MIN)
+  ) {
+    const candStart = new Date(probe.getTime() + KUNDE_ALTERNATIVE_OFFSET_MIN * 60_000)
+    const candEnd = new Date(candStart.getTime() + slotDauerMin * 60_000)
+    if (candEnd.getTime() > heuteEnde.getTime()) break
+    if (await istSlotFrei(supabase, svId, candStart.toISOString(), candEnd.toISOString(), exkludiereTerminId)) {
+      out.push({
+        start: candStart.toISOString(),
+        end: candEnd.toISOString(),
+        label: 'Später heute',
+        datum: fmtTag(candStart),
+        diffTage: 0,
+        diffMinuten: diffMin(candStart),
+      })
+      break
+    }
+  }
+
+  // ── 3. Anderer Tag, gleiche Uhrzeit ──────────────────────────────
+  for (let tagOffset = 1; tagOffset <= KUNDE_ALTERNATIVE_MAX_TAGE_VORWAERTS; tagOffset++) {
+    const candStart = new Date(wunschStart)
+    candStart.setDate(candStart.getDate() + tagOffset)
+    const candEnd = new Date(candStart.getTime() + slotDauerMin * 60_000)
+    if (await istSlotFrei(supabase, svId, candStart.toISOString(), candEnd.toISOString(), exkludiereTerminId)) {
+      out.push({
+        start: candStart.toISOString(),
+        end: candEnd.toISOString(),
+        label:
+          tagOffset === 1
+            ? 'Morgen, gleiche Uhrzeit'
+            : `+${tagOffset} Tage, gleiche Uhrzeit`,
+        datum: fmtTag(candStart),
+        diffTage: tagOffset,
+        diffMinuten: diffMin(candStart),
+      })
+      break
+    }
+  }
+
+  return out
 }

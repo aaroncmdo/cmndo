@@ -5106,6 +5106,7 @@ export type Database = {
           uebersprungen: boolean | null
           verlegung_eskalation_an_kb_an: string | null
           verlegung_grund: string | null
+          verlegung_initiator_kunde: boolean
           verlegung_kunde_benachrichtigt_an: string | null
           verlegung_quelle_id: string | null
           verspaetung_minuten: number | null
@@ -5184,6 +5185,7 @@ export type Database = {
           uebersprungen?: boolean | null
           verlegung_eskalation_an_kb_an?: string | null
           verlegung_grund?: string | null
+          verlegung_initiator_kunde?: boolean
           verlegung_kunde_benachrichtigt_an?: string | null
           verlegung_quelle_id?: string | null
           verspaetung_minuten?: number | null
@@ -5262,6 +5264,7 @@ export type Database = {
           uebersprungen?: boolean | null
           verlegung_eskalation_an_kb_an?: string | null
           verlegung_grund?: string | null
+          verlegung_initiator_kunde?: boolean
           verlegung_kunde_benachrichtigt_an?: string | null
           verlegung_quelle_id?: string | null
           verspaetung_minuten?: number | null
@@ -13871,4 +13874,3 @@ export const Constants = {
     },
   },
 } as const
-

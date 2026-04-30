@@ -435,6 +435,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           const aktiverSv = svTermin
           const terminInfo = aktiverSv?.start_zeit
             ? {
+                terminId: aktiverSv.id as string,
+                status: (aktiverSv.status as string | null) ?? null,
                 datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
                   weekday: 'long',
                   day: '2-digit',

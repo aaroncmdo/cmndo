@@ -8,7 +8,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { findVerlegungsVorschlaege, type VerlegungsVorschlag } from '@/lib/termine/verlegung-vorschlaege'
+import { findVerlegungsVorschlaege, type VerlegungsVorschlag, istSlotFrei, findAlternativenZuWunschslot, type KundenAlternative } from '@/lib/termine/verlegung-vorschlaege'
 import { emitEvent } from '@/lib/notifications/emit'
 
 // Datum/Uhrzeit-Formatter für Notifikations-Payloads (de-DE)
@@ -334,6 +334,145 @@ export async function terminVerlegungVorschlagen(input: {
 
 type DecisionResult = { ok: true } | { ok: false; error: string }
 
+/**
+ * AAR-864: Kunde schlägt Verlegung vor.
+ * Output:
+ *  - { ok: true, neuerTerminId } wenn Wunschslot frei + State-Machine angelegt
+ *  - { ok: false, alternatives } wenn Wunschslot belegt — Modal zeigt 3 Alternativen
+ *  - { ok: false, error } bei Auth-/Datenfehler
+ */
+type KundeSubmitResult =
+  | { ok: true; neuerTerminId: string }
+  | { ok: false; error: string; alternatives?: KundenAlternative[] }
+
+export async function kundeTerminVerlegungVorschlagen(input: {
+  terminId: string
+  neuesStartIso: string
+  grund?: string
+}): Promise<KundeSubmitResult> {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
+
+  // Termin laden
+  const { data: alt } = await admin
+    .from('gutachter_termine')
+    .select('id, sv_id, fall_id, kb_id, kanal, typ, status, start_zeit, end_zeit')
+    .eq('id', input.terminId)
+    .maybeSingle()
+  if (!alt) return { ok: false, error: 'Termin nicht gefunden.' }
+  if (alt.status !== 'bestaetigt') {
+    return { ok: false, error: `Termin ist nicht bestaetigt (aktuell: ${alt.status}).` }
+  }
+
+  // Auth: User muss Kunde des Falls sein
+  if (!alt.fall_id) return { ok: false, error: 'Termin nicht mit einem Fall verknüpft.' }
+  const guardErr = await assertDarfVerlegungEntscheiden(user.id, alt.fall_id as string)
+  if (guardErr) return { ok: false, error: guardErr }
+
+  // Slot-Dauer aus altem Termin
+  const dauerMin = Math.round(
+    (new Date(alt.end_zeit as string).getTime() -
+      new Date(alt.start_zeit as string).getTime()) /
+      60_000,
+  )
+  const slotDauerMin = dauerMin >= 30 && dauerMin <= 240 ? dauerMin : 45
+
+  const wunschStart = new Date(input.neuesStartIso)
+  const wunschEnde = new Date(wunschStart.getTime() + slotDauerMin * 60_000)
+
+  // Free-Busy-Check (alter Termin selbst muss exkludiert werden — wir
+  // verschieben ihn ja, er soll dafür kein Konflikt sein)
+  const frei = await istSlotFrei(
+    admin,
+    alt.sv_id as string,
+    wunschStart.toISOString(),
+    wunschEnde.toISOString(),
+    alt.id as string,
+  )
+  if (!frei) {
+    const alternatives = await findAlternativenZuWunschslot(
+      admin,
+      alt.sv_id as string,
+      input.neuesStartIso,
+      slotDauerMin,
+      alt.id as string,
+    )
+    return { ok: false, error: 'Der gewünschte Termin ist beim Gutachter belegt.', alternatives }
+  }
+
+  // 1) Alter Termin auf 'verlegt' (atomar via status='bestaetigt'-Check)
+  const { error: updErr } = await admin
+    .from('gutachter_termine')
+    .update({
+      status: 'verlegt',
+      verlegung_grund: input.grund?.trim() || null,
+      verlegung_initiator_kunde: true,
+    })
+    .eq('id', alt.id)
+    .eq('status', 'bestaetigt')
+  if (updErr) {
+    return { ok: false, error: `Verlegung fehlgeschlagen: ${updErr.message}` }
+  }
+
+  // 2) Neuen Slot anlegen — verlegung_pending, Initiator=Kunde
+  const { data: neu, error: insErr } = await admin
+    .from('gutachter_termine')
+    .insert({
+      sv_id: alt.sv_id,
+      fall_id: alt.fall_id,
+      kb_id: alt.kb_id,
+      kanal: alt.kanal,
+      typ: alt.typ ?? 'sv_begutachtung',
+      start_zeit: wunschStart.toISOString(),
+      end_zeit: wunschEnde.toISOString(),
+      status: 'verlegung_pending',
+      verlegung_quelle_id: alt.id,
+      verlegung_grund: input.grund?.trim() || null,
+      verlegung_kunde_benachrichtigt_an: new Date().toISOString(),
+      verlegung_initiator_kunde: true,
+    })
+    .select('id')
+    .single()
+
+  if (insErr || !neu) {
+    // Rollback
+    await admin
+      .from('gutachter_termine')
+      .update({ status: 'bestaetigt', verlegung_grund: null, verlegung_initiator_kunde: false })
+      .eq('id', alt.id)
+    return {
+      ok: false,
+      error: `Pending-Slot anlegen fehlgeschlagen: ${insErr?.message ?? 'unbekannt'}`,
+    }
+  }
+
+  revalidateFallPaths(alt.fall_id as string | null)
+
+  // Notifikation: SV soll bestätigen — gleicher Event-Type, andere Empfänger-Wahl im Worker
+  const svVorname = await lookupSvVorname(alt.sv_id as string)
+  emitEvent(
+    'termin.verlegung_vorgeschlagen',
+    {
+      fallId: alt.fall_id as string,
+      terminId: neu.id as string,
+      alterTerminId: alt.id as string,
+      alterDatum: fmtDatum(alt.start_zeit as string),
+      alterUhrzeit: fmtUhrzeit(alt.start_zeit as string),
+      neuesDatum: fmtDatum(wunschStart.toISOString()),
+      neuesUhrzeit: fmtUhrzeit(wunschStart.toISOString()),
+      svVorname,
+      grund: input.grund?.trim() || undefined,
+    },
+    { fallId: alt.fall_id as string, triggeredBy: user.id },
+  ).catch((e) => console.error('[AAR-864] emit kunde-verlegung_vorgeschlagen failed', e))
+
+  return { ok: true, neuerTerminId: neu.id as string }
+}
+
 function revalidateFallPaths(fallId: string | null) {
   if (fallId) {
     revalidatePath(`/gutachter/fall/${fallId}`)
@@ -350,7 +489,7 @@ function revalidateFallPaths(fallId: string | null) {
 
 /**
  * Prüft ob der eingeloggte User die Verlegung für diesen Fall entscheiden
- * darf: Kunde des Falls, KB des Falls, oder Admin/Staff.
+ * darf: Kunde des Falls, KB des Falls, SV des Falls, oder Admin/Staff.
  * Liefert null wenn ok, sonst Fehler-String.
  */
 async function assertDarfVerlegungEntscheiden(
@@ -368,12 +507,21 @@ async function assertDarfVerlegungEntscheiden(
 
   const { data: fall } = await admin
     .from('faelle')
-    .select('kunde_id, kundenbetreuer_id')
+    .select('kunde_id, kundenbetreuer_id, sv_id')
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return 'Fall nicht gefunden.'
   if (fall.kunde_id === userId) return null
   if (fall.kundenbetreuer_id === userId) return null
+  // SV-Auth: User muss profile_id des zugewiesenen SV sein
+  if (fall.sv_id) {
+    const { data: sv } = await admin
+      .from('sachverstaendige')
+      .select('profile_id')
+      .eq('id', fall.sv_id as string)
+      .maybeSingle()
+    if (sv?.profile_id === userId) return null
+  }
   return 'Keine Berechtigung für diese Verlegung.'
 }
 

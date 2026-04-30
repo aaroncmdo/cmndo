@@ -34,6 +34,10 @@ import {
   terminAblehnen,
   terminGegenvorschlag,
 } from '@/lib/actions/termin-actions'
+import {
+  terminVerlegungBestaetigen,
+  terminVerlegungAblehnen,
+} from '@/lib/actions/termin-verlegung-actions'
 import TerminVerlegenModal from './TerminVerlegenModal'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 
@@ -49,6 +53,8 @@ export type AuftragTerminInfo = {
   start_zeit: string | null
   vorgeschlagenes_datum: string | null
   gegenvorschlag_von: string | null
+  /** AAR-864: TRUE wenn Kunde die Verlegung initiiert hat — SV bestätigt. */
+  verlegung_initiator_kunde?: boolean | null
 }
 
 type Props = {
@@ -107,15 +113,17 @@ export default function AuftragHeaderPanel({
   const istBestaetigt = termin?.status === 'bestaetigt'
   const istEigenerGegenvorschlag =
     termin?.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'sv'
-  // AAR-864: SV hat eine Verlegung beantragt — wartet auf Kunden-Antwort.
-  // Hinweis nur sichtbar solange wir noch in der Termin-Phase sind UND der
-  // pending-Slot in der Zukunft liegt. Sobald die Besichtigung läuft oder
-  // der Slot vorbei ist, ist die Verlegung obsolet und der Hinweis weg.
+  // AAR-864: Verlegung-Pending-State — Hinweis nur sichtbar solange wir noch
+  // in der Termin-Phase sind UND der Slot in der Zukunft liegt.
   const pendingInZukunft = termin?.start_zeit
     ? new Date(termin.start_zeit).getTime() > Date.now()
     : false
   const istVerlegungPending =
     termin?.status === 'verlegung_pending' && phase === 'termin' && pendingInZukunft
+  // Wer hat die Verlegung initiiert?
+  const istKundeInitiator = !!termin?.verlegung_initiator_kunde
+  // SV muss bestätigen wenn Kunde initiiert hat
+  const svDarfBestaetigen = istVerlegungPending && istKundeInitiator
 
   const fmt = fmtTermin(termin?.start_zeit ?? null)
   const fmtVorgeschlag = fmtTermin(termin?.vorgeschlagenes_datum ?? null)
@@ -125,11 +133,38 @@ export default function AuftragHeaderPanel({
 
   async function handleAblehnen() {
     setLoading(true)
+    // AAR-864: Bei pending-Verlegung lehnen wir die Verlegung ab (alter
+    // Termin bleibt bestehen) statt den Termin zu stornieren.
+    if (istVerlegungPending && termin?.id) {
+      const r = await terminVerlegungAblehnen({ neuerTerminId: termin.id, grund })
+      setLoading(false)
+      if (r.ok) {
+        setModal(null)
+        router.refresh()
+      }
+      return
+    }
     const result = await terminAblehnen({ grund, source: 'sv_portal', fallId })
     setLoading(false)
     if (result.success) {
       setModal(null)
       router.refresh()
+    }
+  }
+
+  async function handleVerlegungBestaetigen() {
+    if (!termin?.id) return
+    setLoading(true)
+    try {
+      const r = await terminVerlegungBestaetigen({ neuerTerminId: termin.id })
+      if (!r.ok) {
+        // eslint-disable-next-line no-alert
+        alert(`Fehler: ${r.error}`)
+        return
+      }
+      router.refresh()
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -244,15 +279,18 @@ export default function AuftragHeaderPanel({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-amber-900">
-                Verlegung beantragt — Bestätigung ausstehend
+                {istKundeInitiator
+                  ? 'Kunde möchte verlegen — bitte bestätigen'
+                  : 'Verlegung beantragt — Bestätigung ausstehend'}
               </p>
               <p className="text-xs text-amber-800 mt-0.5">
-                Der Kunde wurde benachrichtigt. Bei Nicht-Reaktion eskalieren
-                wir 48h vor dem Original-Termin automatisch an den Kundenbetreuer.
+                {istKundeInitiator
+                  ? 'Der Kunde hat einen neuen Termin vorgeschlagen. Bestätige oder lehne ab — solange wartet der Original-Termin.'
+                  : 'Der Kunde wurde benachrichtigt. Bei Nicht-Reaktion eskalieren wir 48h vor dem Original-Termin automatisch an den Kundenbetreuer.'}
               </p>
             </div>
           </div>
-          {/* Read-only Termin-Daten: Datum + Uhrzeit + Adresse */}
+          {/* Termin-Daten — read-only bei SV-Initiator, mit Buttons bei Kunde-Initiator */}
           {fmt && (
             <div className="rounded-xl bg-white border-2 border-amber-300 p-3 ml-11">
               <p className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold mb-1">
@@ -263,6 +301,26 @@ export default function AuftragHeaderPanel({
               </p>
               {adresse && (
                 <p className="text-xs text-claimondo-ondo mt-0.5">{adresse}</p>
+              )}
+              {svDarfBestaetigen && (
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => setModal('ablehnen')}
+                    disabled={loading}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium text-red-700 bg-white border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    <XCircleIcon className="w-4 h-4" />
+                    Ablehnen
+                  </button>
+                  <button
+                    onClick={handleVerlegungBestaetigen}
+                    disabled={loading}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
+                  >
+                    <CheckIcon className="w-4 h-4" />
+                    {loading ? 'Wird bestätigt…' : 'Verlegung bestätigen'}
+                  </button>
+                </div>
               )}
             </div>
           )}

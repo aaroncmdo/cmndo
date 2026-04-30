@@ -6,6 +6,7 @@
 
 import React from 'react'
 import { CheckIcon, ClipboardListIcon, WrenchIcon, ShieldCheckIcon, FlagIcon, AlertTriangleIcon, CalendarIcon, NavigationIcon } from 'lucide-react'
+import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
 import {
   MAIN_PHASE_LABEL,
   SUBPHASE_LABEL,
@@ -28,6 +29,8 @@ const MAIN_PHASE_INDEX: Record<ClaimMainPhase, number> = {
 }
 
 type TerminInfo = {
+  /** Termin-ID — für „Termin verschieben"-Trigger */
+  terminId: string
   /** Datum formatiert für Anzeige (z.B. „Mo. 05.05.2026") */
   datum: string
   /** Uhrzeit formatiert (z.B. „14:00") */
@@ -36,6 +39,8 @@ type TerminInfo = {
   adresse: string | null
   /** SV-Vorname (nur Vorname — AAR-858 Anonymität) */
   svVorname?: string | null
+  /** Termin-Status — bei 'bestaetigt' wird der Verschieben-Button gezeigt */
+  status?: string | null
 }
 
 /** AAR-864: Notice-Item das als verschmolzene Bottom-Sektion im Stepper
@@ -176,17 +181,23 @@ export default function ClaimStepper({
                 )}
               </div>
             </div>
-            {terminInfo.adresse && (
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(terminInfo.adresse)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-sm font-medium px-3 py-1.5 transition-colors"
-              >
-                <NavigationIcon className="w-3.5 h-3.5" />
-                Navigation
-              </a>
-            )}
+            <div className="ml-auto flex items-center gap-2">
+              {/* AAR-864: Verschieben-Button nur bei bestätigtem Termin */}
+              {terminInfo.status === 'bestaetigt' && (
+                <KundeTerminVerschiebenButton terminId={terminInfo.terminId} />
+              )}
+              {terminInfo.adresse && (
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(terminInfo.adresse)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-sm font-medium px-3 py-1.5 transition-colors"
+                >
+                  <NavigationIcon className="w-3.5 h-3.5" />
+                  Navigation
+                </a>
+              )}
+            </div>
           </div>
         </div>
       )}

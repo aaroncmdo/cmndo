@@ -244,7 +244,7 @@ export default async function GutachterFallPage({
   // verlegt-Slot bleibt draußen — er ist nur Slot-Blocker im Kalender.
   const { data: aktiveTermine } = await admin
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_unterwegs_seit, sv_angekommen_am, durchgefuehrt_am, geschaetzte_fahrtzeit_min, sv_eta_minuten')
+    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_unterwegs_seit, sv_angekommen_am, durchgefuehrt_am, geschaetzte_fahrtzeit_min, sv_eta_minuten, verlegung_initiator_kunde')
     .eq('fall_id', id)
     .eq('sv_id', sv.id)
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'durchgefuehrt', 'verlegung_pending'])
