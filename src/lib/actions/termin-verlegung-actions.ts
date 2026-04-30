@@ -104,13 +104,19 @@ export async function getVerlegungsVorschlaegeAction(input: {
   } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
 
+  if (!input.terminId) {
+    return { ok: false, error: 'Kein Termin in der Auftragsansicht — Verlegung nicht möglich.' }
+  }
+
   // Termin laden über Admin-Client
   const { data: termin, error: terminErr } = await admin
     .from('gutachter_termine')
     .select('id, sv_id, start_zeit, end_zeit, status, fall_id')
     .eq('id', input.terminId)
     .maybeSingle()
-  if (terminErr || !termin) return { ok: false, error: 'Termin nicht gefunden.' }
+  if (terminErr || !termin) {
+    return { ok: false, error: `Termin ${input.terminId} nicht gefunden.` }
+  }
 
   // Auth-Guard: User muss der SV des Termins sein, oder Admin/Staff
   if (termin.sv_id) {
@@ -128,13 +134,21 @@ export async function getVerlegungsVorschlaegeAction(input: {
     }
   }
 
+  // AAR-864: fall_id aus dem Termin nehmen — der Caller-Prop fallId kann
+  // bei AuftragHeaderPanel über mehrere Layer übergeben werden, der DB-
+  // Eintrag ist die Quelle der Wahrheit.
+  const fallId = (termin.fall_id as string | null) ?? input.fallId
+  if (!fallId) {
+    return { ok: false, error: 'Termin ist nicht mit einem Fall verknüpft.' }
+  }
+
   // Fall + Adresse laden — Admin damit garantiert alle Spalten sichtbar
   const { data: fall } = await admin
     .from('faelle')
     .select('id, besichtigungsort_adresse, besichtigungsort_plz, schadens_adresse, schadens_plz, schadens_ort')
-    .eq('id', input.fallId)
+    .eq('id', fallId)
     .maybeSingle()
-  if (!fall) return { ok: false, error: 'Fall nicht gefunden.' }
+  if (!fall) return { ok: false, error: `Fall ${fallId} nicht gefunden.` }
 
   // Bevorzugt besichtigungsort_*, Fallback schadens_*
   const adresse =
