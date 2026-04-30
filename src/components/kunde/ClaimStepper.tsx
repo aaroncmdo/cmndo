@@ -5,7 +5,7 @@
 // als zusätzliche Zeile unter dem Stepper angezeigt.
 
 import React from 'react'
-import { CheckIcon, ClipboardListIcon, WrenchIcon, ShieldCheckIcon, FlagIcon, AlertTriangleIcon } from 'lucide-react'
+import { CheckIcon, ClipboardListIcon, WrenchIcon, ShieldCheckIcon, FlagIcon, AlertTriangleIcon, CalendarIcon, NavigationIcon } from 'lucide-react'
 import {
   MAIN_PHASE_LABEL,
   SUBPHASE_LABEL,
@@ -27,15 +27,30 @@ const MAIN_PHASE_INDEX: Record<ClaimMainPhase, number> = {
   abschluss: 3,
 }
 
+type TerminInfo = {
+  /** Datum formatiert für Anzeige (z.B. „Mo. 05.05.2026") */
+  datum: string
+  /** Uhrzeit formatiert (z.B. „14:00") */
+  uhrzeit: string
+  /** Adresse für Anzeige + Navigation */
+  adresse: string | null
+  /** SV-Vorname (nur Vorname — AAR-858 Anonymität) */
+  svVorname?: string | null
+}
+
 export default function ClaimStepper({
   lifecycle,
   bottomSlot,
+  terminInfo,
 }: {
   lifecycle: ClaimLifecycle
   /** AAR-864: Optionale Sektion unten — z.B. Verlegungs-Banner. Wenn gesetzt,
    *  wechselt der Outer-Border auf amber und das Slot wird als verschmolzene
    *  Bottom-Sektion ohne eigenen Border gerendert. */
   bottomSlot?: React.ReactNode
+  /** AAR-864 Polish: Termin-Sektion analog zum SV-Header — Datum, Uhrzeit,
+   *  Adresse, Navi-Button. Wird über dem bottomSlot gerendert. */
+  terminInfo?: TerminInfo | null
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
@@ -126,6 +141,39 @@ export default function ClaimStepper({
         </div>
       )}
       </div>
+      {/* AAR-864: Termin-Sektion analog SV-Header — sichtbar wenn Termin
+          existiert und keine Verlegung pending. */}
+      {terminInfo && !bottomSlot && (
+        <div className="border-t border-claimondo-navy/10 px-4 sm:px-6 py-3.5">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <CalendarIcon className="w-4 h-4 shrink-0 text-claimondo-navy" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-claimondo-navy">
+                  {terminInfo.datum}, {terminInfo.uhrzeit} Uhr
+                </p>
+                {terminInfo.adresse && (
+                  <p className="text-xs text-claimondo-ondo truncate">
+                    {terminInfo.adresse}
+                    {terminInfo.svVorname && ` · ${terminInfo.svVorname}`}
+                  </p>
+                )}
+              </div>
+            </div>
+            {terminInfo.adresse && (
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(terminInfo.adresse)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-sm font-medium px-3 py-1.5 transition-colors"
+              >
+                <NavigationIcon className="w-3.5 h-3.5" />
+                Navigation
+              </a>
+            )}
+          </div>
+        </div>
+      )}
       {bottomSlot}
     </div>
   )

@@ -423,17 +423,39 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         </div>
 
         {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase.
-            AAR-864: Verlegungs-Banner als verschmolzene Bottom-Sektion, damit der
-            Kunde die offene Entscheidung direkt aus dem Stepper „herauswachsend"
-            sieht (gleiches Pattern wie der Termin-Header beim Gutachter). */}
-        <ClaimStepper
-          lifecycle={claimLifecycle}
-          bottomSlot={
-            verlegungBannerProps ? (
-              <TerminVerlegungBanner {...verlegungBannerProps} embedded />
-            ) : null
-          }
-        />
+            AAR-864: Termin-Sektion analog zum SV-Header (Datum/Uhrzeit/Adresse/Navi)
+            und Verlegungs-Banner als verschmolzene Bottom-Sektion. */}
+        {(() => {
+          const aktiverSv = svTermin
+          const terminInfo = aktiverSv?.start_zeit
+            ? {
+                datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
+                  weekday: 'long',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                }),
+                uhrzeit: new Date(aktiverSv.start_zeit as string).toLocaleTimeString('de-DE', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
+                adresse: terminAdresse,
+                // AAR-858: nur Vorname für Anonymität
+                svVorname: svKontakt?.name?.split(' ')[0] ?? null,
+              }
+            : null
+          return (
+            <ClaimStepper
+              lifecycle={claimLifecycle}
+              terminInfo={terminInfo}
+              bottomSlot={
+                verlegungBannerProps ? (
+                  <TerminVerlegungBanner {...verlegungBannerProps} embedded />
+                ) : null
+              }
+            />
+          )
+        })()}
 
         {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
         {svTermin?.id && (
