@@ -29,6 +29,9 @@ type Props = {
   neuesUhrzeit: string
   svVorname: string
   grund: string | null
+  /** Embedded-Mode: keine eigene rounded/border, nur Inhalt + obere Trennlinie.
+   *  Wird genutzt wenn der Banner aus dem PageHeader-Container „entspringt". */
+  embedded?: boolean
 }
 
 export default function TerminVerlegungBanner({
@@ -39,6 +42,7 @@ export default function TerminVerlegungBanner({
   neuesUhrzeit,
   svVorname,
   grund,
+  embedded = false,
 }: Props) {
   const router = useRouter()
   const [busy, setBusy] = useState<'bestaetigen' | 'ablehnen' | null>(null)
@@ -76,7 +80,13 @@ export default function TerminVerlegungBanner({
 
   return (
     <>
-      <div className="rounded-2xl border-2 border-amber-400 bg-amber-50 p-5">
+      <div
+        className={
+          embedded
+            ? 'border-t-2 border-amber-400 bg-amber-50 p-5'
+            : 'rounded-2xl border-2 border-amber-400 bg-amber-50 p-5'
+        }
+      >
         <div className="flex items-start gap-3 mb-3">
           <div className="w-10 h-10 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
             <CalendarClockIcon className="w-5 h-5 text-amber-700" />

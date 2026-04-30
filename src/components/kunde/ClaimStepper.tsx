@@ -27,12 +27,26 @@ const MAIN_PHASE_INDEX: Record<ClaimMainPhase, number> = {
   abschluss: 3,
 }
 
-export default function ClaimStepper({ lifecycle }: { lifecycle: ClaimLifecycle }) {
+export default function ClaimStepper({
+  lifecycle,
+  bottomSlot,
+}: {
+  lifecycle: ClaimLifecycle
+  /** AAR-864: Optionale Sektion unten — z.B. Verlegungs-Banner. Wenn gesetzt,
+   *  wechselt der Outer-Border auf amber und das Slot wird als verschmolzene
+   *  Bottom-Sektion ohne eigenen Border gerendert. */
+  bottomSlot?: React.ReactNode
+}) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
 
+  const outerCls = bottomSlot
+    ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden'
+    : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
+
   return (
-    <div className="rounded-2xl bg-white border border-claimondo-border px-4 sm:px-6 py-4 space-y-3">
+    <div className={outerCls}>
+      <div className="px-4 sm:px-6 py-4 space-y-3">
       <div className="flex items-center w-full">
         {MAIN_PHASES.map((p, i) => {
           const isCurrent = !abgeschlossen && i === aktuellIdx
@@ -104,6 +118,8 @@ export default function ClaimStepper({ lifecycle }: { lifecycle: ClaimLifecycle 
           </div>
         </div>
       )}
+      </div>
+      {bottomSlot}
     </div>
   )
 }

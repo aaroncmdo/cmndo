@@ -414,13 +414,18 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
-        {/* AAR-864: Verlegungs-Banner ganz oben — wie der Termin-Header beim
-            Gutachter direkt unter dem PageHeader, damit der Kunde die offene
-            Entscheidung sofort sieht. */}
-        {verlegungBannerProps && <TerminVerlegungBanner {...verlegungBannerProps} />}
-
-        {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase. */}
-        <ClaimStepper lifecycle={claimLifecycle} />
+        {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase.
+            AAR-864: Verlegungs-Banner als verschmolzene Bottom-Sektion, damit der
+            Kunde die offene Entscheidung direkt aus dem Stepper „herauswachsend"
+            sieht (gleiches Pattern wie der Termin-Header beim Gutachter). */}
+        <ClaimStepper
+          lifecycle={claimLifecycle}
+          bottomSlot={
+            verlegungBannerProps ? (
+              <TerminVerlegungBanner {...verlegungBannerProps} embedded />
+            ) : null
+          }
+        />
 
         {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
         {svTermin?.id && (
