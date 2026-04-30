@@ -41,6 +41,7 @@ export default function SVKalenderClient({
   standortLng,
   termine,
   externalBusy,
+  verlegteSlots,
 }: {
   faelle: Fall[]
   leadMap: Record<string, string>
@@ -51,6 +52,9 @@ export default function SVKalenderClient({
   termine?: GutachterTermin[]
   // AAR-google-cal-drift: externe Google-Termine als geblockte Zeitfenster
   externalBusy?: { start: string; end: string }[]
+  // AAR-864: verlegt-Slots — gedimmter „Privater Termin"-Block, blockt
+  // weiter den Slot bis der Kunde entscheidet
+  verlegteSlots?: { id: string; start: string; end: string }[]
 }) {
   const router = useRouter()
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -240,10 +244,37 @@ export default function SVKalenderClient({
                           </div>
                         )
                       })}
+                    {/* AAR-864: verlegt-Slots als gedimmter „Privater Termin"-Block */}
+                    {(verlegteSlots ?? [])
+                      .filter((v) => {
+                        const vs = new Date(v.start)
+                        return vs.getFullYear() === day.getFullYear()
+                          && vs.getMonth() === day.getMonth()
+                          && vs.getDate() === day.getDate()
+                      })
+                      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+                      .map((v) => {
+                        const vs = new Date(v.start)
+                        const ve = new Date(v.end)
+                        return (
+                          <div
+                            key={`verlegt-${v.id}`}
+                            className="px-2 py-1 rounded-lg text-[10px] leading-tight bg-claimondo-border/30 text-claimondo-ondo/70 border border-claimondo-border/60 italic"
+                            title="Verlegung beantragt — Slot blockiert bis Kunde entscheidet"
+                          >
+                            <div className="font-medium not-italic">
+                              {format(vs, 'HH:mm')}–{format(ve, 'HH:mm')}
+                            </div>
+                            <div className="truncate">Privater Termin</div>
+                          </div>
+                        )
+                      })}
                     {entries.map(fall => {
                       const time = fall.sv_termin ? format(new Date(fall.sv_termin), 'HH:mm') : ''
                       const overdue = fall.sv_termin && isBefore(new Date(fall.sv_termin), startOfDay(new Date()))
                       const isReserviert = fall.gutachter_termin_status === 'reserviert'
+                      // AAR-864: pending Verlegung — gestrichelt amber
+                      const isVerlegungPending = fall.gutachter_termin_status === 'verlegung_pending'
                       // KFZ-192: Zugehörigen gutachter_termine Eintrag finden
                       const gtTermin = terminMapByFall[fall.id]
                       const darfAblehnen = gtTermin && kannTerminAblehnen(gtTermin) && isReserviert
@@ -254,12 +285,18 @@ export default function SVKalenderClient({
                             className={`block px-2 py-1.5 rounded-lg text-[10px] leading-tight transition-colors ${
                               overdue
                                 ? 'bg-red-50/80 text-red-300 hover:bg-red-900/80'
-                                : isReserviert
-                                  ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
-                                  : 'bg-[var(--brand-secondary)]/10 text-[var(--brand-accent)] hover:bg-[var(--brand-primary)]/80'
+                                : isVerlegungPending
+                                  ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border-2 border-dashed border-amber-400'
+                                  : isReserviert
+                                    ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                                    : 'bg-[var(--brand-secondary)]/10 text-[var(--brand-accent)] hover:bg-[var(--brand-primary)]/80'
                             }`}
                           >
-                            <div className="font-medium">{time}{isReserviert && <span className="ml-1 text-[8px] opacity-70">(reserviert)</span>}</div>
+                            <div className="font-medium">
+                              {time}
+                              {isReserviert && <span className="ml-1 text-[8px] opacity-70">(reserviert)</span>}
+                              {isVerlegungPending && <span className="ml-1 text-[8px] opacity-80">(Verlegung pending)</span>}
+                            </div>
                             <div className="truncate">{fall.fall_nummer ?? fall.id.slice(0, 8)}</div>
                             {fall.lead_id && (
                               <div className="truncate text-[9px] opacity-70">{leadMap[fall.lead_id] ?? ''}</div>
