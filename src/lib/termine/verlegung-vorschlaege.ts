@@ -328,8 +328,14 @@ async function bewerteSlot({
     }
   }
 
-  // Slot droppen wenn beide Anker scheitern (rot)
-  const ampelVor = vor ? ampelFor(pufferVorMin) : 'green'
+  // 'buero'-Quelle hat keinen Puffer-Anker (kein Vortermin der endet) —
+  // der SV kann vom Büro früher losfahren. Deshalb immer 'green' für
+  // buero-Quelle, unabhängig von pufferVorMin (der bei buero null bleibt).
+  const ampelVor = !vor
+    ? 'green'
+    : vor.quelle === 'buero'
+      ? 'green'
+      : ampelFor(pufferVorMin)
   const ampelNach = nach ? ampelFor(pufferNachMin) : 'green'
   const ampelRank: Record<Ampel, number> = { green: 0, yellow: 1, red: 2 }
   const gesamt: Ampel =
