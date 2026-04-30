@@ -330,21 +330,24 @@ export default function FallDetailClient(props: Props) {
   })
 
   return (
-    <div className="min-h-full bg-[#f8f9fb] -m-2 sm:-m-3 lg:-m-4">
+    <div className="min-h-full bg-[#f8f9fb] -m-2 sm:-m-3 lg:-m-4 [&_.rounded-2xl]:shadow-sm">
       <FallRealtimeRefresh fallId={fall.id as string} />
       <FallWindowDropzone fallId={fall.id as string} />
-      <FallHeader
-        fallNummer={fallNummer}
-        fallId={fall.id as string}
-        kundenName={kundenName}
-        ort={ort}
-        kennzeichen={kennzeichen}
-        fahrzeug={fahrzeug}
-        subphase={subphase}
-        drawer={drawerData}
-        aktuellePhaseSnake={aktuellePhaseSnake}
-        abgeschlossenAm={abgeschlossenAm}
-      />
+      {/* AAR-864 Polish: Akten-Header sticky + dezenter Schatten beim Scrollen */}
+      <div className="sticky top-0 z-30 bg-[#f8f9fb] shadow-sm">
+        <FallHeader
+          fallNummer={fallNummer}
+          fallId={fall.id as string}
+          kundenName={kundenName}
+          ort={ort}
+          kennzeichen={kennzeichen}
+          fahrzeug={fahrzeug}
+          subphase={subphase}
+          drawer={drawerData}
+          aktuellePhaseSnake={aktuellePhaseSnake}
+          abgeschlossenAm={abgeschlossenAm}
+        />
+      </div>
 
       {/* Stepper + Termin-Banner als verschmolzener Header — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
