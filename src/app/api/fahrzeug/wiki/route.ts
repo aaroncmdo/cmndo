@@ -143,6 +143,7 @@ export async function GET(req: NextRequest) {
   // 2. Summary-Suche — bei mehreren Kandidaten + Baujahr versuchen wir,
   // den Generations-Artikel zu finden dessen Baujahr-Range das gesuchte
   // Jahr enthält. Wenn nichts matcht → ersten Kandidaten als Fallback.
+  let chosenTitle: string | null = null
   let chosenSummary: SummaryResponse | null = null
   if (year && candidates.length > 1) {
     for (const cand of candidates) {
@@ -150,12 +151,14 @@ export async function GET(req: NextRequest) {
       if (!sum) continue
       if (summaryMatchesYear(sum, year)) {
         chosenSummary = sum
+        chosenTitle = cand
         break
       }
     }
   }
   if (!chosenSummary) {
     chosenSummary = await fetchSummary(candidates[0])
+    chosenTitle = candidates[0]
   }
   if (!chosenSummary) return new Response('summary-failed', { status: 404 })
 
@@ -178,7 +181,12 @@ export async function GET(req: NextRequest) {
     status: 200,
     headers: {
       'Content-Type': img.headers.get('content-type') ?? 'image/jpeg',
-      'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+      // 5 Minuten cache während wir am Render-Pfad debuggen — vorher 24h.
+      'Cache-Control': 'public, max-age=300, s-maxage=300',
+      'X-Wiki-Title': chosenTitle ?? '?',
+      'X-Wiki-Candidates': candidates.slice(0, 10).join(' | '),
+      'X-Wiki-Query': query,
+      'X-Wiki-Year': year ? String(year) : 'none',
     },
   })
 }
