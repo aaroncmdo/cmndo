@@ -59,14 +59,31 @@ function summaryMatchesYear(
   return false
 }
 
+/** Modellname normalisieren:
+ *  - Hersteller-Präfix entfernen ("Audi A4" → "A4")
+ *  - Karosserie-/Trim-/Motor-Suffixe abschneiden ("A4 Avant 2.0 TDI" → "A4")
+ *  - Erstes Token bleibt — das ist die Modellfamilie die in Wikipedia-
+ *    Titeln auch tatsächlich vorkommt ("Audi A4 B9").
+ */
+function cleanModel(rawModel: string, make: string): string {
+  let m = rawModel.trim()
+  // Hersteller-Präfix entfernen (case insensitive)
+  const makeRe = new RegExp(`^${make.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+`, 'i')
+  m = m.replace(makeRe, '')
+  // Erstes Token (alphanumerisch + Bindestrich) — schneidet Trim/Motor ab
+  const first = m.match(/^[A-Za-zÄÖÜäöüß0-9-]+/)
+  return first?.[0] ?? m
+}
+
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams
   const make = sp.get('make')?.trim()
-  const model = sp.get('model')?.trim()
+  const rawModel = sp.get('model')?.trim()
   const yearStr = sp.get('year')
   const year = yearStr ? Number(yearStr.match(/\d{4}/)?.[0] ?? '') : null
   if (!make) return new Response('missing-make', { status: 404 })
 
+  const model = rawModel ? cleanModel(rawModel, make) : null
   const query = [make, model].filter(Boolean).join(' ')
 
   // 1. OpenSearch — bis zu 10 Kandidaten holen damit wir Generationen
@@ -84,6 +101,23 @@ export async function GET(req: NextRequest) {
     }
   } catch {
     /* fall-through, leer */
+  }
+
+  // Harte Filterung: Title muss sowohl Make als auch Model (genau, als
+  // separater Token) enthalten. Verhindert dass „Audi A4" auf „Audi A2"
+  // matcht weil OpenSearch die Modell-Wertigkeit niedriger gewichtet.
+  if (model) {
+    const makeLc = make.toLowerCase()
+    const modelLc = model.toLowerCase()
+    const tokenRe = new RegExp(
+      `\\b${modelLc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`,
+      'i',
+    )
+    const filtered = candidates.filter((c) => {
+      const lc = c.toLowerCase()
+      return lc.includes(makeLc) && tokenRe.test(c)
+    })
+    if (filtered.length > 0) candidates = filtered
   }
 
   // Fallback nur Hersteller wenn Modell nichts brachte
