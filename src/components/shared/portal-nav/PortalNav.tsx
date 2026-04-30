@@ -9,9 +9,32 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 import { ExternalLinkIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
+
+// CMM-32 P2: --app-sidebar-width auf <html> setzen, damit Portal-rendered
+// Modals (Modal.web.tsx) ihren Backdrop nur über den Content-Bereich legen
+// und die Sidebar nicht einschließen. PortalNav nutzt w-56 = 224px ab md+.
+function useSidebarWidthVar(width: string, breakpoint: string = '(min-width: 768px)') {
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mql = window.matchMedia(breakpoint)
+    const apply = () => {
+      document.documentElement.style.setProperty(
+        '--app-sidebar-width',
+        mql.matches ? width : '0px',
+      )
+    }
+    apply()
+    mql.addEventListener('change', apply)
+    return () => {
+      mql.removeEventListener('change', apply)
+      document.documentElement.style.removeProperty('--app-sidebar-width')
+    }
+  }, [width, breakpoint])
+}
 
 export type PortalNavItem = {
   href: string
@@ -55,6 +78,7 @@ export function PortalNav({
   className = '',
 }: Props) {
   const pathname = usePathname()
+  useSidebarWidthVar('224px')
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href
