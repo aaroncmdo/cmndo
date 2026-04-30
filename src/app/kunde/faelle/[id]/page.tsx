@@ -416,6 +416,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             auftraege und faelle für diesen Fall, refresht die Page bei
             jedem Event. */}
         <FallRealtimeRefresh fallId={fall.id as string} />
+
+        {/* AAR-864 DEBUG (entfernen sobald Banner-Bug gefixt): zeigt was
+            der Loader für die Verlegungs-Banner-Anzeige gefunden hat. */}
+        {process.env.NEXT_PUBLIC_DEBUG_AAR864 !== 'off' && (
+          <div className="rounded-lg bg-amber-50 border border-amber-300 px-3 py-2 text-[11px] font-mono text-amber-900">
+            <p>DEBUG AAR-864:</p>
+            <p>· fall.id (URL match): {(fall.id as string).slice(0, 8)} ↔ URL: {id.slice(0, 8)}</p>
+            <p>· Pending-Slot gefunden: {verlegungPendingRow ? `JA — id=${(verlegungPendingRow.id as string).slice(0, 8)} start=${(verlegungPendingRow.start_zeit as string)?.slice(0, 16)}` : 'NEIN'}</p>
+            <p>· Banner-Props gesetzt: {verlegungBannerProps ? 'JA' : 'NEIN'}</p>
+          </div>
+        )}
         {/* Header — CMM-28: Zurück-Link nur bei Multi-Fall-Kunden */}
         <div>
           {hatMehrereFaelle && (
