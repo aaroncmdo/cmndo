@@ -81,9 +81,12 @@ function kategorisieren(d: WeiteresDokument): Kategorie {
 export default function WeitereDokumenteCard({
   fallId,
   dokumente,
+  inline = false,
 }: {
   fallId: string
   dokumente: WeiteresDokument[]
+  /** Wenn true: kein Card-Wrapper + kein Header — für Einbettung in Tab. */
+  inline?: boolean
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -121,14 +124,25 @@ export default function WeitereDokumenteCard({
     })
   }
 
-  return (
-    <div className="rounded-2xl bg-white border border-claimondo-border p-4">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-semibold text-claimondo-navy">
-          Dokumente am Fall
-        </p>
-        <span className="text-xs text-claimondo-ondo">{total}</span>
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
+    inline ? (
+      <div>{children}</div>
+    ) : (
+      <div className="rounded-2xl bg-white border border-claimondo-border p-4">
+        {children}
       </div>
+    )
+
+  return (
+    <Wrapper>
+      {!inline && (
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-semibold text-claimondo-navy">
+            Dokumente am Fall
+          </p>
+          <span className="text-xs text-claimondo-ondo">{total}</span>
+        </div>
+      )}
 
       {total === 0 ? (
         <p className="text-xs text-claimondo-ondo/70 text-center py-3">
@@ -215,6 +229,6 @@ export default function WeitereDokumenteCard({
           {error}
         </p>
       )}
-    </div>
+    </Wrapper>
   )
 }

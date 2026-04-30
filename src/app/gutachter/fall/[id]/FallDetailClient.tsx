@@ -381,6 +381,7 @@ export default function FallDetailClient(props: Props) {
           dokumenteSlot={
             <WeitereDokumenteCard
               fallId={fall.id as string}
+              inline
               dokumente={(props.dokumente ?? []).map((d) => ({
                 id: String(d.id),
                 dokument_typ: (d.typ as string | null) ?? null,
