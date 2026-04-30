@@ -23,13 +23,88 @@ function wEmoji(c: number): string {
   return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️'
 }
 function wGrad(c: number): string {
-  return c >= 61
-    ? 'from-gray-700 to-gray-500'
-    : c >= 45
-      ? 'from-gray-500 to-gray-400'
-      : c <= 3
-        ? 'from-blue-500 to-sky-400'
-        : 'from-gray-400 to-gray-300'
+  return c >= 95
+    ? 'from-slate-900 to-indigo-900'
+    : c >= 61
+      ? 'from-slate-700 to-slate-500'
+      : c >= 71
+        ? 'from-slate-400 to-slate-300'
+        : c >= 45
+          ? 'from-slate-500 to-slate-400'
+          : c <= 3
+            ? 'from-blue-500 to-sky-400'
+            : 'from-slate-400 to-slate-300'
+}
+
+/** AAR-864: Wetter-Effekt-Layer hinter dem Banner-Inhalt. */
+function WeatherEffect({ code }: { code: number }) {
+  // Regen / Schauer (61-67, 80-82)
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) {
+    const drops = Array.from({ length: 40 })
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {drops.map((_, i) => (
+          <span
+            key={i}
+            className="wx-rain-drop"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 0.8}s`,
+              animationDuration: `${0.5 + Math.random() * 0.6}s`,
+            }}
+          />
+        ))}
+      </div>
+    )
+  }
+  // Schnee (71-77)
+  if (code >= 71 && code <= 77) {
+    const flakes = Array.from({ length: 30 })
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {flakes.map((_, i) => (
+          <span
+            key={i}
+            className="wx-snow-flake"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 6}s`,
+              animationDuration: `${4 + Math.random() * 4}s`,
+            }}
+          />
+        ))}
+      </div>
+    )
+  }
+  // Gewitter (95-99) — Regen + Blitz-Flash
+  if (code >= 95) {
+    const drops = Array.from({ length: 40 })
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {drops.map((_, i) => (
+          <span
+            key={i}
+            className="wx-rain-drop"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 0.8}s`,
+              animationDuration: `${0.4 + Math.random() * 0.5}s`,
+            }}
+          />
+        ))}
+        <div className="wx-thunder-flash" />
+      </div>
+    )
+  }
+  // Sonnig (0) — pulsierender Sonnen-Glow
+  if (code === 0) {
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="wx-sun-glow" />
+      </div>
+    )
+  }
+  return null
 }
 function wTip(c: number, t: number): string {
   return c >= 95
@@ -109,17 +184,18 @@ export default function WeatherBanner({ standortLat, standortLng, trailingSlot, 
 
   return (
     <div
-      className={`flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white`}
+      className={`relative flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white rounded-2xl overflow-hidden shadow-sm`}
       style={{ minHeight: 64 }}
     >
-      <div className="flex items-center gap-2.5 shrink-0">
+      <WeatherEffect code={weather.code} />
+      <div className="relative z-10 flex items-center gap-2.5 shrink-0">
         <span className="text-3xl">{wEmoji(weather.code)}</span>
         <div>
           <p className="text-xl font-bold">{weather.temp}°C</p>
           <p className="text-[10px] opacity-80">{wLabel(weather.code)}</p>
         </div>
       </div>
-      <div className="flex-1 flex items-center gap-1 overflow-x-auto min-w-0">
+      <div className="relative z-10 flex-1 flex items-center gap-1 overflow-x-auto min-w-0">
         {todayHourly
           .filter((_, i) => i % 2 === 0)
           .map((h) => (
@@ -132,10 +208,10 @@ export default function WeatherBanner({ standortLat, standortLng, trailingSlot, 
       </div>
       {/* Mobile: nur Trailing-Slot */}
       {trailingSlot && (
-        <div className="shrink-0 sm:hidden flex items-center gap-2">{trailingSlot}</div>
+        <div className="relative z-10 shrink-0 sm:hidden flex items-center gap-2">{trailingSlot}</div>
       )}
       {/* Desktop: Greeting + Tip + Tomorrow + Trailing */}
-      <div className="shrink-0 text-right hidden sm:flex sm:items-center sm:gap-3">
+      <div className="relative z-10 shrink-0 text-right hidden sm:flex sm:items-center sm:gap-3">
         <div>
           <p className="text-sm font-medium">{greeting}</p>
           <p className="text-[10px] opacity-80">{wTip(weather.code, weather.temp)}</p>
