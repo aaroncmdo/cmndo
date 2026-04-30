@@ -280,7 +280,7 @@ export default function GutachterShell({
   }
 
   return (
-    <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-surface)' }}>
+    <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-primary, #0D1B3E)' }}>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -475,12 +475,21 @@ export default function GutachterShell({
           }
         />
 
-        {/* AAR-457: overflow-y-auto (statt overflow-hidden) — sonst wird
-            alles unterhalb des Viewports auf Seiten ohne eigenen Scroll-
-            Container abgeschnitten (zB /gutachter/profil/branding). Map-
-            basierte Seiten (Heute/Gebiet) setzen inner-Container auf
-            absolute inset-0 und sind nicht betroffen. */}
-        <main id="main-content" role="main" className="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-4">{children}</main>
+        {/* AAR-864 Polish: Content rechts in einem weißen rounded Wrapper —
+            der dunkle App-Hintergrund (Sidebar-Navy) zieht sich durch und
+            der Content sitzt als „Card" mittendrin.
+            AAR-457 Begründung gilt weiter: overflow-y-auto auf dem inneren
+            <main> damit Seiten ohne eigenen Scroll-Container nicht abgeschnitten
+            werden. */}
+        <div className="flex-1 p-2 sm:p-3 lg:p-4 overflow-hidden">
+          <main
+            id="main-content"
+            role="main"
+            className="h-full overflow-y-auto rounded-2xl bg-[#f8f9fb] shadow-sm p-2 sm:p-3 lg:p-4"
+          >
+            {children}
+          </main>
+        </div>
       </div>
       <GlobalPosteingangFab currentUserId={userId} />
       <SVSpotlight />
