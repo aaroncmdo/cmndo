@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import TageskalenderRail from './TageskalenderRail'
 import TagesrouteStartCard from './TagesrouteStartCard'
+import TagesvorbereitungButton from '../auftraege/TagesvorbereitungButton'
 import type { HeuteTerminFull } from './page'
 
 export interface HeuteClientProps {
@@ -71,6 +72,17 @@ export default function HeuteClient({
           </p>
           <p className="text-2xl font-semibold text-claimondo-navy mt-1">
             {aktiveTermine.length}
+          </p>
+        </div>
+        {/* Aaron 2026-04-30: Tagesvorbereitung-Export auch hier auf Heute-Seite */}
+        <div className="bg-white border border-claimondo-border rounded-xl p-4">
+          <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider mb-2">
+            Tagesvorbereitung
+          </p>
+          <TagesvorbereitungButton />
+          <p className="text-[10px] text-claimondo-ondo/70 mt-2 leading-tight">
+            CSV mit allen Stammdaten der Tagestermine — Import in
+            AutoiXpert / Audatex / Excel.
           </p>
         </div>
       </div>
