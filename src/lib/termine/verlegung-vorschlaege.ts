@@ -264,20 +264,22 @@ async function bewerteSlot({
       zielLng,
       cache,
     )
-    if (min === null) return null
-    fahrtVor = min
-    const ankunft = new Date(new Date(vorTermin.end_zeit).getTime() + min * 60_000)
-    pufferVorMin = Math.round((slotStart.getTime() - ankunft.getTime()) / 60_000)
-    vor = {
-      quelle: 'vor_termin',
-      terminId: vorTermin.id,
-      end: vorTermin.end_zeit,
-      adresse: vorTermin.adresse,
-      fahrtMin: min,
-      pufferMin: pufferVorMin,
+    // Mapbox-Fail nicht als „unschaffbar" werten — Slot behalten,
+    // Routen-Info wird im UI als „Routen-Check unbekannt" angezeigt.
+    if (min !== null) {
+      fahrtVor = min
+      const ankunft = new Date(new Date(vorTermin.end_zeit).getTime() + min * 60_000)
+      pufferVorMin = Math.round((slotStart.getTime() - ankunft.getTime()) / 60_000)
+      vor = {
+        quelle: 'vor_termin',
+        terminId: vorTermin.id,
+        end: vorTermin.end_zeit,
+        adresse: vorTermin.adresse,
+        fahrtMin: min,
+        pufferMin: pufferVorMin,
+      }
     }
   } else if (!vorTermin && svStandort) {
-    // AAR-864: Kein Vor-Termin → Anfahrt vom SV-Büro berechnen
     const min = await fahrtMinutenLatLng(
       svStandort.lat,
       svStandort.lng,
