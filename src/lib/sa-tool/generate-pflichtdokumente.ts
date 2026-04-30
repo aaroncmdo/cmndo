@@ -38,6 +38,47 @@ const SLOT_LABEL: Record<(typeof PFLICHT_SLOTS)[number], string> = {
   sv_widerrufsbelehrung: 'Widerrufsbelehrung',
 }
 
+/** Klick-Editor-Konfig je Slot (admin gepflegt unter /admin/vertraege). */
+type KlickKonfig = {
+  page: number
+  x: number
+  y: number
+  width: number
+  height: number
+  datum_x?: number
+  datum_y?: number
+  name_x?: number
+  name_y?: number
+}
+
+/** Liest die jüngste Klick-Editor-Konfig für den Slot (JSON-Sidecar im
+ *  Storage). Liefert null wenn kein Editor-Eintrag vorhanden. */
+async function loadKlickKonfig(
+  admin: SupabaseClient,
+  svSlotId: (typeof PFLICHT_SLOTS)[number],
+): Promise<KlickKonfig | null> {
+  const shortSlot = svSlotId.replace(/^sv_/, '')
+  const dir = `vertraege-vorlagen/${shortSlot}`
+  const { data: files, error } = await admin.storage
+    .from('fall-dokumente')
+    .list(dir, { sortBy: { column: 'name', order: 'desc' }, limit: 50 })
+  if (error || !files) return null
+  const json = files.find((f) => f.name.endsWith('.json'))
+  if (!json) return null
+  const { data: blob } = await admin.storage
+    .from('fall-dokumente')
+    .download(`${dir}/${json.name}`)
+  if (!blob) return null
+  try {
+    const text = await blob.text()
+    const parsed = JSON.parse(text) as KlickKonfig
+    if (typeof parsed.x !== 'number' || typeof parsed.y !== 'number') return null
+    return parsed
+  } catch {
+    return null
+  }
+}
+
 export type GeneratePflichtdokResult =
   | { success: true; storagePath: string; slotId: string; dokumentId: string }
   | { success: false; slotId: string; error: string; skipped?: boolean }
@@ -129,6 +170,11 @@ export async function generateGutachterPflichtdokumente(
     }
 
     try {
+      // Klick-Konfig aus dem Vertragseditor laden (falls Admin gepflegt).
+      // Wenn vorhanden: Position-Merge direkt aufs Original-PDF;
+      // sonst: Fallback auf Anhang-Seite.
+      const klickKonfig = await loadKlickKonfig(args.admin, slotId)
+
       const result = await mergeOneDoc({
         admin: args.admin,
         fallId: args.fallId,
@@ -139,6 +185,7 @@ export async function generateGutachterPflichtdokumente(
         sourcePath: row.dokument_url as string,
         pngBytes,
         kundenName,
+        klickKonfig,
       })
       results.push(result)
     } catch (err) {
@@ -163,6 +210,7 @@ async function mergeOneDoc({
   sourcePath,
   pngBytes,
   kundenName,
+  klickKonfig,
 }: {
   admin: SupabaseClient
   fallId: string
@@ -173,6 +221,7 @@ async function mergeOneDoc({
   sourcePath: string
   pngBytes: Uint8Array
   kundenName: string
+  klickKonfig: KlickKonfig | null
 }): Promise<GeneratePflichtdokResult> {
   // 1. Original-PDF runterladen
   const { data: pdfBlob, error: dlErr } = await admin.storage
@@ -187,12 +236,63 @@ async function mergeOneDoc({
   }
   const pdfBytes = new Uint8Array(await pdfBlob.arrayBuffer())
 
-  // 2. PDF öffnen + Signatur-Seite anhängen
+  // 2. PDF öffnen
   const pdfDoc = await PDFDocument.load(pdfBytes)
   const pngImage = await pdfDoc.embedPng(pngBytes)
   const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
   const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
 
+  const today = new Date()
+  const datumStr = `${String(today.getDate()).padStart(2, '0')}.${String(
+    today.getMonth() + 1,
+  ).padStart(2, '0')}.${today.getFullYear()}`
+
+  // 2a. Wenn Klick-Konfig vorhanden: direkt auf der konfigurierten Seite
+  // Unterschrift + Datum + Name an den Admin-Koordinaten platzieren.
+  // Sonst: Anhang-Seite (Default-Layout).
+  if (klickKonfig) {
+    const pages = pdfDoc.getPages()
+    const pageIndex = Math.min(Math.max(0, klickKonfig.page), pages.length - 1)
+    const targetPage = pages[pageIndex]
+
+    targetPage.drawImage(pngImage, {
+      x: klickKonfig.x,
+      y: klickKonfig.y,
+      width: klickKonfig.width,
+      height: klickKonfig.height,
+    })
+
+    if (klickKonfig.datum_x != null && klickKonfig.datum_y != null) {
+      targetPage.drawText(datumStr, {
+        x: klickKonfig.datum_x,
+        y: klickKonfig.datum_y,
+        size: 11,
+        font: helvetica,
+        color: rgb(0, 0, 0),
+      })
+    }
+    if (klickKonfig.name_x != null && klickKonfig.name_y != null) {
+      targetPage.drawText(kundenName, {
+        x: klickKonfig.name_x,
+        y: klickKonfig.name_y,
+        size: 11,
+        font: helvetica,
+        color: rgb(0, 0, 0),
+      })
+    }
+
+    return await persistMerged({
+      admin,
+      pdfDoc,
+      claimId,
+      fallId,
+      svId,
+      slotId,
+      slotLabel,
+    })
+  }
+
+  // 2b. Fallback: separate Signatur-Seite anhängen
   const page = pdfDoc.addPage([595, 842]) // A4 portrait
   const { width, height } = page.getSize()
 
@@ -223,12 +323,7 @@ async function mergeOneDoc({
     color: rgb(0.7, 0.75, 0.85),
   })
 
-  // Body
-  const today = new Date()
-  const datumStr = `${String(today.getDate()).padStart(2, '0')}.${String(
-    today.getMonth() + 1,
-  ).padStart(2, '0')}.${today.getFullYear()}`
-
+  // Body — datumStr ist oben bereits berechnet
   const introText =
     `Hiermit bestätige ich, ${kundenName}, mit meiner unten dargestellten ` +
     `elektronischen Unterschrift den Inhalt des oben genannten Dokuments. ` +
@@ -310,32 +405,47 @@ async function mergeOneDoc({
     },
   )
 
-  const outBytes = await pdfDoc.save()
+  return await persistMerged({
+    admin,
+    pdfDoc,
+    claimId,
+    fallId,
+    svId,
+    slotId,
+    slotLabel,
+  })
+}
 
-  // 3. Output-Pfad: claim-zentriert wenn claim_id da ist, sonst fallback
-  // auf fall_id (alte Fälle ohne claim_id — sollte nach CMM-32 nicht
-  // mehr vorkommen, aber Defense-in-Depth).
+async function persistMerged({
+  admin,
+  pdfDoc,
+  claimId,
+  fallId,
+  svId,
+  slotId,
+  slotLabel,
+}: {
+  admin: SupabaseClient
+  pdfDoc: PDFDocument
+  claimId: string | null
+  fallId: string
+  svId: string
+  slotId: string
+  slotLabel: string
+}): Promise<GeneratePflichtdokResult> {
+  const outBytes = await pdfDoc.save()
   const ts = Date.now()
   const baseDir = claimId
     ? `claim/${claimId}/signed`
     : `fall/${fallId}/signed`
   const outPath = `${baseDir}/${slotId}_${ts}.pdf`
 
-  const outBlob = new Blob([outBytes as BlobPart], {
-    type: 'application/pdf',
-  })
+  const outBlob = new Blob([outBytes as BlobPart], { type: 'application/pdf' })
   const { error: upErr } = await admin.storage
     .from('fall-dokumente')
-    .upload(outPath, outBlob, {
-      contentType: 'application/pdf',
-      upsert: true,
-    })
-  if (upErr) {
-    return { success: false, slotId, error: `Upload: ${upErr.message}` }
-  }
+    .upload(outPath, outBlob, { contentType: 'application/pdf', upsert: true })
+  if (upErr) return { success: false, slotId, error: `Upload: ${upErr.message}` }
 
-  // 4. fall_dokumente-Row anlegen — sichtbar NUR für SV/Admin/KB/Kanzlei
-  // (Aaron-Spec: Kunde sieht stattdessen die Claimondo-Standard-Doks)
   const dateiName = `${slotLabel.replace(/\s+/g, '_')}_signiert.pdf`
   const { data: dokRow, error: insErr } = await admin
     .from('fall_dokumente')

@@ -73,6 +73,10 @@ export type ImaginParams = {
   hersteller: string | null
   modell: string | null
   lackfarbe: LackfarbeCode | null
+  /** Erstzulassungs- bzw. Modelljahr (vierstellig, z.B. 2019).
+   *  Wenn übergeben, schickt der Imagin-Endpoint das modell-jahrgenaue
+   *  Asset zurück (nicht den aktuellen Generations-Default). */
+  baujahr?: number | string | null
   /** Imagin angle: 21 = front-driver-side ¾, 13 = side, 1 = front. Default 21. */
   angle?: number
   zoomType?: 'fullscreen' | 'cabin'
@@ -87,6 +91,7 @@ export function buildImaginUrl({
   hersteller,
   modell,
   lackfarbe,
+  baujahr,
   angle = 21,
   zoomType = 'fullscreen',
 }: ImaginParams): string | null {
@@ -100,6 +105,10 @@ export function buildImaginUrl({
   })
   if (modell?.trim()) params.set('modelFamily', modell.trim())
   if (lackfarbe) params.set('paintDescription', PAINT_MAP[lackfarbe])
+  if (baujahr != null) {
+    const yr = String(baujahr).match(/\d{4}/)?.[0]
+    if (yr) params.set('modelYear', yr)
+  }
   return `${IMAGIN_BASE}?${params.toString()}`
 }
 
@@ -108,15 +117,21 @@ export function buildImaginProxyUrl({
   hersteller,
   modell,
   lackfarbe,
+  baujahr,
 }: {
   hersteller: string | null
   modell: string | null
   lackfarbe: LackfarbeCode | null
+  baujahr?: number | string | null
 }): string | null {
   if (!hersteller?.trim()) return null
   const params = new URLSearchParams({ make: hersteller.trim() })
   if (modell?.trim()) params.set('model', modell.trim())
   if (lackfarbe) params.set('paint', lackfarbe)
+  if (baujahr != null) {
+    const yr = String(baujahr).match(/\d{4}/)?.[0]
+    if (yr) params.set('year', yr)
+  }
   return `/api/fahrzeug/imagin?${params.toString()}`
 }
 

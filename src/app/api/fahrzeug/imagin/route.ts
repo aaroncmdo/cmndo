@@ -19,8 +19,9 @@ export async function GET(req: NextRequest) {
   const hersteller = sp.get('make')
   const modell = sp.get('model')
   const lackfarbe = sp.get('paint') as LackfarbeCode | null
+  const baujahr = sp.get('year')
 
-  const url = buildImaginUrl({ hersteller, modell, lackfarbe })
+  const url = buildImaginUrl({ hersteller, modell, lackfarbe, baujahr })
   if (!url) return new Response('missing-params', { status: 404 })
 
   let upstream: Response

@@ -36,6 +36,7 @@ export type AuftragCardProps = {
     kennzeichen?: string | null
     fahrzeug_hersteller?: string | null
     fahrzeug_modell?: string | null
+    fahrzeug_baujahr?: string | number | null
     lackfarbe_code?: string | null
   }
   kunde: {
@@ -147,6 +148,7 @@ export default function AuftragCard(props: AuftragCardProps) {
             hersteller={props.fall.fahrzeug_hersteller}
             modell={props.fall.fahrzeug_modell ?? null}
             lackfarbe={(props.fall.lackfarbe_code as LackfarbeCode | null) ?? null}
+            baujahr={props.fall.fahrzeug_baujahr ?? null}
             width={180}
           />
         </div>

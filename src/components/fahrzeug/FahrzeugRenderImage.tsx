@@ -69,6 +69,10 @@ type Props = {
   hersteller: string | null
   modell: string | null
   lackfarbe: LackfarbeCode | null
+  /** Erstzulassungs- oder Modelljahr — wird als modelYear an Imagin
+   *  durchgereicht damit das jahrgenaue Asset zurückkommt (statt der
+   *  jüngsten Generation). */
+  baujahr?: number | string | null
   /** Pixel — Renderbreite. */
   width?: number
   /** Tailwind-Klassen am Wrapper. */
@@ -83,13 +87,14 @@ export default function FahrzeugRenderImage({
   hersteller,
   modell,
   lackfarbe,
+  baujahr,
   width = 200,
   className = '',
   alt,
 }: Props) {
   const [stage, setStage] = useState<Stage>('imagin')
 
-  const imaginUrl = buildImaginProxyUrl({ hersteller, modell, lackfarbe })
+  const imaginUrl = buildImaginProxyUrl({ hersteller, modell, lackfarbe, baujahr })
   const wikiUrl = buildWikiProxyUrl({ hersteller, modell })
   const domain = hersteller ? getDomain(hersteller) : null
   const clearbitUrl = domain ? `https://logo.clearbit.com/${domain}` : null

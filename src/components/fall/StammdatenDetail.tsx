@@ -155,6 +155,7 @@ function FahrzeugDetail({ data }: { data: StammdatenAccordionData }) {
           hersteller={hersteller}
           modell={modell}
           lackfarbe={lack}
+          baujahr={baujahr}
           width={280}
           className="mx-auto"
         />

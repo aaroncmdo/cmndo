@@ -104,6 +104,7 @@ export default function StammdatenAccordion({
             hersteller={hersteller}
             modell={modell}
             lackfarbe={lack}
+            baujahr={baujahr}
             width={260}
           />
 
