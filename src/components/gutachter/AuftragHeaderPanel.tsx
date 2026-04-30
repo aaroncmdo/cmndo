@@ -224,12 +224,14 @@ export default function AuftragHeaderPanel({
         </div>
       )}
 
-      {/* AAR-864: Verlegungs-Pending-Hinweis — direkt unter dem Stepper.
-          Sichtbar nur wenn der SV einen Verlegungs-Vorschlag gemacht hat
-          und auf die Antwort des Kunden wartet. */}
+      {/* AAR-864: Verlegungs-Pending-Hinweis (read-only) — direkt unter dem
+          Stepper. Sichtbar wenn der SV einen Verlegungs-Vorschlag gemacht
+          hat und auf Antwort des Kunden wartet. Termin-Daten werden read-
+          only angezeigt — kein Navigation/Termin-Block daneben, weil der
+          Termin noch nicht final bestätigt ist. */}
       {termin && istVerlegungPending && (
         <div className="border-t-2 border-amber-400 bg-amber-50 px-6 py-3.5">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 mb-3">
             <div className="w-8 h-8 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
               <ClockIcon className="w-4 h-4 text-amber-700" />
             </div>
@@ -238,13 +240,25 @@ export default function AuftragHeaderPanel({
                 Verlegung beantragt — Bestätigung ausstehend
               </p>
               <p className="text-xs text-amber-800 mt-0.5">
-                Der Kunde wurde benachrichtigt. Sobald er bestätigt, wird der
-                Termin auf {fmt ? `${fmt.datum}, ${fmt.uhrzeit} Uhr` : 'das neue Datum'}{' '}
-                gelegt. Bei Nicht-Reaktion eskalieren wir 48h vor dem Original-
-                Termin automatisch an den Kundenbetreuer.
+                Der Kunde wurde benachrichtigt. Bei Nicht-Reaktion eskalieren
+                wir 48h vor dem Original-Termin automatisch an den Kundenbetreuer.
               </p>
             </div>
           </div>
+          {/* Read-only Termin-Daten: Datum + Uhrzeit + Adresse */}
+          {fmt && (
+            <div className="rounded-xl bg-white border-2 border-amber-300 p-3 ml-11">
+              <p className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold mb-1">
+                Vorgeschlagener neuer Termin
+              </p>
+              <p className="text-sm font-semibold text-claimondo-navy">
+                {fmt.datum}, {fmt.uhrzeit} Uhr
+              </p>
+              {adresse && (
+                <p className="text-xs text-claimondo-ondo mt-0.5">{adresse}</p>
+              )}
+            </div>
+          )}
         </div>
       )}
 
