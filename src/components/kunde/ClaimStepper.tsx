@@ -38,18 +38,34 @@ type TerminInfo = {
   svVorname?: string | null
 }
 
+/** AAR-864: Notice-Item das als verschmolzene Bottom-Sektion im Stepper
+ *  gerendert wird. sortAt = Zeitpunkt für chronologische Sortierung
+ *  (oldest first → der zuerst eingetroffene Banner steht ganz oben). */
+export type StepperNotice = {
+  key: string
+  /** ISO-String oder Date — null sortiert als oldest. */
+  sortAt: string | Date | null
+  /** Tönung des Trennlinien-Borders. 'amber' für Warn-/Pending-Notices,
+   *  'navy' (default) für Standard. */
+  tone?: 'amber' | 'navy'
+  node: React.ReactNode
+}
+
 export default function ClaimStepper({
   lifecycle,
   bottomSlot,
+  notices,
   terminInfo,
 }: {
   lifecycle: ClaimLifecycle
-  /** AAR-864: Optionale Sektion unten — z.B. Verlegungs-Banner. Wenn gesetzt,
-   *  wechselt der Outer-Border auf amber und das Slot wird als verschmolzene
-   *  Bottom-Sektion ohne eigenen Border gerendert. */
+  /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
+   *  abgelöst, bleibt für Rückwärtskompatibilität. */
   bottomSlot?: React.ReactNode
+  /** AAR-864: mehrere verschmolzene Bottom-Sektionen, chronologisch
+   *  sortiert (oldest first). */
+  notices?: StepperNotice[]
   /** AAR-864 Polish: Termin-Sektion analog zum SV-Header — Datum, Uhrzeit,
-   *  Adresse, Navi-Button. Wird über dem bottomSlot gerendert. */
+   *  Adresse, Navi-Button. Wird über den notices/bottomSlot gerendert. */
   terminInfo?: TerminInfo | null
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]

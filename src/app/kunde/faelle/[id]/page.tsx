@@ -170,7 +170,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const { data: verlegungPendingRow } = await admin
       .from('gutachter_termine')
       .select('id, start_zeit, verlegung_quelle_id, verlegung_grund, sv_id')
-      .eq('fall_id', id)
+      .eq('fall_id', fall.id as string)
       .eq('status', 'verlegung_pending')
       .gt('start_zeit', new Date().toISOString())
       .order('created_at', { ascending: false })
