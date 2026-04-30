@@ -127,7 +127,7 @@ export default function FahrzeugRenderImage({
   // Stage 1 — Imagin
   if (stage === 'imagin' && imaginUrl) {
     return (
-      <div className={`relative ${className}`} style={{ width, height }}>
+      <div className={`relative rounded-xl overflow-hidden ${className}`} style={{ width, height }}>
         <Image
           src={imaginUrl}
           alt={altText}
@@ -144,7 +144,7 @@ export default function FahrzeugRenderImage({
   // Stage 2 — Wikipedia
   if (stage === 'wiki' && wikiUrl) {
     return (
-      <div className={`relative ${className}`} style={{ width, height }}>
+      <div className={`relative rounded-xl overflow-hidden ${className}`} style={{ width, height }}>
         <Image
           src={wikiUrl}
           alt={altText}
