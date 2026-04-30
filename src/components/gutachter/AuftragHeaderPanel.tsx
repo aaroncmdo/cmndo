@@ -150,6 +150,12 @@ export default function AuftragHeaderPanel({
 
   return (
     <div className="rounded-2xl bg-claimondo-navy/[0.06] border border-claimondo-navy/15 backdrop-blur-sm overflow-hidden">
+      {/* AAR-864 DEBUG (entfernen wenn fixed) */}
+      <div className="bg-amber-50 border-b border-amber-300 px-3 py-2 text-[11px] font-mono text-amber-900">
+        DEBUG SV: phase={String(phase)} · termin.status={String(termin?.status ?? 'null')}{' '}
+        · termin.start_zeit={termin?.start_zeit?.slice(0, 16) ?? 'null'} · pendingInZukunft={String(pendingInZukunft)}{' '}
+        · istVerlegungPending={String(istVerlegungPending)}
+      </div>
       {/* Sektion 1 — Stepper (weiß, Aaron lässt Platz für künftige Inhalte) */}
       <div className="bg-white px-6 py-4">
         <div className="flex items-center w-full">
