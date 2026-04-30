@@ -129,10 +129,23 @@ export async function getVerlegungsVorschlaegeAction(input: {
   )
   const slotDauerMin = dauerMin >= 30 && dauerMin <= 240 ? dauerMin : 45
 
+  // AAR-864: SV-Standort als Fallback wenn an einem Tag kein Vor-Termin existiert
+  let svStandortAdresse: string | null = null
+  if (termin.sv_id) {
+    const { data: sv } = await supabase
+      .from('sachverstaendige')
+      .select('standort_adresse, standort_plz')
+      .eq('id', termin.sv_id as string)
+      .maybeSingle()
+    const teile = [sv?.standort_adresse, sv?.standort_plz].filter(Boolean)
+    if (teile.length) svStandortAdresse = teile.join(', ')
+  }
+
   const vorschlaege = await findVerlegungsVorschlaege(supabase, termin.sv_id as string, {
     besichtigungsortAdresse: adresse,
     slotDauerMin,
     exkludiereTerminId: termin.id as string,
+    svStandortAdresse,
   })
 
   return { ok: true, vorschlaege, slotDauerMin }

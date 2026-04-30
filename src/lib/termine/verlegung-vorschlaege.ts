@@ -30,11 +30,16 @@ export type VerlegungsVorschlag = {
   datum: string
   ampel: Ampel
   vor: {
-    terminId: string
-    end: string
+    /** 'vor_termin' = anderer Auftrag am gleichen Tag, 'buero' = SV-Standort */
+    quelle: 'vor_termin' | 'buero'
+    /** terminId nur wenn quelle='vor_termin' */
+    terminId: string | null
+    /** end-Zeit nur wenn quelle='vor_termin' */
+    end: string | null
     adresse: string
     fahrtMin: number
-    pufferMin: number
+    /** Puffer nur sinnvoll bei quelle='vor_termin'; bei 'buero' = null */
+    pufferMin: number | null
   } | null
   nach: {
     terminId: string
@@ -56,6 +61,9 @@ type Optionen = {
   fensterTage?: number
   /** ID des zu verschiebenden Termins — wird im Tagesplan ignoriert. */
   exkludiereTerminId?: string
+  /** SV-Standort (Büro) als Fallback, wenn an einem Tag kein Vor-Termin
+   *  existiert. Aaron-Spec: dann muss die Anfahrt vom Büro berechnet werden. */
+  svStandortAdresse?: string | null
 }
 
 function ymd(d: Date): string {
@@ -117,6 +125,7 @@ export async function findVerlegungsVorschlaege(
         vorTermin: luecke.vor,
         nachTermin: luecke.nach,
         besichtigungsort: optionen.besichtigungsortAdresse,
+        svStandortAdresse: optionen.svStandortAdresse ?? null,
         cache,
         tagOffset,
       })
@@ -215,6 +224,7 @@ type BewerteParams = {
   vorTermin: TagesplanTermin | null
   nachTermin: TagesplanTermin | null
   besichtigungsort: string
+  svStandortAdresse: string | null
   cache: RouteCache
   tagOffset: number
 }
@@ -225,6 +235,7 @@ async function bewerteSlot({
   vorTermin,
   nachTermin,
   besichtigungsort,
+  svStandortAdresse,
   cache,
   tagOffset,
 }: BewerteParams): Promise<VerlegungsVorschlag | null> {
@@ -242,12 +253,29 @@ async function bewerteSlot({
     const ankunft = new Date(new Date(vorTermin.end_zeit).getTime() + min * 60_000)
     pufferVorMin = Math.round((slotStart.getTime() - ankunft.getTime()) / 60_000)
     vor = {
+      quelle: 'vor_termin',
       terminId: vorTermin.id,
       end: vorTermin.end_zeit,
       adresse: vorTermin.adresse,
       fahrtMin: min,
       pufferMin: pufferVorMin,
     }
+  } else if (svStandortAdresse) {
+    // AAR-864: Kein Vor-Termin → Anfahrt vom SV-Büro berechnen
+    const min = await fahrtMinuten(svStandortAdresse, besichtigungsort, cache)
+    if (min !== null) {
+      fahrtVor = min
+      vor = {
+        quelle: 'buero',
+        terminId: null,
+        end: null,
+        adresse: svStandortAdresse,
+        fahrtMin: min,
+        pufferMin: null, // Kein Puffer-Konzept beim Büro-Start
+      }
+    }
+    // Wenn null: Slot bleibt ohne vor-Info, kein blocker — SV kommt
+    // morgens irgendwann los.
   }
 
   if (nachTermin) {

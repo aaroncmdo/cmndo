@@ -158,12 +158,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .limit(1)
       .maybeSingle()
 
-    // AAR-864: Pending Verlegungs-Slot + alter Termin (für Banner)
+    // AAR-864: Pending Verlegungs-Slot + alter Termin (für Banner).
+    // Banner verschwindet automatisch sobald der pending-Slot in der
+    // Vergangenheit liegt (= Verlegung obsolet, Termin gelaufen oder verstrichen).
     const { data: verlegungPendingRow } = await admin
       .from('gutachter_termine')
       .select('id, start_zeit, verlegung_quelle_id, verlegung_grund, sv_id')
       .eq('fall_id', id)
       .eq('status', 'verlegung_pending')
+      .gt('start_zeit', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()

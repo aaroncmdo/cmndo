@@ -106,8 +106,15 @@ export default function AuftragHeaderPanel({
   const istBestaetigt = termin?.status === 'bestaetigt'
   const istEigenerGegenvorschlag =
     termin?.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'sv'
-  // AAR-864: SV hat eine Verlegung beantragt — wartet auf Kunden-Antwort
-  const istVerlegungPending = termin?.status === 'verlegung_pending'
+  // AAR-864: SV hat eine Verlegung beantragt — wartet auf Kunden-Antwort.
+  // Hinweis nur sichtbar solange wir noch in der Termin-Phase sind UND der
+  // pending-Slot in der Zukunft liegt. Sobald die Besichtigung läuft oder
+  // der Slot vorbei ist, ist die Verlegung obsolet und der Hinweis weg.
+  const pendingInZukunft = termin?.start_zeit
+    ? new Date(termin.start_zeit).getTime() > Date.now()
+    : false
+  const istVerlegungPending =
+    termin?.status === 'verlegung_pending' && phase === 'termin' && pendingInZukunft
 
   const fmt = fmtTermin(termin?.start_zeit ?? null)
   const fmtVorgeschlag = fmtTermin(termin?.vorgeschlagenes_datum ?? null)
@@ -195,6 +202,22 @@ export default function AuftragHeaderPanel({
         </div>
       </div>
 
+      {/* AAR-864: Während aktiver Besichtigung im Header NUR „Besichtigung läuft" —
+          alle anderen Sektionen (Termin-Navi, Briefing, Pflichtliste, Verlegungs-
+          Hinweis) werden ausgeblendet, weil sie in dem Moment irrelevant sind. */}
+      {phase === 'besichtigung' && (
+        <div className="border-t border-claimondo-navy/10 px-6 py-3.5 bg-emerald-50">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center shrink-0">
+              <MapPinIcon className="w-4 h-4 text-emerald-700" />
+            </div>
+            <p className="text-sm font-semibold text-emerald-900">
+              Besichtigung läuft
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* AAR-864: Verlegungs-Pending-Hinweis — direkt unter dem Stepper.
           Sichtbar nur wenn der SV einen Verlegungs-Vorschlag gemacht hat
           und auf die Antwort des Kunden wartet. */}
@@ -219,8 +242,8 @@ export default function AuftragHeaderPanel({
         </div>
       )}
 
-      {/* Sektion 2 — Termin + Navi */}
-      {termin && !abgeschlossen && (istBestaetigt || istReserviert || istEigenerGegenvorschlag) && (
+      {/* Sektion 2 — Termin + Navi (während Besichtigung ausblenden) */}
+      {phase !== 'besichtigung' && termin && !abgeschlossen && (istBestaetigt || istReserviert || istEigenerGegenvorschlag) && (
         <div className="border-t border-claimondo-navy/10 px-6 py-3.5">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -296,8 +319,8 @@ export default function AuftragHeaderPanel({
         </div>
       )}
 
-      {/* Sektion 3 — Briefing + Einzusammeln (zwei Spalten) */}
-      {(hatBriefing || offenePflicht.length > 0) && (
+      {/* Sektion 3 — Briefing + Einzusammeln (während Besichtigung ausblenden) */}
+      {phase !== 'besichtigung' && (hatBriefing || offenePflicht.length > 0) && (
         <div className="border-t border-claimondo-navy/10 px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Briefing */}
           {hatBriefing && (

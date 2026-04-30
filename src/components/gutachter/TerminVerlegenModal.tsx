@@ -182,8 +182,9 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
                     <p className="flex items-center gap-1.5">
                       <CarIcon className="w-3 h-3 shrink-0" />
                       <span>
-                        Nach Termin {fmtTime(v.vor.end)} Uhr ({v.vor.adresse}):{' '}
-                        {v.vor.fahrtMin} Min Fahrt · {v.vor.pufferMin} Min Puffer
+                        {v.vor.quelle === 'buero'
+                          ? `Vom Büro (${v.vor.adresse}): ${v.vor.fahrtMin} Min Fahrt`
+                          : `Nach Termin ${v.vor.end ? fmtTime(v.vor.end) : ''} Uhr (${v.vor.adresse}): ${v.vor.fahrtMin} Min Fahrt${v.vor.pufferMin !== null ? ` · ${v.vor.pufferMin} Min Puffer` : ''}`}
                       </span>
                     </p>
                   )}
