@@ -108,10 +108,12 @@ export async function getVerlegungsVorschlaegeAction(input: {
     return { ok: false, error: 'Kein Termin in der Auftragsansicht — Verlegung nicht möglich.' }
   }
 
-  // Termin laden über Admin-Client
+  // Termin laden über Admin-Client. Datenmodell-Pfad bis zur SSoT-Migration:
+  // Termin → Auftrag → Fall → Claim. fall_id ist als Shortcut gesetzt, aber
+  // bei manchen Rows nur über auftrag_id.fall_id auflösbar.
   const { data: termin, error: terminErr } = await admin
     .from('gutachter_termine')
-    .select('id, sv_id, start_zeit, end_zeit, status, fall_id')
+    .select('id, sv_id, start_zeit, end_zeit, status, fall_id, auftrag_id')
     .eq('id', input.terminId)
     .maybeSingle()
   if (terminErr || !termin) {
@@ -134,12 +136,22 @@ export async function getVerlegungsVorschlaegeAction(input: {
     }
   }
 
-  // AAR-864: fall_id aus dem Termin nehmen — der Caller-Prop fallId kann
-  // bei AuftragHeaderPanel über mehrere Layer übergeben werden, der DB-
-  // Eintrag ist die Quelle der Wahrheit.
-  const fallId = (termin.fall_id as string | null) ?? input.fallId
+  // AAR-864 — Aaron-Datenmodell-Spec: Termin → Auftrag → Fall → Claim.
+  // 1) Direkter Shortcut über termin.fall_id (häufig gesetzt)
+  // 2) Sonst über termin.auftrag_id → auftraege.fall_id
+  // 3) Sonst Caller-Prop als letzter Fallback
+  let fallId: string | null = (termin.fall_id as string | null) ?? null
+  if (!fallId && termin.auftrag_id) {
+    const { data: auftrag } = await admin
+      .from('auftraege')
+      .select('fall_id')
+      .eq('id', termin.auftrag_id as string)
+      .maybeSingle()
+    fallId = (auftrag?.fall_id as string | null) ?? null
+  }
+  if (!fallId) fallId = input.fallId || null
   if (!fallId) {
-    return { ok: false, error: 'Termin ist nicht mit einem Fall verknüpft.' }
+    return { ok: false, error: 'Termin ist nicht mit einem Fall verknüpft (weder fall_id noch auftrag_id auflösbar).' }
   }
 
   // Fall + Adresse laden — Admin damit garantiert alle Spalten sichtbar
