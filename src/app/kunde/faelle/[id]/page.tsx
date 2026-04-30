@@ -414,6 +414,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
+        {/* AAR-864: Verlegungs-Banner ganz oben — wie der Termin-Header beim
+            Gutachter direkt unter dem PageHeader, damit der Kunde die offene
+            Entscheidung sofort sieht. */}
+        {verlegungBannerProps && <TerminVerlegungBanner {...verlegungBannerProps} />}
+
         {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase. */}
         <ClaimStepper lifecycle={claimLifecycle} />
 
@@ -433,11 +438,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             }}
           />
         )}
-
-        {/* AAR-864: Verlegungs-Banner mit Bestätigen/Ablehnen — sichtbar wenn
-            der SV eine Verlegung beantragt hat und der Kunde noch nicht
-            entschieden hat. */}
-        {verlegungBannerProps && <TerminVerlegungBanner {...verlegungBannerProps} />}
 
         {/* AAR-770: Mitteilungs-Banner — ganz oben mit Quick-Action */}
         <FallMitteilungenBanner fallId={fall.id as string} rolle="kunde" />
