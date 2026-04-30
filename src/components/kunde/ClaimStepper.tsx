@@ -5,7 +5,7 @@
 // als zusätzliche Zeile unter dem Stepper angezeigt.
 
 import React from 'react'
-import { CheckIcon, ClipboardListIcon, WrenchIcon, ShieldCheckIcon, FlagIcon } from 'lucide-react'
+import { CheckIcon, ClipboardListIcon, WrenchIcon, ShieldCheckIcon, FlagIcon, AlertTriangleIcon } from 'lucide-react'
 import {
   MAIN_PHASE_LABEL,
   SUBPHASE_LABEL,
@@ -51,29 +51,36 @@ export default function ClaimStepper({
         {MAIN_PHASES.map((p, i) => {
           const isCurrent = !abgeschlossen && i === aktuellIdx
           const isDone = abgeschlossen || i < aktuellIdx
-          const Icon = p.icon
+          // AAR-864: Begutachtungs-Phase amber + Warndreieck wenn eine
+          // Verlegung pending ist (= bottomSlot gesetzt).
+          const istVerlegungWarn = !!bottomSlot && p.key === 'begutachtung'
+          const Icon = istVerlegungWarn ? AlertTriangleIcon : p.icon
           return (
             <React.Fragment key={p.key}>
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-                    isDone
-                      ? 'bg-emerald-500 text-white'
-                      : isCurrent
-                        ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                        : 'bg-claimondo-border/40 text-claimondo-ondo/60'
+                    istVerlegungWarn
+                      ? 'bg-amber-500 text-white ring-2 ring-amber-300'
+                      : isDone
+                        ? 'bg-emerald-500 text-white'
+                        : isCurrent
+                          ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                          : 'bg-claimondo-border/40 text-claimondo-ondo/60'
                   }`}
                 >
-                  {isDone ? <CheckIcon className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+                  {istVerlegungWarn || !isDone ? <Icon className="w-4 h-4" /> : <CheckIcon className="w-4 h-4" />}
                 </div>
                 <div className="flex flex-col min-w-0">
                   <p
                     className={`text-sm font-semibold whitespace-nowrap ${
-                      isCurrent
-                        ? 'text-claimondo-navy'
-                        : isDone
-                          ? 'text-emerald-700'
-                          : 'text-claimondo-ondo/60'
+                      istVerlegungWarn
+                        ? 'text-amber-700'
+                        : isCurrent
+                          ? 'text-claimondo-navy'
+                          : isDone
+                            ? 'text-emerald-700'
+                            : 'text-claimondo-ondo/60'
                     }`}
                   >
                     {MAIN_PHASE_LABEL[p.key]}
