@@ -27,10 +27,23 @@ const FENSTER_REFRESH_MS = 30_000
 
 function imAnfahrtsFenster(opts: {
   terminStartIso: string | null
+  terminStatus: string | null
   geschaetzteFahrtzeitMin: number | null
   kundeAngekommenAm: string | null
 }): boolean {
-  if (opts.terminStartIso == null) return true
+  // AAR-864: Ohne aktiven Termin oder im Verlegungs-Pending-/Verlegt-State
+  // niemals tracken — sonst zeigt das SV-Banner „... ist unterwegs" obwohl
+  // gar kein Termin scharf ist.
+  if (opts.terminStartIso == null) return false
+  if (
+    opts.terminStatus === 'verlegung_pending' ||
+    opts.terminStatus === 'verlegt' ||
+    opts.terminStatus === 'storniert' ||
+    opts.terminStatus === 'abgesagt' ||
+    opts.terminStatus === 'abgelehnt'
+  ) {
+    return false
+  }
   const start = new Date(opts.terminStartIso).getTime()
   if (Number.isNaN(start)) return false
   const fahrtzeit = Math.max(opts.geschaetzteFahrtzeitMin ?? FENSTER_FALLBACK_MIN, FENSTER_FALLBACK_MIN)
@@ -46,6 +59,9 @@ export function useGeoTracking(opts: {
   svId: string | null
   zielAdresse: string | null
   terminStartIso?: string | null
+  /** AAR-864: Status des aktiven Termins — verlegung_pending / verlegt
+   *  schalten Tracking aus. */
+  terminStatus?: string | null
   geschaetzteFahrtzeitMin?: number | null
   kundeAngekommenAm?: string | null
   /** Nur informativ — die Logik (Auto-Ankunft, ETA-Spiegelung) lebt in useGeoPosition. */
@@ -58,6 +74,7 @@ export function useGeoTracking(opts: {
   const {
     svId,
     terminStartIso = null,
+    terminStatus = null,
     geschaetzteFahrtzeitMin = null,
     kundeAngekommenAm = null,
     terminId = null,
@@ -81,7 +98,7 @@ export function useGeoTracking(opts: {
   const phaseSignaturRef = useRef<string>(`${kundeAngekommenAm ?? 'no_arr'}|${'no_unterwegs'}`)
 
   function fensterAktiv(): boolean {
-    return imAnfahrtsFenster({ terminStartIso, geschaetzteFahrtzeitMin, kundeAngekommenAm })
+    return imAnfahrtsFenster({ terminStartIso, terminStatus, geschaetzteFahrtzeitMin, kundeAngekommenAm })
   }
 
   useEffect(() => {

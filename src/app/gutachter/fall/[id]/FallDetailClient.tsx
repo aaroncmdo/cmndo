@@ -320,6 +320,7 @@ export default function FallDetailClient(props: Props) {
     svId: props.svId ?? null,
     zielAdresse: hatGutachten ? null : besichtigungsAdresse,
     terminStartIso: aktiverTermin?.start_zeit ?? null,
+    terminStatus: aktiverTermin?.status ?? null,
     geschaetzteFahrtzeitMin: aktiverTermin?.geschaetzte_fahrtzeit_min ?? null,
     kundeAngekommenAm: aktiverTermin?.sv_angekommen_am ?? null,
     terminId: aktiverTermin?.id ?? null,

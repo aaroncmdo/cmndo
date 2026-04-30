@@ -17,6 +17,7 @@ import {
   NavigationIcon,
   ClockIcon,
   XCircleIcon,
+  AlertTriangleIcon,
   SparklesIcon,
   ClipboardListIcon,
 } from 'lucide-react'
@@ -149,13 +150,13 @@ export default function AuftragHeaderPanel({
   }
 
   return (
-    <div className="rounded-2xl bg-claimondo-navy/[0.06] border border-claimondo-navy/15 backdrop-blur-sm overflow-hidden">
-      {/* AAR-864 DEBUG (entfernen wenn fixed) */}
-      <div className="bg-amber-50 border-b border-amber-300 px-3 py-2 text-[11px] font-mono text-amber-900">
-        DEBUG SV: phase={String(phase)} · termin.status={String(termin?.status ?? 'null')}{' '}
-        · termin.start_zeit={termin?.start_zeit?.slice(0, 16) ?? 'null'} · pendingInZukunft={String(pendingInZukunft)}{' '}
-        · istVerlegungPending={String(istVerlegungPending)}
-      </div>
+    <div
+      className={
+        istVerlegungPending
+          ? 'rounded-2xl bg-amber-50 border-2 border-amber-400 overflow-hidden'
+          : 'rounded-2xl bg-claimondo-navy/[0.06] border border-claimondo-navy/15 backdrop-blur-sm overflow-hidden'
+      }
+    >
       {/* Sektion 1 — Stepper (weiß, Aaron lässt Platz für künftige Inhalte) */}
       <div className="bg-white px-6 py-4">
         <div className="flex items-center w-full">
@@ -163,32 +164,38 @@ export default function AuftragHeaderPanel({
             const isCurrent = !abgeschlossen && i === aktuellIdx
             const isDone = abgeschlossen || i < aktuellIdx
             const istQc = isCurrent && p.key === 'gutachten' && gutachtenInQc
-            const Icon = p.icon
+            // AAR-864: bei Verlegung-Pending → Termin-Phase amber + Warndreieck
+            const istVerlegungWarn = istVerlegungPending && p.key === 'termin'
+            const Icon = istVerlegungWarn ? AlertTriangleIcon : p.icon
             return (
               <React.Fragment key={p.key}>
                 <div className="flex items-center gap-3 shrink-0">
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-                      isDone
-                        ? 'bg-emerald-500 text-white'
-                        : istQc
-                          ? 'bg-violet-600 text-white ring-2 ring-violet-300'
-                          : isCurrent
-                            ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                            : 'bg-white/60 text-claimondo-ondo/60 border border-claimondo-border'
+                      istVerlegungWarn
+                        ? 'bg-amber-500 text-white ring-2 ring-amber-300'
+                        : isDone
+                          ? 'bg-emerald-500 text-white'
+                          : istQc
+                            ? 'bg-violet-600 text-white ring-2 ring-violet-300'
+                            : isCurrent
+                              ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                              : 'bg-white/60 text-claimondo-ondo/60 border border-claimondo-border'
                     }`}
                   >
-                    {isDone ? <CheckIcon className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+                    {istVerlegungWarn || !isDone ? <Icon className="w-4 h-4" /> : <CheckIcon className="w-4 h-4" />}
                   </div>
                   <p
                     className={`text-sm font-semibold whitespace-nowrap ${
-                      istQc
-                        ? 'text-violet-700'
-                        : isCurrent
-                          ? 'text-claimondo-navy'
-                          : isDone
-                            ? 'text-emerald-700'
-                            : 'text-claimondo-ondo/60'
+                      istVerlegungWarn
+                        ? 'text-amber-700'
+                        : istQc
+                          ? 'text-violet-700'
+                          : isCurrent
+                            ? 'text-claimondo-navy'
+                            : isDone
+                              ? 'text-emerald-700'
+                              : 'text-claimondo-ondo/60'
                     }`}
                   >
                     {istQc ? 'Vollständigkeits-Check' : AUFTRAGS_PHASE_LABEL[p.key]}
