@@ -8,6 +8,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import Link from 'next/link'
 import { BriefcaseIcon } from 'lucide-react'
 import AuftragCard from './AuftragCard'
+import TagesvorbereitungButton from './TagesvorbereitungButton'
 import { getUrsacheLabel } from '@/lib/statusLabels'
 import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
@@ -67,7 +68,10 @@ export default async function AuftraegePage({
     return (
       <div className="h-full flex flex-col">
         <div className="w-full space-y-6">
-          <PageHeader title="Meine Aufträge" description="0 Aufträge" icon={BriefcaseIcon} />
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <PageHeader title="Meine Aufträge" description="0 Aufträge" icon={BriefcaseIcon} />
+            <TagesvorbereitungButton />
+          </div>
           <EmptyState title="Keine Aufträge gefunden." />
         </div>
       </div>
@@ -143,11 +147,14 @@ export default async function AuftraegePage({
   return (
     <div className="h-full flex flex-col">
       <div className="w-full space-y-6">
-        <PageHeader
-          title="Meine Aufträge"
-          description={`${sichtbareAuftraege.length} ${sichtbareAuftraege.length === 1 ? 'Auftrag' : 'Aufträge'}`}
-          icon={BriefcaseIcon}
-        />
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <PageHeader
+            title="Meine Aufträge"
+            description={`${sichtbareAuftraege.length} ${sichtbareAuftraege.length === 1 ? 'Auftrag' : 'Aufträge'}`}
+            icon={BriefcaseIcon}
+          />
+          <TagesvorbereitungButton />
+        </div>
 
         <div className="flex gap-2 overflow-x-auto">
           {(
