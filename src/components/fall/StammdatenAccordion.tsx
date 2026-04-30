@@ -42,12 +42,12 @@ export type StammdatenAccordionData = {
 
 type TabKey = Exclude<StammdatenCategory, 'fahrzeug'>
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'historie',  label: 'Historie'  },
-  { key: 'dokumente', label: 'Dokumente' },
-  { key: 'kunde',     label: 'Kunde'     },
-  { key: 'gegner',    label: 'Gegner'    },
-  { key: 'schaden',   label: 'Schaden'   },
+const TABS: { key: TabKey; label: string; icon: typeof ClockIcon }[] = [
+  { key: 'historie',  label: 'Historie',  icon: ClockIcon            },
+  { key: 'schaden',   label: 'Schaden',   icon: AlertTriangleIcon    },
+  { key: 'dokumente', label: 'Dokumente', icon: FileTextIcon         },
+  { key: 'kunde',     label: 'Kunde',     icon: UserIcon             },
+  { key: 'gegner',    label: 'Gegner',    icon: ShieldIcon           },
 ]
 
 function str(v: unknown): string | null {
@@ -164,18 +164,19 @@ export default function StammdatenAccordion({
 
           {/* Tab-Leiste */}
           <div className="flex border-b border-claimondo-border/60">
-            {TABS.map(({ key, label }) => (
+            {TABS.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setActiveTab(key)}
-                className={`flex-1 px-3 py-4 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px ${
+                className={`flex-1 px-3 py-4 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px inline-flex items-center justify-center gap-1.5 ${
                   activeTab === key
                     ? 'border-claimondo-navy text-claimondo-navy'
                     : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
                 }`}
               >
-                {label}
+                <Icon className="w-4 h-4" />
+                <span>{label}</span>
               </button>
             ))}
           </div>
