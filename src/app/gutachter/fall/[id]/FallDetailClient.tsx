@@ -43,6 +43,7 @@ import { useState } from 'react'
 import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
+import FallWindowDropzone from '@/components/gutachter/FallWindowDropzone'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
@@ -327,6 +328,7 @@ export default function FallDetailClient(props: Props) {
 
   return (
     <div className="min-h-full bg-[#f8f9fb]">
+      <FallWindowDropzone fallId={fall.id as string} />
       <FallHeader
         fallNummer={fallNummer}
         fallId={fall.id as string}
