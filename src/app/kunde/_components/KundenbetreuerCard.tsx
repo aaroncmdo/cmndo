@@ -1,17 +1,20 @@
-// Kunde-Sidebar-Card: zeigt zugewiesenen Kundenbetreuer + Quick-Actions
-// (Anrufen, Chat). Wird in der Sidebar oberhalb der Profil-Zeile gerendert,
-// damit der Kunde seinen festen Ansprechpartner immer sichtbar hat.
+'use client'
 
-import Link from 'next/link'
+// Kunde-Sidebar-Card: zeigt zugewiesenen Kundenbetreuer + Quick-Actions
+// (Anrufen, Chat). Chat-Button öffnet ein right-side Slide-Out-Drawer
+// im Glass-Design statt einer eigenen Page-Navigation — der Kunde kann
+// in jedem Kontext kurz ein paar Worte schreiben, ohne die Seite zu wechseln.
+
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { PhoneIcon, MessageSquareIcon } from 'lucide-react'
+import { PhoneIcon, MessageSquareIcon, XIcon } from 'lucide-react'
 
 type Props = {
   vorname: string | null
   nachname: string | null
   telefon: string | null
   avatarUrl: string | null
-  /** Pfad zur Chat-Page für den Kunden (idR /kunde/chat oder Fall-Chat-Tab) */
+  /** Iframe-Quelle für den Chat-Drawer (idR /kunde/chat?fall=<id>) */
   chatHref: string
   /** Akzent-Farbe (Brand-Primary mit Fallback) */
   accentBg: string
@@ -25,6 +28,21 @@ export default function KundenbetreuerCard({
   chatHref,
   accentBg,
 }: Props) {
+  const [chatOpen, setChatOpen] = useState(false)
+
+  // ESC schließt das Drawer
+  useEffect(() => {
+    if (!chatOpen) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setChatOpen(false)
+    }
+    document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = ''
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [chatOpen])
   const name = [vorname, nachname].filter(Boolean).join(' ') || 'Ihr Betreuer'
   const initials =
     [vorname?.[0], nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
@@ -73,14 +91,67 @@ export default function KundenbetreuerCard({
             Anrufen
           </span>
         )}
-        <Link
-          href={chatHref}
+        <button
+          type="button"
+          onClick={() => setChatOpen(true)}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium py-2 transition-colors"
         >
           <MessageSquareIcon className="w-3.5 h-3.5" />
           Chat
-        </Link>
+        </button>
       </div>
+
+      {/* Slide-Out-Drawer: Chat im Glass-Design, von rechts ausfahrend.
+          Iframe rendert die bestehende Chat-Page (Cookies/Session werden
+          mitgeschickt) — keine Logik-Duplikation. */}
+      {chatOpen && (
+        <>
+          <div
+            onClick={() => setChatOpen(false)}
+            className="fixed inset-0 z-[1100] bg-claimondo-navy/40 backdrop-blur-md transition-opacity"
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Chat mit Ihrem Betreuer"
+            className="fixed right-0 top-0 bottom-0 z-[1101] w-full sm:max-w-[440px] flex flex-col bg-white/85 backdrop-blur-xl border-l border-white/40 shadow-2xl animate-[slideInRight_240ms_ease-out]"
+            style={{
+              animationFillMode: 'forwards',
+            }}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border bg-white/60 backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <MessageSquareIcon className="w-4 h-4 text-claimondo-navy" />
+                <h2 className="text-sm font-semibold text-claimondo-navy">Chat</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setChatOpen(false)}
+                aria-label="Chat schließen"
+                className="text-claimondo-ondo hover:text-claimondo-navy p-1.5 rounded-lg hover:bg-white/60 transition-colors"
+              >
+                <XIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <iframe
+              src={chatHref}
+              title="Chat"
+              className="flex-1 w-full border-0 bg-transparent"
+            />
+          </div>
+          <style jsx>{`
+            @keyframes slideInRight {
+              from {
+                transform: translateX(100%);
+              }
+              to {
+                transform: translateX(0);
+              }
+            }
+          `}</style>
+        </>
+      )}
     </div>
   )
 }

@@ -104,8 +104,10 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         .eq('id', kbId)
         .maybeSingle()
       if (kbProfile) {
+        // Chat-Drawer iframed /kunde/chat (?fall= scoped). Keine Tab-URL,
+        // damit das Iframe nicht den ganzen Layout-Frame nochmal lädt.
         const fallChatBase = singleFallId
-          ? `/kunde/faelle/${singleFallId}?tab=chat`
+          ? `/kunde/chat?fall=${singleFallId}`
           : '/kunde/chat'
         kbCard = {
           vorname: (kbProfile.vorname as string | null) ?? null,
