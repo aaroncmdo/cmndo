@@ -32,7 +32,7 @@ import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
-import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
+import { FileTextIcon, DownloadIcon } from 'lucide-react'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
@@ -649,17 +649,28 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               Sidebar-KundenbetreuerCard mit Anruf + Chat-Modal. */}
         </div>
 
-        {/* Opt-in Gutachten-Weiterleitung — nur sichtbar wenn Gutachten vorliegt */}
-        {gutachtenVerfuegbar && (
-          <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-claimondo-navy">Gutachten erhalten?</p>
-              <p className="text-xs text-claimondo-ondo mt-0.5">
-                Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link).
-              </p>
+        {/* Gutachten-Download — direkt verfügbar wenn freigegeben */}
+        {gutachtenVerfuegbar && fall.gutachten_url && (
+          <a
+            href={fall.gutachten_url as string}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block bg-white rounded-xl border border-claimondo-border shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 hover:bg-[#f8f9fb] transition-colors"
+          >
+            <div className="min-w-0 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-claimondo-navy/10 flex items-center justify-center shrink-0">
+                <FileTextIcon className="w-5 h-5 text-claimondo-navy" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-claimondo-navy">Ihr Gutachten</p>
+                <p className="text-xs text-claimondo-ondo mt-0.5">PDF herunterladen</p>
+              </div>
             </div>
-            <GutachtenWeiterleitungButton fallId={fall.id as string} defaultEmail={user.email ?? null} />
-          </div>
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy text-white text-sm font-medium px-3 py-1.5 shrink-0">
+              <DownloadIcon className="w-4 h-4" />
+              Download
+            </span>
+          </a>
         )}
 
         <div className="space-y-4">
