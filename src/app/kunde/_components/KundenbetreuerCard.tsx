@@ -88,9 +88,9 @@ export default function KundenbetreuerCard({
 
   return (
     <div
-      className={`mb-2 ml-3 transition-all duration-200 relative ${
+      className={`mb-2 ml-3 transition-all duration-200 relative z-[1102] ${
         chatOpen
-          ? 'z-[1102] mr-0 rounded-l-xl rounded-r-none bg-white/15 border border-white/40 border-r-0 shadow-lg pr-3'
+          ? 'mr-0 rounded-l-xl rounded-r-none bg-white/15 border border-white/40 border-r-0 shadow-lg pr-3'
           : 'mr-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10'
       }`}
     >
