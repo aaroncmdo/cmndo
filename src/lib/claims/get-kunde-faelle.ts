@@ -432,6 +432,7 @@ export async function getKundeFallDetailRecord(
     // Identität / Status / Phase
     id: f.id,
     claim_id: claimId,
+    claim_nummer: c.claim_nummer ?? null,
     fall_nummer: f.fall_nummer ?? c.claim_nummer ?? null,
     status: f.status,
     szenario: f.szenario,

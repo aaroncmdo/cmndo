@@ -65,6 +65,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const fall = await getKundeFallDetailRecord(admin, user.id, user.email ?? null, id)
     if (!fall) notFound()
 
+    // Kunde-Vorname (für TerminLiveStatus "X ist da")
+    const { data: kundeProfile } = await admin
+      .from('profiles')
+      .select('vorname')
+      .eq('id', user.id)
+      .maybeSingle()
+    const kundeVorname = (kundeProfile?.vorname as string | null) ?? null
+
     // CMM-28: Zurück-Link „← Meine Fälle" nur sinnvoll wenn der Kunde
     // mehrere Fälle hat. Bei Single-Fall existiert keine Liste-Seite zum
     // zurückkehren (Layout-Nav heißt „Mein Fall" + linked direkt hierher).
@@ -332,24 +340,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       termin: React.ComponentProps<typeof TerminSectionCard>['termin']
       gegenueber: React.ComponentProps<typeof TerminSectionCard>['gegenueber']
     }> = []
-    if (svTermin) {
-      terminCards.push({
-        termin: {
-          id: svTermin.id as string,
-          typ: 'sv_begutachtung',
-          status: (svTermin.status as string) ?? 'reserviert',
-          start_zeit: svTermin.start_zeit as string | null,
-          end_zeit: svTermin.end_zeit as string | null,
-          kanal: svTermin.kanal as string | null,
-          video_link: svTermin.video_link as string | null,
-          sv_unterwegs_seit: svTermin.sv_unterwegs_seit as string | null,
-          sv_angekommen_am: svTermin.sv_angekommen_am as string | null,
-          sv_eta_minuten: (svTermin.sv_eta_minuten as number | null) ?? null,
-          adresse: terminAdresse,
-        },
-        gegenueber: svKontakt ? { rolle: 'sachverstaendiger', ...svKontakt } : null,
-      })
-    }
+    // SV-Termin lebt im ClaimStepper-Wrapper (terminInfo). Doppelte
+    // TerminSectionCard wäre Redundanz — nur KB-Termin als eigene Card.
     if (kbTermin) {
       terminCards.push({
         termin: {
@@ -423,14 +415,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; Meine Fälle</Link>
           )}
           <PageHeader
-            title={`${kennzeichen || (fall.fall_nummer as string | null) || 'Schadensfall'}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
+            title={`${(fall.claim_nummer as string | null) ?? (fall.fall_nummer as string | null) ?? 'Schadensfall'}${kennzeichen ? ` · ${kennzeichen}` : ''}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
             description={adresse || undefined}
           />
         </div>
 
-        {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase.
-            AAR-864: Termin-Sektion analog zum SV-Header (Datum/Uhrzeit/Adresse/Navi)
-            und Verlegungs-Banner als verschmolzene Bottom-Sektion. */}
+        {/* CMM-32f: Claim-Stepper — 4 Hauptphasen + aktive Subphase + Termin-
+            Sektion (Datum/Uhrzeit/Adresse/Navi). Termin lebt NUR hier, keine
+            zweite TerminSectionCard für SV. */}
         {(() => {
           const aktiverSv = svTermin
           const terminInfo = aktiverSv?.start_zeit
@@ -450,6 +442,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 adresse: terminAdresse,
                 // AAR-858: nur Vorname für Anonymität
                 svVorname: svKontakt?.name?.split(' ')[0] ?? null,
+                kundeVorname: kundeVorname ?? null,
               }
             : null
           return (

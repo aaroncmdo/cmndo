@@ -2551,6 +2551,7 @@ export type Database = {
           auszahlung_zahlungsweg: string | null
           bank_name: string | null
           bankdaten_hinterlegt_am: string | null
+          besichtigung_gestartet_am: string | null
           besichtigungsort_adresse: string | null
           besichtigungsort_lat: number | null
           besichtigungsort_lng: number | null
@@ -2882,6 +2883,7 @@ export type Database = {
           auszahlung_zahlungsweg?: string | null
           bank_name?: string | null
           bankdaten_hinterlegt_am?: string | null
+          besichtigung_gestartet_am?: string | null
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
@@ -3215,6 +3217,7 @@ export type Database = {
           auszahlung_zahlungsweg?: string | null
           bank_name?: string | null
           bankdaten_hinterlegt_am?: string | null
+          besichtigung_gestartet_am?: string | null
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
@@ -5044,6 +5047,7 @@ export type Database = {
           ankunft_via: string | null
           ankunft_zeit: string | null
           auftrag_id: string | null
+          besichtigung_gestartet_am: string | null
           bezahlt: boolean
           cancelled_at: string | null
           created_at: string | null
@@ -5123,6 +5127,7 @@ export type Database = {
           ankunft_via?: string | null
           ankunft_zeit?: string | null
           auftrag_id?: string | null
+          besichtigung_gestartet_am?: string | null
           bezahlt?: boolean
           cancelled_at?: string | null
           created_at?: string | null
@@ -5202,6 +5207,7 @@ export type Database = {
           ankunft_via?: string | null
           ankunft_zeit?: string | null
           auftrag_id?: string | null
+          besichtigung_gestartet_am?: string | null
           bezahlt?: boolean
           cancelled_at?: string | null
           created_at?: string | null

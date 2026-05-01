@@ -64,6 +64,7 @@ export default function KundeTrackingClient({
   const [svPosition, setSvPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null)
   const [isAngekommen, setIsAngekommen] = useState(angekommen)
+  const [besichtigungLaeuft, setBesichtigungLaeuft] = useState(false)
   const [notified5min, setNotified5min] = useState(notification5minSent)
   const [showGegenvorschlag, setShowGegenvorschlag] = useState(false)
   const [gegenDatum, setGegenDatum] = useState('')
@@ -116,6 +117,44 @@ export default function KundeTrackingClient({
     return () => { supabase.removeChannel(channel) }
   }, [svId, supabase, channelHash])
 
+  // Auto-Arrive-Trigger via Realtime auf gutachter_termine.besichtigung_gestartet_am.
+  // Sobald der SV (oder das Zeit-Fallback im Feldmodus) die Spalte setzt,
+  // sieht der Kunde dieselbe "Besichtigung läuft"-Meldung wie der SV.
+  useEffect(() => {
+    let cancelled = false
+    void supabase
+      .from('gutachter_termine')
+      .select('besichtigung_gestartet_am')
+      .eq('id', terminId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return
+        if ((data as { besichtigung_gestartet_am: string | null } | null)?.besichtigung_gestartet_am) {
+          setBesichtigungLaeuft(true)
+        }
+      })
+    const ch = supabase
+      .channel(`kunde-besichtigung-${terminId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'gutachter_termine',
+          filter: `id=eq.${terminId}`,
+        },
+        (payload) => {
+          const row = payload.new as { besichtigung_gestartet_am: string | null }
+          if (row.besichtigung_gestartet_am) setBesichtigungLaeuft(true)
+        },
+      )
+      .subscribe()
+    return () => {
+      cancelled = true
+      void supabase.removeChannel(ch)
+    }
+  }, [supabase, terminId])
+
   // ETA berechnen + 5-Min-Notification
   useEffect(() => {
     if (!svPosition) return
@@ -134,6 +173,20 @@ export default function KundeTrackingClient({
 
     if (distKm < 0.1) setIsAngekommen(true)
   }, [svPosition, terminLat, terminLng, notified5min, token])
+
+  if (besichtigungLaeuft) {
+    return (
+      <div className="flex-1 flex items-center justify-center px-6 py-10">
+        <div className="max-w-md text-center">
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircleIcon className="w-8 h-8 text-emerald-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-claimondo-navy mb-2">Besichtigung läuft</h1>
+          <p className="text-claimondo-ondo">{svVorname} dokumentiert jetzt das Fahrzeug.</p>
+        </div>
+      </div>
+    )
+  }
 
   if (isAngekommen) {
     return (
@@ -206,34 +259,89 @@ export default function KundeTrackingClient({
             </div>
           )}
 
-          {showGegenvorschlag && (
-            <div className="bg-white border border-claimondo-border rounded-2xl p-4 space-y-3">
-              <h3 className="text-sm font-semibold text-claimondo-navy">Alternativen Termin vorschlagen</h3>
-              {/* AAR-452: text-base + min-h-[44px] für iOS-Zoom + Touch-Target */}
-              <input type="datetime-local" value={gegenDatum} onChange={e => setGegenDatum(e.target.value)}
-                min={new Date().toISOString().slice(0, 16)}
-                className="w-full border border-claimondo-border rounded-lg px-3 min-h-[44px] text-base focus:outline-none"
-                style={{ outlineColor: brandPrimary }} />
-              <textarea value={gegenGrund} onChange={e => setGegenGrund(e.target.value)} placeholder="Begründung (optional)"
-                className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-base resize-none focus:outline-none"
-                style={{ outlineColor: brandPrimary }} rows={2} />
-              <div className="flex gap-2">
-                <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
-                <button
-                  onClick={async () => {
-                    if (!gegenDatum) return
-                    setActionPending(true)
-                    await terminGegenvorschlag({ source: 'kunde', fallId, neuesDatum: gegenDatum, grund: gegenGrund })
-                    setActionDone('Gegenvorschlag gesendet!')
-                  }}
-                  disabled={actionPending || !gegenDatum}
-                  className="flex-1 min-h-[44px] rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50"
-                >
-                  Vorschlagen
-                </button>
+          {showGegenvorschlag && (() => {
+            // 3 Smart-Vorschläge rund um den SV-Vorschlag: 2h früher, 2h später,
+            // gleiche Uhrzeit am nächsten Werktag. Vergangene Zeitpunkte werden
+            // gefiltert, damit der Datepicker-min nicht reingreifen muss.
+            const base = vorgeschlagenesDatum ? new Date(vorgeschlagenesDatum) : null
+            const toLocalInput = (d: Date) => {
+              const tz = d.getTime() - d.getTimezoneOffset() * 60_000
+              return new Date(tz).toISOString().slice(0, 16)
+            }
+            const formatDe = (d: Date) =>
+              d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+            type Vorschlag = { key: string; label: string; sub: string; datum: Date }
+            const vorschlaege: Vorschlag[] = []
+            if (base && !Number.isNaN(base.getTime())) {
+              const earlier = new Date(base.getTime() - 2 * 60 * 60 * 1000)
+              const later = new Date(base.getTime() + 2 * 60 * 60 * 1000)
+              const nextDay = new Date(base.getTime())
+              nextDay.setDate(nextDay.getDate() + 1)
+              const now = Date.now()
+              if (earlier.getTime() > now) vorschlaege.push({ key: 'earlier', label: '2 Stunden früher', sub: formatDe(earlier), datum: earlier })
+              vorschlaege.push({ key: 'later', label: '2 Stunden später', sub: formatDe(later), datum: later })
+              vorschlaege.push({ key: 'nextDay', label: 'Gleiche Zeit, 1 Tag später', sub: formatDe(nextDay), datum: nextDay })
+            }
+
+            const submit = async (datumIso: string, grund: string) => {
+              setActionPending(true)
+              await terminGegenvorschlag({ source: 'kunde', fallId, neuesDatum: datumIso, grund })
+              setActionDone('Gegenvorschlag gesendet!')
+            }
+
+            return (
+              <div className="bg-white border border-claimondo-border rounded-2xl p-4 space-y-3">
+                <h3 className="text-sm font-semibold text-claimondo-navy">Alternativen Termin vorschlagen</h3>
+
+                {vorschlaege.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">Schnell-Vorschläge</p>
+                    {vorschlaege.map((v) => (
+                      <button
+                        key={v.key}
+                        type="button"
+                        onClick={() => submit(v.datum.toISOString(), gegenGrund)}
+                        disabled={actionPending}
+                        className="w-full flex items-center justify-between gap-3 rounded-xl border border-claimondo-border hover:bg-[#f8f9fb] px-3 py-2.5 text-left disabled:opacity-50"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-claimondo-navy">{v.label}</p>
+                          <p className="text-xs text-claimondo-ondo capitalize">{v.sub} Uhr</p>
+                        </div>
+                        <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className="space-y-2 pt-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">Eigene Zeit</p>
+                  {/* AAR-452: text-base + min-h-[44px] für iOS-Zoom + Touch-Target */}
+                  <input type="datetime-local" value={gegenDatum} onChange={e => setGegenDatum(e.target.value)}
+                    min={new Date().toISOString().slice(0, 16)}
+                    className="w-full border border-claimondo-border rounded-lg px-3 min-h-[44px] text-base focus:outline-none"
+                    style={{ outlineColor: brandPrimary }} />
+                </div>
+
+                <textarea value={gegenGrund} onChange={e => setGegenGrund(e.target.value)} placeholder="Begründung (optional)"
+                  className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-base resize-none focus:outline-none"
+                  style={{ outlineColor: brandPrimary }} rows={2} />
+                <div className="flex gap-2">
+                  <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
+                  <button
+                    onClick={async () => {
+                      if (!gegenDatum) return
+                      await submit(new Date(gegenDatum).toISOString(), gegenGrund)
+                    }}
+                    disabled={actionPending || !gegenDatum}
+                    className="flex-1 min-h-[44px] rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50"
+                  >
+                    Eigene Zeit vorschlagen
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {!isSvVorschlag && (
             <p className="text-center text-claimondo-ondo text-sm">

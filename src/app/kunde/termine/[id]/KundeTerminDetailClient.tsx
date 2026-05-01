@@ -12,6 +12,8 @@
 // /kunde/termin/<token>-Seite, die bereits SV-Live-Position rendert.
 
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import {
   CalendarIcon,
   MapPinIcon,
@@ -118,7 +120,56 @@ export default function KundeTerminDetailClient({
   }
   const StatusIcon = status.icon
 
-  const isUnterwegs = !!termin.sv_unterwegs_seit && !termin.sv_angekommen_am
+  // Realtime: Besichtigung-läuft-Trigger live abrufen, damit der Kunde die
+  // Seite offen halten kann und den Statuswechsel ohne Reload sieht.
+  const [besichtigungLaeuft, setBesichtigungLaeuft] = useState(false)
+  const [svAngekommenAm, setSvAngekommenAm] = useState(termin.sv_angekommen_am)
+  const [svUnterwegsSeit, setSvUnterwegsSeit] = useState(termin.sv_unterwegs_seit)
+  useEffect(() => {
+    const supabase = createClient()
+    void supabase
+      .from('gutachter_termine')
+      .select('besichtigung_gestartet_am, sv_angekommen_am, sv_unterwegs_seit')
+      .eq('id', termin.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        const row = data as {
+          besichtigung_gestartet_am: string | null
+          sv_angekommen_am: string | null
+          sv_unterwegs_seit: string | null
+        } | null
+        if (row?.besichtigung_gestartet_am) setBesichtigungLaeuft(true)
+        if (row?.sv_angekommen_am) setSvAngekommenAm(row.sv_angekommen_am)
+        if (row?.sv_unterwegs_seit) setSvUnterwegsSeit(row.sv_unterwegs_seit)
+      })
+    const channel = supabase
+      .channel(`kunde-termin-detail-${termin.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'gutachter_termine',
+          filter: `id=eq.${termin.id}`,
+        },
+        (payload) => {
+          const row = payload.new as {
+            besichtigung_gestartet_am: string | null
+            sv_angekommen_am: string | null
+            sv_unterwegs_seit: string | null
+          }
+          if (row.besichtigung_gestartet_am) setBesichtigungLaeuft(true)
+          setSvAngekommenAm(row.sv_angekommen_am)
+          setSvUnterwegsSeit(row.sv_unterwegs_seit)
+        },
+      )
+      .subscribe()
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [termin.id])
+
+  const isUnterwegs = !!svUnterwegsSeit && !svAngekommenAm
   const mapsEmbedSrc = fall.adresse
     ? `https://www.google.com/maps?q=${encodeURIComponent(fall.adresse)}&output=embed`
     : null
@@ -128,6 +179,17 @@ export default function KundeTerminDetailClient({
 
   return (
     <div className="w-full px-4 md:px-8 pt-5 pb-10 max-w-2xl mx-auto space-y-5">
+      {besichtigungLaeuft && (
+        <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 flex items-center gap-3">
+          <CheckCircle2Icon className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-emerald-900">Besichtigung läuft</p>
+            <p className="text-xs text-emerald-800/80">
+              Ihr Sachverständiger dokumentiert das Fahrzeug.
+            </p>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div>
         <Link
