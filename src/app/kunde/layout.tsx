@@ -81,6 +81,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // sorgt dafür dass der Kunde über alle Fälle hinweg denselben KB hat —
   // wir zeigen also einfach den KB des ersten Treffers.
   let kbCard: {
+    id: string
     vorname: string | null
     nachname: string | null
     telefon: string | null
@@ -104,6 +105,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         .maybeSingle()
       if (kbProfile) {
         kbCard = {
+          id: kbId,
           vorname: (kbProfile.vorname as string | null) ?? null,
           nachname: (kbProfile.nachname as string | null) ?? null,
           telefon: (kbProfile.telefon as string | null) ?? null,
@@ -112,6 +114,12 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       }
     }
   }
+
+  // Fall-Options für den Bezug-Picker im Chat-Modal.
+  const fallOptionsForChat = navFaelle.map((f) => ({
+    id: f.id as string,
+    fall_nummer: (f.fall_nummer as string | null) ?? null,
+  }))
 
   // AAR-536 (K4): SV-Branding aufgelöst. `useBrand=true` nur wenn zugewiesener
   // SV verifiziert + use_custom_branding aktiv + Theme vorhanden.
@@ -163,6 +171,8 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             accentBg={accentBg}
             fallId={singleFallId}
             currentUserId={user.id}
+            kbUserId={kbCard.id}
+            fallOptions={fallOptionsForChat}
           />
         )}
 

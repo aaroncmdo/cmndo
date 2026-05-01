@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { PhoneIcon, MessageSquareIcon, VideoIcon, XIcon } from 'lucide-react'
 import BeratungBuchenSheet from '@/components/kunde/BeratungBuchenSheet'
-import MultiChannelChat from '@/components/chat/MultiChannelChat'
+import KundeKbChat from './KundeKbChat'
 
 type Props = {
   vorname: string | null
@@ -19,10 +19,14 @@ type Props = {
   avatarUrl: string | null
   /** Akzent-Farbe (Brand-Primary mit Fallback) */
   accentBg: string
-  /** Single-Fall-ID für Chat + Videotermin — null = beide deaktiviert */
+  /** Single-Fall-ID für Videotermin (Default-Fall im Chat-Picker) */
   fallId: string | null
-  /** Kunde-User-ID für MultiChannelChat (sender) */
+  /** Kunde-User-ID (aktuell eingeloggter User) */
   currentUserId: string | null
+  /** KB-User-ID — nötig für KundeKbChat (Realtime-Filter auf Sender-IDs) */
+  kbUserId: string | null
+  /** Alle Fälle des Kunden — für Fall-Bezug-Picker im Chat-Input */
+  fallOptions: Array<{ id: string; fall_nummer: string | null }>
 }
 
 export default function KundenbetreuerCard({
@@ -33,6 +37,8 @@ export default function KundenbetreuerCard({
   accentBg,
   fallId,
   currentUserId,
+  kbUserId,
+  fallOptions,
 }: Props) {
   const [chatOpen, setChatOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
@@ -102,7 +108,7 @@ export default function KundenbetreuerCard({
         <button
           type="button"
           onClick={() => setChatOpen(true)}
-          disabled={!fallId}
+          disabled={!currentUserId || !kbUserId}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium py-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <MessageSquareIcon className="w-3.5 h-3.5" />
@@ -112,8 +118,9 @@ export default function KundenbetreuerCard({
 
       {/* Glass-Modal: poppt aus der KB-Card heraus (Sidebar links unten),
           blurred Backdrop deckt den Rest. transform-origin bottom-left,
-          damit das Modal sichtbar aus der Card "wächst". */}
-      {chatOpen && fallId && (
+          damit das Modal sichtbar aus der Card "wächst". Chat ist NICHT
+          fall-scoped — direkter KB-Kunde-Chat über alle Fälle. */}
+      {chatOpen && currentUserId && kbUserId && (
         <div
           role="dialog"
           aria-modal="true"
@@ -156,14 +163,16 @@ export default function KundenbetreuerCard({
                 </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setVideoOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
-                >
-                  <VideoIcon className="w-3.5 h-3.5" />
-                  Videotermin
-                </button>
+                {fallId && (
+                  <button
+                    type="button"
+                    onClick={() => setVideoOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
+                  >
+                    <VideoIcon className="w-3.5 h-3.5" />
+                    Videotermin
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setChatOpen(false)}
@@ -174,12 +183,12 @@ export default function KundenbetreuerCard({
                 </button>
               </div>
             </div>
-            <div className="flex-1 min-h-0 chat-without-tabs">
-              <MultiChannelChat
-                fallId={fallId}
+            <div className="flex-1 min-h-0">
+              <KundeKbChat
                 currentUserId={currentUserId}
-                visibleKanaele={['chat_kb_kunde']}
-                defaultKanal="chat_kb_kunde"
+                kbUserId={kbUserId}
+                fallOptions={fallOptions}
+                defaultFallId={fallId}
               />
             </div>
           </div>
@@ -196,11 +205,6 @@ export default function KundenbetreuerCard({
                 opacity: 1;
                 transform: scale(1) translateY(0);
               }
-            }
-            /* Single-Channel-Modus: Tab-Leiste ausblenden — die Card-Header
-               kommuniziert "Chat mit X" bereits. */
-            .chat-without-tabs > :global(div) > :global(div:first-child):has(:global(button)) {
-              display: none;
             }
           `}</style>
         </div>
