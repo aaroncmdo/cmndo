@@ -153,7 +153,7 @@ export default function GutachterCard({
             aria-hidden="true"
           />
           <div
-            className="absolute md:left-64 md:ml-3 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-2xl glass-shell overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
+            className="absolute md:left-64 md:ml-3 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col gap-2 animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
             style={{
               transformOrigin: 'bottom left',
               ...(typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
