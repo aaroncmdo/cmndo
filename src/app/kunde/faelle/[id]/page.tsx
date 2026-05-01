@@ -423,7 +423,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; Meine Fälle</Link>
           )}
           <PageHeader
-            title={`${kennzeichen || (fall.fall_nummer as string | null) || 'Schadensfall'}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
+            title={`${(fall.fall_nummer as string | null) ?? 'Schadensfall'}${kennzeichen ? ` · ${kennzeichen}` : ''}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
             description={adresse || undefined}
           />
         </div>
