@@ -259,7 +259,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             </div>
             <OutboxBadge />
           </Link>
-          <SupportButton userName={displayName} />
+          <div className="pt-2">
+            <SupportButton userName={displayName} />
+          </div>
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
