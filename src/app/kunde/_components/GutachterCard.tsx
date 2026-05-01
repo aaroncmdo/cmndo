@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { PhoneIcon, MessageSquareIcon, XIcon } from 'lucide-react'
 import KundeKbChat from './KundeKbChat'
+import { useActiveContactStore } from './useActiveContactStore'
 
 type Props = {
   vorname: string | null
@@ -54,7 +55,10 @@ export default function GutachterCard({
   adminAvatarUrl,
   fallOptions,
 }: Props) {
-  const [chatOpen, setChatOpen] = useState(false)
+  const active = useActiveContactStore((s) => s.active)
+  const setActive = useActiveContactStore((s) => s.setActive)
+  const chatOpen = active === 'sv'
+  const setChatOpen = (open: boolean) => setActive(open ? 'sv' : null)
   const cardRef = useRef<HTMLDivElement>(null)
   const [cardRect, setCardRect] = useState<{ top: number; bottom: number; right: number } | null>(null)
 

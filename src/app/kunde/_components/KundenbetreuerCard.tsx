@@ -11,6 +11,7 @@ import Image from 'next/image'
 import { PhoneIcon, MessageSquareIcon, VideoIcon, XIcon } from 'lucide-react'
 import BeratungBuchenSheet from '@/components/kunde/BeratungBuchenSheet'
 import KundeKbChat from './KundeKbChat'
+import { useActiveContactStore } from './useActiveContactStore'
 
 type Props = {
   vorname: string | null
@@ -60,7 +61,10 @@ export default function KundenbetreuerCard({
   const rolleLabel = kbRolle && ROLLE_LABEL[kbRolle]
     ? ROLLE_LABEL[kbRolle]
     : 'Kundenbetreuer'
-  const [chatOpen, setChatOpen] = useState(false)
+  const active = useActiveContactStore((s) => s.active)
+  const setActive = useActiveContactStore((s) => s.setActive)
+  const chatOpen = active === 'kb'
+  const setChatOpen = (open: boolean) => setActive(open ? 'kb' : null)
   const [videoOpen, setVideoOpen] = useState(false)
   const [bookingKanal, setBookingKanal] = useState<'video' | 'telefon'>('video')
   const cardRef = useRef<HTMLDivElement>(null)
