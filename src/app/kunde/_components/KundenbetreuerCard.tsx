@@ -62,7 +62,13 @@ export default function KundenbetreuerCard({
     [vorname?.[0], nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
 
   return (
-    <div className="mx-3 mb-3 rounded-xl bg-white/5 border border-white/10 p-3">
+    <div
+      className={`mx-3 mb-3 rounded-xl border p-3 transition-all duration-200 relative z-[1102] ${
+        chatOpen
+          ? 'bg-white/15 border-white/40 shadow-lg ring-2 ring-white/20'
+          : 'bg-white/5 border-white/10'
+      }`}
+    >
       <p className="text-[10px] uppercase tracking-wider text-[#7BA3CC] mb-2">
         Ihr Betreuer
       </p>
