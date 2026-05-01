@@ -332,24 +332,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       termin: React.ComponentProps<typeof TerminSectionCard>['termin']
       gegenueber: React.ComponentProps<typeof TerminSectionCard>['gegenueber']
     }> = []
-    if (svTermin) {
-      terminCards.push({
-        termin: {
-          id: svTermin.id as string,
-          typ: 'sv_begutachtung',
-          status: (svTermin.status as string) ?? 'reserviert',
-          start_zeit: svTermin.start_zeit as string | null,
-          end_zeit: svTermin.end_zeit as string | null,
-          kanal: svTermin.kanal as string | null,
-          video_link: svTermin.video_link as string | null,
-          sv_unterwegs_seit: svTermin.sv_unterwegs_seit as string | null,
-          sv_angekommen_am: svTermin.sv_angekommen_am as string | null,
-          sv_eta_minuten: (svTermin.sv_eta_minuten as number | null) ?? null,
-          adresse: terminAdresse,
-        },
-        gegenueber: svKontakt ? { rolle: 'sachverstaendiger', ...svKontakt } : null,
-      })
-    }
+    // SV-Termin wird im ClaimStepper (terminInfo) + KundeSvLiveBanner gerendert.
+    // Eigenes TerminSectionCard wäre Doppelung — nur KB-Termin als Card.
     if (kbTermin) {
       terminCards.push({
         termin: {

@@ -17,7 +17,7 @@ import OfflineStatusBanner from './OfflineStatusBanner'
 import SvFallakteView from './SvFallakteView'
 import FokusChatPanel from './FokusChatPanel'
 import { useFieldTracking } from './useFieldTracking'
-import { markArrived, pauseFokusmodus } from './actions'
+import { markArrived, pauseFokusmodus, startStop } from './actions'
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
@@ -98,6 +98,25 @@ export default function FeldmodusClient({
     targetLng: aktuellerStop?.lng ?? null,
     onGeofenceReached,
   })
+
+  // Auto-Losfahren: sobald der SV den Feldmodus für einen aktiven Stop öffnet,
+  // markieren wir den Termin als "losgefahren" — generiert Tracking-Token,
+  // berechnet ETA und benachrichtigt den Kunden via WhatsApp. Ohne diesen
+  // Auto-Trigger sähe der Kunde nichts (kein sv_unterwegs_seit), bis das
+  // Geofence-Event im Hintergrund feuert. Idempotent durch losgefahren_am-
+  // Check serverseitig + Ref clientseitig.
+  const losfahrenFiredRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!aktuellerStop) return
+    if (sessionStatus === 'arrived' || sessionStatus === 'finished' || sessionStatus === 'paused') return
+    if (aktuellerStop.losgefahren_am) return
+    if (losfahrenFiredRef.current === aktuellerStop.termin_id) return
+    losfahrenFiredRef.current = aktuellerStop.termin_id
+    void startStop(session.id, aktuellerStop.termin_id).catch(() => {
+      // Idempotent — wenn der Server sagt "bereits losgefahren", ignorieren wir.
+      losfahrenFiredRef.current = null
+    })
+  }, [aktuellerStop, sessionStatus, session.id])
 
   // Realtime-Sub auf den aktiven Termin: wenn besichtigung_gestartet_am
   // (z.B. durch Zeit-Fallback auf einem anderen Gerät, oder durch eine
