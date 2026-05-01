@@ -332,8 +332,24 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       termin: React.ComponentProps<typeof TerminSectionCard>['termin']
       gegenueber: React.ComponentProps<typeof TerminSectionCard>['gegenueber']
     }> = []
-    // SV-Termin wird im ClaimStepper (terminInfo) + KundeSvLiveBanner gerendert.
-    // Eigenes TerminSectionCard wäre Doppelung — nur KB-Termin als Card.
+    if (svTermin) {
+      terminCards.push({
+        termin: {
+          id: svTermin.id as string,
+          typ: 'sv_begutachtung',
+          status: (svTermin.status as string) ?? 'reserviert',
+          start_zeit: svTermin.start_zeit as string | null,
+          end_zeit: svTermin.end_zeit as string | null,
+          kanal: svTermin.kanal as string | null,
+          video_link: svTermin.video_link as string | null,
+          sv_unterwegs_seit: svTermin.sv_unterwegs_seit as string | null,
+          sv_angekommen_am: svTermin.sv_angekommen_am as string | null,
+          sv_eta_minuten: (svTermin.sv_eta_minuten as number | null) ?? null,
+          adresse: terminAdresse,
+        },
+        gegenueber: svKontakt ? { rolle: 'sachverstaendiger', ...svKontakt } : null,
+      })
+    }
     if (kbTermin) {
       terminCards.push({
         termin: {
@@ -412,42 +428,18 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
-        {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase.
-            AAR-864: Termin-Sektion analog zum SV-Header (Datum/Uhrzeit/Adresse/Navi)
-            und Verlegungs-Banner als verschmolzene Bottom-Sektion. */}
-        {(() => {
-          const aktiverSv = svTermin
-          const terminInfo = aktiverSv?.start_zeit
-            ? {
-                terminId: aktiverSv.id as string,
-                status: (aktiverSv.status as string | null) ?? null,
-                datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                }),
-                uhrzeit: new Date(aktiverSv.start_zeit as string).toLocaleTimeString('de-DE', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                }),
-                adresse: terminAdresse,
-                // AAR-858: nur Vorname für Anonymität
-                svVorname: svKontakt?.name?.split(' ')[0] ?? null,
-              }
-            : null
-          return (
-            <ClaimStepper
-              lifecycle={claimLifecycle}
-              terminInfo={terminInfo}
-              bottomSlot={
-                verlegungBannerProps ? (
-                  <TerminVerlegungBanner {...verlegungBannerProps} embedded />
-                ) : null
-              }
-            />
-          )
-        })()}
+        {/* CMM-32f: Claim-Stepper — 4 Hauptphasen + aktive Subphase.
+            Termin-Detail wandert in die TerminSectionCard unten (Single-Source),
+            der Stepper bleibt schlank und ist nur Phasen-Anzeige. */}
+        <ClaimStepper
+          lifecycle={claimLifecycle}
+          terminInfo={null}
+          bottomSlot={
+            verlegungBannerProps ? (
+              <TerminVerlegungBanner {...verlegungBannerProps} embedded />
+            ) : null
+          }
+        />
 
         {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
         {svTermin?.id && (
