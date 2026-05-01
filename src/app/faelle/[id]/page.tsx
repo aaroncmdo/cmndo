@@ -68,16 +68,35 @@ export default async function FallaktePage({
   let claimStatus: string | null = null
   let claimPhase: string | null = null
   let claimKanzleiWunsch: string | null = null
+  let claimNoShowCount = 0
+  let claimLetzterNoShowAm: string | null = null
   if (claimId) {
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, phase, kanzlei_wunsch')
+      .select('status, phase, kanzlei_wunsch, kunde_no_show_count, letzter_no_show_am')
       .eq('id', claimId)
       .maybeSingle()
     claimStatus        = (claimRow?.status         as string | null) ?? null
     claimPhase         = (claimRow?.phase          as string | null) ?? null
     claimKanzleiWunsch = (claimRow?.kanzlei_wunsch as string | null) ?? null
+    claimNoShowCount   = (claimRow?.kunde_no_show_count as number | null) ?? 0
+    claimLetzterNoShowAm = (claimRow?.letzter_no_show_am as string | null) ?? null
   }
+
+  // Recent kunde-getriebene Verlegung (letzte 7 Tage, neuer Termin still
+  // bestaetigt) -> KB/Admin sehen einen amber-Banner als Hinweis.
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const { data: recentVerlegung } = await supabase
+    .from('gutachter_termine')
+    .select('id, start_zeit, created_at')
+    .eq('fall_id', id)
+    .eq('verlegung_initiator_kunde', true)
+    .eq('status', 'bestaetigt')
+    .gte('created_at', sevenDaysAgo)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const kundeVerlegungVorhanden = !!recentVerlegung
   // userRolle für Timeline-Rolle und viele andere Stellen (Auth + RLS),
   // wird unten erneut für FallakteRolle-Cast verwendet.
 
@@ -715,6 +734,9 @@ export default async function FallaktePage({
         claimStatus={claimStatus}
         claimKanzleiWunsch={claimKanzleiWunsch}
         kanzleiPaketPending={kanzleiPaketPending}
+        kundeNoShowCount={claimNoShowCount}
+        letzterNoShowAm={claimLetzterNoShowAm}
+        kundeVerlegungVorhanden={kundeVerlegungVorhanden}
         timelineEvents={timelineEvents}
         futureEvents={futureEvents}
         dokumenteTabProps={{
