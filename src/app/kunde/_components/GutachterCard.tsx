@@ -138,42 +138,73 @@ export default function GutachterCard({
             className="absolute md:left-64 md:bottom-4 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:border-l-0 bg-white/85 backdrop-blur-xl border border-white/50 shadow-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)] max-md:rounded-2xl"
             style={{ transformOrigin: 'bottom left' }}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border/60 bg-white/60 backdrop-blur-sm">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 overflow-hidden"
-                  style={{ backgroundColor: accentBg }}
-                >
-                  {avatarUrl ? (
-                    <Image src={avatarUrl} alt={name} width={32} height={32} className="w-full h-full object-cover" unoptimized />
-                  ) : (
-                    initials
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-semibold text-claimondo-navy truncate">{name}</p>
-                    {telefon && (
-                      <a
-                        href={`tel:${telefon}`}
-                        className="shrink-0 w-6 h-6 rounded-full bg-claimondo-navy/10 hover:bg-claimondo-navy/20 text-claimondo-navy inline-flex items-center justify-center transition-colors"
-                        aria-label={`${name} anrufen`}
-                      >
-                        <PhoneIcon className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-claimondo-ondo">Mit Ihrem Betreuer im CC</p>
-                </div>
+            <button
+              type="button"
+              onClick={() => setChatOpen(false)}
+              aria-label="Chat schließen"
+              className="absolute top-3 right-3 z-10 text-claimondo-ondo hover:text-claimondo-navy p-1.5 rounded-full hover:bg-white/60 transition-colors"
+            >
+              <XIcon className="w-5 h-5" />
+            </button>
+            {/* Header-Card: gestackte Avatare aller Teilnehmer + Gruppenchat-Titel */}
+            <div className="px-2 pt-2 shrink-0">
+              <div className="rounded-2xl bg-white/55 backdrop-blur-sm border border-white/60 shadow-sm px-3 py-2.5 flex items-center gap-2.5">
+                {(() => {
+                  type Participant = { name: string; avatar: string | null; bg: string }
+                  const teilnehmer: Participant[] = [
+                    { name, avatar: avatarUrl, bg: accentBg },
+                  ]
+                  if (kbUserId && kbName) {
+                    teilnehmer.push({ name: kbName, avatar: kbAvatarUrl ?? null, bg: '#4573A2' })
+                  }
+                  if (adminUserId && adminName) {
+                    teilnehmer.push({ name: adminName, avatar: adminAvatarUrl ?? null, bg: '#F59E0B' })
+                  }
+                  const namen = teilnehmer.map((p) => p.name.split(' ')[0]).join(', ')
+                  return (
+                    <>
+                      <div className="flex -space-x-2 shrink-0">
+                        {teilnehmer.slice(0, 4).map((p, idx) => {
+                          const ini =
+                            p.name
+                              .split(' ')
+                              .map((w) => w[0])
+                              .filter(Boolean)
+                              .slice(0, 2)
+                              .join('')
+                              .toUpperCase() || '?'
+                          return (
+                            <div
+                              key={idx}
+                              className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white border-2 border-white/85"
+                              style={{ backgroundColor: p.bg, zIndex: teilnehmer.length - idx }}
+                            >
+                              {p.avatar ? (
+                                <Image
+                                  src={p.avatar}
+                                  alt={p.name}
+                                  width={36}
+                                  height={36}
+                                  className="w-full h-full object-cover"
+                                  unoptimized
+                                />
+                              ) : (
+                                ini
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-claimondo-navy leading-tight">Gruppenchat</p>
+                        <p className="text-[10px] text-claimondo-ondo leading-tight mt-0.5 truncate">
+                          mit {namen}
+                        </p>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
-              <button
-                type="button"
-                onClick={() => setChatOpen(false)}
-                aria-label="Chat schließen"
-                className="text-claimondo-ondo hover:text-claimondo-navy p-1.5 rounded-lg hover:bg-white/60 transition-colors"
-              >
-                <XIcon className="w-5 h-5" />
-              </button>
             </div>
             <div className="flex-1 min-h-0">
               <KundeKbChat

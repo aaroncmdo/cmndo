@@ -62,6 +62,7 @@ export default function KundenbetreuerCard({
     : 'Kundenbetreuer'
   const [chatOpen, setChatOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
+  const [bookingKanal, setBookingKanal] = useState<'video' | 'telefon'>('video')
 
   // Videotermin braucht einen Fall. Single-Fall: direkt nehmen. Multi-Fall:
   // ersten verfuegbaren als Default. Wenn ueberhaupt kein Fall existiert,
@@ -164,62 +165,60 @@ export default function KundenbetreuerCard({
             className="absolute md:left-64 md:bottom-4 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:border-l-0 bg-white/85 backdrop-blur-xl border border-white/50 shadow-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)] max-md:rounded-2xl"
             style={{ transformOrigin: 'bottom left' }}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border/60 bg-white/60 backdrop-blur-sm">
-              <div className="flex items-center gap-2.5 min-w-0">
+            {/* Close-Button schwebt absolut oben rechts ueber dem Header */}
+            <button
+              type="button"
+              onClick={() => setChatOpen(false)}
+              aria-label="Chat schließen"
+              className="absolute top-3 right-3 z-10 text-claimondo-ondo hover:text-claimondo-navy p-1.5 rounded-full hover:bg-white/60 transition-colors"
+            >
+              <XIcon className="w-5 h-5" />
+            </button>
+            {/* Header-Card: Avatar + Name + 2 Quick-Action-Kreise (Telefon=Rueckruf, Video=Videotermin) */}
+            <div className="px-2 pt-2 shrink-0">
+              <div className="rounded-2xl bg-white/55 backdrop-blur-sm border border-white/60 shadow-sm px-3 py-2.5 flex items-center gap-2.5">
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 overflow-hidden"
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 overflow-hidden"
                   style={{ backgroundColor: accentBg }}
                 >
                   {avatarUrl ? (
-                    <Image
-                      src={avatarUrl}
-                      alt={name}
-                      width={32}
-                      height={32}
-                      className="w-full h-full object-cover"
-                      unoptimized
-                    />
+                    <Image src={avatarUrl} alt={name} width={36} height={36} className="w-full h-full object-cover" unoptimized />
                   ) : (
                     initials
                   )}
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-semibold text-claimondo-navy truncate">
-                      {name}
-                    </p>
-                    {telefon && (
-                      <a
-                        href={`tel:${telefon}`}
-                        className="shrink-0 w-6 h-6 rounded-full bg-claimondo-navy/10 hover:bg-claimondo-navy/20 text-claimondo-navy inline-flex items-center justify-center transition-colors"
-                        aria-label={`${name} anrufen`}
-                      >
-                        <PhoneIcon className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-claimondo-ondo">Ihr Betreuer</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-claimondo-navy truncate leading-tight">{name}</p>
+                  <p className="text-[10px] text-claimondo-ondo leading-tight mt-0.5">Ihr Betreuer</p>
                 </div>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0">
                 {effectiveBookingFallId && (
-                  <button
-                    type="button"
-                    onClick={() => setVideoOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
-                  >
-                    <VideoIcon className="w-3.5 h-3.5" />
-                    Videotermin buchen
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBookingKanal('telefon')
+                        setVideoOpen(true)
+                      }}
+                      className="shrink-0 w-9 h-9 rounded-full bg-claimondo-navy/10 hover:bg-claimondo-navy/20 text-claimondo-navy inline-flex items-center justify-center transition-colors"
+                      aria-label="Rückruftermin buchen"
+                      title="Rückruftermin buchen"
+                    >
+                      <PhoneIcon className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBookingKanal('video')
+                        setVideoOpen(true)
+                      }}
+                      className="shrink-0 w-9 h-9 rounded-full bg-claimondo-navy/10 hover:bg-claimondo-navy/20 text-claimondo-navy inline-flex items-center justify-center transition-colors"
+                      aria-label="Videotermin buchen"
+                      title="Videotermin buchen"
+                    >
+                      <VideoIcon className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setChatOpen(false)}
-                  aria-label="Chat schließen"
-                  className="text-claimondo-ondo hover:text-claimondo-navy p-1.5 rounded-lg hover:bg-white/60 transition-colors"
-                >
-                  <XIcon className="w-5 h-5" />
-                </button>
               </div>
             </div>
             <div className="flex-1 min-h-0">
@@ -258,12 +257,13 @@ export default function KundenbetreuerCard({
         </div>
       )}
 
-      {/* Videotermin-Buchung — separates Modal, ueber dem Chat-Modal */}
+      {/* Termin-Buchung (Video oder Telefon) — separates Modal, ueber dem Chat */}
       {effectiveBookingFallId && (
         <BeratungBuchenSheet
           fallId={effectiveBookingFallId}
           open={videoOpen}
           onClose={() => setVideoOpen(false)}
+          defaultKanal={bookingKanal}
         />
       )}
     </div>
