@@ -68,10 +68,10 @@ export default function GutachterCard({
 
   return (
     <div
-      className={`mx-3 mb-2 rounded-xl border transition-all duration-200 relative ${
+      className={`mb-2 ml-3 transition-all duration-200 relative ${
         chatOpen
-          ? 'z-[1102] bg-white/15 border-white/40 shadow-lg ring-2 ring-white/20'
-          : 'bg-white/[0.04] border-white/10 hover:bg-white/10'
+          ? 'z-[1102] mr-0 rounded-l-xl rounded-r-none bg-white/15 border border-white/40 border-r-0 shadow-lg pr-3'
+          : 'mr-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10'
       }`}
     >
       <button
@@ -109,7 +109,7 @@ export default function GutachterCard({
             aria-hidden="true"
           />
           <div
-            className="absolute md:left-64 md:bottom-4 md:ml-3 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-2xl bg-white/85 backdrop-blur-xl border border-white/50 shadow-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
+            className="absolute md:left-64 md:bottom-4 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:border-l-0 bg-white/85 backdrop-blur-xl border border-white/50 shadow-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)] max-md:rounded-2xl"
             style={{ transformOrigin: 'bottom left' }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border/60 bg-white/60 backdrop-blur-sm">
