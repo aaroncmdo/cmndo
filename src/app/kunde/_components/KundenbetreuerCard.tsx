@@ -110,21 +110,25 @@ export default function KundenbetreuerCard({
         </button>
       </div>
 
-      {/* Glass-Modal: zentriert, blurred backdrop. Rendert MultiChannelChat
-          nur mit Kanal 'chat_kb_kunde' — kein Tab, kein WhatsApp, kein SV. */}
+      {/* Glass-Modal: poppt aus der KB-Card heraus (Sidebar links unten),
+          blurred Backdrop deckt den Rest. transform-origin bottom-left,
+          damit das Modal sichtbar aus der Card "wächst". */}
       {chatOpen && fallId && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Chat mit Ihrem Betreuer"
-          className="fixed inset-0 z-[1100] flex items-center justify-center px-4 sm:px-6 py-6"
+          className="fixed inset-0 z-[1100]"
         >
           <div
             onClick={() => setChatOpen(false)}
             className="absolute inset-0 bg-claimondo-navy/40 backdrop-blur-md"
             aria-hidden="true"
           />
-          <div className="relative w-full max-w-md h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-2xl bg-white/85 backdrop-blur-xl border border-white/50 shadow-2xl overflow-hidden animate-[fadeInUp_220ms_ease-out]">
+          <div
+            className="absolute md:left-64 md:bottom-4 md:ml-3 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-2xl bg-white/85 backdrop-blur-xl border border-white/50 shadow-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
+            style={{ transformOrigin: 'bottom left' }}
+          >
             <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border/60 bg-white/60 backdrop-blur-sm">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
@@ -180,14 +184,17 @@ export default function KundenbetreuerCard({
             </div>
           </div>
           <style jsx>{`
-            @keyframes fadeInUp {
-              from {
+            @keyframes popFromCard {
+              0% {
                 opacity: 0;
-                transform: translateY(8px);
+                transform: scale(0.4) translateY(20px);
               }
-              to {
+              60% {
                 opacity: 1;
-                transform: translateY(0);
+              }
+              100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
               }
             }
             /* Single-Channel-Modus: Tab-Leiste ausblenden — die Card-Header
