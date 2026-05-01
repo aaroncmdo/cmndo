@@ -216,7 +216,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
     <Modal open={open} onClose={() => { reset(); onClose() }} maxWidth={520} ariaLabel="Termin verschieben">
       <h3 className="text-lg font-semibold text-claimondo-navy mb-1">Termin verschieben</h3>
       <p className="text-sm text-claimondo-ondo mb-4">
-        Wählen Sie einen der verfügbaren Vorschläge oder geben Sie einen eigenen Wunschtermin an.
+        Wähle einen Slot — der Termin wird sofort verschoben. Der Gutachter wird benachrichtigt, eine Bestätigung ist nicht nötig.
       </p>
 
       {/* ── Besichtigungsort (mit Edit) ── */}
@@ -449,7 +449,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
           >
             {submitting ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
-            Alternativ-Vorschlag senden
+            Termin verschieben
           </button>
         ) : showCustom && wunsch && alternatives.length === 0 ? (
           <button
@@ -458,7 +458,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
           >
             {submitting ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
-            Termin prüfen & vorschlagen
+            Termin prüfen & verschieben
           </button>
         ) : ausgewaehlterVorschlag ? (
           <button
@@ -467,7 +467,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
           >
             {submitting ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
-            Vorschlag senden
+            Termin verschieben
           </button>
         ) : null}
       </div>

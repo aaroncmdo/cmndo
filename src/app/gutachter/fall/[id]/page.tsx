@@ -70,17 +70,25 @@ export default async function GutachterFallPage({
   const admin = createAdminClient()
 
   // AAR-724: Alle ungesehenen Termine dieses Falls auf „gesehen" setzen
-  // sobald der SV die Fallakte öffnet. Best-effort, Fehler nicht blockend.
+  // sobald der SV die Fallakte öffnet. RETURNING-Clause liefert die IDs
+  // der gerade-frisch-gesehenen Termine fuer eine "verschoben durch Kunde"-
+  // Hervorhebung im Stepper (gelb bis zum nächsten Reload).
+  let zuletztGesehenIds: string[] = []
   try {
-    await supabase
+    const { data: aktualisiert } = await supabase
       .from('gutachter_termine')
       .update({ gesehen_am: new Date().toISOString() })
       .eq('fall_id', id)
       .eq('sv_id', (sv as { id: string }).id)
       .is('gesehen_am', null)
+      .select('id, verlegung_initiator_kunde')
+    zuletztGesehenIds = ((aktualisiert ?? []) as Array<{ id: string; verlegung_initiator_kunde: boolean | null }>)
+      .filter((t) => t.verlegung_initiator_kunde === true)
+      .map((t) => t.id)
   } catch (err) {
     console.error('[AAR-724] auto-mark-seen gutachter_termine failed:', err)
   }
+  const hatNeueKundeVerlegung = zuletztGesehenIds.length > 0
 
   // Fetch all related data in parallel
   const [
@@ -502,6 +510,18 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
+      {/* Kunde hat Termin verschoben — gelb bis zum naechsten Reload (auto-
+          gesehen-Mechanik). Quelle: gutachter_termine.verlegung_initiator_kunde
+          + frisch markiertes gesehen_am. */}
+      {hatNeueKundeVerlegung && (
+        <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4">
+          <p className="text-sm font-semibold text-amber-900">Termin durch Kunde verschoben</p>
+          <p className="text-xs text-amber-800 mt-1">
+            Der Kunde hat den Termin selbst verlegt. Keine Bestätigung von dir nötig — der neue Slot ist bereits aktiv.
+            Diese Markierung verschwindet beim nächsten Aufruf der Fallakte.
+          </p>
+        </div>
+      )}
       {/* No-Show-Hinweis (vom Claim, claim > fall > auftrag) */}
       {claimNoShow.count > 0 && (
         <div className="rounded-2xl border-2 border-rose-300 bg-rose-50 p-4">
