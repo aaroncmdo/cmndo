@@ -218,7 +218,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     <div className="flex min-h-screen bg-[#f8f9fb]" style={themeStyle}>
       {/* Desktop Sidebar — hidden on mobile */}
       <aside
-        className="hidden md:flex md:flex-col md:w-64 md:shrink-0 fixed top-0 left-0 h-screen z-40"
+        className="kunde-sidebar hidden md:flex md:flex-col md:w-64 md:shrink-0 fixed top-0 left-0 h-screen z-40"
         style={{ backgroundColor: sidebarBg }}
       >
         <div className="px-5 py-5">

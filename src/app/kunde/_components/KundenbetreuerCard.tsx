@@ -66,8 +66,8 @@ export default function KundenbetreuerCard({
   const cardRef = useRef<HTMLDivElement>(null)
   const [cardRect, setCardRect] = useState<{ top: number; bottom: number; right: number } | null>(null)
 
-  // Modal-Position an Card-Rect anbinden — wenn Modal offen, soll es vom
-  // rechten Card-Rand starten und vertikal mit der Card abschliessen.
+  // Modal-Position an Card-Rect anbinden — Card-Rect dient nur fuer den
+  // X-Button-Anchor, nicht fuer die Modal-Position selbst.
   useEffect(() => {
     if (!chatOpen) return
     const measure = () => {
@@ -76,7 +76,19 @@ export default function KundenbetreuerCard({
     }
     measure()
     window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
+    // Sidebar-Aside in den Vordergrund — sonst legt sich das Modal-Backdrop
+    // (z-1100) ueber die Card und sie wirkt geblurrt. Aside hat normalerweise
+    // z-40 -> wir heben sie temporaer auf z-1102.
+    const aside = document.querySelector('aside.kunde-sidebar') as HTMLElement | null
+    let original = ''
+    if (aside) {
+      original = aside.style.zIndex
+      aside.style.zIndex = '1102'
+    }
+    return () => {
+      window.removeEventListener('resize', measure)
+      if (aside) aside.style.zIndex = original
+    }
   }, [chatOpen])
 
   // Videotermin braucht einen Fall. Single-Fall: direkt nehmen. Multi-Fall:
@@ -178,28 +190,16 @@ export default function KundenbetreuerCard({
             aria-hidden="true"
           />
           <div
-            className="absolute left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
-            style={{
-              transformOrigin: 'bottom left',
-              // Desktop: an Card-Rect andocken — Modal-Bottom = Card-Bottom,
-              // Modal-Top fließt nach oben weg.
-              ...(cardRect && typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
-                ? {
-                    left: `${cardRect.right}px`,
-                    bottom: `${window.innerHeight - cardRect.bottom}px`,
-                    height: `min(640px, calc(${cardRect.bottom}px - 1rem))`,
-                  }
-                : {}),
-            }}
+            className="absolute md:left-64 md:bottom-4 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
+            style={{ transformOrigin: 'bottom left' }}
           >
-            {/* Close-Button schwebt absolut oben rechts ueber dem Header */}
             <button
               type="button"
               onClick={() => setChatOpen(false)}
               aria-label="Chat schließen"
-              className="absolute top-3 right-3 z-10 text-claimondo-ondo hover:text-claimondo-navy p-1.5 rounded-full hover:bg-white/60 transition-colors"
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/40 hover:bg-white/60 text-claimondo-navy inline-flex items-center justify-center transition-colors"
             >
-              <XIcon className="w-5 h-5" />
+              <XIcon className="w-4 h-4" />
             </button>
             {/* Header-Card: Avatar + Name + 2 Quick-Action-Kreise (Telefon=Rueckruf, Video=Videotermin) */}
             <div className="px-2 pt-2 shrink-0">
