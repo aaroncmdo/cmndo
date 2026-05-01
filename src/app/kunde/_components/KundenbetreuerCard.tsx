@@ -70,29 +70,6 @@ export default function KundenbetreuerCard({
   const cardRef = useRef<HTMLDivElement>(null)
   const [cardRect, setCardRect] = useState<{ top: number; bottom: number; right: number } | null>(null)
 
-  useEffect(() => {
-    if (!chatOpen) return
-    const measure = () => {
-      const r = cardRef.current?.getBoundingClientRect()
-      if (r) setCardRect({ top: r.top, bottom: r.bottom, right: r.right })
-    }
-    // Doppelt messen: einmal sofort, einmal nach Reflow (ueber rAF) damit
-    // die mr-0-Aenderung der active-Card aufgenommen ist.
-    measure()
-    const raf = requestAnimationFrame(measure)
-    window.addEventListener('resize', measure)
-    const aside = document.querySelector('aside.kunde-sidebar') as HTMLElement | null
-    let original = ''
-    if (aside) {
-      original = aside.style.zIndex
-      aside.style.zIndex = '1102'
-    }
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('resize', measure)
-      if (aside) aside.style.zIndex = original
-    }
-  }, [chatOpen])
 
   // Videotermin braucht einen Fall. Single-Fall: direkt nehmen. Multi-Fall:
   // ersten verfuegbaren als Default. Wenn ueberhaupt kein Fall existiert,
@@ -120,11 +97,7 @@ export default function KundenbetreuerCard({
   return (
     <div
       ref={cardRef}
-      className={`mb-2 ml-3 transition-all duration-200 relative z-[1102] ${
-        chatOpen
-          ? 'mr-0 rounded-l-xl rounded-r-none glass-card-source pr-3'
-          : 'mr-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10'
-      }`}
+      className="mb-2 mx-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative"
     >
       <button
         type="button"
@@ -193,7 +166,7 @@ export default function KundenbetreuerCard({
             aria-hidden="true"
           />
           <div
-            className="absolute md:left-64 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
+            className="absolute md:left-64 md:ml-3 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-2xl glass-shell overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
             style={{
               transformOrigin: 'bottom left',
               ...(typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches

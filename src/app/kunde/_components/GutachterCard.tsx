@@ -73,23 +73,9 @@ export default function GutachterCard({
       const r = cardRef.current?.getBoundingClientRect()
       if (r) setCardRect({ top: r.top, bottom: r.bottom, right: r.right })
     }
-    measure()
-    const raf = requestAnimationFrame(measure)
-    window.addEventListener('resize', measure)
-    // Sidebar in den Vordergrund — sonst legt sich das Modal-Backdrop
-    // ueber die Card und sie wirkt geblurrt.
-    const aside = document.querySelector('aside.kunde-sidebar') as HTMLElement | null
-    let originalZ = ''
-    if (aside) {
-      originalZ = aside.style.zIndex
-      aside.style.zIndex = '1102'
-    }
     return () => {
-      cancelAnimationFrame(raf)
       document.body.style.overflow = ''
       document.removeEventListener('keydown', onKey)
-      window.removeEventListener('resize', measure)
-      if (aside) aside.style.zIndex = originalZ
     }
   }, [chatOpen])
 
@@ -100,11 +86,7 @@ export default function GutachterCard({
   return (
     <div
       ref={cardRef}
-      className={`mb-2 ml-3 transition-all duration-200 relative z-[1102] ${
-        chatOpen
-          ? 'mr-0 rounded-l-xl rounded-r-none glass-card-source pr-3'
-          : 'mr-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10'
-      }`}
+      className="mb-2 mx-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative"
     >
       <button
         type="button"
@@ -160,7 +142,7 @@ export default function GutachterCard({
             aria-hidden="true"
           />
           <div
-            className="absolute md:left-64 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
+            className="absolute md:left-64 md:ml-3 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-2xl glass-shell overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
             style={{
               transformOrigin: 'bottom left',
               ...(typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
