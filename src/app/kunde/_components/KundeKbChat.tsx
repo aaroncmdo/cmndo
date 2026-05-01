@@ -183,9 +183,12 @@ export default function KundeKbChat({
   }
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-white/40 to-claimondo-bg/40">
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+    <div className="flex flex-col h-full bg-transparent p-2 gap-2 min-h-0">
+      {/* Messages — eigener gewrappter Bereich (white-transparent, rounded) */}
+      <div
+        ref={scrollRef}
+        className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-2 rounded-2xl bg-white/55 backdrop-blur-sm border border-white/60 shadow-sm"
+      >
         {messages.length === 0 && (
           <p className="text-center text-xs text-claimondo-ondo/70 mt-8">
             Noch keine Nachrichten. Schreib einfach was — dein Betreuer bekommt
@@ -299,9 +302,11 @@ export default function KundeKbChat({
         })}
       </div>
 
-      {/* Floating Composer — schwebt mit shadow-md, wirkt offener */}
-      <div className="px-2 pb-2 pt-1 shrink-0">
-        <div className="rounded-2xl bg-white/95 backdrop-blur-sm shadow-md border border-white/70 px-3 pt-2 pb-2">
+      {/* Composer — eigener gewrappter Bereich, optisch entkoppelt vom
+          Nachrichten-Block aber gleicher Stil. Links neben dem Input sitzt
+          der runde Claim-Bezug-Picker. */}
+      <div className="shrink-0">
+        <div className="rounded-2xl bg-white/55 backdrop-blur-sm shadow-sm border border-white/60 px-3 pt-2 pb-2">
         {sendError && (
           <p className="text-[11px] text-rose-600 mb-1.5 px-1">{sendError}</p>
         )}
