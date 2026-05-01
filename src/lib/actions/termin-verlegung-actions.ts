@@ -343,7 +343,17 @@ export async function terminVerlegungVorschlagen(input: {
 type DecisionResult = { ok: true } | { ok: false; error: string }
 
 type KundeVorschlaegeResult =
-  | { ok: true; vorschlaege: Array<{ start: string; end: string; datum: string }>; slotDauerMin: number }
+  | {
+      ok: true
+      vorschlaege: Array<{ start: string; end: string; datum: string }>
+      slotDauerMin: number
+      fallId: string
+      besichtigungsort: {
+        adresse: string
+        lat: number
+        lng: number
+      }
+    }
   | { ok: false; error: string }
 
 /**
@@ -368,7 +378,12 @@ export async function getKundeTerminVorschlaegeAction(
     .eq('id', terminId)
     .maybeSingle()
   if (!termin) return { ok: false, error: 'Termin nicht gefunden.' }
-  if (termin.status !== 'bestaetigt') {
+  // 'bestaetigt' = regulaerer Verlegen-Flow.
+  // 'reserviert' / 'gegenvorschlag' / 'verlegung_pending' = blockiert.
+  // Verstrichener Termin (start_zeit in der Vergangenheit) bleibt bestaetigt
+  // bis abgesagt — fuer die "Neuen Termin vereinbaren"-UX wollen wir die
+  // Vorschlaege weiter laden koennen.
+  if (!['bestaetigt'].includes(termin.status as string)) {
     return { ok: false, error: 'Termin ist nicht mehr bestätigt.' }
   }
   if (!termin.fall_id) return { ok: false, error: 'Termin ohne Fall-Verknüpfung.' }
@@ -432,7 +447,17 @@ export async function getKundeTerminVorschlaegeAction(
 
   // Routen-Details rausfiltern — Kunde sieht nur Datum + Uhrzeit (SV-Privatsphäre)
   const vorschlaege = vorschlaegeRaw.map((v) => ({ start: v.start, end: v.end, datum: v.datum }))
-  return { ok: true, vorschlaege, slotDauerMin }
+  return {
+    ok: true,
+    vorschlaege,
+    slotDauerMin,
+    fallId: termin.fall_id as string,
+    besichtigungsort: {
+      adresse: zielLabel,
+      lat: Number(zielLat),
+      lng: Number(zielLng),
+    },
+  }
 }
 
 /**

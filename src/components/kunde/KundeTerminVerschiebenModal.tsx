@@ -17,12 +17,16 @@ import {
   ChevronDownIcon,
   ClockIcon,
   Loader2Icon,
+  MapPinIcon,
+  PencilIcon,
 } from 'lucide-react'
 import { Modal } from '@/components/primitives/Modal'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import {
   getKundeTerminVorschlaegeAction,
   kundeTerminVerlegungVorschlagen,
 } from '@/lib/actions/termin-verlegung-actions'
+import { updateBesichtigungsortVomKunden } from '@/app/kunde/faelle/[id]/_actions/besichtigungsort'
 import type { KundenAlternative } from '@/lib/termine/verlegung-vorschlaege'
 
 type Vorschlag = { start: string; end: string; datum: string }
@@ -62,6 +66,13 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
   const [submitting, setSubmitting] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
 
+  // Besichtigungsort-Edit
+  const [fallId, setFallId] = useState<string | null>(null)
+  const [adresse, setAdresse] = useState<string>('')
+  const [adresseEditMode, setAdresseEditMode] = useState(false)
+  const [adresseSaving, setAdresseSaving] = useState(false)
+  const [adresseError, setAdresseError] = useState<string | null>(null)
+
   function reset() {
     setVorschlaege([])
     setVorschlaegeErr(null)
@@ -73,18 +84,24 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
     setGrund('')
     setFehler(null)
     setSubmitting(false)
+    setFallId(null)
+    setAdresse('')
+    setAdresseEditMode(false)
+    setAdresseSaving(false)
+    setAdresseError(null)
   }
 
-  // Vorschläge laden sobald Modal öffnet
-  useEffect(() => {
-    if (!open) return
+  // Vorschlaege-Loader extrahiert, damit wir nach Adress-Update neu laden koennen.
+  function loadVorschlaege() {
     setLadeVorschlaege(true)
     setVorschlaegeErr(null)
     setVorschlaege([])
-    getKundeTerminVorschlaegeAction(terminId)
+    return getKundeTerminVorschlaegeAction(terminId)
       .then((r) => {
         if (r.ok) {
           setVorschlaege(r.vorschlaege)
+          setFallId(r.fallId)
+          setAdresse(r.besichtigungsort.adresse)
         } else {
           setVorschlaegeErr(r.error)
         }
@@ -92,10 +109,45 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
       })
       .catch((e: unknown) => {
         const msg = e instanceof Error ? e.message : String(e)
-        console.error('[AAR-864] getKundeTerminVorschlaegeAction rejected:', msg)
+        console.error('[Verlegen] getKundeTerminVorschlaegeAction rejected:', msg)
         setVorschlaegeErr(`Unerwarteter Fehler: ${msg}`)
         setLadeVorschlaege(false)
       })
+  }
+
+  async function handleAdresseSave(place: PlaceResult) {
+    if (!fallId) return
+    setAdresseSaving(true)
+    setAdresseError(null)
+    try {
+      const r = await updateBesichtigungsortVomKunden({
+        fallId,
+        adresse: place.adresse,
+        lat: place.lat ?? null,
+        lng: place.lng ?? null,
+      })
+      if (!r.ok) {
+        setAdresseError(r.error ?? 'Aktualisierung fehlgeschlagen')
+        return
+      }
+      // Re-Fetch der Vorschlaege mit neuer Adresse
+      setAdresse(place.adresse)
+      setAdresseEditMode(false)
+      setAusgewaehlterVorschlag(null)
+      setAlternatives([])
+      await loadVorschlaege()
+    } catch (e) {
+      setAdresseError(e instanceof Error ? e.message : 'Unbekannter Fehler')
+    } finally {
+      setAdresseSaving(false)
+    }
+  }
+
+  // Vorschläge laden sobald Modal öffnet
+  useEffect(() => {
+    if (!open) return
+    void loadVorschlaege()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, terminId])
 
   async function submitSlot(neuesStartIso: string) {
@@ -166,6 +218,61 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
       <p className="text-sm text-claimondo-ondo mb-4">
         Wählen Sie einen der verfügbaren Vorschläge oder geben Sie einen eigenen Wunschtermin an.
       </p>
+
+      {/* ── Besichtigungsort (mit Edit) ── */}
+      {adresse && (
+        <div className="mb-4 rounded-lg border border-claimondo-border bg-[#f8f9fb] p-3">
+          <div className="flex items-start gap-2">
+            <MapPinIcon className="w-4 h-4 text-claimondo-ondo shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] uppercase tracking-wider font-semibold text-claimondo-ondo mb-0.5">
+                Besichtigungsort
+              </p>
+              {adresseEditMode ? (
+                <>
+                  <GooglePlaceAutocomplete
+                    defaultValue={adresse}
+                    placeholder="Neue Adresse eingeben …"
+                    onSelect={handleAdresseSave}
+                    className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30"
+                  />
+                  {adresseSaving && (
+                    <p className="text-[11px] text-claimondo-ondo mt-1 flex items-center gap-1">
+                      <Loader2Icon className="w-3 h-3 animate-spin" />
+                      Routen werden neu berechnet …
+                    </p>
+                  )}
+                  {adresseError && (
+                    <p className="text-[11px] text-rose-700 mt-1">{adresseError}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdresseEditMode(false)
+                      setAdresseError(null)
+                    }}
+                    className="text-[11px] text-claimondo-ondo hover:text-claimondo-navy underline mt-1"
+                  >
+                    Abbrechen
+                  </button>
+                </>
+              ) : (
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm text-claimondo-navy">{adresse}</p>
+                  <button
+                    type="button"
+                    onClick={() => setAdresseEditMode(true)}
+                    className="shrink-0 inline-flex items-center gap-1 text-[11px] text-claimondo-ondo hover:text-claimondo-navy"
+                  >
+                    <PencilIcon className="w-3 h-3" />
+                    Ändern
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Sektion 1: Vorschläge ── */}
       <div className="mb-4">
