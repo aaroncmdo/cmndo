@@ -9,8 +9,9 @@
 // abonniert Realtime auf neue Nachrichten von beiden Seiten.
 
 import { useEffect, useRef, useState, useTransition } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { SendIcon, FileTextIcon, ChevronDownIcon, XIcon } from 'lucide-react'
+import { SendIcon, FileTextIcon, ChevronDownIcon, XIcon, ChevronRightIcon } from 'lucide-react'
 import { sendKbKundeMessage, markKbKundeMessagesRead } from './kb-chat-actions'
 
 type Nachricht = {
@@ -146,15 +147,44 @@ export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defa
                     : 'bg-white/80 text-claimondo-navy rounded-bl-sm border border-claimondo-border/60'
                 }`}
               >
-                {fallNr && (
-                  <p
-                    className={`inline-flex items-center gap-1 text-[10px] font-mono mb-1 px-1.5 py-0.5 rounded ${
-                      ownMessage ? 'bg-white/15 text-white/90' : 'bg-claimondo-ondo/10 text-claimondo-ondo'
+                {/* WhatsApp-Style Reply-Preview: angelinkter Fall ueber dem
+                    Nachrichten-Text. Klick auf den Block fuehrt zur Fallakte. */}
+                {fallNr && m.fall_id && (
+                  <Link
+                    href={`/kunde/faelle/${m.fall_id}`}
+                    className={`flex items-center gap-2 rounded-lg px-2 py-1.5 mb-1.5 transition-colors ${
+                      ownMessage
+                        ? 'bg-white/10 hover:bg-white/15 border-l-[3px] border-white/40'
+                        : 'bg-claimondo-ondo/10 hover:bg-claimondo-ondo/15 border-l-[3px] border-claimondo-ondo'
                     }`}
                   >
-                    <FileTextIcon className="w-2.5 h-2.5" />
-                    {fallNr}
-                  </p>
+                    <FileTextIcon
+                      className={`w-3.5 h-3.5 shrink-0 ${
+                        ownMessage ? 'text-white/80' : 'text-claimondo-ondo'
+                      }`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={`text-[10px] uppercase tracking-wider font-semibold ${
+                          ownMessage ? 'text-white/70' : 'text-claimondo-ondo/80'
+                        }`}
+                      >
+                        Bezug
+                      </p>
+                      <p
+                        className={`text-[12px] font-mono font-semibold truncate ${
+                          ownMessage ? 'text-white' : 'text-claimondo-navy'
+                        }`}
+                      >
+                        {fallNr}
+                      </p>
+                    </div>
+                    <ChevronRightIcon
+                      className={`w-3.5 h-3.5 shrink-0 ${
+                        ownMessage ? 'text-white/60' : 'text-claimondo-ondo/60'
+                      }`}
+                    />
+                  </Link>
                 )}
                 <p className="whitespace-pre-wrap break-words">{m.nachricht}</p>
                 <p
