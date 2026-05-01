@@ -91,11 +91,15 @@ export default function KundenbetreuerCard({
     if (aside) {
       originalZ = aside.style.zIndex
       aside.style.zIndex = '1102'
+      aside.setAttribute('data-chat-open', 'true')
     }
     return () => {
       document.body.style.overflow = ''
       document.removeEventListener('keydown', onKey)
-      if (aside) aside.style.zIndex = originalZ
+      if (aside) {
+        aside.style.zIndex = originalZ
+        aside.removeAttribute('data-chat-open')
+      }
     }
   }, [chatOpen])
 

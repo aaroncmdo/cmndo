@@ -340,6 +340,16 @@ html[lang="ar"] {
   box-shadow: 0 24px 48px -12px rgba(13, 27, 62, 0.3);
 }
 
+/* Wenn Chat-Modal offen: alles in der Sidebar AUSSER den Cards
+   abdunkeln + leicht blurren. Cards selbst (KB/Gutachter/Admin) sind
+   nicht in `.kunde-sidebar-rest`, deshalb bleiben sie sharp. */
+aside.kunde-sidebar[data-chat-open] .kunde-sidebar-rest {
+  opacity: 0.25;
+  filter: blur(2px);
+  pointer-events: none;
+  transition: opacity 0.2s, filter 0.2s;
+}
+
 /* Source-Card im offenen Zustand — solide white, ohne rechte Kante,
    damit sie sich mit der glass-edge zu einem L-foermigen Block fuegt. */
 .glass-card-source {

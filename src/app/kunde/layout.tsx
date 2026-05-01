@@ -221,7 +221,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         className="kunde-sidebar hidden md:flex md:flex-col md:w-64 md:shrink-0 fixed top-0 left-0 h-screen z-40"
         style={{ backgroundColor: sidebarBg }}
       >
-        <div className="px-5 py-5">
+        <div className="kunde-sidebar-rest px-5 py-5 transition-opacity duration-200">
           <Link href="/kunde" className="block">
             {branding.useBrand && branding.logoUrl ? (
               <div className="bg-white rounded-lg p-2 flex items-center justify-center">
@@ -243,7 +243,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           </Link>
         </div>
 
-        <KundeNav singleFallId={singleFallId} />
+        <div className="kunde-sidebar-rest contents">
+          <KundeNav singleFallId={singleFallId} />
+        </div>
 
         {/* Gutachter-Card oberhalb der KB-Card — Gruppenchat (Kunde+SV+KB+Admin) */}
         {svCard && (
@@ -295,7 +297,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
         {/* Profil-Klick + Support + Abmelden unten — Updates raus
             (kommt zurueck wenn B2B). */}
-        <div className="mt-auto px-3 pb-4 space-y-1 border-t border-white/10 pt-3">
+        <div className="kunde-sidebar-rest mt-auto px-3 pb-4 space-y-1 border-t border-white/10 pt-3 transition-opacity duration-200">
           <Link
             href="/kunde/profil"
             className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors"
