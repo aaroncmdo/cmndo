@@ -6453,6 +6453,7 @@ export type Database = {
           konvertiert_zu_claim_id: string | null
           konvertiert_zu_fall_id: string | null
           kunde_adresse: string | null
+          kunde_id: string | null
           kunde_lat: number | null
           kunde_lng: number | null
           kunde_plz: string | null
@@ -6647,6 +6648,7 @@ export type Database = {
           konvertiert_zu_claim_id?: string | null
           konvertiert_zu_fall_id?: string | null
           kunde_adresse?: string | null
+          kunde_id?: string | null
           kunde_lat?: number | null
           kunde_lng?: number | null
           kunde_plz?: string | null
@@ -6841,6 +6843,7 @@ export type Database = {
           konvertiert_zu_claim_id?: string | null
           konvertiert_zu_fall_id?: string | null
           kunde_adresse?: string | null
+          kunde_id?: string | null
           kunde_lat?: number | null
           kunde_lng?: number | null
           kunde_plz?: string | null
@@ -7028,6 +7031,13 @@ export type Database = {
             columns: ["konvertiert_zu_fall_id"]
             isOneToOne: false
             referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_kunde_id_fkey"
+            columns: ["kunde_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {

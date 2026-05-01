@@ -25,6 +25,7 @@ import {
   GespraechshilfePanel,
   EinwandKarten,
 } from './_sidebar/SidebarStubs'
+import KundenMatchCard from './_sidebar/KundenMatchCard'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
 import { PHASE_LABELS as PHASE_LABELS_CONST, PHASE_BADGES } from '../_components/leadPhaseConstants'
 import PageHeader from '@/components/shared/PageHeader'
@@ -149,6 +150,12 @@ export default function DispatchShell({
         {/* Sidebar */}
         <aside className="lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-claimondo-border bg-[#f8f9fb] overflow-y-auto p-4 space-y-3">
           <TimerWidget />
+          <KundenMatchCard
+            leadId={lead.id as string}
+            initialMatchedKundeId={
+              ((lead as Record<string, unknown>).kunde_id as string | null) ?? null
+            }
+          />
           <DisqualifizierenButton />
           <RueckrufButton />
           <TerminListeSidebar />
