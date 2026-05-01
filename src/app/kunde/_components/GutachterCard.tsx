@@ -74,6 +74,7 @@ export default function GutachterCard({
       if (r) setCardRect({ top: r.top, bottom: r.bottom, right: r.right })
     }
     measure()
+    const raf = requestAnimationFrame(measure)
     window.addEventListener('resize', measure)
     // Sidebar in den Vordergrund — sonst legt sich das Modal-Backdrop
     // ueber die Card und sie wirkt geblurrt.
@@ -84,6 +85,7 @@ export default function GutachterCard({
       aside.style.zIndex = '1102'
     }
     return () => {
+      cancelAnimationFrame(raf)
       document.body.style.overflow = ''
       document.removeEventListener('keydown', onKey)
       window.removeEventListener('resize', measure)

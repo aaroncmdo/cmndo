@@ -70,19 +70,17 @@ export default function KundenbetreuerCard({
   const cardRef = useRef<HTMLDivElement>(null)
   const [cardRect, setCardRect] = useState<{ top: number; bottom: number; right: number } | null>(null)
 
-  // Modal-Position an Card-Rect anbinden — Card-Rect dient nur fuer den
-  // X-Button-Anchor, nicht fuer die Modal-Position selbst.
   useEffect(() => {
     if (!chatOpen) return
     const measure = () => {
       const r = cardRef.current?.getBoundingClientRect()
       if (r) setCardRect({ top: r.top, bottom: r.bottom, right: r.right })
     }
+    // Doppelt messen: einmal sofort, einmal nach Reflow (ueber rAF) damit
+    // die mr-0-Aenderung der active-Card aufgenommen ist.
     measure()
+    const raf = requestAnimationFrame(measure)
     window.addEventListener('resize', measure)
-    // Sidebar-Aside in den Vordergrund — sonst legt sich das Modal-Backdrop
-    // (z-1100) ueber die Card und sie wirkt geblurrt. Aside hat normalerweise
-    // z-40 -> wir heben sie temporaer auf z-1102.
     const aside = document.querySelector('aside.kunde-sidebar') as HTMLElement | null
     let original = ''
     if (aside) {
@@ -90,6 +88,7 @@ export default function KundenbetreuerCard({
       aside.style.zIndex = '1102'
     }
     return () => {
+      cancelAnimationFrame(raf)
       window.removeEventListener('resize', measure)
       if (aside) aside.style.zIndex = original
     }
