@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import Image from 'next/image'
 import Link from 'next/link'
+import { LogOutIcon } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
 import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
@@ -122,6 +123,15 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             <OutboxBadge />
             <UpdatesNav variant="dark" />
           </div>
+          <form action="/api/auth/logout" method="POST">
+            <button
+              type="submit"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-[#7BA3CC] hover:bg-white/5 hover:text-white"
+            >
+              <LogOutIcon style={{ width: 17, height: 17 }} />
+              Abmelden
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -152,6 +162,15 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         <div className="flex items-center gap-2">
           <OutboxBadge />
           <UpdatesNav variant="dark" />
+          <form action="/api/auth/logout" method="POST">
+            <button
+              type="submit"
+              className="text-[#7BA3CC] hover:text-white p-1.5"
+              aria-label="Abmelden"
+            >
+              <LogOutIcon style={{ width: 18, height: 18 }} />
+            </button>
+          </form>
         </div>
       </header>
 
