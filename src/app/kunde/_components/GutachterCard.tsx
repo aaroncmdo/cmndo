@@ -29,6 +29,10 @@ type Props = {
   kbName?: string | null
   /** KB-Avatar — fuer Mini-Avatar neben KB-Bubbles im Gruppenchat */
   kbAvatarUrl?: string | null
+  /** Eskalierter Admin (zusaetzlicher Sender im Gruppenchat) */
+  adminUserId?: string | null
+  adminName?: string | null
+  adminAvatarUrl?: string | null
   /** Alle Faelle des Kunden — fuer Fall-Bezug-Picker */
   fallOptions: Array<{ id: string; fall_nummer: string | null }>
 }
@@ -45,6 +49,9 @@ export default function GutachterCard({
   kbUserId,
   kbName,
   kbAvatarUrl,
+  adminUserId,
+  adminName,
+  adminAvatarUrl,
   fallOptions,
 }: Props) {
   const [chatOpen, setChatOpen] = useState(false)
@@ -97,7 +104,10 @@ export default function GutachterCard({
               initials
             )}
           </div>
-          <p className="text-sm font-semibold text-white truncate leading-tight flex-1">{name}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white truncate leading-tight">{name}</p>
+            <p className="text-[10px] text-[#7BA3CC] leading-tight mt-0.5">Sachverständiger</p>
+          </div>
         </div>
       </button>
 
@@ -153,7 +163,10 @@ export default function GutachterCard({
               <KundeKbChat
                 currentUserId={currentUserId}
                 partnerUserId={svUserId}
-                additionalSenderIds={kbUserId ? [kbUserId] : []}
+                additionalSenderIds={[
+                  ...(kbUserId ? [kbUserId] : []),
+                  ...(adminUserId ? [adminUserId] : []),
+                ]}
                 kanal="gruppenchat"
                 fallOptions={fallOptions}
                 defaultFallId={fallId}
@@ -162,6 +175,9 @@ export default function GutachterCard({
                   [svUserId]: { name, rolle: 'sv', avatarUrl },
                   ...(kbUserId && kbName
                     ? { [kbUserId]: { name: kbName, rolle: 'kb' as const, avatarUrl: kbAvatarUrl ?? null } }
+                    : {}),
+                  ...(adminUserId && adminName
+                    ? { [adminUserId]: { name: adminName, rolle: 'kb' as const, avatarUrl: adminAvatarUrl ?? null } }
                     : {}),
                 }}
               />

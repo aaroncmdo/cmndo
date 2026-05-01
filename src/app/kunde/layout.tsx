@@ -10,6 +10,7 @@ import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
 import KundenbetreuerCard from './_components/KundenbetreuerCard'
 import GutachterCard from './_components/GutachterCard'
+import EskalierterAdminCard from './_components/EskalierterAdminCard'
 // CMM-28: Loader für singleFallId-Resolution in der Nav.
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
@@ -86,6 +87,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     nachname: string | null
     telefon: string | null
     avatarUrl: string | null
+    rolle: string | null
   } | null = null
   if (navFaelle.length > 0) {
     const { data: kbFall } = await adminForNav
@@ -100,7 +102,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     if (kbId) {
       const { data: kbProfile } = await adminForNav
         .from('profiles')
-        .select('vorname, nachname, telefon, avatar_url')
+        .select('vorname, nachname, telefon, avatar_url, rolle')
         .eq('id', kbId)
         .maybeSingle()
       if (kbProfile) {
@@ -110,6 +112,41 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           nachname: (kbProfile.nachname as string | null) ?? null,
           telefon: (kbProfile.telefon as string | null) ?? null,
           avatarUrl: (kbProfile.avatar_url as string | null) ?? null,
+          rolle: (kbProfile.rolle as string | null) ?? null,
+        }
+      }
+    }
+  }
+
+  // Eskalierter Admin (read-only Card) — neuster Fall mit eskaliert_an_admin_id
+  let adminCard: {
+    id: string
+    vorname: string | null
+    nachname: string | null
+    avatarUrl: string | null
+  } | null = null
+  if (navFaelle.length > 0) {
+    const { data: eskFall } = await adminForNav
+      .from('faelle')
+      .select('eskaliert_an_admin_id')
+      .eq('kunde_id', user.id)
+      .not('eskaliert_an_admin_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const adminId = (eskFall?.eskaliert_an_admin_id as string | null) ?? null
+    if (adminId) {
+      const { data: adminProfile } = await adminForNav
+        .from('profiles')
+        .select('vorname, nachname, avatar_url')
+        .eq('id', adminId)
+        .maybeSingle()
+      if (adminProfile) {
+        adminCard = {
+          id: adminId,
+          vorname: (adminProfile.vorname as string | null) ?? null,
+          nachname: (adminProfile.nachname as string | null) ?? null,
+          avatarUrl: (adminProfile.avatar_url as string | null) ?? null,
         }
       }
     }
@@ -208,7 +245,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
         <KundeNav singleFallId={singleFallId} />
 
-        {/* Gutachter-Card oberhalb der KB-Card — Gruppenchat (Kunde+SV+KB) */}
+        {/* Gutachter-Card oberhalb der KB-Card — Gruppenchat (Kunde+SV+KB+Admin) */}
         {svCard && (
           <GutachterCard
             vorname={svCard.vorname}
@@ -222,6 +259,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             kbUserId={kbCard?.id ?? null}
             kbName={kbCard ? [kbCard.vorname, kbCard.nachname].filter(Boolean).join(' ') || null : null}
             kbAvatarUrl={kbCard?.avatarUrl ?? null}
+            adminUserId={adminCard?.id ?? null}
+            adminName={adminCard ? [adminCard.vorname, adminCard.nachname].filter(Boolean).join(' ') || null : null}
+            adminAvatarUrl={adminCard?.avatarUrl ?? null}
             fallOptions={fallOptionsForChat}
           />
         )}
@@ -236,7 +276,20 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             fallId={singleFallId}
             currentUserId={user.id}
             kbUserId={kbCard.id}
+            kbRolle={kbCard.rolle}
+            adminUserId={adminCard?.id ?? null}
+            adminName={adminCard ? [adminCard.vorname, adminCard.nachname].filter(Boolean).join(' ') || null : null}
+            adminAvatarUrl={adminCard?.avatarUrl ?? null}
             fallOptions={fallOptionsForChat}
+          />
+        )}
+        {/* Eskalierter Admin (read-only — KB hat eskaliert) */}
+        {adminCard && (
+          <EskalierterAdminCard
+            vorname={adminCard.vorname}
+            nachname={adminCard.nachname}
+            avatarUrl={adminCard.avatarUrl}
+            accentBg={accentBg}
           />
         )}
 

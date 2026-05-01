@@ -2590,6 +2590,9 @@ export type Database = {
           eskalation_tag_28_ergebnis: string | null
           eskalation_tag_28_ergebnis_am: string | null
           eskalation_tag_28_ergebnis_von: string | null
+          eskaliert_am: string | null
+          eskaliert_an_admin_id: string | null
+          eskaliert_grund: string | null
           fahrerflucht: boolean | null
           fahrzeug_ausstattung: Json | null
           fahrzeug_baujahr: number | null
@@ -2925,6 +2928,9 @@ export type Database = {
           eskalation_tag_28_ergebnis?: string | null
           eskalation_tag_28_ergebnis_am?: string | null
           eskalation_tag_28_ergebnis_von?: string | null
+          eskaliert_am?: string | null
+          eskaliert_an_admin_id?: string | null
+          eskaliert_grund?: string | null
           fahrerflucht?: boolean | null
           fahrzeug_ausstattung?: Json | null
           fahrzeug_baujahr?: number | null
@@ -3260,6 +3266,9 @@ export type Database = {
           eskalation_tag_28_ergebnis?: string | null
           eskalation_tag_28_ergebnis_am?: string | null
           eskalation_tag_28_ergebnis_von?: string | null
+          eskaliert_am?: string | null
+          eskaliert_an_admin_id?: string | null
+          eskaliert_grund?: string | null
           fahrerflucht?: boolean | null
           fahrzeug_ausstattung?: Json | null
           fahrzeug_baujahr?: number | null
@@ -3583,6 +3592,13 @@ export type Database = {
           {
             foreignKeyName: "faelle_eskalation_tag_28_ergebnis_von_fkey"
             columns: ["eskalation_tag_28_ergebnis_von"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faelle_eskaliert_an_admin_id_fkey"
+            columns: ["eskaliert_an_admin_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

@@ -25,8 +25,21 @@ type Props = {
   currentUserId: string | null
   /** KB-User-ID — nötig für KundeKbChat (Realtime-Filter auf Sender-IDs) */
   kbUserId: string | null
+  /** DB-Rolle des zugewiesenen Betreuers (kundenbetreuer | admin | …)
+   *  fuer das Subline-Label */
+  kbRolle?: string | null
+  /** Eskalierter Admin (liest mit + chattet). User-ID + Name + Avatar */
+  adminUserId?: string | null
+  adminName?: string | null
+  adminAvatarUrl?: string | null
   /** Alle Fälle des Kunden — für Fall-Bezug-Picker im Chat-Input */
   fallOptions: Array<{ id: string; fall_nummer: string | null }>
+}
+
+const ROLLE_LABEL: Record<string, string> = {
+  kundenbetreuer: 'Kundenbetreuer',
+  admin: 'Admin',
+  dispatch: 'Dispatch',
 }
 
 export default function KundenbetreuerCard({
@@ -38,8 +51,15 @@ export default function KundenbetreuerCard({
   fallId,
   currentUserId,
   kbUserId,
+  kbRolle,
+  adminUserId,
+  adminName,
+  adminAvatarUrl,
   fallOptions,
 }: Props) {
+  const rolleLabel = kbRolle && ROLLE_LABEL[kbRolle]
+    ? ROLLE_LABEL[kbRolle]
+    : 'Kundenbetreuer'
   const [chatOpen, setChatOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
 
@@ -97,7 +117,10 @@ export default function KundenbetreuerCard({
               initials
             )}
           </div>
-          <p className="text-sm font-semibold text-white truncate leading-tight flex-1">{name}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white truncate leading-tight">{name}</p>
+            <p className="text-[10px] text-[#7BA3CC] leading-tight mt-0.5">{rolleLabel}</p>
+          </div>
         </div>
       </button>
 
@@ -187,12 +210,16 @@ export default function KundenbetreuerCard({
               <KundeKbChat
                 currentUserId={currentUserId}
                 partnerUserId={kbUserId}
+                additionalSenderIds={adminUserId ? [adminUserId] : []}
                 kanal="chat_kb_kunde"
                 fallOptions={fallOptions}
                 defaultFallId={fallId}
                 placeholder="Nachricht an deinen Betreuer …"
                 senderLabels={{
                   [kbUserId]: { name, rolle: 'kb', avatarUrl },
+                  ...(adminUserId && adminName
+                    ? { [adminUserId]: { name: adminName, rolle: 'kb' as const, avatarUrl: adminAvatarUrl ?? null } }
+                    : {}),
                 }}
               />
             </div>
