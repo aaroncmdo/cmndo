@@ -44,6 +44,8 @@ type TerminInfo = {
   kundeVorname?: string | null
   /** Termin-Status — bei 'bestaetigt' wird der Verschieben-Button gezeigt */
   status?: string | null
+  /** Termin ist verstrichen (start_zeit + 60min vorbei + nicht durchgeführt). */
+  verstrichen?: boolean
 }
 
 /** AAR-864: Notice-Item das als verschmolzene Bottom-Sektion im Stepper
@@ -78,10 +80,13 @@ export default function ClaimStepper({
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
+  const terminVerstrichen = !!terminInfo?.verstrichen
 
-  const outerCls = bottomSlot
-    ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden'
-    : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
+  const outerCls = terminVerstrichen
+    ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden'
+    : bottomSlot
+      ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden'
+      : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
 
   return (
     <div className={outerCls}>
@@ -92,34 +97,40 @@ export default function ClaimStepper({
           const isDone = abgeschlossen || i < aktuellIdx
           // AAR-864: Begutachtungs-Phase amber + Warndreieck wenn eine
           // Verlegung pending ist (= bottomSlot gesetzt).
+          // Verstrichen: Begutachtungs-Phase rot + Warndreieck.
           const istVerlegungWarn = !!bottomSlot && p.key === 'begutachtung'
-          const Icon = istVerlegungWarn ? AlertTriangleIcon : p.icon
+          const istVerstrichenWarn = terminVerstrichen && p.key === 'begutachtung'
+          const Icon = istVerlegungWarn || istVerstrichenWarn ? AlertTriangleIcon : p.icon
           return (
             <React.Fragment key={p.key}>
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-                    istVerlegungWarn
-                      ? 'bg-amber-500 text-white ring-2 ring-amber-300'
-                      : isDone
-                        ? 'bg-emerald-500 text-white'
-                        : isCurrent
-                          ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                          : 'bg-claimondo-border/40 text-claimondo-ondo/60'
+                    istVerstrichenWarn
+                      ? 'bg-rose-500 text-white ring-2 ring-rose-300'
+                      : istVerlegungWarn
+                        ? 'bg-amber-500 text-white ring-2 ring-amber-300'
+                        : isDone
+                          ? 'bg-emerald-500 text-white'
+                          : isCurrent
+                            ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                            : 'bg-claimondo-border/40 text-claimondo-ondo/60'
                   }`}
                 >
-                  {istVerlegungWarn || !isDone ? <Icon className="w-4 h-4" /> : <CheckIcon className="w-4 h-4" />}
+                  {istVerstrichenWarn || istVerlegungWarn || !isDone ? <Icon className="w-4 h-4" /> : <CheckIcon className="w-4 h-4" />}
                 </div>
                 <div className="flex flex-col min-w-0">
                   <p
                     className={`text-sm font-semibold whitespace-nowrap ${
-                      istVerlegungWarn
-                        ? 'text-amber-700'
-                        : isCurrent
-                          ? 'text-claimondo-navy'
-                          : isDone
-                            ? 'text-emerald-700'
-                            : 'text-claimondo-ondo/60'
+                      istVerstrichenWarn
+                        ? 'text-rose-700'
+                        : istVerlegungWarn
+                          ? 'text-amber-700'
+                          : isCurrent
+                            ? 'text-claimondo-navy'
+                            : isDone
+                              ? 'text-emerald-700'
+                              : 'text-claimondo-ondo/60'
                     }`}
                   >
                     {MAIN_PHASE_LABEL[p.key]}
@@ -168,20 +179,36 @@ export default function ClaimStepper({
       {/* AAR-864: Termin-Sektion analog SV-Header — sichtbar wenn Termin
           existiert und keine Verlegung pending. */}
       {terminInfo && !bottomSlot && (
-        <div className="border-t border-claimondo-navy/10 px-4 sm:px-6 py-3.5">
+        <div
+          className={`border-t px-4 sm:px-6 py-3.5 ${
+            terminVerstrichen ? 'border-rose-300 bg-rose-50/40' : 'border-claimondo-navy/10'
+          }`}
+        >
+          {terminVerstrichen && (
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-700 mb-1.5">
+              <AlertTriangleIcon className="w-3 h-3" />
+              Termin verstrichen — kein Status erfasst
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-2.5 min-w-0">
-              <CalendarIcon className="w-4 h-4 shrink-0 text-claimondo-navy" />
+              <CalendarIcon className={`w-4 h-4 shrink-0 ${terminVerstrichen ? 'text-rose-700' : 'text-claimondo-navy'}`} />
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <p className="text-sm font-semibold text-claimondo-navy">
+                  <p
+                    className={`text-sm font-semibold ${
+                      terminVerstrichen ? 'text-rose-700 line-through' : 'text-claimondo-navy'
+                    }`}
+                  >
                     {terminInfo.datum}, {terminInfo.uhrzeit} Uhr
                   </p>
-                  <TerminLiveStatus
-                    terminId={terminInfo.terminId}
-                    svVorname={terminInfo.svVorname}
-                    kundeVorname={terminInfo.kundeVorname}
-                  />
+                  {!terminVerstrichen && (
+                    <TerminLiveStatus
+                      terminId={terminInfo.terminId}
+                      svVorname={terminInfo.svVorname}
+                      kundeVorname={terminInfo.kundeVorname}
+                    />
+                  )}
                 </div>
                 {terminInfo.adresse && (
                   <p className="text-xs text-claimondo-ondo truncate">
@@ -192,11 +219,16 @@ export default function ClaimStepper({
               </div>
             </div>
             <div className="ml-auto flex items-center gap-2">
-              {/* AAR-864: Verschieben-Button nur bei bestätigtem Termin */}
-              {terminInfo.status === 'bestaetigt' && (
+              {terminVerstrichen ? (
+                <KundeTerminVerschiebenButton
+                  terminId={terminInfo.terminId}
+                  label="Neuen Termin vereinbaren"
+                  variant="primary"
+                />
+              ) : terminInfo.status === 'bestaetigt' ? (
                 <KundeTerminVerschiebenButton terminId={terminInfo.terminId} />
-              )}
-              {terminInfo.adresse && (
+              ) : null}
+              {!terminVerstrichen && terminInfo.adresse && (
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(terminInfo.adresse)}`}
                   target="_blank"

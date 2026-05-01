@@ -433,6 +433,19 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             ? {
                 terminId: aktiverSv.id as string,
                 status: (aktiverSv.status as string | null) ?? null,
+                verstrichen: (() => {
+                  // Termin ist verstrichen wenn: start_zeit + 60min in der Vergangenheit,
+                  // durchgefuehrt_am NULL, status nicht abgesagt/storniert/verschoben.
+                  const startMs = new Date(aktiverSv.start_zeit as string).getTime()
+                  const cutoff = startMs + 60 * 60 * 1000 // 60min Toleranz
+                  const status = (aktiverSv.status as string | null) ?? ''
+                  const durchgefuehrt = !!(aktiverSv.durchgefuehrt_am as string | null)
+                  return (
+                    cutoff < Date.now() &&
+                    !durchgefuehrt &&
+                    !['abgesagt', 'storniert', 'verschoben', 'verlegung_pending'].includes(status)
+                  )
+                })(),
                 datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
                   weekday: 'long',
                   day: '2-digit',
