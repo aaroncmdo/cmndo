@@ -6,6 +6,7 @@ import MitarbeiterNav from './_components/MitarbeiterNav'
 import TasksPill from '@/components/shared/TasksPill'
 import UpdatesNav from '@/components/shared/updates'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 
 export default async function MitarbeiterLayout({
   children,
@@ -65,6 +66,9 @@ export default async function MitarbeiterLayout({
         <MitarbeiterNav unreadNachrichten={unread} />
         <main className="flex-1 px-4 py-6 md:w-[96%] md:mx-auto md:px-0">{children}</main>
       </div>
+      {/* Globaler Posteingang + Pinned-Chats — gleicher FAB den Admin/SV nutzen,
+          damit KB Chats genauso anpinnen + parallel offen halten kann. */}
+      <GlobalPosteingangFab currentUserId={user.id} />
     </div>
   )
 }
