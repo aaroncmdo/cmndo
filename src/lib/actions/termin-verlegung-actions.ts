@@ -305,6 +305,14 @@ export async function terminVerlegungVorschlagen(input: {
     revalidatePath(`/gutachter/fall/${alt.fall_id}`)
     revalidatePath(`/faelle/${alt.fall_id}`)
     revalidatePath(`/kunde/faelle/${alt.fall_id}`)
+
+    // Realtime-Trigger: faelle.updated_at berühren damit FallRealtimeRefresh
+    // auf dem Kunden-Portal feuert (gutachter_termine ist per RLS für den
+    // Kunden-Client nicht abonnierbar, faelle schon).
+    void createAdminClient()
+      .from('faelle')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', alt.fall_id)
   }
   revalidatePath('/gutachter/auftraege')
   revalidatePath('/gutachter/heute')
@@ -497,21 +505,12 @@ export async function kundeTerminVerlegungVorschlagen(input: {
     return { ok: false, error: 'Der gewünschte Termin ist beim Gutachter belegt.', alternatives }
   }
 
-  // 1) Alter Termin auf 'verlegt' (atomar via status='bestaetigt'-Check)
-  const { error: updErr } = await admin
-    .from('gutachter_termine')
-    .update({
-      status: 'verlegt',
-      verlegung_grund: input.grund?.trim() || null,
-      verlegung_initiator_kunde: true,
-    })
-    .eq('id', alt.id)
-    .eq('status', 'bestaetigt')
-  if (updErr) {
-    return { ok: false, error: `Verlegung fehlgeschlagen: ${updErr.message}` }
-  }
+  // Kunde ist König: kein Pending — neuer Slot wird sofort 'bestaetigt'.
+  // Der SV wird informiert, muss aber nicht bestätigen. Will er den Termin
+  // weiter verschieben, schlägt er seinerseits vor (SV-Flow → verlegung_pending
+  // beim Kunden). So entsteht der Loop Kunde↔SV bei Bedarf.
 
-  // 2) Neuen Slot anlegen — verlegung_pending, Initiator=Kunde
+  // 1) Neuen Slot anlegen — sofort 'bestaetigt', Initiator=Kunde
   const { data: neu, error: insErr } = await admin
     .from('gutachter_termine')
     .insert({
@@ -522,33 +521,43 @@ export async function kundeTerminVerlegungVorschlagen(input: {
       typ: alt.typ ?? 'sv_begutachtung',
       start_zeit: wunschStart.toISOString(),
       end_zeit: wunschEnde.toISOString(),
-      status: 'verlegung_pending',
+      status: 'bestaetigt',
       verlegung_quelle_id: alt.id,
       verlegung_grund: input.grund?.trim() || null,
-      verlegung_kunde_benachrichtigt_an: new Date().toISOString(),
       verlegung_initiator_kunde: true,
     })
     .select('id')
     .single()
 
   if (insErr || !neu) {
-    // Rollback
-    await admin
-      .from('gutachter_termine')
-      .update({ status: 'bestaetigt', verlegung_grund: null, verlegung_initiator_kunde: false })
-      .eq('id', alt.id)
     return {
       ok: false,
-      error: `Pending-Slot anlegen fehlgeschlagen: ${insErr?.message ?? 'unbekannt'}`,
+      error: `Neuer Slot anlegen fehlgeschlagen: ${insErr?.message ?? 'unbekannt'}`,
     }
+  }
+
+  // 2) Alter Termin auf 'verschoben' (terminal — Kunde hat entschieden)
+  const { error: updErr } = await admin
+    .from('gutachter_termine')
+    .update({
+      status: 'verschoben',
+      verlegung_grund: input.grund?.trim() || null,
+      verlegung_initiator_kunde: true,
+    })
+    .eq('id', alt.id)
+    .eq('status', 'bestaetigt')
+  if (updErr) {
+    // Rollback neuer Termin
+    await admin.from('gutachter_termine').delete().eq('id', neu.id)
+    return { ok: false, error: `Alter Termin lässt sich nicht abschließen: ${updErr.message}` }
   }
 
   revalidateFallPaths(alt.fall_id as string | null)
 
-  // Notifikation: SV soll bestätigen — gleicher Event-Type, andere Empfänger-Wahl im Worker
+  // Notifikation: SV informieren — kein Bestätigungs-Request, nur Hinweis
   const svVorname = await lookupSvVorname(alt.sv_id as string)
   emitEvent(
-    'termin.verlegung_vorgeschlagen',
+    'termin.verschoben_durch_kunde',
     {
       fallId: alt.fall_id as string,
       terminId: neu.id as string,

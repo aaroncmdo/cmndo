@@ -153,6 +153,11 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   termin_verlegung_eskalation: (v) =>
     `Wichtig, ${v['1'] ?? ''}: Ihr Gutachter hat eine Terminverlegung beantragt, der ursprüngliche Termin am ${v['2'] ?? ''} um ${v['3'] ?? ''} Uhr steht aber bevor. Bitte JETZT entscheiden, sonst fährt der Gutachter umsonst zu Ihnen: ${v['4'] ?? ''}`,
 
+  // AAR-864 T35: SV-WA — Kunde hat Termin proaktiv verschoben
+  //   1=SV-Vorname, 2=alterDatum, 3=alterUhrzeit, 4=neuesDatum, 5=neuesUhrzeit
+  termin_verschoben_durch_kunde: (v) =>
+    `Hallo ${v['1'] ?? ''}, ein Kunde hat den Termin vom ${v['2'] ?? ''} um ${v['3'] ?? ''} Uhr eigenständig auf ${v['4'] ?? ''} um ${v['5'] ?? ''} Uhr verschoben. Bitte denke daran, deine Route anzupassen.`,
+
 }
 // KFZ-200 → KFZ-201: SV-Navigation Templates (sv_nav_unterwegs, sv_nav_15min,
 // sv_nav_5min, sv_nav_angekommen, sv_begutachtung_fertig) wurden konsolidiert:

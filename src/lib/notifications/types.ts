@@ -87,6 +87,7 @@ export type EventType =
   | 'termin.verlegung_bestaetigt'
   | 'termin.verlegung_abgelehnt'
   | 'termin.verlegung_eskalation'
+  | 'termin.verschoben_durch_kunde'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -192,6 +193,18 @@ export interface EventPayloads {
     alterTerminId: string
     alterDatum: string
     alterUhrzeit: string
+  }
+  // Kunde hat proaktiv einen bestätigten Termin eigenständig verschoben
+  'termin.verschoben_durch_kunde': {
+    fallId: string
+    terminId: string         // = neuer bestaetigt-Slot
+    alterTerminId: string
+    alterDatum: string
+    alterUhrzeit: string
+    neuesDatum: string
+    neuesUhrzeit: string
+    svVorname: string        // SV-Vorname für Anrede in WA-Nachricht
+    grund?: string
   }
 }
 

@@ -399,6 +399,14 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       admin:          ['in_app'],
     },
   },
+  'termin.verschoben_durch_kunde': {
+    priority: 'urgent',
+    channels: {
+      sachverstaendiger: ['whatsapp', 'web_push', 'in_app'],
+      kundenbetreuer:    ['in_app'],
+      admin:             ['in_app'],
+    },
+  },
 }
 
 export function getEventConfig(eventType: EventType): EventConfig {

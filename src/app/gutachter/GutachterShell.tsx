@@ -125,6 +125,9 @@ export default function GutachterShell({
   svId?: string | null
 }) {
   const pathname = usePathname()
+  // Feldmodus übernimmt den vollen Viewport — Sidebar + FAB ausblenden damit
+  // sie nicht über der Mapbox-Karte rendern (Sidebar hat lg:z-[1100] > z-50).
+  const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   // CMM-36: Geo-Tracking beim App-Öffnen starten
   useGeoPosition(svId ?? null)
@@ -282,15 +285,16 @@ export default function GutachterShell({
 
   return (
     <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-primary, #0D1B3E)' }}>
-      {/* Mobile overlay */}
-      {sidebarOpen && (
+      {/* Mobile overlay — ausgeblendet im Feldmodus */}
+      {!isFeldmodus && sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* AAR-220: Sidebar nutzt Theme-Vars + sanfte 1.5s Transition für
           Background- und Border-Farben, damit Logo-Upload nicht ruckartig
-          umschaltet. */}
-      <aside
+          umschaltet. Im Feldmodus komplett ausgeblendet (Karte braucht
+          vollen Viewport, Sidebar hat lg:z-[1100] > FeldmodusLayout z-50). */}
+      {!isFeldmodus && <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
         className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] ${
@@ -418,7 +422,7 @@ export default function GutachterShell({
             <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>
-      </aside>
+      </aside>}
 
       <div className="flex-1 flex flex-col min-w-0 h-screen">
         {/* Mobile Header (nur Hamburger + Logo, Glocke ist im Wetter-Banner) */}
@@ -498,14 +502,16 @@ export default function GutachterShell({
           zuverlässiger als das CSS-Var-Pattern. pointer-events-none damit
           das leere Div keine Klicks abfängt; Backdrop-Kinder überschreiben
           das mit pointer-events-auto. */}
-      <div
-        id="sv-modal-root"
-        aria-hidden="true"
-        className="fixed inset-y-0 right-0 z-[1000] pointer-events-none"
-        style={{ left: '256px' }}
-      />
-      <GlobalPosteingangFab currentUserId={userId} />
-      <SVSpotlight />
+      {!isFeldmodus && (
+        <div
+          id="sv-modal-root"
+          aria-hidden="true"
+          className="fixed inset-y-0 right-0 z-[1000] pointer-events-none"
+          style={{ left: '256px' }}
+        />
+      )}
+      {!isFeldmodus && <GlobalPosteingangFab currentUserId={userId} />}
+      {!isFeldmodus && <SVSpotlight />}
     </div>
   )
 }

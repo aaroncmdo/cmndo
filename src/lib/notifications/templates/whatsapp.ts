@@ -289,6 +289,18 @@ const MAPPING: Partial<Record<EventType, Partial<Record<Role, EventTemplate>>>> 
       }),
     },
   },
+  'termin.verschoben_durch_kunde': {
+    sachverstaendiger: {
+      template: 'termin_verschoben_durch_kunde',
+      resolve: (p, c) => ({
+        '1': c.vorname ?? '',
+        '2': s(p.alterDatum),
+        '3': s(p.alterUhrzeit),
+        '4': s(p.neuesDatum),
+        '5': s(p.neuesUhrzeit),
+      }),
+    },
+  },
 }
 
 /**
