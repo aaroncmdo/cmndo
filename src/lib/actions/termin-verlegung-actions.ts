@@ -592,6 +592,31 @@ export async function kundeTerminVerlegungVorschlagen(input: {
     beschreibung: input.grund?.trim() || null,
   })
 
+  // Bei verpasstem Termin: claim.no_show-Counter inkrementieren.
+  if (verstrichen && alt.fall_id) {
+    const { data: fallRow } = await admin
+      .from('faelle')
+      .select('claim_id')
+      .eq('id', alt.fall_id as string)
+      .maybeSingle()
+    const claimId = (fallRow?.claim_id as string | null) ?? null
+    if (claimId) {
+      const { data: claim } = await admin
+        .from('claims')
+        .select('kunde_no_show_count')
+        .eq('id', claimId)
+        .maybeSingle()
+      const currentCount = (claim?.kunde_no_show_count as number | null) ?? 0
+      await admin
+        .from('claims')
+        .update({
+          kunde_no_show_count: currentCount + 1,
+          letzter_no_show_am: new Date().toISOString(),
+        })
+        .eq('id', claimId)
+    }
+  }
+
   revalidateFallPaths(alt.fall_id as string | null)
 
   // Notifikation: SV informieren — kein Bestätigungs-Request, nur Hinweis

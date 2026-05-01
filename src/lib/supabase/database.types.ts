@@ -1808,9 +1808,11 @@ export type Database = {
           kanzlei_wunsch: string
           kanzlei_wunsch_gefragt_am: string | null
           kanzlei_wunsch_gefragt_in_phase: string | null
+          kunde_no_show_count: number
           kunden_konstellation: string | null
           kundenbetreuer_id: string | null
           lead_id: string | null
+          letzter_no_show_am: string | null
           phase: string
           polizei_aktenzeichen: string | null
           polizei_bericht_vorhanden: boolean
@@ -1877,9 +1879,11 @@ export type Database = {
           kanzlei_wunsch?: string
           kanzlei_wunsch_gefragt_am?: string | null
           kanzlei_wunsch_gefragt_in_phase?: string | null
+          kunde_no_show_count?: number
           kunden_konstellation?: string | null
           kundenbetreuer_id?: string | null
           lead_id?: string | null
+          letzter_no_show_am?: string | null
           phase?: string
           polizei_aktenzeichen?: string | null
           polizei_bericht_vorhanden?: boolean
@@ -1946,9 +1950,11 @@ export type Database = {
           kanzlei_wunsch?: string
           kanzlei_wunsch_gefragt_am?: string | null
           kanzlei_wunsch_gefragt_in_phase?: string | null
+          kunde_no_show_count?: number
           kunden_konstellation?: string | null
           kundenbetreuer_id?: string | null
           lead_id?: string | null
+          letzter_no_show_am?: string | null
           phase?: string
           polizei_aktenzeichen?: string | null
           polizei_bericht_vorhanden?: boolean
