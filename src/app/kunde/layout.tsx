@@ -169,6 +169,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             avatarUrl={kbCard.avatarUrl}
             chatHref={kbCard.chatHref}
             accentBg={accentBg}
+            fallId={singleFallId}
           />
         )}
 

@@ -7,7 +7,8 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { PhoneIcon, MessageSquareIcon, XIcon } from 'lucide-react'
+import { PhoneIcon, MessageSquareIcon, VideoIcon, XIcon } from 'lucide-react'
+import BeratungBuchenSheet from '@/components/kunde/BeratungBuchenSheet'
 
 type Props = {
   vorname: string | null
@@ -18,6 +19,8 @@ type Props = {
   chatHref: string
   /** Akzent-Farbe (Brand-Primary mit Fallback) */
   accentBg: string
+  /** Single-Fall-ID für die Videotermin-Buchung — null = Button versteckt */
+  fallId: string | null
 }
 
 export default function KundenbetreuerCard({
@@ -27,8 +30,10 @@ export default function KundenbetreuerCard({
   avatarUrl,
   chatHref,
   accentBg,
+  fallId,
 }: Props) {
   const [chatOpen, setChatOpen] = useState(false)
+  const [videoOpen, setVideoOpen] = useState(false)
 
   // ESC schließt das Drawer
   useEffect(() => {
@@ -125,14 +130,26 @@ export default function KundenbetreuerCard({
                 <MessageSquareIcon className="w-4 h-4 text-claimondo-navy" />
                 <h2 className="text-sm font-semibold text-claimondo-navy">Chat</h2>
               </div>
-              <button
-                type="button"
-                onClick={() => setChatOpen(false)}
-                aria-label="Chat schließen"
-                className="text-claimondo-ondo hover:text-claimondo-navy p-1.5 rounded-lg hover:bg-white/60 transition-colors"
-              >
-                <XIcon className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1.5">
+                {fallId && (
+                  <button
+                    type="button"
+                    onClick={() => setVideoOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
+                  >
+                    <VideoIcon className="w-3.5 h-3.5" />
+                    Videotermin
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setChatOpen(false)}
+                  aria-label="Chat schließen"
+                  className="text-claimondo-ondo hover:text-claimondo-navy p-1.5 rounded-lg hover:bg-white/60 transition-colors"
+                >
+                  <XIcon className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             <iframe
               src={chatHref}
@@ -151,6 +168,15 @@ export default function KundenbetreuerCard({
             }
           `}</style>
         </>
+      )}
+
+      {/* Videotermin-Buchung — separates Modal, ueber dem Chat-Drawer */}
+      {fallId && (
+        <BeratungBuchenSheet
+          fallId={fallId}
+          open={videoOpen}
+          onClose={() => setVideoOpen(false)}
+        />
       )}
     </div>
   )

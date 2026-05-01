@@ -99,28 +99,21 @@ export default function FallDetailSections({
             />
           </div>
 
-          {/* AAR-754: Shared FallKontakteCard — ersetzt die handgerollten
-              "Ihr Ansprechpartner" + "Ihr Gutachter" Sections. Kunde-Rolle
-              nutzt Labels "Ihr Betreuer" / "Ihr Gutachter" automatisch. */}
-          <FallKontakteCard
-            rolle="kunde"
-            kundenbetreuer={
-              kbName
-                ? { vorname: kbName, nachname: null, telefon: null, email: null }
-                : null
-            }
-            sv={
-              svName
-                ? {
-                    vorname: svName,
-                    nachname: null,
-                    telefon: svTelefon,
-                    email: null,
-                    verifiziert: svVerifiziert,
-                  }
-                : null
-            }
-          />
+          {/* "Ihr Betreuer" lebt jetzt in der Sidebar-KundenbetreuerCard
+              (mit Anrufen + Chat). FallKontakteCard zeigt nur noch den SV. */}
+          {svName && (
+            <FallKontakteCard
+              rolle="kunde"
+              kundenbetreuer={null}
+              sv={{
+                vorname: svName,
+                nachname: null,
+                telefon: svTelefon,
+                email: null,
+                verifiziert: svVerifiziert,
+              }}
+            />
+          )}
 
           {/* AAR-754: Shared StammdatenReadSection — ersetzt die inline
               Fahrzeug-Section. Kunde-Rolle filtert eigenen Kontakt + Halter
