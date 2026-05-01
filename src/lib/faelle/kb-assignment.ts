@@ -130,16 +130,21 @@ export async function findStickyKb(
   if (hints.kunde_id) {
     const { data: kbFall } = await supabase
       .from('faelle')
-      .select('kundenbetreuer_id, profiles!faelle_kundenbetreuer_id_fkey(id, aktiv)')
+      .select('kundenbetreuer_id, profiles!faelle_kundenbetreuer_id_fkey(id, aktiv, rolle)')
       .eq('kunde_id', hints.kunde_id)
       .not('kundenbetreuer_id', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
     const kbId = (kbFall?.kundenbetreuer_id as string | null) ?? null
-    const profileJoin = (kbFall as { profiles?: { aktiv?: boolean } | { aktiv?: boolean }[] } | null)?.profiles
+    const profileJoin = (kbFall as { profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[] } | null)?.profiles
     const profileRow = Array.isArray(profileJoin) ? profileJoin[0] : profileJoin
-    if (kbId && profileRow?.aktiv) {
+    // Sticky-KB nur akzeptieren wenn Rolle KB oder Admin (nicht Dispatch)
+    if (
+      kbId &&
+      profileRow?.aktiv &&
+      ['kundenbetreuer', 'admin'].includes((profileRow.rolle as string) ?? '')
+    ) {
       return { kb_id: kbId, quelle: 'kunde_id' }
     }
   }
@@ -179,16 +184,19 @@ export async function findStickyKb(
     if (claimIds.length > 0) {
       const { data: kbFaelle } = await supabase
         .from('faelle')
-        .select('kundenbetreuer_id, claim_id, profiles!faelle_kundenbetreuer_id_fkey(id, aktiv)')
+        .select('kundenbetreuer_id, claim_id, profiles!faelle_kundenbetreuer_id_fkey(id, aktiv, rolle)')
         .in('claim_id', claimIds)
         .not('kundenbetreuer_id', 'is', null)
         .order('created_at', { ascending: false })
       for (const row of (kbFaelle ?? []) as Array<{
         kundenbetreuer_id: string
-        profiles?: { aktiv?: boolean } | { aktiv?: boolean }[]
+        profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[]
       }>) {
         const profileRow = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
-        if (profileRow?.aktiv) {
+        if (
+          profileRow?.aktiv &&
+          ['kundenbetreuer', 'admin'].includes((profileRow.rolle as string) ?? '')
+        ) {
           return { kb_id: row.kundenbetreuer_id, quelle: 'claim_parties' }
         }
       }

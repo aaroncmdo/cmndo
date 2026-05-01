@@ -107,8 +107,23 @@ export async function convertLeadToClaim(
     null
 
   // ─── Schritt 7a: KB Round-Robin (falls nicht angegeben) ─────────────────
+  // WICHTIG: lead.zugewiesen_an ist meistens der Dispatcher der den Lead
+  // qualifiziert hat — Dispatcher dürfen NIEMALS als KB zugewiesen werden,
+  // sie haben keinen Zugriff auf Fallakten. Wir validieren die Rolle und
+  // fallen auf Round-Robin zurueck wenn die Rolle nicht passt.
   let kundenbetreuerId: string | null =
     input.kundenbetreuerId ?? (lead.zugewiesen_an as string | null) ?? null
+  if (kundenbetreuerId) {
+    const { data: candidate } = await admin
+      .from('profiles')
+      .select('rolle, aktiv')
+      .eq('id', kundenbetreuerId)
+      .maybeSingle()
+    const rolle = (candidate?.rolle as string | null) ?? null
+    if (!candidate?.aktiv || !rolle || !['kundenbetreuer', 'admin'].includes(rolle)) {
+      kundenbetreuerId = null
+    }
+  }
   if (!kundenbetreuerId) {
     kundenbetreuerId = await pickKundenbetreuerRoundRobin(admin)
   }
