@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HomeIcon, UserIcon, SearchIcon, CalendarIcon } from 'lucide-react'
+import { HomeIcon, SearchIcon, CalendarIcon } from 'lucide-react'
 
 // CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
 // und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
@@ -10,13 +10,12 @@ function buildNavItems(singleFallId: string | null) {
   const fallItem = singleFallId
     ? { href: `/kunde/faelle/${singleFallId}`, label: 'Mein Fall', icon: HomeIcon, exact: false }
     : { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true }
-  // "Nachrichten"-Eintrag entfernt — Chat läuft jetzt über das Drawer
-  // in der KundenbetreuerCard (siehe KundenbetreuerCard.tsx).
+  // "Nachrichten" raus (Chat lebt im KB-Card-Modal), "Profil" raus (klickt
+  // jetzt auf den eigenen Namen unten in der Sidebar).
   return [
     fallItem,
     { href: '/kunde/termine', label: 'Termine', icon: CalendarIcon, exact: false },
     { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon, exact: false },
-    { href: '/kunde/profil', label: 'Profil', icon: UserIcon, exact: false },
   ]
 }
 
@@ -35,7 +34,6 @@ export default function KundeNav({
     NAV_ITEMS[0]!,
     NAV_ITEMS.find((i) => i.href === '/kunde/termine')!,
     NAV_ITEMS.find((i) => i.href === '/kunde/nachbesichtigung')!,
-    NAV_ITEMS.find((i) => i.href === '/kunde/profil')!,
   ]
 
   function isActive(href: string, exact?: boolean) {

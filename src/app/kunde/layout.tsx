@@ -6,7 +6,6 @@ import { roleToPath } from '@/lib/auth/role-redirect'
 import Image from 'next/image'
 import Link from 'next/link'
 import { LogOutIcon } from 'lucide-react'
-import UpdatesNav from '@/components/shared/updates'
 import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
 import KundenbetreuerCard from './_components/KundenbetreuerCard'
@@ -241,10 +240,13 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           />
         )}
 
-        {/* Profil + Notification unten */}
-        <div className="mt-auto px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
-          <SupportButton userName={displayName} />
-          <div className="flex items-center gap-3 px-3 py-2">
+        {/* Profil-Klick + Support + Abmelden unten — Updates raus
+            (kommt zurueck wenn B2B). */}
+        <div className="mt-auto px-3 pb-4 space-y-1 border-t border-white/10 pt-3">
+          <Link
+            href="/kunde/profil"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors"
+          >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
               style={{ backgroundColor: accentBg }}
@@ -253,10 +255,11 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate">{displayName}</p>
+              <p className="text-[10px] text-[#7BA3CC] leading-tight">Profil ansehen</p>
             </div>
             <OutboxBadge />
-            <UpdatesNav variant="dark" />
-          </div>
+          </Link>
+          <SupportButton userName={displayName} />
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
@@ -295,7 +298,6 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         </Link>
         <div className="flex items-center gap-2">
           <OutboxBadge />
-          <UpdatesNav variant="dark" />
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
