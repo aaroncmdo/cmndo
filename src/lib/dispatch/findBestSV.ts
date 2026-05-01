@@ -26,6 +26,9 @@ export type SvMatchInput = {
   // im ±wunschterminFensterMin-Fenster bereits einen anderen Termin hat.
   wunschterminIso?: string | null
   wunschterminFensterMin?: number
+  // Sticky-SV: bevorzuge diesen SV (kunde hatte ihn schon mal) — er bekommt
+  // einen massiven Score-Bonus + "Sticky"-Reason-Badge, sonst normale Logik.
+  stickySvId?: string | null
 }
 
 export type SvMatchCandidate = {
@@ -256,9 +259,18 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
 
     // Score: höher = besser
     // +100 pro Paket-Stufe, -2 pro offenem Fall, -2 pro Ablehnung, -1 pro km, +40 wenn am Wunschtermin frei
-    const score = paketPrio * 100 - kontingentGenutzt * 2 - ablehnungen * 2 - distanzKm + wunschterminBonus
+    // Sticky-SV: +1000 (schlaegt alle anderen Faktoren — Kontinuitaet > Optimierung)
+    const stickyBonus = input.stickySvId && sv.id === input.stickySvId ? 1000 : 0
+    const score =
+      paketPrio * 100 -
+      kontingentGenutzt * 2 -
+      ablehnungen * 2 -
+      distanzKm +
+      wunschterminBonus +
+      stickyBonus
     reasons.push(`Paket: ${paket}`)
     reasons.push(`${kontingentFrei}/${kontingentGesamt} frei`)
+    if (stickyBonus > 0) reasons.unshift('Bekannter SV (Sticky)')
 
     const profile = Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles
     candidates.push({

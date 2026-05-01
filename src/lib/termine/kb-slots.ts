@@ -81,6 +81,23 @@ export async function getAvailableKbSlots(
     }),
   )
 
+  // 2a-bis: Admin-Termine des KBs (Rueckrufe, Meetings) blockieren ebenfalls.
+  // Diese sind nicht in gutachter_termine sondern in admin_termine, mit
+  // zugewiesen_an=kbId. Status 'offen' = aktiv, 'erledigt'/'abgesagt' ignorieren.
+  const { data: adminTermine } = await db
+    .from('admin_termine')
+    .select('start_zeit, end_zeit')
+    .eq('zugewiesen_an', kbId)
+    .eq('status', 'offen')
+    .gte('start_zeit', windowStart)
+    .lte('start_zeit', windowEnd)
+  const adminBlockedRanges: Array<{ start: number; end: number }> = (
+    adminTermine ?? []
+  ).map((t) => ({
+    start: new Date(t.start_zeit as string).getTime(),
+    end: new Date((t.end_zeit as string) ?? (t.start_zeit as string)).getTime(),
+  }))
+
   // 2b. Google-Calendar-Busy-Slots des KBs (externe Termine, Urlaub, etc.).
   // Wenn der KB nicht mit Google verbunden ist, liefert der Helper [] —
   // dann blockieren nur die in Claimondo gebuchten Slots.
@@ -124,13 +141,16 @@ export async function getAvailableKbSlots(
         const utcKey = `${slotTime.getUTCFullYear()}-${String(slotTime.getUTCMonth() + 1).padStart(2, '0')}-${String(slotTime.getUTCDate()).padStart(2, '0')}T${String(slotTime.getUTCHours()).padStart(2, '0')}:${String(slotTime.getUTCMinutes()).padStart(2, '0')}`
 
         if (!bookedTimes.has(utcKey)) {
-          // Prüfe Überlappung mit Google-Calendar-Busy
+          // Prüfe Überlappung mit Google-Calendar-Busy + admin_termine
           const slotStart = slotTime.getTime()
           const slotEnd = slotStart + KB_BERATUNG_DURATION_MIN * 60 * 1000
           const busyOverlap = externalBusy.some(
             (b) => slotStart < b.end && slotEnd > b.start,
           )
-          if (!busyOverlap) {
+          const adminOverlap = adminBlockedRanges.some(
+            (b) => slotStart < b.end && slotEnd > b.start,
+          )
+          if (!busyOverlap && !adminOverlap) {
             const datum = slotTime.toISOString().split('T')[0]
             const uhrzeit = slotTime.toLocaleTimeString('de-DE', {
               hour: '2-digit',
