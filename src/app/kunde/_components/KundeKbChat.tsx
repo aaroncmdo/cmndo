@@ -32,7 +32,11 @@ type FallOption = {
   fall_nummer: string | null
 }
 
-type SenderInfo = { name: string; rolle: 'kb' | 'sv' | 'kunde' }
+type SenderInfo = {
+  name: string
+  rolle: 'kb' | 'sv' | 'kunde'
+  avatarUrl?: string | null
+}
 
 type Props = {
   currentUserId: string
@@ -179,44 +183,69 @@ export default function KundeKbChat({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-gradient-to-b from-white/40 to-claimondo-bg/40">
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
         {messages.length === 0 && (
           <p className="text-center text-xs text-claimondo-ondo/70 mt-8">
             Noch keine Nachrichten. Schreib einfach was — dein Betreuer bekommt
             es direkt.
           </p>
         )}
-        {messages.map((m) => {
+        {messages.map((m, idx) => {
           const ownMessage = m.sender_id === currentUserId
           const fallNr = fallNummerOf(m.fall_id)
           const sender = m.sender_id ? senderLabels?.[m.sender_id] : undefined
-          // Bubble-Stil pro Rolle, damit Kunde KB vs SV im Gruppenchat
-          // visuell unterscheiden kann.
+          // Avatar nur bei der LETZTEN Nachricht einer Sender-Sequenz zeigen
+          // (iMessage/WhatsApp-Pattern). Naechste Nachricht vom selben Sender?
+          const next = messages[idx + 1]
+          const showAvatar =
+            !ownMessage && (!next || next.sender_id !== m.sender_id)
           let bubbleCls = ''
+          let accentColor = ''
           if (ownMessage) {
-            bubbleCls = 'bg-claimondo-navy text-white rounded-br-sm'
+            bubbleCls = 'bg-gradient-to-br from-claimondo-navy to-[#1A2A55] text-white rounded-[18px] rounded-br-md shadow-sm'
           } else if (sender?.rolle === 'kb') {
-            // KB: ondo-blau Akzent
-            bubbleCls = 'bg-claimondo-ondo/15 text-claimondo-navy rounded-bl-sm border border-claimondo-ondo/30'
+            bubbleCls = 'bg-claimondo-ondo/12 text-claimondo-navy rounded-[18px] rounded-bl-md shadow-sm'
+            accentColor = '#4573A2'
           } else if (sender?.rolle === 'sv') {
-            // SV: emerald-Akzent
-            bubbleCls = 'bg-emerald-50 text-claimondo-navy rounded-bl-sm border border-emerald-200'
+            bubbleCls = 'bg-emerald-50 text-claimondo-navy rounded-[18px] rounded-bl-md shadow-sm'
+            accentColor = '#059669'
           } else {
-            bubbleCls = 'bg-white/80 text-claimondo-navy rounded-bl-sm border border-claimondo-border/60'
+            bubbleCls = 'bg-white text-claimondo-navy rounded-[18px] rounded-bl-md shadow-sm border border-claimondo-border/50'
+            accentColor = '#7BA3CC'
           }
+          const initials = sender
+            ? sender.name
+                .split(' ')
+                .map((w) => w[0])
+                .filter(Boolean)
+                .slice(0, 2)
+                .join('')
+                .toUpperCase() || '?'
+            : '?'
           return (
-            <div key={m.id} className={`flex flex-col ${ownMessage ? 'items-end' : 'items-start'}`}>
-              {!ownMessage && sender && (
-                <p className="text-[10px] font-semibold text-claimondo-ondo px-1 mb-0.5">
-                  {sender.name}
-                  <span className="ml-1 text-[9px] uppercase tracking-wider text-claimondo-ondo/60 font-medium">
-                    · {sender.rolle === 'kb' ? 'Betreuer' : sender.rolle === 'sv' ? 'Gutachter' : ''}
-                  </span>
-                </p>
+            <div key={m.id} className={`flex items-end gap-2 ${ownMessage ? 'justify-end' : 'justify-start'}`}>
+              {!ownMessage && (
+                <div className={`shrink-0 w-7 h-7 ${showAvatar ? 'visible' : 'invisible'}`}>
+                  <div
+                    className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-[10px] font-bold text-white"
+                    style={{ backgroundColor: accentColor }}
+                  >
+                    {sender?.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={sender.avatarUrl}
+                        alt={sender.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      initials
+                    )}
+                  </div>
+                </div>
               )}
-              <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-snug ${bubbleCls}`}>
+              <div className={`max-w-[78%] px-3.5 py-2 text-sm leading-snug ${bubbleCls}`}>
                 {/* WhatsApp-Style Reply-Preview: angelinkter Fall ueber dem
                     Nachrichten-Text. Klick auf den Block fuehrt zur Fallakte. */}
                 {fallNr && m.fall_id && (
@@ -270,8 +299,9 @@ export default function KundeKbChat({
         })}
       </div>
 
-      {/* Composer (Fall-Chip + Input) */}
-      <div className="px-3 pt-2 pb-3 bg-white/60 border-t border-claimondo-border/40">
+      {/* Floating Composer — schwebt mit shadow-md, wirkt offener */}
+      <div className="px-2 pb-2 pt-1 shrink-0">
+        <div className="rounded-2xl bg-white/95 backdrop-blur-sm shadow-md border border-white/70 px-3 pt-2 pb-2">
         {sendError && (
           <p className="text-[11px] text-rose-600 mb-1.5 px-1">{sendError}</p>
         )}
@@ -357,18 +387,19 @@ export default function KundeKbChat({
             }}
             placeholder={placeholder}
             rows={1}
-            className="flex-1 resize-none rounded-2xl border border-claimondo-border bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30 max-h-32"
+            className="flex-1 resize-none border-0 bg-transparent px-1 py-1.5 text-sm focus:outline-none placeholder:text-claimondo-ondo/50 max-h-32"
             disabled={pending}
           />
           <button
             type="submit"
             disabled={pending || !input.trim()}
-            className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-claimondo-navy hover:bg-claimondo-navy/90 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-claimondo-navy to-[#1A2A55] hover:from-[#1A2A55] hover:to-claimondo-navy text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
             aria-label="Senden"
           >
             <SendIcon className="w-4 h-4" />
           </button>
         </form>
+        </div>
       </div>
     </div>
   )

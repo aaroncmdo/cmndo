@@ -222,6 +222,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             svUserId={svCard.id}
             kbUserId={kbCard?.id ?? null}
             kbName={kbCard ? [kbCard.vorname, kbCard.nachname].filter(Boolean).join(' ') || null : null}
+            kbAvatarUrl={kbCard?.avatarUrl ?? null}
             fallOptions={fallOptionsForChat}
           />
         )}
