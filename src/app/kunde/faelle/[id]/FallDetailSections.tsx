@@ -122,15 +122,6 @@ export default function FallDetailSections({
             }
           />
 
-          {!!fall.sv_termin && (
-            <Section title="Nächster Termin">
-              <InfoRow label="Besichtigung" value={fmtDateTime(fall.sv_termin as string)} />
-              {!!fall.besichtigungsort_adresse && (
-                <InfoRow label="Besichtigungsort" value={fall.besichtigungsort_adresse as string} />
-              )}
-            </Section>
-          )}
-
           {/* AAR-754: Shared StammdatenReadSection — ersetzt die inline
               Fahrzeug-Section. Kunde-Rolle filtert eigenen Kontakt + Halter
               automatisch raus. Unfallhergang bleibt separat darunter. */}
