@@ -5,7 +5,7 @@
 // als zusätzliche Zeile unter dem Stepper angezeigt.
 
 import React from 'react'
-import { CheckIcon, ClipboardListIcon, WrenchIcon, ShieldCheckIcon, FlagIcon, AlertTriangleIcon, CalendarIcon, NavigationIcon } from 'lucide-react'
+import { CheckIcon, CheckCircleIcon, ClipboardListIcon, WrenchIcon, ShieldCheckIcon, FlagIcon, AlertTriangleIcon, CalendarIcon, NavigationIcon, FileTextIcon } from 'lucide-react'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
@@ -66,6 +66,7 @@ export default function ClaimStepper({
   bottomSlot,
   notices,
   terminInfo,
+  gutachtenUrl,
 }: {
   lifecycle: ClaimLifecycle
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
@@ -77,11 +78,21 @@ export default function ClaimStepper({
   /** AAR-864 Polish: Termin-Sektion analog zum SV-Header — Datum, Uhrzeit,
    *  Adresse, Navi-Button. Wird über den notices/bottomSlot gerendert. */
   terminInfo?: TerminInfo | null
+  /** Gutachten-PDF-URL — wenn der Auftrag QC-freigegeben ist und der Fall
+   *  in der Regulierung-Phase ist, zeigt der Stepper einen gruenen
+   *  Erfolgs-Banner "Gutachten fertig" oben. */
+  gutachtenUrl?: string | null
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
   const terminVerstrichen = !!terminInfo?.verstrichen
   const noShowCount = lifecycle.kundeNoShowCount ?? 0
+  // Gutachten ist QC-freigegeben und an die Kanzlei uebergeben sobald
+  // der Claim in der Regulierungs- oder Abschluss-Phase ist und eine
+  // Gutachten-URL existiert.
+  const gutachtenFertig =
+    !!gutachtenUrl &&
+    (lifecycle.mainPhase === 'regulierung' || lifecycle.mainPhase === 'abschluss')
 
   const outerCls = terminVerstrichen
     ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden'
@@ -92,6 +103,26 @@ export default function ClaimStepper({
   return (
     <div className={outerCls}>
       <div className="px-4 sm:px-6 py-4 space-y-3">
+      {gutachtenFertig && (
+        <a
+          href={gutachtenUrl ?? '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2.5 flex items-center gap-3 hover:bg-emerald-100 transition-colors"
+        >
+          <CheckCircleIcon className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-emerald-900">
+              Ihr Gutachten ist fertig und wurde der Kanzlei übermittelt!
+            </p>
+            <p className="text-xs text-emerald-800/80">PDF ansehen oder herunterladen</p>
+          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 shrink-0">
+            <FileTextIcon className="w-3.5 h-3.5" />
+            Gutachten ansehen
+          </span>
+        </a>
+      )}
       {noShowCount > 0 && (
         <div className="rounded-lg bg-rose-50 border border-rose-200 px-3 py-2 flex items-center gap-2">
           <AlertTriangleIcon className="w-4 h-4 text-rose-600 shrink-0" />
