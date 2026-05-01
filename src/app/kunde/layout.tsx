@@ -9,6 +9,7 @@ import { LogOutIcon } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
 import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
+import KundenbetreuerCard from './_components/KundenbetreuerCard'
 // CMM-28: Loader für singleFallId-Resolution in der Nav.
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
@@ -76,6 +77,47 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   const navFaelle = await getKundeFaelle(adminForNav, user.id, user.email ?? null)
   const singleFallId = navFaelle.length === 1 ? navFaelle[0].id : null
 
+  // Kundenbetreuer-Card-Daten: KB des neusten aktiven Falls. Sticky-KB-Logik
+  // sorgt dafür dass der Kunde über alle Fälle hinweg denselben KB hat —
+  // wir zeigen also einfach den KB des ersten Treffers.
+  let kbCard: {
+    vorname: string | null
+    nachname: string | null
+    telefon: string | null
+    avatarUrl: string | null
+    chatHref: string
+  } | null = null
+  if (navFaelle.length > 0) {
+    const { data: kbFall } = await adminForNav
+      .from('faelle')
+      .select('id, kundenbetreuer_id')
+      .eq('kunde_id', user.id)
+      .not('kundenbetreuer_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const kbId = (kbFall?.kundenbetreuer_id as string | null) ?? null
+    if (kbId) {
+      const { data: kbProfile } = await adminForNav
+        .from('profiles')
+        .select('vorname, nachname, telefon, avatar_url')
+        .eq('id', kbId)
+        .maybeSingle()
+      if (kbProfile) {
+        const fallChatBase = singleFallId
+          ? `/kunde/faelle/${singleFallId}?tab=chat`
+          : '/kunde/chat'
+        kbCard = {
+          vorname: (kbProfile.vorname as string | null) ?? null,
+          nachname: (kbProfile.nachname as string | null) ?? null,
+          telefon: (kbProfile.telefon as string | null) ?? null,
+          avatarUrl: (kbProfile.avatar_url as string | null) ?? null,
+          chatHref: fallChatBase,
+        }
+      }
+    }
+  }
+
   // AAR-536 (K4): SV-Branding aufgelöst. `useBrand=true` nur wenn zugewiesener
   // SV verifiziert + use_custom_branding aktiv + Theme vorhanden.
   const branding = await resolveKundenTheme(user.id)
@@ -115,6 +157,18 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         </div>
 
         <KundeNav singleFallId={singleFallId} />
+
+        {/* KB-Card direkt über Profil/Logout */}
+        {kbCard && (
+          <KundenbetreuerCard
+            vorname={kbCard.vorname}
+            nachname={kbCard.nachname}
+            telefon={kbCard.telefon}
+            avatarUrl={kbCard.avatarUrl}
+            chatHref={kbCard.chatHref}
+            accentBg={accentBg}
+          />
+        )}
 
         {/* Profil + Notification unten */}
         <div className="mt-auto px-3 pb-4 space-y-2 border-t border-white/10 pt-3">

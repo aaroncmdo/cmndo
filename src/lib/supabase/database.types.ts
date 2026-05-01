@@ -1417,6 +1417,7 @@ export type Database = {
           anrede: string | null
           arbeitsunfaehig_bis: string | null
           arbeitsunfaehig_seit: string | null
+          beziehung_zum_halter: string | null
           claim_id: string
           created_at: string
           created_by_user_id: string | null
@@ -1468,6 +1469,7 @@ export type Database = {
           anrede?: string | null
           arbeitsunfaehig_bis?: string | null
           arbeitsunfaehig_seit?: string | null
+          beziehung_zum_halter?: string | null
           claim_id: string
           created_at?: string
           created_by_user_id?: string | null
@@ -1519,6 +1521,7 @@ export type Database = {
           anrede?: string | null
           arbeitsunfaehig_bis?: string | null
           arbeitsunfaehig_seit?: string | null
+          beziehung_zum_halter?: string | null
           claim_id?: string
           created_at?: string
           created_by_user_id?: string | null
@@ -2677,6 +2680,7 @@ export type Database = {
           kunde_id: string | null
           kunde_lat: number | null
           kunde_lng: number | null
+          kunde_match_via: string | null
           kunde_nachname: string | null
           kunde_plz: string | null
           kunde_stadt: string | null
@@ -3011,6 +3015,7 @@ export type Database = {
           kunde_id?: string | null
           kunde_lat?: number | null
           kunde_lng?: number | null
+          kunde_match_via?: string | null
           kunde_nachname?: string | null
           kunde_plz?: string | null
           kunde_stadt?: string | null
@@ -3345,6 +3350,7 @@ export type Database = {
           kunde_id?: string | null
           kunde_lat?: number | null
           kunde_lng?: number | null
+          kunde_match_via?: string | null
           kunde_nachname?: string | null
           kunde_plz?: string | null
           kunde_stadt?: string | null
@@ -6361,6 +6367,7 @@ export type Database = {
           aircall_contact_id: string | null
           anrede: string | null
           anruf_versuche: number | null
+          ansprechpartner_beziehung: string | null
           aufklaerung_teilschuld_bestaetigt: boolean | null
           auslandskennzeichen: boolean | null
           besichtigungsort_adresse: string | null
@@ -6554,6 +6561,7 @@ export type Database = {
           aircall_contact_id?: string | null
           anrede?: string | null
           anruf_versuche?: number | null
+          ansprechpartner_beziehung?: string | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
           besichtigungsort_adresse?: string | null
@@ -6747,6 +6755,7 @@ export type Database = {
           aircall_contact_id?: string | null
           anrede?: string | null
           anruf_versuche?: number | null
+          ansprechpartner_beziehung?: string | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
           besichtigungsort_adresse?: string | null

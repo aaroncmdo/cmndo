@@ -541,10 +541,12 @@ async function convertLeadToFall(
   const nr = String((count ?? 0) + 1).padStart(3, '0')
   const fallNummer = `CLM-${dateStr}-${nr}`
 
-  // 3. Kundenbetreuer per Round-Robin zuweisen (AAR-427: mit Admin-Fallback)
+  // 3. Kundenbetreuer-Zuweisung mit Sticky-Lookup (gleicher Kunde/Ansprechpartner
+  // → gleicher KB, auch bei voller Kapazität). Fallback: Round-Robin → Admin.
   const kbAssignment = await assignKundenbetreuer(supabase, /* fallId noch nicht bekannt */ '', {
     writeToFall: false,
     logToTimeline: false,
+    stickyHints: { lead_id: leadId },
   })
   const kundenbetreuerId = kbAssignment.kundenbetreuer_id
   const kbFallbackFlag = kbAssignment.fallback_used === 'admin'
