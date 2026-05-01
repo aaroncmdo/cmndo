@@ -6475,6 +6475,7 @@ export type Database = {
           reminder_2_sent_at: string | null
           reminder_3_sent_at: string | null
           reminder_token: string | null
+          rueckruf_geplant_am: string | null
           sa_datum: string | null
           sa_unterschrieben: boolean | null
           sa_unterschrieben_am: string | null
@@ -6667,6 +6668,7 @@ export type Database = {
           reminder_2_sent_at?: string | null
           reminder_3_sent_at?: string | null
           reminder_token?: string | null
+          rueckruf_geplant_am?: string | null
           sa_datum?: string | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
@@ -6859,6 +6861,7 @@ export type Database = {
           reminder_2_sent_at?: string | null
           reminder_3_sent_at?: string | null
           reminder_token?: string | null
+          rueckruf_geplant_am?: string | null
           sa_datum?: string | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
