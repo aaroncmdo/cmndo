@@ -77,7 +77,7 @@ export default function GutachterCard({
     <div
       className={`mb-2 ml-3 transition-all duration-200 relative z-[1102] ${
         chatOpen
-          ? 'mr-0 rounded-l-xl rounded-r-none bg-white/15 border border-white/40 border-r-0 shadow-lg pr-3'
+          ? 'mr-0 rounded-l-xl rounded-r-none bg-white/85 backdrop-blur-xl border border-white/50 border-r-0 shadow-2xl pr-3'
           : 'mr-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10'
       }`}
     >
@@ -90,7 +90,11 @@ export default function GutachterCard({
         className="w-full px-3 py-2.5 text-left flex flex-col gap-1.5 disabled:cursor-not-allowed"
         aria-label={`Chat mit ${name} öffnen`}
       >
-        <p className="text-[9px] uppercase tracking-wider text-[#7BA3CC] leading-tight">
+        <p
+          className={`text-[9px] uppercase tracking-wider leading-tight ${
+            chatOpen ? 'text-claimondo-ondo' : 'text-[#7BA3CC]'
+          }`}
+        >
           Ihr Gutachter
         </p>
         <div className="flex items-center gap-2.5">
@@ -105,8 +109,20 @@ export default function GutachterCard({
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate leading-tight">{name}</p>
-            <p className="text-[10px] text-[#7BA3CC] leading-tight mt-0.5">Sachverständiger</p>
+            <p
+              className={`text-sm font-semibold truncate leading-tight ${
+                chatOpen ? 'text-claimondo-navy' : 'text-white'
+              }`}
+            >
+              {name}
+            </p>
+            <p
+              className={`text-[10px] leading-tight mt-0.5 ${
+                chatOpen ? 'text-claimondo-ondo' : 'text-[#7BA3CC]'
+              }`}
+            >
+              Sachverständiger
+            </p>
           </div>
         </div>
       </button>
