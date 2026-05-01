@@ -181,7 +181,7 @@ export default async function GutachterFallPage({
     kundenbetreuer = kbProfile
   }
 
-  // Attach leadpreis to fall object for display
+  // Attach leadpreis to fall object for display.
   const fallWithAbrechnung = {
     ...fall,
     _leadpreis: abrechnung?.leadpreis ? Number(abrechnung.leadpreis) : null,
@@ -572,7 +572,12 @@ export default async function GutachterFallPage({
       {isFallPhase(svPhase) && (
         <MeinFallStatusCard
           phase={svPhase}
-          geforderterBetrag={(fall.gutachten_betrag as number | null) ?? null}
+          geforderteGesamtsumme={(fall.gutachten_betrag as number | null) ?? null}
+          geforderterGrundhonorarBetrag={
+            (erstgutachtenAuftrag?.grundhonorar_brutto as number | null) ??
+            (erstgutachtenAuftrag?.grundhonorar_netto as number | null) ??
+            null
+          }
           gutachtenUrl={(fall.gutachten_url as string | null) ?? null}
           gutachtenFreigegebenAm={(fall.gutachten_freigabe_am as string | null) ?? (fall.gutachten_eingegangen_am as string | null) ?? null}
           lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
@@ -599,7 +604,7 @@ export default async function GutachterFallPage({
       pflichtSlots={pflichtSlots}
       svPhase={svPhase}
       gutachtenInQc={!!erstgutachtenAuftrag?.gutachten_url && !erstgutachtenAuftrag?.gutachten_final_freigegeben && !erstgutachtenReject}
-      fall={fallWithAbrechnung}
+      fall={{ ...fallWithAbrechnung, claim_id: claimIdForStorage || null }}
       lead={lead}
       dokumente={dokumenteLegacy}
       pflichtdokumente={(pflichtdokumente ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['pflichtdokumente']}

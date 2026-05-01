@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClockIcon } from 'lucide-react'
 import { TabDropContent } from '@/components/ui/TabDropContent'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
+import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
 // AAR-687: alle 5 Tabs leben jetzt im _tabs/-Ordner (private-folder-
 // Konvention). Vorher war 4× tabs/ + 1× _tabs/ parallel.
@@ -158,6 +159,7 @@ export default function FallakteShell({
 
   return (
     <FallProvider fall={fall} lead={lead} userRolle={userRolle}>
+      <FallRealtimeRefresh fallId={fall.id} claimId={claimId ?? null} />
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-96px)] gap-0">
         {/* AAR-567 (V1) / AAR-727: Linke Spalte — Glass-Panel (aside). */}
         <aside className="lg:w-72 xl:w-80 shrink-0 overflow-y-auto">

@@ -408,17 +408,58 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     }
     // Claim-SSoT-Daten zuerst laden (Reihenfolge: claim > fall > auftrag).
     let claimRow: { kunde_no_show_count: number | null; letzter_no_show_am: string | null } | null = null
+    // OCR-Werte werden hier nur server-seitig gelesen, um den Anspruch
+    // gegen die VS abzuleiten. Einzelwerte verlassen den Server NICHT —
+    // der Kunde sieht nur den Gesamt-Eurobetrag.
+    let anspruchVsEur: number | null = null
     if (fall.claim_id) {
       const { data } = await admin
         .from('claims')
-        .select('kunde_no_show_count, letzter_no_show_am')
+        .select(
+          'kunde_no_show_count, letzter_no_show_am, ' +
+          'reparaturkosten_brutto, minderwert, restwert, wiederbeschaffungswert, ' +
+          'totalschaden, gutachten_ocr_processed_at',
+        )
         .eq('id', fall.claim_id as string)
         .maybeSingle()
       if (data) {
+        const row = data as unknown as Record<string, unknown>
         claimRow = {
-          kunde_no_show_count: (data.kunde_no_show_count as number | null) ?? null,
-          letzter_no_show_am: (data.letzter_no_show_am as string | null) ?? null,
+          kunde_no_show_count: (row.kunde_no_show_count as number | null) ?? null,
+          letzter_no_show_am: (row.letzter_no_show_am as string | null) ?? null,
         }
+        const { berechneAnspruchVs } = await import('@/lib/claims/anspruch')
+        anspruchVsEur = berechneAnspruchVs({
+          reparaturkosten_brutto: (row.reparaturkosten_brutto as number | null) ?? null,
+          minderwert: (row.minderwert as number | null) ?? null,
+          restwert: (row.restwert as number | null) ?? null,
+          wiederbeschaffungswert: (row.wiederbeschaffungswert as number | null) ?? null,
+          totalschaden: (row.totalschaden as boolean | null) ?? null,
+          gutachten_ocr_processed_at: (row.gutachten_ocr_processed_at as string | null) ?? null,
+        })
+      }
+    }
+
+    // Gutachten-PDF aus dem Storage-Bucket — DB-Quelle: fall_dokumente
+    // mit dokument_typ='gutachten' im Claim-Pfad. Sichtbar fuer den Kunden,
+    // sobald der Auftrag QC-freigegeben ist (Stepper-Phase regulierung/abschluss).
+    let gutachtenUrlAusBucket: string | null = null
+    if (fall.claim_id) {
+      const { data: gut } = await admin
+        .from('fall_dokumente')
+        .select('storage_path')
+        .in('fall_id', claimFallIds)
+        .eq('dokument_typ', 'gutachten')
+        .like('storage_path', `claim/${fall.claim_id as string}/gutachten/%`)
+        .is('geloescht_am', null)
+        .is('abgelehnt_am', null)
+        .order('hochgeladen_am', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (gut?.storage_path) {
+        gutachtenUrlAusBucket = admin.storage
+          .from('fall-dokumente')
+          .getPublicUrl(gut.storage_path as string).data.publicUrl
       }
     }
 
@@ -438,7 +479,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* AAR-864: Live-Aktualisierung — abonniert gutachter_termine,
             auftraege und faelle für diesen Fall, refresht die Page bei
             jedem Event. */}
-        <FallRealtimeRefresh fallId={fall.id as string} />
+        <FallRealtimeRefresh fallId={fall.id as string} claimId={(fall.claim_id as string | null) ?? null} />
 
         {/* Header — CMM-28: Zurück-Link nur bei Multi-Fall-Kunden */}
         <div>
@@ -494,18 +535,21 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 kundeVorname: kundeVorname ?? null,
               }
             : null
-          // Gutachten-URL fuer den gruenen Erfolgs-Banner im Stepper.
-          // Quelle: erstgutachten-Auftrag mit gutachten_final_freigegeben=true.
+          // Gutachten-URL fuer den gruenen Erfolgs-Banner — Quelle ist der
+          // Storage-Bucket via fall_dokumente (DB-driven, claim-scoped).
+          // Anzeige nur wenn ein erstgutachten existiert das QC-freigegeben
+          // ist; die Phase-Gating-Logik im Stepper (regulierung/abschluss)
+          // entscheidet final, ob der Banner gezeigt wird.
           const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten')
-          const gutachtenUrlFuerStepper =
-            erstgutachten?.gutachten_url && erstgutachten.gutachten_final_freigegeben
-              ? (erstgutachten.gutachten_url as string)
-              : null
+          const gutachtenFreigegeben =
+            !!erstgutachten?.gutachten_final_freigegeben && !!gutachtenUrlAusBucket
+          const gutachtenUrlFuerStepper = gutachtenFreigegeben ? gutachtenUrlAusBucket : null
           return (
             <ClaimStepper
               lifecycle={claimLifecycle}
               terminInfo={terminInfo}
               gutachtenUrl={gutachtenUrlFuerStepper}
+              anspruchVsEur={gutachtenFreigegeben ? anspruchVsEur : null}
               bottomSlot={
                 verlegungBannerProps ? (
                   <TerminVerlegungBanner {...verlegungBannerProps} embedded />

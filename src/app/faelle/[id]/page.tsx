@@ -46,6 +46,9 @@ import { projectNextEvents } from '@/lib/claims/timeline-projection'
 import { getActiveKanzleiPaket, getPartnerKanzleiSettings, isKanzleiPaketPending } from '@/lib/kanzlei/queries'
 import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
 import { KanzleiAnsprechpartnerBlock } from '@/components/shared/claims'
+// Gutachten-OCR-Auswertung — admin-only Card mit den extrahierten
+// Schadensummen aus dem QC-freigegebenen Gutachten.
+import GutachtenOcrCard from '@/components/admin/fallakte/GutachtenOcrCard'
 
 export default async function FallaktePage({
   params,
@@ -83,6 +86,24 @@ export default async function FallaktePage({
     claimLetzterNoShowAm = (claimRow?.letzter_no_show_am as string | null) ?? null
   }
 
+  // Gutachten-OCR-Daten (admin-only) — separater Select damit die OCR-Werte
+  // nicht in den allgemeinen claimRow-Pfad fliessen, der auch für andere
+  // Rollen indirekt sichtbar werden könnte.
+  let gutachtenOcr: Awaited<ReturnType<typeof loadGutachtenOcr>> = null
+  async function loadGutachtenOcr() {
+    if (!claimId) return null
+    const { data } = await supabase
+      .from('claims')
+      .select(
+        'reparaturkosten_netto, reparaturkosten_brutto, minderwert, restwert, ' +
+        'wiederbeschaffungswert, wiederbeschaffungsdauer_tage, nutzungsausfall_tage, ' +
+        'totalschaden, gutachten_datum, gutachten_ocr_processed_at, gutachten_ocr_error',
+      )
+      .eq('id', claimId)
+      .maybeSingle()
+    return data
+  }
+
   // Recent kunde-getriebene Verlegung (letzte 7 Tage, neuer Termin still
   // bestaetigt) -> KB/Admin sehen einen amber-Banner als Hinweis.
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -107,6 +128,12 @@ export default async function FallaktePage({
     .eq('id', user.id)
     .single()
   const userRolle = ((profile?.rolle as FallakteRolle | null) ?? 'kunde') as FallakteRolle
+
+  // OCR-Auswertung NUR für Admin laden — andere Rollen bekommen `null`
+  // und damit keinen Render-Pfad.
+  if (userRolle === 'admin') {
+    gutachtenOcr = await loadGutachtenOcr()
+  }
 
   // AAR-843: Timeline + Future-Projection laden (nach userRolle-Auflösung,
   // weil RLS via security_invoker auf der View die Auth braucht).
@@ -655,11 +682,12 @@ export default async function FallaktePage({
   } | null = null
   if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
     const adminCli = createAdminClient()
-    const { data: kf } = await adminCli
+    // CMM-37: Read via claim_id (kanonisch).
+    const { data: kf } = claimId ? await adminCli
       .from('kanzlei_faelle')
       .select('status, vs_kontakt_am, ausgezahlt_am')
-      .eq('fall_id', id)
-      .maybeSingle()
+      .eq('claim_id', claimId)
+      .maybeSingle() : { data: null }
     if (kf) {
       regulierungCardProps = {
         fallId: id,
@@ -693,6 +721,11 @@ export default async function FallaktePage({
         </div>
       )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
+      {userRolle === 'admin' && gutachtenOcr && (
+        <div className="mb-4">
+          <GutachtenOcrCard data={gutachtenOcr as unknown as Parameters<typeof GutachtenOcrCard>[0]['data']} />
+        </div>
+      )}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
       {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
           Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}

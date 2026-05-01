@@ -37,10 +37,16 @@ export async function kanzleiVsKontaktErfasst(
 
   const db = createAdminClient()
 
+  // CMM-37: Read via claim_id (kanonisch). fall_id wird vom Sync-Trigger
+  // gepflegt, ist aber nicht mehr der primaere Lookup-Pfad.
+  const { data: fall } = await db
+    .from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (fall as { claim_id?: string | null } | null)?.claim_id
+  if (!claimId) return { ok: false, error: 'Fall hat keinen Claim' }
   const { data: kf } = await db
     .from('kanzlei_faelle')
     .select('id, vs_kontakt_am')
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId)
     .maybeSingle()
   if (!kf) return { ok: false, error: 'Kein Kanzlei-Fall — Gutachten ist noch nicht freigegeben' }
   if (kf.vs_kontakt_am) return { ok: true }
@@ -78,10 +84,14 @@ export async function kanzleiAuszahlungEingegangen(
 
   const db = createAdminClient()
 
+  const { data: fall2 } = await db
+    .from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId2 = (fall2 as { claim_id?: string | null } | null)?.claim_id
+  if (!claimId2) return { ok: false, error: 'Fall hat keinen Claim' }
   const { data: kf } = await db
     .from('kanzlei_faelle')
     .select('id, status, ausgezahlt_am')
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId2)
     .maybeSingle()
   if (!kf) return { ok: false, error: 'Kein Kanzlei-Fall — Gutachten ist noch nicht freigegeben' }
   if (kf.ausgezahlt_am) return { ok: true }

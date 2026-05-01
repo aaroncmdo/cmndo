@@ -67,6 +67,7 @@ export default function ClaimStepper({
   notices,
   terminInfo,
   gutachtenUrl,
+  anspruchVsEur,
 }: {
   lifecycle: ClaimLifecycle
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
@@ -82,6 +83,10 @@ export default function ClaimStepper({
    *  in der Regulierung-Phase ist, zeigt der Stepper einen gruenen
    *  Erfolgs-Banner "Gutachten fertig" oben. */
   gutachtenUrl?: string | null
+  /** Voraussichtlicher Anspruch gegen die VS in Euro — abgeleitet aus
+   *  den OCR-Werten des Gutachtens. Einziger OCR-Wert, den der Kunde
+   *  zu sehen bekommt. Null = noch nicht berechenbar. */
+  anspruchVsEur?: number | null
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
@@ -115,7 +120,20 @@ export default function ClaimStepper({
             <p className="text-sm font-semibold text-emerald-900">
               Ihr Gutachten ist fertig und wurde der Kanzlei übermittelt!
             </p>
-            <p className="text-xs text-emerald-800/80">PDF ansehen oder herunterladen</p>
+            {anspruchVsEur != null ? (
+              <p className="text-xs text-emerald-800/90 mt-0.5">
+                Ihr Anspruch an die Versicherung:{' '}
+                <span className="font-semibold">
+                  {anspruchVsEur.toLocaleString('de-DE', {
+                    style: 'currency',
+                    currency: 'EUR',
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+              </p>
+            ) : (
+              <p className="text-xs text-emerald-800/80">PDF ansehen oder herunterladen</p>
+            )}
           </div>
           <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 shrink-0">
             <FileTextIcon className="w-3.5 h-3.5" />

@@ -331,7 +331,10 @@ export default function FallDetailClient(props: Props) {
 
   return (
     <div className="min-h-full bg-[#f8f9fb] -mx-2 sm:-mx-3 lg:-mx-4 -mb-2 sm:-mb-3 lg:-mb-4 -mt-2 sm:-mt-3 lg:-mt-4 [&_.rounded-2xl]:shadow-sm">
-      <FallRealtimeRefresh fallId={fall.id as string} />
+      <FallRealtimeRefresh
+        fallId={fall.id as string}
+        claimId={((fall as { claim_id?: string | null }).claim_id) ?? null}
+      />
       <FallWindowDropzone fallId={fall.id as string} />
       {/* AAR-864 Polish: Akten-Header sticky direkt am Wrapper-Oberrand.
           Negativer top kompensiert das main-Padding (p-2/3/4) damit der
