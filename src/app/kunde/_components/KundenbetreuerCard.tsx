@@ -1,26 +1,28 @@
 'use client'
 
 // Kunde-Sidebar-Card: zeigt zugewiesenen Kundenbetreuer + Quick-Actions
-// (Anrufen, Chat). Chat-Button öffnet ein right-side Slide-Out-Drawer
-// im Glass-Design statt einer eigenen Page-Navigation — der Kunde kann
-// in jedem Kontext kurz ein paar Worte schreiben, ohne die Seite zu wechseln.
+// (Anrufen, Chat, Videotermin). Chat-Button öffnet ein zentriertes Glass-
+// Modal mit reinem KB↔Kunde-Chat (Kanal 'chat_kb_kunde' — keine Tabs,
+// kein /kunde/chat-Iframe). Videotermin-Button öffnet das BeratungBuchen-
+// Sheet mit Google-Meet-Slot-Picker.
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { PhoneIcon, MessageSquareIcon, VideoIcon, XIcon } from 'lucide-react'
 import BeratungBuchenSheet from '@/components/kunde/BeratungBuchenSheet'
+import MultiChannelChat from '@/components/chat/MultiChannelChat'
 
 type Props = {
   vorname: string | null
   nachname: string | null
   telefon: string | null
   avatarUrl: string | null
-  /** Iframe-Quelle für den Chat-Drawer (idR /kunde/chat?fall=<id>) */
-  chatHref: string
   /** Akzent-Farbe (Brand-Primary mit Fallback) */
   accentBg: string
-  /** Single-Fall-ID für die Videotermin-Buchung — null = Button versteckt */
+  /** Single-Fall-ID für Chat + Videotermin — null = beide deaktiviert */
   fallId: string | null
+  /** Kunde-User-ID für MultiChannelChat (sender) */
+  currentUserId: string | null
 }
 
 export default function KundenbetreuerCard({
@@ -28,14 +30,14 @@ export default function KundenbetreuerCard({
   nachname,
   telefon,
   avatarUrl,
-  chatHref,
   accentBg,
   fallId,
+  currentUserId,
 }: Props) {
   const [chatOpen, setChatOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
 
-  // ESC schließt das Drawer
+  // ESC schließt das Modal
   useEffect(() => {
     if (!chatOpen) return
     function onKey(e: KeyboardEvent) {
@@ -48,6 +50,7 @@ export default function KundenbetreuerCard({
       document.removeEventListener('keydown', onKey)
     }
   }, [chatOpen])
+
   const name = [vorname, nachname].filter(Boolean).join(' ') || 'Ihr Betreuer'
   const initials =
     [vorname?.[0], nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
@@ -99,48 +102,64 @@ export default function KundenbetreuerCard({
         <button
           type="button"
           onClick={() => setChatOpen(true)}
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium py-2 transition-colors"
+          disabled={!fallId}
+          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium py-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <MessageSquareIcon className="w-3.5 h-3.5" />
           Chat
         </button>
       </div>
 
-      {/* Slide-Out-Drawer: Chat im Glass-Design, von rechts ausfahrend.
-          Iframe rendert die bestehende Chat-Page (Cookies/Session werden
-          mitgeschickt) — keine Logik-Duplikation. */}
-      {chatOpen && (
-        <>
+      {/* Glass-Modal: zentriert, blurred backdrop. Rendert MultiChannelChat
+          nur mit Kanal 'chat_kb_kunde' — kein Tab, kein WhatsApp, kein SV. */}
+      {chatOpen && fallId && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Chat mit Ihrem Betreuer"
+          className="fixed inset-0 z-[1100] flex items-center justify-center px-4 sm:px-6 py-6"
+        >
           <div
             onClick={() => setChatOpen(false)}
-            className="fixed inset-0 z-[1100] bg-claimondo-navy/40 backdrop-blur-md transition-opacity"
+            className="absolute inset-0 bg-claimondo-navy/40 backdrop-blur-md"
             aria-hidden="true"
           />
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Chat mit Ihrem Betreuer"
-            className="fixed right-0 top-0 bottom-0 z-[1101] w-full sm:max-w-[440px] flex flex-col bg-white/85 backdrop-blur-xl border-l border-white/40 shadow-2xl animate-[slideInRight_240ms_ease-out]"
-            style={{
-              animationFillMode: 'forwards',
-            }}
-          >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border bg-white/60 backdrop-blur-sm">
-              <div className="flex items-center gap-2">
-                <MessageSquareIcon className="w-4 h-4 text-claimondo-navy" />
-                <h2 className="text-sm font-semibold text-claimondo-navy">Chat</h2>
+          <div className="relative w-full max-w-md h-[min(640px,calc(100vh-3rem))] flex flex-col rounded-2xl bg-white/85 backdrop-blur-xl border border-white/50 shadow-2xl overflow-hidden animate-[fadeInUp_220ms_ease-out]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border/60 bg-white/60 backdrop-blur-sm">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 overflow-hidden"
+                  style={{ backgroundColor: accentBg }}
+                >
+                  {avatarUrl ? (
+                    <Image
+                      src={avatarUrl}
+                      alt={name}
+                      width={32}
+                      height={32}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    initials
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-claimondo-navy truncate">
+                    {name}
+                  </p>
+                  <p className="text-[10px] text-claimondo-ondo">Ihr Betreuer</p>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                {fallId && (
-                  <button
-                    type="button"
-                    onClick={() => setVideoOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
-                  >
-                    <VideoIcon className="w-3.5 h-3.5" />
-                    Videotermin
-                  </button>
-                )}
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setVideoOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
+                >
+                  <VideoIcon className="w-3.5 h-3.5" />
+                  Videotermin
+                </button>
                 <button
                   type="button"
                   onClick={() => setChatOpen(false)}
@@ -151,26 +170,36 @@ export default function KundenbetreuerCard({
                 </button>
               </div>
             </div>
-            <iframe
-              src={chatHref}
-              title="Chat"
-              className="flex-1 w-full border-0 bg-transparent"
-            />
+            <div className="flex-1 min-h-0 chat-without-tabs">
+              <MultiChannelChat
+                fallId={fallId}
+                currentUserId={currentUserId}
+                visibleKanaele={['chat_kb_kunde']}
+                defaultKanal="chat_kb_kunde"
+              />
+            </div>
           </div>
           <style jsx>{`
-            @keyframes slideInRight {
+            @keyframes fadeInUp {
               from {
-                transform: translateX(100%);
+                opacity: 0;
+                transform: translateY(8px);
               }
               to {
-                transform: translateX(0);
+                opacity: 1;
+                transform: translateY(0);
               }
             }
+            /* Single-Channel-Modus: Tab-Leiste ausblenden — die Card-Header
+               kommuniziert "Chat mit X" bereits. */
+            .chat-without-tabs > :global(div) > :global(div:first-child):has(:global(button)) {
+              display: none;
+            }
           `}</style>
-        </>
+        </div>
       )}
 
-      {/* Videotermin-Buchung — separates Modal, ueber dem Chat-Drawer */}
+      {/* Videotermin-Buchung — separates Modal, ueber dem Chat-Modal */}
       {fallId && (
         <BeratungBuchenSheet
           fallId={fallId}

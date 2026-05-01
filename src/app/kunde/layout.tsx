@@ -85,7 +85,6 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     nachname: string | null
     telefon: string | null
     avatarUrl: string | null
-    chatHref: string
   } | null = null
   if (navFaelle.length > 0) {
     const { data: kbFall } = await adminForNav
@@ -104,17 +103,11 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         .eq('id', kbId)
         .maybeSingle()
       if (kbProfile) {
-        // Chat-Drawer iframed /kunde/chat (?fall= scoped). Keine Tab-URL,
-        // damit das Iframe nicht den ganzen Layout-Frame nochmal lädt.
-        const fallChatBase = singleFallId
-          ? `/kunde/chat?fall=${singleFallId}`
-          : '/kunde/chat'
         kbCard = {
           vorname: (kbProfile.vorname as string | null) ?? null,
           nachname: (kbProfile.nachname as string | null) ?? null,
           telefon: (kbProfile.telefon as string | null) ?? null,
           avatarUrl: (kbProfile.avatar_url as string | null) ?? null,
-          chatHref: fallChatBase,
         }
       }
     }
@@ -167,9 +160,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             nachname={kbCard.nachname}
             telefon={kbCard.telefon}
             avatarUrl={kbCard.avatarUrl}
-            chatHref={kbCard.chatHref}
             accentBg={accentBg}
             fallId={singleFallId}
+            currentUserId={user.id}
           />
         )}
 
