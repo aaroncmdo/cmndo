@@ -151,20 +151,65 @@ export default function FallDetailSections({
           {/* AAR-761 Phase 2: Upload-Card mit Typ-Auswahl + OCR */}
           <BelegUploadCard fallId={fall.id as string} />
 
-          <Section title="Hochgeladene Dokumente">
-            <DokumenteDownloadListe
-              variant="list"
-              rolle="kunde"
-              emptyTitle="Noch keine Dokumente vorhanden."
-              dokumente={dokumente.map<DokumentItem>(doc => ({
-                id: doc.id,
-                name: doc.datei_name ?? 'Dokument',
-                url: doc.datei_url,
-                typ: doc.typ,
-                createdAt: doc.created_at,
-              }))}
-            />
-          </Section>
+          {(() => {
+            // Dokumente nach Typ gruppieren — uebersichtlicher als eine
+            // lange Liste bei vielen Dateien (Storage-Bucket-Sicht).
+            const grouped = dokumente.reduce<Record<string, typeof dokumente>>(
+              (acc, doc) => {
+                const key = doc.typ || 'sonstiges'
+                if (!acc[key]) acc[key] = []
+                acc[key].push(doc)
+                return acc
+              },
+              {},
+            )
+            const TYP_LABEL: Record<string, string> = {
+              gutachten: 'Gutachten',
+              gutachten_anlage: 'Gutachten-Anlagen',
+              schadenanzeige: 'Schadenanzeige',
+              versicherungsschein: 'Versicherungsschein',
+              fahrzeugschein: 'Fahrzeugschein',
+              fuehrerschein: 'Führerschein',
+              polizeibericht: 'Polizeibericht',
+              zulassungsbescheinigung: 'Zulassungsbescheinigung',
+              kostenvoranschlag: 'Kostenvoranschlag',
+              werkstattrechnung: 'Werkstattrechnung',
+              mietwagenrechnung: 'Mietwagenrechnung',
+              foto: 'Fotos',
+              'kunde-nachreichung': 'Sonstige (von Ihnen)',
+              sonstiges: 'Sonstiges',
+            }
+            const sortedKeys = Object.keys(grouped).sort((a, b) => {
+              if (a === 'gutachten') return -1
+              if (b === 'gutachten') return 1
+              return (TYP_LABEL[a] ?? a).localeCompare(TYP_LABEL[b] ?? b)
+            })
+
+            if (sortedKeys.length === 0) {
+              return (
+                <Section title="Alle Dokumente">
+                  <p className="text-sm text-claimondo-ondo italic">Noch keine Dokumente vorhanden.</p>
+                </Section>
+              )
+            }
+
+            return sortedKeys.map((typ) => (
+              <Section key={typ} title={TYP_LABEL[typ] ?? typ}>
+                <DokumenteDownloadListe
+                  variant="list"
+                  rolle="kunde"
+                  emptyTitle=""
+                  dokumente={grouped[typ].map<DokumentItem>((doc) => ({
+                    id: doc.id,
+                    name: doc.datei_name ?? 'Dokument',
+                    url: doc.datei_url,
+                    typ: doc.typ,
+                    createdAt: doc.created_at,
+                  }))}
+                />
+              </Section>
+            ))
+          })()}
         </div>
       )}
 

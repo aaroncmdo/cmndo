@@ -131,21 +131,37 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
-    // Dokumente laden — abgelehnte Iterationen (KB-Reject-Loop) werden
-    // dem Kunden nicht gezeigt; er sieht nur die aktive Version.
+    // Dokumente laden — alle Dokumente des Claims, die fuer den Kunden
+    // sichtbar sind. Mehrere Faelle pro Claim werden zusammen angezeigt.
+    // Abgelehnte Iterationen (KB-Reject-Loop) werden ausgeblendet.
+    let claimFallIds: string[] = [id]
+    if (fall.claim_id) {
+      const { data: claimFaelle } = await admin
+        .from('faelle')
+        .select('id')
+        .eq('claim_id', fall.claim_id as string)
+      claimFallIds = ((claimFaelle ?? []) as Array<{ id: string }>).map((f) => f.id)
+      if (claimFallIds.length === 0) claimFallIds = [id]
+    }
     const { data: dokumenteRaw } = await admin.from('fall_dokumente')
-      .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am')
-      .eq('fall_id', id)
+      .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am, sichtbar_fuer')
+      .in('fall_id', claimFallIds)
       .is('geloescht_am', null)
       .is('abgelehnt_am', null)
-      .order('hochgeladen_am')
-    const dokumente = (dokumenteRaw ?? []).map(d => ({
-      id: d.id as string,
-      typ: d.dokument_typ as string,
-      datei_url: admin.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl,
-      datei_name: (d.original_filename as string | null) ?? null,
-      created_at: d.hochgeladen_am as string,
-    }))
+      .order('hochgeladen_am', { ascending: false })
+    const dokumente = (dokumenteRaw ?? [])
+      .filter((d) => {
+        const sichtbar = (d.sichtbar_fuer as string[] | null) ?? null
+        // Default: sichtbar fuer alle wenn nicht gesetzt (Legacy)
+        return !sichtbar || sichtbar.includes('kunde')
+      })
+      .map((d) => ({
+        id: d.id as string,
+        typ: d.dokument_typ as string,
+        datei_url: admin.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl,
+        datei_name: (d.original_filename as string | null) ?? null,
+        created_at: d.hochgeladen_am as string,
+      }))
 
     // CMM-23: Pflichtdokumente-Liste laden — identische Filter-Logik wie
     // beim SV im Auftrag, nur aus Kunden-Sicht.
