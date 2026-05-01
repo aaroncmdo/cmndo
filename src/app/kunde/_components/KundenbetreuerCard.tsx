@@ -193,16 +193,15 @@ export default function KundenbetreuerCard({
             aria-hidden="true"
           />
           <div
-            className="absolute left-3 right-3 bottom-3 md:right-auto md:w-[400px] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
+            className="absolute md:left-64 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
             style={{
               transformOrigin: 'bottom left',
-              ...(cardRect && typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
+              ...(typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
                 ? {
-                    left: `${cardRect.right}px`,
-                    bottom: `${window.innerHeight - cardRect.bottom}px`,
-                    height: '640px',
+                    top: `calc(50vh - 320px)`,
+                    bottom: 'auto',
                   }
-                : { height: 'min(640px, calc(100vh - 2rem))' }),
+                : {}),
             }}
           >
             <button
