@@ -138,12 +138,13 @@ export default function KundenbetreuerCard({
           aria-label="Chat mit Ihrem Betreuer"
           className="fixed inset-0 z-[1100]"
         >
-          {/* Backdrop deckt nur den Hauptinhalt — nicht die Sidebar (md:left-64),
-              damit die KB-Card nicht mit-geblurrt wird. Mobile (vor md) deckt
-              alles, weil die Sidebar dort nicht sichtbar ist. */}
+          {/* Voll-Page-Backdrop mit Blur — die Sidebar wird mitgeblurrt
+              (gewollt: das Modal soll sich klar abheben). Die Source-Card
+              bleibt durch die hellere Hintergrundfarbe + Ring trotzdem
+              erkennbar. */}
           <div
             onClick={() => setChatOpen(false)}
-            className="absolute inset-0 md:left-64 bg-claimondo-navy/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-claimondo-navy/30 backdrop-blur-sm"
             aria-hidden="true"
           />
           <div

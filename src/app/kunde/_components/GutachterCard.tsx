@@ -117,7 +117,7 @@ export default function GutachterCard({
         <div role="dialog" aria-modal="true" aria-label="Gruppenchat" className="fixed inset-0 z-[1100]">
           <div
             onClick={() => setChatOpen(false)}
-            className="absolute inset-0 md:left-64 bg-claimondo-navy/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-claimondo-navy/30 backdrop-blur-sm"
             aria-hidden="true"
           />
           <div
