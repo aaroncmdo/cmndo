@@ -393,6 +393,22 @@ export default async function GutachterFallPage({
     .maybeSingle()
   const claimIdForStorage = (fallClaim?.claim_id as string | null) ?? ''
 
+  // Claim-SSoT-Daten (No-Show-Counter etc.). Reihenfolge: claim > fall > auftrag.
+  let claimNoShow: { count: number; letzter: string | null } = { count: 0, letzter: null }
+  if (fallClaim?.claim_id) {
+    const { data: claimData } = await admin
+      .from('claims')
+      .select('kunde_no_show_count, letzter_no_show_am')
+      .eq('id', fallClaim.claim_id as string)
+      .maybeSingle()
+    if (claimData) {
+      claimNoShow = {
+        count: (claimData.kunde_no_show_count as number | null) ?? 0,
+        letzter: (claimData.letzter_no_show_am as string | null) ?? null,
+      }
+    }
+  }
+
   // CMM-32e: Abgelehnte Docs mit Kommentar für den SV — nur im Reject-Zustand laden.
   // SV sieht welche Dateien konkret beanstandet wurden + warum.
   let abgelehnteDocsInfo: { filename: string; kommentar: string | null }[] = []
@@ -486,6 +502,20 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
+      {/* No-Show-Hinweis (vom Claim, claim > fall > auftrag) */}
+      {claimNoShow.count > 0 && (
+        <div className="rounded-2xl border-2 border-rose-300 bg-rose-50 p-4">
+          <p className="text-sm font-semibold text-rose-900">
+            {claimNoShow.count === 1
+              ? 'Termin wurde verpasst'
+              : `${claimNoShow.count} Termine wurden verpasst`}
+          </p>
+          <p className="text-xs text-rose-800 mt-1">
+            Der Kunde war beim letzten Termin nicht vor Ort und hat keinen Bescheid gegeben. Plane Puffer für den
+            Folgetermin ein und stimme dich ggf. mit dem Kundenbetreuer ab.
+          </p>
+        </div>
+      )}
       {/* CMM-32: Gutachten-Upload-Banner — sichtbar nach Besichtigung, vor QC */}
       {zeigeGutachtenUpload && erstgutachtenAuftrag && (
         <GutachtenUploadBanner
