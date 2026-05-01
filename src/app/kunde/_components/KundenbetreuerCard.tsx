@@ -43,6 +43,11 @@ export default function KundenbetreuerCard({
   const [chatOpen, setChatOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
 
+  // Videotermin braucht einen Fall. Single-Fall: direkt nehmen. Multi-Fall:
+  // ersten verfuegbaren als Default. Wenn ueberhaupt kein Fall existiert,
+  // bleibt der Button versteckt.
+  const effectiveBookingFallId = fallId ?? fallOptions[0]?.id ?? null
+
   // ESC schließt das Modal
   useEffect(() => {
     if (!chatOpen) return
@@ -172,14 +177,14 @@ export default function KundenbetreuerCard({
                 </div>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                {fallId && (
+                {effectiveBookingFallId && (
                   <button
                     type="button"
                     onClick={() => setVideoOpen(true)}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
                   >
                     <VideoIcon className="w-3.5 h-3.5" />
-                    Videotermin
+                    Videotermin buchen
                   </button>
                 )}
                 <button
@@ -220,9 +225,9 @@ export default function KundenbetreuerCard({
       )}
 
       {/* Videotermin-Buchung — separates Modal, ueber dem Chat-Modal */}
-      {fallId && (
+      {effectiveBookingFallId && (
         <BeratungBuchenSheet
-          fallId={fallId}
+          fallId={effectiveBookingFallId}
           open={videoOpen}
           onClose={() => setVideoOpen(false)}
         />
