@@ -298,6 +298,61 @@ html[lang="ar"] {
   background: #f8f9fb;
 }
 
+/* ─── Glass-System — Standard fuer Modals + Inhaltskarten ───────────────────
+   Drei zusammengehoerige Stufen, die zusammen das Layered-Glass-Pattern
+   liefern (siehe Kunde-Chat-Modal als Referenz):
+
+   .glass-shell  — aeusseres Modal (groesste Tiefe, viel Blur, kraeftige Border)
+   .glass-panel  — innere Sub-Card (mittlere Tiefe, weniger Blur, leichte Border)
+   .glass-edge   — Variante von .glass-shell die seitlich an die Quelle-Card
+                   anknüpft: keine linke Rundung + keine linke Border, fließt
+                   damit aus einer Sidebar-Card heraus.
+
+   Verwendung:
+   <div className="glass-shell rounded-2xl ..."> ... </div>
+   <div className="glass-panel rounded-2xl ..."> ... </div>
+*/
+.glass-shell {
+  background-color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: saturate(180%) blur(28px);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  box-shadow: 0 24px 48px -12px rgba(13, 27, 62, 0.25);
+}
+
+.glass-panel {
+  background-color: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  box-shadow: 0 1px 3px 0 rgba(13, 27, 62, 0.08);
+}
+
+.glass-edge {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  border-left: 0;
+  backdrop-filter: saturate(180%) blur(28px);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  box-shadow: 0 24px 48px -12px rgba(13, 27, 62, 0.25);
+}
+
+/* Zwischenstufe fuer Sidebar-Cards die im offenen Zustand zur glass-edge
+   werden — gleicher bg + Border-Optik, aber ohne rechte Border + Rundung,
+   damit sie nahtlos in ein .glass-edge-Modal uebergehen koennen. */
+.glass-card-source {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  border-left: 1px solid rgba(255, 255, 255, 0.5);
+  border-right: 0;
+  backdrop-filter: saturate(180%) blur(28px);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  box-shadow: 0 12px 24px -8px rgba(13, 27, 62, 0.18);
+}
+
 /* ─── Droplet-UI: Tropfen-Animationen ───────────────────────────────────── */
 
 /* Teardrop-Badge: tropfenartige Form für Mitteilungs-Badges.

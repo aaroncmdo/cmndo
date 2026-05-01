@@ -91,7 +91,7 @@ export default function KundenbetreuerCard({
     <div
       className={`mb-2 ml-3 transition-all duration-200 relative z-[1102] ${
         chatOpen
-          ? 'mr-0 rounded-l-xl rounded-r-none bg-white/85 backdrop-blur-xl border border-white/50 border-r-0 shadow-2xl pr-3'
+          ? 'mr-0 rounded-l-xl rounded-r-none glass-card-source pr-3'
           : 'mr-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10'
       }`}
     >
@@ -162,7 +162,7 @@ export default function KundenbetreuerCard({
             aria-hidden="true"
           />
           <div
-            className="absolute md:left-64 md:bottom-4 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:border-l-0 bg-white/85 backdrop-blur-xl border border-white/50 shadow-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)] max-md:rounded-2xl"
+            className="absolute md:left-64 md:bottom-4 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
             style={{ transformOrigin: 'bottom left' }}
           >
             {/* Close-Button schwebt absolut oben rechts ueber dem Header */}
@@ -176,7 +176,7 @@ export default function KundenbetreuerCard({
             </button>
             {/* Header-Card: Avatar + Name + 2 Quick-Action-Kreise (Telefon=Rueckruf, Video=Videotermin) */}
             <div className="px-2 pt-2 shrink-0">
-              <div className="rounded-2xl bg-white/55 backdrop-blur-sm border border-white/60 shadow-sm px-3 py-2.5 flex items-center gap-2.5">
+              <div className="glass-panel rounded-2xl px-3 py-2.5 flex items-center gap-2.5">
                 <div
                   className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 overflow-hidden"
                   style={{ backgroundColor: accentBg }}

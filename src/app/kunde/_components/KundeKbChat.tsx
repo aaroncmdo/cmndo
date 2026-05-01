@@ -187,7 +187,7 @@ export default function KundeKbChat({
       {/* Messages — eigener gewrappter Bereich (white-transparent, rounded) */}
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-2 rounded-2xl bg-white/55 backdrop-blur-sm border border-white/60 shadow-sm"
+        className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-2 glass-panel rounded-2xl"
       >
         {messages.length === 0 && (
           <p className="text-center text-xs text-claimondo-ondo/70 mt-8">
@@ -306,7 +306,7 @@ export default function KundeKbChat({
           Nachrichten-Block aber gleicher Stil. Links neben dem Input sitzt
           der runde Claim-Bezug-Picker. */}
       <div className="shrink-0">
-        <div className="rounded-2xl bg-white/55 backdrop-blur-sm shadow-sm border border-white/60 px-3 pt-2 pb-2">
+        <div className="glass-panel rounded-2xl px-3 pt-2 pb-2">
         {sendError && (
           <p className="text-[11px] text-rose-600 mb-1.5 px-1">{sendError}</p>
         )}
