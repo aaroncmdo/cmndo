@@ -30,7 +30,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('rolle, vorname, nachname, onboarding_completed_at')
+    .select('rolle, vorname, nachname')
     .eq('id', user.id)
     .single()
 
@@ -38,11 +38,20 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // auf /login — sonst wirkt die Seite „rausgeworfen".
   if (profile?.rolle !== 'kunde') redirect(roleToPath(profile?.rolle as string | null | undefined))
 
-  // AAR-100: Onboarding-Redirect wenn noch nicht abgeschlossen
+  // Onboarding-Redirect ist jetzt pro Fall (nicht mehr pro User-Profil).
+  // Sobald ein Fall onboarding_complete=false hat, soll der Kunde dorthin —
+  // egal ob er für einen früheren Fall schon mal durchgelaufen ist.
   const h = await headers()
   const pathname = h.get('x-pathname') ?? h.get('x-next-url') ?? h.get('x-invoke-path') ?? ''
-  if (!profile?.onboarding_completed_at && !pathname.includes('/onboarding') && !pathname.includes('/passwort-aendern')) {
-    redirect('/kunde/onboarding')
+  if (!pathname.includes('/onboarding') && !pathname.includes('/passwort-aendern')) {
+    const { data: incompleteFall } = await supabase
+      .from('faelle')
+      .select('id')
+      .eq('kunde_id', user.id)
+      .eq('onboarding_complete', false)
+      .limit(1)
+      .maybeSingle()
+    if (incompleteFall) redirect('/kunde/onboarding')
   }
 
   const displayName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || user.email?.split('@')[0] || 'Kunde'

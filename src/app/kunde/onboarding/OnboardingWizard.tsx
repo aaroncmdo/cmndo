@@ -330,7 +330,7 @@ export default function OnboardingWizard({
 
   function handleFinish() {
     startTransition(async () => {
-      await completeOnboarding()
+      await completeOnboarding(fall?.id)
       router.push('/kunde')
       router.refresh()
     })
