@@ -40,9 +40,22 @@ export type ClaimLifecycle = {
   aktiveSideQuests: AuftragRow[]
   /** Aktiver Auftrag (für Anzeige der Termin/ETA-Details). */
   aktiverAuftrag: AuftragRow | null
+  /** Kunde-No-Show-Counter (aus claim.kunde_no_show_count). */
+  kundeNoShowCount: number
+  /** Zeitstempel des letzten verpassten Termins. */
+  letzterNoShowAm: string | null
 }
 
 export type ClaimLifecycleInput = {
+  /**
+   * Claim-SSoT-Daten. Reihenfolge der Wahrheit: claim > fall > auftrag.
+   * Felder die ueberall gleich sein sollen (no_show, schadensdaten) kommen
+   * primaer vom claim — fall + auftrag liefern Sub-Workflow-Status.
+   */
+  claim: {
+    kunde_no_show_count: number | null
+    letzter_no_show_am: string | null
+  } | null
   /** Lead-Felder die den Erfassungs-Status beschreiben. */
   lead: {
     sa_unterschrieben: boolean | null
@@ -88,7 +101,10 @@ export function mainPhaseOf(sub: ClaimSubPhase): ClaimMainPhase {
 }
 
 export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
-  const { lead, auftraege, kanzleiFall } = input
+  const { claim, lead, auftraege, kanzleiFall } = input
+  // Claim-Felder: SSoT fuer Querschnitts-Daten (no_show etc.).
+  const kundeNoShowCount = (claim?.kunde_no_show_count as number | null) ?? 0
+  const letzterNoShowAm = (claim?.letzter_no_show_am as string | null) ?? null
 
   const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten') ?? null
   const sideQuests = auftraege.filter(
@@ -106,6 +122,8 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
       subPhase: 'abgeschlossen',
       aktiveSideQuests: [],
       aktiverAuftrag: null,
+      kundeNoShowCount,
+      letzterNoShowAm,
     }
   }
 
@@ -121,6 +139,8 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
       subPhase: sub,
       aktiveSideQuests: sideQuests,
       aktiverAuftrag: sideQuests[0] ?? null,
+      kundeNoShowCount,
+      letzterNoShowAm,
     }
   }
 
@@ -138,6 +158,8 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
       subPhase: subMap[erstgutachten.status],
       aktiveSideQuests: [],
       aktiverAuftrag: erstgutachten,
+      kundeNoShowCount,
+      letzterNoShowAm,
     }
   }
 
@@ -152,6 +174,8 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
       subPhase: sub,
       aktiveSideQuests: [],
       aktiverAuftrag: null,
+      kundeNoShowCount,
+      letzterNoShowAm,
     }
   }
 
@@ -161,6 +185,8 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
     subPhase: 'sa_offen',
     aktiveSideQuests: [],
     aktiverAuftrag: null,
+    kundeNoShowCount,
+    letzterNoShowAm,
   }
 }
 

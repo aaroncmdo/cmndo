@@ -391,7 +391,24 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         }
       }
     }
+    // Claim-SSoT-Daten zuerst laden (Reihenfolge: claim > fall > auftrag).
+    let claimRow: { kunde_no_show_count: number | null; letzter_no_show_am: string | null } | null = null
+    if (fall.claim_id) {
+      const { data } = await admin
+        .from('claims')
+        .select('kunde_no_show_count, letzter_no_show_am')
+        .eq('id', fall.claim_id as string)
+        .maybeSingle()
+      if (data) {
+        claimRow = {
+          kunde_no_show_count: (data.kunde_no_show_count as number | null) ?? null,
+          letzter_no_show_am: (data.letzter_no_show_am as string | null) ?? null,
+        }
+      }
+    }
+
     const claimLifecycle = getClaimLifecycle({
+      claim: claimRow,
       lead: leadInputForLifecycle,
       auftraege,
       kanzleiFall,

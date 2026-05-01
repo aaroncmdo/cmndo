@@ -81,6 +81,7 @@ export default function ClaimStepper({
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
   const terminVerstrichen = !!terminInfo?.verstrichen
+  const noShowCount = lifecycle.kundeNoShowCount ?? 0
 
   const outerCls = terminVerstrichen
     ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden'
@@ -91,6 +92,16 @@ export default function ClaimStepper({
   return (
     <div className={outerCls}>
       <div className="px-4 sm:px-6 py-4 space-y-3">
+      {noShowCount > 0 && (
+        <div className="rounded-lg bg-rose-50 border border-rose-200 px-3 py-2 flex items-center gap-2">
+          <AlertTriangleIcon className="w-4 h-4 text-rose-600 shrink-0" />
+          <p className="text-[11px] font-medium text-rose-800">
+            {noShowCount === 1
+              ? '1 Termin wurde verpasst'
+              : `${noShowCount} Termine wurden verpasst`}
+          </p>
+        </div>
+      )}
       <div className="flex items-center w-full">
         {MAIN_PHASES.map((p, i) => {
           const isCurrent = !abgeschlossen && i === aktuellIdx
