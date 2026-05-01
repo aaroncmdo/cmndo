@@ -42,6 +42,7 @@ export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defa
   const [selectedFallId, setSelectedFallId] = useState<string | null>(defaultFallId)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pending, startTransition] = useTransition()
+  const [sendError, setSendError] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Initial-Load + Realtime-Sub
@@ -84,7 +85,20 @@ export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defa
         (payload) => {
           const row = payload.new as Nachricht
           if (row.sender_id !== currentUserId && row.sender_id !== kbUserId) return
-          setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]))
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === row.id)) return prev
+            // Optimistisch eingefuegte Eigen-Nachrichten durch echten Eintrag ersetzen
+            const optimistic = prev.find(
+              (m) =>
+                m.id.startsWith('optimistic-') &&
+                m.sender_id === row.sender_id &&
+                m.nachricht === row.nachricht,
+            )
+            if (optimistic) {
+              return prev.map((m) => (m.id === optimistic.id ? row : m))
+            }
+            return [...prev, row]
+          })
           if (row.sender_id === kbUserId) void markKbKundeMessagesRead()
         },
       )
@@ -108,10 +122,27 @@ export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defa
   function handleSend() {
     const text = input.trim()
     if (!text) return
+    setSendError(null)
+    // Optimistisch lokal hinzufuegen — falls Realtime nicht durchkommt
+    // (RLS-Edge-Case), zeigt der Kunde die Nachricht trotzdem sofort.
+    const optimistic: Nachricht = {
+      id: `optimistic-${Date.now()}`,
+      fall_id: selectedFallId,
+      sender_id: currentUserId,
+      nachricht: text,
+      gelesen: false,
+      created_at: new Date().toISOString(),
+    }
+    setMessages((prev) => [...prev, optimistic])
+    setInput('')
     startTransition(async () => {
       const res = await sendKbKundeMessage({ nachricht: text, fallId: selectedFallId })
-      if (res.ok) setInput('')
-      // Nachricht erscheint via Realtime-Sub automatisch
+      if (!res.ok) {
+        // Optimistic entfernen + Input wiederherstellen
+        setMessages((prev) => prev.filter((m) => m.id !== optimistic.id))
+        setInput(text)
+        setSendError(res.error ?? 'Nachricht konnte nicht gesendet werden')
+      }
     })
   }
 
@@ -269,6 +300,9 @@ export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defa
 
       {/* Input */}
       <div className="px-3 py-3 border-t border-claimondo-border/60 bg-white/60">
+        {sendError && (
+          <p className="text-[11px] text-rose-600 mb-2 px-1">{sendError}</p>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault()

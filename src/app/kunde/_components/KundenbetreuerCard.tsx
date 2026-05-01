@@ -129,7 +129,7 @@ export default function KundenbetreuerCard({
         >
           <div
             onClick={() => setChatOpen(false)}
-            className="absolute inset-0 bg-claimondo-navy/40 backdrop-blur-md"
+            className="absolute inset-0 bg-claimondo-navy/30 backdrop-blur-sm"
             aria-hidden="true"
           />
           <div

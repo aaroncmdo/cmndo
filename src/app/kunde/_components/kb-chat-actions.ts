@@ -36,7 +36,10 @@ export async function sendKbKundeMessage(params: {
   const kbId = (kbFall?.kundenbetreuer_id as string | null) ?? null
   if (!kbId) return { ok: false, error: 'Kein Kundenbetreuer zugeordnet' }
 
-  const { error } = await supabase.from('nachrichten').insert({
+  // Insert via Admin-Client um RLS-Edge-Cases (fall_id NULL,
+  // kanal='chat_kb_kunde' vom Kunden) zu umgehen — wir haben die Owner-
+  // schaft oben bereits geprueft (kbId aus Sticky-KB des Kunden).
+  const { error } = await admin.from('nachrichten').insert({
     fall_id: params.fallId ?? null,
     kanal: 'chat_kb_kunde',
     sender_id: user.id,
@@ -46,7 +49,10 @@ export async function sendKbKundeMessage(params: {
     richtung: 'outbound',
     gelesen: false,
   })
-  if (error) return { ok: false, error: error.message }
+  if (error) {
+    console.error('[sendKbKundeMessage] insert error:', error.message)
+    return { ok: false, error: error.message }
+  }
 
   revalidatePath('/kunde')
   if (params.fallId) revalidatePath(`/kunde/faelle/${params.fallId}`)
