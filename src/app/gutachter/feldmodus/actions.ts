@@ -37,35 +37,52 @@ export async function startStop(
 }
 
 /**
- * „Ich bin angekommen" — setzt gutachter_termine.sv_angekommen_am,
- * ankunft_via, gps_lat/lng_ankunft und hebt Session auf status='arrived'.
- * Sendet zusätzlich die Angekommen-WA an den Kunden (non-blocking).
+ * Auto-Arrive: setzt gutachter_termine.sv_angekommen_am +
+ * besichtigung_gestartet_am und spiegelt den Trigger auf faelle, damit BEIDE
+ * Portale (SV + Kunde) via Realtime denselben "Besichtigung läuft"-Status
+ * sehen. via='termin_uhrzeit' ist der Fallback wenn GPS auf einer Seite fehlt.
  */
 export async function markArrived(
   sessionId: string,
   terminId: string,
   lat: number,
   lng: number,
-  via: 'geofence' | 'manuell',
+  via: 'geofence' | 'manuell' | 'termin_uhrzeit',
 ): Promise<Result> {
   // markArrival nutzt `ankunft_via: 'gps' | 'manual_swipe'` — wir mappen.
-  const mappedVia = via === 'geofence' ? 'gps' : 'manual_swipe'
+  const mappedVia: 'gps' | 'manual_swipe' = via === 'geofence' ? 'gps' : 'manual_swipe'
   const res = await markArrival({ termin_id: terminId, lat, lng, via: mappedVia })
   if (!res.success) return { success: false, error: res.error ?? 'Ankunft fehlgeschlagen' }
 
-  // gutachter_termine: sv_angekommen_am + Notification-Flag setzen (AAR-380
-  // Foundation hat diese Felder bereits).
   const admin = createAdminClient()
-  await admin
+  const nowIso = new Date().toISOString()
+
+  // gutachter_termine: SV-Ankunft + Auto-Arrive-Trigger
+  const { data: terminRow } = await admin
     .from('gutachter_termine')
     .update({
-      sv_angekommen_am: new Date().toISOString(),
-      notification_angekommen_gesendet_am: new Date().toISOString(),
+      sv_angekommen_am: nowIso,
+      notification_angekommen_gesendet_am: nowIso,
+      besichtigung_gestartet_am: nowIso,
     })
     .eq('id', terminId)
+    .select('fall_id')
+    .maybeSingle()
+
+  // faelle: Trigger spiegeln, damit Akten-Listen + Kunde-Akten-Realtime greifen
+  if (terminRow?.fall_id) {
+    await admin
+      .from('faelle')
+      .update({ besichtigung_gestartet_am: nowIso, updated_at: nowIso })
+      .eq('id', terminRow.fall_id)
+  }
 
   await transitionTagesSession(sessionId, 'arrived')
   revalidatePath('/gutachter/feldmodus')
+  revalidatePath('/kunde/termin')
+  if (terminRow?.fall_id) {
+    revalidatePath(`/kunde/faelle/${terminRow.fall_id}`)
+  }
   return { success: true }
 }
 

@@ -17,7 +17,10 @@ export interface RouteSidebarProps {
   aktuellerStopIndex: number
   svPosition: { lat: number; lng: number } | null
   distanceMeters: number | null
+  svInGeofence: boolean
+  permissionState: 'pending' | 'granted' | 'denied'
   onAdvanced: (nextTerminId: string | null) => void
+  onArrived: (lat: number, lng: number, via: 'geofence' | 'manuell' | 'termin_uhrzeit') => void
 }
 
 export default function RouteSidebar({
@@ -27,7 +30,10 @@ export default function RouteSidebar({
   aktuellerStopIndex,
   svPosition,
   distanceMeters,
+  svInGeofence,
+  permissionState,
   onAdvanced,
+  onArrived,
 }: RouteSidebarProps) {
   const aktuellerStop = stops[aktuellerStopIndex] ?? null
   const kommende = stops.slice(aktuellerStopIndex + 1)
@@ -50,7 +56,10 @@ export default function RouteSidebar({
             sessionId={sessionId}
             sessionStatus={sessionStatus}
             svPosition={svPosition}
+            svInGeofence={svInGeofence}
+            permissionState={permissionState}
             onAdvanced={onAdvanced}
+            onArrived={onArrived}
           />
         ) : (
           <div className="rounded-xl bg-white/10 p-4 text-sm text-white/80">

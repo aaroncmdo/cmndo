@@ -1,17 +1,19 @@
 'use client'
 
-// AAR-382: Expanded Card für den aktiven Stop im Fokus-Modus.
-// Enthält Kunden-Kontakt, Fahrzeug, Adresse, Slots für Briefing (AAR-385) und
-// Dokumente (AAR-386 — Platzhalter), sowie die primären Aktionen Losfahren /
-// Angekommen / Abschließen je nach State.
+// AAR-382 / Auto-Arrive: Expanded Card für den aktiven Stop im Fokus-Modus.
+// Keine manuellen "Losfahren"/"Ich bin angekommen"-Buttons mehr — Ankunft wird
+// automatisch erkannt:
+//   1. SV im 100m-Geofence UND (Kunde nicht aktiviert ODER Kunde angekommen)
+//   2. Fallback: Terminuhrzeit erreicht und GPS nicht verfügbar
+// Beim Auslösen ruft onArrived() — FeldmodusClient setzt sessionStatus='arrived'
+// → Fallakte öffnet automatisch.
 
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   PhoneIcon,
   NavigationIcon,
   CheckCircle2Icon,
-  PlayCircleIcon,
   MapPinIcon,
   CarIcon,
 } from 'lucide-react'
@@ -19,14 +21,17 @@ import { formatUhrzeit } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
 import type { FeldmodusStop } from './page'
 import type { SessionStatus } from '@/lib/types/field-modus'
-import { startStop, markArrived, completeAndAdvance } from './actions'
+import { completeAndAdvance } from './actions'
 
 export interface AktuellerStopCardProps {
   stop: FeldmodusStop
   sessionId: string
   sessionStatus: SessionStatus
   svPosition: { lat: number; lng: number } | null
+  svInGeofence: boolean
+  permissionState: 'pending' | 'granted' | 'denied'
   onAdvanced: (nextTerminId: string | null) => void
+  onArrived: (lat: number, lng: number, via: 'geofence' | 'manuell' | 'termin_uhrzeit') => void
 }
 
 function buildGoogleMapsLink(stop: FeldmodusStop): string {
@@ -45,13 +50,15 @@ export default function AktuellerStopCard({
   sessionId,
   sessionStatus,
   svPosition,
+  svInGeofence,
+  permissionState,
   onAdvanced,
+  onArrived,
 }: AktuellerStopCardProps) {
   const [pending, startTransition] = useTransition()
-  const [manuelleAnkunft, setManuelleAnkunft] = useState(false)
+  const arrivedFiredRef = useRef(false)
 
-  // AAR-384: Kunde-Tracking-State live beobachten (eigene Subscription,
-  // damit die AktuellerStopCard unabhängig vom Parent nachzieht).
+  // AAR-384: Kunde-Tracking-State live beobachten.
   const supabase = useMemo(() => createClient(), [])
   const [kundeTracking, setKundeTracking] = useState<{
     aktiviert: boolean
@@ -104,44 +111,60 @@ export default function AktuellerStopCard({
     }
   }, [supabase, stop.termin_id])
 
-  const losgefahren = Boolean(stop.losgefahren_am)
-  const angekommen = Boolean(stop.sv_angekommen_am)
+  const angekommen = Boolean(stop.sv_angekommen_am) || sessionStatus === 'arrived'
 
-  function onLosfahren() {
-    startTransition(async () => {
-      const res = await startStop(sessionId, stop.termin_id)
-      if (res.success) {
-        toast.success(
-          res.etaMinutes != null
-            ? `Losgefahren · ETA ${res.etaMinutes} Min`
-            : 'Losgefahren',
-        )
-      } else {
-        toast.error(res.error ?? 'Losfahren fehlgeschlagen')
-      }
-    })
-  }
+  // Reset arrived-flag wenn neuer Stop geladen wird
+  useEffect(() => {
+    arrivedFiredRef.current = false
+  }, [stop.termin_id])
 
-  function onAngekommen() {
-    setManuelleAnkunft(true)
-    startTransition(async () => {
-      const lat = svPosition?.lat ?? stop.lat ?? 0
-      const lng = svPosition?.lng ?? stop.lng ?? 0
-      const res = await markArrived(
-        sessionId,
-        stop.termin_id,
-        lat,
-        lng,
-        'manuell',
-      )
-      if (res.success) {
-        toast.success('Ankunft bestätigt')
-      } else {
-        toast.error(res.error ?? 'Ankunft fehlgeschlagen')
-        setManuelleAnkunft(false)
-      }
-    })
-  }
+  // Auto-Ankunft via Geofence: SV vor Ort UND Kunde vor Ort (falls aktiv)
+  useEffect(() => {
+    if (angekommen) return
+    if (arrivedFiredRef.current) return
+    if (!svInGeofence) return
+    // Wenn Kunde aktiv getrackt wird, MUSS er ebenfalls angekommen sein.
+    if (kundeTracking.aktiviert && !kundeTracking.angekommenAm) return
+    arrivedFiredRef.current = true
+    onArrived(
+      svPosition?.lat ?? stop.lat ?? 0,
+      svPosition?.lng ?? stop.lng ?? 0,
+      'geofence',
+    )
+  }, [
+    angekommen,
+    svInGeofence,
+    kundeTracking.aktiviert,
+    kundeTracking.angekommenAm,
+    onArrived,
+    svPosition,
+    stop.lat,
+    stop.lng,
+  ])
+
+  // Fallback: Terminuhrzeit erreicht und GPS nicht verfügbar
+  useEffect(() => {
+    if (angekommen) return
+    // Wenn beide Seiten GPS-Tracking haben, kein Zeit-Fallback nötig
+    if (permissionState === 'granted' && kundeTracking.aktiviert) return
+    const startMs = new Date(stop.start_zeit).getTime()
+    const delay = Math.max(0, startMs - Date.now())
+    const timer = setTimeout(() => {
+      if (arrivedFiredRef.current) return
+      if (angekommen) return
+      arrivedFiredRef.current = true
+      onArrived(stop.lat ?? 0, stop.lng ?? 0, 'termin_uhrzeit')
+    }, delay)
+    return () => clearTimeout(timer)
+  }, [
+    angekommen,
+    permissionState,
+    kundeTracking.aktiviert,
+    stop.start_zeit,
+    stop.lat,
+    stop.lng,
+    onArrived,
+  ])
 
   function onAbschliessen() {
     startTransition(async () => {
@@ -158,6 +181,19 @@ export default function AktuellerStopCard({
   }
 
   const mapsLink = buildGoogleMapsLink(stop)
+
+  // Status-Hinweis für den SV (ersetzt die alten Action-Buttons)
+  const statusHinweis = (() => {
+    if (angekommen) return null
+    if (svInGeofence && kundeTracking.aktiviert && !kundeTracking.angekommenAm) {
+      return 'Du bist vor Ort — warte auf Kunde'
+    }
+    if (svInGeofence) return 'Ankunft wird gleich bestätigt'
+    if (permissionState === 'denied') {
+      return 'GPS verweigert — Ankunft wird zur Terminuhrzeit erkannt'
+    }
+    return 'Auto-Ankunft aktiv (Geofence 100 m)'
+  })()
 
   return (
     <div className="rounded-xl bg-white text-claimondo-navy p-4 shadow-sm space-y-3">
@@ -191,8 +227,7 @@ export default function AktuellerStopCard({
         <p className="flex-1">{stop.adresse}</p>
       </div>
 
-      {/* AAR-384: Kunde-Tracking-Status — zeigt dem SV ob und wann der
-          Kunde ankommt (nur bei Termin außerhalb Kunde-zuhause). */}
+      {/* Kunde-Tracking-Status */}
       {kundeTracking.angekommenAm ? (
         <div className="flex items-center gap-2 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
           <CheckCircle2Icon className="w-4 h-4" />
@@ -219,8 +254,7 @@ export default function AktuellerStopCard({
         </a>
       )}
 
-      {/* AAR-772: SV-Briefing im Feldmodus — nur Plain-Text, kein Struktur-
-          Briefing (das ist intern für Admin/KB, nicht für den SV vor Ort). */}
+      {/* SV-Briefing */}
       {stop.briefing_text && (
         <div className="border-t border-claimondo-border pt-3">
           <p className="text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
@@ -229,37 +263,15 @@ export default function AktuellerStopCard({
         </div>
       )}
 
-      {/* Dokumente-Slot (AAR-386 Platzhalter) */}
-      <div className="border-t border-claimondo-border pt-3 text-[11px] text-claimondo-ondo italic">
-        Dokumenten-Checkliste folgt in AAR-386
-      </div>
+      {/* Auto-Ankunft-Hinweis (ersetzt alte Action-Buttons) */}
+      {statusHinweis && (
+        <div className="rounded-lg bg-[color:var(--brand-primary,var(--brand-secondary))]/5 border border-[color:var(--brand-primary,var(--brand-secondary))]/20 px-3 py-2 text-[11px] text-claimondo-navy">
+          {statusHinweis}
+        </div>
+      )}
 
-      {/* Aktionen — State-Machine-abhängig */}
+      {/* Aktionen */}
       <div className="flex flex-col gap-2 pt-2">
-        {!losgefahren && sessionStatus !== 'arrived' && (
-          <button
-            type="button"
-            onClick={onLosfahren}
-            disabled={pending}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[color:var(--brand-primary,var(--brand-secondary))] text-white text-sm font-semibold py-2.5 hover:bg-[#3a6290] disabled:opacity-50"
-          >
-            <PlayCircleIcon className="w-4 h-4" />
-            {pending ? 'Starte …' : 'Losfahren & Kunde informieren'}
-          </button>
-        )}
-
-        {losgefahren && !angekommen && (
-          <button
-            type="button"
-            onClick={onAngekommen}
-            disabled={pending || manuelleAnkunft}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold py-2.5 hover:bg-emerald-700 disabled:opacity-50"
-          >
-            <CheckCircle2Icon className="w-4 h-4" />
-            {pending ? 'Bestätige …' : 'Ich bin angekommen'}
-          </button>
-        )}
-
         {angekommen && sessionStatus !== 'finished' && (
           <button
             type="button"
