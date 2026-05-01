@@ -30,7 +30,6 @@ import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
 import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
-import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
@@ -412,7 +411,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* Header — CMM-28: Zurück-Link nur bei Multi-Fall-Kunden */}
         <div>
           {hatMehrereFaelle && (
-            <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; Meine Fälle</Link>
+            <Link
+              href="/kunde"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy mb-3 px-2.5 py-1.5 rounded-lg border border-claimondo-border bg-white hover:bg-[#f8f9fb] transition-colors"
+            >
+              <span aria-hidden>&larr;</span> Meine Fälle
+            </Link>
           )}
           <PageHeader
             title={`${(fall.claim_nummer as string | null) ?? (fall.fall_nummer as string | null) ?? 'Schadensfall'}${kennzeichen ? ` · ${kennzeichen}` : ''}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
@@ -611,13 +615,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             zahlungsweg={fall.zahlungsweg as string | null}
             onZahlungswegSave={updateZahlungsweg}
           />
-          <SaeuleMeinBetreuer
-            fallId={fall.id as string}
-            kbName={kbName}
-            kbTelefon={kbTelefon}
-            kbAvatarUrl={kbAvatarUrl}
-            kbBeschreibung={kbBeschreibung}
-          />
+          {/* SaeuleMeinBetreuer entfernt — Betreuer lebt jetzt in der
+              Sidebar-KundenbetreuerCard mit Anruf + Chat-Modal. */}
         </div>
 
         {/* Opt-in Gutachten-Weiterleitung — nur sichtbar wenn Gutachten vorliegt */}

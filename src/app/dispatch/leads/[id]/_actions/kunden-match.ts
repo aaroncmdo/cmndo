@@ -25,6 +25,7 @@ export type KundenMatch = {
     kennzeichen: string | null
     fahrzeug: string | null
     kb_name: string | null
+    sv_name: string | null
     created_at: string | null
   }>
 }
@@ -105,7 +106,7 @@ export async function findKundenMatches(
   if (ids.length > 0) {
     const { data: faelle } = await admin
       .from('faelle')
-      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, kundenbetreuer_id, created_at')
+      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, kundenbetreuer_id, sv_id, created_at')
       .in('kunde_id', ids)
       .order('created_at', { ascending: false })
       .limit(50)
@@ -128,6 +129,26 @@ export async function findKundenMatches(
       }
     }
 
+    // SV-Name-Lookup (sachverstaendige.profile_id → profiles.vorname/nachname)
+    const svIds = Array.from(
+      new Set(
+        ((faelle ?? []) as Array<{ sv_id: string | null }>)
+          .map((f) => f.sv_id)
+          .filter(Boolean) as string[],
+      ),
+    )
+    const svMap = new Map<string, string>()
+    if (svIds.length > 0) {
+      const { data: svRows } = await admin
+        .from('sachverstaendige')
+        .select('id, profiles(vorname, nachname)')
+        .in('id', svIds)
+      for (const sv of (svRows ?? []) as Array<{ id: string; profiles?: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] }>) {
+        const p = Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles
+        svMap.set(sv.id, [p?.vorname, p?.nachname].filter(Boolean).join(' ') || '—')
+      }
+    }
+
     for (const f of (faelle ?? []) as Array<{
       id: string
       fall_nummer: string | null
@@ -136,6 +157,7 @@ export async function findKundenMatches(
       fahrzeug_modell: string | null
       kunde_id: string | null
       kundenbetreuer_id: string | null
+      sv_id: string | null
       created_at: string | null
     }>) {
       if (!f.kunde_id) continue
@@ -148,6 +170,7 @@ export async function findKundenMatches(
         kennzeichen: f.kennzeichen,
         fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null,
         kb_name: f.kundenbetreuer_id ? kbMap.get(f.kundenbetreuer_id) ?? null : null,
+        sv_name: f.sv_id ? svMap.get(f.sv_id) ?? null : null,
         created_at: f.created_at,
       })
     }

@@ -12,7 +12,11 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { SendIcon, FileTextIcon, ChevronDownIcon, XIcon, ChevronRightIcon } from 'lucide-react'
-import { sendKbKundeMessage, markKbKundeMessagesRead } from './kb-chat-actions'
+import {
+  sendKundeChatMessage,
+  markKundeChatMessagesRead,
+  type KundeChatKanal,
+} from './kb-chat-actions'
 
 type Nachricht = {
   id: string
@@ -30,13 +34,27 @@ type FallOption = {
 
 type Props = {
   currentUserId: string
-  kbUserId: string
+  /** Partner-User-ID — KB beim Direktchat, SV beim Gruppenchat */
+  partnerUserId: string
+  /** Zusätzliche Sender-IDs die in diesem Channel mitlesen (z.B. KB beim
+   *  gruppenchat sendet ebenfalls — ihre Nachrichten sollen sichtbar sein) */
+  additionalSenderIds?: string[]
+  kanal: KundeChatKanal
   fallOptions: FallOption[]
   /** Default-Fall der vorausgewählt wird (singleFallId). Null = "Allgemein". */
   defaultFallId: string | null
+  placeholder?: string
 }
 
-export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defaultFallId }: Props) {
+export default function KundeKbChat({
+  currentUserId,
+  partnerUserId,
+  additionalSenderIds = [],
+  kanal,
+  fallOptions,
+  defaultFallId,
+  placeholder = 'Nachricht …',
+}: Props) {
   const [messages, setMessages] = useState<Nachricht[]>([])
   const [input, setInput] = useState('')
   const [selectedFallId, setSelectedFallId] = useState<string | null>(defaultFallId)
@@ -49,45 +67,38 @@ export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defa
   useEffect(() => {
     let cancelled = false
     const supabase = createClient()
+    const validSenders = new Set([currentUserId, partnerUserId, ...additionalSenderIds])
 
     void supabase
       .from('nachrichten')
       .select('id, fall_id, sender_id, nachricht, gelesen, created_at')
-      .eq('kanal', 'chat_kb_kunde')
-      .or(`sender_id.eq.${currentUserId},sender_id.eq.${kbUserId}`)
+      .eq('kanal', kanal)
       .order('created_at', { ascending: true })
       .limit(200)
       .then(({ data }) => {
         if (cancelled) return
         const rows = (data ?? []) as Nachricht[]
-        // Nur Nachrichten zwischen kunde und kb (egal welcher fall)
-        const filtered = rows.filter((m) => {
-          return (
-            (m.sender_id === currentUserId) ||
-            (m.sender_id === kbUserId)
-          )
-        })
+        const filtered = rows.filter((m) => validSenders.has(m.sender_id ?? ''))
         setMessages(filtered)
       })
 
-    void markKbKundeMessagesRead()
+    void markKundeChatMessagesRead(kanal)
 
     const channel = supabase
-      .channel(`kb-kunde-chat-${currentUserId}`)
+      .channel(`kunde-chat-${kanal}-${currentUserId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'nachrichten',
-          filter: `kanal=eq.chat_kb_kunde`,
+          filter: `kanal=eq.${kanal}`,
         },
         (payload) => {
           const row = payload.new as Nachricht
-          if (row.sender_id !== currentUserId && row.sender_id !== kbUserId) return
+          if (!validSenders.has(row.sender_id ?? '')) return
           setMessages((prev) => {
             if (prev.some((m) => m.id === row.id)) return prev
-            // Optimistisch eingefuegte Eigen-Nachrichten durch echten Eintrag ersetzen
             const optimistic = prev.find(
               (m) =>
                 m.id.startsWith('optimistic-') &&
@@ -99,7 +110,7 @@ export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defa
             }
             return [...prev, row]
           })
-          if (row.sender_id === kbUserId) void markKbKundeMessagesRead()
+          if (row.sender_id !== currentUserId) void markKundeChatMessagesRead(kanal)
         },
       )
       .subscribe()
@@ -108,7 +119,7 @@ export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defa
       cancelled = true
       void supabase.removeChannel(channel)
     }
-  }, [currentUserId, kbUserId])
+  }, [currentUserId, partnerUserId, kanal, additionalSenderIds])
 
   // Auto-Scroll bei neuen Nachrichten
   useEffect(() => {
@@ -136,7 +147,12 @@ export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defa
     setMessages((prev) => [...prev, optimistic])
     setInput('')
     startTransition(async () => {
-      const res = await sendKbKundeMessage({ nachricht: text, fallId: selectedFallId })
+      const res = await sendKundeChatMessage({
+        nachricht: text,
+        kanal,
+        empfaengerId: partnerUserId,
+        fallId: selectedFallId,
+      })
       if (!res.ok) {
         // Optimistic entfernen + Input wiederherstellen
         setMessages((prev) => prev.filter((m) => m.id !== optimistic.id))
@@ -319,7 +335,7 @@ export default function KundeKbChat({ currentUserId, kbUserId, fallOptions, defa
                 handleSend()
               }
             }}
-            placeholder="Nachricht an deinen Betreuer …"
+            placeholder={placeholder}
             rows={1}
             className="flex-1 resize-none rounded-xl border border-claimondo-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30 max-h-32"
             disabled={pending}

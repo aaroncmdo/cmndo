@@ -5,7 +5,7 @@
 // Liste (Fahrzeug, Kennzeichen, Fallnummer, KB).
 
 import { useEffect, useState, useTransition } from 'react'
-import { UserCheckIcon, UsersIcon, XIcon, CheckIcon, FileTextIcon, CarIcon, UserIcon } from 'lucide-react'
+import { UserCheckIcon, UsersIcon, XIcon, CheckIcon, FileTextIcon, CarIcon, UserIcon, WrenchIcon } from 'lucide-react'
 import {
   findKundenMatches,
   linkLeadToExistingKunde,
@@ -266,12 +266,20 @@ function KandidatCard({
                       {f.fahrzeug}
                     </span>
                   )}
-                  {f.kb_name && (
-                    <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-claimondo-ondo">
-                      <UserIcon className="w-3 h-3" />
-                      {f.kb_name}
-                    </span>
-                  )}
+                  <div className="ml-auto flex items-center gap-2">
+                    {f.kb_name && (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-claimondo-ondo">
+                        <UserIcon className="w-3 h-3" />
+                        KB: {f.kb_name}
+                      </span>
+                    )}
+                    {f.sv_name && (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-claimondo-ondo">
+                        <WrenchIcon className="w-3 h-3" />
+                        SV: {f.sv_name}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

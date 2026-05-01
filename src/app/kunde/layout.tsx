@@ -10,6 +10,7 @@ import UpdatesNav from '@/components/shared/updates'
 import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
 import KundenbetreuerCard from './_components/KundenbetreuerCard'
+import GutachterCard from './_components/GutachterCard'
 // CMM-28: Loader für singleFallId-Resolution in der Nav.
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
@@ -121,6 +122,48 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     fall_nummer: (f.fall_nummer as string | null) ?? null,
   }))
 
+  // Gutachter-Card-Daten (analog KB): SV des neusten Falls mit zugewiesenem
+  // SV. Sticky-SV sorgt fuer Konsistenz ueber alle Faelle.
+  let svCard: {
+    id: string
+    vorname: string | null
+    nachname: string | null
+    telefon: string | null
+    avatarUrl: string | null
+  } | null = null
+  if (navFaelle.length > 0) {
+    const { data: svFall } = await adminForNav
+      .from('faelle')
+      .select('id, sv_id')
+      .eq('kunde_id', user.id)
+      .not('sv_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const svId = (svFall?.sv_id as string | null) ?? null
+    if (svId) {
+      const { data: svRow } = await adminForNav
+        .from('sachverstaendige')
+        .select('profile_id, telefon, profiles(vorname, nachname, avatar_url, anzeigename)')
+        .eq('id', svId)
+        .maybeSingle()
+      const profileJoin = (svRow as { profiles?: { vorname: string | null; nachname: string | null; avatar_url: string | null; anzeigename: string | null } | { vorname: string | null; nachname: string | null; avatar_url: string | null; anzeigename: string | null }[] } | null)?.profiles
+      const profileRow = Array.isArray(profileJoin) ? profileJoin[0] : profileJoin
+      const svProfileId = (svRow?.profile_id as string | null) ?? null
+      if (svProfileId && profileRow) {
+        // AAR-858: Anonymitaet — nur Vorname (oder anzeigename), kein Nachname
+        const anzeige = profileRow.anzeigename
+        svCard = {
+          id: svProfileId,
+          vorname: anzeige ?? profileRow.vorname,
+          nachname: null,
+          telefon: (svRow?.telefon as string | null) ?? null,
+          avatarUrl: profileRow.avatar_url,
+        }
+      }
+    }
+  }
+
   // AAR-536 (K4): SV-Branding aufgelöst. `useBrand=true` nur wenn zugewiesener
   // SV verifiziert + use_custom_branding aktiv + Theme vorhanden.
   const branding = await resolveKundenTheme(user.id)
@@ -161,6 +204,21 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
         <KundeNav singleFallId={singleFallId} />
 
+        {/* Gutachter-Card oberhalb der KB-Card — Gruppenchat (Kunde+SV+KB) */}
+        {svCard && (
+          <GutachterCard
+            vorname={svCard.vorname}
+            nachname={svCard.nachname}
+            telefon={svCard.telefon}
+            avatarUrl={svCard.avatarUrl}
+            accentBg={accentBg}
+            fallId={singleFallId}
+            currentUserId={user.id}
+            svUserId={svCard.id}
+            kbUserId={kbCard?.id ?? null}
+            fallOptions={fallOptionsForChat}
+          />
+        )}
         {/* KB-Card direkt über Profil/Logout */}
         {kbCard && (
           <KundenbetreuerCard

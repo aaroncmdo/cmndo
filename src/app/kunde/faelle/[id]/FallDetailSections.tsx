@@ -87,33 +87,9 @@ export default function FallDetailSections({
       {/* Tab-Inhalt */}
       {activeTab === 'uebersicht' && (
         <div className="space-y-5">
-          {/* AAR-746: Shared Identity-Header statt handgerollter Aktueller-
-              Status-Section. KB + nächster Termin wandern in die Detail-
-              Section darunter. */}
-          <div className="-mx-4 sm:-mx-0 rounded-none sm:rounded-xl overflow-hidden sm:border sm:border-claimondo-border">
-            <FallIdentityHeader
-              rolle="kunde"
-              fallNummer={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)}
-              subphaseLabel={(fall.status as string) ?? null}
-              className="!border-b-0"
-            />
-          </div>
-
-          {/* "Ihr Betreuer" lebt jetzt in der Sidebar-KundenbetreuerCard
-              (mit Anrufen + Chat). FallKontakteCard zeigt nur noch den SV. */}
-          {svName && (
-            <FallKontakteCard
-              rolle="kunde"
-              kundenbetreuer={null}
-              sv={{
-                vorname: svName,
-                nachname: null,
-                telefon: svTelefon,
-                email: null,
-                verifiziert: svVerifiziert,
-              }}
-            />
-          )}
+          {/* FallIdentityHeader entfernt — die PageHeader weiter oben (page.tsx)
+              zeigt bereits CLM-Nr + Kennzeichen + Fahrzeug. KB + Gutachter leben
+              in den Sidebar-Cards. */}
 
           {/* AAR-754: Shared StammdatenReadSection — ersetzt die inline
               Fahrzeug-Section. Kunde-Rolle filtert eigenen Kontakt + Halter
