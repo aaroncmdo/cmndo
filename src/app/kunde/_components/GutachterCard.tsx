@@ -5,7 +5,7 @@
 // liest mit (kanal='gruppenchat') und kann jederzeit eingreifen.
 // Pin-Pattern + Glass-Modal sind identisch zur KundenbetreuerCard.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { PhoneIcon, MessageSquareIcon, XIcon } from 'lucide-react'
 import KundeKbChat from './KundeKbChat'
@@ -55,6 +55,8 @@ export default function GutachterCard({
   fallOptions,
 }: Props) {
   const [chatOpen, setChatOpen] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [cardRect, setCardRect] = useState<{ top: number; bottom: number; right: number } | null>(null)
 
   useEffect(() => {
     if (!chatOpen) return
@@ -63,9 +65,16 @@ export default function GutachterCard({
     }
     document.body.style.overflow = 'hidden'
     document.addEventListener('keydown', onKey)
+    const measure = () => {
+      const r = cardRef.current?.getBoundingClientRect()
+      if (r) setCardRect({ top: r.top, bottom: r.bottom, right: r.right })
+    }
+    measure()
+    window.addEventListener('resize', measure)
     return () => {
       document.body.style.overflow = ''
       document.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', measure)
     }
   }, [chatOpen])
 
@@ -75,6 +84,7 @@ export default function GutachterCard({
 
   return (
     <div
+      ref={cardRef}
       className={`mb-2 ml-3 transition-all duration-200 relative z-[1102] ${
         chatOpen
           ? 'mr-0 rounded-l-xl rounded-r-none glass-card-source pr-3'
@@ -135,8 +145,17 @@ export default function GutachterCard({
             aria-hidden="true"
           />
           <div
-            className="absolute md:left-64 md:bottom-4 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
-            style={{ transformOrigin: 'bottom left' }}
+            className="absolute left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
+            style={{
+              transformOrigin: 'bottom left',
+              ...(cardRect && typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
+                ? {
+                    left: `${cardRect.right}px`,
+                    bottom: `${window.innerHeight - cardRect.bottom}px`,
+                    height: `min(640px, calc(${cardRect.bottom}px - 1rem))`,
+                  }
+                : {}),
+            }}
           >
             <button
               type="button"

@@ -6,7 +6,7 @@
 // kein /kunde/chat-Iframe). Videotermin-Button öffnet das BeratungBuchen-
 // Sheet mit Google-Meet-Slot-Picker.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { PhoneIcon, MessageSquareIcon, VideoIcon, XIcon } from 'lucide-react'
 import BeratungBuchenSheet from '@/components/kunde/BeratungBuchenSheet'
@@ -63,6 +63,21 @@ export default function KundenbetreuerCard({
   const [chatOpen, setChatOpen] = useState(false)
   const [videoOpen, setVideoOpen] = useState(false)
   const [bookingKanal, setBookingKanal] = useState<'video' | 'telefon'>('video')
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [cardRect, setCardRect] = useState<{ top: number; bottom: number; right: number } | null>(null)
+
+  // Modal-Position an Card-Rect anbinden — wenn Modal offen, soll es vom
+  // rechten Card-Rand starten und vertikal mit der Card abschliessen.
+  useEffect(() => {
+    if (!chatOpen) return
+    const measure = () => {
+      const r = cardRef.current?.getBoundingClientRect()
+      if (r) setCardRect({ top: r.top, bottom: r.bottom, right: r.right })
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [chatOpen])
 
   // Videotermin braucht einen Fall. Single-Fall: direkt nehmen. Multi-Fall:
   // ersten verfuegbaren als Default. Wenn ueberhaupt kein Fall existiert,
@@ -89,6 +104,7 @@ export default function KundenbetreuerCard({
 
   return (
     <div
+      ref={cardRef}
       className={`mb-2 ml-3 transition-all duration-200 relative z-[1102] ${
         chatOpen
           ? 'mr-0 rounded-l-xl rounded-r-none glass-card-source pr-3'
@@ -162,8 +178,19 @@ export default function KundenbetreuerCard({
             aria-hidden="true"
           />
           <div
-            className="absolute md:left-64 md:bottom-4 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
-            style={{ transformOrigin: 'bottom left' }}
+            className="absolute left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
+            style={{
+              transformOrigin: 'bottom left',
+              // Desktop: an Card-Rect andocken — Modal-Bottom = Card-Bottom,
+              // Modal-Top fließt nach oben weg.
+              ...(cardRect && typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
+                ? {
+                    left: `${cardRect.right}px`,
+                    bottom: `${window.innerHeight - cardRect.bottom}px`,
+                    height: `min(640px, calc(${cardRect.bottom}px - 1rem))`,
+                  }
+                : {}),
+            }}
           >
             {/* Close-Button schwebt absolut oben rechts ueber dem Header */}
             <button

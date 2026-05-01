@@ -83,12 +83,15 @@ export default function KundeKbChat({
       .from('nachrichten')
       .select('id, fall_id, sender_id, nachricht, gelesen, created_at')
       .eq('kanal', kanal)
-      .order('created_at', { ascending: true })
-      .limit(200)
+      .order('created_at', { ascending: false })
+      .limit(500)
       .then(({ data }) => {
         if (cancelled) return
         const rows = (data ?? []) as Nachricht[]
-        const filtered = rows.filter((m) => validSenders.has(m.sender_id ?? ''))
+        // Newest 500 holen, dann auf chronologische Reihenfolge bringen
+        const filtered = rows
+          .filter((m) => validSenders.has(m.sender_id ?? ''))
+          .reverse()
         setMessages(filtered)
       })
 
