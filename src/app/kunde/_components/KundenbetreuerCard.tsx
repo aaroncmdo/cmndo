@@ -194,8 +194,19 @@ export default function KundenbetreuerCard({
             aria-hidden="true"
           />
           <div
-            className="absolute md:left-64 md:bottom-4 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
-            style={{ transformOrigin: 'bottom left' }}
+            className="absolute left-3 right-3 bottom-3 md:right-auto md:w-[400px] flex flex-col rounded-r-2xl rounded-l-none md:glass-edge max-md:glass-shell max-md:rounded-2xl overflow-hidden animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
+            style={{
+              transformOrigin: 'bottom left',
+              // Desktop: an Card-Rect andocken (Modal-Bottom = Card-Bottom),
+              // damit das Modal auch bei der OBEREN Card direkt aus ihr fliesst.
+              ...(cardRect && typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
+                ? {
+                    left: `${cardRect.right}px`,
+                    bottom: `${window.innerHeight - cardRect.bottom}px`,
+                    height: `${Math.min(640, cardRect.bottom - 16)}px`,
+                  }
+                : { height: 'min(640px, calc(100vh - 2rem))' }),
+            }}
           >
             <button
               type="button"
