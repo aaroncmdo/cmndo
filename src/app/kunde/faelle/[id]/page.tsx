@@ -65,6 +65,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const fall = await getKundeFallDetailRecord(admin, user.id, user.email ?? null, id)
     if (!fall) notFound()
 
+    // Kunde-Vorname (für TerminLiveStatus "X ist da")
+    const { data: kundeProfile } = await admin
+      .from('profiles')
+      .select('vorname')
+      .eq('id', user.id)
+      .maybeSingle()
+    const kundeVorname = (kundeProfile?.vorname as string | null) ?? null
+
     // CMM-28: Zurück-Link „← Meine Fälle" nur sinnvoll wenn der Kunde
     // mehrere Fälle hat. Bei Single-Fall existiert keine Liste-Seite zum
     // zurückkehren (Layout-Nav heißt „Mein Fall" + linked direkt hierher).
@@ -434,6 +442,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 adresse: terminAdresse,
                 // AAR-858: nur Vorname für Anonymität
                 svVorname: svKontakt?.name?.split(' ')[0] ?? null,
+                kundeVorname: kundeVorname ?? null,
               }
             : null
           return (

@@ -7,6 +7,7 @@
 import React from 'react'
 import { CheckIcon, ClipboardListIcon, WrenchIcon, ShieldCheckIcon, FlagIcon, AlertTriangleIcon, CalendarIcon, NavigationIcon } from 'lucide-react'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
+import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
   MAIN_PHASE_LABEL,
   SUBPHASE_LABEL,
@@ -39,6 +40,8 @@ type TerminInfo = {
   adresse: string | null
   /** SV-Vorname (nur Vorname — AAR-858 Anonymität) */
   svVorname?: string | null
+  /** Kunde-Vorname für die "X ist da"-Anzeige im Live-Status */
+  kundeVorname?: string | null
   /** Termin-Status — bei 'bestaetigt' wird der Verschieben-Button gezeigt */
   status?: string | null
 }
@@ -170,9 +173,16 @@ export default function ClaimStepper({
             <div className="flex items-center gap-2.5 min-w-0">
               <CalendarIcon className="w-4 h-4 shrink-0 text-claimondo-navy" />
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-claimondo-navy">
-                  {terminInfo.datum}, {terminInfo.uhrzeit} Uhr
-                </p>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <p className="text-sm font-semibold text-claimondo-navy">
+                    {terminInfo.datum}, {terminInfo.uhrzeit} Uhr
+                  </p>
+                  <TerminLiveStatus
+                    terminId={terminInfo.terminId}
+                    svVorname={terminInfo.svVorname}
+                    kundeVorname={terminInfo.kundeVorname}
+                  />
+                </div>
                 {terminInfo.adresse && (
                   <p className="text-xs text-claimondo-ondo truncate">
                     {terminInfo.adresse}

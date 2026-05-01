@@ -21,7 +21,7 @@ import { formatUhrzeit } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
 import type { FeldmodusStop } from './page'
 import type { SessionStatus } from '@/lib/types/field-modus'
-import { completeAndAdvance } from './actions'
+import { completeAndAdvance, markSvVorOrt, markBesichtigungGestartet } from './actions'
 
 export interface AktuellerStopCardProps {
   stop: FeldmodusStop
@@ -56,21 +56,27 @@ export default function AktuellerStopCard({
   onArrived,
 }: AktuellerStopCardProps) {
   const [pending, startTransition] = useTransition()
-  const arrivedFiredRef = useRef(false)
 
-  // AAR-384: Kunde-Tracking-State live beobachten.
+  // AAR-384 + Auto-Arrive: Termin-State live beobachten (Kunde-Tracking +
+  // sv_angekommen_am + besichtigung_gestartet_am).
   const supabase = useMemo(() => createClient(), [])
   const [kundeTracking, setKundeTracking] = useState<{
     aktiviert: boolean
     etaMinutes: number | null
     angekommenAm: string | null
   }>({ aktiviert: false, etaMinutes: null, angekommenAm: null })
+  const [svAngekommenAm, setSvAngekommenAm] = useState<string | null>(stop.sv_angekommen_am ?? null)
+  const [besichtigungGestartetAm, setBesichtigungGestartetAm] = useState<string | null>(null)
+  const svVorOrtFiredRef = useRef(false)
+  const besichtigungFiredRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
     void supabase
       .from('gutachter_termine')
-      .select('kunde_tracking_aktiviert, kunde_eta_minuten, kunde_angekommen_am')
+      .select(
+        'kunde_tracking_aktiviert, kunde_eta_minuten, kunde_angekommen_am, sv_angekommen_am, besichtigung_gestartet_am',
+      )
       .eq('id', stop.termin_id)
       .single()
       .then(({ data }) => {
@@ -80,9 +86,11 @@ export default function AktuellerStopCard({
           etaMinutes: (data.kunde_eta_minuten as number | null) ?? null,
           angekommenAm: (data.kunde_angekommen_am as string | null) ?? null,
         })
+        setSvAngekommenAm((data.sv_angekommen_am as string | null) ?? null)
+        setBesichtigungGestartetAm((data.besichtigung_gestartet_am as string | null) ?? null)
       })
     const channel = supabase
-      .channel(`sv-kunde-eta-${stop.termin_id}`)
+      .channel(`sv-termin-state-${stop.termin_id}`)
       .on(
         'postgres_changes',
         {
@@ -96,12 +104,16 @@ export default function AktuellerStopCard({
             kunde_tracking_aktiviert: boolean | null
             kunde_eta_minuten: number | null
             kunde_angekommen_am: string | null
+            sv_angekommen_am: string | null
+            besichtigung_gestartet_am: string | null
           }
           setKundeTracking({
             aktiviert: !!row.kunde_tracking_aktiviert,
             etaMinutes: row.kunde_eta_minuten ?? null,
             angekommenAm: row.kunde_angekommen_am ?? null,
           })
+          setSvAngekommenAm(row.sv_angekommen_am ?? null)
+          setBesichtigungGestartetAm(row.besichtigung_gestartet_am ?? null)
         },
       )
       .subscribe()
@@ -111,55 +123,92 @@ export default function AktuellerStopCard({
     }
   }, [supabase, stop.termin_id])
 
-  const angekommen = Boolean(stop.sv_angekommen_am) || sessionStatus === 'arrived'
+  const besichtigungLaeuft = Boolean(besichtigungGestartetAm) || sessionStatus === 'arrived'
+  const svIstDa = Boolean(svAngekommenAm)
 
-  // Reset arrived-flag wenn neuer Stop geladen wird
+  // Reset arrived-flags wenn neuer Stop geladen wird
   useEffect(() => {
-    arrivedFiredRef.current = false
+    svVorOrtFiredRef.current = false
+    besichtigungFiredRef.current = false
   }, [stop.termin_id])
 
-  // Auto-Ankunft via Geofence: SV vor Ort UND Kunde vor Ort (falls aktiv)
+  // Phase 1: SV im Geofence → sv_angekommen_am setzen (alleine)
   useEffect(() => {
-    if (angekommen) return
-    if (arrivedFiredRef.current) return
+    if (svIstDa || svVorOrtFiredRef.current) return
     if (!svInGeofence) return
-    // Wenn Kunde aktiv getrackt wird, MUSS er ebenfalls angekommen sein.
-    if (kundeTracking.aktiviert && !kundeTracking.angekommenAm) return
-    arrivedFiredRef.current = true
-    onArrived(
+    svVorOrtFiredRef.current = true
+    void markSvVorOrt(
+      stop.termin_id,
       svPosition?.lat ?? stop.lat ?? 0,
       svPosition?.lng ?? stop.lng ?? 0,
       'geofence',
-    )
+    ).catch(() => {
+      svVorOrtFiredRef.current = false
+    })
+  }, [svIstDa, svInGeofence, stop.termin_id, svPosition, stop.lat, stop.lng])
+
+  // Phase 2: Beide vor Ort → besichtigung_gestartet_am
+  useEffect(() => {
+    if (besichtigungLaeuft || besichtigungFiredRef.current) return
+    if (!svIstDa) return
+    if (kundeTracking.aktiviert && !kundeTracking.angekommenAm) return
+    besichtigungFiredRef.current = true
+    void markBesichtigungGestartet(sessionId, stop.termin_id, 'beide_angekommen')
+      .then((res) => {
+        if (res.success) {
+          onArrived(
+            svPosition?.lat ?? stop.lat ?? 0,
+            svPosition?.lng ?? stop.lng ?? 0,
+            'geofence',
+          )
+        } else {
+          besichtigungFiredRef.current = false
+        }
+      })
+      .catch(() => {
+        besichtigungFiredRef.current = false
+      })
   }, [
-    angekommen,
-    svInGeofence,
+    besichtigungLaeuft,
+    svIstDa,
     kundeTracking.aktiviert,
     kundeTracking.angekommenAm,
+    sessionId,
+    stop.termin_id,
     onArrived,
     svPosition,
     stop.lat,
     stop.lng,
   ])
 
-  // Fallback: Terminuhrzeit erreicht und GPS nicht verfügbar
+  // Phase 3 — Fallback: Terminuhrzeit erreicht und GPS nicht überall
   useEffect(() => {
-    if (angekommen) return
-    // Wenn beide Seiten GPS-Tracking haben, kein Zeit-Fallback nötig
+    if (besichtigungLaeuft) return
     if (permissionState === 'granted' && kundeTracking.aktiviert) return
     const startMs = new Date(stop.start_zeit).getTime()
     const delay = Math.max(0, startMs - Date.now())
     const timer = setTimeout(() => {
-      if (arrivedFiredRef.current) return
-      if (angekommen) return
-      arrivedFiredRef.current = true
-      onArrived(stop.lat ?? 0, stop.lng ?? 0, 'termin_uhrzeit')
+      if (besichtigungFiredRef.current) return
+      besichtigungFiredRef.current = true
+      void markBesichtigungGestartet(sessionId, stop.termin_id, 'termin_uhrzeit')
+        .then((res) => {
+          if (res.success) {
+            onArrived(stop.lat ?? 0, stop.lng ?? 0, 'termin_uhrzeit')
+          } else {
+            besichtigungFiredRef.current = false
+          }
+        })
+        .catch(() => {
+          besichtigungFiredRef.current = false
+        })
     }, delay)
     return () => clearTimeout(timer)
   }, [
-    angekommen,
+    besichtigungLaeuft,
     permissionState,
     kundeTracking.aktiviert,
+    sessionId,
+    stop.termin_id,
     stop.start_zeit,
     stop.lat,
     stop.lng,
@@ -184,7 +233,7 @@ export default function AktuellerStopCard({
 
   // Status-Hinweis für den SV (ersetzt die alten Action-Buttons)
   const statusHinweis = (() => {
-    if (angekommen) return null
+    if (besichtigungLaeuft) return null
     if (svInGeofence && kundeTracking.aktiviert && !kundeTracking.angekommenAm) {
       return 'Du bist vor Ort — warte auf Kunde'
     }
@@ -272,7 +321,7 @@ export default function AktuellerStopCard({
 
       {/* Aktionen */}
       <div className="flex flex-col gap-2 pt-2">
-        {angekommen && sessionStatus !== 'finished' && (
+        {besichtigungLaeuft && sessionStatus !== 'finished' && (
           <button
             type="button"
             onClick={onAbschliessen}
