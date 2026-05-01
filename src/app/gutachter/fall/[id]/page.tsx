@@ -238,15 +238,31 @@ export default async function GutachterFallPage({
   // KFZ-134: Aktiven gutachter_termine Eintrag laden (admin-client bereits oben)
   // CMM-23: zusätzlich kunde_losgefahren_am, kunde_angekommen_am und
   // durchgefuehrt_am für die Phasen-Bestimmung.
-  const { data: aktiverTermin } = await admin
+  // AAR-864: verlegung_pending zum Status-Filter — wenn der SV verlegt hat,
+  // ist der NEUE Slot der "aktuelle" Termin den der Header rendert (mit
+  // dem read-only „Verlegung beantragt — Bestätigung ausstehend"-Hinweis).
+  // verlegt-Slot bleibt draußen — er ist nur Slot-Blocker im Kalender.
+  const { data: aktiveTermine } = await admin
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_unterwegs_seit, sv_angekommen_am, durchgefuehrt_am, geschaetzte_fahrtzeit_min, sv_eta_minuten')
+    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_unterwegs_seit, sv_angekommen_am, durchgefuehrt_am, geschaetzte_fahrtzeit_min, sv_eta_minuten, verlegung_initiator_kunde')
     .eq('fall_id', id)
     .eq('sv_id', sv.id)
-    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'durchgefuehrt'])
+    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'durchgefuehrt', 'verlegung_pending'])
     .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+
+  // Priorität wie in v_faelle_mit_aktuellem_termin:
+  // bestaetigt > verlegung_pending > gegenvorschlag > reserviert > durchgefuehrt.
+  const STATUS_PRIO: Record<string, number> = {
+    bestaetigt: 1,
+    verlegung_pending: 2,
+    gegenvorschlag: 3,
+    reserviert: 4,
+    durchgefuehrt: 5,
+  }
+  const aktiverTermin = (aktiveTermine ?? []).slice().sort(
+    (a, b) =>
+      (STATUS_PRIO[a.status as string] ?? 9) - (STATUS_PRIO[b.status as string] ?? 9),
+  )[0] ?? null
 
   // AAR-327: Katalog-Slots für Dokument-Anforderung (rolle=sachverstaendiger).
   // Cachelayer: getAlleSlots dedupliziert intern (TTL 5 min), daher ist der

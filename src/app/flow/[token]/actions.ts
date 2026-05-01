@@ -1110,6 +1110,44 @@ export async function signSAandCreateFall(
         } catch (err) { console.error('[AAR-360] SA-Tool unerwartet:', err) }
       })()
     )
+
+    // Aaron 2026-04-30: Multi-Doc-Signatur — alle SV-Pflichtdokumente
+    // (Sicherungsabtretung / Honorarvereinbarung / Datenschutz / Widerruf)
+    // mit Kunden-Unterschrift versehen + claim-zentriert ablegen.
+    // Sichtbar im SV-Auftrag, NICHT im Kunden-Portal.
+    slaPromises.push(
+      (async () => {
+        try {
+          const { data: fallRow } = await admin
+            .from('faelle')
+            .select('claim_id')
+            .eq('id', fall.id)
+            .maybeSingle()
+          const claimId = (fallRow?.claim_id as string | null) ?? null
+
+          const { generateGutachterPflichtdokumente } = await import(
+            '@/lib/sa-tool/generate-pflichtdokumente'
+          )
+          const results = await generateGutachterPflichtdokumente({
+            admin,
+            fallId: fall.id,
+            claimId,
+            svId: svIdFromTermin!,
+            kundenVorname: (lead.vorname as string | null) ?? null,
+            kundenNachname: (lead.nachname as string | null) ?? null,
+            kundenSignaturUrl: signatureUrl,
+          })
+          for (const r of results) {
+            if (!r.success) {
+              const tag = r.skipped ? 'übersprungen' : 'Fehler'
+              console.warn(`[Pflichtdok-Merge] ${r.slotId} ${tag}:`, r.error)
+            }
+          }
+        } catch (err) {
+          console.error('[Pflichtdok-Merge] unerwartet:', err)
+        }
+      })(),
+    )
   }
 
   // AAR-377: SV-Briefing asynchron generieren. Der Fall ist bereits angelegt —

@@ -8,6 +8,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import Link from 'next/link'
 import { BriefcaseIcon } from 'lucide-react'
 import AuftragCard from './AuftragCard'
+import TagesvorbereitungButton from './TagesvorbereitungButton'
 import { getUrsacheLabel } from '@/lib/statusLabels'
 import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
@@ -67,7 +68,10 @@ export default async function AuftraegePage({
     return (
       <div className="h-full flex flex-col">
         <div className="w-full space-y-6">
-          <PageHeader title="Meine Aufträge" description="0 Aufträge" icon={BriefcaseIcon} />
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <PageHeader title="Meine Aufträge" description="0 Aufträge" icon={BriefcaseIcon} />
+            <TagesvorbereitungButton />
+          </div>
           <EmptyState title="Keine Aufträge gefunden." />
         </div>
       </div>
@@ -78,7 +82,7 @@ export default async function AuftraegePage({
   const [faelleRes, katalogRes, offenRes, termineRes] = await Promise.all([
     admin
       .from('faelle')
-      .select('id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lackfarbe_code, lead_id, sa_unterschrieben')
+      .select('id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, sa_unterschrieben')
       .in('id', fallIds),
     admin.from('dokument_katalog').select('slot_id, uploadbar_von'),
     admin
@@ -143,11 +147,14 @@ export default async function AuftraegePage({
   return (
     <div className="h-full flex flex-col">
       <div className="w-full space-y-6">
-        <PageHeader
-          title="Meine Aufträge"
-          description={`${sichtbareAuftraege.length} ${sichtbareAuftraege.length === 1 ? 'Auftrag' : 'Aufträge'}`}
-          icon={BriefcaseIcon}
-        />
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <PageHeader
+            title="Meine Aufträge"
+            description={`${sichtbareAuftraege.length} ${sichtbareAuftraege.length === 1 ? 'Auftrag' : 'Aufträge'}`}
+            icon={BriefcaseIcon}
+          />
+          <TagesvorbereitungButton />
+        </div>
 
         <div className="flex gap-2 overflow-x-auto">
           {(
@@ -193,6 +200,7 @@ export default async function AuftraegePage({
                     kennzeichen: (fall.kennzeichen as string | null) ?? null,
                     fahrzeug_hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
                     fahrzeug_modell: (fall.fahrzeug_modell as string | null) ?? null,
+                    fahrzeug_baujahr: (fall.fahrzeug_baujahr as string | number | null) ?? null,
                     lackfarbe_code: (fall.lackfarbe_code as string | null) ?? null,
                   }}
                   kunde={kunde ? { vorname: kunde.vorname, nachname: kunde.nachname } : null}

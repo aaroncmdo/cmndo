@@ -37,13 +37,15 @@ import type { TeamMitglied } from './_components/FallakteDrawer'
 // kein Activity-Feed. Stellungnahme/Nachbesichtigung/Konfrontation
 // rendern als Mitteilungs-Banner oben (topServerBlocks aus page.tsx).
 import { StammdatenCard } from './_components/StammdatenCard'
-// CMM-32: Master-Detail-Stammdaten — links klickbare Tabelle, rechts Detail-Block.
-import StammdatenAccordion, { type StammdatenCategory } from '@/components/fall/StammdatenAccordion'
-import StammdatenDetail from '@/components/fall/StammdatenDetail'
+// CMM-32: Master-Detail-Stammdaten — Accordion mit Inline-Expansion.
+import StammdatenAccordion from '@/components/fall/StammdatenAccordion'
 import { useState } from 'react'
 import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
+import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
+import FallWindowDropzone from '@/components/gutachter/FallWindowDropzone'
+import AnsprechpartnerCard from './_components/AnsprechpartnerCard'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
@@ -242,11 +244,6 @@ export default function FallDetailClient(props: Props) {
       .filter(Boolean)
       .join(' ') || null
 
-  // CMM-32 Stammdaten-Master-Detail: ausgewählte Kategorie steuert was im
-  // rechten Detail-Slot gerendert wird. null = Default-Layout (Dokumente).
-  const [stammdatenSelected, setStammdatenSelected] =
-    useState<StammdatenCategory | null>(null)
-
   // AAR-405: Team-Tab befüllen — Kundenbetreuer + Kunde; Kanzlei folgt mit
   // eigener Daten-Ladung, sobald Phase 5 (Kanzlei-Integration) live ist.
   const team: TeamMitglied[] = []
@@ -323,6 +320,7 @@ export default function FallDetailClient(props: Props) {
     svId: props.svId ?? null,
     zielAdresse: hatGutachten ? null : besichtigungsAdresse,
     terminStartIso: aktiverTermin?.start_zeit ?? null,
+    terminStatus: aktiverTermin?.status ?? null,
     geschaetzteFahrtzeitMin: aktiverTermin?.geschaetzte_fahrtzeit_min ?? null,
     kundeAngekommenAm: aktiverTermin?.sv_angekommen_am ?? null,
     terminId: aktiverTermin?.id ?? null,
@@ -332,19 +330,27 @@ export default function FallDetailClient(props: Props) {
   })
 
   return (
-    <div className="min-h-full bg-[#f8f9fb]">
-      <FallHeader
-        fallNummer={fallNummer}
-        fallId={fall.id as string}
-        kundenName={kundenName}
-        ort={ort}
-        kennzeichen={kennzeichen}
-        fahrzeug={fahrzeug}
-        subphase={subphase}
-        drawer={drawerData}
-        aktuellePhaseSnake={aktuellePhaseSnake}
-        abgeschlossenAm={abgeschlossenAm}
-      />
+    <div className="min-h-full bg-[#f8f9fb] -mx-2 sm:-mx-3 lg:-mx-4 -mb-2 sm:-mb-3 lg:-mb-4 -mt-2 sm:-mt-3 lg:-mt-4 [&_.rounded-2xl]:shadow-sm">
+      <FallRealtimeRefresh fallId={fall.id as string} />
+      <FallWindowDropzone fallId={fall.id as string} />
+      {/* AAR-864 Polish: Akten-Header sticky direkt am Wrapper-Oberrand.
+          Negativer top kompensiert das main-Padding (p-2/3/4) damit der
+          Sticky-Anker direkt an der oberen rounded-2xl-Kante des Wrappers
+          klebt, nicht am Padding-Inside. */}
+      <div className="sticky -top-2 sm:-top-3 lg:-top-4 z-30 bg-[#f8f9fb] shadow-sm">
+        <FallHeader
+          fallNummer={fallNummer}
+          fallId={fall.id as string}
+          kundenName={kundenName}
+          ort={ort}
+          kennzeichen={kennzeichen}
+          fahrzeug={fahrzeug}
+          subphase={subphase}
+          drawer={drawerData}
+          aktuellePhaseSnake={aktuellePhaseSnake}
+          abgeschlossenAm={abgeschlossenAm}
+        />
+      </div>
 
       {/* Stepper + Termin-Banner als verschmolzener Header — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
@@ -374,12 +380,11 @@ export default function FallDetailClient(props: Props) {
         </div>
       )}
 
-      {/* CMM-23 Aaron-Layout: links Stammdaten; rechts Termin +
-          Gutachten + hochgeladene Dokumente. */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-4 sm:gap-6">
-        <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start min-w-0">
-          {/* CMM-32: Master-Detail — kompakte klickbare Tabelle.
-              Detail-Block rendert in der rechten Section (siehe unten). */}
+      {/* CMM-32 Walkthrough: Stammdaten-Block links, Dokumente rechts
+          daneben. Aaron 2026-04-30: Dokumente waren als Tab kontra-
+          intuitiv — jetzt eigene Spalte. Mobile: stacked. */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4 sm:gap-6">
           <StammdatenAccordion
             data={{
               fall,
@@ -387,92 +392,8 @@ export default function FallDetailClient(props: Props) {
               parteien: props.parteien,
               dokumenteAnzahl: (props.dokumente ?? []).length,
             }}
-            selected={stammdatenSelected}
-            onSelect={setStammdatenSelected}
           />
-          {/* CMM-32: StammdatenCard alte Variante als Fallback nur wenn
-              man explizit alle Daten auf einen Blick will (read-only Cardentity-
-              Footer). Vorerst raus — der Detail-Block ersetzt sie. */}
-          {false && (
-            <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
-          )}
-        </aside>
-
-        <section className="space-y-4 min-w-0">
-          {/* CMM-32 Walkthrough: TerminCard rausgenommen — Termin-Info lebt
-              jetzt im AuftragHeaderPanel oben (Banner-Sektion 2). */}
-          {/* CMM-23: Vorschäden-Hinweis — wenn der Kunde im Lead/Claim
-              Vorschäden gemeldet hat, weiß der SV das vor dem Termin und
-              kann die nachgereichten Reparaturrechnungen direkt sehen. */}
-          {!!fall.hat_vorschaeden && (
-            <div className="rounded-2xl bg-amber-50/40 border border-amber-200 p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
-                  <span className="text-lg">⚠️</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-claimondo-navy">
-                    Vorschäden gemeldet
-                  </p>
-                  <p className="text-xs text-claimondo-ondo mt-1">
-                    Der Kunde hat{' '}
-                    <span className="font-medium text-claimondo-navy">
-                      {fall.vorschaden_anzahl != null
-                        ? `${String(fall.vorschaden_anzahl)} Vorschäden`
-                        : 'Vorschäden'}
-                    </span>{' '}
-                    am Fahrzeug angegeben. Reparaturrechnungen werden — falls
-                    vorhanden — über den gelben Banner mit nachgereicht.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-          <GutachtenCard
-            fallId={fall.id as string}
-            fallNummer={fallNummer}
-            subphase={subphase}
-            gutachten={
-              (sichtbarFallDokumente ?? [])
-                .filter((d) => d.dokument_typ === 'gutachten')
-                .map((d) => ({
-                  id: d.id,
-                  dokument_typ: d.dokument_typ,
-                  storage_path: d.storage_path,
-                  original_filename: d.original_filename,
-                  hochgeladen_am: d.hochgeladen_am,
-                }))
-            }
-          />
-          {/* CMM-32: Master-Detail — wenn der SV in der Stammdaten-Tabelle
-              eine Kategorie wählt, ersetzt der Detail-Block hier die
-              WeitereDokumenteCard. Standard: WeitereDokumenteCard sichtbar. */}
-          {stammdatenSelected ? (
-            <StammdatenDetail
-              category={stammdatenSelected}
-              data={{
-                fall,
-                lead,
-                parteien: props.parteien,
-                dokumenteAnzahl: (props.dokumente ?? []).length,
-              }}
-              onClose={() => setStammdatenSelected(null)}
-              dokumenteSlot={
-                <WeitereDokumenteCard
-                  fallId={fall.id as string}
-                  dokumente={(props.dokumente ?? []).map((d) => ({
-                    id: String(d.id),
-                    dokument_typ: (d.typ as string | null) ?? null,
-                    datei_url: (d.datei_url as string | null) ?? null,
-                    datei_name: (d.datei_name as string | null) ?? null,
-                    hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
-                    created_at: (d.created_at as string | null) ?? null,
-                    storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
-                  }))}
-                />
-              }
-            />
-          ) : (
+          <div className="space-y-4">
             <WeitereDokumenteCard
               fallId={fall.id as string}
               dokumente={(props.dokumente ?? []).map((d) => ({
@@ -485,8 +406,56 @@ export default function FallDetailClient(props: Props) {
                 storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
               }))}
             />
-          )}
-        </section>
+            <AnsprechpartnerCard team={team} />
+          </div>
+        </div>
+
+        {/* CMM-32: alte StammdatenCard-Fallback — vorerst raus */}
+        {false && (
+          <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
+        )}
+
+        {!!fall.hat_vorschaeden && (
+          <div className="rounded-2xl bg-amber-50/40 border border-amber-200 p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">⚠️</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-claimondo-navy">
+                  Vorschäden gemeldet
+                </p>
+                <p className="text-xs text-claimondo-ondo mt-1">
+                  Der Kunde hat{' '}
+                  <span className="font-medium text-claimondo-navy">
+                    {fall.vorschaden_anzahl != null
+                      ? `${String(fall.vorschaden_anzahl)} Vorschäden`
+                      : 'Vorschäden'}
+                  </span>{' '}
+                  am Fahrzeug angegeben. Reparaturrechnungen werden — falls
+                  vorhanden — über den gelben Banner mit nachgereicht.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <GutachtenCard
+          fallId={fall.id as string}
+          fallNummer={fallNummer}
+          subphase={subphase}
+          gutachten={
+            (sichtbarFallDokumente ?? [])
+              .filter((d) => d.dokument_typ === 'gutachten')
+              .map((d) => ({
+                id: d.id,
+                dokument_typ: d.dokument_typ,
+                storage_path: d.storage_path,
+                original_filename: d.original_filename,
+                hochgeladen_am: d.hochgeladen_am,
+              }))
+          }
+        />
       </div>
 
       {/* CMM-32: Vor-Ort-Trigger ganz unten */}

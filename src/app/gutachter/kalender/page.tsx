@@ -67,6 +67,26 @@ export default async function SVKalenderPage({
         .in('status', ['reserviert', 'bestaetigt'])
     : { data: [] }
 
+  // AAR-864: verlegt-Slots als „Privater Termin"-Blocker im Kalender. Diese
+  // tauchen NICHT in v_faelle_mit_aktuellem_termin auf (View priorisiert
+  // verlegung_pending), sollen aber im Kalender weiter Slot-blockierend
+  // sichtbar sein damit der SV nicht versehentlich neu drauf bucht.
+  const fenster = new Date()
+  const von = new Date(fenster.getFullYear(), fenster.getMonth(), fenster.getDate() - 14).toISOString()
+  const bis = new Date(fenster.getFullYear(), fenster.getMonth(), fenster.getDate() + 35).toISOString()
+  const { data: verlegteRows } = await supabase
+    .from('gutachter_termine')
+    .select('id, start_zeit, end_zeit')
+    .eq('sv_id', sv.id)
+    .eq('status', 'verlegt')
+    .gte('start_zeit', von)
+    .lte('start_zeit', bis)
+  const verlegteSlots = (verlegteRows ?? []).map((r) => ({
+    id: r.id as string,
+    start: r.start_zeit as string,
+    end: r.end_zeit as string,
+  }))
+
   // Fetch lead names
   const leadIds = [...new Set((faelle ?? []).map(f => f.lead_id).filter(Boolean))]
   const { data: leads } = leadIds.length > 0
@@ -123,6 +143,7 @@ export default async function SVKalenderPage({
             final_verbindlich_ab: t.final_verbindlich_ab as string | null,
           }))}
           externalBusy={externalBusy}
+          verlegteSlots={verlegteSlots}
         />
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">

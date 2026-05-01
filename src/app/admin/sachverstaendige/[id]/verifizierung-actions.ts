@@ -7,6 +7,13 @@ import { createLinkedTask } from '@/lib/tasks/create-task'
 import { getKatalogSlot } from '@/lib/dokumente/katalog'
 import { revalidatePath } from 'next/cache'
 
+const ADMIN_UPLOADBARE_SLOTS = [
+  'sv_sicherungsabtretung',
+  'sv_honorarvereinbarung',
+  'sv_datenschutzerklaerung',
+  'sv_widerrufsbelehrung',
+] as const
+
 // AAR-359 W6: Admin-Actions für Verifizierungs-Tab.
 //
 // Die 6 Actions bilden den Admin-seitigen Gegenpart zum SV-Upload-Flow:
@@ -425,4 +432,119 @@ export async function dokumenteAlleFreigeben(
 
   revalidateBoth(svId)
   return { success: true }
+}
+
+// ─── Admin-Upload für SV-Pflichtdokumente ────────────────────────────
+//
+// Aaron-Spec 2026-04-30: Admin soll im SV-Detail-Tab die 4 Pflicht-
+// Dokumente (Sicherungsabtretung / Honorarvereinbarung / Datenschutz-
+// erklärung / Widerrufsbelehrung) selbst hochladen können — z.B. wenn
+// der SV sie per Email schickt statt durchs Onboarding zu laden.
+//
+// Storage-Pfad ist IDENTISCH zum SV-Onboarding-Upload
+// (`fall-dokumente/sv-pflicht/${svId}/${slotId}/${ts}.${ext}`) und
+// die `pflichtdokumente`-Row wird beim Upsert wiederverwendet.
+// Damit referenziert ein bereits hochgeladenes Dokument exakt die
+// gleiche Storage-URL — keine Duplikate, kein doppeltes Pflegen.
+//
+// Unterschied zum SV-Upload:
+//   - quelle = 'admin'
+//   - status direkt = 'geprueft' (Admin-Upload = bereits geprüft,
+//     wer den Dokumentenstand selbst eingetragen hat hat ihn auch
+//     visuell verifiziert)
+//   - kein Admin-Review-Task (es ist ja schon der Admin)
+
+export async function uploadAdminPflichtdokument(
+  svId: string,
+  formData: FormData,
+): Promise<{ ok: boolean; storage_path?: string; error?: string }> {
+  const auth = await requireAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+
+  const slotId = (formData.get('slot_id') as string | null)?.trim() ?? ''
+  const file = formData.get('datei') as File | null
+  if (!slotId) return { ok: false, error: 'Kein Slot angegeben' }
+  if (!ADMIN_UPLOADBARE_SLOTS.includes(slotId as typeof ADMIN_UPLOADBARE_SLOTS[number])) {
+    return { ok: false, error: `Slot "${slotId}" ist nicht admin-uploadbar` }
+  }
+  if (!file || file.size === 0) return { ok: false, error: 'Keine Datei ausgewählt' }
+
+  const supabase = await createClient()
+  const slot = await getKatalogSlot(supabase, slotId)
+  if (!slot || !slot.aktiv) return { ok: false, error: `Unbekannter oder deaktivierter Slot: ${slotId}` }
+
+  const maxBytes = slot.max_mb * 1024 * 1024
+  if (file.size > maxBytes) return { ok: false, error: `Datei zu groß (max ${slot.max_mb} MB)` }
+  if (
+    slot.akzeptierte_mime_types.length > 0 &&
+    file.type &&
+    !slot.akzeptierte_mime_types.includes(file.type) &&
+    file.type !== 'application/octet-stream'
+  ) {
+    return {
+      ok: false,
+      error: `MIME-Type nicht erlaubt (erwartet: ${slot.akzeptierte_mime_types.join(', ')})`,
+    }
+  }
+
+  const db = createAdminClient()
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin'
+
+  // Identischer Pfad wie uploadSvPflichtdokument — der SA-Tool-Generator
+  // und alle Loader prüfen exakt diesen Pfad-Pattern.
+  const path = `sv-pflicht/${svId}/${slotId}/${Date.now()}.${ext}`
+  const { error: uploadErr } = await db.storage
+    .from('fall-dokumente')
+    .upload(path, file, {
+      contentType: file.type || 'application/octet-stream',
+      upsert: true,
+    })
+  if (uploadErr) return { ok: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
+
+  // Row upsert — wenn der SV bereits hochgeladen hatte, überschreiben
+  // wir die Storage-Referenz damit „eine Wahrheit pro Slot".
+  const { data: existing } = await db
+    .from('pflichtdokumente')
+    .select('id')
+    .eq('sv_id', svId)
+    .eq('dokument_typ', slotId)
+    .maybeSingle()
+
+  if (existing) {
+    const { error: updErr } = await db
+      .from('pflichtdokumente')
+      .update({
+        status: 'geprueft',
+        dokument_url: path,
+        hochgeladen_am: new Date().toISOString(),
+        quelle: 'admin',
+        begruendung: null,
+      })
+      .eq('id', existing.id)
+    if (updErr) return { ok: false, error: `DB-Update fehlgeschlagen: ${updErr.message}` }
+  } else {
+    const { error: insErr } = await db.from('pflichtdokumente').insert({
+      sv_id: svId,
+      dokument_typ: slotId,
+      status: 'geprueft',
+      pflicht: true,
+      quelle: 'admin',
+      dokument_url: path,
+      hochgeladen_am: new Date().toISOString(),
+      angefordert_von_user_id: auth.userId,
+      angefordert_am: new Date().toISOString(),
+    })
+    if (insErr) return { ok: false, error: `DB-Insert fehlgeschlagen: ${insErr.message}` }
+  }
+
+  // Offene Review-Tasks für genau diesen SV+Slot schließen — wenn der SV
+  // vorher hochgeladen hatte und ein Review-Task offen war.
+  await resolveTasksForEntity(
+    'gutachter',
+    svId,
+    `${slot.label} durch Admin hochgeladen + freigegeben`,
+  )
+
+  revalidateBoth(svId)
+  return { ok: true, storage_path: path }
 }

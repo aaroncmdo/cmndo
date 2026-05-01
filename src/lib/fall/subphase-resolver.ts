@@ -174,8 +174,12 @@ export function resolveSubphase(input: ResolverInput): SubphaseResult {
   const triggers: TriggerField[] = []
   const szenario = (fall.szenario as Szenario | null | undefined) ?? null
 
+  // AAR-864: 'verlegt' (= Slot-Blocker während Verlegungs-Pending) und
+  // 'verschoben' (= terminaler Verlegungs-Endzustand) gehören NICHT in
+  // den aktiven Termin — sonst zeigt der Resolver „SV unterwegs" anhand
+  // alter Tracking-Felder obwohl der Termin nicht mehr stattfindet.
   const aktTermin = (gutachter_termine ?? [])
-    .filter((t) => (t.status ?? '') !== 'storniert')
+    .filter((t) => !['storniert', 'verlegt', 'verschoben'].includes(t.status ?? ''))
     .sort((a, b) => ((b.durchgefuehrt_am ?? b.sv_angekommen_am ?? b.sv_unterwegs_seit ?? '') > (a.durchgefuehrt_am ?? a.sv_angekommen_am ?? a.sv_unterwegs_seit ?? '') ? 1 : -1))[0]
 
   // ══ Phase 9 — Abschluss (top-priorisiert, Abschluss überschreibt alles) ══
@@ -325,6 +329,12 @@ export function resolveSubphase(input: ResolverInput): SubphaseResult {
 
   // ══ Phase 3 — Besichtigung ══
   if (aktTermin) {
+    // AAR-864: Verlegung pending hat Vorrang — Termin kann zwar gerade noch
+    // bestätigt sein, aber die Verlegungs-Anfrage des SV wartet auf Antwort.
+    if (aktTermin.status === 'verlegung_pending') {
+      pushTrigger(triggers, 'termin.status', 'verlegung_pending', null)
+      return build(2, '2.7', 'Verlegung — Bestätigung ausstehend', szenario, triggers)
+    }
     if (aktTermin.durchgefuehrt_am) {
       pushTrigger(triggers, 'termin.durchgefuehrt_am', true, aktTermin.durchgefuehrt_am)
       return build(4, '4.1', 'Gutachten in Bearbeitung', szenario, triggers)

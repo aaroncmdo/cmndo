@@ -17,6 +17,7 @@ import {
   NavigationIcon,
   ClockIcon,
   XCircleIcon,
+  AlertTriangleIcon,
   SparklesIcon,
   ClipboardListIcon,
 } from 'lucide-react'
@@ -33,6 +34,11 @@ import {
   terminAblehnen,
   terminGegenvorschlag,
 } from '@/lib/actions/termin-actions'
+import {
+  terminVerlegungBestaetigen,
+  terminVerlegungAblehnen,
+} from '@/lib/actions/termin-verlegung-actions'
+import TerminVerlegenModal from './TerminVerlegenModal'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 
 const PHASES: { key: AuftragsPhase; icon: typeof CalendarIcon }[] = [
@@ -47,6 +53,8 @@ export type AuftragTerminInfo = {
   start_zeit: string | null
   vorgeschlagenes_datum: string | null
   gegenvorschlag_von: string | null
+  /** AAR-864: TRUE wenn Kunde die Verlegung initiiert hat — SV bestätigt. */
+  verlegung_initiator_kunde?: boolean | null
 }
 
 type Props = {
@@ -91,7 +99,7 @@ export default function AuftragHeaderPanel({
   pflichtSlots,
 }: Props) {
   const router = useRouter()
-  const [modal, setModal] = useState<'ablehnen' | 'gegenvorschlag' | null>(null)
+  const [modal, setModal] = useState<'ablehnen' | 'gegenvorschlag' | 'verlegen' | null>(null)
   const [grund, setGrund] = useState('')
   const [neuerTermin, setNeuerTermin] = useState('')
   const [loading, setLoading] = useState(false)
@@ -105,6 +113,17 @@ export default function AuftragHeaderPanel({
   const istBestaetigt = termin?.status === 'bestaetigt'
   const istEigenerGegenvorschlag =
     termin?.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'sv'
+  // AAR-864: Verlegung-Pending-State — Hinweis nur sichtbar solange wir noch
+  // in der Termin-Phase sind UND der Slot in der Zukunft liegt.
+  const pendingInZukunft = termin?.start_zeit
+    ? new Date(termin.start_zeit).getTime() > Date.now()
+    : false
+  const istVerlegungPending =
+    termin?.status === 'verlegung_pending' && phase === 'termin' && pendingInZukunft
+  // Wer hat die Verlegung initiiert?
+  const istKundeInitiator = !!termin?.verlegung_initiator_kunde
+  // SV muss bestätigen wenn Kunde initiiert hat
+  const svDarfBestaetigen = istVerlegungPending && istKundeInitiator
 
   const fmt = fmtTermin(termin?.start_zeit ?? null)
   const fmtVorgeschlag = fmtTermin(termin?.vorgeschlagenes_datum ?? null)
@@ -114,11 +133,38 @@ export default function AuftragHeaderPanel({
 
   async function handleAblehnen() {
     setLoading(true)
+    // AAR-864: Bei pending-Verlegung lehnen wir die Verlegung ab (alter
+    // Termin bleibt bestehen) statt den Termin zu stornieren.
+    if (istVerlegungPending && termin?.id) {
+      const r = await terminVerlegungAblehnen({ neuerTerminId: termin.id, grund })
+      setLoading(false)
+      if (r.ok) {
+        setModal(null)
+        router.refresh()
+      }
+      return
+    }
     const result = await terminAblehnen({ grund, source: 'sv_portal', fallId })
     setLoading(false)
     if (result.success) {
       setModal(null)
       router.refresh()
+    }
+  }
+
+  async function handleVerlegungBestaetigen() {
+    if (!termin?.id) return
+    setLoading(true)
+    try {
+      const r = await terminVerlegungBestaetigen({ neuerTerminId: termin.id })
+      if (!r.ok) {
+        // eslint-disable-next-line no-alert
+        alert(`Fehler: ${r.error}`)
+        return
+      }
+      router.refresh()
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -139,7 +185,13 @@ export default function AuftragHeaderPanel({
   }
 
   return (
-    <div className="rounded-2xl bg-claimondo-navy/[0.06] border border-claimondo-navy/15 backdrop-blur-sm overflow-hidden">
+    <div
+      className={
+        istVerlegungPending
+          ? 'rounded-2xl bg-amber-50 border-2 border-amber-400 overflow-hidden'
+          : 'rounded-2xl bg-claimondo-navy/[0.06] border border-claimondo-navy/15 backdrop-blur-sm overflow-hidden'
+      }
+    >
       {/* Sektion 1 — Stepper (weiß, Aaron lässt Platz für künftige Inhalte) */}
       <div className="bg-white px-6 py-4">
         <div className="flex items-center w-full">
@@ -147,32 +199,38 @@ export default function AuftragHeaderPanel({
             const isCurrent = !abgeschlossen && i === aktuellIdx
             const isDone = abgeschlossen || i < aktuellIdx
             const istQc = isCurrent && p.key === 'gutachten' && gutachtenInQc
-            const Icon = p.icon
+            // AAR-864: bei Verlegung-Pending → Termin-Phase amber + Warndreieck
+            const istVerlegungWarn = istVerlegungPending && p.key === 'termin'
+            const Icon = istVerlegungWarn ? AlertTriangleIcon : p.icon
             return (
               <React.Fragment key={p.key}>
                 <div className="flex items-center gap-3 shrink-0">
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-                      isDone
-                        ? 'bg-emerald-500 text-white'
-                        : istQc
-                          ? 'bg-violet-600 text-white ring-2 ring-violet-300'
-                          : isCurrent
-                            ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                            : 'bg-white/60 text-claimondo-ondo/60 border border-claimondo-border'
+                      istVerlegungWarn
+                        ? 'bg-amber-500 text-white ring-2 ring-amber-300'
+                        : isDone
+                          ? 'bg-emerald-500 text-white'
+                          : istQc
+                            ? 'bg-violet-600 text-white ring-2 ring-violet-300'
+                            : isCurrent
+                              ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                              : 'bg-white/60 text-claimondo-ondo/60 border border-claimondo-border'
                     }`}
                   >
-                    {isDone ? <CheckIcon className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+                    {istVerlegungWarn || !isDone ? <Icon className="w-4 h-4" /> : <CheckIcon className="w-4 h-4" />}
                   </div>
                   <p
                     className={`text-sm font-semibold whitespace-nowrap ${
-                      istQc
-                        ? 'text-violet-700'
-                        : isCurrent
-                          ? 'text-claimondo-navy'
-                          : isDone
-                            ? 'text-emerald-700'
-                            : 'text-claimondo-ondo/60'
+                      istVerlegungWarn
+                        ? 'text-amber-700'
+                        : istQc
+                          ? 'text-violet-700'
+                          : isCurrent
+                            ? 'text-claimondo-navy'
+                            : isDone
+                              ? 'text-emerald-700'
+                              : 'text-claimondo-ondo/60'
                     }`}
                   >
                     {istQc ? 'Vollständigkeits-Check' : AUFTRAGS_PHASE_LABEL[p.key]}
@@ -192,8 +250,85 @@ export default function AuftragHeaderPanel({
         </div>
       </div>
 
-      {/* Sektion 2 — Termin + Navi */}
-      {termin && !abgeschlossen && (istBestaetigt || istReserviert || istEigenerGegenvorschlag) && (
+      {/* AAR-864: Während aktiver Besichtigung im Header NUR „Besichtigung läuft" —
+          alle anderen Sektionen (Termin-Navi, Briefing, Pflichtliste, Verlegungs-
+          Hinweis) werden ausgeblendet, weil sie in dem Moment irrelevant sind. */}
+      {phase === 'besichtigung' && (
+        <div className="border-t border-claimondo-navy/10 px-6 py-3.5 bg-emerald-50">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center shrink-0">
+              <MapPinIcon className="w-4 h-4 text-emerald-700" />
+            </div>
+            <p className="text-sm font-semibold text-emerald-900">
+              Besichtigung läuft
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* AAR-864: Verlegungs-Pending-Hinweis (read-only) — direkt unter dem
+          Stepper. Sichtbar wenn der SV einen Verlegungs-Vorschlag gemacht
+          hat und auf Antwort des Kunden wartet. Termin-Daten werden read-
+          only angezeigt — kein Navigation/Termin-Block daneben, weil der
+          Termin noch nicht final bestätigt ist. */}
+      {termin && istVerlegungPending && (
+        <div className="border-t-2 border-amber-400 bg-amber-50 px-6 py-3.5">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="w-8 h-8 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
+              <ClockIcon className="w-4 h-4 text-amber-700" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-900">
+                {istKundeInitiator
+                  ? 'Kunde möchte verlegen — bitte bestätigen'
+                  : 'Verlegung beantragt — Bestätigung ausstehend'}
+              </p>
+              <p className="text-xs text-amber-800 mt-0.5">
+                {istKundeInitiator
+                  ? 'Der Kunde hat einen neuen Termin vorgeschlagen. Bestätige oder lehne ab — solange wartet der Original-Termin.'
+                  : 'Der Kunde wurde benachrichtigt. Bei Nicht-Reaktion eskalieren wir 48h vor dem Original-Termin automatisch an den Kundenbetreuer.'}
+              </p>
+            </div>
+          </div>
+          {/* Termin-Daten — read-only bei SV-Initiator, mit Buttons bei Kunde-Initiator */}
+          {fmt && (
+            <div className="rounded-xl bg-white border-2 border-amber-300 p-3 ml-11">
+              <p className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold mb-1">
+                Vorgeschlagener neuer Termin
+              </p>
+              <p className="text-sm font-semibold text-claimondo-navy">
+                {fmt.datum}, {fmt.uhrzeit} Uhr
+              </p>
+              {adresse && (
+                <p className="text-xs text-claimondo-ondo mt-0.5">{adresse}</p>
+              )}
+              {svDarfBestaetigen && (
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => setModal('ablehnen')}
+                    disabled={loading}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium text-red-700 bg-white border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    <XCircleIcon className="w-4 h-4" />
+                    Ablehnen
+                  </button>
+                  <button
+                    onClick={handleVerlegungBestaetigen}
+                    disabled={loading}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
+                  >
+                    <CheckIcon className="w-4 h-4" />
+                    {loading ? 'Wird bestätigt…' : 'Verlegung bestätigen'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Sektion 2 — Termin + Navi (während Besichtigung ausblenden) */}
+      {phase !== 'besichtigung' && termin && !abgeschlossen && (istBestaetigt || istReserviert || istEigenerGegenvorschlag) && (
         <div className="border-t border-claimondo-navy/10 px-6 py-3.5">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -231,6 +366,15 @@ export default function AuftragHeaderPanel({
                   Navigation
                 </a>
               )}
+              {istBestaetigt && (
+                <button
+                  onClick={() => setModal('verlegen')}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-claimondo-border bg-white text-claimondo-navy hover:bg-claimondo-navy/5 text-sm font-medium px-3 py-1.5 transition-colors"
+                >
+                  <ClockIcon className="w-3.5 h-3.5" />
+                  Termin verlegen
+                </button>
+              )}
               {istReserviert && (
                 <>
                   <button
@@ -260,8 +404,8 @@ export default function AuftragHeaderPanel({
         </div>
       )}
 
-      {/* Sektion 3 — Briefing + Einzusammeln (zwei Spalten) */}
-      {(hatBriefing || offenePflicht.length > 0) && (
+      {/* Sektion 3 — Briefing + Einzusammeln (während Besichtigung ausblenden) */}
+      {phase !== 'besichtigung' && (hatBriefing || offenePflicht.length > 0) && (
         <div className="border-t border-claimondo-navy/10 px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Briefing */}
           {hatBriefing && (
@@ -280,7 +424,7 @@ export default function AuftragHeaderPanel({
 
           {/* Vor Ort einzusammeln — gelb eingefasst zur Hervorhebung */}
           {offenePflicht.length > 0 && (
-            <div className="flex flex-col rounded-xl border border-amber-300 bg-amber-50 p-3">
+            <div className="flex flex-col rounded-xl border border-dashed border-amber-300 bg-amber-50 p-3">
               <div className="flex items-center gap-2 mb-2">
                 <ClipboardListIcon className="w-4 h-4 text-amber-700" />
                 <p className="text-xs font-semibold uppercase tracking-wider text-amber-900">
@@ -292,7 +436,7 @@ export default function AuftragHeaderPanel({
                   <li key={slot.slot_id} className="text-sm text-claimondo-navy">
                     <span className="font-medium">{slot.label}</span>
                     {slot.beschreibung && (
-                      <span className="text-xs text-claimondo-ondo">
+                      <span className="text-xs text-amber-900">
                         {' — '}
                         {slot.beschreibung}
                       </span>
@@ -333,9 +477,24 @@ export default function AuftragHeaderPanel({
         </div>
       </Modal>
 
-      <Modal open={modal === 'gegenvorschlag'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Gegenvorschlag">
+      {/* AAR-864: Verlegen-Modal mit Top-3-Vorschlägen + Routen-Check */}
+      <TerminVerlegenModal
+        open={modal === 'verlegen'}
+        onClose={() => setModal(null)}
+        terminId={termin?.id ?? ''}
+        fallId={fallId}
+      />
+
+      <Modal
+        open={modal === 'gegenvorschlag'}
+        onClose={() => setModal(null)}
+        maxWidth={384}
+        ariaLabel="Gegenvorschlag"
+      >
         <h3 className="text-lg font-semibold text-claimondo-navy mb-2">Gegenvorschlag</h3>
-        <p className="text-sm text-claimondo-ondo mb-4">Schlagen Sie einen alternativen Termin vor:</p>
+        <p className="text-sm text-claimondo-ondo mb-4">
+          Schlagen Sie einen alternativen Termin vor:
+        </p>
         <input
           type="datetime-local"
           value={neuerTermin}

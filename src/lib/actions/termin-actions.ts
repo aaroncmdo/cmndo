@@ -314,11 +314,14 @@ export async function terminGegenvorschlag({
   } else if (source === 'sv_portal' && fallIdArg) {
     const auth = await authSvPortal(fallIdArg)
     if ('error' in auth) return { success: false, error: auth.error }
+    // Aaron 2026-04-30: 'bestaetigt' mit aufgenommen — Verlegung
+    // bestätigter Termine geht über denselben Pfad (status wandert
+    // zurück auf 'gegenvorschlag', Kunde muss neu bestätigen).
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id')
       .eq('fall_id', fallIdArg)
       .eq('sv_id', auth.svId)
-      .in('status', ['reserviert', 'gegenvorschlag'])
+      .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
       .order('created_at', { ascending: false })
       .limit(1)
       .single()

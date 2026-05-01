@@ -10,7 +10,7 @@
 // Actions) ist jetzt shared via FallIdentityHeader. Phasen-Strip bleibt
 // als Composition drunter, das ist SV-spezifisch.
 
-import { FallakteDrawer } from './FallakteDrawer'
+import type { FallakteDrawer } from './FallakteDrawer'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
 // AAR-746: Shared Identity-Header.
 import { FallIdentityHeader } from '@/components/shared/fall-header'
@@ -23,7 +23,6 @@ export function FallHeader({
   ort,
   kennzeichen,
   fahrzeug,
-  drawer,
 }: {
   fallNummer: string
   fallId: string
@@ -34,6 +33,8 @@ export function FallHeader({
   /** CMM-32 Walkthrough: Marke + Modell als Subline (z.B. „BMW 320i"). */
   fahrzeug?: string | null
   subphase: SvSubphase
+  /** Aaron 2026-04-30: Drawer-Trigger (alte Akte) raus aus dem Header.
+   *  Prop bleibt für Caller-Kompat, wird ignoriert. */
   drawer: DrawerData
   aktuellePhaseSnake: string | null
   abgeschlossenAm?: string | null
@@ -48,8 +49,6 @@ export function FallHeader({
       fahrzeug={fahrzeug ?? null}
       backHref="/gutachter/faelle"
       backLabel="Zurück zu Fällen"
-    >
-      <FallakteDrawer {...drawer} />
-    </FallIdentityHeader>
+    />
   )
 }

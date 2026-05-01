@@ -117,11 +117,11 @@ export default function FeldmodusClient({
   )
 
   return (
-    <div className="h-full w-full flex flex-col">
+    <div className="h-screen w-screen flex flex-col">
       <OfflineStatusBanner />
       <div className="flex-1 flex flex-col lg:flex-row min-h-0">
       {/* Karte — oben auf mobile, links auf desktop */}
-      <div className="relative h-1/2 lg:h-full lg:flex-1">
+      <div className="relative flex-1 min-h-0 lg:flex-1">
         <FeldmodusMap
           sv={sv}
           stops={stops}
@@ -142,7 +142,7 @@ export default function FeldmodusClient({
 
       {/* Sidebar — unten auf mobile, rechts auf desktop.
           AAR-386: Im arrived-State zeigt SvFallakteView statt RouteSidebar. */}
-      <div className="h-1/2 lg:h-full lg:w-[380px] lg:border-l lg:border-white/10">
+      <div className="flex-1 min-h-0 overflow-y-auto lg:flex-none lg:w-[380px] lg:border-l lg:border-white/10">
         {sessionStatus === 'arrived' && aktuellerStop ? (
           <SvFallakteView
             fallId={aktuellerStop.fall_id}

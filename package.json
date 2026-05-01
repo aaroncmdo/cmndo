@@ -87,7 +87,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "react-email": "^5.2.10",
-    "supabase": "^2.92.1",
+    "supabase": "^2.98.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.4"

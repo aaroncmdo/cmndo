@@ -82,6 +82,12 @@ export type EventType =
   // 5.17 Gutachten-OCR-Pipeline (AAR-838)
   | 'gutachten.ocr_succeeded'
   | 'gutachten.ocr_failed'
+  // 5.18 Termin-Verlegung (AAR-864)
+  | 'termin.verlegung_vorgeschlagen'
+  | 'termin.verlegung_bestaetigt'
+  | 'termin.verlegung_abgelehnt'
+  | 'termin.verlegung_eskalation'
+  | 'termin.verschoben_durch_kunde'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -152,6 +158,54 @@ export interface EventPayloads {
   // 5.17 Gutachten-OCR-Pipeline (AAR-838)
   'gutachten.ocr_succeeded':       { fallId: string; gutachtenId: string; engine: string; confidence: number }
   'gutachten.ocr_failed':          { fallId: string; gutachtenId: string; runNummer: number; reason: string }
+  // 5.18 Termin-Verlegung (AAR-864)
+  'termin.verlegung_vorgeschlagen': {
+    fallId: string
+    terminId: string         // = neuer pending-Slot
+    alterTerminId: string
+    alterDatum: string       // formatiert (z.B. "Mo. 05.05.")
+    alterUhrzeit: string     // "10:00"
+    neuesDatum: string
+    neuesUhrzeit: string
+    svVorname: string
+    grund?: string
+  }
+  'termin.verlegung_bestaetigt': {
+    fallId: string
+    terminId: string         // = neuer (jetzt bestätigt)
+    alterTerminId: string
+    neuesDatum: string
+    neuesUhrzeit: string
+    kundenVorname: string
+    von_wem: 'kunde' | 'kundenbetreuer' | 'admin'
+  }
+  'termin.verlegung_abgelehnt': {
+    fallId: string
+    terminId: string         // = neuer (jetzt storniert)
+    alterTerminId: string
+    kundenVorname: string
+    grund?: string
+    von_wem: 'kunde' | 'kundenbetreuer' | 'admin'
+  }
+  'termin.verlegung_eskalation': {
+    fallId: string
+    terminId: string         // = neuer pending-Slot
+    alterTerminId: string
+    alterDatum: string
+    alterUhrzeit: string
+  }
+  // Kunde hat proaktiv einen bestätigten Termin eigenständig verschoben
+  'termin.verschoben_durch_kunde': {
+    fallId: string
+    terminId: string         // = neuer bestaetigt-Slot
+    alterTerminId: string
+    alterDatum: string
+    alterUhrzeit: string
+    neuesDatum: string
+    neuesUhrzeit: string
+    svVorname: string        // SV-Vorname für Anrede in WA-Nachricht
+    grund?: string
+  }
 }
 
 // ── DB-Row-Shapes ─────────────────────────────────────────────────────────

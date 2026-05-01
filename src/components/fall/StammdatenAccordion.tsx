@@ -1,26 +1,29 @@
 'use client'
 
-// CMM-32: Master-Detail-Layout für die Fall-Stammdaten. Links eine kompakte
-// klickbare Tabelle mit 6 Kategorien, rechts (im Parent-Layout-Slot) der
-// passende Detail-Block. Der Caller hält den Selection-State und rendert
-// <StammdatenDetail> in seinem Detail-Slot.
+// CMM-32: Stammdaten-Block — links Fahrzeug-Panel, rechts Tabs (Historie /
+// Dokumente / Kunde / Gegner / Schaden). Ein einziger Card-Block mit
+// vertikalem Trenner zwischen den beiden Hälften.
 
 import { useState } from 'react'
 import {
-  CarIcon,
   ClockIcon,
   FileTextIcon,
   UserIcon,
   ShieldIcon,
   AlertTriangleIcon,
-  ChevronRightIcon,
+  CheckCircle2Icon,
+  XCircleIcon,
+  CarFrontIcon,
+  WrenchIcon,
 } from 'lucide-react'
 import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import { LACKFARBE_LABEL, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
+import StammdatenDetail from './StammdatenDetail'
 
 export type StammdatenCategory =
   | 'fahrzeug'
   | 'historie'
+  | 'unfall'
   | 'dokumente'
   | 'kunde'
   | 'gegner'
@@ -36,23 +39,21 @@ export type StammdatenAccordionData = {
     hat_vorschaeden?: boolean | null
   } | null
   parteien?: Array<Record<string, unknown>>
-  /** Anzahl Dokumente am Fall — wird in der Zeilen-Summary gezeigt. */
+  /** Anzahl Dokumente am Fall — wird in der Tab-Summary gezeigt. */
   dokumenteAnzahl?: number
 }
 
-type RowConfig = {
-  key: StammdatenCategory
-  label: string
-  icon: typeof CarIcon
-}
+type TabKey = Exclude<StammdatenCategory, 'fahrzeug' | 'dokumente'>
 
-const ROWS: RowConfig[] = [
-  { key: 'fahrzeug', label: 'Fahrzeug', icon: CarIcon },
-  { key: 'historie', label: 'Historie', icon: ClockIcon },
-  { key: 'dokumente', label: 'Dokumente', icon: FileTextIcon },
-  { key: 'kunde', label: 'Kunde', icon: UserIcon },
-  { key: 'gegner', label: 'Gegner', icon: ShieldIcon },
-  { key: 'schaden', label: 'Schaden', icon: AlertTriangleIcon },
+// Aaron 2026-04-30: Dokumente raus aus den Tabs — die rendern jetzt
+// rechts daneben als eigene Card. Tab-Position für Dokumente war
+// kontraintuitiv (Aaron-Spec).
+const TABS: { key: TabKey; label: string; icon: typeof ClockIcon }[] = [
+  { key: 'historie',  label: 'Historie',  icon: ClockIcon            },
+  { key: 'unfall',    label: 'Unfall',    icon: CarFrontIcon         },
+  { key: 'schaden',   label: 'Schaden',   icon: WrenchIcon           },
+  { key: 'kunde',     label: 'Kunde',     icon: UserIcon             },
+  { key: 'gegner',    label: 'Gegner',    icon: ShieldIcon           },
 ]
 
 function str(v: unknown): string | null {
@@ -61,165 +62,145 @@ function str(v: unknown): string | null {
   return s.length > 0 ? s : null
 }
 
-function buildSummary(
-  category: StammdatenCategory,
-  data: StammdatenAccordionData,
-): string {
-  const { fall, lead, parteien, dokumenteAnzahl = 0 } = data
-  switch (category) {
-    case 'fahrzeug': {
-      const hersteller = str(fall.fahrzeug_hersteller)
-      const modell = str(fall.fahrzeug_modell)
-      const lack = str(fall.lackfarbe_code) as LackfarbeCode | null
-      const lackLabel = lack ? LACKFARBE_LABEL[lack] : null
-      const parts = [
-        [hersteller, modell].filter(Boolean).join(' ') || null,
-        lackLabel,
-        str(fall.kennzeichen),
-      ].filter(Boolean)
-      return parts.join(' · ') || '—'
-    }
-    case 'historie': {
-      const vorschaedenAnzahl = (fall.vorschaden_anzahl as number | null) ?? null
-      const hatVorschaeden = lead?.hat_vorschaeden ?? null
-      if (vorschaedenAnzahl != null && vorschaedenAnzahl > 0) {
-        return `${vorschaedenAnzahl} Vorschäden`
-      }
-      if (hatVorschaeden === true) return 'Vorschäden gemeldet'
-      if (hatVorschaeden === false) return 'Keine Vorschäden'
-      return 'Noch keine Angabe'
-    }
-    case 'dokumente':
-      return dokumenteAnzahl === 0
-        ? 'Keine Dokumente'
-        : `${dokumenteAnzahl} ${dokumenteAnzahl === 1 ? 'Dokument' : 'Dokumente'}`
-    case 'kunde': {
-      const name = lead
-        ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || null
-        : null
-      return name ?? '—'
-    }
-    case 'gegner': {
-      const verursacher = (parteien ?? []).find(
-        (p) => (p.rolle as string | null) === 'verursacher',
-      )
-      if (!verursacher) return 'Nicht erfasst'
-      return (
-        (verursacher.name as string | null) ??
-        (verursacher.versicherung_name as string | null) ??
-        '—'
-      )
-    }
-    case 'schaden': {
-      const datum = str(fall.schadens_datum)
-      const ort = str(fall.schadens_ort)
-      const ursache = str(fall.schadens_ursache)
-      return [ursache, ort, datum && new Date(datum).toLocaleDateString('de-DE')]
-        .filter(Boolean)
-        .join(' · ') || '—'
-    }
-  }
-}
-
 type Props = {
   data: StammdatenAccordionData
-  selected: StammdatenCategory | null
-  onSelect: (cat: StammdatenCategory | null) => void
+  /** Optionaler Slot für den Dokumente-Tab (WeitereDokumenteCard o. ä.) */
+  dokumenteSlot?: React.ReactNode
   className?: string
 }
 
 export default function StammdatenAccordion({
   data,
-  selected,
-  onSelect,
+  dokumenteSlot,
   className = '',
 }: Props) {
-  const [hovered, setHovered] = useState<StammdatenCategory | null>(null)
-  const fall = data.fall
+  const [activeTab, setActiveTab] = useState<TabKey>('historie')
+
+  const { fall } = data
   const hersteller = str(fall.fahrzeug_hersteller)
-  const modell = str(fall.fahrzeug_modell)
-  const lack = (str(fall.lackfarbe_code) as LackfarbeCode | null) ?? null
+  const modell     = str(fall.fahrzeug_modell)
+  const lack       = (str(fall.lackfarbe_code) as LackfarbeCode | null) ?? null
   const kennzeichen = str(fall.kennzeichen)
+  const baujahr    = str(fall.fahrzeug_baujahr)
+  const fin        = str(fall.fin_vin)
+  const fahrbereit =
+    fall.fahrzeug_fahrbereit === true
+      ? true
+      : fall.fahrzeug_fahrbereit === false
+        ? false
+        : null
+
+  const hasFahrzeugDetails = baujahr || fin || fahrbereit !== null
 
   return (
     <div
-      className={`rounded-2xl bg-white border border-claimondo-border overflow-hidden ${className}`}
+      className={`w-full rounded-2xl bg-white border border-claimondo-border overflow-hidden ${className}`}
     >
-      {/* Header mit Mini-Render-Bild oben */}
-      {hersteller && (
-        <div className="bg-claimondo-navy/[0.04] border-b border-claimondo-border px-4 py-3 flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row min-h-0">
+
+        {/* ── Links: Fahrzeug-Panel ── */}
+        <div className="sm:w-[300px] shrink-0 flex flex-col items-center gap-4 px-6 py-6 border-b sm:border-b-0 sm:border-r border-claimondo-border/60 bg-claimondo-navy/[0.025]">
           <FahrzeugRenderImage
             hersteller={hersteller}
             modell={modell}
             lackfarbe={lack}
-            width={96}
-            className="shrink-0"
+            baujahr={baujahr}
+            width={260}
           />
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-claimondo-navy truncate">
-              {[hersteller, modell].filter(Boolean).join(' ')}
-            </p>
+
+          {/* Modell + Kennzeichen + Farbe */}
+          <div className="w-full text-center space-y-2">
+            {(hersteller || modell) && (
+              <p className="text-base font-semibold text-claimondo-navy leading-snug">
+                {[hersteller, modell].filter(Boolean).join(' ')}
+              </p>
+            )}
             {kennzeichen && (
-              <span className="inline-flex items-center mt-1 rounded-md border-2 border-claimondo-navy bg-white px-1.5 py-0.5 font-mono text-xs tracking-wide text-claimondo-navy">
-                {kennzeichen}
-              </span>
+              <div className="flex justify-center">
+                <span className="inline-flex items-center rounded-md border-2 border-claimondo-navy bg-white px-2.5 py-1 font-mono text-sm tracking-wide text-claimondo-navy">
+                  {kennzeichen}
+                </span>
+              </div>
             )}
             {lack && (
-              <p className="text-xs text-claimondo-ondo mt-1">{LACKFARBE_LABEL[lack]}</p>
+              <p className="text-sm text-claimondo-ondo">{LACKFARBE_LABEL[lack]}</p>
             )}
           </div>
-        </div>
-      )}
 
-      {/* Klickbare Tabellen-Zeilen */}
-      <ul className="divide-y divide-claimondo-border/60">
-        {ROWS.map(({ key, label, icon: Icon }) => {
-          const isSelected = selected === key
-          const isHovered = hovered === key
-          return (
-            <li key={key}>
+          {/* Baujahr · FIN · Fahrbereit */}
+          {hasFahrzeugDetails && (
+            <div className="w-full space-y-2.5 pt-4 border-t border-claimondo-border/50">
+              {baujahr && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70 shrink-0">
+                    Baujahr
+                  </span>
+                  <span className="text-sm font-medium text-claimondo-navy">{baujahr}</span>
+                </div>
+              )}
+              {fin && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70 shrink-0">
+                    FIN
+                  </span>
+                  <span className="text-xs font-mono text-claimondo-navy truncate">{fin}</span>
+                </div>
+              )}
+              {fahrbereit !== null && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70 shrink-0">
+                    Fahrbereit
+                  </span>
+                  {fahrbereit ? (
+                    <span className="inline-flex items-center gap-1 text-sm text-emerald-700">
+                      <CheckCircle2Icon className="w-3.5 h-3.5" /> Ja
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-sm text-rose-700">
+                      <XCircleIcon className="w-3.5 h-3.5" /> Nein
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* ── Rechts: Tabs + Detail ── */}
+        <div className="flex-1 flex flex-col min-w-0">
+
+          {/* Tab-Leiste */}
+          <div className="flex border-b border-claimondo-border/60">
+            {TABS.map(({ key, label, icon: Icon }) => (
               <button
+                key={key}
                 type="button"
-                onClick={() => onSelect(isSelected ? null : key)}
-                onMouseEnter={() => setHovered(key)}
-                onMouseLeave={() => setHovered(null)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                  isSelected
-                    ? 'bg-claimondo-navy/[0.06]'
-                    : isHovered
-                      ? 'bg-[#f8f9fb]'
-                      : 'bg-white'
+                onClick={() => setActiveTab(key)}
+                className={`flex-1 px-3 py-4 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px inline-flex items-center justify-center gap-1.5 ${
+                  activeTab === key
+                    ? 'border-claimondo-navy text-claimondo-navy'
+                    : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
                 }`}
               >
-                <Icon
-                  className={`w-4 h-4 shrink-0 ${
-                    isSelected ? 'text-claimondo-navy' : 'text-claimondo-ondo/70'
-                  }`}
-                />
-                <div className="flex-1 min-w-0">
-                  <p
-                    className={`text-sm font-semibold ${
-                      isSelected ? 'text-claimondo-navy' : 'text-claimondo-navy'
-                    }`}
-                  >
-                    {label}
-                  </p>
-                  <p className="text-xs text-claimondo-ondo truncate">
-                    {buildSummary(key, data)}
-                  </p>
-                </div>
-                <ChevronRightIcon
-                  className={`w-4 h-4 shrink-0 transition-transform ${
-                    isSelected
-                      ? 'rotate-90 text-claimondo-navy'
-                      : 'text-claimondo-ondo/50'
-                  }`}
-                />
+                <Icon className="w-4 h-4" />
+                <span>{label}</span>
               </button>
-            </li>
-          )
-        })}
-      </ul>
+            ))}
+          </div>
+
+          {/* Tab-Inhalt */}
+          <div className="flex-1 min-h-0">
+            <StammdatenDetail
+              category={activeTab}
+              data={data}
+              onClose={() => {}}
+              dokumenteSlot={dokumenteSlot}
+              inline
+            />
+          </div>
+        </div>
+
+      </div>
     </div>
   )
 }

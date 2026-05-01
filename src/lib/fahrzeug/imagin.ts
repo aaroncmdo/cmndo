@@ -73,18 +73,25 @@ export type ImaginParams = {
   hersteller: string | null
   modell: string | null
   lackfarbe: LackfarbeCode | null
+  /** Erstzulassungs- bzw. Modelljahr (vierstellig, z.B. 2019).
+   *  Wenn übergeben, schickt der Imagin-Endpoint das modell-jahrgenaue
+   *  Asset zurück (nicht den aktuellen Generations-Default). */
+  baujahr?: number | string | null
   /** Imagin angle: 21 = front-driver-side ¾, 13 = side, 1 = front. Default 21. */
   angle?: number
   zoomType?: 'fullscreen' | 'cabin'
 }
 
-/** Baut die Imagin-URL. Returnt null wenn weder Hersteller noch Modell
- *  bekannt sind (kein nutzbares Asset). Imagin selbst macht graceful
- *  fallback auf generische Renderings wenn das exakte Modell fehlt. */
+/** Baut die Imagin-Direkt-URL. Returnt null wenn kein Hersteller bekannt
+ *  ist. Wird ausschließlich vom Proxy-Route `/api/fahrzeug/imagin`
+ *  konsumiert — der filtert den `X-Imaginstudio-Error`-Header raus,
+ *  damit `<img onError>` im Browser zuverlässig feuert. Das Frontend
+ *  ruft NICHT diese URL direkt auf. */
 export function buildImaginUrl({
   hersteller,
   modell,
   lackfarbe,
+  baujahr,
   angle = 21,
   zoomType = 'fullscreen',
 }: ImaginParams): string | null {
@@ -98,5 +105,52 @@ export function buildImaginUrl({
   })
   if (modell?.trim()) params.set('modelFamily', modell.trim())
   if (lackfarbe) params.set('paintDescription', PAINT_MAP[lackfarbe])
+  if (baujahr != null) {
+    const yr = String(baujahr).match(/\d{4}/)?.[0]
+    if (yr) params.set('modelYear', yr)
+  }
   return `${IMAGIN_BASE}?${params.toString()}`
+}
+
+/** Browser-seitige URL — geht durch unseren Proxy. */
+export function buildImaginProxyUrl({
+  hersteller,
+  modell,
+  lackfarbe,
+  baujahr,
+}: {
+  hersteller: string | null
+  modell: string | null
+  lackfarbe: LackfarbeCode | null
+  baujahr?: number | string | null
+}): string | null {
+  if (!hersteller?.trim()) return null
+  const params = new URLSearchParams({ make: hersteller.trim() })
+  if (modell?.trim()) params.set('model', modell.trim())
+  if (lackfarbe) params.set('paint', lackfarbe)
+  if (baujahr != null) {
+    const yr = String(baujahr).match(/\d{4}/)?.[0]
+    if (yr) params.set('year', yr)
+  }
+  return `/api/fahrzeug/imagin?${params.toString()}`
+}
+
+/** Wikipedia-Proxy für Auto-Thumbnails (zweite Fallback-Stufe). */
+export function buildWikiProxyUrl({
+  hersteller,
+  modell,
+  baujahr,
+}: {
+  hersteller: string | null
+  modell: string | null
+  baujahr?: number | string | null
+}): string | null {
+  if (!hersteller?.trim()) return null
+  const params = new URLSearchParams({ make: hersteller.trim() })
+  if (modell?.trim()) params.set('model', modell.trim())
+  if (baujahr != null) {
+    const yr = String(baujahr).match(/\d{4}/)?.[0]
+    if (yr) params.set('year', yr)
+  }
+  return `/api/fahrzeug/wiki?${params.toString()}`
 }

@@ -125,6 +125,9 @@ export default function GutachterShell({
   svId?: string | null
 }) {
   const pathname = usePathname()
+  // Feldmodus übernimmt den vollen Viewport — Sidebar + FAB ausblenden damit
+  // sie nicht über der Mapbox-Karte rendern (Sidebar hat lg:z-[1100] > z-50).
+  const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   // CMM-36: Geo-Tracking beim App-Öffnen starten
   useGeoPosition(svId ?? null)
@@ -153,6 +156,27 @@ export default function GutachterShell({
   // stehen jetzt auch --brand-success/--brand-text-muted/etc. allen Children
   // der Shell zur Verfügung ohne dass einzelne Consumer das Theme re-importieren.
   const themeVars = generateCssVars(theme, 'full')
+
+  // CMM-32 P2 / AAR-864: --app-sidebar-width = Sidebar-Breite + lg-Padding
+  // (256px Sidebar + 16px pl-4 = 272px). Damit startet ein portal-rendered
+  // Modal (Modal.web.tsx) bündig am inneren Wrapper-Rand und überdeckt nur
+  // den Content-Bereich rechts. Auf Mobile (< lg) ist die Sidebar weg → 0.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mql = window.matchMedia('(min-width: 1024px)')
+    const apply = () => {
+      document.documentElement.style.setProperty(
+        '--app-sidebar-width',
+        mql.matches ? '272px' : '0px',
+      )
+    }
+    apply()
+    mql.addEventListener('change', apply)
+    return () => {
+      mql.removeEventListener('change', apply)
+      document.documentElement.style.removeProperty('--app-sidebar-width')
+    }
+  }, [])
 
   // AAR-220 Fix 5: Einmalige 2s-Transition nach Logo-Upload.
   const [brandTransitioning, setBrandTransitioning] = useState(false)
@@ -260,19 +284,20 @@ export default function GutachterShell({
   }
 
   return (
-    <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-surface)' }}>
-      {/* Mobile overlay */}
-      {sidebarOpen && (
+    <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-primary, #0D1B3E)' }}>
+      {/* Mobile overlay — ausgeblendet im Feldmodus */}
+      {!isFeldmodus && sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* AAR-220: Sidebar nutzt Theme-Vars + sanfte 1.5s Transition für
           Background- und Border-Farben, damit Logo-Upload nicht ruckartig
-          umschaltet. */}
-      <aside
+          umschaltet. Im Feldmodus komplett ausgeblendet (Karte braucht
+          vollen Viewport, Sidebar hat lg:z-[1100] > FeldmodusLayout z-50). */}
+      {!isFeldmodus && <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
@@ -397,7 +422,7 @@ export default function GutachterShell({
             <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>
-      </aside>
+      </aside>}
 
       <div className="flex-1 flex flex-col min-w-0 h-screen">
         {/* Mobile Header (nur Hamburger + Logo, Glocke ist im Wetter-Banner) */}
@@ -442,28 +467,51 @@ export default function GutachterShell({
           <UpdatesNav variant="dark" />
         </header>
 
-        {/* AAR-809: Wetter-Banner — auf allen Gutachter-Seiten sichtbar.
-            Trailing-Slot zeigt Outbox + Notifications-Glocke (Mobile + Desktop). */}
-        <WeatherBanner
-          standortLat={standortLat ?? null}
-          standortLng={standortLng ?? null}
-          trailingSlot={
-            <>
-              <OutboxBadge />
-              <UpdatesNav variant="dark" />
-            </>
-          }
-        />
+        {/* AAR-864 Polish: beide Wrapper (Wetter + Content) öffnen sich nach
+            rechts (rounded-r-none, kein right-padding) und schließen links
+            bündig zur Sidebar mit gleichem Abstand ab (pl-2 sm:pl-3 lg:pl-4
+            + rounded-l-2xl). Der navy-Hintergrund des Outer-Containers zieht
+            sich rechts durch. */}
+        <div className="pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4">
+          <WeatherBanner
+            standortLat={standortLat ?? null}
+            standortLng={standortLng ?? null}
+            trailingSlot={
+              <>
+                <OutboxBadge />
+                <UpdatesNav variant="dark" />
+              </>
+            }
+          />
+        </div>
 
-        {/* AAR-457: overflow-y-auto (statt overflow-hidden) — sonst wird
-            alles unterhalb des Viewports auf Seiten ohne eigenen Scroll-
-            Container abgeschnitten (zB /gutachter/profil/branding). Map-
-            basierte Seiten (Heute/Gebiet) setzen inner-Container auf
-            absolute inset-0 und sind nicht betroffen. */}
-        <main id="main-content" role="main" className="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-4">{children}</main>
+        <div className="flex-1 pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4 overflow-hidden">
+          <main
+            id="main-content"
+            role="main"
+            className="h-full overflow-y-auto rounded-l-2xl rounded-r-none bg-[#f8f9fb] shadow-sm p-2 sm:p-3 lg:p-4"
+          >
+            {children}
+          </main>
+        </div>
       </div>
-      <GlobalPosteingangFab currentUserId={userId} />
-      <SVSpotlight />
+      {/* AAR-864: Portal-Root für Modals im SV-Portal. position:fixed mit
+          left=256px (Sidebar-Breite) damit der Backdrop nur den Content-
+          Bereich überdeckt und die Sidebar nie einschließt. Modals
+          portalieren hierhin (absolute inset-0) statt nach document.body —
+          zuverlässiger als das CSS-Var-Pattern. pointer-events-none damit
+          das leere Div keine Klicks abfängt; Backdrop-Kinder überschreiben
+          das mit pointer-events-auto. */}
+      {!isFeldmodus && (
+        <div
+          id="sv-modal-root"
+          aria-hidden="true"
+          className="fixed inset-y-0 right-0 z-[1000] pointer-events-none"
+          style={{ left: '256px' }}
+        />
+      )}
+      {!isFeldmodus && <GlobalPosteingangFab currentUserId={userId} />}
+      {!isFeldmodus && <SVSpotlight />}
     </div>
   )
 }

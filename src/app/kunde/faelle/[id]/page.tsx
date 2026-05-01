@@ -35,6 +35,8 @@ import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
+import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
+import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
@@ -42,6 +44,11 @@ import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
 import { getClaimLifecycle } from '@/lib/claims/lifecycle'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
+
+// AAR-864: force-dynamic, damit der Verlegungs-Banner direkt nach dem
+// SV-Submit ohne Hard-Reload erscheint (revalidatePath alleine reicht
+// nicht zuverlässig wenn der Kunde gerade auf der Page ist).
+export const dynamic = 'force-dynamic'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -156,6 +163,66 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
+
+    // AAR-864: Pending Verlegungs-Slot + alter Termin (für Banner).
+    // Banner verschwindet automatisch sobald der pending-Slot in der
+    // Vergangenheit liegt (= Verlegung obsolet, Termin gelaufen oder verstrichen).
+    const { data: verlegungPendingRow } = await admin
+      .from('gutachter_termine')
+      .select('id, start_zeit, verlegung_quelle_id, verlegung_grund, sv_id')
+      .eq('fall_id', fall.id as string)
+      .eq('status', 'verlegung_pending')
+      .gt('start_zeit', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    let verlegungBannerProps: React.ComponentProps<typeof TerminVerlegungBanner> | null = null
+    if (verlegungPendingRow?.verlegung_quelle_id) {
+      const { data: alterTermin } = await admin
+        .from('gutachter_termine')
+        .select('start_zeit')
+        .eq('id', verlegungPendingRow.verlegung_quelle_id as string)
+        .maybeSingle()
+      // SV-Vorname aus profiles
+      let svVorname = ''
+      if (verlegungPendingRow.sv_id) {
+        const { data: sv } = await admin
+          .from('sachverstaendige')
+          .select('profile_id')
+          .eq('id', verlegungPendingRow.sv_id as string)
+          .maybeSingle()
+        if (sv?.profile_id) {
+          const { data: p } = await admin
+            .from('profiles')
+            .select('vorname, anzeigename')
+            .eq('id', sv.profile_id as string)
+            .maybeSingle()
+          svVorname = ((p?.vorname as string | null) ?? (p?.anzeigename as string | null) ?? '') as string
+        }
+      }
+      const fmtD = (iso: string | null) =>
+        iso
+          ? new Date(iso).toLocaleDateString('de-DE', {
+              weekday: 'long',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })
+          : ''
+      const fmtT = (iso: string | null) =>
+        iso
+          ? new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+          : ''
+      verlegungBannerProps = {
+        pendingTerminId: verlegungPendingRow.id as string,
+        alterDatum: fmtD(alterTermin?.start_zeit as string | null),
+        alterUhrzeit: fmtT(alterTermin?.start_zeit as string | null),
+        neuesDatum: fmtD(verlegungPendingRow.start_zeit as string | null),
+        neuesUhrzeit: fmtT(verlegungPendingRow.start_zeit as string | null),
+        svVorname,
+        grund: (verlegungPendingRow.verlegung_grund as string | null) ?? null,
+      }
+    }
 
     // AAR-558 (C9): Kunden-sichere Felder aus faelle_kunde_view laden.
     // Nur noch für AuszahlungCard genutzt — Eskalations-Tag-Felder kommen
@@ -345,6 +412,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
+        {/* AAR-864: Live-Aktualisierung — abonniert gutachter_termine,
+            auftraege und faelle für diesen Fall, refresht die Page bei
+            jedem Event. */}
+        <FallRealtimeRefresh fallId={fall.id as string} />
+
         {/* Header — CMM-28: Zurück-Link nur bei Multi-Fall-Kunden */}
         <div>
           {hatMehrereFaelle && (
@@ -356,8 +428,42 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
-        {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase. */}
-        <ClaimStepper lifecycle={claimLifecycle} />
+        {/* CMM-32f: Claim-Stepper — kombiniert die 4 Hauptphasen mit aktiver Subphase.
+            AAR-864: Termin-Sektion analog zum SV-Header (Datum/Uhrzeit/Adresse/Navi)
+            und Verlegungs-Banner als verschmolzene Bottom-Sektion. */}
+        {(() => {
+          const aktiverSv = svTermin
+          const terminInfo = aktiverSv?.start_zeit
+            ? {
+                terminId: aktiverSv.id as string,
+                status: (aktiverSv.status as string | null) ?? null,
+                datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
+                  weekday: 'long',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                }),
+                uhrzeit: new Date(aktiverSv.start_zeit as string).toLocaleTimeString('de-DE', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
+                adresse: terminAdresse,
+                // AAR-858: nur Vorname für Anonymität
+                svVorname: svKontakt?.name?.split(' ')[0] ?? null,
+              }
+            : null
+          return (
+            <ClaimStepper
+              lifecycle={claimLifecycle}
+              terminInfo={terminInfo}
+              bottomSlot={
+                verlegungBannerProps ? (
+                  <TerminVerlegungBanner {...verlegungBannerProps} embedded />
+                ) : null
+              }
+            />
+          )
+        })()}
 
         {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
         {svTermin?.id && (

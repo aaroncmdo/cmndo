@@ -50,6 +50,12 @@ export type TemplateName =
   | 'sv_konfrontation_anfrage'
   // AAR-561 (C12): Kunde wird informiert dass SV seinen Konfrontations-Termin bestätigt hat
   | 'sv_konfrontation_bestaetigt_kunde'
+  // AAR-864: Termin-Verlegung — vier neue Templates (T31-T34) + T35
+  | 'termin_verlegung_request'
+  | 'termin_verlegung_bestaetigt'
+  | 'termin_verlegung_abgelehnt'
+  | 'termin_verlegung_eskalation'
+  | 'termin_verschoben_durch_kunde'
   // KFZ-200 → KFZ-201: SV-Navigation Templates konsolidiert zu T21-T25:
   //   sv_nav_unterwegs    → sv_losgefahren (T21)
   //   sv_nav_15min        → sv_fast_da (T22)
@@ -109,6 +115,12 @@ export const TEMPLATE_CONFIGS: Record<TemplateName, TemplateConfig> = {
   sv_konfrontation_anfrage:     { envKey: 'TWILIO_TPL_SV_KONFRONTATION_ANFRAGE', variableCount: 4, beschreibung: 'AAR-561 (C12): SV-WA Konfrontations-Termin-Anfrage (SV-Vorname, Fall-Nr, Termin, Portal-Link)' },
   // AAR-561 (C12): Kunde-WA — SV hat Konfrontations-Termin bestätigt — Kunden-Vorname, SV-Vorname, Termin-Datum+Uhrzeit, Portal-Link
   sv_konfrontation_bestaetigt_kunde: { envKey: 'TWILIO_TPL_SV_KONFRONTATION_BESTAETIGT_KUNDE', variableCount: 4, beschreibung: 'AAR-561 (C12): Kunde-WA SV-Konfrontations-Zusage (Kunden-Vorname, SV-Vorname, Termin, Portal-Link)' },
+  // AAR-864: Termin-Verlegung
+  termin_verlegung_request:     { envKey: 'TWILIO_TPL_TERMIN_VERLEGUNG_REQUEST',     variableCount: 7, beschreibung: 'T31: SV bittet um Verlegung (Vorname, alterDatum, alterUhrzeit, neuesDatum, neuesUhrzeit, SV-Vorname, Portal-Link)' },
+  termin_verlegung_bestaetigt:  { envKey: 'TWILIO_TPL_TERMIN_VERLEGUNG_BESTAETIGT',  variableCount: 4, beschreibung: 'T32: SV-WA Verlegung bestätigt (SV-Vorname, neuesDatum, neuesUhrzeit, Kunden-Vorname)' },
+  termin_verlegung_abgelehnt:   { envKey: 'TWILIO_TPL_TERMIN_VERLEGUNG_ABGELEHNT',   variableCount: 3, beschreibung: 'T33: SV-WA Verlegung abgelehnt (SV-Vorname, Kunden-Vorname, Grund/leer)' },
+  termin_verlegung_eskalation:  { envKey: 'TWILIO_TPL_TERMIN_VERLEGUNG_ESKALATION',  variableCount: 4, beschreibung: 'T34: KB-Eskalation 48h vor altem Termin (Vorname, alterDatum, alterUhrzeit, Portal-Link)' },
+  termin_verschoben_durch_kunde: { envKey: 'TWILIO_TPL_TERMIN_VERSCHOBEN_DURCH_KUNDE', variableCount: 5, beschreibung: 'T35: SV-WA Kunde hat Termin proaktiv verschoben (SV-Vorname, alterDatum, alterUhrzeit, neuesDatum, neuesUhrzeit)' },
 }
 
 /**

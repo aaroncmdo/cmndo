@@ -42,6 +42,8 @@ export async function saveRueckruf(
       .from('leads')
       .update({ updated_at: new Date().toISOString() })
       .eq('id', leadId)
+    // Schnell-Lookup auf leads nullen
+    await supabase.from('leads').update({ rueckruf_geplant_am: null, updated_at: new Date().toISOString() }).eq('id', leadId)
     // AAR-698: Google-Calendar-Events der abgesagten Termine entfernen
     for (const c of cancelled ?? []) {
       import('@/lib/google-calendar/admin-event-sync').then(({ syncAdminTerminCalendarEvent }) =>
@@ -118,6 +120,7 @@ export async function saveRueckruf(
     .from('leads')
     .update({
       qualifizierungs_phase: 'rueckruf',
+      rueckruf_geplant_am: datumIso,
       updated_at: nowIso,
     })
     .eq('id', leadId)
@@ -154,6 +157,9 @@ export async function markRueckrufErledigt(leadId: string): Promise<RueckrufActi
     .select('id')
 
   if (error) return { success: false, error: error.message }
+
+  // Schnell-Lookup auf leads nullen
+  await supabase.from('leads').update({ rueckruf_geplant_am: null, updated_at: new Date().toISOString() }).eq('id', leadId)
 
   // AAR-698: Google-Calendar-Events entfernen wenn als erledigt markiert
   for (const e of erledigt ?? []) {

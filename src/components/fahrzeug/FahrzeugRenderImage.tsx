@@ -1,92 +1,109 @@
 'use client'
 
-// CMM-32: Render-Bild eines Fahrzeugs in der richtigen Lackfarbe via Imagin
-// Studio. Fallback-Kette: Imagin-Render → Hersteller-Logo → CarIcon.
+// CMM-32: Fahrzeug-Render-Kaskade.
+//   1) Imagin-Studio-Render (parametrisch + Lackfarbe + Baujahr) via
+//      Server-Proxy. Demo-Customer ist gesperrt — funktioniert erst
+//      mit Production-Customer-Key in NEXT_PUBLIC_IMAGIN_CUSTOMER.
+//   2) SimpleIcons-CDN (Marken-Logos in Original-Brandfarben, kostenlos).
+//   3) Clearbit-Logo-CDN als Sub-Fallback für Marken ohne SimpleIcons-
+//      Eintrag (z.B. Opel, Dacia, Smart).
+//   4) CarIcon als letzter Fallback.
+//
+// Aaron 2026-04-30: Wikipedia-Stage rausgenommen, brachte falsche
+// Generationen / falsche Modelle bei Freitext-Eingaben. Marken-Logo
+// ist ehrlicher und reicht für die Wiedererkennung.
 
 import Image from 'next/image'
 import { CarIcon } from 'lucide-react'
-import { buildImaginUrl, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
+import { buildImaginProxyUrl, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 import { useState } from 'react'
 
-// Bekannte Marken → Clearbit-Logo-Domain
-const BRAND_LOGO_DOMAINS: Record<string, string> = {
-  audi:              'audi.com',
-  bmw:               'bmw.com',
-  mercedes:          'mercedes-benz.com',
-  'mercedes-benz':   'mercedes-benz.com',
-  volkswagen:        'volkswagen.com',
-  vw:                'volkswagen.com',
-  porsche:           'porsche.com',
-  opel:              'opel.com',
-  ford:              'ford.com',
-  toyota:            'toyota.com',
-  honda:             'honda.com',
-  hyundai:           'hyundai.com',
-  kia:               'kia.com',
-  renault:           'renault.com',
-  peugeot:           'peugeot.com',
-  citroen:           'citroen.com',
-  fiat:              'fiat.com',
-  seat:              'seat.com',
-  skoda:             'skoda.com',
-  volvo:             'volvocars.com',
-  mazda:             'mazda.com',
-  nissan:            'nissan.com',
-  mitsubishi:        'mitsubishi-motors.com',
-  suzuki:            'suzuki.com',
-  tesla:             'tesla.com',
-  mini:              'mini.com',
-  'land rover':      'landrover.com',
-  jaguar:            'jaguar.com',
-  'alfa romeo':      'alfaromeo.com',
-  lexus:             'lexus.com',
-  infiniti:          'infiniti.com',
-  jeep:              'jeep.com',
-  chrysler:          'chrysler.com',
-  dodge:             'dodge.com',
-  chevrolet:         'chevrolet.com',
-  dacia:             'dacia.com',
-  smart:             'smart.com',
-  cupra:             'cupraofficial.com',
+/** Hersteller-String → SimpleIcons-Slug. Bei null fallen wir auf
+ *  Clearbit zurück (manche Marken haben keinen SimpleIcons-Eintrag). */
+const SI_SLUG: Record<string, string | null> = {
+  audi:              'audi',
+  bmw:               'bmw',
+  mercedes:          'mercedes',
+  'mercedes-benz':   'mercedes',
+  volkswagen:        'volkswagen',
+  vw:                'volkswagen',
+  porsche:           'porsche',
+  ford:              'ford',
+  toyota:            'toyota',
+  honda:             'honda',
+  hyundai:           'hyundai',
+  kia:               'kia',
+  renault:           'renault',
+  peugeot:           'peugeot',
+  citroen:           'citroen',
+  fiat:              'fiat',
+  seat:              'seat',
+  skoda:             'skoda',
+  cupra:             'cupra',
+  volvo:             'volvo',
+  mazda:             'mazda',
+  nissan:            'nissan',
+  mitsubishi:        'mitsubishi',
+  suzuki:            'suzuki',
+  tesla:             'tesla',
+  mini:              'mini',
+  'land rover':      'landrover',
+  jaguar:            'jaguar',
+  'alfa romeo':      'alfaromeo',
+  lexus:             'lexus',
+  infiniti:          'infiniti',
+  jeep:              'jeep',
+  chevrolet:         'chevrolet',
+  ferrari:           'ferrari',
+  maserati:          'maserati',
+  // Marken ohne SimpleIcons-Eintrag → null → Clearbit
+  opel:              null,
+  smart:             null,
+  dacia:             null,
+  chrysler:          null,
+  dodge:             null,
+  subaru:            null,
 }
 
-function getLogoUrl(hersteller: string): string | null {
-  const key = hersteller.toLowerCase().trim()
-  const domain = BRAND_LOGO_DOMAINS[key]
-  if (!domain) return null
-  return `https://logo.clearbit.com/${domain}`
+const CLEARBIT_DOMAIN: Record<string, string> = {
+  opel:    'opel.com',
+  smart:   'smart.com',
+  dacia:   'dacia.com',
+  chrysler:'chrysler.com',
+  dodge:   'dodge.com',
+  subaru:  'subaru.com',
+}
+
+function lookupKey(hersteller: string): string {
+  return hersteller.toLowerCase().trim()
 }
 
 type Props = {
   hersteller: string | null
   modell: string | null
   lackfarbe: LackfarbeCode | null
-  /** Pixel — Imagin liefert hochaufgelöste PNGs, das `width` steuert
-   *  die Render-Pixel-Breite. */
+  baujahr?: number | string | null
   width?: number
-  /** Tailwind-Klassen am Wrapper. */
   className?: string
-  /** Optionaler Alt-Text-Override. */
   alt?: string
 }
+
+type Stage = 'imagin' | 'simpleicons' | 'clearbit' | 'icon'
 
 export default function FahrzeugRenderImage({
   hersteller,
   modell,
   lackfarbe,
+  baujahr,
   width = 200,
   className = '',
   alt,
 }: Props) {
-  const [imaginFailed, setImaginFailed] = useState(false)
-  const [logoFailed, setLogoFailed] = useState(false)
+  const [stage, setStage] = useState<Stage>('imagin')
 
-  const imaginUrl = buildImaginUrl({ hersteller, modell, lackfarbe, angle: 21 })
-  const logoUrl = hersteller ? getLogoUrl(hersteller) : null
   const altText = alt ?? `${hersteller ?? 'Fahrzeug'} ${modell ?? ''}`.trim()
   const height = Math.round(width * 0.6)
 
-  // Kein Hersteller — generischer Platzhalter
   if (!hersteller) {
     return (
       <div
@@ -98,10 +115,28 @@ export default function FahrzeugRenderImage({
     )
   }
 
-  // Imagin-Render (primär)
-  if (imaginUrl && !imaginFailed) {
+  const key = lookupKey(hersteller)
+  const imaginUrl = buildImaginProxyUrl({ hersteller, modell, lackfarbe, baujahr })
+  const siSlug = key in SI_SLUG ? SI_SLUG[key] : null
+  // Claimondo-Navy als Logo-Farbe — SimpleIcons rendert sonst in der
+  // Brand-Color (z.B. Audi-Rot), das passt nicht ins CI.
+  const siUrl = siSlug ? `https://cdn.simpleicons.org/${siSlug}/0D1B3E` : null
+  const clearbitDomain = CLEARBIT_DOMAIN[key] ?? null
+  const clearbitUrl = clearbitDomain ? `https://logo.clearbit.com/${clearbitDomain}` : null
+
+  function next(from: Stage) {
+    if (from === 'imagin') setStage(siUrl ? 'simpleicons' : clearbitUrl ? 'clearbit' : 'icon')
+    else if (from === 'simpleicons') setStage(clearbitUrl ? 'clearbit' : 'icon')
+    else setStage('icon')
+  }
+
+  // Stage 1 — Imagin
+  if (stage === 'imagin' && imaginUrl) {
     return (
-      <div className={`relative ${className}`} style={{ width, height }}>
+      <div
+        className={`relative rounded-xl overflow-hidden ${className}`}
+        style={{ width, height }}
+      >
         <Image
           src={imaginUrl}
           alt={altText}
@@ -109,34 +144,55 @@ export default function FahrzeugRenderImage({
           sizes={`${width}px`}
           unoptimized
           className="object-contain"
-          onError={() => setImaginFailed(true)}
+          onError={() => next('imagin')}
         />
       </div>
     )
   }
 
-  // Hersteller-Logo (erster Fallback)
-  if (logoUrl && !logoFailed) {
-    const logoSize = Math.round(width * 0.4)
+  // Stage 2 — SimpleIcons (Marken-Logo in Claimondo-Navy, ohne Hintergrund)
+  if (stage === 'simpleicons' && siUrl) {
+    const logoSize = Math.round(width * 0.6)
     return (
       <div
-        className={`flex items-center justify-center rounded-xl bg-claimondo-border/30 ${className}`}
+        className={`flex items-center justify-center ${className}`}
         style={{ width, height }}
       >
         <Image
-          src={logoUrl}
+          src={siUrl}
           alt={`${hersteller} Logo`}
           width={logoSize}
           height={logoSize}
           unoptimized
-          className="object-contain opacity-70"
-          onError={() => setLogoFailed(true)}
+          className="object-contain"
+          onError={() => next('simpleicons')}
         />
       </div>
     )
   }
 
-  // CarIcon (letzter Fallback)
+  // Stage 3 — Clearbit (für Marken ohne SimpleIcons-Eintrag) — ohne Hintergrund
+  if (stage === 'clearbit' && clearbitUrl) {
+    const logoSize = Math.round(width * 0.55)
+    return (
+      <div
+        className={`flex items-center justify-center ${className}`}
+        style={{ width, height }}
+      >
+        <Image
+          src={clearbitUrl}
+          alt={`${hersteller} Logo`}
+          width={logoSize}
+          height={logoSize}
+          unoptimized
+          className="object-contain"
+          onError={() => next('clearbit')}
+        />
+      </div>
+    )
+  }
+
+  // Stage 4 — CarIcon
   return (
     <div
       className={`flex items-center justify-center rounded-xl bg-claimondo-border/30 text-claimondo-ondo ${className}`}

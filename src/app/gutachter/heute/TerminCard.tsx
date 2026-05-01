@@ -40,6 +40,11 @@ function statusBadge(status: string): { label: string; className: string } {
       return { label: 'No-Show', className: 'bg-amber-50 text-amber-700' }
     case 'reserviert':
       return { label: 'Reserviert', className: 'bg-[#f8f9fb] text-claimondo-ondo' }
+    // AAR-864: Verlegungs-Slots
+    case 'verlegung_pending':
+      return { label: 'Verlegung pending', className: 'bg-amber-50 text-amber-700' }
+    case 'verlegt':
+      return { label: 'Verlegt', className: 'bg-claimondo-border/40 text-claimondo-ondo italic' }
     default:
       return { label: 'Offen', className: 'bg-amber-50 text-amber-700' }
   }
@@ -67,10 +72,14 @@ export default function TerminCard({
 
   return (
     <div
-      className={`absolute left-16 right-2 rounded-xl border px-3 py-2 shadow-sm transition-opacity ${
+      className={`absolute left-16 right-2 rounded-xl px-3 py-2 shadow-sm transition-opacity ${
         vergangen
-          ? 'bg-[#f8f9fb] border-claimondo-border opacity-60'
-          : 'bg-white border-claimondo-border hover:border-[color:var(--brand-primary,var(--brand-secondary))]'
+          ? 'bg-[#f8f9fb] border border-claimondo-border opacity-60'
+          : termin.status === 'verlegung_pending'
+            ? 'bg-amber-50 border-2 border-dashed border-amber-400'
+            : termin.status === 'verlegt'
+              ? 'bg-claimondo-border/30 border border-claimondo-border opacity-70 italic'
+              : 'bg-white border border-claimondo-border hover:border-[color:var(--brand-primary,var(--brand-secondary))]'
       }`}
       style={{ top: `${topPx}px`, minHeight: `${heightPx}px` }}
     >

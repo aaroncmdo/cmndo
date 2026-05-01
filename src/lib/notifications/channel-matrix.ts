@@ -366,6 +366,47 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       admin:          ['in_app'],
     },
   },
+  // 5.18 Termin-Verlegung (AAR-864)
+  'termin.verlegung_vorgeschlagen': {
+    priority: 'urgent',
+    channels: {
+      kunde:          ['whatsapp', 'email', 'web_push', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin:          ['in_app'],
+    },
+  },
+  'termin.verlegung_bestaetigt': {
+    priority: 'normal',
+    channels: {
+      sachverstaendiger: ['whatsapp', 'web_push', 'in_app'],
+      kundenbetreuer:    ['in_app'],
+      admin:             ['in_app'],
+    },
+  },
+  'termin.verlegung_abgelehnt': {
+    priority: 'urgent',
+    channels: {
+      sachverstaendiger: ['whatsapp', 'web_push', 'in_app'],
+      kundenbetreuer:    ['in_app'],
+      admin:             ['in_app'],
+    },
+  },
+  'termin.verlegung_eskalation': {
+    priority: 'urgent',
+    channels: {
+      kunde:          ['whatsapp', 'web_push', 'in_app'],
+      kundenbetreuer: ['web_push', 'in_app'],
+      admin:          ['in_app'],
+    },
+  },
+  'termin.verschoben_durch_kunde': {
+    priority: 'urgent',
+    channels: {
+      sachverstaendiger: ['whatsapp', 'web_push', 'in_app'],
+      kundenbetreuer:    ['in_app'],
+      admin:             ['in_app'],
+    },
+  },
 }
 
 export function getEventConfig(eventType: EventType): EventConfig {
