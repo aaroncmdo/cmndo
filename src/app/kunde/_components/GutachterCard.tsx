@@ -165,7 +165,7 @@ export default function GutachterCard({
                 ? {
                     left: `${cardRect.right}px`,
                     bottom: `${window.innerHeight - cardRect.bottom}px`,
-                    height: `${Math.min(640, cardRect.bottom - 16)}px`,
+                    height: '640px',
                   }
                 : { height: 'min(640px, calc(100vh - 2rem))' }),
             }}
