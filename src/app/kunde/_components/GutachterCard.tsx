@@ -25,6 +25,8 @@ type Props = {
   svUserId: string | null
   /** KB-User-ID — als zusaetzlicher Sender im Realtime-Filter (KB liest mit) */
   kbUserId: string | null
+  /** KB-Anzeigename — fuer Bubble-Label im Gruppenchat */
+  kbName?: string | null
   /** Alle Faelle des Kunden — fuer Fall-Bezug-Picker */
   fallOptions: Array<{ id: string; fall_nummer: string | null }>
 }
@@ -39,6 +41,7 @@ export default function GutachterCard({
   currentUserId,
   svUserId,
   kbUserId,
+  kbName,
   fallOptions,
 }: Props) {
   const [chatOpen, setChatOpen] = useState(false)
@@ -86,32 +89,32 @@ export default function GutachterCard({
           <p className="text-sm font-semibold text-white truncate">{name}</p>
           <p className="text-[10px] text-[#7BA3CC]">Sachverständiger</p>
         </div>
-      </div>
-      <div className="grid grid-cols-2 gap-1.5 mt-3">
         {telefon ? (
           <a
             href={`tel:${telefon}`}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium py-2 transition-colors"
+            className="shrink-0 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white inline-flex items-center justify-center transition-colors"
+            aria-label={`${name} anrufen`}
           >
-            <PhoneIcon className="w-3.5 h-3.5" />
-            Anrufen
+            <PhoneIcon className="w-4 h-4" />
           </a>
         ) : (
-          <span className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/5 text-[#7BA3CC]/60 text-xs py-2 cursor-not-allowed">
-            <PhoneIcon className="w-3.5 h-3.5" />
-            Anrufen
+          <span
+            className="shrink-0 w-8 h-8 rounded-full bg-white/5 text-[#7BA3CC]/40 inline-flex items-center justify-center cursor-not-allowed"
+            aria-hidden="true"
+          >
+            <PhoneIcon className="w-4 h-4" />
           </span>
         )}
-        <button
-          type="button"
-          onClick={() => setChatOpen(true)}
-          disabled={!currentUserId || !svUserId}
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium py-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <MessageSquareIcon className="w-3.5 h-3.5" />
-          Chat
-        </button>
       </div>
+      <button
+        type="button"
+        onClick={() => setChatOpen(true)}
+        disabled={!currentUserId || !svUserId}
+        className="w-full mt-3 inline-flex items-center justify-center gap-2 rounded-lg bg-white text-claimondo-navy hover:bg-white/90 text-sm font-semibold py-2.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <MessageSquareIcon className="w-4 h-4" />
+        Nachricht senden
+      </button>
 
       {chatOpen && currentUserId && svUserId && (
         <div role="dialog" aria-modal="true" aria-label="Gruppenchat" className="fixed inset-0 z-[1100]">
@@ -159,6 +162,12 @@ export default function GutachterCard({
                 fallOptions={fallOptions}
                 defaultFallId={fallId}
                 placeholder="Nachricht an Gutachter (Betreuer im CC) …"
+                senderLabels={{
+                  [svUserId]: { name, rolle: 'sv' },
+                  ...(kbUserId && kbName
+                    ? { [kbUserId]: { name: kbName, rolle: 'kb' as const } }
+                    : {}),
+                }}
               />
             </div>
           </div>

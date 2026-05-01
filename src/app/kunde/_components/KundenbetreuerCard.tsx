@@ -99,33 +99,32 @@ export default function KundenbetreuerCard({
           <p className="text-sm font-semibold text-white truncate">{name}</p>
           <p className="text-[10px] text-[#7BA3CC]">Kundenbetreuer</p>
         </div>
-      </div>
-      <div className="grid grid-cols-2 gap-1.5 mt-3">
         {telefon ? (
           <a
             href={`tel:${telefon}`}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium py-2 transition-colors"
+            className="shrink-0 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white inline-flex items-center justify-center transition-colors"
             aria-label={`${name} anrufen`}
           >
-            <PhoneIcon className="w-3.5 h-3.5" />
-            Anrufen
+            <PhoneIcon className="w-4 h-4" />
           </a>
         ) : (
-          <span className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/5 text-[#7BA3CC]/60 text-xs py-2 cursor-not-allowed">
-            <PhoneIcon className="w-3.5 h-3.5" />
-            Anrufen
+          <span
+            className="shrink-0 w-8 h-8 rounded-full bg-white/5 text-[#7BA3CC]/40 inline-flex items-center justify-center cursor-not-allowed"
+            aria-hidden="true"
+          >
+            <PhoneIcon className="w-4 h-4" />
           </span>
         )}
-        <button
-          type="button"
-          onClick={() => setChatOpen(true)}
-          disabled={!currentUserId || !kbUserId}
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-medium py-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <MessageSquareIcon className="w-3.5 h-3.5" />
-          Chat
-        </button>
       </div>
+      <button
+        type="button"
+        onClick={() => setChatOpen(true)}
+        disabled={!currentUserId || !kbUserId}
+        className="w-full mt-3 inline-flex items-center justify-center gap-2 rounded-lg bg-white text-claimondo-navy hover:bg-white/90 text-sm font-semibold py-2.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <MessageSquareIcon className="w-4 h-4" />
+        Nachricht senden
+      </button>
 
       {/* Glass-Modal: poppt aus der KB-Card heraus (Sidebar links unten),
           blurred Backdrop deckt den Rest. transform-origin bottom-left,

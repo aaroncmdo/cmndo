@@ -32,6 +32,8 @@ type FallOption = {
   fall_nummer: string | null
 }
 
+type SenderInfo = { name: string; rolle: 'kb' | 'sv' | 'kunde' }
+
 type Props = {
   currentUserId: string
   /** Partner-User-ID — KB beim Direktchat, SV beim Gruppenchat */
@@ -44,6 +46,9 @@ type Props = {
   /** Default-Fall der vorausgewählt wird (singleFallId). Null = "Allgemein". */
   defaultFallId: string | null
   placeholder?: string
+  /** Map user_id → Anzeigename + Rolle. Wird ueber den Bubbles als Label
+   *  gerendert, damit klar ist wer geschrieben hat (relevant bei Gruppenchat). */
+  senderLabels?: Record<string, SenderInfo>
 }
 
 export default function KundeKbChat({
@@ -54,6 +59,7 @@ export default function KundeKbChat({
   fallOptions,
   defaultFallId,
   placeholder = 'Nachricht …',
+  senderLabels,
 }: Props) {
   const [messages, setMessages] = useState<Nachricht[]>([])
   const [input, setInput] = useState('')
@@ -175,7 +181,7 @@ export default function KundeKbChat({
   return (
     <div className="flex flex-col h-full">
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.length === 0 && (
           <p className="text-center text-xs text-claimondo-ondo/70 mt-8">
             Noch keine Nachrichten. Schreib einfach was — dein Betreuer bekommt
@@ -185,15 +191,32 @@ export default function KundeKbChat({
         {messages.map((m) => {
           const ownMessage = m.sender_id === currentUserId
           const fallNr = fallNummerOf(m.fall_id)
+          const sender = m.sender_id ? senderLabels?.[m.sender_id] : undefined
+          // Bubble-Stil pro Rolle, damit Kunde KB vs SV im Gruppenchat
+          // visuell unterscheiden kann.
+          let bubbleCls = ''
+          if (ownMessage) {
+            bubbleCls = 'bg-claimondo-navy text-white rounded-br-sm'
+          } else if (sender?.rolle === 'kb') {
+            // KB: ondo-blau Akzent
+            bubbleCls = 'bg-claimondo-ondo/15 text-claimondo-navy rounded-bl-sm border border-claimondo-ondo/30'
+          } else if (sender?.rolle === 'sv') {
+            // SV: emerald-Akzent
+            bubbleCls = 'bg-emerald-50 text-claimondo-navy rounded-bl-sm border border-emerald-200'
+          } else {
+            bubbleCls = 'bg-white/80 text-claimondo-navy rounded-bl-sm border border-claimondo-border/60'
+          }
           return (
-            <div key={m.id} className={`flex ${ownMessage ? 'justify-end' : 'justify-start'}`}>
-              <div
-                className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-snug ${
-                  ownMessage
-                    ? 'bg-claimondo-navy text-white rounded-br-sm'
-                    : 'bg-white/80 text-claimondo-navy rounded-bl-sm border border-claimondo-border/60'
-                }`}
-              >
+            <div key={m.id} className={`flex flex-col ${ownMessage ? 'items-end' : 'items-start'}`}>
+              {!ownMessage && sender && (
+                <p className="text-[10px] font-semibold text-claimondo-ondo px-1 mb-0.5">
+                  {sender.name}
+                  <span className="ml-1 text-[9px] uppercase tracking-wider text-claimondo-ondo/60 font-medium">
+                    · {sender.rolle === 'kb' ? 'Betreuer' : sender.rolle === 'sv' ? 'Gutachter' : ''}
+                  </span>
+                </p>
+              )}
+              <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-snug ${bubbleCls}`}>
                 {/* WhatsApp-Style Reply-Preview: angelinkter Fall ueber dem
                     Nachrichten-Text. Klick auf den Block fuehrt zur Fallakte. */}
                 {fallNr && m.fall_id && (
@@ -247,77 +270,26 @@ export default function KundeKbChat({
         })}
       </div>
 
-      {/* Fall-Bezug-Selector (nur wenn mehr als 1 Fall existiert) */}
-      {fallOptions.length > 0 && (
-        <div className="px-4 py-2 border-t border-claimondo-border/60 bg-white/50">
-          <div className="relative">
+      {/* Composer (Fall-Chip + Input) */}
+      <div className="px-3 pt-2 pb-3 bg-white/60 border-t border-claimondo-border/40">
+        {sendError && (
+          <p className="text-[11px] text-rose-600 mb-1.5 px-1">{sendError}</p>
+        )}
+        {/* Fall-Bezug Chip (nur wenn ein Fall ausgewaehlt) — wie WhatsApp-
+            Reply-Preview, schwebt direkt ueber dem Input */}
+        {selectedFall && (
+          <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-md bg-claimondo-navy/5 border-l-[3px] border-claimondo-navy pl-2 pr-1.5 py-1 text-[11px] text-claimondo-navy">
+            <FileTextIcon className="w-3 h-3 text-claimondo-navy/70 shrink-0" />
+            <span>Bezug: <span className="font-mono font-semibold">{selectedFall.fall_nummer ?? selectedFall.id.slice(0, 8)}</span></span>
             <button
               type="button"
-              onClick={() => setPickerOpen((v) => !v)}
-              className="inline-flex items-center gap-1.5 text-[11px] text-claimondo-ondo hover:text-claimondo-navy transition-colors"
+              onClick={() => setSelectedFallId(null)}
+              className="text-claimondo-navy/40 hover:text-claimondo-navy ml-0.5"
+              aria-label="Fall-Bezug entfernen"
             >
-              <FileTextIcon className="w-3 h-3" />
-              {selectedFall ? (
-                <>
-                  Bezug: <span className="font-mono font-semibold">{selectedFall.fall_nummer ?? selectedFall.id.slice(0, 8)}</span>
-                </>
-              ) : (
-                'Allgemein (kein Fall-Bezug)'
-              )}
-              <ChevronDownIcon className={`w-3 h-3 transition-transform ${pickerOpen ? 'rotate-180' : ''}`} />
-              {selectedFall && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setSelectedFallId(null)
-                  }}
-                  className="ml-0.5 text-claimondo-ondo/50 hover:text-claimondo-navy"
-                  aria-label="Fall-Bezug entfernen"
-                >
-                  <XIcon className="w-3 h-3" />
-                </button>
-              )}
+              <XIcon className="w-3 h-3" />
             </button>
-            {pickerOpen && (
-              <div className="absolute bottom-full left-0 mb-1 w-64 bg-white rounded-xl border border-claimondo-border shadow-lg overflow-hidden z-10">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedFallId(null)
-                    setPickerOpen(false)
-                  }}
-                  className={`w-full text-left px-3 py-2 text-xs hover:bg-[#f8f9fb] ${
-                    selectedFallId === null ? 'bg-claimondo-navy/5 font-semibold' : ''
-                  }`}
-                >
-                  Allgemein (kein Fall-Bezug)
-                </button>
-                {fallOptions.map((f) => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedFallId(f.id)
-                      setPickerOpen(false)
-                    }}
-                    className={`w-full text-left px-3 py-2 text-xs font-mono hover:bg-[#f8f9fb] border-t border-claimondo-border/30 ${
-                      selectedFallId === f.id ? 'bg-claimondo-navy/5 font-semibold' : ''
-                    }`}
-                  >
-                    {f.fall_nummer ?? f.id.slice(0, 8)}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
-        </div>
-      )}
-
-      {/* Input */}
-      <div className="px-3 py-3 border-t border-claimondo-border/60 bg-white/60">
-        {sendError && (
-          <p className="text-[11px] text-rose-600 mb-2 px-1">{sendError}</p>
         )}
         <form
           onSubmit={(e) => {
@@ -326,6 +298,54 @@ export default function KundeKbChat({
           }}
           className="flex items-end gap-2"
         >
+          {/* Fall-Bezug-Picker als kleines Plus-Icon links vom Input */}
+          {fallOptions.length > 0 && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setPickerOpen((v) => !v)}
+                className={`shrink-0 w-9 h-9 rounded-full inline-flex items-center justify-center transition-colors ${
+                  selectedFall
+                    ? 'bg-claimondo-navy/10 text-claimondo-navy hover:bg-claimondo-navy/15'
+                    : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-ondo/10'
+                }`}
+                aria-label="Fall-Bezug waehlen"
+              >
+                <FileTextIcon className="w-4 h-4" />
+              </button>
+              {pickerOpen && (
+                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl border border-claimondo-border shadow-lg overflow-hidden z-10">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedFallId(null)
+                      setPickerOpen(false)
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-[#f8f9fb] ${
+                      selectedFallId === null ? 'bg-claimondo-navy/5 font-semibold' : ''
+                    }`}
+                  >
+                    Allgemein (kein Fall-Bezug)
+                  </button>
+                  {fallOptions.map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedFallId(f.id)
+                        setPickerOpen(false)
+                      }}
+                      className={`w-full text-left px-3 py-2 text-xs font-mono hover:bg-[#f8f9fb] border-t border-claimondo-border/30 ${
+                        selectedFallId === f.id ? 'bg-claimondo-navy/5 font-semibold' : ''
+                      }`}
+                    >
+                      {f.fall_nummer ?? f.id.slice(0, 8)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -337,13 +357,13 @@ export default function KundeKbChat({
             }}
             placeholder={placeholder}
             rows={1}
-            className="flex-1 resize-none rounded-xl border border-claimondo-border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30 max-h-32"
+            className="flex-1 resize-none rounded-2xl border border-claimondo-border bg-white px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30 max-h-32"
             disabled={pending}
           />
           <button
             type="submit"
             disabled={pending || !input.trim()}
-            className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-claimondo-navy hover:bg-claimondo-navy/90 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-claimondo-navy hover:bg-claimondo-navy/90 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             aria-label="Senden"
           >
             <SendIcon className="w-4 h-4" />
