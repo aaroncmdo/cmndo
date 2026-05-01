@@ -76,7 +76,9 @@ export default function KundenbetreuerCard({
   // bleibt der Button versteckt.
   const effectiveBookingFallId = fallId ?? fallOptions[0]?.id ?? null
 
-  // ESC schließt das Modal
+  // ESC schließt das Modal + Sidebar in den Vordergrund (sonst legt sich
+  // das Backdrop-Blur ueber die Cards). Aside hat normalerweise z-40 →
+  // wir heben sie temporaer auf z-1102 ueber das Backdrop (z-1100).
   useEffect(() => {
     if (!chatOpen) return
     function onKey(e: KeyboardEvent) {
@@ -84,9 +86,16 @@ export default function KundenbetreuerCard({
     }
     document.body.style.overflow = 'hidden'
     document.addEventListener('keydown', onKey)
+    const aside = document.querySelector('aside.kunde-sidebar') as HTMLElement | null
+    let originalZ = ''
+    if (aside) {
+      originalZ = aside.style.zIndex
+      aside.style.zIndex = '1102'
+    }
     return () => {
       document.body.style.overflow = ''
       document.removeEventListener('keydown', onKey)
+      if (aside) aside.style.zIndex = originalZ
     }
   }, [chatOpen])
 
@@ -97,7 +106,7 @@ export default function KundenbetreuerCard({
   return (
     <div
       ref={cardRef}
-      className="mb-2 mx-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative"
+      className="mb-2 mx-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative z-[1102]"
     >
       <button
         type="button"
@@ -162,7 +171,7 @@ export default function KundenbetreuerCard({
               erkennbar. */}
           <div
             onClick={() => setChatOpen(false)}
-            className="absolute inset-0 bg-claimondo-navy/30"
+            className="absolute inset-0 bg-claimondo-navy/30 backdrop-blur-sm"
             aria-hidden="true"
           />
           <div

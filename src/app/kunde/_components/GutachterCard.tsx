@@ -73,9 +73,16 @@ export default function GutachterCard({
       const r = cardRef.current?.getBoundingClientRect()
       if (r) setCardRect({ top: r.top, bottom: r.bottom, right: r.right })
     }
+    const aside = document.querySelector('aside.kunde-sidebar') as HTMLElement | null
+    let originalZ = ''
+    if (aside) {
+      originalZ = aside.style.zIndex
+      aside.style.zIndex = '1102'
+    }
     return () => {
       document.body.style.overflow = ''
       document.removeEventListener('keydown', onKey)
+      if (aside) aside.style.zIndex = originalZ
     }
   }, [chatOpen])
 
@@ -86,7 +93,7 @@ export default function GutachterCard({
   return (
     <div
       ref={cardRef}
-      className="mb-2 mx-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative"
+      className="mb-2 mx-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative z-[1102]"
     >
       <button
         type="button"
@@ -138,7 +145,7 @@ export default function GutachterCard({
         <div role="dialog" aria-modal="true" aria-label="Gruppenchat" className="fixed inset-0 z-[1100]">
           <div
             onClick={() => setChatOpen(false)}
-            className="absolute inset-0 bg-claimondo-navy/30"
+            className="absolute inset-0 bg-claimondo-navy/30 backdrop-blur-sm"
             aria-hidden="true"
           />
           <div
