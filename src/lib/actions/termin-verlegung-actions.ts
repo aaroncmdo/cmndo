@@ -561,11 +561,18 @@ export async function kundeTerminVerlegungVorschlagen(input: {
     }
   }
 
-  // 2) Alter Termin auf 'verschoben' (terminal — Kunde hat entschieden)
+  // 2) Alter Termin schliessen.
+  // Wenn der Termin bereits verstrichen ist (start_zeit + 60min in der
+  // Vergangenheit, nicht durchgefuehrt) -> 'verpasst' statt 'verschoben'.
+  // Damit ist die Historie als Kunde-No-Show erkennbar.
+  const altStartMs = new Date(alt.start_zeit as string).getTime()
+  const verstrichen = altStartMs + 60 * 60 * 1000 < Date.now()
+  const neuerAltStatus = verstrichen ? 'verpasst' : 'verschoben'
+
   const { error: updErr } = await admin
     .from('gutachter_termine')
     .update({
-      status: 'verschoben',
+      status: neuerAltStatus,
       verlegung_grund: input.grund?.trim() || null,
       verlegung_initiator_kunde: true,
     })
@@ -576,6 +583,14 @@ export async function kundeTerminVerlegungVorschlagen(input: {
     await admin.from('gutachter_termine').delete().eq('id', neu.id)
     return { ok: false, error: `Alter Termin lässt sich nicht abschließen: ${updErr.message}` }
   }
+
+  // Timeline-Eintrag fuer Audit
+  await admin.from('timeline').insert({
+    fall_id: alt.fall_id,
+    typ: verstrichen ? 'system' : 'termin',
+    titel: verstrichen ? 'Termin verpasst — Kunde bucht neu' : 'Termin verschoben (Kunde)',
+    beschreibung: input.grund?.trim() || null,
+  })
 
   revalidateFallPaths(alt.fall_id as string | null)
 
