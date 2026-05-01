@@ -144,21 +144,26 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     if (svId) {
       const { data: svRow } = await adminForNav
         .from('sachverstaendige')
-        .select('profile_id, telefon, profiles(vorname, nachname, avatar_url, anzeigename)')
+        .select('profile_id')
         .eq('id', svId)
         .maybeSingle()
-      const profileJoin = (svRow as { profiles?: { vorname: string | null; nachname: string | null; avatar_url: string | null; anzeigename: string | null } | { vorname: string | null; nachname: string | null; avatar_url: string | null; anzeigename: string | null }[] } | null)?.profiles
-      const profileRow = Array.isArray(profileJoin) ? profileJoin[0] : profileJoin
       const svProfileId = (svRow?.profile_id as string | null) ?? null
-      if (svProfileId && profileRow) {
-        // AAR-858: Anonymitaet — nur Vorname (oder anzeigename), kein Nachname
-        const anzeige = profileRow.anzeigename
-        svCard = {
-          id: svProfileId,
-          vorname: anzeige ?? profileRow.vorname,
-          nachname: null,
-          telefon: (svRow?.telefon as string | null) ?? null,
-          avatarUrl: profileRow.avatar_url,
+      if (svProfileId) {
+        const { data: profileRow } = await adminForNav
+          .from('profiles')
+          .select('vorname, nachname, avatar_url, anzeigename, telefon')
+          .eq('id', svProfileId)
+          .maybeSingle()
+        if (profileRow) {
+          // AAR-858: Anonymitaet — anzeigename oder Vorname, kein Nachname
+          const anzeige = (profileRow.anzeigename as string | null) ?? null
+          svCard = {
+            id: svProfileId,
+            vorname: anzeige ?? (profileRow.vorname as string | null) ?? null,
+            nachname: null,
+            telefon: (profileRow.telefon as string | null) ?? null,
+            avatarUrl: (profileRow.avatar_url as string | null) ?? null,
+          }
         }
       }
     }
