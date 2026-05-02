@@ -396,7 +396,7 @@ export async function bestaetigeVollmachtKunde(
   const nowIso = new Date().toISOString()
   const { error: uErr } = await admin
     .from('faelle')
-    .update({ vollmacht_signiert_am: nowIso, vollmacht_datum: nowIso })
+    .update({ vollmacht_signiert_am: nowIso })
     .eq('id', fallId)
   if (uErr) return { ok: false, error: uErr.message }
 
@@ -476,7 +476,6 @@ export async function smokeResetAufKanzleiWunsch(
   // 2) Fall — Vollmacht-Felder leer, Onboarding fertig, Status regulierung.
   await admin.from('faelle').update({
     vollmacht_signiert_am: null,
-    vollmacht_datum: null,
     onboarding_complete: true,
     status: 'regulierung',
   }).eq('id', fallId)
@@ -548,7 +547,6 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
   // Fall: Vollmacht + Stammdaten
   await admin.from('faelle').update({
     vollmacht_signiert_am: nowIso,
-    vollmacht_datum: nowIso,
     kennzeichen: 'K-AS 2014',
     fahrzeug_hersteller: 'BMW',
     fahrzeug_modell: '5er',
