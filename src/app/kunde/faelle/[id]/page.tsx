@@ -627,6 +627,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             ? {
                 terminId: aktiverSv.id as string,
                 status: (aktiverSv.status as string | null) ?? null,
+                durchgefuehrt: !!(aktiverSv.durchgefuehrt_am as string | null),
                 verstrichen: (() => {
                   // Termin ist verstrichen wenn: start_zeit + 60min in der Vergangenheit,
                   // durchgefuehrt_am NULL, status nicht abgesagt/storniert/verschoben.

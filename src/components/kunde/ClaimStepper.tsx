@@ -76,6 +76,8 @@ type TerminInfo = {
   status?: string | null
   /** Termin ist verstrichen (start_zeit + 60min vorbei + nicht durchgeführt). */
   verstrichen?: boolean
+  /** Termin wurde wahrgenommen (durchgefuehrt_am gesetzt). */
+  durchgefuehrt?: boolean
   /** CMM-32 Polish: Wer war (laut Geo) nicht da? 'sv' wenn der SV nicht
    *  vor Ort war (sv_angekommen_am IS NULL), 'kunde' wenn der SV da war
    *  aber nichts passiert ist, 'unklar' wenn keine Geo-Daten — dann
@@ -757,9 +759,13 @@ export default function ClaimStepper({
       </AnimatePresence>
 
       {/* AAR-864: Termin-Sektion analog SV-Header — sichtbar wenn die
-          Begutachtungs-Phase ausgewaehlt ist und ein Termin existiert. */}
+          Begutachtungs-Phase ausgewaehlt ist und ein Termin existiert.
+          Sobald der Termin wahrgenommen wurde (durchgefuehrt_am), brauchen
+          wir die Sektion nicht mehr — die Historie zeigt 'Termin
+          wahrgenommen' weiter unten. */}
       {selectedPhase === 'begutachtung' &&
         terminInfo &&
+        !terminInfo.durchgefuehrt &&
         !bottomSlot && (
         <div
           className={`border-t px-4 sm:px-6 py-3.5 ${
