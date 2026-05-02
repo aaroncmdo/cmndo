@@ -39,6 +39,7 @@ import ClaimStepper from '@/components/kunde/ClaimStepper'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import SmokeKanzleiButton from '@/components/kunde/SmokeKanzleiButton'
+import ClaimSummary from '@/components/kunde/ClaimSummary'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
 import { getClaimLifecycle } from '@/lib/claims/lifecycle'
@@ -823,6 +824,37 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             />
           )
         })()}
+
+        {/* CMM-32 Polish: Read-only Claim-Summary mit Kennzeichenhalter
+            + Tabs (Fahrzeug · Unfall · Beteiligte). Zeigt nur kuratierte,
+            kunden-relevante Felder an. */}
+        <ClaimSummary
+          data={{
+            kennzeichen: (fall.kennzeichen as string | null) ?? null,
+            fahrzeug_hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
+            fahrzeug_modell: (fall.fahrzeug_modell as string | null) ?? null,
+            erstzulassung: (fall.erstzulassung as string | null) ?? null,
+            kilometerstand: (fall.kilometerstand as number | null) ?? null,
+            fahrzeug_aufbau: (fall.fahrzeug_typ as string | null) ?? null,
+            kraftstoff: null,
+            fahrgestellnummer: (fall.fin_vin as string | null) ?? null,
+            schadens_datum: (fall.schadens_datum as string | null) ?? null,
+            schadens_ort: (fall.schadens_ort as string | null) ?? null,
+            schadens_plz: (fall.schadens_plz as string | null) ?? null,
+            schadens_beschreibung: (fall.schadens_beschreibung as string | null) ?? null,
+            schadenart: (fall.schadens_art as string | null) ?? null,
+            halter_vorname: (fall.halter_vorname as string | null) ?? null,
+            halter_nachname: (fall.halter_nachname as string | null) ?? null,
+            halter_ist_kunde: (fall.ist_fahrzeughalter as boolean | null) ?? null,
+            vs_eigener_name: null,
+            vs_gegner_name: (fall.gegner_versicherung as string | null) ?? null,
+            vs_gegner_schaden_nr: (fall.gegner_schadennummer as string | null) ?? null,
+            vs_gegner_telefon: null,
+            vs_gegner_email: null,
+            kunde_vorname: leadInputForLifecycle?.vorname ?? null,
+            kunde_nachname: leadInputForLifecycle?.nachname ?? null,
+          }}
+        />
 
         {/* CMM-32 Polish: Kanzlei-Pfad-Wahl. Switch je nach
             claim.kanzlei_wunsch: Frage / eigene Kanzlei / selbst einreichen.
