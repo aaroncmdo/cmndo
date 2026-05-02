@@ -200,9 +200,9 @@ export default function ClaimStepper({
     lifecycle.mainPhase,
   )
 
-  // Zwei-Schritt LexDrive-Auswahl: erst Bestätigungs-Panel zeigen,
-  // dann erst setKanzleiWunsch speichern.
+  // Zwei-Schritt Kanzlei-Auswahl: erst Vergleichs-Panel zeigen, dann speichern.
   const [confirmingLexDrive, setConfirmingLexDrive] = useState(false)
+  const [confirmingEigeneKanzlei, setConfirmingEigeneKanzlei] = useState(false)
 
   // Pro Phase ein subtiler Token-Hintergrund — wird sowohl auf den
   // Step-Button (selected) als auch auf das Detail-Panel angewandt.
@@ -245,20 +245,23 @@ export default function ClaimStepper({
   //   1. Error (Termin verpasst)             → rose
   //   2. Warnung (Verlegung pending)          → amber
   //   3. Kanzlei-Wunsch offen (noch offen)   → violet
-  //   4. LexDrive Vollmacht ausstehend        → #0e5be9 (LexDrive-Blau)
-  //   5. Abschluss (Auszahlung eingegangen)   → emerald
-  //   6. Sonst                                → neutral
+  //   4. Eigene-Kanzlei-Vergleich            → yellow-400
+  //   5. LexDrive Bestätigung / ausstehend   → #0e5be9 (LexDrive-Blau)
+  //   6. Abschluss (Auszahlung eingegangen)   → emerald
+  //   7. Sonst                                → neutral
   const outerCls = terminVerstrichen
     ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden'
     : bottomSlot
       ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden'
-      : (zeigeKanzleiWunschBanner && !confirmingLexDrive)
+      : (zeigeKanzleiWunschBanner && !confirmingLexDrive && !confirmingEigeneKanzlei)
         ? 'rounded-2xl bg-white border-2 border-violet-400 overflow-hidden'
-        : (confirmingLexDrive || lexdriveVollmachtAusstehend)
-          ? 'rounded-2xl bg-white border-2 border-[#0e5be9] overflow-hidden'
-          : lifecycle.mainPhase === 'abschluss'
-            ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden'
-            : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
+        : confirmingEigeneKanzlei
+          ? 'rounded-2xl bg-white border-2 border-yellow-400 overflow-hidden'
+          : (confirmingLexDrive || lexdriveVollmachtAusstehend)
+            ? 'rounded-2xl bg-white border-2 border-[#0e5be9] overflow-hidden'
+            : lifecycle.mainPhase === 'abschluss'
+              ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden'
+              : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
 
   return (
     <div className={outerCls}>
@@ -413,23 +416,45 @@ export default function ClaimStepper({
       )}
       </div>
 
-      {/* Kanzlei-Wunsch: lila Banner (Auswahl) ODER blaues Bestätigungs-Panel
-          (Schritt 2 nach LexDrive-Klick). Nur eines davon ist sichtbar. */}
+      {/* Kanzlei-Wunsch: Auswahloptionen — immer sichtbar solange banner aktiv.
+          Hintergrundton wechselt je nach selektierter Option. */}
       {zeigeKanzleiWunschBanner && claimId && (
-        <div className={`border-t-2 px-4 sm:px-6 py-4 ${confirmingLexDrive ? 'border-[#0e5be9]/40 bg-[#0e5be9]/[0.03]' : 'border-violet-300 bg-violet-50'}`}>
+        <div className={`border-t-2 px-4 sm:px-6 py-4 ${
+          confirmingLexDrive
+            ? 'border-[#0e5be9]/40 bg-[#0e5be9]/[0.03]'
+            : confirmingEigeneKanzlei
+              ? 'border-yellow-300 bg-yellow-50/60'
+              : 'border-violet-300 bg-violet-50'
+        }`}>
           <KanzleiWunschBanner
             claimId={claimId}
-            onLexDriveClick={() => setConfirmingLexDrive(true)}
+            onLexDriveClick={() => { setConfirmingEigeneKanzlei(false); setConfirmingLexDrive(true) }}
+            onEigeneKanzleiClick={() => { setConfirmingLexDrive(false); setConfirmingEigeneKanzlei(true) }}
             confirmingLexDrive={confirmingLexDrive}
+            confirmingEigeneKanzlei={confirmingEigeneKanzlei}
           />
         </div>
       )}
+      {/* LexDrive Bestätigungs-Panel — zeigt vollen Anspruch + Konditionen */}
       {confirmingLexDrive && claimId && (
         <div className="border-t-2 border-[#0e5be9] bg-[#0e5be9]/[0.04] px-4 sm:px-6 py-5">
           <LexDriveBestaetigenPanel
             claimId={claimId}
             anspruchVsEur={anspruchVsEur ?? null}
+            anspruchPositionen={anspruchPositionen}
+            ausfallSlot={ausfallSlot}
             onAbort={() => setConfirmingLexDrive(false)}
+          />
+        </div>
+      )}
+      {/* Eigene-Kanzlei Vergleichs-Panel — zeigt Anspruch ohne LexDrive-Extras */}
+      {confirmingEigeneKanzlei && claimId && (
+        <div className="border-t-2 border-yellow-400 bg-yellow-50/50 px-4 sm:px-6 py-5">
+          <EigeneKanzleiAnspruchPanel
+            claimId={claimId}
+            anspruchVsEur={anspruchVsEur ?? null}
+            anspruchPositionen={anspruchPositionen}
+            onAbort={() => setConfirmingEigeneKanzlei(false)}
           />
         </div>
       )}
@@ -482,10 +507,10 @@ export default function ClaimStepper({
       )}
 
       {/* CMM-32 Polish: Regulierungs- und Abschluss-Detail-Panel — Anspruch
-          + Kanzlei-Sub-Stepper. Auch sichtbar wenn der User auf eine
-          zukuenftige Phase klickt, die noch nicht erreicht ist (zeigt
-          dann „steht noch aus"-Hinweis). */}
-      {(selectedPhase === 'regulierung' || selectedPhase === 'abschluss') && !bottomSlot && (
+          + Kanzlei-Sub-Stepper. Nur sichtbar wenn eine Vollmacht vorliegt
+          (vollmacht_signiert_am gesetzt) — ohne Vollmacht zeigen wir den
+          Anspruch im Kanzlei-Wunsch-Banner-Flow stattdessen. */}
+      {(selectedPhase === 'regulierung' || selectedPhase === 'abschluss') && !bottomSlot && !!lead?.vollmacht_signiert_am && (
         <div
           className={`border-t border-claimondo-navy/10 px-4 sm:px-6 py-4 ${
             selectedPhase === 'regulierung' ? PHASE_BG.regulierung : PHASE_BG.abschluss
@@ -697,21 +722,24 @@ export default function ClaimStepper({
 function KanzleiWunschBanner({
   claimId,
   onLexDriveClick,
+  onEigeneKanzleiClick,
   confirmingLexDrive,
+  confirmingEigeneKanzlei,
 }: {
   claimId: string
   onLexDriveClick: () => void
+  onEigeneKanzleiClick: () => void
   confirmingLexDrive: boolean
+  confirmingEigeneKanzlei: boolean
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const confirmingAny = confirmingLexDrive || confirmingEigeneKanzlei
 
   function pick(wunsch: 'partnerkanzlei' | 'eigene_kanzlei' | 'keine_kanzlei') {
-    if (wunsch === 'partnerkanzlei') {
-      onLexDriveClick()
-      return
-    }
+    if (wunsch === 'partnerkanzlei') { onLexDriveClick(); return }
+    if (wunsch === 'eigene_kanzlei') { onEigeneKanzleiClick(); return }
     setError(null)
     startTransition(async () => {
       const r = await setKanzleiWunsch(claimId, wunsch)
@@ -720,15 +748,19 @@ function KanzleiWunschBanner({
     })
   }
 
+  const headerColor = confirmingLexDrive ? 'text-[#0a3fa0]' : confirmingEigeneKanzlei ? 'text-amber-900' : 'text-violet-900'
+  const subColor = confirmingLexDrive ? 'text-[#0e5be9]/70' : confirmingEigeneKanzlei ? 'text-amber-800/80' : 'text-violet-800/90'
+  const iconColor = confirmingLexDrive ? 'text-[#0e5be9]' : confirmingEigeneKanzlei ? 'text-amber-600' : 'text-violet-700'
+
   return (
     <div className="space-y-3">
       <div className="flex items-start gap-2">
-        <ScaleIcon className={`w-4 h-4 shrink-0 mt-0.5 ${confirmingLexDrive ? 'text-[#0e5be9]' : 'text-violet-700'}`} />
+        <ScaleIcon className={`w-4 h-4 shrink-0 mt-0.5 ${iconColor}`} />
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold ${confirmingLexDrive ? 'text-[#0a3fa0]' : 'text-violet-900'}`}>
+          <p className={`text-sm font-semibold ${headerColor}`}>
             Wer übernimmt die Schadenregulierung?
           </p>
-          <p className={`text-xs mt-0.5 ${confirmingLexDrive ? 'text-[#0e5be9]/70' : 'text-violet-800/90'}`}>
+          <p className={`text-xs mt-0.5 ${subColor}`}>
             Dein Gutachten ist fertig und QC-geprüft. Bevor wir an die Versicherung
             gehen, brauchen wir deine Wahl — das ist eine juristische Entscheidung.
           </p>
@@ -749,14 +781,16 @@ function KanzleiWunschBanner({
           titel="Eigene Kanzlei"
           subtitel="Wir senden Paket an deine Kanzlei"
           onClick={() => pick('eigene_kanzlei')}
-          disabled={pending || confirmingLexDrive}
+          disabled={pending}
+          active={confirmingEigeneKanzlei}
+          activeColor="yellow"
         />
         <BannerOption
           icon={<DownloadIcon className="w-3.5 h-3.5" />}
           titel="Selbst einreichen"
           subtitel="Du regelst es direkt mit der VS"
           onClick={() => pick('keine_kanzlei')}
-          disabled={pending || confirmingLexDrive}
+          disabled={pending || confirmingAny}
         />
       </div>
       {error && <p className="text-xs text-red-700">{error}</p>}
@@ -779,22 +813,37 @@ function BannerOption({
   onClick: () => void
   disabled: boolean
   active?: boolean
-  activeColor?: 'blue'
+  activeColor?: 'blue' | 'yellow'
 }) {
-  const blueCls = 'border-[#0e5be9] bg-[#0e5be9]/[0.07] ring-1 ring-[#0e5be9]/30'
+  const activeCls =
+    active && activeColor === 'blue'
+      ? 'border-[#0e5be9] bg-[#0e5be9]/[0.07] ring-1 ring-[#0e5be9]/30'
+      : active && activeColor === 'yellow'
+        ? 'border-yellow-400 bg-yellow-50 ring-1 ring-yellow-300'
+        : null
   const normalCls = 'border-violet-200 bg-white hover:border-violet-400 hover:bg-violet-100'
+  const iconTextCls =
+    active && activeColor === 'blue'
+      ? 'text-[#0e5be9]'
+      : active && activeColor === 'yellow'
+        ? 'text-amber-600'
+        : 'text-violet-700'
+  const titleTextCls =
+    active && activeColor === 'blue'
+      ? 'text-[#0a3fa0]'
+      : active && activeColor === 'yellow'
+        ? 'text-amber-900'
+        : 'text-claimondo-navy'
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`text-left rounded-lg border px-3 py-2 transition-colors disabled:opacity-40 ${
-        active && activeColor === 'blue' ? blueCls : normalCls
-      }`}
+      className={`text-left rounded-lg border px-3 py-2 transition-colors disabled:opacity-40 ${activeCls ?? normalCls}`}
     >
-      <div className={`flex items-center gap-1.5 font-semibold text-xs ${active && activeColor === 'blue' ? 'text-[#0e5be9]' : 'text-violet-700'}`}>
+      <div className={`flex items-center gap-1.5 font-semibold text-xs ${iconTextCls}`}>
         {icon}
-        <span className={active && activeColor === 'blue' ? 'text-[#0a3fa0]' : 'text-claimondo-navy'}>{titel}</span>
+        <span className={titleTextCls}>{titel}</span>
       </div>
       <p className="text-[11px] text-claimondo-ondo mt-0.5">{subtitel}</p>
     </button>
@@ -901,10 +950,14 @@ function ResetKanzleiWunschButton({
 function LexDriveBestaetigenPanel({
   claimId,
   anspruchVsEur,
+  anspruchPositionen,
+  ausfallSlot,
   onAbort,
 }: {
   claimId: string
   anspruchVsEur: number | null
+  anspruchPositionen?: AnspruchPosition[]
+  ausfallSlot?: React.ReactNode
   onAbort: () => void
 }) {
   const router = useRouter()
@@ -925,20 +978,52 @@ function LexDriveBestaetigenPanel({
         <HandshakeIcon className="w-4 h-4 text-[#0e5be9] shrink-0" />
         <p className="text-sm font-semibold text-[#0a3fa0]">Komplettservice durch LexDrive</p>
       </div>
+
+      {/* Voller Anspruchsblock — Positionen + Nutzungsausfall-Slot */}
       {anspruchVsEur != null && (
-        <div className="rounded-xl bg-[#0e5be9]/[0.08] border border-[#0e5be9]/20 px-4 py-3">
-          <p className="text-[11px] uppercase tracking-wider font-semibold text-[#0e5be9]/70 mb-0.5">
-            Dein Anspruch
-          </p>
-          <p className="text-2xl font-bold text-[#0a3fa0]">
-            {anspruchVsEur.toLocaleString('de-DE', {
-              style: 'currency',
-              currency: 'EUR',
-              maximumFractionDigits: 0,
-            })}
-          </p>
+        <div className="rounded-xl bg-[#0e5be9]/[0.06] border border-[#0e5be9]/20 px-4 py-3 space-y-3">
+          <div>
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-[#0e5be9]/70 mb-0.5">
+              Dein Anspruch gegen die Versicherung
+            </p>
+            <p className="text-3xl font-bold text-[#0a3fa0]">
+              {anspruchVsEur.toLocaleString('de-DE', {
+                style: 'currency',
+                currency: 'EUR',
+                maximumFractionDigits: 0,
+              })}
+            </p>
+          </div>
+          {anspruchPositionen && anspruchPositionen.length > 0 && (
+            <div className="rounded-lg border border-[#0e5be9]/15 bg-white/50 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-[#0e5be9]/60 font-semibold mb-1.5">
+                Wie sich der Anspruch zusammensetzt
+              </p>
+              <ul className="space-y-1 text-xs">
+                {anspruchPositionen.map((pos) => (
+                  <li key={pos.key} className="flex items-baseline gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[#0a3fa0]">{pos.label}</p>
+                      {pos.detail && (
+                        <p className="text-[11px] text-[#0e5be9]/60">{pos.detail}</p>
+                      )}
+                    </div>
+                    <span className="font-medium text-[#0a3fa0] whitespace-nowrap">
+                      {pos.betragEur.toLocaleString('de-DE', {
+                        style: 'currency',
+                        currency: 'EUR',
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {ausfallSlot && <div>{ausfallSlot}</div>}
         </div>
       )}
+
       <div className="flex items-end gap-3">
         <p className="flex-1 text-xs text-[#0a3fa0]/80 leading-relaxed">
           Abgewickelt in ~20 Tagen + Vollservice durch unser Team. Du erhältst
@@ -959,6 +1044,119 @@ function LexDriveBestaetigenPanel({
         type="button"
         onClick={onAbort}
         className="text-[11px] text-[#0e5be9]/50 hover:text-[#0e5be9] transition-colors"
+      >
+        ← Zurück zur Auswahl
+      </button>
+    </div>
+  )
+}
+
+// Schlüssel-Fragmente die aus dem Eigene-Kanzlei-Vergleich rausgefiltert werden.
+// LexDrive-exklusive Positionen: Nutzungsausfall (LexDrive holt ihn aktiv durch)
+// und Auslagenpauschale (25€ nur bei LexDrive).
+const EIGENE_KANZLEI_EXCLUDE = ['nutzungsausfall', 'mietwagen', 'auslagenpauschale']
+
+function EigeneKanzleiAnspruchPanel({
+  claimId,
+  anspruchVsEur,
+  anspruchPositionen,
+  onAbort,
+}: {
+  claimId: string
+  anspruchVsEur: number | null
+  anspruchPositionen?: AnspruchPosition[]
+  onAbort: () => void
+}) {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  const gefiltert = (anspruchPositionen ?? []).filter(
+    (p) => !EIGENE_KANZLEI_EXCLUDE.some((k) => p.key.toLowerCase().includes(k)),
+  )
+  const gefiltertTotal = gefiltert.reduce((s, p) => s + p.betragEur, 0)
+  const anzeigeBetrag = gefiltert.length > 0 ? gefiltertTotal : (anspruchVsEur ?? null)
+
+  function bestaetigen() {
+    startTransition(async () => {
+      const r = await setKanzleiWunsch(claimId, 'eigene_kanzlei')
+      if (!r.ok) { setError(r.error ?? 'Fehler beim Speichern'); return }
+      router.refresh()
+    })
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <BriefcaseIcon className="w-4 h-4 text-amber-600 shrink-0" />
+        <p className="text-sm font-semibold text-amber-900">Eigene Kanzlei</p>
+      </div>
+
+      {anzeigeBetrag != null && (
+        <div className="rounded-xl bg-yellow-50 border border-yellow-300 px-4 py-3 space-y-3">
+          <div>
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-amber-700/70 mb-0.5">
+              Dein Anspruch (ohne LexDrive-Extras)
+            </p>
+            <p className="text-3xl font-bold text-amber-900">
+              {anzeigeBetrag.toLocaleString('de-DE', {
+                style: 'currency',
+                currency: 'EUR',
+                maximumFractionDigits: 0,
+              })}
+            </p>
+          </div>
+          {gefiltert.length > 0 && (
+            <div className="rounded-lg border border-yellow-300/60 bg-white/60 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-amber-700/60 font-semibold mb-1.5">
+                Enthaltene Positionen
+              </p>
+              <ul className="space-y-1 text-xs">
+                {gefiltert.map((pos) => (
+                  <li key={pos.key} className="flex items-baseline gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-amber-900">{pos.label}</p>
+                      {pos.detail && (
+                        <p className="text-[11px] text-amber-700/60">{pos.detail}</p>
+                      )}
+                    </div>
+                    <span className="font-medium text-amber-900 whitespace-nowrap">
+                      {pos.betragEur.toLocaleString('de-DE', {
+                        style: 'currency',
+                        currency: 'EUR',
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-amber-700/70 mt-2">
+                Nutzungsausfall und Auslagenpauschale sind nicht enthalten — diese holt LexDrive aktiv durch.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="flex items-end gap-3">
+        <p className="flex-1 text-xs text-amber-800/80 leading-relaxed">
+          Wir senden dir das Gutachten und alle Unterlagen — deine Kanzlei übernimmt
+          die Kommunikation mit der Versicherung.
+        </p>
+        <button
+          type="button"
+          onClick={bestaetigen}
+          disabled={pending}
+          className="shrink-0 bg-amber-500 hover:bg-amber-600 active:bg-amber-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
+        >
+          Bestätigen
+        </button>
+      </div>
+      {error && <p className="text-xs text-red-700">{error}</p>}
+      <button
+        type="button"
+        onClick={onAbort}
+        className="text-[11px] text-amber-600/50 hover:text-amber-600 transition-colors"
       >
         ← Zurück zur Auswahl
       </button>
