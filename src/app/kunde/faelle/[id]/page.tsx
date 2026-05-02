@@ -798,6 +798,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               claimId={fall.claim_id as string | null}
               fallId={fall.id as string}
               gutachtenFreigegeben={gutachtenFreigegeben}
+              bankdatenFehlen={
+                claimRow?.kanzlei_wunsch === 'partnerkanzlei' &&
+                !!(fall.vollmacht_signiert_am as string | null) &&
+                kanzleiFall?.status === 'auszahlung' &&
+                !(fall.bankdaten_hinterlegt_am as string | null)
+              }
               kanzleiFall={
                 kanzleiFall
                   ? {
@@ -985,14 +991,22 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* Gutachten-Banner lebt jetzt im ClaimStepper (gruener Erfolgsbanner). */}
 
-        <div className="space-y-4">
-          <BankdatenBanner
-            fallId={fall.id as string}
-            status={(fall.status as string) ?? ''}
-            bankdatenHinterlegt={!!fall.bankdaten_hinterlegt_am}
-            saveBankdaten={saveBankdaten}
-          />
-        </div>
+        {/* Bankdaten-Banner — nur sichtbar wenn LexDrive-Vollmacht +
+            Kanzleifall in Auszahlung + Bankdaten fehlen. Sonst zahlt die
+            Kanzlei nicht aus. */}
+        {claimRow?.kanzlei_wunsch === 'partnerkanzlei' &&
+          !!(fall.vollmacht_signiert_am as string | null) &&
+          kanzleiFall?.status === 'auszahlung' &&
+          !(fall.bankdaten_hinterlegt_am as string | null) && (
+          <div className="space-y-4">
+            <BankdatenBanner
+              fallId={fall.id as string}
+              status="regulierung"
+              bankdatenHinterlegt={false}
+              saveBankdaten={saveBankdaten}
+            />
+          </div>
+        )}
 
         {/* Fortschritt + Fall-Details */}
         <div className="grid md:grid-cols-2 gap-5">

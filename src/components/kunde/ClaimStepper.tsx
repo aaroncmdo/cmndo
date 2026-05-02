@@ -138,6 +138,7 @@ export default function ClaimStepper({
   claimId,
   fallId,
   gutachtenFreigegeben,
+  bankdatenFehlen,
 }: {
   lifecycle: ClaimLifecycle
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
@@ -209,6 +210,10 @@ export default function ClaimStepper({
   fallId?: string | null
   /** TRUE wenn Gutachten QC-freigegeben ist. Steuert das Top-Banner. */
   gutachtenFreigegeben?: boolean
+  /** TRUE wenn die Kanzlei in den Auszahlungs-Schritt gewechselt ist,
+   *  aber wir die Bankdaten des Kunden noch nicht haben. Faerbt den
+   *  Wrapper amber + Reg.-Kreis amber + zeigt den Bankdaten-Banner. */
+  bankdatenFehlen?: boolean
 }) {
   const router = useRouter()
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
@@ -328,15 +333,17 @@ export default function ClaimStepper({
     ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden transition-colors duration-300'
     : bottomSlot
       ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden transition-colors duration-300'
-      : (zeigeKanzleiWunschBanner && !confirmingLexDrive && !confirmingEigeneKanzlei)
-        ? 'rounded-2xl bg-white border-2 border-violet-400 overflow-hidden transition-colors duration-300'
-        : confirmingEigeneKanzlei
-          ? 'rounded-2xl bg-white border-2 border-yellow-400 overflow-hidden transition-colors duration-300'
-          : (confirmingLexDrive || lexdriveVollmachtAusstehend)
-            ? 'rounded-2xl bg-white border-2 border-[#0e5be9] overflow-hidden transition-colors duration-300'
-            : lifecycle.mainPhase === 'abschluss'
-              ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden transition-colors duration-300'
-              : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden transition-colors duration-300'
+      : bankdatenFehlen
+        ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden transition-colors duration-300'
+        : (zeigeKanzleiWunschBanner && !confirmingLexDrive && !confirmingEigeneKanzlei)
+          ? 'rounded-2xl bg-white border-2 border-violet-400 overflow-hidden transition-colors duration-300'
+          : confirmingEigeneKanzlei
+            ? 'rounded-2xl bg-white border-2 border-yellow-400 overflow-hidden transition-colors duration-300'
+            : (confirmingLexDrive || lexdriveVollmachtAusstehend)
+              ? 'rounded-2xl bg-white border-2 border-[#0e5be9] overflow-hidden transition-colors duration-300'
+              : lifecycle.mainPhase === 'abschluss'
+                ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden transition-colors duration-300'
+                : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden transition-colors duration-300'
 
   return (
     <div className={outerCls}>
@@ -428,7 +435,8 @@ export default function ClaimStepper({
             : confirmingEigeneKanzlei
               ? BriefcaseIcon
               : ScaleIcon
-          const Icon = istVerlegungWarn || istVerstrichenWarn
+          const istBankdatenWarn = !!bankdatenFehlen && p.key === 'regulierung'
+          const Icon = istVerlegungWarn || istVerstrichenWarn || istBankdatenWarn
             ? AlertTriangleIcon
             : istKanzleiRegulierung
               ? kanzleiRegIcon
@@ -450,18 +458,20 @@ export default function ClaimStepper({
                       ? 'bg-rose-500 text-white ring-2 ring-rose-300'
                       : istVerlegungWarn
                         ? 'bg-amber-500 text-white ring-2 ring-amber-300'
-                        : istEigeneKanzleiPfad
-                          ? 'bg-violet-500 text-white ring-2 ring-violet-300'
-                          : istKanzleiRegulierung
-                            ? kanzleiRegCircleCls
-                            : isDone
-                              ? 'bg-emerald-500 text-white'
-                              : isCurrent
-                                ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                                : 'bg-claimondo-border/40 text-claimondo-ondo/60'
+                        : (bankdatenFehlen && p.key === 'regulierung')
+                          ? 'bg-amber-500 text-white ring-2 ring-amber-300'
+                          : istEigeneKanzleiPfad
+                            ? 'bg-violet-500 text-white ring-2 ring-violet-300'
+                            : istKanzleiRegulierung
+                              ? kanzleiRegCircleCls
+                              : isDone
+                                ? 'bg-emerald-500 text-white'
+                                : isCurrent
+                                  ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                                  : 'bg-claimondo-border/40 text-claimondo-ondo/60'
                   }`}
                 >
-                  {istVerstrichenWarn || istVerlegungWarn || istKanzleiRegulierung || !isDone
+                  {istVerstrichenWarn || istVerlegungWarn || istBankdatenWarn || istKanzleiRegulierung || !isDone
                     ? <Icon className="w-4 h-4" />
                     : <CheckIcon className="w-4 h-4" />}
                 </div>
@@ -472,15 +482,17 @@ export default function ClaimStepper({
                         ? 'text-rose-700'
                         : istVerlegungWarn
                           ? 'text-amber-700'
-                          : istEigeneKanzleiPfad
-                            ? 'text-violet-700'
-                            : istKanzleiRegulierung
-                              ? kanzleiRegLabelCls
-                              : isCurrent
-                                ? 'text-claimondo-navy'
-                                : isDone
-                                  ? 'text-emerald-700'
-                                  : 'text-claimondo-ondo/60'
+                          : istBankdatenWarn
+                            ? 'text-amber-700'
+                            : istEigeneKanzleiPfad
+                              ? 'text-violet-700'
+                              : istKanzleiRegulierung
+                                ? kanzleiRegLabelCls
+                                : isCurrent
+                                  ? 'text-claimondo-navy'
+                                  : isDone
+                                    ? 'text-emerald-700'
+                                    : 'text-claimondo-ondo/60'
                     }`}
                   >
                     {zeigeKanzleiWunschBanner && p.key === 'begutachtung'
