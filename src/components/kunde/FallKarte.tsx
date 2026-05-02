@@ -261,26 +261,48 @@ export default function FallKarte({
       href={`/kunde/faelle/${fall.id}`}
       className="block rounded-3xl overflow-hidden shadow-[0_2px_12px_rgba(13,27,62,0.08),0_8px_32px_rgba(13,27,62,0.06)] border border-claimondo-border/50 transition-all hover:shadow-[0_6px_24px_rgba(13,27,62,0.14),0_16px_48px_rgba(13,27,62,0.10)] hover:-translate-y-0.5 active:scale-[0.99]"
     >
-      {/* ── Hero: Markenlogo auf dunklem Gradient ── */}
+      {/* ── Hero: Markenlogo auf Werkstatt-Hintergrund ── */}
       <div
         className="relative h-[140px] flex items-center justify-center overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #0D1B3E 0%, #14254f 40%, #0f1d45 70%, #091530 100%)',
+          /* Werkstatt-Atmosphäre: dunkle Halle mit Overhead-Deckenstrahler */
+          background: [
+            /* Deckenstrahler links */
+            'radial-gradient(ellipse 55% 100% at 18% -10%, rgba(255,220,140,0.18) 0%, transparent 55%)',
+            /* Deckenstrahler mitte (direkt über Logo) */
+            'radial-gradient(ellipse 50% 90% at 50% -10%, rgba(255,235,180,0.14) 0%, transparent 55%)',
+            /* Deckenstrahler rechts */
+            'radial-gradient(ellipse 55% 100% at 82% -10%, rgba(255,220,140,0.16) 0%, transparent 55%)',
+            /* Boden-Reflex: glänzender Betonboden spiegelt Licht zurück */
+            'radial-gradient(ellipse 80% 35% at 50% 110%, rgba(80,110,170,0.22) 0%, transparent 70%)',
+            /* Seitenwände: leicht heller als Decke */
+            'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, transparent 25%, transparent 75%, rgba(255,255,255,0.03) 100%)',
+            /* Basis: fast schwarz, dunkler als normales navy */
+            'linear-gradient(180deg, #080c14 0%, #0a0f1c 50%, #060810 100%)',
+          ].join(', '),
         }}
       >
-        {/* Licht-Spot hinter dem Logo */}
+        {/* Leuchtstreifen an der Decke: schmale Linie oben = Neonröhre */}
         <div
-          className="absolute inset-0"
+          className="absolute top-0 inset-x-0"
           style={{
-            background:
-              'radial-gradient(ellipse 55% 55% at 50% 45%, rgba(255,255,255,0.07) 0%, transparent 70%)',
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent 5%, rgba(255,230,150,0.4) 30%, rgba(255,240,180,0.55) 50%, rgba(255,230,150,0.4) 70%, transparent 95%)',
+          }}
+        />
+        {/* Boden-Lichtlinie: Spiegelung der Neonröhre */}
+        <div
+          className="absolute bottom-0 inset-x-0"
+          style={{
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent 15%, rgba(80,110,200,0.25) 40%, rgba(100,130,220,0.30) 50%, rgba(80,110,200,0.25) 60%, transparent 85%)',
           }}
         />
         {/* Bodenseitige Aufhellung für Übergang zum weißen Card-Body */}
         <div
           className="absolute bottom-0 inset-x-0 h-10"
           style={{
-            background: 'linear-gradient(to top, rgba(248,249,251,0.12) 0%, transparent 100%)',
+            background: 'linear-gradient(to top, rgba(248,249,251,0.10) 0%, transparent 100%)',
           }}
         />
 

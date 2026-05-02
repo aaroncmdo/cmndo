@@ -22,22 +22,22 @@ export async function GET(req: NextRequest) {
   const baujahr = sp.get('year')
 
   const url = buildImaginUrl({ hersteller, modell, lackfarbe, baujahr })
-  if (!url) return new Response('missing-params', { status: 404 })
+  if (!url) return new Response('missing-params', { status: 404, headers: { 'Cache-Control': 'no-store' } })
 
   let upstream: Response
   try {
     upstream = await fetch(url, { cache: 'no-store' })
   } catch {
-    return new Response('upstream-fetch-failed', { status: 502 })
+    return new Response('upstream-fetch-failed', { status: 502, headers: { 'Cache-Control': 'no-store' } })
   }
 
   if (!upstream.ok) {
-    return new Response('upstream-error', { status: upstream.status })
+    return new Response('upstream-error', { status: upstream.status, headers: { 'Cache-Control': 'no-store' } })
   }
 
   const errorHeader = upstream.headers.get('x-imaginstudio-error')
   if (errorHeader) {
-    return new Response(`imagin-access-error: ${errorHeader}`, { status: 404 })
+    return new Response(`imagin-access-error: ${errorHeader}`, { status: 404, headers: { 'Cache-Control': 'no-store' } })
   }
 
   const buf = await upstream.arrayBuffer()
