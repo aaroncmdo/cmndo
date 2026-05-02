@@ -1010,12 +1010,12 @@ function LexDriveBestaetigenPanel({
 
       {/* Voller Anspruchsblock — Positionen + Nutzungsausfall-Slot */}
       {anspruchVsEur != null && (
-        <div className="rounded-xl bg-[#0e5be9]/[0.06] border border-[#0e5be9]/20 px-4 py-3 space-y-3">
+        <div className="rounded-xl border border-claimondo-border bg-white px-4 py-3 space-y-3">
           <div>
-            <p className="text-[11px] uppercase tracking-wider font-semibold text-[#0e5be9]/70 mb-0.5">
+            <p className="text-[11px] uppercase tracking-wider font-semibold text-claimondo-ondo/70 mb-0.5">
               Dein Anspruch gegen die Versicherung
             </p>
-            <p className="text-3xl font-bold text-[#0a3fa0]">
+            <p className="text-3xl font-bold text-claimondo-navy">
               {anspruchVsEur.toLocaleString('de-DE', {
                 style: 'currency',
                 currency: 'EUR',
@@ -1024,20 +1024,20 @@ function LexDriveBestaetigenPanel({
             </p>
           </div>
           {anspruchPositionen && anspruchPositionen.length > 0 && (
-            <div className="rounded-lg border border-[#0e5be9]/15 bg-white/50 p-3">
-              <p className="text-[10px] uppercase tracking-wider text-[#0e5be9]/60 font-semibold mb-1.5">
+            <div className="rounded-lg border border-claimondo-border/60 bg-[#f8f9fb] p-3">
+              <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-1.5">
                 Wie sich der Anspruch zusammensetzt
               </p>
               <ul className="space-y-1 text-xs">
                 {anspruchPositionen.map((pos) => (
                   <li key={pos.key} className="flex items-baseline gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-[#0a3fa0]">{pos.label}</p>
+                      <p className="text-claimondo-navy">{pos.label}</p>
                       {pos.detail && (
-                        <p className="text-[11px] text-[#0e5be9]/60">{pos.detail}</p>
+                        <p className="text-[11px] text-claimondo-ondo/60">{pos.detail}</p>
                       )}
                     </div>
-                    <span className="font-medium text-[#0a3fa0] whitespace-nowrap">
+                    <span className="font-medium text-claimondo-navy whitespace-nowrap">
                       {pos.betragEur.toLocaleString('de-DE', {
                         style: 'currency',
                         currency: 'EUR',
@@ -1049,7 +1049,11 @@ function LexDriveBestaetigenPanel({
               </ul>
             </div>
           )}
-          {ausfallSlot && <div>{ausfallSlot}</div>}
+          {ausfallSlot && (
+            <div className="rounded-lg bg-[#0e5be9]/[0.06] border border-[#0e5be9]/20 p-3">
+              {ausfallSlot}
+            </div>
+          )}
         </div>
       )}
 
