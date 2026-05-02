@@ -1300,7 +1300,7 @@ function EigeneKanzleiAnspruchPanel({
               disabled={pending}
               className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
             >
-              Bestätigen (Eigene Kanzlei)
+              Bestätigen (kein Service)
             </button>
           </motion.div>
         )}
