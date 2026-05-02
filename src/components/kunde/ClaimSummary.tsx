@@ -137,44 +137,64 @@ export default function ClaimSummary({
   const subtitelTeile = [data.claim_nummer, data.kennzeichen].filter(Boolean)
 
   return (
-    <section
-      className="rounded-3xl bg-gradient-to-br from-white via-white to-[#f3f6fb] shadow-[0_2px_12px_rgba(13,27,62,0.06),0_8px_30px_rgba(13,27,62,0.04)] border border-claimondo-border/60 overflow-hidden"
-    >
-      {/* Header */}
-      <header className="px-5 sm:px-7 py-4 sm:py-5 border-b border-claimondo-border/40 bg-white/70 backdrop-blur-md">
-        <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold">
-          {subtitelTeile.length > 0 ? subtitelTeile.join(' · ') : 'Schadensfall'}
-        </p>
-        <h2 className="text-xl sm:text-2xl font-bold text-claimondo-navy leading-tight mt-0.5 truncate">
-          {titel}
-        </h2>
+    <section className="rounded-2xl bg-white border border-claimondo-border overflow-hidden">
+      {/* Header — gleiche Sprache wie ClaimStepper */}
+      <header className="px-4 sm:px-6 py-4 sm:py-5 border-b border-claimondo-navy/10 flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold">
+            {subtitelTeile.length > 0 ? subtitelTeile.join(' · ') : 'Schadensfall'}
+          </p>
+          <h2 className="text-lg sm:text-xl font-bold text-claimondo-navy leading-tight mt-0.5 truncate">
+            {titel}
+          </h2>
+        </div>
+        {/* Fahrzeug-Logo im Header — kompakt, dunkel */}
+        <div
+          className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #0D1B3E 0%, #14254f 100%)' }}
+        >
+          <FahrzeugRenderImage
+            hersteller={data.fahrzeug_hersteller}
+            modell={data.fahrzeug_modell}
+            lackfarbe={data.lackfarbe}
+            baujahr={data.fahrzeug_baujahr}
+            width={48}
+            className="object-contain"
+            dark
+          />
+        </div>
       </header>
 
       {/* Body — zwei Spalten ab lg */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(260px,320px)_1fr] gap-0">
-        {/* ─── Linke Spalte: Fahrzeug ─── */}
-        <div className="p-5 sm:p-7 lg:border-r border-claimondo-border/40 space-y-5 bg-gradient-to-b from-white to-[#f8f9fb]">
-          <CarRender
-            hersteller={data.fahrzeug_hersteller}
-            modell={data.fahrzeug_modell}
-            baujahr={data.fahrzeug_baujahr}
-            lackfarbe={data.lackfarbe}
-            schadensAdresse={data.schadens_adresse ?? buildSchadensortFallback(data)}
-          />
-
-          <div className="flex justify-center">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(240px,280px)_1fr]">
+        {/* ─── Linke Spalte: Fahrzeug-Stammdaten ─── */}
+        <div className="px-4 sm:px-6 py-5 lg:border-r border-claimondo-navy/10 bg-[#f8f9fb] space-y-4">
+          {/* Kennzeichenhalter zentriert */}
+          <div className="flex justify-center pt-1">
             <Kennzeichenhalter
               kennzeichen={data.kennzeichen}
               kreis={data.kennzeichen_kreis}
               buchstaben={data.kennzeichen_buchstaben}
               zahl={data.kennzeichen_zahl}
               suffix={data.kennzeichen_suffix}
-              size="lg"
+              size="md"
             />
           </div>
 
-          {/* Wichtigste Daten — untereinander, mit Trennlinien */}
-          <dl className="divide-y divide-claimondo-border/40">
+          {/* Schadensort kompakt */}
+          {(data.schadens_adresse ?? buildSchadensortFallback(data)) && (
+            <div className="rounded-lg border border-claimondo-border bg-white px-3 py-2">
+              <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold flex items-center gap-1">
+                <MapPinIcon className="w-3 h-3" /> Schadensort
+              </p>
+              <p className="text-xs text-claimondo-navy mt-0.5 leading-snug">
+                {data.schadens_adresse ?? buildSchadensortFallback(data)}
+              </p>
+            </div>
+          )}
+
+          {/* Stammdaten-Tabelle */}
+          <dl className="divide-y divide-claimondo-border">
             <Row label="Hersteller" value={data.fahrzeug_hersteller} />
             <Row label="Modell" value={data.fahrzeug_modell} />
             <Row
@@ -191,30 +211,28 @@ export default function ClaimSummary({
             />
           </dl>
 
-          {/* Sekundäre Infos als Chip-Reihe */}
-          <div className="flex flex-wrap gap-1.5">
-            {data.fahrzeug_aufbau && (
-              <Chip icon={CarFrontIcon} label={aufbauLabel(data.fahrzeug_aufbau)} />
-            )}
-            {data.kraftstoff && (
-              <Chip icon={FuelIcon} label={kraftstoffLabel(data.kraftstoff)} />
-            )}
-            {data.fahrgestellnummer && (
-              <Chip
-                icon={HashIcon}
-                label={`FIN •••${data.fahrgestellnummer.slice(-4)}`}
-                mono
-              />
-            )}
-            {data.kennzeichen_suffix === 'E' && <Chip icon={Disc3Icon} label="Elektro" />}
-            {data.kennzeichen_suffix === 'H' && <Chip icon={Disc3Icon} label="Oldtimer" />}
-          </div>
+          {/* Chips */}
+          {(data.fahrzeug_aufbau || data.kraftstoff || data.fahrgestellnummer || data.kennzeichen_suffix) && (
+            <div className="flex flex-wrap gap-1.5">
+              {data.fahrzeug_aufbau && (
+                <Chip icon={CarFrontIcon} label={aufbauLabel(data.fahrzeug_aufbau)} />
+              )}
+              {data.kraftstoff && (
+                <Chip icon={FuelIcon} label={kraftstoffLabel(data.kraftstoff)} />
+              )}
+              {data.fahrgestellnummer && (
+                <Chip icon={HashIcon} label={`FIN •••${data.fahrgestellnummer.slice(-4)}`} mono />
+              )}
+              {data.kennzeichen_suffix === 'E' && <Chip icon={Disc3Icon} label="Elektro" />}
+              {data.kennzeichen_suffix === 'H' && <Chip icon={Disc3Icon} label="Oldtimer" />}
+            </div>
+          )}
         </div>
 
-        {/* ─── Rechte Spalte: Glassy Tabs ─── */}
-        <div className="p-5 sm:p-7">
-          {/* Tab-Buttons */}
-          <div className="inline-flex p-1 rounded-2xl bg-claimondo-navy/[0.06] backdrop-blur-md border border-claimondo-navy/10 mb-4 max-w-full overflow-x-auto">
+        {/* ─── Rechte Spalte: Tabs ─── */}
+        <div className="flex flex-col">
+          {/* Tab-Leiste — Stepper-Style: border-b, nicht pill-in-padding */}
+          <div className="flex items-center gap-0 border-b border-claimondo-navy/10 px-4 sm:px-6 overflow-x-auto">
             {TABS.map((tab) => {
               const TabIcon = tab.icon
               const active = activeTab === tab.key
@@ -223,10 +241,10 @@ export default function ClaimSummary({
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-3 py-3.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors -mb-px ${
                     active
-                      ? 'bg-white text-claimondo-navy shadow-[0_1px_3px_rgba(13,27,62,0.08),0_2px_8px_rgba(13,27,62,0.06)]'
-                      : 'text-claimondo-ondo/80 hover:text-claimondo-navy'
+                      ? 'border-claimondo-navy text-claimondo-navy'
+                      : 'border-transparent text-claimondo-ondo/60 hover:text-claimondo-navy'
                   }`}
                 >
                   <TabIcon className="w-3.5 h-3.5" />
@@ -236,8 +254,8 @@ export default function ClaimSummary({
             })}
           </div>
 
-          {/* Glassy Tab-Panel */}
-          <div className="rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_1px_2px_rgba(13,27,62,0.04),0_8px_24px_rgba(13,27,62,0.06)] p-5 sm:p-6">
+          {/* Tab-Inhalt */}
+          <div className="px-4 sm:px-6 py-5 flex-1">
             {activeTab === 'unfall' && <UnfallTab data={data} />}
             {activeTab === 'anspruch' && (
               <AnspruchTab
