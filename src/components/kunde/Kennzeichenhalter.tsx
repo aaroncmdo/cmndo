@@ -41,6 +41,8 @@ export default function Kennzeichenhalter({
   hideHuPlakette,
   /** Wenn true, werden die Befestigungs-Bolzen ausgeblendet. */
   hideBolts,
+  /** Wenn true, leichte Perspektiv-Neigung für 3D-Effekt (gut für Karten). */
+  tilt,
 }: {
   kennzeichen?: string | null
   kreis?: string | null
@@ -51,6 +53,7 @@ export default function Kennzeichenhalter({
   huJahr?: number
   hideHuPlakette?: boolean
   hideBolts?: boolean
+  tilt?: boolean
 }) {
   const strukturiert = kreis || buchstaben || zahl
     ? {
@@ -76,22 +79,47 @@ export default function Kennzeichenhalter({
     <div
       className={`relative inline-flex items-stretch ${sizeCfg.h} rounded-md border-[3px] border-black select-none`}
       style={{
-        // Metallischer Verlauf statt einfaches Weiss
+        // Feines Metall-Pressblech: Highlight oben → weiß Mitte → Schatten unten
         background:
-          'linear-gradient(180deg, #ffffff 0%, #f6f7f9 35%, #ffffff 65%, #e9eaee 100%)',
+          'linear-gradient(180deg,' +
+          '#fdfdfd 0%,' +
+          '#f0f1f4 18%,' +
+          '#fafbfc 42%,' +
+          '#f8f9fb 58%,' +
+          '#e8eaef 80%,' +
+          '#d4d6dc 100%)',
         boxShadow:
-          // Innerer Highlight oben + leichter Schatten unten + outset shadow
-          'inset 0 1px 0 rgba(255,255,255,0.9),' +
-          'inset 0 -2px 0 rgba(0,0,0,0.10),' +
-          '0 1px 2px rgba(0,0,0,0.18),' +
-          '0 6px 14px rgba(0,0,0,0.22)',
+          // Gepresstes Blech: Aluminium-Randlicht innen
+          'inset 0 1.5px 0 rgba(255,255,255,0.95),' +
+          'inset 0 -1.5px 0 rgba(0,0,0,0.18),' +
+          'inset 1px 0 0 rgba(255,255,255,0.55),' +
+          'inset -1px 0 0 rgba(0,0,0,0.10),' +
+          // Nahschatten (Kontakt)
+          '0 1px 0 rgba(255,255,255,0.12),' +
+          '0 2px 4px rgba(0,0,0,0.30),' +
+          // Tiefenschatten (Float)
+          '0 6px 14px rgba(0,0,0,0.22),' +
+          '0 14px 28px rgba(0,0,0,0.14)',
+        // 3D-Tilt: leichte Perspektiv-Neigung
+        transform: tilt
+          ? 'perspective(600px) rotateX(6deg) rotateY(-1deg)'
+          : undefined,
+        transformOrigin: tilt ? 'center bottom' : undefined,
       }}
       aria-label={`Kennzeichen ${parts.kreis} ${parts.buchstaben} ${parts.zahl}${parts.suffix ?? ''}`}
     >
       {/* EU-Streifen mit echtem 12-Stern-Kreis als SVG */}
       <div
-        className="bg-[#003399] flex flex-col items-center justify-center px-1.5 py-0.5 text-white shrink-0 relative"
-        style={{ boxShadow: 'inset -1px 0 0 rgba(0,0,0,0.20)' }}
+        className="flex flex-col items-center justify-center px-1.5 py-0.5 text-white shrink-0 relative"
+        style={{
+          // Echter EU-Blau-Gradient mit leichtem 3D-Glanz
+          background: 'linear-gradient(170deg, #0044cc 0%, #003399 35%, #002b80 75%, #002070 100%)',
+          boxShadow:
+            'inset 1px 0 0 rgba(255,255,255,0.15),' +
+            'inset -1px 0 0 rgba(0,0,0,0.30),' +
+            'inset 0 1px 0 rgba(255,255,255,0.20),' +
+            'inset 0 -1px 0 rgba(0,0,0,0.25)',
+        }}
       >
         <svg
           width={sizeCfg.huSize}
@@ -119,7 +147,11 @@ export default function Kennzeichenhalter({
         className={`flex items-center ${sizeCfg.gap} ${sizeCfg.pad} font-extrabold tracking-[0.04em] text-black ${sizeCfg.mainText} flex-1 relative`}
         style={{
           fontFamily: PLATE_FONT,
-          textShadow: '0 1px 0 rgba(255,255,255,0.7)',
+          // Embossed-Schrift: Buchstaben wirken gepresst/erhaben
+          textShadow:
+            '0 -1px 0 rgba(0,0,0,0.20),' +    // gedrückte Oberkante
+            '0 1px 0 rgba(255,255,255,0.90),' + // Highlight-Unterkante
+            '0 2px 3px rgba(0,0,0,0.14)',       // Tiefenschatten
         }}
       >
         <span>{parts.kreis}</span>
@@ -248,18 +280,30 @@ function Bolt({
     bl: 'bottom-1 left-1',
     br: 'bottom-1 right-1',
   }
+  const s = size
   return (
-    <span
-      className={`absolute ${positions[position]} rounded-full pointer-events-none`}
-      style={{
-        width: size,
-        height: size,
-        background:
-          'radial-gradient(circle at 30% 30%, #c8cdd4 0%, #6e7682 70%, #2a2e36 100%)',
-        boxShadow:
-          'inset 0 0.5px 0 rgba(255,255,255,0.6),' +
-          '0 0.5px 1px rgba(0,0,0,0.4)',
-      }}
-    />
+    <svg
+      className={`absolute ${positions[position]} pointer-events-none`}
+      width={s}
+      height={s}
+      viewBox="0 0 10 10"
+      aria-hidden
+    >
+      {/* Schraubenkopf — Chrom-Radialverlauf */}
+      <defs>
+        <radialGradient id={`bolt-${position}`} cx="35%" cy="28%" r="65%">
+          <stop offset="0%"   stopColor="#e8ecf3" />
+          <stop offset="40%"  stopColor="#9aa0ae" />
+          <stop offset="75%"  stopColor="#52586a" />
+          <stop offset="100%" stopColor="#2a2e3a" />
+        </radialGradient>
+      </defs>
+      <circle cx="5" cy="5" r="4.5" fill={`url(#bolt-${position})`} />
+      {/* Schlitz — simuliert echten Kreuzschlitz */}
+      <line x1="5" y1="2.2" x2="5" y2="7.8" stroke="rgba(0,0,0,0.5)" strokeWidth="1" strokeLinecap="round" />
+      <line x1="2.2" y1="5" x2="7.8" y2="5" stroke="rgba(0,0,0,0.5)" strokeWidth="1" strokeLinecap="round" />
+      {/* Specular-Highlight */}
+      <ellipse cx="3.8" cy="3.2" rx="1.4" ry="0.9" fill="rgba(255,255,255,0.45)" transform="rotate(-35 3.8 3.2)" />
+    </svg>
   )
 }
