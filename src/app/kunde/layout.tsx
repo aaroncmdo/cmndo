@@ -206,37 +206,26 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     }
   }
 
-  // CMM-32 Polish: LexDrive-Card — sichtbar wenn der Kunde mindestens einen
-  // Fall mit kanzlei_wunsch='partnerkanzlei' UND signierter Vollmacht hat.
+  // CMM-32 Polish: LexDrive-Card — sichtbar sobald der Kunde mindestens
+  // einen Fall mit signierter Vollmacht hat (vollmacht_signiert_am gesetzt).
   // Der QR-Code zeigt auf die LexDrive-WhatsApp-Nummer.
   let lexdriveQr: { qrSvg: string; qrUrl: string } | null = null
   if (navFaelle.length > 0) {
     const fallIds = navFaelle.map((f) => f.id as string)
     const { data: lexdriveFall } = await adminForNav
       .from('faelle')
-      .select('id, claim_id, vollmacht_signiert_am')
+      .select('id, vollmacht_signiert_am')
       .in('id', fallIds)
       .not('vollmacht_signiert_am', 'is', null)
-      .not('claim_id', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
-    if (lexdriveFall?.claim_id) {
-      const { data: claimRow } = await adminForNav
-        .from('claims')
-        .select('kanzlei_wunsch, kanzlei_uebergeben_am')
-        .eq('id', lexdriveFall.claim_id as string)
-        .maybeSingle()
-      if (
-        claimRow?.kanzlei_wunsch === 'partnerkanzlei' &&
-        !claimRow.kanzlei_uebergeben_am
-      ) {
-        const LEXDRIVE_WA = 'https://wa.me/4932221096850?text=' +
-          encodeURIComponent('Hallo, ich habe eine Frage zu meinem Fall.')
-        const { generateQrCodeSvg } = await import('@/lib/kanzlei/qr-code')
-        const qrSvg = await generateQrCodeSvg(LEXDRIVE_WA, 240)
-        if (qrSvg) lexdriveQr = { qrSvg, qrUrl: LEXDRIVE_WA }
-      }
+    if (lexdriveFall) {
+      const LEXDRIVE_WA = 'https://wa.me/4932221096850?text=' +
+        encodeURIComponent('Hallo, ich habe eine Frage zu meinem Fall.')
+      const { generateQrCodeSvg } = await import('@/lib/kanzlei/qr-code')
+      const qrSvg = await generateQrCodeSvg(LEXDRIVE_WA, 240)
+      if (qrSvg) lexdriveQr = { qrSvg, qrUrl: LEXDRIVE_WA }
     }
   }
 
