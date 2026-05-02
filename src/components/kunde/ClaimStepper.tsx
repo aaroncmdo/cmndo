@@ -120,6 +120,7 @@ export default function ClaimStepper({
   anspruchPositionen,
   kanzleiWunsch,
   kanzleiUebergebenAm,
+  ausfallSlot,
 }: {
   lifecycle: ClaimLifecycle
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
@@ -171,6 +172,10 @@ export default function ClaimStepper({
     | null
   /** Zeitstempel des Kanzleipaket-Versands an externe Kanzlei. */
   kanzleiUebergebenAm?: string | null
+  /** CMM-32 Polish: Mietwagen/Nutzungsausfall-Block — wird im
+   *  Regulierungs-/Abschluss-Panel unter den Positionen gerendert.
+   *  Page liefert die fertige Card als ReactNode. */
+  ausfallSlot?: React.ReactNode
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
@@ -457,6 +462,11 @@ export default function ClaimStepper({
               Die Anspruchssumme wird berechnet, sobald das Gutachten freigegeben ist.
             </p>
           )}
+
+          {/* CMM-32 Polish: Mietwagen/Nutzungsausfall-Slot — semantisch
+              gehoert das zum Anspruch (XOR Mietwagen ODER Nutzungsausfall),
+              also direkt unter die Positionen-Aufschluesselung. */}
+          {ausfallSlot && <div className="mt-3">{ausfallSlot}</div>}
 
           {/* Kanzlei-Sub-Stepper */}
           {kanzleiFall && (

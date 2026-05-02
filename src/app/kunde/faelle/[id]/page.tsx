@@ -660,9 +660,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           // ist; die Phase-Gating-Logik im Stepper (regulierung/abschluss)
           // entscheidet final, ob der Banner gezeigt wird.
           const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten')
-          const gutachtenFreigegeben =
-            !!erstgutachten?.gutachten_final_freigegeben && !!gutachtenUrlAusBucket
-          const gutachtenUrlFuerStepper = gutachtenFreigegeben ? gutachtenUrlAusBucket : null
+          // CMM-32 Polish: Anspruch ist an OCR + QC-Freigabe gekoppelt,
+          // NICHT am Storage-PDF. Wenn das PDF noch fehlt (Edge-Case oder
+          // Mock-Daten), zeigen wir die Summe trotzdem — Download-Button
+          // bleibt aber an gutachtenUrlAusBucket gekoppelt.
+          const gutachtenFreigegeben = !!erstgutachten?.gutachten_final_freigegeben
+          const gutachtenUrlFuerStepper = gutachtenFreigegeben && gutachtenUrlAusBucket ? gutachtenUrlAusBucket : null
 
           // CMM-32 Polish: Begutachtungs-Verlauf zusammensammeln aus
           // gutachter_termine (Verschoben/Wahrgenommen/Verpasst), Auftrag
@@ -760,6 +763,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               }
               kanzleiWunsch={claimRow?.kanzlei_wunsch ?? null}
               kanzleiUebergebenAm={claimRow?.kanzlei_uebergeben_am ?? null}
+              ausfallSlot={
+                ausfallProps ? <KundeAusfallEntschaedigungCard {...ausfallProps} /> : null
+              }
               kanzleiFall={
                 kanzleiFall
                   ? {
@@ -940,9 +946,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           uebergebenAm={null}
         />
 
-        {/* CMM-32 Polish: Mietwagen-/Nutzungsausfall-Card — XOR-Logik aus
-            Gutachten-OCR + faelle-Mietwagen-Feldern. Render-Gate intern. */}
-        {ausfallProps && <KundeAusfallEntschaedigungCard {...ausfallProps} />}
+        {/* CMM-32 Polish: KundeAusfallEntschaedigungCard ist jetzt im
+            Stepper-Wrapper (Regulierungs-Panel) integriert — siehe
+            ausfallSlot-Prop am ClaimStepper. */}
 
         {/* 2-Säulen Layout (Geld + Betreuer) — Anwalt-Säule entfällt durch
             Konsolidierung in MeineKanzleiCard. */}
