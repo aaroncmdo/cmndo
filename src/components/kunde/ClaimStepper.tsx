@@ -218,6 +218,17 @@ export default function ClaimStepper({
   const [confirmingLexDrive, setConfirmingLexDrive] = useState(false)
   const [confirmingEigeneKanzlei, setConfirmingEigeneKanzlei] = useState(false)
 
+  // Optimistischer lokaler Kanzlei-Wunsch — wird bei LexDrive-Bestätigung
+  // sofort gesetzt, damit keine router.refresh()-Pause entsteht.
+  const [localKanzleiWunsch, setLocalKanzleiWunsch] = useState<'partnerkanzlei' | null>(null)
+  const effectiveKanzleiWunsch = localKanzleiWunsch ?? kanzleiWunsch
+
+  function handleLexDriveConfirmed() {
+    setLocalKanzleiWunsch('partnerkanzlei')
+    setConfirmingLexDrive(false)
+    setConfirmingEigeneKanzlei(false)
+  }
+
   // Pro Phase ein subtiler Token-Hintergrund — wird sowohl auf den
   // Step-Button (selected) als auch auf das Detail-Panel angewandt.
   // Erfassung + Abschluss = emerald (Done/Erfolg), Begutachtung = navy
@@ -244,15 +255,15 @@ export default function ClaimStepper({
     !!gutachtenFreigegeben &&
     !!claimId &&
     !lead?.vollmacht_signiert_am &&
-    (kanzleiWunsch === 'noch_unentschieden' ||
-      kanzleiWunsch === 'nicht_gefragt' ||
-      kanzleiWunsch == null)
+    (effectiveKanzleiWunsch === 'noch_unentschieden' ||
+      effectiveKanzleiWunsch === 'nicht_gefragt' ||
+      effectiveKanzleiWunsch == null)
 
   // LexDrive Vollmacht-Gate: Wrapper wird blau (#0e5be9) sobald der Kunde
   // partnerkanzlei gewählt hat aber die Vollmacht noch nicht bestätigt ist
   // (kanzlei_uebergeben_am = null → Paket noch nicht raus).
   const lexdriveVollmachtAusstehend =
-    kanzleiWunsch === 'partnerkanzlei' && !kanzleiUebergebenAm
+    effectiveKanzleiWunsch === 'partnerkanzlei' && !kanzleiUebergebenAm
 
   // Wrapper-Border haengt am AKTUELLEN Claim-Status (mainPhase + Warn/Error-
   // Bedingungen), nicht an der vom User selektierten Phase. Reihenfolge:
@@ -513,6 +524,7 @@ export default function ClaimStepper({
                     anspruchPositionen={anspruchPositionen}
                     ausfallSlot={ausfallSlotLexDrive ?? ausfallSlot}
                     nutzungsausfallBetragEur={nutzungsausfallBetragEur ?? null}
+                    onConfirmed={handleLexDriveConfirmed}
                   />
                 </motion.div>
               ) : (
@@ -535,6 +547,7 @@ export default function ClaimStepper({
                       setConfirmingEigeneKanzlei(false)
                       setConfirmingLexDrive(true)
                     }}
+                    onLexDriveConfirmed={handleLexDriveConfirmed}
                   />
                 </motion.div>
               )}
@@ -555,11 +568,21 @@ export default function ClaimStepper({
           Webhook schickt. Wrapper-Border faerbt sich #0e5be9 (LexDrive-Blau).
           Nach Bestätigung → Kanzleipaket raus → kanzlei_uebergeben_am gesetzt
           → Gate fällt weg, normaler Stepper. */}
-      {lexdriveVollmachtAusstehend && (
-        <div className="border-t-2 border-[#0e5be9] bg-[#0e5be9]/[0.05] px-4 sm:px-6 py-4">
-          <LexDriveVollmachtGate />
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {lexdriveVollmachtAusstehend && (
+          <motion.div
+            key="lexdrive-vollmacht-gate"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+            className="border-t-2 border-[#0e5be9] bg-[#0e5be9]/[0.05] px-4 sm:px-6 py-4"
+          >
+            <LexDriveVollmachtGate />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* CMM-32 Polish: Erfassungs-Detail-Panel — Lead-Status. */}
       {selectedPhase === 'erfassung' && !bottomSlot && (
@@ -1050,14 +1073,15 @@ function LexDriveBestaetigenPanel({
   anspruchPositionen,
   ausfallSlot,
   nutzungsausfallBetragEur,
+  onConfirmed,
 }: {
   claimId: string
   anspruchVsEur: number | null
   anspruchPositionen?: AnspruchPosition[]
   ausfallSlot?: React.ReactNode
   nutzungsausfallBetragEur?: number | null
+  onConfirmed?: () => void
 }) {
-  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -1065,7 +1089,7 @@ function LexDriveBestaetigenPanel({
     startTransition(async () => {
       const r = await setKanzleiWunsch(claimId, 'partnerkanzlei')
       if (!r.ok) { setError(r.error ?? 'Fehler beim Speichern'); return }
-      router.refresh()
+      onConfirmed?.()
     })
   }
 
@@ -1179,6 +1203,7 @@ function EigeneKanzleiAnspruchPanel({
   kundeVorname,
   kundeNachname,
   onSwitchToLexDrive,
+  onLexDriveConfirmed,
 }: {
   claimId: string
   anspruchVsEur: number | null
@@ -1188,6 +1213,7 @@ function EigeneKanzleiAnspruchPanel({
   kundeVorname?: string | null
   kundeNachname?: string | null
   onSwitchToLexDrive?: () => void
+  onLexDriveConfirmed?: () => void
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -1224,7 +1250,7 @@ function EigeneKanzleiAnspruchPanel({
       const r = await setKanzleiWunsch(claimId, 'partnerkanzlei')
       if (!r.ok) { setError(r.error ?? 'Fehler beim Speichern'); return }
       setShowModal(false)
-      router.refresh()
+      onLexDriveConfirmed?.()
     })
   }
 
