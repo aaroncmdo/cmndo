@@ -490,10 +490,12 @@ export default function ClaimStepper({
               </button>
               {i < MAIN_PHASES.length - 1 && (() => {
                 // Verbindung zwischen Begutachtung (Kanzlei) und Regulierung
-                // wird lila, solange die Vollmacht ausstehend ist — visuell
-                // konsistent mit dem violet Kanzlei-Wunsch-Banner.
+                // wird lila, solange die Kanzlei-Wahl noch aussteht (Banner
+                // sichtbar / Vollmacht ausstehend). Sobald der Kanzlei-Step
+                // erledigt ist (Vollmacht / Selbst / eigene Kanzlei versendet),
+                // faellt sie auf emerald (isDone) zurueck.
                 const istKanzleiToRegulierung =
-                  i === 1 && !!gutachtenFreigegeben && !effectiveVollmachtSigniert
+                  i === 1 && !!gutachtenFreigegeben && !kanzleiStepDone
                 const lineCls = istKanzleiToRegulierung
                   ? 'bg-violet-400'
                   : isDone
