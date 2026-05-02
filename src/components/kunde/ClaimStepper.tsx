@@ -1056,8 +1056,8 @@ function LexDriveBestaetigenPanel({
       <div className="flex items-end gap-3">
         <p className="flex-1 text-xs text-[#0a3fa0]/80 leading-relaxed">
           Abgewickelt in ~20 Tagen + Vollservice durch unser Team. Du erhältst
-          25&nbsp;€ Auslagenpauschale. Für dich völlig kostenfrei, unabhängig
-          von Kürzung oder Teilschuld.
+          25&nbsp;€ Auslagenpauschale. Unser Komplettservice inkl. anwaltlicher
+          Betreuung ist für dich völlig kostenfrei, unabhängig von Kürzung oder Teilschuld.
         </p>
         <button
           type="button"
