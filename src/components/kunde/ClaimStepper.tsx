@@ -217,35 +217,36 @@ export default function ClaimStepper({
     !!gutachtenUrl &&
     (lifecycle.mainPhase === 'regulierung' || lifecycle.mainPhase === 'abschluss')
 
+  // CMM-32 Polish: Lila Kanzlei-Wunsch-Banner — sichtbar wenn QC durch
+  // ist und der Kunde noch nicht entschieden hat. Wir prerunnen das hier
+  // damit der Wrapper-Border passend faerbt.
+  const zeigeKanzleiWunschBanner =
+    !!gutachtenFreigegeben &&
+    !!claimId &&
+    (kanzleiWunsch === 'noch_unentschieden' ||
+      kanzleiWunsch === 'nicht_gefragt' ||
+      kanzleiWunsch == null)
+
   // Wrapper-Border haengt am AKTUELLEN Claim-Status (mainPhase + Warn/Error-
   // Bedingungen), nicht an der vom User selektierten Phase. Reihenfolge:
   //   1. Error (Termin verpasst)            → rose
   //   2. Warnung (Verlegung pending)         → amber
-  //   3. Abschluss (Auszahlung eingegangen)  → emerald
-  //   4. Sonst                               → neutral
+  //   3. Kanzlei-Wunsch offen (legislative)  → violet
+  //   4. Abschluss (Auszahlung eingegangen)  → emerald
+  //   5. Sonst                               → neutral
   const outerCls = terminVerstrichen
     ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden'
     : bottomSlot
       ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden'
-      : lifecycle.mainPhase === 'abschluss'
-        ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden'
-        : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
+      : zeigeKanzleiWunschBanner
+        ? 'rounded-2xl bg-white border-2 border-violet-400 overflow-hidden'
+        : lifecycle.mainPhase === 'abschluss'
+          ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden'
+          : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
 
   return (
     <div className={outerCls}>
       <div className="px-4 sm:px-6 py-5 sm:py-6 space-y-4">
-      {/* CMM-32 Polish: Lila Kanzlei-Wunsch-Banner — sichtbar sobald die
-          QC-Pruefung durch ist (gutachtenFreigegeben) und der Kunde sich
-          noch nicht entschieden hat. Drei Inline-CTAs setzen den Wunsch
-          direkt und das Banner verschwindet. Ein juristischer Schritt =
-          violet (Sonderpfad-Tonalitaet). */}
-      {gutachtenFreigegeben &&
-        claimId &&
-        (kanzleiWunsch === 'noch_unentschieden' ||
-          kanzleiWunsch === 'nicht_gefragt' ||
-          kanzleiWunsch == null) && (
-          <KanzleiWunschBanner claimId={claimId} />
-        )}
       {gutachtenFertig && (
         <a
           href={gutachtenUrl ?? '#'}
@@ -392,6 +393,17 @@ export default function ClaimStepper({
         </div>
       )}
       </div>
+
+      {/* CMM-32 Polish: Lila Kanzlei-Wunsch-Banner als Bottom-Sektion
+          unter dem Stepper-Block (analog zu den Phase-Detail-Panels).
+          Sichtbar sobald QC durch ist + Kunde noch nicht entschieden.
+          Wrapper-Border faerbt sich passend lila. */}
+      {zeigeKanzleiWunschBanner && claimId && (
+        <div className="border-t-2 border-violet-300 bg-violet-50 px-4 sm:px-6 py-4">
+          <KanzleiWunschBanner claimId={claimId} />
+        </div>
+      )}
+
       {/* CMM-32 Polish: Erfassungs-Detail-Panel — Lead-Status. */}
       {selectedPhase === 'erfassung' && !bottomSlot && (
         <div className={`border-t border-claimondo-navy/10 px-4 sm:px-6 py-3.5 ${PHASE_BG.erfassung}`}>
@@ -649,7 +661,7 @@ function KanzleiWunschBanner({ claimId }: { claimId: string }) {
   }
 
   return (
-    <div className="rounded-xl border-2 border-violet-300 bg-violet-50 px-4 py-3 space-y-3">
+    <div className="space-y-3">
       <div className="flex items-start gap-2">
         <ScaleIcon className="w-4 h-4 text-violet-700 shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
