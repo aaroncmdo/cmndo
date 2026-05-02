@@ -1,24 +1,39 @@
 'use client'
 
-// Smoke-Helper: Button setzt den aktuellen Fall auf den Stand
-// "Erfassung -> Kanzlei-Wunsch offen, ohne Vollmacht" zurueck, damit der
-// Walkthrough erneut durchgespielt werden kann.
+// Smoke-Helper: Zwei Buttons fuer den Kanzlei-Walkthrough.
+//   1) Reset auf "Kanzlei-Wunsch offen" — Banner sichtbar, keine Vollmacht
+//   2) Reset auf "LexDrive gewaehlt, Vollmacht offen" — blauer Vollmacht-Gate
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { RefreshCcwIcon } from 'lucide-react'
-import { smokeResetAufKanzleiWunsch } from '@/lib/kanzlei-wunsch/actions'
+import { RefreshCcwIcon, HandshakeIcon } from 'lucide-react'
+import {
+  smokeResetAufKanzleiWunsch,
+  smokeResetAufLexDriveVollmachtOffen,
+} from '@/lib/kanzlei-wunsch/actions'
 
 export default function SmokeKanzleiButton({ fallId }: { fallId: string }) {
   const router = useRouter()
-  const [pending, startTransition] = useTransition()
+  const [pendingWunsch, startWunsch] = useTransition()
+  const [pendingLex, startLex] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const pending = pendingWunsch || pendingLex
 
-  function reset() {
-    if (!confirm('Fall auf Kanzlei-Wunsch-Walkthrough zurücksetzen? Vollmacht wird entfernt, Gutachten als freigegeben markiert.')) return
+  function resetWunsch() {
+    if (!confirm('Fall auf Kanzlei-Wunsch-Walkthrough zurücksetzen? Vollmacht raus, Gutachten freigegeben.')) return
     setError(null)
-    startTransition(async () => {
+    startWunsch(async () => {
       const r = await smokeResetAufKanzleiWunsch(fallId)
+      if (!r.ok) { setError(r.error ?? 'Fehler'); return }
+      router.refresh()
+    })
+  }
+
+  function resetLexDrive() {
+    if (!confirm('Fall auf LexDrive + Vollmacht-Gate zurücksetzen? kanzlei_wunsch=partnerkanzlei, Vollmacht raus.')) return
+    setError(null)
+    startLex(async () => {
+      const r = await smokeResetAufLexDriveVollmachtOffen(fallId)
       if (!r.ok) { setError(r.error ?? 'Fehler'); return }
       router.refresh()
     })
@@ -26,24 +41,35 @@ export default function SmokeKanzleiButton({ fallId }: { fallId: string }) {
 
   return (
     <div className="rounded-xl border-2 border-dashed border-amber-400 bg-amber-50/60 p-3 text-xs">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-amber-900 flex items-center gap-1.5">
-            <span aria-hidden>🔧</span> Smoke: Kanzlei-Walkthrough
+            <span aria-hidden>🔧</span> Smoke: Walkthrough-Reset
           </p>
           <p className="text-[11px] text-amber-800/80 mt-0.5">
-            Setzt den Fall auf „QC durch, kein Kanzlei-Wunsch, keine Vollmacht" zurück — du kannst den Banner-Flow neu durchspielen.
+            Setze den Fall auf einen Punkt im Kanzlei-Flow zurück, um den Walkthrough zu testen.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={reset}
-          disabled={pending}
-          className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-50 transition-colors"
-        >
-          <RefreshCcwIcon className="w-3.5 h-3.5" />
-          {pending ? 'Wird zurückgesetzt…' : 'Zurücksetzen'}
-        </button>
+        <div className="flex gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={resetWunsch}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-50 transition-colors"
+          >
+            <RefreshCcwIcon className="w-3.5 h-3.5" />
+            {pendingWunsch ? 'Setzt zurück…' : 'Kanzlei-Wunsch'}
+          </button>
+          <button
+            type="button"
+            onClick={resetLexDrive}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0e5be9] hover:bg-[#0a3fa0] text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-50 transition-colors"
+          >
+            <HandshakeIcon className="w-3.5 h-3.5" />
+            {pendingLex ? 'Setzt zurück…' : 'LexDrive + Vollmacht offen'}
+          </button>
+        </div>
       </div>
       {error && <p className="text-[11px] text-red-700 mt-1.5">{error}</p>}
     </div>

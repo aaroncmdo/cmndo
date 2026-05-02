@@ -505,3 +505,31 @@ export async function smokeResetAufKanzleiWunsch(
   if (fall.claim_id) revalidateClaim(fall.claim_id as string, fallId)
   return { ok: true }
 }
+
+/**
+ * SMOKE-Helper: Setzt den Fall in den Zustand
+ * "LexDrive gewaehlt, Vollmacht ausstehend" — der blaue Vollmacht-Gate
+ * ist sichtbar, der Kunde kann hier oder via WhatsApp bestaetigen.
+ *
+ * Auth: Geschaedigter, Admin oder KB.
+ */
+export async function smokeResetAufLexDriveVollmachtOffen(
+  fallId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const base = await smokeResetAufKanzleiWunsch(fallId)
+  if (!base.ok) return base
+
+  const admin = createAdminClient()
+  const { data: fall } = await admin
+    .from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  if (!fall?.claim_id) return { ok: false, error: 'Kein Claim am Fall' }
+
+  const { error } = await admin.from('claims').update({
+    kanzlei_wunsch: 'partnerkanzlei',
+    kanzlei_wunsch_gefragt_am: new Date().toISOString(),
+  }).eq('id', fall.claim_id as string)
+  if (error) return { ok: false, error: error.message }
+
+  revalidateClaim(fall.claim_id as string, fallId)
+  return { ok: true }
+}
