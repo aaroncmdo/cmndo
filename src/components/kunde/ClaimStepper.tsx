@@ -1049,11 +1049,7 @@ function LexDriveBestaetigenPanel({
               </ul>
             </div>
           )}
-          {ausfallSlot && (
-            <div className="rounded-lg bg-[#0e5be9]/[0.06] border border-[#0e5be9]/20 p-3">
-              {ausfallSlot}
-            </div>
-          )}
+          {ausfallSlot && ausfallSlot}
         </div>
       )}
 
