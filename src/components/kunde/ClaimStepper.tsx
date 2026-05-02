@@ -638,8 +638,15 @@ export default function ClaimStepper({
           + Kanzlei-Sub-Stepper. Nur sichtbar wenn eine Vollmacht vorliegt
           (vollmacht_signiert_am gesetzt) — ohne Vollmacht zeigen wir den
           Anspruch im Kanzlei-Wunsch-Banner-Flow stattdessen. */}
+      <AnimatePresence initial={false}>
       {(selectedPhase === 'regulierung' || selectedPhase === 'abschluss') && !bottomSlot && effectiveVollmachtSigniert && (
-        <div
+        <motion.div
+          key={`reg-panel-${selectedPhase}`}
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+          style={{ overflow: 'hidden', transformOrigin: 'top' }}
           className={`border-t border-claimondo-navy/10 px-4 sm:px-6 py-4 ${
             selectedPhase === 'regulierung' ? PHASE_BG.regulierung : PHASE_BG.abschluss
           }`}
@@ -742,8 +749,9 @@ export default function ClaimStepper({
                     ? 'Wir holen das Geld bei der gegnerischen Versicherung. Du musst nichts tun.'
                     : 'Steht noch aus — startet sobald das Gutachten an die Kanzlei übermittelt ist.'}
           </p>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* AAR-864: Termin-Sektion analog SV-Header — sichtbar wenn die
           Begutachtungs-Phase ausgewaehlt ist und ein Termin existiert. */}
