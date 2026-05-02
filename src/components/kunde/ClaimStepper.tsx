@@ -30,6 +30,7 @@ import {
   HandshakeIcon,
   BriefcaseIcon,
   DownloadIcon,
+  ClockIcon,
 } from 'lucide-react'
 import { setKanzleiWunsch } from '@/lib/kanzlei-wunsch/actions'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
@@ -227,22 +228,31 @@ export default function ClaimStepper({
       kanzleiWunsch === 'nicht_gefragt' ||
       kanzleiWunsch == null)
 
+  // LexDrive Vollmacht-Gate: Wrapper wird blau (#0e5be9) sobald der Kunde
+  // partnerkanzlei gewählt hat aber die Vollmacht noch nicht bestätigt ist
+  // (kanzlei_uebergeben_am = null → Paket noch nicht raus).
+  const lexdriveVollmachtAusstehend =
+    kanzleiWunsch === 'partnerkanzlei' && !kanzleiUebergebenAm
+
   // Wrapper-Border haengt am AKTUELLEN Claim-Status (mainPhase + Warn/Error-
   // Bedingungen), nicht an der vom User selektierten Phase. Reihenfolge:
-  //   1. Error (Termin verpasst)            → rose
-  //   2. Warnung (Verlegung pending)         → amber
-  //   3. Kanzlei-Wunsch offen (legislative)  → violet
-  //   4. Abschluss (Auszahlung eingegangen)  → emerald
-  //   5. Sonst                               → neutral
+  //   1. Error (Termin verpasst)             → rose
+  //   2. Warnung (Verlegung pending)          → amber
+  //   3. Kanzlei-Wunsch offen (noch offen)   → violet
+  //   4. LexDrive Vollmacht ausstehend        → #0e5be9 (LexDrive-Blau)
+  //   5. Abschluss (Auszahlung eingegangen)   → emerald
+  //   6. Sonst                                → neutral
   const outerCls = terminVerstrichen
     ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden'
     : bottomSlot
       ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden'
       : zeigeKanzleiWunschBanner
         ? 'rounded-2xl bg-white border-2 border-violet-400 overflow-hidden'
-        : lifecycle.mainPhase === 'abschluss'
-          ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden'
-          : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
+        : lexdriveVollmachtAusstehend
+          ? 'rounded-2xl bg-white border-2 border-[#0e5be9] overflow-hidden'
+          : lifecycle.mainPhase === 'abschluss'
+            ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden'
+            : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
 
   return (
     <div className={outerCls}>
@@ -401,6 +411,16 @@ export default function ClaimStepper({
       {zeigeKanzleiWunschBanner && claimId && (
         <div className="border-t-2 border-violet-300 bg-violet-50 px-4 sm:px-6 py-4">
           <KanzleiWunschBanner claimId={claimId} />
+        </div>
+      )}
+
+      {/* LexDrive Vollmacht-Gate: Hard-Block bis LexDrive den vollmacht_bestaetigt
+          Webhook schickt. Wrapper-Border faerbt sich #0e5be9 (LexDrive-Blau).
+          Nach Bestätigung → Kanzleipaket raus → kanzlei_uebergeben_am gesetzt
+          → Gate fällt weg, normaler Stepper. */}
+      {lexdriveVollmachtAusstehend && (
+        <div className="border-t-2 border-[#0e5be9] bg-[#0e5be9]/[0.05] px-4 sm:px-6 py-4">
+          <LexDriveVollmachtGate />
         </div>
       )}
 
@@ -788,6 +808,30 @@ function ChecklistItem({
         </span>
       )}
     </li>
+  )
+}
+
+function LexDriveVollmachtGate() {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="w-8 h-8 rounded-full bg-[#0e5be9]/10 flex items-center justify-center shrink-0 mt-0.5">
+        <ClockIcon className="w-4 h-4 text-[#0e5be9]" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-[#0a3fa0]">
+          Bitte bestätige die Vollmacht
+        </p>
+        <p className="text-xs text-[#0e5be9]/80 mt-0.5">
+          LexDrive hat dir eine Vollmacht per WhatsApp geschickt. Sobald du sie
+          bestätigst, schicken wir deine Akte automatisch an die Kanzlei — du
+          musst hier nichts weiter tun.
+        </p>
+        <div className="mt-2.5 flex items-center gap-1.5">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#0e5be9] animate-pulse" />
+          <span className="text-[11px] font-medium text-[#0e5be9]">Warte auf deine Bestätigung</span>
+        </div>
+      </div>
+    </div>
   )
 }
 
