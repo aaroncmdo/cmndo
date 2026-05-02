@@ -200,6 +200,10 @@ export default function ClaimStepper({
     lifecycle.mainPhase,
   )
 
+  // Zwei-Schritt LexDrive-Auswahl: erst Bestätigungs-Panel zeigen,
+  // dann erst setKanzleiWunsch speichern.
+  const [confirmingLexDrive, setConfirmingLexDrive] = useState(false)
+
   // Pro Phase ein subtiler Token-Hintergrund — wird sowohl auf den
   // Step-Button (selected) als auch auf das Detail-Panel angewandt.
   // Erfassung + Abschluss = emerald (Done/Erfolg), Begutachtung = navy
@@ -248,9 +252,9 @@ export default function ClaimStepper({
     ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden'
     : bottomSlot
       ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden'
-      : zeigeKanzleiWunschBanner
+      : (zeigeKanzleiWunschBanner && !confirmingLexDrive)
         ? 'rounded-2xl bg-white border-2 border-violet-400 overflow-hidden'
-        : lexdriveVollmachtAusstehend
+        : (confirmingLexDrive || lexdriveVollmachtAusstehend)
           ? 'rounded-2xl bg-white border-2 border-[#0e5be9] overflow-hidden'
           : lifecycle.mainPhase === 'abschluss'
             ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden'
@@ -409,13 +413,23 @@ export default function ClaimStepper({
       )}
       </div>
 
-      {/* CMM-32 Polish: Lila Kanzlei-Wunsch-Banner als Bottom-Sektion
-          unter dem Stepper-Block (analog zu den Phase-Detail-Panels).
-          Sichtbar sobald QC durch ist + Kunde noch nicht entschieden.
-          Wrapper-Border faerbt sich passend lila. */}
-      {zeigeKanzleiWunschBanner && claimId && (
+      {/* Kanzlei-Wunsch: lila Banner (Auswahl) ODER blaues Bestätigungs-Panel
+          (Schritt 2 nach LexDrive-Klick). Nur eines davon ist sichtbar. */}
+      {zeigeKanzleiWunschBanner && claimId && !confirmingLexDrive && (
         <div className="border-t-2 border-violet-300 bg-violet-50 px-4 sm:px-6 py-4">
-          <KanzleiWunschBanner claimId={claimId} />
+          <KanzleiWunschBanner
+            claimId={claimId}
+            onLexDriveClick={() => setConfirmingLexDrive(true)}
+          />
+        </div>
+      )}
+      {confirmingLexDrive && claimId && (
+        <div className="border-t-2 border-[#0e5be9] bg-[#0e5be9]/[0.04] px-4 sm:px-6 py-5">
+          <LexDriveBestaetigenPanel
+            claimId={claimId}
+            anspruchVsEur={anspruchVsEur ?? null}
+            onAbort={() => setConfirmingLexDrive(false)}
+          />
         </div>
       )}
 
@@ -679,12 +693,22 @@ export default function ClaimStepper({
   )
 }
 
-function KanzleiWunschBanner({ claimId }: { claimId: string }) {
+function KanzleiWunschBanner({
+  claimId,
+  onLexDriveClick,
+}: {
+  claimId: string
+  onLexDriveClick: () => void
+}) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
   function pick(wunsch: 'partnerkanzlei' | 'eigene_kanzlei' | 'keine_kanzlei') {
+    if (wunsch === 'partnerkanzlei') {
+      onLexDriveClick()
+      return
+    }
     setError(null)
     startTransition(async () => {
       const r = await setKanzleiWunsch(claimId, wunsch)
@@ -861,6 +885,74 @@ function ResetKanzleiWunschButton({
   )
 }
 
+function LexDriveBestaetigenPanel({
+  claimId,
+  anspruchVsEur,
+  onAbort,
+}: {
+  claimId: string
+  anspruchVsEur: number | null
+  onAbort: () => void
+}) {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  function bestaetigen() {
+    startTransition(async () => {
+      const r = await setKanzleiWunsch(claimId, 'partnerkanzlei')
+      if (!r.ok) { setError(r.error ?? 'Fehler beim Speichern'); return }
+      router.refresh()
+    })
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <HandshakeIcon className="w-4 h-4 text-[#0e5be9] shrink-0" />
+        <p className="text-sm font-semibold text-[#0a3fa0]">Komplettservice durch LexDrive</p>
+      </div>
+      {anspruchVsEur != null && (
+        <div className="rounded-xl bg-[#0e5be9]/[0.08] border border-[#0e5be9]/20 px-4 py-3">
+          <p className="text-[11px] uppercase tracking-wider font-semibold text-[#0e5be9]/70 mb-0.5">
+            Dein Anspruch
+          </p>
+          <p className="text-2xl font-bold text-[#0a3fa0]">
+            {anspruchVsEur.toLocaleString('de-DE', {
+              style: 'currency',
+              currency: 'EUR',
+              maximumFractionDigits: 0,
+            })}
+          </p>
+        </div>
+      )}
+      <div className="flex items-end gap-3">
+        <p className="flex-1 text-xs text-[#0a3fa0]/80 leading-relaxed">
+          Abgewickelt in ~20 Tagen + Vollservice durch unser Team. Du erhältst
+          25&nbsp;€ Auslagenpauschale. Für dich völlig kostenfrei, unabhängig
+          von Kürzung oder Teilschuld.
+        </p>
+        <button
+          type="button"
+          onClick={bestaetigen}
+          disabled={pending}
+          className="shrink-0 bg-[#0e5be9] hover:bg-[#0a3fa0] active:bg-[#0a3fa0] text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
+        >
+          Bestätigen
+        </button>
+      </div>
+      {error && <p className="text-xs text-red-700">{error}</p>}
+      <button
+        type="button"
+        onClick={onAbort}
+        className="text-[11px] text-[#0e5be9]/50 hover:text-[#0e5be9] transition-colors"
+      >
+        ← Zurück zur Auswahl
+      </button>
+    </div>
+  )
+}
+
 function LexDriveVollmachtGate() {
   return (
     <div className="flex items-start gap-3">
@@ -872,9 +964,10 @@ function LexDriveVollmachtGate() {
           Bitte bestätige die Vollmacht
         </p>
         <p className="text-xs text-[#0e5be9]/80 mt-0.5">
-          LexDrive hat dir eine Vollmacht per WhatsApp geschickt. Sobald du sie
-          bestätigst, schicken wir deine Akte automatisch an die Kanzlei — du
-          musst hier nichts weiter tun.
+          LexDrive hat dir eine Vollmacht per WhatsApp geschickt.{' '}
+          <span className="font-semibold text-[#0a3fa0]">Bitte schau auf dein Handy</span>{' '}
+          und bestätige sie dort — sobald wir die Rückmeldung haben, geht deine
+          Akte automatisch an die Kanzlei. Du musst hier nichts weiter tun.
         </p>
         <div className="mt-2.5 flex items-center gap-1.5">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#0e5be9] animate-pulse" />
