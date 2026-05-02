@@ -415,11 +415,12 @@ export default function ClaimStepper({
 
       {/* Kanzlei-Wunsch: lila Banner (Auswahl) ODER blaues Bestätigungs-Panel
           (Schritt 2 nach LexDrive-Klick). Nur eines davon ist sichtbar. */}
-      {zeigeKanzleiWunschBanner && claimId && !confirmingLexDrive && (
-        <div className="border-t-2 border-violet-300 bg-violet-50 px-4 sm:px-6 py-4">
+      {zeigeKanzleiWunschBanner && claimId && (
+        <div className={`border-t-2 px-4 sm:px-6 py-4 ${confirmingLexDrive ? 'border-[#0e5be9]/40 bg-[#0e5be9]/[0.03]' : 'border-violet-300 bg-violet-50'}`}>
           <KanzleiWunschBanner
             claimId={claimId}
             onLexDriveClick={() => setConfirmingLexDrive(true)}
+            confirmingLexDrive={confirmingLexDrive}
           />
         </div>
       )}
@@ -696,9 +697,11 @@ export default function ClaimStepper({
 function KanzleiWunschBanner({
   claimId,
   onLexDriveClick,
+  confirmingLexDrive,
 }: {
   claimId: string
   onLexDriveClick: () => void
+  confirmingLexDrive: boolean
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -720,12 +723,12 @@ function KanzleiWunschBanner({
   return (
     <div className="space-y-3">
       <div className="flex items-start gap-2">
-        <ScaleIcon className="w-4 h-4 text-violet-700 shrink-0 mt-0.5" />
+        <ScaleIcon className={`w-4 h-4 shrink-0 mt-0.5 ${confirmingLexDrive ? 'text-[#0e5be9]' : 'text-violet-700'}`} />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-violet-900">
+          <p className={`text-sm font-semibold ${confirmingLexDrive ? 'text-[#0a3fa0]' : 'text-violet-900'}`}>
             Wer übernimmt die Schadenregulierung?
           </p>
-          <p className="text-xs text-violet-800/90 mt-0.5">
+          <p className={`text-xs mt-0.5 ${confirmingLexDrive ? 'text-[#0e5be9]/70' : 'text-violet-800/90'}`}>
             Dein Gutachten ist fertig und QC-geprüft. Bevor wir an die Versicherung
             gehen, brauchen wir deine Wahl — das ist eine juristische Entscheidung.
           </p>
@@ -738,20 +741,22 @@ function KanzleiWunschBanner({
           subtitel="LexDrive übernimmt"
           onClick={() => pick('partnerkanzlei')}
           disabled={pending}
+          active={confirmingLexDrive}
+          activeColor="blue"
         />
         <BannerOption
           icon={<BriefcaseIcon className="w-3.5 h-3.5" />}
           titel="Eigene Kanzlei"
           subtitel="Wir senden Paket an deine Kanzlei"
           onClick={() => pick('eigene_kanzlei')}
-          disabled={pending}
+          disabled={pending || confirmingLexDrive}
         />
         <BannerOption
           icon={<DownloadIcon className="w-3.5 h-3.5" />}
           titel="Selbst einreichen"
           subtitel="Du regelst es direkt mit der VS"
           onClick={() => pick('keine_kanzlei')}
-          disabled={pending}
+          disabled={pending || confirmingLexDrive}
         />
       </div>
       {error && <p className="text-xs text-red-700">{error}</p>}
@@ -765,23 +770,31 @@ function BannerOption({
   subtitel,
   onClick,
   disabled,
+  active,
+  activeColor,
 }: {
   icon: React.ReactNode
   titel: string
   subtitel: string
   onClick: () => void
   disabled: boolean
+  active?: boolean
+  activeColor?: 'blue'
 }) {
+  const blueCls = 'border-[#0e5be9] bg-[#0e5be9]/[0.07] ring-1 ring-[#0e5be9]/30'
+  const normalCls = 'border-violet-200 bg-white hover:border-violet-400 hover:bg-violet-100'
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="text-left rounded-lg border border-violet-200 bg-white px-3 py-2 hover:border-violet-400 hover:bg-violet-100 transition-colors disabled:opacity-50"
+      className={`text-left rounded-lg border px-3 py-2 transition-colors disabled:opacity-40 ${
+        active && activeColor === 'blue' ? blueCls : normalCls
+      }`}
     >
-      <div className="flex items-center gap-1.5 text-violet-700 font-semibold text-xs">
+      <div className={`flex items-center gap-1.5 font-semibold text-xs ${active && activeColor === 'blue' ? 'text-[#0e5be9]' : 'text-violet-700'}`}>
         {icon}
-        <span className="text-claimondo-navy">{titel}</span>
+        <span className={active && activeColor === 'blue' ? 'text-[#0a3fa0]' : 'text-claimondo-navy'}>{titel}</span>
       </div>
       <p className="text-[11px] text-claimondo-ondo mt-0.5">{subtitel}</p>
     </button>
