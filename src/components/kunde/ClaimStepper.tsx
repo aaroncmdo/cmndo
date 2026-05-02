@@ -32,6 +32,7 @@ import {
   BriefcaseIcon,
   DownloadIcon,
   ClockIcon,
+  ChevronRightIcon,
 } from 'lucide-react'
 import { setKanzleiWunsch, resetKanzleiWunsch } from '@/lib/kanzlei-wunsch/actions'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
@@ -1279,10 +1280,18 @@ function EigeneKanzleiAnspruchPanel({
               <button
                 type="button"
                 onClick={onSwitchToLexDrive}
-                className="w-full flex items-center justify-center gap-2 bg-[#0e5be9] hover:bg-[#0a3fa0] active:bg-[#0a3fa0] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+                className="w-full text-left rounded-xl border-2 border-[#0e5be9] bg-[#0e5be9]/[0.07] hover:bg-[#0e5be9]/[0.13] active:bg-[#0e5be9]/[0.13] px-4 py-3.5 transition-colors"
               >
-                <HandshakeIcon className="w-4 h-4 shrink-0" />
-                LexDrive Komplettservice wählen
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#0e5be9]/15 flex items-center justify-center shrink-0">
+                    <HandshakeIcon className="w-4 h-4 text-[#0e5be9]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#0a3fa0]">Kostenfreier Komplettservice durch LexDrive</p>
+                    <p className="text-xs text-[#0e5be9]/70 mt-0.5">Anwaltliche Betreuung inklusive — für dich vollständig kostenlos</p>
+                  </div>
+                  <ChevronRightIcon className="w-4 h-4 text-[#0e5be9] shrink-0" />
+                </div>
               </button>
             )}
             <button
