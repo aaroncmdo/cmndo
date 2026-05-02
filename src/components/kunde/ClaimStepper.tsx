@@ -363,7 +363,9 @@ export default function ClaimStepper({
                                 : 'text-claimondo-ondo/60'
                     }`}
                   >
-                    {MAIN_PHASE_LABEL[p.key]}
+                    {zeigeKanzleiWunschBanner && p.key === 'begutachtung'
+                    ? 'Kanzlei'
+                    : MAIN_PHASE_LABEL[p.key]}
                   </p>
                   {isCurrent && (
                     <p className="text-[11px] text-claimondo-ondo whitespace-nowrap mt-0.5">
