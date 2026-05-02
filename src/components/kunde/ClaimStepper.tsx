@@ -13,6 +13,7 @@
 
 import React, { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   CheckIcon,
   CheckCircleIcon,
@@ -257,18 +258,18 @@ export default function ClaimStepper({
   //   6. Abschluss (Auszahlung eingegangen)   → emerald
   //   7. Sonst                                → neutral
   const outerCls = terminVerstrichen
-    ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden'
+    ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden transition-colors duration-300'
     : bottomSlot
-      ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden'
+      ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden transition-colors duration-300'
       : (zeigeKanzleiWunschBanner && !confirmingLexDrive && !confirmingEigeneKanzlei)
-        ? 'rounded-2xl bg-white border-2 border-violet-400 overflow-hidden'
+        ? 'rounded-2xl bg-white border-2 border-violet-400 overflow-hidden transition-colors duration-300'
         : confirmingEigeneKanzlei
-          ? 'rounded-2xl bg-white border-2 border-yellow-400 overflow-hidden'
+          ? 'rounded-2xl bg-white border-2 border-yellow-400 overflow-hidden transition-colors duration-300'
           : (confirmingLexDrive || lexdriveVollmachtAusstehend)
-            ? 'rounded-2xl bg-white border-2 border-[#0e5be9] overflow-hidden'
+            ? 'rounded-2xl bg-white border-2 border-[#0e5be9] overflow-hidden transition-colors duration-300'
             : lifecycle.mainPhase === 'abschluss'
-              ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden'
-              : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
+              ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden transition-colors duration-300'
+              : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden transition-colors duration-300'
 
   return (
     <div className={outerCls}>
@@ -454,13 +455,16 @@ export default function ClaimStepper({
       {/* Kanzlei-Wunsch: Auswahloptionen — immer sichtbar solange banner aktiv.
           Hintergrundton wechselt je nach selektierter Option. */}
       {zeigeKanzleiWunschBanner && claimId && (
-        <div className={`border-t-2 px-4 sm:px-6 py-4 ${
-          confirmingLexDrive
-            ? 'border-[#0e5be9]/40 bg-[#0e5be9]/[0.03]'
-            : confirmingEigeneKanzlei
-              ? 'border-yellow-300 bg-yellow-50/60'
-              : 'border-violet-300 bg-violet-50'
-        }`}>
+        <motion.div
+          layout
+          className={`border-t-2 px-4 sm:px-6 py-4 transition-colors duration-300 ${
+            confirmingLexDrive
+              ? 'border-[#0e5be9]/40 bg-[#0e5be9]/[0.03]'
+              : confirmingEigeneKanzlei
+                ? 'border-yellow-300 bg-yellow-50/60'
+                : 'border-violet-300 bg-violet-50'
+          }`}
+        >
           <KanzleiWunschBanner
             claimId={claimId}
             onLexDriveClick={() => { setConfirmingEigeneKanzlei(false); setConfirmingLexDrive(true) }}
@@ -468,32 +472,50 @@ export default function ClaimStepper({
             confirmingLexDrive={confirmingLexDrive}
             confirmingEigeneKanzlei={confirmingEigeneKanzlei}
           />
-        </div>
+        </motion.div>
       )}
-      {/* LexDrive Bestätigungs-Panel — zeigt vollen Anspruch + Konditionen */}
-      {confirmingLexDrive && claimId && (
-        <div className="border-t-2 border-[#0e5be9] bg-[#0e5be9]/[0.04] px-4 sm:px-6 py-5">
-          <LexDriveBestaetigenPanel
-            claimId={claimId}
-            anspruchVsEur={anspruchVsEur ?? null}
-            anspruchPositionen={anspruchPositionen}
-            ausfallSlot={ausfallSlotLexDrive ?? ausfallSlot}
-          />
-        </div>
-      )}
-      {/* Eigene-Kanzlei Vergleichs-Panel — zeigt Anspruch ohne LexDrive-Extras */}
-      {confirmingEigeneKanzlei && claimId && (
-        <div className="border-t-2 border-yellow-400 bg-yellow-50/50 px-4 sm:px-6 py-5">
-          <EigeneKanzleiAnspruchPanel
-            claimId={claimId}
-            anspruchVsEur={anspruchVsEur ?? null}
-            anspruchPositionen={anspruchPositionen}
-            kundeAnrede={lead?.anrede ?? null}
-            kundeVorname={lead?.vorname ?? null}
-            kundeNachname={lead?.nachname ?? null}
-          />
-        </div>
-      )}
+
+      {/* Detail-Panels — slide-down mit AnimatePresence */}
+      <AnimatePresence initial={false}>
+        {confirmingLexDrive && claimId && (
+          <motion.div
+            key="lexdrive-panel"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+            className="border-t-2 border-[#0e5be9] bg-[#0e5be9]/[0.04] px-4 sm:px-6 py-5"
+          >
+            <LexDriveBestaetigenPanel
+              claimId={claimId}
+              anspruchVsEur={anspruchVsEur ?? null}
+              anspruchPositionen={anspruchPositionen}
+              ausfallSlot={ausfallSlotLexDrive ?? ausfallSlot}
+            />
+          </motion.div>
+        )}
+        {confirmingEigeneKanzlei && claimId && (
+          <motion.div
+            key="eigene-kanzlei-panel"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+            className="border-t-2 border-yellow-400 bg-yellow-50/50 px-4 sm:px-6 py-5"
+          >
+            <EigeneKanzleiAnspruchPanel
+              claimId={claimId}
+              anspruchVsEur={anspruchVsEur ?? null}
+              anspruchPositionen={anspruchPositionen}
+              kundeAnrede={lead?.anrede ?? null}
+              kundeVorname={lead?.vorname ?? null}
+              kundeNachname={lead?.nachname ?? null}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Test-Reset: Wahl zurücksetzen — sichtbar wenn Wunsch gesetzt + Paket noch nicht raus */}
       {claimId &&
@@ -1063,7 +1085,15 @@ function LexDriveBestaetigenPanel({
               </ul>
             </div>
           )}
-          {ausfallSlot && ausfallSlot}
+          {ausfallSlot && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: 0.1 }}
+            >
+              {ausfallSlot}
+            </motion.div>
+          )}
         </div>
       )}
 
