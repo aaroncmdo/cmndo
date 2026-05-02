@@ -22,21 +22,6 @@ type KanzleiWunsch =
   | 'noch_unentschieden'
   | 'nicht_gefragt'
 
-async function requireKbOrAdmin() {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { ok: false as const, error: 'Nicht angemeldet' }
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rolle')
-    .eq('id', user.id)
-    .maybeSingle()
-  if (!profile || !['admin', 'kundenbetreuer'].includes(profile.rolle as string)) {
-    return { ok: false as const, error: 'Nur Admin/KB' }
-  }
-  return { ok: true as const, userId: user.id }
-}
-
 async function requireKundeOfClaim(claimId: string): Promise<
   | { ok: true; userId: string }
   | { ok: false; error: string }
@@ -74,13 +59,40 @@ function revalidateClaim(claimId: string, fallId: string | null) {
   revalidatePath(`/admin/claims/${claimId}`)
 }
 
+/**
+ * Setzt den Kanzlei-Wunsch. Erlaubte Caller:
+ *   - Admin/KB jederzeit (setzen pro Claim)
+ *   - Kunde des Claims, solange noch nicht uebergeben (eigenstaendige
+ *     Wahl im Kunde-Portal: partnerkanzlei / eigene_kanzlei / keine_kanzlei)
+ */
 export async function setKanzleiWunsch(
   claimId: string,
   wunsch: KanzleiWunsch,
 ): Promise<{ ok: boolean; error?: string }> {
-  const auth = await requireKbOrAdmin()
-  if (!auth.ok) return { ok: false, error: auth.error }
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+
   const admin = createAdminClient()
+  const { data: profile } = await supabase
+    .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
+  const istAdminKb = profile && ['admin', 'kundenbetreuer'].includes(profile.rolle as string)
+
+  if (!istAdminKb) {
+    const { data: c } = await admin
+      .from('claims')
+      .select('geschaedigter_user_id, kanzlei_uebergeben_am')
+      .eq('id', claimId)
+      .maybeSingle()
+    if (!c) return { ok: false, error: 'Claim nicht gefunden' }
+    if (c.geschaedigter_user_id !== user.id) {
+      return { ok: false, error: 'Nur Admin/KB oder Geschaedigter darf den Wunsch setzen' }
+    }
+    if (c.kanzlei_uebergeben_am) {
+      return { ok: false, error: 'Paket wurde bereits versendet — Wunsch nicht mehr aenderbar' }
+    }
+  }
+
   const { data: claim, error: selErr } = await admin
     .from('claims')
     .select('id, kanzlei_wunsch')
@@ -238,6 +250,73 @@ export async function versendeKanzleiPaketAnEigeneKanzlei(
     })
   } catch (err) {
     console.warn('[versendeKanzleiPaket] Timeline:', err)
+  }
+
+  revalidateClaim(claimId, fall.id)
+  return { ok: true }
+}
+
+/**
+ * CMM-32 Polish: Kunde regelt komplett selbst (keine Kanzlei). Setzt den
+ * Claim auf den gleichen Endzustand 'an_externe_kanzlei_uebergeben' wie
+ * der eigene-Kanzlei-Pfad — semantisch passt das, weil "wir sind raus" in
+ * beiden Faellen identisch ist. Trigger: Kunde drueckt im UI „Ich reiche
+ * selbst ein" nachdem er Gutachten + Anlagen heruntergeladen hat.
+ */
+export async function bestaetigeSelbstEinreichungOhneKanzlei(
+  claimId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireKundeOfClaim(claimId)
+  if (!auth.ok) return { ok: false, error: auth.error }
+  const admin = createAdminClient()
+
+  const { data: claim } = await admin
+    .from('claims')
+    .select('id, status, kanzlei_wunsch, kanzlei_uebergeben_am')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return { ok: false, error: 'Claim nicht gefunden' }
+  if (claim.kanzlei_wunsch !== 'keine_kanzlei') {
+    return { ok: false, error: 'Nicht im keine-Kanzlei-Pfad' }
+  }
+  if (claim.kanzlei_uebergeben_am) return { ok: true }
+
+  const { data: fall } = await admin
+    .from('faelle').select('id').eq('claim_id', claimId).maybeSingle()
+  if (!fall?.id) return { ok: false, error: 'Kein Fall am Claim' }
+
+  // Sanity: Gutachten muss freigegeben sein, sonst hat der Kunde nichts in der Hand.
+  const { data: erstgutachten } = await admin
+    .from('auftraege')
+    .select('gutachten_final_freigegeben')
+    .eq('fall_id', fall.id)
+    .eq('typ', 'erstgutachten')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (!erstgutachten?.gutachten_final_freigegeben) {
+    return { ok: false, error: 'Gutachten ist noch nicht freigegeben' }
+  }
+
+  const now = new Date().toISOString()
+  const { error: uErr } = await admin
+    .from('claims')
+    .update({
+      kanzlei_uebergeben_am: now,
+      status: 'an_externe_kanzlei_uebergeben',
+    })
+    .eq('id', claimId)
+  if (uErr) return { ok: false, error: uErr.message }
+
+  try {
+    await admin.from('timeline').insert({
+      fall_id: fall.id,
+      typ: 'system',
+      titel: 'Kunde reicht selbst ein',
+      beschreibung: 'Kunde hat bestaetigt, dass er Gutachten + Anlagen selbst bei der Versicherung einreicht.',
+    })
+  } catch (err) {
+    console.warn('[bestaetigeSelbstEinreichung] Timeline:', err)
   }
 
   revalidateClaim(claimId, fall.id)

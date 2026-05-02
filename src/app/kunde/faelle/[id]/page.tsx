@@ -38,7 +38,7 @@ import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
-import EigeneKanzleiPaketCard from '@/components/kunde/EigeneKanzleiPaketCard'
+import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
 import { getClaimLifecycle } from '@/lib/claims/lifecycle'
@@ -786,21 +786,22 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           )
         })()}
 
-        {/* CMM-32 Polish: Eigene-Kanzlei-Pfad — Kunde traegt Email + sendet
-            Paket. Sichtbar wenn kanzlei_wunsch='eigene_kanzlei' UND fall.claim_id
-            existiert. Versand setzt claim auf an_externe_kanzlei_uebergeben
-            und der Lifecycle springt auf Abschluss. */}
-        {claimRow?.kanzlei_wunsch === 'eigene_kanzlei' && fall.claim_id && (
-          <EigeneKanzleiPaketCard
+        {/* CMM-32 Polish: Kanzlei-Pfad-Wahl. Switch je nach
+            claim.kanzlei_wunsch: Frage / eigene Kanzlei / selbst einreichen.
+            Bei partnerkanzlei rendert die Card null (Standardweg laeuft im
+            Stepper-Sub-Stepper). */}
+        {fall.claim_id && (
+          <KanzleiPfadCard
             claimId={fall.claim_id as string}
+            kanzleiWunsch={claimRow?.kanzlei_wunsch ?? null}
             kanzleiName={kanzleiAnsprechpartner?.name ?? null}
             kanzleiEmail={kanzleiAnsprechpartner?.email ?? null}
             kanzleiTelefon={kanzleiAnsprechpartner?.telefon ?? null}
-            bereitsVersendet={!!claimRow?.kanzlei_uebergeben_am}
-            uebergebenAm={claimRow?.kanzlei_uebergeben_am ?? null}
+            kanzleiUebergebenAm={claimRow?.kanzlei_uebergeben_am ?? null}
             gutachtenFreigegeben={
               !!auftraege.find((a) => a.typ === 'erstgutachten')?.gutachten_final_freigegeben
             }
+            gutachtenUrl={gutachtenUrlAusBucket}
           />
         )}
 
