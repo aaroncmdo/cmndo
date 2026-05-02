@@ -1,11 +1,31 @@
+'use client'
+
 // CMM-32f: Kombinierter 4-Phasen-Stepper für die Kunde-Fallseite.
 // Zeigt erfassung → begutachtung → regulierung → abschluss mit der
 // aktiven Subphase inline beim aktuellen Hauptschritt.
 // Side-Quests (Nachbesichtigung/Stellungnahme während Regulierung) werden
 // als zusätzliche Zeile unter dem Stepper angezeigt.
+//
+// CMM-32 Polish: Steps sind klickbar — der Bottom-Bereich switcht je
+// nach selektierter Phase und zeigt die phasenspezifischen Details
+// (Erfassung-Status, Termin, Anspruch, Auszahlung). Default ist die
+// aktuelle Phase ausgewaehlt.
 
-import React from 'react'
-import { CheckIcon, CheckCircleIcon, ClipboardListIcon, WrenchIcon, ShieldCheckIcon, FlagIcon, AlertTriangleIcon, CalendarIcon, NavigationIcon, FileTextIcon } from 'lucide-react'
+import React, { useState } from 'react'
+import {
+  CheckIcon,
+  CheckCircleIcon,
+  ClipboardListIcon,
+  WrenchIcon,
+  ShieldCheckIcon,
+  FlagIcon,
+  AlertTriangleIcon,
+  CalendarIcon,
+  NavigationIcon,
+  FileTextIcon,
+  EuroIcon,
+  MailIcon,
+} from 'lucide-react'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
@@ -73,6 +93,8 @@ export default function ClaimStepper({
   terminInfo,
   gutachtenUrl,
   anspruchVsEur,
+  lead,
+  kanzleiFall,
 }: {
   lifecycle: ClaimLifecycle
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
@@ -92,10 +114,28 @@ export default function ClaimStepper({
    *  den OCR-Werten des Gutachtens. Einziger OCR-Wert, den der Kunde
    *  zu sehen bekommt. Null = noch nicht berechenbar. */
   anspruchVsEur?: number | null
+  /** Lead-Status fuer das Erfassungs-Detail-Panel. Optional damit
+   *  bestehende Aufrufe ohne Lead weiterhin funktionieren. */
+  lead?: {
+    sa_unterschrieben: boolean | null
+    vollmacht_signiert_am: string | null
+    onboarding_complete: boolean | null
+  } | null
+  /** Kanzlei-Fall-Status fuer das Regulierungs-Detail-Panel. */
+  kanzleiFall?: {
+    status: 'versicherungskontakt' | 'auszahlung'
+    vs_kontakt_am: string | null
+    ausgezahlt_am: string | null
+  } | null
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
   const terminVerstrichen = !!terminInfo?.verstrichen
+
+  // CMM-32 Polish: Klickbare Phase-Auswahl. Default = aktuelle Phase.
+  const [selectedPhase, setSelectedPhase] = useState<ClaimMainPhase>(
+    lifecycle.mainPhase,
+  )
   const noShowCount = lifecycle.kundeNoShowCount ?? 0
   // Gutachten ist QC-freigegeben und an die Kanzlei uebergeben sobald
   // der Claim in der Regulierungs- oder Abschluss-Phase ist und eine
@@ -166,9 +206,17 @@ export default function ClaimStepper({
           const istVerlegungWarn = !!bottomSlot && p.key === 'begutachtung'
           const istVerstrichenWarn = terminVerstrichen && p.key === 'begutachtung'
           const Icon = istVerlegungWarn || istVerstrichenWarn ? AlertTriangleIcon : p.icon
+          const isSelected = selectedPhase === p.key
           return (
             <React.Fragment key={p.key}>
-              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSelectedPhase(p.key)}
+                aria-pressed={isSelected}
+                className={`flex items-center gap-2 sm:gap-3 shrink-0 rounded-lg p-1 -m-1 transition-colors hover:bg-claimondo-navy/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-navy/40 ${
+                  isSelected ? 'bg-claimondo-navy/[0.06]' : ''
+                }`}
+              >
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
                     istVerstrichenWarn
@@ -184,7 +232,7 @@ export default function ClaimStepper({
                 >
                   {istVerstrichenWarn || istVerlegungWarn || !isDone ? <Icon className="w-4 h-4" /> : <CheckIcon className="w-4 h-4" />}
                 </div>
-                <div className="flex flex-col min-w-0">
+                <div className="flex flex-col min-w-0 text-left">
                   <p
                     className={`text-sm font-semibold whitespace-nowrap ${
                       istVerstrichenWarn
@@ -206,7 +254,7 @@ export default function ClaimStepper({
                     </p>
                   )}
                 </div>
-              </div>
+              </button>
               {i < MAIN_PHASES.length - 1 && (
                 <div
                   className={`flex-1 h-px mx-2 sm:mx-4 ${isDone ? 'bg-emerald-300' : 'bg-claimondo-border'}`}
@@ -241,39 +289,98 @@ export default function ClaimStepper({
         </div>
       )}
       </div>
-      {/* CMM-32 Polish: Sobald die Begutachtung durch ist (mainPhase
-          regulierung/abschluss), wird die Termin-Bottom-Sektion durch
-          eine Anspruchs-Sektion ersetzt — der Termin-Status ist nicht
-          mehr relevant, der Kunde will sehen wie viel er bekommt. */}
-      {(lifecycle.mainPhase === 'regulierung' || lifecycle.mainPhase === 'abschluss') &&
-        anspruchVsEur != null &&
-        !bottomSlot && (
-          <div className="border-t border-claimondo-navy/10 px-4 sm:px-6 py-4 bg-emerald-50/40">
-            <p className="text-[10px] uppercase tracking-wider text-emerald-800/80 font-semibold">
-              Dein Anspruch gegen die Versicherung
+      {/* CMM-32 Polish: Erfassungs-Detail-Panel — Lead-Status. */}
+      {selectedPhase === 'erfassung' && !bottomSlot && (
+        <div className="border-t border-claimondo-navy/10 px-4 sm:px-6 py-3.5">
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/80 font-semibold mb-2">
+            Erfassung
+          </p>
+          <ul className="space-y-1.5 text-xs">
+            <ChecklistItem
+              done={!!lead?.sa_unterschrieben}
+              label="Sicherungsabtretung unterschrieben"
+            />
+            <ChecklistItem
+              done={!!lead?.vollmacht_signiert_am}
+              label="Vollmacht signiert"
+              datum={lead?.vollmacht_signiert_am ?? null}
+            />
+            <ChecklistItem
+              done={!!lead?.onboarding_complete}
+              label="Onboarding abgeschlossen"
+            />
+          </ul>
+          {lifecycle.mainPhase === 'erfassung' && (
+            <p className="text-[11px] text-claimondo-ondo mt-2">
+              Aktueller Schritt: {SUBPHASE_LABEL[lifecycle.subPhase]}
             </p>
-            <p className="text-3xl font-bold text-emerald-900 mt-1">
-              {anspruchVsEur.toLocaleString('de-DE', {
-                style: 'currency',
-                currency: 'EUR',
-                maximumFractionDigits: 0,
-              })}
-            </p>
-            <p className="text-xs text-claimondo-ondo mt-1">
-              {lifecycle.mainPhase === 'abschluss'
-                ? 'Auszahlung eingegangen — Fall abgeschlossen.'
-                : lifecycle.subPhase === 'auszahlung'
-                  ? 'Versicherung hat zugesagt — Auszahlung läuft.'
-                  : 'Wir holen das Geld bei der gegnerischen Versicherung. Du musst nichts tun — Status siehst du im Stepper oben.'}
-            </p>
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
-      {/* AAR-864: Termin-Sektion analog SV-Header — sichtbar wenn Termin
-          existiert, keine Verlegung pending UND Begutachtung noch nicht
-          komplett durch (= mainPhase erfassung/begutachtung). */}
-      {lifecycle.mainPhase !== 'regulierung' &&
-        lifecycle.mainPhase !== 'abschluss' &&
+      {/* CMM-32 Polish: Regulierungs- und Abschluss-Detail-Panel — Anspruch
+          + Kanzlei-Sub-Stepper. Auch sichtbar wenn der User auf eine
+          zukuenftige Phase klickt, die noch nicht erreicht ist (zeigt
+          dann „steht noch aus"-Hinweis). */}
+      {(selectedPhase === 'regulierung' || selectedPhase === 'abschluss') && !bottomSlot && (
+        <div className="border-t border-claimondo-navy/10 px-4 sm:px-6 py-4 bg-emerald-50/40">
+          {anspruchVsEur != null ? (
+            <>
+              <p className="text-[10px] uppercase tracking-wider text-emerald-800/80 font-semibold">
+                Dein Anspruch gegen die Versicherung
+              </p>
+              <p className="text-3xl font-bold text-emerald-900 mt-1">
+                {anspruchVsEur.toLocaleString('de-DE', {
+                  style: 'currency',
+                  currency: 'EUR',
+                  maximumFractionDigits: 0,
+                })}
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-claimondo-ondo">
+              Die Anspruchssumme wird berechnet, sobald das Gutachten freigegeben ist.
+            </p>
+          )}
+
+          {/* Kanzlei-Sub-Stepper */}
+          {kanzleiFall && (
+            <div className="mt-3 flex items-center gap-2 text-xs">
+              <KanzleiSubStep
+                done={!!kanzleiFall.vs_kontakt_am}
+                icon={<MailIcon className="w-3 h-3" />}
+                label="Versicherung kontaktiert"
+                datum={kanzleiFall.vs_kontakt_am}
+              />
+              <div
+                className={`flex-1 h-px ${kanzleiFall.vs_kontakt_am ? 'bg-emerald-400' : 'bg-claimondo-border'}`}
+              />
+              <KanzleiSubStep
+                done={!!kanzleiFall.ausgezahlt_am}
+                icon={<EuroIcon className="w-3 h-3" />}
+                label="Auszahlung"
+                datum={kanzleiFall.ausgezahlt_am}
+              />
+            </div>
+          )}
+
+          <p className="text-xs text-claimondo-ondo mt-3">
+            {selectedPhase === 'abschluss' && lifecycle.mainPhase === 'abschluss'
+              ? 'Auszahlung eingegangen — Fall abgeschlossen.'
+              : selectedPhase === 'abschluss'
+                ? 'Steht noch aus — wird abgeschlossen, sobald die Auszahlung eingegangen ist.'
+                : kanzleiFall?.status === 'auszahlung'
+                  ? 'Versicherung hat zugesagt — Auszahlung läuft.'
+                  : kanzleiFall
+                    ? 'Wir holen das Geld bei der gegnerischen Versicherung. Du musst nichts tun.'
+                    : 'Steht noch aus — startet sobald das Gutachten an die Kanzlei übermittelt ist.'}
+          </p>
+        </div>
+      )}
+
+      {/* AAR-864: Termin-Sektion analog SV-Header — sichtbar wenn die
+          Begutachtungs-Phase ausgewaehlt ist und ein Termin existiert. */}
+      {selectedPhase === 'begutachtung' &&
         terminInfo &&
         !bottomSlot && (
         <div
@@ -347,6 +454,68 @@ export default function ClaimStepper({
         </div>
       )}
       {bottomSlot}
+    </div>
+  )
+}
+
+function ChecklistItem({
+  done,
+  label,
+  datum,
+}: {
+  done: boolean
+  label: string
+  datum?: string | null
+}) {
+  return (
+    <li className="flex items-center gap-2">
+      <span
+        className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
+          done ? 'bg-emerald-500 text-white' : 'bg-claimondo-border/60 text-claimondo-ondo'
+        }`}
+      >
+        {done && <CheckIcon className="w-3 h-3" />}
+      </span>
+      <span className={done ? 'text-claimondo-navy' : 'text-claimondo-ondo'}>{label}</span>
+      {datum && (
+        <span className="ml-auto text-[10px] text-claimondo-ondo/70">
+          {new Date(datum).toLocaleDateString('de-DE')}
+        </span>
+      )}
+    </li>
+  )
+}
+
+function KanzleiSubStep({
+  done,
+  icon,
+  label,
+  datum,
+}: {
+  done: boolean
+  icon: React.ReactNode
+  label: string
+  datum: string | null
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span
+        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+          done ? 'bg-emerald-500 text-white' : 'bg-claimondo-border/60 text-claimondo-ondo'
+        }`}
+      >
+        {done ? <CheckIcon className="w-3 h-3" /> : icon}
+      </span>
+      <div className="flex flex-col">
+        <span className={`font-medium ${done ? 'text-emerald-800' : 'text-claimondo-ondo'}`}>
+          {label}
+        </span>
+        {datum && (
+          <span className="text-[10px] text-claimondo-ondo/70">
+            {new Date(datum).toLocaleDateString('de-DE')}
+          </span>
+        )}
+      </div>
     </div>
   )
 }

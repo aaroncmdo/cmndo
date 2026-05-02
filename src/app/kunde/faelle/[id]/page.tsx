@@ -582,6 +582,18 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               terminInfo={terminInfo}
               gutachtenUrl={gutachtenUrlFuerStepper}
               anspruchVsEur={gutachtenFreigegeben ? anspruchVsEur : null}
+              lead={leadInputForLifecycle}
+              kanzleiFall={
+                kanzleiFall
+                  ? {
+                      status:
+                        (kanzleiFall.status as 'versicherungskontakt' | 'auszahlung') ??
+                        'versicherungskontakt',
+                      vs_kontakt_am: (kanzleiFall.vs_kontakt_am as string | null) ?? null,
+                      ausgezahlt_am: (kanzleiFall.ausgezahlt_am as string | null) ?? null,
+                    }
+                  : null
+              }
               bottomSlot={
                 verlegungBannerProps ? (
                   <TerminVerlegungBanner {...verlegungBannerProps} embedded />
