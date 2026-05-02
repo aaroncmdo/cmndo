@@ -42,7 +42,6 @@ function fmtDateTime(val: string | null): string {
 const TABS = [
   { key: 'uebersicht', label: 'Übersicht' },
   { key: 'dokumente', label: 'Dokumente' },
-  { key: 'chat', label: 'Chat' },
 ] as const
 
 type TabKey = (typeof TABS)[number]['key']
@@ -70,10 +69,7 @@ export default function FallDetailSections({
       {/* Tab-Leiste */}
       <div className="flex bg-white rounded-xl border border-claimondo-border shadow-sm overflow-hidden mb-5">
         {TABS.map(tab => (
-          <button key={tab.key} onClick={() => {
-            setActiveTab(tab.key)
-            if (tab.key === 'chat') markNachrichtenGelesen(fall.id as string)
-          }}
+          <button key={tab.key} onClick={() => setActiveTab(tab.key)}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.key
                 ? 'bg-claimondo-ondo text-white'
@@ -213,9 +209,6 @@ export default function FallDetailSections({
         </div>
       )}
 
-      {activeTab === 'chat' && (
-        <ChatTab fallId={fall.id as string} nachrichten={nachrichten} userId={userId} teilnehmer={chatTeilnehmer ?? []} />
-      )}
     </div>
   )
 }
