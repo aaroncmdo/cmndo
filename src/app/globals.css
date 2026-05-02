@@ -8,6 +8,20 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* CMM-32 Polish: FE-Schrift (Faelschungserschwerende Schrift) — die offizielle
+   deutsche Kennzeichen-Schrift fuer den Kennzeichenhalter. Font-Datei gehoert
+   nach public/fonts/fe-schrift.woff2 (oder .ttf). Wenn nicht vorhanden,
+   greift der font-Stack auf Roboto Mono / Courier zurueck — der Halter sieht
+   dann etwas weniger authentisch aus, funktioniert aber. */
+@font-face {
+  font-family: 'FE-Schrift';
+  src: url('/fonts/fe-schrift.woff2') format('woff2'),
+       url('/fonts/fe-schrift.ttf') format('truetype');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 html[lang="ar"] {
   font-family: 'Noto Sans Arabic', var(--font-montserrat), system-ui, sans-serif;
 }
