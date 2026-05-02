@@ -876,7 +876,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           const qcLaeuft =
             !!erst && (erst.status === 'besichtigung' || erst.status === 'gutachten') &&
             !erst.gutachten_final_freigegeben
-          if (qcLaeuft) return null
+          // Sobald wir in der Regulierung sind und eine Vollmacht haben,
+          // wollen wir den Banner garantiert wieder anzeigen — bis zum
+          // Abschluss. Ueberschreibt das qcLaeuft-Hide.
+          const inAuszahlungsPhase =
+            (claimLifecycle.mainPhase === 'regulierung' || claimLifecycle.mainPhase === 'abschluss') &&
+            !!(fall.vollmacht_signiert_am as string | null)
+          if (qcLaeuft && !inAuszahlungsPhase) return null
           return (
             <PflichtdokumenteSection
               slots={pflichtSlots}

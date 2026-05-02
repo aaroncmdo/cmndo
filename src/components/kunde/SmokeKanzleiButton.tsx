@@ -6,11 +6,12 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { RefreshCcwIcon, HandshakeIcon, CheckCircle2Icon } from 'lucide-react'
+import { RefreshCcwIcon, HandshakeIcon, CheckCircle2Icon, FileWarningIcon } from 'lucide-react'
 import {
   smokeResetAufKanzleiWunsch,
   smokeResetAufLexDriveVollmachtOffen,
   smokeResetAufLexDriveVollmachtSigniert,
+  smokePflichtdokumenteAnlegen,
 } from '@/lib/kanzlei-wunsch/actions'
 
 export default function SmokeKanzleiButton({ fallId }: { fallId: string }) {
@@ -18,8 +19,9 @@ export default function SmokeKanzleiButton({ fallId }: { fallId: string }) {
   const [pendingWunsch, startWunsch] = useTransition()
   const [pendingLex, startLex] = useTransition()
   const [pendingSigniert, startSigniert] = useTransition()
+  const [pendingPflicht, startPflicht] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const pending = pendingWunsch || pendingLex || pendingSigniert
+  const pending = pendingWunsch || pendingLex || pendingSigniert || pendingPflicht
 
   function resetWunsch() {
     if (!confirm('Fall auf Kanzlei-Wunsch-Walkthrough zurücksetzen? Vollmacht raus, Gutachten freigegeben.')) return
@@ -46,6 +48,16 @@ export default function SmokeKanzleiButton({ fallId }: { fallId: string }) {
     setError(null)
     startSigniert(async () => {
       const r = await smokeResetAufLexDriveVollmachtSigniert(fallId)
+      if (!r.ok) { setError(r.error ?? 'Fehler'); return }
+      router.refresh()
+    })
+  }
+
+  function pflichtAnlegen() {
+    if (!confirm('Offene Pflichtdokumente (Personalausweis, Fahrzeugschein, Schadenmeldung) anlegen?')) return
+    setError(null)
+    startPflicht(async () => {
+      const r = await smokePflichtdokumenteAnlegen(fallId)
       if (!r.ok) { setError(r.error ?? 'Fehler'); return }
       router.refresh()
     })
@@ -89,6 +101,15 @@ export default function SmokeKanzleiButton({ fallId }: { fallId: string }) {
           >
             <CheckCircle2Icon className="w-3.5 h-3.5" />
             {pendingSigniert ? 'Setzt zurück…' : 'LexDrive signiert · 7000 €'}
+          </button>
+          <button
+            type="button"
+            onClick={pflichtAnlegen}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-50 transition-colors"
+          >
+            <FileWarningIcon className="w-3.5 h-3.5" />
+            {pendingPflicht ? 'Legt an…' : 'Pflichtdokumente offen'}
           </button>
         </div>
       </div>

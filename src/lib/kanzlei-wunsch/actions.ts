@@ -595,6 +595,68 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
 }
 
 /**
+ * SMOKE-Helper: Erzeugt offene Pflichtdokumente fuer den aktuellen Fall —
+ * triggert den gelben Pflichtdokumente-Banner ueber dem Layout-Inhalt.
+ * Nutzt die kanonische createPflichtdokumenteFromKatalog-Logik, ergaenzt
+ * fallback-direkte Inserts wenn der Katalog keine Eintraege erzeugt.
+ */
+export async function smokePflichtdokumenteAnlegen(
+  fallId: string,
+): Promise<{ ok: boolean; error?: string; angelegt: number }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet', angelegt: 0 }
+
+  const admin = createAdminClient()
+  const { data: fall } = await admin
+    .from('faelle').select('id, claim_id, lead_id').eq('id', fallId).maybeSingle()
+  if (!fall) return { ok: false, error: 'Fall nicht gefunden', angelegt: 0 }
+
+  // Katalog-Pfad
+  let lead: Record<string, unknown> | null = null
+  if (fall.lead_id) {
+    const { data } = await admin.from('leads').select('*').eq('id', fall.lead_id as string).maybeSingle()
+    lead = (data as Record<string, unknown> | null) ?? null
+  }
+  const { data: fallRow } = await admin.from('faelle').select('*').eq('id', fallId).maybeSingle()
+  try {
+    const { createPflichtdokumenteFromKatalog } = await import('@/lib/dokumente/create-pflicht')
+    await createPflichtdokumenteFromKatalog(admin as unknown as Parameters<typeof createPflichtdokumenteFromKatalog>[0], fallId, lead, fallRow as Record<string, unknown> | null)
+  } catch (err) {
+    console.warn('[smokePflichtdokumenteAnlegen] Katalog-Pfad:', err)
+  }
+
+  // Fallback: ein paar haendisch eingefuegte Slots damit der Banner sicher
+  // etwas zu zeigen hat. status='ausstehend' + pflicht=true triggert den
+  // Banner-Filter.
+  const fallback = ['personalausweis', 'fahrzeugschein', 'schadenmeldung']
+  const { data: existing } = await admin
+    .from('pflichtdokumente')
+    .select('dokument_typ').eq('fall_id', fallId)
+  const existingTypen = new Set((existing ?? []).map((r) => r.dokument_typ as string))
+  const toInsert = fallback
+    .filter((t) => !existingTypen.has(t))
+    .map((typ, i) => ({
+      fall_id: fallId,
+      dokument_typ: typ,
+      pflicht: true,
+      status: 'ausstehend',
+      quelle: 'smoke',
+      sort_order: i,
+    }))
+  if (toInsert.length > 0) {
+    await admin.from('pflichtdokumente').insert(toInsert)
+  }
+
+  if (fall.claim_id) revalidateClaim(fall.claim_id as string, fallId)
+  else {
+    revalidatePath(`/kunde/faelle/${fallId}`)
+    revalidatePath('/kunde', 'layout')
+  }
+  return { ok: true, angelegt: toInsert.length }
+}
+
+/**
  * SMOKE-Helper: Setzt den Fall in den Zustand
  * "LexDrive gewaehlt, Vollmacht ausstehend" — der blaue Vollmacht-Gate
  * ist sichtbar, der Kunde kann hier oder via WhatsApp bestaetigen.
