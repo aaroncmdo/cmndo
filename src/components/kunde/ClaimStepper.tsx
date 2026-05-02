@@ -481,50 +481,64 @@ export default function ClaimStepper({
         </motion.div>
       )}
 
-      {/* Detail-Panels — slide-down mit AnimatePresence */}
+      {/* Detail-Panel — ein persistenter Wrapper, Farbe wechselt per CSS,
+          nur der Inhalt fährt aus (slide-down rein, slide-up raus). */}
       <AnimatePresence initial={false}>
-        {confirmingLexDrive && claimId && (
+        {(confirmingLexDrive || confirmingEigeneKanzlei) && claimId && (
           <motion.div
-            key="lexdrive-panel"
+            key="detail-wrapper"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             style={{ overflow: 'hidden' }}
-            className="border-t-2 border-[#0e5be9] bg-[#0e5be9]/[0.04] px-4 sm:px-6 py-5"
+            className={`border-t-2 px-4 sm:px-6 py-5 transition-colors duration-300 ${
+              confirmingLexDrive
+                ? 'border-[#0e5be9] bg-[#0e5be9]/[0.04]'
+                : 'border-yellow-400 bg-yellow-50/50'
+            }`}
           >
-            <LexDriveBestaetigenPanel
-              claimId={claimId}
-              anspruchVsEur={anspruchVsEur ?? null}
-              anspruchPositionen={anspruchPositionen}
-              ausfallSlot={ausfallSlotLexDrive ?? ausfallSlot}
-              nutzungsausfallBetragEur={nutzungsausfallBetragEur ?? null}
-            />
-          </motion.div>
-        )}
-        {confirmingEigeneKanzlei && claimId && (
-          <motion.div
-            key="eigene-kanzlei-panel"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: 'hidden' }}
-            className="border-t-2 border-yellow-400 bg-yellow-50/50 px-4 sm:px-6 py-5"
-          >
-            <EigeneKanzleiAnspruchPanel
-              claimId={claimId}
-              anspruchVsEur={anspruchVsEur ?? null}
-              anspruchPositionen={anspruchPositionen}
-              nutzungsausfallBetragEur={nutzungsausfallBetragEur ?? null}
-              kundeAnrede={lead?.anrede ?? null}
-              kundeVorname={lead?.vorname ?? null}
-              kundeNachname={lead?.nachname ?? null}
-              onSwitchToLexDrive={() => {
-                setConfirmingEigeneKanzlei(false)
-                setConfirmingLexDrive(true)
-              }}
-            />
+            <AnimatePresence mode="wait" initial={false}>
+              {confirmingLexDrive ? (
+                <motion.div
+                  key="lexdrive-content"
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                >
+                  <LexDriveBestaetigenPanel
+                    claimId={claimId}
+                    anspruchVsEur={anspruchVsEur ?? null}
+                    anspruchPositionen={anspruchPositionen}
+                    ausfallSlot={ausfallSlotLexDrive ?? ausfallSlot}
+                    nutzungsausfallBetragEur={nutzungsausfallBetragEur ?? null}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="eigene-kanzlei-content"
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                >
+                  <EigeneKanzleiAnspruchPanel
+                    claimId={claimId}
+                    anspruchVsEur={anspruchVsEur ?? null}
+                    anspruchPositionen={anspruchPositionen}
+                    nutzungsausfallBetragEur={nutzungsausfallBetragEur ?? null}
+                    kundeAnrede={lead?.anrede ?? null}
+                    kundeVorname={lead?.vorname ?? null}
+                    kundeNachname={lead?.nachname ?? null}
+                    onSwitchToLexDrive={() => {
+                      setConfirmingEigeneKanzlei(false)
+                      setConfirmingLexDrive(true)
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
