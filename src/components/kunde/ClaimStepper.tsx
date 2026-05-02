@@ -128,6 +128,7 @@ export default function ClaimStepper({
   kanzleiWunsch,
   kanzleiUebergebenAm,
   ausfallSlot,
+  ausfallSlotLexDrive,
   claimId,
   gutachtenFreigegeben,
 }: {
@@ -185,6 +186,9 @@ export default function ClaimStepper({
    *  Regulierungs-/Abschluss-Panel unter den Positionen gerendert.
    *  Page liefert die fertige Card als ReactNode. */
   ausfallSlot?: React.ReactNode
+  /** Gleiche Card wie ausfallSlot, aber mit blauem LexDrive-Styling —
+   *  wird im LexDrive-Bestätigungs-Panel gerendert. */
+  ausfallSlotLexDrive?: React.ReactNode
   /** CMM-32 Polish: Claim-ID fuer das lila Top-Banner (Kanzlei-Wunsch-
    *  Frage). Ohne ClaimId rendert das Banner nicht. */
   claimId?: string | null
@@ -470,7 +474,7 @@ export default function ClaimStepper({
             claimId={claimId}
             anspruchVsEur={anspruchVsEur ?? null}
             anspruchPositionen={anspruchPositionen}
-            ausfallSlot={ausfallSlot}
+            ausfallSlot={ausfallSlotLexDrive ?? ausfallSlot}
           />
         </div>
       )}

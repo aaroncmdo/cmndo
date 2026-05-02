@@ -766,6 +766,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               ausfallSlot={
                 ausfallProps ? <KundeAusfallEntschaedigungCard {...ausfallProps} /> : null
               }
+              ausfallSlotLexDrive={
+                ausfallProps
+                  ? <KundeAusfallEntschaedigungCard
+                      {...ausfallProps}
+                      className="bg-[#0e5be9]/[0.06] border-[#0e5be9]/20"
+                    />
+                  : null
+              }
               claimId={fall.claim_id as string | null}
               gutachtenFreigegeben={gutachtenFreigegeben}
               kanzleiFall={

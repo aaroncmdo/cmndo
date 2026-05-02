@@ -44,6 +44,8 @@ type Props = {
   /** Falls Kunde sich noch zwischen Mietwagen und Nutzungsausfall entscheidet —
    *  zeigen wir auch den Mietwagen-Tagessatz fuer den Vergleich (info-only). */
   mietwagenTagessatzEur: number | null
+  /** Optionale Klasse für den äußeren section-Wrapper — z.B. für blaue LexDrive-Variante. */
+  className?: string
 }
 
 function formatDate(iso: string | null): string {
@@ -77,6 +79,7 @@ export default function KundeAusfallEntschaedigungCard({
   wiederbeschaffungsdauerTage,
   nutzungsausfallTagessatzEur,
   mietwagenTagessatzEur,
+  className,
 }: Props) {
   // Render-Gate: ohne OCR keine Werte, ohne Schadenstyp keine Berechnung.
   if (!ocrVerarbeitet || totalschaden == null) return null
@@ -102,7 +105,7 @@ export default function KundeAusfallEntschaedigungCard({
         className={`rounded-2xl border p-5 space-y-3 ${
           istUeberfaellig
             ? 'bg-rose-50 border-rose-300'
-            : 'bg-white border-claimondo-border'
+            : className ?? 'bg-white border-claimondo-border'
         }`}
       >
         <header className="flex items-center gap-2">
@@ -192,7 +195,7 @@ export default function KundeAusfallEntschaedigungCard({
   const summe = effDauerTage * tagessatz
 
   return (
-    <section className="rounded-2xl border border-claimondo-border bg-white p-5 space-y-3">
+    <section className={`rounded-2xl border p-5 space-y-3 ${className ?? 'border-claimondo-border bg-white'}`}>
       <header className="flex items-center gap-2">
         <EuroIcon className="w-4 h-4 text-claimondo-shield" />
         <h3 className="text-sm font-semibold text-claimondo-navy">
