@@ -11,6 +11,7 @@ import KundeNav from './_components/KundeNav'
 import KundenbetreuerCard from './_components/KundenbetreuerCard'
 import GutachterCard from './_components/GutachterCard'
 import EskalierterAdminCard from './_components/EskalierterAdminCard'
+import LexDriveCard from './_components/LexDriveCard'
 // CMM-28: Loader für singleFallId-Resolution in der Nav.
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
@@ -205,6 +206,40 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     }
   }
 
+  // CMM-32 Polish: LexDrive-Card — sichtbar wenn der Kunde mindestens einen
+  // Fall mit kanzlei_wunsch='partnerkanzlei' UND signierter Vollmacht hat.
+  // Der QR-Code zeigt auf die LexDrive-WhatsApp-Nummer.
+  let lexdriveQr: { qrSvg: string; qrUrl: string } | null = null
+  if (navFaelle.length > 0) {
+    const fallIds = navFaelle.map((f) => f.id as string)
+    const { data: lexdriveFall } = await adminForNav
+      .from('faelle')
+      .select('id, claim_id, vollmacht_signiert_am')
+      .in('id', fallIds)
+      .not('vollmacht_signiert_am', 'is', null)
+      .not('claim_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (lexdriveFall?.claim_id) {
+      const { data: claimRow } = await adminForNav
+        .from('claims')
+        .select('kanzlei_wunsch, kanzlei_uebergeben_am')
+        .eq('id', lexdriveFall.claim_id as string)
+        .maybeSingle()
+      if (
+        claimRow?.kanzlei_wunsch === 'partnerkanzlei' &&
+        !claimRow.kanzlei_uebergeben_am
+      ) {
+        const LEXDRIVE_WA = 'https://wa.me/4932221096850?text=' +
+          encodeURIComponent('Hallo, ich habe eine Frage zu meinem Fall.')
+        const { generateQrCodeSvg } = await import('@/lib/kanzlei/qr-code')
+        const qrSvg = await generateQrCodeSvg(LEXDRIVE_WA, 240)
+        if (qrSvg) lexdriveQr = { qrSvg, qrUrl: LEXDRIVE_WA }
+      }
+    }
+  }
+
   // AAR-536 (K4): SV-Branding aufgelöst. `useBrand=true` nur wenn zugewiesener
   // SV verifiziert + use_custom_branding aktiv + Theme vorhanden.
   const branding = await resolveKundenTheme(user.id)
@@ -246,6 +281,15 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         <div className="kunde-sidebar-rest contents">
           <KundeNav singleFallId={singleFallId} />
         </div>
+
+        {/* LexDrive-Card: nur wenn LexDrive-Pfad + Vollmacht signiert. */}
+        {lexdriveQr && (
+          <LexDriveCard
+            qrSvg={lexdriveQr.qrSvg}
+            qrUrl={lexdriveQr.qrUrl}
+            accentBg={accentBg}
+          />
+        )}
 
         {/* Gutachter-Card oberhalb der KB-Card — Gruppenchat (Kunde+SV+KB+Admin) */}
         {svCard && (
