@@ -645,7 +645,10 @@ export default function ClaimStepper({
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: 'auto', opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+          transition={{
+            height: { duration: 0.4, ease: [0.4, 0, 0.2, 1], delay: 0.25 },
+            opacity: { duration: 0.3, ease: [0.4, 0, 0.2, 1], delay: 0.3 },
+          }}
           style={{ overflow: 'hidden', transformOrigin: 'top' }}
           className={`border-t border-claimondo-navy/10 px-4 sm:px-6 py-4 ${
             selectedPhase === 'regulierung' ? PHASE_BG.regulierung : PHASE_BG.abschluss
