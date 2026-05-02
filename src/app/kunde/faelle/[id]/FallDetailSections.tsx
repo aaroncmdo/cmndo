@@ -79,13 +79,8 @@ export default function FallDetailSections({
             }}
           />
 
-          {!!fall.schadens_beschreibung && (
-            <Section title="Unfallhergang">
-              <p className="text-sm text-claimondo-navy whitespace-pre-wrap">
-                {fall.schadens_beschreibung as string}
-              </p>
-            </Section>
-          )}
+          {/* Unfallhergang lebt jetzt im ClaimSummary-Tab 'Unfall &
+              Beteiligte' (schadens_beschreibung). */}
 
           {/* KFZ-134: SV-Gegenvorschlag Banner (altes Format: 1 Datum) */}
           {aktiverTermin && aktiverTermin.status === 'gegenvorschlag' && aktiverTermin.gegenvorschlag_von === 'sv' && aktiverTermin.vorgeschlagenes_datum && !aktiverTermin.sv_vorgeschlagene_slots?.length && (
