@@ -325,7 +325,29 @@ export default function ClaimStepper({
           const istEigeneKanzleiPfad =
             (kanzleiWunsch === 'eigene_kanzlei' || zeigeKanzleiWunschBanner) &&
             p.key === 'begutachtung'
-          const Icon = istVerlegungWarn || istVerstrichenWarn ? AlertTriangleIcon : p.icon
+          // Regulierungs-Kreis spiegelt die Wrapper-Farbe je nach Kanzlei-Wahl wider.
+          const istKanzleiRegulierung = p.key === 'regulierung' &&
+            (zeigeKanzleiWunschBanner || confirmingLexDrive || confirmingEigeneKanzlei || lexdriveVollmachtAusstehend)
+          const kanzleiRegCircleCls = confirmingLexDrive || lexdriveVollmachtAusstehend
+            ? 'bg-[#0e5be9] text-white ring-2 ring-[#0e5be9]/30'
+            : confirmingEigeneKanzlei
+              ? 'bg-yellow-400 text-white ring-2 ring-yellow-300'
+              : 'bg-violet-500 text-white ring-2 ring-violet-300'
+          const kanzleiRegLabelCls = confirmingLexDrive || lexdriveVollmachtAusstehend
+            ? 'text-[#0a3fa0]'
+            : confirmingEigeneKanzlei
+              ? 'text-amber-700'
+              : 'text-violet-700'
+          const kanzleiRegIcon = confirmingLexDrive || lexdriveVollmachtAusstehend
+            ? HandshakeIcon
+            : confirmingEigeneKanzlei
+              ? BriefcaseIcon
+              : ScaleIcon
+          const Icon = istVerlegungWarn || istVerstrichenWarn
+            ? AlertTriangleIcon
+            : istKanzleiRegulierung
+              ? kanzleiRegIcon
+              : p.icon
           const isSelected = selectedPhase === p.key
           return (
             <React.Fragment key={p.key}>
@@ -345,14 +367,18 @@ export default function ClaimStepper({
                         ? 'bg-amber-500 text-white ring-2 ring-amber-300'
                         : istEigeneKanzleiPfad
                           ? 'bg-violet-500 text-white ring-2 ring-violet-300'
-                          : isDone
-                            ? 'bg-emerald-500 text-white'
-                            : isCurrent
-                              ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                              : 'bg-claimondo-border/40 text-claimondo-ondo/60'
+                          : istKanzleiRegulierung
+                            ? kanzleiRegCircleCls
+                            : isDone
+                              ? 'bg-emerald-500 text-white'
+                              : isCurrent
+                                ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                                : 'bg-claimondo-border/40 text-claimondo-ondo/60'
                   }`}
                 >
-                  {istVerstrichenWarn || istVerlegungWarn || !isDone ? <Icon className="w-4 h-4" /> : <CheckIcon className="w-4 h-4" />}
+                  {istVerstrichenWarn || istVerlegungWarn || istKanzleiRegulierung || !isDone
+                    ? <Icon className="w-4 h-4" />
+                    : <CheckIcon className="w-4 h-4" />}
                 </div>
                 <div className="flex flex-col min-w-0 text-left">
                   <p
@@ -363,11 +389,13 @@ export default function ClaimStepper({
                           ? 'text-amber-700'
                           : istEigeneKanzleiPfad
                             ? 'text-violet-700'
-                            : isCurrent
-                              ? 'text-claimondo-navy'
-                              : isDone
-                                ? 'text-emerald-700'
-                                : 'text-claimondo-ondo/60'
+                            : istKanzleiRegulierung
+                              ? kanzleiRegLabelCls
+                              : isCurrent
+                                ? 'text-claimondo-navy'
+                                : isDone
+                                  ? 'text-emerald-700'
+                                  : 'text-claimondo-ondo/60'
                     }`}
                   >
                     {zeigeKanzleiWunschBanner && p.key === 'begutachtung'
