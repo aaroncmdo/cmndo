@@ -597,6 +597,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const fahrzeug = [(fall.fahrzeug_hersteller as string), (fall.fahrzeug_modell as string)].filter(Boolean).join(' ')
     const adresse = (fall.besichtigungsort_adresse as string) || (fall.unfallort as string) || [(fall.schadens_adresse as string), (fall.schadens_plz as string), (fall.schadens_ort as string)].filter(Boolean).join(', ') || ''
 
+    // Gutachten-Freigabe und URL für ClaimSummary-Anspruch-Tab
+    const erstgutachtenFuerSummary = auftraege.find((a) => a.typ === 'erstgutachten')
+    const gutachtenFreigegebenFuerSummary = !!erstgutachtenFuerSummary?.gutachten_final_freigegeben
+    const gutachtenUrlFuerSummary = gutachtenFreigegebenFuerSummary && gutachtenUrlAusBucket ? gutachtenUrlAusBucket : null
+
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
         {/* AAR-864: Live-Aktualisierung — abonniert gutachter_termine,
@@ -830,6 +835,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             kunden-relevante Felder an. */}
         <ClaimSummary
           uploadSlot={<BelegUploadCard fallId={fall.id as string} />}
+          anspruch={{
+            positionen: anspruchPositionen,
+            totalEur: anspruchVsEur,
+            gutachtenFreigegeben: gutachtenFreigegebenFuerSummary,
+            gutachtenUrl: gutachtenUrlFuerSummary,
+          }}
           dokumente={(dokumente ?? []).map((d) => ({
             id: d.id as string,
             typ: (d.typ as string) ?? 'sonstiges',

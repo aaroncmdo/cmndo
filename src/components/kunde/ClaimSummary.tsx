@@ -33,6 +33,9 @@ import {
   UsersIcon,
   InfoIcon,
   UploadCloudIcon,
+  EuroIcon,
+  DownloadIcon,
+  ClockIcon,
 } from 'lucide-react'
 import Kennzeichenhalter from './Kennzeichenhalter'
 import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
@@ -86,8 +89,16 @@ type FallSummary = {
   kunde_nachname: string | null
 }
 
+type AnspruchPosition = {
+  key: string
+  label: string
+  detail?: string | null
+  betragEur: number
+}
+
 const TABS = [
   { key: 'unfall', label: 'Unfall & Beteiligte', icon: AlertOctagonIcon },
+  { key: 'anspruch', label: 'Mein Anspruch', icon: EuroIcon },
   { key: 'dokumente', label: 'Dokumente', icon: FolderOpenIcon },
 ] as const
 
@@ -97,11 +108,18 @@ export default function ClaimSummary({
   data,
   dokumente,
   uploadSlot,
+  anspruch,
 }: {
   data: FallSummary
   dokumente?: ClaimSummaryDokument[]
   /** Slot für die BelegUploadCard — Page rendert sie, hier nur eingebunden. */
   uploadSlot?: React.ReactNode
+  anspruch?: {
+    positionen: AnspruchPosition[] | null
+    totalEur: number | null
+    gutachtenFreigegeben: boolean
+    gutachtenUrl?: string | null
+  }
 }) {
   const [activeTab, setActiveTab] = useState<TabKey>('unfall')
 
@@ -221,6 +239,14 @@ export default function ClaimSummary({
           {/* Glassy Tab-Panel */}
           <div className="rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_1px_2px_rgba(13,27,62,0.04),0_8px_24px_rgba(13,27,62,0.06)] p-5 sm:p-6">
             {activeTab === 'unfall' && <UnfallTab data={data} />}
+            {activeTab === 'anspruch' && (
+              <AnspruchTab
+                positionen={anspruch?.positionen ?? null}
+                totalEur={anspruch?.totalEur ?? null}
+                gutachtenFreigegeben={anspruch?.gutachtenFreigegeben ?? false}
+                gutachtenUrl={anspruch?.gutachtenUrl ?? null}
+              />
+            )}
             {activeTab === 'dokumente' && (
               <DokumenteTab dokumente={dokumente ?? []} uploadSlot={uploadSlot} />
             )}
@@ -358,6 +384,94 @@ function UnfallTab({ data }: { data: FallSummary }) {
           />
         </div>
       </div>
+    </div>
+  )
+}
+
+function AnspruchTab({
+  positionen,
+  totalEur,
+  gutachtenFreigegeben,
+  gutachtenUrl,
+}: {
+  positionen: AnspruchPosition[] | null
+  totalEur: number | null
+  gutachtenFreigegeben: boolean
+  gutachtenUrl: string | null
+}) {
+  const fmt = (eur: number) =>
+    new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Math.abs(eur))
+
+  if (!gutachtenFreigegeben) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
+        <span className="w-12 h-12 rounded-full bg-claimondo-navy/[0.06] flex items-center justify-center">
+          <ClockIcon className="w-6 h-6 text-claimondo-ondo/60" />
+        </span>
+        <p className="text-sm font-semibold text-claimondo-navy">Wird nach Begutachtung befüllt</p>
+        <p className="text-xs text-claimondo-ondo/70 max-w-[240px]">
+          Sobald der Gutachter seinen Bericht abgeschlossen und freigegeben hat, sehen Sie hier Ihre Schadensberechnung.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-5">
+      <SectionLabel icon={EuroIcon}>Schadensberechnung</SectionLabel>
+
+      {positionen && positionen.length > 0 ? (
+        <div className="rounded-xl bg-white/80 border border-claimondo-border/50 overflow-hidden">
+          <ul className="divide-y divide-claimondo-border/40">
+            {positionen.map((pos) => (
+              <li key={pos.key} className="flex items-start justify-between gap-3 px-4 py-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-claimondo-navy">{pos.label}</p>
+                  {pos.detail && (
+                    <p className="text-[11px] text-claimondo-ondo/70 mt-0.5">{pos.detail}</p>
+                  )}
+                </div>
+                <span
+                  className={`text-sm font-semibold shrink-0 ${
+                    pos.betragEur < 0 ? 'text-red-600' : 'text-claimondo-navy'
+                  }`}
+                >
+                  {pos.betragEur < 0 ? `− ${fmt(pos.betragEur)}` : fmt(pos.betragEur)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p className="text-sm text-claimondo-ondo/60 italic">Keine Einzelpositionen verfügbar.</p>
+      )}
+
+      {totalEur != null && (
+        <div className="rounded-xl bg-claimondo-navy px-5 py-4 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-white/60 font-semibold">
+              Ihr Gesamtanspruch
+            </p>
+            <p className="text-2xl font-extrabold text-white leading-tight mt-0.5">
+              {fmt(totalEur)}
+            </p>
+          </div>
+          <EuroIcon className="w-8 h-8 text-white/30 shrink-0" />
+        </div>
+      )}
+
+      {gutachtenUrl && (
+        <a
+          href={gutachtenUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 w-full rounded-xl border border-claimondo-border/60 bg-white/80 hover:bg-white transition-colors px-4 py-3"
+        >
+          <DownloadIcon className="w-4 h-4 text-claimondo-ondo/70 shrink-0" />
+          <span className="text-sm font-medium text-claimondo-navy flex-1">Gutachten herunterladen</span>
+          <span className="text-[11px] text-claimondo-ondo/60">PDF</span>
+        </a>
+      )}
     </div>
   )
 }
