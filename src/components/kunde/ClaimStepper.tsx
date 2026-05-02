@@ -822,30 +822,30 @@ export default function ClaimStepper({
               also direkt unter die Positionen-Aufschluesselung. */}
           {ausfallSlot && <div className="mt-3">{ausfallSlot}</div>}
 
-          {/* Kanzlei-Sub-Stepper */}
-          {kanzleiFall && (
-            <div className="mt-3 flex items-center gap-2 text-xs">
-              <KanzleiSubStep
-                done={!!kanzleiFall.vs_kontakt_am}
-                icon={<MailIcon className="w-3 h-3" />}
-                label={
-                  kanzleiWunsch === 'partnerkanzlei'
-                    ? 'Versicherung kontaktiert durch LexDrive'
-                    : 'Versicherung kontaktiert'
-                }
-                datum={kanzleiFall.vs_kontakt_am}
-              />
-              <div
-                className={`flex-1 h-px ${kanzleiFall.vs_kontakt_am ? 'bg-emerald-400' : 'bg-claimondo-border'}`}
-              />
-              <KanzleiSubStep
-                done={!!kanzleiFall.ausgezahlt_am}
-                icon={<EuroIcon className="w-3 h-3" />}
-                label="Auszahlung"
-                datum={kanzleiFall.ausgezahlt_am}
-              />
-            </div>
-          )}
+          {/* Kanzlei-Sub-Stepper — immer sichtbar im Regulierungs-Wrapper.
+              Wenn noch kein kanzlei_faelle-Row existiert, zeigen wir beide
+              Steps als ausstehend. */}
+          <div className="mt-3 flex items-center gap-2 text-xs">
+            <KanzleiSubStep
+              done={!!kanzleiFall?.vs_kontakt_am}
+              icon={<MailIcon className="w-3 h-3" />}
+              label={
+                effectiveKanzleiWunsch === 'partnerkanzlei'
+                  ? 'Versicherung kontaktiert durch LexDrive'
+                  : 'Versicherung kontaktiert'
+              }
+              datum={kanzleiFall?.vs_kontakt_am ?? null}
+            />
+            <div
+              className={`flex-1 h-px ${kanzleiFall?.vs_kontakt_am ? 'bg-emerald-400' : 'bg-claimondo-border'}`}
+            />
+            <KanzleiSubStep
+              done={!!kanzleiFall?.ausgezahlt_am}
+              icon={<EuroIcon className="w-3 h-3" />}
+              label="Auszahlung"
+              datum={kanzleiFall?.ausgezahlt_am ?? null}
+            />
+          </div>
 
           <p className="text-xs text-claimondo-ondo mt-3">
             {selectedPhase === 'abschluss' && lifecycle.mainPhase === 'abschluss'
