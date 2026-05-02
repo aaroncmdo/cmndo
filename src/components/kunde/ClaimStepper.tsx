@@ -517,6 +517,10 @@ export default function ClaimStepper({
               kundeAnrede={lead?.anrede ?? null}
               kundeVorname={lead?.vorname ?? null}
               kundeNachname={lead?.nachname ?? null}
+              onSwitchToLexDrive={() => {
+                setConfirmingEigeneKanzlei(false)
+                setConfirmingLexDrive(true)
+              }}
             />
           </motion.div>
         )}
@@ -1152,6 +1156,7 @@ function EigeneKanzleiAnspruchPanel({
   kundeAnrede,
   kundeVorname,
   kundeNachname,
+  onSwitchToLexDrive,
 }: {
   claimId: string
   anspruchVsEur: number | null
@@ -1159,6 +1164,7 @@ function EigeneKanzleiAnspruchPanel({
   kundeAnrede?: string | null
   kundeVorname?: string | null
   kundeNachname?: string | null
+  onSwitchToLexDrive?: () => void
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -1258,16 +1264,38 @@ function EigeneKanzleiAnspruchPanel({
         </p>
       </label>
 
-      {disclaimerAkzeptiert && (
-        <button
-          type="button"
-          onClick={bestaetigen}
-          disabled={pending}
-          className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
-        >
-          Bestätigen
-        </button>
-      )}
+      <AnimatePresence>
+        {disclaimerAkzeptiert && (
+          <motion.div
+            key="disclaimer-actions"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+            className="space-y-2"
+          >
+            {onSwitchToLexDrive && (
+              <button
+                type="button"
+                onClick={onSwitchToLexDrive}
+                className="w-full flex items-center justify-center gap-2 bg-[#0e5be9] hover:bg-[#0a3fa0] active:bg-[#0a3fa0] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+              >
+                <HandshakeIcon className="w-4 h-4 shrink-0" />
+                LexDrive Komplettservice wählen
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={bestaetigen}
+              disabled={pending}
+              className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
+            >
+              Bestätigen (Eigene Kanzlei)
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {error && <p className="text-xs text-red-700">{error}</p>}
     </div>
   )
