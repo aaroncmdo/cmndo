@@ -109,6 +109,11 @@ export default async function KundeFaelleListe() {
                 fahrzeug_hersteller: f.fahrzeug_hersteller as string | null,
                 fahrzeug_modell: f.fahrzeug_modell as string | null,
                 schadens_datum: f.schadens_datum as string | null,
+                sa_unterschrieben: f.sa_unterschrieben as boolean | null,
+                gutachten_eingegangen_am: f.gutachten_eingegangen_am as string | null,
+                regulierung_am: f.regulierung_am as string | null,
+                abgeschlossen_am: f.abgeschlossen_am as string | null,
+                vollmacht_signiert_am: f.vollmacht_signiert_am as string | null,
               }}
               aktion={meta.aktion}
               nextTermin={meta.nextTermin}

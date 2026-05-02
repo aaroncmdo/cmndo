@@ -1,9 +1,9 @@
-// AAR-449: Meine-Fälle-Karte mit 4 Zonen (Header, Identifier, Nächster Termin,
-// Action-Hint, Footer). Ersetzt die alten Mini-Cards auf /kunde und
-// /kunde/faelle. Nutzt getKundenJetztZuTun (AAR-432) als Single-Source
-// für Action-Hints und CSS-Tokens var(--brand-*) für Whitelabeling.
+// CMM-32 Polish: FallKarte für „Meine Fälle" — angepasst an das
+// ClaimStepper-Designsystem (claimondo-Token, Phase-Fortschritt, Action-Banner).
 
 import Link from 'next/link'
+import { CheckIcon, ClockIcon, CalendarIcon, AlertTriangleIcon, ChevronRightIcon, CircleCheckIcon } from 'lucide-react'
+import Kennzeichenhalter from './Kennzeichenhalter'
 import type { KundeAktion } from '@/lib/kunde/jetzt-zu-tun'
 
 export type FallKarteTermin = {
@@ -26,6 +26,12 @@ export type FallKarteProps = {
     fahrzeug_hersteller: string | null
     fahrzeug_modell: string | null
     schadens_datum: string | null
+    // Lifecycle-Marker für Phasen-Ableitung
+    sa_unterschrieben?: boolean | null
+    gutachten_eingegangen_am?: string | null
+    regulierung_am?: string | null
+    abgeschlossen_am?: string | null
+    vollmacht_signiert_am?: string | null
   }
   aktion: KundeAktion | null
   nextTermin: FallKarteTermin | null
@@ -33,80 +39,103 @@ export type FallKarteProps = {
   ungeleseneNachrichten?: number
 }
 
-function fmtTerminKompakt(iso: string): string {
+// ─── Phase-Logik ─────────────────────────────────────────────────────────────
+
+type PhaseKey = 'erfassung' | 'begutachtung' | 'regulierung' | 'abschluss'
+
+const PHASEN: Array<{ key: PhaseKey; label: string }> = [
+  { key: 'erfassung', label: 'Erfassung' },
+  { key: 'begutachtung', label: 'Gutachten' },
+  { key: 'regulierung', label: 'Regulierung' },
+  { key: 'abschluss', label: 'Abschluss' },
+]
+
+function derivePhase(fall: FallKarteProps['fall']): PhaseKey {
+  if (fall.abgeschlossen_am || fall.status === 'abgeschlossen') return 'abschluss'
+  if (fall.gutachten_eingegangen_am || fall.regulierung_am) return 'regulierung'
+  if (fall.sa_unterschrieben) return 'begutachtung'
+  return 'erfassung'
+}
+
+function phaseIndex(key: PhaseKey): number {
+  return PHASEN.findIndex((p) => p.key === key)
+}
+
+// ─── Termin-Format ────────────────────────────────────────────────────────────
+
+function fmtTermin(iso: string): string {
   try {
     const d = new Date(iso)
-    const datum = d.toLocaleDateString('de-DE', {
-      weekday: 'short',
-      day: '2-digit',
-      month: '2-digit',
-    })
-    const zeit = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-    return `${datum} · ${zeit} Uhr`
+    return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }) +
+      ' · ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr'
   } catch {
     return iso
   }
 }
 
-function fmtRelativUpdate(iso: string | null): string {
-  if (!iso) return ''
-  try {
-    const d = new Date(iso).getTime()
-    const diff = Date.now() - d
-    if (diff < 0) return 'gerade eben'
-    const min = Math.floor(diff / 60000)
-    if (min < 1) return 'gerade eben'
-    if (min < 60) return `vor ${min} Min.`
-    const h = Math.floor(min / 60)
-    if (h < 24) return `vor ${h} Std.`
-    const tage = Math.floor(h / 24)
-    if (tage < 30) return `vor ${tage} Tag${tage === 1 ? '' : 'en'}`
-    const monate = Math.floor(tage / 30)
-    return `vor ${monate} Monat${monate === 1 ? '' : 'en'}`
-  } catch {
-    return ''
-  }
+// ─── Action-Banner-Config ─────────────────────────────────────────────────────
+
+type BannerConfig = {
+  bg: string
+  border: string
+  textColor: string
+  labelColor: string
+  icon: React.ReactNode
 }
 
-// Welche Aktions-Typen rechtfertigen einen prominenten Action-Hint?
-const HINT_AKTIONSTYPEN = new Set([
-  'onboarding-offen',
-  'pflichtdokumente-offen',
-  'polizeibericht-fehlt',
-  'daten-an-kanzlei',
-  'vollmacht-unterschreiben',
-  'termin-bestaetigen',
-])
-
-function statusPillStyle(status: string | null): { bg: string; color: string; label: string } {
-  const s = (status ?? '').toLowerCase()
-  if (s === 'abgeschlossen') {
+function bannerConfig(severity: KundeAktion['severity'], variant: KundeAktion['variant']): BannerConfig {
+  if (variant === 'live') {
     return {
-      bg: 'var(--brand-success-soft, #ecfdf5)',
-      color: 'var(--brand-success, #16a34a)',
-      label: 'abgeschlossen',
+      bg: 'bg-emerald-50',
+      border: 'border-emerald-200',
+      textColor: 'text-emerald-800',
+      labelColor: 'text-emerald-700',
+      icon: (
+        <span className="relative inline-flex h-2.5 w-2.5 shrink-0 mt-0.5">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+        </span>
+      ),
     }
   }
-  if (s === 'storniert') {
+  if (severity === 'success') {
     return {
-      bg: 'var(--brand-surface-muted, #f3f4f6)',
-      color: 'var(--brand-text-secondary, #6b7280)',
-      label: 'storniert',
+      bg: 'bg-emerald-50',
+      border: 'border-emerald-200',
+      textColor: 'text-emerald-800',
+      labelColor: 'text-emerald-700',
+      icon: <CircleCheckIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />,
     }
   }
-  if (s.startsWith('vs-') || s === 'anschlussschreiben-versendet') {
+  if (severity === 'critical') {
     return {
-      bg: 'var(--brand-warning-soft, #fffbeb)',
-      color: 'var(--brand-warning, #d97706)',
-      label: status ?? '',
+      bg: 'bg-amber-50',
+      border: 'border-amber-300',
+      textColor: 'text-amber-900',
+      labelColor: 'text-amber-800',
+      icon: <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />,
     }
   }
+  if (severity === 'warning') {
+    return {
+      bg: 'bg-amber-50',
+      border: 'border-amber-200',
+      textColor: 'text-amber-800',
+      labelColor: 'text-amber-700',
+      icon: <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />,
+    }
+  }
+  // neutral / info
   return {
-    bg: 'var(--brand-primary-soft, #eff6ff)',
-    color: 'var(--brand-accent, #4573A2)',
-    label: status ?? '—',
+    bg: 'bg-claimondo-ondo/5',
+    border: 'border-claimondo-light-blue/30',
+    textColor: 'text-claimondo-navy',
+    labelColor: 'text-claimondo-shield',
+    icon: <ClockIcon className="w-3.5 h-3.5 text-claimondo-ondo/60 shrink-0 mt-0.5" />,
   }
 }
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function FallKarte({
   fall,
@@ -116,165 +145,147 @@ export default function FallKarte({
   ungeleseneNachrichten,
 }: FallKarteProps) {
   const fahrzeug = [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')
-  const statusPill = statusPillStyle(fall.status)
-  const abgeschlossen = (fall.status ?? '').toLowerCase() === 'abgeschlossen'
+  const aktivePhase = derivePhase(fall)
+  const aktiveIdx = phaseIndex(aktivePhase)
+  const abgeschlossen = aktivePhase === 'abschluss'
 
-  const showHint = !!aktion && HINT_AKTIONSTYPEN.has(aktion.state) && !abgeschlossen
-
-  const isVideoTermin = nextTermin?.typ === 'kb_beratung' || nextTermin?.kanal === 'video'
   const svLive = nextTermin?.sv_unterwegs_seit || nextTermin?.sv_angekommen_am
 
   return (
     <Link
       href={`/kunde/faelle/${fall.id}`}
-      className={`block rounded-xl border shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] ${abgeschlossen ? 'opacity-75' : ''}`}
-      style={{
-        background: 'var(--brand-surface, #ffffff)',
-        borderColor: 'var(--brand-border, #e5e7eb)',
-      }}
+      className="block rounded-3xl bg-gradient-to-br from-white via-white to-[#f3f6fb] shadow-[0_2px_12px_rgba(13,27,62,0.06),0_8px_30px_rgba(13,27,62,0.04)] border border-claimondo-border/60 overflow-hidden transition-shadow hover:shadow-[0_4px_20px_rgba(13,27,62,0.10),0_12px_40px_rgba(13,27,62,0.08)] active:scale-[0.99]"
     >
-      <div className="p-4 space-y-3">
-        {/* Zone 1: Header — Fall-Nummer + Status-Pill */}
-        <div className="flex items-center justify-between gap-2">
-          <p
-            className="text-sm font-semibold"
-            style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
-          >
+      {/* Header-Streifen: Claim-Nr + Ungelesene + Phase-Dots */}
+      <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-2 border-b border-claimondo-border/30">
+        <div className="flex items-center gap-1.5">
+          <p className="text-[11px] font-semibold text-claimondo-navy tracking-wide">
             {fall.fall_nummer ?? fall.id.slice(0, 8)}
           </p>
-          <div className="flex items-center gap-1.5">
-            {typeof ungeleseneNachrichten === 'number' && ungeleseneNachrichten > 0 && (
-              <span
-                className="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-bold"
-                style={{
-                  background: 'var(--brand-accent, #4573A2)',
-                  color: 'var(--brand-text-on-primary, #ffffff)',
-                }}
-              >
-                {ungeleseneNachrichten}
-              </span>
-            )}
-            <span
-              className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
-              style={{ background: statusPill.bg, color: statusPill.color }}
-            >
-              {statusPill.label}
+          {typeof ungeleseneNachrichten === 'number' && ungeleseneNachrichten > 0 && (
+            <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold bg-claimondo-ondo text-white leading-none">
+              {ungeleseneNachrichten}
             </span>
-          </div>
+          )}
         </div>
 
-        {/* Zone 2: Identifier — Fahrzeug + Kennzeichen + Schadens-Datum */}
-        <div
-          className="space-y-0.5 text-sm"
-          style={{ color: 'var(--brand-text-secondary, #4b5563)' }}
-        >
-          {(fahrzeug || fall.kennzeichen) && (
-            <p className="flex items-center gap-1.5">
-              <span aria-hidden>🚗</span>
-              <span>
-                {fahrzeug}
-                {fahrzeug && fall.kennzeichen ? ' · ' : ''}
-                {fall.kennzeichen ?? ''}
-              </span>
-            </p>
+        {/* 4-Phasen Progress */}
+        <div className="flex items-center gap-1">
+          {PHASEN.map((phase, idx) => {
+            const done = idx < aktiveIdx
+            const active = idx === aktiveIdx
+            return (
+              <div key={phase.key} className="flex items-center gap-1">
+                {idx > 0 && (
+                  <div
+                    className={`w-3 h-px rounded-full ${done || active ? 'bg-claimondo-ondo' : 'bg-claimondo-border'}`}
+                  />
+                )}
+                <div
+                  className={`rounded-full transition-all ${
+                    done
+                      ? 'w-3 h-3 bg-claimondo-ondo flex items-center justify-center'
+                      : active
+                        ? 'w-3 h-3 bg-claimondo-navy ring-2 ring-claimondo-navy/20'
+                        : 'w-2.5 h-2.5 bg-claimondo-border'
+                  }`}
+                  title={phase.label}
+                >
+                  {done && <CheckIcon className="w-2 h-2 text-white" strokeWidth={3} />}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Body: Kennzeichenhalter + Fahrzeug-Info */}
+      <div className="px-4 py-4 space-y-3">
+        {fall.kennzeichen && (
+          <div className="flex justify-center">
+            <Kennzeichenhalter
+              kennzeichen={fall.kennzeichen}
+              size="sm"
+              hideHuPlakette
+              hideBolts
+            />
+          </div>
+        )}
+
+        <div className="text-center space-y-0.5">
+          {fahrzeug && (
+            <p className="text-sm font-semibold text-claimondo-navy leading-tight">{fahrzeug}</p>
           )}
           {fall.schadens_datum && (
-            <p
-              className="text-xs"
-              style={{ color: 'var(--brand-text-muted, #9ca3af)' }}
-            >
-              Unfall: {new Date(fall.schadens_datum).toLocaleDateString('de-DE')}
+            <p className="text-[11px] text-claimondo-ondo/70">
+              Unfall {new Date(fall.schadens_datum).toLocaleDateString('de-DE')}
             </p>
           )}
         </div>
 
-        {/* Zone 3: Nächster Termin — kompakt */}
-        {nextTermin && (
-          <div
-            className="rounded-md border px-3 py-2 text-xs"
-            style={{
-              borderColor: 'var(--brand-border, #e5e7eb)',
-              background: 'var(--brand-surface-muted, #f8f9fb)',
-            }}
-          >
+        {/* Nächster Termin — kompakt */}
+        {nextTermin && !abgeschlossen && (
+          <div className="rounded-xl bg-white/80 border border-claimondo-border/50 px-3 py-2">
             {svLive ? (
-              <p
-                className="flex items-center gap-1.5 font-medium"
-                style={{ color: 'var(--brand-success, #16a34a)' }}
-              >
-                <span className="relative inline-flex h-2 w-2">
-                  <span
-                    className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping"
-                    style={{ background: 'var(--brand-success, #16a34a)' }}
-                  />
-                  <span
-                    className="relative inline-flex h-2 w-2 rounded-full"
-                    style={{ background: 'var(--brand-success, #16a34a)' }}
-                  />
+              <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                <span className="relative inline-flex h-2 w-2 shrink-0">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
                 {nextTermin.sv_angekommen_am
                   ? 'Gutachter ist vor Ort'
                   : `Gutachter unterwegs${nextTermin.sv_eta_minuten ? ` · ETA ${nextTermin.sv_eta_minuten} Min.` : ''}`}
               </p>
             ) : (
-              <>
-                <p
-                  className="flex items-center gap-1.5 font-medium"
-                  style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
-                >
-                  <span aria-hidden>{isVideoTermin ? '🎥' : '📅'}</span>
-                  {isVideoTermin ? 'Videocall · ' : 'Nächster Termin · '}
-                  {fmtTerminKompakt(nextTermin.start_zeit)}
-                </p>
-                {!isVideoTermin && nextTermin.adresse && (
-                  <p
-                    className="mt-0.5 truncate"
-                    style={{ color: 'var(--brand-text-secondary, #6b7280)' }}
-                  >
-                    {nextTermin.adresse}
-                  </p>
-                )}
-                {isVideoTermin && nextTermin.video_link && (
-                  <p
-                    className="mt-0.5 truncate"
-                    style={{ color: 'var(--brand-accent, #4573A2)' }}
-                  >
-                    Meet-Link im Fall hinterlegt
-                  </p>
-                )}
-              </>
+              <p className="flex items-center gap-1.5 text-xs font-medium text-claimondo-navy">
+                <CalendarIcon className="w-3.5 h-3.5 text-claimondo-ondo/60 shrink-0" />
+                {fmtTermin(nextTermin.start_zeit)}
+              </p>
             )}
           </div>
         )}
-
-        {/* Zone 4: Action-Hint */}
-        {showHint && aktion && (
-          <div
-            className="rounded-md border px-3 py-2 text-xs"
-            style={{
-              background: 'var(--brand-warning-soft, #fffbeb)',
-              borderColor: 'var(--brand-warning, #d97706)',
-              color: 'var(--brand-warning, #92400e)',
-            }}
-          >
-            <p className="flex items-center gap-1.5 font-semibold">
-              <span aria-hidden>⚠️</span>
-              Aktion erforderlich
-            </p>
-            <p className="mt-0.5">{aktion.titel}</p>
-          </div>
-        )}
-
-        {/* Footer: zuletzt aktualisiert */}
-        {lastUpdate && (
-          <p
-            className="text-[11px]"
-            style={{ color: 'var(--brand-text-muted, #9ca3af)' }}
-          >
-            Zuletzt aktualisiert {fmtRelativUpdate(lastUpdate)}
-          </p>
-        )}
       </div>
+
+      {/* Action-Banner oder aktive Phase-Info */}
+      {aktion && !abgeschlossen ? (
+        (() => {
+          const cfg = bannerConfig(aktion.severity, aktion.variant)
+          return (
+            <div className={`mx-3 mb-3 rounded-2xl ${cfg.bg} border ${cfg.border} px-3.5 py-2.5`}>
+              <div className="flex items-start gap-2">
+                {cfg.icon}
+                <div className="flex-1 min-w-0">
+                  <p className={`text-xs font-semibold ${cfg.labelColor} leading-tight`}>
+                    {aktion.titel}
+                  </p>
+                  {aktion.beschreibung && (
+                    <p className={`text-[11px] ${cfg.textColor} mt-0.5 leading-snug line-clamp-2`}>
+                      {aktion.beschreibung}
+                    </p>
+                  )}
+                </div>
+                <ChevronRightIcon className={`w-3.5 h-3.5 ${cfg.textColor} opacity-50 shrink-0 mt-0.5`} />
+              </div>
+            </div>
+          )
+        })()
+      ) : abgeschlossen ? (
+        <div className="mx-3 mb-3 rounded-2xl bg-emerald-50 border border-emerald-200 px-3.5 py-2.5">
+          <div className="flex items-center gap-2">
+            <CircleCheckIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <p className="text-xs font-semibold text-emerald-700">Fall abgeschlossen</p>
+          </div>
+        </div>
+      ) : (
+        <div className="mx-3 mb-3 rounded-2xl bg-claimondo-ondo/5 border border-claimondo-light-blue/30 px-3.5 py-2.5">
+          <div className="flex items-center gap-2">
+            <ClockIcon className="w-3.5 h-3.5 text-claimondo-ondo/60 shrink-0" />
+            <p className="text-xs font-medium text-claimondo-shield">
+              {PHASEN[aktiveIdx]?.label ?? 'In Bearbeitung'}
+            </p>
+          </div>
+        </div>
+      )}
     </Link>
   )
 }

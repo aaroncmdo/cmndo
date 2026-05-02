@@ -208,6 +208,11 @@ export default async function KundeStartseite() {
                   fahrzeug_hersteller: fall.fahrzeug_hersteller as string | null,
                   fahrzeug_modell: fall.fahrzeug_modell as string | null,
                   schadens_datum: fall.schadens_datum as string | null,
+                  sa_unterschrieben: fall.sa_unterschrieben as boolean | null,
+                  gutachten_eingegangen_am: fall.gutachten_eingegangen_am as string | null,
+                  regulierung_am: fall.regulierung_am as string | null,
+                  abgeschlossen_am: fall.abgeschlossen_am as string | null,
+                  vollmacht_signiert_am: fall.vollmacht_signiert_am as string | null,
                 }}
                 aktion={meta.aktion}
                 nextTermin={meta.nextTermin}
