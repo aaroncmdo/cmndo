@@ -26,6 +26,11 @@ import type { SpracheCode } from '@/lib/i18n/sprach-banner'
 import { resolveKundenTheme } from '@/lib/branding/kunden-theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 
+// Layout zeigt Kontextdaten (KB-/SV-Card, LexDrive-QR-Card) die sich nach
+// Vollmacht-Bestaetigung aendern — dynamisch rendern, damit
+// router.refresh() neue Daten holt.
+export const dynamic = 'force-dynamic'
+
 export default async function KundeLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -209,24 +214,19 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // CMM-32 Polish: LexDrive-Card — sichtbar sobald der Kunde mindestens
   // einen Fall mit signierter Vollmacht hat (vollmacht_signiert_am gesetzt).
   // Der QR-Code zeigt auf die LexDrive-WhatsApp-Nummer.
+  // Wir filtern direkt aus navFaelle (das hat den Wert bereits dabei) statt
+  // einer zusaetzlichen DB-Roundtrip — vermeidet Race-Conditions beim
+  // router.refresh() nach dem Vollmacht-Bestaetigen.
   let lexdriveQr: { qrSvg: string; qrUrl: string } | null = null
-  if (navFaelle.length > 0) {
-    const fallIds = navFaelle.map((f) => f.id as string)
-    const { data: lexdriveFall } = await adminForNav
-      .from('faelle')
-      .select('id, vollmacht_signiert_am')
-      .in('id', fallIds)
-      .not('vollmacht_signiert_am', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    if (lexdriveFall) {
-      const LEXDRIVE_WA = 'https://wa.me/4932221096850?text=' +
-        encodeURIComponent('Hallo, ich habe eine Frage zu meinem Fall.')
-      const { generateQrCodeSvg } = await import('@/lib/kanzlei/qr-code')
-      const qrSvg = await generateQrCodeSvg(LEXDRIVE_WA, 240)
-      if (qrSvg) lexdriveQr = { qrSvg, qrUrl: LEXDRIVE_WA }
-    }
+  const hatVollmachtSigniertenFall = navFaelle.some(
+    (f) => !!f.vollmacht_signiert_am,
+  )
+  if (hatVollmachtSigniertenFall) {
+    const LEXDRIVE_WA = 'https://wa.me/4932221096850?text=' +
+      encodeURIComponent('Hallo, ich habe eine Frage zu meinem Fall.')
+    const { generateQrCodeSvg } = await import('@/lib/kanzlei/qr-code')
+    const qrSvg = await generateQrCodeSvg(LEXDRIVE_WA, 240)
+    if (qrSvg) lexdriveQr = { qrSvg, qrUrl: LEXDRIVE_WA }
   }
 
   // AAR-536 (K4): SV-Branding aufgelöst. `useBrand=true` nur wenn zugewiesener

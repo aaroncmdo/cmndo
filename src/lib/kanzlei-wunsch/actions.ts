@@ -391,18 +391,31 @@ export async function bestaetigeVollmachtKunde(
     }
   }
 
+  // Direkt schreiben — verlassen uns nicht auf confirmVollmacht (das skippt
+  // bei service_typ != 'komplett' und liest nur reservierte Termine).
+  const nowIso = new Date().toISOString()
+  const { error: uErr } = await admin
+    .from('faelle')
+    .update({ vollmacht_signiert_am: nowIso, vollmacht_datum: nowIso })
+    .eq('id', fallId)
+  if (uErr) return { ok: false, error: uErr.message }
+
+  // Lead synchronisieren (manche Loader lesen aus leads, nicht faelle)
+  const { data: fallWithLead } = await admin
+    .from('faelle').select('lead_id').eq('id', fallId).maybeSingle()
+  if (fallWithLead?.lead_id) {
+    await admin.from('leads').update({
+      vollmacht_signiert_am: nowIso,
+    }).eq('id', fallWithLead.lead_id as string)
+  }
+
+  // Side-Effects (Termin-Bestaetigung, Kalender-Sync) im Hintergrund —
+  // Fehler werden geloggt, blockieren aber das Ergebnis nicht.
   try {
     const { confirmVollmacht } = await import('@/app/flow/[token]/actions')
     await confirmVollmacht(fallId)
   } catch (err) {
-    console.warn('[bestaetigeVollmachtKunde] confirmVollmacht:', err)
-    // Fallback: zumindest den Timestamp setzen, damit das UI den Gate verlaesst
-    const nowIso = new Date().toISOString()
-    const { error: uErr } = await admin
-      .from('faelle')
-      .update({ vollmacht_signiert_am: nowIso, vollmacht_datum: nowIso })
-      .eq('id', fallId)
-    if (uErr) return { ok: false, error: uErr.message }
+    console.warn('[bestaetigeVollmachtKunde] confirmVollmacht (non-critical):', err)
   }
 
   if (fall.claim_id) revalidateClaim(fall.claim_id as string, fallId)
