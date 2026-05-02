@@ -287,6 +287,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .in('status', aktiveStatus)
       .is('cancelled_at', null)
       .order('created_at', { ascending: false })
+
+    // CMM-32 Polish: ALLE Termine fuer den Begutachtungs-Verlauf (auch
+    // verlegt/verpasst/verschoben/durchgefuehrt). Sortiert chronologisch.
+    const { data: alleTermineForVerlauf } = await admin
+      .from('gutachter_termine')
+      .select('id, status, start_zeit, durchgefuehrt_am, verlegung_quelle_id, verlegung_initiator_kunde, created_at, updated_at')
+      .eq('fall_id', id)
+      .eq('typ', 'sv_begutachtung')
+      .order('created_at', { ascending: true })
     const STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3, verschoben: 4 }
     const svTermin = (svKandidaten ?? []).slice().sort((a, b) =>
       (STATUS_PRIO[a.status as string] ?? 9) - (STATUS_PRIO[b.status as string] ?? 9),
@@ -576,6 +585,87 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           const gutachtenFreigegeben =
             !!erstgutachten?.gutachten_final_freigegeben && !!gutachtenUrlAusBucket
           const gutachtenUrlFuerStepper = gutachtenFreigegeben ? gutachtenUrlAusBucket : null
+
+          // CMM-32 Polish: Begutachtungs-Verlauf zusammensammeln aus
+          // gutachter_termine (Verschoben/Wahrgenommen/Verpasst), Auftrag
+          // (Gutachten erstellt + QC bestanden) und Claim (gutachten_datum
+          // als Fallback). Datum-getrieben, chronologisch sortiert.
+          const begutachtungEvents: Array<{
+            key: string
+            label: string
+            detail?: string | null
+            datum: string
+            variant?: 'done' | 'warn' | 'error' | 'neutral'
+          }> = []
+          for (const t of (alleTermineForVerlauf ?? []) as Array<{
+            id: string
+            status: string | null
+            start_zeit: string | null
+            durchgefuehrt_am: string | null
+            verlegung_quelle_id: string | null
+            verlegung_initiator_kunde: boolean | null
+            updated_at: string | null
+          }>) {
+            const status = t.status ?? ''
+            // Verschoben / verlegt / verpasst — Datum ist das updated_at
+            if (
+              (status === 'verlegt' || status === 'verschoben' || status === 'verpasst') &&
+              t.updated_at
+            ) {
+              const istKundeInitiator = !!t.verlegung_initiator_kunde
+              const label = status === 'verpasst'
+                ? 'Termin verpasst'
+                : 'Termin verschoben'
+              const detail = istKundeInitiator
+                ? 'durch Kunde'
+                : status === 'verpasst'
+                  ? null
+                  : 'durch Gutachter'
+              begutachtungEvents.push({
+                key: `t-${t.id}-${status}`,
+                label,
+                detail,
+                datum: t.updated_at,
+                variant: status === 'verpasst' ? 'error' : 'warn',
+              })
+            }
+            // Termin wahrgenommen
+            if (t.durchgefuehrt_am) {
+              begutachtungEvents.push({
+                key: `t-${t.id}-done`,
+                label: 'Termin wahrgenommen',
+                datum: t.durchgefuehrt_am,
+                variant: 'done',
+              })
+            }
+          }
+          // Gutachten erstellt — claim.gutachten_datum als kanonische
+          // Quelle (aus OCR), fallback auf erstgutachten.gutachten_url +
+          // dessen abgeschlossen_am ist nicht praezise genug.
+          const gutachtenDatum = (claimRow as unknown as { gutachten_datum?: string | null })?.gutachten_datum ??
+            null
+          if (gutachtenDatum) {
+            begutachtungEvents.push({
+              key: 'gutachten-erstellt',
+              label: 'Gutachten erstellt',
+              datum: gutachtenDatum,
+              variant: 'done',
+            })
+          }
+          // QC bestanden = auftrag.abgeschlossen_am
+          if (
+            erstgutachten?.gutachten_final_freigegeben &&
+            (erstgutachten as { abgeschlossen_am?: string | null }).abgeschlossen_am
+          ) {
+            begutachtungEvents.push({
+              key: 'qc-bestanden',
+              label: 'Gutachten freigegeben (Vollständigkeits-Check)',
+              datum: (erstgutachten as { abgeschlossen_am: string }).abgeschlossen_am,
+              variant: 'done',
+            })
+          }
+          begutachtungEvents.sort((a, b) => new Date(a.datum).getTime() - new Date(b.datum).getTime())
+
           return (
             <ClaimStepper
               lifecycle={claimLifecycle}
@@ -583,6 +673,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               gutachtenUrl={gutachtenUrlFuerStepper}
               anspruchVsEur={gutachtenFreigegeben ? anspruchVsEur : null}
               lead={leadInputForLifecycle}
+              begutachtungEvents={begutachtungEvents}
               kanzleiFall={
                 kanzleiFall
                   ? {

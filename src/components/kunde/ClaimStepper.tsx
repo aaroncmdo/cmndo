@@ -73,6 +73,19 @@ type TerminInfo = {
   verstrichenInitiator?: 'sv' | 'kunde' | 'unklar'
 }
 
+export type BegutachtungEvent = {
+  /** Stable React-Key */
+  key: string
+  /** Kurze Beschreibung des Events */
+  label: string
+  /** Optionaler Sub-Text (z.B. „durch Kunde" / „SV nicht erschienen") */
+  detail?: string | null
+  /** ISO-Zeitstempel — Pflicht; ohne Datum kein Event in der Historie */
+  datum: string
+  /** Visueller Akzent — done (gruen), warn (amber), error (rose), neutral */
+  variant?: 'done' | 'warn' | 'error' | 'neutral'
+}
+
 /** AAR-864: Notice-Item das als verschmolzene Bottom-Sektion im Stepper
  *  gerendert wird. sortAt = Zeitpunkt für chronologische Sortierung
  *  (oldest first → der zuerst eingetroffene Banner steht ganz oben). */
@@ -95,6 +108,7 @@ export default function ClaimStepper({
   anspruchVsEur,
   lead,
   kanzleiFall,
+  begutachtungEvents,
 }: {
   lifecycle: ClaimLifecycle
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
@@ -127,6 +141,10 @@ export default function ClaimStepper({
     vs_kontakt_am: string | null
     ausgezahlt_am: string | null
   } | null
+  /** Begutachtungs-Historie — chronologische Events (Termin verschoben,
+   *  Termin wahrgenommen, Gutachten erstellt, QC bestanden). Wird im
+   *  Begutachtungs-Detail-Panel gerendert. */
+  begutachtungEvents?: BegutachtungEvent[]
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
@@ -480,8 +498,62 @@ export default function ClaimStepper({
           </div>
         </div>
       )}
+
+      {/* CMM-32 Polish: Begutachtungs-Historie — alle Events mit Datum
+          (Termin verschoben, Termin wahrgenommen, Gutachten erstellt,
+          QC bestanden). Sichtbar bei selectedPhase=begutachtung sobald
+          mindestens 1 Event existiert. Dient vor allem dem nachtraeglichen
+          Nachvollziehen wenn der Kunde nach Regulierung zurueckklickt. */}
+      {selectedPhase === 'begutachtung' &&
+        !bottomSlot &&
+        begutachtungEvents &&
+        begutachtungEvents.length > 0 && (
+          <div className={`border-t border-claimondo-navy/10 px-4 sm:px-6 py-3.5 ${PHASE_BG.begutachtung}`}>
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/80 font-semibold mb-2">
+              Verlauf der Begutachtung
+            </p>
+            <ol className="space-y-2 text-xs">
+              {begutachtungEvents.map((ev) => (
+                <BegutachtungEventRow key={ev.key} ev={ev} />
+              ))}
+            </ol>
+          </div>
+        )}
+
       {bottomSlot}
     </div>
+  )
+}
+
+function BegutachtungEventRow({ ev }: { ev: BegutachtungEvent }) {
+  const variant = ev.variant ?? 'done'
+  const dotCls =
+    variant === 'error'
+      ? 'bg-rose-500'
+      : variant === 'warn'
+        ? 'bg-amber-500'
+        : variant === 'neutral'
+          ? 'bg-claimondo-border'
+          : 'bg-emerald-500'
+  const datum = new Date(ev.datum)
+  const datumStr = Number.isNaN(datum.getTime())
+    ? ev.datum
+    : datum.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const uhrzeit = Number.isNaN(datum.getTime())
+    ? null
+    : datum.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return (
+    <li className="flex items-start gap-2.5">
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${dotCls}`} />
+      <div className="flex-1 min-w-0">
+        <p className="text-claimondo-navy font-medium">{ev.label}</p>
+        {ev.detail && <p className="text-claimondo-ondo">{ev.detail}</p>}
+      </div>
+      <span className="text-[11px] text-claimondo-ondo whitespace-nowrap">
+        {datumStr}
+        {uhrzeit && <span className="text-claimondo-ondo/60"> · {uhrzeit}</span>}
+      </span>
+    </li>
   )
 }
 
