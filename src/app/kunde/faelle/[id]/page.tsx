@@ -21,7 +21,6 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
@@ -852,6 +851,18 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             fahrzeug_aufbau:
               (fall.fahrzeug_aufbau as string | null) ??
               (fall.fahrzeug_typ as string | null) ?? null,
+            fahrzeug_baujahr: (fall.fahrzeug_baujahr as number | null) ?? null,
+            lackfarbe:
+              ((fall.lackfarbe_code as string | null) ?? null) as
+                | 'schwarz' | 'weiss' | 'silber' | 'grau' | 'blau' | 'rot'
+                | 'gruen' | 'gelb' | 'orange' | 'braun' | 'beige' | 'sonstige'
+                | null,
+            schadens_adresse:
+              (fall.schadens_adresse as string | null) ??
+              ([
+                (fall.schadens_plz as string | null) ?? null,
+                (fall.schadens_ort as string | null) ?? null,
+              ].filter(Boolean).join(' ') || null),
             kraftstoff: null,
             fahrgestellnummer: (fall.fin_vin as string | null) ?? null,
             schadens_datum: (fall.schadens_datum as string | null) ?? null,
@@ -891,8 +902,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
-        {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
-        {svTermin?.id && (
+        {/* CMM-36 + CMM-32f: SV-Live-Banner — nur sichtbar wenn der SV
+            tatsaechlich unterwegs ist (sv_unterwegs_seit gesetzt) und
+            der Termin noch nicht durchgefuehrt wurde. */}
+        {svTermin?.id &&
+          !!(svTermin.sv_unterwegs_seit as string | null) &&
+          !(svTermin.durchgefuehrt_am as string | null) && (
           <KundeSvLiveBanner
             terminId={svTermin.id as string}
             svName={svName}
@@ -1062,40 +1077,21 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </div>
         )}
 
-        {/* Fortschritt + Fall-Details */}
-        <div className="grid md:grid-cols-2 gap-5">
-          <FallPhasenPanel
-            fall={{
-              id: fall.id as string,
-              aktuelle_phase: aktuellePhaseSnake,
-              abgeschlossen_am: abgeschlossenAmKunde,
-            }}
-            rolle="kunde"
-            variant="progress-card"
-            banner={
-              szenario === 'ruegefall' ? (
-                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                  <p className="text-xs text-amber-700 font-medium">
-                    Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum.
-                  </p>
-                </div>
-              ) : null
-            }
-          />
-
-          <FallDetailSections
-            fall={fall as Record<string, unknown>}
-            svName={svName}
-            svTelefon={svTelefon}
-            svVerifiziert={svVerifiziert}
-            kbName={kbName}
-            dokumente={dokumente ?? []}
-            nachrichten={nachrichten ?? []}
-            userId={user.id}
-            chatTeilnehmer={chatTeilnehmer}
-            aktiverTermin={aktiverTermin}
-          />
-        </div>
+        {/* FallPhasenPanel entfernt — Phasen-Progress lebt im ClaimStepper.
+            FallDetailSections schlank gemacht: Fahrzeug-Block lebt jetzt
+            in ClaimSummary, hier bleiben nur Mietwagen + Termin-Banner. */}
+        <FallDetailSections
+          fall={fall as Record<string, unknown>}
+          svName={svName}
+          svTelefon={svTelefon}
+          svVerifiziert={svVerifiziert}
+          kbName={kbName}
+          dokumente={dokumente ?? []}
+          nachrichten={nachrichten ?? []}
+          userId={user.id}
+          chatTeilnehmer={chatTeilnehmer}
+          aktiverTermin={aktiverTermin}
+        />
       </div>
     )
   } catch (err) {

@@ -35,6 +35,8 @@ import {
   UploadCloudIcon,
 } from 'lucide-react'
 import Kennzeichenhalter from './Kennzeichenhalter'
+import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
+import type { LackfarbeCode } from '@/lib/fahrzeug/imagin'
 
 export type ClaimSummaryDokument = {
   id: string
@@ -58,8 +60,12 @@ type FallSummary = {
   erstzulassung: string | null
   kilometerstand: number | null
   fahrzeug_aufbau: string | null
+  fahrzeug_baujahr: number | null
+  lackfarbe: LackfarbeCode | null
   kraftstoff: string | null
   fahrgestellnummer: string | null
+  // Schadensort fuer das Render-Panel
+  schadens_adresse: string | null
   // Unfall
   schadens_datum: string | null
   schadens_ort: string | null
@@ -130,7 +136,13 @@ export default function ClaimSummary({
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(260px,320px)_1fr] gap-0">
         {/* ─── Linke Spalte: Fahrzeug ─── */}
         <div className="p-5 sm:p-7 lg:border-r border-claimondo-border/40 space-y-5 bg-gradient-to-b from-white to-[#f8f9fb]">
-          <CarRender />
+          <CarRender
+            hersteller={data.fahrzeug_hersteller}
+            modell={data.fahrzeug_modell}
+            baujahr={data.fahrzeug_baujahr}
+            lackfarbe={data.lackfarbe}
+            schadensAdresse={data.schadens_adresse ?? buildSchadensortFallback(data)}
+          />
 
           <div className="flex justify-center">
             <Kennzeichenhalter
@@ -221,19 +233,49 @@ export default function ClaimSummary({
 
 // ─── Auto-Render (oben links) ─────────────────────────────────────────────
 
-function CarRender() {
+function CarRender({
+  hersteller,
+  modell,
+  baujahr,
+  lackfarbe,
+  schadensAdresse,
+}: {
+  hersteller: string | null
+  modell: string | null
+  baujahr: number | null
+  lackfarbe: LackfarbeCode | null
+  schadensAdresse: string | null
+}) {
   return (
-    <div className="relative h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-[#0D1B3E] via-[#1f2e54] to-[#3b5a9a] flex items-center justify-center">
-      {/* Lichtreflexion */}
-      <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-      <CarFrontIcon
-        className="w-24 h-24 text-white relative z-10"
-        strokeWidth={1.4}
-        style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.35))' }}
-      />
+    <div className="space-y-3">
+      {/* Imagin-Studio-Render mit Mehrstufen-Fallback (Logo → Auto-Bild → Icon) */}
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#f4f6fb] via-[#eef1f8] to-[#e6ebf5] border border-claimondo-border/50 flex items-center justify-center p-3 min-h-[140px]">
+        <FahrzeugRenderImage
+          hersteller={hersteller}
+          modell={modell}
+          lackfarbe={lackfarbe}
+          baujahr={baujahr}
+          width={240}
+          className="max-w-full"
+        />
+      </div>
+      {/* Schadensort */}
+      {schadensAdresse && (
+        <div className="rounded-xl bg-white/70 border border-claimondo-border/50 px-3 py-2">
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold flex items-center gap-1.5">
+            <MapPinIcon className="w-3 h-3" /> Schadensort
+          </p>
+          <p className="text-xs text-claimondo-navy mt-0.5 leading-snug">
+            {schadensAdresse}
+          </p>
+        </div>
+      )}
     </div>
   )
+}
+
+function buildSchadensortFallback(d: { schadens_plz: string | null; schadens_ort: string | null }) {
+  return [d.schadens_plz, d.schadens_ort].filter(Boolean).join(' ') || null
 }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────

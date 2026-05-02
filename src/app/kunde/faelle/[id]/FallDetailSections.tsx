@@ -5,8 +5,6 @@ import { CalendarIcon } from 'lucide-react'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { waehleGegenvorschlagSlot } from './actions'
 import Link from 'next/link'
-// AAR-754 (Phase C): Shared Stammdaten.
-import { StammdatenReadSection } from '@/components/shared/stammdaten'
 import { Modal } from '@/components/primitives/Modal'
 // AAR-759 (Phase 1): Mietwagen-Status-Anzeige
 import { MietwagenStatusCard } from '@/components/shared/mietwagen'
@@ -54,15 +52,8 @@ export default function FallDetailSections({
               zeigt bereits CLM-Nr + Kennzeichen + Fahrzeug. KB + Gutachter leben
               in den Sidebar-Cards. */}
 
-          {/* AAR-754: Shared StammdatenReadSection — ersetzt die inline
-              Fahrzeug-Section. Kunde-Rolle filtert eigenen Kontakt + Halter
-              automatisch raus. Unfallhergang bleibt separat darunter. */}
-          <StammdatenReadSection
-            rolle="kunde"
-            lead={null}
-            fall={fall}
-            title="Fahrzeug & Unfall"
-          />
+          {/* StammdatenReadSection entfernt — Fahrzeug-Block lebt jetzt
+              in ClaimSummary (CarRender + Kennzeichenhalter + Stammdaten). */}
 
           {/* AAR-759: Mietwagen-Status für Kunde (Phase 1 read-only) */}
           <MietwagenStatusCard
