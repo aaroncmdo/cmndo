@@ -292,7 +292,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // verlegt/verpasst/verschoben/durchgefuehrt). Sortiert chronologisch.
     const { data: alleTermineForVerlauf } = await admin
       .from('gutachter_termine')
-      .select('id, status, start_zeit, durchgefuehrt_am, verlegung_quelle_id, verlegung_initiator_kunde, created_at, updated_at')
+      .select('id, status, start_zeit, durchgefuehrt_am, verlegung_quelle_id, verlegung_initiator_kunde, created_at')
       .eq('fall_id', id)
       .eq('typ', 'sv_begutachtung')
       .order('created_at', { ascending: true })
@@ -604,13 +604,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             durchgefuehrt_am: string | null
             verlegung_quelle_id: string | null
             verlegung_initiator_kunde: boolean | null
-            updated_at: string | null
+            created_at: string | null
           }>) {
             const status = t.status ?? ''
-            // Verschoben / verlegt / verpasst — Datum ist das updated_at
+            // Verschoben / verlegt / verpasst — Datum ist created_at des
+            // Folge-Slots (= Zeitpunkt der Verschiebung). Bei verpasst ist
+            // der alte Slot betroffen — created_at gibt den Anlegezeitpunkt
+            // wieder, der Verlegungs-Trigger kommt aus dem Folge-Slot.
             if (
               (status === 'verlegt' || status === 'verschoben' || status === 'verpasst') &&
-              t.updated_at
+              t.created_at
             ) {
               const istKundeInitiator = !!t.verlegung_initiator_kunde
               const label = status === 'verpasst'
@@ -625,7 +628,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 key: `t-${t.id}-${status}`,
                 label,
                 detail,
-                datum: t.updated_at,
+                datum: t.created_at,
                 variant: status === 'verpasst' ? 'error' : 'warn',
               })
             }
