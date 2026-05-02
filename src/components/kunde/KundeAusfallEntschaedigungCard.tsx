@@ -46,6 +46,8 @@ type Props = {
   mietwagenTagessatzEur: number | null
   /** Optionale Klasse für den äußeren section-Wrapper — z.B. für blaue LexDrive-Variante. */
   className?: string
+  /** 'lexdrive': Schrift, Icons und Betrag in LexDrive-Blau einfärben. */
+  variant?: 'lexdrive'
 }
 
 function formatDate(iso: string | null): string {
@@ -80,7 +82,13 @@ export default function KundeAusfallEntschaedigungCard({
   nutzungsausfallTagessatzEur,
   mietwagenTagessatzEur,
   className,
+  variant,
 }: Props) {
+  const isLexDrive = variant === 'lexdrive'
+  const headingCls = isLexDrive ? 'text-[#0a3fa0]' : 'text-claimondo-navy'
+  const iconCls = isLexDrive ? 'text-[#0e5be9]' : 'text-claimondo-shield'
+  const amountCls = isLexDrive ? 'text-[#0a3fa0]' : 'text-claimondo-navy'
+  const labelCls = isLexDrive ? 'text-[#0e5be9]/70' : 'text-claimondo-ondo'
   // Render-Gate: ohne OCR keine Werte, ohne Schadenstyp keine Berechnung.
   if (!ocrVerarbeitet || totalschaden == null) return null
 
@@ -197,14 +205,14 @@ export default function KundeAusfallEntschaedigungCard({
   return (
     <section className={`rounded-2xl border p-5 space-y-3 ${className ?? 'border-claimondo-border bg-white'}`}>
       <header className="flex items-center gap-2">
-        <EuroIcon className="w-4 h-4 text-claimondo-shield" />
-        <h3 className="text-sm font-semibold text-claimondo-navy">
+        <EuroIcon className={`w-4 h-4 ${iconCls}`} />
+        <h3 className={`text-sm font-semibold ${headingCls}`}>
           {totalschaden ? 'Nutzungsausfall (Totalschaden)' : 'Nutzungsausfall'}
         </h3>
       </header>
 
-      <p className="text-2xl font-bold text-claimondo-navy">{formatEuro(summe)}</p>
-      <p className="text-xs text-claimondo-ondo">
+      <p className={`text-2xl font-bold ${amountCls}`}>{formatEuro(summe)}</p>
+      <p className={`text-xs ${labelCls}`}>
         {effDauerTage} {totalschaden ? 'Tage Wiederbeschaffungsdauer' : 'Tage Reparaturdauer'} ×{' '}
         {formatEuro(tagessatz)} pro Tag
       </p>

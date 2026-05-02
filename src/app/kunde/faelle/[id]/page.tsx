@@ -771,6 +771,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                   ? <KundeAusfallEntschaedigungCard
                       {...ausfallProps}
                       className="bg-[#0e5be9]/[0.06] border-[#0e5be9]/20"
+                      variant="lexdrive"
                     />
                   : null
               }
