@@ -519,6 +519,18 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                     !['abgesagt', 'storniert', 'verschoben', 'verlegung_pending'].includes(status)
                   )
                 })(),
+                // CMM-32 Polish: Geo-basierte Verschuldens-Vermutung. Wenn
+                // sv_angekommen_am gesetzt ist, war der SV definitiv vor
+                // Ort (Geofence-Hit) — dann ist der Termin nicht durch
+                // SV-Schuld verstrichen, sondern wahrscheinlich Kunde-No-
+                // Show. Ist sv_angekommen_am NULL, ist der SV nicht da
+                // gewesen (Permission war an, sonst hätten wir gar keine
+                // Daten — beide Hypothesen blieben offen → 'unklar').
+                verstrichenInitiator: (
+                  (aktiverSv.sv_angekommen_am as string | null)
+                    ? 'kunde'
+                    : 'sv'
+                ) as 'sv' | 'kunde',
                 datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
                   weekday: 'long',
                   day: '2-digit',

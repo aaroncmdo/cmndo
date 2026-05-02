@@ -46,6 +46,11 @@ type TerminInfo = {
   status?: string | null
   /** Termin ist verstrichen (start_zeit + 60min vorbei + nicht durchgeführt). */
   verstrichen?: boolean
+  /** CMM-32 Polish: Wer war (laut Geo) nicht da? 'sv' wenn der SV nicht
+   *  vor Ort war (sv_angekommen_am IS NULL), 'kunde' wenn der SV da war
+   *  aber nichts passiert ist, 'unklar' wenn keine Geo-Daten — dann
+   *  zeigen wir zwei Buttons als Fallback. */
+  verstrichenInitiator?: 'sv' | 'kunde' | 'unklar'
 }
 
 /** AAR-864: Notice-Item das als verschmolzene Bottom-Sektion im Stepper
@@ -245,9 +250,15 @@ export default function ClaimStepper({
           }`}
         >
           {terminVerstrichen && (
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-700 mb-1.5">
-              <AlertTriangleIcon className="w-3 h-3" />
-              Termin verstrichen — kein Status erfasst
+            <div className="flex items-start gap-1.5 text-[11px] font-semibold text-rose-700 mb-1.5">
+              <AlertTriangleIcon className="w-3 h-3 mt-0.5 shrink-0" />
+              <span>
+                {terminInfo.verstrichenInitiator === 'sv'
+                  ? 'Gutachter ist nicht erschienen — du kannst einen neuen Termin wählen'
+                  : terminInfo.verstrichenInitiator === 'kunde'
+                    ? 'Termin verpasst — du warst nicht vor Ort'
+                    : 'Termin verstrichen — kein Status erfasst'}
+              </span>
             </div>
           )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
