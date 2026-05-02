@@ -86,9 +86,15 @@ export default async function FallaktePage({
     claimLetzterNoShowAm = (claimRow?.letzter_no_show_am as string | null) ?? null
   }
 
+  // erstgutachten-Auftrag-ID fuer die OCR-Card (Re-Run-Trigger). Nur fuer
+  // Admins relevant; KB sieht die Card nicht.
+  let erstgutachtenAuftragId: string | null = null
+
   // Gutachten-OCR-Daten (admin-only) — separater Select damit die OCR-Werte
   // nicht in den allgemeinen claimRow-Pfad fliessen, der auch für andere
-  // Rollen indirekt sichtbar werden könnte.
+  // Rollen indirekt sichtbar werden könnte. CMM-32 Walkthrough: erweitert
+  // um Cluster A (Fahrzeug), B (Zustand), C (Reparatur), D (Mietwagen),
+  // E (SV-Meta) — siehe migration claims_gutachten_ocr_extended.
   let gutachtenOcr: Awaited<ReturnType<typeof loadGutachtenOcr>> = null
   async function loadGutachtenOcr() {
     if (!claimId) return null
@@ -96,8 +102,18 @@ export default async function FallaktePage({
       .from('claims')
       .select(
         'reparaturkosten_netto, reparaturkosten_brutto, minderwert, restwert, ' +
-        'wiederbeschaffungswert, wiederbeschaffungsdauer_tage, nutzungsausfall_tage, ' +
-        'totalschaden, gutachten_datum, gutachten_ocr_processed_at, gutachten_ocr_error',
+          'wiederbeschaffungswert, wiederbeschaffungsdauer_tage, nutzungsausfall_tage, ' +
+          'totalschaden, gutachten_datum, gutachten_ocr_processed_at, gutachten_ocr_error, ' +
+          'gutachten_ocr_manuell_ueberschrieben, ' +
+          'gutachten_fin, gutachten_kennzeichen, gutachten_erstzulassung, ' +
+          'gutachten_laufleistung_km, gutachten_tuv_bis, gutachten_fahrzeug_typ, ' +
+          'gutachten_farbe, gutachten_farbcode, gutachten_kraftstoff, ' +
+          'gutachten_vorschaeden_text, gutachten_lackmesswert_max_my, gutachten_karosseriezustand, ' +
+          'gutachten_zeit_ak_std, gutachten_zeit_kar_std, gutachten_zeit_lack_std, ' +
+          'gutachten_lohnsatz_ak_eur, gutachten_lohnsatz_kar_eur, gutachten_lohnsatz_lack_eur, ' +
+          'gutachten_materialkosten_eur, gutachten_lackmaterial_eur, gutachten_verbringung_eur, ' +
+          'gutachten_mietwagen_klasse, gutachten_mietwagen_tagessatz_eur, gutachten_nutzungsausfall_tagessatz_eur, ' +
+          'gutachten_sv_honorar_netto, gutachten_sv_honorar_brutto, gutachten_kalkulationssystem, gutachten_seitenzahl',
       )
       .eq('id', claimId)
       .maybeSingle()
@@ -133,6 +149,17 @@ export default async function FallaktePage({
   // und damit keinen Render-Pfad.
   if (userRolle === 'admin') {
     gutachtenOcr = await loadGutachtenOcr()
+    // erstgutachten-Auftrag-ID fuer den OCR-Re-Run-Trigger.
+    const adminClient = createAdminClient()
+    const { data: erstgutachtenRow } = await adminClient
+      .from('auftraege')
+      .select('id')
+      .eq('fall_id', id)
+      .eq('typ', 'erstgutachten')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    erstgutachtenAuftragId = (erstgutachtenRow?.id as string | null) ?? null
   }
 
   // AAR-843: Timeline + Future-Projection laden (nach userRolle-Auflösung,
@@ -721,9 +748,20 @@ export default async function FallaktePage({
         </div>
       )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
-      {userRolle === 'admin' && gutachtenOcr && (
+      {userRolle === 'admin' && gutachtenOcr && claimId && (
         <div className="mb-4">
-          <GutachtenOcrCard data={gutachtenOcr as unknown as Parameters<typeof GutachtenOcrCard>[0]['data']} />
+          {/* CMM-32 Walkthrough: GutachtenOcrCard ist jetzt 'use client' mit
+              Edit-Mode + Re-Run. Sie braucht claim_id/fall_id/auftrag_id
+              fuer die Server-Actions. erstgutachtenAuftragId wurde oben
+              geladen. */}
+          <GutachtenOcrCard
+            data={{
+              ...(gutachtenOcr as unknown as Record<string, unknown>),
+              claim_id: claimId,
+              fall_id: id,
+              auftrag_id: erstgutachtenAuftragId,
+            } as unknown as Parameters<typeof GutachtenOcrCard>[0]['data']}
+          />
         </div>
       )}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}

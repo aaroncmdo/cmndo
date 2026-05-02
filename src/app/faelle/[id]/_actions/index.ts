@@ -77,3 +77,8 @@ export {
 export { createFallTask, updateTaskStatus } from './tasks'
 
 export { deleteFall, deactivateFall, reactivateFall } from './core'
+
+export {
+  reRunGutachtenOcr,
+  updateGutachtenOcrFelder,
+} from './gutachten-ocr'
