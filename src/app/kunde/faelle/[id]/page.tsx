@@ -29,7 +29,6 @@ import PflichtdokumenteSection from '@/components/fall/PflichtdokumenteSection'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
 import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
-import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
@@ -967,21 +966,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* CMM-32 Polish: KundeAusfallEntschaedigungCard ist jetzt im
             Stepper-Wrapper (Regulierungs-Panel) integriert — siehe
             ausfallSlot-Prop am ClaimStepper. */}
-
-        {/* 2-Säulen Layout (Geld + Betreuer) — Anwalt-Säule entfällt durch
-            Konsolidierung in MeineKanzleiCard. */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SaeuleMeinGeld
-            fallId={fall.id as string}
-            status={(fall.status as string) ?? ''}
-            schadens_hoehe_netto={fall.schadens_hoehe_netto as number | null}
-            totalschaden={!!fall.totalschaden}
-            zahlungsweg={fall.zahlungsweg as string | null}
-            onZahlungswegSave={updateZahlungsweg}
-          />
-          {/* SaeuleMeinBetreuer entfernt — Betreuer lebt jetzt in der
-              Sidebar-KundenbetreuerCard mit Anruf + Chat-Modal. */}
-        </div>
 
         {/* Gutachten-Banner lebt jetzt im ClaimStepper (gruener Erfolgsbanner). */}
 
