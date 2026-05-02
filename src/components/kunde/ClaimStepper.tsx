@@ -11,7 +11,8 @@
 // (Erfassung-Status, Termin, Anspruch, Auszahlung). Default ist die
 // aktuelle Phase ausgewaehlt.
 
-import React, { useState } from 'react'
+import React, { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   CheckIcon,
   CheckCircleIcon,
@@ -25,7 +26,12 @@ import {
   FileTextIcon,
   EuroIcon,
   MailIcon,
+  ScaleIcon,
+  HandshakeIcon,
+  BriefcaseIcon,
+  DownloadIcon,
 } from 'lucide-react'
+import { setKanzleiWunsch } from '@/lib/kanzlei-wunsch/actions'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
@@ -121,6 +127,8 @@ export default function ClaimStepper({
   kanzleiWunsch,
   kanzleiUebergebenAm,
   ausfallSlot,
+  claimId,
+  gutachtenFreigegeben,
 }: {
   lifecycle: ClaimLifecycle
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
@@ -176,6 +184,11 @@ export default function ClaimStepper({
    *  Regulierungs-/Abschluss-Panel unter den Positionen gerendert.
    *  Page liefert die fertige Card als ReactNode. */
   ausfallSlot?: React.ReactNode
+  /** CMM-32 Polish: Claim-ID fuer das lila Top-Banner (Kanzlei-Wunsch-
+   *  Frage). Ohne ClaimId rendert das Banner nicht. */
+  claimId?: string | null
+  /** TRUE wenn Gutachten QC-freigegeben ist. Steuert das Top-Banner. */
+  gutachtenFreigegeben?: boolean
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
@@ -221,6 +234,18 @@ export default function ClaimStepper({
   return (
     <div className={outerCls}>
       <div className="px-4 sm:px-6 py-5 sm:py-6 space-y-4">
+      {/* CMM-32 Polish: Lila Kanzlei-Wunsch-Banner — sichtbar sobald die
+          QC-Pruefung durch ist (gutachtenFreigegeben) und der Kunde sich
+          noch nicht entschieden hat. Drei Inline-CTAs setzen den Wunsch
+          direkt und das Banner verschwindet. Ein juristischer Schritt =
+          violet (Sonderpfad-Tonalitaet). */}
+      {gutachtenFreigegeben &&
+        claimId &&
+        (kanzleiWunsch === 'noch_unentschieden' ||
+          kanzleiWunsch === 'nicht_gefragt' ||
+          kanzleiWunsch == null) && (
+          <KanzleiWunschBanner claimId={claimId} />
+        )}
       {gutachtenFertig && (
         <a
           href={gutachtenUrl ?? '#'}
@@ -606,6 +631,91 @@ export default function ClaimStepper({
 
       {bottomSlot}
     </div>
+  )
+}
+
+function KanzleiWunschBanner({ claimId }: { claimId: string }) {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  function pick(wunsch: 'partnerkanzlei' | 'eigene_kanzlei' | 'keine_kanzlei') {
+    setError(null)
+    startTransition(async () => {
+      const r = await setKanzleiWunsch(claimId, wunsch)
+      if (!r.ok) setError(r.error ?? 'Speichern fehlgeschlagen')
+      else router.refresh()
+    })
+  }
+
+  return (
+    <div className="rounded-xl border-2 border-violet-300 bg-violet-50 px-4 py-3 space-y-3">
+      <div className="flex items-start gap-2">
+        <ScaleIcon className="w-4 h-4 text-violet-700 shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-violet-900">
+            Wer übernimmt die Schadenregulierung?
+          </p>
+          <p className="text-xs text-violet-800/90 mt-0.5">
+            Dein Gutachten ist fertig und QC-geprüft. Bevor wir an die Versicherung
+            gehen, brauchen wir deine Wahl — das ist eine juristische Entscheidung.
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <BannerOption
+          icon={<HandshakeIcon className="w-3.5 h-3.5" />}
+          titel="Komplettservice"
+          subtitel="LexDrive übernimmt"
+          onClick={() => pick('partnerkanzlei')}
+          disabled={pending}
+        />
+        <BannerOption
+          icon={<BriefcaseIcon className="w-3.5 h-3.5" />}
+          titel="Eigene Kanzlei"
+          subtitel="Wir senden Paket an deine Kanzlei"
+          onClick={() => pick('eigene_kanzlei')}
+          disabled={pending}
+        />
+        <BannerOption
+          icon={<DownloadIcon className="w-3.5 h-3.5" />}
+          titel="Selbst einreichen"
+          subtitel="Du regelst es direkt mit der VS"
+          onClick={() => pick('keine_kanzlei')}
+          disabled={pending}
+        />
+      </div>
+      {error && <p className="text-xs text-red-700">{error}</p>}
+    </div>
+  )
+}
+
+function BannerOption({
+  icon,
+  titel,
+  subtitel,
+  onClick,
+  disabled,
+}: {
+  icon: React.ReactNode
+  titel: string
+  subtitel: string
+  onClick: () => void
+  disabled: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="text-left rounded-lg border border-violet-200 bg-white px-3 py-2 hover:border-violet-400 hover:bg-violet-100 transition-colors disabled:opacity-50"
+    >
+      <div className="flex items-center gap-1.5 text-violet-700 font-semibold text-xs">
+        {icon}
+        <span className="text-claimondo-navy">{titel}</span>
+      </div>
+      <p className="text-[11px] text-claimondo-ondo mt-0.5">{subtitel}</p>
+    </button>
   )
 }
 

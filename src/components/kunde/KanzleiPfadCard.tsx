@@ -22,17 +22,12 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   CheckCircleIcon,
-  HandshakeIcon,
-  BriefcaseIcon,
   DownloadIcon,
   CheckIcon,
   FileTextIcon,
 } from 'lucide-react'
 import EigeneKanzleiPaketCard from './EigeneKanzleiPaketCard'
-import {
-  setKanzleiWunsch,
-  bestaetigeSelbstEinreichungOhneKanzlei,
-} from '@/lib/kanzlei-wunsch/actions'
+import { bestaetigeSelbstEinreichungOhneKanzlei } from '@/lib/kanzlei-wunsch/actions'
 
 type KanzleiWunsch =
   | 'partnerkanzlei'
@@ -92,110 +87,10 @@ export default function KanzleiPfadCard({
     )
   }
 
-  // unentschieden / nicht_gefragt / null
-  return <KanzleiWunschFrageCard claimId={claimId} />
-}
-
-// ─── Frage-Card: Kunde waehlt einen der drei Pfade ───────────────────────────
-
-function KanzleiWunschFrageCard({ claimId }: { claimId: string }) {
-  const router = useRouter()
-  const [pending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
-
-  function pick(wunsch: 'partnerkanzlei' | 'eigene_kanzlei' | 'keine_kanzlei') {
-    setError(null)
-    startTransition(async () => {
-      const r = await setKanzleiWunsch(claimId, wunsch)
-      if (!r.ok) setError(r.error ?? 'Speichern fehlgeschlagen')
-      else router.refresh()
-    })
-  }
-
-  return (
-    <div className="rounded-xl border border-claimondo-border bg-white p-4 space-y-3">
-      <div>
-        <p className="text-sm font-semibold text-claimondo-navy">
-          Wer kümmert sich um die Schadenregulierung?
-        </p>
-        <p className="text-xs text-claimondo-ondo mt-0.5">
-          Sobald dein Gutachten freigegeben ist, brauchen wir deine Wahl.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <PfadOption
-          icon={<HandshakeIcon className="w-4 h-4" />}
-          titel="Komplettservice via LexDrive"
-          beschreibung="Wir leiten das Gutachten + Forderung selbst an die gegnerische Versicherung. Du musst nichts tun."
-          onClick={() => pick('partnerkanzlei')}
-          disabled={pending}
-          accent="navy"
-        />
-        <PfadOption
-          icon={<BriefcaseIcon className="w-4 h-4" />}
-          titel="Ich habe eine eigene Kanzlei"
-          beschreibung="Wir senden das vollständige Kanzleipaket an die Email deiner Kanzlei. Ab da läuft alles über deine Kanzlei."
-          onClick={() => pick('eigene_kanzlei')}
-          disabled={pending}
-          accent="violet"
-        />
-        <PfadOption
-          icon={<DownloadIcon className="w-4 h-4" />}
-          titel="Ich reiche selbst ein"
-          beschreibung="Du lädst Gutachten + Anlagen herunter und schickst sie selbst an die gegnerische Versicherung."
-          onClick={() => pick('keine_kanzlei')}
-          disabled={pending}
-          accent="emerald"
-        />
-      </div>
-
-      {error && <p className="text-xs text-red-700">{error}</p>}
-    </div>
-  )
-}
-
-function PfadOption({
-  icon,
-  titel,
-  beschreibung,
-  onClick,
-  disabled,
-  accent,
-}: {
-  icon: React.ReactNode
-  titel: string
-  beschreibung: string
-  onClick: () => void
-  disabled: boolean
-  accent: 'navy' | 'violet' | 'emerald'
-}) {
-  const ringCls =
-    accent === 'navy'
-      ? 'hover:border-claimondo-navy hover:bg-claimondo-navy/[0.04]'
-      : accent === 'violet'
-        ? 'hover:border-violet-400 hover:bg-violet-50'
-        : 'hover:border-emerald-400 hover:bg-emerald-50'
-  const iconCls =
-    accent === 'navy'
-      ? 'text-claimondo-navy'
-      : accent === 'violet'
-        ? 'text-violet-700'
-        : 'text-emerald-700'
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`text-left rounded-lg border border-claimondo-border bg-white p-3 transition-colors disabled:opacity-50 ${ringCls}`}
-    >
-      <div className={`flex items-center gap-1.5 ${iconCls} font-semibold text-xs`}>
-        {icon}
-        <span className="text-claimondo-navy">{titel}</span>
-      </div>
-      <p className="text-[11px] text-claimondo-ondo mt-1.5 leading-relaxed">{beschreibung}</p>
-    </button>
-  )
+  // unentschieden / nicht_gefragt / null — die Frage selbst lebt jetzt
+  // im lila Top-Banner des ClaimSteppers (CMM-32 Polish, sobald QC durch
+  // ist). Diese Card rendert in dem Fall nichts mehr.
+  return null
 }
 
 // ─── Selbst-Einreichen-Card ──────────────────────────────────────────────────

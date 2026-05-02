@@ -95,6 +95,21 @@ export async function gibKanzleipaketFrei(
     if (kErr) return { ok: false, error: kErr.message }
   }
 
+  // CMM-32 Polish: Auto-Trigger Kanzlei-Wunsch-Frage. Sobald die QC durch
+  // ist, brauchen wir vom Kunden eine Entscheidung — Komplettservice via
+  // LexDrive, eigene Kanzlei oder Selbst-Einreichen. Wir setzen
+  // 'noch_unentschieden' (statt dem default 'nicht_gefragt'), damit das
+  // lila Top-Banner im Stepper erscheint und der Kunde geprompt wird.
+  await db
+    .from('claims')
+    .update({
+      kanzlei_wunsch: 'noch_unentschieden',
+      kanzlei_wunsch_gefragt_am: new Date().toISOString(),
+      kanzlei_wunsch_gefragt_in_phase: 'phase_4_re_frage',
+    })
+    .eq('id', claimIdForKanzleifall)
+    .eq('kanzlei_wunsch', 'nicht_gefragt')
+
   revalidatePath(`/faelle/${auftrag.fall_id}`)
   revalidatePath(`/kunde/faelle/${auftrag.fall_id}`)
   revalidatePath(`/gutachter/fall/${auftrag.fall_id}`)
