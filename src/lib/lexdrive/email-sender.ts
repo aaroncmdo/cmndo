@@ -4,7 +4,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resend, isResendAvailable } from '@/lib/email/resend-client'
 
-const LEXDRIVE_EMAIL = process.env.LEXDRIVE_KANZLEI_EMAIL ?? 'schaden@lexdrive.de'
+const LEXDRIVE_EMAIL = process.env.LEXDRIVE_KANZLEI_EMAIL ?? 'aaronsprafke@claimondo.de'
 
 type Anhang = { filename: string; content: Buffer | string }
 
