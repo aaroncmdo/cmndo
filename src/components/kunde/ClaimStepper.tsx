@@ -1061,6 +1061,19 @@ function LexDriveBestaetigenPanel({
         </div>
       )}
 
+      {anspruchVsEur != null && (
+        <div className="flex items-baseline justify-between border-t border-[#0e5be9]/20 pt-3">
+          <p className="text-xs font-semibold text-[#0e5be9]/70 uppercase tracking-wider">Gesamtanspruch</p>
+          <p className="text-3xl font-bold text-[#0e5be9]">
+            {anspruchVsEur.toLocaleString('de-DE', {
+              style: 'currency',
+              currency: 'EUR',
+              maximumFractionDigits: 0,
+            })}
+          </p>
+        </div>
+      )}
+
       <div className="flex items-end gap-3">
         <p className="flex-1 text-xs text-[#0a3fa0]/80 leading-relaxed">
           Abgewickelt in ~20 Tagen + Vollservice durch unser Team. Du erhältst
