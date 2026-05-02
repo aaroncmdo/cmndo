@@ -57,6 +57,10 @@ function revalidateClaim(claimId: string, fallId: string | null) {
     revalidatePath(`/gutachter/fall/${fallId}`)
   }
   revalidatePath(`/admin/claims/${claimId}`)
+  // Layout (Sidebar mit LexDrive-QR-Card) rendert pro Route — wir
+  // revalidieren den Layout-Root, damit die Sidebar bei einem Vollmacht-
+  // Update neu rendert und die Card erscheint.
+  revalidatePath('/kunde', 'layout')
 }
 
 /**
