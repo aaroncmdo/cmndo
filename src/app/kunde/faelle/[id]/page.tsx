@@ -38,6 +38,7 @@ import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
+import SmokeKanzleiButton from '@/components/kunde/SmokeKanzleiButton'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
 import { getClaimLifecycle } from '@/lib/claims/lifecycle'
@@ -617,6 +618,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             description={adresse || undefined}
           />
         </div>
+
+        {/* Smoke-Helper (sichtbar fuer Aaron's Test-Walkthrough) */}
+        <SmokeKanzleiButton fallId={fall.id as string} />
 
         {/* CMM-32f: Claim-Stepper — 4 Hauptphasen + aktive Subphase + Termin-
             Sektion (Datum/Uhrzeit/Adresse/Navi). Termin lebt NUR hier, keine

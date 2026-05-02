@@ -408,3 +408,100 @@ export async function bestaetigeVollmachtKunde(
   if (fall.claim_id) revalidateClaim(fall.claim_id as string, fallId)
   return { ok: true }
 }
+
+/**
+ * SMOKE-Helper: Setzt einen bestehenden Fall in den Zustand
+ * "Erfassung -> Kanzlei-Wunsch offen, ohne Vollmacht" zurueck, damit der
+ * Walkthrough (Banner-Wahl LexDrive/eigene Kanzlei/selbst, Vollmacht-
+ * Bestaetigung) erneut durchgespielt werden kann.
+ *
+ * Setzt:
+ *  - leads.sa_unterschrieben=true, vollmacht_signiert_am=null,
+ *    onboarding_complete=true
+ *  - faelle.vollmacht_signiert_am=null, vollmacht_datum=null,
+ *    onboarding_complete=true, status='regulierung'
+ *  - claims.kanzlei_wunsch='noch_unentschieden', kanzlei_uebergeben_am=null,
+ *    kanzlei_ansprechpartner_*=null, phase='4_gutachten_fertig'
+ *  - auftraege.gutachten_final_freigegeben=true (latest erstgutachten)
+ *  - loescht kanzlei_faelle Eintraege
+ *
+ * Auth: Geschaedigter, Admin oder KB.
+ */
+export async function smokeResetAufKanzleiWunsch(
+  fallId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+
+  const admin = createAdminClient()
+  const { data: fall } = await admin
+    .from('faelle')
+    .select('id, kunde_id, claim_id, lead_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
+
+  const istKunde = fall.kunde_id === user.id
+  if (!istKunde) {
+    const { data: profile } = await supabase
+      .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
+    if (!profile || !['admin', 'kundenbetreuer'].includes(profile.rolle as string)) {
+      return { ok: false, error: 'Nur der Kunde oder Admin/KB' }
+    }
+  }
+
+  // 1) Lead — SA bleibt, Vollmacht raus, Onboarding bleibt komplett.
+  if (fall.lead_id) {
+    await admin.from('leads').update({
+      sa_unterschrieben: true,
+      vollmacht_signiert_am: null,
+      onboarding_complete: true,
+    }).eq('id', fall.lead_id as string)
+  }
+
+  // 2) Fall — Vollmacht-Felder leer, Onboarding fertig, Status regulierung.
+  await admin.from('faelle').update({
+    vollmacht_signiert_am: null,
+    vollmacht_datum: null,
+    onboarding_complete: true,
+    status: 'regulierung',
+  }).eq('id', fallId)
+
+  // 3) Claim — Kanzlei-Wunsch zurueck, Phase auf 4_gutachten_fertig.
+  if (fall.claim_id) {
+    await admin.from('claims').update({
+      kanzlei_wunsch: 'noch_unentschieden',
+      kanzlei_wunsch_gefragt_am: null,
+      kanzlei_uebergeben_am: null,
+      kanzlei_ansprechpartner_name: null,
+      kanzlei_ansprechpartner_email: null,
+      kanzlei_ansprechpartner_telefon: null,
+      phase: '4_gutachten_fertig',
+      status: 'in_bearbeitung',
+    }).eq('id', fall.claim_id as string)
+
+    // 4) kanzlei_faelle - alle Eintraege fuer diesen Claim entfernen
+    await admin.from('kanzlei_faelle').delete().eq('claim_id', fall.claim_id as string)
+  }
+
+  // 5) Erstgutachten als QC-freigegeben markieren — sonst zeigt der Stepper
+  //    den Banner gar nicht. Wenn keiner existiert, nichts tun.
+  const { data: erstgutachten } = await admin
+    .from('auftraege')
+    .select('id')
+    .eq('fall_id', fallId)
+    .eq('typ', 'erstgutachten')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (erstgutachten?.id) {
+    await admin.from('auftraege').update({
+      gutachten_final_freigegeben: true,
+      gutachten_url: 'https://example.com/smoke-gutachten.pdf',
+    }).eq('id', erstgutachten.id as string)
+  }
+
+  if (fall.claim_id) revalidateClaim(fall.claim_id as string, fallId)
+  return { ok: true }
+}
