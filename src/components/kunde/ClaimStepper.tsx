@@ -235,6 +235,16 @@ export default function ClaimStepper({
     setConfirmingEigeneKanzlei(false)
   }
 
+  function handleVollmachtConfirmed() {
+    setLocalVollmachtSigniert(true)
+    // Phase optimistisch auf regulierung — vollstaendiger Anspruchs-/
+    // Auszahlungs-Banner soll direkt nach Vollmacht ausfahren.
+    setSelectedPhase('regulierung')
+  }
+
+  // Effektive Vollmacht-Bestaetigung — DB-Wert ODER lokal optimistisch.
+  const effectiveVollmachtSigniert = !!lead?.vollmacht_signiert_am || localVollmachtSigniert
+
   // Pro Phase ein subtiler Token-Hintergrund — wird sowohl auf den
   // Step-Button (selected) als auch auf das Detail-Panel angewandt.
   // Erfassung + Abschluss = emerald (Done/Erfolg), Begutachtung = navy
@@ -260,7 +270,7 @@ export default function ClaimStepper({
   const zeigeKanzleiWunschBanner =
     !!gutachtenFreigegeben &&
     !!claimId &&
-    !lead?.vollmacht_signiert_am &&
+    !effectiveVollmachtSigniert &&
     (effectiveKanzleiWunsch === 'noch_unentschieden' ||
       effectiveKanzleiWunsch === 'nicht_gefragt' ||
       effectiveKanzleiWunsch == null)
@@ -271,8 +281,7 @@ export default function ClaimStepper({
   const lexdriveVollmachtAusstehend =
     effectiveKanzleiWunsch === 'partnerkanzlei' &&
     !kanzleiUebergebenAm &&
-    !localVollmachtSigniert &&
-    !lead?.vollmacht_signiert_am
+    !effectiveVollmachtSigniert
 
   // Wrapper-Border haengt am AKTUELLEN Claim-Status (mainPhase + Warn/Error-
   // Bedingungen), nicht an der vom User selektierten Phase. Reihenfolge:
@@ -590,7 +599,7 @@ export default function ClaimStepper({
           >
             <LexDriveVollmachtGate
               fallId={fallId ?? null}
-              onConfirmed={() => setLocalVollmachtSigniert(true)}
+              onConfirmed={handleVollmachtConfirmed}
             />
           </motion.div>
         )}
@@ -629,7 +638,7 @@ export default function ClaimStepper({
           + Kanzlei-Sub-Stepper. Nur sichtbar wenn eine Vollmacht vorliegt
           (vollmacht_signiert_am gesetzt) — ohne Vollmacht zeigen wir den
           Anspruch im Kanzlei-Wunsch-Banner-Flow stattdessen. */}
-      {(selectedPhase === 'regulierung' || selectedPhase === 'abschluss') && !bottomSlot && !!lead?.vollmacht_signiert_am && (
+      {(selectedPhase === 'regulierung' || selectedPhase === 'abschluss') && !bottomSlot && effectiveVollmachtSigniert && (
         <div
           className={`border-t border-claimondo-navy/10 px-4 sm:px-6 py-4 ${
             selectedPhase === 'regulierung' ? PHASE_BG.regulierung : PHASE_BG.abschluss
