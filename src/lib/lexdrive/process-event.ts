@@ -805,8 +805,10 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
               .from('claims')
               .update({ kanzlei_uebergeben_am: now })
               .eq('id', fallForClaim.claim_id as string)
-            // Fire-and-forget Kanzleipaket-Comm an LexDrive
-            sendFallCommunication(input.fallId, 'kanzleipaket_an_lexdrive').catch(() => {})
+            // Fire-and-forget Kanzleipaket-Email an LexDrive (AAR-77 buildAndSendKanzleiEmail)
+            import('@/lib/lexdrive/email-sender')
+              .then(({ buildAndSendKanzleiEmail }) => buildAndSendKanzleiEmail(input.fallId))
+              .catch((err) => console.error('[CMM-32] buildAndSendKanzleiEmail failed:', err))
             // KB informieren
             await sendKbMitteilung(
               input.fallId,
