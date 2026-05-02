@@ -218,12 +218,14 @@ export default function ClaimStepper({
     !!gutachtenUrl &&
     (lifecycle.mainPhase === 'regulierung' || lifecycle.mainPhase === 'abschluss')
 
-  // CMM-32 Polish: Lila Kanzlei-Wunsch-Banner — sichtbar wenn QC durch
-  // ist und der Kunde noch nicht entschieden hat. Wir prerunnen das hier
-  // damit der Wrapper-Border passend faerbt.
+  // CMM-32 Polish: Lila Kanzlei-Wunsch-Banner — sichtbar wenn QC durch,
+  // kein Kanzlei-Wunsch gesetzt UND noch keine Vollmacht in der DB.
+  // Liegt eine Vollmacht vor → Kanzleipaket geht nach QC automatisch raus,
+  // Kunde muss nichts wählen → Banner entfällt.
   const zeigeKanzleiWunschBanner =
     !!gutachtenFreigegeben &&
     !!claimId &&
+    !lead?.vollmacht_signiert_am &&
     (kanzleiWunsch === 'noch_unentschieden' ||
       kanzleiWunsch === 'nicht_gefragt' ||
       kanzleiWunsch == null)
@@ -309,12 +311,13 @@ export default function ClaimStepper({
           // Verstrichen: Begutachtungs-Phase rot + Warndreieck.
           const istVerlegungWarn = !!bottomSlot && p.key === 'begutachtung'
           const istVerstrichenWarn = terminVerstrichen && p.key === 'begutachtung'
-          // CMM-32 Polish: Eigener-Kanzlei-Pfad — Begutachtungs-Phase wird
-          // lila gefaerbt sobald der Wunsch auf 'eigene_kanzlei' gesetzt
-          // ist. Das ist der visuelle Hinweis fuer den Kunden „dieser Fall
-          // laeuft nicht den Standardweg ueber LexDrive".
+          // Begutachtungs-Phase wird lila gefaerbt wenn:
+          //   a) eigene_kanzlei gewählt (visueller Hinweis alternativer Pfad)
+          //   b) Kanzlei-Wunsch-Banner sichtbar (= Vollmacht fehlt noch,
+          //      Kunde muss sich entscheiden — pending-State)
           const istEigeneKanzleiPfad =
-            kanzleiWunsch === 'eigene_kanzlei' && p.key === 'begutachtung'
+            (kanzleiWunsch === 'eigene_kanzlei' || zeigeKanzleiWunschBanner) &&
+            p.key === 'begutachtung'
           const Icon = istVerlegungWarn || istVerstrichenWarn ? AlertTriangleIcon : p.icon
           const isSelected = selectedPhase === p.key
           return (
