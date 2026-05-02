@@ -85,8 +85,18 @@ export async function setKanzleiWunsch(
       .eq('id', claimId)
       .maybeSingle()
     if (!c) return { ok: false, error: 'Claim nicht gefunden' }
-    if (c.geschaedigter_user_id !== user.id) {
-      return { ok: false, error: 'Nur Admin/KB oder Geschaedigter darf den Wunsch setzen' }
+    // geschaedigter_user_id kann null sein (Legacy/Backfill) →
+    // Fallback: Ownership über faelle.kunde_id prüfen
+    const istGeschaedigter = c.geschaedigter_user_id === user.id
+    if (!istGeschaedigter) {
+      const { data: fallRow } = await admin
+        .from('faelle')
+        .select('kunde_id')
+        .eq('claim_id', claimId)
+        .maybeSingle()
+      if (!fallRow || fallRow.kunde_id !== user.id) {
+        return { ok: false, error: 'Nur Admin/KB oder Geschaedigter darf den Wunsch setzen' }
+      }
     }
     if (c.kanzlei_uebergeben_am) {
       return { ok: false, error: 'Paket wurde bereits versendet — Wunsch nicht mehr aenderbar' }
