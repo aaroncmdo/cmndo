@@ -37,6 +37,7 @@ import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
+import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
 import { getClaimLifecycle } from '@/lib/claims/lifecycle'
@@ -410,15 +411,19 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     let claimRow: { kunde_no_show_count: number | null; letzter_no_show_am: string | null } | null = null
     // OCR-Werte werden hier nur server-seitig gelesen, um den Anspruch
     // gegen die VS abzuleiten. Einzelwerte verlassen den Server NICHT —
-    // der Kunde sieht nur den Gesamt-Eurobetrag.
+    // der Kunde sieht nur den Gesamt-Eurobetrag (Anspruch) plus die
+    // Mietwagen-/Nutzungsausfall-Card (kombinierte Werte, kein Detail).
     let anspruchVsEur: number | null = null
+    let ausfallProps: Parameters<typeof KundeAusfallEntschaedigungCard>[0] | null = null
     if (fall.claim_id) {
       const { data } = await admin
         .from('claims')
         .select(
           'kunde_no_show_count, letzter_no_show_am, ' +
-          'reparaturkosten_brutto, minderwert, restwert, wiederbeschaffungswert, ' +
-          'totalschaden, gutachten_ocr_processed_at',
+            'reparaturkosten_brutto, minderwert, restwert, wiederbeschaffungswert, ' +
+            'totalschaden, gutachten_ocr_processed_at, ' +
+            'nutzungsausfall_tage, wiederbeschaffungsdauer_tage, ' +
+            'gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur',
         )
         .eq('id', fall.claim_id as string)
         .maybeSingle()
@@ -437,6 +442,21 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           totalschaden: (row.totalschaden as boolean | null) ?? null,
           gutachten_ocr_processed_at: (row.gutachten_ocr_processed_at as string | null) ?? null,
         })
+        ausfallProps = {
+          totalschaden: (row.totalschaden as boolean | null) ?? null,
+          ocrVerarbeitet: !!(row.gutachten_ocr_processed_at as string | null),
+          mietwagenHat: !!(fall.mietwagen_hat as boolean | null),
+          mietwagenSeitDatum: (fall.mietwagen_seit_datum as string | null) ?? null,
+          mietwagenVermieter: (fall.mietwagen_vermieter as string | null) ?? null,
+          mietwagenLimitTage: (fall.mietwagen_limit_tage as number | null) ?? null,
+          mietwagenRechnungVorhanden: !!(fall.mietwagen_rechnung_vorhanden as boolean | null),
+          nutzungsausfallTage: (row.nutzungsausfall_tage as number | null) ?? null,
+          wiederbeschaffungsdauerTage: (row.wiederbeschaffungsdauer_tage as number | null) ?? null,
+          nutzungsausfallTagessatzEur:
+            (row.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null,
+          mietwagenTagessatzEur:
+            (row.gutachten_mietwagen_tagessatz_eur as number | null) ?? null,
+        }
       }
     }
 
@@ -712,6 +732,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           vollmachtSigniertAm={fall.vollmacht_signiert_am as string | null}
           uebergebenAm={null}
         />
+
+        {/* CMM-32 Polish: Mietwagen-/Nutzungsausfall-Card — XOR-Logik aus
+            Gutachten-OCR + faelle-Mietwagen-Feldern. Render-Gate intern. */}
+        {ausfallProps && <KundeAusfallEntschaedigungCard {...ausfallProps} />}
 
         {/* 2-Säulen Layout (Geld + Betreuer) — Anwalt-Säule entfällt durch
             Konsolidierung in MeineKanzleiCard. */}
