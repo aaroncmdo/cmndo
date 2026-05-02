@@ -156,6 +156,9 @@ export default function ClaimStepper({
     sa_unterschrieben: boolean | null
     vollmacht_signiert_am: string | null
     onboarding_complete: boolean | null
+    anrede?: string | null
+    vorname?: string | null
+    nachname?: string | null
   } | null
   /** Kanzlei-Fall-Status fuer das Regulierungs-Detail-Panel. */
   kanzleiFall?: {
@@ -485,6 +488,9 @@ export default function ClaimStepper({
             claimId={claimId}
             anspruchVsEur={anspruchVsEur ?? null}
             anspruchPositionen={anspruchPositionen}
+            kundeAnrede={lead?.anrede ?? null}
+            kundeVorname={lead?.vorname ?? null}
+            kundeNachname={lead?.nachname ?? null}
           />
         </div>
       )}
@@ -1103,20 +1109,31 @@ function EigeneKanzleiAnspruchPanel({
   claimId,
   anspruchVsEur,
   anspruchPositionen,
+  kundeAnrede,
+  kundeVorname,
+  kundeNachname,
 }: {
   claimId: string
   anspruchVsEur: number | null
   anspruchPositionen?: AnspruchPosition[]
+  kundeAnrede?: string | null
+  kundeVorname?: string | null
+  kundeNachname?: string | null
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [disclaimerAkzeptiert, setDisclaimerAkzeptiert] = useState(false)
 
   const gefiltert = (anspruchPositionen ?? []).filter(
     (p) => !EIGENE_KANZLEI_EXCLUDE.some((k) => p.key.toLowerCase().includes(k)),
   )
   const gefiltertTotal = gefiltert.reduce((s, p) => s + p.betragEur, 0)
   const anzeigeBetrag = gefiltert.length > 0 ? gefiltertTotal : (anspruchVsEur ?? null)
+
+  const anredeText =
+    kundeAnrede === 'herr' ? 'Herr' : kundeAnrede === 'frau' ? 'Frau' : null
+  const vollName = [anredeText, kundeVorname, kundeNachname].filter(Boolean).join(' ') || null
 
   function bestaetigen() {
     startTransition(async () => {
@@ -1179,20 +1196,38 @@ function EigeneKanzleiAnspruchPanel({
         </div>
       )}
 
-      <div className="flex items-end gap-3">
-        <p className="flex-1 text-xs text-amber-800/80 leading-relaxed">
-          Wir senden dir das Gutachten und alle Unterlagen — deine Kanzlei übernimmt
-          die Kommunikation mit der Versicherung.
+      <p className="text-xs text-amber-800/80 leading-relaxed">
+        Wir senden dir das Gutachten und alle Unterlagen — deine Kanzlei übernimmt
+        die Kommunikation mit der Versicherung.
+      </p>
+
+      {/* Disclaimer — muss aktiv bestätigt werden */}
+      <label className="flex items-start gap-3 rounded-xl border-2 border-rose-300 bg-rose-50 px-4 py-3 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={disclaimerAkzeptiert}
+          onChange={(e) => setDisclaimerAkzeptiert(e.target.checked)}
+          className="mt-0.5 w-4 h-4 shrink-0 accent-rose-600 cursor-pointer"
+        />
+        <p className="text-xs text-rose-900 leading-relaxed">
+          Hiermit versichere ich
+          {vollName ? `, ${vollName},` : ''}{' '}
+          der Claimondo GmbH, dass ich mich vollständig eigenständig um die
+          Kommunikation mit der Kanzlei &amp; mit dem gegnerischen Versicherer kümmere{' '}
+          <span className="font-semibold">und im Besitz einer Rechtsschutzversicherung</span> bin.
         </p>
+      </label>
+
+      {disclaimerAkzeptiert && (
         <button
           type="button"
           onClick={bestaetigen}
           disabled={pending}
-          className="shrink-0 bg-amber-500 hover:bg-amber-600 active:bg-amber-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
+          className="w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
         >
           Bestätigen
         </button>
-      </div>
+      )}
       {error && <p className="text-xs text-red-700">{error}</p>}
     </div>
   )

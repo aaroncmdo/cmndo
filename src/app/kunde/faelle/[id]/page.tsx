@@ -402,11 +402,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       sa_unterschrieben: boolean | null
       vollmacht_signiert_am: string | null
       onboarding_complete: boolean | null
+      anrede: string | null
+      vorname: string | null
+      nachname: string | null
     } | null = null
     if (fall.lead_id) {
       const { data: leadRow } = await admin
         .from('leads')
-        .select('sa_unterschrieben, vollmacht_signiert_am, onboarding_complete')
+        .select('sa_unterschrieben, vollmacht_signiert_am, onboarding_complete, anrede, vorname, nachname')
         .eq('id', fall.lead_id as string)
         .maybeSingle()
       if (leadRow) {
@@ -414,6 +417,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
           vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
           onboarding_complete: (leadRow.onboarding_complete as boolean | null) ?? null,
+          anrede: (leadRow.anrede as string | null) ?? null,
+          vorname: (leadRow.vorname as string | null) ?? null,
+          nachname: (leadRow.nachname as string | null) ?? null,
         }
       }
     }
