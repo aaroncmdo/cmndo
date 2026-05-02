@@ -94,6 +94,12 @@ type TerminInfo = {
   sv_angekommen_am?: string | null
   sv_unterwegs_seit?: string | null
   sv_eta_minuten?: number | null
+  durchgefuehrt_am?: string | null
+  verlegung_initiator_kunde?: boolean | null
+  /** CMM-32 Polish: Server-side berechnet — Termin liegt > 60min in der
+   *  Vergangenheit ohne durchgefuehrt_am/sv_angekommen_am und keiner der
+   *  Folgezustände wurde erreicht. Triggert den roten Banner. */
+  verstrichen?: boolean
 }
 
 type Pflichtdoc = {

@@ -272,6 +272,30 @@ export default async function GutachterFallPage({
       (STATUS_PRIO[a.status as string] ?? 9) - (STATUS_PRIO[b.status as string] ?? 9),
   )[0] ?? null
 
+  // CMM-32 Walkthrough Polish: SV sieht roten "Termin verstrichen"-Banner
+  // wenn der bestätigte Slot in der Vergangenheit liegt UND keiner der
+  // Folgezustände erreicht wurde. Strikte Guards gegen Fehlanzeige:
+  //   - Start + 60 Min Toleranz vorbei (Pufferzeit für SV-Spätankunft)
+  //   - durchgefuehrt_am NULL (Termin nicht abgehakt)
+  //   - sv_angekommen_am NULL (SV war nicht vor Ort)
+  //   - sv_unterwegs_seit NULL (SV ist nicht aktuell auf dem Weg —
+  //     Verspätungs-Sonderfall bekommt eigene Card via SvUnterwegsInfo)
+  //   - status nur 'bestaetigt' (reserviert/gegenvorschlag/verlegung_pending
+  //     sind eigene UI-Zustände; verschoben/verpasst/durchgefuehrt/abgesagt
+  //     sind Endzustände, die der Banner nicht überlagern darf)
+  // Server-Side berechnet, damit kein Client-Clock-Skew die Anzeige
+  // triggert und der Banner stabil ist solange der DB-Zustand stabil ist.
+  const aktiverTerminVerstrichen = (() => {
+    if (!aktiverTermin?.start_zeit) return false
+    const status = (aktiverTermin.status as string | null) ?? ''
+    if (status !== 'bestaetigt') return false
+    if (aktiverTermin.durchgefuehrt_am) return false
+    if (aktiverTermin.sv_angekommen_am) return false
+    if (aktiverTermin.sv_unterwegs_seit) return false
+    const startMs = new Date(aktiverTermin.start_zeit as string).getTime()
+    return startMs + 60 * 60 * 1000 < Date.now()
+  })()
+
   // AAR-327: Katalog-Slots für Dokument-Anforderung (rolle=sachverstaendiger).
   // Cachelayer: getAlleSlots dedupliziert intern (TTL 5 min), daher ist der
   // zweite Call praktisch kostenlos.
@@ -616,7 +640,11 @@ export default async function GutachterFallPage({
       nachrichten={nachrichten ?? []}
       kundenbetreuer={kundenbetreuer}
       chatTeilnehmer={chatTeilnehmer}
-      aktiverTermin={aktiverTermin}
+      aktiverTermin={
+        aktiverTermin
+          ? { ...aktiverTermin, verstrichen: aktiverTerminVerstrichen }
+          : null
+      }
       fallDokumente={fallDokumente}
       kuerzungen={kuerzungen}
       abrechnungAusgezahltAm={(abrechnung as { abgerechnet_am?: string | null } | null)?.abgerechnet_am ?? null}
