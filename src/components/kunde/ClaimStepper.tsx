@@ -241,9 +241,41 @@ export default function ClaimStepper({
         </div>
       )}
       </div>
+      {/* CMM-32 Polish: Sobald die Begutachtung durch ist (mainPhase
+          regulierung/abschluss), wird die Termin-Bottom-Sektion durch
+          eine Anspruchs-Sektion ersetzt — der Termin-Status ist nicht
+          mehr relevant, der Kunde will sehen wie viel er bekommt. */}
+      {(lifecycle.mainPhase === 'regulierung' || lifecycle.mainPhase === 'abschluss') &&
+        anspruchVsEur != null &&
+        !bottomSlot && (
+          <div className="border-t border-claimondo-navy/10 px-4 sm:px-6 py-4 bg-emerald-50/40">
+            <p className="text-[10px] uppercase tracking-wider text-emerald-800/80 font-semibold">
+              Dein Anspruch gegen die Versicherung
+            </p>
+            <p className="text-3xl font-bold text-emerald-900 mt-1">
+              {anspruchVsEur.toLocaleString('de-DE', {
+                style: 'currency',
+                currency: 'EUR',
+                maximumFractionDigits: 0,
+              })}
+            </p>
+            <p className="text-xs text-claimondo-ondo mt-1">
+              {lifecycle.mainPhase === 'abschluss'
+                ? 'Auszahlung eingegangen — Fall abgeschlossen.'
+                : lifecycle.subPhase === 'auszahlung'
+                  ? 'Versicherung hat zugesagt — Auszahlung läuft.'
+                  : 'Wir holen das Geld bei der gegnerischen Versicherung. Du musst nichts tun — Status siehst du im Stepper oben.'}
+            </p>
+          </div>
+        )}
+
       {/* AAR-864: Termin-Sektion analog SV-Header — sichtbar wenn Termin
-          existiert und keine Verlegung pending. */}
-      {terminInfo && !bottomSlot && (
+          existiert, keine Verlegung pending UND Begutachtung noch nicht
+          komplett durch (= mainPhase erfassung/begutachtung). */}
+      {lifecycle.mainPhase !== 'regulierung' &&
+        lifecycle.mainPhase !== 'abschluss' &&
+        terminInfo &&
+        !bottomSlot && (
         <div
           className={`border-t px-4 sm:px-6 py-3.5 ${
             terminVerstrichen ? 'border-rose-300 bg-rose-50/40' : 'border-claimondo-navy/10'
