@@ -380,8 +380,18 @@ export default function ClaimStepper({
       )}
       <div className="flex items-center w-full">
         {MAIN_PHASES.map((p, i) => {
-          const isCurrent = !abgeschlossen && i === aktuellIdx
-          const isDone = abgeschlossen || i < aktuellIdx
+          // Optimistisch: Kanzlei-Step (= Begutachtung-Slot) gilt als
+          // erledigt sobald die Vollmacht signiert ODER der Selbst-Pfad
+          // bestaetigt ODER ein eigene-Kanzlei-Paket versendet wurde.
+          // Dann bleibt der Kreis nicht "current" haengen sondern wird gruen.
+          const kanzleiStepDone =
+            effectiveVollmachtSigniert ||
+            localSelbstUebergeben ||
+            (effectiveKanzleiWunsch === 'eigene_kanzlei' && !!kanzleiUebergebenAm)
+          const isCurrent = !abgeschlossen && i === aktuellIdx &&
+            !(p.key === 'begutachtung' && kanzleiStepDone)
+          const isDone = abgeschlossen || i < aktuellIdx ||
+            (p.key === 'begutachtung' && kanzleiStepDone)
           // AAR-864: Begutachtungs-Phase amber + Warndreieck wenn eine
           // Verlegung pending ist (= bottomSlot gesetzt).
           // Verstrichen: Begutachtungs-Phase rot + Warndreieck.
