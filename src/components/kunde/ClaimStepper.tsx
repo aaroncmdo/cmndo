@@ -173,11 +173,19 @@ export default function ClaimStepper({
     !!gutachtenUrl &&
     (lifecycle.mainPhase === 'regulierung' || lifecycle.mainPhase === 'abschluss')
 
+  // Wrapper-Border haengt am AKTUELLEN Claim-Status (mainPhase + Warn/Error-
+  // Bedingungen), nicht an der vom User selektierten Phase. Reihenfolge:
+  //   1. Error (Termin verpasst)            → rose
+  //   2. Warnung (Verlegung pending)         → amber
+  //   3. Abschluss (Auszahlung eingegangen)  → emerald
+  //   4. Sonst                               → neutral
   const outerCls = terminVerstrichen
     ? 'rounded-2xl bg-white border-2 border-rose-400 overflow-hidden'
     : bottomSlot
       ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden'
-      : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
+      : lifecycle.mainPhase === 'abschluss'
+        ? 'rounded-2xl bg-white border-2 border-emerald-400 overflow-hidden'
+        : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
 
   return (
     <div className={outerCls}>
