@@ -1335,7 +1335,7 @@ function EigeneKanzleiAnspruchPanel({
             <button
               type="button"
               onClick={() => { setModalMode('eigene_kanzlei'); setShowModal(true) }}
-              className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+              className="w-full bg-rose-500/70 hover:bg-rose-500/90 active:bg-rose-600/90 backdrop-blur-sm border border-rose-300/40 shadow-inner text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all"
             >
               Bestätigen (kein Service)
             </button>
@@ -1485,7 +1485,7 @@ function EigeneKanzleiAnspruchPanel({
                   className={`w-full text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ${
                     modalMode === 'lexdrive'
                       ? 'bg-[#0e5be9] hover:bg-[#0a3fa0] active:bg-[#0a3fa0]'
-                      : 'bg-rose-600 hover:bg-rose-700 active:bg-rose-700'
+                      : 'bg-rose-500/70 hover:bg-rose-500/90 active:bg-rose-600/90 backdrop-blur-sm border border-rose-300/40 shadow-inner'
                   }`}
                 >
                   {pending
