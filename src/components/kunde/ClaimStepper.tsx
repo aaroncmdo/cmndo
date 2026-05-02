@@ -35,7 +35,7 @@ import {
   ChevronRightIcon,
   XIcon,
 } from 'lucide-react'
-import { setKanzleiWunsch, resetKanzleiWunsch, updateKanzleiAnsprechpartner, bestaetigeVollmachtKunde } from '@/lib/kanzlei-wunsch/actions'
+import { setKanzleiWunsch, resetKanzleiWunsch, updateKanzleiAnsprechpartner, bestaetigeVollmachtKunde, bestaetigeSelbstEinreichungOhneKanzlei } from '@/lib/kanzlei-wunsch/actions'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
@@ -223,13 +223,18 @@ export default function ClaimStepper({
   const [confirmingLexDrive, setConfirmingLexDrive] = useState(false)
   const [confirmingEigeneKanzlei, setConfirmingEigeneKanzlei] = useState(false)
 
-  // Optimistischer lokaler Kanzlei-Wunsch — wird bei LexDrive-Bestätigung
-  // sofort gesetzt, damit keine router.refresh()-Pause entsteht.
-  const [localKanzleiWunsch, setLocalKanzleiWunsch] = useState<'partnerkanzlei' | null>(null)
+  // Optimistischer lokaler Kanzlei-Wunsch — wird bei LexDrive-/Selbst-
+  // Bestätigung sofort gesetzt, damit keine router.refresh()-Pause entsteht.
+  const [localKanzleiWunsch, setLocalKanzleiWunsch] = useState<
+    'partnerkanzlei' | 'keine_kanzlei' | null
+  >(null)
   const effectiveKanzleiWunsch = localKanzleiWunsch ?? kanzleiWunsch
 
   // Optimistische lokale Vollmacht-Bestätigung — Gate verschwindet sofort.
   const [localVollmachtSigniert, setLocalVollmachtSigniert] = useState(false)
+  // Optimistisches Selbst-Einreichen-Bestätigt — Stepper springt sofort
+  // auf Abschluss, sobald der Kunde den Download triggert.
+  const [localSelbstUebergeben, setLocalSelbstUebergeben] = useState(false)
 
   function handleLexDriveConfirmed() {
     setLocalKanzleiWunsch('partnerkanzlei')
@@ -242,6 +247,25 @@ export default function ClaimStepper({
     // Phase optimistisch auf regulierung — vollstaendiger Anspruchs-/
     // Auszahlungs-Banner soll direkt nach Vollmacht ausfahren.
     setSelectedPhase('regulierung')
+  }
+
+  // Selbst-Einreichen: Click auf 'Gutachten herunterladen' loest die
+  // Server-Action aus, oeffnet das PDF in neuem Tab und springt im
+  // Stepper auf Abschluss.
+  const [selbstPending, startSelbst] = useTransition()
+  function handleSelbstEinreichenDownload(url: string) {
+    if (!claimId) return
+    // PDF zuerst oeffnen — sonst blockt Safari den popup-Window-Open im
+    // Async-Callback.
+    if (typeof window !== 'undefined') {
+      window.open(url, '_blank', 'noopener,noreferrer')
+    }
+    startSelbst(async () => {
+      const r = await bestaetigeSelbstEinreichungOhneKanzlei(claimId)
+      if (!r.ok) return
+      setLocalSelbstUebergeben(true)
+      setSelectedPhase('abschluss')
+    })
   }
 
   // Effektive Vollmacht-Bestaetigung — DB-Wert ODER lokal optimistisch.
@@ -514,6 +538,11 @@ export default function ClaimStepper({
             claimId={claimId}
             onLexDriveClick={() => { setConfirmingEigeneKanzlei(false); setConfirmingLexDrive(true) }}
             onEigeneKanzleiClick={() => { setConfirmingLexDrive(false); setConfirmingEigeneKanzlei(true) }}
+            onKeineKanzleiSelected={() => {
+              setLocalKanzleiWunsch('keine_kanzlei')
+              setConfirmingLexDrive(false)
+              setConfirmingEigeneKanzlei(false)
+            }}
             confirmingLexDrive={confirmingLexDrive}
             confirmingEigeneKanzlei={confirmingEigeneKanzlei}
           />
@@ -580,6 +609,55 @@ export default function ClaimStepper({
                 </motion.div>
               )}
             </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Selbst-einreichen-Panel — sobald der Kunde 'keine_kanzlei' gewaehlt
+          hat aber noch nicht uebergeben. Click auf Gutachten-Download
+          triggert Bestaetigung + Sprung auf Abschluss. */}
+      <AnimatePresence initial={false}>
+        {effectiveKanzleiWunsch === 'keine_kanzlei' &&
+          !kanzleiUebergebenAm &&
+          !localSelbstUebergeben &&
+          claimId && (
+          <motion.div
+            key="selbst-einreichen-panel"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+            className="border-t border-claimondo-border bg-white px-4 sm:px-6 py-5"
+          >
+            <div className="space-y-3">
+              <div className="flex items-start gap-2">
+                <FileTextIcon className="w-4 h-4 text-claimondo-shield shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-claimondo-navy">Dein Gutachten</p>
+                  <p className="text-xs text-claimondo-ondo mt-0.5 leading-relaxed">
+                    Lade dein Gutachten herunter und reiche es zusammen mit der Schadensanzeige
+                    direkt bei der gegnerischen Versicherung ein. Sobald du den Download gestartet
+                    hast, geht dein Fall in den Abschluss.
+                  </p>
+                </div>
+              </div>
+              {gutachtenUrl ? (
+                <button
+                  type="button"
+                  onClick={() => handleSelbstEinreichenDownload(gutachtenUrl)}
+                  disabled={selbstPending}
+                  className="inline-flex items-center gap-2 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-sm font-semibold px-4 py-2 disabled:opacity-50 transition-colors"
+                >
+                  <DownloadIcon className="w-4 h-4" />
+                  {selbstPending ? 'Wird abgeschlossen…' : 'Gutachten herunterladen'}
+                </button>
+              ) : (
+                <p className="text-[11px] text-claimondo-ondo bg-[#f8f9fb] border border-claimondo-border rounded px-2 py-1.5">
+                  Gutachten-Download wird verfügbar sobald die Vollständigkeitsprüfung durch ist.
+                </p>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -876,16 +954,17 @@ function KanzleiWunschBanner({
   claimId,
   onLexDriveClick,
   onEigeneKanzleiClick,
+  onKeineKanzleiSelected,
   confirmingLexDrive,
   confirmingEigeneKanzlei,
 }: {
   claimId: string
   onLexDriveClick: () => void
   onEigeneKanzleiClick: () => void
+  onKeineKanzleiSelected?: () => void
   confirmingLexDrive: boolean
   confirmingEigeneKanzlei: boolean
 }) {
-  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const confirmingAny = confirmingLexDrive || confirmingEigeneKanzlei
@@ -896,8 +975,8 @@ function KanzleiWunschBanner({
     setError(null)
     startTransition(async () => {
       const r = await setKanzleiWunsch(claimId, wunsch)
-      if (!r.ok) setError(r.error ?? 'Speichern fehlgeschlagen')
-      else router.refresh()
+      if (!r.ok) { setError(r.error ?? 'Speichern fehlgeschlagen'); return }
+      onKeineKanzleiSelected?.()
     })
   }
 
