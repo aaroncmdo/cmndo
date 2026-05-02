@@ -454,11 +454,19 @@ export default function ClaimStepper({
                   )}
                 </div>
               </button>
-              {i < MAIN_PHASES.length - 1 && (
-                <div
-                  className={`flex-1 h-px mx-2 sm:mx-4 ${isDone ? 'bg-emerald-300' : 'bg-claimondo-border'}`}
-                />
-              )}
+              {i < MAIN_PHASES.length - 1 && (() => {
+                // Verbindung zwischen Begutachtung (Kanzlei) und Regulierung
+                // wird lila, solange die Vollmacht ausstehend ist — visuell
+                // konsistent mit dem violet Kanzlei-Wunsch-Banner.
+                const istKanzleiToRegulierung =
+                  i === 1 && !!gutachtenFreigegeben && !effectiveVollmachtSigniert
+                const lineCls = istKanzleiToRegulierung
+                  ? 'bg-violet-400'
+                  : isDone
+                    ? 'bg-emerald-300'
+                    : 'bg-claimondo-border'
+                return <div className={`flex-1 h-px mx-2 sm:mx-4 transition-colors duration-300 ${lineCls}`} />
+              })()}
             </React.Fragment>
           )
         })}
