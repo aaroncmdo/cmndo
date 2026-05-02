@@ -453,6 +453,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       betragEur: number
     }> | null = null
     let ausfallProps: Parameters<typeof KundeAusfallEntschaedigungCard>[0] | null = null
+    let nutzungsausfallBetragEur: number | null = null
     if (fall.claim_id) {
       const { data } = await admin
         .from('claims')
@@ -534,21 +535,29 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           }
         }
         if (positionen.length > 0) anspruchPositionen = positionen
+        const _totalschaden = (row.totalschaden as boolean | null) ?? null
+        const _mietwagenHat = !!(fall.mietwagen_hat as boolean | null)
+        const _nutzungsausfallTage = (row.nutzungsausfall_tage as number | null) ?? null
+        const _wbd = (row.wiederbeschaffungsdauer_tage as number | null) ?? null
+        const _tagessatz = (row.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null
+        const _effTage = _totalschaden ? _wbd : _nutzungsausfallTage
+        const nutzungsausfallBetragEurCalc =
+          !_mietwagenHat && _effTage && _tagessatz ? _effTage * _tagessatz : null
         ausfallProps = {
-          totalschaden: (row.totalschaden as boolean | null) ?? null,
+          totalschaden: _totalschaden,
           ocrVerarbeitet: !!(row.gutachten_ocr_processed_at as string | null),
-          mietwagenHat: !!(fall.mietwagen_hat as boolean | null),
+          mietwagenHat: _mietwagenHat,
           mietwagenSeitDatum: (fall.mietwagen_seit_datum as string | null) ?? null,
           mietwagenVermieter: (fall.mietwagen_vermieter as string | null) ?? null,
           mietwagenLimitTage: (fall.mietwagen_limit_tage as number | null) ?? null,
           mietwagenRechnungVorhanden: !!(fall.mietwagen_rechnung_vorhanden as boolean | null),
-          nutzungsausfallTage: (row.nutzungsausfall_tage as number | null) ?? null,
-          wiederbeschaffungsdauerTage: (row.wiederbeschaffungsdauer_tage as number | null) ?? null,
-          nutzungsausfallTagessatzEur:
-            (row.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null,
+          nutzungsausfallTage: _nutzungsausfallTage,
+          wiederbeschaffungsdauerTage: _wbd,
+          nutzungsausfallTagessatzEur: _tagessatz,
           mietwagenTagessatzEur:
             (row.gutachten_mietwagen_tagessatz_eur as number | null) ?? null,
         }
+        if (nutzungsausfallBetragEurCalc) nutzungsausfallBetragEur = nutzungsausfallBetragEurCalc
       }
     }
 
@@ -780,6 +789,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                     />
                   : null
               }
+              nutzungsausfallBetragEur={nutzungsausfallBetragEur}
               claimId={fall.claim_id as string | null}
               gutachtenFreigegeben={gutachtenFreigegeben}
               kanzleiFall={

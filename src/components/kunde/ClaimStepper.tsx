@@ -130,6 +130,7 @@ export default function ClaimStepper({
   kanzleiUebergebenAm,
   ausfallSlot,
   ausfallSlotLexDrive,
+  nutzungsausfallBetragEur,
   claimId,
   gutachtenFreigegeben,
 }: {
@@ -193,6 +194,9 @@ export default function ClaimStepper({
   /** Gleiche Card wie ausfallSlot, aber mit blauem LexDrive-Styling —
    *  wird im LexDrive-Bestätigungs-Panel gerendert. */
   ausfallSlotLexDrive?: React.ReactNode
+  /** Berechneter Nutzungsausfall-Betrag (effTage × Tagessatz) — wird im
+   *  LexDrive-Panel auf den Gesamtanspruch addiert. */
+  nutzungsausfallBetragEur?: number | null
   /** CMM-32 Polish: Claim-ID fuer das lila Top-Banner (Kanzlei-Wunsch-
    *  Frage). Ohne ClaimId rendert das Banner nicht. */
   claimId?: string | null
@@ -492,6 +496,7 @@ export default function ClaimStepper({
               anspruchVsEur={anspruchVsEur ?? null}
               anspruchPositionen={anspruchPositionen}
               ausfallSlot={ausfallSlotLexDrive ?? ausfallSlot}
+              nutzungsausfallBetragEur={nutzungsausfallBetragEur ?? null}
             />
           </motion.div>
         )}
@@ -1019,11 +1024,13 @@ function LexDriveBestaetigenPanel({
   anspruchVsEur,
   anspruchPositionen,
   ausfallSlot,
+  nutzungsausfallBetragEur,
 }: {
   claimId: string
   anspruchVsEur: number | null
   anspruchPositionen?: AnspruchPosition[]
   ausfallSlot?: React.ReactNode
+  nutzungsausfallBetragEur?: number | null
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -1098,15 +1105,18 @@ function LexDriveBestaetigenPanel({
       )}
 
       {anspruchVsEur != null && (
-        <div className="flex items-baseline justify-between border-t border-[#0e5be9]/20 pt-3">
-          <p className="text-xs font-semibold text-[#0e5be9]/70 uppercase tracking-wider">Gesamtanspruch</p>
-          <p className="text-3xl font-bold text-[#0e5be9]">
-            {anspruchVsEur.toLocaleString('de-DE', {
-              style: 'currency',
-              currency: 'EUR',
-              maximumFractionDigits: 0,
-            })}
-          </p>
+        <div className="border-t border-[#0e5be9]/20 pt-3 flex items-end justify-between gap-3">
+          <p className="text-xs font-semibold text-[#0e5be9]/70 uppercase tracking-wider shrink-0">Gesamtanspruch</p>
+          <div className="text-right">
+            <p className="text-3xl font-bold text-[#0e5be9]">
+              {(anspruchVsEur + (nutzungsausfallBetragEur ?? 0)).toLocaleString('de-DE', {
+                style: 'currency',
+                currency: 'EUR',
+                maximumFractionDigits: 0,
+              })}
+            </p>
+            <p className="text-xs font-semibold text-[#0e5be9]/60 mt-0.5">+&nbsp;25&nbsp;€ Auslagenpauschale</p>
+          </div>
         </div>
       )}
 
