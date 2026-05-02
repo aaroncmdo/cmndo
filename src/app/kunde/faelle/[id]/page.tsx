@@ -791,6 +791,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               }
               nutzungsausfallBetragEur={nutzungsausfallBetragEur}
               claimId={fall.claim_id as string | null}
+              fallId={fall.id as string}
               gutachtenFreigegeben={gutachtenFreigegeben}
               kanzleiFall={
                 kanzleiFall

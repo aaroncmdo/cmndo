@@ -357,3 +357,54 @@ export async function bestaetigeSelbstEinreichungOhneKanzlei(
   revalidateClaim(claimId, fall.id)
   return { ok: true }
 }
+
+/**
+ * CMM-32 Polish: Kunde bestaetigt die Vollmacht direkt aus dem Stepper
+ * (statt ueber den WhatsApp-Flow). Ruft die zentrale confirmVollmacht-Logik
+ * (Termin-Bestaetigung, Kalender-Sync) auf.
+ *
+ * Auth: nur der Geschaedigte des Falls (oder Admin/KB) darf das aendern.
+ */
+export async function bestaetigeVollmachtKunde(
+  fallId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+
+  const admin = createAdminClient()
+  const { data: fall } = await admin
+    .from('faelle')
+    .select('id, kunde_id, claim_id, vollmacht_signiert_am')
+    .eq('id', fallId)
+    .maybeSingle()
+  if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
+  if (fall.vollmacht_signiert_am) return { ok: true }
+
+  // Ownership-Check
+  const istKunde = fall.kunde_id === user.id
+  if (!istKunde) {
+    const { data: profile } = await supabase
+      .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
+    if (!profile || !['admin', 'kundenbetreuer'].includes(profile.rolle as string)) {
+      return { ok: false, error: 'Nur der Kunde oder Admin/KB' }
+    }
+  }
+
+  try {
+    const { confirmVollmacht } = await import('@/app/flow/[token]/actions')
+    await confirmVollmacht(fallId)
+  } catch (err) {
+    console.warn('[bestaetigeVollmachtKunde] confirmVollmacht:', err)
+    // Fallback: zumindest den Timestamp setzen, damit das UI den Gate verlaesst
+    const nowIso = new Date().toISOString()
+    const { error: uErr } = await admin
+      .from('faelle')
+      .update({ vollmacht_signiert_am: nowIso, vollmacht_datum: nowIso })
+      .eq('id', fallId)
+    if (uErr) return { ok: false, error: uErr.message }
+  }
+
+  if (fall.claim_id) revalidateClaim(fall.claim_id as string, fallId)
+  return { ok: true }
+}

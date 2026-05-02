@@ -35,7 +35,7 @@ import {
   ChevronRightIcon,
   XIcon,
 } from 'lucide-react'
-import { setKanzleiWunsch, resetKanzleiWunsch, updateKanzleiAnsprechpartner } from '@/lib/kanzlei-wunsch/actions'
+import { setKanzleiWunsch, resetKanzleiWunsch, updateKanzleiAnsprechpartner, bestaetigeVollmachtKunde } from '@/lib/kanzlei-wunsch/actions'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
@@ -134,6 +134,7 @@ export default function ClaimStepper({
   ausfallSlotLexDrive,
   nutzungsausfallBetragEur,
   claimId,
+  fallId,
   gutachtenFreigegeben,
 }: {
   lifecycle: ClaimLifecycle
@@ -202,6 +203,8 @@ export default function ClaimStepper({
   /** CMM-32 Polish: Claim-ID fuer das lila Top-Banner (Kanzlei-Wunsch-
    *  Frage). Ohne ClaimId rendert das Banner nicht. */
   claimId?: string | null
+  /** Fall-ID — fuer den 'Vollmacht bestaetigen'-Button im LexDrive-Gate. */
+  fallId?: string | null
   /** TRUE wenn Gutachten QC-freigegeben ist. Steuert das Top-Banner. */
   gutachtenFreigegeben?: boolean
 }) {
@@ -222,6 +225,9 @@ export default function ClaimStepper({
   // sofort gesetzt, damit keine router.refresh()-Pause entsteht.
   const [localKanzleiWunsch, setLocalKanzleiWunsch] = useState<'partnerkanzlei' | null>(null)
   const effectiveKanzleiWunsch = localKanzleiWunsch ?? kanzleiWunsch
+
+  // Optimistische lokale Vollmacht-Bestätigung — Gate verschwindet sofort.
+  const [localVollmachtSigniert, setLocalVollmachtSigniert] = useState(false)
 
   function handleLexDriveConfirmed() {
     setLocalKanzleiWunsch('partnerkanzlei')
@@ -263,7 +269,10 @@ export default function ClaimStepper({
   // partnerkanzlei gewählt hat aber die Vollmacht noch nicht bestätigt ist
   // (kanzlei_uebergeben_am = null → Paket noch nicht raus).
   const lexdriveVollmachtAusstehend =
-    effectiveKanzleiWunsch === 'partnerkanzlei' && !kanzleiUebergebenAm
+    effectiveKanzleiWunsch === 'partnerkanzlei' &&
+    !kanzleiUebergebenAm &&
+    !localVollmachtSigniert &&
+    !lead?.vollmacht_signiert_am
 
   // Wrapper-Border haengt am AKTUELLEN Claim-Status (mainPhase + Warn/Error-
   // Bedingungen), nicht an der vom User selektierten Phase. Reihenfolge:
@@ -579,7 +588,10 @@ export default function ClaimStepper({
             style={{ overflow: 'hidden' }}
             className="border-t-2 border-[#0e5be9] bg-[#0e5be9]/[0.05] px-4 sm:px-6 py-4"
           >
-            <LexDriveVollmachtGate />
+            <LexDriveVollmachtGate
+              fallId={fallId ?? null}
+              onConfirmed={() => setLocalVollmachtSigniert(true)}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -1531,7 +1543,26 @@ function EigeneKanzleiAnspruchPanel({
   )
 }
 
-function LexDriveVollmachtGate() {
+function LexDriveVollmachtGate({
+  fallId,
+  onConfirmed,
+}: {
+  fallId?: string | null
+  onConfirmed?: () => void
+}) {
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  function bestaetigen() {
+    if (!fallId) { setError('Fall-ID fehlt'); return }
+    setError(null)
+    startTransition(async () => {
+      const r = await bestaetigeVollmachtKunde(fallId)
+      if (!r.ok) { setError(r.error ?? 'Speichern fehlgeschlagen'); return }
+      onConfirmed?.()
+    })
+  }
+
   return (
     <div className="flex items-start gap-3">
       <div className="w-8 h-8 rounded-full bg-[#0e5be9]/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -1542,15 +1573,26 @@ function LexDriveVollmachtGate() {
           Bitte bestätige die Vollmacht
         </p>
         <p className="text-xs text-[#0e5be9]/80 mt-0.5">
-          LexDrive hat dir eine Vollmacht per WhatsApp geschickt.{' '}
-          <span className="font-semibold text-[#0a3fa0]">Bitte schau auf dein Handy</span>{' '}
-          und bestätige sie dort — sobald wir die Rückmeldung haben, geht deine
-          Akte automatisch an die Kanzlei. Du musst hier nichts weiter tun.
+          LexDrive hat dir eine Vollmacht per WhatsApp geschickt.
+          Du kannst sie dort bestätigen — oder direkt hier mit einem Klick.
+          Sobald die Bestätigung vorliegt, geht deine Akte automatisch an die Kanzlei.
         </p>
-        <div className="mt-2.5 flex items-center gap-1.5">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#0e5be9] animate-pulse" />
-          <span className="text-[11px] font-medium text-[#0e5be9]">Warte auf deine Bestätigung</span>
+        <div className="mt-3 flex items-center gap-3 flex-wrap">
+          <button
+            type="button"
+            onClick={bestaetigen}
+            disabled={pending || !fallId}
+            className="bg-[#0e5be9] hover:bg-[#0a3fa0] active:bg-[#0a3fa0] text-white text-xs font-semibold px-4 py-2 rounded-lg disabled:opacity-50 transition-colors flex items-center gap-1.5"
+          >
+            <CheckIcon className="w-3.5 h-3.5" />
+            {pending ? 'Wird bestätigt…' : 'Vollmacht jetzt bestätigen'}
+          </button>
+          <div className="flex items-center gap-1.5">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#0e5be9] animate-pulse" />
+            <span className="text-[11px] font-medium text-[#0e5be9]">Warte auf deine Bestätigung</span>
+          </div>
         </div>
+        {error && <p className="text-[11px] text-red-700 mt-1.5">{error}</p>}
       </div>
     </div>
   )
