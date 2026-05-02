@@ -132,6 +132,7 @@ export default async function KundeStartseite() {
     schadens_plz: f.schadens_plz as string | null,
     schadens_ort: f.schadens_ort as string | null,
     nachbesichtigung_status: f.nachbesichtigung_status as string | null,
+    kanzlei_wunsch: f.kanzlei_wunsch as string | null,
   }))
   // AAR-705: Defensive — wenn der Karten-Loader (Termine/Timeline/Pflichtdok)
   // crasht, soll die Seite trotzdem die Fall-Karten ohne Meta zeigen statt
