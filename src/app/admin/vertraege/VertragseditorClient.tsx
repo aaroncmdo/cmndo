@@ -22,6 +22,7 @@ import {
   type SlotId,
   type VorlageEntry,
   type VertragsKonfig,
+  type SvOption,
 } from './actions'
 
 const SLOT_LABEL: Record<SlotId, string> = {
@@ -45,18 +46,29 @@ const DEFAULT_PDF_HEIGHT = 842
 type Props = {
   initialVorlagen: VorlageEntry[]
   loadError: string | null
+  svs: SvOption[]
 }
 
 export default function VertragseditorClient({
   initialVorlagen,
   loadError,
+  svs,
 }: Props) {
+  const [svId, setSvId] = useState<string | null>(null)
   const [vorlagen, setVorlagen] = useState<VorlageEntry[]>(initialVorlagen)
+  const [loading, setLoading] = useState(false)
   const byId = new Map(vorlagen.map((v) => [v.slotId, v]))
 
-  async function refresh() {
-    const r = await listVertragsVorlagen()
+  async function refresh(targetSvId: string | null = svId) {
+    setLoading(true)
+    const r = await listVertragsVorlagen(targetSvId)
     if (r.ok) setVorlagen(r.vorlagen)
+    setLoading(false)
+  }
+
+  async function onSvChange(next: string | null) {
+    setSvId(next)
+    await refresh(next)
   }
 
   return (
@@ -66,18 +78,38 @@ export default function VertragseditorClient({
           {loadError}
         </p>
       )}
+      <div className="flex items-center gap-3 flex-wrap">
+        <label className="text-xs font-medium text-claimondo-navy">
+          Vorlage für:
+        </label>
+        <select
+          value={svId ?? ''}
+          onChange={(e) => onSvChange(e.target.value || null)}
+          className="px-3 py-1.5 text-xs border border-claimondo-border rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-claimondo-navy"
+        >
+          <option value="">Default (alle SVs ohne eigene Vorlage)</option>
+          {svs.map((sv) => (
+            <option key={sv.id} value={sv.id}>
+              {sv.label}
+            </option>
+          ))}
+        </select>
+        {loading && (
+          <span className="text-[11px] text-claimondo-ondo">lädt …</span>
+        )}
+      </div>
       <p className="text-xs text-claimondo-ondo">
-        Pro Slot kann eine PDF-Vorlage hochgeladen werden. Klick auf das PDF
-        setzt die Position für Unterschrift, Datum und Name. Die jüngste
-        Version je Slot ist die aktive — beim Fall-Anlage wird sie mit der
-        Kunden-Unterschrift gemerged.
+        {svId
+          ? 'SV-spezifische Vorlage. Wenn nichts hochgeladen ist, fällt der Fall-Anlage-Flow auf die Default-Vorlage zurück.'
+          : 'Default-Vorlage — gilt für alle SVs ohne eigene Konfig. Klick auf das PDF setzt die Position für Unterschrift, Datum und Name.'}
       </p>
       {SLOT_ORDER.map((slotId) => (
         <SlotCard
-          key={slotId}
+          key={`${slotId}-${svId ?? 'default'}`}
           slotId={slotId}
+          svId={svId}
           entry={byId.get(slotId) ?? null}
-          onChanged={refresh}
+          onChanged={() => refresh()}
         />
       ))}
     </div>
@@ -86,10 +118,12 @@ export default function VertragseditorClient({
 
 function SlotCard({
   slotId,
+  svId,
   entry,
   onChanged,
 }: {
   slotId: SlotId
+  svId: string | null
   entry: VorlageEntry | null
   onChanged: () => void
 }) {
@@ -134,7 +168,7 @@ function SlotCard({
     const fd = new FormData()
     fd.append('datei', f)
     startTransition(async () => {
-      const res = await uploadVertragPdf(slotId, fd)
+      const res = await uploadVertragPdf(slotId, svId, fd)
       if (!res.ok) {
         setError(res.error)
         return
@@ -199,8 +233,30 @@ function SlotCard({
             {SLOT_LABEL[slotId]}
           </h2>
           {entry && (
+            <>
+              <span className="text-[10px] text-claimondo-ondo">
+                · v{new Date(entry.ts).toLocaleString('de-DE')}
+              </span>
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                  entry.quelle === 'sv'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : entry.quelle === 'legacy'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                      : 'bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border'
+                }`}
+              >
+                {entry.quelle === 'sv'
+                  ? 'SV-eigen'
+                  : entry.quelle === 'legacy'
+                    ? 'Legacy'
+                    : 'Default'}
+              </span>
+            </>
+          )}
+          {!entry && svId && (
             <span className="text-[10px] text-claimondo-ondo">
-              · v{new Date(entry.ts).toLocaleString('de-DE')}
+              · keine SV-Vorlage — Default greift
             </span>
           )}
         </div>

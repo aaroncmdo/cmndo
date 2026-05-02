@@ -21,20 +21,34 @@ export default async function SmokeLifecyclePage() {
     .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
   if (!profile || profile.rolle !== 'admin') redirect('/login')
 
-  // Aktuell aktive Smoke-Claims laden (gefiltert via fall_typ='SMOKE-LC')
-  const admin = createAdminClient()
-  const { data: smokeClaims } = await admin
-    .from('claims')
-    .select('id, phase, status, faelle:faelle(id, fall_nummer, status)')
-    .eq('fall_typ', 'SMOKE-LC')
-    .order('id')
-
-  const claims = (smokeClaims ?? []) as Array<{
+  // Aktuell aktive Smoke-Claims laden (gefiltert via fall_typ='SMOKE-LC').
+  // Defensiv: jeder Loader-Fehler wird inline gezeigt statt die Page
+  // crashen zu lassen — dann sieht der Admin den echten Fehler statt
+  // eines anonymisierten Digest.
+  type SmokeClaim = {
     id: string
     phase: string | null
     status: string | null
     faelle: Array<{ id: string; fall_nummer: string | null; status: string | null }> | null
-  }>
+  }
+  let claims: SmokeClaim[] = []
+  let loadError: string | null = null
+  try {
+    const admin = createAdminClient()
+    const { data: smokeClaims, error } = await admin
+      .from('claims')
+      .select('id, phase, status, faelle:faelle(id, fall_nummer, status)')
+      .eq('fall_typ', 'SMOKE-LC')
+      .order('id')
+    if (error) {
+      loadError = error.message
+    } else {
+      claims = (smokeClaims ?? []) as SmokeClaim[]
+    }
+  } catch (err) {
+    loadError = err instanceof Error ? err.message : String(err)
+    console.error('[smoke/lifecycle] Loader-Fehler:', err)
+  }
 
   // Fall_nummer-Format: SMOKE-LC-{idx}-{ts}, also können wir per Prefix matchen.
   const fallByScenario = new Map<string, { id: string; fall_nummer: string | null }>()
@@ -60,6 +74,13 @@ export default async function SmokeLifecyclePage() {
           räumt faelle, auftraege, gutachter_termine, kanzlei_faelle auf.
         </p>
       </div>
+
+      {loadError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+          <p className="font-semibold">Loader-Fehler:</p>
+          <code className="font-mono break-all">{loadError}</code>
+        </div>
+      )}
 
       <div className="flex gap-3">
         <form action={seedAction}>
