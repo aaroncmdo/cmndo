@@ -831,11 +831,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         <ClaimSummary
           data={{
             kennzeichen: (fall.kennzeichen as string | null) ?? null,
+            kennzeichen_kreis: (fall.kennzeichen_kreis as string | null) ?? null,
+            kennzeichen_buchstaben: (fall.kennzeichen_buchstaben as string | null) ?? null,
+            kennzeichen_zahl: (fall.kennzeichen_zahl as string | null) ?? null,
+            kennzeichen_suffix: (fall.kennzeichen_suffix as string | null) ?? null,
             fahrzeug_hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
             fahrzeug_modell: (fall.fahrzeug_modell as string | null) ?? null,
             erstzulassung: (fall.erstzulassung as string | null) ?? null,
             kilometerstand: (fall.kilometerstand as number | null) ?? null,
-            fahrzeug_aufbau: (fall.fahrzeug_typ as string | null) ?? null,
+            fahrzeug_aufbau:
+              (fall.fahrzeug_aufbau as string | null) ??
+              (fall.fahrzeug_typ as string | null) ?? null,
             kraftstoff: null,
             fahrgestellnummer: (fall.fin_vin as string | null) ?? null,
             schadens_datum: (fall.schadens_datum as string | null) ?? null,

@@ -31,12 +31,31 @@ export function parseKennzeichen(raw: string | null): {
 
 export default function Kennzeichenhalter({
   kennzeichen,
+  kreis,
+  buchstaben,
+  zahl,
+  suffix,
   size = 'md',
 }: {
-  kennzeichen: string | null
+  /** Komplettstring (Phase 1 / Legacy). Wird nur genutzt wenn die
+   *  strukturierten Felder fehlen. */
+  kennzeichen?: string | null
+  kreis?: string | null
+  buchstaben?: string | null
+  zahl?: string | null
+  suffix?: string | null
   size?: 'sm' | 'md' | 'lg'
 }) {
-  const parts = parseKennzeichen(kennzeichen)
+  // Strukturierte Felder bevorzugen (Phase 2). Fallback auf Regex-Parse.
+  const strukturiert = kreis || buchstaben || zahl
+    ? {
+        kreis: (kreis ?? '').toUpperCase(),
+        buchstaben: (buchstaben ?? '').toUpperCase(),
+        zahl: zahl ?? '',
+        suffix: suffix === 'E' || suffix === 'H' ? suffix : null,
+      }
+    : null
+  const parts = strukturiert ?? parseKennzeichen(kennzeichen ?? null)
   if (!parts) return null
 
   const sizeCfg = {

@@ -27,6 +27,12 @@ import Kennzeichenhalter from './Kennzeichenhalter'
 type FallSummary = {
   // Fahrzeug
   kennzeichen: string | null
+  /** Phase 2: strukturiertes Kennzeichen (faelle.kennzeichen_*). Wenn
+   *  vorhanden, hat es Vorrang vor dem Komplettstring. */
+  kennzeichen_kreis?: string | null
+  kennzeichen_buchstaben?: string | null
+  kennzeichen_zahl?: string | null
+  kennzeichen_suffix?: string | null
   fahrzeug_hersteller: string | null
   fahrzeug_modell: string | null
   erstzulassung: string | null
@@ -69,7 +75,14 @@ export default function ClaimSummary({ data }: { data: FallSummary }) {
     <section className="rounded-2xl border border-claimondo-border bg-white shadow-sm overflow-hidden">
       {/* Kennzeichenhalter-Header */}
       <header className="bg-gradient-to-br from-[#0D1B3E] to-[#1f2e54] px-5 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-center gap-4">
-        <Kennzeichenhalter kennzeichen={data.kennzeichen} size="lg" />
+        <Kennzeichenhalter
+          kennzeichen={data.kennzeichen}
+          kreis={data.kennzeichen_kreis}
+          buchstaben={data.kennzeichen_buchstaben}
+          zahl={data.kennzeichen_zahl}
+          suffix={data.kennzeichen_suffix}
+          size="lg"
+        />
         <div className="flex-1 min-w-0">
           <p className="text-[10px] uppercase tracking-wider text-[#7BA3CC] font-semibold">
             Zusammenfassung
