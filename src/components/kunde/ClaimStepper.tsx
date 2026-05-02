@@ -210,6 +210,7 @@ export default function ClaimStepper({
   /** TRUE wenn Gutachten QC-freigegeben ist. Steuert das Top-Banner. */
   gutachtenFreigegeben?: boolean
 }) {
+  const router = useRouter()
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
   const terminVerstrichen = !!terminInfo?.verstrichen
@@ -240,6 +241,7 @@ export default function ClaimStepper({
     setLocalKanzleiWunsch('partnerkanzlei')
     setConfirmingLexDrive(false)
     setConfirmingEigeneKanzlei(false)
+    router.refresh()
   }
 
   function handleVollmachtConfirmed() {
@@ -247,6 +249,10 @@ export default function ClaimStepper({
     // Phase optimistisch auf regulierung — vollstaendiger Anspruchs-/
     // Auszahlungs-Banner soll direkt nach Vollmacht ausfahren.
     setSelectedPhase('regulierung')
+    // Sidebar (Layout) re-rendern — die LexDrive-QR-Card wird in der
+    // Layout-Server-Component anhand vollmacht_signiert_am geladen, also
+    // muss das Layout aktualisiert werden, damit die Card erscheint.
+    router.refresh()
   }
 
   // Selbst-Einreichen: Click auf 'Gutachten herunterladen' loest die

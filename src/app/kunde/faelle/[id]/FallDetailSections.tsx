@@ -1,32 +1,22 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { SendIcon, FileTextIcon, CalendarIcon } from 'lucide-react'
-import { markNachrichtenGelesen } from '@/lib/markNachrichtenGelesen'
+import { useState } from 'react'
+import { CalendarIcon } from 'lucide-react'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { waehleGegenvorschlagSlot } from './actions'
 import Link from 'next/link'
 // AAR-727 Kandidat 1: Shared Download-Liste — Kunde zeigt flat list.
 import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/DokumenteDownloadListe'
-// AAR-746 (Phase B): Shared Identity-Header — löst die "Aktueller Status"-
-// Section ab. KB + Termin bleiben in einer separaten Detail-Section.
-import { FallIdentityHeader } from '@/components/shared/fall-header'
-// AAR-754 (Phase C): Shared Stammdaten + Kontakte.
+// AAR-754 (Phase C): Shared Stammdaten.
 import { StammdatenReadSection } from '@/components/shared/stammdaten'
-import { FallKontakteCard } from '@/components/shared/fall-kontakte'
 import { Modal } from '@/components/primitives/Modal'
 // AAR-759 (Phase 1): Mietwagen-Status-Anzeige
 import { MietwagenStatusCard } from '@/components/shared/mietwagen'
 // AAR-761 Phase 2: Kunde-Upload-Card fuer Belege
 import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 
-type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
-type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }
 type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null; sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null }
-
-const ROLLE_LABEL: Record<string, string> = { kunde: 'Sie', admin: 'Claimondo', kundenbetreuer: 'Ihr Betreuer', gutachter: 'Gutachter', sachverstaendiger: 'Gutachter', system: 'System' }
-const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-claimondo-ondo', admin: 'bg-claimondo-navy', kundenbetreuer: 'bg-claimondo-shield', gutachter: 'bg-claimondo-shield', sachverstaendiger: 'bg-claimondo-shield', system: 'bg-claimondo-ondo/70' }
 
 function fmt(val: string | null): string {
   if (!val) return ''
@@ -37,52 +27,33 @@ function fmtDateTime(val: string | null): string {
   return new Date(val).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
-// ─── Tabs ───────────────────────────────────────────────────────────────────
-
-const TABS = [
-  { key: 'uebersicht', label: 'Übersicht' },
-  { key: 'dokumente', label: 'Dokumente' },
-] as const
-
-type TabKey = (typeof TABS)[number]['key']
+// Tab-System entfernt — Übersicht + Dokumente werden direkt
+// untereinander gerendert.
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function FallDetailSections({
-  fall, svName, svTelefon, svVerifiziert = false, kbName, dokumente, nachrichten, userId, chatTeilnehmer, aktiverTermin,
+  fall, svName, dokumente, aktiverTermin,
 }: {
   fall: Record<string, unknown>
   svName: string | null
-  svTelefon: string | null
+  /** @deprecated — Kontakt-Cards leben in der Sidebar */
+  svTelefon?: string | null
   svVerifiziert?: boolean
   kbName?: string | null
   dokumente: Dokument[]
-  nachrichten: Nachricht[]
-  userId: string
-  chatTeilnehmer?: ChatTeilnehmer[]
+  /** @deprecated — Chat ist entfernt, Nachrichten gehen ueber Sidebar */
+  nachrichten?: unknown[]
+  /** @deprecated — userId nur noch fuer Chat genutzt, der ist raus */
+  userId?: string
+  /** @deprecated — Chat-Teilnehmer nicht mehr noetig */
+  chatTeilnehmer?: unknown[]
   aktiverTermin?: AktiverTermin | null
 }) {
-  const [activeTab, setActiveTab] = useState<TabKey>('uebersicht')
-
   return (
-    <div>
-      {/* Tab-Leiste */}
-      <div className="flex bg-white rounded-xl border border-claimondo-border shadow-sm overflow-hidden mb-5">
-        {TABS.map(tab => (
-          <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === tab.key
-                ? 'bg-claimondo-ondo text-white'
-                : 'text-claimondo-ondo hover:bg-[#f8f9fb]'
-            }`}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab-Inhalt */}
-      {activeTab === 'uebersicht' && (
-        <div className="space-y-5">
+    <div className="space-y-8">
+      {/* Übersicht */}
+      <div className="space-y-5">
           {/* FallIdentityHeader entfernt — die PageHeader weiter oben (page.tsx)
               zeigt bereits CLM-Nr + Kennzeichen + Fahrzeug. KB + Gutachter leben
               in den Sidebar-Cards. */}
@@ -139,13 +110,13 @@ export default function FallDetailSections({
               slots={aktiverTermin.sv_vorgeschlagene_slots}
             />
           )}
-        </div>
-      )}
+      </div>
 
-      {activeTab === 'dokumente' && (
-        <div className="space-y-5">
-          {/* AAR-761 Phase 2: Upload-Card mit Typ-Auswahl + OCR */}
-          <BelegUploadCard fallId={fall.id as string} />
+      {/* Dokumente */}
+      <div className="space-y-5">
+        <h2 className="text-base font-semibold text-claimondo-navy">Dokumente</h2>
+        {/* AAR-761 Phase 2: Upload-Card mit Typ-Auswahl + OCR */}
+        <BelegUploadCard fallId={fall.id as string} />
 
           {(() => {
             // Dokumente nach Typ gruppieren — uebersichtlicher als eine
@@ -206,9 +177,7 @@ export default function FallDetailSections({
               </Section>
             ))
           })()}
-        </div>
-      )}
-
+      </div>
     </div>
   )
 }
@@ -229,151 +198,6 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     <div className="flex justify-between py-1.5 border-b border-claimondo-border last:border-0">
       <span className="text-sm text-claimondo-ondo">{label}</span>
       <span className="text-sm text-claimondo-navy font-medium text-right">{value}</span>
-    </div>
-  )
-}
-
-// ─── Chat Tab — KFZ-129: Gruppen-Chat mit Teilnehmer-Header ──────────────
-
-function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }: {
-  fallId: string; nachrichten: Nachricht[]; userId: string; teilnehmer: ChatTeilnehmer[]
-}) {
-  const [messages, setMessages] = useState(initialNachrichten)
-  const [text, setText] = useState('')
-  const [sending, setSending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const endRef = useRef<HTMLDivElement>(null)
-
-  // Teilnehmer-Map fuer Namen-Lookup
-  const teilnehmerMap = Object.fromEntries(teilnehmer.map(t => [t.user_id, t]))
-
-  function getSenderName(msg: Nachricht): string {
-    if (msg.sender_id === userId) return 'Sie'
-    const t = teilnehmerMap[msg.sender_id]
-    if (t) return [t.vorname, t.nachname].filter(Boolean).join(' ') || ROLLE_LABEL[t.rolle] || t.rolle
-    return ROLLE_LABEL[msg.sender_rolle] ?? msg.sender_rolle
-  }
-
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
-
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault()
-    if (!text.trim()) return
-    setSending(true); setError(null)
-    try {
-      const { sendNachricht } = await import('./actions')
-      await sendNachricht(fallId, text.trim(), 'chat_kb_kunde')
-      setMessages(prev => [...prev, {
-        id: crypto.randomUUID(), kanal: 'gruppe', sender_id: userId,
-        sender_rolle: 'kunde', nachricht: text.trim(), hat_anhang: false, anhang_url: null,
-        created_at: new Date().toISOString(),
-      }])
-      setText('')
-    } catch (err) { setError(err instanceof Error ? err.message : 'Fehler beim Senden') }
-    finally { setSending(false) }
-  }
-
-  // Andere Teilnehmer (nicht der Kunde selbst)
-  const otherTeilnehmer = teilnehmer.filter(t => t.user_id !== userId)
-
-  return (
-    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm overflow-hidden">
-      {/* KFZ-129: Teilnehmer-Header */}
-      {otherTeilnehmer.length > 0 && (
-        <div className="px-4 py-3 bg-claimondo-navy/5 border-b border-claimondo-border">
-          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2">Ihre Ansprechpartner</p>
-          <div className="flex flex-wrap gap-3">
-            {otherTeilnehmer.map(t => {
-              const name = [t.vorname, t.nachname].filter(Boolean).join(' ') || 'Unbekannt'
-              const rolleLabel = t.rolle === 'kundenbetreuer' ? 'Kundenbetreuer' : t.rolle === 'gutachter' ? 'Gutachter' : t.rolle === 'admin' ? 'Admin' : t.rolle
-              const avatarBg = ROLLE_COLOR[t.rolle] ?? 'bg-claimondo-ondo/70'
-              const initials = [t.vorname?.[0], t.nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
-              return (
-                <div key={t.user_id} className="flex items-center gap-2">
-                  {t.avatar_url ? (
-                    <img src={t.avatar_url} alt={name} className="w-8 h-8 rounded-full object-cover" />
-                  ) : (
-                    <div className={`w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white text-xs font-bold`}>
-                      {initials}
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm font-medium text-claimondo-navy">{name}</p>
-                    <p className="text-[10px] text-claimondo-ondo/70">{rolleLabel}</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Messages — ein Stream fuer alle */}
-      <div className="space-y-3 p-4 max-h-96 overflow-y-auto">
-        {messages.length === 0 && <p className="text-sm text-claimondo-ondo/70 text-center py-8">Noch keine Nachrichten. Schreiben Sie uns!</p>}
-        {messages.map(msg => {
-          const isOwn = msg.sender_id === userId
-          const isSystem = msg.sender_rolle === 'system'
-          const isWhatsApp = msg.kanal === 'whatsapp'
-
-          // KFZ-134: System-Nachrichten zentriert mit eigenem Style
-          if (isSystem) {
-            return (
-              <div key={msg.id} className="flex justify-center">
-                <div className="bg-[#f8f9fb] border border-claimondo-light-blue/30 rounded-xl px-4 py-2 max-w-[85%]">
-                  <p className="text-xs text-claimondo-navy text-center whitespace-pre-wrap">{msg.nachricht}</p>
-                  <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">
-                    {new Date(msg.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            )
-          }
-
-          const senderName = getSenderName(msg)
-          const bubbleColor = isOwn ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-navy'
-          const lightText = isOwn ? 'text-white/60' : 'text-claimondo-ondo/70'
-
-          return (
-            <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${bubbleColor}`}>
-                <div className="flex items-center gap-1.5">
-                  <p className={`text-[10px] font-semibold uppercase tracking-wide ${lightText}`}>
-                    {senderName}
-                  </p>
-                  {isWhatsApp && <span className={`text-[9px] ${lightText}`}>via WhatsApp</span>}
-                </div>
-                <p className="text-sm whitespace-pre-wrap">{msg.nachricht}</p>
-                {msg.hat_anhang && msg.anhang_url && (
-                  <a href={msg.anhang_url} target="_blank" rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-1 mt-1 text-xs underline ${isOwn ? 'text-white/70' : 'text-claimondo-ondo'}`}>
-                    Anhang
-                  </a>
-                )}
-                <p className={`text-[10px] mt-1 ${lightText}`}>
-                  {new Date(msg.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-          )
-        })}
-        <div ref={endRef} />
-      </div>
-
-      {/* Input */}
-      <div className="p-4 border-t border-claimondo-border">
-        {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
-        <form onSubmit={handleSend} className="flex gap-2">
-          <input type="text" value={text} onChange={e => setText(e.target.value)}
-            placeholder="Nachricht schreiben..."
-            // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
-            className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-xl px-4 py-3 text-base text-claimondo-navy placeholder-gray-400 focus:outline-none focus:border-claimondo-ondo" />
-          <button type="submit" disabled={sending || !text.trim()}
-            className="px-4 py-3 bg-claimondo-ondo hover:bg-claimondo-shield text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
-            {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}
-          </button>
-        </form>
-      </div>
     </div>
   )
 }
