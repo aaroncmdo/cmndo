@@ -1176,6 +1176,7 @@ function EigeneKanzleiAnspruchPanel({
   const [error, setError] = useState<string | null>(null)
   const [disclaimerAkzeptiert, setDisclaimerAkzeptiert] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [modalMode, setModalMode] = useState<'eigene_kanzlei' | 'lexdrive'>('eigene_kanzlei')
   const [kanzleiEmail, setKanzleiEmail] = useState('')
 
   const gefiltert = (anspruchPositionen ?? []).filter(
@@ -1195,6 +1196,15 @@ function EigeneKanzleiAnspruchPanel({
       if (kanzleiEmail.trim()) {
         await updateKanzleiAnsprechpartner(claimId, { email: kanzleiEmail.trim() })
       }
+      setShowModal(false)
+      router.refresh()
+    })
+  }
+
+  function bestaetigenLexDrive() {
+    startTransition(async () => {
+      const r = await setKanzleiWunsch(claimId, 'partnerkanzlei')
+      if (!r.ok) { setError(r.error ?? 'Fehler beim Speichern'); return }
       setShowModal(false)
       router.refresh()
     })
@@ -1306,7 +1316,7 @@ function EigeneKanzleiAnspruchPanel({
             )}
             <button
               type="button"
-              onClick={() => setShowModal(true)}
+              onClick={() => { setModalMode('eigene_kanzlei'); setShowModal(true) }}
               className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
             >
               Bestätigen (kein Service)
@@ -1333,43 +1343,56 @@ function EigeneKanzleiAnspruchPanel({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.97 }}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-              className="w-full max-w-md rounded-2xl border border-rose-400/30 bg-red-950/80 backdrop-blur-2xl shadow-2xl overflow-hidden"
+              className={`w-full max-w-md rounded-2xl backdrop-blur-2xl shadow-2xl overflow-hidden transition-colors duration-300 ${
+                modalMode === 'lexdrive'
+                  ? 'border border-[#0e5be9]/40 bg-[#071e4a]/90'
+                  : 'border border-rose-400/30 bg-red-950/80'
+              }`}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-rose-400/20">
+              <div className={`flex items-center justify-between px-5 py-4 border-b transition-colors duration-300 ${
+                modalMode === 'lexdrive' ? 'border-[#0e5be9]/20' : 'border-rose-400/20'
+              }`}>
                 <div className="flex items-center gap-2">
-                  <BriefcaseIcon className="w-4 h-4 text-rose-300 shrink-0" />
-                  <p className="text-sm font-semibold text-white">Eigene Kanzlei — Bestätigung</p>
+                  {modalMode === 'lexdrive'
+                    ? <HandshakeIcon className="w-4 h-4 text-[#7bb3f7] shrink-0" />
+                    : <BriefcaseIcon className="w-4 h-4 text-rose-300 shrink-0" />
+                  }
+                  <p className="text-sm font-semibold text-white">
+                    {modalMode === 'lexdrive' ? 'LexDrive Komplettservice' : 'Eigene Kanzlei — Bestätigung'}
+                  </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
                   className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
                 >
-                  <XIcon className="w-3.5 h-3.5 text-rose-200" />
+                  <XIcon className={`w-3.5 h-3.5 ${modalMode === 'lexdrive' ? 'text-[#7bb3f7]' : 'text-rose-200'}`} />
                 </button>
               </div>
 
               <div className="px-5 py-5 space-y-5">
-                {/* E-Mail-Eingabe */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-rose-200">
-                    E-Mail deiner Kanzlei
-                  </label>
-                  <div className="relative">
-                    <MailIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-rose-400 pointer-events-none" />
-                    <input
-                      type="email"
-                      value={kanzleiEmail}
-                      onChange={(e) => setKanzleiEmail(e.target.value)}
-                      placeholder="kanzlei@example.de"
-                      className="w-full bg-white/10 border border-rose-400/40 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder:text-rose-300/40 focus:outline-none focus:ring-2 focus:ring-rose-400/60 focus:border-rose-400/60 transition-colors"
-                    />
+                {/* E-Mail-Eingabe — nur bei eigene Kanzlei */}
+                {modalMode === 'eigene_kanzlei' && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-rose-200">
+                      E-Mail deiner Kanzlei
+                    </label>
+                    <div className="relative">
+                      <MailIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-rose-400 pointer-events-none" />
+                      <input
+                        type="email"
+                        value={kanzleiEmail}
+                        onChange={(e) => setKanzleiEmail(e.target.value)}
+                        placeholder="kanzlei@example.de"
+                        className="w-full bg-white/10 border border-rose-400/40 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder:text-rose-300/40 focus:outline-none focus:ring-2 focus:ring-rose-400/60 focus:border-rose-400/60 transition-colors"
+                      />
+                    </div>
+                    <p className="text-[11px] text-rose-300/70">
+                      Wir senden Gutachten und Unterlagen an diese Adresse.
+                    </p>
                   </div>
-                  <p className="text-[11px] text-rose-300/70">
-                    Wir senden Gutachten und Unterlagen an diese Adresse.
-                  </p>
-                </div>
+                )}
 
                 {/* Vergleich: Eigene Kanzlei vs LexDrive */}
                 <div className="rounded-xl border border-[#0e5be9]/30 bg-[#0e5be9]/[0.08] p-4 space-y-3">
@@ -1378,7 +1401,9 @@ function EigeneKanzleiAnspruchPanel({
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     {/* Eigene Kanzlei */}
-                    <div className="rounded-lg bg-rose-900/40 border border-rose-500/30 px-3 py-2.5 space-y-0.5">
+                    <div className={`rounded-lg border px-3 py-2.5 space-y-0.5 transition-opacity duration-300 ${
+                      modalMode === 'lexdrive' ? 'opacity-40 bg-white/5 border-white/10' : 'bg-rose-900/40 border-rose-500/30'
+                    }`}>
                       <p className="text-[10px] text-rose-300/70 font-medium uppercase tracking-wide">Eigene Kanzlei</p>
                       <p className="text-lg font-bold text-rose-200">
                         {(anzeigeBetrag ?? 0).toLocaleString('de-DE', {
@@ -1390,7 +1415,11 @@ function EigeneKanzleiAnspruchPanel({
                       <p className="text-[10px] text-rose-300/60">Ohne Nutzungsausfall &amp; Pauschale</p>
                     </div>
                     {/* LexDrive */}
-                    <div className="rounded-lg bg-[#0e5be9]/15 border border-[#0e5be9]/40 px-3 py-2.5 space-y-0.5">
+                    <div className={`rounded-lg border px-3 py-2.5 space-y-0.5 transition-all duration-300 ${
+                      modalMode === 'lexdrive'
+                        ? 'bg-[#0e5be9]/30 border-[#0e5be9] ring-1 ring-[#0e5be9]/60'
+                        : 'bg-[#0e5be9]/15 border-[#0e5be9]/40'
+                    }`}>
                       <p className="text-[10px] text-[#7bb3f7]/70 font-medium uppercase tracking-wide">LexDrive</p>
                       <p className="text-lg font-bold text-[#7bb3f7]">
                         {((anspruchVsEur ?? 0) + (nutzungsausfallBetragEur ?? 0) + 25).toLocaleString('de-DE', {
@@ -1402,38 +1431,53 @@ function EigeneKanzleiAnspruchPanel({
                       <p className="text-[10px] text-[#7bb3f7]/60">Inkl. Nutzungsausfall + 25 € Pauschale</p>
                     </div>
                   </div>
-                  {/* LexDrive-CTA */}
-                  {onSwitchToLexDrive && (
-                    <button
-                      type="button"
-                      onClick={() => { setShowModal(false); onSwitchToLexDrive() }}
-                      className="w-full text-left rounded-xl border border-[#0e5be9]/50 bg-[#0e5be9]/10 hover:bg-[#0e5be9]/20 px-4 py-3 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-full bg-[#0e5be9]/20 flex items-center justify-center shrink-0">
-                          <HandshakeIcon className="w-3.5 h-3.5 text-[#7bb3f7]" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-[#7bb3f7]">Kostenfreier LexDrive-Komplettservice</p>
-                          <p className="text-[10px] text-[#7bb3f7]/60 mt-0.5">Anwaltliche Betreuung — vollständig kostenlos</p>
-                        </div>
-                        <ChevronRightIcon className="w-3.5 h-3.5 text-[#7bb3f7]/60 shrink-0" />
+                  {/* LexDrive-CTA — zeigt Ausgewählt wenn aktiv */}
+                  <button
+                    type="button"
+                    onClick={() => setModalMode('lexdrive')}
+                    className={`w-full text-left rounded-xl border px-4 py-3 transition-all duration-300 ${
+                      modalMode === 'lexdrive'
+                        ? 'border-[#0e5be9] bg-[#0e5be9]/25 ring-1 ring-[#0e5be9]/50'
+                        : 'border-[#0e5be9]/50 bg-[#0e5be9]/10 hover:bg-[#0e5be9]/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-[#0e5be9]/30 flex items-center justify-center shrink-0">
+                        {modalMode === 'lexdrive'
+                          ? <CheckIcon className="w-3.5 h-3.5 text-[#7bb3f7]" />
+                          : <HandshakeIcon className="w-3.5 h-3.5 text-[#7bb3f7]" />
+                        }
                       </div>
-                    </button>
-                  )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-[#7bb3f7]">
+                          {modalMode === 'lexdrive' ? 'LexDrive gewählt ✓' : 'Kostenfreier LexDrive-Komplettservice'}
+                        </p>
+                        <p className="text-[10px] text-[#7bb3f7]/60 mt-0.5">Anwaltliche Betreuung — vollständig kostenlos</p>
+                      </div>
+                      {modalMode !== 'lexdrive' && <ChevronRightIcon className="w-3.5 h-3.5 text-[#7bb3f7]/60 shrink-0" />}
+                    </div>
+                  </button>
                 </div>
 
-                {/* Bestätigen */}
+                {/* Bestätigen — Farbe + Funktion je nach Modus */}
                 <button
                   type="button"
-                  onClick={bestaetigen}
-                  disabled={pending}
-                  disabled={pending || !kanzleiEmail.trim()}
-                  className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  onClick={modalMode === 'lexdrive' ? bestaetigenLexDrive : bestaetigen}
+                  disabled={pending || (modalMode === 'eigene_kanzlei' && !kanzleiEmail.trim())}
+                  className={`w-full text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ${
+                    modalMode === 'lexdrive'
+                      ? 'bg-[#0e5be9] hover:bg-[#0a3fa0] active:bg-[#0a3fa0]'
+                      : 'bg-rose-600 hover:bg-rose-700 active:bg-rose-700'
+                  }`}
                 >
-                  {pending ? 'Wird gespeichert…' : 'Bestätigen (kein Service)'}
+                  {pending
+                    ? 'Wird gespeichert…'
+                    : modalMode === 'lexdrive'
+                      ? 'LexDrive Komplettservice bestätigen'
+                      : 'Bestätigen (kein Service)'
+                  }
                 </button>
-                {error && <p className="text-xs text-rose-300">{error}</p>}
+                {error && <p className={`text-xs ${modalMode === 'lexdrive' ? 'text-[#7bb3f7]' : 'text-rose-300'}`}>{error}</p>}
               </div>
             </motion.div>
           </motion.div>
