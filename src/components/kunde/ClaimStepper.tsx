@@ -859,7 +859,7 @@ function KanzleiWunschBanner({
           disabled={pending}
           active={confirmingLexDrive}
           activeColor="blue"
-          dimmed={confirmingAny && !confirmingLexDrive}
+          dimmed={confirmingAny && !confirmingLexDrive ? (confirmingEigeneKanzlei ? 'yellow' : true) : false}
         />
         <BannerOption
           icon={<BriefcaseIcon className="w-3.5 h-3.5" />}
@@ -877,7 +877,7 @@ function KanzleiWunschBanner({
           subtitel="Du regelst es direkt mit der VS"
           onClick={() => pick('keine_kanzlei')}
           disabled={pending}
-          dimmed={confirmingAny ? (confirmingLexDrive ? 'blue' : true) : false}
+          dimmed={confirmingAny ? (confirmingLexDrive ? 'blue' : confirmingEigeneKanzlei ? 'yellow' : true) : false}
         />
       </div>
       {error && <p className="text-xs text-red-700">{error}</p>}
@@ -902,7 +902,7 @@ function BannerOption({
   disabled: boolean
   active?: boolean
   activeColor?: 'blue' | 'yellow'
-  dimmed?: boolean | 'blue'
+  dimmed?: boolean | 'blue' | 'yellow'
 }) {
   const activeCls =
     active && activeColor === 'blue'
@@ -918,7 +918,9 @@ function BannerOption({
         ? 'text-amber-600'
         : dimmed === 'blue'
           ? 'text-[#0e5be9]'
-          : 'text-violet-700'
+          : dimmed === 'yellow'
+            ? 'text-amber-600'
+            : 'text-violet-700'
   const titleTextCls =
     active && activeColor === 'blue'
       ? 'text-[#0a3fa0]'
@@ -926,7 +928,9 @@ function BannerOption({
         ? 'text-amber-900'
         : dimmed === 'blue'
           ? 'text-[#0a3fa0]'
-          : 'text-claimondo-navy'
+          : dimmed === 'yellow'
+            ? 'text-amber-900'
+            : 'text-claimondo-navy'
   return (
     <button
       type="button"
