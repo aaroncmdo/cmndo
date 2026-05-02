@@ -73,6 +73,14 @@ type TerminInfo = {
   verstrichenInitiator?: 'sv' | 'kunde' | 'unklar'
 }
 
+export type AnspruchPosition = {
+  key: string
+  label: string
+  /** Optionaler Sub-Text fuer Erklaerung (z.B. „12 Tage × 65 €/Tag"). */
+  detail?: string | null
+  betragEur: number
+}
+
 export type BegutachtungEvent = {
   /** Stable React-Key */
   key: string
@@ -109,6 +117,7 @@ export default function ClaimStepper({
   lead,
   kanzleiFall,
   begutachtungEvents,
+  anspruchPositionen,
 }: {
   lifecycle: ClaimLifecycle
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
@@ -145,6 +154,10 @@ export default function ClaimStepper({
    *  Termin wahrgenommen, Gutachten erstellt, QC bestanden). Wird im
    *  Begutachtungs-Detail-Panel gerendert. */
   begutachtungEvents?: BegutachtungEvent[]
+  /** Anspruchs-Positionen — wie sich die Anspruchssumme zusammensetzt
+   *  (Reparatur, Minderwert, Nutzungsausfall, ...). Wird im Regulierungs-
+   *  und Abschluss-Panel unter der grossen Summe gerendert. */
+  anspruchPositionen?: AnspruchPosition[]
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
@@ -389,6 +402,32 @@ export default function ClaimStepper({
                   maximumFractionDigits: 0,
                 })}
               </p>
+              {anspruchPositionen && anspruchPositionen.length > 0 && (
+                <div className="mt-3 rounded-lg border border-claimondo-border/60 bg-white/60 backdrop-blur-sm p-3">
+                  <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/80 font-semibold mb-1.5">
+                    Wie sich der Anspruch zusammensetzt
+                  </p>
+                  <ul className="space-y-1 text-xs">
+                    {anspruchPositionen.map((pos) => (
+                      <li key={pos.key} className="flex items-baseline gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-claimondo-navy">{pos.label}</p>
+                          {pos.detail && (
+                            <p className="text-[11px] text-claimondo-ondo/70">{pos.detail}</p>
+                          )}
+                        </div>
+                        <span className="font-medium text-claimondo-navy whitespace-nowrap">
+                          {pos.betragEur.toLocaleString('de-DE', {
+                            style: 'currency',
+                            currency: 'EUR',
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </>
           ) : (
             <p className="text-xs text-claimondo-ondo">

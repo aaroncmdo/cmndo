@@ -423,6 +423,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // der Kunde sieht nur den Gesamt-Eurobetrag (Anspruch) plus die
     // Mietwagen-/Nutzungsausfall-Card (kombinierte Werte, kein Detail).
     let anspruchVsEur: number | null = null
+    let anspruchPositionen: Array<{
+      key: string
+      label: string
+      detail?: string | null
+      betragEur: number
+    }> | null = null
     let ausfallProps: Parameters<typeof KundeAusfallEntschaedigungCard>[0] | null = null
     if (fall.claim_id) {
       const { data } = await admin
@@ -451,6 +457,50 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           totalschaden: (row.totalschaden as boolean | null) ?? null,
           gutachten_ocr_processed_at: (row.gutachten_ocr_processed_at as string | null) ?? null,
         })
+
+        // CMM-32 Polish: Anspruch-Positionen — Aufschluesselung der Summe.
+        // Bewusst nur die direkten Bestandteile (was in berechneAnspruchVs
+        // einfliesst). Nutzungsausfall + Mietwagen sind tagessatz-abhaengig
+        // und werden in der KundeAusfallEntschaedigungCard separat gezeigt.
+        const totalschaden = (row.totalschaden as boolean | null) ?? null
+        const reparaturBrutto = (row.reparaturkosten_brutto as number | null) ?? null
+        const minderwert = (row.minderwert as number | null) ?? null
+        const wbw = (row.wiederbeschaffungswert as number | null) ?? null
+        const restwert = (row.restwert as number | null) ?? null
+        const positionen: Array<{
+          key: string
+          label: string
+          detail?: string | null
+          betragEur: number
+        }> = []
+        if (totalschaden) {
+          if (wbw != null) {
+            positionen.push({ key: 'wbw', label: 'Wiederbeschaffungswert', betragEur: wbw })
+          }
+          if (restwert != null && restwert > 0) {
+            positionen.push({
+              key: 'restwert',
+              label: 'Restwert',
+              detail: 'wird vom Wiederbeschaffungswert abgezogen',
+              betragEur: -restwert,
+            })
+          }
+          if (minderwert != null && minderwert > 0) {
+            positionen.push({ key: 'minderwert', label: 'Wertminderung', betragEur: minderwert })
+          }
+        } else {
+          if (reparaturBrutto != null) {
+            positionen.push({
+              key: 'rep',
+              label: 'Reparaturkosten (brutto)',
+              betragEur: reparaturBrutto,
+            })
+          }
+          if (minderwert != null && minderwert > 0) {
+            positionen.push({ key: 'minderwert', label: 'Wertminderung', betragEur: minderwert })
+          }
+        }
+        if (positionen.length > 0) anspruchPositionen = positionen
         ausfallProps = {
           totalschaden: (row.totalschaden as boolean | null) ?? null,
           ocrVerarbeitet: !!(row.gutachten_ocr_processed_at as string | null),
@@ -677,6 +727,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               anspruchVsEur={gutachtenFreigegeben ? anspruchVsEur : null}
               lead={leadInputForLifecycle}
               begutachtungEvents={begutachtungEvents}
+              anspruchPositionen={
+                gutachtenFreigegeben ? anspruchPositionen ?? undefined : undefined
+              }
               kanzleiFall={
                 kanzleiFall
                   ? {
