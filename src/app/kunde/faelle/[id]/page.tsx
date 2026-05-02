@@ -40,6 +40,7 @@ import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntsc
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import SmokeKanzleiButton from '@/components/kunde/SmokeKanzleiButton'
 import ClaimSummary from '@/components/kunde/ClaimSummary'
+import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
 import { getClaimLifecycle } from '@/lib/claims/lifecycle'
@@ -829,7 +830,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             + Tabs (Fahrzeug · Unfall · Beteiligte). Zeigt nur kuratierte,
             kunden-relevante Felder an. */}
         <ClaimSummary
+          uploadSlot={<BelegUploadCard fallId={fall.id as string} />}
+          dokumente={(dokumente ?? []).map((d) => ({
+            id: d.id as string,
+            typ: (d.typ as string) ?? 'sonstiges',
+            datei_url: d.datei_url as string,
+            datei_name: (d.datei_name as string | null) ?? null,
+            created_at: d.created_at as string,
+          }))}
           data={{
+            claim_nummer: (fall.claim_nummer as string | null) ?? null,
             kennzeichen: (fall.kennzeichen as string | null) ?? null,
             kennzeichen_kreis: (fall.kennzeichen_kreis as string | null) ?? null,
             kennzeichen_buchstaben: (fall.kennzeichen_buchstaben as string | null) ?? null,

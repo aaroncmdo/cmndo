@@ -5,15 +5,11 @@ import { CalendarIcon } from 'lucide-react'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { waehleGegenvorschlagSlot } from './actions'
 import Link from 'next/link'
-// AAR-727 Kandidat 1: Shared Download-Liste — Kunde zeigt flat list.
-import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/DokumenteDownloadListe'
 // AAR-754 (Phase C): Shared Stammdaten.
 import { StammdatenReadSection } from '@/components/shared/stammdaten'
 import { Modal } from '@/components/primitives/Modal'
 // AAR-759 (Phase 1): Mietwagen-Status-Anzeige
 import { MietwagenStatusCard } from '@/components/shared/mietwagen'
-// AAR-761 Phase 2: Kunde-Upload-Card fuer Belege
-import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
 type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null; sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null }
@@ -111,73 +107,9 @@ export default function FallDetailSections({
             />
           )}
       </div>
-
-      {/* Dokumente */}
-      <div className="space-y-5">
-        <h2 className="text-base font-semibold text-claimondo-navy">Dokumente</h2>
-        {/* AAR-761 Phase 2: Upload-Card mit Typ-Auswahl + OCR */}
-        <BelegUploadCard fallId={fall.id as string} />
-
-          {(() => {
-            // Dokumente nach Typ gruppieren — uebersichtlicher als eine
-            // lange Liste bei vielen Dateien (Storage-Bucket-Sicht).
-            const grouped = dokumente.reduce<Record<string, typeof dokumente>>(
-              (acc, doc) => {
-                const key = doc.typ || 'sonstiges'
-                if (!acc[key]) acc[key] = []
-                acc[key].push(doc)
-                return acc
-              },
-              {},
-            )
-            const TYP_LABEL: Record<string, string> = {
-              gutachten: 'Gutachten',
-              gutachten_anlage: 'Gutachten-Anlagen',
-              schadenanzeige: 'Schadenanzeige',
-              versicherungsschein: 'Versicherungsschein',
-              fahrzeugschein: 'Fahrzeugschein',
-              fuehrerschein: 'Führerschein',
-              polizeibericht: 'Polizeibericht',
-              zulassungsbescheinigung: 'Zulassungsbescheinigung',
-              kostenvoranschlag: 'Kostenvoranschlag',
-              werkstattrechnung: 'Werkstattrechnung',
-              mietwagenrechnung: 'Mietwagenrechnung',
-              foto: 'Fotos',
-              'kunde-nachreichung': 'Sonstige (von Ihnen)',
-              sonstiges: 'Sonstiges',
-            }
-            const sortedKeys = Object.keys(grouped).sort((a, b) => {
-              if (a === 'gutachten') return -1
-              if (b === 'gutachten') return 1
-              return (TYP_LABEL[a] ?? a).localeCompare(TYP_LABEL[b] ?? b)
-            })
-
-            if (sortedKeys.length === 0) {
-              return (
-                <Section title="Alle Dokumente">
-                  <p className="text-sm text-claimondo-ondo italic">Noch keine Dokumente vorhanden.</p>
-                </Section>
-              )
-            }
-
-            return sortedKeys.map((typ) => (
-              <Section key={typ} title={TYP_LABEL[typ] ?? typ}>
-                <DokumenteDownloadListe
-                  variant="list"
-                  rolle="kunde"
-                  emptyTitle=""
-                  dokumente={grouped[typ].map<DokumentItem>((doc) => ({
-                    id: doc.id,
-                    name: doc.datei_name ?? 'Dokument',
-                    url: doc.datei_url,
-                    typ: doc.typ,
-                    createdAt: doc.created_at,
-                  }))}
-                />
-              </Section>
-            ))
-          })()}
-      </div>
+      {/* Dokumente leben jetzt im ClaimSummary-Tab — diese Section ist
+          obsolet, BelegUploadCard + DokumenteDownloadListe wurden in
+          components/kunde/ClaimSummary.tsx integriert. */}
     </div>
   )
 }

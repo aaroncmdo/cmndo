@@ -1,34 +1,54 @@
 'use client'
 
-// CMM-32 Polish: Read-only Übersicht des Falls für den Kunden.
-// Tabs:
-//   1. Fahrzeug      — Marke/Modell/Baujahr/Aufbau, Kennzeichenhalter oben
-//   2. Unfall        — Datum, Ort, Beschreibung, Schadenstyp
-//   3. Beteiligte    — Halter (falls != Kunde), eigene VS, gegnerische VS
-// Komplett read-only — Editing läuft über das Onboarding/KB-Portal.
+// CMM-32 Polish: iOS-style read-only Claim-Übersicht.
+//
+// Layout (Desktop):
+//   ┌─────────────────────────────────────────────────────────────┐
+//   │ {Halter}'s {Modell}                                         │
+//   │ CLM-…  ·  K-AS 2014                                         │
+//   ├─────────────────────────┬───────────────────────────────────┤
+//   │ [Auto-Render]           │ [Glassy Tabs] Unfall · Dokumente  │
+//   │ [Kennzeichenhalter]     │                                   │
+//   │ Hersteller, Modell,     │ Tab-Inhalt in Glassy-Panel        │
+//   │ EZ, KM-Stand            │                                   │
+//   │ [Aufbau][FIN][Antrieb]  │                                   │
+//   └─────────────────────────┴───────────────────────────────────┘
+//
+// Mobile: stacked, Tabs unter den Stammdaten.
 
 import { useState } from 'react'
 import {
-  CarIcon,
-  AlertOctagonIcon,
-  UsersIcon,
+  CarFrontIcon,
   CalendarIcon,
-  MapPinIcon,
   GaugeIcon,
-  FuelIcon,
-  ShieldIcon,
   HashIcon,
+  FuelIcon,
+  Disc3Icon,
+  AlertOctagonIcon,
+  FolderOpenIcon,
+  MapPinIcon,
   PhoneIcon,
   MailIcon,
+  ShieldIcon,
+  UsersIcon,
   InfoIcon,
+  UploadCloudIcon,
 } from 'lucide-react'
 import Kennzeichenhalter from './Kennzeichenhalter'
 
+export type ClaimSummaryDokument = {
+  id: string
+  typ: string
+  datei_url: string
+  datei_name: string | null
+  created_at: string
+}
+
 type FallSummary = {
+  // Identifikation
+  claim_nummer: string | null
   // Fahrzeug
   kennzeichen: string | null
-  /** Phase 2: strukturiertes Kennzeichen (faelle.kennzeichen_*). Wenn
-   *  vorhanden, hat es Vorrang vor dem Komplettstring. */
   kennzeichen_kreis?: string | null
   kennzeichen_buchstaben?: string | null
   kennzeichen_zahl?: string | null
@@ -55,283 +75,426 @@ type FallSummary = {
   vs_gegner_schaden_nr: string | null
   vs_gegner_telefon: string | null
   vs_gegner_email: string | null
-  // Kontakt-Kunde (falls als Halter zu zeigen)
+  // Kontakt-Kunde
   kunde_vorname: string | null
   kunde_nachname: string | null
 }
 
 const TABS = [
-  { key: 'fahrzeug', label: 'Fahrzeug', icon: CarIcon },
-  { key: 'unfall', label: 'Unfall', icon: AlertOctagonIcon },
-  { key: 'beteiligte', label: 'Beteiligte', icon: UsersIcon },
+  { key: 'unfall', label: 'Unfall & Beteiligte', icon: AlertOctagonIcon },
+  { key: 'dokumente', label: 'Dokumente', icon: FolderOpenIcon },
 ] as const
 
 type TabKey = (typeof TABS)[number]['key']
 
-export default function ClaimSummary({ data }: { data: FallSummary }) {
-  const [activeTab, setActiveTab] = useState<TabKey>('fahrzeug')
+export default function ClaimSummary({
+  data,
+  dokumente,
+  uploadSlot,
+}: {
+  data: FallSummary
+  dokumente?: ClaimSummaryDokument[]
+  /** Slot für die BelegUploadCard — Page rendert sie, hier nur eingebunden. */
+  uploadSlot?: React.ReactNode
+}) {
+  const [activeTab, setActiveTab] = useState<TabKey>('unfall')
+
+  // "Serkan's 5er" — bevorzugt Halter-Vorname (oder Kunde wenn er der Halter ist),
+  // Fallback Hersteller/Modell-only.
+  const eigentumsVorname =
+    data.halter_ist_kunde === true || !data.halter_vorname
+      ? data.kunde_vorname
+      : data.halter_vorname
+  const titelLinks = data.fahrzeug_modell ?? data.fahrzeug_hersteller ?? 'Fahrzeug'
+  const titel = eigentumsVorname
+    ? `${eigentumsVorname}'s ${titelLinks}`
+    : [data.fahrzeug_hersteller, data.fahrzeug_modell].filter(Boolean).join(' ') || 'Dein Fahrzeug'
+
+  const subtitelTeile = [data.claim_nummer, data.kennzeichen].filter(Boolean)
 
   return (
-    <section className="rounded-2xl border border-claimondo-border bg-white shadow-sm overflow-hidden">
-      {/* Kennzeichenhalter-Header */}
-      <header className="bg-gradient-to-br from-[#0D1B3E] to-[#1f2e54] px-5 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-center gap-4">
-        <Kennzeichenhalter
-          kennzeichen={data.kennzeichen}
-          kreis={data.kennzeichen_kreis}
-          buchstaben={data.kennzeichen_buchstaben}
-          zahl={data.kennzeichen_zahl}
-          suffix={data.kennzeichen_suffix}
-          size="lg"
-        />
-        <div className="flex-1 min-w-0">
-          <p className="text-[10px] uppercase tracking-wider text-[#7BA3CC] font-semibold">
-            Zusammenfassung
-          </p>
-          <p className="text-lg sm:text-xl font-bold text-white leading-tight mt-0.5 truncate">
-            {[data.fahrzeug_hersteller, data.fahrzeug_modell].filter(Boolean).join(' ')
-              || 'Dein Fahrzeug'}
-          </p>
-          {data.erstzulassung && (
-            <p className="text-xs text-[#7BA3CC] mt-0.5">
-              Erstzulassung {formatDate(data.erstzulassung)}
-            </p>
-          )}
-        </div>
+    <section
+      className="rounded-3xl bg-gradient-to-br from-white via-white to-[#f3f6fb] shadow-[0_2px_12px_rgba(13,27,62,0.06),0_8px_30px_rgba(13,27,62,0.04)] border border-claimondo-border/60 overflow-hidden"
+    >
+      {/* Header */}
+      <header className="px-5 sm:px-7 py-4 sm:py-5 border-b border-claimondo-border/40 bg-white/70 backdrop-blur-md">
+        <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold">
+          {subtitelTeile.length > 0 ? subtitelTeile.join(' · ') : 'Schadensfall'}
+        </p>
+        <h2 className="text-xl sm:text-2xl font-bold text-claimondo-navy leading-tight mt-0.5 truncate">
+          {titel}
+        </h2>
       </header>
 
-      {/* Tab-Leiste */}
-      <div className="flex border-b border-claimondo-border bg-[#f8f9fb]">
-        {TABS.map((tab) => {
-          const TabIcon = tab.icon
-          const active = activeTab === tab.key
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-xs sm:text-sm font-medium transition-colors ${
-                active
-                  ? 'text-claimondo-navy border-b-2 border-claimondo-navy bg-white'
-                  : 'text-claimondo-ondo hover:text-claimondo-navy hover:bg-white/60'
-              }`}
-            >
-              <TabIcon className="w-3.5 h-3.5" />
-              {tab.label}
-            </button>
-          )
-        })}
-      </div>
+      {/* Body — zwei Spalten ab lg */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(260px,320px)_1fr] gap-0">
+        {/* ─── Linke Spalte: Fahrzeug ─── */}
+        <div className="p-5 sm:p-7 lg:border-r border-claimondo-border/40 space-y-5 bg-gradient-to-b from-white to-[#f8f9fb]">
+          <CarRender />
 
-      {/* Tab-Inhalt */}
-      <div className="p-5 sm:p-6">
-        {activeTab === 'fahrzeug' && <FahrzeugTab data={data} />}
-        {activeTab === 'unfall' && <UnfallTab data={data} />}
-        {activeTab === 'beteiligte' && <BeteiligteTab data={data} />}
+          <div className="flex justify-center">
+            <Kennzeichenhalter
+              kennzeichen={data.kennzeichen}
+              kreis={data.kennzeichen_kreis}
+              buchstaben={data.kennzeichen_buchstaben}
+              zahl={data.kennzeichen_zahl}
+              suffix={data.kennzeichen_suffix}
+              size="lg"
+            />
+          </div>
+
+          {/* Wichtigste Daten — untereinander, mit Trennlinien */}
+          <dl className="divide-y divide-claimondo-border/40">
+            <Row label="Hersteller" value={data.fahrzeug_hersteller} />
+            <Row label="Modell" value={data.fahrzeug_modell} />
+            <Row
+              label="Erstzulassung"
+              value={data.erstzulassung ? formatDate(data.erstzulassung) : null}
+            />
+            <Row
+              label="KM-Stand"
+              value={
+                data.kilometerstand != null
+                  ? `${data.kilometerstand.toLocaleString('de-DE')} km`
+                  : null
+              }
+            />
+          </dl>
+
+          {/* Sekundäre Infos als Chip-Reihe */}
+          <div className="flex flex-wrap gap-1.5">
+            {data.fahrzeug_aufbau && (
+              <Chip icon={CarFrontIcon} label={aufbauLabel(data.fahrzeug_aufbau)} />
+            )}
+            {data.kraftstoff && (
+              <Chip icon={FuelIcon} label={kraftstoffLabel(data.kraftstoff)} />
+            )}
+            {data.fahrgestellnummer && (
+              <Chip
+                icon={HashIcon}
+                label={`FIN •••${data.fahrgestellnummer.slice(-4)}`}
+                mono
+              />
+            )}
+            {data.kennzeichen_suffix === 'E' && <Chip icon={Disc3Icon} label="Elektro" />}
+            {data.kennzeichen_suffix === 'H' && <Chip icon={Disc3Icon} label="Oldtimer" />}
+          </div>
+        </div>
+
+        {/* ─── Rechte Spalte: Glassy Tabs ─── */}
+        <div className="p-5 sm:p-7">
+          {/* Tab-Buttons */}
+          <div className="inline-flex p-1 rounded-2xl bg-claimondo-navy/[0.06] backdrop-blur-md border border-claimondo-navy/10 mb-4 max-w-full overflow-x-auto">
+            {TABS.map((tab) => {
+              const TabIcon = tab.icon
+              const active = activeTab === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                    active
+                      ? 'bg-white text-claimondo-navy shadow-[0_1px_3px_rgba(13,27,62,0.08),0_2px_8px_rgba(13,27,62,0.06)]'
+                      : 'text-claimondo-ondo/80 hover:text-claimondo-navy'
+                  }`}
+                >
+                  <TabIcon className="w-3.5 h-3.5" />
+                  {tab.label}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Glassy Tab-Panel */}
+          <div className="rounded-2xl bg-white/60 backdrop-blur-xl border border-white/80 shadow-[0_1px_2px_rgba(13,27,62,0.04),0_8px_24px_rgba(13,27,62,0.06)] p-5 sm:p-6">
+            {activeTab === 'unfall' && <UnfallTab data={data} />}
+            {activeTab === 'dokumente' && (
+              <DokumenteTab dokumente={dokumente ?? []} uploadSlot={uploadSlot} />
+            )}
+          </div>
+        </div>
       </div>
     </section>
   )
 }
 
-// ─── Fahrzeug ─────────────────────────────────────────────────────────────
+// ─── Auto-Render (oben links) ─────────────────────────────────────────────
 
-function FahrzeugTab({ data }: { data: FallSummary }) {
-  const fahrgestellMasked = data.fahrgestellnummer
-    ? `••• •••• ${data.fahrgestellnummer.slice(-4)}`
-    : null
+function CarRender() {
   return (
-    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-      <Field
-        icon={CarIcon}
-        label="Hersteller"
-        value={data.fahrzeug_hersteller}
+    <div className="relative h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-[#0D1B3E] via-[#1f2e54] to-[#3b5a9a] flex items-center justify-center">
+      {/* Lichtreflexion */}
+      <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+      <CarFrontIcon
+        className="w-24 h-24 text-white relative z-10"
+        strokeWidth={1.4}
+        style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.35))' }}
       />
-      <Field
-        icon={CarIcon}
-        label="Modell"
-        value={data.fahrzeug_modell}
-      />
-      <Field
-        icon={CalendarIcon}
-        label="Erstzulassung"
-        value={data.erstzulassung ? formatDate(data.erstzulassung) : null}
-      />
-      <Field
-        icon={GaugeIcon}
-        label="Kilometerstand"
-        value={data.kilometerstand != null ? `${data.kilometerstand.toLocaleString('de-DE')} km` : null}
-      />
-      <Field
-        icon={CarIcon}
-        label="Aufbau"
-        value={data.fahrzeug_aufbau ? aufbauLabel(data.fahrzeug_aufbau) : null}
-      />
-      <Field
-        icon={FuelIcon}
-        label="Antrieb"
-        value={data.kraftstoff ? kraftstoffLabel(data.kraftstoff) : null}
-      />
-      <Field
-        icon={HashIcon}
-        label="Fahrgestellnummer"
-        value={fahrgestellMasked}
-        valueClassName="font-mono"
-      />
-    </dl>
-  )
-}
-
-// ─── Unfall ───────────────────────────────────────────────────────────────
-
-function UnfallTab({ data }: { data: FallSummary }) {
-  const ort = [data.schadens_plz, data.schadens_ort].filter(Boolean).join(' ') || null
-  return (
-    <div className="space-y-5">
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-        <Field
-          icon={CalendarIcon}
-          label="Schadensdatum"
-          value={data.schadens_datum ? formatDate(data.schadens_datum) : null}
-        />
-        <Field
-          icon={MapPinIcon}
-          label="Ort"
-          value={ort}
-        />
-        <Field
-          icon={ShieldIcon}
-          label="Schadensart"
-          value={data.schadenart ? schadenartLabel(data.schadenart) : null}
-        />
-      </dl>
-      {data.schadens_beschreibung && (
-        <div>
-          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-1.5">
-            Unfallhergang
-          </p>
-          <p className="text-sm text-claimondo-navy leading-relaxed whitespace-pre-wrap rounded-lg bg-[#f8f9fb] border border-claimondo-border p-3">
-            {data.schadens_beschreibung}
-          </p>
-        </div>
-      )}
     </div>
   )
 }
 
-// ─── Beteiligte ───────────────────────────────────────────────────────────
+// ─── Tabs ─────────────────────────────────────────────────────────────────
 
-function BeteiligteTab({ data }: { data: FallSummary }) {
+function UnfallTab({ data }: { data: FallSummary }) {
+  const ort = [data.schadens_plz, data.schadens_ort].filter(Boolean).join(' ') || null
   const halterName =
     data.halter_ist_kunde
       ? [data.kunde_vorname, data.kunde_nachname].filter(Boolean).join(' ') || null
       : [data.halter_vorname, data.halter_nachname].filter(Boolean).join(' ') || null
+
   return (
     <div className="space-y-5">
-      {/* Halter */}
-      <PartyCard
-        title="Halter"
-        rows={[
-          { label: 'Name', value: halterName },
-          ...(data.halter_ist_kunde === false ? [{ label: 'Hinweis', value: 'Halter ist nicht der Geschädigte (du)' }] : []),
-        ]}
-      />
+      {/* Unfall-Daten */}
+      <div>
+        <SectionLabel icon={AlertOctagonIcon}>Unfall</SectionLabel>
+        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-2.5">
+          <Field
+            icon={CalendarIcon}
+            label="Schadensdatum"
+            value={data.schadens_datum ? formatDate(data.schadens_datum) : null}
+          />
+          <Field icon={MapPinIcon} label="Ort" value={ort} />
+          <Field
+            icon={ShieldIcon}
+            label="Schadensart"
+            value={data.schadenart ? schadenartLabel(data.schadenart) : null}
+          />
+        </dl>
+        {data.schadens_beschreibung && (
+          <div className="mt-3 rounded-xl bg-white/70 border border-claimondo-border/50 px-3.5 py-2.5">
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold">
+              Unfallhergang
+            </p>
+            <p className="text-sm text-claimondo-navy whitespace-pre-wrap leading-relaxed mt-0.5">
+              {data.schadens_beschreibung}
+            </p>
+          </div>
+        )}
+      </div>
 
-      {/* Eigene Versicherung */}
-      {data.vs_eigener_name && (
-        <PartyCard
-          title="Deine Versicherung"
-          rows={[{ label: 'Versicherer', value: data.vs_eigener_name }]}
-        />
+      <div className="border-t border-claimondo-border/40 pt-4">
+        <SectionLabel icon={UsersIcon}>Beteiligte</SectionLabel>
+        <div className="mt-2.5 space-y-3">
+          <PartyRow
+            title="Halter"
+            primary={halterName}
+            secondary={
+              data.halter_ist_kunde === false ? 'Halter ist nicht der Geschädigte' : null
+            }
+          />
+          {data.vs_eigener_name && (
+            <PartyRow title="Deine Versicherung" primary={data.vs_eigener_name} />
+          )}
+          <PartyRow
+            title="Gegnerische Versicherung"
+            primary={data.vs_gegner_name}
+            extra={
+              <div className="space-y-0.5 text-xs text-claimondo-navy">
+                {data.vs_gegner_schaden_nr && (
+                  <div className="flex items-center gap-1.5">
+                    <HashIcon className="w-3 h-3 text-claimondo-ondo/60" />
+                    <span className="font-mono">{data.vs_gegner_schaden_nr}</span>
+                  </div>
+                )}
+                {data.vs_gegner_telefon && (
+                  <div className="flex items-center gap-1.5">
+                    <PhoneIcon className="w-3 h-3 text-claimondo-ondo/60" />
+                    <span>{data.vs_gegner_telefon}</span>
+                  </div>
+                )}
+                {data.vs_gegner_email && (
+                  <div className="flex items-center gap-1.5">
+                    <MailIcon className="w-3 h-3 text-claimondo-ondo/60" />
+                    <span className="font-mono">{data.vs_gegner_email}</span>
+                  </div>
+                )}
+              </div>
+            }
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DokumenteTab({
+  dokumente,
+  uploadSlot,
+}: {
+  dokumente: ClaimSummaryDokument[]
+  uploadSlot?: React.ReactNode
+}) {
+  const grouped = dokumente.reduce<Record<string, ClaimSummaryDokument[]>>((acc, d) => {
+    const key = d.typ || 'sonstiges'
+    if (!acc[key]) acc[key] = []
+    acc[key].push(d)
+    return acc
+  }, {})
+  const sortedKeys = Object.keys(grouped).sort((a, b) => {
+    if (a === 'gutachten') return -1
+    if (b === 'gutachten') return 1
+    return (TYP_LABEL[a] ?? a).localeCompare(TYP_LABEL[b] ?? b)
+  })
+
+  return (
+    <div className="space-y-4">
+      {uploadSlot && (
+        <div className="rounded-xl bg-white/80 border border-claimondo-border/50 p-3">
+          <SectionLabel icon={UploadCloudIcon}>Hochladen</SectionLabel>
+          <div className="mt-2">{uploadSlot}</div>
+        </div>
       )}
 
-      {/* Gegnerische Versicherung */}
-      <PartyCard
-        title="Gegnerische Versicherung"
-        rows={[
-          { label: 'Versicherer', value: data.vs_gegner_name },
-          { label: 'Schadennummer', value: data.vs_gegner_schaden_nr, mono: true },
-          { label: 'Telefon', value: data.vs_gegner_telefon, icon: PhoneIcon },
-          { label: 'E-Mail', value: data.vs_gegner_email, icon: MailIcon, mono: true },
-        ]}
-      />
+      {dokumente.length === 0 ? (
+        <p className="text-sm text-claimondo-ondo/70 italic">Noch keine Dokumente vorhanden.</p>
+      ) : (
+        <div className="space-y-3">
+          {sortedKeys.map((typ) => (
+            <div
+              key={typ}
+              className="rounded-xl bg-white/70 border border-claimondo-border/50 px-4 py-3"
+            >
+              <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2">
+                {TYP_LABEL[typ] ?? typ}
+              </p>
+              <ul className="space-y-1.5">
+                {grouped[typ].map((d) => (
+                  <li key={d.id} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-claimondo-navy truncate">{d.datei_name ?? 'Dokument'}</span>
+                    <a
+                      href={d.datei_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 text-xs font-semibold text-claimondo-shield hover:text-claimondo-navy underline underline-offset-2"
+                    >
+                      Öffnen
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
+function Row({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div className="flex items-baseline justify-between py-2 gap-3">
+      <dt className="text-xs text-claimondo-ondo/80">{label}</dt>
+      <dd
+        className={`text-sm font-semibold text-right truncate ${
+          value == null ? 'text-claimondo-ondo/40 italic font-normal' : 'text-claimondo-navy'
+        }`}
+      >
+        {value ?? 'nicht angegeben'}
+      </dd>
+    </div>
+  )
+}
+
+function Chip({
+  icon: Icon,
+  label,
+  mono,
+}: {
+  icon: typeof CarFrontIcon
+  label: string
+  mono?: boolean
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full bg-claimondo-navy/[0.05] border border-claimondo-navy/10 px-2.5 py-1 text-[11px] text-claimondo-navy ${
+        mono ? 'font-mono' : ''
+      }`}
+    >
+      <Icon className="w-3 h-3 text-claimondo-ondo/70" />
+      {label}
+    </span>
+  )
+}
+
+function SectionLabel({
+  icon: Icon,
+  children,
+}: {
+  icon: typeof CarFrontIcon
+  children: React.ReactNode
+}) {
+  return (
+    <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold flex items-center gap-1.5">
+      <Icon className="w-3 h-3" />
+      {children}
+    </p>
+  )
+}
+
 function Field({
   icon: Icon,
   label,
   value,
-  valueClassName,
 }: {
-  icon: typeof CarIcon
+  icon: typeof CarFrontIcon
   label: string
   value: string | null
-  valueClassName?: string
 }) {
   return (
     <div className="flex items-start gap-2">
-      <Icon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0 mt-1" />
+      <Icon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0 mt-0.5" />
       <div className="flex-1 min-w-0">
-        <dt className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold">
+        <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold">
           {label}
-        </dt>
-        <dd
-          className={`text-sm text-claimondo-navy mt-0.5 ${valueClassName ?? ''} ${
-            value == null ? 'text-claimondo-ondo/40 italic' : ''
+        </p>
+        <p
+          className={`text-sm truncate ${
+            value == null ? 'text-claimondo-ondo/40 italic' : 'text-claimondo-navy font-medium'
           }`}
         >
           {value ?? 'nicht angegeben'}
-        </dd>
+        </p>
       </div>
     </div>
   )
 }
 
-function PartyCard({
+function PartyRow({
   title,
-  rows,
+  primary,
+  secondary,
+  extra,
 }: {
   title: string
-  rows: Array<{
-    label: string
-    value: string | null
-    mono?: boolean
-    icon?: typeof CarIcon
-  }>
+  primary: string | null
+  secondary?: string | null
+  extra?: React.ReactNode
 }) {
-  const hasAny = rows.some((r) => r.value)
-  return (
-    <div className="rounded-xl border border-claimondo-border bg-[#f8f9fb] p-4">
-      <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2.5">
-        {title}
-      </p>
-      {!hasAny ? (
-        <p className="text-xs text-claimondo-ondo/60 flex items-center gap-1.5">
+  if (!primary && !extra) {
+    return (
+      <div className="rounded-xl bg-white/50 border border-claimondo-border/50 px-3.5 py-2.5">
+        <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold">
+          {title}
+        </p>
+        <p className="text-xs text-claimondo-ondo/60 italic flex items-center gap-1 mt-0.5">
           <InfoIcon className="w-3 h-3" /> Noch keine Angaben
         </p>
-      ) : (
-        <dl className="space-y-1.5">
-          {rows.map((r) => {
-            if (!r.value) return null
-            const RIcon = r.icon
-            return (
-              <div key={r.label} className="flex items-baseline gap-3 text-xs">
-                <dt className="w-32 shrink-0 text-claimondo-ondo/80 flex items-center gap-1">
-                  {RIcon && <RIcon className="w-3 h-3" />}
-                  {r.label}
-                </dt>
-                <dd
-                  className={`flex-1 font-medium text-claimondo-navy ${r.mono ? 'font-mono' : ''}`}
-                >
-                  {r.value}
-                </dd>
-              </div>
-            )
-          })}
-        </dl>
-      )}
+      </div>
+    )
+  }
+  return (
+    <div className="rounded-xl bg-white/70 border border-claimondo-border/50 px-3.5 py-2.5">
+      <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold">
+        {title}
+      </p>
+      {primary && <p className="text-sm font-semibold text-claimondo-navy">{primary}</p>}
+      {secondary && <p className="text-[11px] text-claimondo-ondo/70">{secondary}</p>}
+      {extra && <div className="mt-1.5">{extra}</div>}
     </div>
   )
 }
@@ -351,10 +514,11 @@ function aufbauLabel(raw: string): string {
     coupe: 'Coupé',
     cabrio: 'Cabrio',
     transporter: 'Transporter',
-    caravan: 'Wohnwagen / Caravan',
+    caravan: 'Wohnwagen',
     motorrad: 'Motorrad',
     oldtimer: 'Oldtimer',
-    elektro: 'Elektrofahrzeug',
+    lkw: 'LKW',
+    sonstiges: 'Sonstiges',
   }
   return map[raw.toLowerCase()] ?? raw
 }
@@ -376,11 +540,28 @@ function kraftstoffLabel(raw: string): string {
 function schadenartLabel(raw: string): string {
   const map: Record<string, string> = {
     haftpflicht: 'Haftpflichtschaden',
-    haftpflicht_eindeutig: 'Haftpflichtschaden (eindeutig)',
-    haftpflicht_strittig: 'Haftpflichtschaden (strittig)',
+    haftpflicht_eindeutig: 'Haftpflicht (eindeutig)',
+    haftpflicht_strittig: 'Haftpflicht (strittig)',
     kasko: 'Kaskoschaden',
     teilschuld: 'Teilschuld',
     totalschaden: 'Totalschaden',
   }
   return map[raw.toLowerCase()] ?? raw
+}
+
+const TYP_LABEL: Record<string, string> = {
+  gutachten: 'Gutachten',
+  gutachten_anlage: 'Gutachten-Anlagen',
+  schadenanzeige: 'Schadenanzeige',
+  versicherungsschein: 'Versicherungsschein',
+  fahrzeugschein: 'Fahrzeugschein',
+  fuehrerschein: 'Führerschein',
+  polizeibericht: 'Polizeibericht',
+  zulassungsbescheinigung: 'Zulassungsbescheinigung',
+  kostenvoranschlag: 'Kostenvoranschlag',
+  werkstattrechnung: 'Werkstattrechnung',
+  mietwagenrechnung: 'Mietwagenrechnung',
+  foto: 'Fotos',
+  'kunde-nachreichung': 'Sonstige (von Ihnen)',
+  sonstiges: 'Sonstiges',
 }
