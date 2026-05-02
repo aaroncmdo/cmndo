@@ -635,67 +635,83 @@ export default function ClaimStepper({
             selectedPhase === 'regulierung' ? PHASE_BG.regulierung : PHASE_BG.abschluss
           }`}
         >
-          {anspruchVsEur != null ? (
+          {/* Bei LexDrive (partnerkanzlei) zeigen wir den schlichten
+              Auszahlungs-Sub-Stepper — die Anspruchs-Specs lebten im
+              LexDrive-Bestätigungs-Panel. Bei eigene_kanzlei/keine_kanzlei
+              bleibt der detaillierte Anspruchsblock. */}
+          {effectiveKanzleiWunsch !== 'partnerkanzlei' && (
             <>
-              <p
-                className={`text-[10px] uppercase tracking-wider font-semibold ${
-                  selectedPhase === 'abschluss'
-                    ? 'text-emerald-800/80'
-                    : 'text-claimondo-navy/70'
-                }`}
-              >
-                Dein Anspruch gegen die Versicherung
-              </p>
-              <p
-                className={`text-3xl font-bold mt-1 ${
-                  selectedPhase === 'abschluss'
-                    ? 'text-emerald-900'
-                    : 'text-claimondo-navy'
-                }`}
-              >
-                {anspruchVsEur.toLocaleString('de-DE', {
-                  style: 'currency',
-                  currency: 'EUR',
-                  maximumFractionDigits: 0,
-                })}
-              </p>
-              {anspruchPositionen && anspruchPositionen.length > 0 && (
-                <div className="mt-3 rounded-lg border border-claimondo-border/60 bg-white/60 backdrop-blur-sm p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/80 font-semibold mb-1.5">
-                    Wie sich der Anspruch zusammensetzt
+              {anspruchVsEur != null ? (
+                <>
+                  <p
+                    className={`text-[10px] uppercase tracking-wider font-semibold ${
+                      selectedPhase === 'abschluss'
+                        ? 'text-emerald-800/80'
+                        : 'text-claimondo-navy/70'
+                    }`}
+                  >
+                    Dein Anspruch gegen die Versicherung
                   </p>
-                  <ul className="space-y-1 text-xs">
-                    {anspruchPositionen.map((pos) => (
-                      <li key={pos.key} className="flex items-baseline gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-claimondo-navy">{pos.label}</p>
-                          {pos.detail && (
-                            <p className="text-[11px] text-claimondo-ondo/70">{pos.detail}</p>
-                          )}
-                        </div>
-                        <span className="font-medium text-claimondo-navy whitespace-nowrap">
-                          {pos.betragEur.toLocaleString('de-DE', {
-                            style: 'currency',
-                            currency: 'EUR',
-                            maximumFractionDigits: 2,
-                          })}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                  <p
+                    className={`text-3xl font-bold mt-1 ${
+                      selectedPhase === 'abschluss'
+                        ? 'text-emerald-900'
+                        : 'text-claimondo-navy'
+                    }`}
+                  >
+                    {anspruchVsEur.toLocaleString('de-DE', {
+                      style: 'currency',
+                      currency: 'EUR',
+                      maximumFractionDigits: 0,
+                    })}
+                  </p>
+                  {anspruchPositionen && anspruchPositionen.length > 0 && (
+                    <div className="mt-3 rounded-lg border border-claimondo-border/60 bg-white/60 backdrop-blur-sm p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/80 font-semibold mb-1.5">
+                        Wie sich der Anspruch zusammensetzt
+                      </p>
+                      <ul className="space-y-1 text-xs">
+                        {anspruchPositionen.map((pos) => (
+                          <li key={pos.key} className="flex items-baseline gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-claimondo-navy">{pos.label}</p>
+                              {pos.detail && (
+                                <p className="text-[11px] text-claimondo-ondo/70">{pos.detail}</p>
+                              )}
+                            </div>
+                            <span className="font-medium text-claimondo-navy whitespace-nowrap">
+                              {pos.betragEur.toLocaleString('de-DE', {
+                                style: 'currency',
+                                currency: 'EUR',
+                                maximumFractionDigits: 2,
+                              })}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-xs text-claimondo-ondo">
+                  Die Anspruchssumme wird berechnet, sobald das Gutachten freigegeben ist.
+                </p>
               )}
+
+              {/* Mietwagen/Nutzungsausfall-Slot — nur Nicht-LexDrive */}
+              {ausfallSlot && <div className="mt-3">{ausfallSlot}</div>}
             </>
-          ) : (
-            <p className="text-xs text-claimondo-ondo">
-              Die Anspruchssumme wird berechnet, sobald das Gutachten freigegeben ist.
-            </p>
           )}
 
-          {/* CMM-32 Polish: Mietwagen/Nutzungsausfall-Slot — semantisch
-              gehoert das zum Anspruch (XOR Mietwagen ODER Nutzungsausfall),
-              also direkt unter die Positionen-Aufschluesselung. */}
-          {ausfallSlot && <div className="mt-3">{ausfallSlot}</div>}
+          {/* LexDrive: schlichter Auszahlungs-Header */}
+          {effectiveKanzleiWunsch === 'partnerkanzlei' && (
+            <div className="flex items-center gap-2 mb-1">
+              <EuroIcon className="w-4 h-4 text-claimondo-shield shrink-0" />
+              <p className="text-sm font-semibold text-claimondo-navy">
+                {selectedPhase === 'abschluss' ? 'Auszahlung' : 'Auszahlung läuft'}
+              </p>
+            </div>
+          )}
 
           {/* Kanzlei-Sub-Stepper */}
           {kanzleiFall && (
