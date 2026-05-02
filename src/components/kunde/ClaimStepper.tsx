@@ -764,57 +764,36 @@ function KanzleiWunschBanner({
           </p>
         </div>
       </div>
-      {/* Wenn eine Option aktiv ist: nur diese zeigen. Sonst alle drei. */}
-      {confirmingAny ? (
-        <div>
-          {confirmingLexDrive && (
-            <BannerOption
-              icon={<HandshakeIcon className="w-3.5 h-3.5" />}
-              titel="Komplettservice"
-              subtitel="LexDrive übernimmt"
-              onClick={() => pick('partnerkanzlei')}
-              disabled={pending}
-              active
-              activeColor="blue"
-            />
-          )}
-          {confirmingEigeneKanzlei && (
-            <BannerOption
-              icon={<BriefcaseIcon className="w-3.5 h-3.5" />}
-              titel="Eigene Kanzlei"
-              subtitel="Wir senden Paket an deine Kanzlei"
-              onClick={() => pick('eigene_kanzlei')}
-              disabled={pending}
-              active
-              activeColor="yellow"
-            />
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          <BannerOption
-            icon={<HandshakeIcon className="w-3.5 h-3.5" />}
-            titel="Komplettservice"
-            subtitel="LexDrive übernimmt"
-            onClick={() => pick('partnerkanzlei')}
-            disabled={pending}
-          />
-          <BannerOption
-            icon={<BriefcaseIcon className="w-3.5 h-3.5" />}
-            titel="Eigene Kanzlei"
-            subtitel="Wir senden Paket an deine Kanzlei"
-            onClick={() => pick('eigene_kanzlei')}
-            disabled={pending}
-          />
-          <BannerOption
-            icon={<DownloadIcon className="w-3.5 h-3.5" />}
-            titel="Selbst einreichen"
-            subtitel="Du regelst es direkt mit der VS"
-            onClick={() => pick('keine_kanzlei')}
-            disabled={pending}
-          />
-        </div>
-      )}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <BannerOption
+          icon={<HandshakeIcon className="w-3.5 h-3.5" />}
+          titel="Komplettservice"
+          subtitel="LexDrive übernimmt"
+          onClick={() => pick('partnerkanzlei')}
+          disabled={pending}
+          active={confirmingLexDrive}
+          activeColor="blue"
+          dimmed={confirmingAny && !confirmingLexDrive}
+        />
+        <BannerOption
+          icon={<BriefcaseIcon className="w-3.5 h-3.5" />}
+          titel="Eigene Kanzlei"
+          subtitel="Wir senden Paket an deine Kanzlei"
+          onClick={() => pick('eigene_kanzlei')}
+          disabled={pending}
+          active={confirmingEigeneKanzlei}
+          activeColor="yellow"
+          dimmed={confirmingAny && !confirmingEigeneKanzlei}
+        />
+        <BannerOption
+          icon={<DownloadIcon className="w-3.5 h-3.5" />}
+          titel="Selbst einreichen"
+          subtitel="Du regelst es direkt mit der VS"
+          onClick={() => pick('keine_kanzlei')}
+          disabled={pending}
+          dimmed={confirmingAny}
+        />
+      </div>
       {error && <p className="text-xs text-red-700">{error}</p>}
     </div>
   )
@@ -828,6 +807,7 @@ function BannerOption({
   disabled,
   active,
   activeColor,
+  dimmed,
 }: {
   icon: React.ReactNode
   titel: string
@@ -836,6 +816,7 @@ function BannerOption({
   disabled: boolean
   active?: boolean
   activeColor?: 'blue' | 'yellow'
+  dimmed?: boolean
 }) {
   const activeCls =
     active && activeColor === 'blue'
@@ -861,7 +842,7 @@ function BannerOption({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`text-left rounded-lg border px-3 py-2 transition-colors disabled:opacity-40 ${activeCls ?? normalCls}`}
+      className={`text-left rounded-lg border px-3 py-2 transition-colors disabled:opacity-40 ${activeCls ?? normalCls} ${dimmed ? 'opacity-40' : ''}`}
     >
       <div className={`flex items-center gap-1.5 font-semibold text-xs ${iconTextCls}`}>
         {icon}
