@@ -35,6 +35,7 @@ import WeatherBanner from '@/components/shared/WeatherBanner'
 import { toInitials } from '@/components/shared/KundeAvatar'
 // CMM-36: Geo-Tracking startet beim App-Öffnen
 import { useGeoPosition } from '@/hooks/useGeoPosition'
+import { GeoPermissionPrompt } from '@/components/gutachter/GeoPermissionPrompt'
 
 // AAR-222: Sidebar-Refactor von 18 flachen Items auf 10 in 4 Sektionen.
 // Removed Items (Dashboard, Mitteilungen, Tasks, Stellungnahmen, Termine,
@@ -129,8 +130,10 @@ export default function GutachterShell({
   // sie nicht über der Mapbox-Karte rendern (Sidebar hat lg:z-[1100] > z-50).
   const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  // CMM-36: Geo-Tracking beim App-Öffnen starten
-  useGeoPosition(svId ?? null)
+  // CMM-36: Geo-Tracking beim App-Öffnen starten — feuert watchPosition
+  // erst nach Permission 'granted'. Der Prompt wird per Klick auf den
+  // GeoPermissionPrompt-Banner ausgeloest, nicht silent beim ersten Render.
+  const geoState = useGeoPosition(svId ?? null)
   // AAR-245: Verwaltung nicht mehr collapsible — alle Sektionen flach +
   // direkt sichtbar, konsistent zu Tagesgeschäft/Kommunikation/Finanzen.
   // AAR-222: Sektions-basierte Nav. Team/Community werden conditional in
@@ -491,6 +494,19 @@ export default function GutachterShell({
             role="main"
             className="h-full overflow-y-auto rounded-l-2xl rounded-r-none bg-[#f8f9fb] shadow-sm p-2 sm:p-3 lg:p-4"
           >
+            {/* CMM-32 Polish: Standort-CTA — sichtbar wenn Browser-Permission
+                noch 'prompt' oder 'denied' ist; bei 'granted' rendert die
+                Komponente null. Sitzt oberhalb der Page damit der SV bei
+                jedem Aufruf einer Seite (Heute, Fall, Termin, ...) den
+                Hinweis sieht solange er Standort noch nicht freigegeben hat. */}
+            {!isFeldmodus && (
+              <div className="mb-3">
+                <GeoPermissionPrompt
+                  permission={geoState.permission}
+                  onRequest={geoState.requestPermission}
+                />
+              </div>
+            )}
             {children}
           </main>
         </div>
