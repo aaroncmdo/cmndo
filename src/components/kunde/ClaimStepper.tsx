@@ -33,8 +33,9 @@ import {
   DownloadIcon,
   ClockIcon,
   ChevronRightIcon,
+  XIcon,
 } from 'lucide-react'
-import { setKanzleiWunsch, resetKanzleiWunsch } from '@/lib/kanzlei-wunsch/actions'
+import { setKanzleiWunsch, resetKanzleiWunsch, updateKanzleiAnsprechpartner } from '@/lib/kanzlei-wunsch/actions'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
@@ -515,6 +516,7 @@ export default function ClaimStepper({
               claimId={claimId}
               anspruchVsEur={anspruchVsEur ?? null}
               anspruchPositionen={anspruchPositionen}
+              nutzungsausfallBetragEur={nutzungsausfallBetragEur ?? null}
               kundeAnrede={lead?.anrede ?? null}
               kundeVorname={lead?.vorname ?? null}
               kundeNachname={lead?.nachname ?? null}
@@ -1154,6 +1156,7 @@ function EigeneKanzleiAnspruchPanel({
   claimId,
   anspruchVsEur,
   anspruchPositionen,
+  nutzungsausfallBetragEur,
   kundeAnrede,
   kundeVorname,
   kundeNachname,
@@ -1162,6 +1165,7 @@ function EigeneKanzleiAnspruchPanel({
   claimId: string
   anspruchVsEur: number | null
   anspruchPositionen?: AnspruchPosition[]
+  nutzungsausfallBetragEur?: number | null
   kundeAnrede?: string | null
   kundeVorname?: string | null
   kundeNachname?: string | null
@@ -1171,6 +1175,8 @@ function EigeneKanzleiAnspruchPanel({
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [disclaimerAkzeptiert, setDisclaimerAkzeptiert] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [kanzleiEmail, setKanzleiEmail] = useState('')
 
   const gefiltert = (anspruchPositionen ?? []).filter(
     (p) => !EIGENE_KANZLEI_EXCLUDE.some((k) => p.key.toLowerCase().includes(k)),
@@ -1186,6 +1192,10 @@ function EigeneKanzleiAnspruchPanel({
     startTransition(async () => {
       const r = await setKanzleiWunsch(claimId, 'eigene_kanzlei')
       if (!r.ok) { setError(r.error ?? 'Fehler beim Speichern'); return }
+      if (kanzleiEmail.trim()) {
+        await updateKanzleiAnsprechpartner(claimId, { email: kanzleiEmail.trim() })
+      }
+      setShowModal(false)
       router.refresh()
     })
   }
@@ -1296,9 +1306,8 @@ function EigeneKanzleiAnspruchPanel({
             )}
             <button
               type="button"
-              onClick={bestaetigen}
-              disabled={pending}
-              className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
+              onClick={() => setShowModal(true)}
+              className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
             >
               Bestätigen (kein Service)
             </button>
@@ -1306,6 +1315,129 @@ function EigeneKanzleiAnspruchPanel({
         )}
       </AnimatePresence>
       {error && <p className="text-xs text-red-700">{error}</p>}
+
+      {/* Modal — roter Glassy-Overlay mit Kanzlei-Email + Vergleich */}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            key="eigene-kanzlei-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 backdrop-blur-sm bg-black/40"
+            onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false) }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.97 }}
+              transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+              className="w-full max-w-md rounded-2xl border border-rose-400/30 bg-red-950/80 backdrop-blur-2xl shadow-2xl overflow-hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-rose-400/20">
+                <div className="flex items-center gap-2">
+                  <BriefcaseIcon className="w-4 h-4 text-rose-300 shrink-0" />
+                  <p className="text-sm font-semibold text-white">Eigene Kanzlei — Bestätigung</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                >
+                  <XIcon className="w-3.5 h-3.5 text-rose-200" />
+                </button>
+              </div>
+
+              <div className="px-5 py-5 space-y-5">
+                {/* E-Mail-Eingabe */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-rose-200">
+                    E-Mail deiner Kanzlei
+                  </label>
+                  <div className="relative">
+                    <MailIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-rose-400 pointer-events-none" />
+                    <input
+                      type="email"
+                      value={kanzleiEmail}
+                      onChange={(e) => setKanzleiEmail(e.target.value)}
+                      placeholder="kanzlei@example.de"
+                      className="w-full bg-white/10 border border-rose-400/40 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder:text-rose-300/40 focus:outline-none focus:ring-2 focus:ring-rose-400/60 focus:border-rose-400/60 transition-colors"
+                    />
+                  </div>
+                  <p className="text-[11px] text-rose-300/70">
+                    Wir senden Gutachten und Unterlagen an diese Adresse.
+                  </p>
+                </div>
+
+                {/* Vergleich: Eigene Kanzlei vs LexDrive */}
+                <div className="rounded-xl border border-[#0e5be9]/30 bg-[#0e5be9]/[0.08] p-4 space-y-3">
+                  <p className="text-[11px] uppercase tracking-wider font-semibold text-[#7bb3f7]/80">
+                    Auszahlungsvergleich
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Eigene Kanzlei */}
+                    <div className="rounded-lg bg-rose-900/40 border border-rose-500/30 px-3 py-2.5 space-y-0.5">
+                      <p className="text-[10px] text-rose-300/70 font-medium uppercase tracking-wide">Eigene Kanzlei</p>
+                      <p className="text-lg font-bold text-rose-200">
+                        {(anzeigeBetrag ?? 0).toLocaleString('de-DE', {
+                          style: 'currency',
+                          currency: 'EUR',
+                          maximumFractionDigits: 0,
+                        })}
+                      </p>
+                      <p className="text-[10px] text-rose-300/60">Ohne Nutzungsausfall &amp; Pauschale</p>
+                    </div>
+                    {/* LexDrive */}
+                    <div className="rounded-lg bg-[#0e5be9]/15 border border-[#0e5be9]/40 px-3 py-2.5 space-y-0.5">
+                      <p className="text-[10px] text-[#7bb3f7]/70 font-medium uppercase tracking-wide">LexDrive</p>
+                      <p className="text-lg font-bold text-[#7bb3f7]">
+                        {((anspruchVsEur ?? 0) + (nutzungsausfallBetragEur ?? 0) + 25).toLocaleString('de-DE', {
+                          style: 'currency',
+                          currency: 'EUR',
+                          maximumFractionDigits: 0,
+                        })}
+                      </p>
+                      <p className="text-[10px] text-[#7bb3f7]/60">Inkl. Nutzungsausfall + 25 € Pauschale</p>
+                    </div>
+                  </div>
+                  {/* LexDrive-CTA */}
+                  {onSwitchToLexDrive && (
+                    <button
+                      type="button"
+                      onClick={() => { setShowModal(false); onSwitchToLexDrive() }}
+                      className="w-full text-left rounded-xl border border-[#0e5be9]/50 bg-[#0e5be9]/10 hover:bg-[#0e5be9]/20 px-4 py-3 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-full bg-[#0e5be9]/20 flex items-center justify-center shrink-0">
+                          <HandshakeIcon className="w-3.5 h-3.5 text-[#7bb3f7]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-[#7bb3f7]">Kostenfreier LexDrive-Komplettservice</p>
+                          <p className="text-[10px] text-[#7bb3f7]/60 mt-0.5">Anwaltliche Betreuung — vollständig kostenlos</p>
+                        </div>
+                        <ChevronRightIcon className="w-3.5 h-3.5 text-[#7bb3f7]/60 shrink-0" />
+                      </div>
+                    </button>
+                  )}
+                </div>
+
+                {/* Bestätigen */}
+                <button
+                  type="button"
+                  onClick={bestaetigen}
+                  disabled={pending}
+                  className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
+                >
+                  {pending ? 'Wird gespeichert…' : 'Bestätigen (kein Service)'}
+                </button>
+                {error && <p className="text-xs text-rose-300">{error}</p>}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
