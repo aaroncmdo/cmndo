@@ -799,7 +799,7 @@ function KanzleiWunschBanner({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <BannerOption
           icon={<HandshakeIcon className="w-3.5 h-3.5" />}
-          titel="Komplettservice"
+          titel="Kostenfreier Komplettservice"
           subtitel="LexDrive übernimmt"
           onClick={() => pick('partnerkanzlei')}
           disabled={pending}
@@ -1013,7 +1013,7 @@ function LexDriveBestaetigenPanel({
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <HandshakeIcon className="w-4 h-4 text-[#0e5be9] shrink-0" />
-        <p className="text-sm font-semibold text-[#0a3fa0]">Komplettservice durch LexDrive</p>
+        <p className="text-sm font-semibold text-[#0a3fa0]">Kostenfreier Komplettservice durch LexDrive</p>
       </div>
 
       {/* Voller Anspruchsblock — Positionen + Nutzungsausfall-Slot */}
