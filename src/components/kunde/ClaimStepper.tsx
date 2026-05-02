@@ -1428,7 +1428,8 @@ function EigeneKanzleiAnspruchPanel({
                   type="button"
                   onClick={bestaetigen}
                   disabled={pending}
-                  className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
+                  disabled={pending || !kanzleiEmail.trim()}
+                  className="w-full bg-rose-600 hover:bg-rose-700 active:bg-rose-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {pending ? 'Wird gespeichert…' : 'Bestätigen (kein Service)'}
                 </button>
