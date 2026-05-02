@@ -136,6 +136,17 @@ export default function ClaimStepper({
   const [selectedPhase, setSelectedPhase] = useState<ClaimMainPhase>(
     lifecycle.mainPhase,
   )
+
+  // Pro Phase ein subtiler Token-Hintergrund — wird sowohl auf den
+  // Step-Button (selected) als auch auf das Detail-Panel angewandt.
+  // Erfassung + Abschluss = emerald (Done/Erfolg), Begutachtung = navy
+  // (aktive Klassik), Regulierung = shield-blau (Geld-Phase).
+  const PHASE_BG: Record<ClaimMainPhase, string> = {
+    erfassung: 'bg-emerald-50',
+    begutachtung: 'bg-claimondo-navy/[0.06]',
+    regulierung: 'bg-[#7BA3CC]/15',
+    abschluss: 'bg-emerald-50',
+  }
   const noShowCount = lifecycle.kundeNoShowCount ?? 0
   // Gutachten ist QC-freigegeben und an die Kanzlei uebergeben sobald
   // der Claim in der Regulierungs- oder Abschluss-Phase ist und eine
@@ -152,7 +163,7 @@ export default function ClaimStepper({
 
   return (
     <div className={outerCls}>
-      <div className="px-4 sm:px-6 py-4 space-y-3">
+      <div className="px-4 sm:px-6 py-5 sm:py-6 space-y-4">
       {gutachtenFertig && (
         <a
           href={gutachtenUrl ?? '#'}
@@ -213,8 +224,8 @@ export default function ClaimStepper({
                 type="button"
                 onClick={() => setSelectedPhase(p.key)}
                 aria-pressed={isSelected}
-                className={`flex items-center gap-2 sm:gap-3 shrink-0 rounded-lg p-1 -m-1 transition-colors hover:bg-claimondo-navy/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-navy/40 ${
-                  isSelected ? 'bg-claimondo-navy/[0.06]' : ''
+                className={`flex items-center gap-2 sm:gap-3 shrink-0 rounded-xl px-2 py-2.5 -mx-2 -my-1 transition-colors hover:bg-claimondo-navy/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-navy/40 ${
+                  isSelected ? PHASE_BG[p.key] : ''
                 }`}
               >
                 <div
@@ -291,7 +302,7 @@ export default function ClaimStepper({
       </div>
       {/* CMM-32 Polish: Erfassungs-Detail-Panel — Lead-Status. */}
       {selectedPhase === 'erfassung' && !bottomSlot && (
-        <div className="border-t border-claimondo-navy/10 px-4 sm:px-6 py-3.5">
+        <div className={`border-t border-claimondo-navy/10 px-4 sm:px-6 py-3.5 ${PHASE_BG.erfassung}`}>
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/80 font-semibold mb-2">
             Erfassung
           </p>
@@ -323,13 +334,29 @@ export default function ClaimStepper({
           zukuenftige Phase klickt, die noch nicht erreicht ist (zeigt
           dann „steht noch aus"-Hinweis). */}
       {(selectedPhase === 'regulierung' || selectedPhase === 'abschluss') && !bottomSlot && (
-        <div className="border-t border-claimondo-navy/10 px-4 sm:px-6 py-4 bg-emerald-50/40">
+        <div
+          className={`border-t border-claimondo-navy/10 px-4 sm:px-6 py-4 ${
+            selectedPhase === 'regulierung' ? PHASE_BG.regulierung : PHASE_BG.abschluss
+          }`}
+        >
           {anspruchVsEur != null ? (
             <>
-              <p className="text-[10px] uppercase tracking-wider text-emerald-800/80 font-semibold">
+              <p
+                className={`text-[10px] uppercase tracking-wider font-semibold ${
+                  selectedPhase === 'abschluss'
+                    ? 'text-emerald-800/80'
+                    : 'text-claimondo-navy/70'
+                }`}
+              >
                 Dein Anspruch gegen die Versicherung
               </p>
-              <p className="text-3xl font-bold text-emerald-900 mt-1">
+              <p
+                className={`text-3xl font-bold mt-1 ${
+                  selectedPhase === 'abschluss'
+                    ? 'text-emerald-900'
+                    : 'text-claimondo-navy'
+                }`}
+              >
                 {anspruchVsEur.toLocaleString('de-DE', {
                   style: 'currency',
                   currency: 'EUR',
