@@ -32,7 +32,7 @@ import {
   DownloadIcon,
   ClockIcon,
 } from 'lucide-react'
-import { setKanzleiWunsch } from '@/lib/kanzlei-wunsch/actions'
+import { setKanzleiWunsch, resetKanzleiWunsch } from '@/lib/kanzlei-wunsch/actions'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
@@ -417,6 +417,14 @@ export default function ClaimStepper({
         <div className="border-t-2 border-violet-300 bg-violet-50 px-4 sm:px-6 py-4">
           <KanzleiWunschBanner claimId={claimId} />
         </div>
+      )}
+
+      {/* Test-Reset: Wahl zurücksetzen — sichtbar wenn Wunsch gesetzt + Paket noch nicht raus */}
+      {claimId &&
+        kanzleiWunsch &&
+        !['noch_unentschieden', 'nicht_gefragt'].includes(kanzleiWunsch) &&
+        !kanzleiUebergebenAm && (
+        <ResetKanzleiWunschButton claimId={claimId} kanzleiWunsch={kanzleiWunsch} />
       )}
 
       {/* LexDrive Vollmacht-Gate: Hard-Block bis LexDrive den vollmacht_bestaetigt
@@ -813,6 +821,43 @@ function ChecklistItem({
         </span>
       )}
     </li>
+  )
+}
+
+function ResetKanzleiWunschButton({
+  claimId,
+  kanzleiWunsch,
+}: {
+  claimId: string
+  kanzleiWunsch: string
+}) {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const label: Record<string, string> = {
+    partnerkanzlei: 'LexDrive',
+    eigene_kanzlei: 'Eigene Kanzlei',
+    keine_kanzlei: 'Selbst einreichen',
+  }
+  function reset() {
+    startTransition(async () => {
+      await resetKanzleiWunsch(claimId)
+      router.refresh()
+    })
+  }
+  return (
+    <div className="border-t border-claimondo-border/40 px-4 sm:px-6 py-2 flex items-center justify-between bg-[#f8f9fb]">
+      <p className="text-[11px] text-claimondo-ondo">
+        Gewählt: <span className="font-medium text-claimondo-navy">{label[kanzleiWunsch] ?? kanzleiWunsch}</span>
+      </p>
+      <button
+        type="button"
+        onClick={reset}
+        disabled={pending}
+        className="text-[11px] text-claimondo-ondo hover:text-rose-600 underline underline-offset-2 disabled:opacity-40"
+      >
+        Wahl zurücksetzen
+      </button>
+    </div>
   )
 }
 

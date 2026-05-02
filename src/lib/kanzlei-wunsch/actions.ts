@@ -138,6 +138,31 @@ export async function setKanzleiWunsch(
   return { ok: true }
 }
 
+/** Test-Helper: Setzt kanzlei_wunsch + kanzlei_uebergeben_am zurück. */
+export async function resetKanzleiWunsch(
+  claimId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('claims')
+    .update({
+      kanzlei_wunsch: 'noch_unentschieden',
+      kanzlei_wunsch_gefragt_am: null,
+      kanzlei_uebergeben_am: null,
+    })
+    .eq('id', claimId)
+  if (error) return { ok: false, error: error.message }
+  try {
+    const { data: fall } = await admin
+      .from('faelle').select('id').eq('claim_id', claimId).maybeSingle()
+    revalidateClaim(claimId, fall?.id ?? null)
+  } catch { /* ignore */ }
+  return { ok: true }
+}
+
 export async function updateKanzleiAnsprechpartner(
   claimId: string,
   patch: { name?: string | null; email?: string | null; telefon?: string | null },
