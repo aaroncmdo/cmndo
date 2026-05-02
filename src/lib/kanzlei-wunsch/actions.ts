@@ -507,6 +507,79 @@ export async function smokeResetAufKanzleiWunsch(
 }
 
 /**
+ * SMOKE-Helper: Setzt den Fall auf den Stand "LexDrive gewaehlt + Vollmacht
+ * signiert + Anspruch 7000 EUR + Stammdaten BMW 5er, K-AS 2014,
+ * CLM-2026-00043". Damit kann das volle Regulierungs-Panel + die
+ * Sidebar-LexDrive-QR-Card gleichzeitig getestet werden.
+ */
+export async function smokeResetAufLexDriveVollmachtSigniert(
+  fallId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const base = await smokeResetAufKanzleiWunsch(fallId)
+  if (!base.ok) return base
+
+  const admin = createAdminClient()
+  const { data: fall } = await admin
+    .from('faelle').select('claim_id, lead_id').eq('id', fallId).maybeSingle()
+  if (!fall?.claim_id) return { ok: false, error: 'Kein Claim am Fall' }
+
+  const nowIso = new Date().toISOString()
+
+  // Lead: Vollmacht signiert
+  if (fall.lead_id) {
+    await admin.from('leads').update({
+      vollmacht_signiert_am: nowIso,
+    }).eq('id', fall.lead_id as string)
+  }
+
+  // Fall: Vollmacht + Stammdaten
+  await admin.from('faelle').update({
+    vollmacht_signiert_am: nowIso,
+    vollmacht_datum: nowIso,
+    kennzeichen: 'K-AS 2014',
+    fahrzeug_hersteller: 'BMW',
+    fahrzeug_modell: '5er',
+    status: 'regulierung',
+  }).eq('id', fallId)
+
+  // Claim: LexDrive gewaehlt, OCR-Werte fuer 7000 EUR Anspruch,
+  // Phase weiter Richtung VS-Kontakt.
+  await admin.from('claims').update({
+    kanzlei_wunsch: 'partnerkanzlei',
+    kanzlei_wunsch_gefragt_am: nowIso,
+    claim_nummer: 'CLM-2026-00043',
+    reparaturkosten_brutto: 6500,
+    minderwert: 500,
+    totalschaden: false,
+    gutachten_ocr_processed_at: nowIso,
+    nutzungsausfall_tage: 12,
+    gutachten_nutzungsausfall_tagessatz_eur: 65,
+    phase: '6_kommunikation_versicherung',
+    status: 'in_kommunikation_vs',
+  }).eq('id', fall.claim_id as string)
+
+  // Erstgutachten als final freigegeben markieren (uebernimmt smokeResetAufKanzleiWunsch
+  // bereits, aber sicherheitshalber)
+  const { data: erstgutachten } = await admin
+    .from('auftraege')
+    .select('id')
+    .eq('fall_id', fallId)
+    .eq('typ', 'erstgutachten')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (erstgutachten?.id) {
+    await admin.from('auftraege').update({
+      gutachten_final_freigegeben: true,
+      abgeschlossen_am: nowIso,
+    }).eq('id', erstgutachten.id as string)
+  }
+
+  revalidateClaim(fall.claim_id as string, fallId)
+  return { ok: true }
+}
+
+/**
  * SMOKE-Helper: Setzt den Fall in den Zustand
  * "LexDrive gewaehlt, Vollmacht ausstehend" — der blaue Vollmacht-Gate
  * ist sichtbar, der Kunde kann hier oder via WhatsApp bestaetigen.

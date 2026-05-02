@@ -6,18 +6,20 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { RefreshCcwIcon, HandshakeIcon } from 'lucide-react'
+import { RefreshCcwIcon, HandshakeIcon, CheckCircle2Icon } from 'lucide-react'
 import {
   smokeResetAufKanzleiWunsch,
   smokeResetAufLexDriveVollmachtOffen,
+  smokeResetAufLexDriveVollmachtSigniert,
 } from '@/lib/kanzlei-wunsch/actions'
 
 export default function SmokeKanzleiButton({ fallId }: { fallId: string }) {
   const router = useRouter()
   const [pendingWunsch, startWunsch] = useTransition()
   const [pendingLex, startLex] = useTransition()
+  const [pendingSigniert, startSigniert] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const pending = pendingWunsch || pendingLex
+  const pending = pendingWunsch || pendingLex || pendingSigniert
 
   function resetWunsch() {
     if (!confirm('Fall auf Kanzlei-Wunsch-Walkthrough zurücksetzen? Vollmacht raus, Gutachten freigegeben.')) return
@@ -34,6 +36,16 @@ export default function SmokeKanzleiButton({ fallId }: { fallId: string }) {
     setError(null)
     startLex(async () => {
       const r = await smokeResetAufLexDriveVollmachtOffen(fallId)
+      if (!r.ok) { setError(r.error ?? 'Fehler'); return }
+      router.refresh()
+    })
+  }
+
+  function resetLexDriveSigniert() {
+    if (!confirm('Fall auf LexDrive + Vollmacht signiert + 7000 € Anspruch + BMW 5er K-AS 2014 setzen?')) return
+    setError(null)
+    startSigniert(async () => {
+      const r = await smokeResetAufLexDriveVollmachtSigniert(fallId)
       if (!r.ok) { setError(r.error ?? 'Fehler'); return }
       router.refresh()
     })
@@ -68,6 +80,15 @@ export default function SmokeKanzleiButton({ fallId }: { fallId: string }) {
           >
             <HandshakeIcon className="w-3.5 h-3.5" />
             {pendingLex ? 'Setzt zurück…' : 'LexDrive + Vollmacht offen'}
+          </button>
+          <button
+            type="button"
+            onClick={resetLexDriveSigniert}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-50 transition-colors"
+          >
+            <CheckCircle2Icon className="w-3.5 h-3.5" />
+            {pendingSigniert ? 'Setzt zurück…' : 'LexDrive signiert · 7000 €'}
           </button>
         </div>
       </div>
