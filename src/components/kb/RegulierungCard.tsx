@@ -6,18 +6,25 @@
 // für diesen Fall existiert (also nach KB-Freigabe).
 
 import { useState, useTransition } from 'react'
-import { CheckIcon, MailIcon, EuroIcon } from 'lucide-react'
+import { CheckIcon, MailIcon, EuroIcon, BriefcaseIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {
   kanzleiVsKontaktErfasst,
   kanzleiAuszahlungEingegangen,
 } from '@/lib/kanzlei-fall/actions'
+import { setKanzleiWunsch } from '@/lib/kanzlei-wunsch/actions'
 
 type Props = {
   fallId: string
+  claimId: string | null
   status: 'versicherungskontakt' | 'auszahlung'
   vsKontaktAm: string | null
   ausgezahltAm: string | null
+  /** CMM-32 Polish: Wenn 'eigene_kanzlei' wird der Standardweg
+   *  (VS-Kontakt → Auszahlung) deaktiviert — der Kunde regelt selbst
+   *  nach Kanzleipaket-Versand. */
+  kanzleiWunsch: 'partnerkanzlei' | 'eigene_kanzlei' | 'keine_kanzlei' | 'noch_unentschieden' | 'nicht_gefragt' | null
+  kanzleiUebergebenAm: string | null
 }
 
 function fmt(iso: string | null): string | null {
@@ -35,18 +42,37 @@ function fmt(iso: string | null): string | null {
 
 export default function RegulierungCard({
   fallId,
+  claimId,
   status,
   vsKontaktAm,
   ausgezahltAm,
+  kanzleiWunsch,
+  kanzleiUebergebenAm,
 }: Props) {
   const router = useRouter()
   const [betrag, setBetrag] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [pendingKontakt, startKontakt] = useTransition()
   const [pendingAuszahlung, startAuszahlung] = useTransition()
+  const [pendingWunsch, startWunsch] = useTransition()
 
   const vsKontaktDone = !!vsKontaktAm
   const auszahlungDone = !!ausgezahltAm
+  const istEigeneKanzlei = kanzleiWunsch === 'eigene_kanzlei'
+  const istUebergeben = !!kanzleiUebergebenAm
+
+  function handleToggleEigeneKanzlei(naechsterWunsch: 'eigene_kanzlei' | 'partnerkanzlei') {
+    if (!claimId) {
+      setError('Kein Claim — Wunsch kann nicht gesetzt werden')
+      return
+    }
+    setError(null)
+    startWunsch(async () => {
+      const r = await setKanzleiWunsch(claimId, naechsterWunsch)
+      if (!r.ok) setError(r.error ?? 'Fehler')
+      else router.refresh()
+    })
+  }
 
   function handleKontakt() {
     setError(null)
@@ -106,8 +132,42 @@ export default function RegulierungCard({
         />
       </div>
 
-      {/* Aktionen */}
-      {!auszahlungDone && (
+      {/* CMM-32 Polish: Eigene-Kanzlei-Toggle. Setzt kanzlei_wunsch und
+          deaktiviert die VS-Kontakt/Auszahlung-Buttons (wir regeln nichts
+          mehr selbst, Kunde versendet Paket via eigener Card). */}
+      <div className="flex items-start gap-2.5 rounded-lg border border-claimondo-border/60 bg-[#f8f9fb] px-3 py-2">
+        <BriefcaseIcon className="w-4 h-4 text-violet-700 shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-claimondo-navy">
+            Hat der Kunde eine eigene Kanzlei beauftragt?
+          </p>
+          <p className="text-[11px] text-claimondo-ondo">
+            Bei „ja" verschwindet die VS-Kommunikation auf unserer Seite. Der Kunde sendet das
+            Kanzleipaket eigenständig an seine Kanzlei und der Fall geht nach Versand auf
+            Abschluss.
+          </p>
+          {istEigeneKanzlei && istUebergeben && (
+            <p className="text-[11px] text-violet-800 mt-1 font-medium">
+              Paket wurde bereits an die externe Kanzlei versendet — Toggle gesperrt.
+            </p>
+          )}
+        </div>
+        <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
+          <input
+            type="checkbox"
+            checked={istEigeneKanzlei}
+            disabled={pendingWunsch || istUebergeben || !claimId}
+            onChange={(e) =>
+              handleToggleEigeneKanzlei(e.target.checked ? 'eigene_kanzlei' : 'partnerkanzlei')
+            }
+            className="w-4 h-4 accent-violet-600"
+          />
+          <span className="font-medium text-claimondo-navy">eigene Kanzlei</span>
+        </label>
+      </div>
+
+      {/* Aktionen — bei eigene-Kanzlei verschwinden VS-Kontakt/Auszahlung */}
+      {!istEigeneKanzlei && !auszahlungDone && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-claimondo-border/60">
           {!vsKontaktDone && (
             <button

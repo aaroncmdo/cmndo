@@ -38,6 +38,7 @@ import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
+import EigeneKanzleiPaketCard from '@/components/kunde/EigeneKanzleiPaketCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
 import { getClaimLifecycle } from '@/lib/claims/lifecycle'
@@ -417,7 +418,24 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
     // Claim-SSoT-Daten zuerst laden (Reihenfolge: claim > fall > auftrag).
-    let claimRow: { kunde_no_show_count: number | null; letzter_no_show_am: string | null } | null = null
+    type ClaimKanzleiWunsch =
+      | 'partnerkanzlei'
+      | 'eigene_kanzlei'
+      | 'keine_kanzlei'
+      | 'noch_unentschieden'
+      | 'nicht_gefragt'
+    let claimRow: {
+      kunde_no_show_count: number | null
+      letzter_no_show_am: string | null
+      kanzlei_wunsch: ClaimKanzleiWunsch | null
+      kanzlei_uebergeben_am: string | null
+      status: string | null
+    } | null = null
+    let kanzleiAnsprechpartner: {
+      name: string | null
+      email: string | null
+      telefon: string | null
+    } | null = null
     // OCR-Werte werden hier nur server-seitig gelesen, um den Anspruch
     // gegen die VS abzuleiten. Einzelwerte verlassen den Server NICHT —
     // der Kunde sieht nur den Gesamt-Eurobetrag (Anspruch) plus die
@@ -434,11 +452,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       const { data } = await admin
         .from('claims')
         .select(
-          'kunde_no_show_count, letzter_no_show_am, ' +
+          'kunde_no_show_count, letzter_no_show_am, status, ' +
             'reparaturkosten_brutto, minderwert, restwert, wiederbeschaffungswert, ' +
             'totalschaden, gutachten_ocr_processed_at, ' +
             'nutzungsausfall_tage, wiederbeschaffungsdauer_tage, ' +
-            'gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur',
+            'gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, ' +
+            'kanzlei_wunsch, kanzlei_uebergeben_am, ' +
+            'kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon',
         )
         .eq('id', fall.claim_id as string)
         .maybeSingle()
@@ -447,6 +467,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         claimRow = {
           kunde_no_show_count: (row.kunde_no_show_count as number | null) ?? null,
           letzter_no_show_am: (row.letzter_no_show_am as string | null) ?? null,
+          kanzlei_wunsch: (row.kanzlei_wunsch as ClaimKanzleiWunsch | null) ?? null,
+          kanzlei_uebergeben_am: (row.kanzlei_uebergeben_am as string | null) ?? null,
+          status: (row.status as string | null) ?? null,
+        }
+        kanzleiAnsprechpartner = {
+          name: (row.kanzlei_ansprechpartner_name as string | null) ?? null,
+          email: (row.kanzlei_ansprechpartner_email as string | null) ?? null,
+          telefon: (row.kanzlei_ansprechpartner_telefon as string | null) ?? null,
         }
         const { berechneAnspruchVs } = await import('@/lib/claims/anspruch')
         anspruchVsEur = berechneAnspruchVs({
@@ -730,6 +758,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               anspruchPositionen={
                 gutachtenFreigegeben ? anspruchPositionen ?? undefined : undefined
               }
+              kanzleiWunsch={claimRow?.kanzlei_wunsch ?? null}
+              kanzleiUebergebenAm={claimRow?.kanzlei_uebergeben_am ?? null}
               kanzleiFall={
                 kanzleiFall
                   ? {
@@ -749,6 +779,24 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             />
           )
         })()}
+
+        {/* CMM-32 Polish: Eigene-Kanzlei-Pfad — Kunde traegt Email + sendet
+            Paket. Sichtbar wenn kanzlei_wunsch='eigene_kanzlei' UND fall.claim_id
+            existiert. Versand setzt claim auf an_externe_kanzlei_uebergeben
+            und der Lifecycle springt auf Abschluss. */}
+        {claimRow?.kanzlei_wunsch === 'eigene_kanzlei' && fall.claim_id && (
+          <EigeneKanzleiPaketCard
+            claimId={fall.claim_id as string}
+            kanzleiName={kanzleiAnsprechpartner?.name ?? null}
+            kanzleiEmail={kanzleiAnsprechpartner?.email ?? null}
+            kanzleiTelefon={kanzleiAnsprechpartner?.telefon ?? null}
+            bereitsVersendet={!!claimRow?.kanzlei_uebergeben_am}
+            uebergebenAm={claimRow?.kanzlei_uebergeben_am ?? null}
+            gutachtenFreigegeben={
+              !!auftraege.find((a) => a.typ === 'erstgutachten')?.gutachten_final_freigegeben
+            }
+          />
+        )}
 
         {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
         {svTermin?.id && (

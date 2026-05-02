@@ -703,9 +703,18 @@ export default async function FallaktePage({
   // nach KB-Freigabe (gibKanzleipaketFrei legt den Eintrag an).
   let regulierungCardProps: {
     fallId: string
+    claimId: string | null
     status: 'versicherungskontakt' | 'auszahlung'
     vsKontaktAm: string | null
     ausgezahltAm: string | null
+    kanzleiWunsch:
+      | 'partnerkanzlei'
+      | 'eigene_kanzlei'
+      | 'keine_kanzlei'
+      | 'noch_unentschieden'
+      | 'nicht_gefragt'
+      | null
+    kanzleiUebergebenAm: string | null
   } | null = null
   if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
     const adminCli = createAdminClient()
@@ -715,12 +724,31 @@ export default async function FallaktePage({
       .select('status, vs_kontakt_am, ausgezahlt_am')
       .eq('claim_id', claimId)
       .maybeSingle() : { data: null }
-    if (kf) {
+    // CMM-32 Polish: kanzlei_wunsch + uebergeben_am fuer den Toggle.
+    const { data: claimForWunsch } = claimId ? await adminCli
+      .from('claims')
+      .select('kanzlei_wunsch, kanzlei_uebergeben_am')
+      .eq('id', claimId)
+      .maybeSingle() : { data: null }
+    // Card immer rendern wenn Admin/KB + Claim vorhanden ist — der
+    // KB-Toggle muss auch ohne Kanzlei-Fall sichtbar sein, sonst kann
+    // niemand den eigene-Kanzlei-Pfad anstossen.
+    if (claimId && (kf || claimForWunsch)) {
       regulierungCardProps = {
         fallId: id,
-        status: (kf.status as 'versicherungskontakt' | 'auszahlung') ?? 'versicherungskontakt',
-        vsKontaktAm: (kf.vs_kontakt_am as string | null) ?? null,
-        ausgezahltAm: (kf.ausgezahlt_am as string | null) ?? null,
+        claimId,
+        status: (kf?.status as 'versicherungskontakt' | 'auszahlung') ?? 'versicherungskontakt',
+        vsKontaktAm: (kf?.vs_kontakt_am as string | null) ?? null,
+        ausgezahltAm: (kf?.ausgezahlt_am as string | null) ?? null,
+        kanzleiWunsch:
+          (claimForWunsch?.kanzlei_wunsch as
+            | 'partnerkanzlei'
+            | 'eigene_kanzlei'
+            | 'keine_kanzlei'
+            | 'noch_unentschieden'
+            | 'nicht_gefragt'
+            | null) ?? null,
+        kanzleiUebergebenAm: (claimForWunsch?.kanzlei_uebergeben_am as string | null) ?? null,
       }
     }
   }

@@ -118,6 +118,8 @@ export default function ClaimStepper({
   kanzleiFall,
   begutachtungEvents,
   anspruchPositionen,
+  kanzleiWunsch,
+  kanzleiUebergebenAm,
 }: {
   lifecycle: ClaimLifecycle
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
@@ -158,6 +160,17 @@ export default function ClaimStepper({
    *  (Reparatur, Minderwert, Nutzungsausfall, ...). Wird im Regulierungs-
    *  und Abschluss-Panel unter der grossen Summe gerendert. */
   anspruchPositionen?: AnspruchPosition[]
+  /** Kanzlei-Wunsch — entscheidet ueber Label-Switch (LexDrive vs. eigene
+   *  Kanzlei) und Sonder-Pfad-Visuals. */
+  kanzleiWunsch?:
+    | 'partnerkanzlei'
+    | 'eigene_kanzlei'
+    | 'keine_kanzlei'
+    | 'noch_unentschieden'
+    | 'nicht_gefragt'
+    | null
+  /** Zeitstempel des Kanzleipaket-Versands an externe Kanzlei. */
+  kanzleiUebergebenAm?: string | null
 }) {
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
@@ -255,6 +268,12 @@ export default function ClaimStepper({
           // Verstrichen: Begutachtungs-Phase rot + Warndreieck.
           const istVerlegungWarn = !!bottomSlot && p.key === 'begutachtung'
           const istVerstrichenWarn = terminVerstrichen && p.key === 'begutachtung'
+          // CMM-32 Polish: Eigener-Kanzlei-Pfad — Begutachtungs-Phase wird
+          // lila gefaerbt sobald der Wunsch auf 'eigene_kanzlei' gesetzt
+          // ist. Das ist der visuelle Hinweis fuer den Kunden „dieser Fall
+          // laeuft nicht den Standardweg ueber LexDrive".
+          const istEigeneKanzleiPfad =
+            kanzleiWunsch === 'eigene_kanzlei' && p.key === 'begutachtung'
           const Icon = istVerlegungWarn || istVerstrichenWarn ? AlertTriangleIcon : p.icon
           const isSelected = selectedPhase === p.key
           return (
@@ -273,11 +292,13 @@ export default function ClaimStepper({
                       ? 'bg-rose-500 text-white ring-2 ring-rose-300'
                       : istVerlegungWarn
                         ? 'bg-amber-500 text-white ring-2 ring-amber-300'
-                        : isDone
-                          ? 'bg-emerald-500 text-white'
-                          : isCurrent
-                            ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                            : 'bg-claimondo-border/40 text-claimondo-ondo/60'
+                        : istEigeneKanzleiPfad
+                          ? 'bg-violet-500 text-white ring-2 ring-violet-300'
+                          : isDone
+                            ? 'bg-emerald-500 text-white'
+                            : isCurrent
+                              ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                              : 'bg-claimondo-border/40 text-claimondo-ondo/60'
                   }`}
                 >
                   {istVerstrichenWarn || istVerlegungWarn || !isDone ? <Icon className="w-4 h-4" /> : <CheckIcon className="w-4 h-4" />}
@@ -289,11 +310,13 @@ export default function ClaimStepper({
                         ? 'text-rose-700'
                         : istVerlegungWarn
                           ? 'text-amber-700'
-                          : isCurrent
-                            ? 'text-claimondo-navy'
-                            : isDone
-                              ? 'text-emerald-700'
-                              : 'text-claimondo-ondo/60'
+                          : istEigeneKanzleiPfad
+                            ? 'text-violet-700'
+                            : isCurrent
+                              ? 'text-claimondo-navy'
+                              : isDone
+                                ? 'text-emerald-700'
+                                : 'text-claimondo-ondo/60'
                     }`}
                   >
                     {MAIN_PHASE_LABEL[p.key]}
@@ -441,7 +464,11 @@ export default function ClaimStepper({
               <KanzleiSubStep
                 done={!!kanzleiFall.vs_kontakt_am}
                 icon={<MailIcon className="w-3 h-3" />}
-                label="Versicherung kontaktiert"
+                label={
+                  kanzleiWunsch === 'partnerkanzlei'
+                    ? 'Versicherung kontaktiert durch LexDrive'
+                    : 'Versicherung kontaktiert'
+                }
                 datum={kanzleiFall.vs_kontakt_am}
               />
               <div

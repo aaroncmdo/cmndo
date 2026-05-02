@@ -55,6 +55,20 @@ export type ClaimLifecycleInput = {
   claim: {
     kunde_no_show_count: number | null
     letzter_no_show_am: string | null
+    /** CMM-32 Polish: 'partnerkanzlei' = Komplettservice via LexDrive,
+     *  'eigene_kanzlei' = Kunde regelt selbst nach Kanzleipaket-Versand. */
+    kanzlei_wunsch?:
+      | 'partnerkanzlei'
+      | 'eigene_kanzlei'
+      | 'keine_kanzlei'
+      | 'noch_unentschieden'
+      | 'nicht_gefragt'
+      | null
+    /** Zeitstempel des Kanzleipaket-Versands an die externe Kanzlei. */
+    kanzlei_uebergeben_am?: string | null
+    /** Endzustand-Status — 'an_externe_kanzlei_uebergeben' triggert Abschluss
+     *  ohne dass wir VS-Kommunikation fuehren. */
+    status?: string | null
   } | null
   /** Lead-Felder die den Erfassungs-Status beschreiben. */
   lead: {
@@ -112,11 +126,26 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
   )
 
   // ── Abschluss ───────────────────────────────────────────────────────────
+  // Drei Wege zum Abschluss:
+  //   1. Kanzlei-Auszahlung erfolgt (Standardpfad ueber LexDrive)
+  //   2. claim.status='an_externe_kanzlei_uebergeben' (eigene Kanzlei,
+  //      Kunde hat Paket bekommen, wir kuemmern uns ab da nicht mehr)
+  //   3. Manuelle Endzustaende abgelehnt/storniert (eigene Phase, hier nicht)
   if (
     kanzleiFall?.status === 'auszahlung' &&
     kanzleiFall.ausgezahlt_am &&
     auftraege.every((a) => a.status === 'abgeschlossen')
   ) {
+    return {
+      mainPhase: 'abschluss',
+      subPhase: 'abgeschlossen',
+      aktiveSideQuests: [],
+      aktiverAuftrag: null,
+      kundeNoShowCount,
+      letzterNoShowAm,
+    }
+  }
+  if (claim?.status === 'an_externe_kanzlei_uebergeben') {
     return {
       mainPhase: 'abschluss',
       subPhase: 'abgeschlossen',

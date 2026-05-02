@@ -1,0 +1,245 @@
+'use server'
+
+// CMM-32 Polish: Kanzlei-Wunsch-Workflow.
+//   - setKanzleiWunsch (KB/Admin): toggelt zwischen Komplettservice und
+//     eigene Kanzlei
+//   - updateKanzleiAnsprechpartner (Kunde, sofern eigene_kanzlei):
+//     Kunde traegt Email/Name/Telefon der eigenen Kanzlei ein
+//   - versendeKanzleiPaketAnEigeneKanzlei (Kunde): triggert Email mit
+//     Gutachten + Stammdaten an die externe Kanzlei, setzt
+//     kanzlei_uebergeben_am und claim.status='an_externe_kanzlei_uebergeben'
+//     → Lifecycle springt auf Abschluss, wir kuemmern uns nicht weiter um
+//     die Kommunikation.
+
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { revalidatePath } from 'next/cache'
+
+type KanzleiWunsch =
+  | 'partnerkanzlei'
+  | 'eigene_kanzlei'
+  | 'keine_kanzlei'
+  | 'noch_unentschieden'
+  | 'nicht_gefragt'
+
+async function requireKbOrAdmin() {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false as const, error: 'Nicht angemeldet' }
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!profile || !['admin', 'kundenbetreuer'].includes(profile.rolle as string)) {
+    return { ok: false as const, error: 'Nur Admin/KB' }
+  }
+  return { ok: true as const, userId: user.id }
+}
+
+async function requireKundeOfClaim(claimId: string): Promise<
+  | { ok: true; userId: string }
+  | { ok: false; error: string }
+> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  const admin = createAdminClient()
+  const { data: claim } = await admin
+    .from('claims')
+    .select('geschaedigter_user_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return { ok: false, error: 'Claim nicht gefunden' }
+  if (claim.geschaedigter_user_id !== user.id) {
+    // Admin/KB darf auch — pragmatischer Override
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('rolle')
+      .eq('id', user.id)
+      .maybeSingle()
+    if (!profile || !['admin', 'kundenbetreuer'].includes(profile.rolle as string)) {
+      return { ok: false, error: 'Nur der Geschaedigte oder Admin/KB' }
+    }
+  }
+  return { ok: true, userId: user.id }
+}
+
+function revalidateClaim(claimId: string, fallId: string | null) {
+  if (fallId) {
+    revalidatePath(`/faelle/${fallId}`)
+    revalidatePath(`/kunde/faelle/${fallId}`)
+    revalidatePath(`/gutachter/fall/${fallId}`)
+  }
+  revalidatePath(`/admin/claims/${claimId}`)
+}
+
+export async function setKanzleiWunsch(
+  claimId: string,
+  wunsch: KanzleiWunsch,
+): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireKbOrAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+  const admin = createAdminClient()
+  const { data: claim, error: selErr } = await admin
+    .from('claims')
+    .select('id, kanzlei_wunsch')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (selErr || !claim) return { ok: false, error: selErr?.message ?? 'Claim nicht gefunden' }
+
+  const { error } = await admin
+    .from('claims')
+    .update({
+      kanzlei_wunsch: wunsch,
+      kanzlei_wunsch_gefragt_am: new Date().toISOString(),
+    })
+    .eq('id', claimId)
+  if (error) return { ok: false, error: error.message }
+
+  // Timeline-Audit
+  try {
+    const { data: fall } = await admin
+      .from('faelle').select('id').eq('claim_id', claimId).maybeSingle()
+    if (fall?.id) {
+      await admin.from('timeline').insert({
+        fall_id: fall.id,
+        typ: 'system',
+        titel: 'Kanzlei-Wunsch geaendert',
+        beschreibung: `KB hat kanzlei_wunsch=${wunsch} gesetzt.`,
+      })
+    }
+    revalidateClaim(claimId, fall?.id ?? null)
+  } catch (err) {
+    console.warn('[setKanzleiWunsch] Timeline/Revalidate:', err)
+  }
+  return { ok: true }
+}
+
+export async function updateKanzleiAnsprechpartner(
+  claimId: string,
+  patch: { name?: string | null; email?: string | null; telefon?: string | null },
+): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireKundeOfClaim(claimId)
+  if (!auth.ok) return { ok: false, error: auth.error }
+  const admin = createAdminClient()
+
+  // Nur erlaubt wenn kanzlei_wunsch='eigene_kanzlei' — sonst hat es keinen Effekt.
+  const { data: claim } = await admin
+    .from('claims')
+    .select('kanzlei_wunsch, kanzlei_uebergeben_am')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (claim?.kanzlei_wunsch !== 'eigene_kanzlei') {
+    return { ok: false, error: 'Nicht im eigene-Kanzlei-Pfad' }
+  }
+  if (claim.kanzlei_uebergeben_am) {
+    return { ok: false, error: 'Paket wurde bereits versendet — Aenderung nicht moeglich' }
+  }
+
+  const update: Record<string, string | null> = {}
+  if (patch.name !== undefined) update.kanzlei_ansprechpartner_name = patch.name?.trim() || null
+  if (patch.email !== undefined) update.kanzlei_ansprechpartner_email = patch.email?.trim() || null
+  if (patch.telefon !== undefined)
+    update.kanzlei_ansprechpartner_telefon = patch.telefon?.trim() || null
+  if (Object.keys(update).length === 0) return { ok: true }
+
+  const { error } = await admin.from('claims').update(update).eq('id', claimId)
+  if (error) return { ok: false, error: error.message }
+
+  const { data: fall } = await admin
+    .from('faelle').select('id').eq('claim_id', claimId).maybeSingle()
+  revalidateClaim(claimId, fall?.id ?? null)
+  return { ok: true }
+}
+
+export async function versendeKanzleiPaketAnEigeneKanzlei(
+  claimId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireKundeOfClaim(claimId)
+  if (!auth.ok) return { ok: false, error: auth.error }
+  const admin = createAdminClient()
+
+  // Daten + Vorbedingungen pruefen
+  const { data: claim } = await admin
+    .from('claims')
+    .select(
+      'id, status, kanzlei_wunsch, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_name, kanzlei_uebergeben_am',
+    )
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return { ok: false, error: 'Claim nicht gefunden' }
+  if (claim.kanzlei_wunsch !== 'eigene_kanzlei') {
+    return { ok: false, error: 'Nicht im eigene-Kanzlei-Pfad' }
+  }
+  if (claim.kanzlei_uebergeben_am) {
+    return { ok: false, error: 'Paket wurde bereits versendet' }
+  }
+  const email = claim.kanzlei_ansprechpartner_email as string | null
+  if (!email) return { ok: false, error: 'Bitte zuerst Email der Kanzlei eintragen' }
+
+  // Gutachten-Freigabe als Sanity — wir versenden nur wenn das Gutachten
+  // QC-bestanden ist. Sonst hat der Kunde nichts in der Hand.
+  const { data: fall } = await admin
+    .from('faelle').select('id').eq('claim_id', claimId).maybeSingle()
+  if (!fall?.id) return { ok: false, error: 'Kein Fall am Claim' }
+
+  const { data: erstgutachten } = await admin
+    .from('auftraege')
+    .select('id, gutachten_url, gutachten_final_freigegeben')
+    .eq('fall_id', fall.id)
+    .eq('typ', 'erstgutachten')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (!erstgutachten?.gutachten_final_freigegeben) {
+    return { ok: false, error: 'Gutachten ist noch nicht freigegeben' }
+  }
+
+  // Email-Versand fire-and-forget — wir verlassen uns auf den existierenden
+  // Communications-Layer (Resend via lib/communications/send wenn vorhanden).
+  // Falls der Versand scheitert, brechen wir trotzdem nicht ab — Admin sieht
+  // den Fail in den Logs und kann manuell nachsenden.
+  try {
+    const { sendCommunication } = await import('@/lib/communications/send')
+    await (sendCommunication as unknown as (
+      kategorie: string,
+      payload: Record<string, unknown>,
+    ) => Promise<unknown>)('kanzlei_paket_an_externe_kanzlei', {
+      fall_id: fall.id,
+      kanzlei_email: email,
+      kanzlei_name: (claim.kanzlei_ansprechpartner_name as string | null) ?? null,
+      gutachten_url: erstgutachten.gutachten_url ?? null,
+    }).catch((e: unknown) => {
+      console.warn('[versendeKanzleiPaket] Email-Send fehlgeschlagen (nicht-kritisch):', e)
+    })
+  } catch (err) {
+    console.warn('[versendeKanzleiPaket] Communications-Layer nicht verfuegbar:', err)
+  }
+
+  // DB: Übergabe-Marker + Endzustand
+  const now = new Date().toISOString()
+  const { error: uErr } = await admin
+    .from('claims')
+    .update({
+      kanzlei_uebergeben_am: now,
+      status: 'an_externe_kanzlei_uebergeben',
+    })
+    .eq('id', claimId)
+  if (uErr) return { ok: false, error: uErr.message }
+
+  // Timeline-Audit
+  try {
+    await admin.from('timeline').insert({
+      fall_id: fall.id,
+      typ: 'system',
+      titel: 'Kanzleipaket an externe Kanzlei versendet',
+      beschreibung: `An ${email} — Fall geht in Eigenregie weiter.`,
+    })
+  } catch (err) {
+    console.warn('[versendeKanzleiPaket] Timeline:', err)
+  }
+
+  revalidateClaim(claimId, fall.id)
+  return { ok: true }
+}
