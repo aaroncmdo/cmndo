@@ -443,7 +443,6 @@ export default function ClaimStepper({
             anspruchVsEur={anspruchVsEur ?? null}
             anspruchPositionen={anspruchPositionen}
             ausfallSlot={ausfallSlot}
-            onAbort={() => setConfirmingLexDrive(false)}
           />
         </div>
       )}
@@ -454,7 +453,6 @@ export default function ClaimStepper({
             claimId={claimId}
             anspruchVsEur={anspruchVsEur ?? null}
             anspruchPositionen={anspruchPositionen}
-            onAbort={() => setConfirmingEigeneKanzlei(false)}
           />
         </div>
       )}
@@ -766,33 +764,57 @@ function KanzleiWunschBanner({
           </p>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        <BannerOption
-          icon={<HandshakeIcon className="w-3.5 h-3.5" />}
-          titel="Komplettservice"
-          subtitel="LexDrive übernimmt"
-          onClick={() => pick('partnerkanzlei')}
-          disabled={pending}
-          active={confirmingLexDrive}
-          activeColor="blue"
-        />
-        <BannerOption
-          icon={<BriefcaseIcon className="w-3.5 h-3.5" />}
-          titel="Eigene Kanzlei"
-          subtitel="Wir senden Paket an deine Kanzlei"
-          onClick={() => pick('eigene_kanzlei')}
-          disabled={pending}
-          active={confirmingEigeneKanzlei}
-          activeColor="yellow"
-        />
-        <BannerOption
-          icon={<DownloadIcon className="w-3.5 h-3.5" />}
-          titel="Selbst einreichen"
-          subtitel="Du regelst es direkt mit der VS"
-          onClick={() => pick('keine_kanzlei')}
-          disabled={pending || confirmingAny}
-        />
-      </div>
+      {/* Wenn eine Option aktiv ist: nur diese zeigen. Sonst alle drei. */}
+      {confirmingAny ? (
+        <div>
+          {confirmingLexDrive && (
+            <BannerOption
+              icon={<HandshakeIcon className="w-3.5 h-3.5" />}
+              titel="Komplettservice"
+              subtitel="LexDrive übernimmt"
+              onClick={() => pick('partnerkanzlei')}
+              disabled={pending}
+              active
+              activeColor="blue"
+            />
+          )}
+          {confirmingEigeneKanzlei && (
+            <BannerOption
+              icon={<BriefcaseIcon className="w-3.5 h-3.5" />}
+              titel="Eigene Kanzlei"
+              subtitel="Wir senden Paket an deine Kanzlei"
+              onClick={() => pick('eigene_kanzlei')}
+              disabled={pending}
+              active
+              activeColor="yellow"
+            />
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <BannerOption
+            icon={<HandshakeIcon className="w-3.5 h-3.5" />}
+            titel="Komplettservice"
+            subtitel="LexDrive übernimmt"
+            onClick={() => pick('partnerkanzlei')}
+            disabled={pending}
+          />
+          <BannerOption
+            icon={<BriefcaseIcon className="w-3.5 h-3.5" />}
+            titel="Eigene Kanzlei"
+            subtitel="Wir senden Paket an deine Kanzlei"
+            onClick={() => pick('eigene_kanzlei')}
+            disabled={pending}
+          />
+          <BannerOption
+            icon={<DownloadIcon className="w-3.5 h-3.5" />}
+            titel="Selbst einreichen"
+            subtitel="Du regelst es direkt mit der VS"
+            onClick={() => pick('keine_kanzlei')}
+            disabled={pending}
+          />
+        </div>
+      )}
       {error && <p className="text-xs text-red-700">{error}</p>}
     </div>
   )
@@ -952,13 +974,11 @@ function LexDriveBestaetigenPanel({
   anspruchVsEur,
   anspruchPositionen,
   ausfallSlot,
-  onAbort,
 }: {
   claimId: string
   anspruchVsEur: number | null
   anspruchPositionen?: AnspruchPosition[]
   ausfallSlot?: React.ReactNode
-  onAbort: () => void
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -1040,13 +1060,6 @@ function LexDriveBestaetigenPanel({
         </button>
       </div>
       {error && <p className="text-xs text-red-700">{error}</p>}
-      <button
-        type="button"
-        onClick={onAbort}
-        className="text-[11px] text-[#0e5be9]/50 hover:text-[#0e5be9] transition-colors"
-      >
-        ← Zurück zur Auswahl
-      </button>
     </div>
   )
 }
@@ -1060,12 +1073,10 @@ function EigeneKanzleiAnspruchPanel({
   claimId,
   anspruchVsEur,
   anspruchPositionen,
-  onAbort,
 }: {
   claimId: string
   anspruchVsEur: number | null
   anspruchPositionen?: AnspruchPosition[]
-  onAbort: () => void
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -1153,13 +1164,6 @@ function EigeneKanzleiAnspruchPanel({
         </button>
       </div>
       {error && <p className="text-xs text-red-700">{error}</p>}
-      <button
-        type="button"
-        onClick={onAbort}
-        className="text-[11px] text-amber-600/50 hover:text-amber-600 transition-colors"
-      >
-        ← Zurück zur Auswahl
-      </button>
     </div>
   )
 }
