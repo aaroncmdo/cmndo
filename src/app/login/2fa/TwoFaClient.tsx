@@ -61,6 +61,8 @@ export default function TwoFaClient({
       } else {
         setError(r.error ?? 'Code konnte nicht gesendet werden')
       }
+    }).catch(err => {
+      setError(err instanceof Error ? err.message : 'Code konnte nicht gesendet werden')
     })
   }, [codeSent, method])
 
@@ -77,6 +79,8 @@ export default function TwoFaClient({
     request().then(r => {
       if (r.success) setResendCooldown(60)
       else setError(r.error ?? 'Erneut senden fehlgeschlagen')
+    }).catch(err => {
+      setError(err instanceof Error ? err.message : 'Erneut senden fehlgeschlagen')
     })
   }
 

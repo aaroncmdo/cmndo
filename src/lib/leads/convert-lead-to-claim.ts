@@ -456,6 +456,18 @@ export async function convertLeadToClaim(
     console.error('[convertLeadToClaim] leads-Update fehlgeschlagen:', leadUpdErr)
   }
 
+  // ─── Schritt 10: fall_dokumente nachholen (non-critical) ───────────────────
+  // Während des Uploads im Dispatch-Lead war noch kein Fall vorhanden, deshalb
+  // hat insertFallDokument() früh returned (if (!fallId) return). Die Dateien
+  // liegen im Bucket, aber die fall_dokumente-Rows fehlen. Wir lesen die
+  // Mirror-Felder des Leads und erstellen die fehlenden Rows nach.
+  // Fehler hier brechen die Konvertierung nicht ab — die Docs sind im Bucket.
+  try {
+    await migriereLeadDokumenteZuFall(admin, input.leadId, fallId, lead, now)
+  } catch (err) {
+    console.error('[convertLeadToClaim] fall_dokumente-Migration fehlgeschlagen:', err)
+  }
+
   return {
     ok: true,
     claimId,
@@ -464,6 +476,137 @@ export async function convertLeadToClaim(
     fallNummer,
     kundenbetreuerId,
     idempotent: false,
+  }
+}
+
+// ─── Helper: Mirror-Felder → fall_dokumente ─────────────────────────────────
+// Extrahiert den Storage-Pfad aus einer Supabase-Public-URL.
+// Format: https://{project}.supabase.co/storage/v1/object/public/fall-dokumente/{path}
+function storagePathAusUrl(url: string): string | null {
+  const marker = '/object/public/fall-dokumente/'
+  const idx = url.indexOf(marker)
+  return idx >= 0 ? url.slice(idx + marker.length) : null
+}
+
+async function migriereLeadDokumenteZuFall(
+  admin: ReturnType<typeof createAdminClient>,
+  leadId: string,
+  fallId: string,
+  lead: Record<string, unknown>,
+  now: string,
+): Promise<void> {
+  const inserts: Array<Record<string, unknown>> = []
+
+  // Polizeibericht
+  const polizeiUrl = (lead.polizeibericht_url as string | null) ?? null
+  if (polizeiUrl) {
+    const storagePath = storagePathAusUrl(polizeiUrl)
+    if (storagePath) {
+      inserts.push({
+        fall_id: fallId,
+        lead_id: leadId,
+        dokument_typ: 'polizeibericht',
+        storage_path: storagePath,
+        uploaded_by_kunde: true,
+        hochgeladen_am: (lead.polizeibericht_hochgeladen_am as string | null) ?? now,
+        beschreibung: 'Polizeiliche Unfallmitteilung',
+        quelle: 'lead_migration',
+      })
+    }
+  }
+
+  // Fahrzeugschein (ZB1)
+  const zb1Url = (lead.zb1_url as string | null) ?? null
+  if (zb1Url) {
+    const storagePath = storagePathAusUrl(zb1Url)
+    if (storagePath) {
+      inserts.push({
+        fall_id: fallId,
+        lead_id: leadId,
+        dokument_typ: 'fahrzeugschein',
+        storage_path: storagePath,
+        uploaded_by_kunde: true,
+        hochgeladen_am: (lead.zb1_hochgeladen_am as string | null) ?? now,
+        beschreibung: 'Fahrzeugschein / ZB1',
+        quelle: 'lead_migration',
+      })
+    }
+  }
+
+  // Unfallfotos / Schadensfotos (JSONB-Array auf dem Lead)
+  const fotoUrls = Array.isArray(lead.schadensfoto_urls)
+    ? (lead.schadensfoto_urls as string[])
+    : []
+  for (const url of fotoUrls) {
+    const storagePath = storagePathAusUrl(url)
+    if (storagePath) {
+      inserts.push({
+        fall_id: fallId,
+        lead_id: leadId,
+        dokument_typ: 'schadensfotos',
+        storage_path: storagePath,
+        uploaded_by_kunde: true,
+        hochgeladen_am: now,
+        beschreibung: 'Schadensfoto',
+        quelle: 'lead_migration',
+      })
+    }
+  }
+
+  // Weitere Dokument-Typen via dokument_upload_anfragen (kein Mirror-Feld auf leads)
+  // Querys alle abgeschlossenen Slots für den Lead und migriert die fehlenden Rows.
+  const ANFRAGE_SLOT_MAP: Record<string, string> = {
+    sachschaden_foto: 'sachschaden_foto',
+    sachschaden_rechnung: 'sachschaden_rechnung',
+    aerztliches_attest: 'aerztliches_attest',
+    diagnosebericht: 'diagnosebericht',
+    zeugenaussage: 'zeugenaussage',
+  }
+  const { data: anfragen } = await admin
+    .from('dokument_upload_anfragen')
+    .select('slots')
+    .eq('lead_id', leadId)
+  for (const anfrage of anfragen ?? []) {
+    const slots = anfrage.slots as Array<{
+      slot_id: string
+      doc_url: string | null
+      hochgeladen: boolean
+      label: string
+      hochgeladen_am: string | null
+    }>
+    for (const slot of slots ?? []) {
+      const dokTyp = ANFRAGE_SLOT_MAP[slot.slot_id]
+      if (!dokTyp || !slot.hochgeladen || !slot.doc_url) continue
+      const storagePath = storagePathAusUrl(slot.doc_url)
+      if (!storagePath) continue
+      inserts.push({
+        fall_id: fallId,
+        lead_id: leadId,
+        dokument_typ: dokTyp,
+        storage_path: storagePath,
+        uploaded_by_kunde: true,
+        hochgeladen_am: slot.hochgeladen_am ?? now,
+        beschreibung: slot.label,
+        quelle: 'lead_migration',
+      })
+    }
+  }
+
+  if (inserts.length === 0) return
+
+  // Idempotenz: nur einfügen wenn die Kombination fall_id + storage_path noch
+  // nicht existiert (verhindert Doppel-Rows bei wiederholtem Aufruf).
+  const { data: existing } = await admin
+    .from('fall_dokumente')
+    .select('storage_path')
+    .eq('fall_id', fallId)
+    .in('quelle', ['lead_migration'])
+
+  const existingPaths = new Set((existing ?? []).map((r) => r.storage_path as string))
+  const neueInserts = inserts.filter((r) => !existingPaths.has(r.storage_path as string))
+
+  if (neueInserts.length > 0) {
+    await admin.from('fall_dokumente').insert(neueInserts)
   }
 }
 

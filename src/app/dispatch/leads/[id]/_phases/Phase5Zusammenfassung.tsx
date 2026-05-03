@@ -8,6 +8,7 @@
 import { useState, useTransition, useEffect, useRef } from 'react'
 import { useDispatchPhase } from '../_lib/phase-context'
 import { sendFlowLinkMultiChannel, saveStammdaten } from '../actions'
+import { checkEmailIsSv } from '../_actions/email-sv-check'
 // AAR-317: Unfallskizze-Card (Claude-API-Generator + MA-Freigabe)
 import { UnfallskizzeCard } from './UnfallskizzeCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -79,6 +80,7 @@ export default function Phase5Zusammenfassung() {
   // Save sei erfolgreich.
   const [nummerError, setNummerError] = useState<string | null>(null)
   const [emailError, setEmailError] = useState<string | null>(null)
+  const [emailIsSv, setEmailIsSv] = useState(false)
   const [, startTransition] = useTransition()
   const [sendStatus, setSendStatus] = useState<{ kanal: string | null; text: string; ok: boolean }>({
     kanal: null,
@@ -119,9 +121,22 @@ export default function Phase5Zusammenfassung() {
   // tippt der Kunde die Adresse am Telefon, und der MA muss sie live
   // korrigieren können bevor er Email-FlowLink abschickt.
   function saveEmail() {
+    // SV-Check bei jedem Blur — auch wenn sich die Email nicht geändert hat
+    const trimmed = email.trim()
+    if (trimmed) {
+      checkEmailIsSv(trimmed).then(r => setEmailIsSv(r.isSv)).catch(() => null)
+    } else {
+      setEmailIsSv(false)
+    }
     if (email === (l.email ?? '')) return
-    saveInlineField({ email: email.trim() || null }, setSavingEmail, setEmailError, 'Email')
+    saveInlineField({ email: trimmed || null }, setSavingEmail, setEmailError, 'Email')
   }
+
+  // SV-Check beim initialen Laden wenn Email bereits gesetzt ist
+  useEffect(() => {
+    const trimmed = (l.email ?? '').trim()
+    if (trimmed) checkEmailIsSv(trimmed).then(r => setEmailIsSv(r.isSv)).catch(() => null)
+  }, [l.email])
 
   // AAR-179 Audit-Fix: Auto-Advance-Timeout wird beim Unmount/Re-Send
   // aufgeräumt damit nicht ein stale setPhase(6) den User überschreibt.
@@ -383,6 +398,14 @@ export default function Phase5Zusammenfassung() {
           <p className={`text-[10px] mt-0.5 ${emailError ? 'text-red-600' : 'text-claimondo-ondo/70'}`}>
             {emailError ? emailError : savingEmail ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
           </p>
+          {emailIsSv && (
+            <div className="flex items-start gap-2 mt-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2">
+              <AlertTriangleIcon className="w-3.5 h-3.5 text-red-600 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-red-800">
+                Diese E-Mail-Adresse gehört bereits zu einem <strong>Sachverständigen-Account</strong>. FlowLink würde einen Zweit-Account anlegen — bitte Email prüfen oder Kanal wechseln.
+              </p>
+            </div>
+          )}
         </div>
         {/* AAR-348: Gelbe Warnbanner wenn Felder leer — macht dem MA klar,
             dass er den betroffenen Kanal nicht versenden kann. */}
