@@ -553,6 +553,45 @@ async function migriereLeadDokumenteZuFall(
     }
   }
 
+  // Weitere Dokument-Typen via dokument_upload_anfragen (kein Mirror-Feld auf leads)
+  // Querys alle abgeschlossenen Slots für den Lead und migriert die fehlenden Rows.
+  const ANFRAGE_SLOT_MAP: Record<string, string> = {
+    sachschaden_foto: 'sachschaden_foto',
+    sachschaden_rechnung: 'sachschaden_rechnung',
+    aerztliches_attest: 'aerztliches_attest',
+    diagnosebericht: 'diagnosebericht',
+    zeugenaussage: 'zeugenaussage',
+  }
+  const { data: anfragen } = await admin
+    .from('dokument_upload_anfragen')
+    .select('slots')
+    .eq('lead_id', leadId)
+  for (const anfrage of anfragen ?? []) {
+    const slots = anfrage.slots as Array<{
+      slot_id: string
+      doc_url: string | null
+      hochgeladen: boolean
+      label: string
+      hochgeladen_am: string | null
+    }>
+    for (const slot of slots ?? []) {
+      const dokTyp = ANFRAGE_SLOT_MAP[slot.slot_id]
+      if (!dokTyp || !slot.hochgeladen || !slot.doc_url) continue
+      const storagePath = storagePathAusUrl(slot.doc_url)
+      if (!storagePath) continue
+      inserts.push({
+        fall_id: fallId,
+        lead_id: leadId,
+        dokument_typ: dokTyp,
+        storage_path: storagePath,
+        uploaded_by_kunde: true,
+        hochgeladen_am: slot.hochgeladen_am ?? now,
+        beschreibung: slot.label,
+        quelle: 'lead_migration',
+      })
+    }
+  }
+
   if (inserts.length === 0) return
 
   // Idempotenz: nur einfügen wenn die Kombination fall_id + storage_path noch

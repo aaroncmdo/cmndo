@@ -27,6 +27,9 @@ import {
   XCircleIcon,
   XIcon,
   CameraIcon,
+  StethoscopeIcon,
+  ReceiptIcon,
+  UsersIcon,
 } from 'lucide-react'
 
 type Props = {
@@ -50,6 +53,10 @@ type Props = {
   // Polling-Refresh den Haiku-Status sichtbar macht.
   schadensfotoUrls?: string[] | null
   sachschadenBeschreibung?: string | null
+  // Bedingte Slots: werden nur angezeigt wenn das Lead-Flag gesetzt ist.
+  hatSachschaden?: boolean
+  hatPersonenschaden?: boolean
+  hatZeugen?: boolean
 }
 
 type SonstigesEintrag = { id: number; label: string }
@@ -75,6 +82,9 @@ export default function DokumenteAnfordernCard({
   unfallfotosAnfragenDefault,
   schadensfotoUrls,
   sachschadenBeschreibung,
+  hatSachschaden,
+  hatPersonenschaden,
+  hatZeugen,
 }: Props) {
   const router = useRouter()
 
@@ -92,6 +102,11 @@ export default function DokumenteAnfordernCard({
   const [selectUnfallfotos, setSelectUnfallfotos] = useState(
     !!unfallfotosAnfragenDefault && !unfallfotosVorhanden,
   )
+  const [selectSachschadenFoto, setSelectSachschadenFoto] = useState(false)
+  const [selectSachschadenRechnung, setSelectSachschadenRechnung] = useState(false)
+  const [selectAttest, setSelectAttest] = useState(false)
+  const [selectDiagnosebericht, setSelectDiagnosebericht] = useState(false)
+  const [selectZeugenaussage, setSelectZeugenaussage] = useState(false)
   const [sonstige, setSonstige] = useState<SonstigesEintrag[]>([])
   const [nextId, setNextId] = useState(1)
 
@@ -184,6 +199,21 @@ export default function DokumenteAnfordernCard({
     if (selectUnfallfotos) {
       slots.push({ slot_id: 'unfallfotos' })
     }
+    if (selectSachschadenFoto) {
+      slots.push({ slot_id: 'sachschaden_foto' })
+    }
+    if (selectSachschadenRechnung) {
+      slots.push({ slot_id: 'sachschaden_rechnung' })
+    }
+    if (selectAttest) {
+      slots.push({ slot_id: 'aerztliches_attest' })
+    }
+    if (selectDiagnosebericht) {
+      slots.push({ slot_id: 'diagnosebericht' })
+    }
+    if (selectZeugenaussage) {
+      slots.push({ slot_id: 'zeugenaussage' })
+    }
     for (const s of sonstige) {
       const trimmed = s.label.trim()
       if (trimmed.length > 0) {
@@ -215,6 +245,11 @@ export default function DokumenteAnfordernCard({
     selectFahrzeugschein ||
     selectPolizeibericht ||
     selectUnfallfotos ||
+    selectSachschadenFoto ||
+    selectSachschadenRechnung ||
+    selectAttest ||
+    selectDiagnosebericht ||
+    selectZeugenaussage ||
     sonstige.some((s) => s.label.trim().length > 0)
 
   return (
@@ -440,6 +475,122 @@ export default function DokumenteAnfordernCard({
             </div>
           )}
         </div>
+
+        {/* Sachschaden-Slots — nur wenn hat_sachschaden=true */}
+        {hatSachschaden && (
+          <>
+            <div className={`rounded-lg border p-3 ${selectSachschadenFoto ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectSachschadenFoto}
+                  onChange={(e) => setSelectSachschadenFoto(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                    <span className="text-xs font-semibold text-claimondo-navy">Fotos des Sachschadens</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-medium">Sachschaden</span>
+                  </div>
+                  <p className="text-[10px] text-claimondo-ondo mt-0.5">
+                    Fotos des beschädigten Gegenstands (z. B. Handy, Brille, Kleidung).
+                  </p>
+                </div>
+              </label>
+            </div>
+            <div className={`rounded-lg border p-3 ${selectSachschadenRechnung ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectSachschadenRechnung}
+                  onChange={(e) => setSelectSachschadenRechnung(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <ReceiptIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                    <span className="text-xs font-semibold text-claimondo-navy">Rechnung / Kostenvoranschlag Sachschaden</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-medium">Sachschaden</span>
+                  </div>
+                  <p className="text-[10px] text-claimondo-ondo mt-0.5">
+                    Reparaturrechnung oder Kostenvoranschlag für den beschädigten Gegenstand.
+                  </p>
+                </div>
+              </label>
+            </div>
+          </>
+        )}
+
+        {/* Personenschaden-Slots — nur wenn hat_personenschaden=true */}
+        {hatPersonenschaden && (
+          <>
+            <div className={`rounded-lg border p-3 ${selectAttest ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectAttest}
+                  onChange={(e) => setSelectAttest(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <StethoscopeIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                    <span className="text-xs font-semibold text-claimondo-navy">Ärztliches Attest</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-medium">Personenschaden</span>
+                  </div>
+                  <p className="text-[10px] text-claimondo-ondo mt-0.5">
+                    Ärztliche Bescheinigung über Verletzungen infolge des Unfalls.
+                  </p>
+                </div>
+              </label>
+            </div>
+            <div className={`rounded-lg border p-3 ${selectDiagnosebericht ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectDiagnosebericht}
+                  onChange={(e) => setSelectDiagnosebericht(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <FileTextIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                    <span className="text-xs font-semibold text-claimondo-navy">Diagnosebericht / Befundbericht</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-medium">Personenschaden</span>
+                  </div>
+                  <p className="text-[10px] text-claimondo-ondo mt-0.5">
+                    Ärztlicher Befundbericht oder Entlassungsbericht aus der Klinik.
+                  </p>
+                </div>
+              </label>
+            </div>
+          </>
+        )}
+
+        {/* Zeugenaussage — nur wenn zeugen=true */}
+        {hatZeugen && (
+          <div className={`rounded-lg border p-3 ${selectZeugenaussage ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectZeugenaussage}
+                onChange={(e) => setSelectZeugenaussage(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5">
+                  <UsersIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                  <span className="text-xs font-semibold text-claimondo-navy">Zeugenaussage / Zeugenkontakt</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-claimondo-shield/10 text-claimondo-navy font-medium">Zeugen</span>
+                </div>
+                <p className="text-[10px] text-claimondo-ondo mt-0.5">
+                  Schriftliche Zeugenaussage oder Kontaktdaten des Zeugen als Scan / Foto.
+                </p>
+              </div>
+            </label>
+          </div>
+        )}
 
         {/* Freie „Sonstige"-Slots */}
         {sonstige.map((s) => (

@@ -17,7 +17,16 @@ import {
   FileTextIcon,
 } from 'lucide-react'
 
-type SlotId = 'fahrzeugschein' | 'polizeibericht' | 'unfallfotos' | 'sonstiges'
+type SlotId =
+  | 'fahrzeugschein'
+  | 'polizeibericht'
+  | 'unfallfotos'
+  | 'sonstiges'
+  | 'sachschaden_foto'
+  | 'sachschaden_rechnung'
+  | 'aerztliches_attest'
+  | 'diagnosebericht'
+  | 'zeugenaussage'
 
 type SlotUi = {
   slot_id: SlotId
@@ -96,6 +105,11 @@ const SLOT_HINTS: Record<SlotId, string> = {
   polizeibericht: 'Der Zettel, den Sie nach dem Unfall von der Polizei bekommen haben.',
   unfallfotos: 'Fotos vom Fahrzeugschaden — mehrere Ansichten willkommen (Front, Heck, Seiten, Detail). Je mehr Fotos, desto besser die Schadenbeschreibung.',
   sonstiges: 'Beliebiges Dokument zum Fall — z. B. Kaufvertrag, Rechnung, Foto.',
+  sachschaden_foto: 'Fotos des beschädigten Gegenstands — mehrere Ansichten, gutes Licht.',
+  sachschaden_rechnung: 'Reparaturrechnung oder Kostenvoranschlag für den beschädigten Gegenstand.',
+  aerztliches_attest: 'Ärztliche Bescheinigung über Ihre Verletzungen — Vorder- und Rückseite falls vorhanden.',
+  diagnosebericht: 'Ärztlicher Befundbericht oder Entlassungsbericht — alle Seiten hochladen.',
+  zeugenaussage: 'Schriftliche Zeugenaussage oder Visitenkarte / Notizzettel mit Kontaktdaten.',
 }
 
 function emptySlotState(): SlotState {

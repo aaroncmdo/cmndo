@@ -80,6 +80,8 @@ type LeadFields = {
   vorschaden_letzter_datum?: string | null
   cardentity_abfrage_am?: string | null
   vorschaeden_beschreibung?: string | null
+  personenschaden_flag?: boolean | null
+  sachschaden_flag?: boolean | null
   finanzierung_leasing?: 'keine' | 'finanzierung' | 'leasing' | string | null
   vorsteuerabzugsberechtigt?: boolean | null
   gegner_bekannt?: boolean | null
@@ -1321,6 +1323,9 @@ export default function Phase4Stammdaten() {
           unfallfotosAnfragenDefault={unfallfotosAnfragen}
           schadensfotoUrls={l.schadensfoto_urls ?? null}
           sachschadenBeschreibung={l.fahrzeugschaden_beschreibung ?? null}
+          hatSachschaden={l.sachschaden_flag === true}
+          hatPersonenschaden={l.personenschaden_flag === true}
+          hatZeugen={l.zeugen === true}
         />
       </div>
 

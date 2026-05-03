@@ -22,7 +22,16 @@ export type SlotEingabe = {
   // leads.schadensfoto_urls angehängt. Haiku-Vision wertet die Fotos aus und
   // befüllt leads.fahrzeugschaden_beschreibung (separate Spalte seit
   // AAR-665-Follow — sachschaden_beschreibung ist Drittschaden in Phase 1).
-  slot_id: 'fahrzeugschein' | 'polizeibericht' | 'unfallfotos' | 'sonstiges'
+  slot_id:
+    | 'fahrzeugschein'
+    | 'polizeibericht'
+    | 'unfallfotos'
+    | 'sonstiges'
+    | 'sachschaden_foto'
+    | 'sachschaden_rechnung'
+    | 'aerztliches_attest'
+    | 'diagnosebericht'
+    | 'zeugenaussage'
   ocr?: boolean
   label?: string  // optional — überschreibt Default-Label (nur für 'sonstiges' relevant)
 }
@@ -34,6 +43,11 @@ const DEFAULT_LABELS: Record<SlotEingabe['slot_id'], string> = {
   polizeibericht: 'Polizeiliche Unfallmitteilung',
   unfallfotos: 'Unfallfotos (alle Schaden-Ansichten)',
   sonstiges: 'Sonstiges Dokument',
+  sachschaden_foto: 'Fotos des Sachschadens',
+  sachschaden_rechnung: 'Rechnung / Kostenvoranschlag Sachschaden',
+  aerztliches_attest: 'Ärztliches Attest',
+  diagnosebericht: 'Diagnosebericht / Befundbericht',
+  zeugenaussage: 'Zeugenaussage / Zeugenkontakt',
 }
 
 async function requireDispatcher(supabase: Awaited<ReturnType<typeof createClient>>) {
