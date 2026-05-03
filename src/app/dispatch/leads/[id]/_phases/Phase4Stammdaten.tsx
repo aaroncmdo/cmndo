@@ -591,6 +591,26 @@ export default function Phase4Stammdaten() {
 
   return (
     <div className="space-y-4">
+      {/* Dokumente anfragen — ganz oben: Dispatcher schickt den Link bevor
+          er in die Stammdaten einsteigt, Kunde lädt parallel hoch. */}
+      <DokumenteAnfordernCard
+        leadId={leadId}
+        zb1Status={l.zb1_status ?? null}
+        zb1HochgeladenAm={l.zb1_hochgeladen_am ?? null}
+        polizeiberichtStatus={l.polizeibericht_status ?? null}
+        polizeiberichtHochgeladenAm={l.polizeibericht_hochgeladen_am ?? null}
+        zeigePolizeibericht={l.polizei_vor_ort === true && l.polizeibericht_pflicht === true}
+        telefon={l.telefon ?? null}
+        email={l.email ?? null}
+        unfallfotosVorhanden={hatUnfallfotos}
+        unfallfotosAnfragenDefault={unfallfotosAnfragen}
+        schadensfotoUrls={l.schadensfoto_urls ?? null}
+        sachschadenBeschreibung={l.fahrzeugschaden_beschreibung ?? null}
+        hatSachschaden={l.sachschaden_flag === true}
+        hatPersonenschaden={l.personenschaden_flag === true}
+        hatZeugen={l.zeugen === true}
+      />
+
       {/* CMM-23: KI-Analyse (OCR first, LLM-Fallback). Hier in Phase 4 statt
          Phase 3 — der Kunden-Polizeibericht-Upload triggert den Auto-OCR
          schon im Onboarding (uploadPflichtdokument), die Daten-Anfrage an
@@ -635,29 +655,18 @@ export default function Phase4Stammdaten() {
           placeholder="z. B. Heckstoßstange eingedrückt, Kofferraumklappe lässt sich nicht mehr öffnen, Rückleuchte rechts zersplittert …"
           type="text"
         />
-        {/* Checkmark-Button: aktiviert die Unfallfotos-Checkbox in der
-            DokumenteAnfordernCard am Ende der Phase + scrollt dort hin. */}
+        {/* Checkmark-Button: aktiviert die Unfallfotos-Checkbox in der DokumenteAnfordernCard oben. */}
         <label className="flex items-start gap-2 cursor-pointer pt-1">
           <input
             type="checkbox"
             checked={unfallfotosAnfragen}
-            onChange={(e) => {
-              const checked = e.target.checked
-              setUnfallfotosAnfragen(checked)
-              if (checked) {
-                requestAnimationFrame(() => {
-                  document
-                    .getElementById('dokumente-anfordern-card')
-                    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                })
-              }
-            }}
+            onChange={(e) => setUnfallfotosAnfragen(e.target.checked)}
             className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
           />
           <span className="text-xs text-claimondo-navy">
             <span className="font-medium">Kunde hat Unfallfotos</span>
             <span className="text-claimondo-ondo">
-              {' '}— bei Anforderung unten (Fahrzeugschein / Polizei / Fotos in einem
+              {' '}— bei Anforderung oben (Fahrzeugschein / Polizei / Fotos in einem
               Link) werden die Fotos mitgeordert. Claude füllt danach automatisch
               die Beschreibung.
             </span>
@@ -1363,31 +1372,6 @@ export default function Phase4Stammdaten() {
           Pflichtfelder fehlen: Kennzeichen, Marke und Modell müssen gesetzt sein.
         </p>
       )}
-
-      {/* AAR-unfallfotos: Bulk-Anforderung am Ende von Phase 4. Dispatcher
-          wählt welche Dokumente er beim Kunden anfordert (Fahrzeugschein,
-          Polizeibericht, Unfallfotos, sonstige) und verschickt einen einzigen
-          WA/SMS/Email-Link. Der „Kunde hat Unfallfotos"-Button im Banner oben
-          setzt unfallfotosAnfragen auf true → Checkbox hier vorausgewählt. */}
-      <div id="dokumente-anfordern-card">
-        <DokumenteAnfordernCard
-          leadId={leadId}
-          zb1Status={l.zb1_status ?? null}
-          zb1HochgeladenAm={l.zb1_hochgeladen_am ?? null}
-          polizeiberichtStatus={l.polizeibericht_status ?? null}
-          polizeiberichtHochgeladenAm={l.polizeibericht_hochgeladen_am ?? null}
-          zeigePolizeibericht={l.polizei_vor_ort === true && l.polizeibericht_pflicht === true}
-          telefon={l.telefon ?? null}
-          email={l.email ?? null}
-          unfallfotosVorhanden={hatUnfallfotos}
-          unfallfotosAnfragenDefault={unfallfotosAnfragen}
-          schadensfotoUrls={l.schadensfoto_urls ?? null}
-          sachschadenBeschreibung={l.fahrzeugschaden_beschreibung ?? null}
-          hatSachschaden={l.sachschaden_flag === true}
-          hatPersonenschaden={l.personenschaden_flag === true}
-          hatZeugen={l.zeugen === true}
-        />
-      </div>
 
       {/* AAR-617: Zurück-/Weiter-Row */}
       {/* AAR-340: „Weiter zu Phase 5"-Button — Pflichtfelder q6 + q7 müssen
