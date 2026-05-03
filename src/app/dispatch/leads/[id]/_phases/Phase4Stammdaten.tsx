@@ -591,16 +591,6 @@ export default function Phase4Stammdaten() {
 
   return (
     <div className="space-y-4">
-      {/* ehem. Phase 3 — SchadentypPicker direkt in Phase 4 konsolidiert */}
-      <SchadentypPicker
-        leadId={lead.id}
-        initialTyp={l.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
-        initialFreitext={l.schadentyp_freitext ?? null}
-        gegnerKennzeichen={l.gegner_kennzeichen ?? null}
-        initialKamera={l.parkplatz_kamera ?? null}
-        onSaved={() => router.refresh()}
-      />
-
       {/* CMM-23: KI-Analyse (OCR first, LLM-Fallback). Hier in Phase 4 statt
          Phase 3 — der Kunden-Polizeibericht-Upload triggert den Auto-OCR
          schon im Onboarding (uploadPflichtdokument), die Daten-Anfrage an
@@ -610,6 +600,16 @@ export default function Phase4Stammdaten() {
         leadId={lead.id}
         polizeiVorOrt={l.polizei_vor_ort ?? null}
         onSchadentypGesetzt={() => router.refresh()}
+      />
+
+      {/* Schadentyp — zwischen BKAT-Identifizierung und Schadenbeschreibung */}
+      <SchadentypPicker
+        leadId={lead.id}
+        initialTyp={l.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
+        initialFreitext={l.schadentyp_freitext ?? null}
+        gegnerKennzeichen={l.gegner_kennzeichen ?? null}
+        initialKamera={l.parkplatz_kamera ?? null}
+        onSaved={() => router.refresh()}
       />
 
       {/* AAR-665-Follow: Schadenbeschreibungs-Card (WAS am Auto kaputt).
