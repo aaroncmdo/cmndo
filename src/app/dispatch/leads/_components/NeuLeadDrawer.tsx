@@ -35,7 +35,7 @@ const INITIAL: CreateManualLeadInput = {
 // Fahrzeugfelder (Hersteller/Modell/Kennzeichen/Lackfarbe/Render) werden
 // in Phase 4 Stammdaten erfasst — nicht beim schnellen Lead-Anlegen.
 
-export default function NeuLeadDrawer() {
+export default function NeuLeadDrawer({ fab = false }: { fab?: boolean }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
@@ -72,7 +72,10 @@ export default function NeuLeadDrawer() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-colors"
+        className={fab
+          ? 'flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-semibold bg-claimondo-navy hover:bg-claimondo-shield text-white shadow-lg shadow-claimondo-navy/30 transition-colors'
+          : 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-colors'
+        }
       >
         <PlusIcon className="w-4 h-4" />
         Neuer Lead
