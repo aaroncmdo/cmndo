@@ -16,21 +16,37 @@ import PageHeader from '@/components/shared/PageHeader'
 
 function phaseFromAktuellePhase(aktuellePhase: string | null | undefined): number | null {
   if (!aktuellePhase) return null
+  // Welle-7 Sub-Phase-Strings (aus map_claim_phase_to_faelle_phase)
+  if (['vollzahlung_eingegangen', 'ablehnung_kanzlei_prueft', 'klage_eingereicht', 'kanzlei_fallakte_angelegt', 'fall_akzeptiert_storniert'].includes(aktuellePhase)) return 9
+  if (['warten_auf_vs', 'vs_kontakt_laeuft'].includes(aktuellePhase)) return 6
+  if (['qc_bestanden'].includes(aktuellePhase)) return 4
+  if (['gutachten_erstellt', 'gutachten_wird_erstellt'].includes(aktuellePhase)) return 3
+  if (['sv_unterwegs', 'sv_vor_ort', 'begutachtung_abgeschlossen'].includes(aktuellePhase)) return 2
+  if (['termin_bestaetigt', 'fallakte_angelegt', 'fallakte_wird_angelegt'].includes(aktuellePhase)) return 1
+  // Welle-6 Legacy-Format mit führender Zahl (z.B. "3_gutachten_qc")
   const m = aktuellePhase.match(/^(\d{1,2})/)
-  return m ? parseInt(m[1], 10) : null
+  if (m) {
+    const n = parseInt(m[1], 10)
+    // Phase 7+8+10 wurden in AAR-839 entfernt → abrunden auf 6 bzw. 9
+    if (n === 7 || n === 8) return 6
+    if (n === 10) return 9
+    return n
+  }
+  return null
 }
 
 function phaseFromStatus(status: string | null | undefined): number {
-  // Fallback-Mapping wenn aktuelle_phase nicht gesetzt ist.
-  // Reihenfolge wichtig — longestMatch-First.
   if (!status) return 1
-  if (['abgeschlossen', 'zahlung-eingegangen'].includes(status)) return 10
+  // Welle-7 Werte
+  if (['reguliert', 'abgelehnt', 'kanzlei'].includes(status)) return 9
+  if (status === 'vs_kontakt') return 6
+  if (['in_bearbeitung', 'onboarding'].includes(status)) return 1
+  // Welle-6 Werte (Backward-Compat)
+  if (['abgeschlossen', 'zahlung-eingegangen'].includes(status)) return 9
   if (['regulierung', 'regulierung-laeuft'].includes(status)) return 9
-  if (status === 'nachbesichtigung-laeuft') return 8
-  if (['vs-abgelehnt', 'klage'].includes(status)) return 7
-  if (['vs-kuerzt', 'anschlussschreiben'].includes(status)) return 6
-  if (status === 'kanzlei-uebergeben') return 5
-  if (status === 'qc-pruefung' || status === 'filmcheck') return 4
+  if (['anschlussschreiben'].includes(status)) return 5
+  if (status === 'kanzlei-uebergeben') return 4
+  if (status === 'qc-pruefung' || status === 'filmcheck') return 3
   if (status === 'gutachten-eingegangen') return 3
   if (['begutachtung-laeuft', 'besichtigung', 'sv-termin'].includes(status)) return 2
   return 1
