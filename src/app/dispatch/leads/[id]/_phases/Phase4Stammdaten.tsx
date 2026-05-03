@@ -19,6 +19,7 @@ import { useCarQuery } from '../_hooks/useCarQuery'
 // AAR-352: Zb1UploadCard + PolizeiberichtUploadCard ersetzt durch
 // DokumenteAnfordernCard (kombinierte Multi-Slot-Anfrage in einem Link).
 import DokumenteAnfordernCard from './DokumenteAnfordernCard'
+import SchadentypPicker from '../SchadentypPicker'
 import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import { LACKFARBE_OPTIONS, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 import BkatAnalysePanel from './BkatAnalysePanel'
@@ -103,6 +104,7 @@ type LeadFields = {
   // AAR-314: Datum der Anfrage beim Deutschen Büro Grüne Karte (10-Tage-Wartezeit)
   gegner_versicherung_anfrage_datum?: string | null
   schadentyp?: string | null
+  schadentyp_freitext?: string | null
   parkplatz_kamera?: boolean | null
   zeugen?: boolean | null
   // AAR-208: Halter-Daten aus ZB1-OCR (Fahrzeugschein)
@@ -589,6 +591,16 @@ export default function Phase4Stammdaten() {
 
   return (
     <div className="space-y-4">
+      {/* ehem. Phase 3 — SchadentypPicker direkt in Phase 4 konsolidiert */}
+      <SchadentypPicker
+        leadId={lead.id}
+        initialTyp={l.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
+        initialFreitext={l.schadentyp_freitext ?? null}
+        gegnerKennzeichen={l.gegner_kennzeichen ?? null}
+        initialKamera={l.parkplatz_kamera ?? null}
+        onSaved={() => router.refresh()}
+      />
+
       {/* CMM-23: KI-Analyse (OCR first, LLM-Fallback). Hier in Phase 4 statt
          Phase 3 — der Kunden-Polizeibericht-Upload triggert den Auto-OCR
          schon im Onboarding (uploadPflichtdokument), die Daten-Anfrage an
@@ -1383,10 +1395,10 @@ export default function Phase4Stammdaten() {
       <div className="flex gap-2 mt-2">
         <button
           type="button"
-          onClick={() => setPhase(3)}
+          onClick={() => setPhase(2)}
           className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] text-sm font-semibold flex items-center justify-center gap-2"
         >
-          ← Zurück zu Phase 3
+          ← Zurück zu Phase 2
         </button>
         <button
           type="button"

@@ -292,10 +292,10 @@ export default function Phase2TerminServiceTyp() {
           <button
             type="button"
             disabled={pending}
-            onClick={() => setPhase(3)}
+            onClick={() => setPhase(4)}
             className="flex-1 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            Weiter zu Phase 3 →
+            Weiter zu Phase 4 →
           </button>
         )}
       </div>
