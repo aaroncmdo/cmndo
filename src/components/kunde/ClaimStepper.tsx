@@ -887,6 +887,7 @@ export default function ClaimStepper({
       {selectedPhase === 'begutachtung' &&
         terminInfo &&
         !terminInfo.durchgefuehrt &&
+        !terminVerstrichen &&
         !bottomSlot && (
         besichtigungAktiv ? (
           <div className="border-t border-emerald-200 bg-emerald-50/50 px-4 sm:px-6 py-3.5 flex items-center gap-3">
