@@ -215,6 +215,23 @@ export async function convertLeadToClaim(
     anzahl_beteiligte_total:
       ((lead.gegner_anzahl_beteiligte as number | null) ?? 0) + 1,
 
+    // — Gewerbe / Privat / Leasing
+    gewerbe_flag: Boolean(lead.gewerbe_flag ?? false),
+    vorsteuerabzugsberechtigt: Boolean(lead.vorsteuerabzugsberechtigt ?? false),
+    firma_name: (lead.firma_name as string | null) ?? null,
+    firma_ustid: (lead.firma_ustid as string | null) ?? null,
+    finanzierung_leasing:
+      (['keine', 'leasing', 'finanzierung'] as const).includes(
+        lead.finanzierung_leasing as 'keine' | 'leasing' | 'finanzierung',
+      )
+        ? (lead.finanzierung_leasing as string)
+        : 'keine',
+    leasinggeber_name: (lead.leasing_geber as string | null) ?? null,
+    finanzierungsgeber_name: (lead.finanzierungsgeber_name as string | null) ?? null,
+    finanzierungsgeber_adresse: (lead.finanzierungsgeber_adresse as string | null) ?? null,
+    finanzierungsgeber_vertragsnr: (lead.finanzierungsgeber_vertragsnr as string | null) ?? null,
+    finanzierung_bank: (lead.finanzierung_bank as string | null) ?? null,
+
     // — Klassifikation
     kunden_konstellation: (lead.kunden_konstellation as string | null) ?? null,
 
