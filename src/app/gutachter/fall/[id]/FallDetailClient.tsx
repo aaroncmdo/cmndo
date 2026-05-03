@@ -67,6 +67,7 @@ import type { AnforderbarerSlot } from '@/components/dokumente/AnforderungsModal
 // CMM-36: Geo-Tracking
 import { useGeoTracking } from '@/hooks/useGeoTracking'
 import { SvUnterwegsInfo } from '@/components/gutachter/SvUnterwegsInfo'
+import { ShieldAlertIcon } from 'lucide-react'
 
 type Lead = {
   vorname: string | null
@@ -379,6 +380,23 @@ export default function FallDetailClient(props: Props) {
               pflichtSlots={props.pflichtSlots ?? []}
             />
           )}
+        {!!fall.hat_vorschaeden && (
+          <div className="rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+              <ShieldAlertIcon className="w-4 h-4 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-claimondo-navy">
+                {fall.vorschaden_anzahl != null
+                  ? `${String(fall.vorschaden_anzahl)} Vorschäden gemeldet`
+                  : 'Vorschäden gemeldet'}
+              </p>
+              <p className="text-xs text-claimondo-ondo mt-0.5">
+                Der Kunde hat Vorschäden am Fahrzeug angegeben. Zugehörige Unterlagen finden Sie in der Dokumente-Sektion.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* CMM-23: Server-rendered Top-Blocks (Briefing + Einzuholen-Banner,
@@ -422,31 +440,6 @@ export default function FallDetailClient(props: Props) {
         {/* CMM-32: alte StammdatenCard-Fallback — vorerst raus */}
         {false && (
           <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
-        )}
-
-        {!!fall.hat_vorschaeden && (
-          <div className="rounded-2xl bg-amber-50/40 border border-amber-200 p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
-                <span className="text-lg">⚠️</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-claimondo-navy">
-                  Vorschäden gemeldet
-                </p>
-                <p className="text-xs text-claimondo-ondo mt-1">
-                  Der Kunde hat{' '}
-                  <span className="font-medium text-claimondo-navy">
-                    {fall.vorschaden_anzahl != null
-                      ? `${String(fall.vorschaden_anzahl)} Vorschäden`
-                      : 'Vorschäden'}
-                  </span>{' '}
-                  am Fahrzeug angegeben. Reparaturrechnungen werden — falls
-                  vorhanden — über den gelben Banner mit nachgereicht.
-                </p>
-              </div>
-            </div>
-          </div>
         )}
 
         <GutachtenCard
