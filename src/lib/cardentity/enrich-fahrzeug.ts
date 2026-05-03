@@ -48,15 +48,25 @@ async function enrichByFin(
 
   try {
     const available = await checkVinAvailability(fin)
-    if (!available) return { success: false, error: 'Fahrzeug nicht in Cardentity vorhanden', code: 404 }
-
+    // Wenn Typ A (Availability-Index) kein Ergebnis liefert, trotzdem Typ B
+    // versuchen: getVehicleReport direkt ohne Availability-Gate. Cardentity
+    // hat zwei getrennte Datenpools — ein Fahrzeug kann im Report-Pool
+    // existieren obwohl es nicht im Availability-Index gelistet ist.
     const km = r.kilometerstand as number | null
     const erstzulassung = r.erstzulassung as string | null
     const report = await getVehicleReport(fin, {
       mileage: km ?? undefined,
       firstRegistrationDate: erstzulassung ?? undefined,
     })
-    if (!report) return { success: false, error: 'Kein Report verfuegbar', code: 404 }
+    if (!report) {
+      return {
+        success: false,
+        error: available
+          ? `FIN ${fin}: Kein Report verfügbar`
+          : `FIN ${fin}: Nicht in Cardentity (Typ A + Typ B kein Ergebnis)`,
+        code: 404,
+      }
+    }
 
     // Update nur leere Felder
     const updates: Record<string, unknown> = {
