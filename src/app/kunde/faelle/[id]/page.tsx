@@ -280,7 +280,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // PflichtdokumenteSection.
 
     // Termin-Daten für die Detail-Card (SV + KB)
-    const aktiveStatus = ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben']
+    // 'verschoben' absichtlich nicht drin — nach Verschieben ist der neue
+    // 'bestaetigt'-Slot der aktive Termin, der alte 'verschoben'-Slot ist Terminal.
+    const aktiveStatus = ['reserviert', 'bestaetigt', 'gegenvorschlag']
     const { data: svKandidaten } = await admin
       .from('gutachter_termine')
       .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am, sv_id, kb_id, created_at')
@@ -298,7 +300,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .eq('fall_id', id)
       .eq('typ', 'sv_begutachtung')
       .order('created_at', { ascending: true })
-    const STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3, verschoben: 4 }
+    const STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3 }
     const svTermin = (svKandidaten ?? []).slice().sort((a, b) =>
       (STATUS_PRIO[a.status as string] ?? 9) - (STATUS_PRIO[b.status as string] ?? 9),
     )[0] ?? null
@@ -913,11 +915,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
-        {/* CMM-36 + CMM-32f: SV-Live-Banner — nur sichtbar wenn der SV
-            tatsaechlich unterwegs ist (sv_unterwegs_seit gesetzt) und
-            der Termin noch nicht durchgefuehrt wurde. */}
+        {/* CMM-36 + CMM-32f: SV-Live-Banner — immer gemountet solange ein
+            aktiver Termin existiert (kein sv_unterwegs_seit-Guard hier,
+            damit die Realtime-Subscription den "unterwegs"-Trigger live
+            einfängt auch wenn der Kunde die Seite vor dem Start geladen hat). */}
         {svTermin?.id &&
-          !!(svTermin.sv_unterwegs_seit as string | null) &&
           !(svTermin.durchgefuehrt_am as string | null) && (
           <KundeSvLiveBanner
             terminId={svTermin.id as string}

@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
 import OutboxBadge from '@/components/offline/OutboxBadge'
-import { SupportButton } from '@/components/support/SupportButton'
+import { SupportSidebarPanel } from '@/components/support/SupportSidebarPanel'
 import TasksPill from '@/components/shared/TasksPill'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
@@ -130,6 +130,7 @@ export default function GutachterShell({
   // sie nicht über der Mapbox-Karte rendern (Sidebar hat lg:z-[1100] > z-50).
   const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showSupport, setShowSupport] = useState(false)
   // CMM-36: Geo-Tracking beim App-Öffnen starten — feuert watchPosition
   // erst nach Permission 'granted'. Der Prompt wird per Klick auf den
   // GeoPermissionPrompt-Banner ausgeloest, nicht silent beim ersten Render.
@@ -300,7 +301,7 @@ export default function GutachterShell({
       {!isFeldmodus && <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] relative overflow-hidden ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
@@ -390,8 +391,25 @@ export default function GutachterShell({
           ))}
         </nav>
 
+        {/* Hilfe & Support — Inline-Panel ersetzt Sidebar-Inhalt (gleiche Breite, kein Drawer) */}
+        <SupportSidebarPanel
+          open={showSupport}
+          onClose={() => setShowSupport(false)}
+          userName={displayName}
+        />
+
         <div className="mt-auto px-3 py-3 border-t border-white/10 space-y-2">
-          <SupportButton userName={displayName} />
+          <button
+            type="button"
+            onClick={() => setShowSupport(true)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium bg-white text-[#0D1B3E] hover:bg-[#f8f9fb] transition-colors"
+            aria-label="Hilfe und Support öffnen"
+          >
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            Hilfe &amp; Support
+          </button>
           <Link href="/gutachter/profil" onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors group">
             <div
