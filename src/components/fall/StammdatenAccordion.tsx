@@ -96,7 +96,7 @@ export default function StammdatenAccordion({
     <div
       className={`w-full rounded-2xl bg-white border border-claimondo-border overflow-hidden ${className}`}
     >
-      <div className="flex flex-col sm:flex-row min-h-0">
+      <div className="flex flex-col sm:flex-row sm:items-stretch">
 
         {/* ── Links: Fahrzeug-Panel ── */}
         <div className="sm:w-[300px] shrink-0 flex flex-col items-center gap-4 px-6 py-6 border-b sm:border-b-0 sm:border-r border-claimondo-border/60 bg-claimondo-navy/[0.025]">
@@ -189,7 +189,7 @@ export default function StammdatenAccordion({
           </div>
 
           {/* Tab-Inhalt */}
-          <div className="flex-1 min-h-0">
+          <div>
             <StammdatenDetail
               category={activeTab}
               data={data}
