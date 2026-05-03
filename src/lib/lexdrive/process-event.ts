@@ -779,6 +779,48 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       } catch (err) {
         console.error('[AAR-kanzlei] confirmVollmacht failed:', err)
       }
+
+      // CMM-32 / LexDrive-Pfad: Wenn der Kunde vorher 'partnerkanzlei' gewählt
+      // hat und das Paket noch nicht raus ist → Kanzleipaket auto-versenden.
+      // LexDrive schickt die Vollmacht per WA selbst; sobald der Kunde bestätigt
+      // kommt dieser Hook zurück. Jetzt schicken wir die Akte automatisch.
+      try {
+        const { data: fallForClaim } = await db
+          .from('faelle')
+          .select('claim_id')
+          .eq('id', input.fallId)
+          .maybeSingle()
+        if (fallForClaim?.claim_id) {
+          const { data: claimForKanzlei } = await db
+            .from('claims')
+            .select('kanzlei_wunsch, kanzlei_uebergeben_am')
+            .eq('id', fallForClaim.claim_id as string)
+            .maybeSingle()
+          if (
+            claimForKanzlei?.kanzlei_wunsch === 'partnerkanzlei' &&
+            !claimForKanzlei.kanzlei_uebergeben_am
+          ) {
+            const now = new Date().toISOString()
+            await db
+              .from('claims')
+              .update({ kanzlei_uebergeben_am: now })
+              .eq('id', fallForClaim.claim_id as string)
+            // Fire-and-forget Kanzleipaket-Email an LexDrive (AAR-77 buildAndSendKanzleiEmail)
+            import('@/lib/lexdrive/email-sender')
+              .then(({ buildAndSendKanzleiEmail }) => buildAndSendKanzleiEmail(input.fallId))
+              .catch((err) => console.error('[CMM-32] buildAndSendKanzleiEmail failed:', err))
+            // KB informieren
+            await sendKbMitteilung(
+              input.fallId,
+              'Vollmacht bestätigt — Kanzleipaket an LexDrive versendet',
+              'Kunde hat LexDrive-Vollmacht bestätigt. Akte wurde automatisch übermittelt.',
+              'normal',
+            )
+          }
+        }
+      } catch (err) {
+        console.error('[CMM-32] LexDrive-Kanzleipaket Auto-Trigger failed:', err)
+      }
     }
 
     // WA-Template

@@ -22,7 +22,12 @@ import { getLexdriveDeepLink, getLexdriveLoginUrl } from '@/lib/kanzlei/lexdrive
 
 type Props = {
   phase: FallPhase
-  geforderterBetrag: number | null
+  /** Geforderte Gesamtsumme — Kunden-Anspruch gegen die VS (faelle.gutachten_betrag).
+   *  Treibt den Kanzleifall-Lifecycle, ist aber NICHT das SV-Grundhonorar. */
+  geforderteGesamtsumme: number | null
+  /** Vom SV gefordertes Grundhonorar (auftraege.grundhonorar_netto/brutto).
+   *  Bewusst „gefordert" weil VS noch nicht ausgezahlt hat. */
+  geforderterGrundhonorarBetrag: number | null
   gutachtenUrl: string | null
   gutachtenFreigegebenAm: string | null
   lexdriveCaseId: string | null
@@ -79,16 +84,30 @@ export default function MeinFallStatusCard(props: Props) {
         </div>
       </div>
 
-      {/* Gutachten-Übersicht: geforderter Betrag + Link aufs PDF */}
-      {(props.geforderterBetrag != null || props.gutachtenUrl) && (
+      {/* Forderungen: Gesamtsumme (gegen VS) + SV-Grundhonorar + Link aufs PDF.
+          Beide Betraege sind „gefordert" — VS hat noch nicht ausgezahlt. Das
+          treibt den Kanzleifall-Lifecycle. */}
+      {(props.geforderteGesamtsumme != null ||
+        props.geforderterGrundhonorarBetrag != null ||
+        props.gutachtenUrl) && (
         <div className="rounded-xl bg-[#f8f9fb] border border-claimondo-border p-3 space-y-2">
-          {props.geforderterBetrag != null && (
+          {props.geforderteGesamtsumme != null && (
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-claimondo-ondo flex items-center gap-1.5">
-                <EuroIcon className="w-3.5 h-3.5" /> Geforderter Betrag
+                <EuroIcon className="w-3.5 h-3.5" /> Geforderte Gesamtsumme
               </span>
               <span className="text-sm font-semibold text-claimondo-navy">
-                {fmtEuro(props.geforderterBetrag)}
+                {fmtEuro(props.geforderteGesamtsumme)}
+              </span>
+            </div>
+          )}
+          {props.geforderterGrundhonorarBetrag != null && (
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-claimondo-ondo flex items-center gap-1.5">
+                <EuroIcon className="w-3.5 h-3.5" /> Gefordertes Grundhonorar
+              </span>
+              <span className="text-sm font-semibold text-claimondo-navy">
+                {fmtEuro(props.geforderterGrundhonorarBetrag)}
               </span>
             </div>
           )}

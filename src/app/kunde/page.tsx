@@ -132,6 +132,7 @@ export default async function KundeStartseite() {
     schadens_plz: f.schadens_plz as string | null,
     schadens_ort: f.schadens_ort as string | null,
     nachbesichtigung_status: f.nachbesichtigung_status as string | null,
+    kanzlei_wunsch: f.kanzlei_wunsch as string | null,
   }))
   // AAR-705: Defensive — wenn der Karten-Loader (Termine/Timeline/Pflichtdok)
   // crasht, soll die Seite trotzdem die Fall-Karten ohne Meta zeigen statt
@@ -208,6 +209,11 @@ export default async function KundeStartseite() {
                   fahrzeug_hersteller: fall.fahrzeug_hersteller as string | null,
                   fahrzeug_modell: fall.fahrzeug_modell as string | null,
                   schadens_datum: fall.schadens_datum as string | null,
+                  sa_unterschrieben: fall.sa_unterschrieben as boolean | null,
+                  gutachten_eingegangen_am: fall.gutachten_eingegangen_am as string | null,
+                  regulierung_am: fall.regulierung_am as string | null,
+                  abgeschlossen_am: fall.abgeschlossen_am as string | null,
+                  vollmacht_signiert_am: fall.vollmacht_signiert_am as string | null,
                 }}
                 aktion={meta.aktion}
                 nextTermin={meta.nextTermin}

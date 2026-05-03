@@ -453,31 +453,52 @@ export async function markiereAlleSpaeterNachreichen(
   return { success: true, count: ids.length }
 }
 
-export async function completeOnboarding(): Promise<{ success: boolean; error?: string }> {
+export async function completeOnboarding(
+  fallId?: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  // AAR-607 A2: faelle-Update ZUERST — das ist die Source-of-Truth für
-  // /kunde/page.tsx. Wenn faelle schreibt aber profiles failed, ist das nur
-  // kosmetisch. Wenn profiles schreibt aber faelle failed, lief der Kunde in
-  // einen Redirect-Loop (gefixt in AAR-228 Bug 2 mit Sync, aber Error war stumm).
   const admin = createAdminClient()
-  const { error: fallError } = await admin.from('faelle')
-    .update({ onboarding_complete: true })
-    .eq('kunde_id', user.id)
-    .is('onboarding_complete', false)
 
-  if (fallError) return { success: false, error: fallError.message }
+  // Onboarding ist pro Fall: nur den übergebenen Fall (oder wenn nicht angegeben,
+  // den ältesten unvollständigen) auf complete setzen — NICHT alle Fälle des
+  // Kunden. Sonst werden zukünftige Schadensfälle automatisch übersprungen.
+  let targetFallId = fallId ?? null
+  if (!targetFallId) {
+    const { data } = await admin
+      .from('faelle')
+      .select('id')
+      .eq('kunde_id', user.id)
+      .eq('onboarding_complete', false)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    targetFallId = (data?.id as string | null) ?? null
+  }
 
+  if (targetFallId) {
+    const { error: fallError } = await admin
+      .from('faelle')
+      .update({ onboarding_complete: true })
+      .eq('id', targetFallId)
+      .eq('kunde_id', user.id)
+    if (fallError) return { success: false, error: fallError.message }
+  }
+
+  // profiles.onboarding_completed_at zusätzlich setzen (Erstkontakt-Marker).
+  // NICHT mehr als Redirect-Gate genutzt — nur noch Analytics/Stamp.
   const { error } = await supabase
     .from('profiles')
     .update({ onboarding_completed_at: new Date().toISOString() })
     .eq('id', user.id)
+    .is('onboarding_completed_at', null)
 
   if (error) return { success: false, error: error.message }
 
   revalidatePath('/kunde')
+  revalidatePath('/kunde/onboarding')
   return { success: true }
 }
 

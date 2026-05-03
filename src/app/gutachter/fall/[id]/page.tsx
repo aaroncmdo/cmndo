@@ -70,17 +70,25 @@ export default async function GutachterFallPage({
   const admin = createAdminClient()
 
   // AAR-724: Alle ungesehenen Termine dieses Falls auf „gesehen" setzen
-  // sobald der SV die Fallakte öffnet. Best-effort, Fehler nicht blockend.
+  // sobald der SV die Fallakte öffnet. RETURNING-Clause liefert die IDs
+  // der gerade-frisch-gesehenen Termine fuer eine "verschoben durch Kunde"-
+  // Hervorhebung im Stepper (gelb bis zum nächsten Reload).
+  let zuletztGesehenIds: string[] = []
   try {
-    await supabase
+    const { data: aktualisiert } = await supabase
       .from('gutachter_termine')
       .update({ gesehen_am: new Date().toISOString() })
       .eq('fall_id', id)
       .eq('sv_id', (sv as { id: string }).id)
       .is('gesehen_am', null)
+      .select('id, verlegung_initiator_kunde')
+    zuletztGesehenIds = ((aktualisiert ?? []) as Array<{ id: string; verlegung_initiator_kunde: boolean | null }>)
+      .filter((t) => t.verlegung_initiator_kunde === true)
+      .map((t) => t.id)
   } catch (err) {
     console.error('[AAR-724] auto-mark-seen gutachter_termine failed:', err)
   }
+  const hatNeueKundeVerlegung = zuletztGesehenIds.length > 0
 
   // Fetch all related data in parallel
   const [
@@ -173,7 +181,7 @@ export default async function GutachterFallPage({
     kundenbetreuer = kbProfile
   }
 
-  // Attach leadpreis to fall object for display
+  // Attach leadpreis to fall object for display.
   const fallWithAbrechnung = {
     ...fall,
     _leadpreis: abrechnung?.leadpreis ? Number(abrechnung.leadpreis) : null,
@@ -263,6 +271,30 @@ export default async function GutachterFallPage({
     (a, b) =>
       (STATUS_PRIO[a.status as string] ?? 9) - (STATUS_PRIO[b.status as string] ?? 9),
   )[0] ?? null
+
+  // CMM-32 Walkthrough Polish: SV sieht roten "Termin verstrichen"-Banner
+  // wenn der bestätigte Slot in der Vergangenheit liegt UND keiner der
+  // Folgezustände erreicht wurde. Strikte Guards gegen Fehlanzeige:
+  //   - Start + 60 Min Toleranz vorbei (Pufferzeit für SV-Spätankunft)
+  //   - durchgefuehrt_am NULL (Termin nicht abgehakt)
+  //   - sv_angekommen_am NULL (SV war nicht vor Ort)
+  //   - sv_unterwegs_seit NULL (SV ist nicht aktuell auf dem Weg —
+  //     Verspätungs-Sonderfall bekommt eigene Card via SvUnterwegsInfo)
+  //   - status nur 'bestaetigt' (reserviert/gegenvorschlag/verlegung_pending
+  //     sind eigene UI-Zustände; verschoben/verpasst/durchgefuehrt/abgesagt
+  //     sind Endzustände, die der Banner nicht überlagern darf)
+  // Server-Side berechnet, damit kein Client-Clock-Skew die Anzeige
+  // triggert und der Banner stabil ist solange der DB-Zustand stabil ist.
+  const aktiverTerminVerstrichen = (() => {
+    if (!aktiverTermin?.start_zeit) return false
+    const status = (aktiverTermin.status as string | null) ?? ''
+    if (status !== 'bestaetigt') return false
+    if (aktiverTermin.durchgefuehrt_am) return false
+    if (aktiverTermin.sv_angekommen_am) return false
+    if (aktiverTermin.sv_unterwegs_seit) return false
+    const startMs = new Date(aktiverTermin.start_zeit as string).getTime()
+    return startMs + 60 * 60 * 1000 < Date.now()
+  })()
 
   // AAR-327: Katalog-Slots für Dokument-Anforderung (rolle=sachverstaendiger).
   // Cachelayer: getAlleSlots dedupliziert intern (TTL 5 min), daher ist der
@@ -393,6 +425,22 @@ export default async function GutachterFallPage({
     .maybeSingle()
   const claimIdForStorage = (fallClaim?.claim_id as string | null) ?? ''
 
+  // Claim-SSoT-Daten (No-Show-Counter etc.). Reihenfolge: claim > fall > auftrag.
+  let claimNoShow: { count: number; letzter: string | null } = { count: 0, letzter: null }
+  if (fallClaim?.claim_id) {
+    const { data: claimData } = await admin
+      .from('claims')
+      .select('kunde_no_show_count, letzter_no_show_am')
+      .eq('id', fallClaim.claim_id as string)
+      .maybeSingle()
+    if (claimData) {
+      claimNoShow = {
+        count: (claimData.kunde_no_show_count as number | null) ?? 0,
+        letzter: (claimData.letzter_no_show_am as string | null) ?? null,
+      }
+    }
+  }
+
   // CMM-32e: Abgelehnte Docs mit Kommentar für den SV — nur im Reject-Zustand laden.
   // SV sieht welche Dateien konkret beanstandet wurden + warum.
   let abgelehnteDocsInfo: { filename: string; kommentar: string | null }[] = []
@@ -486,6 +534,32 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
+      {/* Kunde hat Termin verschoben — gelb bis zum naechsten Reload (auto-
+          gesehen-Mechanik). Quelle: gutachter_termine.verlegung_initiator_kunde
+          + frisch markiertes gesehen_am. */}
+      {hatNeueKundeVerlegung && (
+        <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4">
+          <p className="text-sm font-semibold text-amber-900">Termin durch Kunde verschoben</p>
+          <p className="text-xs text-amber-800 mt-1">
+            Der Kunde hat den Termin selbst verlegt. Keine Bestätigung von dir nötig — der neue Slot ist bereits aktiv.
+            Diese Markierung verschwindet beim nächsten Aufruf der Fallakte.
+          </p>
+        </div>
+      )}
+      {/* No-Show-Hinweis (vom Claim, claim > fall > auftrag) */}
+      {claimNoShow.count > 0 && (
+        <div className="rounded-2xl border-2 border-rose-300 bg-rose-50 p-4">
+          <p className="text-sm font-semibold text-rose-900">
+            {claimNoShow.count === 1
+              ? 'Termin wurde verpasst'
+              : `${claimNoShow.count} Termine wurden verpasst`}
+          </p>
+          <p className="text-xs text-rose-800 mt-1">
+            Der Kunde war beim letzten Termin nicht vor Ort und hat keinen Bescheid gegeben. Plane Puffer für den
+            Folgetermin ein und stimme dich ggf. mit dem Kundenbetreuer ab.
+          </p>
+        </div>
+      )}
       {/* CMM-32: Gutachten-Upload-Banner — sichtbar nach Besichtigung, vor QC */}
       {zeigeGutachtenUpload && erstgutachtenAuftrag && (
         <GutachtenUploadBanner
@@ -522,7 +596,12 @@ export default async function GutachterFallPage({
       {isFallPhase(svPhase) && (
         <MeinFallStatusCard
           phase={svPhase}
-          geforderterBetrag={(fall.gutachten_betrag as number | null) ?? null}
+          geforderteGesamtsumme={(fall.gutachten_betrag as number | null) ?? null}
+          geforderterGrundhonorarBetrag={
+            (erstgutachtenAuftrag?.grundhonorar_brutto as number | null) ??
+            (erstgutachtenAuftrag?.grundhonorar_netto as number | null) ??
+            null
+          }
           gutachtenUrl={(fall.gutachten_url as string | null) ?? null}
           gutachtenFreigegebenAm={(fall.gutachten_freigabe_am as string | null) ?? (fall.gutachten_eingegangen_am as string | null) ?? null}
           lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
@@ -549,7 +628,7 @@ export default async function GutachterFallPage({
       pflichtSlots={pflichtSlots}
       svPhase={svPhase}
       gutachtenInQc={!!erstgutachtenAuftrag?.gutachten_url && !erstgutachtenAuftrag?.gutachten_final_freigegeben && !erstgutachtenReject}
-      fall={fallWithAbrechnung}
+      fall={{ ...fallWithAbrechnung, claim_id: claimIdForStorage || null }}
       lead={lead}
       dokumente={dokumenteLegacy}
       pflichtdokumente={(pflichtdokumente ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['pflichtdokumente']}
@@ -561,7 +640,11 @@ export default async function GutachterFallPage({
       nachrichten={nachrichten ?? []}
       kundenbetreuer={kundenbetreuer}
       chatTeilnehmer={chatTeilnehmer}
-      aktiverTermin={aktiverTermin}
+      aktiverTermin={
+        aktiverTermin
+          ? { ...aktiverTermin, verstrichen: aktiverTerminVerstrichen }
+          : null
+      }
       fallDokumente={fallDokumente}
       kuerzungen={kuerzungen}
       abrechnungAusgezahltAm={(abrechnung as { abgerechnet_am?: string | null } | null)?.abgerechnet_am ?? null}

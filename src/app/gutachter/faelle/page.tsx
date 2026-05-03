@@ -49,6 +49,8 @@ export default async function GutachterFaellePage({
   const admin = createAdminClient()
 
   // CMM-32f: Schritt 1 — alle abgeschlossenen Aufträge des SV finden.
+  // CMM-37: Wir resolven von Auftrag → Fall → Claim, weil kanzlei_faelle
+  // jetzt am Claim haengt, nicht am Fall.
   const { data: meineAuftraege } = await admin
     .from('auftraege')
     .select('fall_id')
@@ -57,6 +59,15 @@ export default async function GutachterFaellePage({
 
   const meineFallIds = Array.from(
     new Set((meineAuftraege ?? []).map((a) => a.fall_id as string).filter(Boolean)),
+  )
+
+  // Fall → Claim auflösen, um kanzlei_faelle ueber claim_id zu lesen.
+  const { data: faelleForClaims } = meineFallIds.length
+    ? await admin.from('faelle').select('id, claim_id').in('id', meineFallIds)
+    : { data: [] as { id: string; claim_id: string | null }[] }
+  const meineClaimIds = Array.from(
+    new Set(((faelleForClaims ?? []) as { claim_id: string | null }[])
+      .map((f) => f.claim_id).filter(Boolean) as string[]),
   )
 
   if (meineFallIds.length === 0) {
@@ -70,11 +81,11 @@ export default async function GutachterFaellePage({
     )
   }
 
-  // CMM-32f: Schritt 2 — kanzlei_faelle für genau diese Fälle.
+  // CMM-32f / CMM-37: Schritt 2 — kanzlei_faelle für genau diese Claims.
   let kanzleiQuery = admin
     .from('kanzlei_faelle')
-    .select('id, fall_id, status, vs_kontakt_am, ausgezahlt_am, erstellt_am')
-    .in('fall_id', meineFallIds)
+    .select('id, fall_id, claim_id, status, vs_kontakt_am, ausgezahlt_am, erstellt_am')
+    .in('claim_id', meineClaimIds)
     .order('erstellt_am', { ascending: false })
 
   if (activeFilter !== 'alle') {

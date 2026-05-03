@@ -21,7 +21,6 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
@@ -29,16 +28,18 @@ import PflichtdokumenteSection from '@/components/fall/PflichtdokumenteSection'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
 import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
-import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
-import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
-import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
+import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
+import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
+import SmokeKanzleiButton from '@/components/kunde/SmokeKanzleiButton'
+import ClaimSummary from '@/components/kunde/ClaimSummary'
+import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
 import { getClaimLifecycle } from '@/lib/claims/lifecycle'
@@ -132,21 +133,37 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
-    // Dokumente laden — abgelehnte Iterationen (KB-Reject-Loop) werden
-    // dem Kunden nicht gezeigt; er sieht nur die aktive Version.
+    // Dokumente laden — alle Dokumente des Claims, die fuer den Kunden
+    // sichtbar sind. Mehrere Faelle pro Claim werden zusammen angezeigt.
+    // Abgelehnte Iterationen (KB-Reject-Loop) werden ausgeblendet.
+    let claimFallIds: string[] = [id]
+    if (fall.claim_id) {
+      const { data: claimFaelle } = await admin
+        .from('faelle')
+        .select('id')
+        .eq('claim_id', fall.claim_id as string)
+      claimFallIds = ((claimFaelle ?? []) as Array<{ id: string }>).map((f) => f.id)
+      if (claimFallIds.length === 0) claimFallIds = [id]
+    }
     const { data: dokumenteRaw } = await admin.from('fall_dokumente')
-      .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am')
-      .eq('fall_id', id)
+      .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am, sichtbar_fuer')
+      .in('fall_id', claimFallIds)
       .is('geloescht_am', null)
       .is('abgelehnt_am', null)
-      .order('hochgeladen_am')
-    const dokumente = (dokumenteRaw ?? []).map(d => ({
-      id: d.id as string,
-      typ: d.dokument_typ as string,
-      datei_url: admin.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl,
-      datei_name: (d.original_filename as string | null) ?? null,
-      created_at: d.hochgeladen_am as string,
-    }))
+      .order('hochgeladen_am', { ascending: false })
+    const dokumente = (dokumenteRaw ?? [])
+      .filter((d) => {
+        const sichtbar = (d.sichtbar_fuer as string[] | null) ?? null
+        // Default: sichtbar fuer alle wenn nicht gesetzt (Legacy)
+        return !sichtbar || sichtbar.includes('kunde')
+      })
+      .map((d) => ({
+        id: d.id as string,
+        typ: d.dokument_typ as string,
+        datei_url: admin.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl,
+        datei_name: (d.original_filename as string | null) ?? null,
+        created_at: d.hochgeladen_am as string,
+      }))
 
     // CMM-23: Pflichtdokumente-Liste laden — identische Filter-Logik wie
     // beim SV im Auftrag, nur aus Kunden-Sicht.
@@ -272,6 +289,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .in('status', aktiveStatus)
       .is('cancelled_at', null)
       .order('created_at', { ascending: false })
+
+    // CMM-32 Polish: ALLE Termine fuer den Begutachtungs-Verlauf (auch
+    // verlegt/verpasst/verschoben/durchgefuehrt). Sortiert chronologisch.
+    const { data: alleTermineForVerlauf } = await admin
+      .from('gutachter_termine')
+      .select('id, status, start_zeit, durchgefuehrt_am, verlegung_quelle_id, verlegung_initiator_kunde, created_at')
+      .eq('fall_id', id)
+      .eq('typ', 'sv_begutachtung')
+      .order('created_at', { ascending: true })
     const STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3, verschoben: 4 }
     const svTermin = (svKandidaten ?? []).slice().sort((a, b) =>
       (STATUS_PRIO[a.status as string] ?? 9) - (STATUS_PRIO[b.status as string] ?? 9),
@@ -377,11 +403,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       sa_unterschrieben: boolean | null
       vollmacht_signiert_am: string | null
       onboarding_complete: boolean | null
+      anrede: string | null
+      vorname: string | null
+      nachname: string | null
     } | null = null
     if (fall.lead_id) {
       const { data: leadRow } = await admin
         .from('leads')
-        .select('sa_unterschrieben, vollmacht_signiert_am, onboarding_complete')
+        .select('sa_unterschrieben, vollmacht_signiert_am, onboarding_complete, anrede, vorname, nachname')
         .eq('id', fall.lead_id as string)
         .maybeSingle()
       if (leadRow) {
@@ -389,10 +418,176 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
           vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
           onboarding_complete: (leadRow.onboarding_complete as boolean | null) ?? null,
+          anrede: (leadRow.anrede as string | null) ?? null,
+          vorname: (leadRow.vorname as string | null) ?? null,
+          nachname: (leadRow.nachname as string | null) ?? null,
         }
       }
     }
+    // Claim-SSoT-Daten zuerst laden (Reihenfolge: claim > fall > auftrag).
+    type ClaimKanzleiWunsch =
+      | 'partnerkanzlei'
+      | 'eigene_kanzlei'
+      | 'keine_kanzlei'
+      | 'noch_unentschieden'
+      | 'nicht_gefragt'
+    let claimRow: {
+      kunde_no_show_count: number | null
+      letzter_no_show_am: string | null
+      kanzlei_wunsch: ClaimKanzleiWunsch | null
+      kanzlei_uebergeben_am: string | null
+      status: string | null
+    } | null = null
+    let kanzleiAnsprechpartner: {
+      name: string | null
+      email: string | null
+      telefon: string | null
+    } | null = null
+    // OCR-Werte werden hier nur server-seitig gelesen, um den Anspruch
+    // gegen die VS abzuleiten. Einzelwerte verlassen den Server NICHT —
+    // der Kunde sieht nur den Gesamt-Eurobetrag (Anspruch) plus die
+    // Mietwagen-/Nutzungsausfall-Card (kombinierte Werte, kein Detail).
+    let anspruchVsEur: number | null = null
+    let anspruchPositionen: Array<{
+      key: string
+      label: string
+      detail?: string | null
+      betragEur: number
+    }> | null = null
+    let ausfallProps: Parameters<typeof KundeAusfallEntschaedigungCard>[0] | null = null
+    let nutzungsausfallBetragEur: number | null = null
+    if (fall.claim_id) {
+      const { data } = await admin
+        .from('claims')
+        .select(
+          'kunde_no_show_count, letzter_no_show_am, status, ' +
+            'reparaturkosten_brutto, minderwert, restwert, wiederbeschaffungswert, ' +
+            'totalschaden, gutachten_ocr_processed_at, ' +
+            'nutzungsausfall_tage, wiederbeschaffungsdauer_tage, ' +
+            'gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, ' +
+            'kanzlei_wunsch, kanzlei_uebergeben_am, ' +
+            'kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon',
+        )
+        .eq('id', fall.claim_id as string)
+        .maybeSingle()
+      if (data) {
+        const row = data as unknown as Record<string, unknown>
+        claimRow = {
+          kunde_no_show_count: (row.kunde_no_show_count as number | null) ?? null,
+          letzter_no_show_am: (row.letzter_no_show_am as string | null) ?? null,
+          kanzlei_wunsch: (row.kanzlei_wunsch as ClaimKanzleiWunsch | null) ?? null,
+          kanzlei_uebergeben_am: (row.kanzlei_uebergeben_am as string | null) ?? null,
+          status: (row.status as string | null) ?? null,
+        }
+        kanzleiAnsprechpartner = {
+          name: (row.kanzlei_ansprechpartner_name as string | null) ?? null,
+          email: (row.kanzlei_ansprechpartner_email as string | null) ?? null,
+          telefon: (row.kanzlei_ansprechpartner_telefon as string | null) ?? null,
+        }
+        const { berechneAnspruchVs } = await import('@/lib/claims/anspruch')
+        anspruchVsEur = berechneAnspruchVs({
+          reparaturkosten_brutto: (row.reparaturkosten_brutto as number | null) ?? null,
+          minderwert: (row.minderwert as number | null) ?? null,
+          restwert: (row.restwert as number | null) ?? null,
+          wiederbeschaffungswert: (row.wiederbeschaffungswert as number | null) ?? null,
+          totalschaden: (row.totalschaden as boolean | null) ?? null,
+          gutachten_ocr_processed_at: (row.gutachten_ocr_processed_at as string | null) ?? null,
+        })
+
+        // CMM-32 Polish: Anspruch-Positionen — Aufschluesselung der Summe.
+        // Bewusst nur die direkten Bestandteile (was in berechneAnspruchVs
+        // einfliesst). Nutzungsausfall + Mietwagen sind tagessatz-abhaengig
+        // und werden in der KundeAusfallEntschaedigungCard separat gezeigt.
+        const totalschaden = (row.totalschaden as boolean | null) ?? null
+        const reparaturBrutto = (row.reparaturkosten_brutto as number | null) ?? null
+        const minderwert = (row.minderwert as number | null) ?? null
+        const wbw = (row.wiederbeschaffungswert as number | null) ?? null
+        const restwert = (row.restwert as number | null) ?? null
+        const positionen: Array<{
+          key: string
+          label: string
+          detail?: string | null
+          betragEur: number
+        }> = []
+        if (totalschaden) {
+          if (wbw != null) {
+            positionen.push({ key: 'wbw', label: 'Wiederbeschaffungswert', betragEur: wbw })
+          }
+          if (restwert != null && restwert > 0) {
+            positionen.push({
+              key: 'restwert',
+              label: 'Restwert',
+              detail: 'wird vom Wiederbeschaffungswert abgezogen',
+              betragEur: -restwert,
+            })
+          }
+          if (minderwert != null && minderwert > 0) {
+            positionen.push({ key: 'minderwert', label: 'Wertminderung', betragEur: minderwert })
+          }
+        } else {
+          if (reparaturBrutto != null) {
+            positionen.push({
+              key: 'rep',
+              label: 'Reparaturkosten (brutto)',
+              betragEur: reparaturBrutto,
+            })
+          }
+          if (minderwert != null && minderwert > 0) {
+            positionen.push({ key: 'minderwert', label: 'Wertminderung', betragEur: minderwert })
+          }
+        }
+        if (positionen.length > 0) anspruchPositionen = positionen
+        const _totalschaden = (row.totalschaden as boolean | null) ?? null
+        const _mietwagenHat = !!(fall.mietwagen_hat as boolean | null)
+        const _nutzungsausfallTage = (row.nutzungsausfall_tage as number | null) ?? null
+        const _wbd = (row.wiederbeschaffungsdauer_tage as number | null) ?? null
+        const _tagessatz = (row.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null
+        const _effTage = _totalschaden ? _wbd : _nutzungsausfallTage
+        const nutzungsausfallBetragEurCalc =
+          !_mietwagenHat && _effTage && _tagessatz ? _effTage * _tagessatz : null
+        ausfallProps = {
+          totalschaden: _totalschaden,
+          ocrVerarbeitet: !!(row.gutachten_ocr_processed_at as string | null),
+          mietwagenHat: _mietwagenHat,
+          mietwagenSeitDatum: (fall.mietwagen_seit_datum as string | null) ?? null,
+          mietwagenVermieter: (fall.mietwagen_vermieter as string | null) ?? null,
+          mietwagenLimitTage: (fall.mietwagen_limit_tage as number | null) ?? null,
+          mietwagenRechnungVorhanden: !!(fall.mietwagen_rechnung_vorhanden as boolean | null),
+          nutzungsausfallTage: _nutzungsausfallTage,
+          wiederbeschaffungsdauerTage: _wbd,
+          nutzungsausfallTagessatzEur: _tagessatz,
+          mietwagenTagessatzEur:
+            (row.gutachten_mietwagen_tagessatz_eur as number | null) ?? null,
+        }
+        if (nutzungsausfallBetragEurCalc) nutzungsausfallBetragEur = nutzungsausfallBetragEurCalc
+      }
+    }
+
+    // Gutachten-PDF aus dem Storage-Bucket — DB-Quelle: fall_dokumente
+    // mit dokument_typ='gutachten' im Claim-Pfad. Sichtbar fuer den Kunden,
+    // sobald der Auftrag QC-freigegeben ist (Stepper-Phase regulierung/abschluss).
+    let gutachtenUrlAusBucket: string | null = null
+    if (fall.claim_id) {
+      const { data: gut } = await admin
+        .from('fall_dokumente')
+        .select('storage_path')
+        .in('fall_id', claimFallIds)
+        .eq('dokument_typ', 'gutachten')
+        .like('storage_path', `claim/${fall.claim_id as string}/gutachten/%`)
+        .is('geloescht_am', null)
+        .is('abgelehnt_am', null)
+        .order('hochgeladen_am', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (gut?.storage_path) {
+        gutachtenUrlAusBucket = admin.storage
+          .from('fall-dokumente')
+          .getPublicUrl(gut.storage_path as string).data.publicUrl
+      }
+    }
+
     const claimLifecycle = getClaimLifecycle({
+      claim: claimRow,
       lead: leadInputForLifecycle,
       auftraege,
       kanzleiFall,
@@ -402,23 +597,36 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const fahrzeug = [(fall.fahrzeug_hersteller as string), (fall.fahrzeug_modell as string)].filter(Boolean).join(' ')
     const adresse = (fall.besichtigungsort_adresse as string) || (fall.unfallort as string) || [(fall.schadens_adresse as string), (fall.schadens_plz as string), (fall.schadens_ort as string)].filter(Boolean).join(', ') || ''
 
+    // Gutachten-Freigabe und URL für ClaimSummary-Anspruch-Tab
+    const erstgutachtenFuerSummary = auftraege.find((a) => a.typ === 'erstgutachten')
+    const gutachtenFreigegebenFuerSummary = !!erstgutachtenFuerSummary?.gutachten_final_freigegeben
+    const gutachtenUrlFuerSummary = gutachtenFreigegebenFuerSummary && gutachtenUrlAusBucket ? gutachtenUrlAusBucket : null
+
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
         {/* AAR-864: Live-Aktualisierung — abonniert gutachter_termine,
             auftraege und faelle für diesen Fall, refresht die Page bei
             jedem Event. */}
-        <FallRealtimeRefresh fallId={fall.id as string} />
+        <FallRealtimeRefresh fallId={fall.id as string} claimId={(fall.claim_id as string | null) ?? null} />
 
         {/* Header — CMM-28: Zurück-Link nur bei Multi-Fall-Kunden */}
         <div>
           {hatMehrereFaelle && (
-            <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; Meine Fälle</Link>
+            <Link
+              href="/kunde"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy mb-3 px-2.5 py-1.5 rounded-lg border border-claimondo-border bg-white hover:bg-[#f8f9fb] transition-colors"
+            >
+              <span aria-hidden>&larr;</span> Meine Fälle
+            </Link>
           )}
           <PageHeader
             title={`${(fall.claim_nummer as string | null) ?? (fall.fall_nummer as string | null) ?? 'Schadensfall'}${kennzeichen ? ` · ${kennzeichen}` : ''}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
             description={adresse || undefined}
           />
         </div>
+
+        {/* Smoke-Helper (sichtbar fuer Aaron's Test-Walkthrough) */}
+        <SmokeKanzleiButton fallId={fall.id as string} />
 
         {/* CMM-32f: Claim-Stepper — 4 Hauptphasen + aktive Subphase + Termin-
             Sektion (Datum/Uhrzeit/Adresse/Navi). Termin lebt NUR hier, keine
@@ -429,6 +637,32 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             ? {
                 terminId: aktiverSv.id as string,
                 status: (aktiverSv.status as string | null) ?? null,
+                durchgefuehrt: !!(aktiverSv.durchgefuehrt_am as string | null),
+                verstrichen: (() => {
+                  // Termin ist verstrichen wenn: start_zeit + 60min in der Vergangenheit,
+                  // durchgefuehrt_am NULL, status nicht abgesagt/storniert/verschoben.
+                  const startMs = new Date(aktiverSv.start_zeit as string).getTime()
+                  const cutoff = startMs + 60 * 60 * 1000 // 60min Toleranz
+                  const status = (aktiverSv.status as string | null) ?? ''
+                  const durchgefuehrt = !!(aktiverSv.durchgefuehrt_am as string | null)
+                  return (
+                    cutoff < Date.now() &&
+                    !durchgefuehrt &&
+                    !['abgesagt', 'storniert', 'verschoben', 'verlegung_pending'].includes(status)
+                  )
+                })(),
+                // CMM-32 Polish: Geo-basierte Verschuldens-Vermutung. Wenn
+                // sv_angekommen_am gesetzt ist, war der SV definitiv vor
+                // Ort (Geofence-Hit) — dann ist der Termin nicht durch
+                // SV-Schuld verstrichen, sondern wahrscheinlich Kunde-No-
+                // Show. Ist sv_angekommen_am NULL, ist der SV nicht da
+                // gewesen (Permission war an, sonst hätten wir gar keine
+                // Daten — beide Hypothesen blieben offen → 'unklar').
+                verstrichenInitiator: (
+                  (aktiverSv.sv_angekommen_am as string | null)
+                    ? 'kunde'
+                    : 'sv'
+                ) as 'sv' | 'kunde',
                 datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
                   weekday: 'long',
                   day: '2-digit',
@@ -445,10 +679,148 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 kundeVorname: kundeVorname ?? null,
               }
             : null
+          // Gutachten-URL fuer den gruenen Erfolgs-Banner — Quelle ist der
+          // Storage-Bucket via fall_dokumente (DB-driven, claim-scoped).
+          // Anzeige nur wenn ein erstgutachten existiert das QC-freigegeben
+          // ist; die Phase-Gating-Logik im Stepper (regulierung/abschluss)
+          // entscheidet final, ob der Banner gezeigt wird.
+          const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten')
+          // CMM-32 Polish: Anspruch ist an OCR + QC-Freigabe gekoppelt,
+          // NICHT am Storage-PDF. Wenn das PDF noch fehlt (Edge-Case oder
+          // Mock-Daten), zeigen wir die Summe trotzdem — Download-Button
+          // bleibt aber an gutachtenUrlAusBucket gekoppelt.
+          const gutachtenFreigegeben = !!erstgutachten?.gutachten_final_freigegeben
+          const gutachtenUrlFuerStepper = gutachtenFreigegeben && gutachtenUrlAusBucket ? gutachtenUrlAusBucket : null
+
+          // CMM-32 Polish: Begutachtungs-Verlauf zusammensammeln aus
+          // gutachter_termine (Verschoben/Wahrgenommen/Verpasst), Auftrag
+          // (Gutachten erstellt + QC bestanden) und Claim (gutachten_datum
+          // als Fallback). Datum-getrieben, chronologisch sortiert.
+          const begutachtungEvents: Array<{
+            key: string
+            label: string
+            detail?: string | null
+            datum: string
+            variant?: 'done' | 'warn' | 'error' | 'neutral'
+          }> = []
+          for (const t of (alleTermineForVerlauf ?? []) as Array<{
+            id: string
+            status: string | null
+            start_zeit: string | null
+            durchgefuehrt_am: string | null
+            verlegung_quelle_id: string | null
+            verlegung_initiator_kunde: boolean | null
+            created_at: string | null
+          }>) {
+            const status = t.status ?? ''
+            // Verschoben / verlegt / verpasst — Datum ist created_at des
+            // Folge-Slots (= Zeitpunkt der Verschiebung). Bei verpasst ist
+            // der alte Slot betroffen — created_at gibt den Anlegezeitpunkt
+            // wieder, der Verlegungs-Trigger kommt aus dem Folge-Slot.
+            if (
+              (status === 'verlegt' || status === 'verschoben' || status === 'verpasst') &&
+              t.created_at
+            ) {
+              const istKundeInitiator = !!t.verlegung_initiator_kunde
+              const label = status === 'verpasst'
+                ? 'Termin verpasst'
+                : 'Termin verschoben'
+              const detail = istKundeInitiator
+                ? 'durch Kunde'
+                : status === 'verpasst'
+                  ? null
+                  : 'durch Gutachter'
+              begutachtungEvents.push({
+                key: `t-${t.id}-${status}`,
+                label,
+                detail,
+                datum: t.created_at,
+                variant: status === 'verpasst' ? 'error' : 'warn',
+              })
+            }
+            // Termin wahrgenommen
+            if (t.durchgefuehrt_am) {
+              begutachtungEvents.push({
+                key: `t-${t.id}-done`,
+                label: 'Termin wahrgenommen',
+                datum: t.durchgefuehrt_am,
+                variant: 'done',
+              })
+            }
+          }
+          // Gutachten erstellt — claim.gutachten_datum als kanonische
+          // Quelle (aus OCR), fallback auf erstgutachten.gutachten_url +
+          // dessen abgeschlossen_am ist nicht praezise genug.
+          const gutachtenDatum = (claimRow as unknown as { gutachten_datum?: string | null })?.gutachten_datum ??
+            null
+          if (gutachtenDatum) {
+            begutachtungEvents.push({
+              key: 'gutachten-erstellt',
+              label: 'Gutachten erstellt',
+              datum: gutachtenDatum,
+              variant: 'done',
+            })
+          }
+          // QC bestanden = auftrag.abgeschlossen_am
+          if (
+            erstgutachten?.gutachten_final_freigegeben &&
+            (erstgutachten as { abgeschlossen_am?: string | null }).abgeschlossen_am
+          ) {
+            begutachtungEvents.push({
+              key: 'qc-bestanden',
+              label: 'Gutachten freigegeben (Vollständigkeits-Check)',
+              datum: (erstgutachten as { abgeschlossen_am: string }).abgeschlossen_am,
+              variant: 'done',
+            })
+          }
+          begutachtungEvents.sort((a, b) => new Date(a.datum).getTime() - new Date(b.datum).getTime())
+
           return (
             <ClaimStepper
               lifecycle={claimLifecycle}
               terminInfo={terminInfo}
+              gutachtenUrl={gutachtenUrlFuerStepper}
+              anspruchVsEur={gutachtenFreigegeben ? anspruchVsEur : null}
+              lead={leadInputForLifecycle}
+              begutachtungEvents={begutachtungEvents}
+              anspruchPositionen={
+                gutachtenFreigegeben ? anspruchPositionen ?? undefined : undefined
+              }
+              kanzleiWunsch={claimRow?.kanzlei_wunsch ?? null}
+              kanzleiUebergebenAm={claimRow?.kanzlei_uebergeben_am ?? null}
+              ausfallSlot={
+                ausfallProps ? <KundeAusfallEntschaedigungCard {...ausfallProps} /> : null
+              }
+              ausfallSlotLexDrive={
+                ausfallProps
+                  ? <KundeAusfallEntschaedigungCard
+                      {...ausfallProps}
+                      className="bg-[#0e5be9]/[0.06] border-[#0e5be9]/20"
+                      variant="lexdrive"
+                    />
+                  : null
+              }
+              nutzungsausfallBetragEur={nutzungsausfallBetragEur}
+              claimId={fall.claim_id as string | null}
+              fallId={fall.id as string}
+              gutachtenFreigegeben={gutachtenFreigegeben}
+              bankdatenFehlen={
+                claimRow?.kanzlei_wunsch === 'partnerkanzlei' &&
+                !!(fall.vollmacht_signiert_am as string | null) &&
+                kanzleiFall?.status === 'auszahlung' &&
+                !(fall.bankdaten_hinterlegt_am as string | null)
+              }
+              kanzleiFall={
+                kanzleiFall
+                  ? {
+                      status:
+                        (kanzleiFall.status as 'versicherungskontakt' | 'auszahlung') ??
+                        'versicherungskontakt',
+                      vs_kontakt_am: (kanzleiFall.vs_kontakt_am as string | null) ?? null,
+                      ausgezahlt_am: (kanzleiFall.ausgezahlt_am as string | null) ?? null,
+                    }
+                  : null
+              }
               bottomSlot={
                 verlegungBannerProps ? (
                   <TerminVerlegungBanner {...verlegungBannerProps} embedded />
@@ -458,8 +830,95 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           )
         })()}
 
-        {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
-        {svTermin?.id && (
+        {/* CMM-32 Polish: Read-only Claim-Summary mit Kennzeichenhalter
+            + Tabs (Fahrzeug · Unfall · Beteiligte). Zeigt nur kuratierte,
+            kunden-relevante Felder an. */}
+        <ClaimSummary
+          uploadSlot={<BelegUploadCard fallId={fall.id as string} />}
+          anspruch={{
+            positionen: anspruchPositionen,
+            totalEur: anspruchVsEur,
+            gutachtenFreigegeben: gutachtenFreigegebenFuerSummary,
+            gutachtenUrl: gutachtenUrlFuerSummary,
+          }}
+          dokumente={(dokumente ?? []).map((d) => ({
+            id: d.id as string,
+            typ: (d.typ as string) ?? 'sonstiges',
+            datei_url: d.datei_url as string,
+            datei_name: (d.datei_name as string | null) ?? null,
+            created_at: d.created_at as string,
+          }))}
+          data={{
+            claim_nummer: (fall.claim_nummer as string | null) ?? null,
+            kennzeichen: (fall.kennzeichen as string | null) ?? null,
+            kennzeichen_kreis: (fall.kennzeichen_kreis as string | null) ?? null,
+            kennzeichen_buchstaben: (fall.kennzeichen_buchstaben as string | null) ?? null,
+            kennzeichen_zahl: (fall.kennzeichen_zahl as string | null) ?? null,
+            kennzeichen_suffix: (fall.kennzeichen_suffix as string | null) ?? null,
+            fahrzeug_hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
+            fahrzeug_modell: (fall.fahrzeug_modell as string | null) ?? null,
+            erstzulassung: (fall.erstzulassung as string | null) ?? null,
+            kilometerstand: (fall.kilometerstand as number | null) ?? null,
+            fahrzeug_aufbau:
+              (fall.fahrzeug_aufbau as string | null) ??
+              (fall.fahrzeug_typ as string | null) ?? null,
+            fahrzeug_baujahr: (fall.fahrzeug_baujahr as number | null) ?? null,
+            lackfarbe:
+              ((fall.lackfarbe_code as string | null) ?? null) as
+                | 'schwarz' | 'weiss' | 'silber' | 'grau' | 'blau' | 'rot'
+                | 'gruen' | 'gelb' | 'orange' | 'braun' | 'beige' | 'sonstige'
+                | null,
+            schadens_adresse:
+              (fall.schadens_adresse as string | null) ??
+              ([
+                (fall.schadens_plz as string | null) ?? null,
+                (fall.schadens_ort as string | null) ?? null,
+              ].filter(Boolean).join(' ') || null),
+            kraftstoff: null,
+            fahrgestellnummer: (fall.fin_vin as string | null) ?? null,
+            schadens_datum: (fall.schadens_datum as string | null) ?? null,
+            schadens_ort: (fall.schadens_ort as string | null) ?? null,
+            schadens_plz: (fall.schadens_plz as string | null) ?? null,
+            schadens_beschreibung: (fall.schadens_beschreibung as string | null) ?? null,
+            schadenart: (fall.schadens_art as string | null) ?? null,
+            halter_vorname: (fall.halter_vorname as string | null) ?? null,
+            halter_nachname: (fall.halter_nachname as string | null) ?? null,
+            halter_ist_kunde: (fall.ist_fahrzeughalter as boolean | null) ?? null,
+            vs_eigener_name: null,
+            vs_gegner_name: (fall.gegner_versicherung as string | null) ?? null,
+            vs_gegner_schaden_nr: (fall.gegner_schadennummer as string | null) ?? null,
+            vs_gegner_telefon: null,
+            vs_gegner_email: null,
+            kunde_vorname: leadInputForLifecycle?.vorname ?? null,
+            kunde_nachname: leadInputForLifecycle?.nachname ?? null,
+          }}
+        />
+
+        {/* CMM-32 Polish: Kanzlei-Pfad-Wahl. Switch je nach
+            claim.kanzlei_wunsch: Frage / eigene Kanzlei / selbst einreichen.
+            Bei partnerkanzlei rendert die Card null (Standardweg laeuft im
+            Stepper-Sub-Stepper). */}
+        {fall.claim_id && (
+          <KanzleiPfadCard
+            claimId={fall.claim_id as string}
+            kanzleiWunsch={claimRow?.kanzlei_wunsch ?? null}
+            kanzleiName={kanzleiAnsprechpartner?.name ?? null}
+            kanzleiEmail={kanzleiAnsprechpartner?.email ?? null}
+            kanzleiTelefon={kanzleiAnsprechpartner?.telefon ?? null}
+            kanzleiUebergebenAm={claimRow?.kanzlei_uebergeben_am ?? null}
+            gutachtenFreigegeben={
+              !!auftraege.find((a) => a.typ === 'erstgutachten')?.gutachten_final_freigegeben
+            }
+            gutachtenUrl={gutachtenUrlAusBucket}
+          />
+        )}
+
+        {/* CMM-36 + CMM-32f: SV-Live-Banner — nur sichtbar wenn der SV
+            tatsaechlich unterwegs ist (sv_unterwegs_seit gesetzt) und
+            der Termin noch nicht durchgefuehrt wurde. */}
+        {svTermin?.id &&
+          !!(svTermin.sv_unterwegs_seit as string | null) &&
+          !(svTermin.durchgefuehrt_am as string | null) && (
           <KundeSvLiveBanner
             terminId={svTermin.id as string}
             svName={svName}
@@ -491,7 +950,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           const qcLaeuft =
             !!erst && (erst.status === 'besichtigung' || erst.status === 'gutachten') &&
             !erst.gutachten_final_freigegeben
-          if (qcLaeuft) return null
+          // Sobald wir in der Regulierung sind und eine Vollmacht haben,
+          // wollen wir den Banner garantiert wieder anzeigen — bis zum
+          // Abschluss. Ueberschreibt das qcLaeuft-Hide.
+          const inAuszahlungsPhase =
+            (claimLifecycle.mainPhase === 'regulierung' || claimLifecycle.mainPhase === 'abschluss') &&
+            !!(fall.vollmacht_signiert_am as string | null)
+          if (qcLaeuft && !inAuszahlungsPhase) return null
           return (
             <PflichtdokumenteSection
               slots={pflichtSlots}
@@ -600,82 +1065,44 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           uebergebenAm={null}
         />
 
-        {/* 2-Säulen Layout (Geld + Betreuer) — Anwalt-Säule entfällt durch
-            Konsolidierung in MeineKanzleiCard. */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SaeuleMeinGeld
-            fallId={fall.id as string}
-            status={(fall.status as string) ?? ''}
-            schadens_hoehe_netto={fall.schadens_hoehe_netto as number | null}
-            totalschaden={!!fall.totalschaden}
-            zahlungsweg={fall.zahlungsweg as string | null}
-            onZahlungswegSave={updateZahlungsweg}
-          />
-          <SaeuleMeinBetreuer
-            fallId={fall.id as string}
-            kbName={kbName}
-            kbTelefon={kbTelefon}
-            kbAvatarUrl={kbAvatarUrl}
-            kbBeschreibung={kbBeschreibung}
-          />
-        </div>
+        {/* CMM-32 Polish: KundeAusfallEntschaedigungCard ist jetzt im
+            Stepper-Wrapper (Regulierungs-Panel) integriert — siehe
+            ausfallSlot-Prop am ClaimStepper. */}
 
-        {/* Opt-in Gutachten-Weiterleitung — nur sichtbar wenn Gutachten vorliegt */}
-        {gutachtenVerfuegbar && (
-          <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-claimondo-navy">Gutachten erhalten?</p>
-              <p className="text-xs text-claimondo-ondo mt-0.5">
-                Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link).
-              </p>
-            </div>
-            <GutachtenWeiterleitungButton fallId={fall.id as string} defaultEmail={user.email ?? null} />
+        {/* Gutachten-Banner lebt jetzt im ClaimStepper (gruener Erfolgsbanner). */}
+
+        {/* Bankdaten-Banner — nur sichtbar wenn LexDrive-Vollmacht +
+            Kanzleifall in Auszahlung + Bankdaten fehlen. Sonst zahlt die
+            Kanzlei nicht aus. */}
+        {claimRow?.kanzlei_wunsch === 'partnerkanzlei' &&
+          !!(fall.vollmacht_signiert_am as string | null) &&
+          kanzleiFall?.status === 'auszahlung' &&
+          !(fall.bankdaten_hinterlegt_am as string | null) && (
+          <div className="space-y-4">
+            <BankdatenBanner
+              fallId={fall.id as string}
+              status="regulierung"
+              bankdatenHinterlegt={false}
+              saveBankdaten={saveBankdaten}
+            />
           </div>
         )}
 
-        <div className="space-y-4">
-          <BankdatenBanner
-            fallId={fall.id as string}
-            status={(fall.status as string) ?? ''}
-            bankdatenHinterlegt={!!fall.bankdaten_hinterlegt_am}
-            saveBankdaten={saveBankdaten}
-          />
-        </div>
-
-        {/* Fortschritt + Fall-Details */}
-        <div className="grid md:grid-cols-2 gap-5">
-          <FallPhasenPanel
-            fall={{
-              id: fall.id as string,
-              aktuelle_phase: aktuellePhaseSnake,
-              abgeschlossen_am: abgeschlossenAmKunde,
-            }}
-            rolle="kunde"
-            variant="progress-card"
-            banner={
-              szenario === 'ruegefall' ? (
-                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                  <p className="text-xs text-amber-700 font-medium">
-                    Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum.
-                  </p>
-                </div>
-              ) : null
-            }
-          />
-
-          <FallDetailSections
-            fall={fall as Record<string, unknown>}
-            svName={svName}
-            svTelefon={svTelefon}
-            svVerifiziert={svVerifiziert}
-            kbName={kbName}
-            dokumente={dokumente ?? []}
-            nachrichten={nachrichten ?? []}
-            userId={user.id}
-            chatTeilnehmer={chatTeilnehmer}
-            aktiverTermin={aktiverTermin}
-          />
-        </div>
+        {/* FallPhasenPanel entfernt — Phasen-Progress lebt im ClaimStepper.
+            FallDetailSections schlank gemacht: Fahrzeug-Block lebt jetzt
+            in ClaimSummary, hier bleiben nur Mietwagen + Termin-Banner. */}
+        <FallDetailSections
+          fall={fall as Record<string, unknown>}
+          svName={svName}
+          svTelefon={svTelefon}
+          svVerifiziert={svVerifiziert}
+          kbName={kbName}
+          dokumente={dokumente ?? []}
+          nachrichten={nachrichten ?? []}
+          userId={user.id}
+          chatTeilnehmer={chatTeilnehmer}
+          aktiverTermin={aktiverTermin}
+        />
       </div>
     )
   } catch (err) {

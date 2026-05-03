@@ -67,6 +67,8 @@ export type KundeFallContext = {
   abgeschlossen_am?: string | null
   // AAR-558 (C11): Nachbesichtigung-Anforderung (unabhängig vom Fall-Status)
   nachbesichtigung_status?: string | null
+  // CMM-32: Kanzlei-Wunsch des Kunden — bestimmt ob Vollmacht benötigt wird
+  kanzlei_wunsch?: string | null
 }
 
 export type KundeSlaRecord = {
@@ -247,19 +249,21 @@ export function getKundenJetztZuTun(
     }
   }
 
-  // 8. Vollmacht unterschreiben
-  const vollmachtUnterschrieben =
-    fall.sa_unterschrieben === true ||
+  // 8. Vollmacht unterschreiben — nur relevant wenn Kunde LexDrive gewählt hat.
+  // sa_unterschrieben ist die Service-Vereinbarung (anderes Dokument), nicht
+  // die LexDrive-Vollmacht → wird hier bewusst NICHT als Proxy genutzt.
+  const brauchtVollmacht = fall.kanzlei_wunsch === 'partnerkanzlei'
+  const vollmachtErledigt =
     !!fall.vollmacht_signiert_am ||
     fall.vollmacht_status === 'unterschrieben'
-  if (!vollmachtUnterschrieben) {
+  if (brauchtVollmacht && !vollmachtErledigt) {
     return {
       state: 'vollmacht-unterschreiben',
       prioritaet: 'hoch',
-      titel: 'Vollmacht unterschreiben',
+      titel: 'Vollmacht bestätigen',
       beschreibung:
-        'Damit die Partnerkanzlei mit der Versicherung verhandeln darf, brauchen wir Ihre unterschriebene Vollmacht.',
-      cta: { label: 'Jetzt unterschreiben', href: fallHref },
+        'Damit LexDrive mit der Versicherung verhandeln darf, brauchen wir Ihre digitale Vollmacht.',
+      cta: { label: 'Jetzt bestätigen', href: fallHref },
       variant: 'default',
       severity: 'warning',
     }

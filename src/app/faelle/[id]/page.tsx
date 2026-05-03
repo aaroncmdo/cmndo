@@ -46,6 +46,9 @@ import { projectNextEvents } from '@/lib/claims/timeline-projection'
 import { getActiveKanzleiPaket, getPartnerKanzleiSettings, isKanzleiPaketPending } from '@/lib/kanzlei/queries'
 import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
 import { KanzleiAnsprechpartnerBlock } from '@/components/shared/claims'
+// Gutachten-OCR-Auswertung — admin-only Card mit den extrahierten
+// Schadensummen aus dem QC-freigegebenen Gutachten.
+import GutachtenOcrCard from '@/components/admin/fallakte/GutachtenOcrCard'
 
 export default async function FallaktePage({
   params,
@@ -68,16 +71,69 @@ export default async function FallaktePage({
   let claimStatus: string | null = null
   let claimPhase: string | null = null
   let claimKanzleiWunsch: string | null = null
+  let claimNoShowCount = 0
+  let claimLetzterNoShowAm: string | null = null
   if (claimId) {
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, phase, kanzlei_wunsch')
+      .select('status, phase, kanzlei_wunsch, kunde_no_show_count, letzter_no_show_am')
       .eq('id', claimId)
       .maybeSingle()
     claimStatus        = (claimRow?.status         as string | null) ?? null
     claimPhase         = (claimRow?.phase          as string | null) ?? null
     claimKanzleiWunsch = (claimRow?.kanzlei_wunsch as string | null) ?? null
+    claimNoShowCount   = (claimRow?.kunde_no_show_count as number | null) ?? 0
+    claimLetzterNoShowAm = (claimRow?.letzter_no_show_am as string | null) ?? null
   }
+
+  // erstgutachten-Auftrag-ID fuer die OCR-Card (Re-Run-Trigger). Nur fuer
+  // Admins relevant; KB sieht die Card nicht.
+  let erstgutachtenAuftragId: string | null = null
+
+  // Gutachten-OCR-Daten (admin-only) — separater Select damit die OCR-Werte
+  // nicht in den allgemeinen claimRow-Pfad fliessen, der auch für andere
+  // Rollen indirekt sichtbar werden könnte. CMM-32 Walkthrough: erweitert
+  // um Cluster A (Fahrzeug), B (Zustand), C (Reparatur), D (Mietwagen),
+  // E (SV-Meta) — siehe migration claims_gutachten_ocr_extended.
+  let gutachtenOcr: Awaited<ReturnType<typeof loadGutachtenOcr>> = null
+  async function loadGutachtenOcr() {
+    if (!claimId) return null
+    const { data } = await supabase
+      .from('claims')
+      .select(
+        'reparaturkosten_netto, reparaturkosten_brutto, minderwert, restwert, ' +
+          'wiederbeschaffungswert, wiederbeschaffungsdauer_tage, nutzungsausfall_tage, ' +
+          'totalschaden, gutachten_datum, gutachten_ocr_processed_at, gutachten_ocr_error, ' +
+          'gutachten_ocr_manuell_ueberschrieben, ' +
+          'gutachten_fin, gutachten_kennzeichen, gutachten_erstzulassung, ' +
+          'gutachten_laufleistung_km, gutachten_tuv_bis, gutachten_fahrzeug_typ, ' +
+          'gutachten_farbe, gutachten_farbcode, gutachten_kraftstoff, ' +
+          'gutachten_vorschaeden_text, gutachten_lackmesswert_max_my, gutachten_karosseriezustand, ' +
+          'gutachten_zeit_ak_std, gutachten_zeit_kar_std, gutachten_zeit_lack_std, ' +
+          'gutachten_lohnsatz_ak_eur, gutachten_lohnsatz_kar_eur, gutachten_lohnsatz_lack_eur, ' +
+          'gutachten_materialkosten_eur, gutachten_lackmaterial_eur, gutachten_verbringung_eur, ' +
+          'gutachten_mietwagen_klasse, gutachten_mietwagen_tagessatz_eur, gutachten_nutzungsausfall_tagessatz_eur, ' +
+          'gutachten_sv_honorar_netto, gutachten_sv_honorar_brutto, gutachten_kalkulationssystem, gutachten_seitenzahl',
+      )
+      .eq('id', claimId)
+      .maybeSingle()
+    return data
+  }
+
+  // Recent kunde-getriebene Verlegung (letzte 7 Tage, neuer Termin still
+  // bestaetigt) -> KB/Admin sehen einen amber-Banner als Hinweis.
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const { data: recentVerlegung } = await supabase
+    .from('gutachter_termine')
+    .select('id, start_zeit, created_at')
+    .eq('fall_id', id)
+    .eq('verlegung_initiator_kunde', true)
+    .eq('status', 'bestaetigt')
+    .gte('created_at', sevenDaysAgo)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const kundeVerlegungVorhanden = !!recentVerlegung
   // userRolle für Timeline-Rolle und viele andere Stellen (Auth + RLS),
   // wird unten erneut für FallakteRolle-Cast verwendet.
 
@@ -88,6 +144,23 @@ export default async function FallaktePage({
     .eq('id', user.id)
     .single()
   const userRolle = ((profile?.rolle as FallakteRolle | null) ?? 'kunde') as FallakteRolle
+
+  // OCR-Auswertung NUR für Admin laden — andere Rollen bekommen `null`
+  // und damit keinen Render-Pfad.
+  if (userRolle === 'admin') {
+    gutachtenOcr = await loadGutachtenOcr()
+    // erstgutachten-Auftrag-ID fuer den OCR-Re-Run-Trigger.
+    const adminClient = createAdminClient()
+    const { data: erstgutachtenRow } = await adminClient
+      .from('auftraege')
+      .select('id')
+      .eq('fall_id', id)
+      .eq('typ', 'erstgutachten')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    erstgutachtenAuftragId = (erstgutachtenRow?.id as string | null) ?? null
+  }
 
   // AAR-843: Timeline + Future-Projection laden (nach userRolle-Auflösung,
   // weil RLS via security_invoker auf der View die Auth braucht).
@@ -630,23 +703,52 @@ export default async function FallaktePage({
   // nach KB-Freigabe (gibKanzleipaketFrei legt den Eintrag an).
   let regulierungCardProps: {
     fallId: string
+    claimId: string | null
     status: 'versicherungskontakt' | 'auszahlung'
     vsKontaktAm: string | null
     ausgezahltAm: string | null
+    kanzleiWunsch:
+      | 'partnerkanzlei'
+      | 'eigene_kanzlei'
+      | 'keine_kanzlei'
+      | 'noch_unentschieden'
+      | 'nicht_gefragt'
+      | null
+    kanzleiUebergebenAm: string | null
   } | null = null
   if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
     const adminCli = createAdminClient()
-    const { data: kf } = await adminCli
+    // CMM-37: Read via claim_id (kanonisch).
+    const { data: kf } = claimId ? await adminCli
       .from('kanzlei_faelle')
       .select('status, vs_kontakt_am, ausgezahlt_am')
-      .eq('fall_id', id)
-      .maybeSingle()
-    if (kf) {
+      .eq('claim_id', claimId)
+      .maybeSingle() : { data: null }
+    // CMM-32 Polish: kanzlei_wunsch + uebergeben_am fuer den Toggle.
+    const { data: claimForWunsch } = claimId ? await adminCli
+      .from('claims')
+      .select('kanzlei_wunsch, kanzlei_uebergeben_am')
+      .eq('id', claimId)
+      .maybeSingle() : { data: null }
+    // Card immer rendern wenn Admin/KB + Claim vorhanden ist — der
+    // KB-Toggle muss auch ohne Kanzlei-Fall sichtbar sein, sonst kann
+    // niemand den eigene-Kanzlei-Pfad anstossen.
+    if (claimId && (kf || claimForWunsch)) {
       regulierungCardProps = {
         fallId: id,
-        status: (kf.status as 'versicherungskontakt' | 'auszahlung') ?? 'versicherungskontakt',
-        vsKontaktAm: (kf.vs_kontakt_am as string | null) ?? null,
-        ausgezahltAm: (kf.ausgezahlt_am as string | null) ?? null,
+        claimId,
+        status: (kf?.status as 'versicherungskontakt' | 'auszahlung') ?? 'versicherungskontakt',
+        vsKontaktAm: (kf?.vs_kontakt_am as string | null) ?? null,
+        ausgezahltAm: (kf?.ausgezahlt_am as string | null) ?? null,
+        kanzleiWunsch:
+          (claimForWunsch?.kanzlei_wunsch as
+            | 'partnerkanzlei'
+            | 'eigene_kanzlei'
+            | 'keine_kanzlei'
+            | 'noch_unentschieden'
+            | 'nicht_gefragt'
+            | null) ?? null,
+        kanzleiUebergebenAm: (claimForWunsch?.kanzlei_uebergeben_am as string | null) ?? null,
       }
     }
   }
@@ -674,6 +776,22 @@ export default async function FallaktePage({
         </div>
       )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
+      {userRolle === 'admin' && gutachtenOcr && claimId && (
+        <div className="mb-4">
+          {/* CMM-32 Walkthrough: GutachtenOcrCard ist jetzt 'use client' mit
+              Edit-Mode + Re-Run. Sie braucht claim_id/fall_id/auftrag_id
+              fuer die Server-Actions. erstgutachtenAuftragId wurde oben
+              geladen. */}
+          <GutachtenOcrCard
+            data={{
+              ...(gutachtenOcr as unknown as Record<string, unknown>),
+              claim_id: claimId,
+              fall_id: id,
+              auftrag_id: erstgutachtenAuftragId,
+            } as unknown as Parameters<typeof GutachtenOcrCard>[0]['data']}
+          />
+        </div>
+      )}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
       {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
           Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}
@@ -715,6 +833,9 @@ export default async function FallaktePage({
         claimStatus={claimStatus}
         claimKanzleiWunsch={claimKanzleiWunsch}
         kanzleiPaketPending={kanzleiPaketPending}
+        kundeNoShowCount={claimNoShowCount}
+        letzterNoShowAm={claimLetzterNoShowAm}
+        kundeVerlegungVorhanden={kundeVerlegungVorhanden}
         timelineEvents={timelineEvents}
         futureEvents={futureEvents}
         dokumenteTabProps={{

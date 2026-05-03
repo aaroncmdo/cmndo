@@ -13,6 +13,7 @@ import { useFall } from '../FallContext'
 import QuickActions from './QuickActions'
 import SlaAlerts from './SlaAlerts'
 import FallRueckrufSection from './FallRueckrufSection'
+import EskalationCard from './EskalationCard'
 import TerminListeClient from '@/components/termine/TerminListeClient'
 // AAR-754 (Phase C): Shared FallKontakteCard statt handgerollter
 // Ansprechpartner-Block.
@@ -50,6 +51,13 @@ export default function FallSidebar({
     <aside className="w-full lg:w-[340px] shrink-0 bg-[#f8f9fb] border-l border-claimondo-border overflow-y-auto p-4 space-y-3">
       {/* Quick Actions (phase-abhängig) */}
       <QuickActions />
+
+      {/* Eskalation an Admin (Hartfall) */}
+      <EskalationCard
+        fallId={fall.id}
+        initialAdminId={(fall.eskaliert_an_admin_id as string | null) ?? null}
+        initialAdminName={null}
+      />
 
       {/* SLA-Alerts (Countdown-Timer) */}
       <SlaAlerts />

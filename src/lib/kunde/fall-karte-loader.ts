@@ -36,6 +36,7 @@ export type FallKarteMetaInput = {
   schadens_ort?: string | null
   // AAR-558 (C11): Nachbesichtigungs-Anforderung durchreichen
   nachbesichtigung_status?: string | null
+  kanzlei_wunsch?: string | null
 }
 
 export type FallKarteMeta = {
@@ -159,6 +160,7 @@ export async function ladeFallKartenMeta(
         status: f.status ?? null,
         abgeschlossen_am: f.abgeschlossen_am ?? null,
         nachbesichtigung_status: f.nachbesichtigung_status ?? null,
+        kanzlei_wunsch: f.kanzlei_wunsch ?? null,
       },
       slaRecords,
     )
