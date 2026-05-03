@@ -30,7 +30,12 @@ export async function sendVerificationCode(telefon: string): Promise<{ success: 
     return { success: false, error: 'Bitte 60 Sekunden warten bevor ein neuer Code gesendet wird' }
   }
 
-  const { accountSid, authToken, serviceSid } = getVerifyConfig()
+  let accountSid: string, authToken: string, serviceSid: string
+  try {
+    ;({ accountSid, authToken, serviceSid } = getVerifyConfig())
+  } catch {
+    return { success: false, error: 'SMS-2FA nicht konfiguriert — bitte Administrator kontaktieren' }
+  }
 
   try {
     const resp = await fetch(
@@ -57,7 +62,12 @@ export async function sendVerificationCode(telefon: string): Promise<{ success: 
 
 export async function checkVerificationCode(telefon: string, code: string): Promise<{ success: boolean; error?: string }> {
   const normalized = normalizePhone(telefon)
-  const { accountSid, authToken, serviceSid } = getVerifyConfig()
+  let accountSid: string, authToken: string, serviceSid: string
+  try {
+    ;({ accountSid, authToken, serviceSid } = getVerifyConfig())
+  } catch {
+    return { success: false, error: 'SMS-2FA nicht konfiguriert' }
+  }
 
   try {
     const resp = await fetch(
