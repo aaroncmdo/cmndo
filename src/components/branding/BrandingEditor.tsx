@@ -224,25 +224,25 @@ export default function BrandingEditor({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-[var(--brand-primary)]">Branding</h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-claimondo-ondo">
             Lade dein Logo hoch — Farben & Schriftart werden automatisch extrahiert.
           </p>
         </div>
         {canSaveToOrg && (
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-500">Speichern für:</span>
-            <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
+            <span className="text-claimondo-ondo">Speichern für:</span>
+            <div className="inline-flex rounded-lg border border-claimondo-border overflow-hidden">
               <button
                 type="button"
                 onClick={() => { setScope('sv'); setDirty(true) }}
-                className={`px-3 py-1 ${scope === 'sv' ? 'bg-[var(--brand-secondary)] text-white' : 'bg-white text-gray-700'}`}
+                className={`px-3 py-1 ${scope === 'sv' ? 'bg-[var(--brand-secondary)] text-white' : 'bg-white text-claimondo-navy'}`}
               >
                 Nur ich
               </button>
               <button
                 type="button"
                 onClick={() => { setScope('org'); setDirty(true) }}
-                className={`px-3 py-1 ${scope === 'org' ? 'bg-[var(--brand-secondary)] text-white' : 'bg-white text-gray-700'}`}
+                className={`px-3 py-1 ${scope === 'org' ? 'bg-[var(--brand-secondary)] text-white' : 'bg-white text-claimondo-navy'}`}
               >
                 Ganzes Büro
               </button>
@@ -274,7 +274,7 @@ export default function BrandingEditor({
       {/* Hauptgrid: Upload + Preview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-gray-700">Logo</h2>
+          <h2 className="text-sm font-semibold text-claimondo-navy">Logo</h2>
           <LogoUploader
             logoUrl={logoUrl}
             uploading={uploading}
@@ -291,7 +291,7 @@ export default function BrandingEditor({
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-gray-700">Live-Vorschau</h2>
+          <h2 className="text-sm font-semibold text-claimondo-navy">Live-Vorschau</h2>
           <LivePreview
             theme={theme}
             fontPair={fontPair}
@@ -303,7 +303,7 @@ export default function BrandingEditor({
 
       {/* Font-Picker */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-gray-700">Schriftart</h2>
+        <h2 className="text-sm font-semibold text-claimondo-navy">Schriftart</h2>
         <FontPicker
           selectedPairId={fontPair.id}
           recommendedCategory={recommendedCategory}
@@ -326,12 +326,12 @@ export default function BrandingEditor({
       )}
 
       {/* Aktionen */}
-      <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-5">
+      <div className="flex items-center justify-end gap-3 border-t border-claimondo-border pt-5">
         <button
           type="button"
           onClick={handleReset}
           disabled={busy}
-          className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1.5 disabled:opacity-40"
+          className="text-sm text-claimondo-ondo hover:text-claimondo-navy flex items-center gap-1.5 disabled:opacity-40"
         >
           <RotateCcwIcon className="w-3.5 h-3.5" />
           Auf Claimondo-Standard

@@ -6,7 +6,8 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon } from 'lucide-react'
+import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClockIcon } from 'lucide-react'
+import { TabDropContent } from '@/components/ui/TabDropContent'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
 // AAR-687: alle 5 Tabs leben jetzt im _tabs/-Ordner (private-folder-
@@ -20,11 +21,23 @@ import FallSidebar from './_sidebar/FallSidebar'
 // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar
 import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
 // AAR-567 (V1): PhasePipeline als linke Spalte + FallActionBar über der Tab-Bar
-import { PhasePipeline } from '@/components/shared/fall-phases'
+// AAR-727 (fallphasen-glass): Aside nutzt shared FallPhasenPanel (glass-light).
+import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import type { Rolle as PhasenRolle } from '@/components/shared/fall-phases'
-import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
 import { FallActionBar } from '@/components/admin/fallakte/FallActionBar'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
+// AAR-840: Endzustand-Dropdown + Claim-Status-Badge im Header
+import { EndzustandDropdown, ClaimStatusBadge, KanzleiWunschDropdown } from '@/components/shared/claims'
+// AAR-843: Timeline-View für den Verlaufs-Tab
+import { TimelineView } from '@/components/shared/claims'
+import type { ClaimTimelineEvent } from '@/lib/claims/timeline-queries'
+import type { ProjectedEvent } from '@/lib/claims/timeline-projection'
+// AAR-746 (Phase B): Shared Identity-Header — neu auch im Admin-Portal.
+import { FallIdentityHeader } from '@/components/shared/fall-header'
+// AAR-770: Mitteilungs-Banner ganz oben in der Fallakte
+import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
+// AAR-776: Shared Tab-Bar
+import { FallakteTabs } from '@/components/shared/fall-tabs'
 
 // Mapping FallakteRolle → shared PhasenRolle.
 // Admin-Route sieht im Normalfall nur admin + kundenbetreuer; dispatch und
@@ -38,13 +51,14 @@ function toPhasenRolle(r: FallakteRolle): PhasenRolle {
 // AAR-544 (C7): unified Event-Stream für den Timeline-Tab
 import type { FallEvent } from '@/lib/fall/event-stream'
 
-type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline'
+type TabId = 'uebersicht' | 'dokumente' | 'kommunikation' | 'prozess' | 'timeline' | 'verlauf'
 
 const TABS: { id: TabId; label: string; icon: typeof ListIcon }[] = [
   { id: 'uebersicht', label: 'Übersicht', icon: ListIcon },
   { id: 'dokumente', label: 'Dokumente', icon: FolderOpenIcon },
   { id: 'kommunikation', label: 'Kommunikation', icon: MessageCircleIcon },
   { id: 'prozess', label: 'Prozess', icon: GitBranchIcon },
+  { id: 'verlauf', label: 'Verlauf', icon: ClockIcon },
   { id: 'timeline', label: 'Timeline', icon: ActivityIcon },
 ]
 
@@ -80,6 +94,16 @@ type ShellProps = {
   // AAR-541 (C4): Kommunikations-Tab Props (currentUserId + Teilnehmer)
   currentUserId: string | null
   teilnehmer: FallTeilnehmer[]
+  // AAR-840: claim_id + claims.status für Endzustand-Dropdown im Header
+  claimId: string | null
+  claimStatus: string | null
+  // AAR-841: claims.kanzlei_wunsch für KB-Sidebar-Override-Dropdown
+  claimKanzleiWunsch: string | null
+  // AAR-844: "Paket jetzt versenden"-Quick-Action im Dropdown conditional
+  kanzleiPaketPending: boolean
+  // AAR-843: Timeline-Daten für den Verlaufs-Tab (server-seitig geladen)
+  timelineEvents: ClaimTimelineEvent[]
+  futureEvents: ProjectedEvent[]
 }
 
 export default function FallakteShell({
@@ -93,6 +117,12 @@ export default function FallakteShell({
   subphase,
   currentUserId,
   teilnehmer,
+  claimId,
+  claimStatus,
+  claimKanzleiWunsch,
+  kanzleiPaketPending,
+  timelineEvents,
+  futureEvents,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -109,88 +139,107 @@ export default function FallakteShell({
     router.replace(`?${params.toString()}`, { scroll: false })
   }
 
-  // AAR-567 (V1): Pipeline-Daten aus Visibility-Matrix ableiten.
-  // `aktuelle_phase` (snake_case) ist die Quelle; falls noch nicht gesetzt,
-  // dient `subphase.phase` (vom Resolver) als Fallback für die Phase-Nummer.
+  // AAR-567 (V1) / AAR-727: Pipeline-Input für FallPhasenPanel. Die Panel-
+  // Komponente ruft buildPhasePipelineData intern auf.
   const phasenRolle = toPhasenRolle(userRolle)
   const aktuellePhaseSnake = (fall.aktuelle_phase as string | null | undefined) ?? null
-  const pipelinePhases = buildPhasePipelineData(
-    {
-      id: fall.id,
-      aktuelle_phase: aktuellePhaseSnake,
-      phase_nummer: subphase.phase,
-      abgeschlossen_am: fall.abgeschlossen_am ?? null,
-    },
-    phasenRolle,
-  )
+  const phasenFall = {
+    id: fall.id,
+    aktuelle_phase: aktuellePhaseSnake,
+    phase_nummer: subphase.phase,
+    abgeschlossen_am: fall.abgeschlossen_am ?? null,
+  }
 
   return (
     <FallProvider fall={fall} lead={lead} userRolle={userRolle}>
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-96px)] gap-0">
-        {/* AAR-567 (V1): Linke Spalte — PhasePipeline (vertical) */}
-        <aside className="lg:w-72 xl:w-80 shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 bg-white overflow-y-auto">
+        {/* AAR-567 (V1) / AAR-727: Linke Spalte — Glass-Panel (aside). */}
+        <aside className="lg:w-72 xl:w-80 shrink-0 overflow-y-auto">
           <div className="px-4 py-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-              Phasen
-            </h3>
-            <PhasePipeline
-              fall={{ id: fall.id, aktuelle_phase: aktuellePhaseSnake }}
+            <FallPhasenPanel
+              fall={phasenFall}
               rolle={phasenRolle}
-              phases={pipelinePhases}
-              variant="vertical"
-              showTimestamps
+              variant="aside"
             />
           </div>
         </aside>
 
-        {/* Haupt-Column: Action-Bar + Tabs + Content */}
+        {/* Haupt-Column: Konsolidierter Header + Tabs + Content */}
         <main className="flex-1 overflow-y-auto min-w-0">
-          {/* AAR-567 (V1): Action-Bar ersetzt den Phase-Text-Badge. Status-
-              Override, Kanzlei-Paket, Phase vorrücken und Trigger-Felder-
-              Diagnostik. Phase-Darstellung ist in der linken Spalte. */}
-          <FallActionBar result={subphase} fallId={fall.id} />
-          {/* Tab-Bar — AAR-668: visuell verstärkt, aktiver Tab mit Hintergrund */}
-          <nav className="border-b border-gray-200 bg-white">
-            <div className="flex items-center justify-between gap-3 px-4">
-              <ul className="flex items-center gap-1 overflow-x-auto py-1.5">
-                {TABS.map((tab) => {
-                  const active = activeTab === tab.id
-                  const Icon = tab.icon
-                  return (
-                    <li key={tab.id}>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-3.5 py-2 text-sm rounded-lg transition-all whitespace-nowrap ${
-                          active
-                            ? 'bg-[#4573A2]/10 text-[#0D1B3E] font-semibold ring-1 ring-[#4573A2]/20'
-                            : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50 font-medium'
-                        }`}
-                      >
-                        <Icon className={`w-4 h-4 ${active ? 'text-[#4573A2]' : 'text-gray-400'}`} />
-                        {tab.label}
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-              {/* AAR-307: Ad-hoc Task-Anlegen — nur für KB/Admin (SV nutzt SV-Portal) */}
-              <div className="shrink-0 py-2">
-                <TaskAnlegenButton fallId={fall.id} rolle={userRolle} label="Task anlegen" />
-              </div>
-            </div>
-          </nav>
+          {/* AAR-758: Ein gemeinsamer Header-Block statt vorher zwei (IdentityHeader + ActionBar).
+              FallIdentityHeader zeigt Fallnummer · Kunde · Ort, die ActionBar-
+              Buttons landen im actions-Slot rechts. Phase-Label weggelassen —
+              steht bereits in der Aside-Phasen-Pipeline, keine Dopplung mehr. */}
+          {/* AAR-770: Mitteilungs-Banner ganz oben — vor dem Identity-Header */}
+          <div className="px-4 sm:px-6 pt-4">
+            <FallMitteilungenBanner fallId={fall.id} rolle={userRolle} />
+          </div>
+          <FallIdentityHeader
+            rolle="admin"
+            fallNummer={fall.fall_nummer ?? fall.id.slice(0, 8)}
+            kundenName={
+              lead
+                ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null
+                : null
+            }
+            ort={(fall.schadens_ort as string | null) ?? null}
+          >
+            <FallActionBar result={subphase} fallId={fall.id} compact />
+            {/* AAR-840: Status-Badge + Endzustand-Dropdown rechts im Header.
+                Sichtbar für Admin (immer) und KB (durch EndzustandDropdown
+                rolle-intern guarded). claimId-Guard: ohne Claim kein Dropdown. */}
+            {claimStatus && (
+              <ClaimStatusBadge status={claimStatus} viewerRole="admin" size="sm" withIcon />
+            )}
+            {claimId && (
+              <EndzustandDropdown
+                claimId={claimId}
+                currentStatus={claimStatus ?? 'dispatch_done'}
+                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
+              />
+            )}
+            {/* AAR-841 Self-Review-Fix: KanzleiWunschDropdown war als shared
+                Component gebaut aber nicht eingebunden. KB sieht jetzt den
+                aktuellen Wunsch + kann Override triggern. */}
+            {claimId && (
+              <KanzleiWunschDropdown
+                claimId={claimId}
+                currentWunsch={claimKanzleiWunsch}
+                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
+                paketVersandPending={kanzleiPaketPending}
+              />
+            )}
+          </FallIdentityHeader>
+          {/* AAR-776: Tab-Bar als shared Component (FallakteTabs) — gleiches
+              Component wie SV-Fallakte und Kunde-Fallakte. */}
+          <FallakteTabs
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            rightSlot={
+              <TaskAnlegenButton fallId={fall.id} rolle={userRolle} label="Task anlegen" />
+            }
+          />
 
           {/* Content */}
-          <div className="px-4 sm:px-6 py-6">
+          <TabDropContent tabKey={activeTab} className="px-4 sm:px-6 py-6">
             {activeTab === 'uebersicht' && <UebersichtTab />}
             {activeTab === 'dokumente' && <DokumenteTab {...dokumenteTabProps} />}
             {activeTab === 'kommunikation' && (
               <KommunikationTab currentUserId={currentUserId} teilnehmer={teilnehmer} />
             )}
             {activeTab === 'prozess' && <ProzessTab subphase={subphase} />}
+            {activeTab === 'verlauf' && (
+              <TimelineView
+                events={timelineEvents}
+                futureEvents={futureEvents}
+                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : userRolle === 'sachverstaendiger' ? 'sv' : 'kunde'}
+                variant="full"
+                showKategorieBadge
+              />
+            )}
             {activeTab === 'timeline' && <TimelineTab events={events} />}
-          </div>
+          </TabDropContent>
         </main>
 
         {/* Sidebar */}

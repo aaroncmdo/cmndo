@@ -37,36 +37,110 @@ export async function startStop(
 }
 
 /**
- * „Ich bin angekommen" — setzt gutachter_termine.sv_angekommen_am,
- * ankunft_via, gps_lat/lng_ankunft und hebt Session auf status='arrived'.
- * Sendet zusätzlich die Angekommen-WA an den Kunden (non-blocking).
+ * SV erreicht den Besichtigungsort: setzt nur sv_angekommen_am.
+ * Triggert NICHT besichtigung_gestartet_am — das passiert erst wenn beide
+ * Parteien da sind (markBesichtigungGestartet) oder die Zeit erreicht ist.
+ * Idempotent: wenn sv_angekommen_am bereits gesetzt, wird nichts überschrieben.
  */
-export async function markArrived(
-  sessionId: string,
+export async function markSvVorOrt(
   terminId: string,
   lat: number,
   lng: number,
   via: 'geofence' | 'manuell',
 ): Promise<Result> {
-  // markArrival nutzt `ankunft_via: 'gps' | 'manual_swipe'` — wir mappen.
-  const mappedVia = via === 'geofence' ? 'gps' : 'manual_swipe'
+  const mappedVia: 'gps' | 'manual_swipe' = via === 'geofence' ? 'gps' : 'manual_swipe'
   const res = await markArrival({ termin_id: terminId, lat, lng, via: mappedVia })
   if (!res.success) return { success: false, error: res.error ?? 'Ankunft fehlgeschlagen' }
 
-  // gutachter_termine: sv_angekommen_am + Notification-Flag setzen (AAR-380
-  // Foundation hat diese Felder bereits).
   const admin = createAdminClient()
+  const nowIso = new Date().toISOString()
+  const { data: existing } = await admin
+    .from('gutachter_termine')
+    .select('sv_angekommen_am, fall_id')
+    .eq('id', terminId)
+    .maybeSingle()
+  if (!existing?.sv_angekommen_am) {
+    await admin
+      .from('gutachter_termine')
+      .update({
+        sv_angekommen_am: nowIso,
+        notification_angekommen_gesendet_am: nowIso,
+      })
+      .eq('id', terminId)
+  }
+  revalidatePath('/gutachter/feldmodus')
+  if (existing?.fall_id) {
+    revalidatePath(`/kunde/faelle/${existing.fall_id}`)
+  }
+  return { success: true }
+}
+
+/**
+ * Besichtigung-läuft-Trigger: beide vor Ort ODER Zeit-Fallback.
+ * Setzt besichtigung_gestartet_am auf gutachter_termine + faelle und
+ * transitioniert die Session in den arrived-State (öffnet die Fallakte
+ * beim SV via Realtime-Sub im FeldmodusClient).
+ */
+export async function markBesichtigungGestartet(
+  sessionId: string,
+  terminId: string,
+  via: 'beide_angekommen' | 'termin_uhrzeit',
+): Promise<Result> {
+  const admin = createAdminClient()
+  const nowIso = new Date().toISOString()
+
+  const { data: existing } = await admin
+    .from('gutachter_termine')
+    .select('besichtigung_gestartet_am, sv_angekommen_am, fall_id')
+    .eq('id', terminId)
+    .maybeSingle()
+
+  if (existing?.besichtigung_gestartet_am) {
+    return { success: true }
+  }
+
+  // Bei Zeit-Fallback ohne GPS: sv_angekommen_am ebenfalls setzen, damit
+  // der KundeSvLiveBanner / die ClaimStepper-Status-Logik konsistent ist.
+  const update: Record<string, string> = { besichtigung_gestartet_am: nowIso }
+  if (via === 'termin_uhrzeit' && !existing?.sv_angekommen_am) {
+    update.sv_angekommen_am = nowIso
+    update.notification_angekommen_gesendet_am = nowIso
+  }
+
   await admin
     .from('gutachter_termine')
-    .update({
-      sv_angekommen_am: new Date().toISOString(),
-      notification_angekommen_gesendet_am: new Date().toISOString(),
-    })
+    .update(update)
     .eq('id', terminId)
+
+  if (existing?.fall_id) {
+    await admin
+      .from('faelle')
+      .update({ besichtigung_gestartet_am: nowIso, updated_at: nowIso })
+      .eq('id', existing.fall_id)
+  }
 
   await transitionTagesSession(sessionId, 'arrived')
   revalidatePath('/gutachter/feldmodus')
+  revalidatePath('/kunde/termin')
+  if (existing?.fall_id) {
+    revalidatePath(`/kunde/faelle/${existing.fall_id}`)
+  }
   return { success: true }
+}
+
+/** @deprecated Übergangs-Wrapper bis alle Caller umgestellt sind. */
+export async function markArrived(
+  sessionId: string,
+  terminId: string,
+  lat: number,
+  lng: number,
+  via: 'geofence' | 'manuell' | 'termin_uhrzeit',
+): Promise<Result> {
+  if (via === 'termin_uhrzeit') {
+    return markBesichtigungGestartet(sessionId, terminId, 'termin_uhrzeit')
+  }
+  // Sonst: nur SV vor Ort markieren — Besichtigung-läuft kommt separat.
+  return markSvVorOrt(terminId, lat, lng, via as 'geofence' | 'manuell')
 }
 
 /**

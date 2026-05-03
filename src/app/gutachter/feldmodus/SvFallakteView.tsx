@@ -181,7 +181,7 @@ export default function SvFallakteView({
             <div className="bg-white rounded-2xl p-4 text-[var(--brand-primary)] space-y-2">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-gray-500">
+                  <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
                     Fall #{fall.fall_nummer}
                   </p>
                   {fall.kennzeichen && (
@@ -201,15 +201,15 @@ export default function SvFallakteView({
                 )}
               </div>
               {fall.fahrzeug && (
-                <p className="text-xs text-gray-700">{fall.fahrzeug}</p>
+                <p className="text-xs text-claimondo-navy">{fall.fahrzeug}</p>
               )}
               {fall.szenario && (
-                <p className="text-[11px] text-gray-500">
+                <p className="text-[11px] text-claimondo-ondo">
                   Szenario: {fall.szenario}
                 </p>
               )}
               {fall.besichtigungsort_adresse && (
-                <p className="text-[11px] text-gray-500 border-t border-gray-100 pt-2">
+                <p className="text-[11px] text-claimondo-ondo border-t border-claimondo-border pt-2">
                   {fall.besichtigungsort_adresse}
                 </p>
               )}
@@ -230,7 +230,7 @@ export default function SvFallakteView({
             {/* Dokumente (shared DokumentenListe) */}
             <div className="bg-white rounded-2xl p-4 text-[var(--brand-primary)]">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
                   Dokumente
                 </p>
                 {pflichtOffen > 0 ? (
@@ -244,7 +244,7 @@ export default function SvFallakteView({
                 ) : null}
               </div>
               {slots.length === 0 ? (
-                <p className="text-xs text-gray-500 italic">
+                <p className="text-xs text-claimondo-ondo italic">
                   Keine Dokumente angefordert.
                 </p>
               ) : (
@@ -272,7 +272,7 @@ export default function SvFallakteView({
               <div className="flex items-center justify-between mb-2">
                 <label
                   htmlFor="sv-feldmodus-notizen"
-                  className="text-xs font-semibold uppercase tracking-wider text-gray-500"
+                  className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo"
                 >
                   Vor-Ort-Notizen
                 </label>
@@ -293,13 +293,13 @@ export default function SvFallakteView({
                 onBlur={handleSaveNotizen}
                 rows={5}
                 placeholder="Was ist bei der Besichtigung aufgefallen?"
-                className="w-full text-xs text-[var(--brand-primary)] border border-gray-200 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none"
+                className="w-full text-xs text-[var(--brand-primary)] border border-claimondo-border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none"
               />
               <button
                 type="button"
                 onClick={handleSaveNotizen}
                 disabled={!notizenDirty || savingNotizen}
-                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] disabled:bg-gray-300 rounded-lg py-2"
+                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] disabled:bg-claimondo-border rounded-lg py-2"
               >
                 {savingNotizen ? (
                   <Loader2Icon className="w-3.5 h-3.5 animate-spin" />

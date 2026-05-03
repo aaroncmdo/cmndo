@@ -117,7 +117,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
               <select
                 value={paketId}
                 onChange={(e) => handlePaketChange(e.target.value)}
-                className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
               >
                 {pakete.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -126,7 +126,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
                 ))}
               </select>
               {paket && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-claimondo-ondo">
                   Routet zu Endpoint <code className="font-mono">{paket.endpoint_event}</code> ·{' '}
                   {paket.subphase_from} → {paket.subphase_to}
                 </p>
@@ -156,9 +156,9 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
                       type="file"
                       accept="application/pdf,image/*"
                       onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                      className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-[#EBF1F8] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-[#0D1B3E] hover:file:bg-[#d9e5f2]"
+                      className="block w-full text-sm text-claimondo-navy file:mr-3 file:rounded-md file:border-0 file:bg-[#EBF1F8] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-[#0D1B3E] hover:file:bg-[#d9e5f2]"
                     />
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-claimondo-ondo">
                       Wird im Bucket <code className="font-mono">fall-dokumente</code> unter{' '}
                       <code className="font-mono">kanzlei-pakete/{fallId.slice(0, 8)}/…</code> abgelegt.
                     </p>
@@ -167,7 +167,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
 
                 <div className="rounded-md border border-[#EBF1F8] bg-[#f8f9fb] p-3">
                   <p className="text-xs font-medium text-[#0D1B3E] mb-1.5">Side-Effects (Vorschau)</p>
-                  <ul className="list-disc ml-4 space-y-0.5 text-xs text-gray-700">
+                  <ul className="list-disc ml-4 space-y-0.5 text-xs text-claimondo-navy">
                     {paket.side_effects.map((s, i) => (
                       <li key={i}>{s}</li>
                     ))}
@@ -183,7 +183,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
             type="button"
             onClick={() => onOpenChange(false)}
             disabled={pending}
-            className="text-sm rounded-md border border-gray-200 bg-white px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-[#f8f9fb] disabled:opacity-50"
           >
             Abbrechen
           </button>
@@ -223,10 +223,10 @@ function FieldRow({
     return (
       <div className="space-y-1.5">
         {baseLabel}
-        <div className="w-full rounded-md border border-gray-200 bg-[#f8f9fb] px-3 py-2 text-sm text-gray-600 font-mono">
+        <div className="w-full rounded-md border border-claimondo-border bg-[#f8f9fb] px-3 py-2 text-sm text-claimondo-ondo font-mono">
           {computed || '—'}
         </div>
-        {field.hint && <p className="text-xs text-gray-500">{field.hint}</p>}
+        {field.hint && <p className="text-xs text-claimondo-ondo">{field.hint}</p>}
       </div>
     )
   }
@@ -238,7 +238,7 @@ function FieldRow({
         <select
           value={typeof value === 'string' ? value : ''}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+          className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
         >
           <option value="">– bitte wählen –</option>
           {field.options.map((o) => (
@@ -247,7 +247,7 @@ function FieldRow({
             </option>
           ))}
         </select>
-        {field.hint && <p className="text-xs text-gray-500">{field.hint}</p>}
+        {field.hint && <p className="text-xs text-claimondo-ondo">{field.hint}</p>}
       </div>
     )
   }
@@ -261,9 +261,9 @@ function FieldRow({
           onChange={(e) => onChange(e.target.value)}
           placeholder={field.placeholder}
           rows={3}
-          className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+          className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
         />
-        {field.hint && <p className="text-xs text-gray-500">{field.hint}</p>}
+        {field.hint && <p className="text-xs text-claimondo-ondo">{field.hint}</p>}
       </div>
     )
   }
@@ -293,9 +293,9 @@ function FieldRow({
           }
         }}
         placeholder={field.placeholder}
-        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+        className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
       />
-      {field.hint && <p className="text-xs text-gray-500">{field.hint}</p>}
+      {field.hint && <p className="text-xs text-claimondo-ondo">{field.hint}</p>}
     </div>
   )
 }

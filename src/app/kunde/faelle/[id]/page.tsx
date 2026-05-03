@@ -1,33 +1,54 @@
+// CMM-28: Kunde-Detail-Page komplett auf claim-Loader umgestellt.
+//
+// Vorher: getFallById(supabase, id, FALL_SELECT_KUNDE) las aus
+// v_faelle_mit_aktuellem_termin. Jetzt: getKundeFallDetailRecord liest
+// claims als Anker + faelle als Lifecycle-Bridge + gutachter_termine.
+// Output-Shape ist ein flaches Record damit die Sub-Components 1:1
+// weiter funktionieren.
+//
+// Cleanup:
+//   • EskalationsErgebnisCard raus (Eskalations-Edge-Case)
+//   • FaqBotCard raus (lieber WhatsApp-First Support)
+//   • ReFrageKanzleiClient raus (Self-Review-Modal)
+//   • SaeuleMeinAnwalt + KanzleiAnsprechpartnerBlock-Render raus —
+//     konsolidiert zu einer „Meine Kanzlei"-Card.
+//
+// KanzleiAnsprechpartnerBlock-Component bleibt unter
+// src/components/shared/claims/ erhalten — Admin- und KB-Portal nutzen
+// sie weiter.
+
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-// AAR-569 (V3): Shared PhasePipeline ersetzt den alten Szenario-Stepper.
-import { PhasePipeline } from '@/components/shared/fall-phases'
-import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
+import { FallPhasenPanel } from '@/components/shared/fall-phases'
+import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
-import FallStatusCard from '@/components/kunde/FallStatusCard'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
-import DokumenteSection from '@/components/kunde/DokumenteSection'
-import SaeuleMeinAnwalt from '@/components/kunde/SaeuleMeinAnwalt'
+import PflichtdokumenteSection from '@/components/fall/PflichtdokumenteSection'
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
+import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
+import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
-// AAR-558 (C9): Auszahlungs- + Eskalations-Ergebnis-Card aus faelle_kunde_view
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
-import EskalationsErgebnisCard from '@/components/kunde/EskalationsErgebnisCard'
-import { saveBankdaten, uploadPflichtdokumentKunde, updateZahlungsweg } from './actions'
-// AAR-319: FAQ-Bot-Card + Historie-Loader
-import { FaqBotCard } from './_components/FaqBotCard'
-import { ladeKundenFaqHistorie } from './faq-bot-actions'
-// AAR-432: Jetzt-zu-tun-Card + Gutachten-Weiterleitung
-import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
+import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
-import { getKundenJetztZuTun, type KundeSlaRecord } from '@/lib/kunde/jetzt-zu-tun'
-// AAR-448: Termin-Detail-Card mit Quick-Actions
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
-// AAR-651: Zentrale Fall-Loader-Lib — FALL_SELECT_KUNDE ist die shared
-// Spalten-Liste (52 Felder ohne Brutto-Beträge, AAR-558 C9 Leak-Fix).
-import { getFallById, FALL_SELECT_KUNDE } from '@/lib/fall/queries'
+import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
+import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
+import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
+import ClaimStepper from '@/components/kunde/ClaimStepper'
+import { getAlleAuftraege } from '@/lib/auftrag/queries'
+import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
+import { getClaimLifecycle } from '@/lib/claims/lifecycle'
+import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
+
+// AAR-864: force-dynamic, damit der Verlegungs-Banner direkt nach dem
+// SV-Submit ohne Hard-Reload erscheint (revalidatePath alleine reicht
+// nicht zuverlässig wenn der Kunde gerade auf der Page ist).
+export const dynamic = 'force-dynamic'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -39,35 +60,60 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     const admin = createAdminClient()
 
-    // AAR-651: Zentrale Lib mit FALL_SELECT_KUNDE (52 Felder ohne Brutto-Beträge,
-    // AAR-558 C9 Leak-Fix). Ownership-Check bleibt separat unten wegen Email-Fallback.
-    const fall = await getFallById(supabase, id, FALL_SELECT_KUNDE)
+    // CMM-28: claim-zentrierter Loader. Ownership wird intern aufgelöst
+    // (claim_parties.user_id ODER faelle.kunde_id ODER lead.email).
+    const fall = await getKundeFallDetailRecord(admin, user.id, user.email ?? null, id)
     if (!fall) notFound()
 
-    // Ownership: kunde_id oder lead-email
-    const owned = fall.kunde_id === user.id
-    if (!owned) {
-      if (fall.lead_id) {
-        const { data: lead } = await admin.from('leads').select('email').eq('id', fall.lead_id).single()
-        if (lead?.email !== user.email) notFound()
-      } else {
-        notFound()
+    // Kunde-Vorname (für TerminLiveStatus "X ist da")
+    const { data: kundeProfile } = await admin
+      .from('profiles')
+      .select('vorname')
+      .eq('id', user.id)
+      .maybeSingle()
+    const kundeVorname = (kundeProfile?.vorname as string | null) ?? null
+
+    // CMM-28: Zurück-Link „← Meine Fälle" nur sinnvoll wenn der Kunde
+    // mehrere Fälle hat. Bei Single-Fall existiert keine Liste-Seite zum
+    // zurückkehren (Layout-Nav heißt „Mein Fall" + linked direkt hierher).
+    const allFaelle = await getKundeFaelle(admin, user.id, user.email ?? null)
+    const hatMehrereFaelle = allFaelle.length > 1
+
+    // Kanzlei-Daten laden (Name, Adresse, Email aus kanzleien-Tabelle)
+    let kanzleiRow: { name: string | null; email: string | null; adresse: string | null } | null = null
+    if (fall.kanzlei_id) {
+      const { data: k } = await admin
+        .from('kanzleien')
+        .select('name, email, adresse')
+        .eq('id', fall.kanzlei_id as string)
+        .maybeSingle()
+      if (k) {
+        kanzleiRow = {
+          name: (k.name as string | null) ?? null,
+          email: (k.email as string | null) ?? null,
+          adresse: (k.adresse as string | null) ?? null,
+        }
       }
     }
 
     // SV-Daten laden
     let svName: string | null = null
     let svTelefon: string | null = null
+    let svVerifiziert = false
     if (fall.sv_id) {
-      const { data: sv } = await admin.from('sachverstaendige').select('profile_id').eq('id', fall.sv_id).single()
+      const { data: sv } = await admin
+        .from('sachverstaendige')
+        .select('profile_id, verifizierung_status')
+        .eq('id', fall.sv_id as string)
+        .single()
       if (sv?.profile_id) {
         const { data: p } = await admin.from('profiles').select('vorname, nachname, telefon').eq('id', sv.profile_id).single()
         if (p) { svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || null; svTelefon = p.telefon }
       }
+      svVerifiziert = sv?.verifizierung_status === 'geprueft'
     }
 
     // KB-Daten laden
-    // AAR-369: anzeigename + avatar_url mitladen, damit Kunde echten Betreuer sieht
     let kbName: string | null = null
     let kbTelefon: string | null = null
     let kbAvatarUrl: string | null = null
@@ -76,7 +122,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       const { data: kb } = await admin
         .from('profiles')
         .select('vorname, nachname, telefon, anzeigename, avatar_url, profilbeschreibung')
-        .eq('id', fall.kundenbetreuer_id)
+        .eq('id', fall.kundenbetreuer_id as string)
         .single()
       if (kb) {
         kbName = (kb.anzeigename as string | null) || [kb.vorname, kb.nachname].filter(Boolean).join(' ') || null
@@ -86,12 +132,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
-    // AAR-553: Dokumente aus fall_dokumente laden. datei_url wird on-the-
-    // fly aus storage_path via getPublicUrl abgeleitet.
+    // Dokumente laden — abgelehnte Iterationen (KB-Reject-Loop) werden
+    // dem Kunden nicht gezeigt; er sieht nur die aktive Version.
     const { data: dokumenteRaw } = await admin.from('fall_dokumente')
       .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am')
       .eq('fall_id', id)
       .is('geloescht_am', null)
+      .is('abgelehnt_am', null)
       .order('hochgeladen_am')
     const dokumente = (dokumenteRaw ?? []).map(d => ({
       id: d.id as string,
@@ -101,23 +148,21 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       created_at: d.hochgeladen_am as string,
     }))
 
+    // CMM-23: Pflichtdokumente-Liste laden — identische Filter-Logik wie
+    // beim SV im Auftrag, nur aus Kunden-Sicht.
+    const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'kunde')
+
     // Nachrichten laden (alle Kanaele inkl. Gruppe)
     const { data: nachrichten } = await admin.from('nachrichten')
       .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
       .eq('fall_id', id)
       .order('created_at', { ascending: true })
 
-    // KFZ-129: Chat-Teilnehmer laden
+    // Chat-Teilnehmer laden
     const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
     const chatTeilnehmer = await getChatTeilnehmer(id)
 
-    // KFZ-206: Pflichtdokumente laden
-    const { data: pflichtdokumente } = await admin.from('pflichtdokumente')
-      .select('id, titel, status, datei_url, datei_name')
-      .eq('fall_id', id)
-      .order('created_at')
-
-    // KFZ-134 + KFZ-192: Aktiven gutachter_termine Eintrag laden (inkl. sv_vorgeschlagene_slots)
+    // Aktiven gutachter_termine Eintrag laden (inkl. sv_vorgeschlagene_slots)
     const { data: aktiverTermin } = await admin
       .from('gutachter_termine')
       .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_id, sv_vorgeschlagene_slots')
@@ -127,23 +172,78 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .limit(1)
       .maybeSingle()
 
-    // AAR-319: FAQ-Bot-Historie für diesen Kunden + Fall laden (RLS schützt)
-    const faqHistory = await ladeKundenFaqHistorie(id)
+    // AAR-864: Pending Verlegungs-Slot + alter Termin (für Banner).
+    // Banner verschwindet automatisch sobald der pending-Slot in der
+    // Vergangenheit liegt (= Verlegung obsolet, Termin gelaufen oder verstrichen).
+    const { data: verlegungPendingRow } = await admin
+      .from('gutachter_termine')
+      .select('id, start_zeit, verlegung_quelle_id, verlegung_grund, sv_id')
+      .eq('fall_id', fall.id as string)
+      .eq('status', 'verlegung_pending')
+      .gt('start_zeit', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    let verlegungBannerProps: React.ComponentProps<typeof TerminVerlegungBanner> | null = null
+    if (verlegungPendingRow?.verlegung_quelle_id) {
+      const { data: alterTermin } = await admin
+        .from('gutachter_termine')
+        .select('start_zeit')
+        .eq('id', verlegungPendingRow.verlegung_quelle_id as string)
+        .maybeSingle()
+      // SV-Vorname aus profiles
+      let svVorname = ''
+      if (verlegungPendingRow.sv_id) {
+        const { data: sv } = await admin
+          .from('sachverstaendige')
+          .select('profile_id')
+          .eq('id', verlegungPendingRow.sv_id as string)
+          .maybeSingle()
+        if (sv?.profile_id) {
+          const { data: p } = await admin
+            .from('profiles')
+            .select('vorname, anzeigename')
+            .eq('id', sv.profile_id as string)
+            .maybeSingle()
+          svVorname = ((p?.vorname as string | null) ?? (p?.anzeigename as string | null) ?? '') as string
+        }
+      }
+      const fmtD = (iso: string | null) =>
+        iso
+          ? new Date(iso).toLocaleDateString('de-DE', {
+              weekday: 'long',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })
+          : ''
+      const fmtT = (iso: string | null) =>
+        iso
+          ? new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+          : ''
+      verlegungBannerProps = {
+        pendingTerminId: verlegungPendingRow.id as string,
+        alterDatum: fmtD(alterTermin?.start_zeit as string | null),
+        alterUhrzeit: fmtT(alterTermin?.start_zeit as string | null),
+        neuesDatum: fmtD(verlegungPendingRow.start_zeit as string | null),
+        neuesUhrzeit: fmtT(verlegungPendingRow.start_zeit as string | null),
+        svVorname,
+        grund: (verlegungPendingRow.verlegung_grund as string | null) ?? null,
+      }
+    }
 
     // AAR-558 (C9): Kunden-sichere Felder aus faelle_kunde_view laden.
-    // Die View erzwingt per Column-Filter dass NUR auszahlung_kunde_betrag
-    // sichtbar ist (nicht Brutto-regulierung, nicht Gutachter-Honorar).
+    // Nur noch für AuszahlungCard genutzt — Eskalations-Tag-Felder kommen
+    // mit, werden aber nicht mehr gerendert (CMM-28 Cleanup).
     const { data: kundeView } = await supabase
       .from('faelle_kunde_view')
       .select(
-        'auszahlung_kunde_betrag, auszahlung_kunde_eingegangen_am, auszahlung_zahlungsweg, eskalation_tag_14_ergebnis, eskalation_tag_14_ergebnis_am, eskalation_tag_21_ergebnis, eskalation_tag_21_ergebnis_am, eskalation_tag_28_ergebnis, eskalation_tag_28_ergebnis_am',
+        'auszahlung_kunde_betrag, auszahlung_kunde_eingegangen_am, auszahlung_zahlungsweg',
       )
       .eq('id', id)
       .maybeSingle()
 
-    // AAR-569 (V3): Szenario-Label bleibt für den Rügefall-Banner erhalten —
-    // die Phasen-Visualisierung kommt aber jetzt zentral aus der shared
-    // PhasePipeline + Visibility-Matrix (rolle='kunde').
+    // Szenario-Label für Rügefall-Banner
     const fallStatus = (fall.status as string) ?? ''
     let szenario = (fall.szenario as string) ?? 'normalfall'
     if (fallStatus === 'klage' && szenario !== 'klagefall') szenario = 'klagefall'
@@ -154,96 +254,41 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       szenario = 'ruegefall'
     }
 
-    // AAR-569 (V3): Pipeline-Daten aus Visibility-Matrix ableiten + Progress
-    // als „sichtbare done-Phasen / sichtbare Phasen" berechnen.
     const aktuellePhaseSnake = (fall.aktuelle_phase as string | null | undefined) ?? null
-    const pipelinePhases = buildPhasePipelineData(
-      {
-        id: fall.id as string,
-        aktuelle_phase: aktuellePhaseSnake,
-        abgeschlossen_am: (fall.abgeschlossen_am as string | null | undefined) ?? null,
-      },
-      'kunde',
-    )
-    const sichtbarePhasen = pipelinePhases.filter((p) => p.state !== 'hidden')
-    const donePhasen = sichtbarePhasen.filter((p) => p.state === 'done').length
-    const progressPct = sichtbarePhasen.length
-      ? Math.round((donePhasen / sichtbarePhasen.length) * 100)
-      : 0
+    const abgeschlossenAmKunde = (fall.abgeschlossen_am as string | null | undefined) ?? null
 
-    // AAR-432: Jetzt-zu-tun-Aktion für diesen Fall berechnen
-    const { data: polizeiDocs } = await admin
-      .from('pflichtdokumente')
-      .select('dokument_typ, dokument_url, status')
-      .eq('fall_id', id)
-    const polizeiberichtUploaded = !!(polizeiDocs ?? []).find(
-      (d) => d.dokument_typ === 'polizeibericht' && !!d.dokument_url,
-    )
-    const hatOffeneNachreichung = !!(polizeiDocs ?? []).find(
-      (d) => d.status === 'nachgereicht_angefordert',
-    )
-    let kundeSlasDetail: KundeSlaRecord[] = []
-    try {
-      const { data: slas } = await admin
-        .from('sla_tracking')
-        .select('fall_id, blocker_rolle, blocker_grund, status, breach_at')
-        .eq('fall_id', id)
-        .eq('blocker_rolle', 'kunde')
-        .eq('status', 'breached')
-      kundeSlasDetail = (slas ?? []) as KundeSlaRecord[]
-    } catch { /* non-critical */ }
+    // CMM-36: polizeiDocs/SLAs/svLive-Berechnung für KundeJetztZuTunCard
+    // entfernt — die Card existiert nicht mehr auf dieser Seite. Live-Tracking
+    // läuft über KundeSvLiveBanner (Realtime), Pflichtdokumente über
+    // PflichtdokumenteSection.
 
-    // SV-Live-Status für diesen Fall (sv_unterwegs/sv_angekommen)
-    let svLive: { unterwegs: boolean; vorOrt: boolean; eta: number | null } = {
-      unterwegs: false,
-      vorOrt: false,
-      eta: null,
-    }
-    try {
-      const { data: termine } = await admin
-        .from('gutachter_termine')
-        .select('sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am')
-        .eq('fall_id', id)
-        .eq('typ', 'sv_begutachtung')
-        .is('durchgefuehrt_am', null)
-        .not('sv_unterwegs_seit', 'is', null)
-        .order('sv_unterwegs_seit', { ascending: false })
-        .limit(1)
-      const t = termine?.[0]
-      if (t) {
-        svLive = {
-          unterwegs: !t.sv_angekommen_am,
-          vorOrt: !!t.sv_angekommen_am,
-          eta: t.sv_eta_minuten ? Number(t.sv_eta_minuten) : null,
-        }
-      }
-    } catch { /* non-critical */ }
-
-    // AAR-448: Termin-Daten für die Detail-Card (SV + KB)
-    // Nimmt den jeweils frühesten aktiven Termin pro Typ.
+    // Termin-Daten für die Detail-Card (SV + KB)
     const aktiveStatus = ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben']
-    const { data: svTermin } = await admin
+    const { data: svKandidaten } = await admin
       .from('gutachter_termine')
-      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, sv_id, kb_id')
+      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am, sv_id, kb_id, created_at')
       .eq('fall_id', id)
       .eq('typ', 'sv_begutachtung')
       .in('status', aktiveStatus)
-      .is('durchgefuehrt_am', null)
-      .order('start_zeit', { ascending: true })
-      .limit(1)
-      .maybeSingle()
+      .is('cancelled_at', null)
+      .order('created_at', { ascending: false })
+    const STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3, verschoben: 4 }
+    const svTermin = (svKandidaten ?? []).slice().sort((a, b) =>
+      (STATUS_PRIO[a.status as string] ?? 9) - (STATUS_PRIO[b.status as string] ?? 9),
+    )[0] ?? null
     const { data: kbTermin } = await admin
       .from('gutachter_termine')
       .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, sv_id, kb_id')
       .eq('fall_id', id)
       .eq('typ', 'kb_beratung')
       .in('status', aktiveStatus)
+      .is('cancelled_at', null)
       .gte('start_zeit', new Date(Date.now() - 60 * 60 * 1000).toISOString())
-      .order('start_zeit', { ascending: true })
+      .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
 
-    // Gegenüber-Daten auflösen (SV-Kontakt + KB-Kontakt)
+    // SV-Kontakt für TerminSectionCard
     let svKontakt: { name: string | null; telefon: string | null; email: string | null; avatar_url: string | null } | null = null
     if (svTermin?.sv_id ?? fall.sv_id) {
       const svId = (svTermin?.sv_id as string | null) ?? (fall.sv_id as string | null)
@@ -291,29 +336,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') ||
       null
 
-    // Sortier-Logik: SV + KB-Termin nach Start-Zeit
     const terminCards: Array<{
       termin: React.ComponentProps<typeof TerminSectionCard>['termin']
       gegenueber: React.ComponentProps<typeof TerminSectionCard>['gegenueber']
     }> = []
-    if (svTermin) {
-      terminCards.push({
-        termin: {
-          id: svTermin.id as string,
-          typ: 'sv_begutachtung',
-          status: (svTermin.status as string) ?? 'reserviert',
-          start_zeit: svTermin.start_zeit as string | null,
-          end_zeit: svTermin.end_zeit as string | null,
-          kanal: svTermin.kanal as string | null,
-          video_link: svTermin.video_link as string | null,
-          sv_unterwegs_seit: svTermin.sv_unterwegs_seit as string | null,
-          sv_angekommen_am: svTermin.sv_angekommen_am as string | null,
-          sv_eta_minuten: (svTermin.sv_eta_minuten as number | null) ?? null,
-          adresse: terminAdresse,
-        },
-        gegenueber: svKontakt ? { rolle: 'sachverstaendiger', ...svKontakt } : null,
-      })
-    }
+    // SV-Termin lebt im ClaimStepper-Wrapper (terminInfo). Doppelte
+    // TerminSectionCard wäre Redundanz — nur KB-Termin als eigene Card.
     if (kbTermin) {
       terminCards.push({
         termin: {
@@ -338,33 +366,37 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       return ta - tb
     })
 
-    const aktion = getKundenJetztZuTun(
-      {
-        id: fall.id as string,
-        onboarding_complete: (fall.onboarding_complete as boolean | null) ?? null,
-        sa_unterschrieben: (fall.sa_unterschrieben as boolean | null) ?? null,
-        vollmacht_signiert_am: (fall as Record<string, unknown>).vollmacht_signiert_am as string | null,
-        vollmacht_status: (fall as Record<string, unknown>).vollmacht_status as string | null,
-        gutachter_termin_status: (fall.gutachter_termin_status as string | null) ?? null,
-        sv_termin: (fall.sv_termin as string | null) ?? null,
-        gutachter_termin_bestaetigt_am: (fall as Record<string, unknown>).gutachter_termin_bestaetigt_am as string | null,
-        anschlussschreiben_am: (fall.anschlussschreiben_am as string | null) ?? null,
-        regulierung_am: (fall.regulierung_am as string | null) ?? null,
-        polizei_vor_ort: (fall.polizei_vor_ort as boolean | null) ?? null,
-        polizeibericht_uploaded: polizeiberichtUploaded,
-        hat_offene_nachreichung: hatOffeneNachreichung,
-        sv_unterwegs_seit: svLive.unterwegs ? new Date().toISOString() : null,
-        sv_angekommen_am: svLive.vorOrt ? new Date().toISOString() : null,
-        sv_name: svName,
-        sv_eta_minuten: svLive.eta,
-        status: (fall.status as string | null) ?? null,
-        abgeschlossen_am: fall.abgeschlossen_am as string | null,
-        nachbesichtigung_status: (fall as Record<string, unknown>).nachbesichtigung_status as string | null,
-      },
-      kundeSlasDetail,
-    )
+    const gutachtenVerfuegbar = !!fall.gutachten_eingegangen_am
 
-    const gutachtenVerfuegbar = !!(fall as Record<string, unknown>).gutachten_eingegangen_am
+    // CMM-32f: Claim-Lifecycle-Resolver für den kombinierten Stepper
+    const [auftraege, kanzleiFall] = await Promise.all([
+      getAlleAuftraege(admin, fall.id as string),
+      getKanzleiFall(admin, fall.id as string),
+    ])
+    let leadInputForLifecycle: {
+      sa_unterschrieben: boolean | null
+      vollmacht_signiert_am: string | null
+      onboarding_complete: boolean | null
+    } | null = null
+    if (fall.lead_id) {
+      const { data: leadRow } = await admin
+        .from('leads')
+        .select('sa_unterschrieben, vollmacht_signiert_am, onboarding_complete')
+        .eq('id', fall.lead_id as string)
+        .maybeSingle()
+      if (leadRow) {
+        leadInputForLifecycle = {
+          sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
+          vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
+          onboarding_complete: (leadRow.onboarding_complete as boolean | null) ?? null,
+        }
+      }
+    }
+    const claimLifecycle = getClaimLifecycle({
+      lead: leadInputForLifecycle,
+      auftraege,
+      kanzleiFall,
+    })
 
     const kennzeichen = (fall.kennzeichen as string) ?? ''
     const fahrzeug = [(fall.fahrzeug_hersteller as string), (fall.fahrzeug_modell as string)].filter(Boolean).join(' ')
@@ -372,17 +404,107 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
-        {/* Header */}
+        {/* AAR-864: Live-Aktualisierung — abonniert gutachter_termine,
+            auftraege und faelle für diesen Fall, refresht die Page bei
+            jedem Event. */}
+        <FallRealtimeRefresh fallId={fall.id as string} />
+
+        {/* Header — CMM-28: Zurück-Link nur bei Multi-Fall-Kunden */}
         <div>
-          <Link href="/kunde" className="text-xs text-gray-400 hover:text-[#4573A2] mb-2 inline-block">&larr; Meine Fälle</Link>
-          <h1 className="text-lg font-bold text-[#0D1B3E]">
-            {kennzeichen || (fall.fall_nummer as string | null) || 'Schadensfall'}{fahrzeug ? ` — ${fahrzeug}` : ''}
-          </h1>
-          {adresse && <p className="text-sm text-gray-500 mt-0.5">{adresse}</p>}
+          {hatMehrereFaelle && (
+            <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; Meine Fälle</Link>
+          )}
+          <PageHeader
+            title={`${(fall.claim_nummer as string | null) ?? (fall.fall_nummer as string | null) ?? 'Schadensfall'}${kennzeichen ? ` · ${kennzeichen}` : ''}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
+            description={adresse || undefined}
+          />
         </div>
 
-        {/* AAR-432: Jetzt-zu-tun Matrix — eine konsolidierte Aktions-Card */}
-        <KundeJetztZuTunCard aktion={aktion} />
+        {/* CMM-32f: Claim-Stepper — 4 Hauptphasen + aktive Subphase + Termin-
+            Sektion (Datum/Uhrzeit/Adresse/Navi). Termin lebt NUR hier, keine
+            zweite TerminSectionCard für SV. */}
+        {(() => {
+          const aktiverSv = svTermin
+          const terminInfo = aktiverSv?.start_zeit
+            ? {
+                terminId: aktiverSv.id as string,
+                status: (aktiverSv.status as string | null) ?? null,
+                datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
+                  weekday: 'long',
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                }),
+                uhrzeit: new Date(aktiverSv.start_zeit as string).toLocaleTimeString('de-DE', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
+                adresse: terminAdresse,
+                // AAR-858: nur Vorname für Anonymität
+                svVorname: svKontakt?.name?.split(' ')[0] ?? null,
+                kundeVorname: kundeVorname ?? null,
+              }
+            : null
+          return (
+            <ClaimStepper
+              lifecycle={claimLifecycle}
+              terminInfo={terminInfo}
+              bottomSlot={
+                verlegungBannerProps ? (
+                  <TerminVerlegungBanner {...verlegungBannerProps} embedded />
+                ) : null
+              }
+            />
+          )
+        })()}
+
+        {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
+        {svTermin?.id && (
+          <KundeSvLiveBanner
+            terminId={svTermin.id as string}
+            svName={svName}
+            gutachtenHochgeladen={!!auftraege.find((a) => a.typ === 'erstgutachten')?.gutachten_url}
+            qcFreigegeben={!!auftraege.find((a) => a.typ === 'erstgutachten')?.gutachten_final_freigegeben}
+            inUeberarbeitung={!!(auftraege.find((a) => a.typ === 'erstgutachten') as { zurueckgewiesen_am?: string | null } | undefined)?.zurueckgewiesen_am}
+            initial={{
+              sv_unterwegs_seit: (svTermin.sv_unterwegs_seit as string | null) ?? null,
+              sv_angekommen_am: (svTermin.sv_angekommen_am as string | null) ?? null,
+              sv_eta_minuten: (svTermin.sv_eta_minuten as number | null) ?? null,
+              durchgefuehrt_am: (svTermin.durchgefuehrt_am as string | null) ?? null,
+            }}
+          />
+        )}
+
+        {/* AAR-770: Mitteilungs-Banner — ganz oben mit Quick-Action */}
+        <FallMitteilungenBanner fallId={fall.id as string} rolle="kunde" />
+
+        {/* CMM-33: Banner-Click-Tile → öffnet Pop-over mit allen Slot-
+            Drag&Drop-Cards. Kompakt in der Detail-Page, voller Upload-
+            Workflow im Pop-over.
+            CMM-32e: Während Besichtigung + Vollständigkeits-Check
+            (Auftrag-Status besichtigung/gutachten + nicht freigegeben)
+            ist der Banner ausgeblendet — der Kunde soll währenddessen
+            keine neuen Dokumente nachladen. Nach QC-Freigabe erscheint
+            er wieder für Nachreichungen. */}
+        {(() => {
+          const erst = auftraege.find((a) => a.typ === 'erstgutachten')
+          const qcLaeuft =
+            !!erst && (erst.status === 'besichtigung' || erst.status === 'gutachten') &&
+            !erst.gutachten_final_freigegeben
+          if (qcLaeuft) return null
+          return (
+            <PflichtdokumenteSection
+              slots={pflichtSlots}
+              fallId={fall.id as string}
+              rolle="kunde"
+              variant="banner"
+            />
+          )
+        })()}
+
+        {/* CMM-36: KundeJetztZuTunCard entfernt — die Kanzlei-Flow-Aktionen
+            sind nicht mehr relevant, Live-Tracking läuft via SV-Live-Banner
+            ganz oben, Pflichtdokumente via PflichtdokumenteSection. */}
 
         {/* AAR-448: Termin-Detail-Card(s) — SV- und KB-Termine mit Quick-Actions */}
         {terminCards.length > 0 && (
@@ -393,31 +515,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </div>
         )}
 
-        {/* KFZ-206: Status-Card — AAR-558 (C9): Brutto-Betrags-Felder entfernt,
-            Auszahlungs-Summe kommt aus AuszahlungCard. */}
-        <FallStatusCard
-          fall={{
-            id: fall.id as string,
-            status: (fall.status as string) ?? '',
-            fall_nummer: fall.fall_nummer as string | null,
-            sv_termin: fall.sv_termin as string | null,
-            anschlussschreiben_am: fall.anschlussschreiben_am as string | null,
-            vs_ablehnungsgrund: (fall as Record<string, unknown>).vs_ablehnungsgrund as string | null,
-            storno_grund: fall.storno_grund as string | null,
-            abgeschlossen_am: fall.abgeschlossen_am as string | null,
-            google_review_gesendet: fall.google_review_gesendet as boolean | null,
-            gegner_versicherung: fall.gegner_versicherung as string | null,
-            kanzlei_ansprechpartner_name: fall.kanzlei_ansprechpartner_name as string | null,
-          }}
-          svName={svName ?? undefined}
-        />
+        {/* CMM-36: FallStatusCard entfernt — bei laufender Anfahrt redundant zum
+            KundeSvLiveBanner, ansonsten nicht aussagekräftig genug. */}
 
-        {/* KFZ-210: Nachbesichtigung Soft-Blocker. AAR-558 (C11): Banner greift
-            sobald nachbesichtigung_status = 'angefordert' ODER Fall-Status
-            nachbesichtigung-laeuft — vorher nur letzteres, was Fälle verpasste
-            bei denen der Kunde-Status noch nicht umgeschaltet wurde. */}
+        {/* Nachbesichtigung Soft-Blocker */}
         {((fall.status as string) === 'nachbesichtigung-laeuft' ||
-          (fall as Record<string, unknown>).nachbesichtigung_status === 'angefordert') && (
+          fall.nachbesichtigung_status === 'angefordert') && (
           <div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-3">
               <span className="text-violet-600 text-lg">&#9888;</span>
@@ -435,19 +538,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </div>
         )}
 
-        {/* AAR-558 (C9): Eskalations-Ergebnis-Card — sichtbar sobald Kanzlei
-            ein Tag-14/21/28-Ergebnis eingetragen hat. */}
-        {kundeView && (
-          <EskalationsErgebnisCard
-            tag14Ergebnis={(kundeView.eskalation_tag_14_ergebnis as string | null) ?? null}
-            tag14Am={(kundeView.eskalation_tag_14_ergebnis_am as string | null) ?? null}
-            tag21Ergebnis={(kundeView.eskalation_tag_21_ergebnis as string | null) ?? null}
-            tag21Am={(kundeView.eskalation_tag_21_ergebnis_am as string | null) ?? null}
-            tag28Ergebnis={(kundeView.eskalation_tag_28_ergebnis as string | null) ?? null}
-            tag28Am={(kundeView.eskalation_tag_28_ergebnis_am as string | null) ?? null}
-          />
-        )}
-
         {/* AAR-558 (C9): Auszahlungs-Card — nur Netto-Kunden-Anteil. */}
         {kundeView && (
           <AuszahlungCard
@@ -457,30 +547,25 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
-        {/* AAR-558 (C9) Brutto-Leak-Fix: VS-Kürzung — Kürzungs-/Teilregulierungs-
-            Beträge (Brutto) werden dem Kunden nicht mehr angezeigt; nur noch
-            der Begründungs-Text und der Hinweis auf die Kanzlei-Rüge. Die
-            ausgezahlte Netto-Summe erscheint nach Regulierung in AuszahlungCard. */}
+        {/* VS-Kürzung-Hinweis (Brutto-Beträge bewusst nicht gerendert) */}
         {(fall.status as string) === 'vs-kuerzt' && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-amber-700 text-lg">&#9888;</span>
               <p className="text-sm font-semibold text-amber-900">Versicherung hat gekürzt</p>
             </div>
-            {typeof (fall as Record<string, unknown>).vs_kuerzung_grund === 'string' &&
-              ((fall as Record<string, unknown>).vs_kuerzung_grund as string) && (
-                <div className="rounded-md bg-white/60 border border-amber-200 p-2 text-[11px] text-amber-800">
-                  <strong className="block mb-0.5">Begründung der Versicherung:</strong>
-                  {(fall as Record<string, unknown>).vs_kuerzung_grund as string}
-                </div>
-              )}
+            {typeof fall.vs_kuerzung_grund === 'string' && (fall.vs_kuerzung_grund as string) && (
+              <div className="rounded-md bg-white/60 border border-amber-200 p-2 text-[11px] text-amber-800">
+                <strong className="block mb-0.5">Begründung der Versicherung:</strong>
+                {fall.vs_kuerzung_grund as string}
+              </div>
+            )}
             <p className="text-[11px] text-amber-700">
               Die Partnerkanzlei bereitet eine Rüge vor. Sie müssen nichts tun — wir melden uns bei Fortschritt.
             </p>
           </div>
         )}
 
-        {/* AAR-171: VS hat abgelehnt — noch härterer Hinweis */}
         {(fall.status as string) === 'vs-abgelehnt' && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 space-y-1">
             <p className="text-sm font-semibold text-red-900">Versicherung hat abgelehnt</p>
@@ -490,7 +575,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </div>
         )}
 
-        {/* AAR-171: Klage übergeben — Kunde sieht dass der Fall bei der Kanzlei liegt */}
         {(fall.status as string) === 'klage' && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 space-y-1">
             <p className="text-sm font-semibold text-red-900">Fall wird gerichtlich geklärt</p>
@@ -500,29 +584,33 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </div>
         )}
 
-        {/* ═══ 5-Säulen Layout (KFZ-206) ═══ */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* CMM-28 Konsolidierung: Eine „Meine Kanzlei"-Card statt 3 separaten
+            Cards (SaeuleMeinAnwalt + MeineKanzleiCard + KanzleiAnsprechpartnerBlock).
+            Anwalt-Mandatstyp und Vollmacht-Status sind in MeineKanzleiCard
+            integriert (vollmachtSigniertAm-Prop). */}
+        <MeineKanzleiCard
+          kanzlei={kanzleiRow}
+          ansprechpartner={{
+            name: (fall.kanzlei_ansprechpartner_name as string | null) ?? null,
+            position: null,
+            email: null,
+            telefon: null,
+          }}
+          vollmachtSigniertAm={fall.vollmacht_signiert_am as string | null}
+          uebergebenAm={null}
+        />
 
-          {/* S1: Mein Anwalt (nur bei Komplett-Service) */}
-          <SaeuleMeinAnwalt
-            mandatstyp={(fall as Record<string, unknown>).mandatstyp as string | null}
-            serviceTyp={(fall as Record<string, unknown>).service_typ as string | null}
-            vollmacht_status={!!(fall as Record<string, unknown>).vollmacht_signiert_am}
-            kanzlei_name={fall.kanzlei_ansprechpartner_name as string | null}
-          />
-
-          {/* S2: Mein Geld — AAR-558 (C9): Nur eigene Forderung + Zahlungsweg,
-              keine Brutto-Beträge mehr. Auszahlungs-Summe kommt aus AuszahlungCard. */}
+        {/* 2-Säulen Layout (Geld + Betreuer) — Anwalt-Säule entfällt durch
+            Konsolidierung in MeineKanzleiCard. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <SaeuleMeinGeld
             fallId={fall.id as string}
             status={(fall.status as string) ?? ''}
             schadens_hoehe_netto={fall.schadens_hoehe_netto as number | null}
-            totalschaden={!!((fall as Record<string, unknown>).totalschaden)}
-            zahlungsweg={(fall as Record<string, unknown>).zahlungsweg as string | null}
+            totalschaden={!!fall.totalschaden}
+            zahlungsweg={fall.zahlungsweg as string | null}
             onZahlungswegSave={updateZahlungsweg}
           />
-
-          {/* S5: Mein Betreuer */}
           <SaeuleMeinBetreuer
             fallId={fall.id as string}
             kbName={kbName}
@@ -532,13 +620,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
-        {/* AAR-432: Opt-in Gutachten-Weiterleitung — nur sichtbar wenn Gutachten vorliegt */}
-        {/* AAR-452: flex-col auf Mobile, damit der Button auf 375px nicht den Text quetscht. */}
+        {/* Opt-in Gutachten-Weiterleitung — nur sichtbar wenn Gutachten vorliegt */}
         {gutachtenVerfuegbar && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#0D1B3E]">Gutachten erhalten?</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-sm font-semibold text-claimondo-navy">Gutachten erhalten?</p>
+              <p className="text-xs text-claimondo-ondo mt-0.5">
                 Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link).
               </p>
             </div>
@@ -546,54 +633,41 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           </div>
         )}
 
-        {/* S3: Meine Aufgaben (Docs + Bankdaten) */}
         <div className="space-y-4">
           <BankdatenBanner
             fallId={fall.id as string}
             status={(fall.status as string) ?? ''}
-            bankdatenHinterlegt={!!(fall as Record<string, unknown>).bankdaten_hinterlegt_am}
+            bankdatenHinterlegt={!!fall.bankdaten_hinterlegt_am}
             saveBankdaten={saveBankdaten}
-          />
-          <DokumenteSection
-            fallId={fall.id as string}
-            pflichtdokumente={(pflichtdokumente ?? []) as { id: string; titel: string; status: string; datei_url: string | null; datei_name: string | null }[]}
-            uploadDokument={uploadPflichtdokumentKunde}
           />
         </div>
 
-        {/* S4: Mein Fortschritt + Fall-Details */}
+        {/* Fortschritt + Fall-Details */}
         <div className="grid md:grid-cols-2 gap-5">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-base font-semibold text-[#0D1B3E]">Mein Fortschritt</p>
-              <span className="text-base font-bold text-[#4573A2]">{progressPct}%</span>
-            </div>
-            <div className="w-full h-2.5 bg-gray-100 rounded-full mb-5">
-              <div
-                className="h-full bg-[#4573A2] rounded-full transition-all duration-700"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-            {/* AAR-569 (V3): Shared PhasePipeline mit rolle='kunde' — Labels
-                sind kundenfreundlich (z. B. „Schaden gemeldet" statt der
-                internen Notion-Subphase „fallakte_angelegt"). */}
-            <PhasePipeline
-              fall={{ id: fall.id as string, aktuelle_phase: aktuellePhaseSnake }}
-              rolle="kunde"
-              phases={pipelinePhases}
-              variant="vertical"
-            />
-            {szenario === 'ruegefall' && (
-              <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                <p className="text-xs text-amber-700 font-medium">Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum.</p>
-              </div>
-            )}
-          </div>
+          <FallPhasenPanel
+            fall={{
+              id: fall.id as string,
+              aktuelle_phase: aktuellePhaseSnake,
+              abgeschlossen_am: abgeschlossenAmKunde,
+            }}
+            rolle="kunde"
+            variant="progress-card"
+            banner={
+              szenario === 'ruegefall' ? (
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                  <p className="text-xs text-amber-700 font-medium">
+                    Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum.
+                  </p>
+                </div>
+              ) : null
+            }
+          />
 
           <FallDetailSections
             fall={fall as Record<string, unknown>}
             svName={svName}
             svTelefon={svTelefon}
+            svVerifiziert={svVerifiziert}
             kbName={kbName}
             dokumente={dokumente ?? []}
             nachrichten={nachrichten ?? []}
@@ -601,18 +675,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             chatTeilnehmer={chatTeilnehmer}
             aktiverTermin={aktiverTermin}
           />
-
-          {/* AAR-319: FAQ-Bot für den Kunden — kennt seinen eigenen Fall */}
-          <FaqBotCard fallId={fall.id as string} initialHistory={faqHistory} />
         </div>
       </div>
     )
   } catch (err) {
+    if (isRedirectError(err)) throw err
     console.error('[KundeFallDetail] Error:', err)
     return (
       <div className="p-8 text-center">
         <p className="text-red-600 font-semibold">Fehler beim Laden</p>
-        <p className="text-sm text-gray-500 mt-1">Bitte versuchen Sie es erneut.</p>
+        <p className="text-sm text-claimondo-ondo mt-1">Bitte versuchen Sie es erneut.</p>
       </div>
     )
   }

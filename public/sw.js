@@ -31,11 +31,15 @@ self.addEventListener('fetch', (event) => {
   // Nur GET Requests cachen
   if (event.request.method !== 'GET') return
 
-  // API/Auth Requests NICHT cachen
   const url = new URL(event.request.url)
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/')) return
 
-  // Statische Assets: Cache-first
+  // CMM-14: Statische Assets sind die EINZIGEN Requests die der SW abfängt.
+  // Alle anderen (Navigation, RSC-Streams, API, Auth) müssen explizit
+  // fetch-pass-through bekommen — sonst kann der SW während Install/Activate
+  // den `?_rsc=`-Stream der Login-Redirect-Soft-Navigation verschlucken
+  // → weiße Seite, erst Reload behebt es. Der "kein respondWith"-Pfad ist
+  // theoretisch identisch mit Browser-Default, aber in der Praxis kommt
+  // es bei manchen Browsern/Versionen zu Race-Conditions im Lifecycle.
   if (STATIC_ASSETS.some((a) => url.pathname === a) || url.pathname.startsWith('/icons/')) {
     event.respondWith(
       caches.match(event.request).then((cached) => cached || fetch(event.request))
@@ -43,8 +47,9 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Navigation + andere Requests: Network-first, kein Cache
-  // (App-Daten sollen immer frisch sein)
+  // Alles andere: explizit pass-through — SW garantiert keine Interferenz.
+  // Insbesondere RSC-Streams (`?_rsc=`), Auth-Routes und API.
+  event.respondWith(fetch(event.request))
 })
 
 // AAR-499 N4: Push-Notifications via web-push — Payload kommt aus

@@ -7,6 +7,7 @@
 // gegner-kz-flags.ts berechnet und mitgespeichert.
 
 import { useState, useTransition, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { saveStammdaten } from '../actions'
 import { checkKZFlags } from '../_lib/gegner-kz-flags'
 import { useDispatchPhase } from '../_lib/phase-context'
@@ -18,11 +19,11 @@ import { useCarQuery } from '../_hooks/useCarQuery'
 // AAR-352: Zb1UploadCard + PolizeiberichtUploadCard ersetzt durch
 // DokumenteAnfordernCard (kombinierte Multi-Slot-Anfrage in einem Link).
 import DokumenteAnfordernCard from './DokumenteAnfordernCard'
+import BkatAnalysePanel from './BkatAnalysePanel'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
 import { requestCardentityTypBForLead } from '../_actions/cardentity'
 // AAR-314: Auslandskennzeichen — Anfrage an Deutsches Büro Grüne Karte mit Reminder
 import { setGrueneKarteAngefragt } from '../_actions/gruene-karte'
-import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
 import {
   CarIcon,
@@ -224,10 +225,10 @@ function InlineField({
 
   return (
     <div className="space-y-0.5">
-      <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
+      <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1">
         {label}
         {required && <span className="text-red-500" aria-label="Pflichtfeld">*</span>}
-        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-blue-400 animate-spin" />}
+        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
         {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
         {status === 'error' && <span className="text-red-500">Fehler</span>}
       </label>
@@ -239,15 +240,15 @@ function InlineField({
         placeholder={placeholder}
         className={`text-sm font-medium bg-transparent border-b w-full py-0.5 outline-none transition-colors ${
           status === 'saving'
-            ? 'border-blue-300'
+            ? 'border-claimondo-ondo'
             : status === 'saved'
               ? 'border-green-300'
               : status === 'error'
                 ? 'border-red-300'
-                : 'border-gray-200 hover:border-gray-300 focus:border-[#4573A2]'
+                : 'border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo'
         }`}
       />
-      {hint && <p className="text-[10px] text-gray-400">{hint}</p>}
+      {hint && <p className="text-[10px] text-claimondo-ondo/70">{hint}</p>}
     </div>
   )
 }
@@ -294,9 +295,9 @@ function VersicherungField({
 
   return (
     <div className="space-y-0.5">
-      <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
+      <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1">
         Gegner-Versicherung
-        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-blue-400 animate-spin" />}
+        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
         {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
         {status === 'error' && <span className="text-red-500">Fehler</span>}
       </label>
@@ -357,23 +358,23 @@ function ZeugenKontakteEditor({
   }
 
   return (
-    <div className="space-y-2 mt-2 pt-2 border-t border-gray-100">
+    <div className="space-y-2 mt-2 pt-2 border-t border-claimondo-border">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">
+        <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-medium">
           Zeugen-Kontaktdaten
         </p>
-        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-blue-400 animate-spin" />}
+        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
         {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
       </div>
       {kontakte.map((k, i) => (
-        <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 p-2 rounded-lg bg-gray-50">
+        <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 p-2 rounded-lg bg-[#f8f9fb]">
           <input
             type="text"
             value={k.name}
             onChange={(e) => updateKontakt(i, 'name', e.target.value)}
             onBlur={() => save(kontakte)}
             placeholder="Name"
-            className="px-2 py-1 text-xs border border-gray-200 rounded bg-white"
+            className="px-2 py-1 text-xs border border-claimondo-border rounded bg-white"
           />
           <input
             type="tel"
@@ -381,7 +382,7 @@ function ZeugenKontakteEditor({
             onChange={(e) => updateKontakt(i, 'telefon', e.target.value)}
             onBlur={() => save(kontakte)}
             placeholder="Telefon"
-            className="px-2 py-1 text-xs border border-gray-200 rounded bg-white"
+            className="px-2 py-1 text-xs border border-claimondo-border rounded bg-white"
           />
           <input
             type="email"
@@ -389,7 +390,7 @@ function ZeugenKontakteEditor({
             onChange={(e) => updateKontakt(i, 'email', e.target.value)}
             onBlur={() => save(kontakte)}
             placeholder="Email (optional)"
-            className="px-2 py-1 text-xs border border-gray-200 rounded bg-white"
+            className="px-2 py-1 text-xs border border-claimondo-border rounded bg-white"
           />
           <input
             type="text"
@@ -397,7 +398,7 @@ function ZeugenKontakteEditor({
             onChange={(e) => updateKontakt(i, 'notiz', e.target.value)}
             onBlur={() => save(kontakte)}
             placeholder="Notiz (optional)"
-            className="px-2 py-1 text-xs border border-gray-200 rounded bg-white"
+            className="px-2 py-1 text-xs border border-claimondo-border rounded bg-white"
           />
           {kontakte.length > 1 && (
             <button
@@ -413,7 +414,7 @@ function ZeugenKontakteEditor({
       <button
         type="button"
         onClick={addKontakt}
-        className="text-[11px] text-[#4573A2] hover:underline"
+        className="text-[11px] text-claimondo-ondo hover:underline"
       >
         + Weiteren Zeugen hinzufügen
       </button>
@@ -431,8 +432,8 @@ function Card({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-      <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+    <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-4">
+      <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
         {icon}
         {title}
       </h2>
@@ -443,6 +444,7 @@ function Card({
 
 export default function Phase4Stammdaten() {
   const { lead, qualification, setPhase, patchLead } = useDispatchPhase()
+  const router = useRouter()
   const l = lead as unknown as LeadFields
   const leadId = lead.id
   const [gegnerKzDraft, setGegnerKzDraft] = useState(l.gegner_kennzeichen ?? '')
@@ -554,17 +556,28 @@ export default function Phase4Stammdaten() {
 
   return (
     <div className="space-y-4">
+      {/* CMM-23: KI-Analyse (OCR first, LLM-Fallback). Hier in Phase 4 statt
+         Phase 3 — der Kunden-Polizeibericht-Upload triggert den Auto-OCR
+         schon im Onboarding (uploadPflichtdokument), die Daten-Anfrage an
+         den Kunden läuft erst in Phase 4. Dispatcher sieht Klassifikation
+         vor Bestätigung der Stammdaten + manuellem LLM-Fallback. */}
+      <BkatAnalysePanel
+        leadId={lead.id}
+        polizeiVorOrt={l.polizei_vor_ort ?? null}
+        onSchadentypGesetzt={() => router.refresh()}
+      />
+
       {/* AAR-665-Follow: Schadenbeschreibungs-Card (WAS am Auto kaputt).
           Optional, kein Hard-Gate. Mit „Kunde hat Unfallfotos"-Checkmark
           für Bulk-Anforderung via DokumenteAnfordernCard. */}
       <div className="rounded-xl bg-white border border-[#e4e7ef] p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-xs font-semibold text-gray-900 flex items-center gap-1.5">
-            <CameraIcon className="w-3.5 h-3.5 text-[#4573A2]" />
-            Schadenbeschreibung <span className="text-gray-400 font-normal">(was am Auto kaputt ist)</span>
+          <p className="text-xs font-semibold text-claimondo-navy flex items-center gap-1.5">
+            <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+            Schadenbeschreibung <span className="text-claimondo-ondo/70 font-normal">(was am Auto kaputt ist)</span>
           </p>
           {hatUnfallfotos && l.fahrzeugschaden_beschreibung && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#f8f9fb] text-claimondo-ondo font-medium">
               Aus {l.schadensfoto_urls!.length} Foto{l.schadensfoto_urls!.length === 1 ? '' : 's'} von Claude gefüllt
             </span>
           )}
@@ -594,11 +607,11 @@ export default function Phase4Stammdaten() {
                 })
               }
             }}
-            className="mt-0.5 w-4 h-4 accent-[#4573A2]"
+            className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
           />
-          <span className="text-xs text-gray-700">
+          <span className="text-xs text-claimondo-navy">
             <span className="font-medium">Kunde hat Unfallfotos</span>
-            <span className="text-gray-500">
+            <span className="text-claimondo-ondo">
               {' '}— bei Anforderung unten (Fahrzeugschein / Polizei / Fotos in einem
               Link) werden die Fotos mitgeordert. Claude füllt danach automatisch
               die Beschreibung.
@@ -614,7 +627,7 @@ export default function Phase4Stammdaten() {
 
       {/* 1. Fahrzeugdaten — AAR-194: Baujahr OBEN, dann Marke + Modell
           dynamisch via CarQuery (gefiltert nach Baujahr falls gesetzt). */}
-      <Card icon={<CarIcon className="w-4 h-4 text-gray-400" />} title="Fahrzeugdaten">
+      <Card icon={<CarIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Fahrzeugdaten">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* AAR-194: Baujahr als erstes Feld damit CarQuery Marke/Modell
               direkt gefiltert lädt. AAR-199: Baujahr ist OPTIONAL — wird
@@ -645,9 +658,9 @@ export default function Phase4Stammdaten() {
               Fallback. Wenn CarQuery nichts liefert (Offline/Error), zeigen
               wir die Top-20-Liste als datalist. */}
           <div className="space-y-0.5">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1">
               Marke
-              {loadingMarken && <LoaderIcon className="w-3 h-3 text-blue-400 animate-spin" />}
+              {loadingMarken && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
             </label>
             {markeMode === 'dropdown' ? (
               <>
@@ -665,7 +678,7 @@ export default function Phase4Stammdaten() {
                     if (v !== marke) saveToggle('fahrzeug_hersteller', v || null)
                   }}
                   placeholder={loadingMarken ? 'Lade Marken ...' : 'Marke wählen oder tippen'}
-                  className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-[#4573A2] w-full py-0.5 outline-none"
+                  className="text-sm font-medium bg-transparent border-b border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo w-full py-0.5 outline-none"
                 />
                 <datalist id="carquery-marken">
                   {(carMarken.length > 0 ? carMarken : (KFZ_MARKEN as readonly string[])).map((m) => (
@@ -687,9 +700,9 @@ export default function Phase4Stammdaten() {
 
           {/* Modell — Datalist mit CarQuery-Modellen für gewählte Marke. */}
           <div className="space-y-0.5">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1">
               Modell
-              {loadingModelle && <LoaderIcon className="w-3 h-3 text-blue-400 animate-spin" />}
+              {loadingModelle && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
             </label>
             <input
               type="text"
@@ -704,7 +717,7 @@ export default function Phase4Stammdaten() {
               }}
               disabled={!marke}
               placeholder={!marke ? 'Erst Marke wählen' : loadingModelle ? 'Lade Modelle ...' : 'Modell wählen oder tippen'}
-              className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-[#4573A2] w-full py-0.5 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              className="text-sm font-medium bg-transparent border-b border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo w-full py-0.5 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <datalist id="carquery-modelle">
               {carModelle.map((m) => (
@@ -759,17 +772,17 @@ export default function Phase4Stammdaten() {
               ZB1 bezogen — der MA weiß dann dass der Anrufer nicht
               zwingend der Halter sein muss. */}
           <div className="space-y-1 sm:col-span-2">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider flex items-center gap-1">
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1">
               <UserCheckIcon className="w-3 h-3" />
               Fahrzeug-Eigentümer (laut Fahrzeugschein/ZB1)
               <span
-                className="text-gray-400 cursor-help"
+                className="text-claimondo-ondo/70 cursor-help"
                 title="Privat = Kunde ist Eigentümer + nicht vorsteuerabzugsberechtigt. Leasing = Leasing-Fahrzeug → Vollmacht vom Leasinggeber nötig. Gewerblich = Firma als Eigentümer, Netto-Regulierung (Vorsteuer ziehbar)."
               >
                 <InfoIcon className="w-3 h-3" />
               </span>
             </label>
-            <p className="text-[10px] text-gray-400">
+            <p className="text-[10px] text-claimondo-ondo/70">
               Wer steht als Halter im Fahrzeugschein? Nicht zwingend der Anrufer.
             </p>
             <div className="flex gap-2">
@@ -785,8 +798,8 @@ export default function Phase4Stammdaten() {
                 }
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
                   (l.finanzierung_leasing ?? 'keine') === 'keine' && !l.vorsteuerabzugsberechtigt
-                    ? 'bg-[#4573A2] text-white'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'bg-claimondo-ondo text-white'
+                    : 'bg-[#f8f9fb] text-claimondo-ondo'
                 }`}
                 title="Kunde ist Eigentümer und nicht vorsteuerabzugsberechtigt — Brutto-Regulierung."
               >
@@ -805,7 +818,7 @@ export default function Phase4Stammdaten() {
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
                   l.finanzierung_leasing === 'leasing' && !l.vorsteuerabzugsberechtigt
                     ? 'bg-amber-500 text-white'
-                    : 'bg-gray-100 text-gray-600'
+                    : 'bg-[#f8f9fb] text-claimondo-ondo'
                 }`}
                 title="Leasing-Fahrzeug → Vollmacht vom Leasinggeber nötig bevor Kanzlei reguliert."
               >
@@ -823,8 +836,8 @@ export default function Phase4Stammdaten() {
                 }
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
                   l.vorsteuerabzugsberechtigt === true
-                    ? 'bg-[#0D1B3E] text-white'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'bg-claimondo-navy text-white'
+                    : 'bg-[#f8f9fb] text-claimondo-ondo'
                 }`}
                 title="Gewerblicher Halter — Netto-Regulierung, Vorsteuer wird abgezogen."
               >
@@ -859,11 +872,11 @@ export default function Phase4Stammdaten() {
               </div>
             )}
             {l.vorsteuerabzugsberechtigt === true && (
-              <div className="mt-2 rounded-md bg-[#0D1B3E]/5 border border-[#4573A2]/30 p-2 space-y-1">
-                <p className="text-[11px] font-semibold text-[#0D1B3E] flex items-center gap-1">
+              <div className="mt-2 rounded-md bg-claimondo-navy/5 border border-claimondo-ondo/30 p-2 space-y-1">
+                <p className="text-[11px] font-semibold text-claimondo-navy flex items-center gap-1">
                   <InfoIcon className="w-3 h-3" /> Hinweis bei Gewerblich
                 </p>
-                <ul className="text-[10px] text-[#0D1B3E] list-disc list-inside space-y-0.5">
+                <ul className="text-[10px] text-claimondo-navy list-disc list-inside space-y-0.5">
                   <li>Firma als Eigentümer → Gutachten an Firma adressieren</li>
                   <li>Regulierung NETTO (Versicherung zieht USt. ab)</li>
                   <li>Bei Gewerbenachweis-Pflicht: FlowLink zeigt Upload-Slot automatisch</li>
@@ -874,13 +887,13 @@ export default function Phase4Stammdaten() {
 
           {/* Vorschäden */}
           <div className="space-y-1 sm:col-span-2">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider">Vorschäden bekannt?</label>
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider">Vorschäden bekannt?</label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => saveToggle('hat_vorschaeden', true)}
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
-                  l.hat_vorschaeden === true ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'
+                  l.hat_vorschaeden === true ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'
                 }`}
               >
                 Ja, Vorschäden
@@ -889,7 +902,7 @@ export default function Phase4Stammdaten() {
                 type="button"
                 onClick={() => saveToggle('hat_vorschaeden', false)}
                 className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
-                  l.hat_vorschaeden === false ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'
+                  l.hat_vorschaeden === false ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'
                 }`}
               >
                 Nein
@@ -915,9 +928,9 @@ export default function Phase4Stammdaten() {
             bei Namens-Gleichheit direkt auf true (Upload-Action). Wenn Namen
             abweichen, zeigt der Badge oben „⚠ Abweichung zum Kunden" statt
             „Aus Fahrzeugschein". */}
-        <div className="sm:col-span-2 mt-3 rounded-lg bg-blue-50 border border-blue-200 p-3 space-y-2">
+        <div className="sm:col-span-2 mt-3 rounded-lg bg-[#f8f9fb] border border-claimondo-border p-3 space-y-2">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <p className="text-[10px] text-blue-700 font-semibold uppercase tracking-wider flex items-center gap-1">
+            <p className="text-[10px] text-claimondo-ondo font-semibold uppercase tracking-wider flex items-center gap-1">
               <UserCheckIcon className="w-3 h-3" />
               Fahrzeughalter
               {(() => {
@@ -965,8 +978,8 @@ export default function Phase4Stammdaten() {
               }}
               className={`px-2 py-1 rounded-md text-[11px] font-medium border ${
                 l.ist_fahrzeughalter === true
-                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                  : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                  ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
+                  : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
               }`}
               title="Wenn der Anrufer/Kunde gleichzeitig der Fahrzeughalter ist"
             >
@@ -1042,8 +1055,8 @@ export default function Phase4Stammdaten() {
             läuft automatisch nach ZB1-OCR.
             AAR-311: Cardentity Typ-B (15€/Detailbericht) als manueller Trigger
             für Vorschadenverdacht im Erstgespräch. */}
-        <div className="sm:col-span-2 pt-2 border-t border-gray-100">
-          <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1.5">
+        <div className="sm:col-span-2 pt-2 border-t border-claimondo-border">
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1.5">
             Vorschaden-Detailbericht
           </p>
           <CardentityTypBButton
@@ -1060,18 +1073,18 @@ export default function Phase4Stammdaten() {
       </Card>
 
       {/* 3. Gegner & Unfall */}
-      <Card icon={<ShieldIcon className="w-4 h-4 text-gray-400" />} title="Gegner & Unfall">
+      <Card icon={<ShieldIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Gegner & Unfall">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Gegner-KZ mit Live-Flags */}
           <div className="space-y-0.5 sm:col-span-2">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider">Gegner-Kennzeichen</label>
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider">Gegner-Kennzeichen</label>
             <input
               type="text"
               value={gegnerKzDraft}
               onChange={(e) => setGegnerKzDraft(e.target.value)}
               onBlur={saveGegnerKz}
               placeholder="Kennzeichen oder leer lassen bei Fahrerflucht"
-              className="text-sm font-medium bg-transparent border-b border-gray-200 hover:border-gray-300 focus:border-[#4573A2] w-full py-0.5 outline-none"
+              className="text-sm font-medium bg-transparent border-b border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo w-full py-0.5 outline-none"
             />
             {kzFlags.warnung && (
               <p className={`text-[11px] mt-1 flex items-start gap-1 ${kzFlags.fahrerflucht ? 'text-red-700' : 'text-amber-700'}`}>
@@ -1135,7 +1148,7 @@ export default function Phase4Stammdaten() {
                         if (!r.success) alert(r.error ?? 'Fehler beim Setzen des Reminders')
                       })
                     }
-                    className="px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-[11px] font-medium hover:bg-[#0D1B3E]"
+                    className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy"
                   >
                     Anfrage gesendet — 10-Tage-Reminder setzen
                   </button>
@@ -1158,8 +1171,8 @@ export default function Phase4Stammdaten() {
               </div>
             )}
             {kzFlags.showKameraCheck && (
-              <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-2 space-y-1.5">
-                <p className="text-[11px] font-semibold text-blue-900 flex items-center gap-1">
+              <div className="mt-2 bg-[#f8f9fb] border border-claimondo-border rounded-lg p-2 space-y-1.5">
+                <p className="text-[11px] font-semibold text-claimondo-navy flex items-center gap-1">
                   <CameraIcon className="w-3.5 h-3.5" /> Parkplatz + kein KZ — gibt es eine Kamera vor Ort?
                 </p>
                 <div className="flex gap-2">
@@ -1167,7 +1180,7 @@ export default function Phase4Stammdaten() {
                     type="button"
                     onClick={() => saveParkplatzKamera(true)}
                     className={`flex-1 px-2 py-1 rounded text-[11px] font-medium ${
-                      l.parkplatz_kamera === true ? 'bg-[#4573A2] text-white' : 'bg-white border border-blue-200 text-blue-800'
+                      l.parkplatz_kamera === true ? 'bg-claimondo-ondo text-white' : 'bg-white border border-claimondo-border text-claimondo-navy'
                     }`}
                   >
                     Ja, Kamera vorhanden
@@ -1176,7 +1189,7 @@ export default function Phase4Stammdaten() {
                     type="button"
                     onClick={() => saveParkplatzKamera(false)}
                     className={`flex-1 px-2 py-1 rounded text-[11px] font-medium ${
-                      l.parkplatz_kamera === false ? 'bg-[#4573A2] text-white' : 'bg-white border border-blue-200 text-blue-800'
+                      l.parkplatz_kamera === false ? 'bg-claimondo-ondo text-white' : 'bg-white border border-claimondo-border text-claimondo-navy'
                     }`}
                   >
                     Nein (⚠️ wird disqualifiziert)
@@ -1197,45 +1210,16 @@ export default function Phase4Stammdaten() {
             fieldName="gegner_schadennummer"
             leadId={leadId}
           />
-          <InlineField
-            label="Unfalldatum"
-            value={l.unfalldatum ? l.unfalldatum.slice(0, 10) : null}
-            fieldName="unfalldatum"
-            leadId={leadId}
-            type="date"
-          />
-          <InlineField
-            label="Unfall-Uhrzeit (ca.)"
-            value={l.unfall_uhrzeit}
-            fieldName="unfall_uhrzeit"
-            leadId={leadId}
-            placeholder="z.B. 14:30 oder ca. 14 Uhr"
-          />
-
-          {/* Unfallort Google Places */}
-          <div className="space-y-0.5 sm:col-span-2">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider">Unfallort</label>
-            <GooglePlaceAutocomplete
-              defaultValue={l.unfallort ?? ''}
-              placeholder="Adresse wählen ..."
-              onSelect={(r) =>
-                startTransition(async () => {
-                  await saveStammdaten(leadId, {
-                    unfallort: r.adresse,
-                    unfallort_lat: r.lat,
-                    unfallort_lng: r.lng,
-                  })
-                })
-              }
-              className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
-            />
-          </div>
+          {/* CMM-26: Unfalldatum, Unfall-Uhrzeit und Unfallort sind in Phase 1
+              (Erstkontakt) Owner. Phase 4 bezieht sich nur noch auf Gegner +
+              Versicherung. Wenn Korrekturen am Unfall-Block nötig werden, geht
+              der Dispatcher in Phase 1 zurück. */}
         </div>
       </Card>
 
       {/* 4. Zeugen */}
-      <Card icon={<UsersIcon className="w-4 h-4 text-gray-400" />} title="Zeugen">
-        <p className="text-[11px] text-gray-500">
+      <Card icon={<UsersIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Zeugen">
+        <p className="text-[11px] text-claimondo-ondo">
           Nur abfragen bei Unklarheiten zum Hergang. Falls Kontaktdaten vorhanden, kann der
           Kunde diese gleich im Portal-FlowLink eingeben.
         </p>
@@ -1244,7 +1228,7 @@ export default function Phase4Stammdaten() {
             type="button"
             onClick={() => saveToggle('zeugen', true)}
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
-              l.zeugen === true ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'
+              l.zeugen === true ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'
             }`}
           >
             Ja — Zeugen vorhanden
@@ -1253,7 +1237,7 @@ export default function Phase4Stammdaten() {
             type="button"
             onClick={() => saveToggle('zeugen', false)}
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
-              l.zeugen === false ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-600'
+              l.zeugen === false ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'
             }`}
           >
             Nein
@@ -1313,7 +1297,7 @@ export default function Phase4Stammdaten() {
         <button
           type="button"
           onClick={() => setPhase(3)}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] text-sm font-semibold flex items-center justify-center gap-2"
         >
           ← Zurück zu Phase 3
         </button>
@@ -1321,7 +1305,7 @@ export default function Phase4Stammdaten() {
           type="button"
           onClick={() => setPhase(5)}
           disabled={!qualification.q6_gegnerKz || !qualification.q7_fahrzeug}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Weiter zu Phase 5 →
         </button>

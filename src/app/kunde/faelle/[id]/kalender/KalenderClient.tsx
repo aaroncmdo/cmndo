@@ -81,7 +81,7 @@ export default function KalenderClient({
           {confirmSlot && new Date(confirmSlot).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
         </p>
         <button onClick={() => router.push(`/kunde/faelle/${fallId}`)}
-          className="px-4 py-2 bg-[#4573A2] text-white rounded-lg text-sm font-medium hover:bg-[#1E3A5F] transition-colors">
+          className="px-4 py-2 bg-claimondo-ondo text-white rounded-lg text-sm font-medium hover:bg-claimondo-shield transition-colors">
           Zurück zum Fall
         </button>
       </div>
@@ -93,8 +93,8 @@ export default function KalenderClient({
   return (
     <div className="space-y-4">
       {/* Tage-Auswahl */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-        <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 font-semibold">Tag wählen</p>
+      <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4">
+        <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-3 font-semibold">Tag wählen</p>
         <div className="grid grid-cols-7 gap-1.5">
           {arbeitsTage.map(day => {
             const isSelected = selectedDay?.toDateString() === day.toDateString()
@@ -105,12 +105,12 @@ export default function KalenderClient({
               <button key={day.toISOString()} onClick={() => { setSelectedDay(day); setConfirmSlot(null) }}
                 className={`flex flex-col items-center py-2 px-1 rounded-lg text-xs transition-colors ${
                   isSelected
-                    ? 'bg-[#4573A2] text-white'
-                    : 'bg-gray-50 text-gray-700 hover:bg-[#4573A2]/10'
+                    ? 'bg-claimondo-ondo text-white'
+                    : 'bg-[#f8f9fb] text-claimondo-navy hover:bg-claimondo-ondo/10'
                 }`}>
                 <span className="font-medium">{dayName}</span>
                 <span className="text-lg font-bold leading-tight">{dayNum}</span>
-                <span className={`text-[10px] ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>{monthName}</span>
+                <span className={`text-[10px] ${isSelected ? 'text-white/70' : 'text-claimondo-ondo/70'}`}>{monthName}</span>
               </button>
             )
           })}
@@ -119,12 +119,12 @@ export default function KalenderClient({
 
       {/* Slots fuer gewaehlten Tag */}
       {selectedDay && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 font-semibold">
+        <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4">
+          <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-3 font-semibold">
             Verfügbare Zeiten — {selectedDay.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
           </p>
           {selectedSlots.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">Keine verfügbaren Zeiten an diesem Tag.</p>
+            <p className="text-sm text-claimondo-ondo/70 text-center py-4">Keine verfügbaren Zeiten an diesem Tag.</p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
               {selectedSlots.map(slot => {
@@ -138,8 +138,8 @@ export default function KalenderClient({
                       slot.belegt
                         ? 'bg-red-50 text-red-300 cursor-not-allowed'
                         : isSelected
-                          ? 'bg-[#4573A2] text-white ring-2 ring-[#4573A2] ring-offset-1'
-                          : 'bg-gray-50 text-gray-700 hover:bg-[#4573A2]/10'
+                          ? 'bg-claimondo-ondo text-white ring-2 ring-claimondo-ondo ring-offset-1'
+                          : 'bg-[#f8f9fb] text-claimondo-navy hover:bg-claimondo-ondo/10'
                     }`}>
                     {slot.belegt ? (
                       <span className="line-through">{timeStr}</span>
@@ -156,22 +156,22 @@ export default function KalenderClient({
 
       {/* Bestaetigung */}
       {confirmSlot && (
-        <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl p-4">
-          <p className="text-sm text-[#0D1B3E] mb-3">
+        <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-xl p-4">
+          <p className="text-sm text-claimondo-navy mb-3">
             <strong>Gewählter Termin:</strong>{' '}
             {new Date(confirmSlot).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr
           </p>
           <button onClick={handleBuchen} disabled={loading}
-            className="w-full py-3 rounded-xl bg-[#4573A2] text-white font-medium text-sm hover:bg-[#1E3A5F] transition-colors disabled:opacity-40">
+            className="w-full py-3 rounded-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-claimondo-shield transition-colors disabled:opacity-40">
             {loading ? 'Wird gebucht...' : 'Termin verbindlich buchen'}
           </button>
         </div>
       )}
 
       {/* Legende */}
-      <div className="flex items-center gap-4 text-xs text-gray-400">
+      <div className="flex items-center gap-4 text-xs text-claimondo-ondo/70">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-gray-50 border border-gray-200" />
+          <div className="w-3 h-3 rounded bg-[#f8f9fb] border border-claimondo-border" />
           <span>Frei</span>
         </div>
         <div className="flex items-center gap-1.5">

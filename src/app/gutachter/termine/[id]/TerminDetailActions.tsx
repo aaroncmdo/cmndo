@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { NavigationIcon, MapPinIcon, CheckCircleIcon, XCircleIcon, ClockIcon, AlertTriangleIcon, PlusIcon } from 'lucide-react'
 import { startNavigation } from '@/lib/termine/actions'
 import { svAblehneTermin, svGegenvorschlagTermin } from './actions'
+import { Modal } from '@/components/primitives/Modal'
 
 // KFZ-200: Client component for Termin-Detail action buttons.
 // AAR-134: Ablehnen + Gegenvorschlag Modals + collapsible Section.
@@ -68,9 +69,9 @@ export default function TerminDetailActions({
   if (svAngekommen) {
     return (
       <div className="space-y-3">
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3">
-          <MapPinIcon className="w-5 h-5 text-blue-600 flex-shrink-0" />
-          <p className="text-sm font-medium text-blue-800">SV ist vor Ort angekommen</p>
+        <div className="bg-[#f8f9fb] border border-claimondo-border rounded-2xl p-4 flex items-center gap-3">
+          <MapPinIcon className="w-5 h-5 text-claimondo-ondo flex-shrink-0" />
+          <p className="text-sm font-medium text-claimondo-navy">SV ist vor Ort angekommen</p>
         </div>
         <Link
           href={`/gutachter/termine/${terminId}/vor-ort`}
@@ -97,7 +98,7 @@ export default function TerminDetailActions({
         </Link>
         <Link
           href={`/gutachter/termine/${terminId}/vor-ort`}
-          className="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-2xl py-3 text-sm font-medium transition-colors"
+          className="block w-full text-center bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy rounded-2xl py-3 text-sm font-medium transition-colors"
         >
           Direkt zum Vor-Ort-Modus
         </Link>
@@ -133,8 +134,8 @@ export default function TerminDetailActions({
 
       {/* AAR-134: Ablehnen / Gegenvorschlag — collapsible */}
       {canAblehnen && (
-        <details className="bg-gray-50 border border-gray-200 rounded-2xl">
-          <summary className="px-4 py-3 cursor-pointer text-sm font-medium text-gray-700">
+        <details className="bg-[#f8f9fb] border border-claimondo-border rounded-2xl">
+          <summary className="px-4 py-3 cursor-pointer text-sm font-medium text-claimondo-navy">
             Kann ich diesen Termin nicht wahrnehmen?
           </summary>
           <div className="px-4 pb-4 pt-2 space-y-2">
@@ -204,12 +205,11 @@ function AblehnenModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl p-5 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-base font-semibold text-gray-900 mb-1 flex items-center gap-2">
-          <XCircleIcon className="w-5 h-5 text-red-500" />
-          Termin ablehnen
-        </h3>
+    <Modal open onClose={onClose} maxWidth={448} ariaLabel="Termin ablehnen">
+      <h3 className="text-base font-semibold text-claimondo-navy mb-1 flex items-center gap-2">
+        <XCircleIcon className="w-5 h-5 text-red-500" />
+        Termin ablehnen
+      </h3>
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 my-3 flex items-start gap-2">
           <AlertTriangleIcon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-800">
@@ -222,7 +222,7 @@ function AblehnenModal({
               key={g}
               type="button"
               onClick={() => setGrund(g === 'Sonstiges' ? '' : g + ' — ')}
-              className="text-[10px] px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700"
+              className="text-[10px] px-2 py-1 rounded bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy"
             >
               {g}
             </button>
@@ -233,14 +233,14 @@ function AblehnenModal({
           onChange={(e) => setGrund(e.target.value)}
           placeholder="Begründung (min. 10 Zeichen)..."
           rows={3}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[var(--brand-secondary)]"
+          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[var(--brand-secondary)]"
         />
         {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
         <div className="flex gap-2 mt-3">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2 rounded-xl text-sm bg-gray-100 text-gray-600"
+            className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo"
           >
             Abbrechen
           </button>
@@ -253,8 +253,7 @@ function AblehnenModal({
             {pending ? 'Lehne ab...' : 'Termin ablehnen'}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -319,13 +318,13 @@ function GegenvorschlagModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl p-5 max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-base font-semibold text-gray-900 mb-1 flex items-center gap-2">
+    <Modal open onClose={onClose} maxWidth={448} ariaLabel="Anderen Termin vorschlagen">
+      <div className="max-h-[90vh] overflow-y-auto">
+        <h3 className="text-base font-semibold text-claimondo-navy mb-1 flex items-center gap-2">
           <ClockIcon className="w-5 h-5 text-amber-500" />
           Anderen Termin vorschlagen
         </h3>
-        <p className="text-xs text-gray-600 mb-3">
+        <p className="text-xs text-claimondo-ondo mb-3">
           Schlage bis zu 5 alternative Termine vor. Der Dispatcher wählt einen davon aus und bestätigt mit dem Kunden.
         </p>
 
@@ -336,19 +335,19 @@ function GegenvorschlagModal({
                 type="date"
                 value={slot.datum}
                 onChange={(e) => updateSlot(idx, { datum: e.target.value })}
-                className="px-2 py-1.5 border border-gray-200 rounded text-xs"
+                className="px-2 py-1.5 border border-claimondo-border rounded text-xs"
               />
               <input
                 type="time"
                 value={slot.zeit}
                 onChange={(e) => updateSlot(idx, { zeit: e.target.value })}
                 step={900}
-                className="px-2 py-1.5 border border-gray-200 rounded text-xs"
+                className="px-2 py-1.5 border border-claimondo-border rounded text-xs"
               />
               <select
                 value={slot.dauerMin}
                 onChange={(e) => updateSlot(idx, { dauerMin: Number(e.target.value) })}
-                className="px-2 py-1.5 border border-gray-200 rounded text-xs bg-white"
+                className="px-2 py-1.5 border border-claimondo-border rounded text-xs bg-white"
               >
                 {[60, 90, 120, 150, 180].map((m) => (
                   <option key={m} value={m}>{m} min</option>
@@ -358,7 +357,7 @@ function GegenvorschlagModal({
                 type="button"
                 onClick={() => removeSlot(idx)}
                 disabled={slots.length === 1}
-                className="text-gray-400 hover:text-red-500 disabled:opacity-30"
+                className="text-claimondo-ondo/70 hover:text-red-500 disabled:opacity-30"
                 title="Slot entfernen"
               >
                 ×
@@ -371,7 +370,7 @@ function GegenvorschlagModal({
           type="button"
           onClick={addSlot}
           disabled={slots.length >= 5}
-          className="w-full text-xs flex items-center justify-center gap-1 py-1.5 rounded-lg border border-dashed border-gray-300 text-gray-500 hover:border-gray-400 disabled:opacity-50 mb-3"
+          className="w-full text-xs flex items-center justify-center gap-1 py-1.5 rounded-lg border border-dashed border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo disabled:opacity-50 mb-3"
         >
           <PlusIcon className="w-3 h-3" /> Weiteren Slot hinzufügen ({slots.length}/5)
         </button>
@@ -381,7 +380,7 @@ function GegenvorschlagModal({
           onChange={(e) => setBegruendung(e.target.value)}
           placeholder="Begründung (optional)..."
           rows={2}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-amber-500"
+          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-amber-500"
         />
 
         {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
@@ -390,7 +389,7 @@ function GegenvorschlagModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2 rounded-xl text-sm bg-gray-100 text-gray-600"
+            className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo"
           >
             Abbrechen
           </button>
@@ -404,6 +403,6 @@ function GegenvorschlagModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

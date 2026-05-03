@@ -1,7 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
+// CMM-24: Auftrags-Banner mit den vom Kunden noch nicht eingereichten
+// Doku-Anforderungen — der SV soll die Liste vor dem Termin sehen.
+// CMM-23/33: AuftragDokumenteBanner ersetzt durch PflichtdokumenteSection (read-only für SV)
+// (vollständige Slot-Sicht mit Download-Links).
+// CMM-23: post-Auftrag MeinFallStatusCard für die Fall-Phasen.
+// Der Stepper rendert in der linken Sidebar (FallDetailClient).
+import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
+import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
+// SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
+import BriefingCard from '@/components/fall/BriefingCard'
+import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
+import GutachtenUploadBanner from '@/components/gutachter/GutachtenUploadBanner'
+import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
+import { getAlleAuftraege } from '@/lib/auftrag/queries'
+// CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
+// gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-651: Zentrale Fall-Loader-Lib
@@ -27,6 +45,43 @@ export default async function GutachterFallPage({
   const fall = await getFallForSv(supabase, id, (sv as { id: string }).id)
   if (!fall) notFound()
 
+  // CMM-25: Auftragslebenszyklus beim SV beginnt erst mit der Sicherungs-
+  // abtretungs-Unterschrift. Vorher ist der vom Dispatcher reservierte Slot
+  // ein reiner Kalenderblock (Google/CalDAV) — die Fallakte ist gesperrt.
+  if (!(fall as { sa_unterschrieben?: boolean | null }).sa_unterschrieben) {
+    notFound()
+  }
+
+  // AAR-772: SV-Briefing automatisch generieren wenn noch nicht vorhanden.
+  // Best-effort, blockiert nicht den Page-Render. Bei nächstem Refresh
+  // ist der Text dann da. Cache-Logik (24h) lebt in generateSvBriefing.
+  if (!fall.sv_briefing_text) {
+    void import('@/lib/ai/briefing').then(({ generateSvBriefing }) =>
+      generateSvBriefing(id).catch((err) => {
+        console.warn('[AAR-772] SV-Briefing-Auto-Generate fehlgeschlagen:', err)
+      }),
+    )
+  }
+
+  // AAR-771: SV hat keine RLS-Erlaubnis auf `leads` (PII-geschützt). Wir
+  // benutzen den Admin-Client für die Stammdaten-Lookups, NACHDEM die
+  // SV↔Fall-Beziehung über getFallForSv geprüft ist (Defense-in-Depth).
+  // Vorher zeigte die Stammdaten-Card nur "—" weil lead = null war.
+  const admin = createAdminClient()
+
+  // AAR-724: Alle ungesehenen Termine dieses Falls auf „gesehen" setzen
+  // sobald der SV die Fallakte öffnet. Best-effort, Fehler nicht blockend.
+  try {
+    await supabase
+      .from('gutachter_termine')
+      .update({ gesehen_am: new Date().toISOString() })
+      .eq('fall_id', id)
+      .eq('sv_id', (sv as { id: string }).id)
+      .is('gesehen_am', null)
+  } catch (err) {
+    console.error('[AAR-724] auto-mark-seen gutachter_termine failed:', err)
+  }
+
   // Fetch all related data in parallel
   const [
     { data: lead },
@@ -39,14 +94,13 @@ export default async function GutachterFallPage({
     { data: svView },
   ] = await Promise.all([
     fall.lead_id
-      ? supabase
+      ? admin
           .from('leads')
+          // AAR-771: Admin-Client weil SV keine RLS auf leads hat.
           // Fall-Daten-Konsistenz: vorschaden_* + cardentity_abfrage_am leben
-          // auf faelle (nicht mehr auf leads). Analog AAR-626-Fix für den
-          // Admin-Pfad — SV-Pfad selectierte die 4 Legacy-Spalten weiter und
-          // crashte mit PostgREST-400 + an.map beim SV-Fall-Öffnen.
+          // auf faelle (nicht mehr auf leads).
           // AAR-545 Cluster D: eigene_versicherung + eigene_policennr für
-          // „Eigene Versicherung"-Block (früher faelle.versicherung_name).
+          // „Eigene Versicherung"-Block.
           .select('vorname, nachname, email, telefon, fin, hat_vorschaeden, zb1_status, eigene_versicherung, eigene_policennr')
           .eq('id', fall.lead_id)
           .single()
@@ -59,6 +113,7 @@ export default async function GutachterFallPage({
       .select('id, dokument_typ, storage_path, original_filename, groesse_bytes, kategorie, quelle, sichtbar_fuer, uploaded_by_sv, uploaded_by_kunde, hochgeladen_am')
       .eq('fall_id', id)
       .is('geloescht_am', null)
+      .is('abgelehnt_am', null)
       .contains('sichtbar_fuer', ['sachverstaendiger'])
       .order('hochgeladen_am'),
     supabase
@@ -180,18 +235,34 @@ export default async function GutachterFallPage({
     .order('prioritaet', { ascending: false })
     .order('faellig_am', { ascending: true, nullsFirst: false })
 
-  // KFZ-134: Aktiven gutachter_termine Eintrag laden
-  const { createAdminClient } = await import('@/lib/supabase/admin')
-  const admin = createAdminClient()
-  const { data: aktiverTermin } = await admin
+  // KFZ-134: Aktiven gutachter_termine Eintrag laden (admin-client bereits oben)
+  // CMM-23: zusätzlich kunde_losgefahren_am, kunde_angekommen_am und
+  // durchgefuehrt_am für die Phasen-Bestimmung.
+  // AAR-864: verlegung_pending zum Status-Filter — wenn der SV verlegt hat,
+  // ist der NEUE Slot der "aktuelle" Termin den der Header rendert (mit
+  // dem read-only „Verlegung beantragt — Bestätigung ausstehend"-Hinweis).
+  // verlegt-Slot bleibt draußen — er ist nur Slot-Blocker im Kalender.
+  const { data: aktiveTermine } = await admin
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund')
+    .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_unterwegs_seit, sv_angekommen_am, durchgefuehrt_am, geschaetzte_fahrtzeit_min, sv_eta_minuten, verlegung_initiator_kunde')
     .eq('fall_id', id)
     .eq('sv_id', sv.id)
-    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
+    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'durchgefuehrt', 'verlegung_pending'])
     .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+
+  // Priorität wie in v_faelle_mit_aktuellem_termin:
+  // bestaetigt > verlegung_pending > gegenvorschlag > reserviert > durchgefuehrt.
+  const STATUS_PRIO: Record<string, number> = {
+    bestaetigt: 1,
+    verlegung_pending: 2,
+    gegenvorschlag: 3,
+    reserviert: 4,
+    durchgefuehrt: 5,
+  }
+  const aktiverTermin = (aktiveTermine ?? []).slice().sort(
+    (a, b) =>
+      (STATUS_PRIO[a.status as string] ?? 9) - (STATUS_PRIO[b.status as string] ?? 9),
+  )[0] ?? null
 
   // AAR-327: Katalog-Slots für Dokument-Anforderung (rolle=sachverstaendiger).
   // Cachelayer: getAlleSlots dedupliziert intern (TTL 5 min), daher ist der
@@ -289,6 +360,7 @@ export default async function GutachterFallPage({
         ? 'kunde'
         : null,
     created_at: (d.hochgeladen_am as string | null) ?? null,
+    storage_path: (d.storage_path as string | null) ?? null,
   }))
 
   // AAR-559 (C10): SV-View-Felder für SvHonorarCard + KonfrontationsTerminCard.
@@ -307,8 +379,176 @@ export default async function GutachterFallPage({
       )
     : null
 
+  // CMM-32: aktive Auftraege bereits hier laden, damit der Phase-Resolver
+  // gutachten_final_freigegeben aus auftraege ziehen kann.
+  const auftraegeOfFall = await getAlleAuftraege(supabase, id)
+  const erstgutachtenAuftrag = auftraegeOfFall.find((a) => a.typ === 'erstgutachten') ?? null
+
+  // CMM-32: claim_id ist nicht in der v_faelle_mit_aktuellem_termin-View
+  // enthalten — separat aus faelle laden für den Storage-Pfad.
+  const { data: fallClaim } = await admin
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', id)
+    .maybeSingle()
+  const claimIdForStorage = (fallClaim?.claim_id as string | null) ?? ''
+
+  // CMM-32e: Abgelehnte Docs mit Kommentar für den SV — nur im Reject-Zustand laden.
+  // SV sieht welche Dateien konkret beanstandet wurden + warum.
+  let abgelehnteDocsInfo: { filename: string; kommentar: string | null }[] = []
+  const erstgutachtenRejectCheck = (erstgutachtenAuftrag as { zurueckgewiesen_am?: string | null } | null)?.zurueckgewiesen_am ?? null
+  if (erstgutachtenAuftrag && claimIdForStorage && erstgutachtenRejectCheck) {
+    const { data: abgelehnteRows } = await admin
+      .from('fall_dokumente')
+      .select('original_filename, zurueckweisung_kommentar')
+      .eq('fall_id', id)
+      .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
+      .not('abgelehnt_am', 'is', null)
+      .is('geloescht_am', null)
+      .order('abgelehnt_am', { ascending: false })
+    abgelehnteDocsInfo = (abgelehnteRows ?? []).map((r) => ({
+      filename: (r.original_filename as string | null) ?? 'Datei',
+      kommentar: (r.zurueckweisung_kommentar as string | null) ?? null,
+    }))
+  }
+
+  // CMM-32e: Abgebbare Hauptgutachten — neuere fall_dokumente als die aktuell
+  // verlinkte gutachten_url. Triggert den „Abgeben"-Button im Banner.
+  let abgebbareDokumenteAnzahl = 0
+  if (erstgutachtenAuftrag && claimIdForStorage) {
+    const cutoff = (erstgutachtenAuftrag as { updated_at?: string | null }).updated_at ?? null
+    const { count } = await admin
+      .from('fall_dokumente')
+      .select('id', { count: 'exact', head: true })
+      .eq('fall_id', id)
+      .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
+      .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
+      .is('geloescht_am', null)
+      .gt('hochgeladen_am', cutoff ?? '1970-01-01')
+    abgebbareDokumenteAnzahl = count ?? 0
+  }
+
+  // CMM-23: SV-Lifecycle-Phase aus Auftrag + Fall-State ableiten.
+  const svPhase = getSvLifecyclePhase({
+    terminStart: (aktiverTermin?.start_zeit as string | null) ?? null,
+    terminStatus: (aktiverTermin?.status as string | null) ?? null,
+    svUnterwegsSeit: (aktiverTermin?.sv_unterwegs_seit as string | null) ?? null,
+    svAngekommenAm: (aktiverTermin?.sv_angekommen_am as string | null) ?? null,
+    terminDurchgefuehrtAm: (aktiverTermin?.durchgefuehrt_am as string | null) ?? null,
+    gutachtenEingegangenAm: (fall.gutachten_eingegangen_am as string | null) ?? null,
+    // CMM-32: Wahrheit ist auftraege.gutachten_final_freigegeben (faelle hat die Spalte nicht).
+    gutachtenFinalFreigegeben: erstgutachtenAuftrag?.gutachten_final_freigegeben ?? null,
+    lexdriveCaseId: (fall.lexdrive_case_id as string | null) ?? null,
+    technischeStellungnahmeStatus: (fall.technische_stellungnahme_status as string | null) ?? null,
+    nachbesichtigungStatus: (fall.nachbesichtigung_status as string | null) ?? null,
+    svHonorarEingegangenAm,
+    fallStatus: (fall.status as string | null) ?? null,
+  })
+
+  // CMM-23: Pflichtdokumente-Liste laden — 1:1 das was der Kunde im
+  // Onboarding sieht, mit Download-Links für hochgeladene Files.
+  const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'sv')
+
+  // SV-Vorname für Unterwegs-Banner — kommt aus profiles, nicht aus sachverstaendige
+  const { data: svProfile } = await supabase
+    .from('profiles')
+    .select('vorname')
+    .eq('id', user.id)
+    .single()
+  const svVorname = (svProfile?.vorname as string | null) ?? null
+
+  // Vor-Ort-Card: phase-gated (nur wenn Termin da, noch kein Gutachten, richtiger Status)
+  const hatGutachten = !!(fall.gutachten_eingegangen_am as string | null)
+  const zeigeVorOrt =
+    !!(fall.sv_termin as string | null) &&
+    !hatGutachten &&
+    ((fall.status as string | null) === 'sv-termin' || (fall.status as string | null) === 'sv-zugewiesen')
+  const kundenName = lead
+    ? `${(lead.vorname as string | null) ?? ''} ${(lead.nachname as string | null) ?? ''}`.trim()
+    : '—'
+  // CMM-32 Walkthrough: VorOrtTriggerCard fährt zum besichtigungsort.
+  // schadens_*-Felder beschreiben den Unfallort (separat in Stammdaten),
+  // lead.adresse die Wohnadresse — drei klar getrennte Bedeutungen.
+  const besichtigungsAdresse = (fall.besichtigungsort_adresse as string | null) ?? null
+
+  const stellungnahmeAktiv = (fall.technische_stellungnahme_status as string | null) === 'angefordert'
+  const nachbesichtigungAktiv =
+    (fall.nachbesichtigung_status as string | null) === 'angefordert' ||
+    (fall.nachbesichtigung_status as string | null) === 'termin-eingereicht'
+
+  // CMM-32: Banner sichtbar wenn Termin durchgeführt + (kein Gutachten ODER Reject offen).
+  const erstgutachtenReject = (erstgutachtenAuftrag as { zurueckgewiesen_am?: string | null } | null)?.zurueckgewiesen_am ?? null
+  const erstgutachtenRejectGrund = (erstgutachtenAuftrag as { zurueckweisung_grund?: string | null } | null)?.zurueckweisung_grund ?? null
+  const zeigeGutachtenUpload =
+    !!erstgutachtenAuftrag &&
+    !!(aktiverTermin?.durchgefuehrt_am as string | null) &&
+    !erstgutachtenAuftrag.gutachten_final_freigegeben
+
+  const topServerBlocks = (
+    <>
+      {/* CMM-32: Gutachten-Upload-Banner — sichtbar nach Besichtigung, vor QC */}
+      {zeigeGutachtenUpload && erstgutachtenAuftrag && (
+        <GutachtenUploadBanner
+          auftragId={erstgutachtenAuftrag.id}
+          claimId={claimIdForStorage}
+          hatGutachten={!!erstgutachtenAuftrag.gutachten_url}
+          zurueckgewiesenAm={erstgutachtenReject}
+          zurueckweisungGrund={erstgutachtenRejectGrund}
+          abgebbareDokumenteAnzahl={abgebbareDokumenteAnzahl}
+          abgelehnteDocsInfo={abgelehnteDocsInfo}
+        />
+      )}
+      {/* CMM-32 Walkthrough: Briefing + Einzuholen sind jetzt im
+          AuftragHeaderPanel verschmolzen. Die „Bin angekommen"-Card wandert
+          ans Ende der Seite (Aaron-Spec) — wird via vorOrtCard-Prop unten
+          angehängt, nicht hier in topServerBlocks. */}
+      {stellungnahmeAktiv && (
+        <div className="rounded-2xl border-2 border-orange-300 bg-orange-50 p-4">
+          <p className="text-sm font-semibold text-orange-900">Stellungnahme angefordert</p>
+          <p className="text-xs text-orange-800 mt-1">
+            Der Kundenbetreuer bittet um eine technische Stellungnahme zu diesem Fall.
+            Bitte über den Chat mit dem Betreuer abstimmen.
+          </p>
+        </div>
+      )}
+      {nachbesichtigungAktiv && (
+        <div className="rounded-2xl border-2 border-violet-300 bg-violet-50 p-4">
+          <p className="text-sm font-semibold text-violet-900">Nachbesichtigung mit dem Kunden</p>
+          <p className="text-xs text-violet-800 mt-1">
+            Eine erneute Besichtigung ist angefordert. Termin wird mit dem Kunden gemeinsam geplant.
+          </p>
+        </div>
+      )}
+      {isFallPhase(svPhase) && (
+        <MeinFallStatusCard
+          phase={svPhase}
+          geforderterBetrag={(fall.gutachten_betrag as number | null) ?? null}
+          gutachtenUrl={(fall.gutachten_url as string | null) ?? null}
+          gutachtenFreigegebenAm={(fall.gutachten_freigabe_am as string | null) ?? (fall.gutachten_eingegangen_am as string | null) ?? null}
+          lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
+          svHonorarBetrag={svHonorarBetrag}
+          svHonorarEingegangenAm={svHonorarEingegangenAm}
+        />
+      )}
+    </>
+  )
+
   return (
     <FallDetailClient
+      topServerBlocks={topServerBlocks}
+      vorOrtCard={
+        zeigeVorOrt ? (
+          <VorOrtTriggerCard
+            fallId={id}
+            kundeName={kundenName}
+            kennzeichen={(fall.kennzeichen as string | null) ?? null}
+            adresse={besichtigungsAdresse}
+          />
+        ) : null
+      }
+      pflichtSlots={pflichtSlots}
+      svPhase={svPhase}
+      gutachtenInQc={!!erstgutachtenAuftrag?.gutachten_url && !erstgutachtenAuftrag?.gutachten_final_freigegeben && !erstgutachtenReject}
       fall={fallWithAbrechnung}
       lead={lead}
       dokumente={dokumenteLegacy}
@@ -343,6 +583,8 @@ export default async function GutachterFallPage({
       konfrontationGewuenscht={konfrontationGewuenscht}
       konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
       konfrontationTerminVorschlaege={terminVorschlaege}
+      svId={(sv as { id: string }).id}
+      svVorname={svVorname}
     />
   )
 }

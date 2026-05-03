@@ -1,0 +1,192 @@
+// CMM-32: Wikipedia-Thumbnail-Proxy. Sucht via OpenSearch nach
+// "<Hersteller> <Modell>", holt das Page-Summary und streamt das
+// Thumbnail zurück. Zweite Fallback-Stufe nach Imagin.
+//
+// Vorteile: völlig kostenlos, deutsche Wikipedia hat für die
+// allermeisten KFZ-Modelle ein Press-Foto. Nachteile: keine Lackfarben-
+// Variante, Bildqualität variiert, Modell-Generation nicht differenziert.
+
+import { NextRequest } from 'next/server'
+
+export const runtime = 'edge'
+
+type OpenSearchResponse = [string, string[], string[], string[]]
+
+type SummaryResponse = {
+  extract?: string
+  description?: string
+  thumbnail?: { source?: string }
+  originalimage?: { source?: string }
+}
+
+const UA = 'Claimondo/1.0 (https://claimondo.de; support@claimondo.de)'
+
+const SUMMARY_BASE = 'https://de.wikipedia.org/api/rest_v1/page/summary/'
+
+async function fetchSummary(title: string): Promise<SummaryResponse | null> {
+  try {
+    const r = await fetch(SUMMARY_BASE + encodeURIComponent(title), {
+      headers: { 'User-Agent': UA },
+    })
+    if (!r.ok) return null
+    return (await r.json()) as SummaryResponse
+  } catch {
+    return null
+  }
+}
+
+/** Sucht im Summary-Text nach einer Baujahr-Range (z.B. "2015 bis 2024"
+ *  oder "2007–2015") und prüft ob das gewünschte Baujahr drin liegt. */
+function summaryMatchesYear(
+  summary: SummaryResponse,
+  year: number,
+): boolean {
+  const blob = `${summary.extract ?? ''} ${summary.description ?? ''}`
+  const range = blob.match(
+    /(19|20)(\d{2})\s*(?:bis|–|—|-)\s*(19|20)(\d{2})/,
+  )
+  if (range) {
+    const from = Number(range[1] + range[2])
+    const to = Number(range[3] + range[4])
+    return year >= from && year <= to
+  }
+  // Offene Range "seit 2024"
+  const since = blob.match(/seit\s+(19|20)(\d{2})/i)
+  if (since) {
+    const from = Number(since[1] + since[2])
+    return year >= from
+  }
+  return false
+}
+
+/** Modellname normalisieren:
+ *  - Hersteller-Präfix entfernen ("Audi A4" → "A4")
+ *  - Karosserie-/Trim-/Motor-Suffixe abschneiden ("A4 Avant 2.0 TDI" → "A4")
+ *  - Erstes Token bleibt — das ist die Modellfamilie die in Wikipedia-
+ *    Titeln auch tatsächlich vorkommt ("Audi A4 B9").
+ */
+function cleanModel(rawModel: string, make: string): string {
+  let m = rawModel.trim()
+  // Hersteller-Präfix entfernen (case insensitive)
+  const makeRe = new RegExp(`^${make.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+`, 'i')
+  m = m.replace(makeRe, '')
+  // Erstes Token (alphanumerisch + Bindestrich) — schneidet Trim/Motor ab
+  const first = m.match(/^[A-Za-zÄÖÜäöüß0-9-]+/)
+  return first?.[0] ?? m
+}
+
+export async function GET(req: NextRequest) {
+  const sp = req.nextUrl.searchParams
+  const make = sp.get('make')?.trim()
+  const rawModel = sp.get('model')?.trim()
+  const yearStr = sp.get('year')
+  const year = yearStr ? Number(yearStr.match(/\d{4}/)?.[0] ?? '') : null
+  if (!make) return new Response('missing-make', { status: 404 })
+
+  const model = rawModel ? cleanModel(rawModel, make) : null
+  const query = [make, model].filter(Boolean).join(' ')
+
+  // 1. OpenSearch — bis zu 10 Kandidaten holen damit wir Generationen
+  // (z.B. „Audi A4 B8", „Audi A4 B9") matchen können
+  const searchUrl =
+    `https://de.wikipedia.org/w/api.php?action=opensearch&format=json` +
+    `&limit=10&namespace=0&search=${encodeURIComponent(query)}`
+
+  let candidates: string[] = []
+  try {
+    const sr = await fetch(searchUrl, { headers: { 'User-Agent': UA } })
+    if (sr.ok) {
+      const data = (await sr.json()) as OpenSearchResponse
+      candidates = data[1] ?? []
+    }
+  } catch {
+    /* fall-through, leer */
+  }
+
+  // Harte Filterung: Title muss sowohl Make als auch Model (genau, als
+  // separater Token) enthalten. Verhindert dass „Audi A4" auf „Audi A2"
+  // matcht weil OpenSearch die Modell-Wertigkeit niedriger gewichtet.
+  if (model) {
+    const makeLc = make.toLowerCase()
+    const modelLc = model.toLowerCase()
+    const tokenRe = new RegExp(
+      `\\b${modelLc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`,
+      'i',
+    )
+    const filtered = candidates.filter((c) => {
+      const lc = c.toLowerCase()
+      return lc.includes(makeLc) && tokenRe.test(c)
+    })
+    if (filtered.length > 0) candidates = filtered
+  }
+
+  // Fallback nur Hersteller wenn Modell nichts brachte
+  if (candidates.length === 0 && model) {
+    try {
+      const sr2 = await fetch(
+        `https://de.wikipedia.org/w/api.php?action=opensearch&format=json&limit=5&namespace=0&search=${encodeURIComponent(make)}`,
+        { headers: { 'User-Agent': UA } },
+      )
+      if (sr2.ok) {
+        const data = (await sr2.json()) as OpenSearchResponse
+        candidates = data[1] ?? []
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (candidates.length === 0) {
+    return new Response('no-wiki-page', { status: 404 })
+  }
+
+  // 2. Summary-Suche — bei mehreren Kandidaten + Baujahr versuchen wir,
+  // den Generations-Artikel zu finden dessen Baujahr-Range das gesuchte
+  // Jahr enthält. Wenn nichts matcht → ersten Kandidaten als Fallback.
+  let chosenTitle: string | null = null
+  let chosenSummary: SummaryResponse | null = null
+  if (year && candidates.length > 1) {
+    for (const cand of candidates) {
+      const sum = await fetchSummary(cand)
+      if (!sum) continue
+      if (summaryMatchesYear(sum, year)) {
+        chosenSummary = sum
+        chosenTitle = cand
+        break
+      }
+    }
+  }
+  if (!chosenSummary) {
+    chosenSummary = await fetchSummary(candidates[0])
+    chosenTitle = candidates[0]
+  }
+  if (!chosenSummary) return new Response('summary-failed', { status: 404 })
+
+  const imageUrl =
+    chosenSummary.originalimage?.source ?? chosenSummary.thumbnail?.source ?? null
+
+  if (!imageUrl) return new Response('no-image', { status: 404 })
+
+  // 3. Bild streamen
+  let img: Response
+  try {
+    img = await fetch(imageUrl, { headers: { 'User-Agent': UA } })
+  } catch {
+    return new Response('image-fetch-failed', { status: 502 })
+  }
+  if (!img.ok) return new Response('image-upstream-error', { status: img.status })
+
+  const buf = await img.arrayBuffer()
+  return new Response(buf, {
+    status: 200,
+    headers: {
+      'Content-Type': img.headers.get('content-type') ?? 'image/jpeg',
+      // 5 Minuten cache während wir am Render-Pfad debuggen — vorher 24h.
+      'Cache-Control': 'public, max-age=300, s-maxage=300',
+      'X-Wiki-Title': chosenTitle ?? '?',
+      'X-Wiki-Candidates': candidates.slice(0, 10).join(' | '),
+      'X-Wiki-Query': query,
+      'X-Wiki-Year': year ? String(year) : 'none',
+    },
+  })
+}

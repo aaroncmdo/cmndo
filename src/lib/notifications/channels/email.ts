@@ -1,13 +1,228 @@
-// AAR-497 N2: Email-Stub. Later: Gmail-SMTP-Versand über bestehende
-// lib/email/google/send.ts — template pro event_type.
+// AAR-497 N2: Email-Channel-Handler. Löst Event×Rolle auf Subject + HTML auf
+// und sendet über lib/email/google/client.ts (Resend ↔ SMTP-Fallback).
 
+import { createAdminClient } from '@/lib/supabase/admin'
+import { sendEmail } from '@/lib/email/google/client'
 import type { ChannelHandler } from './types'
+import type { EventType } from '../types'
+
+async function lookupEmail(userId: string): Promise<string | null> {
+  const db = createAdminClient()
+  const { data } = await db.from('profiles').select('email').eq('id', userId).maybeSingle()
+  return (data?.email as string | null) ?? null
+}
+
+type EmailTemplate = { subject: string; html: string }
+
+function buildTemplate(
+  eventType: EventType,
+  payload: Record<string, unknown>,
+  vorname: string,
+): EmailTemplate {
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claimondo.de'
+  const fallId = payload.fallId as string | undefined
+  const fallLink = fallId ? `${base}/faelle/${fallId}` : base
+
+  const greet = vorname ? `<p>Hallo ${vorname},</p>` : '<p>Hallo,</p>'
+  const footer = `<p style="color:#888;font-size:12px;margin-top:24px">Claimondo — Ihr Schadenmanagement-Portal<br><a href="${base}">${base}</a></p>`
+
+  switch (eventType) {
+    case 'fall.created':
+      return {
+        subject: 'Ihr Fall wurde erfolgreich angelegt',
+        html: `${greet}<p>Ihr Schadenfall wurde erfolgreich bei uns angelegt. Unser Team bearbeitet Ihren Fall und meldet sich in Kürze.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    case 'fall.sv_assigned':
+      return {
+        subject: 'Sachverständiger für Ihren Fall wurde zugewiesen',
+        html: `${greet}<p>Für Ihren Schadenfall wurde ein Sachverständiger beauftragt. Sie erhalten in Kürze einen Terminvorschlag.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    case 'fall.storniert':
+      return {
+        subject: 'Ihr Fall wurde storniert',
+        html: `${greet}<p>Ihr Schadenfall wurde leider storniert${payload.grund ? `: ${payload.grund}` : ''}. Bei Fragen wenden Sie sich bitte an unser Team.</p><p><a href="${base}/kontakt">Kontakt aufnehmen</a></p>${footer}`,
+      }
+    case 'sa.flow_sent': {
+      const flowUrl = payload.flowLinkUrl as string | undefined
+      return {
+        subject: 'Bitte unterschreiben Sie Ihren Schadenauftrag',
+        html: `${greet}<p>Wir haben Ihnen einen Schadenauftrag zur Unterschrift zugestellt. Bitte schließen Sie den Prozess ab, damit wir mit der Bearbeitung beginnen können.</p>${flowUrl ? `<p><a href="${flowUrl}" style="background:#0D1B3E;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block">Jetzt unterschreiben</a></p>` : ''}<p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    case 'termin.sv_bestaetigt': {
+      const datum = payload.datum as string | undefined
+      const uhrzeit = payload.uhrzeit as string | undefined
+      const ort = payload.ort as string | undefined
+      return {
+        subject: 'Ihr Begutachtungstermin wurde bestätigt',
+        html: `${greet}<p>Ihr Begutachtungstermin wurde bestätigt:</p><ul>${datum ? `<li><strong>Datum:</strong> ${datum}</li>` : ''}${uhrzeit ? `<li><strong>Uhrzeit:</strong> ${uhrzeit}</li>` : ''}${ort ? `<li><strong>Ort:</strong> ${ort}</li>` : ''}</ul><p><a href="${fallLink}">Details im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    case 'gutachten.fertig':
+      return {
+        subject: 'Ihr Gutachten ist fertig',
+        html: `${greet}<p>Das Gutachten für Ihren Schadenfall wurde erstellt und steht Ihnen im Portal zur Verfügung.</p><p><a href="${fallLink}">Gutachten ansehen</a></p>${footer}`,
+      }
+    case 'kanzlei.uebergabe':
+      return {
+        subject: 'Ihr Fall wurde an die Kanzlei übergeben',
+        html: `${greet}<p>Ihr Schadenfall wurde an unsere Kanzlei übergeben, die nun die rechtliche Durchsetzung Ihrer Ansprüche übernimmt. Wir halten Sie auf dem Laufenden.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    case 'regulierung.ergebnis': {
+      const typ = payload.typ as string | undefined
+      const betrag = payload.betragEur as number | undefined
+      const labels: Record<string, string> = {
+        voll: 'vollständig anerkannt',
+        teilweise: 'teilweise anerkannt',
+        kuerzung: 'mit Kürzung anerkannt',
+        abgelehnt: 'abgelehnt',
+      }
+      return {
+        subject: `Regulierungsergebnis: Ihr Anspruch wurde ${labels[typ ?? ''] ?? 'bearbeitet'}`,
+        html: `${greet}<p>Die Regulierung Ihres Schadensfalls wurde abgeschlossen. Ergebnis: <strong>${labels[typ ?? ''] ?? typ}</strong>${betrag ? ` (${betrag.toFixed(2)} €)` : ''}.</p><p><a href="${fallLink}">Details im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    case 'auszahlung.veranlasst': {
+      const betrag = payload.betragEur as number | undefined
+      const tage = payload.erwarteteGutschriftTage as number | undefined
+      return {
+        subject: 'Auszahlung wurde veranlasst',
+        html: `${greet}<p>Wir haben die Auszahlung${betrag ? ` von ${betrag.toFixed(2)} €` : ''} veranlasst. Die Gutschrift auf Ihrem Konto ist${tage ? ` in ca. ${tage} Werktagen` : ' in Kürze'} zu erwarten.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    case 'makler.lead_eingegangen':
+      return {
+        subject: 'Neuer Lead eingegangen',
+        html: `${greet}<p>Über Ihren Partnerlink ist ein neuer Lead eingegangen. Wir haben mit der Bearbeitung begonnen.</p><p><a href="${base}/makler">Im Makler-Portal ansehen</a></p>${footer}`,
+      }
+    case 'makler.provision_status': {
+      const status = payload.status as string | undefined
+      const betrag = payload.betragEur as number | undefined
+      return {
+        subject: `Provision ${status === 'freigegeben' ? 'freigegeben' : 'storniert'}`,
+        html: `${greet}<p>Ihre Provision${betrag ? ` von ${betrag.toFixed(2)} €` : ''} wurde <strong>${status === 'freigegeben' ? 'freigegeben' : 'storniert'}</strong>.</p><p><a href="${base}/makler">Im Makler-Portal ansehen</a></p>${footer}`,
+      }
+    }
+    // AAR-840: Manuelle Endzustände
+    case 'claim.in_kommunikation_vs':
+      return {
+        subject: 'Wir kommunizieren jetzt mit Ihrer Versicherung',
+        html: `${greet}<p>Wir haben die Kommunikation mit Ihrer Versicherung aufgenommen und vertreten Ihre Forderung. Sie hören von uns, sobald es Neuigkeiten gibt.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    case 'claim.reguliert': {
+      const betrag = payload.betragEur as number | undefined
+      return {
+        subject: 'Ihr Schadensfall wurde reguliert',
+        html: `${greet}<p>Gute Nachrichten: Ihr Schadensfall wurde reguliert${betrag ? ` mit einem Betrag von <strong>${betrag.toFixed(2)} €</strong>` : ''}. Die Auszahlung wird nun veranlasst.</p><p><a href="${fallLink}">Details im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    case 'claim.abgelehnt': {
+      const grundMap: Record<string, string> = {
+        verjaehrung: 'Verjährung',
+        haftung_strittig: 'strittiger Haftungsfrage',
+        fahrzeug_bereits_repariert: 'bereits durchgeführter Reparatur',
+        vollmacht_fehlt: 'fehlender Vollmacht',
+        sonstiges: 'sonstigen Gründen',
+      }
+      const grundKey = payload.vsAblehnungsGrund as string | undefined
+      const grundLabel = grundMap[grundKey ?? ''] ?? grundKey ?? 'einem Sachgrund'
+      return {
+        subject: 'Ihr Schadensfall wurde abgelehnt',
+        html: `${greet}<p>Leider wurde Ihr Schadensfall aufgrund von <strong>${grundLabel}</strong> abgelehnt. Bei Fragen oder zur Prüfung weiterer Schritte melden Sie sich gern bei uns.</p><p><a href="${fallLink}">Details im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    case 'claim.storniert':
+      return {
+        subject: 'Ihr Schadensfall wurde storniert',
+        html: `${greet}<p>Ihr Schadensfall wurde storniert. Bei Rückfragen wenden Sie sich bitte an unser Team.</p><p><a href="${base}/kontakt">Kontakt aufnehmen</a></p>${footer}`,
+      }
+    case 'claim.an_externe_kanzlei_uebergeben': {
+      const kanzlei = payload.kanzleiName as string | undefined
+      return {
+        subject: 'Ihr Schadensfall wurde an eine Kanzlei übergeben',
+        html: `${greet}<p>Ihr Schadensfall wurde${kanzlei ? ` an die Kanzlei <strong>${kanzlei}</strong>` : ' an eine externe Kanzlei'} übergeben, die nun die rechtliche Vertretung übernimmt. Wir bleiben weiterhin Ihr Ansprechpartner für Rückfragen.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    // AAR-838: Gutachten-OCR-Pipeline
+    case 'gutachten.ocr_succeeded':
+      return {
+        subject: 'Gutachten ist da',
+        html: `${greet}<p>Das Gutachten zu Ihrem Schadensfall wurde erfolgreich ausgelesen und steht im Portal zur Verfügung.</p><p><a href="${fallLink}">Gutachten ansehen</a></p>${footer}`,
+      }
+    case 'gutachten.ocr_failed': {
+      const reason = payload.reason as string | undefined
+      return {
+        subject: 'Gutachten-OCR fehlgeschlagen — manuelle Prüfung nötig',
+        html: `${greet}<p>Die automatische Auslese eines Gutachtens ist fehlgeschlagen${reason ? ` (Grund: ${reason})` : ''}. Bitte manuell prüfen oder Re-Run starten.</p><p><a href="${fallLink}">Fall öffnen</a></p>${footer}`,
+      }
+    }
+    // AAR-844: KB-Notification für Auto-Paket-Trigger
+    case 'claim.kanzlei_paket_pending': {
+      const wunsch = payload.kanzleiWunsch as string | undefined
+      return {
+        subject: `Kanzlei-Paket bereit zum Versand`,
+        html: `${greet}<p>Ein Schadenfall hat den Kanzlei-Wunsch <strong>${wunsch ?? 'gesetzt'}</strong> und ist in einer Phase wo das Paket versendet werden kann. Bitte im Admin-Portal prüfen und versenden.</p><p><a href="${fallLink}">Fall öffnen</a></p>${footer}`,
+      }
+    }
+    case 'claim.kanzlei_re_frage_due':
+      return {
+        subject: 'Möchten Sie eine Kanzlei einbinden?',
+        html: `${greet}<p>Ihr Gutachten ist erstellt. Möchten Sie eine Kanzlei für Ihren Schadenfall einbinden? Eine Kanzlei vertritt Ihre Ansprüche gegenüber der Versicherung.</p><p><a href="${fallLink}">Im Portal entscheiden</a></p>${footer}`,
+      }
+    // AAR-841: Kanzlei-Workflow
+    case 'claim.kanzlei_paket_versendet': {
+      const kanzlei = payload.kanzleiName as string | undefined
+      const typ = payload.empfaengerTyp as string | undefined
+      const subjectExtra = typ === 'partnerkanzlei' ? ' (Partnerkanzlei)' : ''
+      return {
+        subject: `Kanzlei-Paket versendet${subjectExtra}`,
+        html: `${greet}<p>Wir haben Ihr Kanzlei-Paket${kanzlei ? ` an <strong>${kanzlei}</strong>` : ''} versendet. Die Kanzlei meldet sich in Kürze bei Ihnen.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
+      }
+    }
+    default:
+      return {
+        subject: 'Neue Benachrichtigung von Claimondo',
+        html: `${greet}<p>Es gibt eine neue Aktualisierung zu Ihrem Fall.</p><p><a href="${fallLink}">Im Portal ansehen</a></p>${footer}`,
+      }
+  }
+}
 
 export const emailHandler: ChannelHandler = async (input) => {
-  console.log('[channel:email][stub]', {
-    event: input.eventType,
-    recipient: input.recipientUserId,
-    role: input.recipientRole,
-  })
-  return { success: true, externalId: `stub-email-${input.event.id}` }
+  const email = await lookupEmail(input.recipientUserId)
+  if (!email) {
+    return { success: false, skipReason: 'no_email_for_recipient' }
+  }
+
+  const db = createAdminClient()
+  const { data: profile } = await db
+    .from('profiles')
+    .select('vorname')
+    .eq('id', input.recipientUserId)
+    .maybeSingle()
+  const vorname = (profile?.vorname as string | null) ?? ''
+
+  const fallId = (input.payload.fallId ?? input.event.fall_id) as string | undefined
+  const { subject, html } = buildTemplate(input.eventType, input.payload, vorname)
+
+  try {
+    const result = await sendEmail({
+      to: email,
+      subject,
+      html,
+      fallId: fallId ?? null,
+      empfaengerTyp:
+        input.recipientRole === 'sachverstaendiger'
+          ? 'sv'
+          : input.recipientRole === 'kunde'
+            ? 'kunde'
+            : 'admin',
+      template: input.eventType,
+    })
+    return { success: true, externalId: result.messageId }
+  } catch (err) {
+    return {
+      success: false,
+      errorMessage: err instanceof Error ? err.message : String(err),
+    }
+  }
 }

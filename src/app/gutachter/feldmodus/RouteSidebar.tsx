@@ -17,7 +17,10 @@ export interface RouteSidebarProps {
   aktuellerStopIndex: number
   svPosition: { lat: number; lng: number } | null
   distanceMeters: number | null
+  svInGeofence: boolean
+  permissionState: 'pending' | 'granted' | 'denied'
   onAdvanced: (nextTerminId: string | null) => void
+  onArrived: (lat: number, lng: number, via: 'geofence' | 'manuell' | 'termin_uhrzeit') => void
 }
 
 export default function RouteSidebar({
@@ -27,7 +30,10 @@ export default function RouteSidebar({
   aktuellerStopIndex,
   svPosition,
   distanceMeters,
+  svInGeofence,
+  permissionState,
   onAdvanced,
+  onArrived,
 }: RouteSidebarProps) {
   const aktuellerStop = stops[aktuellerStopIndex] ?? null
   const kommende = stops.slice(aktuellerStopIndex + 1)
@@ -50,17 +56,20 @@ export default function RouteSidebar({
             sessionId={sessionId}
             sessionStatus={sessionStatus}
             svPosition={svPosition}
+            svInGeofence={svInGeofence}
+            permissionState={permissionState}
             onAdvanced={onAdvanced}
+            onArrived={onArrived}
           />
         ) : (
-          <div className="rounded-xl bg-white/10 p-4 text-sm text-gray-200">
+          <div className="rounded-xl bg-white/10 p-4 text-sm text-white/80">
             Kein aktiver Stop.
           </div>
         )}
 
         {kommende.length > 0 && (
           <section className="space-y-2">
-            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 px-1">
+            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo/70 px-1">
               Kommende Stops ({kommende.length})
             </h3>
             <div className="space-y-1.5">
@@ -77,7 +86,7 @@ export default function RouteSidebar({
 
         {erledigte.length > 0 && (
           <section className="space-y-2">
-            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 px-1">
+            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo/70 px-1">
               Erledigt ({erledigte.length})
             </h3>
             <div className="space-y-1.5">

@@ -24,7 +24,8 @@ import {
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const ALLOWED_ROLES = new Set(['sachverstaendiger', 'admin', 'kundenbetreuer'])
+// AAR-708: Kunde mit aufgenommen — Aaron will Tickets als Kunde anlegen können.
+const ALLOWED_ROLES = new Set(['sachverstaendiger', 'admin', 'kundenbetreuer', 'kunde'])
 // AAR-625: Durchdenken-Modus nur für interne Rollen (nicht SV)
 const DURCHDENKEN_ROLES = new Set(['admin', 'kundenbetreuer', 'dispatch'])
 const MAX_AGENT_ITERATIONS = 5

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { PhasePipeline } from '@/components/shared/fall-phases'
 import type { PhaseStepData, PhaseVariant, Rolle } from '@/components/shared/fall-phases'
+import PageHeader from '@/components/shared/PageHeader'
 
 const PHASE_NAMES = [
   'Ersterfassung',
@@ -75,12 +76,11 @@ export default async function DevPhasesPage() {
   return (
     <main className="min-h-screen bg-claimondo-bg p-6 space-y-8">
       <header className="max-w-5xl mx-auto">
-        <h1 className="text-xl font-bold text-claimondo-navy">
-          Phase-Component-Library — Playground (AAR-565)
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Alle 4 Rollen × 4 Varianten × 3 Mock-Fälle. Nur Dev-Env.
-        </p>
+        <PageHeader
+          title="Phase-Component-Library — Playground (AAR-565)"
+          description="Alle 4 Rollen × 4 Varianten × 3 Mock-Fälle. Nur Dev-Env."
+          size="lg"
+        />
       </header>
 
       {MOCK_FAELLE.map((mock) => (
@@ -94,7 +94,7 @@ export default async function DevPhasesPage() {
                   className="bg-claimondo-card border border-claimondo-border rounded-xl p-4 shadow-[var(--shadow-claimondo-sm)]"
                 >
                   <header className="flex items-center justify-between mb-3 pb-2 border-b border-claimondo-border">
-                    <span className="text-[11px] uppercase tracking-wider text-gray-400">
+                    <span className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70">
                       {rolle} · {variant}
                     </span>
                   </header>

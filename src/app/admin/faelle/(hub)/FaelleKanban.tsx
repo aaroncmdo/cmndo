@@ -11,6 +11,7 @@ import FallCardBadges, { NotificationDot } from '@/components/faelle/FallCardBad
 // AAR-572 (V6): Shared PhasePipeline als Hover-Overlay auf den Kanban-Karten
 import { PhasePipeline } from '@/components/shared/fall-phases'
 import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
+import { Modal } from '@/components/primitives/Modal'
 
 type Fall = {
   id: string
@@ -33,14 +34,16 @@ type Fall = {
   ungelesene_updates?: number
   aktuelle_phase?: string | null
   abgeschlossen_am?: string | null
+  // AAR-770: Jüngste offene Mitteilung für Hover-Preview
+  mitteilung?: { titel: string; inhalt: string | null; prioritaet: string | null } | null
 }
 
 // BUG-05: Kanban-Columns nach faelle.status Enum
 const COLUMNS = [
-  { key: 'ersterfassung', label: 'Offen', color: 'text-gray-600', bg: 'bg-gray-400' },
-  { key: 'sv-zugewiesen', label: 'SV zugew.', color: 'text-[#4573A2]', bg: 'bg-[#4573A2]' },
-  { key: 'sv-termin', label: 'Termin', color: 'text-[#4573A2]', bg: 'bg-[#4573A2]' },
-  { key: 'besichtigung', label: 'Besichtigung', color: 'text-[#1E3A5F]', bg: 'bg-[#4573A2]' },
+  { key: 'ersterfassung', label: 'Offen', color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo/70' },
+  { key: 'sv-zugewiesen', label: 'SV zugew.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo' },
+  { key: 'sv-termin', label: 'Termin', color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo' },
+  { key: 'besichtigung', label: 'Besichtigung', color: 'text-claimondo-navy', bg: 'bg-claimondo-ondo' },
   { key: 'gutachten-eingegangen', label: 'Gutachten', color: 'text-violet-600', bg: 'bg-violet-500' },
   { key: 'filmcheck', label: 'QC', color: 'text-amber-600', bg: 'bg-amber-500' },
   { key: 'kanzlei-uebergeben', label: 'Kanzlei', color: 'text-green-600', bg: 'bg-green-500' },
@@ -130,20 +133,20 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
           funktioniert. */}
       <div className="flex items-center justify-between px-4 py-2 h-10 flex-shrink-0 md:w-[104.17%] md:-ml-[2.08%]">
         <div className="flex items-center gap-2">
-          <h1 className="text-sm font-semibold text-gray-900">Fälle</h1>
-          <span className="text-gray-400 text-xs">{filtered.length}</span>
+          <h1 className="text-sm font-semibold text-claimondo-navy">Fälle</h1>
+          <span className="text-claimondo-ondo/70 text-xs">{filtered.length}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex gap-0.5 bg-gray-100 rounded-lg p-0.5">
+          <div className="flex gap-0.5 bg-[#f8f9fb] rounded-lg p-0.5">
             {(['aktive', 'deaktivierte', 'alle'] as const).map(f => (
               <button key={f} onClick={() => setAktivFilter(f)}
-                className={`text-[10px] font-medium px-2 py-1 rounded-md transition-colors ${aktivFilter === f ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                className={`text-[10px] font-medium px-2 py-1 rounded-md transition-colors ${aktivFilter === f ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'}`}>
                 {f === 'aktive' ? 'Aktive' : f === 'deaktivierte' ? 'Deaktiv.' : 'Alle'}
               </button>
             ))}
           </div>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
-            className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2] w-40 h-7" />
+            className="px-2 py-1 bg-white border border-claimondo-border rounded-lg text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-40 h-7" />
         </div>
       </div>
 
@@ -165,7 +168,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
                   {/* Column header: 28px */}
                   <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
                     <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
-                    <span className="text-gray-500 text-[10px] font-medium bg-gray-100 px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
+                    <span className="text-claimondo-ondo text-[10px] font-medium bg-[#f8f9fb] px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
                   </div>
                   <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
 
@@ -176,7 +179,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}
-                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-[#4573A2]/5 border-2 border-dashed border-[#4573A2]/30 rounded-lg' : ''}`}
+                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-claimondo-ondo/5 border-2 border-dashed border-claimondo-ondo/30 rounded-lg' : ''}`}
                       >
                         {items.map((fall, i) => (
                           <Draggable key={fall.id} draggableId={fall.id} index={i}>
@@ -263,7 +266,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={`group relative rounded-lg border hover:shadow-sm transition-all ${
-          fall.ist_aktiv === false ? 'bg-red-50/60 border-red-200 opacity-60' : 'bg-white border-gray-200 hover:border-gray-300'
+          fall.ist_aktiv === false ? 'bg-red-50/60 border-red-200 opacity-60' : 'bg-white border-claimondo-border hover:border-claimondo-border'
         }`}
         style={{ padding: '6px 8px' }}
       >
@@ -275,7 +278,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
                 den Link-Klick via mousedown preventDefault */}
             <span
               {...(dragHandleProps ?? {})}
-              className="shrink-0 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing select-none"
+              className="shrink-0 text-claimondo-ondo/50 hover:text-claimondo-ondo cursor-grab active:cursor-grabbing select-none"
               aria-label="Karte verschieben"
             >
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -284,18 +287,18 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
                 <circle cx="6" cy="15" r="1.2"/><circle cx="14" cy="15" r="1.2"/>
               </svg>
             </span>
-            <Link href={`/faelle/${fall.id}`} className="text-xs font-mono text-[#4573A2] truncate hover:underline min-w-0">
+            <Link href={`/faelle/${fall.id}`} className="text-xs font-mono text-claimondo-ondo truncate hover:underline min-w-0">
               {label}
             </Link>
           </div>
           <div className="flex items-center gap-1 shrink-0 ml-1" ref={menuRef}>
             {fall.ist_aktiv === false && <span className="text-[8px] bg-red-100 text-red-500 px-1 py-0.5 rounded font-medium">Deaktiviert</span>}
-            <button onClick={e => { e.stopPropagation(); setMenuOpen(!menuOpen) }} className="p-0.5 text-gray-300 hover:text-gray-500 transition-colors">
+            <button onClick={e => { e.stopPropagation(); setMenuOpen(!menuOpen) }} className="p-0.5 text-claimondo-ondo/50 hover:text-claimondo-ondo transition-colors">
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="4" r="2"/><circle cx="10" cy="10" r="2"/><circle cx="10" cy="16" r="2"/></svg>
             </button>
             {menuOpen && (
-              <div className="absolute right-1 top-6 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-36 z-30">
-                <Link href={`/faelle/${fall.id}`} className="block px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50">Öffnen</Link>
+              <div className="absolute right-1 top-6 bg-white border border-claimondo-border rounded-lg shadow-lg py-1 w-36 z-30">
+                <Link href={`/faelle/${fall.id}`} className="block px-3 py-1.5 text-xs text-claimondo-navy hover:bg-[#f8f9fb]">Öffnen</Link>
                 <button onClick={() => { setMenuOpen(false); setModal('deactivate'); setGrund(''); setError('') }} className="w-full text-left px-3 py-1.5 text-xs text-amber-600 hover:bg-amber-50">Deaktivieren</button>
                 <button onClick={() => { setMenuOpen(false); setModal('delete'); setError('') }} className="w-full text-left px-3 py-1.5 text-xs text-red-500 hover:bg-red-50">Löschen</button>
               </div>
@@ -304,15 +307,39 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
         </div>
         <Link href={`/faelle/${fall.id}`} onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-2">
-            {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{fall.kunde_name}</p>}
+            {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-claimondo-ondo/70 line-through' : 'text-claimondo-navy'}`}>{fall.kunde_name}</p>}
             <FallCardBadges chatCount={fall.ungelesene_nachrichten ?? 0} updateCount={fall.ungelesene_updates ?? 0} />
+            {/* AAR-770: Mitteilungs-Pulse — kleiner Punkt wenn offene Mitteilung anliegt */}
+            {fall.mitteilung && (
+              <span
+                className="relative inline-flex w-2 h-2 rounded-full"
+                style={{
+                  backgroundColor:
+                    fall.mitteilung.prioritaet === 'dringend' ? '#dc2626'
+                    : fall.mitteilung.prioritaet === 'hoch' ? '#d97706'
+                    : '#4573A2',
+                }}
+                title={`Mitteilung: ${fall.mitteilung.titel}`}
+                aria-label="Offene Mitteilung"
+              >
+                <span
+                  className="absolute inset-0 rounded-full animate-ping opacity-60"
+                  style={{
+                    backgroundColor:
+                      fall.mitteilung.prioritaet === 'dringend' ? '#dc2626'
+                      : fall.mitteilung.prioritaet === 'hoch' ? '#d97706'
+                      : '#4573A2',
+                  }}
+                />
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap gap-1 mt-1">
-            {fall.kennzeichen && <span className="bg-gray-100 text-gray-600 text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
-            {fall.schadens_fall_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadens_fall_typ] ?? fall.schadens_fall_typ}</span>}
+            {fall.kennzeichen && <span className="bg-[#f8f9fb] text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
+            {fall.schadens_fall_typ && <span className="bg-claimondo-ondo/5 text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadens_fall_typ] ?? fall.schadens_fall_typ}</span>}
           </div>
           {(fall.betreuer_name || fall.sv_name) && (
-            <div className="flex gap-2 mt-1 text-[9px] text-gray-400 truncate">
+            <div className="flex gap-2 mt-1 text-[9px] text-claimondo-ondo/70 truncate">
               {fall.betreuer_name && <span>KB: {fall.betreuer_name}</span>}
               {fall.sv_name && <span>SV: {fall.sv_name}</span>}
             </div>
@@ -326,69 +353,93 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
           wird. Position wird bei Hover aus der Card-BoundingRect berechnet. */}
       {mounted && overlayPos && createPortal(
         <div
-          className="fixed z-[60] w-[260px] bg-white border border-gray-200 rounded-lg shadow-lg p-3 pointer-events-none"
+          className="fixed z-[60] w-[280px] bg-white border border-claimondo-border rounded-lg shadow-lg p-3 pointer-events-none space-y-3"
           style={{ top: overlayPos.top, left: overlayPos.left }}
           aria-hidden="true"
         >
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">
-            Phasen-Verlauf
-          </p>
-          <PhasePipeline
-            fall={{ id: fall.id, aktuelle_phase: fall.aktuelle_phase ?? null }}
-            rolle="admin"
-            phases={pipelinePhases}
-            variant="compact"
-          />
+          {/* AAR-770: Aktuelle Mitteilung für diesen Fall (falls vorhanden) */}
+          {fall.mitteilung && (
+            <div
+              className="rounded-md p-2"
+              style={{
+                backgroundColor:
+                  fall.mitteilung.prioritaet === 'dringend' ? '#fef2f2'
+                  : fall.mitteilung.prioritaet === 'hoch' ? '#fffbeb'
+                  : '#f8f9fb',
+                borderLeft: `3px solid ${
+                  fall.mitteilung.prioritaet === 'dringend' ? '#dc2626'
+                  : fall.mitteilung.prioritaet === 'hoch' ? '#d97706'
+                  : '#4573A2'
+                }`,
+              }}
+            >
+              <p className="text-[9px] font-semibold uppercase tracking-wider text-claimondo-ondo/70 mb-0.5">
+                {fall.mitteilung.prioritaet === 'dringend' ? 'Dringend' : 'Mitteilung'}
+              </p>
+              <p className="text-xs font-semibold text-claimondo-navy leading-snug">
+                {fall.mitteilung.titel}
+              </p>
+              {fall.mitteilung.inhalt && (
+                <p className="text-[11px] text-claimondo-navy/80 mt-0.5 line-clamp-2">
+                  {fall.mitteilung.inhalt}
+                </p>
+              )}
+            </div>
+          )}
+
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo/70 mb-2">
+              Phasen-Verlauf
+            </p>
+            <PhasePipeline
+              fall={{ id: fall.id, aktuelle_phase: fall.aktuelle_phase ?? null }}
+              rolle="admin"
+              phases={pipelinePhases}
+              variant="compact"
+            />
+          </div>
         </div>,
         document.body,
       )}
 
       {/* Delete Confirmation */}
-      {modal === 'delete' && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-red-600 mb-2">Fall löschen?</h3>
-            <p className="text-sm text-gray-600 mb-1"><strong>{label}</strong> — {fall.kunde_name ?? 'Unbekannt'}</p>
-            <p className="text-xs text-gray-400 mb-4">Alle Daten werden unwiderruflich entfernt.</p>
-            {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
-            <div className="flex gap-2">
-              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">Abbrechen</button>
-              <button disabled={processing} onClick={async () => {
-                setProcessing(true)
-                const result = await deleteFall(fall.id)
-                if (result.success) { onRefresh(); setModal(null) }
-                else { setError(result.error ?? 'Fehler'); setProcessing(false) }
-              }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-40">
-                {processing ? 'Löscht...' : 'Endgültig löschen'}
-              </button>
-            </div>
-          </div>
+      <Modal open={modal === 'delete'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Fall löschen">
+        <h3 className="text-lg font-semibold text-red-600 mb-2">Fall löschen?</h3>
+        <p className="text-sm text-claimondo-ondo mb-1"><strong>{label}</strong> — {fall.kunde_name ?? 'Unbekannt'}</p>
+        <p className="text-xs text-claimondo-ondo/70 mb-4">Alle Daten werden unwiderruflich entfernt.</p>
+        {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+        <div className="flex gap-2">
+          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border">Abbrechen</button>
+          <button disabled={processing} onClick={async () => {
+            setProcessing(true)
+            const result = await deleteFall(fall.id)
+            if (result.success) { onRefresh(); setModal(null) }
+            else { setError(result.error ?? 'Fehler'); setProcessing(false) }
+          }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-40">
+            {processing ? 'Löscht...' : 'Endgültig löschen'}
+          </button>
         </div>
-      )}
+      </Modal>
 
       {/* Deactivate Confirmation */}
-      {modal === 'deactivate' && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Fall deaktivieren</h3>
-            <select value={grund} onChange={e => setGrund(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3">
-              <option value="">— Grund —</option>
-              {['Kunde hat abgesagt', 'Kein Interesse', 'Duplikat', 'Spam', 'Sonstiges'].map(g => <option key={g} value={g}>{g}</option>)}
-            </select>
-            {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
-            <div className="flex gap-2">
-              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200">Abbrechen</button>
-              <button disabled={processing || !grund} onClick={async () => {
-                setProcessing(true)
-                try { await deactivateFall(fall.id, grund, ''); onRefresh() } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
-                setProcessing(false); setModal(null)
-              }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-40">
-                {processing ? 'Deaktiviert...' : 'Deaktivieren'}
-              </button>
-            </div>
-          </div>
+      <Modal open={modal === 'deactivate'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Fall deaktivieren">
+        <h3 className="text-lg font-semibold text-claimondo-navy mb-3">Fall deaktivieren</h3>
+        <select value={grund} onChange={e => setGrund(e.target.value)} className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3">
+          <option value="">— Grund —</option>
+          {['Kunde hat abgesagt', 'Kein Interesse', 'Duplikat', 'Spam', 'Sonstiges'].map(g => <option key={g} value={g}>{g}</option>)}
+        </select>
+        {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
+        <div className="flex gap-2">
+          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border">Abbrechen</button>
+          <button disabled={processing || !grund} onClick={async () => {
+            setProcessing(true)
+            try { await deactivateFall(fall.id, grund, ''); onRefresh() } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
+            setProcessing(false); setModal(null)
+          }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-40">
+            {processing ? 'Deaktiviert...' : 'Deaktivieren'}
+          </button>
         </div>
-      )}
+      </Modal>
     </>
   )
 }

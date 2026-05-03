@@ -64,23 +64,23 @@ export default function PasswortAendernPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <span className="text-3xl font-bold tracking-tight"><span className="text-[#0D1B3E]">Claim</span><span className="text-[#4573A2]">ondo</span></span>
-          <p className="mt-1 text-sm text-gray-500">Bitte ändern Sie Ihr Passwort</p>
+          <p className="mt-1 text-sm text-claimondo-ondo">Bitte ändern Sie Ihr Passwort</p>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-2xl p-8">
+        <div className="bg-white border border-claimondo-border rounded-2xl p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
               <KeyIcon className="w-5 h-5 text-amber-400" />
             </div>
             <div>
-              <p className="text-gray-900 font-medium text-sm">Neues Passwort setzen</p>
-              <p className="text-gray-500 text-xs">Ihr Einmalpasswort muss geändert werden</p>
+              <p className="text-claimondo-navy font-medium text-sm">Neues Passwort setzen</p>
+              <p className="text-claimondo-ondo text-xs">Ihr Einmalpasswort muss geändert werden</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="password" className="text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="text-sm font-medium text-claimondo-navy">
                 Neues Passwort
               </label>
               <PasswordInput
@@ -91,12 +91,12 @@ export default function PasswortAendernPage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-gray-900 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="confirm" className="text-sm font-medium text-gray-700">
+              <label htmlFor="confirm" className="text-sm font-medium text-claimondo-navy">
                 Passwort bestätigen
               </label>
               <PasswordInput
@@ -107,7 +107,7 @@ export default function PasswortAendernPage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-gray-100 text-gray-900 placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
               />
             </div>
 
@@ -121,7 +121,7 @@ export default function PasswortAendernPage() {
               type="submit"
               isLoading={loading}
               loadingText="Wird gespeichert..."
-              className="w-full py-3.5 rounded-xl bg-white hover:bg-zinc-200 disabled:bg-zinc-700 disabled:text-gray-500 text-zinc-950 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
+              className="w-full py-3.5 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white disabled:opacity-50 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
             >
               Passwort ändern
             </LoadingButton>

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,12 +27,12 @@ type AbrechnungRow = {
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
     offen: { label: 'Offen', cls: 'bg-yellow-100 text-yellow-800' },
-    versendet: { label: 'Versendet', cls: 'bg-blue-100 text-blue-800' },
+    versendet: { label: 'Versendet', cls: 'bg-[#f8f9fb] text-claimondo-navy' },
     bezahlt: { label: 'Bezahlt', cls: 'bg-green-100 text-green-800' },
     ueberfaellig: { label: 'Ueberfaellig', cls: 'bg-red-100 text-red-800' },
-    storniert: { label: 'Storniert', cls: 'bg-gray-100 text-gray-500' },
+    storniert: { label: 'Storniert', cls: 'bg-[#f8f9fb] text-claimondo-ondo' },
   }
-  const { label, cls } = map[status] ?? { label: status, cls: 'bg-gray-100 text-gray-600' }
+  const { label, cls } = map[status] ?? { label: status, cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>
       {label}
@@ -115,29 +116,25 @@ export default async function KanzleiAbrechnungenPage() {
 
   return (
     <div className="py-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Kanzlei-Abrechnungen</h1>
-        <p className="text-gray-500 text-sm mt-1">Monatsabrechnungen fuer alle aktiven Kanzleien</p>
-      </div>
+      <PageHeader title="Kanzlei-Abrechnungen" description="Monatsabrechnungen für alle aktiven Kanzleien" size="lg" />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm p-4 border">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Offen</p>
+          <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Offen</p>
           <p className="text-2xl font-bold text-yellow-600 mt-1">{offen}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-4 border">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Bezahlt</p>
+          <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Bezahlt</p>
           <p className="text-2xl font-bold text-green-600 mt-1">{bezahlt}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-4 border">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Ueberfaellig</p>
+          <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Ueberfaellig</p>
           <p className="text-2xl font-bold text-red-600 mt-1">{ueberfaellig}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-4 border">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Offen gesamt</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{gesamtOffen.toFixed(2).replace('.', ',')} €</p>
+          <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Offen gesamt</p>
+          <p className="text-2xl font-bold text-claimondo-navy mt-1">{gesamtOffen.toFixed(2).replace('.', ',')} €</p>
         </div>
       </div>
 
@@ -145,22 +142,22 @@ export default async function KanzleiAbrechnungenPage() {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-[#f8f9fb] border-b">
               <tr>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Rechnungsnummer</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Monat</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Kanzlei</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-600">Vollmachten</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-600">Betrag (brutto)</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Faelligkeit</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-600">Bezahlt am</th>
+                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Rechnungsnummer</th>
+                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Monat</th>
+                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Kanzlei</th>
+                <th className="text-right px-4 py-3 font-semibold text-claimondo-ondo">Vollmachten</th>
+                <th className="text-right px-4 py-3 font-semibold text-claimondo-ondo">Betrag (brutto)</th>
+                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Status</th>
+                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Faelligkeit</th>
+                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Bezahlt am</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-claimondo-border">
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={8} className="px-4 py-8 text-center text-claimondo-ondo/70">
                     Keine Abrechnungen vorhanden
                   </td>
                 </tr>
@@ -170,21 +167,21 @@ export default async function KanzleiAbrechnungenPage() {
                   new Date(row.abrechnungsjahr, row.abrechnungsmonat - 1, 1),
                 )
                 return (
-                  <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-gray-700">{row.rechnungsnummer}</td>
-                    <td className="px-4 py-3 text-gray-700">{monatName} {row.abrechnungsjahr}</td>
-                    <td className="px-4 py-3 text-gray-900 font-medium">{row.kanzlei_name}</td>
-                    <td className="px-4 py-3 text-right text-gray-700">{row.anzahl_vollmachten}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                  <tr key={row.id} className="hover:bg-[#f8f9fb] transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-claimondo-navy">{row.rechnungsnummer}</td>
+                    <td className="px-4 py-3 text-claimondo-navy">{monatName} {row.abrechnungsjahr}</td>
+                    <td className="px-4 py-3 text-claimondo-navy font-medium">{row.kanzlei_name}</td>
+                    <td className="px-4 py-3 text-right text-claimondo-navy">{row.anzahl_vollmachten}</td>
+                    <td className="px-4 py-3 text-right font-semibold text-claimondo-navy">
                       {row.endbetrag_brutto.toFixed(2).replace('.', ',')} €
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={row.status} /></td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">
+                    <td className="px-4 py-3 text-claimondo-ondo text-xs">
                       {row.faelligkeitsdatum
                         ? new Date(row.faelligkeitsdatum).toLocaleDateString('de-DE')
                         : '—'}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">
+                    <td className="px-4 py-3 text-claimondo-ondo text-xs">
                       {row.bezahlt_am
                         ? new Date(row.bezahlt_am).toLocaleDateString('de-DE')
                         : '—'}

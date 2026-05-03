@@ -28,10 +28,10 @@ export function CookieBanner() {
       }}
       expires={365}
     >
-      Wir nutzen Cookies um die Funktionalitaet der Website zu gewaehrleisten
+      Wir nutzen Cookies um die Funktionalität der Website zu gewährleisten
       und anonyme Nutzungs-Statistiken zu sammeln. Mehr Infos in unserer{' '}
       <a href="/datenschutz" style={{ color: '#6AAEF0' }}>
-        Datenschutzerklaerung
+        Datenschutzerklärung
       </a>
       .
     </CookieConsent>

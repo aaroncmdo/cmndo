@@ -89,7 +89,7 @@ export default function NavigationClient({
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-gray-900">
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-claimondo-navy">
 
       {/* ETA Bar at top */}
       <div className="bg-[var(--brand-primary)] text-white px-4 py-3 flex items-center justify-between z-10">
@@ -129,9 +129,9 @@ export default function NavigationClient({
             src={`https://www.google.com/maps/embed/v1/directions?key=${mapsKey}&origin=${position ? `${position.lat},${position.lng}` : 'Mein+Standort'}&destination=${encodeURIComponent(adresse)}&mode=driving`}
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-800 gap-4">
-            <MapPinIcon className="w-16 h-16 text-gray-600" />
-            <p className="text-gray-400 text-sm text-center px-6">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-claimondo-shield gap-4">
+            <MapPinIcon className="w-16 h-16 text-claimondo-ondo" />
+            <p className="text-claimondo-ondo/70 text-sm text-center px-6">
               {adresse || 'Adresse nicht verfügbar'}
             </p>
             {adresse && (

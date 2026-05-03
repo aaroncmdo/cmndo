@@ -28,11 +28,9 @@ export default function PwaInstallBanner() {
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
-  // Register Service Worker
-  useEffect(() => {
-    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
-    navigator.serviceWorker.register('/sw.js').catch(() => {})
-  }, [])
+  // CMM-14: SW-Registration zentral in ServiceWorkerBoot mit Delay.
+  // Hier nicht mehr doppelt registrieren — vermeidet Install-Lifecycle-
+  // Races wenn beide Mount-Points kollidieren.
 
   async function handleInstall() {
     if (!promptRef.current) return
@@ -53,7 +51,7 @@ export default function PwaInstallBanner() {
     <div className="fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50 bg-[#0D1B3E] text-white rounded-2xl p-4 shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom">
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold">Claimondo installieren</p>
-        <p className="text-[11px] text-gray-300 mt-0.5">Schnellzugriff ohne Browser. Offline-fähig.</p>
+        <p className="text-[11px] text-claimondo-ondo/50 mt-0.5">Schnellzugriff ohne Browser. Offline-fähig.</p>
       </div>
       <button
         onClick={handleInstall}
@@ -61,7 +59,7 @@ export default function PwaInstallBanner() {
       >
         <DownloadIcon className="w-3.5 h-3.5" /> Installieren
       </button>
-      <button onClick={handleDismiss} className="text-gray-400 hover:text-white p-1 flex-shrink-0">
+      <button onClick={handleDismiss} className="text-claimondo-ondo/70 hover:text-white p-1 flex-shrink-0">
         <XIcon className="w-4 h-4" />
       </button>
     </div>

@@ -1,18 +1,28 @@
-// AAR-369: Nur-Lese-Avatar mit Initialen-Fallback.
+// AAR-369 / AAR-769: Nur-Lese-Avatar mit Initialen-Fallback.
 // Wird auf Kunden-Seite (Mein Betreuer, Meine Kanzlei, Gutachter-Karte) genutzt.
+//
+// AAR-769 Phase 3 Batch 1: Styling auf Design-Tokens umgestellt. Keine
+// Tailwind-Klassen mehr — Inline-Styles via `tokens`. Dadurch ist die
+// Component RN-kompatibel (bei spaeterem Port: nur <img> -> <Image>
+// austauschen, Rest laeuft via StyleSheet).
+
+import { tokens } from '@/lib/design-tokens'
+
+type AvatarSize = 'xs' | 'sm' | 'md' | 'lg'
 
 type Props = {
   url: string | null | undefined
   name: string | null | undefined
-  size?: 'xs' | 'sm' | 'md' | 'lg'
-  className?: string
+  size?: AvatarSize
+  /** Inline-Style-Override fuer Layout (margin/positioning). Keine Farb-Overrides. */
+  style?: React.CSSProperties
 }
 
-const SIZE_CLASS: Record<NonNullable<Props['size']>, string> = {
-  xs: 'w-8 h-8 text-xs',
-  sm: 'w-10 h-10 text-sm',
-  md: 'w-14 h-14 text-base',
-  lg: 'w-20 h-20 text-2xl',
+const SIZE_MAP: Record<AvatarSize, { diameter: number; fontSize: number }> = {
+  xs: { diameter: 32, fontSize: 12 },
+  sm: { diameter: 40, fontSize: 14 },
+  md: { diameter: 56, fontSize: 16 },
+  lg: { diameter: 80, fontSize: 24 },
 }
 
 function computeInitials(name: string | null | undefined): string {
@@ -23,21 +33,42 @@ function computeInitials(name: string | null | undefined): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-export default function Avatar({ url, name, size = 'md', className = '' }: Props) {
-  const boxClass = SIZE_CLASS[size]
+export default function Avatar({ url, name, size = 'md', style }: Props) {
+  const { diameter, fontSize } = SIZE_MAP[size]
+
   if (url) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={url}
         alt={name ?? 'Profilbild'}
-        className={`${boxClass} rounded-full object-cover bg-gray-100 ${className}`}
+        style={{
+          width: diameter,
+          height: diameter,
+          borderRadius: tokens.radius.full,
+          objectFit: 'cover',
+          backgroundColor: tokens.colors.bg,
+          ...style,
+        }}
       />
     )
   }
+
   return (
     <div
-      className={`${boxClass} rounded-full bg-[#4573A2]/10 text-[#0D1B3E] flex items-center justify-center font-semibold ${className}`}
+      style={{
+        width: diameter,
+        height: diameter,
+        borderRadius: tokens.radius.full,
+        backgroundColor: 'rgba(69, 115, 162, 0.1)', // ondo/10
+        color: tokens.colors.navy,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 600,
+        fontSize,
+        ...style,
+      }}
     >
       {computeInitials(name)}
     </div>

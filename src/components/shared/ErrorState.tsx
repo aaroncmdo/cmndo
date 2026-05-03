@@ -1,11 +1,12 @@
-// AAR-414: Zentrale Error-State-Primitive. Für error.tsx-Boundaries +
-// API-Fehler. Ähnliches Layout wie EmptyState, rote Farbwelt + Retry-CTA.
-// Ergänzt bestehende ErrorBoundary.tsx — diese bleibt für React-Error-
-// Catching, ErrorState ist das UI dafür.
+// AAR-414 / AAR-769 Phase 3: Zentrale Error-State-Primitive. Vollständig
+// auf Primitives migriert. Visuelles Layout wie EmptyState, mit AlertTriangle-
+// Icon in Danger-Tone, optionaler Fehlermeldung im Mono-Font und Retry-CTA.
 
 'use client'
 
 import { AlertTriangleIcon, RefreshCcwIcon } from 'lucide-react'
+import { Button, Card, Icon, Stack, Text } from '@/components/primitives'
+import { tokens } from '@/lib/design-tokens'
 
 export interface ErrorStateProps {
   title?: string
@@ -28,29 +29,47 @@ export default function ErrorState({
     if (typeof window !== 'undefined') window.location.reload()
   })
 
-  return (
-    <div
-      className={`bg-white rounded-2xl p-12 text-center border border-red-200 ${className}`}
-    >
-      <AlertTriangleIcon
-        className="w-10 h-10 text-red-400 mx-auto mb-3"
-        strokeWidth={1.5}
-      />
-      <h2 className="text-gray-900 text-base font-semibold mb-1">{title}</h2>
-      <p className="text-gray-500 text-sm">{description}</p>
-      {error?.message && (
-        <p className="text-red-400/70 text-xs mt-3 font-mono break-all max-w-md mx-auto">
-          {error.message}
-        </p>
-      )}
-      <button
-        type="button"
-        onClick={handleRetry}
-        className="inline-flex items-center gap-2 bg-[#0D1B3E] hover:bg-[#4573A2] text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors mt-5"
-      >
-        <RefreshCcwIcon className="w-4 h-4" />
-        {retryLabel}
-      </button>
-    </div>
+  const inner = (
+    <Card p={12}>
+      <Stack gap={2} align="center">
+        <Icon icon={AlertTriangleIcon} size={40} color="danger" />
+        <Text variant="headingSm" color="navy" align="center">
+          {title}
+        </Text>
+        <Text variant="bodySm" color="ondo" align="center">
+          {description}
+        </Text>
+        {error?.message && (
+          <p
+            style={{
+              color: tokens.colors.danger,
+              fontSize: 11,
+              fontFamily: 'monospace',
+              wordBreak: 'break-all',
+              maxWidth: 480,
+              textAlign: 'center',
+              marginTop: tokens.spacing[2],
+            }}
+          >
+            {error.message}
+          </p>
+        )}
+        <div style={{ marginTop: tokens.spacing[4] }}>
+          <Button
+            tone="navy"
+            size="md"
+            iconLeft={<Icon icon={RefreshCcwIcon} size={16} color="white" />}
+            onPress={handleRetry}
+          >
+            {retryLabel}
+          </Button>
+        </div>
+      </Stack>
+    </Card>
   )
+
+  if (className) {
+    return <div className={className}>{inner}</div>
+  }
+  return inner
 }

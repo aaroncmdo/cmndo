@@ -1,7 +1,7 @@
-// AAR-410: Zentrale Fall-Status-Badge-Primitive.
+// AAR-410 / AAR-769 Phase 3 / AAR-782: Zentrale Fall-Status-Badge-Primitive.
 // Zieht Label + Farben aus FALL_STATUS_LABELS/FALL_STATUS_COLORS in
-// src/lib/statusLabels.ts — alle neuen Stellen MÜSSEN diesen Badge nutzen
-// statt eigene Labels/Farben zu definieren.
+// src/lib/statusLabels.ts. Die Map liefert pro Status Light-Bg-Klassen
+// aus 7 Token-Slots (neutral/active/pending/done/success/warning/danger).
 
 import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
 
@@ -22,7 +22,7 @@ export interface FallStatusBadgeProps {
 export default function FallStatusBadge({ status, size = 'sm', className = '' }: FallStatusBadgeProps) {
   const code = status ?? ''
   const label = FALL_STATUS_LABELS[code] ?? code ?? '—'
-  const color = FALL_STATUS_COLORS[code] ?? 'bg-gray-100 text-gray-700 border-gray-200'
+  const color = FALL_STATUS_COLORS[code] ?? 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border'
   return (
     <span
       className={`inline-flex items-center rounded-full font-medium whitespace-nowrap ${SIZE_CLASSES[size]} ${color} ${className}`}

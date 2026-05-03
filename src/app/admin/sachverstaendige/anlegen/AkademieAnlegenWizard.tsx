@@ -164,8 +164,8 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
             <CheckCircle2Icon className="w-6 h-6 text-emerald-600" />
           </div>
           <div className="flex-1">
-            <h2 className="text-lg font-semibold text-gray-900">{akademieName} angelegt</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="text-lg font-semibold text-claimondo-navy">{akademieName} angelegt</h2>
+            <p className="text-sm text-claimondo-ondo mt-1">
               1 Verwalter-Account + {result.sub_count} Sub-SV(s) wurden angelegt.
               Welcome-Mails versendet. Erst-Anzahlung: {erstAnzahlungEur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}.
             </p>
@@ -190,32 +190,32 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
           return (
             <div key={s.key} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                i < step ? 'bg-emerald-500' : i === step ? 'bg-[#4573A2]' : 'bg-gray-200'
+                i < step ? 'bg-emerald-500' : i === step ? 'bg-[#4573A2]' : 'bg-claimondo-border'
               }`}>
                 <Icon className="w-4 h-4 text-white" />
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`w-8 h-0.5 ${i < step ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+                <div className={`w-8 h-0.5 ${i < step ? 'bg-emerald-500' : 'bg-claimondo-border'}`} />
               )}
             </div>
           )
         })}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-5">{STEPS[step].label}</h2>
+      <div className="bg-white border border-claimondo-border rounded-2xl p-6">
+        <h2 className="text-lg font-semibold text-claimondo-navy mb-5">{STEPS[step].label}</h2>
 
         {/* SCHRITT 0: Akademie-Stammdaten + Verwalter */}
         {step === 0 && (
           <div className="space-y-5">
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Akademie-Stammdaten</p>
+              <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-2">Akademie-Stammdaten</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Akademie-Name *" value={akademieName} onChange={setAkademieName} className="sm:col-span-2" />
                 <Field label="Rechtsform" value={rechtsform} onChange={setRechtsform} placeholder="z.B. e.V., GmbH" />
                 <Field label="Steuernummer *" value={steuernummer} onChange={setSteuernummer} />
                 <div className="sm:col-span-2">
-                  <label className="text-xs text-gray-500 mb-1.5 block">
+                  <label className="text-xs text-claimondo-ondo mb-1.5 block">
                     Anschrift *
                     {anschriftLat !== null && <span className="text-emerald-600 ml-2">✓ Geo gesetzt</span>}
                   </label>
@@ -229,7 +229,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
                       setAnschriftLng(place.lng)
                       setAnschriftPlaceId(place.place_id)
                     }}
-                    className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                    className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
                   />
                 </div>
                 <Field label="USt-IdNr (optional)" value={ustId} onChange={setUstId} />
@@ -239,8 +239,8 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Akademie-Verwalter</p>
+            <div className="pt-4 border-t border-claimondo-border">
+              <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-2">Akademie-Verwalter</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <SelectField label="Anrede *" value={verwalterAnrede} onChange={setVerwalterAnrede} options={ANREDE_OPTIONEN} placeholder="Bitte wählen..." />
                 <SelectField label="Titel" value={verwalterTitel} onChange={setVerwalterTitel} options={TITEL_OPTIONEN} placeholder="kein Titel" />
@@ -251,8 +251,8 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-200 space-y-3">
-              <p className="text-xs text-gray-500 uppercase tracking-wide">Default-Spezialisierungen (gelten für die ganze Akademie)</p>
+            <div className="pt-4 border-t border-claimondo-border space-y-3">
+              <p className="text-xs text-claimondo-ondo uppercase tracking-wide">Default-Spezialisierungen (gelten für die ganze Akademie)</p>
               <TagSection title="Qualifikationen" options={QUALIFIKATIONEN} selected={qualifikationen} onToggle={v => toggleTag(setQualifikationen, v)} />
               <TagSection title="Spezifikationen" options={SPEZIFIKATIONEN} selected={spezifikationen} onToggle={v => toggleTag(setSpezifikationen, v)} />
               {/* AAR-204: Schadenarten raus (irrelevant für SV-Zuweisung) */}
@@ -264,7 +264,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
         {step === 1 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-claimondo-ondo">
                 Mitglieder können auch nachträglich via Sub-SV-Tab hinzugefügt werden — Phase 1 erlaubt 0 Sub-SVs.
               </p>
               <button type="button" onClick={addSubSv}
@@ -274,15 +274,15 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
               </button>
             </div>
             {subSvs.length === 0 && (
-              <div className="text-center py-8 text-xs text-gray-400">
+              <div className="text-center py-8 text-xs text-claimondo-ondo/70">
                 Keine Sub-SVs — die Akademie wird leer angelegt.
               </div>
             )}
             {subSvs.map((s, idx) => (
-              <div key={s.id} className="border border-gray-200 rounded-xl p-4 space-y-3">
+              <div key={s.id} className="border border-claimondo-border rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-gray-500">Mitglied {idx + 1}</span>
-                  <button type="button" onClick={() => removeSubSv(s.id)} className="text-gray-300 hover:text-red-400 p-0.5">
+                  <span className="text-xs font-semibold text-claimondo-ondo">Mitglied {idx + 1}</span>
+                  <button type="button" onClick={() => removeSubSv(s.id)} className="text-claimondo-ondo/50 hover:text-red-400 p-0.5">
                     <TrashIcon className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -297,12 +297,12 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
                 </div>
                 <Field label="Telefon" type="tel" value={s.telefon} onChange={v => updateSubSv(s.id, 'telefon', v)} />
                 <div>
-                  <label className="text-xs text-gray-500 mb-1.5 block">Paket</label>
+                  <label className="text-xs text-claimondo-ondo mb-1.5 block">Paket</label>
                   <div className="grid grid-cols-3 gap-2">
                     {(['standard', 'pro', 'premium'] as const).map(p => (
                       <button key={p} type="button" onClick={() => updateSubSv(s.id, 'paket', p)}
                         className={`px-3 py-2 rounded-lg border text-xs transition-colors ${
-                          s.paket === p ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#4573A2] font-semibold' : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                          s.paket === p ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#4573A2] font-semibold' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
                         }`}>
                         <div className="capitalize">{p}</div>
                         <div className="text-[10px] mt-0.5 opacity-70">{PAKET_KONFIG[p].kontingent} F · {PAKET_KONFIG[p].preis_anzahlung_eur}€</div>
@@ -314,7 +314,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
             ))}
             {subSvs.length > 0 && (
               <div className="bg-[#4573A2]/5 border border-[#4573A2]/10 rounded-xl p-4">
-                <p className="text-xs text-gray-500">Sub-SVs Gesamt-Kontingent</p>
+                <p className="text-xs text-claimondo-ondo">Sub-SVs Gesamt-Kontingent</p>
                 <p className="text-2xl font-bold text-[#4573A2] mt-1">{gesamtKontingentSubSvs} Fälle/Monat</p>
               </div>
             )}
@@ -324,25 +324,25 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
         {/* SCHRITT 2: Zusammenfassung */}
         {step === 2 && (
           <div className="space-y-4">
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm">
-              <p className="text-xs text-gray-500 uppercase mb-2">Akademie</p>
-              <p className="text-gray-900"><strong>{akademieName}</strong>{rechtsform && ` (${rechtsform})`}</p>
-              <p className="text-gray-500 text-xs mt-1">{anschrift}</p>
-              <p className="text-gray-500 text-xs">Steuer: {steuernummer}</p>
-              <p className="text-gray-500 text-xs">Radius: {radiusKm} km · {maxFaelleMonat} Fälle/Monat</p>
-              <p className="text-gray-500 text-xs">Erst-Anzahlung: {erstAnzahlungEur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</p>
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <p className="text-xs text-gray-500 uppercase mb-1">Verwalter</p>
-                <p className="text-gray-900"><strong>{[verwalterAnrede, verwalterTitel, verwalterVorname, verwalterNachname].filter(Boolean).join(' ')}</strong></p>
-                <p className="text-gray-500 text-xs">{verwalterEmail}</p>
+            <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 text-sm">
+              <p className="text-xs text-claimondo-ondo uppercase mb-2">Akademie</p>
+              <p className="text-claimondo-navy"><strong>{akademieName}</strong>{rechtsform && ` (${rechtsform})`}</p>
+              <p className="text-claimondo-ondo text-xs mt-1">{anschrift}</p>
+              <p className="text-claimondo-ondo text-xs">Steuer: {steuernummer}</p>
+              <p className="text-claimondo-ondo text-xs">Radius: {radiusKm} km · {maxFaelleMonat} Fälle/Monat</p>
+              <p className="text-claimondo-ondo text-xs">Erst-Anzahlung: {erstAnzahlungEur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</p>
+              <div className="mt-3 pt-3 border-t border-claimondo-border">
+                <p className="text-xs text-claimondo-ondo uppercase mb-1">Verwalter</p>
+                <p className="text-claimondo-navy"><strong>{[verwalterAnrede, verwalterTitel, verwalterVorname, verwalterNachname].filter(Boolean).join(' ')}</strong></p>
+                <p className="text-claimondo-ondo text-xs">{verwalterEmail}</p>
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <p className="text-xs text-gray-500 uppercase mb-2">{subSvs.length} Mitglied(er)</p>
+              <div className="mt-3 pt-3 border-t border-claimondo-border">
+                <p className="text-xs text-claimondo-ondo uppercase mb-2">{subSvs.length} Mitglied(er)</p>
                 {subSvs.length === 0 ? (
-                  <p className="text-xs text-gray-400">Werden nachträglich hinzugefügt</p>
+                  <p className="text-xs text-claimondo-ondo/70">Werden nachträglich hinzugefügt</p>
                 ) : (
                   subSvs.map((s, i) => (
-                    <div key={s.id} className="text-xs text-gray-700 mb-1">
+                    <div key={s.id} className="text-xs text-claimondo-navy mb-1">
                       <strong>{i + 1}.</strong> {s.vorname} {s.nachname} ({s.email}) — {s.paket}
                     </div>
                   ))
@@ -352,7 +352,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
 
             <div className="bg-[#4573A2]/5 border border-[#4573A2]/10 rounded-xl p-4 flex items-start gap-3">
               <MailIcon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-gray-700">
+              <div className="text-xs text-claimondo-navy">
                 <strong>{1 + subSvs.length} Welcome-Mail(s) werden versendet:</strong>
                 <ul className="mt-2 ml-4 list-disc space-y-1">
                   <li>1× an Verwalter {verwalterEmail}</li>
@@ -372,7 +372,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
         <div className="flex items-center gap-3 mt-6">
           {step > 0 && (
             <button type="button" onClick={() => setStep(step - 1)} disabled={saving}
-              className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40">
+              className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40">
               Zurück
             </button>
           )}
@@ -396,9 +396,9 @@ function Field({
 }) {
   return (
     <div className={className}>
-      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
+        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
     </div>
   )
 }
@@ -406,9 +406,9 @@ function Field({
 function NumField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <div>
-      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <input type="number" value={value} onChange={e => onChange(Number(e.target.value) || 0)}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
+        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
     </div>
   )
 }
@@ -421,9 +421,9 @@ function SelectField({
 }) {
   return (
     <div>
-      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <select value={value} onChange={e => onChange(e.target.value)}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#4573A2]">
+        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]">
         {!options.includes('') && <option value="" disabled>{placeholder ?? 'Bitte wählen...'}</option>}
         {options.map(opt => (
           <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>
@@ -441,8 +441,8 @@ function TagSection({
   return (
     <div>
       <div className="flex items-baseline justify-between mb-1.5">
-        <span className="text-xs font-medium text-gray-700">{title}</span>
-        <span className="text-[10px] text-gray-400">{selected.length} gewählt</span>
+        <span className="text-xs font-medium text-claimondo-navy">{title}</span>
+        <span className="text-[10px] text-claimondo-ondo/70">{selected.length} gewählt</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {options.map(opt => {
@@ -450,7 +450,7 @@ function TagSection({
           return (
             <button key={opt} type="button" onClick={() => onToggle(opt)}
               className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
-                active ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-gray-500 hover:text-gray-800'
+                active ? 'bg-[#4573A2] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy'
               }`}>
               {opt}
             </button>

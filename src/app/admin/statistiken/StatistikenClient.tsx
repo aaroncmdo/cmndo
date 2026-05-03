@@ -6,6 +6,7 @@ import {
   LineChart, Line,
 } from 'recharts'
 import DrillDownModal from '@/components/admin/DrillDownModal'
+import PageHeader from '@/components/shared/PageHeader'
 import type { DrillDownItem } from '@/lib/analytics'
 import type {
   UserStatistikRolle,
@@ -103,7 +104,7 @@ function last6Months(): string[] {
 function canSee(rolle: UserStatistikRolle, section: 'kuerzung' | 'unfall' | 'gegner' | 'potenziale'): boolean {
   if (rolle === 'admin') return true
   if (rolle === 'kundenbetreuer') return section !== 'potenziale'
-  if (rolle === 'leadbearbeiter') return section === 'unfall' || section === 'gegner'
+  if (rolle === 'dispatch') return section === 'unfall' || section === 'gegner'
   if (section === 'potenziale') {
     return ['sv_solo', 'sv_buero_inhaber', 'sv_sub_buero', 'akademie_verwalter', 'akademie_sub_sv', 'community_member'].includes(rolle)
   }
@@ -132,7 +133,7 @@ export default function StatistikenClient({
   totalLeads: number
 }) {
   const [zeitraum, setZeitraum] = useState(90)
-  const [nurEigene, setNurEigene] = useState(rolle === 'kundenbetreuer' || rolle === 'leadbearbeiter')
+  const [nurEigene, setNurEigene] = useState(rolle === 'kundenbetreuer' || rolle === 'dispatch')
   const [filterSv, setFilterSv] = useState('')
   const [filterVersicherer, setFilterVersicherer] = useState('')
   const [filterPlz, setFilterPlz] = useState('')
@@ -156,8 +157,8 @@ export default function StatistikenClient({
     if (nurEigene && rolle === 'kundenbetreuer') {
       f = f.filter(x => x.kundenbetreuer_id === userId)
     }
-    if (nurEigene && rolle === 'leadbearbeiter') {
-      f = f.filter(x => x.leadbearbeiter_id === userId)
+    if (nurEigene && rolle === 'dispatch') {
+      f = f.filter(x => x.dispatch_id === userId)
     }
     if (filterSv) f = f.filter(x => x.sv_id === filterSv)
     if (filterPlz) f = f.filter(x => x.schadens_plz?.startsWith(filterPlz))
@@ -171,7 +172,7 @@ export default function StatistikenClient({
       if (!f) return false
       if (cutoff && f.created_at < cutoff) return false
       if (nurEigene && rolle === 'kundenbetreuer' && f.kundenbetreuer_id !== userId) return false
-      if (nurEigene && rolle === 'leadbearbeiter' && f.leadbearbeiter_id !== userId) return false
+      if (nurEigene && rolle === 'dispatch' && f.dispatch_id !== userId) return false
       if (filterSv && f.sv_id !== filterSv) return false
       if (filterPlz && !f.schadens_plz?.startsWith(filterPlz)) return false
       if (filterVersicherer && k.versicherer !== filterVersicherer) return false
@@ -467,34 +468,34 @@ export default function StatistikenClient({
   return (
     <div className="flex h-full flex-col">
       {/* Sticky Filter-Bar */}
-      <header className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm px-4 py-3">
+      <header className="sticky top-0 z-10 bg-white border-b border-claimondo-border shadow-sm px-4 py-3">
         <div className="max-w-[1600px] mx-auto space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h1 className="text-xl font-semibold text-gray-900">Statistiken</h1>
+            <PageHeader title="Statistiken" />
             <div className="flex items-center gap-3 flex-wrap">
               {/* Zeitraum */}
-              <div className="flex bg-gray-100 rounded-lg p-0.5">
+              <div className="flex bg-[#f8f9fb] rounded-lg p-0.5">
                 {ZEITRAUM_OPTIONS.map(o => (
                   <button key={o.days} onClick={() => setZeitraum(o.days)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${zeitraum === o.days ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${zeitraum === o.days ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'}`}>
                     {o.label}
                   </button>
                 ))}
               </div>
               {/* Kundenberater / Leadabarbeiter Toggle */}
-              {(rolle === 'kundenbetreuer' || rolle === 'leadbearbeiter') && (
-                <div className="flex bg-gray-100 rounded-lg p-0.5">
+              {(rolle === 'kundenbetreuer' || rolle === 'dispatch') && (
+                <div className="flex bg-[#f8f9fb] rounded-lg p-0.5">
                   <button onClick={() => setNurEigene(true)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${nurEigene ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${nurEigene ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'}`}>
                     Eigene
                   </button>
                   <button onClick={() => setNurEigene(false)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${!nurEigene ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
-                    {rolle === 'leadbearbeiter' ? 'Team' : 'Alle Fälle'}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${!nurEigene ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'}`}>
+                    {rolle === 'dispatch' ? 'Team' : 'Alle Fälle'}
                   </button>
                 </div>
               )}
-              <span className="text-xs text-gray-400">{filtered.length} Fälle</span>
+              <span className="text-xs text-claimondo-ondo/70">{filtered.length} Fälle</span>
             </div>
           </div>
           {/* Extended Filters Row */}
@@ -502,7 +503,7 @@ export default function StatistikenClient({
             {/* SV Filter */}
             {(rolle === 'admin' || rolle === 'sv_buero_inhaber' || rolle === 'akademie_verwalter') && svOptions.length > 1 && (
               <select value={filterSv} onChange={e => setFilterSv(e.target.value)}
-                className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-[#4573A2]">
+                className="px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-[#4573A2]">
                 <option value="">Alle SVs</option>
                 {svOptions.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
               </select>
@@ -510,7 +511,7 @@ export default function StatistikenClient({
             {/* Versicherer Filter */}
             {versichererOptions.length > 0 && (
               <select value={filterVersicherer} onChange={e => setFilterVersicherer(e.target.value)}
-                className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-[#4573A2]">
+                className="px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-[#4573A2]">
                 <option value="">Alle Versicherer</option>
                 {versichererOptions.map(v => <option key={v} value={v}>{v}</option>)}
               </select>
@@ -518,10 +519,10 @@ export default function StatistikenClient({
             {/* Region (PLZ) Filter */}
             <input type="text" value={filterPlz} onChange={e => setFilterPlz(e.target.value.replace(/\D/g, '').slice(0, 5))}
               placeholder="PLZ-Region" maxLength={5}
-              className="w-24 px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-[#4573A2]" />
+              className="w-24 px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-[#4573A2]" />
             {(filterSv || filterVersicherer || filterPlz) && (
               <button onClick={() => { setFilterSv(''); setFilterVersicherer(''); setFilterPlz('') }}
-                className="text-xs text-gray-400 hover:text-gray-600">Filter zurücksetzen</button>
+                className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo">Filter zurücksetzen</button>
             )}
           </div>
         </div>
@@ -535,7 +536,7 @@ export default function StatistikenClient({
           {canSee(rolle, 'kuerzung') && (
             <ChartCard title="Kürzungs- & Ablehnungsgründe" subtitle="Sortiert nach Kürzungssumme absteigend">
               {kuerzungData.length === 0 ? (
-                <p className="text-gray-400 text-sm py-8 text-center">Noch keine Regulierungs-Klassifizierungen erfasst</p>
+                <p className="text-claimondo-ondo/70 text-sm py-8 text-center">Noch keine Regulierungs-Klassifizierungen erfasst</p>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                   <ResponsiveContainer width="100%" height={280}>
@@ -551,18 +552,18 @@ export default function StatistikenClient({
                   </ResponsiveContainer>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead><tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
+                      <thead><tr className="border-b border-claimondo-border text-[10px] text-claimondo-ondo uppercase">
                         <th className="text-left py-2 px-2">Grund</th><th className="text-right py-2 px-2">Fälle</th>
                         <th className="text-right py-2 px-2">Summe</th><th className="text-right py-2 px-2">Ø Kürzung</th>
                       </tr></thead>
                       <tbody>
                         {kuerzungData.map(d => (
-                          <tr key={d.grund} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                          <tr key={d.grund} className="border-b border-claimondo-border hover:bg-[#f8f9fb] cursor-pointer"
                             onClick={() => openDrillDown(`Kürzungsgrund: ${d.label}`, d.fallIds, 'regulierungs_klassifizierung.kuerzung_betrag_netto')}>
-                            <td className="py-2 px-2 text-gray-800">{d.label}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-gray-600">{d.count}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-gray-800 font-medium">{fmtEur(d.summeKuerzung)}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-gray-600">{fmtEur(d.avgKuerzung)}</td>
+                            <td className="py-2 px-2 text-claimondo-navy">{d.label}</td>
+                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{d.count}</td>
+                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-navy font-medium">{fmtEur(d.summeKuerzung)}</td>
+                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{fmtEur(d.avgKuerzung)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -577,7 +578,7 @@ export default function StatistikenClient({
           {canSee(rolle, 'unfall') && (
             <ChartCard title="Unfall-Konstellationen" subtitle={`${unfallTotal} Fälle mit Unfall-Typ erfasst`}>
               {unfallData.length === 0 ? (
-                <p className="text-gray-400 text-sm py-8 text-center">Noch keine Unfall-Konstellationen erfasst</p>
+                <p className="text-claimondo-ondo/70 text-sm py-8 text-center">Noch keine Unfall-Konstellationen erfasst</p>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                   <ResponsiveContainer width="100%" height={300}>
@@ -594,21 +595,21 @@ export default function StatistikenClient({
                   </ResponsiveContainer>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead><tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
+                      <thead><tr className="border-b border-claimondo-border text-[10px] text-claimondo-ondo uppercase">
                         <th className="text-left py-2 px-2">Konstellation</th><th className="text-right py-2 px-2">Fälle</th>
                         <th className="text-right py-2 px-2">Anteil</th><th className="text-right py-2 px-2">Ø Schadenhöhe</th>
                         <th className="text-right py-2 px-2">Ø Dauer</th><th className="text-right py-2 px-2">Konversion</th>
                       </tr></thead>
                       <tbody>
                         {unfallData.map(d => (
-                          <tr key={d.typ} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                          <tr key={d.typ} className="border-b border-claimondo-border hover:bg-[#f8f9fb] cursor-pointer"
                             onClick={() => openDrillDown(`Unfall: ${d.label}`, d.fallIds, 'faelle.unfall_konstellation')}>
-                            <td className="py-2 px-2 text-gray-800">{d.label}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-gray-600">{d.count}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-gray-600">{unfallTotal > 0 ? `${Math.round((d.count / unfallTotal) * 100)}%` : '—'}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-gray-800 font-medium">{d.avgBetrag > 0 ? fmtEur(d.avgBetrag) : '—'}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-gray-600">{d.avgDauer != null ? `${d.avgDauer} T` : '—'}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-gray-600">{d.konversionPct != null ? `${d.konversionPct}%` : '—'}</td>
+                            <td className="py-2 px-2 text-claimondo-navy">{d.label}</td>
+                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{d.count}</td>
+                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{unfallTotal > 0 ? `${Math.round((d.count / unfallTotal) * 100)}%` : '—'}</td>
+                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-navy font-medium">{d.avgBetrag > 0 ? fmtEur(d.avgBetrag) : '—'}</td>
+                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{d.avgDauer != null ? `${d.avgDauer} T` : '—'}</td>
+                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{d.konversionPct != null ? `${d.konversionPct}%` : '—'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -624,9 +625,9 @@ export default function StatistikenClient({
             <ChartCard title="Unfall mit Gegner" subtitle="Beteiligte, Fahrzeugtypen & Wer-trifft-Wen">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 <div>
-                  <h4 className="text-xs font-medium text-gray-500 mb-3">Anzahl Beteiligte</h4>
+                  <h4 className="text-xs font-medium text-claimondo-ondo mb-3">Anzahl Beteiligte</h4>
                   {gegnerBeteiligteData.length === 0 ? (
-                    <p className="text-gray-400 text-sm py-6 text-center">Keine Daten</p>
+                    <p className="text-claimondo-ondo/70 text-sm py-6 text-center">Keine Daten</p>
                   ) : (
                     <ResponsiveContainer width="100%" height={220}>
                       <PieChart>
@@ -643,9 +644,9 @@ export default function StatistikenClient({
                   )}
                 </div>
                 <div>
-                  <h4 className="text-xs font-medium text-gray-500 mb-3">Fahrzeugtyp Gegner</h4>
+                  <h4 className="text-xs font-medium text-claimondo-ondo mb-3">Fahrzeugtyp Gegner</h4>
                   {gegnerFahrzeugData.length === 0 ? (
-                    <p className="text-gray-400 text-sm py-6 text-center">Keine Daten</p>
+                    <p className="text-claimondo-ondo/70 text-sm py-6 text-center">Keine Daten</p>
                   ) : (
                     <ResponsiveContainer width="100%" height={220}>
                       <BarChart data={gegnerFahrzeugData}>
@@ -664,21 +665,21 @@ export default function StatistikenClient({
               {/* Wer-trifft-Wen Heatmap Matrix */}
               {heatmapData.maxCount > 0 && (
                 <div className="mt-5">
-                  <h4 className="text-xs font-medium text-gray-500 mb-3">Wer-trifft-Wen Matrix (Eigenes Fahrzeug vs. Gegner)</h4>
+                  <h4 className="text-xs font-medium text-claimondo-ondo mb-3">Wer-trifft-Wen Matrix (Eigenes Fahrzeug vs. Gegner)</h4>
                   <div className="overflow-x-auto">
                     <table className="text-[10px]">
                       <thead>
                         <tr>
-                          <th className="py-1.5 px-2 text-left text-gray-500 font-medium">Eigenes ↓ \ Gegner →</th>
+                          <th className="py-1.5 px-2 text-left text-claimondo-ondo font-medium">Eigenes ↓ \ Gegner →</th>
                           {heatmapData.typLabels.map(t => (
-                            <th key={t} className="py-1.5 px-2 text-center text-gray-500 font-medium">{FAHRZEUGTYP_LABELS[t]}</th>
+                            <th key={t} className="py-1.5 px-2 text-center text-claimondo-ondo font-medium">{FAHRZEUGTYP_LABELS[t]}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {heatmapData.typLabels.map(eigen => (
                           <tr key={eigen}>
-                            <td className="py-1.5 px-2 text-gray-700 font-medium">{FAHRZEUGTYP_LABELS[eigen]}</td>
+                            <td className="py-1.5 px-2 text-claimondo-navy font-medium">{FAHRZEUGTYP_LABELS[eigen]}</td>
                             {heatmapData.typLabels.map(gegner => {
                               const cell = heatmapData.matrix[eigen]?.[gegner]
                               const count = cell?.count ?? 0
@@ -702,7 +703,7 @@ export default function StatistikenClient({
               {/* Insight Box */}
               {gegnerFahrzeugData.length >= 2 && (
                 <div className="mt-4 bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-3">
-                  <p className="text-xs text-gray-700">
+                  <p className="text-xs text-claimondo-navy">
                     <span className="font-semibold text-[#4573A2]">Insight:</span>{' '}
                     {gegnerFahrzeugData[0].count} Fälle ({Math.round((gegnerFahrzeugData[0].count / filtered.length) * 100)}%) haben {gegnerFahrzeugData[0].label} als Gegner.
                     {gegnerFahrzeugData.length > 1 && ` ${gegnerFahrzeugData[1].label}-Fälle haben durchschnittlich ${fmtEur(gegnerFahrzeugData[1].avgBetrag)} Schadenhöhe vs. ${fmtEur(gegnerFahrzeugData[0].avgBetrag)} bei ${gegnerFahrzeugData[0].label}.`}
@@ -716,29 +717,29 @@ export default function StatistikenClient({
           {canSee(rolle, 'potenziale') && (
             <ChartCard title="Potenziale — Branchen-Benchmark Vergleich" subtitle="Eigene Werte vs. Branchendurchschnitt">
               {potenzialeData.length === 0 ? (
-                <p className="text-gray-400 text-sm py-8 text-center">Keine Benchmark-Daten vorhanden</p>
+                <p className="text-claimondo-ondo/70 text-sm py-8 text-center">Keine Benchmark-Daten vorhanden</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {potenzialeData.map(b => (
-                    <div key={b.metrik} className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                    <div key={b.metrik} className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="text-sm font-medium text-gray-800 pr-2">{b.beschreibung}</h4>
+                        <h4 className="text-sm font-medium text-claimondo-navy pr-2">{b.beschreibung}</h4>
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${
                           b.statusColor === 'green' ? 'bg-green-100 text-green-700' :
                           b.statusColor === 'amber' ? 'bg-amber-100 text-amber-700' :
                           b.statusColor === 'blue' ? 'bg-[#4573A2]/10 text-[#4573A2]' :
-                          'bg-gray-100 text-gray-500'
+                          'bg-[#f8f9fb] text-claimondo-ondo'
                         }`}>
                           {b.statusLabel}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-3 mb-2">
-                        <span className="text-2xl font-bold text-gray-900 tabular-nums">
+                        <span className="text-2xl font-bold text-claimondo-navy tabular-nums">
                           {b.eigenerWert != null
                             ? b.einheit === 'EUR' ? fmtEur(b.eigenerWert) : `${b.eigenerWert}${b.einheit === 'Prozent' ? '%' : ''}`
                             : '—'}
                         </span>
-                        <span className="text-sm text-gray-400">
+                        <span className="text-sm text-claimondo-ondo/70">
                           vs. {b.einheit === 'EUR' ? fmtEur(Number(b.branchen_wert)) : `${b.branchen_wert}${b.einheit === 'Prozent' ? '%' : ''}`} Branche
                         </span>
                       </div>
@@ -756,7 +757,7 @@ export default function StatistikenClient({
 
                       {/* Progress bar */}
                       {b.eigenerWert != null && (
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-2 bg-claimondo-border rounded-full overflow-hidden">
                           <div className={`h-full rounded-full transition-all ${
                             b.statusColor === 'green' ? 'bg-green-500' : b.statusColor === 'amber' ? 'bg-amber-500' : 'bg-[#4573A2]'
                           }`} style={{ width: `${Math.min(Math.max((b.eigenerWert / Number(b.branchen_wert)) * 50, 5), 100)}%` }} />
@@ -764,13 +765,13 @@ export default function StatistikenClient({
                       )}
 
                       <div className="flex items-center justify-between mt-2">
-                        <span className="text-[10px] text-gray-400">Quelle: {b.quelle ?? 'k.A.'}</span>
-                        <span className="text-[10px] text-gray-400">{b.datenpunkte} Fälle</span>
+                        <span className="text-[10px] text-claimondo-ondo/70">Quelle: {b.quelle ?? 'k.A.'}</span>
+                        <span className="text-[10px] text-claimondo-ondo/70">{b.datenpunkte} Fälle</span>
                       </div>
 
                       {/* Dynamic Insight Text */}
                       {b.insight && (
-                        <p className="text-[11px] text-gray-600 mt-2 leading-relaxed italic">{b.insight}</p>
+                        <p className="text-[11px] text-claimondo-ondo mt-2 leading-relaxed italic">{b.insight}</p>
                       )}
 
                       {/* Was tun? Tooltip */}
@@ -799,17 +800,17 @@ export default function StatistikenClient({
             <ChartCard title="Community Leaderboard">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead><tr className="border-b border-gray-200 text-[10px] text-gray-500 uppercase">
+                  <thead><tr className="border-b border-claimondo-border text-[10px] text-claimondo-ondo uppercase">
                     <th className="text-left py-2 px-2">Rang</th><th className="text-left py-2 px-2">SV</th>
                     <th className="text-right py-2 px-2">Fälle</th><th className="text-right py-2 px-2">Umsatz</th>
                   </tr></thead>
                   <tbody>
                     {leaderboard.map(l => (
-                      <tr key={l.sv_id} className="border-b border-gray-100">
-                        <td className="py-2 px-2 text-gray-800 font-medium">#{l.rang}</td>
-                        <td className="py-2 px-2 text-gray-700">{svNameMap[l.sv_id] ?? l.sv_id.slice(0, 8)}</td>
-                        <td className="py-2 px-2 text-right tabular-nums text-gray-600">{l.faelle_count}</td>
-                        <td className="py-2 px-2 text-right tabular-nums text-gray-800 font-medium">{fmtEur(Number(l.umsatz_netto))}</td>
+                      <tr key={l.sv_id} className="border-b border-claimondo-border">
+                        <td className="py-2 px-2 text-claimondo-navy font-medium">#{l.rang}</td>
+                        <td className="py-2 px-2 text-claimondo-navy">{svNameMap[l.sv_id] ?? l.sv_id.slice(0, 8)}</td>
+                        <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{l.faelle_count}</td>
+                        <td className="py-2 px-2 text-right tabular-nums text-claimondo-navy font-medium">{fmtEur(Number(l.umsatz_netto))}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -834,10 +835,10 @@ export default function StatistikenClient({
 
 function ChartCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5">
+    <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
       <div className="mb-4">
-        <h2 className="text-base font-semibold text-gray-900">{title}</h2>
-        {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+        <h2 className="text-base font-semibold text-claimondo-navy">{title}</h2>
+        {subtitle && <p className="text-xs text-claimondo-ondo/70 mt-0.5">{subtitle}</p>}
       </div>
       {children}
     </div>

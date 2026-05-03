@@ -11,7 +11,7 @@ export default function FlowError({ error: _error }: { error: Error }) {
         <h1 className="text-lg font-semibold text-[#0D1B3E] mb-2" style={{ fontFamily: 'Montserrat, sans-serif' }}>
           Etwas ist schiefgelaufen
         </h1>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-claimondo-ondo mb-6">
           Bitte versuchen Sie es erneut. Falls das Problem weiterhin besteht, kontaktieren Sie uns.
         </p>
         <button onClick={() => window.location.reload()}

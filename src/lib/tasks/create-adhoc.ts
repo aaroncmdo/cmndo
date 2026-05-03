@@ -10,7 +10,7 @@ import { revalidatePath } from 'next/cache'
 
 export type EntityType = 'kunde' | 'sachverstaendiger' | 'kanzlei' | 'versicherung'
 export type EmpfaengerRolle =
-  | 'leadbearbeiter'
+  | 'dispatch'
   | 'kundenbetreuer'
   | 'sachverstaendiger'
   | 'kanzlei'

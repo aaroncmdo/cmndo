@@ -5,6 +5,16 @@ on:
   push:
     branches: [main, staging]
 
+# wait-for-vercel-preview pollt Deployment-Status via GITHUB_TOKEN.
+# Ohne explizite Grants läuft der Token je nach Repo-Default read-only
+# auf contents — dann kippt die Action mit "Resource not accessible by
+# integration". Explizite minimal-Grants hier.
+permissions:
+  contents: read
+  deployments: read
+  statuses: read
+  pull-requests: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,6 +40,10 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+        env:
+          # tsc --noEmit OOMt im Default-2-GB-Heap auf GH-Runnern, seit die
+          # Codebase die Schwelle gerissen hat. 4 GB gibt Puffer.
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Lint
         run: npm run lint
@@ -38,6 +52,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
+          NODE_OPTIONS: --max-old-space-size=4096
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}

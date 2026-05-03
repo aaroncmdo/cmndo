@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import IsochroneClient from './IsochroneClient'
 import ReadOnlyBanner from '../_components/ReadOnlyBanner'
+import PageHeader from '@/components/shared/PageHeader'
 
 export default async function DispatchIsochronePage() {
   const supabase = await createClient()
@@ -43,17 +44,20 @@ export default async function DispatchIsochronePage() {
   return (
     <div className="py-6 space-y-6">
       <ReadOnlyBanner message="Nur-Lese-Ansicht — Isochrone-Polygone werden im Admin-Portal gepflegt." />
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">Isochrone-Zuweisung</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Wähle einen Lead, um die besten SVs im Fahrzeit-Umkreis zu sehen.
-          Die Reservierung selbst passiert im{' '}
-          <Link href="/dispatch/leads" className="text-[#4573A2] hover:underline">
-            Lead-Detail
-          </Link>
-          .
-        </p>
-      </div>
+      <PageHeader
+        title="Isochrone-Zuweisung"
+        size="lg"
+        description={
+          <>
+            Wähle einen Lead, um die besten SVs im Fahrzeit-Umkreis zu sehen.
+            Die Reservierung selbst passiert im{' '}
+            <Link href="/dispatch/leads" className="text-claimondo-ondo hover:underline">
+              Lead-Detail
+            </Link>
+            .
+          </>
+        }
+      />
 
       <IsochroneClient leads={leads} />
     </div>

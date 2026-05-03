@@ -13,6 +13,7 @@ import GespraechsleitfadenTimer from '../GespraechsleitfadenTimer'
 import RueckrufSection from '../RueckrufSection'
 import TerminListeClient from '@/components/termine/TerminListeClient'
 import { useDispatchPhase, type Phase } from '../_lib/phase-context'
+import { Modal } from '@/components/primitives/Modal'
 import { disqualifiziereLead } from '../actions'
 import {
   AlertCircleIcon,
@@ -72,11 +73,11 @@ export function DisqualifizierenButton() {
         ? `Sonstiges: ${freitext.trim()}`
         : DISQ_GRUENDE.find((g) => g.key === grundKey)?.label ?? grundKey
     startTransition(async () => {
-      try {
-        await disqualifiziereLead(lead.id, grund)
+      const result = await disqualifiziereLead(lead.id, grund)
+      if (result.ok) {
         setOpen(false)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Fehler')
+      } else {
+        setError(result.error ?? 'Fehler')
       }
     })
   }
@@ -91,24 +92,20 @@ export function DisqualifizierenButton() {
         <AlertCircleIcon className="w-4 h-4" />
         Disqualifizieren
       </button>
-      {open && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setOpen(false)}>
-          <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full p-5 space-y-3"
-            onClick={(e) => e.stopPropagation()}
-          >
+      <Modal open={open} onClose={() => setOpen(false)} maxWidth={448} ariaLabel="Lead disqualifizieren">
+        <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-900">Lead disqualifizieren</h3>
-              <button type="button" onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <h3 className="text-sm font-semibold text-claimondo-navy">Lead disqualifizieren</h3>
+              <button type="button" onClick={() => setOpen(false)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
                 <XCircleIcon className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-claimondo-ondo">
               Pflichtangabe: Warum wird der Lead disqualifiziert? Wird im Exit-Skript und in der Timeline protokolliert.
             </p>
             <div className="space-y-1">
               {DISQ_GRUENDE.map((g) => (
-                <label key={g.key} className="flex items-start gap-2 text-xs cursor-pointer hover:bg-gray-50 rounded p-1.5">
+                <label key={g.key} className="flex items-start gap-2 text-xs cursor-pointer hover:bg-[#f8f9fb] rounded p-1.5">
                   <input
                     type="radio"
                     name="dq-grund"
@@ -128,7 +125,7 @@ export function DisqualifizierenButton() {
                 value={freitext}
                 onChange={(e) => setFreitext(e.target.value)}
                 placeholder="Bitte Grund beschreiben ..."
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none h-20"
+                className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm resize-none h-20"
               />
             )}
             {error && <p className="text-xs text-red-600">{error}</p>}
@@ -136,7 +133,7 @@ export function DisqualifizierenButton() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50"
+                className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-sm text-claimondo-ondo hover:bg-[#f8f9fb]"
               >
                 Abbrechen
               </button>
@@ -149,9 +146,8 @@ export function DisqualifizierenButton() {
                 {pending ? 'Speichern ...' : 'Disqualifizieren'}
               </button>
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </>
   )
 }
@@ -280,32 +276,32 @@ export function GespraechshilfePanel() {
   }
 
   return (
-    <details className="bg-white rounded-xl border border-gray-200 p-3 group" open>
-      <summary className="text-xs font-semibold text-gray-700 flex items-center gap-2 cursor-pointer list-none">
-        <BookOpenIcon className="w-4 h-4 text-blue-500" />
+    <details className="bg-white rounded-xl border border-claimondo-border p-3 group" open>
+      <summary className="text-xs font-semibold text-claimondo-navy flex items-center gap-2 cursor-pointer list-none">
+        <BookOpenIcon className="w-4 h-4 text-claimondo-ondo" />
         <span>Gesprächshilfe — {hilfe.titel}</span>
-        <ChevronDownIcon className="w-3.5 h-3.5 ml-auto text-gray-400 group-open:rotate-180 transition-transform" />
+        <ChevronDownIcon className="w-3.5 h-3.5 ml-auto text-claimondo-ondo/70 group-open:rotate-180 transition-transform" />
       </summary>
       <div className="mt-2 space-y-2">
-        <p className="text-[11px] text-gray-700 italic leading-relaxed">{hilfe.opener}</p>
-        <ul className="space-y-1 pt-1 border-t border-gray-100">
+        <p className="text-[11px] text-claimondo-navy italic leading-relaxed">{hilfe.opener}</p>
+        <ul className="space-y-1 pt-1 border-t border-claimondo-border">
           {hilfe.folge.map((f, i) => (
-            <li key={i} className="text-[10px] text-gray-500 flex gap-1.5">
-              <span className="text-gray-400 shrink-0">•</span>
+            <li key={i} className="text-[10px] text-claimondo-ondo flex gap-1.5">
+              <span className="text-claimondo-ondo/70 shrink-0">•</span>
               <span>{f}</span>
             </li>
           ))}
         </ul>
         {/* AAR-302: Conditional Closing-Skript für Phase 5 */}
         {closingSaetze.length > 0 && (
-          <div className="pt-2 border-t border-blue-200">
-            <p className="text-[10px] uppercase tracking-wider text-blue-700 font-semibold mb-1.5">
+          <div className="pt-2 border-t border-claimondo-border">
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-semibold mb-1.5">
               Closing — am Gesprächsende sagen:
             </p>
             <ul className="space-y-1.5">
               {closingSaetze.map((s, i) => (
-                <li key={i} className="text-[11px] text-blue-900 italic leading-relaxed flex gap-1.5">
-                  <span className="text-blue-400 shrink-0">→</span>
+                <li key={i} className="text-[11px] text-claimondo-navy italic leading-relaxed flex gap-1.5">
+                  <span className="text-claimondo-ondo shrink-0">→</span>
                   <span>{s}</span>
                 </li>
               ))}
@@ -381,26 +377,26 @@ export function EinwandKarten() {
     (e) => e.phasen.length === 0 || e.phasen.includes(currentPhase),
   )
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-1.5">
-      <div className="flex items-center gap-2 text-xs font-semibold text-gray-700 mb-1">
+    <div className="bg-white rounded-xl border border-claimondo-border p-3 space-y-1.5">
+      <div className="flex items-center gap-2 text-xs font-semibold text-claimondo-navy mb-1">
         <MessageSquareWarningIcon className="w-4 h-4 text-amber-500" />
         <span>Einwand-Karten</span>
-        <span className="ml-auto text-[9px] text-gray-400 uppercase tracking-wide">
+        <span className="ml-auto text-[9px] text-claimondo-ondo/70 uppercase tracking-wide">
           Phase {currentPhase}
         </span>
       </div>
       <div className="space-y-1">
         {relevante.map((e, i) => (
-          <details key={i} className="group rounded-lg border border-gray-100 p-2 hover:border-amber-200">
-            <summary className="text-[11px] font-medium text-gray-700 cursor-pointer list-none flex items-start gap-1">
-              <ChevronDownIcon className="w-3 h-3 mt-0.5 text-gray-400 group-open:rotate-180 transition-transform shrink-0" />
+          <details key={i} className="group rounded-lg border border-claimondo-border p-2 hover:border-amber-200">
+            <summary className="text-[11px] font-medium text-claimondo-navy cursor-pointer list-none flex items-start gap-1">
+              <ChevronDownIcon className="w-3 h-3 mt-0.5 text-claimondo-ondo/70 group-open:rotate-180 transition-transform shrink-0" />
               <span className="flex-1">{e.einwand}</span>
             </summary>
-            <p className="text-[10px] text-gray-600 mt-1.5 pl-4 italic leading-relaxed">{e.antwort}</p>
+            <p className="text-[10px] text-claimondo-ondo mt-1.5 pl-4 italic leading-relaxed">{e.antwort}</p>
           </details>
         ))}
         {relevante.length === 0 && (
-          <p className="text-[10px] text-gray-400 italic py-1">
+          <p className="text-[10px] text-claimondo-ondo/70 italic py-1">
             Keine phasentypischen Einwände in Phase {currentPhase}.
           </p>
         )}

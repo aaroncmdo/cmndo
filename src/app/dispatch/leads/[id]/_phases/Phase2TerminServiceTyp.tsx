@@ -11,7 +11,6 @@ import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../_lib/phase-context'
 import { setServiceTyp, saveStammdaten } from '../actions'
-import { geocodeAndSaveUnfallort } from '../_actions/geocode'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
 
@@ -19,6 +18,8 @@ export default function Phase2TerminServiceTyp() {
   const router = useRouter()
   const { lead, aktiverTermin, qualification, setPhase, patchLead } = useDispatchPhase()
   const l = lead as unknown as {
+    // CMM-26: Unfallort gehört zu Phase 1 (Schadenereignis) und wird hier
+    // nur noch als Fallback-Lat/Lng fürs SV-Matching gelesen.
     unfallort?: string | null
     unfallort_lat?: number | null
     unfallort_lng?: number | null
@@ -33,9 +34,6 @@ export default function Phase2TerminServiceTyp() {
     wunschtermin_wochentage?: number[] | null
   }
   const [pending, startTransition] = useTransition()
-  const [unfallortDraft, setUnfallortDraft] = useState(l.unfallort ?? '')
-  const [unfallortLat, setUnfallortLat] = useState<number | null>(l.unfallort_lat ?? null)
-  const [unfallortLng, setUnfallortLng] = useState<number | null>(l.unfallort_lng ?? null)
   const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState<string>(
     l.besichtigungsort_adresse ?? '',
   )
@@ -81,56 +79,13 @@ export default function Phase2TerminServiceTyp() {
   const hardGateOk =
     qualification.q1_schuldfrage && qualification.q2_schaden && qualification.q3_polizei
 
-  const hasKoordinaten = unfallortLat != null && unfallortLng != null
-
-  // AAR-176 P2-C: Auto-Save direkt im onSelect — kein Speichern-Button mehr
-  // AAR-221: router.refresh() nach Save — sonst liest SvDispatchPanel weiterhin
-  // den alten Server-State (lead.unfallort_lat=null) und zeigt fälschlich
-  // „Lead hat keine Koordinaten", obwohl der lokale Badge schon „Koordinaten ok"
-  // anzeigt. Nach dem Refresh werden die DB-Koordinaten überall sichtbar.
-  function autoSaveAdresse(adresse: string, lat: number, lng: number) {
-    setUnfallortDraft(adresse)
-    setUnfallortLat(lat)
-    setUnfallortLng(lng)
-    // AAR-realtime: Provider sofort patchen
-    patchLead({ unfallort: adresse, unfallort_lat: lat, unfallort_lng: lng } as Partial<typeof lead>)
-    startTransition(async () => {
-      const r = await saveStammdaten(lead.id, {
-        unfallort: adresse,
-        unfallort_lat: lat,
-        unfallort_lng: lng,
-      })
-      if (r.success) {
-        setToast('Adresse gespeichert')
-        router.refresh()
-      } else {
-        setToast(r.error ?? 'Fehler')
-      }
-      setTimeout(() => setToast(''), 2000)
-    })
-  }
-
-  // AAR-262: Wenn der Dispatcher die Adresse manuell tippt (kein Google-
-  // Places-Dropdown), fehlen lat/lng → SV-Vorschläge sind blockiert.
-  // onBlur löst Server-Side-Geocoding via Google Maps Geocoding API aus.
-  function geocodeOnBlur(currentValue: string) {
-    const trimmed = currentValue.trim()
-    // Nur wenn Text vorhanden, anders als gespeicherte Adresse, und keine
-    // Koordinaten via Dropdown gesetzt.
-    if (!trimmed || trimmed === (l.unfallort ?? '') || hasKoordinaten) return
-    startTransition(async () => {
-      const r = await geocodeAndSaveUnfallort(lead.id, trimmed)
-      if (r.success && r.lat != null && r.lng != null) {
-        setUnfallortLat(r.lat)
-        setUnfallortLng(r.lng)
-        setToast('Adresse geocoded + gespeichert')
-        router.refresh()
-      } else {
-        setToast(r.error ?? 'Geocoding fehlgeschlagen')
-      }
-      setTimeout(() => setToast(''), 3000)
-    })
-  }
+  // CMM-26: SV-Dispatch braucht Koordinaten. Quelle = Besichtigungsort (Phase
+  // 2) wenn gesetzt, sonst Unfallort (Phase 1) als Fallback. Phase 2 editiert
+  // den Unfallort nicht mehr — der gehört zum Schadenereignis und wird in
+  // Phase 1 erfasst, hier nur read-only für den Geometrie-Check.
+  const hasKoordinaten =
+    (l.besichtigungsort_lat != null && l.besichtigungsort_lng != null) ||
+    (l.unfallort_lat != null && l.unfallort_lng != null)
 
   function saveBesichtigungsort(place: PlaceResult) {
     setBesichtigungsortAdresse(place.adresse)
@@ -169,8 +124,8 @@ export default function Phase2TerminServiceTyp() {
   function chooseServiceTyp(typ: 'komplett' | 'nur_gutachter') {
     startTransition(async () => {
       setServiceTypLocal(typ)
-      try {
-        await setServiceTyp(lead.id, typ)
+      const result = await setServiceTyp(lead.id, typ)
+      if (result.ok) {
         // AAR-268: Auto-Advance entfernt — MA klickt explizit „Weiter zu Phase 3"
         if (!aktiverTermin) {
           setToast('Service-Typ gespeichert — bitte noch SV-Termin reservieren')
@@ -180,8 +135,8 @@ export default function Phase2TerminServiceTyp() {
           setToast('Service-Typ gespeichert')
           await router.refresh()
         }
-      } catch (err) {
-        setToast(err instanceof Error ? err.message : 'Fehler')
+      } else {
+        setToast(result.error ?? 'Fehler')
       }
       setTimeout(() => setToast(''), 3000)
     })
@@ -226,11 +181,11 @@ export default function Phase2TerminServiceTyp() {
       {/* AAR-264: Wunschtermin GANZ OBEN — „Wann" ist wichtiger als „Wo" für
           das Gespräch. Auto-Save 500ms Debounce. Der Wunschtermin fließt
           ins SV-Matching ein (verfuegbarAmWunschtermin + Score-Bonus). */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
+      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 space-y-3">
         {/* AAR-270: Wochentag-Picker — vor dem datetime-local-Input.
             Mehrfachauswahl, Default=Egal. Filtert die SV-Slot-Vorschläge. */}
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-blue-900 font-semibold block">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-navy font-semibold block">
             Wunschtag des Kunden (optional, Mehrfachauswahl)
           </label>
           <div className="flex flex-wrap gap-1.5">
@@ -252,8 +207,8 @@ export default function Phase2TerminServiceTyp() {
                   disabled={pending}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     sel
-                      ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                      : 'bg-white text-blue-900 border-blue-200 hover:border-blue-400'
+                      ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
+                      : 'bg-white text-claimondo-navy border-claimondo-border hover:border-claimondo-ondo'
                   } disabled:opacity-50`}
                 >
                   {d.label}
@@ -266,8 +221,8 @@ export default function Phase2TerminServiceTyp() {
               disabled={pending || wochentage.length === 0}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                 wochentage.length === 0
-                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                  : 'bg-white text-blue-900 border-blue-200 hover:border-blue-400'
+                  ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
+                  : 'bg-white text-claimondo-navy border-claimondo-border hover:border-claimondo-ondo'
               } disabled:opacity-50`}
               title="Alle Wochentage zurücksetzen"
             >
@@ -276,10 +231,10 @@ export default function Phase2TerminServiceTyp() {
           </div>
         </div>
 
-        <h3 className="text-xs font-semibold text-blue-900 flex items-center gap-2 pt-1 border-t border-blue-200">
+        <h3 className="text-xs font-semibold text-claimondo-navy flex items-center gap-2 pt-1 border-t border-claimondo-border">
           <CalendarIcon className="w-4 h-4" /> Wunschtermin des Kunden
         </h3>
-        <p className="text-[11px] text-blue-800 italic">
+        <p className="text-[11px] text-claimondo-navy italic">
           Frage-Guidance: „Wann passt es Ihnen am besten? Je konkreter, desto schneller kommt der Termin."
         </p>
         <input
@@ -287,62 +242,50 @@ export default function Phase2TerminServiceTyp() {
           value={wunschtermin}
           onChange={(e) => setWunschtermin(e.target.value)}
           min={minDatetime}
-          className="w-full px-3 py-2 border border-blue-300 rounded-lg text-sm bg-white"
+          className="w-full px-3 py-2 border border-claimondo-ondo rounded-lg text-sm bg-white"
         />
         {wunschtermin && (
-          <p className="text-[10px] text-blue-700">
+          <p className="text-[10px] text-claimondo-ondo">
             SV-Matching bevorzugt Gutachter die zu diesem Termin verfügbar sind.
           </p>
         )}
       </div>
 
-      {/* Besichtigungsadresse für SV-Dispatch */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+      {/* Besichtigungsadresse für SV-Dispatch — CMM-26: nur EIN Picker, der
+         in besichtigungsort_* schreibt. Der Unfallort gehört zu Phase 1
+         (Schadenereignis) und wird hier nicht mehr editiert. Wenn kein
+         expliziter Besichtigungsort gesetzt ist, fällt SV-Matching auf
+         unfallort_lat/lng (Phase 1) bzw. kunde_lat/lng zurück
+         (siehe listSvSuggestionsForLead). */}
+      <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <MapPinIcon className="w-4 h-4 text-[#4573A2]" />
-          <h3 className="text-sm font-semibold text-gray-900">Besichtigungsadresse</h3>
+          <MapPinIcon className="w-4 h-4 text-claimondo-ondo" />
+          <h3 className="text-sm font-semibold text-claimondo-navy">Besichtigungsadresse</h3>
           {hasKoordinaten && (
             <span className="ml-auto text-[10px] text-green-600 font-medium flex items-center gap-1">
               <CheckCircle2Icon className="w-3 h-3" /> Koordinaten ok
             </span>
           )}
         </div>
-        <p className="text-[11px] text-gray-500">
-          Wo soll der Gutachter das Fahrzeug besichtigen? SV-Vorschläge werden anhand dieser
-          Adresse gerankt. Standard = Unfallort aus Phase 1.
+        <p className="text-[11px] text-claimondo-ondo">
+          Wo soll der Gutachter das Fahrzeug besichtigen? Leer lassen = SV fährt
+          zum Unfallort aus Phase 1. Bei abweichender Werkstatt / Halter-Adresse
+          hier eintragen — SV-Vorschläge werden anhand dieser Adresse gerankt.
         </p>
         <GooglePlaceAutocomplete
-          defaultValue={unfallortDraft}
-          placeholder="Adresse wählen ..."
-          onSelect={(r) => autoSaveAdresse(r.adresse, r.lat, r.lng)}
-          onBlur={(currentValue) => {
-            // AAR-262: Wenn der User getippt aber NICHTS aus dem Dropdown
-            // gewählt hat, läuft Server-Side-Geocoding als Fallback —
-            // damit SV-Vorschläge nicht blockiert sind. currentValue wird
-            // als Parameter übergeben, weil setUnfallortDraft async ist
-            // und der State sonst stale bleibt.
-            setUnfallortDraft(currentValue)
-            geocodeOnBlur(currentValue)
+          defaultValue={besichtigungsortAdresse}
+          placeholder='z. B. „Werkstatt Müller, Musterstr. 1, 80331 München" oder leer = Unfallort'
+          onSelect={saveBesichtigungsort}
+          onBlur={(current) => {
+            if (!current.trim()) clearBesichtigungsort()
           }}
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+          className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
         />
-        {/* AAR-581 (N4): Strukturierter SV-Besichtigungsort — Autocomplete
-            liefert Adresse + Koordinaten + place_id. Pflichtfeld wenn der
-            Besichtigungsort vom Unfallort abweicht. */}
-        <div className="space-y-1">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500 block">
-            SV-Besichtigungsort (optional, wenn abweichend vom Unfallort)
-          </label>
-          <GooglePlaceAutocomplete
-            defaultValue={besichtigungsortAdresse}
-            placeholder='z. B. „Werkstatt Müller, Musterstr. 1, 80331 München"'
-            onSelect={saveBesichtigungsort}
-            onBlur={(current) => {
-              if (!current.trim()) clearBesichtigungsort()
-            }}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-          />
-        </div>
+        {l.unfallort && !besichtigungsortAdresse && (
+          <p className="text-[10px] text-claimondo-ondo italic">
+            Fallback aktiv: SV-Matching nutzt Unfallort aus Phase 1 ({l.unfallort}).
+          </p>
+        )}
       </div>
 
       {/* SV + Termin */}
@@ -356,11 +299,11 @@ export default function Phase2TerminServiceTyp() {
       />
 
       {/* Service-Typ (Pfad A/B) — prominent nach SV-Auswahl */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+      <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <ScaleIcon className="w-4 h-4 text-[#4573A2]" />
-          <h3 className="text-sm font-semibold text-gray-900">Service-Typ</h3>
-          <span className="ml-auto text-[10px] text-gray-400">Standard: Pfad A (Komplett)</span>
+          <ScaleIcon className="w-4 h-4 text-claimondo-ondo" />
+          <h3 className="text-sm font-semibold text-claimondo-navy">Service-Typ</h3>
+          <span className="ml-auto text-[10px] text-claimondo-ondo/70">Standard: Pfad A (Komplett)</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
@@ -369,15 +312,15 @@ export default function Phase2TerminServiceTyp() {
             onClick={() => chooseServiceTyp('komplett')}
             className={`text-left p-4 rounded-xl border-2 transition-colors ${
               serviceTyp === 'komplett'
-                ? 'border-[#4573A2] bg-[#4573A2]/5'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-claimondo-ondo bg-claimondo-ondo/5'
+                : 'border-claimondo-border hover:border-claimondo-border'
             }`}
           >
-            <p className="font-semibold text-sm text-gray-900 flex items-center gap-2">
-              <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
+            <p className="font-semibold text-sm text-claimondo-navy flex items-center gap-2">
+              <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
               Pfad A — Komplett
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-claimondo-ondo mt-1">
               Gutachter + LexDrive-Kanzlei · SA + Vollmacht
             </p>
           </button>
@@ -388,11 +331,11 @@ export default function Phase2TerminServiceTyp() {
             className={`text-left p-4 rounded-xl border-2 transition-colors ${
               serviceTyp === 'nur_gutachter'
                 ? 'border-amber-500 bg-amber-50'
-                : 'border-gray-200 hover:border-gray-300'
+                : 'border-claimondo-border hover:border-claimondo-border'
             }`}
           >
-            <p className="font-semibold text-sm text-gray-900">Pfad B — Nur SV</p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="font-semibold text-sm text-claimondo-navy">Pfad B — Nur SV</p>
+            <p className="text-xs text-claimondo-ondo mt-1">
               Nur Gutachter · Nur SA (kein Kanzlei-Mandat)
             </p>
           </button>
@@ -415,7 +358,7 @@ export default function Phase2TerminServiceTyp() {
           type="button"
           disabled={pending}
           onClick={() => setPhase(1)}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
         >
           ← Zurück zu Phase 1
         </button>
@@ -424,7 +367,7 @@ export default function Phase2TerminServiceTyp() {
             type="button"
             disabled={pending}
             onClick={() => setPhase(3)}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-50 flex items-center justify-center gap-2"
           >
             Weiter zu Phase 3 →
           </button>

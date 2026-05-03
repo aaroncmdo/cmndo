@@ -1,41 +1,61 @@
 // AAR-229 W2: Server-Helper zum Erstellen von Mitteilungen.
 // Nutzt Admin-Client (Service Role) damit der Insert unabhängig vom
 // eingeloggten User funktioniert (RLS-Policy erlaubt INSERT für alle).
+//
+// AAR-720: autoRouteUrl nutzt jetzt die zentrale roleToPath-Funktion
+// als Prefix-Quelle — vorher war hier ein eigenes Mapping dupliziert
+// (same Anti-Pattern wie in AAR-718 für Auth-Redirects).
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { roleToPath } from '@/lib/auth/role-redirect'
 import type { CreateMitteilungInput, EmpfaengerRolle, KontextTyp, MitteilungKategorie } from './types'
 
-// F-08: Route-URL Auto-Generation basierend auf Kontext + Rolle.
+// F-08 / AAR-720: Route-URL Auto-Generation basierend auf Kontext + Rolle.
+// Fall-Detail-Route ist rolle-spezifisch:
+//   - sachverstaendiger → /gutachter/fall/{id}
+//   - kunde             → /kunde/faelle/{id}
+//   - makler            → /makler/akten/{id}
+//   - admin/kb/kanzlei  → /faelle/{id} (geteilte Fallakte)
 function autoRouteUrl(
   kontextTyp: KontextTyp | undefined,
   kontextId: string | undefined,
   rolle: EmpfaengerRolle,
 ): string | null {
   if (!kontextTyp || !kontextId) return null
-  const prefix: Record<EmpfaengerRolle, string> = {
-    admin: '/admin',
-    dispatch: '/dispatch',
-    kundenbetreuer: '/admin',
-    sachverstaendiger: '/gutachter',
-    kanzlei: '/kanzlei',
-    kunde: '/kunde',
-  }
-  const p = prefix[rolle]
+
+  // Portal-Base-Pfad über zentrale Quelle.
+  const portalBase = roleToPath(rolle)
+
   switch (kontextTyp) {
     case 'fall':
-      return rolle === 'sachverstaendiger' ? `${p}/fall/${kontextId}` :
-             rolle === 'kunde' ? `${p}/faelle/${kontextId}` :
-             `${p}/faelle/${kontextId}`
+      if (rolle === 'sachverstaendiger') return `/gutachter/fall/${kontextId}`
+      if (rolle === 'kunde') return `/kunde/faelle/${kontextId}`
+      if (rolle === 'makler') return `/makler/akten/${kontextId}`
+      // admin / kundenbetreuer / dispatch / kanzlei → geteilte Fallakte
+      return `/faelle/${kontextId}`
     case 'lead':
-      return rolle === 'dispatch' ? `/dispatch/leads/${kontextId}` : `/admin/faelle`
+      if (rolle === 'dispatch') return `/dispatch/leads/${kontextId}`
+      if (rolle === 'makler') return `/makler/leads/${kontextId}`
+      return '/admin/faelle'
     case 'auftrag':
-      return rolle === 'sachverstaendiger' ? `${p}/auftraege` : `${p}/faelle`
+      if (rolle === 'sachverstaendiger') return `${portalBase}/auftraege`
+      if (rolle === 'makler') return `${portalBase}/akten`
+      return `${portalBase}/faelle`
     case 'termin':
-      return rolle === 'sachverstaendiger' ? `${p}/kalender` : null
+      if (rolle === 'sachverstaendiger') return `${portalBase}/kalender`
+      if (rolle === 'kunde') return `${portalBase}/termin`
+      return null
     case 'abrechnung':
-      return rolle === 'sachverstaendiger' ? `${p}/abrechnung` : null
+      if (rolle === 'sachverstaendiger') return `${portalBase}/abrechnung`
+      if (rolle === 'makler') return `${portalBase}/promo`
+      return null
     case 'nachricht':
-      return `${p}/nachrichten`
+      // Für alle Portale mit Nachrichten-Inbox.
+      if (rolle === 'sachverstaendiger') return '/gutachter/posteingang'
+      if (rolle === 'kunde') return '/kunde/chat'
+      if (rolle === 'kundenbetreuer' || rolle === 'dispatch') return '/mitarbeiter/nachrichten'
+      if (rolle === 'admin') return '/admin/nachrichten'
+      return null
     default:
       return null
   }

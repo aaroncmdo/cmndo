@@ -1,6 +1,7 @@
 import { FlowShell } from '../../_components/FlowShell'
 import { createClient } from '@/lib/supabase/server'
 import { GegnerGuard } from './GegnerGuard'
+import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-474 C8: Schritt 2c — Gegner-Daten-Form.
 // Lädt aktive Versicherer (ist_aktiv=true) für Autocomplete und reicht sie
@@ -20,14 +21,11 @@ export default async function Schritt2GegnerPage() {
   return (
     <FlowShell step={2}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-claimondo-navy">
-          Daten des Unfallgegners
-        </h1>
-        <p className="mt-2 text-slate-600">
-          Je mehr wir über den Gegner wissen, desto schneller läuft die
-          Regulierung. Pflicht sind Name und Kennzeichen — außer bei
-          Fahrerflucht.
-        </p>
+        <PageHeader
+          title="Daten des Unfallgegners"
+          description="Je mehr wir über den Gegner wissen, desto schneller läuft die Regulierung. Pflicht sind Name und Kennzeichen — außer bei Fahrerflucht."
+          size="lg"
+        />
       </div>
       <GegnerGuard versicherer={versicherer} />
     </FlowShell>

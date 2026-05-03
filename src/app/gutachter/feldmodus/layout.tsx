@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export default function FeldmodusLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 bg-[var(--brand-primary)] text-white backdrop-blur-xl">
+    <div className="fixed inset-0 z-[1200] h-screen w-screen bg-[var(--brand-primary)] text-white overflow-hidden">
       {children}
     </div>
   )

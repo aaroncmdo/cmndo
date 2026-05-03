@@ -17,7 +17,7 @@ export default async function MitarbeiterPerformancePage() {
 
   const now = new Date()
   const monatStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
-  const isDispatch = profile.kategorie === 'dispatch' || profile.rolle === 'leadbearbeiter'
+  const isDispatch = profile.kategorie === 'dispatch' || profile.rolle === 'dispatch'
 
   const [{ data: leadsRaw }, { data: faelleAktiv }, { data: faelleAbg }, { data: perf }, { data: incentives }, { data: leaderboardProfiles }] = await Promise.all([
     supabase.from('leads').select('id, status').eq('zugewiesen_an', user.id).gte('created_at', monatStr),
@@ -26,7 +26,7 @@ export default async function MitarbeiterPerformancePage() {
     supabase.from('mitarbeiter_performance').select('*').eq('mitarbeiter_id', user.id).order('jahr', { ascending: false }).order('monat', { ascending: false }).limit(6),
     supabase.from('incentives').select('*').eq('aktiv', true).or(`kategorie.eq.alle,kategorie.eq.${isDispatch ? 'dispatch' : 'kundenbetreuer'}`),
     isDispatch
-      ? supabase.from('profiles').select('id, vorname, nachname').or('kategorie.eq.dispatch,rolle.eq.leadbearbeiter').eq('aktiv', true)
+      ? supabase.from('profiles').select('id, vorname, nachname').or('kategorie.eq.dispatch,rolle.eq.dispatch').eq('aktiv', true)
       : supabase.from('profiles').select('id, vorname, nachname').or('kategorie.eq.kundenbetreuer,rolle.eq.kundenbetreuer').eq('aktiv', true),
   ])
 

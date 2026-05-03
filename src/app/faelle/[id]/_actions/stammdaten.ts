@@ -39,6 +39,8 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'fahrzeug_modell',
   'fahrzeug_baujahr',
   'fahrzeug_farbe',
+  // CMM-32: lackfarbe_code für Imagin-Render-Mapping (12 Standard-Farben)
+  'lackfarbe_code',
   'fahrzeug_typ',
   'kennzeichen',
   'fin_vin',

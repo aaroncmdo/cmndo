@@ -1,11 +1,12 @@
 'use client'
 
 // AAR-544 (C7): Detail-Modal für einen einzelnen Timeline-Event.
-// Zeigt alle Metadaten als JSON + Actor + Timestamps + optionaler Route-Link.
+// AAR-781: Migriert auf Modal-Primitive.
 
 import { XIcon, ExternalLinkIcon } from 'lucide-react'
 import Link from 'next/link'
 import type { FallEvent } from '@/lib/fall/event-stream'
+import { Modal } from '@/components/primitives'
 
 export function EventDetailModal({
   event,
@@ -22,39 +23,32 @@ export function EventDetailModal({
     : ts.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' })
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-gray-200">
+    <Modal open onClose={onClose} maxWidth={512} noPadding hideCloseButton ariaLabel="Event-Details">
+      <div className="flex flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 64px)' }}>
+        <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-claimondo-border">
           <div className="min-w-0">
-            <p className="text-xs text-gray-500 mb-0.5">
+            <p className="text-xs text-claimondo-ondo mb-0.5">
               {event.source} · {event.kategorie}
             </p>
             <h3 className="text-base font-semibold text-[#0D1B3E]">{event.titel}</h3>
-            <p className="text-xs text-gray-500 mt-0.5">{tsLabel}</p>
+            <p className="text-xs text-claimondo-ondo mt-0.5">{tsLabel}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md hover:bg-gray-100 text-gray-500"
+            className="p-1 rounded-md hover:bg-[#f8f9fb] text-claimondo-ondo"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4" />
           </button>
         </div>
+
         <div className="px-5 py-4 overflow-y-auto space-y-3">
           {event.beschreibung && (
-            <p className="text-sm text-gray-700 whitespace-pre-wrap">{event.beschreibung}</p>
+            <p className="text-sm text-claimondo-navy whitespace-pre-wrap">{event.beschreibung}</p>
           )}
           {event.actor && (
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-claimondo-ondo">
               <span className="font-medium text-[#0D1B3E]">Ausgelöst von: </span>
               {event.actor.name ?? event.actor.id ?? '—'}
               {event.actor.rolle && ` (${event.actor.rolle})`}
@@ -62,14 +56,14 @@ export function EventDetailModal({
           )}
           <div>
             <p className="text-xs font-medium text-[#0D1B3E] mb-1">Typ</p>
-            <code className="text-xs text-gray-700 bg-gray-50 rounded px-1.5 py-0.5">
+            <code className="text-xs text-claimondo-navy bg-[#f8f9fb] rounded px-1.5 py-0.5">
               {event.typ}
             </code>
           </div>
           {event.metadata && Object.keys(event.metadata).length > 0 && (
             <div>
               <p className="text-xs font-medium text-[#0D1B3E] mb-1">Metadaten</p>
-              <pre className="text-[11px] text-gray-700 bg-[#f8f9fb] border border-gray-200 rounded p-2 overflow-x-auto">
+              <pre className="text-[11px] text-claimondo-navy bg-[#f8f9fb] border border-claimondo-border rounded p-2 overflow-x-auto">
                 {JSON.stringify(event.metadata, null, 2)}
               </pre>
             </div>
@@ -85,6 +79,6 @@ export function EventDetailModal({
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

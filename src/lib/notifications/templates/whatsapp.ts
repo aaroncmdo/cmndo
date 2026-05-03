@@ -242,6 +242,65 @@ const MAPPING: Partial<Record<EventType, Partial<Record<Role, EventTemplate>>>> 
       }),
     },
   },
+  // AAR-864 Termin-Verlegung
+  'termin.verlegung_vorgeschlagen': {
+    kunde: {
+      template: 'termin_verlegung_request',
+      resolve: (p, c) => ({
+        '1': c.vorname ?? '',
+        '2': s(p.alterDatum),
+        '3': s(p.alterUhrzeit),
+        '4': s(p.neuesDatum),
+        '5': s(p.neuesUhrzeit),
+        '6': s(p.svVorname),
+        '7': c.portalLink,
+      }),
+    },
+  },
+  'termin.verlegung_bestaetigt': {
+    sachverstaendiger: {
+      template: 'termin_verlegung_bestaetigt',
+      resolve: (p, c) => ({
+        '1': c.vorname ?? '',
+        '2': s(p.neuesDatum),
+        '3': s(p.neuesUhrzeit),
+        '4': s(p.kundenVorname),
+      }),
+    },
+  },
+  'termin.verlegung_abgelehnt': {
+    sachverstaendiger: {
+      template: 'termin_verlegung_abgelehnt',
+      resolve: (p, c) => ({
+        '1': c.vorname ?? '',
+        '2': s(p.kundenVorname),
+        '3': s(p.grund),
+      }),
+    },
+  },
+  'termin.verlegung_eskalation': {
+    kunde: {
+      template: 'termin_verlegung_eskalation',
+      resolve: (p, c) => ({
+        '1': c.vorname ?? '',
+        '2': s(p.alterDatum),
+        '3': s(p.alterUhrzeit),
+        '4': c.portalLink,
+      }),
+    },
+  },
+  'termin.verschoben_durch_kunde': {
+    sachverstaendiger: {
+      template: 'termin_verschoben_durch_kunde',
+      resolve: (p, c) => ({
+        '1': c.vorname ?? '',
+        '2': s(p.alterDatum),
+        '3': s(p.alterUhrzeit),
+        '4': s(p.neuesDatum),
+        '5': s(p.neuesUhrzeit),
+      }),
+    },
+  },
 }
 
 /**

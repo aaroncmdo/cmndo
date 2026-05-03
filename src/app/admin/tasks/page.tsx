@@ -8,7 +8,7 @@ import KanbanBoard from './KanbanBoard'
 export default async function TasksPage() {
   const supabase = await createClient()
 
-  const [{ data: tasks }, { data: faelle }, { data: admins }, { data: leads }, { data: svs }] =
+  const [{ data: tasks }, { data: faelle }, { data: admins }, { data: leads }, { data: svs }, { data: reassignProfiles }] =
     await Promise.all([
       supabase
         .from('tasks')
@@ -22,6 +22,14 @@ export default async function TasksPage() {
       supabase
         .from('sachverstaendige')
         .select('id, profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)'),
+      // AAR-723: Alle aktiven Mitarbeiter-Profile als Reassign-Kandidaten
+      // (alle Rollen außer Kunde/Makler/SV — das sind Portal-User, Tasks
+      // werden intern umverteilt).
+      supabase
+        .from('profiles')
+        .select('id, vorname, nachname, rolle')
+        .not('aktiv', 'is', false)
+        .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'kanzlei']),
     ])
 
   const fallMap = Object.fromEntries(
@@ -52,6 +60,12 @@ export default async function TasksPage() {
     }),
   )
 
+  const reassignCandidates = (reassignProfiles ?? []).map(p => ({
+    id: p.id as string,
+    name: [p.vorname, p.nachname].filter(Boolean).join(' ') || 'Unbekannt',
+    rolle: p.rolle as string,
+  }))
+
   return (
     <KanbanBoard
       tasks={tasks ?? []}
@@ -61,6 +75,7 @@ export default async function TasksPage() {
       leadMap={leadMap}
       svMap={svMap}
       admins={admins ?? []}
+      reassignCandidates={reassignCandidates}
     />
   )
 }

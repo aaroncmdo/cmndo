@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ShieldCheckIcon, SmartphoneIcon, MailIcon, RefreshCwIcon } from 'lucide-react'
 import { requestTwoFaCode } from '@/lib/auth/twofa/send-code'
 import { verifyTwoFaCode } from '@/lib/auth/twofa/verify-code'
+import PageHeader from '@/components/shared/PageHeader'
 import { requestEmailOtp, verifyEmailOtp } from '@/lib/auth/twofa/send-email-code'
 import { createRememberToken } from '@/lib/auth/twofa/remember-me'
 
@@ -18,6 +19,9 @@ type Props = {
   smsVerfuegbar: boolean
   emailVerfuegbar: boolean
   initialMethod: Method
+  // AAR-718: Ziel-Pfad nach erfolgreicher 2FA (roleToPath der eigenen Rolle),
+  // damit der User direkt im eigenen Portal landet statt auf der Landing-Page.
+  targetPath: string
 }
 
 export default function TwoFaClient({
@@ -26,6 +30,7 @@ export default function TwoFaClient({
   smsVerfuegbar,
   emailVerfuegbar,
   initialMethod,
+  targetPath,
 }: Props) {
   const router = useRouter()
   const [method, setMethod] = useState<Method>(initialMethod)
@@ -89,7 +94,8 @@ export default function TwoFaClient({
             null,
           )
         }
-        router.push('/')
+        // AAR-718: direkt ins Rollen-Portal statt auf die Landing-Page
+        router.push(targetPath)
         router.refresh()
       } else {
         setError(result.error ?? 'Ungültiger Code')
@@ -107,27 +113,33 @@ export default function TwoFaClient({
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-4">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-[#0D1B3E] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <ShieldCheckIcon className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-[#0D1B3E]">Zwei-Faktor-Authentifizierung</h1>
-          <p className="text-sm text-gray-500 mt-2">
-            {versandZiel
-              ? <>Wir haben einen {versandLabel} an <strong>{versandZiel}</strong> gesendet.</>
-              : `${versandLabel} wird gesendet...`}
-          </p>
+        <div className="mb-8">
+          <PageHeader
+            title="Zwei-Faktor-Authentifizierung"
+            description={
+              versandZiel
+                ? (<>Wir haben einen {versandLabel} an <strong>{versandZiel}</strong> gesendet.</>)
+                : `${versandLabel} wird gesendet...`
+            }
+            size="lg"
+            align="center"
+            leadingSlot={
+              <div className="w-16 h-16 bg-claimondo-navy rounded-2xl flex items-center justify-center">
+                <ShieldCheckIcon className="w-8 h-8 text-white" />
+              </div>
+            }
+          />
         </div>
 
         {beideMethoden && (
-          <div className="mb-4 flex rounded-xl bg-white border border-gray-200 p-1">
+          <div className="mb-4 flex rounded-xl bg-white border border-claimondo-border p-1">
             <button
               type="button"
               onClick={() => setMethod('sms')}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
                 method === 'sms'
                   ? 'bg-[#0D1B3E] text-white'
-                  : 'text-gray-500 hover:text-[#0D1B3E]'
+                  : 'text-claimondo-ondo hover:text-[#0D1B3E]'
               }`}
             >
               <SmartphoneIcon className="w-3.5 h-3.5" />
@@ -139,7 +151,7 @@ export default function TwoFaClient({
               className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
                 method === 'email'
                   ? 'bg-[#0D1B3E] text-white'
-                  : 'text-gray-500 hover:text-[#0D1B3E]'
+                  : 'text-claimondo-ondo hover:text-[#0D1B3E]'
               }`}
             >
               <MailIcon className="w-3.5 h-3.5" />
@@ -148,9 +160,9 @@ export default function TwoFaClient({
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl border border-claimondo-border p-6">
           <div className="mb-4">
-            <label className="text-xs text-gray-500 mb-1.5 block">6-stelliger Code</label>
+            <label className="text-xs text-claimondo-ondo mb-1.5 block">6-stelliger Code</label>
             <input
               ref={inputRef}
               type="text"
@@ -160,7 +172,7 @@ export default function TwoFaClient({
               onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               onKeyDown={e => e.key === 'Enter' && handleSubmit()}
               autoFocus
-              className="w-full text-center text-2xl font-mono tracking-[0.5em] bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent"
+              className="w-full text-center text-2xl font-mono tracking-[0.5em] bg-[#f8f9fb] border border-claimondo-border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent"
               placeholder="000000"
             />
           </div>
@@ -170,9 +182,9 @@ export default function TwoFaClient({
               type="checkbox"
               checked={rememberMe}
               onChange={e => setRememberMe(e.target.checked)}
-              className="rounded border-gray-300 text-[#4573A2] focus:ring-[#4573A2]"
+              className="rounded border-claimondo-border text-[#4573A2] focus:ring-[#4573A2]"
             />
-            <span className="text-sm text-gray-700">Angemeldet bleiben (30 Tage)</span>
+            <span className="text-sm text-claimondo-navy">Angemeldet bleiben (30 Tage)</span>
           </label>
 
           {error && (
@@ -192,14 +204,14 @@ export default function TwoFaClient({
           <button
             onClick={handleResend}
             disabled={resendCooldown > 0}
-            className="w-full mt-3 py-2 text-xs text-gray-500 hover:text-[#4573A2] transition-colors disabled:opacity-40 flex items-center justify-center gap-1"
+            className="w-full mt-3 py-2 text-xs text-claimondo-ondo hover:text-[#4573A2] transition-colors disabled:opacity-40 flex items-center justify-center gap-1"
           >
             <RefreshCwIcon className="w-3 h-3" />
             {resendCooldown > 0 ? `Code erneut senden (${resendCooldown}s)` : 'Code erneut senden'}
           </button>
         </div>
 
-        <p className="text-[10px] text-gray-400 text-center mt-4">
+        <p className="text-[10px] text-claimondo-ondo/70 text-center mt-4">
           {method === 'sms' ? (
             <>
               <SmartphoneIcon className="w-3 h-3 inline mr-1" />

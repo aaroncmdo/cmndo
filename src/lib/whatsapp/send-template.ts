@@ -16,8 +16,13 @@ export async function sendWhatsAppTemplate(
   absender_kb_id?: string,
 ): Promise<{ success: boolean; sid?: string; error?: string; provider: 'twilio-template' | 'twilio-legacy' }> {
   const contentSid = getTemplateSid(templateName)
+  // AAR-705: Templates temporär deaktiviert — Aaron's Vercel-Setup hat noch
+  // keine approved WABA-Templates + Sandbox unterstützt sie ohnehin nicht.
+  // Default-Pfad ist jetzt Legacy-Plain-Text. Wieder aktivieren via env-Var
+  // WHATSAPP_USE_TEMPLATES=1 sobald Templates production-ready sind.
+  const templatesEnabled = process.env.WHATSAPP_USE_TEMPLATES === '1'
 
-  if (contentSid) {
+  if (contentSid && templatesEnabled) {
     // ─── Twilio Content API (Template genehmigt) ──────────────────
     const accountSid = process.env.TWILIO_ACCOUNT_SID
     const authToken = process.env.TWILIO_AUTH_TOKEN
@@ -81,8 +86,34 @@ export async function sendWhatsAppTemplate(
       if (data.sid) {
         return { success: true, sid: data.sid, provider: 'twilio-template' }
       }
-      return { success: false, error: data.message ?? 'Twilio error', provider: 'twilio-template' }
+      // AAR-704: Volle Twilio-Antwort loggen + sprechenden Fehler bauen.
+      // „Invalid Parameter" allein hilft niemandem — Twilio sagt eigentlich
+      // welcher Parameter (code, more_info, status). Plus Hinweis bei den
+      // typischen Fallen: Sandbox-Sender ohne Content-API-Support oder
+      // nicht-opted-in Empfänger.
+      console.error('[whatsapp:template] Twilio fail', {
+        templateName,
+        contentSid,
+        from,
+        to: normalTo,
+        contentVars,
+        twilioCode: data.code,
+        twilioMessage: data.message,
+        moreInfo: data.more_info,
+        status: data.status,
+      })
+      const isSandbox = from.includes('14155238886')
+      const hint = isSandbox
+        ? ' (Sandbox-Sender unterstützt keine Content-Templates oder Empfänger nicht im Sandbox opted-in mit „join …")'
+        : ''
+      const detail = data.code ? `[${data.code}] ${data.message}` : data.message ?? 'Twilio error'
+      return {
+        success: false,
+        error: `${detail}${hint}`,
+        provider: 'twilio-template',
+      }
     } catch (err) {
+      console.error('[whatsapp:template] fetch fail', err)
       return { success: false, error: String(err), provider: 'twilio-template' }
     }
   }

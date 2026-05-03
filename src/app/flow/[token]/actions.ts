@@ -3,9 +3,10 @@
 import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { buildFallInsertFromLead, resolveFallEntityFks } from '@/lib/lead-fall-mapping'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 import { emitEvent } from '@/lib/notifications/emit'
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -157,16 +158,69 @@ export async function notifyNeuerFall(fallId: string) {
 // AAR-308/309: Anzeigenamen für Account-Hijack-Fehlermeldung
 const ROLLE_LABEL: Record<string, string> = {
   admin: 'Administrator',
-  leadbearbeiter: 'Lead-Bearbeiter',
+  dispatch: 'Dispatcher',
   kundenbetreuer: 'Kundenbetreuer',
   sachverstaendiger: 'Sachverständigen',
   kanzlei: 'Kanzlei',
-  dispatch: 'Dispatch',
 }
 
 export type CreateKundeAccountResult =
-  | { success: true; password: string }
+  | { success: true; password: string; magicLink: string | null }
   | { success: false; error: string }
+
+/**
+ * CMM-14: Post-Flow-Login.
+ *
+ * Browser-side `signInWithPassword` schreibt die Auth-Cookies nicht
+ * zuverlässig auf Vercel-Preview-Domains — ein anschließender Server-
+ * Component-Render (`/kunde/onboarding`) sieht keine Session und der
+ * Middleware-Guard schickt den Kunden nach `/login`.
+ *
+ * Diese Server-Action nutzt `createClient` von `@/lib/supabase/server`,
+ * der via `@supabase/ssr` HttpOnly-Cookies in der Action-Response setzt.
+ * Browser muss danach nur noch `window.location.replace(redirectTo)`
+ * machen — die Cookies sind sicher gesetzt.
+ */
+/**
+ * CMM-14: Form-Action für Auto-Login nach SA-Unterschrift.
+ * Wird via Form-Submit aufgerufen — Next.js setzt die Auth-Cookies aus der
+ * Server-Action-Response korrekt vor dem `redirect()`. Das vermeidet die
+ * Cookie-Race-Condition die mit `await action() + window.location.assign`
+ * auftritt (Set-Cookie-Header ist im Response, Browser folgt aber sofort
+ * mit einem GET der die noch nicht persistierten Cookies nicht enthält).
+ */
+export async function loginAfterFlowFormAction(formData: FormData) {
+  const email = String(formData.get('email') ?? '')
+  const password = String(formData.get('password') ?? '')
+
+  if (!email || !password) {
+    redirect('/login?error=Login-Daten+fehlen')
+  }
+
+  const supabase = await createClient()
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+  if (signInError) {
+    redirect(`/login?error=${encodeURIComponent(signInError.message)}`)
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login?error=Auth-User+nicht+gefunden')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('force_password_change, auth_provider')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const authProvider = (profile?.auth_provider as string | null) ?? 'email'
+  if (profile?.force_password_change && authProvider === 'email') {
+    redirect('/passwort-aendern')
+  }
+  redirect('/kunde/onboarding')
+}
 
 /**
  * AAR-308/309: Erstellt einen Supabase-Auth-Account für den Kunden nach
@@ -210,7 +264,10 @@ export async function createKundeAccount(
         .from('profiles').select('rolle').eq('id', existingFall.kunde_id).maybeSingle()
       if (linkedProfile?.rolle === 'kunde' || linkedProfile?.rolle == null) {
         await admin.auth.admin.updateUserById(existingFall.kunde_id, { password })
-        return { success: true, password }
+        // CMM-14: Browser-Reload-Pfad — neuen Magic-Link generieren damit der
+        // Kunde auch beim 2. Aufruf direkt ins Portal kann.
+        const { magicLink } = await sendWelcomeWithLogin(admin, fallId, normalizedEmail, password)
+        return { success: true, password, magicLink }
       }
       // kunde_id zeigt auf einen Nicht-Kunden — Account-Hijack-Verdacht, abbrechen
       return {
@@ -234,8 +291,8 @@ export async function createKundeAccount(
       }
       // 2b. Existierender Kunden-Account (oder Profile ohne Rolle): verknüpfen + Passwort refreshen
       await admin.auth.admin.updateUserById(existingProfile.id, { password })
-      await finalizeKundeSetup(admin, fallId, existingProfile.id, normalizedEmail, vorname, nachname, telefon, password)
-      return { success: true, password }
+      const finRes = await finalizeKundeSetup(admin, fallId, existingProfile.id, normalizedEmail, vorname, nachname, telefon, password)
+      return { success: true, password, magicLink: finRes.magicLink }
     }
 
     // 3. Neuer User
@@ -254,8 +311,8 @@ export async function createKundeAccount(
       }
     }
 
-    await finalizeKundeSetup(admin, fallId, authUser.user.id, normalizedEmail, vorname, nachname, telefon, password)
-    return { success: true, password }
+    const finRes = await finalizeKundeSetup(admin, fallId, authUser.user.id, normalizedEmail, vorname, nachname, telefon, password)
+    return { success: true, password, magicLink: finRes.magicLink }
   } catch (err) {
     console.error('[createKundeAccount] unerwarteter Fehler:', err)
     return {
@@ -278,7 +335,7 @@ async function finalizeKundeSetup(
   nachname: string,
   telefon: string | null,
   password: string,
-): Promise<void> {
+): Promise<{ magicLink: string | null }> {
   await admin.from('profiles').upsert({
     id: userId,
     rolle: 'kunde',
@@ -303,6 +360,38 @@ async function finalizeKundeSetup(
 
   await admin.from('faelle').update({ kunde_id: userId }).eq('id', fallId)
 
+  // CMM-19: claims.geschaedigter_user_id auch nachziehen — beim Initial-
+  // Convert via signSAandCreateFall ist lead.kunde_id noch null (Account
+  // wird ja erst HIER nach SA angelegt). Ohne dieses Update bleibt
+  // claims.geschaedigter_user_id null und die RLS-Policy lässt den Kunden
+  // seinen eigenen Claim nicht sehen.
+  try {
+    const { data: fallRow } = await admin
+      .from('faelle')
+      .select('claim_id')
+      .eq('id', fallId)
+      .maybeSingle()
+    const claimId = (fallRow?.claim_id as string | null) ?? null
+    if (claimId) {
+      await admin
+        .from('claims')
+        .update({ geschaedigter_user_id: userId })
+        .eq('id', claimId)
+
+      // CMM-19: claim_parties.user_id der Geschädigter-Party nachziehen
+      // damit der Kunde via cp_co_party_select / cp_user_own_select RLS-
+      // Zugriff hat. Ohne diesen Fix bleibt parties-Array bei v_claim_full
+      // leer für den Kunden.
+      await admin
+        .from('claim_parties')
+        .update({ user_id: userId })
+        .eq('claim_id', claimId)
+        .eq('rolle', 'geschaedigter')
+    }
+  } catch (err) {
+    console.warn('[CMM-19] claims/claim_parties user_id Update fehlgeschlagen:', err)
+  }
+
   // AAR-125: Lead laden für conditional Polizeibericht
   // AAR-607 A3: .single() throwed bei 0 Rows + leadDocs=null Propagation zu
   // createPflichtdokumenteFromKatalog war Silent-Fail-Pfad.
@@ -322,7 +411,9 @@ async function finalizeKundeSetup(
   // (kein chat_teilnehmer-Sync mehr nötig — siehe lib/chatGruppe.ts).
 
   // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
-  await sendWelcomeWithLogin(admin, fallId, email, password)
+  // CMM-14: Magic-Link weiterreichen damit der Wizard direkt einen
+  // "Zu meinem Portal"-Button anbieten kann.
+  return await sendWelcomeWithLogin(admin, fallId, email, password)
 }
 
 // AAR-127: Helper — generiert Magic-Link via Supabase Auth Admin API
@@ -334,7 +425,7 @@ async function sendWelcomeWithLogin(
   fallId: string,
   email: string,
   password: string,
-): Promise<void> {
+): Promise<{ magicLink: string | null }> {
   let magicLink: string | null = null
   try {
     const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/kunde/onboarding`
@@ -358,6 +449,8 @@ async function sendWelcomeWithLogin(
   } catch (err) {
     console.error('[AAR-127] Welcome-Mail-Versand fehlgeschlagen:', err)
   }
+
+  return { magicLink }
 }
 
 /**
@@ -368,52 +461,23 @@ export async function signSAandCreateFall(
   leadId: string,
   signatureUrl: string,
   flowLinkId: string | null,
-): Promise<{ fallId: string }> {
-  if (!leadId || !signatureUrl) throw new Error('Fehlende Daten für SA-Unterschrift')
+): Promise<{ ok: true; fallId: string } | { ok: false; error: string }> {
+  if (!leadId || !signatureUrl) return { ok: false, error: 'Fehlende Daten für SA-Unterschrift' }
 
   try {
   const admin = createAdminClient()
 
-  // 1. Lead-Daten laden
+  // 1. Lead minimal laden — wir brauchen ihn für die Termin-/Pflichtdoc-/
+  // Mitteilungs-Logik unten. Der eigentliche Schadens-Daten-Übertrag in
+  // den Claim macht convertLeadToClaim.
   const { data: lead, error: leadErr } = await admin
     .from('leads')
     .select('*')
     .eq('id', leadId)
     .single()
-  if (leadErr || !lead) throw new Error('Lead nicht gefunden')
+  if (leadErr || !lead) return { ok: false, error: 'Lead nicht gefunden' }
 
-  // 2. Fallnummer generieren (CLM-YYYYMMDD-NNN)
-  const today = new Date()
-  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-  const { count } = await admin
-    .from('faelle')
-    .select('id', { count: 'exact', head: true })
-    .like('fall_nummer', `CLM-${dateStr}-%`)
-  const nr = String((count ?? 0) + 1).padStart(3, '0')
-  const fallNummer = `CLM-${dateStr}-${nr}`
-
-  // 3. Kundenbetreuer per Round-Robin zuweisen
-  let kundenbetreuerId: string | null = null
-  const { data: betreuer } = await admin
-    .from('profiles')
-    .select('id')
-    .in('rolle', ['kundenbetreuer', 'admin'])
-    .limit(10)
-  if (betreuer && betreuer.length > 0) {
-    const counts: Record<string, number> = {}
-    for (const b of betreuer) {
-      const { count: c } = await admin
-        .from('faelle')
-        .select('id', { count: 'exact', head: true })
-        .eq('kundenbetreuer_id', b.id)
-        .not('status', 'in', '("abgeschlossen","storniert")')
-      counts[b.id] = c ?? 0
-    }
-    const min = betreuer.reduce((m, b) => (counts[b.id] ?? 0) < (counts[m.id] ?? 0) ? b : m, betreuer[0])
-    kundenbetreuerId = min.id
-  }
-
-  // 4a. AAR-345: SV-Zuweisung aus gutachter_termine laden — direkt über
+  // 2. AAR-345: SV-Zuweisung aus gutachter_termine laden — direkt über
   // gutachter_termine.lead_id statt via Legacy-Feld leads.gutachter_termin
   // (der Dispatcher kann den Termin-Eintrag anlegen ohne das Timestamp-Feld
   // auf leads zu pflegen). Vorher wurde in diesem Fall sv_id=NULL gesetzt
@@ -432,28 +496,22 @@ export async function signSAandCreateFall(
     aktiverTerminId = existingTermin?.id ?? null
   }
 
-  // 4aa. AAR-155: Entity-FKs auflösen (versicherung/kanzlei/organisation/
-  // leadbearbeiter) — siehe resolveFallEntityFks JSDoc. Non-blocking:
-  // Misses landen als NULL in faelle, kein Fehler.
-  const entityFks = await resolveFallEntityFks(admin, lead, svIdFromTermin)
-
-  // 4b. Fall erstellen
-  // AAR-128: ~80-Zeilen Inline-Mapping ersetzt durch zentrale buildFallInsertFromLead.
-  // Single Source of Truth für Lead→Fall-Field-Kopie liegt jetzt in
-  // src/lib/lead-fall-mapping.ts — neue Felder dort hinzufügen, nicht hier.
-  const fallInsert = buildFallInsertFromLead(lead, {
-    fallNummer,
-    kundenbetreuerId,
+  // 3. CMM-3: Lead → Claim direkt konvertieren. convertLeadToClaim macht
+  // claims insert + claim_parties + claim_vehicle_involvements + faelle
+  // (vollständig, bis Phase 6 frontend-relevant) + leads-Status auf
+  // "umgewandelt" + alle Konvertierungs-Tags.
+  const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')
+  const conv = await convertLeadToClaim({
+    leadId,
     svIdFromTermin,
     signatureUrl,
-    ...entityFks,
   })
-  const { data: fall, error: fallErr } = await admin
-    .from('faelle')
-    .insert(fallInsert)
-    .select('id')
-    .single()
-  if (fallErr || !fall) throw new Error(`Fall-Erstellung fehlgeschlagen: ${fallErr?.message}`)
+  if (!conv.ok) {
+    return { ok: false, error: `Konvertierung fehlgeschlagen: ${conv.error}` }
+  }
+  const fall: { id: string } = { id: conv.fallId }
+  const fallNummer = conv.fallNummer
+  const kundenbetreuerId = conv.kundenbetreuerId
 
   // 5. KFZ-192 + AAR-345: Termin-State-Machine basierend auf service_typ.
   // Guard auf aktiverTerminId statt Legacy-Feld lead.gutachter_termin —
@@ -472,6 +530,28 @@ export async function signSAandCreateFall(
 
       if (upErr) console.error('[KFZ-192] Termin-Upgrade (nur_gutachter):', upErr.message)
 
+      // CMM-32d / CMM-32i: Auftrag anlegen — robust gegen den Fall, dass der
+      // Termin schon vor SA-Signatur auf bestaetigt stand (UPDATE liefert dann
+      // 0 Rows, ohne Härtung würde kein Auftrag entstehen).
+      if (svIdFromTermin) {
+        try {
+          let terminIdsForAuftrag = (upgradedTermine ?? []).map((t) => t.id as string)
+          if (terminIdsForAuftrag.length === 0) {
+            const { data: existingTermine } = await admin
+              .from('gutachter_termine')
+              .select('id')
+              .eq('fall_id', fall.id)
+              .eq('sv_id', svIdFromTermin)
+              .in('status', ['bestaetigt', 'reserviert'])
+            terminIdsForAuftrag = (existingTermine ?? []).map((t) => t.id as string)
+          }
+          const { createErstgutachtenAuftragWennNoetig } = await import('@/lib/auftrag/create')
+          await createErstgutachtenAuftragWennNoetig(
+            admin, fall.id as string, svIdFromTermin, terminIdsForAuftrag,
+          )
+        } catch (err) { console.error('[CMM-32d] Auftrag-Anlage fehlgeschlagen:', err) }
+      }
+
       // KFZ-192: bestaetigeTermin aufrufen (setzt final_verbindlich_ab + Timeline)
       try {
         const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
@@ -486,12 +566,69 @@ export async function signSAandCreateFall(
 
       // Fall-Status spiegelt die View aus gutachter_termine
     } else {
-      // komplett: SA unterschrieben → Termin bleibt 'reserviert', wartet auf Vollmacht.
-      // fall_id setzen damit der Termin in der Fallakte sichtbar wird.
-      await admin.from('gutachter_termine')
-        .update({ fall_id: fall.id })
+      // CMM-21: komplett — SA unterschrieben = Termin verbindlich bestätigt.
+      // Vorher blieb der Termin auf 'reserviert' bis zur Vollmacht; das hat
+      // dazu geführt dass der Kunde im Onboarding nichts Verbindliches sah.
+      // Aaron-Spec: SA-Unterschrift ist die Termin-Bestätigung, Vollmacht ist
+      // davon entkoppelt. fall_id muss in jedem Fall gesetzt werden.
+      const { data: updatedTermine, error: upErr } = await admin.from('gutachter_termine')
+        .update({ status: 'bestaetigt', fall_id: fall.id })
         .eq('lead_id', leadId)
         .eq('status', 'reserviert')
+        .select('id')
+
+      if (upErr) console.error('[CMM-21] Termin-Upgrade (komplett):', upErr.message)
+
+      // CMM-32d / CMM-32i: Erstgutachten-Auftrag anlegen. Auch wenn das obige
+      // UPDATE 0 Rows liefert (Termin war bereits bestaetigt), müssen wir den
+      // Auftrag anlegen — sonst hängt der Fall ohne Sub-Entity-Eintrag und
+      // der Kunde sieht keine Status-Bar. Termine fresh aus der DB lesen
+      // damit auftrag_id zugeordnet werden kann.
+      if (svIdFromTermin) {
+        try {
+          let terminIdsForAuftrag = (updatedTermine ?? []).map((t) => t.id as string)
+          if (terminIdsForAuftrag.length === 0) {
+            const { data: existingTermine } = await admin
+              .from('gutachter_termine')
+              .select('id')
+              .eq('fall_id', fall.id)
+              .eq('sv_id', svIdFromTermin)
+              .in('status', ['bestaetigt', 'reserviert'])
+            terminIdsForAuftrag = (existingTermine ?? []).map((t) => t.id as string)
+          }
+          const { createErstgutachtenAuftragWennNoetig } = await import('@/lib/auftrag/create')
+          await createErstgutachtenAuftragWennNoetig(
+            admin, fall.id as string, svIdFromTermin, terminIdsForAuftrag,
+          )
+        } catch (err) { console.error('[CMM-32d] Auftrag-Anlage fehlgeschlagen:', err) }
+      }
+
+      // bestaetigeTermin setzt final_verbindlich_ab + Timeline-Eintrag
+      try {
+        const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
+        for (const t of updatedTermine ?? []) { await bestaetigeTermin(t.id) }
+      } catch (err) { console.error('[CMM-21] bestaetigeTermin (komplett):', err) }
+
+      // Reminder generieren (24h vorher Push/WhatsApp)
+      try {
+        const { generateReminderForTermin } = await import('@/lib/reminders/generate')
+        for (const t of updatedTermine ?? []) { await generateReminderForTermin(t.id) }
+      } catch (err) { console.error('[CMM-21] Reminder-Gen (komplett):', err) }
+
+      // AAR-713: SV-Bestätigungs-Email feuert jetzt erst hier (vorher schon
+      // bei der Dispatcher-Vorreservierung — das war die verwirrende
+      // „Vorreservierung"-Mail). nur_gutachter triggert die Email automatisch
+      // via bestaetigeTermin oben; komplett wartet auf Vollmacht und braucht
+      // einen separaten Trigger nach SA, damit der SV überhaupt eine Mail mit
+      // Termindaten bekommt sobald die SA unterschrieben ist.
+      try {
+        const { sendSvTerminBestaetigung } = await import('@/lib/email/google/flows')
+        for (const t of updatedTermine ?? []) {
+          if (svIdFromTermin) await sendSvTerminBestaetigung(svIdFromTermin, t.id)
+        }
+      } catch (err) {
+        console.warn('[AAR-713] SV-Email nach SA fehlgeschlagen:', err instanceof Error ? err.message : err)
+      }
     }
   }
 
@@ -510,15 +647,47 @@ export async function signSAandCreateFall(
   }
 
   // 6. Lead-Status updaten
+  // AAR-702: qualifizierungs_phase auf 'konvertiert' (statt 'abgeschlossen')
+  // sobald die SA unterschrieben ist — der Lead ist damit faktisch zum Fall
+  // konvertiert, egal ob noch ein offener Rückruf existiert.
+  const nowIsoSa = new Date().toISOString()
   await admin.from('leads').update({
     status: 'umgewandelt',
-    qualifizierungs_phase: 'abgeschlossen',
+    qualifizierungs_phase: 'konvertiert',
     sa_unterschrieben: true,
-    sa_datum: new Date().toISOString(),
+    sa_datum: nowIsoSa,
+    sa_unterschrieben_am: nowIsoSa,
     flow_link_abgeschlossen: true,
     konvertiert_zu_fall_id: fall.id,
-    updated_at: new Date().toISOString(),
+    updated_at: nowIsoSa,
   }).eq('id', leadId)
+
+  // AAR-702: Offene Rückrufe des Leads zum Fall mitnehmen — fall_id setzen,
+  // damit der Vereinbarende den Termin weiterhin in seinem Kalender + im
+  // Fall-Kontext sieht. Status bleibt 'offen' (nicht erledigt) — der
+  // Rückruf-Anlass kann auch nach SA-Unterschrift noch existieren.
+  await admin.from('admin_termine')
+    .update({ fall_id: fall.id, updated_at: nowIsoSa })
+    .eq('lead_id', leadId)
+    .eq('typ', 'rueckruf')
+    .eq('status', 'offen')
+
+  // AAR-694b: SA-Status auch auf den Fall propagieren — `syncSvCalendarEvent`
+  // liest faelle.sa_unterschrieben + vollmacht_signiert_am für die Entscheidung
+  // ob ein Event in den SV-Google-Kalender geschrieben wird.
+  await admin.from('faelle').update({
+    sa_unterschrieben: true,
+    sa_unterschrieben_am: nowIsoSa,
+  }).eq('id', fall.id)
+
+  // AAR-694b: SV-Google-Kalender-Events für alle aktiven Termine syncen.
+  // Bei service_typ='nur_gutachter' reicht SA → Event entsteht jetzt.
+  // Bei 'komplett' wartet syncSvCalendarEvent intern auf vollmacht_signiert_am.
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEventsForFall }) =>
+    syncSvCalendarEventsForFall(fall.id).catch((err) =>
+      console.warn('[signSAandCreateFall] syncSvCalendarEventsForFall:', err instanceof Error ? err.message : err),
+    ),
+  )
 
   // AAR-229 W4: SA-Unterschrift Mitteilung an Admin + SV
   try {
@@ -676,7 +845,7 @@ export async function signSAandCreateFall(
           uploaded_by_kunde: true,
           sichtbar_fuer: [
             'admin',
-            'leadbearbeiter',
+            'dispatch',
             'kundenbetreuer',
             'sachverstaendiger',
             'kanzlei',
@@ -833,7 +1002,7 @@ export async function signSAandCreateFall(
   if (lead.gutachter_termin && lead.telefon) {
     try {
       const { data: terminRow } = await admin.from('gutachter_termine')
-        .select('id, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
+        .select('id, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname))')
         .eq('fall_id', fall.id)
         .in('status', ['bestaetigt', 'reserviert'])
         .limit(1)
@@ -848,13 +1017,16 @@ export async function signSAandCreateFall(
           .eq('status', 'reserviert')
       }
 
+      // CMM-21: nur Vorname an den Kunden — Vor-/Nachname zusammen würde
+      // dem Kunden ermöglichen den Sachverständigen direkt zu identifizieren
+      // und an Claimondo vorbei zu beauftragen.
       const svRel = (terminRow as { sachverstaendige: unknown } | null)?.sachverstaendige
       const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
       const profileRel = sv?.profiles
       const profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
-        | { vorname: string | null; nachname: string | null }
+        | { vorname: string | null }
         | null
-      const svName = `${profile?.vorname ?? ''} ${profile?.nachname ?? ''}`.trim() || 'Ihrem Gutachter'
+      const svName = (profile?.vorname ?? '').trim() || 'Ihrem Gutachter'
       const terminDate = new Date(lead.gutachter_termin)
       const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
       const { sendCommunication } = await import('@/lib/communications/send')
@@ -938,6 +1110,44 @@ export async function signSAandCreateFall(
         } catch (err) { console.error('[AAR-360] SA-Tool unerwartet:', err) }
       })()
     )
+
+    // Aaron 2026-04-30: Multi-Doc-Signatur — alle SV-Pflichtdokumente
+    // (Sicherungsabtretung / Honorarvereinbarung / Datenschutz / Widerruf)
+    // mit Kunden-Unterschrift versehen + claim-zentriert ablegen.
+    // Sichtbar im SV-Auftrag, NICHT im Kunden-Portal.
+    slaPromises.push(
+      (async () => {
+        try {
+          const { data: fallRow } = await admin
+            .from('faelle')
+            .select('claim_id')
+            .eq('id', fall.id)
+            .maybeSingle()
+          const claimId = (fallRow?.claim_id as string | null) ?? null
+
+          const { generateGutachterPflichtdokumente } = await import(
+            '@/lib/sa-tool/generate-pflichtdokumente'
+          )
+          const results = await generateGutachterPflichtdokumente({
+            admin,
+            fallId: fall.id,
+            claimId,
+            svId: svIdFromTermin!,
+            kundenVorname: (lead.vorname as string | null) ?? null,
+            kundenNachname: (lead.nachname as string | null) ?? null,
+            kundenSignaturUrl: signatureUrl,
+          })
+          for (const r of results) {
+            if (!r.success) {
+              const tag = r.skipped ? 'übersprungen' : 'Fehler'
+              console.warn(`[Pflichtdok-Merge] ${r.slotId} ${tag}:`, r.error)
+            }
+          }
+        } catch (err) {
+          console.error('[Pflichtdok-Merge] unerwartet:', err)
+        }
+      })(),
+    )
   }
 
   // AAR-377: SV-Briefing asynchron generieren. Der Fall ist bereits angelegt —
@@ -996,11 +1206,17 @@ export async function signSAandCreateFall(
     console.error('[AAR-kanzlei] Kanzlei-Modul-Load-Fehler:', err)
   }
 
-  return { fallId: fall.id }
+  // AAR-802: Cache-Invalidation der UIs die den neuen Fall + Lead-Update sehen
+  revalidatePath('/admin/faelle')
+  revalidatePath('/dispatch/leads')
+  revalidatePath('/dispatch/dashboard')
+  revalidatePath(`/dispatch/leads/${leadId}`)
+
+  return { ok: true, fallId: fall.id }
 
   } catch (err) {
     console.error('[signSAandCreateFall] FEHLER:', err)
-    throw err instanceof Error ? err : new Error(String(err))
+    return { ok: false, error: err instanceof Error ? err.message : String(err) }
   }
 }
 
@@ -1018,7 +1234,7 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
     .eq('id', fallId)
     .single()
 
-  if (fallErr || !fall) throw new Error('Fall nicht gefunden')
+  if (fallErr || !fall) return
 
   // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
   if ((fall.service_typ ?? 'komplett') !== 'komplett') return
@@ -1057,6 +1273,14 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
     const { generateReminderForTermin } = await import('@/lib/reminders/generate')
     await generateReminderForTermin(termin.id)
   } catch (err) { console.error('[KFZ-136] Reminder-Gen nach Vollmacht:', err) }
+
+  // AAR-694b: Bei Komplettpaket war die Vollmacht der finale Trigger für den
+  // Google-Kalender-Event. Jetzt nachschreiben (für alle aktiven Termine).
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEventsForFall }) =>
+    syncSvCalendarEventsForFall(fallId).catch((err) =>
+      console.warn('[confirmVollmacht] syncSvCalendarEventsForFall:', err instanceof Error ? err.message : err),
+    ),
+  )
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

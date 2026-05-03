@@ -214,27 +214,27 @@ export default function Phase6StatusTracking({
         </div>
       )}
 
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
+      <div className="bg-white border border-claimondo-border rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">
-          <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
-          <h2 className="text-sm font-semibold text-gray-900">Status-Tracking</h2>
+          <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
+          <h2 className="text-sm font-semibold text-claimondo-navy">Status-Tracking</h2>
           {/* AAR-201: Auto-Refresh läuft alle 30s im Hintergrund. Manueller
               Button für Dispatcher der sofort sehen will ob Kunde gerade
               geöffnet hat. */}
           <button
             type="button"
             onClick={() => router.refresh()}
-            className="ml-auto text-[10px] text-gray-400 hover:text-[#4573A2] flex items-center gap-1"
+            className="ml-auto text-[10px] text-claimondo-ondo/70 hover:text-claimondo-ondo flex items-center gap-1"
             title="Status neu laden (Auto-Refresh alle 30s)"
           >
             <RefreshCwIcon className="w-3 h-3" />
             Aktualisieren
           </button>
-          <span className="text-[10px] text-gray-400">
+          <span className="text-[10px] text-claimondo-ondo/70">
             {isPfadB ? 'Pfad B — Nur SV' : 'Pfad A — Komplett'}
           </span>
         </div>
-        <ol className="relative border-l border-gray-200 ml-2 space-y-5">
+        <ol className="relative border-l border-claimondo-border ml-2 space-y-5">
           {steps.map((s, i) => (
             <li key={i} className="pl-6">
               <span
@@ -244,20 +244,20 @@ export default function Phase6StatusTracking({
                     : s.state === 'warning'
                       ? 'bg-red-500 text-white'
                       : s.state === 'disabled'
-                        ? 'bg-gray-100 text-gray-300'
-                        : 'bg-gray-200 text-gray-400'
+                        ? 'bg-[#f8f9fb] text-claimondo-ondo/50'
+                        : 'bg-claimondo-border text-claimondo-ondo/70'
                 }`}
               >
                 {s.state === 'done' ? <CheckCircle2Icon className="w-3.5 h-3.5" /> : s.icon}
               </span>
               <p className={`text-sm font-medium ${
                 s.state === 'warning' ? 'text-red-700'
-                : s.state === 'disabled' ? 'text-gray-400'
-                : 'text-gray-900'
+                : s.state === 'disabled' ? 'text-claimondo-ondo/70'
+                : 'text-claimondo-navy'
               }`}>
                 {s.label}
               </p>
-              {s.sub && <p className={`text-[11px] mt-0.5 ${s.state === 'disabled' ? 'text-gray-400 italic' : 'text-gray-500'}`}>{s.sub}</p>}
+              {s.sub && <p className={`text-[11px] mt-0.5 ${s.state === 'disabled' ? 'text-claimondo-ondo/70 italic' : 'text-claimondo-ondo'}`}>{s.sub}</p>}
             </li>
           ))}
           {/* AAR-179 Audit-Fix #2: steps hat jetzt immer 5 Einträge (Vollmacht
@@ -266,11 +266,11 @@ export default function Phase6StatusTracking({
               Der Stepper rendert weiter als visuelle Roadmap, die Empty-Zeile
               darunter macht den Zustand explizit. */}
           {!latestFlow && (
-            <li className="pl-6 pt-3 mt-1 border-t border-dashed border-gray-200">
-              <span className="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white bg-gray-200 text-gray-400">
+            <li className="pl-6 pt-3 mt-1 border-t border-dashed border-claimondo-border">
+              <span className="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white bg-claimondo-border text-claimondo-ondo/70">
                 <CircleIcon className="w-3.5 h-3.5" />
               </span>
-              <p className="text-sm text-gray-500">Noch kein FlowLink versendet — zurück zu Phase 5</p>
+              <p className="text-sm text-claimondo-ondo">Noch kein FlowLink versendet — zurück zu Phase 5</p>
             </li>
           )}
         </ol>
@@ -279,8 +279,8 @@ export default function Phase6StatusTracking({
             (WhatsApp / SMS / Email) damit der MA auch nach Phase-6-Öffnung
             noch den passenden Kanal wählen kann. */}
         {latestFlow && (
-          <div className="mt-5 pt-4 border-t border-gray-100 space-y-2">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider">
+          <div className="mt-5 pt-4 border-t border-claimondo-border space-y-2">
+            <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider">
               FlowLink erneut senden
             </p>
             <div className="flex gap-2">
@@ -306,14 +306,14 @@ export default function Phase6StatusTracking({
                 type="button"
                 onClick={() => resend('email')}
                 disabled={resendPending || !l.email}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#4573A2] text-white text-xs font-semibold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-claimondo-ondo text-white text-xs font-semibold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <MailIcon className="w-3.5 h-3.5" />
                 Email
               </button>
             </div>
             {!l.telefon && !l.email && (
-              <p className="text-[10px] text-gray-400">
+              <p className="text-[10px] text-claimondo-ondo/70">
                 Weder Telefon noch Email am Lead — erst in Phase 5 hinterlegen.
               </p>
             )}

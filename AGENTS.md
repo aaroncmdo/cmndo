@@ -173,4 +173,72 @@ Bei reinen Bugfix-Commits darf der Audit kürzer sein, aber alle 7 Punkte müsse
 ## Begründung
 
 Bisher sind mehrfach Inkonsistenzen durchgerutscht (AAR-123 Tabs statt integrierter View, `flow_links.created_at` statt `erstellt_am`, `faelle.vollmacht_unterschrieben` existierte nicht, `KarteHubClient h-[calc(100vh-120px)]` nach Layout-Move). Jeder dieser Fehler wäre durch einen der 7 Punkte oben gefangen worden. Der Audit ist Pflicht, kein Vorschlag.
+
+# Server-Actions — Error-Handling-Pattern
+
+Server-Actions (`'use server'`-Files unter `src/app/**/actions.ts`) müssen einem festen Pattern folgen, damit Caller keine try/catch-Mischung um sie wickeln müssen.
+
+## Regel: Result-Object statt throw
+
+```typescript
+// ✅ RICHTIG — Result-Object
+export async function markiereAlsBezahlt(
+  abrechnungId: string,
+  betrag: number,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('abrechnungen').update({...}).eq('id', abrechnungId)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath('/admin/finance')
+  return { ok: true }
+}
+
+// ❌ FALSCH — throw
+export async function markiereAlsBezahlt(abrechnungId: string, betrag: number): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('abrechnungen').update({...}).eq('id', abrechnungId)
+  if (error) throw new Error(error.message)
+}
+```
+
+**Caller-Pattern:**
+
+```typescript
+// ✅ Result-Check
+const result = await markiereAlsBezahlt(id, brutto)
+if (!result.ok) toast.error(result.error ?? 'Fehler')
+
+// ❌ try/catch um Server-Action
+try { await markiereAlsBezahlt(id, brutto) } catch (err) { toast.error(err.message) }
+```
+
+## Welcher Result-Shape?
+
+Zwei akzeptierte Varianten — **konsistent innerhalb eines Files bleiben**:
+
+* **`{ ok: boolean; error?: string }`** — Standard für boolean-Ergebnisse
+* **`{ ok: true; data: T } | { ok: false; error: string }`** — wenn der Erfolgsfall einen Wert zurückliefert
+
+Vermeide den Mix mit `success` (alte Files), neue Code-Pfade nutzen `ok`.
+
+## Ausnahmen
+
+* **Non-critical Sub-Operations** (WhatsApp/Email-Sends, Timeline-Inserts, Mitteilungen) bleiben in lokalen `try { ... } catch (err) { console.error(...) }`-Blöcken, damit ein Twilio-Fail nicht den Status-Update atomar bricht
+* **Auth-Guards** (`requireAdmin()`-Helper) dürfen werfen — sie sind per Konvention Pre-Conditions und der Caller behandelt sie als Crash, nicht als Form-Fehler
+
+## revalidatePath nicht vergessen
+
+Jede mutierende Server-Action **muss** die betroffenen Routen revalidieren:
+
+```typescript
+revalidatePath('/admin/faelle')
+revalidatePath(`/dispatch/leads/${leadId}`)
+return { ok: true }
+```
+
+Faustregel: Welche Server-Component zeigt die geänderte Tabelle/Zeile an? Genau der Pfad muss revalidiert werden.
+
+## Begründung
+
+Vor AAR-800 mischten ~30 Server-Actions throw + Result-Object — Caller mussten beides absichern (try/catch + result.ok), oft brachen Errors stillschweigend durch. AAR-308/309 (`createKundeAccount`) hat das Pattern eingeführt, AAR-800/802 hat es konsequent durchgezogen. AAR-664 hat zusätzlich gezeigt, dass Konstanten/Types **nie** aus `'use server'`-Files exportiert werden dürfen — Client-Bundle macht `undefined` daraus.
 <!-- END:post-task-audit -->

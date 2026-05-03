@@ -6,13 +6,14 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { PhoneCallIcon, CalendarIcon, UsersIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
 const TYP_META: Record<string, { label: string; icon: typeof PhoneCallIcon; cls: string }> = {
   rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-gray-50 text-gray-700 border-gray-200' },
+  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
   kb_beratung: { label: 'KB-Beratung', icon: CalendarIcon, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
 }
 
@@ -132,35 +133,30 @@ export default async function MitarbeiterTermine() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-[#0D1B3E]">Meine Termine</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Rückrufe und Kundentermine, die dir zugewiesen sind.
-        </p>
-      </div>
+      <PageHeader title="Meine Termine" description="Rückrufe und Kundentermine, die dir zugewiesen sind." size="lg" />
 
       {groups.size === 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 px-6 py-16 text-center">
-          <p className="text-sm text-gray-400">Keine offenen Termine</p>
+        <div className="bg-white rounded-ios-lg shadow-ios-md px-6 py-16 text-center">
+          <p className="text-sm text-claimondo-ondo/70">Keine offenen Termine</p>
         </div>
       )}
 
       {Array.from(groups.entries()).map(([day, rows]) => {
         const isToday = day === nowIso.slice(0, 10)
         return (
-          <section key={day} className="bg-white rounded-xl border border-gray-200">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-900">
+          <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
+            <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-claimondo-navy">
                 {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
                   weekday: 'long',
                   day: '2-digit',
                   month: '2-digit',
                 })}
-                {isToday && <span className="ml-2 text-xs text-[#4573A2]">(heute)</span>}
+                {isToday && <span className="ml-2 text-xs text-claimondo-ondo">(heute)</span>}
               </h2>
-              <span className="text-xs text-gray-500">{rows?.length ?? 0}</span>
+              <span className="text-xs text-claimondo-ondo">{rows?.length ?? 0}</span>
             </div>
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-claimondo-border">
               {(rows ?? []).map((t) => {
                 const meta = TYP_META[t.typ] ?? TYP_META.intern
                 const Icon = meta.icon
@@ -174,22 +170,22 @@ export default async function MitarbeiterTermine() {
                 const href = lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : '#'
                 const overdue = new Date(t.start_zeit) < new Date()
                 return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-gray-50 transition-colors">
+                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
                     <div className="flex items-center gap-3">
                       <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${meta.cls}`}>
                         <Icon className="w-3 h-3" />
                         {meta.label}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{subject}</p>
-                        <p className={`text-xs ${overdue ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
+                        <p className="text-sm font-medium text-claimondo-navy truncate">{subject}</p>
+                        <p className={`text-xs ${overdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
                           {new Date(t.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
                           {t.notizen && ` · ${t.notizen}`}
                           {overdue && ' (überfällig)'}
                         </p>
                       </div>
                       {lead?.telefon && (
-                        <span className="text-xs text-gray-400 hidden sm:block">{lead.telefon}</span>
+                        <span className="text-xs text-claimondo-ondo/70 hidden sm:block">{lead.telefon}</span>
                       )}
                     </div>
                   </Link>

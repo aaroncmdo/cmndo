@@ -40,7 +40,7 @@ export default function KanzleiCheckoutClient({ abrechnungId, token, endbetragBr
 
   return (
     <div className="bg-white rounded-2xl shadow p-6">
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Zahlung</h2>
+      <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-4">Zahlung</h2>
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           Fehler: {error}
@@ -48,19 +48,19 @@ export default function KanzleiCheckoutClient({ abrechnungId, token, endbetragBr
       )}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-600 text-sm">Gesamtbetrag</p>
-          <p className="text-2xl font-bold text-gray-900">{endbetragBrutto.toFixed(2).replace('.', ',')} €</p>
-          <p className="text-xs text-gray-400">inkl. 19 % MwSt.</p>
+          <p className="text-claimondo-ondo text-sm">Gesamtbetrag</p>
+          <p className="text-2xl font-bold text-claimondo-navy">{endbetragBrutto.toFixed(2).replace('.', ',')} €</p>
+          <p className="text-xs text-claimondo-ondo/70">inkl. 19 % MwSt.</p>
         </div>
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="px-8 py-3 bg-[#0D1B3E] text-white font-semibold rounded-xl hover:bg-[#1E3A5F] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-8 py-3 bg-claimondo-navy text-white font-semibold rounded-xl hover:bg-claimondo-shield transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? 'Weiterleitung...' : 'Jetzt bezahlen'}
         </button>
       </div>
-      <p className="text-xs text-gray-400 mt-3">
+      <p className="text-xs text-claimondo-ondo/70 mt-3">
         Sichere Zahlung via Stripe. Sie werden auf die Stripe-Zahlungsseite weitergeleitet.
       </p>
     </div>

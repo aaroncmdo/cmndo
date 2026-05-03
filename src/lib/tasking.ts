@@ -252,7 +252,7 @@ export async function triggerLeadTasks(leadId: string, zugewiesenAn: string | nu
   const d2h = new Date(Date.now() + 2 * 60 * 60 * 1000)
 
   // L-01 sofort
-  await createAutoTask({ fall_id: leadId, empfaenger_id: zugewiesenAn, empfaenger_rolle: 'leadbearbeiter', task_typ: 'lead-qualifizieren', titel: 'Lead qualifizieren', beschreibung: 'Neuer Lead eingegangen. Bitte innerhalb von 30 Min qualifizieren.', deadline: d30m, prioritaet: 'dringend', phase: 'lead', task_code: 'L-01' })
+  await createAutoTask({ fall_id: leadId, empfaenger_id: zugewiesenAn, empfaenger_rolle: 'dispatch', task_typ: 'lead-qualifizieren', titel: 'Lead qualifizieren', beschreibung: 'Neuer Lead eingegangen. Bitte innerhalb von 30 Min qualifizieren.', deadline: d30m, prioritaet: 'dringend', phase: 'lead', task_code: 'L-01' })
   // L-04 parallel (KI-Schätzung)
   await createAutoTask({ fall_id: leadId, empfaenger_id: null, empfaenger_rolle: 'system', task_typ: 'ki-schaetzung', titel: 'KI-Schadenschaetzung durchfuehren', beschreibung: 'Automatische Schaetzung basierend auf Schadensbeschreibung.', deadline: d2h, phase: 'lead', task_code: 'L-04' })
 }

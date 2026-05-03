@@ -13,17 +13,23 @@ type OffenerSlot = {
   fall_id: string
 }
 
-export async function PflichtdokumenteBanner() {
+export async function PflichtdokumenteBanner({ fallId }: { fallId?: string } = {}) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return null
 
-  // Fälle des Kunden
-  const { data: faelle } = await supabase
-    .from('faelle')
-    .select('id')
-    .eq('kunde_id', user.id)
-  const fallIds = (faelle ?? []).map(f => f.id as string)
+  // AAR-710: optional auf einen einzelnen Fall einschränken — wird in der
+  // Fallakte gerendert. Ohne fallId: alle Fälle des Kunden (Legacy-Pfad).
+  let fallIds: string[]
+  if (fallId) {
+    fallIds = [fallId]
+  } else {
+    const { data: faelle } = await supabase
+      .from('faelle')
+      .select('id')
+      .eq('kunde_id', user.id)
+    fallIds = (faelle ?? []).map((f) => f.id as string)
+  }
   if (fallIds.length === 0) return null
 
   // Offene Pflichtdokumente = alles was NICHT 'hochgeladen' ist.
@@ -38,29 +44,43 @@ export async function PflichtdokumenteBanner() {
 
   if (!docs || docs.length === 0) return null
 
-  // Labels aus dokument_katalog nachladen
+  // AAR-709: Nur Slots anzeigen die der Kunde überhaupt hochladen darf.
+  // Vorher tauchten SV-Tier-2-Slots (Berufshaftpflicht, SA-Vorlage etc.) im
+  // Kunden-Banner auf, weil pflicht=true gesetzt war. Filter über
+  // dokument_katalog.uploadbar_von @> ['kunde'].
   const slotIds = Array.from(new Set(docs.map(d => d.dokument_typ as string)))
   const { data: katalog } = await supabase
     .from('dokument_katalog')
-    .select('slot_id, label')
+    .select('slot_id, label, uploadbar_von, kategorie')
     .in('slot_id', slotIds)
-  const labelMap = new Map<string, string>(
-    (katalog ?? []).map(k => [k.slot_id as string, k.label as string]),
-  )
+  const kundeSlotMap = new Map<string, { label: string; kategorie: string }>()
+  for (const k of katalog ?? []) {
+    const uploadbar = (k.uploadbar_von as string[] | null) ?? []
+    if (uploadbar.includes('kunde')) {
+      kundeSlotMap.set(k.slot_id as string, {
+        label: k.label as string,
+        kategorie: k.kategorie as string,
+      })
+    }
+  }
 
-  // Dedupliziert (gleicher slot_id mehrfach pro Fall wird zu einer Zeile)
+  // Dedupliziert + nur Kunden-uploadbare Slots
   const offen: OffenerSlot[] = []
   const seen = new Set<string>()
   for (const d of docs) {
+    const slotInfo = kundeSlotMap.get(d.dokument_typ as string)
+    if (!slotInfo) continue // SV/Admin-only Slot — nicht im Kunden-Banner
     const key = `${d.fall_id}:${d.dokument_typ}`
     if (seen.has(key)) continue
     seen.add(key)
     offen.push({
       slot_id: d.dokument_typ as string,
-      label: labelMap.get(d.dokument_typ as string) ?? (d.dokument_typ as string),
+      label: slotInfo.label,
       fall_id: d.fall_id as string,
     })
   }
+
+  if (offen.length === 0) return null
 
   // Max 4 Zeilen — Rest wird als "… und N weitere" zusammengefasst
   const shown = offen.slice(0, 4)

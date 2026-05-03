@@ -27,7 +27,7 @@ import { akzeptiereAgbSubSv } from './actions'
 import SignaturePadInput from '@/components/SignaturePadInput'
 import StripeBrandingFooter from '@/components/StripeBrandingFooter'
 import LogoUploadStep from '@/components/LogoUploadStep'
-import SaVorlageUploadStep from '@/components/SaVorlageUploadStep'
+import DokumenteUploadStep, { type DokumentSlotState } from '@/components/DokumenteUploadStep'
 import KalenderConnectStep from '@/components/KalenderConnectStep'
 import OrderSummaryCard from './OrderSummaryCard'
 import LeadPreisOverlay, { type LeadpreisRow } from './LeadPreisOverlay'
@@ -77,10 +77,12 @@ type SvData = {
   // BUG-96: fuer die Stammdaten-Card im Vertrag-Step
   firmenname: string | null
   gcal_connected: boolean
+  // AAR-717: alternativer Kalender-Connect via CalDAV (iCloud etc.)
+  caldav_connected: boolean
   steuernummer: string | null
-  // AAR-359 W3: SA-Vorlage-Status für Step 5
-  sa_vorlage_status: 'ausstehend' | 'geprueft' | 'zurueckgewiesen' | null
-  sa_vorlage_admin_notiz: string | null
+  // AAR-714: Pflichtdokumente-States für den Dokumente-Step
+  dokumenteSlots: DokumentSlotState[]
+  dokumenteKomplett: boolean
 }
 
 type Vorlage = {
@@ -118,15 +120,17 @@ type Organisation = {
 // Branding früh im Prozess, Vertrag + Zahlung in seinen Farben.
 // AAR-242: Kalender-Connect-Step nach Anzahlung ergänzt (Google OAuth oder
 // Opt-Out) — Pflicht für Terminvorschläge.
-// AAR-359 W3: Neuer Step 'sa_vorlage' zwischen Anzahlung und Kalender — der
-// SV lädt seine Schadenaufnahme-Vorlage hoch. Admin-Freigabe öffnet später
-// das Dispatch-Gate. Der Flow hat jetzt 6 Steps für Solo/Inhaber/Akademie.
+// AAR-714: Step 'sa_vorlage' → 'dokumente'. Statt einer SA-PDF werden hier
+// drei Pflichtdokumente (Sicherungsabtretung|Honorarvereinbarung +
+// Datenschutzerklärung + Widerrufsbelehrung) eingesammelt. Nach Admin-
+// Freigabe aller drei setzt dokumenteFreigeben() sachverstaendige.
+// verifiziert=true.
 const STEPS_4: { key: string; label: string; icon: typeof PackageIcon }[] = [
   { key: 'konditionen', label: 'Konditionen', icon: PackageIcon },
   { key: 'branding', label: 'Logo', icon: ImageIcon },
   { key: 'vertrag', label: 'Vertrag', icon: FileSignatureIcon },
   { key: 'anzahlung', label: 'Anzahlung', icon: CreditCardIcon },
-  { key: 'sa_vorlage', label: 'SA-Vorlage', icon: FileTextIcon },
+  { key: 'dokumente', label: 'Dokumente', icon: FileTextIcon },
   { key: 'kalender', label: 'Kalender', icon: CalendarIcon },
 ]
 
@@ -219,24 +223,19 @@ export default function WillkommenClient({
   if (r !== 'sub_mitarbeiter' && sv.portal_zugang_freigeschaltet && !sv.logo_url) {
     initialStep = 1
   }
-  // AAR-359 W3: SA-Vorlage noch nicht hochgeladen oder zurückgewiesen
-  // → Step 4 (SA-Vorlage). Geht VOR dem Kalender-Gate, damit der SV auch
-  // bei vorhandenem Kalender noch die SA nachreicht.
-  if (
-    r !== 'sub_mitarbeiter'
-    && sv.portal_zugang_freigeschaltet
-    && (sv.sa_vorlage_status === null || sv.sa_vorlage_status === 'zurueckgewiesen')
-  ) {
+  // AAR-714: Pflichtdokumente noch nicht vollständig → Step 4 (Dokumente).
+  // Geht VOR dem Kalender-Gate, damit der SV auch bei vorhandenem Kalender
+  // noch die Dokumente nachreicht.
+  if (r !== 'sub_mitarbeiter' && sv.portal_zugang_freigeschaltet && !sv.dokumenteKomplett) {
     initialStep = 4
   }
-  // AAR-242: Kalender noch nicht verbunden → Kalender-Step (AAR-359 W3:
-  // Index ist jetzt 5 weil SA-Vorlage dazugekommen ist).
+  // AAR-242: Kalender noch nicht verbunden → Kalender-Step (Index 5).
   if (
     r !== 'sub_mitarbeiter'
     && sv.portal_zugang_freigeschaltet
-    && sv.sa_vorlage_status !== null
-    && sv.sa_vorlage_status !== 'zurueckgewiesen'
+    && sv.dokumenteKomplett
     && !sv.gcal_connected
+    && !sv.caldav_connected
   ) {
     initialStep = 5
   }
@@ -245,7 +244,7 @@ export default function WillkommenClient({
   const [step, setStep] = useState(initialStep)
   // AAR-509: currentKey vor die Stripe-Effects gezogen damit der Anzahlung-
   // Trigger keybasiert statt index-basiert prüfen kann — sonst hängt der
-  // Checkout, weil `anzahlung` nach Einführung von `branding`/`sa_vorlage`
+  // Checkout, weil `anzahlung` nach Einführung von `branding`/`dokumente`
   // nicht mehr Index 2 ist.
   const currentKey = STEPS[step]?.key ?? ''
   // AAR-233: Key-basierter Step-Navigation-Helper.
@@ -413,13 +412,13 @@ export default function WillkommenClient({
       <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
         <div className="w-full max-w-4xl">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-2xl font-semibold text-claimondo-navy">
               Bedingungen akzeptiert{profile.vorname ? `, ${profile.vorname}` : ''}!
             </h1>
-            <p className="text-gray-500 text-sm mt-1">Letzter Schritt liegt jetzt bei deinem Inhaber</p>
+            <p className="text-claimondo-ondo text-sm mt-1">Letzter Schritt liegt jetzt bei deinem Inhaber</p>
           </div>
 
-          <div className="bg-white border border-gray-200 rounded-2xl p-6">
+          <div className="bg-white border border-claimondo-border rounded-2xl p-6">
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3">
               <ClockIcon className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-amber-800">
@@ -436,7 +435,7 @@ export default function WillkommenClient({
               </div>
             </div>
 
-            <div className="mt-5 text-xs text-gray-500 text-center">
+            <div className="mt-5 text-xs text-claimondo-ondo text-center">
               Du kannst dieses Fenster schließen. Bei Fragen erreichst du uns unter{' '}
               <a href="mailto:aaron.sprafke@claimondo.de" className="text-[var(--brand-primary)] underline">
                 aaron.sprafke@claimondo.de
@@ -462,10 +461,10 @@ export default function WillkommenClient({
       <div className={`w-full ${wrapperWidth}`}>
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-2xl font-semibold text-claimondo-navy">
             Willkommen bei Claimondo{profile.vorname ? `, ${profile.vorname}` : ''}!
           </h1>
-          <p className="text-gray-500 text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
+          <p className="text-claimondo-ondo text-sm mt-1">Schritt {step + 1} von {STEPS.length}</p>
         </div>
 
         {/* AAR-512: Inline-Anzahlung-Banner entfernt — der globale Onboarding-
@@ -488,7 +487,7 @@ export default function WillkommenClient({
                       ? 'bg-[var(--brand-secondary)] text-white'
                       : isActive
                       ? 'bg-[var(--brand-primary)] text-white'
-                      : 'bg-gray-200 text-gray-500'
+                      : 'bg-claimondo-border text-claimondo-ondo'
                   }`}
                   aria-current={isActive ? 'step' : undefined}
                   aria-label={s.label}
@@ -496,7 +495,7 @@ export default function WillkommenClient({
                   {isDone ? <CheckIcon className="w-4 h-4" /> : i + 1}
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-10 h-0.5 transition-colors ${isDone ? 'bg-[var(--brand-secondary)]' : 'bg-gray-300'}`} />
+                  <div className={`w-10 h-0.5 transition-colors ${isDone ? 'bg-[var(--brand-secondary)]' : 'bg-claimondo-border'}`} />
                 )}
               </div>
             )
@@ -504,9 +503,9 @@ export default function WillkommenClient({
         </div>
 
         {/* Content Card */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-6">
+        <div className="bg-white border border-claimondo-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-semibold text-gray-900">{STEPS[step].label}</h2>
+            <h2 className="text-lg font-semibold text-claimondo-navy">{STEPS[step].label}</h2>
             {/* AAR-513: Globaler Zurück-Button — funktioniert auf allen Steps
                 (Branding/Anzahlung/SA-Vorlage/Kalender haben keine eigenen
                 Navigations-Buttons weil ihre Sub-Components sie übernehmen).
@@ -519,7 +518,7 @@ export default function WillkommenClient({
               const prevCommitted =
                 (prevKey === 'vertrag' && sv.vertrag_unterschrieben) ||
                 (prevKey === 'anzahlung' && sv.portal_zugang_freigeschaltet) ||
-                (prevKey === 'sa_vorlage' && sv.sa_vorlage_status === 'geprueft')
+                (prevKey === 'dokumente' && sv.dokumenteKomplett)
               const tooltip = prevCommitted
                 ? 'Dieser Schritt ist bereits abgeschlossen und kann nicht mehr bearbeitet werden'
                 : `Zurück zu „${STEPS[step - 1].label}"`
@@ -529,7 +528,7 @@ export default function WillkommenClient({
                   onClick={() => !prevCommitted && setStep(step - 1)}
                   disabled={saving || prevCommitted}
                   title={tooltip}
-                  className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   aria-label={tooltip}
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -562,7 +561,7 @@ export default function WillkommenClient({
 
               {/* Konditionen-Card */}
               <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-5">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Deine Konditionen</p>
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Konditionen</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
                   <Kondition label="Fälle / Monat" value={String(sv.paket_faelle_gesamt)} />
@@ -581,8 +580,8 @@ export default function WillkommenClient({
               </div>
 
               {/* Stammdaten-Card (read-only) */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Deine Stammdaten</p>
+              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-5">
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
                   <ReadRow icon={UserIcon} label="Email" value={profile.email ?? '—'} />
@@ -604,39 +603,39 @@ export default function WillkommenClient({
             <div className="space-y-5">
               {/* Buero-Header */}
               <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-5">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Du verwaltest</p>
-                <p className="text-base font-semibold text-gray-900">
-                  {organisation?.name ?? '—'} <span className="text-sm text-gray-500 font-normal">mit {subSvs.length} {subSvs.length === 1 ? 'Standort' : 'Standorten'}</span>
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-1">Du verwaltest</p>
+                <p className="text-base font-semibold text-claimondo-navy">
+                  {organisation?.name ?? '—'} <span className="text-sm text-claimondo-ondo font-normal">mit {subSvs.length} {subSvs.length === 1 ? 'Standort' : 'Standorten'}</span>
                 </p>
               </div>
 
               {/* Sub-Standort-Tabelle */}
               {subSvs.length > 0 ? (
-                <div className="border border-gray-200 rounded-xl overflow-hidden">
-                  <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-200">
-                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                <div className="border border-claimondo-border rounded-xl overflow-hidden">
+                  <div className="bg-[#f8f9fb] px-4 py-2.5 border-b border-claimondo-border">
+                    <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wide">
                       Sub-Standorte ({subSvs.length})
                     </p>
                   </div>
-                  <div className="divide-y divide-gray-100">
+                  <div className="divide-y divide-claimondo-border">
                     {subSvs.map((sub, idx) => (
                       <div key={sub.id} className="px-4 py-3 grid grid-cols-12 gap-3 text-sm">
                         <div className="col-span-12 sm:col-span-5">
-                          <p className="text-[10px] text-gray-400 uppercase">Standort {idx + 1}</p>
-                          <p className="text-gray-900 break-words">
+                          <p className="text-[10px] text-claimondo-ondo/70 uppercase">Standort {idx + 1}</p>
+                          <p className="text-claimondo-navy break-words">
                             {[sub.standort_adresse, sub.standort_plz].filter(Boolean).join(', ') || '—'}
                           </p>
                           {sub.profile_email && (
-                            <p className="text-[11px] text-gray-500 mt-0.5">{sub.profile_email}</p>
+                            <p className="text-[11px] text-claimondo-ondo mt-0.5">{sub.profile_email}</p>
                           )}
                         </div>
                         <div className="col-span-6 sm:col-span-3">
-                          <p className="text-[10px] text-gray-400 uppercase">Paket</p>
-                          <p className="text-gray-700">{PAKET_LABELS[sub.paket] ?? sub.paket}</p>
+                          <p className="text-[10px] text-claimondo-ondo/70 uppercase">Paket</p>
+                          <p className="text-claimondo-navy">{PAKET_LABELS[sub.paket] ?? sub.paket}</p>
                         </div>
                         <div className="col-span-6 sm:col-span-4 sm:text-right">
-                          <p className="text-[10px] text-gray-400 uppercase">Anzahlung</p>
-                          <p className="text-gray-900 font-medium">{fmtEur(sub.onboarding_anzahlung_betrag)}</p>
+                          <p className="text-[10px] text-claimondo-ondo/70 uppercase">Anzahlung</p>
+                          <p className="text-claimondo-navy font-medium">{fmtEur(sub.onboarding_anzahlung_betrag)}</p>
                         </div>
                       </div>
                     ))}
@@ -659,8 +658,8 @@ export default function WillkommenClient({
               </div>
 
               {/* Inhaber-Stammdaten */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Deine Inhaber-Stammdaten</p>
+              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-5">
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Inhaber-Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
                   <ReadRow icon={UserIcon} label="Email" value={profile.email ?? '—'} />
@@ -682,7 +681,7 @@ export default function WillkommenClient({
               {organisation && (
                 <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-5 flex items-start gap-3">
                   <Building2Icon className="w-5 h-5 text-[var(--brand-primary)] flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-gray-700">
+                  <div className="text-sm text-claimondo-navy">
                     <p>
                       Du gehoerst zu <strong>{organisation.name}</strong>. Dein{' '}
                       {organisation.typ === 'akademie' ? 'Verwalter' : 'Inhaber'} kuemmert sich
@@ -693,8 +692,8 @@ export default function WillkommenClient({
               )}
 
               {/* Eigenes Paket */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Dein Paket</p>
+              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-5">
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Dein Paket</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
                   <Kondition label="Fälle / Monat" value={String(sv.paket_faelle_gesamt)} />
@@ -707,8 +706,8 @@ export default function WillkommenClient({
               </div>
 
               {/* Stammdaten */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">Deine Stammdaten</p>
+              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-5">
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
                   <ReadRow icon={UserIcon} label="Email" value={profile.email ?? '—'} />
@@ -742,9 +741,9 @@ export default function WillkommenClient({
 
               {/* Hinweis fuer Buero-Inhaber: stellvertretend fuer alle Sub-Standorte */}
               {r === 'buero_inhaber' && organisation && (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-start gap-3">
+                <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 flex items-start gap-3">
                   <Building2Icon className="w-5 h-5 text-[var(--brand-secondary)] flex-shrink-0 mt-0.5" />
-                  <div className="text-xs text-gray-700">
+                  <div className="text-xs text-claimondo-navy">
                     Du unterzeichnest stellvertretend fuer <strong>{organisation.name}</strong> und alle{' '}
                     {subSvs.length} {subSvs.length === 1 ? 'Sub-Standort' : 'Sub-Standorte'}.
                   </div>
@@ -752,8 +751,8 @@ export default function WillkommenClient({
               )}
 
               {/* Stammdaten kompakt — BUG-96: Firma + Steuernummer ergaenzt */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                <p className="text-[10px] text-gray-500 uppercase tracking-wide font-semibold mb-2">
+              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
+                <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-2">
                   Stammdaten
                 </p>
                 <div className="space-y-1.5 text-xs">
@@ -795,20 +794,20 @@ export default function WillkommenClient({
 
               {/* Name */}
               <div>
-                <label className="text-xs text-gray-500 mb-1.5 block">
+                <label className="text-xs text-claimondo-ondo mb-1.5 block">
                   Dein Name (juristisch verbindlich) <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={unterschriftName}
                   onChange={e => setUnterschriftName(e.target.value)}
-                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                  className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                 />
               </div>
 
               {/* Signature Pad — BUG-81 controlled component bleibt */}
               <div>
-                <label className="text-xs text-gray-500 mb-1.5 block">
+                <label className="text-xs text-claimondo-ondo mb-1.5 block">
                   Unterschrift <span className="text-red-400">*</span>
                 </label>
                 <SignaturePadInput
@@ -820,12 +819,12 @@ export default function WillkommenClient({
               </div>
 
               {/* AGB-Checkbox mit Modal-Links */}
-              <label className="flex items-start gap-2.5 cursor-pointer text-sm text-gray-700">
+              <label className="flex items-start gap-2.5 cursor-pointer text-sm text-claimondo-navy">
                 <input
                   type="checkbox"
                   checked={agbAccepted}
                   onChange={e => setAgbAccepted(e.target.checked)}
-                  className="mt-0.5 rounded border-gray-300"
+                  className="mt-0.5 rounded border-claimondo-border"
                 />
                 <span>
                   Ich akzeptiere die{' '}
@@ -868,7 +867,7 @@ export default function WillkommenClient({
           {/* SCHRITT 1 — Sub-Mitarbeiter: nur Checkbox + Name (kein PDF, keine Sig) */}
           {currentKey === 'agb' && r === 'sub_mitarbeiter' && (
             <div className="space-y-5">
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-600 leading-relaxed">
+              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 text-xs text-claimondo-ondo leading-relaxed">
                 Bitte bestätige unsere{' '}
                 <Link href="/nutzungsbedingungen" target="_blank" className="text-[var(--brand-primary)] underline">Nutzungsbedingungen</Link>,
                 die <Link href="/agb" target="_blank" className="text-[var(--brand-primary)] underline">AGB</Link>{' '}
@@ -881,24 +880,24 @@ export default function WillkommenClient({
 
               {/* Name-Bestätigung */}
               <div>
-                <label className="text-xs text-gray-500 mb-1.5 block">
+                <label className="text-xs text-claimondo-ondo mb-1.5 block">
                   Dein Name (zur Bestätigung) <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={unterschriftName}
                   onChange={e => setUnterschriftName(e.target.value)}
-                  className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                  className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                 />
               </div>
 
               {/* AGB-Checkbox */}
-              <label className="flex items-start gap-2.5 cursor-pointer text-sm text-gray-700">
+              <label className="flex items-start gap-2.5 cursor-pointer text-sm text-claimondo-navy">
                 <input
                   type="checkbox"
                   checked={agbAccepted}
                   onChange={e => setAgbAccepted(e.target.checked)}
-                  className="mt-0.5 rounded border-gray-300"
+                  className="mt-0.5 rounded border-claimondo-border"
                 />
                 <span>
                   Ich akzeptiere die <strong>Nutzungsbedingungen</strong>, die <strong>AGB</strong> und die <strong>Datenschutzerklärung</strong>.
@@ -980,11 +979,11 @@ export default function WillkommenClient({
                       </button>
                     </div>
                   ) : !clientSecret ? (
-                    <div className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center text-sm text-gray-500">
+                    <div className="rounded-xl border border-claimondo-border bg-[#f8f9fb] p-8 text-center text-sm text-claimondo-ondo">
                       Checkout wird geladen ...
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
+                    <div className="rounded-xl border border-claimondo-border overflow-hidden bg-white">
                       <EmbeddedCheckoutProvider stripe={stripePromise} options={checkoutOptions}>
                         <EmbeddedCheckout />
                       </EmbeddedCheckoutProvider>
@@ -1010,15 +1009,12 @@ export default function WillkommenClient({
               // onDone leitet zu Vertrag weiter — außer User ist schon
               // portal_zugang_freigeschaltet (kam via ?stripe_success zurück
               // und hatte noch kein Logo).
-              // AAR-359 W3: Wenn freigeschaltet + SA noch offen → zu
-              // SA-Vorlage-Step; wenn SA auch durch → Dashboard.
+              // AAR-714: Wenn freigeschaltet + Dokumente noch offen → zu
+              // Dokumente-Step; wenn alles durch → Dashboard.
               onDone={() => {
                 if (sv.portal_zugang_freigeschaltet) {
-                  const saOffen =
-                    sv.sa_vorlage_status === null
-                    || sv.sa_vorlage_status === 'zurueckgewiesen'
-                  if (saOffen) {
-                    goToStep('sa_vorlage')
+                  if (!sv.dokumenteKomplett) {
+                    goToStep('dokumente')
                   } else {
                     router.push('/gutachter')
                     router.refresh()
@@ -1030,14 +1026,13 @@ export default function WillkommenClient({
             />
           )}
 
-          {/* AAR-359 W3: SA-Vorlage-Step zwischen Anzahlung und Kalender.
-              Sub-Mitarbeiter sehen diesen Step NICHT — sie uploaden die
-              SA später in /gutachter/verifizierung (W5). */}
-          {currentKey === 'sa_vorlage' && r !== 'sub_mitarbeiter' && (
-            <SaVorlageUploadStep
-              svId={sv.id}
-              initialStatus={sv.sa_vorlage_status}
-              adminNotiz={sv.sa_vorlage_admin_notiz}
+          {/* AAR-714: Dokumente-Step (Sicherungsabtretung|Honorarvereinbarung
+              + Datenschutzerklärung + Widerrufsbelehrung). Sub-Mitarbeiter
+              sehen diesen Step NICHT — sie laden Pflichtdokumente später in
+              /gutachter/verifizierung hoch. */}
+          {currentKey === 'dokumente' && r !== 'sub_mitarbeiter' && (
+            <DokumenteUploadStep
+              initialSlots={sv.dokumenteSlots}
               onDone={() => goToStep('kalender')}
             />
           )}
@@ -1047,6 +1042,7 @@ export default function WillkommenClient({
             <KalenderConnectStep
               svId={sv.id}
               gcalConnected={sv.gcal_connected}
+              caldavConnected={sv.caldav_connected}
               onDone={() => {
                 router.push('/gutachter')
                 router.refresh()
@@ -1062,11 +1058,11 @@ export default function WillkommenClient({
             </div>
           )}
 
-          {/* AAR-233 + AAR-242 + AAR-359 W3: Buttons nur auf Konditionen +
+          {/* AAR-233 + AAR-242 + AAR-714: Buttons nur auf Konditionen +
               Vertrag + Sub-AGB. Branding (LogoUploadStep), Anzahlung (Stripe),
-              SA-Vorlage (SaVorlageUploadStep) und Kalender (KalenderConnectStep)
+              Dokumente (DokumenteUploadStep) und Kalender (KalenderConnectStep)
               haben eigene Buttons. */}
-          {currentKey !== 'branding' && currentKey !== 'anzahlung' && currentKey !== 'sa_vorlage' && currentKey !== 'kalender' && (
+          {currentKey !== 'branding' && currentKey !== 'anzahlung' && currentKey !== 'dokumente' && currentKey !== 'kalender' && (
             <div className="flex items-center gap-3 mt-6">
               {/* AAR-513: Bottom-Zurück nur noch für sub_mitarbeiter — alle
                   anderen Rollen nutzen den globalen Zurück-Pfeil oben rechts. */}
@@ -1075,7 +1071,7 @@ export default function WillkommenClient({
                   type="button"
                   onClick={() => setStep(step - 1)}
                   disabled={saving}
-                  className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
+                  className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
                 >
                   Zurück
                 </button>
@@ -1129,7 +1125,7 @@ export default function WillkommenClient({
             </DialogTitle>
           </DialogHeader>
           <div
-            className="flex-1 overflow-y-auto text-xs text-gray-700 leading-relaxed prose prose-sm max-w-none pr-2"
+            className="flex-1 overflow-y-auto text-xs text-claimondo-navy leading-relaxed prose prose-sm max-w-none pr-2"
              
             dangerouslySetInnerHTML={{
               __html: (vertragModal === 'nb' ? nbVorlage?.inhalt_html : kvVorlage?.inhalt_html) ?? '',
@@ -1153,10 +1149,10 @@ export default function WillkommenClient({
 function ReadRow({ icon: Icon, label, value }: { icon: typeof UserIcon; label: string; value: string }) {
   return (
     <div className="flex items-start gap-3">
-      <Icon className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+      <Icon className="w-4 h-4 text-claimondo-ondo/70 flex-shrink-0 mt-0.5" />
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] text-gray-500 uppercase">{label}</p>
-        <p className="text-sm text-gray-800 break-words">{value}</p>
+        <p className="text-[10px] text-claimondo-ondo uppercase">{label}</p>
+        <p className="text-sm text-claimondo-navy break-words">{value}</p>
       </div>
     </div>
   )
@@ -1165,8 +1161,8 @@ function ReadRow({ icon: Icon, label, value }: { icon: typeof UserIcon; label: s
 function Kondition({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div>
-      <p className="text-[10px] text-gray-500 uppercase">{label}</p>
-      <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-[var(--brand-primary)]' : 'text-gray-900'}`}>{value}</p>
+      <p className="text-[10px] text-claimondo-ondo uppercase">{label}</p>
+      <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-[var(--brand-primary)]' : 'text-claimondo-navy'}`}>{value}</p>
     </div>
   )
 }
@@ -1175,15 +1171,15 @@ function Kondition({ label, value, highlight }: { label: string; value: string; 
 function StammRow({ label, value, breakAll }: { label: string; value: string; breakAll?: boolean }) {
   return (
     <div className="flex justify-between gap-2">
-      <span className="text-gray-500">{label}</span>
-      <span className={`text-gray-900 text-right ${breakAll ? 'break-all' : ''}`}>{value}</span>
+      <span className="text-claimondo-ondo">{label}</span>
+      <span className={`text-claimondo-navy text-right ${breakAll ? 'break-all' : ''}`}>{value}</span>
     </div>
   )
 }
 
 function KontaktHinweis() {
   return (
-    <div className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-xl p-4">
+    <div className="text-xs text-claimondo-ondo bg-amber-50 border border-amber-200 rounded-xl p-4">
       <strong>Stimmt etwas nicht?</strong> Schreib uns an{' '}
       <a href="mailto:aaron.sprafke@claimondo.de" className="text-[var(--brand-primary)] underline">
         aaron.sprafke@claimondo.de

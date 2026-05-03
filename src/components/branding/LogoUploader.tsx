@@ -51,36 +51,36 @@ export default function LogoUploader({ logoUrl, uploading, onFile, onClear, disa
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors ${
             isDragActive
               ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5'
-              : 'border-gray-300 bg-gray-50 hover:border-[var(--brand-secondary)] hover:bg-gray-100'
+              : 'border-claimondo-border bg-[#f8f9fb] hover:border-[var(--brand-secondary)] hover:bg-[#f8f9fb]'
           } ${uploading || disabled ? 'pointer-events-none opacity-60' : ''}`}
         >
           <input {...getInputProps()} />
-          <UploadCloudIcon className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-          <p className="text-sm font-medium text-gray-700">
+          <UploadCloudIcon className="w-10 h-10 text-claimondo-ondo/70 mx-auto mb-3" />
+          <p className="text-sm font-medium text-claimondo-navy">
             {isDragActive ? 'Hier ablegen …' : 'Logo hierher ziehen oder klicken'}
           </p>
-          <p className="text-[11px] text-gray-500 mt-1">PNG, JPG, SVG oder WebP — max 2 MB</p>
+          <p className="text-[11px] text-claimondo-ondo mt-1">PNG, JPG, SVG oder WebP — max 2 MB</p>
           {uploading && <p className="text-xs text-[var(--brand-secondary)] mt-3">Wird hochgeladen …</p>}
         </div>
       ) : (
-        <div className="border border-gray-200 rounded-2xl p-4 bg-white">
+        <div className="border border-claimondo-border rounded-2xl p-4 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-20 h-20 rounded-xl border border-gray-200 bg-white flex items-center justify-center overflow-hidden">
+            <div className="w-20 h-20 rounded-xl border border-claimondo-border bg-white flex items-center justify-center overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={logoUrl} alt="Aktuelles Logo" className="max-w-full max-h-full object-contain" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
+              <p className="text-sm font-medium text-claimondo-navy flex items-center gap-1.5">
                 <ImageIcon className="w-4 h-4 text-[var(--brand-secondary)]" />
                 Aktuelles Logo
               </p>
-              <p className="text-[11px] text-gray-500 mt-0.5 truncate">{logoUrl.split('/').pop()}</p>
+              <p className="text-[11px] text-claimondo-ondo mt-0.5 truncate">{logoUrl.split('/').pop()}</p>
               <div className="mt-2 flex gap-2">
                 <button
                   type="button"
                   onClick={onClear}
                   disabled={uploading}
-                  className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                  className="text-xs text-claimondo-ondo hover:text-claimondo-navy flex items-center gap-1"
                 >
                   <XIcon className="w-3.5 h-3.5" />
                   Anderes Logo wählen

@@ -8,6 +8,7 @@ import { NavigationIcon, ExternalLinkIcon } from 'lucide-react'
 import { googleMapsLink } from './googleMapsLink'
 import type { HeuteTerminFull } from './page'
 import { formatUhrzeit } from '@/lib/format'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 export interface TerminCardProps {
   termin: HeuteTerminFull
@@ -31,14 +32,19 @@ function statusBadge(status: string): { label: string; className: string } {
     case 'abgeschlossen':
       return {
         label: 'Abgeschlossen',
-        className: 'bg-gray-100 text-gray-500',
+        className: 'bg-[#f8f9fb] text-claimondo-ondo',
       }
     case 'abgelehnt':
       return { label: 'Abgelehnt', className: 'bg-red-50 text-red-600' }
     case 'no_show':
       return { label: 'No-Show', className: 'bg-amber-50 text-amber-700' }
     case 'reserviert':
-      return { label: 'Reserviert', className: 'bg-blue-50 text-blue-600' }
+      return { label: 'Reserviert', className: 'bg-[#f8f9fb] text-claimondo-ondo' }
+    // AAR-864: Verlegungs-Slots
+    case 'verlegung_pending':
+      return { label: 'Verlegung pending', className: 'bg-amber-50 text-amber-700' }
+    case 'verlegt':
+      return { label: 'Verlegt', className: 'bg-claimondo-border/40 text-claimondo-ondo italic' }
     default:
       return { label: 'Offen', className: 'bg-amber-50 text-amber-700' }
   }
@@ -66,42 +72,49 @@ export default function TerminCard({
 
   return (
     <div
-      className={`absolute left-16 right-2 rounded-xl border px-3 py-2 shadow-sm transition-opacity ${
+      className={`absolute left-16 right-2 rounded-xl px-3 py-2 shadow-sm transition-opacity ${
         vergangen
-          ? 'bg-gray-50 border-gray-200 opacity-60'
-          : 'bg-white border-gray-200 hover:border-[color:var(--brand-primary,var(--brand-secondary))]'
+          ? 'bg-[#f8f9fb] border border-claimondo-border opacity-60'
+          : termin.status === 'verlegung_pending'
+            ? 'bg-amber-50 border-2 border-dashed border-amber-400'
+            : termin.status === 'verlegt'
+              ? 'bg-claimondo-border/30 border border-claimondo-border opacity-70 italic'
+              : 'bg-white border border-claimondo-border hover:border-[color:var(--brand-primary,var(--brand-secondary))]'
       }`}
       style={{ top: `${topPx}px`, minHeight: `${heightPx}px` }}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-semibold text-gray-900">
+            {/* AAR-724: Roter Punkt für noch nicht gesehene Termine. */}
+            {!termin.gesehen_am && (
+              <span
+                className="inline-block w-2 h-2 rounded-full bg-red-500 shrink-0"
+                aria-label="Neu, noch nicht angesehen"
+              />
+            )}
+            <span className="text-sm font-semibold text-claimondo-navy">
               {formatUhrzeit(termin.start_zeit)}
             </span>
-            <span
-              className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${badge.className}`}
-            >
-              {badge.label}
-            </span>
+            <StatusBadge colorCls={badge.className}>{badge.label}</StatusBadge>
             {termin.schadentyp && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-[color:var(--brand-primary,var(--brand-secondary))]/10 text-[color:var(--brand-primary,var(--brand-secondary))] uppercase">
+              <StatusBadge colorCls="bg-[color:var(--brand-primary,var(--brand-secondary))]/10 text-[color:var(--brand-primary,var(--brand-secondary))] uppercase">
                 {termin.schadentyp}
-              </span>
+              </StatusBadge>
             )}
           </div>
-          <p className="text-sm text-gray-900 truncate">
+          <p className="text-sm text-claimondo-navy truncate">
             {termin.kennzeichen && (
               <span className="font-mono mr-2">{termin.kennzeichen}</span>
             )}
             {termin.fahrzeug ?? termin.kunde_name}
           </p>
           {termin.kennzeichen && termin.fahrzeug && (
-            <p className="text-xs text-gray-500 truncate">{termin.kunde_name}</p>
+            <p className="text-xs text-claimondo-ondo truncate">{termin.kunde_name}</p>
           )}
-          <p className="text-xs text-gray-500 truncate">{adresse || '—'}</p>
+          <p className="text-xs text-claimondo-ondo truncate">{adresse || '—'}</p>
           {briefingKurz && (
-            <p className="text-[11px] text-gray-600 mt-1 line-clamp-2">
+            <p className="text-[11px] text-claimondo-ondo mt-1 line-clamp-2">
               {briefingKurz}
             </p>
           )}

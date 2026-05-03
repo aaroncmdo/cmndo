@@ -16,9 +16,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL(`/admin/einstellungen/google?error=${error ?? 'invalid'}`, req.url))
   }
 
+  // AAR-google-cal-drift: state hat Format "<user-id>|<return-path>" — backwards-
+  // compat: alte state="<user-id>" ohne pipe wird weiter als reine User-ID akzeptiert.
+  const [stateUserId, ...returnParts] = state.split('|')
+  const returnTo = returnParts.length > 0 ? returnParts.join('|') : '/admin/einstellungen/google?success=1'
+
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user
-  if (!user || user.id !== state) {
+  if (!user || user.id !== stateUserId) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
@@ -67,5 +72,9 @@ export async function GET(req: NextRequest) {
     google_connected_at: new Date().toISOString(),
   }).eq('id', user.id)
 
-  return NextResponse.redirect(new URL('/admin/einstellungen/google?success=1', req.url))
+  // AAR-google-cal-drift: SV/KB landen jetzt zurück in dem Tab von dem aus
+  // sie verbunden haben. Sicherheits-Whitelist: nur relative Pfade.
+  let safeReturn = '/admin/einstellungen/google?success=1'
+  if (returnTo.startsWith('/') && !returnTo.startsWith('//')) safeReturn = returnTo
+  return NextResponse.redirect(new URL(safeReturn, req.url))
 }

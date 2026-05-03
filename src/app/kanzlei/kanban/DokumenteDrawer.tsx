@@ -12,6 +12,7 @@
 import { useEffect, useState } from 'react'
 import { XIcon, FileTextIcon, DownloadIcon, FileIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Drawer } from '@/components/primitives/Drawer'
 
 type FallDokument = {
   id: string
@@ -100,6 +101,8 @@ export default function DokumenteDrawer({
         )
         .eq('fall_id', fallId)
         .is('geloescht_am', null)
+        // CMM-32e: KB-abgelehnte Iterationen sind nur intern für Audit relevant.
+        .is('abgelehnt_am', null)
         .order('hochgeladen_am', { ascending: false })
       if (cancelled) return
       if (qErr) {
@@ -131,29 +134,20 @@ export default function DokumenteDrawer({
   const andereDokumente = dokumente?.filter((d) => !isKanzleiPaket(d)) ?? []
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Dokumente"
-    >
-      <div
-        className="flex-1 bg-black/40"
-        onClick={onClose}
-      />
-      <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col">
-        <header className="px-5 py-4 border-b border-[#e4e7ef] flex items-start justify-between gap-2">
+    <Drawer open onClose={onClose} width={448} noPadding hideCloseButton ariaLabel="Dokumente">
+      <div className="flex flex-col h-full">
+        <header className="px-5 py-4 border-b border-claimondo-border flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-wider text-gray-400">
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">
               Dokumente
             </p>
-            <p className="text-sm font-mono text-[#4573A2] mt-0.5">{fallNummer}</p>
-            <p className="text-xs text-gray-600 truncate">{kunde}</p>
+            <p className="text-sm font-mono text-claimondo-ondo mt-0.5">{fallNummer}</p>
+            <p className="text-xs text-claimondo-ondo truncate">{kunde}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded hover:bg-gray-100 text-gray-500 shrink-0"
+            className="p-1 rounded hover:bg-[#f8f9fb] text-claimondo-ondo shrink-0"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4" />
@@ -168,11 +162,11 @@ export default function DokumenteDrawer({
           )}
 
           {dokumente === null && !error && (
-            <p className="text-sm text-gray-400 italic">Lade Dokumente …</p>
+            <p className="text-sm text-claimondo-ondo/70 italic">Lade Dokumente …</p>
           )}
 
           {dokumente && dokumente.length === 0 && (
-            <p className="text-sm text-gray-500 italic">
+            <p className="text-sm text-claimondo-ondo italic">
               Noch keine Dokumente im Fall. Sobald Claimondo das Kanzlei-Paket
               erstellt, erscheint es hier.
             </p>
@@ -180,7 +174,7 @@ export default function DokumenteDrawer({
 
           {kanzleiPaket && (
             <section>
-              <p className="text-[10px] uppercase tracking-wider text-gray-500 font-medium mb-2">
+              <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-medium mb-2">
                 Kanzlei-Paket
               </p>
               <DokumentRow
@@ -193,7 +187,7 @@ export default function DokumenteDrawer({
 
           {andereDokumente.length > 0 && (
             <section>
-              <p className="text-[10px] uppercase tracking-wider text-gray-500 font-medium mb-2">
+              <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-medium mb-2">
                 Alle Dokumente ({andereDokumente.length})
               </p>
               <div className="space-y-2">
@@ -209,7 +203,7 @@ export default function DokumenteDrawer({
           )}
         </div>
       </div>
-    </div>
+    </Drawer>
   )
 }
 
@@ -231,13 +225,13 @@ function DokumentRow({
     <div
       className={`rounded-lg border p-3 flex items-start gap-3 ${
         highlight
-          ? 'border-[#4573A2] bg-blue-50/40'
-          : 'border-[#e4e7ef] bg-white'
+          ? 'border-claimondo-ondo bg-[#f8f9fb]/40'
+          : 'border-claimondo-border bg-white'
       }`}
     >
       <div
         className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-          highlight ? 'bg-[#4573A2] text-white' : 'bg-[#f8f9fb] text-[#4573A2]'
+          highlight ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo'
         }`}
       >
         {highlight ? (
@@ -247,16 +241,16 @@ function DokumentRow({
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-[#0D1B3E] truncate" title={name}>
+        <p className="text-sm font-medium text-claimondo-navy truncate" title={name}>
           {name}
         </p>
-        <p className="text-[11px] text-gray-500 mt-0.5">
+        <p className="text-[11px] text-claimondo-ondo mt-0.5">
           {typ}
           {size ? ` · ${size}` : ''}
           {` · ${datum}`}
         </p>
         {dokument.beschreibung && dokument.beschreibung !== name && (
-          <p className="text-[11px] text-gray-500 mt-0.5 italic truncate">
+          <p className="text-[11px] text-claimondo-ondo mt-0.5 italic truncate">
             {dokument.beschreibung}
           </p>
         )}
@@ -267,14 +261,14 @@ function DokumentRow({
           target="_blank"
           rel="noopener"
           download={dokument.original_filename ?? undefined}
-          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#4573A2] text-white text-[11px] font-medium hover:bg-[#1E3A5F] transition-colors"
+          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy transition-colors"
           title="Herunterladen / Öffnen"
         >
           <DownloadIcon className="w-3 h-3" />
           Öffnen
         </a>
       ) : (
-        <span className="shrink-0 text-[10px] text-gray-400 italic">
+        <span className="shrink-0 text-[10px] text-claimondo-ondo/70 italic">
           kein Link
         </span>
       )}

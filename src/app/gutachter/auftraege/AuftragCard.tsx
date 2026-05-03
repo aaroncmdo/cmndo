@@ -1,30 +1,28 @@
 'use client'
 
-// AAR-408: Eine Card pro SV-Auftrag mit Kunden-/Schadens-Info, Termin-Status
-// und Primär-Aktion (Termin vorschlagen, Gegenvorschlag entscheiden, Termin
-// öffnen). Termin-Actions werden über das geteilte TerminVorschlagModal
-// (Phase 0.6) + terminAnnehmen abgewickelt.
+// AAR-408 / CMM-25: Eine Card pro SV-Auftrag. CMM-25 hat den Erstvorschlag-
+// Pfad entfernt — Dispatcher blockt den Slot, SA-Unterschrift bestätigt
+// final. SV kann nur per TerminActionsPanel in der Fallakte den Termin
+// ablehnen oder einen Gegenvorschlag senden.
+//
+// CMM-25 Follow-Up: Action-Zone (Tile mit „Fall öffnen"-Pfeil + read-only
+// Status-Tiles) entfernt — Card-Click öffnet die Fallakte über den
+// Stretched-Link. Termin-Status wandert als gefärbte Meta-Zeile in den
+// Body, damit der SV auf einen Blick sieht, ob ein Termin geblockt /
+// bestätigt ist, ohne sichtbaren Button.
 
-import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
 import {
   CalendarIcon,
-  MapPinIcon,
   UserIcon,
   ClockIcon,
   CheckCircle2Icon,
   AlertCircleIcon,
-  ChevronRightIcon,
-  Loader2Icon,
   FileTextIcon,
 } from 'lucide-react'
-import TerminVorschlagModal, {
-  type TerminVorschlagMode,
-} from '@/components/fall/TerminVorschlagModal'
-import { terminAnnehmen } from '@/lib/actions/termin-actions'
 import { formatDatum } from '@/lib/format'
+import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
+import type { LackfarbeCode } from '@/lib/fahrzeug/imagin'
 
 export type AuftragCardProps = {
   fall: {
@@ -34,6 +32,12 @@ export type AuftragCardProps = {
     schadens_ursache: string | null
     schadens_ort: string | null
     schadens_datum: string | null
+    /** CMM-32 Walkthrough: SV-Identifikation über Kennzeichen + Fahrzeug. */
+    kennzeichen?: string | null
+    fahrzeug_hersteller?: string | null
+    fahrzeug_modell?: string | null
+    fahrzeug_baujahr?: string | number | null
+    lackfarbe_code?: string | null
   }
   kunde: {
     vorname: string | null
@@ -48,63 +52,28 @@ export type AuftragCardProps = {
   } | null
   ursacheLabel: string
   statusLabel: string
+  /** CMM-24: Anzahl offener Pflicht-Dokumente — gelber Badge wenn >0. */
+  offeneDokumente?: number
 }
 
-type PrimaryAction =
-  | { type: 'vorschlagen'; label: string; mode: 'erstvorschlag' }
-  | {
-      type: 'gegenvorschlag-vom-kunden'
-      label: string
-      mode: 'gegenvorschlag'
-      datum: string
-    }
-  | { type: 'warten'; label: string; subLabel: string }
-  | { type: 'bestaetigt'; label: string; datum: string }
-  | { type: 'offen'; label: string; href: string }
+type TerminMeta =
+  | { kind: 'geblockt'; datum: string }
+  | { kind: 'bestaetigt'; datum: string }
+  | { kind: 'sv-gegenvorschlag'; datum: string }
+  | null
 
-function derivePrimary(props: AuftragCardProps): PrimaryAction {
-  const t = props.aktiverTermin
-  if (!t || t.status === 'storniert' || t.status === 'abgelehnt') {
-    if (props.fall.status === 'sv-zugewiesen') {
-      return {
-        type: 'vorschlagen',
-        label: 'Termin vorschlagen',
-        mode: 'erstvorschlag',
-      }
-    }
-    return {
-      type: 'offen',
-      label: 'Fall öffnen',
-      href: `/gutachter/fall/${props.fall.id}`,
-    }
-  }
-  if (t.status === 'gegenvorschlag' && t.gegenvorschlag_von === 'kunde') {
-    return {
-      type: 'gegenvorschlag-vom-kunden',
-      label: 'Der Kunde hat einen anderen Termin vorgeschlagen',
-      mode: 'gegenvorschlag',
-      datum: t.vorgeschlagenes_datum ?? t.start_zeit ?? '',
-    }
+function deriveTerminMeta(t: AuftragCardProps['aktiverTermin']): TerminMeta {
+  if (!t || t.status === 'storniert' || t.status === 'abgelehnt') return null
+  if (t.status === 'gegenvorschlag' && t.gegenvorschlag_von === 'sv') {
+    return { kind: 'sv-gegenvorschlag', datum: t.vorgeschlagenes_datum ?? t.start_zeit ?? '' }
   }
   if (t.status === 'reserviert' || t.status === 'gegenvorschlag') {
-    return {
-      type: 'warten',
-      label: 'Termin-Vorschlag gesendet',
-      subLabel: 'Wartet auf Bestätigung des Kunden.',
-    }
+    return { kind: 'geblockt', datum: t.start_zeit ?? '' }
   }
   if (t.status === 'bestaetigt') {
-    return {
-      type: 'bestaetigt',
-      label: 'Termin bestätigt',
-      datum: t.start_zeit ?? '',
-    }
+    return { kind: 'bestaetigt', datum: t.start_zeit ?? '' }
   }
-  return {
-    type: 'offen',
-    label: 'Fall öffnen',
-    href: `/gutachter/fall/${props.fall.id}`,
-  }
+  return null
 }
 
 function fmtDateShort(iso: string | null | undefined): string {
@@ -123,163 +92,117 @@ function fmtDateShort(iso: string | null | undefined): string {
 }
 
 export default function AuftragCard(props: AuftragCardProps) {
-  const router = useRouter()
-  const [modal, setModal] = useState<{ open: boolean; mode: TerminVorschlagMode }>({
-    open: false,
-    mode: 'erstvorschlag',
-  })
-  const [isPending, startTransition] = useTransition()
-
   const kundeName =
     props.kunde?.vorname || props.kunde?.nachname
       ? `${props.kunde.vorname ?? ''} ${props.kunde.nachname ?? ''}`.trim()
       : '—'
 
-  const action = derivePrimary(props)
+  const terminMeta = deriveTerminMeta(props.aktiverTermin)
 
-  function handleAcceptKunde() {
-    startTransition(async () => {
-      const r = await terminAnnehmen({ source: 'sv_portal', fallId: props.fall.id })
-      if (r.success) {
-        toast.success('Termin angenommen')
-        router.refresh()
-      } else {
-        toast.error(r.error ?? 'Fehler')
-      }
-    })
-  }
+  const fahrzeug = [props.fall.fahrzeug_hersteller, props.fall.fahrzeug_modell]
+    .filter(Boolean)
+    .join(' ')
+    .trim() || null
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-3 hover:border-gray-300 transition-colors">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
+    <div className="relative bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-ondo transition-colors group">
+      {/* CMM-25: Stretched-Link über die ganze Card. Card-Click ist die
+          einzige Aktion — der SV öffnet seinen Auftrag, sonst nichts. */}
+      <Link
+        href={`/gutachter/fall/${props.fall.id}`}
+        aria-label={`Fall ${props.fall.fall_nummer ?? ''} öffnen`}
+        className="absolute inset-0 z-0 rounded-2xl"
+      />
+
+      {/* Header — CMM-32 Walkthrough: Kennzeichen prominent + Kunde, Fall-Nr klein */}
+      <div className="relative z-10 flex items-start justify-between gap-2 pointer-events-none">
         <div className="min-w-0 flex-1">
-          <Link
-            href={`/gutachter/fall/${props.fall.id}`}
-            className="text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] font-mono text-xs"
-          >
-            {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
-          </Link>
-          <p className="text-sm font-semibold text-[var(--brand-primary)] mt-0.5 flex items-center gap-1.5">
-            <UserIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-            <span className="truncate">{kundeName}</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            {props.fall.kennzeichen && (
+              <span className="inline-flex items-center rounded-md border-2 border-claimondo-navy bg-white px-1.5 py-0.5 font-mono text-xs tracking-wide text-claimondo-navy">
+                {props.fall.kennzeichen}
+              </span>
+            )}
+            <p className="text-sm font-semibold text-[var(--brand-primary)] flex items-center gap-1.5 min-w-0">
+              <UserIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
+              <span className="truncate">{kundeName}</span>
+            </p>
+          </div>
+          <p className="text-[11px] text-claimondo-ondo mt-1 truncate">
+            {fahrzeug && <span>{fahrzeug}</span>}
+            {fahrzeug && <span className="mx-1.5">·</span>}
+            <span className="font-mono text-[var(--brand-secondary)]">
+              {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
+            </span>
           </p>
         </div>
-        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-600 whitespace-nowrap">
+        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo whitespace-nowrap">
           {props.statusLabel}
         </span>
       </div>
 
-      {/* Meta */}
-      <div className="text-xs text-gray-600 space-y-1">
+      {/* CMM-32: Fahrzeug-Render-Vorschau */}
+      {props.fall.fahrzeug_hersteller && (
+        <div className="relative z-10 flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/10 py-2 pointer-events-none">
+          <FahrzeugRenderImage
+            hersteller={props.fall.fahrzeug_hersteller}
+            modell={props.fall.fahrzeug_modell ?? null}
+            lackfarbe={(props.fall.lackfarbe_code as LackfarbeCode | null) ?? null}
+            baujahr={props.fall.fahrzeug_baujahr ?? null}
+            width={180}
+          />
+        </div>
+      )}
+
+      {/* CMM-24: Mitteilungs-Slot — gelber Badge bei offenen Doku-Anforderungen */}
+      {(props.offeneDokumente ?? 0) > 0 && (
+        <div className="relative z-10 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium pointer-events-none">
+          <AlertCircleIcon className="w-3.5 h-3.5 text-amber-600" />
+          <span>
+            {props.offeneDokumente}{' '}
+            {props.offeneDokumente === 1 ? 'Dokument fehlt' : 'Dokumente fehlen'}
+          </span>
+        </div>
+      )}
+
+      {/* Meta — CMM-32 Walkthrough: Unfallort raus, Schadensursache + Datum bleiben */}
+      <div className="relative z-10 text-xs text-claimondo-ondo space-y-1 pointer-events-none">
         <div className="flex items-center gap-1.5">
-          <FileTextIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+          <FileTextIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
           <span>{props.ursacheLabel}</span>
         </div>
-        {props.fall.schadens_ort && (
-          <div className="flex items-center gap-1.5">
-            <MapPinIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-            <span className="truncate">{props.fall.schadens_ort}</span>
-          </div>
-        )}
         {props.fall.schadens_datum && (
           <div className="flex items-center gap-1.5">
-            <CalendarIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            <CalendarIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 shrink-0" />
             <span>Schaden: {formatDatum(props.fall.schadens_datum)}</span>
           </div>
         )}
-      </div>
 
-      {/* Action Zone */}
-      <div className="pt-2 border-t border-gray-100">
-        {action.type === 'vorschlagen' && (
-          <button
-            type="button"
-            onClick={() => setModal({ open: true, mode: 'erstvorschlag' })}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold"
-          >
-            <CalendarIcon className="w-4 h-4" />
-            {action.label}
-          </button>
-        )}
-
-        {action.type === 'gegenvorschlag-vom-kunden' && (
-          <div className="space-y-2">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
-              <div className="flex items-start gap-2">
-                <AlertCircleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                <div className="text-xs text-amber-900">
-                  <p className="font-medium">{action.label}</p>
-                  <p className="mt-0.5">{fmtDateShort(action.datum)}</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleAcceptKunde}
-                disabled={isPending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold disabled:opacity-50"
-              >
-                {isPending && <Loader2Icon className="w-3.5 h-3.5 animate-spin" />}
-                Annehmen
-              </button>
-              <button
-                type="button"
-                onClick={() => setModal({ open: true, mode: 'gegenvorschlag' })}
-                disabled={isPending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--brand-secondary)] text-[var(--brand-secondary)] hover:bg-[var(--brand-secondary)]/5 text-xs font-semibold disabled:opacity-50"
-              >
-                Gegenvorschlag
-              </button>
-            </div>
+        {/* CMM-25: Termin als gefärbte Meta-Zeile, kein Button. Klickfläche
+            ist die ganze Card. */}
+        {terminMeta?.kind === 'geblockt' && (
+          <div className="flex items-center gap-1.5 text-amber-800">
+            <ClockIcon className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span className="truncate">
+              Termin geblockt: {fmtDateShort(terminMeta.datum)} — wartet auf SA-Unterschrift
+            </span>
           </div>
         )}
-
-        {action.type === 'warten' && (
-          <div className="flex items-start gap-2 text-xs text-gray-600">
-            <ClockIcon className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-medium text-gray-700">{action.label}</p>
-              <p className="mt-0.5">{action.subLabel}</p>
-            </div>
+        {terminMeta?.kind === 'bestaetigt' && (
+          <div className="flex items-center gap-1.5 text-emerald-700">
+            <CheckCircle2Icon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span className="truncate">Termin: {fmtDateShort(terminMeta.datum)}</span>
           </div>
         )}
-
-        {action.type === 'bestaetigt' && (
-          <Link
-            href={`/gutachter/fall/${props.fall.id}`}
-            className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-800 text-xs"
-          >
-            <div className="flex items-center gap-2">
-              <CheckCircle2Icon className="w-4 h-4 text-emerald-600 shrink-0" />
-              <div>
-                <p className="font-medium">{action.label}</p>
-                <p className="mt-0.5">{fmtDateShort(action.datum)}</p>
-              </div>
-            </div>
-            <ChevronRightIcon className="w-4 h-4" />
-          </Link>
-        )}
-
-        {action.type === 'offen' && (
-          <Link
-            href={action.href}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-medium"
-          >
-            {action.label}
-            <ChevronRightIcon className="w-4 h-4" />
-          </Link>
+        {terminMeta?.kind === 'sv-gegenvorschlag' && (
+          <div className="flex items-center gap-1.5 text-claimondo-navy">
+            <AlertCircleIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
+            <span className="truncate">
+              Gegenvorschlag gesendet: {fmtDateShort(terminMeta.datum)}
+            </span>
+          </div>
         )}
       </div>
-
-      <TerminVorschlagModal
-        fallId={props.fall.id}
-        mode={modal.mode}
-        open={modal.open}
-        onClose={() => setModal((s) => ({ ...s, open: false }))}
-        existingTermin={props.aktiverTermin}
-      />
     </div>
   )
 }

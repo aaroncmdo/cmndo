@@ -10,6 +10,7 @@ import { useDispatchPhase } from '../_lib/phase-context'
 import { sendFlowLinkMultiChannel, saveStammdaten } from '../actions'
 // AAR-317: Unfallskizze-Card (Claude-API-Generator + MA-Freigabe)
 import { UnfallskizzeCard } from './UnfallskizzeCard'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import {
   CheckCircle2Icon,
   AlertTriangleIcon,
@@ -143,7 +144,7 @@ export default function Phase5Zusammenfassung() {
       if (!qualification.q6_gegnerKz) missing.push('Gegner-KZ')
       if (!qualification.q7_fahrzeug) missing.push('Fahrzeug-Pflichtfelder')
       // AAR-305: Schadenshergang-Pflicht wenn fahrzeug_fahrbereit=true
-      if (!qualification.q8_schadenhergang) missing.push('Schadenshergang (mind. 20 Zeichen, bei fahrbereitem Fahrzeug Pflicht)')
+      if (!qualification.q8_schadenhergang) missing.push('Unfallhergang (mind. 20 Zeichen, bei fahrbereitem Fahrzeug Pflicht)')
       setSendStatus({ kanal, ok: false, text: `Versand blockiert — fehlt: ${missing.join(', ')}` })
       return
     }
@@ -264,12 +265,14 @@ export default function Phase5Zusammenfassung() {
       jumpToPhase: 4,
     },
     {
-      label: 'Schadenshergang (Pflicht bei fahrbereitem Fahrzeug)',
+      // AAR-693: bevorzugt unfallhergang aus Phase 1 anzeigen, fallback auf
+      // schadens_hergang. q8_schadenhergang akzeptiert beide Felder.
+      label: 'Unfallhergang (Pflicht bei fahrbereitem Fahrzeug)',
       value: l.fahrzeug_fahrbereit !== true
         ? 'Nicht fahrbereit — kein Pflichtfeld'
-        : (l.schadens_hergang ?? '—'),
+        : (l.unfallhergang?.trim() || l.schadens_hergang?.trim() || '—'),
       missing: !qualification.q8_schadenhergang,
-      jumpToPhase: 4,
+      jumpToPhase: 1,
     },
     {
       label: 'Unfallort',
@@ -304,27 +307,23 @@ export default function Phase5Zusammenfassung() {
       )}
 
       {/* Summary */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
+      <div className="bg-white border border-claimondo-border rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">
-          <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
-          <h2 className="text-sm font-semibold text-gray-900">Zusammenfassung — letzter Check</h2>
-          <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full font-medium ${
-            qualification.canSendFlowLink
-              ? 'bg-green-100 text-green-700'
-              : 'bg-amber-100 text-amber-700'
-          }`}>
+          <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
+          <h2 className="text-sm font-semibold text-claimondo-navy">Zusammenfassung — letzter Check</h2>
+          <StatusBadge tone={qualification.canSendFlowLink ? 'success' : 'warning'} className="ml-auto">
             {qualification.completedCount}/8 Bedingungen
-          </span>
+          </StatusBadge>
         </div>
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-claimondo-border">
           {rows.map((r, i) => (
             <div key={i} className="flex items-start gap-3 py-2">
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 flex items-center gap-1">
+                <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 flex items-center gap-1">
                   {r.missing && <AlertTriangleIcon className="w-3 h-3 text-amber-500" />}
                   {r.label}
                 </p>
-                <p className={`text-sm ${r.missing ? 'text-amber-700 font-medium' : 'text-gray-900'}`}>
+                <p className={`text-sm ${r.missing ? 'text-amber-700 font-medium' : 'text-claimondo-navy'}`}>
                   {r.value}
                 </p>
               </div>
@@ -332,7 +331,7 @@ export default function Phase5Zusammenfassung() {
                 <button
                   type="button"
                   onClick={() => setPhase(r.jumpToPhase!)}
-                  className="text-[#4573A2] hover:text-[#3a6290] p-1"
+                  className="text-claimondo-ondo hover:text-[#3a6290] p-1"
                   title={`Zu Phase ${r.jumpToPhase} springen`}
                 >
                   <PencilIcon className="w-3.5 h-3.5" />
@@ -347,13 +346,13 @@ export default function Phase5Zusammenfassung() {
           AAR-348: Explizite gelbe Warnbanner wenn Tel/Email leer sind —
           zuvor wurden die Buttons nur stumm disabled, der MA hatte keinen
           Hinweis WARUM der Kanal nicht verfügbar ist. */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+      <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <PhoneIcon className="w-4 h-4 text-gray-400" />
-          <h3 className="text-sm font-semibold text-gray-900">Kontaktdaten für FlowLink-Versand</h3>
+          <PhoneIcon className="w-4 h-4 text-claimondo-ondo/70" />
+          <h3 className="text-sm font-semibold text-claimondo-navy">Kontaktdaten für FlowLink-Versand</h3>
         </div>
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo block mb-1">
             WhatsApp / SMS-Nummer
           </label>
           <input
@@ -362,15 +361,15 @@ export default function Phase5Zusammenfassung() {
             onChange={(e) => setWaNummer(e.target.value)}
             onBlur={saveWaNummer}
             placeholder="+49 170 1234567"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
           />
-          <p className={`text-[10px] mt-0.5 ${nummerError ? 'text-red-600' : 'text-gray-400'}`}>
+          <p className={`text-[10px] mt-0.5 ${nummerError ? 'text-red-600' : 'text-claimondo-ondo/70'}`}>
             {nummerError ? nummerError : savingNummer ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
           </p>
         </div>
         {/* AAR-178 P2-K: Email inline editierbar */}
         <div>
-          <label className="text-[10px] uppercase tracking-wider text-gray-500 block mb-1">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo block mb-1">
             Email für FlowLink (optional)
           </label>
           <input
@@ -379,9 +378,9 @@ export default function Phase5Zusammenfassung() {
             onChange={(e) => setEmail(e.target.value)}
             onBlur={saveEmail}
             placeholder="name@example.de"
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
           />
-          <p className={`text-[10px] mt-0.5 ${emailError ? 'text-red-600' : 'text-gray-400'}`}>
+          <p className={`text-[10px] mt-0.5 ${emailError ? 'text-red-600' : 'text-claimondo-ondo/70'}`}>
             {emailError ? emailError : savingEmail ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
           </p>
         </div>
@@ -416,8 +415,8 @@ export default function Phase5Zusammenfassung() {
       />
 
       {/* 3 Versand-Buttons */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
-        <h3 className="text-sm font-semibold text-gray-900">Versandweg wählen</h3>
+      <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
+        <h3 className="text-sm font-semibold text-claimondo-navy">Versandweg wählen</h3>
         {!qualification.canSendFlowLink && (
           <p className="text-[11px] text-amber-700 flex items-start gap-1">
             <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
@@ -450,7 +449,7 @@ export default function Phase5Zusammenfassung() {
             disabled={pending || !qualification.canSendFlowLink || !email.trim()}
             onClick={() => send('email')}
             title={!email.trim() ? 'Bitte Email-Adresse eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#4573A2] text-white text-sm font-bold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-claimondo-ondo text-white text-sm font-bold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <MailIcon className="w-4 h-4" />
             {pending && sendStatus.kanal === 'email' ? 'Sende ...' : 'Email'}

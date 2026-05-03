@@ -2,10 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import {
-  buildFallInsertFromLead,
-  resolveFallEntityFks,
-} from '@/lib/lead-fall-mapping'
+import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 
 // AAR-476 C10: Signup + Lead→Fall-Konvertierung.
 //
@@ -21,7 +18,7 @@ import {
 // Single Source of Truth für Lead→Fall-Feldkopie.
 
 type Result =
-  | { success: true; fallId: string }
+  | { success: true; fallId: string; claimId: string | null }
   | { success: false; error: string; code?: 'EMAIL_EXISTS' }
 
 export async function signupAndConvertLead(input: {
@@ -92,81 +89,47 @@ export async function signupAndConvertLead(input: {
       : promoCode.makler
     : null
 
-  // 4) Fallnummer CLM-YYYYMMDD-NNN
-  const today = new Date()
-  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-  const { count } = await admin
-    .from('faelle')
-    .select('id', { count: 'exact', head: true })
-    .like('fall_nummer', `CLM-${dateStr}-%`)
-  const nr = String((count ?? 0) + 1).padStart(3, '0')
-  const fallNummer = `CLM-${dateStr}-${nr}`
-
-  // 5) Kundenbetreuer per Round-Robin — min aktive Fälle gewinnt
-  let kundenbetreuerId: string | null = null
-  const { data: betreuer } = await admin
-    .from('profiles')
-    .select('id')
-    .in('rolle', ['kundenbetreuer', 'admin'])
-    .limit(10)
-  if (betreuer && betreuer.length > 0) {
-    const counts: Record<string, number> = {}
-    for (const b of betreuer) {
-      const { count: c } = await admin
-        .from('faelle')
-        .select('id', { count: 'exact', head: true })
-        .eq('kundenbetreuer_id', b.id)
-        .not('status', 'in', '("abgeschlossen","storniert")')
-      counts[b.id] = c ?? 0
-    }
-    const min = betreuer.reduce(
-      (m, b) => ((counts[b.id] ?? 0) < (counts[m.id] ?? 0) ? b : m),
-      betreuer[0],
-    )
-    kundenbetreuerId = min.id
-  }
-
-  // 6) Entity-FKs (versicherung/kanzlei/organisation/leadbearbeiter)
-  const entityFks = await resolveFallEntityFks(admin, leadRaw, null)
-
-  // 7) Fall-Insert — SA-Felder überschreiben: beim Signup noch keine SA
-  const fallInsert = buildFallInsertFromLead(leadRaw, {
-    fallNummer,
-    kundenbetreuerId,
-    svIdFromTermin: null,
-    signatureUrl: '',
-    ...entityFks,
+  // 4) CMM-3: Lead → Claim direkt konvertieren. convertLeadToClaim
+  // erledigt fall_nummer, KB-Round-Robin, claims-Insert, Sub-Entities
+  // (parties, vehicle_involvements), faelle (vollständig bis Phase 6) und
+  // setzt Leads-Status auf "umgewandelt" inkl. konvertiert_zu_*-FKs.
+  const conv = await convertLeadToClaim({
+    leadId: input.leadId,
+    triggerByUserId: signup.user.id,
+    kundeUserIdOverride: signup.user.id,
   })
-  fallInsert.kunde_id = signup.user.id
-  fallInsert.sa_unterschrieben = false
-  fallInsert.abtretung_signiert_am = null
-  fallInsert.abtretung_pdf = null
-  fallInsert.status = 'ersterfassung'
-
-  const { data: fall, error: fallErr } = await admin
-    .from('faelle')
-    .insert(fallInsert)
-    .select('id, service_typ, lead_id')
-    .single()
-  if (fallErr || !fall) {
+  if (!conv.ok) {
     return {
       success: false,
-      error: `Fall-Erstellung fehlgeschlagen: ${fallErr?.message ?? 'unbekannt'}`,
+      error: `Konvertierung fehlgeschlagen: ${conv.error}`,
     }
   }
+  const fall = { id: conv.fallId, lead_id: input.leadId, service_typ: 'komplett' as string }
 
-  // 8) Lead-Status auf „umgewandelt" setzen + FK zurückschreiben
+  // 5) Beim Signup noch keine SA — die Convert-Funktion füllt
+  // sa_unterschrieben/abtretung_* mit Defaults aus dem Lead. Wir korrigieren
+  // sie hier explizit auf "nicht unterschrieben" und Status auf
+  // "ersterfassung", weil convertLeadToClaim default `status='dispatch_done'`
+  // gesetzt hat.
   await admin
-    .from('leads')
+    .from('faelle')
     .update({
-      status: 'umgewandelt',
-      qualifizierungs_phase: 'abgeschlossen',
-      konvertiert_zu_fall_id: fall.id,
-      updated_at: new Date().toISOString(),
+      sa_unterschrieben: false,
+      abtretung_signiert_am: null,
+      abtretung_pdf: null,
+      status: 'ersterfassung',
     })
-    .eq('id', input.leadId)
+    .eq('id', fall.id)
 
-  // 9) Makler-Consent + Provision (nur wenn Promo-Code auf dem Lead lag)
+  // 6) Service-Typ aus dem persistierten Fall nachladen für Provisions-Logik
+  const { data: fallRow } = await admin
+    .from('faelle')
+    .select('service_typ')
+    .eq('id', fall.id)
+    .maybeSingle()
+  if (fallRow?.service_typ) fall.service_typ = fallRow.service_typ as string
+
+  // 7) Makler-Consent + Provision (nur wenn Promo-Code auf dem Lead lag)
   if (promoCode && maklerFromPromo?.id) {
     const maklerId = maklerFromPromo.id as string
     const consent_scope = input.consent_vollzugriff ? 'vollzugriff' : 'minimal'
@@ -179,8 +142,7 @@ export async function signupAndConvertLead(input: {
 
     await admin.from('faelle').update({ makler_id: maklerId }).eq('id', fall.id)
 
-    // Provisions-Betrag abhängig vom service_typ im Fall
-    const serviceTypFall = (fall.service_typ as string) ?? 'komplett'
+    const serviceTypFall = fall.service_typ ?? 'komplett'
     const betrag =
       serviceTypFall === 'komplett'
         ? maklerFromPromo.provision_betrag_komplett_netto
@@ -202,7 +164,7 @@ export async function signupAndConvertLead(input: {
     }
   }
 
-  return { success: true, fallId: fall.id }
+  return { success: true, fallId: fall.id, claimId: conv.claimId }
 }
 
 // AAR-476 Helper: Lädt die Daten die der SignupClient für die Render-

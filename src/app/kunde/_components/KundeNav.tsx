@@ -2,34 +2,45 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HomeIcon, MessageSquareIcon, UserIcon, FolderOpenIcon, SearchIcon, CalendarIcon } from 'lucide-react'
+import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon } from 'lucide-react'
 
-// AAR-639: "Termine" wieder in Nav — zeigt jetzt eine konsolidierte
-// Übersicht aller Gutachter-Termine des Kunden (inkl. Historie, Status,
-// Gegenvorschläge). Ergänzt die in-Fallakte Kurzanzeige aus AAR-450.
-const NAV_ITEMS = [
-  { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true },
-  { href: '/kunde/faelle', label: 'Alle Fälle', icon: FolderOpenIcon },
-  { href: '/kunde/termine', label: 'Termine', icon: CalendarIcon },
-  { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon },
-  { href: '/kunde/chat', label: 'Nachrichten', icon: MessageSquareIcon },
-  { href: '/kunde/profil', label: 'Profil', icon: UserIcon },
-]
+// CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
+// und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
+function buildNavItems(singleFallId: string | null) {
+  const fallItem = singleFallId
+    ? { href: `/kunde/faelle/${singleFallId}`, label: 'Mein Fall', icon: HomeIcon, exact: false }
+    : { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true }
+  return [
+    fallItem,
+    { href: '/kunde/termine', label: 'Termine', icon: CalendarIcon, exact: false },
+    { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon, exact: false },
+    { href: '/kunde/chat', label: 'Nachrichten', icon: MessageSquareIcon, exact: false },
+    { href: '/kunde/profil', label: 'Profil', icon: UserIcon, exact: false },
+  ]
+}
 
-// AAR-450: Mobile-Items via href-Lookup (kein hardcoded Index mehr — vermeidet
-// AAR-72-Regression beim Umsortieren von NAV_ITEMS). 4 Items statt 5.
-const MOBILE_ITEMS = [
-  NAV_ITEMS.find(i => i.href === '/kunde')!,
-  NAV_ITEMS.find(i => i.href === '/kunde/faelle')!,
-  NAV_ITEMS.find(i => i.href === '/kunde/chat')!,
-  NAV_ITEMS.find(i => i.href === '/kunde/profil')!,
-]
-
-export default function KundeNav({ mobile }: { mobile?: boolean }) {
+export default function KundeNav({
+  mobile,
+  singleFallId = null,
+}: {
+  mobile?: boolean
+  /** Wenn der Kunde nur einen Fall hat: faelle.id direkt durchreichen, damit
+   *  die Nav direkt zur Detail-Page linkt statt zum Dashboard mit Liste. */
+  singleFallId?: string | null
+}) {
   const pathname = usePathname()
+  const NAV_ITEMS = buildNavItems(singleFallId)
+  const MOBILE_ITEMS = [
+    NAV_ITEMS[0]!,
+    NAV_ITEMS.find((i) => i.href === '/kunde/termine')!,
+    NAV_ITEMS.find((i) => i.href === '/kunde/chat')!,
+    NAV_ITEMS.find((i) => i.href === '/kunde/profil')!,
+  ]
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href
+    // Bei Single-Fall-Href (`/kunde/faelle/[id]`) ist active wenn der User
+    // auf der Detail-Page ODER einer Sub-Page (kalender etc.) ist.
     return pathname === href || pathname?.startsWith(href + '/')
   }
 

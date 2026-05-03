@@ -30,17 +30,26 @@ export async function saveRueckruf(
 
   if (!datumIso) {
     // Datum gelöscht → offenen Rückruf-Termin für diesen Lead absagen
-    const { error } = await supabase
+    const { data: cancelled, error } = await supabase
       .from('admin_termine')
       .update({ status: 'abgesagt', updated_at: new Date().toISOString() })
       .eq('lead_id', leadId)
       .eq('typ', 'rueckruf')
       .eq('status', 'offen')
+      .select('id')
     if (error) return { success: false, error: error.message }
     await supabase
       .from('leads')
       .update({ updated_at: new Date().toISOString() })
       .eq('id', leadId)
+    // Schnell-Lookup auf leads nullen
+    await supabase.from('leads').update({ rueckruf_geplant_am: null, updated_at: new Date().toISOString() }).eq('id', leadId)
+    // AAR-698: Google-Calendar-Events der abgesagten Termine entfernen
+    for (const c of cancelled ?? []) {
+      import('@/lib/google-calendar/admin-event-sync').then(({ syncAdminTerminCalendarEvent }) =>
+        syncAdminTerminCalendarEvent(c.id as string).catch(() => {}),
+      )
+    }
     revalidatePath(`/dispatch/leads/${leadId}`)
     revalidatePath('/dispatch/rueckrufe')
     revalidatePath('/admin/kalender')
@@ -67,7 +76,9 @@ export async function saveRueckruf(
   const endIso = await ensureDauer(datumIso)
   const nowIso = new Date().toISOString()
 
+  let terminId: string | null = null
   if (existing?.id) {
+    terminId = existing.id as string
     const { error } = await supabase
       .from('admin_termine')
       .update({
@@ -78,29 +89,51 @@ export async function saveRueckruf(
         updated_at: nowIso,
       })
       .eq('id', existing.id)
-    if (error) return { success: false, error: error.message }
+    if (error) {
+      console.error('[saveRueckruf] update fehlgeschlagen:', error.message)
+      return { success: false, error: error.message }
+    }
   } else {
-    const { error } = await supabase.from('admin_termine').insert({
-      typ: 'rueckruf',
-      titel,
-      start_zeit: datumIso,
-      end_zeit: endIso,
-      lead_id: leadId,
-      notizen: notiz,
-      erstellt_von: user.id,
-      zugewiesen_an: user.id,
-      status: 'offen',
-    })
-    if (error) return { success: false, error: error.message }
+    const { data: inserted, error } = await supabase
+      .from('admin_termine')
+      .insert({
+        typ: 'rueckruf',
+        titel,
+        start_zeit: datumIso,
+        end_zeit: endIso,
+        lead_id: leadId,
+        notizen: notiz,
+        erstellt_von: user.id,
+        zugewiesen_an: user.id,
+        status: 'offen',
+      })
+      .select('id')
+      .single()
+    if (error || !inserted) {
+      console.error('[saveRueckruf] insert fehlgeschlagen:', error?.message)
+      return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
+    }
+    terminId = inserted.id as string
   }
 
   await supabase
     .from('leads')
     .update({
       qualifizierungs_phase: 'rueckruf',
+      rueckruf_geplant_am: datumIso,
       updated_at: nowIso,
     })
     .eq('id', leadId)
+
+  // AAR-698: Im Google-Kalender des Vereinbarenden (zugewiesen_an = user.id)
+  // spiegeln. Fail-silent wenn kein Token vorhanden.
+  if (terminId) {
+    import('@/lib/google-calendar/admin-event-sync').then(({ syncAdminTerminCalendarEvent }) =>
+      syncAdminTerminCalendarEvent(terminId).catch((err) =>
+        console.warn('[saveRueckruf] syncAdminTerminCalendarEvent:', err instanceof Error ? err.message : err),
+      ),
+    )
+  }
 
   revalidatePath(`/dispatch/leads/${leadId}`)
   revalidatePath('/dispatch/rueckrufe')
@@ -115,14 +148,25 @@ export async function markRueckrufErledigt(leadId: string): Promise<RueckrufActi
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase
+  const { data: erledigt, error } = await supabase
     .from('admin_termine')
     .update({ status: 'erledigt', updated_at: new Date().toISOString() })
     .eq('lead_id', leadId)
     .eq('typ', 'rueckruf')
     .eq('status', 'offen')
+    .select('id')
 
   if (error) return { success: false, error: error.message }
+
+  // Schnell-Lookup auf leads nullen
+  await supabase.from('leads').update({ rueckruf_geplant_am: null, updated_at: new Date().toISOString() }).eq('id', leadId)
+
+  // AAR-698: Google-Calendar-Events entfernen wenn als erledigt markiert
+  for (const e of erledigt ?? []) {
+    import('@/lib/google-calendar/admin-event-sync').then(({ syncAdminTerminCalendarEvent }) =>
+      syncAdminTerminCalendarEvent(e.id as string).catch(() => {}),
+    )
+  }
 
   revalidatePath(`/dispatch/leads/${leadId}`)
   revalidatePath('/dispatch/rueckrufe')

@@ -25,14 +25,20 @@ export async function GET(req: NextRequest) {
     `${baseUrl}/api/auth/google/callback`,
   )
 
+  // AAR-google-cal-drift: return-Param damit SV nach Connect zurück in seinen
+  // Kalender-Tab landet (vorher hardcoded Admin-Settings-Page).
+  // Format: state = "<user-id>|<return-path>" — Callback parsed das wieder.
+  // calendar.readonly für FreeBusy-Slot-Anzeige + calendar.events für Sync.
+  const returnTo = req.nextUrl.searchParams.get('return') ?? '/admin/einstellungen/google?success=1'
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
     scope: [
+      'https://www.googleapis.com/auth/calendar.readonly',
       'https://www.googleapis.com/auth/calendar.events',
       'https://www.googleapis.com/auth/userinfo.email',
     ],
-    state: user.id,
+    state: `${user.id}|${returnTo}`,
   })
 
   return NextResponse.redirect(url)

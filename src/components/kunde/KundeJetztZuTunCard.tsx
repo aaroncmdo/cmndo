@@ -1,120 +1,97 @@
 // AAR-432 (Child 3 von AAR-429): „Jetzt zu tun"-Card für das Kunden-Portal.
 // Rendert genau eine Aktion aus `getKundenJetztZuTun`. Drei Varianten:
-//   - default → Claimondo-Primary Akzent mit CTA-Button
-//   - live    → grüner/amberner Puls-Effekt (Termin läuft gerade)
+//   - default → Claimondo-Navy Accent mit CTA-Button
+//   - live    → Ping-Indikator rechts oben (Termin läuft gerade)
 //   - info    → gedämpft grau, kein CTA
 //
-// Nutzt die CSS-Variablen aus dem Theme-System (AAR-418 Whitelabeling) —
-// keine hardcoded Hex-Farben.
+// AAR-727 Kandidat 2: nutzt shared `TodoCard` + `TodoCardActionBody` für
+// konsistente Hülle (glass-light / severity border-l / iOS-Radius).
 
 import Link from 'next/link'
 import type { KundeAktion } from '@/lib/kunde/jetzt-zu-tun'
+import {
+  TodoCard,
+  TodoCardActionBody,
+  type TodoCardSeverity,
+} from '@/components/shared/TodoCard'
 
 type Props = { aktion: KundeAktion | null }
+
+function mapSeverity(
+  aktion: KundeAktion,
+): { severity: TodoCardSeverity; passive: boolean } {
+  if (aktion.variant === 'info') return { severity: 'info', passive: true }
+  if (aktion.variant === 'live' && aktion.severity === 'success')
+    return { severity: 'success', passive: false }
+  if (aktion.severity === 'critical') return { severity: 'critical', passive: false }
+  if (aktion.severity === 'warning') return { severity: 'warning', passive: false }
+  return { severity: 'default', passive: false }
+}
+
+const CTA_BG: Record<TodoCardSeverity, string> = {
+  default: 'bg-claimondo-navy hover:bg-claimondo-ondo',
+  info: 'bg-claimondo-navy hover:bg-claimondo-ondo',
+  warning: 'bg-amber-600 hover:bg-amber-700',
+  critical: 'bg-rose-600 hover:bg-rose-700',
+  success: 'bg-emerald-600 hover:bg-emerald-700',
+}
 
 export default function KundeJetztZuTunCard({ aktion }: Props) {
   if (!aktion) return null
   // kein-aktionsbedarf → minimale Info-Card
   if (aktion.state === 'kein-aktionsbedarf') {
     return (
-      <div
-        className="mb-4 rounded-xl border px-4 py-3"
-        style={{
-          background: 'var(--brand-surface-muted, #f8f9fb)',
-          borderColor: 'var(--brand-border, #e5e7eb)',
-          color: 'var(--brand-text-secondary, #6b7280)',
-        }}
+      <TodoCard
+        label="Status"
+        severity="info"
+        passive
+        className="mb-4"
       >
-        <p className="text-sm">{aktion.titel}</p>
-        <p className="text-xs mt-0.5">{aktion.beschreibung}</p>
-      </div>
+        <div className="space-y-0.5">
+          <p className="text-sm text-claimondo-navy">{aktion.titel}</p>
+          <p className="text-xs text-claimondo-ondo">{aktion.beschreibung}</p>
+        </div>
+      </TodoCard>
     )
   }
 
+  const { severity, passive } = mapSeverity(aktion)
   const isLive = aktion.variant === 'live'
-  const isInfo = aktion.variant === 'info'
-
-  // Severity-Akzent: über CSS-Vars mit Fallback-Farben des Claimondo-Schemas.
-  // Critical = Rot, Warning = Amber, Success = Grün (live), Neutral = Primary.
-  const accent = (() => {
-    if (isLive && aktion.severity === 'success') return 'var(--brand-success, #16a34a)'
-    if (isLive) return 'var(--brand-accent, #4573A2)'
-    if (aktion.severity === 'critical') return 'var(--brand-danger, #dc2626)'
-    if (aktion.severity === 'warning') return 'var(--brand-warning, #d97706)'
-    return 'var(--brand-primary, #0D1B3E)'
-  })()
-
-  const bg = (() => {
-    if (isInfo) return 'var(--brand-surface-muted, #f8f9fb)'
-    if (isLive && aktion.severity === 'success') return 'var(--brand-success-soft, #ecfdf5)'
-    if (isLive) return 'var(--brand-primary-soft, #eff6ff)'
-    if (aktion.severity === 'critical') return 'var(--brand-danger-soft, #fef2f2)'
-    if (aktion.severity === 'warning') return 'var(--brand-warning-soft, #fffbeb)'
-    return 'var(--brand-primary-soft, #eff6ff)'
-  })()
-
   const deadlineText = aktion.deadline_am ? formatDeadline(aktion.deadline_am) : null
 
   return (
-    <div
-      className="mb-4 relative rounded-xl border-l-4 border px-4 py-4 shadow-sm"
-      style={{
-        background: bg,
-        borderLeftColor: accent,
-        borderColor: 'var(--brand-border, #e5e7eb)',
-      }}
-      role="region"
-      aria-label="Jetzt zu tun"
+    <TodoCard
+      severity={severity}
+      passive={passive}
+      className="mb-4 relative"
     >
       {isLive && (
         <span
           aria-hidden
           className="absolute top-3 right-3 inline-flex h-3 w-3"
         >
-          <span
-            className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping"
-            style={{ background: accent }}
-          />
-          <span
-            className="relative inline-flex h-3 w-3 rounded-full"
-            style={{ background: accent }}
-          />
+          <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-claimondo-ondo" />
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-claimondo-ondo" />
         </span>
       )}
-      <p
-        className="text-sm font-semibold"
-        style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
-      >
-        {aktion.titel}
-      </p>
-      <p
-        className="text-xs mt-1 leading-relaxed"
-        style={{ color: 'var(--brand-text-secondary, #4b5563)' }}
-      >
-        {aktion.beschreibung}
-      </p>
-      {deadlineText && (
-        <p
-          className="text-[11px] mt-2 font-medium"
-          style={{ color: accent }}
-        >
-          Frist: {deadlineText}
-        </p>
-      )}
-      {aktion.cta?.href && (
-        <Link
-          href={aktion.cta.href}
-          className="inline-flex items-center gap-1 mt-3 text-sm font-medium rounded-md px-4 min-h-[44px] transition-colors"
-          style={{
-            background: accent,
-            color: 'var(--brand-text-on-primary, #ffffff)',
-          }}
-        >
-          {aktion.cta.label}
-          <span aria-hidden>→</span>
-        </Link>
-      )}
-    </div>
+      <TodoCardActionBody
+        title={aktion.titel}
+        description={aktion.beschreibung}
+        deadline={deadlineText}
+        severity={severity}
+        cta={
+          aktion.cta?.href ? (
+            <Link
+              href={aktion.cta.href}
+              className={`inline-flex items-center gap-1 text-sm font-medium rounded-md px-4 min-h-[44px] text-white transition-colors ${CTA_BG[severity]}`}
+            >
+              {aktion.cta.label}
+              <span aria-hidden>→</span>
+            </Link>
+          ) : null
+        }
+      />
+    </TodoCard>
   )
 }
 

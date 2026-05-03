@@ -49,7 +49,7 @@ export function EventFilterBar({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-3 mb-4">
+    <div className="glass-light border border-claimondo-border rounded-ios-md p-3 mb-4">
       <div className="flex flex-wrap items-center gap-2 mb-2">
         {SOURCES.map((s) => {
           const active = value.sources.has(s.id)
@@ -60,8 +60,8 @@ export function EventFilterBar({
               onClick={() => toggleSource(s.id)}
               className={`inline-flex items-center gap-1 text-xs font-medium rounded-full border px-2.5 py-1 transition-colors ${
                 active
-                  ? 'bg-[#EBF1F8] border-[#4573A2] text-[#0D1B3E]'
-                  : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                  ? 'bg-[#f8f9fb] border-claimondo-ondo text-claimondo-navy'
+                  : 'bg-white border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
               }`}
             >
               <span>{s.icon}</span>
@@ -76,7 +76,7 @@ export function EventFilterBar({
           onChange={(e) =>
             onChange({ ...value, zeitraum: e.target.value as EventFilterState['zeitraum'] })
           }
-          className="text-xs border border-gray-200 rounded-md px-2 py-1.5 bg-white text-[#0D1B3E]"
+          className="text-xs border border-claimondo-border rounded-md px-2 py-1.5 bg-white text-claimondo-navy"
         >
           <option value="alle">Gesamter Zeitraum</option>
           <option value="7d">Letzte 7 Tage</option>
@@ -84,16 +84,16 @@ export function EventFilterBar({
           <option value="90d">Letzte 90 Tage</option>
         </select>
         <div className="relative flex-1 min-w-[180px]">
-          <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+          <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
           <input
             type="text"
             value={value.search}
             onChange={(e) => onChange({ ...value, search: e.target.value })}
             placeholder="Suche in Titeln, Beschreibungen…"
-            className="w-full text-xs border border-gray-200 rounded-md pl-7 pr-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#4573A2]/30"
+            className="w-full text-xs border border-claimondo-border rounded-md pl-7 pr-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30"
           />
         </div>
-        <span className="text-xs text-gray-500 shrink-0">
+        <span className="text-xs text-claimondo-ondo shrink-0">
           {shown} / {total}
         </span>
       </div>

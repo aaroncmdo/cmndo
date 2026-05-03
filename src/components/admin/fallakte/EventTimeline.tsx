@@ -47,7 +47,7 @@ const ICON_BY_NAME: Record<string, typeof FileTextIcon> = {
 }
 
 const SEVERITY_COLOR: Record<FallEventSeverity, string> = {
-  info: 'text-gray-500 bg-gray-100',
+  info: 'text-claimondo-ondo bg-[#f8f9fb]',
   success: 'text-emerald-700 bg-emerald-50',
   warning: 'text-amber-700 bg-amber-50',
   error: 'text-red-700 bg-red-50',
@@ -142,14 +142,14 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
       />
 
       {filtered.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
-          <p className="text-sm text-gray-500">Keine Events für den gewählten Filter.</p>
+        <div className="glass-light border border-claimondo-border rounded-ios-md p-6 text-center">
+          <p className="text-sm text-claimondo-ondo">Keine Events für den gewählten Filter.</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl">
+        <div className="glass-light border border-claimondo-border rounded-ios-md">
           {grouped.map(([day, dayEvents], i) => (
-            <div key={day} className={i > 0 ? 'border-t border-gray-100' : ''}>
-              <div className="sticky top-0 bg-[#f8f9fb] border-b border-gray-200 px-4 py-2 text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider">
+            <div key={day} className={i > 0 ? 'border-t border-claimondo-border' : ''}>
+              <div className="sticky top-0 bg-claimondo-bg border-b border-claimondo-border px-4 py-2 text-xs font-semibold text-claimondo-navy uppercase tracking-wider">
                 {fmtDateHeader(day + 'T12:00:00Z')}
               </div>
               <ul>
@@ -158,7 +158,7 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
                   return (
                     <li
                       key={ev.id}
-                      className="flex items-start gap-3 px-4 py-2.5 hover:bg-gray-50/70 border-b border-gray-100 last:border-b-0 cursor-pointer"
+                      className="flex items-start gap-3 px-4 py-2.5 hover:bg-[#f8f9fb]/70 border-b border-claimondo-border last:border-b-0 cursor-pointer"
                       onClick={() => setSelected(ev)}
                     >
                       <span
@@ -168,17 +168,17 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
                       </span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-baseline gap-2 flex-wrap">
-                          <span className="text-xs font-mono text-gray-400 shrink-0">
+                          <span className="text-xs font-mono text-claimondo-ondo/70 shrink-0">
                             {fmtTime(ev.timestamp)}
                           </span>
-                          <span className="text-sm text-[#0D1B3E] font-medium">{ev.titel}</span>
+                          <span className="text-sm text-claimondo-navy font-medium">{ev.titel}</span>
                         </div>
                         {ev.beschreibung && (
-                          <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
+                          <p className="text-xs text-claimondo-ondo mt-0.5 line-clamp-2">
                             {ev.beschreibung}
                           </p>
                         )}
-                        <div className="flex items-center gap-1.5 mt-1 text-[10px] text-gray-400">
+                        <div className="flex items-center gap-1.5 mt-1 text-[10px] text-claimondo-ondo/70">
                           <span className="uppercase tracking-wider">{ev.source}</span>
                           {ev.actor?.name && <span>· {ev.actor.name}</span>}
                           {ev.actor?.rolle && !ev.actor?.name && <span>· {ev.actor.rolle}</span>}
@@ -191,11 +191,11 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
             </div>
           ))}
           {filtered.length > limit && (
-            <div className="p-3 border-t border-gray-100 text-center">
+            <div className="p-3 border-t border-claimondo-border text-center">
               <button
                 type="button"
                 onClick={() => setLimit((l) => l + PAGE_SIZE)}
-                className="text-xs font-medium text-[#4573A2] hover:underline"
+                className="text-xs font-medium text-claimondo-ondo hover:underline"
               >
                 {filtered.length - limit} weitere Events laden
               </button>

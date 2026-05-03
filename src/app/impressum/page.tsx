@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const metadata: Metadata = {
   title: 'Impressum | Claimondo',
@@ -12,21 +13,23 @@ export default function ImpressumPage() {
         ENTWURF &mdash; Diese Seite ist ein Entwurf. Anwalts-Review ausstehend.
       </div>
 
-      <h1 className="text-3xl font-bold text-[#1E3A5F] mb-8">Impressum</h1>
+      <div className="mb-8">
+        <PageHeader title="Impressum" size="lg" />
+      </div>
 
       <section className="space-y-6 text-[#1E3A5F]/90 leading-relaxed">
         <div>
-          <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Angaben gemaess &sect; 5 TMG</h2>
+          <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Angaben gemäß &sect; 5 TMG</h2>
           <p>
             Claimondo GmbH i.G.<br />
             Hansaring 10<br />
-            50670 Koeln
+            50670 Köln
           </p>
         </div>
 
         <div>
           <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Vertreten durch</h2>
-          <p>Geschaeftsfuehrer: Aaron Sprafke, Nicolas Kitta</p>
+          <p>Geschäftsführer: Aaron Sprafke, Nicolas Kitta</p>
         </div>
 
         <div>
@@ -48,11 +51,11 @@ export default function ImpressumPage() {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Verantwortlich fuer den Inhalt nach &sect; 55 Abs. 2 RStV</h2>
+          <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Verantwortlich für den Inhalt nach &sect; 55 Abs. 2 RStV</h2>
           <p>
             Aaron Sprafke<br />
             Hansaring 10<br />
-            50670 Koeln
+            50670 Köln
           </p>
         </div>
       </section>

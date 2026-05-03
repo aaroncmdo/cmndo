@@ -604,6 +604,8 @@ async function convertLeadToFall(
       // Kein manueller Write mehr — lead.halter_name wandert via halter_vorname/halter_nachname.
       // KFZ-146: Erweiterte Fahrzeugdaten
       fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
+      // CMM-32: Strukturierter Lackfarbe-Code für Imagin-Render-Mapping.
+      lackfarbe_code: (lead as { lackfarbe_code?: string | null }).lackfarbe_code ?? null,
       erstzulassung: lead.erstzulassung ?? null,
       fin_vin: lead.fin ?? null,
       kilometerstand: lead.kilometerstand ?? null,
@@ -683,7 +685,7 @@ async function convertLeadToFall(
       fahrzeugschaden_beschreibung: lead.fahrzeugschaden_beschreibung ?? null,
       sachschaden_beschreibung: lead.sachschaden_beschreibung ?? null,
       // Konversions-Metadaten
-      leadbearbeiter_id: userId,
+      dispatch_id: userId,
       kundenbetreuer_id: kundenbetreuerId,
       // AAR-427: Fallback-Flag + Zuweisungs-Zeitpunkt. Flag = true wenn
       // ein Admin stellvertretend die KB-Rolle übernimmt (kein aktiver KB).

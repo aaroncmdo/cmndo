@@ -91,17 +91,17 @@ export default function FinanceClient({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
           <Link
             href="/admin/finance/provisionen"
-            className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wider">
+                <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider">
                   Partner-Provisionen
                 </p>
-                <h3 className="text-base font-semibold text-gray-900 mt-0.5">
+                <h3 className="text-base font-semibold text-claimondo-navy mt-0.5">
                   Maik-Provisionen verwalten
                 </h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-claimondo-ondo mt-1">
                   Monatsübersicht je Lead: 150&nbsp;€ minus tatsächlicher CPL.
                   Status offen / bezahlt.
                 </p>
@@ -113,17 +113,17 @@ export default function FinanceClient({
           </Link>
           <Link
             href="/admin/finance/kanzlei"
-            className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wider">
+                <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider">
                   Kanzlei-Abrechnungen
                 </p>
-                <h3 className="text-base font-semibold text-gray-900 mt-0.5">
+                <h3 className="text-base font-semibold text-claimondo-navy mt-0.5">
                   LexDrive-Monatsabrechnung
                 </h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-claimondo-ondo mt-1">
                   Pauschalen pro abgeschlossenem Fall, Rechnungen an die
                   Partnerkanzlei versenden.
                 </p>
@@ -136,8 +136,8 @@ export default function FinanceClient({
         </div>
 
         {/* Chart */}
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-8">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        <div className="glass-light border border-claimondo-border rounded-ios-md p-5 mb-8">
+          <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-4">
             Fälle pro Monat
           </h2>
           <div className="h-64">
@@ -180,16 +180,16 @@ export default function FinanceClient({
         </div>
 
         {/* Tabelle */}
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-200">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+        <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
+          <div className="px-5 py-4 border-b border-claimondo-border">
+            <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
               Letzte abgeschlossene Fälle
             </h2>
           </div>
 
           {tabellenDaten.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-gray-400 text-sm">Noch keine abgeschlossenen Fälle.</p>
+              <p className="text-claimondo-ondo/70 text-sm">Noch keine abgeschlossenen Fälle.</p>
             </div>
           ) : (
             <>
@@ -197,17 +197,17 @@ export default function FinanceClient({
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left px-5 py-3 text-gray-500 font-medium">Fall-Nr.</th>
-                      <th className="text-left px-5 py-3 text-gray-500 font-medium">Kunde</th>
-                      <th className="text-right px-5 py-3 text-gray-500 font-medium">Betrag</th>
-                      <th className="text-right px-5 py-3 text-gray-500 font-medium">Provision</th>
-                      <th className="text-right px-5 py-3 text-gray-500 font-medium">Datum</th>
+                    <tr className="border-b border-claimondo-border">
+                      <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Fall-Nr.</th>
+                      <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Kunde</th>
+                      <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Betrag</th>
+                      <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Provision</th>
+                      <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Datum</th>
                     </tr>
                   </thead>
                   <tbody>
                     {tabellenDaten.map((row) => (
-                      <tr key={row.id} className="border-b border-gray-200/50 hover:bg-gray-100/40 transition-colors">
+                      <tr key={row.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors">
                         <td className="px-5 py-3">
                           <Link
                             href={`/faelle/${row.id}`}
@@ -218,17 +218,17 @@ export default function FinanceClient({
                             {row.fall_nummer ?? row.id.slice(0, 8)}
                           </Link>
                         </td>
-                        <td className="px-5 py-3 text-gray-800">{row.kunde}</td>
-                        <td className="px-5 py-3 text-gray-800 text-right tabular-nums">{eur(row.betrag)}</td>
+                        <td className="px-5 py-3 text-claimondo-navy">{row.kunde}</td>
+                        <td className="px-5 py-3 text-claimondo-navy text-right tabular-nums">{eur(row.betrag)}</td>
                         <td className="px-5 py-3 text-emerald-400 text-right tabular-nums">{eur(row.provision)}</td>
-                        <td className="px-5 py-3 text-gray-500 text-right text-xs">{fmtDate(row.datum)}</td>
+                        <td className="px-5 py-3 text-claimondo-ondo text-right text-xs">{fmtDate(row.datum)}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t border-gray-300">
-                      <td colSpan={2} className="px-5 py-3 text-gray-500 text-sm font-medium">Gesamt</td>
-                      <td className="px-5 py-3 text-gray-900 text-right tabular-nums font-semibold text-sm">
+                    <tr className="border-t border-claimondo-border">
+                      <td colSpan={2} className="px-5 py-3 text-claimondo-ondo text-sm font-medium">Gesamt</td>
+                      <td className="px-5 py-3 text-claimondo-navy text-right tabular-nums font-semibold text-sm">
                         {eur(tabellenDaten.reduce((s, r) => s + r.betrag, 0))}
                       </td>
                       <td className="px-5 py-3 text-emerald-400 text-right tabular-nums font-semibold text-sm">
@@ -241,26 +241,26 @@ export default function FinanceClient({
               </div>
 
               {/* Mobile cards */}
-              <div className="sm:hidden divide-y divide-gray-200/50">
+              <div className="sm:hidden divide-y divide-claimondo-border/50">
                 {tabellenDaten.map((row) => (
                   <Link
                     key={row.id}
                     href={`/faelle/${row.id}`}
                     target="_blank"
                     rel="noopener"
-                    className="block px-5 py-4 hover:bg-gray-100/40 transition-colors"
+                    className="block px-5 py-4 hover:bg-[#f8f9fb]/40 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-1">
                       <div>
                         <span className="text-[#7BA3CC] font-mono text-xs">
                           {row.fall_nummer ?? row.id.slice(0, 8)}
                         </span>
-                        <p className="text-gray-800 text-sm mt-0.5">{row.kunde}</p>
+                        <p className="text-claimondo-navy text-sm mt-0.5">{row.kunde}</p>
                       </div>
-                      <span className="text-gray-900 text-sm font-semibold tabular-nums">{eur(row.betrag)}</span>
+                      <span className="text-claimondo-navy text-sm font-semibold tabular-nums">{eur(row.betrag)}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-gray-500">{fmtDate(row.datum)}</span>
+                      <span className="text-claimondo-ondo">{fmtDate(row.datum)}</span>
                       <span className="text-emerald-400 tabular-nums">+{eur(row.provision)}</span>
                     </div>
                   </Link>
@@ -289,10 +289,10 @@ function KpiCard({
   accent?: string
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5">
-      <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-2">{label}</p>
-      <p className={`text-2xl font-bold tabular-nums ${accent ?? 'text-gray-900'}`}>{value}</p>
-      <p className="text-gray-400 text-xs mt-1">{sub}</p>
+    <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
+      <p className="text-claimondo-ondo text-xs font-medium uppercase tracking-wider mb-2">{label}</p>
+      <p className={`text-2xl font-bold tabular-nums ${accent ?? 'text-claimondo-navy'}`}>{value}</p>
+      <p className="text-claimondo-ondo/70 text-xs mt-1">{sub}</p>
     </div>
   )
 }

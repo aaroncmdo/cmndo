@@ -1,7 +1,11 @@
 'use client'
 
-// AAR-412: Einheitlicher Telefon-Button. Ersetzt AircallCallButton +
-// BridgeCallButton + die ~20 Inline-`<a href="tel:...">`-Links im Codebase.
+// AAR-412 / AAR-769 Phase 3: Einheitlicher Telefon-Button. Ersetzt
+// AircallCallButton + BridgeCallButton + die ~20 Inline-`<a href="tel:...">`-
+// Links im Codebase. Phase 3: bereits Token-konform (claimondo-*), Migration
+// auf <Button>-Primitive blockiert weil Primitive keinen <a href>-Modus
+// unterstützt — bleibt mit lokalem Tailwind-Style. Wenn Primitive einen
+// `as="a" href=`-Modus bekommt, hier ablösen.
 //
 // Varianten:
 //   - 'inline'   → Unterstrichener Link mit Phone-Icon, für Fliesstext
@@ -104,7 +108,7 @@ export default function PhoneButton({
           onClick={startAircall}
           disabled={calling}
           title={`${displayLabel} via Aircall anrufen`}
-          className={`text-[#4573A2] hover:text-[#0D1B3E] disabled:opacity-50 transition-colors ${className}`}
+          className={`text-claimondo-ondo hover:text-claimondo-navy disabled:opacity-50 transition-colors ${className}`}
         >
           {calling
             ? <Loader2Icon className={`${iconSize} animate-spin`} />
@@ -118,7 +122,7 @@ export default function PhoneButton({
           type="button"
           onClick={startAircall}
           disabled={calling}
-          className={`flex items-center gap-2 px-3 py-1.5 bg-[#4573A2] text-white text-sm rounded-lg hover:bg-[#0D1B3E] disabled:opacity-50 transition-colors ${className}`}
+          className={`flex items-center gap-2 px-3 py-1.5 bg-claimondo-ondo text-white text-sm rounded-lg hover:bg-claimondo-navy disabled:opacity-50 transition-colors ${className}`}
         >
           {calling ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <PhoneIcon className="w-4 h-4" />}
           {calling ? 'Anruf läuft…' : (label ?? `${formatTelefon(nummer)} anrufen`)}
@@ -131,7 +135,7 @@ export default function PhoneButton({
         type="button"
         onClick={startAircall}
         disabled={calling}
-        className={`inline-flex items-center gap-1 text-[#4573A2] hover:underline disabled:opacity-50 ${className}`}
+        className={`inline-flex items-center gap-1 text-claimondo-ondo hover:underline disabled:opacity-50 ${className}`}
       >
         {calling ? <Loader2Icon className="w-3.5 h-3.5 animate-spin" /> : <PhoneIcon className={iconSize} />}
         {displayLabel}
@@ -146,7 +150,7 @@ export default function PhoneButton({
         href={href}
         onClick={handleTelClick}
         title={`${displayLabel} anrufen`}
-        className={`text-[#4573A2] hover:text-[#0D1B3E] transition-colors ${className}`}
+        className={`text-claimondo-ondo hover:text-claimondo-navy transition-colors ${className}`}
       >
         <PhoneIcon className={iconSize} />
       </a>
@@ -157,7 +161,7 @@ export default function PhoneButton({
       <a
         href={href}
         onClick={handleTelClick}
-        className={`flex items-center gap-2 px-3 py-1.5 bg-[#4573A2] text-white text-sm rounded-lg hover:bg-[#0D1B3E] transition-colors ${className}`}
+        className={`flex items-center gap-2 px-3 py-1.5 bg-claimondo-ondo text-white text-sm rounded-lg hover:bg-claimondo-navy transition-colors ${className}`}
       >
         <PhoneIcon className="w-4 h-4" />
         {label ?? `${formatTelefon(nummer)} anrufen`}
@@ -169,7 +173,7 @@ export default function PhoneButton({
     <a
       href={href}
       onClick={handleTelClick}
-      className={`inline-flex items-center gap-1 text-[#4573A2] hover:underline ${className}`}
+      className={`inline-flex items-center gap-1 text-claimondo-ondo hover:underline ${className}`}
     >
       <PhoneIcon className={iconSize} />
       {displayLabel}

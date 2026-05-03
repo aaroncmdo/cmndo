@@ -19,30 +19,19 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-5">
-      <div className="text-center max-w-md">
-        <div className="text-red-500 text-5xl mb-4">!</div>
-        <h1 className="text-xl font-semibold text-gray-900 mb-2">
-          Etwas ist schiefgelaufen
-        </h1>
-        <p className="text-gray-500 text-sm mb-4">
-          Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.
-        </p>
-        <p className="text-gray-500 text-xs mb-2 font-mono bg-white border border-gray-200 rounded-lg px-4 py-3 text-left break-all">
-          {error.message || 'Unbekannter Fehler'}
-        </p>
-        {error.digest && (
-          <p className="text-gray-400 text-xs mb-4 font-mono">
-            Fehler-ID: {error.digest}
-          </p>
-        )}
-        <button
-          onClick={() => window.location.reload()}
-          className="px-5 py-2.5 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
-        >
-          Seite neu laden
-        </button>
-      </div>
+    <div style={{ minHeight: '100vh', background: '#9900ff', color: 'white', padding: 24, fontFamily: 'monospace', fontSize: 12 }}>
+      <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>
+        🟣 APP ROOT CRASH (CMM-14 diag)
+      </h1>
+      <div style={{ marginBottom: 8 }}><strong>Message:</strong> {error.message || '(leer)'}</div>
+      <div style={{ marginBottom: 8 }}><strong>Digest:</strong> {error.digest || '(keiner)'}</div>
+      <div style={{ marginBottom: 8 }}><strong>Name:</strong> {error.name}</div>
+      <pre style={{ background: 'rgba(0,0,0,0.4)', padding: 12, borderRadius: 6, overflow: 'auto', maxHeight: 400, whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: 10 }}>
+        {error.stack || '(kein Stack)'}
+      </pre>
+      <button onClick={() => window.location.reload()} style={{ marginTop: 16, padding: '8px 16px', background: 'white', color: '#9900ff', border: 'none', borderRadius: 4, fontWeight: 700 }}>
+        Seite neu laden
+      </button>
     </div>
   )
 }

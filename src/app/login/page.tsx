@@ -11,16 +11,16 @@ export default function LoginPage({
       <div className="w-full max-w-sm relative z-10">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold tracking-tight"><span className="text-[#0D1B3E]">Claim</span><span className="text-[#4573A2]">ondo</span></h1>
-          <p className="mt-2 text-sm text-gray-500">Melde dich mit deinem Konto an</p>
+          <p className="mt-2 text-sm text-claimondo-ondo">Melde dich mit deinem Konto an</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-lg">
+        <div className="bg-white border border-claimondo-border rounded-3xl p-8 shadow-lg">
           <LoginClient loginAction={login} />
           <ErrorMessage searchParams={searchParams} />
         </div>
 
-        <p className="text-center text-gray-500 text-xs mt-6">&copy; 2026 Claimondo GmbH</p>
+        <p className="text-center text-claimondo-ondo text-xs mt-6">&copy; 2026 Claimondo GmbH</p>
       </div>
     </div>
   )

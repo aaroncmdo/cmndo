@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { type TerminData } from './actions'
+// AAR-713 Phase 1: TerminData-Type aus lib/termine/
+import { type TerminData } from '@/lib/termine/get-by-token'
 import { terminAblehnen, terminGegenvorschlag, terminAnnehmen } from '@/lib/actions/termin-actions'
 
 type View = 'overview' | 'ablehnen' | 'gegenvorschlag' | 'done'
@@ -58,13 +59,13 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
 
     return (
       <PageWrapper>
-        <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 border border-gray-200">
+        <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 border border-claimondo-border">
           <div className="text-center mb-4">
             <div className="w-14 h-14 rounded-full bg-[#4573A2]/10 flex items-center justify-center mx-auto mb-3">
               <span className="text-2xl">{icon}</span>
             </div>
             <h1 className="text-lg font-semibold text-[#0D1B3E]" style={{ fontFamily: 'Montserrat, sans-serif' }}>{title}</h1>
-            <p className="text-sm text-gray-500 mt-1">{message}</p>
+            <p className="text-sm text-claimondo-ondo mt-1">{message}</p>
           </div>
 
           <TerminInfoCard termin={termin} datum={datum} uhrzeit={uhrzeit} mapsUrl={mapsUrl} />
@@ -79,12 +80,12 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
   if (view === 'done') {
     return (
       <PageWrapper>
-        <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 border border-gray-200 text-center">
+        <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 border border-claimondo-border text-center">
           <div className={`w-14 h-14 rounded-full ${doneSuccess ? 'bg-green-500/10' : 'bg-red-500/10'} flex items-center justify-center mx-auto mb-3`}>
             <span className="text-2xl">{doneSuccess ? '✓' : '✗'}</span>
           </div>
           <h1 className="text-lg font-semibold text-[#0D1B3E] mb-1">{doneSuccess ? 'Erledigt' : 'Fehler'}</h1>
-          <p className="text-sm text-gray-500">{doneMessage}</p>
+          <p className="text-sm text-claimondo-ondo">{doneMessage}</p>
           <FallakteLink fallId={termin.fall_id} />
         </div>
       </PageWrapper>
@@ -128,7 +129,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
 
   return (
     <PageWrapper>
-      <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 border border-gray-200">
+      <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 border border-claimondo-border">
         <h1 className="text-lg font-semibold text-[#0D1B3E] mb-4" style={{ fontFamily: 'Montserrat, sans-serif' }}>
           Dein nächster Termin
         </h1>
@@ -153,7 +154,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
             <p className="text-sm text-[#1E3A5F]">
               Vorgeschlagenes Datum: {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </p>
-            <p className="text-xs text-gray-500 mt-1">Wir warten auf Rückmeldung vom Kunden.</p>
+            <p className="text-xs text-claimondo-ondo mt-1">Wir warten auf Rückmeldung vom Kunden.</p>
           </div>
         )}
 
@@ -191,31 +192,31 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
         {/* Ablehnen-View */}
         {view === 'ablehnen' && (
           <div className="space-y-3 mb-4">
-            <p className="text-sm text-gray-600">Möchtest du den Termin wirklich ablehnen?</p>
+            <p className="text-sm text-claimondo-ondo">Möchtest du den Termin wirklich ablehnen?</p>
             <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full rounded-2xl border border-gray-300 bg-gray-100 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#4573A2]" rows={3} />
+              className="w-full rounded-2xl border border-claimondo-border bg-[#f8f9fb] px-4 py-3 text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 resize-none focus:outline-none focus:ring-2 focus:ring-[#4573A2]" rows={3} />
             <button onClick={handleAblehnen} disabled={loading}
               className="w-full py-3.5 rounded-2xl bg-red-600 text-white font-medium text-sm hover:bg-red-700 transition-colors disabled:opacity-40 active:scale-[0.98]">
               {loading ? 'Wird verarbeitet...' : 'Termin endgültig ablehnen'}
             </button>
-            <button onClick={() => setView('overview')} disabled={loading} className="w-full py-3 text-sm text-gray-500 hover:text-gray-700">Zurück</button>
+            <button onClick={() => setView('overview')} disabled={loading} className="w-full py-3 text-sm text-claimondo-ondo hover:text-claimondo-navy">Zurück</button>
           </div>
         )}
 
         {/* Gegenvorschlag-View */}
         {view === 'gegenvorschlag' && (
           <div className="space-y-3 mb-4">
-            <p className="text-sm text-gray-600">Schlage einen alternativen Termin vor:</p>
+            <p className="text-sm text-claimondo-ondo">Schlage einen alternativen Termin vor:</p>
             <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="w-full rounded-2xl border border-gray-300 bg-gray-100 px-4 py-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
+              className="w-full rounded-2xl border border-claimondo-border bg-[#f8f9fb] px-4 py-3 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
             <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full rounded-2xl border border-gray-300 bg-gray-100 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#4573A2]" rows={2} />
+              className="w-full rounded-2xl border border-claimondo-border bg-[#f8f9fb] px-4 py-3 text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 resize-none focus:outline-none focus:ring-2 focus:ring-[#4573A2]" rows={2} />
             <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
               className="w-full py-3.5 rounded-2xl bg-[#1E3A5F] text-white font-medium text-sm hover:bg-[#4573A2] transition-colors disabled:opacity-40 active:scale-[0.98]">
               {loading ? 'Wird verarbeitet...' : 'Gegenvorschlag senden'}
             </button>
-            <button onClick={() => setView('overview')} disabled={loading} className="w-full py-3 text-sm text-gray-500 hover:text-gray-700">Zurück</button>
+            <button onClick={() => setView('overview')} disabled={loading} className="w-full py-3 text-sm text-claimondo-ondo hover:text-claimondo-navy">Zurück</button>
           </div>
         )}
 
@@ -240,7 +241,7 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         {children}
-        <p className="text-center text-xs text-gray-400 mt-4">Claimondo GmbH</p>
+        <p className="text-center text-xs text-claimondo-ondo/70 mt-4">Claimondo GmbH</p>
       </div>
     </div>
   )
@@ -253,7 +254,7 @@ function TerminInfoCard({ termin, datum, uhrzeit, mapsUrl }: { termin: TerminDat
       <InfoRow label="Datum" value={datum} />
       <InfoRow label="Uhrzeit" value={`${uhrzeit} Uhr`} />
       <div className="flex justify-between text-sm">
-        <span className="text-gray-500">Adresse</span>
+        <span className="text-claimondo-ondo">Adresse</span>
         <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
           className="text-[#4573A2] font-medium text-right hover:underline max-w-[60%] truncate">
           {termin.adresse}
@@ -270,8 +271,8 @@ function TerminInfoCard({ termin, datum, uhrzeit, mapsUrl }: { termin: TerminDat
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between text-sm">
-      <span className="text-gray-500">{label}</span>
-      <span className="text-gray-900 font-medium text-right">{value}</span>
+      <span className="text-claimondo-ondo">{label}</span>
+      <span className="text-claimondo-navy font-medium text-right">{value}</span>
     </div>
   )
 }
@@ -279,7 +280,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function FallakteLink({ fallId }: { fallId: string | null }) {
   if (!fallId) return null
   return (
-    <div className="mt-4 pt-4 border-t border-gray-100">
+    <div className="mt-4 pt-4 border-t border-claimondo-border">
       <Link href={`/gutachter/fall/${fallId}`}
         className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-[#4573A2] font-medium text-sm border border-[#7BA3CC]/30 hover:bg-[#4573A2]/5 transition-colors">
         → Zur vollständigen Fallakte

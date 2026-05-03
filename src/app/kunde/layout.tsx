@@ -1,18 +1,23 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
+import { roleToPath } from '@/lib/auth/role-redirect'
 import Image from 'next/image'
 import Link from 'next/link'
-import NotificationBell from '@/app/admin/_components/NotificationBell'
+import UpdatesNav from '@/components/shared/updates'
 import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
+// CMM-28: Loader für singleFallId-Resolution in der Nav.
+import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
 import OutboxBadge from '@/components/offline/OutboxBadge'
 // AAR-316 W3: Sprach-Banner mit Google-Translate-Fallback
 import { SprachBanner } from '@/components/i18n/SprachBanner'
 import type { SpracheCode } from '@/lib/i18n/sprach-banner'
-// AAR-354: Persistenter Pflichtdokumente-Banner (offene Pflicht-Slots)
-import { PflichtdokumenteBanner } from '@/components/kunde/PflichtdokumenteBanner'
+// CMM-22 / CMM-33: Globaler OffeneDatenBanner ist raus — Pflichtdokumente
+// haben jetzt einen dedizierten Banner-Click-Tile in der Fall-Detail-Page,
+// das Pop-over übernimmt den Upload-Flow.
 // AAR-536 (K4): SV-Branding im Kunde-Portal — nur bei verifiziertem SV.
 import { resolveKundenTheme } from '@/lib/branding/kunden-theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
@@ -28,7 +33,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     .eq('id', user.id)
     .single()
 
-  if (profile?.rolle !== 'kunde') redirect('/login')
+  // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
+  // auf /login — sonst wirkt die Seite „rausgeworfen".
+  if (profile?.rolle !== 'kunde') redirect(roleToPath(profile?.rolle as string | null | undefined))
 
   // AAR-100: Onboarding-Redirect wenn noch nicht abgeschlossen
   const h = await headers()
@@ -51,10 +58,20 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     .maybeSingle()
   const kundenSprache = ((fallSprache?.sprache as string | null) ?? 'de') as SpracheCode
 
+  // CMM-28: Fall-Anzahl für die Nav. Bei Single-Fall-Kunden zeigt KundeNav
+  // „Mein Fall" + linked direkt zur Detail-Page (kein Listen-Zwischenschritt).
+  // Loader nutzt claim_parties + faelle.kunde_id + lead.email — derselbe Pfad
+  // den Dashboard und Listen-Page nutzen, also einmalige Wahrheit.
+  const adminForNav = createAdminClient()
+  const navFaelle = await getKundeFaelle(adminForNav, user.id, user.email ?? null)
+  const singleFallId = navFaelle.length === 1 ? navFaelle[0].id : null
+
   // AAR-536 (K4): SV-Branding aufgelöst. `useBrand=true` nur wenn zugewiesener
   // SV verifiziert + use_custom_branding aktiv + Theme vorhanden.
   const branding = await resolveKundenTheme(user.id)
   const themeStyle = branding.useBrand ? generateCssVars(branding.theme, 'full') : undefined
+  // Sidebar: solid (keine Transparenz) — konsistent mit Admin/Dispatch.
+  // Mobile Header + Bottom-Nav behalten glass-branded (Scroll-Kontext, iOS-Stil).
   const sidebarBg = branding.useBrand ? 'var(--brand-sidebar-bg, #0D1B3E)' : '#0D1B3E'
   const accentBg = branding.useBrand ? 'var(--brand-secondary, #4573A2)' : '#4573A2'
 
@@ -87,7 +104,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           </Link>
         </div>
 
-        <KundeNav />
+        <KundeNav singleFallId={singleFallId} />
 
         {/* Profil + Notification unten */}
         <div className="mt-auto px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
@@ -103,14 +120,14 @@ export default async function KundeLayout({ children }: { children: React.ReactN
               <p className="text-white text-sm font-medium truncate">{displayName}</p>
             </div>
             <OutboxBadge />
-            <NotificationBell />
+            <UpdatesNav variant="dark" />
           </div>
         </div>
       </aside>
 
       {/* Mobile Header — hidden on desktop */}
       <header
-        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-3 shadow-md"
+        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-3 shadow-ios-md glass-branded"
         style={{ backgroundColor: sidebarBg }}
       >
         <Link href="/kunde">
@@ -134,7 +151,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         </Link>
         <div className="flex items-center gap-2">
           <OutboxBadge />
-          <NotificationBell />
+          <UpdatesNav variant="dark" />
         </div>
       </header>
 
@@ -142,22 +159,22 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       <main className="flex-1 md:ml-64 pt-14 md:pt-0 pb-20 md:pb-6">
         {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
         <SprachBanner sprache={kundenSprache} />
-        {/* AAR-354: Banner rendert sich nur wenn offene Pflichtdokumente existieren.
-            Nicht im /onboarding anzeigen — dort ist der Upload-Flow bereits zentral. */}
-        {!pathname.includes('/onboarding') && <PflichtdokumenteBanner />}
+        {/* CMM-33: Globaler Pflichtdaten-Banner ist raus — die Detail-Page
+            hat einen eigenen Banner-Click-Tile mit Pop-over (PflichtdokumenteSection
+            variant=banner). Doppel-Banner war redundant. */}
         {children}
       </main>
 
       {/* Mobile Bottom-Nav — hidden on desktop */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-branded shadow-ios-md"
         style={{
           backgroundColor: sidebarBg,
           paddingTop: 8,
           paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
         }}
       >
-        <KundeNav mobile />
+        <KundeNav mobile singleFallId={singleFallId} />
       </nav>
     </div>
   )

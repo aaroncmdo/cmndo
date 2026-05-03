@@ -18,6 +18,7 @@ import TerminBuchungClient, {
   type EigenerTermin,
   type AdminBelegung,
 } from './TerminBuchungClient'
+import PageHeader from '@/components/shared/PageHeader'
 
 export default async function KanzleiTerminPage() {
   const supabase = await createClient()
@@ -89,14 +90,11 @@ export default async function KanzleiTerminPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold text-[#0D1B3E]">Termin mit Admin</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Buche einen Video- oder Vor-Ort-Termin mit einem Claimondo-Admin.
-          Der Termin landet direkt im Kalender des Admins, du erhältst per
-          Mail eine Google-Einladung inkl. Meet-Link.
-        </p>
-      </div>
+      <PageHeader
+        title="Termin mit Admin"
+        description="Buche einen Video- oder Vor-Ort-Termin mit einem Claimondo-Admin. Der Termin landet direkt im Kalender des Admins, du erhältst per Mail eine Google-Einladung inkl. Meet-Link."
+        size="lg"
+      />
       <TerminBuchungClient
         verfuegbareAdmins={verfuegbareAdmins}
         alleAdminsCount={alleAdmins.length}

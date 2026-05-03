@@ -6,6 +6,9 @@ import {
   ExternalLinkIcon, XIcon,
 } from 'lucide-react'
 import { retryEinzug, markBezahlt, stornoAbrechnung, reIssueAbrechnung } from './actions'
+import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 // KFZ-149 Hund-D: Listing aller SV-Monatsabrechnungen mit Filter,
 // Detail-Modal, manuellem Retry und Manuell-bezahlt Button.
@@ -53,11 +56,11 @@ function isFaellig(row: Row): boolean {
 }
 
 function statusBadge(row: Row): { label: string; bg: string; text: string; dot: string } {
-  if (row.storniert_am) return { label: 'Storniert', bg: 'bg-gray-100', text: 'text-gray-600', dot: 'bg-gray-400' }
+  if (row.storniert_am) return { label: 'Storniert', bg: 'bg-[#f8f9fb]', text: 'text-claimondo-ondo', dot: 'bg-claimondo-ondo/70' }
   if (row.bezahlt_am) return { label: 'Bezahlt', bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' }
   if (row.status === 'fehlgeschlagen' || row.einzug_fehler) return { label: 'Fehlgeschlagen', bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' }
   if (isFaellig(row)) return { label: 'Faellig', bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' }
-  if (row.status === 'versendet') return { label: 'Versendet', bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' }
+  if (row.status === 'versendet') return { label: 'Versendet', bg: 'bg-[#f8f9fb]', text: 'text-claimondo-ondo', dot: 'bg-[#f8f9fb]0' }
   return { label: 'Offen', bg: 'bg-yellow-50', text: 'text-yellow-700', dot: 'bg-yellow-500' }
 }
 
@@ -171,15 +174,18 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
 
   return (
     <div className="py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Abrechnungen</h1>
-          <p className="text-sm text-gray-500 mt-1">SV-Monatsabrechnungen, Reminder + Lastschrift-Einzug</p>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-          <ReceiptIcon className="w-4 h-4" />
-          {rows.length} Eintrag(e) insgesamt
-        </div>
+      <div className="mb-6">
+        <PageHeader
+          title="Abrechnungen"
+          description="SV-Monatsabrechnungen, Reminder + Lastschrift-Einzug"
+          size="lg"
+          actions={
+            <div className="flex items-center gap-2 text-xs text-claimondo-ondo">
+              <ReceiptIcon className="w-4 h-4" />
+              {rows.length} Eintrag(e) insgesamt
+            </div>
+          }
+        />
       </div>
 
       {/* Filter Tabs */}
@@ -190,8 +196,8 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
             onClick={() => setFilter(t.key)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               filter === t.key
-                ? 'bg-[#1E3A5F] text-white'
-                : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'
+                ? 'bg-claimondo-navy text-white'
+                : 'bg-white text-claimondo-ondo border border-claimondo-border hover:border-claimondo-border'
             }`}
           >
             {t.label} <span className="opacity-70 ml-1">{counts[t.key]}</span>
@@ -211,12 +217,12 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
       )}
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="p-12 text-center text-sm text-gray-500">Keine Eintraege im Filter <strong>{FILTER_TABS.find(t => t.key === filter)?.label}</strong>.</div>
+          <div className="p-12 text-center text-sm text-claimondo-ondo">Keine Eintraege im Filter <strong>{FILTER_TABS.find(t => t.key === filter)?.label}</strong>.</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-[10px] uppercase text-gray-500 tracking-wide">
+            <thead className="bg-[#f8f9fb] text-[10px] uppercase text-claimondo-ondo tracking-wide">
               <tr>
                 <th className="text-left px-4 py-3">Rechnung</th>
                 <th className="text-left px-4 py-3">Empfaenger</th>
@@ -227,32 +233,32 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                 <th className="text-right px-4 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-claimondo-border">
               {filtered.map(r => {
                 const badge = statusBadge(r)
                 return (
-                  <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={r.id} className="hover:bg-[#f8f9fb]/50 transition-colors">
                     <td className="px-4 py-3">
-                      <div className="font-mono text-xs text-gray-900">{r.abrechnungs_nr}</div>
-                      <div className="text-[10px] text-gray-400">erstellt {fmtDate(r.created_at)}</div>
+                      <div className="font-mono text-xs text-claimondo-navy">{r.abrechnungs_nr}</div>
+                      <div className="text-[10px] text-claimondo-ondo/70">erstellt {fmtDate(r.created_at)}</div>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="text-gray-900">{r.empfaenger_name ?? '—'}</div>
-                      <div className="text-[10px] text-gray-400">{r.empfaenger_email ?? '—'}</div>
+                      <div className="text-claimondo-navy">{r.empfaenger_name ?? '—'}</div>
+                      <div className="text-[10px] text-claimondo-ondo/70">{r.empfaenger_email ?? '—'}</div>
                     </td>
-                    <td className="px-4 py-3 text-right font-medium text-gray-900">{fmtEur(r.summe_brutto)}</td>
+                    <td className="px-4 py-3 text-right font-medium text-claimondo-navy">{fmtEur(r.summe_brutto)}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.bg} ${badge.text}`}>
+                      <StatusBadge colorCls={`${badge.bg} ${badge.text}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
                         {badge.label}
-                      </span>
+                      </StatusBadge>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{fmtDate(r.faellig_am)}</td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{fmtDate(r.bezahlt_am)}</td>
+                    <td className="px-4 py-3 text-claimondo-ondo text-xs">{fmtDate(r.faellig_am)}</td>
+                    <td className="px-4 py-3 text-claimondo-ondo text-xs">{fmtDate(r.bezahlt_am)}</td>
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => { setSelected(r); setConfirmMarkBezahlt(false); setBezahltNotiz('') }}
-                        className="text-xs text-[#1E3A5F] hover:text-[#4573A2] underline"
+                        className="text-xs text-claimondo-navy hover:text-claimondo-ondo underline"
                       >
                         Details
                       </button>
@@ -266,21 +272,15 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
       </div>
 
       {/* Detail Modal */}
-      {selected && (
-        <div
-          className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelected(null)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[85vh] overflow-y-auto"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="px-6 py-4 border-b border-gray-200 flex items-start justify-between">
+      <Modal open={selected !== null} onClose={() => setSelected(null)} noPadding hideCloseButton maxWidth={672} ariaLabel="Abrechnung-Detail">
+        {selected && (
+          <div className="max-h-[85vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-claimondo-border flex items-start justify-between">
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-gray-400">Abrechnung</p>
-                <h2 className="text-lg font-semibold text-gray-900 font-mono">{selected.abrechnungs_nr}</h2>
+                <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70">Abrechnung</p>
+                <h2 className="text-lg font-semibold text-claimondo-navy font-mono">{selected.abrechnungs_nr}</h2>
               </div>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 p-1">
+              <button onClick={() => setSelected(null)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-1">
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
@@ -302,14 +302,14 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
               {(() => {
                 const b = statusBadge(selected)
                 return (
-                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                    <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-2">Status</p>
-                    <span className={`inline-flex items-center gap-2 text-sm px-3 py-1 rounded-full font-medium ${b.bg} ${b.text}`}>
+                  <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
+                    <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70 mb-2">Status</p>
+                    <StatusBadge colorCls={`${b.bg} ${b.text}`} size="sm">
                       <span className={`w-2 h-2 rounded-full ${b.dot}`} />
                       {b.label}
-                    </span>
+                    </StatusBadge>
                     {selected.einzug_versucht_am && (
-                      <p className="text-xs text-gray-500 mt-2 flex items-center gap-1.5">
+                      <p className="text-xs text-claimondo-ondo mt-2 flex items-center gap-1.5">
                         <ClockIcon className="w-3.5 h-3.5" /> Letzter Einzugs-Versuch: {fmtDate(selected.einzug_versucht_am)}
                       </p>
                     )}
@@ -333,12 +333,12 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
               {/* Stripe link */}
               {selected.stripe_payment_intent_id && (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Stripe PaymentIntent</p>
+                  <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70 mb-1">Stripe PaymentIntent</p>
                   <a
                     href={`https://dashboard.stripe.com/payments/${selected.stripe_payment_intent_id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-[#4573A2] hover:text-[#1E3A5F] underline font-mono"
+                    className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-claimondo-navy underline font-mono"
                   >
                     {selected.stripe_payment_intent_id}
                     <ExternalLinkIcon className="w-3 h-3" />
@@ -348,20 +348,20 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
 
               {/* Notiz */}
               {selected.notiz && (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                  <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Notiz</p>
-                  <p className="text-xs text-gray-700 whitespace-pre-wrap">{selected.notiz}</p>
+                <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
+                  <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70 mb-1">Notiz</p>
+                  <p className="text-xs text-claimondo-navy whitespace-pre-wrap">{selected.notiz}</p>
                 </div>
               )}
 
               {/* Action buttons */}
               {!selected.bezahlt_am && !selected.storniert_am && (
-                <div className="pt-4 border-t border-gray-200 space-y-3">
+                <div className="pt-4 border-t border-claimondo-border space-y-3">
                   {(selected.status === 'fehlgeschlagen' || selected.einzug_fehler) && (
                     <button
                       onClick={() => handleRetry(selected)}
                       disabled={pending}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-medium transition-colors disabled:opacity-40"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium transition-colors disabled:opacity-40"
                     >
                       <RefreshCwIcon className="w-4 h-4" />
                       {pending ? 'Wird verarbeitet...' : 'Einzug erneut versuchen'}
@@ -388,13 +388,13 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         onChange={e => setBezahltNotiz(e.target.value)}
                         placeholder="Notiz (optional)..."
                         rows={2}
-                        className="w-full bg-white border border-gray-300 rounded-lg px-2 py-1.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
+                        className="w-full bg-white border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
                       />
                       <div className="flex gap-2">
                         <button
                           onClick={() => { setConfirmMarkBezahlt(false); setBezahltNotiz('') }}
                           disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50"
+                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-[#f8f9fb]"
                         >
                           Abbrechen
                         </button>
@@ -425,11 +425,11 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         onChange={e => setStornoGrund(e.target.value)}
                         placeholder="z.B. Fall storniert, Fehl-Abrechnung..."
                         rows={2}
-                        className="w-full bg-white border border-gray-300 rounded-lg px-2 py-1.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-red-300"
+                        className="w-full bg-white border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-red-300"
                       />
                       <div className="flex gap-2">
                         <button onClick={() => { setConfirmStorno(false); setStornoGrund('') }} disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50">Abbrechen</button>
+                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-[#f8f9fb]">Abbrechen</button>
                         <button onClick={() => handleStorno(selected)} disabled={pending || !stornoGrund.trim()}
                           className="flex-1 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium disabled:opacity-40">
                           {pending ? '...' : 'Stornieren'}
@@ -442,10 +442,10 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
 
               {/* KFZ-150: Storno-Details + Re-Issue Button */}
               {selected.storniert_am && selected.status === 'storniert' && (
-                <div className="pt-4 border-t border-gray-200 space-y-3">
-                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-1">
-                    <p className="text-xs text-gray-600"><strong>Storniert am:</strong> {fmtDate(selected.storniert_am)}</p>
-                    {selected.storniert_grund && <p className="text-xs text-gray-600"><strong>Grund:</strong> {selected.storniert_grund}</p>}
+                <div className="pt-4 border-t border-claimondo-border space-y-3">
+                  <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-3 space-y-1">
+                    <p className="text-xs text-claimondo-ondo"><strong>Storniert am:</strong> {fmtDate(selected.storniert_am)}</p>
+                    {selected.storniert_grund && <p className="text-xs text-claimondo-ondo"><strong>Grund:</strong> {selected.storniert_grund}</p>}
                     {selected.ersetzt_durch_abrechnung_id && <p className="text-xs text-emerald-600"><strong>Korrekturabrechnung erstellt</strong></p>}
                   </div>
                   {!selected.ersetzt_durch_abrechnung_id && !showReIssueForm && (
@@ -462,35 +462,35 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         })))
                       }}
                       disabled={pending}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-medium transition-colors disabled:opacity-40"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium transition-colors disabled:opacity-40"
                     >
                       <RefreshCwIcon className="w-4 h-4" />
                       Korrekturabrechnung erstellen (Re-Issue)
                     </button>
                   )}
                   {!selected.ersetzt_durch_abrechnung_id && showReIssueForm && (
-                    <div className="border border-[#4573A2]/20 rounded-xl p-3 bg-[#4573A2]/5 space-y-3">
-                      <p className="text-xs text-gray-700 font-medium">Korrekturen (optional)</p>
-                      <p className="text-[10px] text-gray-500">Positionen können vor dem Re-Issue korrigiert werden. Leer lassen = Originalwert beibehalten.</p>
+                    <div className="border border-claimondo-ondo/20 rounded-xl p-3 bg-claimondo-ondo/5 space-y-3">
+                      <p className="text-xs text-claimondo-navy font-medium">Korrekturen (optional)</p>
+                      <p className="text-[10px] text-claimondo-ondo">Positionen können vor dem Re-Issue korrigiert werden. Leer lassen = Originalwert beibehalten.</p>
                       {reIssueKorrekturen.map((k, i) => (
                         <div key={k.fall_id} className="flex items-center gap-2 text-xs">
-                          <span className="text-gray-600 flex-1 truncate">{k.label}</span>
-                          <span className="text-gray-400 tabular-nums">{fmtEur(k.original)}</span>
-                          <span className="text-gray-400">→</span>
+                          <span className="text-claimondo-ondo flex-1 truncate">{k.label}</span>
+                          <span className="text-claimondo-ondo/70 tabular-nums">{fmtEur(k.original)}</span>
+                          <span className="text-claimondo-ondo/70">→</span>
                           <input type="number" step="0.01" value={k.neuer_betrag}
                             onChange={e => setReIssueKorrekturen(prev => prev.map((p, j) => j === i ? { ...p, neuer_betrag: e.target.value } : p))}
                             placeholder={String(k.original)}
-                            className="w-24 bg-white border border-gray-300 rounded px-2 py-1 text-xs tabular-nums text-right" />
+                            className="w-24 bg-white border border-claimondo-border rounded px-2 py-1 text-xs tabular-nums text-right" />
                         </div>
                       ))}
                       {reIssueKorrekturen.length === 0 && (
-                        <p className="text-[10px] text-gray-400">Keine Positionen in dieser Abrechnung.</p>
+                        <p className="text-[10px] text-claimondo-ondo/70">Keine Positionen in dieser Abrechnung.</p>
                       )}
                       <div className="flex gap-2">
                         <button onClick={() => { setShowReIssueForm(false); setReIssueKorrekturen([]) }} disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50">Abbrechen</button>
+                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-[#f8f9fb]">Abbrechen</button>
                         <button onClick={() => handleReIssue(selected)} disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-xs font-medium disabled:opacity-40">
+                          className="flex-1 py-1.5 rounded-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-xs font-medium disabled:opacity-40">
                           {pending ? 'Erstelle...' : 'Re-Issue erstellen'}
                         </button>
                       </div>
@@ -500,8 +500,8 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
               )}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   )
 }
@@ -509,8 +509,8 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
 function Info({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wide text-gray-400">{label}</p>
-      <p className={`text-sm mt-0.5 ${highlight ? 'font-semibold text-[#1E3A5F]' : 'text-gray-800'}`}>{value}</p>
+      <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70">{label}</p>
+      <p className={`text-sm mt-0.5 ${highlight ? 'font-semibold text-claimondo-navy' : 'text-claimondo-navy'}`}>{value}</p>
     </div>
   )
 }

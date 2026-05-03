@@ -1,5 +1,13 @@
 // AAR-128: Zentrales Mapping von Lead-Feldern zu Fall-Feldern.
 //
+// CMM-3 (Phase 0.5): TEILWEISE DEPRECATED. Die Lead → Fall Mapping-Logik
+// wird intern von `convertLeadToClaim` (src/lib/leads/convert-lead-to-claim.ts)
+// noch wiederverwendet, weil die `faelle`-Tabelle bis Phase 6 weiterhin mit
+// allen Schadensdaten gefüllt werden muss (das Frontend liest sie noch).
+// In Phase 6 wird diese Datei zusammen mit allen `faelle`-Schadensdaten-
+// Spalten gelöscht und die Mapping-Logik bleibt nur in convertLeadToClaim
+// für `claims` und Sub-Entities übrig.
+//
 // Single Source of Truth für das Lead→Fall-Mapping in signSAandCreateFall.
 // Wenn du ein neues Feld in `leads` hinzufügst das beim Fall-Erzeugen
 // kopiert werden soll, ergänze es HIER — nicht inline in actions.ts.
@@ -221,7 +229,7 @@ export type BuildFallOptions = {
   gegnerVersicherungId?: string | null
   kanzleiId?: string | null
   organisationId?: string | null
-  leadbearbeiterId?: string | null
+  dispatchId?: string | null
 }
 
 export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Record<string, unknown> {
@@ -253,14 +261,14 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     // Fuzzy-Match passiert in buildFallInsertFromLead.
     kanzlei_id: options.kanzleiId ?? null,
     organisation_id: options.organisationId ?? null,
-    leadbearbeiter_id: options.leadbearbeiterId ?? null,
+    dispatch_id: options.dispatchId ?? null,
   }
 }
 
 // ─── 6. ENTITY-RESOLVER (AAR-155) ──────────────────────────────────────────
 // Löst die 4 FK-IDs für den Fall auf: Versicherung (Fuzzy-Match auf
 // gegner_versicherung), Kanzlei (bei Pfad A = LexDrive), Organisation
-// (via SV-Mitgliedschaft), Leadbearbeiter (lead.zugewiesen_an oder Fallback).
+// (via SV-Mitgliedschaft), Dispatcher (lead.zugewiesen_an oder Fallback).
 // Non-blocking: jeder Miss → null.
 // Der admin-Parameter ist bewusst `any` — Supabase-Client-Generics sind bei
 // Lookup-Queries über mehrere Tabellen schwer exakt zu typen (TS2589); die
@@ -277,7 +285,7 @@ export async function resolveFallEntityFks(
   gegnerVersicherungId: string | null
   kanzleiId: string | null
   organisationId: string | null
-  leadbearbeiterId: string | null
+  dispatchId: string | null
 }> {
   const gegnerVs = typeof lead.gegner_versicherung === 'string' ? lead.gegner_versicherung.trim() : ''
   const serviceTyp = typeof lead.service_typ === 'string' ? lead.service_typ : 'komplett'
@@ -334,12 +342,12 @@ export async function resolveFallEntityFks(
     } catch { /* non-blocking */ }
   }
 
-  // 4. Leadbearbeiter — lead.zugewiesen_an (gesetzt vom Dispatcher bei
+  // 4. Dispatcher — lead.zugewiesen_an (gesetzt vom Dispatcher bei
   // Qualifizierung) oder null. Wir setzen zugewiesen_an jetzt aus
   // sendFlowLinkMultiChannel automatisch.
-  const leadbearbeiterId = zugewiesenAn
+  const dispatchId = zugewiesenAn
 
-  return { gegnerVersicherungId, kanzleiId, organisationId, leadbearbeiterId }
+  return { gegnerVersicherungId, kanzleiId, organisationId, dispatchId }
 }
 
 /**

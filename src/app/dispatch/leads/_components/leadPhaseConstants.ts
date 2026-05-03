@@ -15,15 +15,15 @@ export const PHASE_OPTIONS = [
 ] as const
 
 export const PHASE_BADGES: Record<string, string> = {
-  'neu': 'bg-blue-100 text-blue-700',
-  'nicht-erreicht': 'bg-gray-100 text-gray-600',
+  'neu': 'bg-[#f8f9fb] text-claimondo-ondo',
+  'nicht-erreicht': 'bg-[#f8f9fb] text-claimondo-ondo',
   'rueckruf': 'bg-amber-100 text-amber-700',
   'in-qualifizierung': 'bg-violet-100 text-violet-700',
   'flow-versendet': 'bg-emerald-100 text-emerald-700',
   'sa-ausstehend': 'bg-cyan-100 text-cyan-700',
   'konvertiert': 'bg-green-100 text-green-800',
   'disqualifiziert': 'bg-red-100 text-red-700',
-  'kalt': 'bg-gray-200 text-gray-500',
+  'kalt': 'bg-claimondo-border text-claimondo-ondo',
 }
 
 export const PHASE_LABELS: Record<string, string> = Object.fromEntries(

@@ -19,7 +19,7 @@ export async function LandingSeoContent() {
         >
           {t('heading')}
         </h2>
-        <p className="mb-12 text-center text-slate-600">{t('subheading')}</p>
+        <p className="mb-12 text-center text-claimondo-ondo">{t('subheading')}</p>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {TOPICS.map((topic) => (
@@ -30,7 +30,7 @@ export async function LandingSeoContent() {
               <h3 className="text-lg font-semibold text-claimondo-navy">
                 {t(`${topic}.question`)}
               </h3>
-              <p className="mt-2 text-slate-600">{t(`${topic}.teaser`)}</p>
+              <p className="mt-2 text-claimondo-ondo">{t(`${topic}.teaser`)}</p>
               <Link
                 href={`/ratgeber/${topic}`}
                 className="mt-4 inline-block font-semibold text-claimondo-ondo hover:underline"

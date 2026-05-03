@@ -25,7 +25,7 @@ export async function LandingSteps() {
           >
             {t('heading')}
           </h2>
-          <p className="mt-2 text-slate-600">{t('subheading')}</p>
+          <p className="mt-2 text-claimondo-ondo">{t('subheading')}</p>
         </div>
 
         <ol className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -49,7 +49,7 @@ export async function LandingSteps() {
                 <h3 className="text-lg font-semibold text-claimondo-navy">
                   {t(`${step.key}.title`)}
                 </h3>
-                <p className="mt-2 text-slate-600">
+                <p className="mt-2 text-claimondo-ondo">
                   {t(`${step.key}.description`)}
                 </p>
               </li>
@@ -61,7 +61,7 @@ export async function LandingSteps() {
           <LandingCta href="/schaden-melden" variant="primary">
             {t('cta')} →
           </LandingCta>
-          <p className="mt-3 text-sm text-slate-600">{t('duration_hint')}</p>
+          <p className="mt-3 text-sm text-claimondo-ondo">{t('duration_hint')}</p>
         </div>
       </div>
     </section>

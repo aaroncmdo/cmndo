@@ -25,16 +25,16 @@ export function SubphaseStepper({
               sub.state === 'active'
                 ? 'text-[12px] font-medium text-claimondo-navy'
                 : sub.state === 'done'
-                  ? 'text-[12px] text-gray-600'
+                  ? 'text-[12px] text-claimondo-ondo'
                   : sub.state === 'blocked'
                     ? 'text-[12px] font-medium text-rose-700'
-                    : 'text-[12px] text-gray-400'
+                    : 'text-[12px] text-claimondo-ondo/70'
             }
           >
             {sub.label}
           </span>
           {showTimestamps && sub.reachedAt && (
-            <span className="text-[10px] text-gray-400 ml-auto">
+            <span className="text-[10px] text-claimondo-ondo/70 ml-auto">
               {new Date(sub.reachedAt).toLocaleDateString('de-DE')}
             </span>
           )}

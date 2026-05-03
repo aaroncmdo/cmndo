@@ -2,9 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
+import { roleToPath } from '@/lib/auth/role-redirect'
 import GutachterShell from './GutachterShell'
-import { PageContainer } from '@/components/PageContainer'
-import { isOnboardingComplete, getOnboardingDeepLink } from '@/lib/gutachter/onboarding-status'
 
 export default async function GutachterLayout({
   children,
@@ -21,7 +20,11 @@ export default async function GutachterLayout({
     .eq('id', user.id)
     .single()
 
-  if (profile?.rolle !== 'sachverstaendiger') redirect('/login')
+  // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
+  // auf /login.
+  if (profile?.rolle !== 'sachverstaendiger') {
+    redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
+  }
 
   const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 
@@ -33,7 +36,7 @@ export default async function GutachterLayout({
   // AAR-359 W5: sa_vorlage_* + verifizierung_* + gesperrt_* Felder für
   // den Verifizierungs-Banner und die Sidebar-Sichtbarkeit.
   // AAR-512: `gcal_connected` für den generalisierten Onboarding-Banner ergänzt.
-  const svSelect = 'logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, sa_vorlage_status, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund, gcal_connected'
+  const svSelect = 'id, logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, sa_vorlage_status, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund, gcal_connected'
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -46,10 +49,12 @@ export default async function GutachterLayout({
   const showTeam = !!(sv?.ist_parent_account || (sv?.rolle_in_organisation === 'inhaber'))
   const showCommunity = sv?.rolle_in_organisation === 'community_member'
 
-  // AAR-359 W5: Verifizierungs-Link in Sidebar, solange ein Verifizierungs-
-  // Zustand aktiv bleibt (SA-Vorlage ausstehend/zurückgewiesen ODER Tier-2
-  // nicht vollständig geprüft). Sobald beide auf 'geprueft' → Link verschwindet.
-  const saVorlageOffen = sv?.sa_vorlage_status !== 'geprueft'
+  // AAR-359 W5 / AAR-714: Verifizierungs-Link in Sidebar, solange ein
+  // Verifizierungs-Zustand aktiv bleibt. Legacy-SA-Vorlage (sv_sa_vorlage_*)
+  // gilt nur noch wenn aktiv ausstehend/zurückgewiesen — null ist seit
+  // AAR-714 der Default für neue SVs (die laufen über Pflichtdokumente).
+  const saVorlageOffen =
+    sv?.sa_vorlage_status === 'ausstehend' || sv?.sa_vorlage_status === 'zurueckgewiesen'
   const tier2Offen = sv?.verifizierung_status && sv.verifizierung_status !== 'geprueft'
   const showVerifizierung = !!(saVorlageOffen || tier2Offen)
 
@@ -97,6 +102,7 @@ export default async function GutachterLayout({
   return (
     <GutachterShell
       displayName={displayName}
+      userId={user.id}
       logoUrl={useBrand ? (sv?.logo_url ?? null) : null}
       brandTheme={brandTheme}
       firmenname={useBrand ? (sv?.firmenname ?? null) : null}
@@ -105,6 +111,7 @@ export default async function GutachterLayout({
       showTeam={showTeam}
       showCommunity={showCommunity}
       showVerifizierung={showVerifizierung}
+      svId={sv?.id ? String(sv.id) : null}
     >
       {/* Deaktiviert-Banner */}
       {isDeactivated && (
@@ -126,66 +133,27 @@ export default async function GutachterLayout({
           <Link href="/gutachter/verifizierung" className="underline font-semibold">Zur Verifizierung</Link>
         </div>
       )}
-      {/* AAR-359 W5: Tier-2-Frist überschritten (rot). */}
-      {!sv?.gesperrt_seit && sv?.verifizierung_status === 'frist_ueberschritten' && (
-        <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-center text-xs text-red-700 font-medium">
-          Ihre 14-Tage-Frist für die Verifizierungs-Unterlagen ist abgelaufen. Bitte reichen Sie die fehlenden Dokumente umgehend nach.{' '}
-          <Link href="/gutachter/verifizierung" className="underline font-semibold">Zur Verifizierung</Link>
-        </div>
-      )}
       {/* AAR-359 W5: SA-Vorlage wird geprüft (gelb). */}
       {!sv?.gesperrt_seit && sv?.sa_vorlage_status === 'ausstehend' && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium">
           Ihre SA-Vorlage wurde hochgeladen und wird vom Admin geprüft. Dispatch wird freigeschaltet, sobald die Freigabe erteilt ist.
         </div>
       )}
-      {/* AAR-359 W5: Tier-2-Countdown läuft (gelb) — wenn < 4 Tage bis
-          verifizierung_frist_bis. */}
-      {!sv?.gesperrt_seit
-        && sv?.verifizierung_status === 'ausstehend'
-        && sv.verifizierung_frist_bis
-        && (() => {
-          const tageOffen = Math.max(
-            0,
-            Math.ceil((new Date(sv.verifizierung_frist_bis).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
-          )
-          if (tageOffen > 4) return null
-          return (
-            <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium">
-              Noch {tageOffen} Tag{tageOffen === 1 ? '' : 'e'} bis zum Ablauf Ihrer Verifizierungs-Frist. Bitte reichen Sie die fehlenden Dokumente rechtzeitig nach.{' '}
-              <Link href="/gutachter/verifizierung" className="underline font-semibold">Zur Verifizierung</Link>
-            </div>
-          )
-        })()}
-      {/* AAR-512: Onboarding-Unvollständig-Banner (generalisiert).
-          Triggert wenn IRGENDEIN Onboarding-Step offen ist (nicht mehr nur
-          Anzahlung). Klickbar, Deep-Link zum nächsten offenen Step. Wird
-          unterdrückt wenn bereits einer der spezifischeren Banner (Sperre,
-          SA-Vorlage zurückgewiesen, SA ausstehend, Tier-2-Countdown) rendert
-          — deren Info ist präziser. */}
-      {!isDeactivated
-        && !sv?.gesperrt_seit
-        && sv?.sa_vorlage_status !== 'zurueckgewiesen'
-        && sv?.sa_vorlage_status !== 'ausstehend'
-        && sv?.verifizierung_status !== 'frist_ueberschritten'
-        && !isWillkommenPath
-        && sv
-        && !isOnboardingComplete(sv)
-        && (
-          <Link
-            href={getOnboardingDeepLink(sv)}
-            className="bg-amber-50 hover:bg-amber-100 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <span>Ihr Onboarding ist noch nicht abgeschlossen. Klicken Sie hier, um es fertigzustellen und Fälle zu erhalten.</span>
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        )}
-      {/* BUG-98: PageContainer gibt Desktop ~15-20% horizontale Marge,
-          Tablet quer großflächig, Mobile fast volle Breite. Banner liegen
-          bewusst außerhalb damit sie weiterhin volle Breite haben. */}
-      <PageContainer className="h-full">{children}</PageContainer>
+      {/* AAR-692: Tier-2-Banner (frist_ueberschritten + ausstehend-Countdown)
+          entfernt. Tier 2 (Berufshaftpflicht, Gewerbeanmeldung etc.) ist
+          kein Matching-Blocker — der Dispatchable-Filter lässt SVs durch
+          auch ohne Tier-2-Freigabe. Tier 2 schaltet lediglich das
+          „Verifiziert"-Badge frei (siehe Fallakte-Kunde-Anzeige). Ein
+          rotes Frist-Banner wäre irreführend. SA-Vorlage (Tier 1) bleibt
+          das einzige Hard-Gate mit sichtbarem Banner. */}
+      {/* AAR-700: AAR-512-Onboarding-Banner entfernt — verwies auf nichts
+          Konkretes mehr und blieb auch nach abgeschlossenem Onboarding
+          stehen. Hard-Gate liegt im Layout-Redirect (portal_zugang_
+          freigeschaltet=false → /gutachter/willkommen) + im SA-Vorlage-
+          Banner (Tier 1). */}
+      {/* AAR-697: PageContainer raus — Aaron-Vorgabe Gutachter-Portal full
+          width. Banner liegen sowieso außerhalb dieses Wrappers. */}
+      <div className="h-full w-full">{children}</div>
     </GutachterShell>
   )
 }

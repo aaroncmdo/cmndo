@@ -35,7 +35,7 @@ function loadGoogleMapsWithDrawing(apiKey: string): Promise<void> {
     }
     const s = document.createElement('script')
     s.id = MAPS_SCRIPT_ID
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing,places`
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing,places&loading=async&v=weekly`
     s.async = true
     s.defer = true
     s.onload = () => resolve()
@@ -207,8 +207,8 @@ export default function PolygonEditor({
 
   return (
     <div className="space-y-2">
-      <div ref={containerRef} className="w-full h-72 rounded-xl border border-gray-200 overflow-hidden bg-gray-50" />
-      <div className="flex items-center justify-between text-[10px] text-gray-500">
+      <div ref={containerRef} className="w-full h-72 rounded-xl border border-claimondo-border overflow-hidden bg-[#f8f9fb]" />
+      <div className="flex items-center justify-between text-[10px] text-claimondo-ondo">
         <span>
           {hasPolygon
             ? '✓ Polygon gesetzt — Ecken zum Anpassen ziehen, Mitte zum Verschieben.'

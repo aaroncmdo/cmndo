@@ -168,21 +168,21 @@ export default function TerminBuchungClient({
       {/* BUCHUNGS-FORMULAR */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-[#e4e7ef] bg-white p-5 space-y-4"
+        className="rounded-xl border border-claimondo-border bg-white p-5 space-y-4"
       >
         <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-[#4573A2]" />
-          <h2 className="text-sm font-semibold text-[#0D1B3E]">Neuen Termin buchen</h2>
+          <CalendarIcon className="w-4 h-4 text-claimondo-ondo" />
+          <h2 className="text-sm font-semibold text-claimondo-navy">Neuen Termin buchen</h2>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Admin
           </label>
           <select
             value={adminId}
             onChange={(e) => setAdminId(e.target.value)}
-            className="w-full rounded-md border border-[#e4e7ef] px-3 py-2 text-sm bg-white"
+            className="w-full rounded-md border border-claimondo-border px-3 py-2 text-sm bg-white"
             required
           >
             {verfuegbareAdmins.map((a) => (
@@ -194,7 +194,7 @@ export default function TerminBuchungClient({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Termin-Typ
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -203,8 +203,8 @@ export default function TerminBuchungClient({
               onClick={() => setTyp('video')}
               className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium border transition-colors ${
                 typ === 'video'
-                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                  : 'bg-white text-gray-700 border-[#e4e7ef] hover:border-gray-300'
+                  ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
+                  : 'bg-white text-claimondo-navy border-claimondo-border hover:border-claimondo-border'
               }`}
             >
               <VideoIcon className="w-3.5 h-3.5" />
@@ -215,8 +215,8 @@ export default function TerminBuchungClient({
               onClick={() => setTyp('vor_ort')}
               className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium border transition-colors ${
                 typ === 'vor_ort'
-                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                  : 'bg-white text-gray-700 border-[#e4e7ef] hover:border-gray-300'
+                  ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
+                  : 'bg-white text-claimondo-navy border-claimondo-border hover:border-claimondo-border'
               }`}
             >
               <MapPinIcon className="w-3.5 h-3.5" />
@@ -227,7 +227,7 @@ export default function TerminBuchungClient({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase tracking-wider text-gray-500">
+            <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
               Datum
             </label>
             <input
@@ -235,12 +235,12 @@ export default function TerminBuchungClient({
               value={datum}
               min={minDateStr}
               onChange={(e) => setDatum(e.target.value)}
-              className="w-full rounded-md border border-[#e4e7ef] px-3 py-2 text-sm"
+              className="w-full rounded-md border border-claimondo-border px-3 py-2 text-sm"
               required
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase tracking-wider text-gray-500">
+            <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
               Uhrzeit
             </label>
             <input
@@ -248,14 +248,14 @@ export default function TerminBuchungClient({
               value={uhrzeit}
               step={900}
               onChange={(e) => setUhrzeit(e.target.value)}
-              className="w-full rounded-md border border-[#e4e7ef] px-3 py-2 text-sm"
+              className="w-full rounded-md border border-claimondo-border px-3 py-2 text-sm"
               required
             />
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Dauer
           </label>
           <div className="flex gap-1.5 flex-wrap">
@@ -266,8 +266,8 @@ export default function TerminBuchungClient({
                 onClick={() => setDauer(d)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium border ${
                   dauer === d
-                    ? 'bg-[#0D1B3E] text-white border-[#0D1B3E]'
-                    : 'bg-white text-gray-700 border-[#e4e7ef]'
+                    ? 'bg-claimondo-navy text-white border-claimondo-navy'
+                    : 'bg-white text-claimondo-navy border-claimondo-border'
                 }`}
               >
                 {d} min
@@ -277,7 +277,7 @@ export default function TerminBuchungClient({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Titel
           </label>
           <input
@@ -285,13 +285,13 @@ export default function TerminBuchungClient({
             value={titel}
             onChange={(e) => setTitel(e.target.value)}
             placeholder="z. B. Absprache Mandat CLM-20260421-007"
-            className="w-full rounded-md border border-[#e4e7ef] px-3 py-2 text-sm"
+            className="w-full rounded-md border border-claimondo-border px-3 py-2 text-sm"
             required
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-gray-500">
+          <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
             Notiz (optional)
           </label>
           <textarea
@@ -299,7 +299,7 @@ export default function TerminBuchungClient({
             onChange={(e) => setBeschreibung(e.target.value)}
             rows={3}
             placeholder="Worum geht es? Stichworte reichen."
-            className="w-full rounded-md border border-[#e4e7ef] px-3 py-2 text-sm resize-none"
+            className="w-full rounded-md border border-claimondo-border px-3 py-2 text-sm resize-none"
           />
         </div>
 
@@ -324,24 +324,24 @@ export default function TerminBuchungClient({
         <button
           type="submit"
           disabled={!kannBuchen}
-          className="w-full px-4 py-2.5 rounded-lg bg-[#4573A2] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="w-full px-4 py-2.5 rounded-lg bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {pending ? 'Bucht …' : 'Termin verbindlich buchen'}
         </button>
-        <p className="text-[10px] text-gray-500 italic">
+        <p className="text-[10px] text-claimondo-ondo italic">
           Der Admin erhält eine Benachrichtigung + Google-Kalender-Einladung.
           Ihr bekommt ebenfalls eine Kalender-Einladung per Email.
         </p>
       </form>
 
       {/* EIGENE TERMINE */}
-      <div className="rounded-xl border border-[#e4e7ef] bg-white p-5 space-y-3">
+      <div className="rounded-xl border border-claimondo-border bg-white p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <Building2Icon className="w-4 h-4 text-[#4573A2]" />
-          <h2 className="text-sm font-semibold text-[#0D1B3E]">Eure kommenden Termine</h2>
+          <Building2Icon className="w-4 h-4 text-claimondo-ondo" />
+          <h2 className="text-sm font-semibold text-claimondo-navy">Eure kommenden Termine</h2>
         </div>
         {eigeneTermine.length === 0 && (
-          <p className="text-xs text-gray-500 italic">
+          <p className="text-xs text-claimondo-ondo italic">
             Noch keine Termine gebucht.
           </p>
         )}
@@ -358,19 +358,19 @@ export default function TerminBuchungClient({
             return (
               <div
                 key={t.id}
-                className="rounded-lg border border-[#e4e7ef] p-3 hover:border-[#4573A2] transition-colors"
+                className="rounded-lg border border-claimondo-border p-3 hover:border-claimondo-ondo transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-[11px] text-gray-500">
+                    <p className="text-[11px] text-claimondo-ondo">
                       {dateStr} · {timeStr}
                     </p>
-                    <p className="text-sm font-semibold text-[#0D1B3E] truncate">
+                    <p className="text-sm font-semibold text-claimondo-navy truncate">
                       {t.titel}
                     </p>
-                    <p className="text-[11px] text-gray-600 mt-0.5">
+                    <p className="text-[11px] text-claimondo-ondo mt-0.5">
                       mit {t.admin_name}{' '}
-                      <span className="text-gray-400">
+                      <span className="text-claimondo-ondo/70">
                         · {t.typ === 'video' ? 'Video' : 'Vor Ort'}
                       </span>
                     </p>
@@ -378,7 +378,7 @@ export default function TerminBuchungClient({
                   <button
                     type="button"
                     onClick={() => handleCancel(t.id)}
-                    className="shrink-0 p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-700"
+                    className="shrink-0 p-1 rounded hover:bg-red-50 text-claimondo-ondo/70 hover:text-red-700"
                     aria-label="Absagen"
                     title="Termin absagen"
                   >
@@ -390,7 +390,7 @@ export default function TerminBuchungClient({
                     href={t.google_meet_link}
                     target="_blank"
                     rel="noopener"
-                    className="mt-2 inline-flex items-center gap-1 text-[11px] text-[#4573A2] hover:underline"
+                    className="mt-2 inline-flex items-center gap-1 text-[11px] text-claimondo-ondo hover:underline"
                   >
                     <VideoIcon className="w-3 h-3" />
                     Meet-Link öffnen
@@ -398,7 +398,7 @@ export default function TerminBuchungClient({
                   </a>
                 )}
                 {t.beschreibung && (
-                  <p className="mt-2 text-[11px] text-gray-500 italic line-clamp-2">
+                  <p className="mt-2 text-[11px] text-claimondo-ondo italic line-clamp-2">
                     {t.beschreibung}
                   </p>
                 )}

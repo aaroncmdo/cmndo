@@ -82,12 +82,12 @@ export default async function FaqBotAnalyseCard({ fallId }: { fallId: string }) 
             <h3 className="text-sm font-semibold text-[color:var(--brand-text,#0D1B3E)]">
               Letzte Bot-Chat-Analyse
             </h3>
-            <p className="text-[11px] text-gray-500">
+            <p className="text-[11px] text-claimondo-ondo">
               Der Kunde hat mit dem FAQ-Bot gesprochen — hier ist die Zusammenfassung.
             </p>
           </div>
         </div>
-        <span className="flex items-center gap-1 text-[11px] text-gray-500">
+        <span className="flex items-center gap-1 text-[11px] text-claimondo-ondo">
           <ClockIcon className="w-3.5 h-3.5" />
           {formatVorZeit(analyse.generated_at)}
         </span>
@@ -102,7 +102,7 @@ export default async function FaqBotAnalyseCard({ fallId }: { fallId: string }) 
         </h4>
       )}
 
-      <p className="text-sm text-gray-700 leading-relaxed mb-3">
+      <p className="text-sm text-claimondo-navy leading-relaxed mb-3">
         {analyse.zusammenfassung}
       </p>
 
@@ -119,7 +119,7 @@ export default async function FaqBotAnalyseCard({ fallId }: { fallId: string }) 
               className="w-3.5 h-3.5"
               style={{ color: 'var(--brand-primary, #4573A2)' }}
             />
-            <span className="text-[11px] uppercase tracking-wider font-medium text-gray-600">
+            <span className="text-[11px] uppercase tracking-wider font-medium text-claimondo-ondo">
               Empfohlene nächste Schritte
             </span>
           </div>
@@ -127,8 +127,8 @@ export default async function FaqBotAnalyseCard({ fallId }: { fallId: string }) 
         </div>
       )}
 
-      <footer className="mt-3 pt-2 border-t border-gray-200/50 flex items-center justify-end">
-        <span className="text-[10px] text-gray-400">{analyse.ai_modell}</span>
+      <footer className="mt-3 pt-2 border-t border-claimondo-border/50 flex items-center justify-end">
+        <span className="text-[10px] text-claimondo-ondo/70">{analyse.ai_modell}</span>
       </footer>
     </section>
   )

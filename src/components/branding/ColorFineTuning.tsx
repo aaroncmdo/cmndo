@@ -31,20 +31,20 @@ export default function ColorFineTuning({ theme, onChange }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden">
+    <div className="border border-claimondo-border rounded-xl overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 flex items-center justify-between text-left"
+        className="w-full px-4 py-3 bg-[#f8f9fb] hover:bg-claimondo-border flex items-center justify-between text-left"
       >
         <div>
-          <span className="text-sm font-medium text-gray-900">Feintuning</span>
-          <p className="text-[11px] text-gray-500 mt-0.5">Optional — Farben manuell anpassen</p>
+          <span className="text-sm font-medium text-claimondo-navy">Feintuning</span>
+          <p className="text-[11px] text-claimondo-ondo mt-0.5">Optional — Farben manuell anpassen</p>
         </div>
         {open ? (
-          <ChevronUpIcon className="w-4 h-4 text-gray-500" />
+          <ChevronUpIcon className="w-4 h-4 text-claimondo-ondo" />
         ) : (
-          <ChevronDownIcon className="w-4 h-4 text-gray-500" />
+          <ChevronDownIcon className="w-4 h-4 text-claimondo-ondo" />
         )}
       </button>
       {open && (
@@ -52,14 +52,14 @@ export default function ColorFineTuning({ theme, onChange }: Props) {
           {ROWS.map(row => (
             <div key={row.key} className="flex items-center gap-3">
               <label className="flex-1">
-                <span className="text-sm text-gray-700 font-medium">{row.label}</span>
-                <span className="text-[11px] text-gray-500 ml-2">{row.hint}</span>
+                <span className="text-sm text-claimondo-navy font-medium">{row.label}</span>
+                <span className="text-[11px] text-claimondo-ondo ml-2">{row.hint}</span>
               </label>
               <input
                 type="color"
                 value={theme[row.key]}
                 onChange={e => onChange(row.key, e.target.value.toUpperCase())}
-                className="w-10 h-9 rounded border border-gray-200 cursor-pointer"
+                className="w-10 h-9 rounded border border-claimondo-border cursor-pointer"
                 aria-label={`${row.label} wählen`}
               />
               <input
@@ -69,7 +69,7 @@ export default function ColorFineTuning({ theme, onChange }: Props) {
                   const v = e.target.value.trim()
                   if (/^#[0-9A-Fa-f]{6}$/.test(v)) onChange(row.key, v.toUpperCase())
                 }}
-                className="w-24 px-2 py-1.5 text-xs font-mono border border-gray-200 rounded"
+                className="w-24 px-2 py-1.5 text-xs font-mono border border-claimondo-border rounded"
                 maxLength={7}
               />
             </div>

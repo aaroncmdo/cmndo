@@ -16,6 +16,8 @@ import { PasswordInput } from '@/components/ui/PasswordInput'
 import { useFlowStore } from '@/lib/flow/flow-store'
 import { schritt4Schema, type Schritt4FormValues } from '@/lib/flow/schemas/schritt4'
 import { signupAndConvertLead } from '@/lib/actions/signup-and-convert'
+// AAR-841 Frontend: Kanzlei-Frage als Modal direkt nach erfolgreicher Konversion
+import { KanzleiWunschModal } from '@/components/shared/claims'
 
 // AAR-476 C10: Signup + optionale zweistufige Makler-Consent-Box.
 //
@@ -59,6 +61,11 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
     formState: { errors },
   } = form
 
+  // AAR-841: Modal nach Convert-Success vor Redirect. claimId wird aus
+  // signupAndConvertLead-Return geholt; Redirect läuft über onClose.
+  const [kanzleiModalOpen, setKanzleiModalOpen] = useState(false)
+  const [convertedClaimId, setConvertedClaimId] = useState<string | null>(null)
+
   async function onSubmit(values: Schritt4FormValues) {
     setSubmitting(true)
     try {
@@ -82,11 +89,22 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
         return
       }
       resetFlow()
-      toast.success('Account erstellt. Leite weiter …')
-      router.push('/kunde')
+      toast.success('Account erstellt.')
+      // AAR-841: Wenn claimId verfügbar, Modal öffnen — sonst direkt redirect
+      if (result.claimId) {
+        setConvertedClaimId(result.claimId)
+        setKanzleiModalOpen(true)
+      } else {
+        router.push('/kunde')
+      }
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function handleKanzleiModalClose() {
+    setKanzleiModalOpen(false)
+    router.push('/kunde')
   }
 
   const showMaklerBox = lead.hasPromotionCode && !!lead.maklerFirma
@@ -116,7 +134,7 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           aria-invalid={!!errors.password}
         />
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-claimondo-ondo">
           Mindestens 8 Zeichen, eine Ziffer, einen Buchstaben.
         </p>
         {errors.password && (
@@ -141,14 +159,14 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
       </div>
 
       {showMaklerBox && (
-        <div className="rounded-xl border border-slate-200 bg-[#f8f9fb] p-4">
+        <div className="rounded-xl border border-claimondo-border bg-[#f8f9fb] p-4">
           <div className="flex items-start gap-3">
             <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#4573A2]" />
             <div className="flex-1">
               <div className="font-semibold text-[#0D1B3E]">
                 Sie wurden von {lead.maklerFirma} zu uns vermittelt.
               </div>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-claimondo-ondo">
                 {lead.maklerFirma} darf Sie zu diesem Schadenfall kontaktieren
                 und den Bearbeitungsstand einsehen. Wählen Sie den Umfang:
               </p>
@@ -157,10 +175,10 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
                 <label className="flex items-start gap-2">
                   <Checkbox checked disabled className="mt-0.5" />
                   <div>
-                    <div className="text-sm font-medium text-slate-800">
+                    <div className="text-sm font-medium text-claimondo-navy">
                       Minimal (empfohlen)
                     </div>
-                    <div className="text-xs text-slate-600">
+                    <div className="text-xs text-claimondo-ondo">
                       {lead.maklerFirma} sieht nur Ihren Fall-Status (offen /
                       in Bearbeitung / abgeschlossen). Keine Detaildaten.
                     </div>
@@ -178,10 +196,10 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
                         className="mt-0.5"
                       />
                       <div>
-                        <div className="text-sm font-medium text-slate-800">
+                        <div className="text-sm font-medium text-claimondo-navy">
                           Vollzugriff (optional)
                         </div>
-                        <div className="text-xs text-slate-600">
+                        <div className="text-xs text-claimondo-ondo">
                           Zusätzlich darf {lead.maklerFirma} die Fall-Detaildaten
                           einsehen (Fahrzeug, Gegner, Schaden­beschreibung,
                           Korrespondenz). Widerrufbar jederzeit im Kunden-Portal.
@@ -208,7 +226,7 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
                 className="mt-0.5"
                 aria-invalid={!!errors.agb_accepted}
               />
-              <span className="text-sm text-slate-700">
+              <span className="text-sm text-claimondo-navy">
                 Ich akzeptiere die{' '}
                 <Link
                   href="/agb"
@@ -237,7 +255,7 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
                 className="mt-0.5"
                 aria-invalid={!!errors.datenschutz_accepted}
               />
-              <span className="text-sm text-slate-700">
+              <span className="text-sm text-claimondo-navy">
                 Ich akzeptiere die{' '}
                 <Link
                   href="/datenschutz"
@@ -272,6 +290,16 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
           'Account erstellen & Fall absenden'
         )}
       </Button>
+
+      {/* AAR-841: Kanzlei-Frage als Modal direkt nach Convert-Success */}
+      {convertedClaimId && (
+        <KanzleiWunschModal
+          open={kanzleiModalOpen}
+          claimId={convertedClaimId}
+          gefragtInPhase="lead_konvertierung"
+          onClose={handleKanzleiModalClose}
+        />
+      )}
     </form>
   )
 }

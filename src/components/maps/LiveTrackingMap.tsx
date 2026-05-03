@@ -15,7 +15,7 @@ function loadMaps(apiKey: string): Promise<void> {
       return
     }
     const s = document.createElement('script')
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&v=weekly`
     s.async = true; s.defer = true
     s.onload = () => resolve()
     s.onerror = () => reject(new Error('Maps load failed'))
@@ -108,5 +108,5 @@ export default function LiveTrackingMap({
     mapRef.current.fitBounds(bounds, 60)
   }, [ready, svPosition, terminLat, terminLng])
 
-  return <div ref={containerRef} className="w-full h-full bg-gray-100" />
+  return <div ref={containerRef} className="w-full h-full bg-[#f8f9fb]" />
 }

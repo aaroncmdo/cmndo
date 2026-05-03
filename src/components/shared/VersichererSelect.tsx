@@ -51,7 +51,7 @@ export function VersichererSelect({
   }, [open])
 
   const borderClass = error
-    ? 'border-red-500 focus-within:border-red-500'
+    ? 'border-rose-500 focus-within:border-rose-500'
     : 'border-claimondo-border focus-within:border-claimondo-ondo'
 
   return (
@@ -62,15 +62,15 @@ export function VersichererSelect({
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => setOpen((v) => !v)}
-        className={`flex w-full items-center justify-between rounded-lg border bg-white px-3 py-2 text-left transition hover:bg-slate-50 ${borderClass}`}
+        className={`flex w-full items-center justify-between rounded-lg border bg-white px-3 py-2 text-left transition hover:bg-claimondo-bg ${borderClass}`}
       >
-        <span className={selected ? 'text-claimondo-navy' : 'text-slate-400'}>
+        <span className={selected ? 'text-claimondo-navy' : 'text-claimondo-ondo/70'}>
           {selected?.name ?? placeholder}
         </span>
         <span className="flex items-center gap-1">
           {selected ? (
             <X
-              className="h-4 w-4 cursor-pointer text-slate-400 hover:text-red-500"
+              className="h-4 w-4 cursor-pointer text-claimondo-ondo/70 hover:text-rose-500"
               role="button"
               aria-label="Auswahl entfernen"
               onClick={(e) => {
@@ -80,12 +80,12 @@ export function VersichererSelect({
               }}
             />
           ) : null}
-          <ChevronDown className="h-4 w-4 text-slate-400" />
+          <ChevronDown className="h-4 w-4 text-claimondo-ondo/70" />
         </span>
       </button>
 
       {open ? (
-        <div className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-claimondo-border bg-white shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-ios-md border border-claimondo-border glass-light shadow-ios-lg">
           <div className="border-b border-claimondo-border px-3 py-2">
             <input
               autoFocus
@@ -93,12 +93,12 @@ export function VersichererSelect({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Versicherung suchen …"
-              className="w-full bg-transparent text-sm text-claimondo-navy outline-none placeholder:text-slate-400"
+              className="w-full bg-transparent text-sm text-claimondo-navy outline-none placeholder:text-claimondo-ondo/70"
             />
           </div>
           <ul role="listbox" className="max-h-64 overflow-y-auto py-1">
             {filtered.length === 0 ? (
-              <li className="px-3 py-2 text-sm text-slate-500">Nicht gefunden</li>
+              <li className="px-3 py-2 text-sm text-claimondo-ondo">Nicht gefunden</li>
             ) : (
               filtered.map((v) => {
                 const active = v.id === value

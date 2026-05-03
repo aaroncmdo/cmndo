@@ -11,6 +11,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { createTask, updateTaskStatus, deleteTask } from './actions'
+import TaskReassignDropdown, { type ReassignCandidate } from '@/components/shared/TaskReassignDropdown'
+import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
 
 type Task = {
   id: string
@@ -53,7 +56,7 @@ const TYP_LABEL: Record<string, string> = {
 }
 
 const TYP_COLOR: Record<string, string> = {
-  dispatch: 'bg-blue-50 text-blue-600',
+  dispatch: 'bg-[#f8f9fb] text-claimondo-ondo',
   filmcheck: 'bg-yellow-50 text-yellow-600',
   'kanzlei-anschlussschreiben': 'bg-green-50 text-green-600',
   'kanzlei-nachfrage': 'bg-emerald-50 text-emerald-600',
@@ -154,6 +157,7 @@ export default function KanbanBoard({
   leadMap,
   svMap,
   admins,
+  reassignCandidates = [],
 }: {
   tasks: Task[]
   faelle: Fall[]
@@ -162,6 +166,7 @@ export default function KanbanBoard({
   leadMap: Record<string, string>
   svMap: Record<string, string>
   admins: Admin[]
+  reassignCandidates?: ReassignCandidate[]
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -257,35 +262,34 @@ export default function KanbanBoard({
   return (
     <div className="h-full overflow-y-auto px-4 py-8">
       <div className="max-w-[1400px] mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Tasks</h1>
-            <p className="text-gray-500 text-sm mt-0.5">
-              {localTasks.length} von {tasks.length} Aufgaben
-              {tasks.length !== linked.length && (
-                <span className="ml-1 text-[10px] text-gray-400">
-                  ({tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)
-                </span>
-              )}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={showAutoResolved}
-                onChange={(e) => setShowAutoResolved(e.target.checked)}
-                className="rounded border-gray-300"
-              />
-              Auto-erledigte anzeigen
-            </label>
-            <button
-              onClick={() => setDialogOpen(true)}
-              className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
-            >
-              + Neuer Task
-            </button>
-          </div>
+        <div className="mb-6">
+          <PageHeader
+            title="Tasks"
+            description={`${localTasks.length} von ${tasks.length} Aufgaben${
+              tasks.length !== linked.length
+                ? ` (${tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)`
+                : ''
+            }`}
+            actions={
+              <>
+                <label className="flex items-center gap-2 text-xs text-claimondo-ondo cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={showAutoResolved}
+                    onChange={(e) => setShowAutoResolved(e.target.checked)}
+                    className="rounded border-claimondo-border"
+                  />
+                  Auto-erledigte anzeigen
+                </label>
+                <button
+                  onClick={() => setDialogOpen(true)}
+                  className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
+                >
+                  + Neuer Task
+                </button>
+              </>
+            }
+          />
         </div>
 
         {error && (
@@ -302,11 +306,11 @@ export default function KanbanBoard({
                 <div key={col.key} className="min-w-0">
                   <div className="flex items-center gap-2 mb-3 px-1">
                     <span
-                      className={`text-sm font-semibold ${COLUMN_HEADER_COLOR[col.key] ?? 'text-gray-500'}`}
+                      className={`text-sm font-semibold ${COLUMN_HEADER_COLOR[col.key] ?? 'text-claimondo-ondo'}`}
                     >
                       {col.label}
                     </span>
-                    <span className="text-gray-400 text-xs font-medium bg-gray-100 px-2 py-0.5 rounded-full">
+                    <span className="text-claimondo-ondo/70 text-xs font-medium bg-[#f8f9fb] px-2 py-0.5 rounded-full">
                       {colTasks.length}
                     </span>
                   </div>
@@ -321,8 +325,8 @@ export default function KanbanBoard({
                         }`}
                       >
                         {colTasks.length === 0 && (
-                          <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center">
-                            <p className="text-gray-400 text-xs">Keine Tasks</p>
+                          <div className="rounded-xl border border-dashed border-claimondo-border p-6 text-center">
+                            <p className="text-claimondo-ondo/70 text-xs">Keine Tasks</p>
                           </div>
                         )}
                         {colTasks.map((task, i) => (
@@ -339,6 +343,7 @@ export default function KanbanBoard({
                                   link={resolveObjectLink(task, fallMap, leadMap, svMap)!}
                                   adminMap={adminMap}
                                   onDelete={handleDelete}
+                                  reassignCandidates={reassignCandidates}
                                 />
                               </div>
                             )}
@@ -377,11 +382,13 @@ function TaskCard({
   link,
   adminMap,
   onDelete,
+  reassignCandidates,
 }: {
   task: Task
   link: { href: string; label: string; kind: 'Fall' | 'Lead' | 'SV' }
   adminMap: Record<string, string>
   onDelete: (taskId: string) => void
+  reassignCandidates: ReassignCandidate[]
 }) {
   const overdue = isOverdue(task.faellig_am) && task.status !== 'erledigt'
   const obsoleteHint = task.status === 'offen' && task.auto_resolved_am
@@ -390,20 +397,20 @@ function TaskCard({
   return (
     <div
       className={`bg-white rounded-xl p-4 border transition-colors cursor-grab active:cursor-grabbing ${
-        overdue ? 'border-red-300' : isAutoResolved ? 'border-gray-100' : 'border-gray-200'
+        overdue ? 'border-red-300' : isAutoResolved ? 'border-claimondo-border' : 'border-claimondo-border'
       }`}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span
           className={`px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap ${
-            TYP_COLOR[task.typ] ?? 'bg-gray-100 text-gray-700'
+            TYP_COLOR[task.typ] ?? 'bg-[#f8f9fb] text-claimondo-navy'
           }`}
         >
           {TYP_LABEL[task.typ] ?? task.typ}
         </span>
         <button
           onClick={() => onDelete(task.id)}
-          className="text-gray-300 hover:text-red-500 transition-colors p-0.5 -mr-1 -mt-0.5"
+          className="text-claimondo-ondo/50 hover:text-red-500 transition-colors p-0.5 -mr-1 -mt-0.5"
           title="Löschen"
         >
           <svg
@@ -419,7 +426,7 @@ function TaskCard({
         </button>
       </div>
 
-      <p className="text-gray-800 text-sm font-medium leading-snug mb-2">{task.titel}</p>
+      <p className="text-claimondo-navy text-sm font-medium leading-snug mb-2">{task.titel}</p>
 
       {obsoleteHint && (
         <div className="mb-2 px-2 py-1.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] leading-tight">
@@ -431,7 +438,7 @@ function TaskCard({
 
       {isAutoResolved && (
         <div
-          className="mb-2 inline-flex items-center gap-1 text-[10px] text-gray-400"
+          className="mb-2 inline-flex items-center gap-1 text-[10px] text-claimondo-ondo/70"
           title={`Automatisch erledigt am ${task.auto_resolved_am ? new Date(task.auto_resolved_am).toLocaleString('de-DE') : ''} weil ${task.auto_resolved_grund ?? ''}`}
         >
           <svg
@@ -474,7 +481,7 @@ function TaskCard({
             d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
           />
         </svg>
-        <span className="text-[10px] uppercase tracking-wider text-gray-400">{link.kind}:</span>
+        <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">{link.kind}:</span>
         <span className="text-xs font-medium truncate">{link.label}</span>
       </Link>
 
@@ -482,7 +489,7 @@ function TaskCard({
         <div className="flex items-center gap-3">
           {task.faellig_am && (
             <span
-              className={`flex items-center gap-1 ${overdue ? 'text-red-600' : 'text-gray-500'}`}
+              className={`flex items-center gap-1 ${overdue ? 'text-red-600' : 'text-claimondo-ondo'}`}
             >
               <svg
                 width="12"
@@ -502,12 +509,30 @@ function TaskCard({
             </span>
           )}
           {task.zugewiesen_an && (
-            <span className="text-gray-400 truncate max-w-24">
+            <span className="text-claimondo-ondo/70 truncate max-w-24">
               {adminMap[task.zugewiesen_an] ?? '—'}
             </span>
           )}
         </div>
       </div>
+
+      {/* AAR-723: Reassign-Dropdown — Admin kann den Task hier direkt an
+          einen Kollegen weiterleiten. onClick/onMouseDown stoppen
+          propagation, damit das Drag-Handle nicht auslöst. */}
+      {reassignCandidates.length > 0 && task.status !== 'erledigt' && (
+        <div
+          onClick={e => e.stopPropagation()}
+          onMouseDown={e => e.stopPropagation()}
+          className="mt-2 pt-2 border-t border-claimondo-border"
+        >
+          <TaskReassignDropdown
+            taskId={task.id}
+            currentAssigneeId={task.zugewiesen_an}
+            candidates={reassignCandidates}
+            compact
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -540,18 +565,13 @@ function NewTaskDialog({
   }
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black/60 z-50" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div
-          className="bg-white border border-gray-200 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-gray-900 font-semibold">Neuer Task</h2>
+    <Modal open onClose={onClose} noPadding hideCloseButton maxWidth={448} ariaLabel="Neuer Task">
+      <div className="max-h-[90vh] overflow-y-auto">
+          <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
+            <h2 className="text-claimondo-navy font-semibold">Neuer Task</h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
+              className="text-claimondo-ondo hover:text-claimondo-navy transition-colors"
             >
               <svg
                 width="20"
@@ -572,11 +592,11 @@ function NewTaskDialog({
 
           <form onSubmit={handleSubmit} className="p-5 space-y-4">
             <div>
-              <label className="block text-gray-500 text-sm mb-1.5">Typ</label>
+              <label className="block text-claimondo-ondo text-sm mb-1.5">Typ</label>
               <select
                 name="typ"
                 required
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Bitte wählen...</option>
                 {TASK_TYPES.map((t) => (
@@ -588,11 +608,11 @@ function NewTaskDialog({
             </div>
 
             <div>
-              <label className="block text-gray-500 text-sm mb-1.5">Fall</label>
+              <label className="block text-claimondo-ondo text-sm mb-1.5">Fall</label>
               <select
                 name="fall_id"
                 required
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Fall auswählen...</option>
                 {faelle.map((f) => (
@@ -604,44 +624,44 @@ function NewTaskDialog({
             </div>
 
             <div>
-              <label className="block text-gray-500 text-sm mb-1.5">Titel</label>
+              <label className="block text-claimondo-ondo text-sm mb-1.5">Titel</label>
               <input
                 type="text"
                 name="titel"
                 required
                 placeholder="Aufgabe beschreiben..."
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
 
             <div>
-              <label className="block text-gray-500 text-sm mb-1.5">
+              <label className="block text-claimondo-ondo text-sm mb-1.5">
                 Beschreibung (optional)
               </label>
               <textarea
                 name="beschreibung"
                 rows={3}
                 placeholder="Details..."
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-gray-500 text-sm mb-1.5">Fällig am (optional)</label>
+              <label className="block text-claimondo-ondo text-sm mb-1.5">Fällig am (optional)</label>
               <input
                 type="date"
                 name="faellig_am"
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
 
             <div>
-              <label className="block text-gray-500 text-sm mb-1.5">
+              <label className="block text-claimondo-ondo text-sm mb-1.5">
                 Zugewiesen an (optional)
               </label>
               <select
                 name="zugewiesen_an"
-                className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Nicht zugewiesen</option>
                 {admins.map((a) => (
@@ -662,8 +682,7 @@ function NewTaskDialog({
               {submitting ? 'Wird erstellt...' : 'Task erstellen'}
             </button>
           </form>
-        </div>
       </div>
-    </>
+    </Modal>
   )
 }

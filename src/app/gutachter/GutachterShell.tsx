@@ -12,6 +12,7 @@ import {
   ReceiptIcon,
   BarChart3Icon,
   UserIcon,
+  SettingsIcon,
   LogOutIcon,
   UsersIcon,
   TrophyIcon,
@@ -22,12 +23,18 @@ import {
   FileSignatureIcon,
   ShieldCheckIcon,
 } from 'lucide-react'
-import NotificationBell from '@/app/admin/_components/NotificationBell'
-import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
+import UpdatesNav from '@/components/shared/updates'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { SupportButton } from '@/components/support/SupportButton'
+import TasksPill from '@/components/shared/TasksPill'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
+import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
+import SVSpotlight from './_components/SVSpotlight'
+import WeatherBanner from '@/components/shared/WeatherBanner'
+import { toInitials } from '@/components/shared/KundeAvatar'
+// CMM-36: Geo-Tracking startet beim App-Öffnen
+import { useGeoPosition } from '@/hooks/useGeoPosition'
 
 // AAR-222: Sidebar-Refactor von 18 flachen Items auf 10 in 4 Sektionen.
 // Removed Items (Dashboard, Mitteilungen, Tasks, Stellungnahmen, Termine,
@@ -40,7 +47,7 @@ type NavItem = {
   label: string
   icon: typeof MapPinIcon
   // badge: optional Render-Funktion die einen Counter zurückgibt
-  badgeKey?: 'auftraege' | 'posteingang'
+  badgeKey?: 'auftraege' | 'posteingang' | 'neueTermine'
 }
 
 type NavSection = {
@@ -55,18 +62,13 @@ const NAV_SECTIONS_BASE: NavSection[] = [
       { href: '/gutachter/heute', label: 'Heute', icon: MapPinIcon },
       { href: '/gutachter/auftraege', label: 'Aufträge', icon: ClipboardListIcon, badgeKey: 'auftraege' },
       { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
-      { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon },
+      { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon, badgeKey: 'neueTermine' },
     ],
   },
-  {
-    title: 'Kommunikation',
-    items: [
-      // AAR-370: Posteingang vereint System-Mitteilungen + Fall-Chat-Nachrichten
-      // in einer Page mit Tabs. Alte Routen /mitteilungen und /nachrichten
-      // redirecten hierher mit passendem ?tab=-Parameter.
-      { href: '/gutachter/posteingang', label: 'Posteingang', icon: InboxIcon, badgeKey: 'posteingang' },
-    ],
-  },
+  // AAR-727: Kommunikations-Sektion entfällt — der GlobalPosteingangFab
+  // (unten rechts) deckt Fall-Chat-Nachrichten global ab. System-Mitteilungen
+  // laufen über UpdatesNav. /gutachter/posteingang bleibt als Route erhalten
+  // (Legacy-Bookmarks), taucht aber nicht mehr in der Sidebar auf.
   {
     title: 'Finanzen',
     items: [
@@ -78,7 +80,8 @@ const NAV_SECTIONS_BASE: NavSection[] = [
   {
     title: 'Verwaltung',
     items: [
-      { href: '/gutachter/gebiet', label: 'Mein Gebiet', icon: MapIcon },
+      // CMM-17: 'Mein Gebiet' aus Nav entfernt — Aaron-Spec, kommt später als
+      // eigenes Feature-Ticket zurück.
       { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
       { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
       { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
@@ -86,16 +89,11 @@ const NAV_SECTIONS_BASE: NavSection[] = [
   },
 ]
 
-type HourW = { hour: number; temp: number; code: number }
-type DailyW = { date: string; tempMax: number; tempMin: number; code: number }
-
-function wEmoji(c: number) { return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️' }
-function wGrad(c: number) { return c >= 61 ? 'from-gray-700 to-gray-500' : c >= 45 ? 'from-gray-500 to-gray-400' : c <= 3 ? 'from-blue-500 to-sky-400' : 'from-gray-400 to-gray-300' }
-function wTip(c: number, t: number) { return c >= 95 ? 'Vorsicht, Gewitter!' : c >= 71 ? 'Straßen können glatt sein!' : c >= 61 ? 'Regenjacke einpacken!' : t > 30 ? 'Wasser mitnehmen!' : t < 5 ? 'Warm anziehen!' : 'Perfektes Gutachter-Wetter!' }
-function wLabel(c: number) { return c === 0 ? 'Sonnig' : c <= 3 ? 'Bewölkt' : c <= 48 ? 'Nebel' : c <= 67 ? 'Regen' : c <= 77 ? 'Schnee' : c <= 82 ? 'Schauer' : 'Gewitter' }
+// AAR-809: Wetter-Logik raus in components/shared/WeatherBanner.
 
 export default function GutachterShell({
   displayName,
+  userId,
   children,
   logoUrl,
   brandTheme,
@@ -105,8 +103,10 @@ export default function GutachterShell({
   showTeam,
   showCommunity,
   showVerifizierung,
+  svId,
 }: {
   displayName: string
+  userId: string
   children: React.ReactNode
   logoUrl?: string | null
   // AAR-220: Vollständiges Theme oder null (= Claimondo-Default).
@@ -121,13 +121,18 @@ export default function GutachterShell({
   showCommunity?: boolean
   // AAR-359 W5: conditional Verifizierungs-Link solange Verifizierung offen.
   showVerifizierung?: boolean
+  // CMM-36: SV-ID für Geo-Tracking
+  svId?: string | null
 }) {
   const pathname = usePathname()
+  // Feldmodus übernimmt den vollen Viewport — Sidebar + FAB ausblenden damit
+  // sie nicht über der Mapbox-Karte rendern (Sidebar hat lg:z-[1100] > z-50).
+  const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  // CMM-36: Geo-Tracking beim App-Öffnen starten
+  useGeoPosition(svId ?? null)
   // AAR-245: Verwaltung nicht mehr collapsible — alle Sektionen flach +
   // direkt sichtbar, konsistent zu Tagesgeschäft/Kommunikation/Finanzen.
-  const [weather, setWeather] = useState<{ temp: number; code: number; hourly: Record<string, HourW[]>; daily: DailyW[] } | null>(null)
-
   // AAR-222: Sektions-basierte Nav. Team/Community werden conditional in
   // Verwaltung eingehängt.
   const NAV_SECTIONS: NavSection[] = NAV_SECTIONS_BASE.map(sec => {
@@ -152,6 +157,27 @@ export default function GutachterShell({
   // der Shell zur Verfügung ohne dass einzelne Consumer das Theme re-importieren.
   const themeVars = generateCssVars(theme, 'full')
 
+  // CMM-32 P2 / AAR-864: --app-sidebar-width = Sidebar-Breite + lg-Padding
+  // (256px Sidebar + 16px pl-4 = 272px). Damit startet ein portal-rendered
+  // Modal (Modal.web.tsx) bündig am inneren Wrapper-Rand und überdeckt nur
+  // den Content-Bereich rechts. Auf Mobile (< lg) ist die Sidebar weg → 0.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mql = window.matchMedia('(min-width: 1024px)')
+    const apply = () => {
+      document.documentElement.style.setProperty(
+        '--app-sidebar-width',
+        mql.matches ? '272px' : '0px',
+      )
+    }
+    apply()
+    mql.addEventListener('change', apply)
+    return () => {
+      mql.removeEventListener('change', apply)
+      document.documentElement.style.removeProperty('--app-sidebar-width')
+    }
+  }, [])
+
   // AAR-220 Fix 5: Einmalige 2s-Transition nach Logo-Upload.
   const [brandTransitioning, setBrandTransitioning] = useState(false)
   useEffect(() => {
@@ -168,39 +194,16 @@ export default function GutachterShell({
     ? { transition: 'background-color 2s ease, color 2s ease, border-color 2s ease' }
     : {}
 
-  // Fetch 7-day weather
-  useEffect(() => {
-    if (!standortLat || !standortLng) return
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${standortLat}&longitude=${standortLng}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Berlin&forecast_days=7`)
-      .then(r => r.json()).then(d => {
-        if (!d.current) return
-        // Group hourly data by date
-        const hourlyByDate: Record<string, HourW[]> = {}
-        for (let i = 0; i < (d.hourly?.time ?? []).length; i++) {
-          const t = d.hourly.time[i]
-          const dateKey = t.split('T')[0]
-          const h: HourW = { hour: new Date(t).getHours(), temp: Math.round(d.hourly.temperature_2m[i]), code: d.hourly.weathercode[i] }
-          if (!hourlyByDate[dateKey]) hourlyByDate[dateKey] = []
-          hourlyByDate[dateKey].push(h)
-        }
-        // Daily data
-        const daily: DailyW[] = (d.daily?.time ?? []).map((t: string, i: number) => ({
-          date: t,
-          tempMax: Math.round(d.daily.temperature_2m_max[i]),
-          tempMin: Math.round(d.daily.temperature_2m_min[i]),
-          code: d.daily.weathercode[i],
-        }))
-        setWeather({ temp: Math.round(d.current.temperature_2m), code: d.current.weathercode, hourly: hourlyByDate, daily })
-      }).catch(() => {})
-  }, [standortLat, standortLng])
+  // AAR-809: Wetter-Fetch + Render → components/shared/WeatherBanner
 
   // AAR-370: Badge-Counter für Sidebar-Items.
   // - auftraege: Anzahl Fälle mit status='sv-zugewiesen' (noch nicht terminiert)
   // - posteingang: ungelesene gutachter_mitteilungen + ungelesene nachrichten
   //   gemeinsam als aggregierter Counter (Tabs Mitteilungen + Nachrichten).
-  const [badgeCounts, setBadgeCounts] = useState<{ auftraege: number; posteingang: number }>({
+  const [badgeCounts, setBadgeCounts] = useState<{ auftraege: number; posteingang: number; neueTermine: number }>({
     auftraege: 0,
     posteingang: 0,
+    neueTermine: 0,
   })
 
   const loadBadges = useCallback(async () => {
@@ -217,13 +220,15 @@ export default function GutachterShell({
     const svIds = (svs ?? []).map(s => s.id)
     if (svIds.length === 0) return
 
-    // Aufträge: Fälle mit status='sv-zugewiesen' (neue Zuweisungen, noch nicht
-    // bestätigt/terminiert) — über alle SV-Rows des Users.
+    // CMM-32f: Aufträge-Badge zählt aktive Aufträge bis QC-Freigabe — auf
+    // auftraege-Sub-Entity migriert. Sobald gutachten_final_freigegeben=true
+    // wandert der Fall in /gutachter/faelle (Regulierungs-Phase).
     const { count: auftraegeCount } = await supabase
-      .from('faelle')
+      .from('auftraege')
       .select('id', { count: 'exact', head: true })
       .in('sv_id', svIds)
-      .eq('status', 'sv-zugewiesen')
+      .eq('gutachten_final_freigegeben', false)
+      .eq('status', 'termin')
 
     // Posteingang Tab 1: ungelesene System-Mitteilungen über alle SV-Rows.
     const { count: mitteilungenCount } = await supabase
@@ -239,9 +244,18 @@ export default function GutachterShell({
       .eq('empfaenger_id', user.id)
       .eq('gelesen', false)
 
+    // AAR-724: Neue / ungesehene Termine (gesehen_am IS NULL) über alle
+    // SV-Rows des Users.
+    const { count: neueTermineCount } = await supabase
+      .from('gutachter_termine')
+      .select('id', { count: 'exact', head: true })
+      .in('sv_id', svIds)
+      .is('gesehen_am', null)
+
     setBadgeCounts({
       auftraege: auftraegeCount ?? 0,
       posteingang: (mitteilungenCount ?? 0) + (nachrichtenCount ?? 0),
+      neueTermine: neueTermineCount ?? 0,
     })
   }, [])
 
@@ -250,9 +264,10 @@ export default function GutachterShell({
     const supabase = createClient()
     const channel = supabase
       .channel('gutachter-sidebar-badges')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'faelle' }, () => loadBadges())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'auftraege' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_mitteilungen' }, () => loadBadges())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_termine' }, () => loadBadges())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [loadBadges])
@@ -268,25 +283,21 @@ export default function GutachterShell({
     return pathname.startsWith(href)
   }
 
-  // Get today's hourly weather for the banner
-  const todayKey = new Date().toISOString().split('T')[0]
-  const todayHourly = weather?.hourly?.[todayKey]?.filter(h => h.hour >= 8 && h.hour <= 18) ?? []
-  const tomorrowDaily = weather?.daily?.[1] ?? null
-
   return (
-    <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-surface)' }}>
-      {/* Mobile overlay */}
-      {sidebarOpen && (
+    <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-primary, #0D1B3E)' }}>
+      {/* Mobile overlay — ausgeblendet im Feldmodus */}
+      {!isFeldmodus && sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* AAR-220: Sidebar nutzt Theme-Vars + sanfte 1.5s Transition für
           Background- und Border-Farben, damit Logo-Upload nicht ruckartig
-          umschaltet. */}
-      <aside
+          umschaltet. Im Feldmodus komplett ausgeblendet (Karte braucht
+          vollen Viewport, Sidebar hat lg:z-[1100] > FeldmodusLayout z-50). */}
+      {!isFeldmodus && <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
@@ -303,27 +314,31 @@ export default function GutachterShell({
           {/* AAR-220: Wenn Custom-Branding aktiv → Logo OHNE Filter auf
               weißem rounded-Container damit farbige Logos echt aussehen.
               Sonst (Default Claimondo) → brightness/invert für SVG-Logo. */}
-          {logoUrl ? (
-            <Link href="/gutachter">
-              {useBrand ? (
-                <span className="inline-flex items-center justify-center bg-white rounded-lg p-2 shadow-sm">
+          <div className="flex items-center gap-2">
+            {logoUrl ? (
+              <Link href="/gutachter">
+                {useBrand ? (
+                  <span className="inline-flex items-center justify-center bg-white rounded-lg p-2 shadow-sm">
+                    <img
+                      src={logoUrl}
+                      alt={firmenname ? `${firmenname} Logo` : 'Logo'}
+                      className="h-8 w-auto max-w-32 object-contain"
+                    />
+                  </span>
+                ) : (
                   <img
                     src={logoUrl}
-                    alt={firmenname ? `${firmenname} Logo` : 'Logo'}
-                    className="h-8 w-auto max-w-32 object-contain"
+                    alt="Claimondo Logo"
+                    className="h-8 w-auto max-w-36 object-contain brightness-0 invert"
                   />
-                </span>
-              ) : (
-                <img
-                  src={logoUrl}
-                  alt="Claimondo Logo"
-                  className="h-8 w-auto max-w-36 object-contain brightness-0 invert"
-                />
-              )}
-            </Link>
-          ) : (
-            <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></Link>
-          )}
+                )}
+              </Link>
+            ) : (
+              <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></Link>
+            )}
+            {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
+            <TasksPill userId={userId} href="/gutachter/tasks" />
+          </div>
           <p className="text-[#7BA3CC] text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
         </div>
 
@@ -384,7 +399,7 @@ export default function GutachterShell({
                 ...transitionStyle,
               }}
             >
-              {displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+              {toInitials(displayName)}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-semibold truncate">{displayName}</p>
@@ -392,21 +407,31 @@ export default function GutachterShell({
             </div>
             <UserIcon className="w-4 h-4 text-[#7BA3CC] group-hover:text-white shrink-0" />
           </Link>
+          {/* AAR-720: Einstellungen-Knopf unter Profil — Hub für Kalender,
+              später weitere Konfigurations-Bereiche (Benachrichtigungen,
+              2FA, etc.). */}
+          <Link
+            href="/gutachter/einstellungen"
+            onClick={() => setSidebarOpen(false)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-white hover:bg-white/5 transition-colors"
+          >
+            <SettingsIcon className="w-4 h-4" /> Einstellungen
+          </Link>
           <button onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-red-400 hover:bg-white/5 transition-colors">
             <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>
-      </aside>
+      </aside>}
 
       <div className="flex-1 flex flex-col min-w-0 h-screen">
         {/* Mobile Header (nur Hamburger + Logo, Glocke ist im Wetter-Banner) */}
         {/* AAR-211 + AAR-220: Header nutzt Theme-Sidebar-Bg (gleicher Look wie
             Sidebar-Hintergrund) mit sanfter 1.5s Color-Transition. */}
         <header
-          className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0"
+          className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0 glass-branded shadow-ios-md"
           style={{
-            backgroundColor: 'var(--brand-sidebar-bg)',
+            backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 82%, transparent)',
             color: 'var(--brand-text-on-primary)',
             ...transitionStyle,
           }}
@@ -439,45 +464,54 @@ export default function GutachterShell({
           )}
           {/* AAR-252: Glocke im Mobile-Header — war vorher nur im Wetter-
               Banner, das aber bei SVs ohne standort_lat nicht rendert. */}
-          <MitteilungszentralePanel variant="dark" />
+          <UpdatesNav variant="dark" />
         </header>
 
-        {/* Wetter-Banner (auf ALLEN Seiten sichtbar) */}
-        {weather && (
-          <div className={`flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white`} style={{ minHeight: 64 }}>
-            <div className="flex items-center gap-2.5 shrink-0">
-              <span className="text-3xl">{wEmoji(weather.code)}</span>
-              <div><p className="text-xl font-bold">{weather.temp}°C</p><p className="text-[10px] opacity-80">{wLabel(weather.code)}</p></div>
-            </div>
-            <div className="flex-1 flex items-center gap-1 overflow-x-auto min-w-0">
-              {todayHourly.filter((_, i) => i % 2 === 0).map(h => (
-                <div key={h.hour} className="text-center shrink-0 px-1"><p className="text-[9px] opacity-60">{String(h.hour).padStart(2, '0')}h</p><p className="text-[10px]">{wEmoji(h.code)}</p><p className="text-xs font-semibold">{h.temp}°</p></div>
-              ))}
-            </div>
-            {/* Mobile: Outbox + Glocke */}
-            <div className="shrink-0 sm:hidden flex items-center gap-2"><OutboxBadge /><MitteilungszentralePanel variant="dark" /></div>
-            {/* Desktop: Gute Fahrt + Glocke */}
-            <div className="shrink-0 text-right hidden sm:flex sm:items-center sm:gap-3">
-              <div>
-                <p className="text-sm font-medium">Gute Fahrt!</p>
-                <p className="text-[10px] opacity-80">{wTip(weather.code, weather.temp)}</p>
-                {tomorrowDaily && (
-                  <p className="text-[10px] opacity-70 mt-0.5">Morgen: {wEmoji(tomorrowDaily.code)} {tomorrowDaily.tempMax}°/{tomorrowDaily.tempMin}° {wLabel(tomorrowDaily.code)}</p>
-                )}
-              </div>
-              <OutboxBadge />
-              <MitteilungszentralePanel variant="dark" />
-            </div>
-          </div>
-        )}
+        {/* AAR-864 Polish: beide Wrapper (Wetter + Content) öffnen sich nach
+            rechts (rounded-r-none, kein right-padding) und schließen links
+            bündig zur Sidebar mit gleichem Abstand ab (pl-2 sm:pl-3 lg:pl-4
+            + rounded-l-2xl). Der navy-Hintergrund des Outer-Containers zieht
+            sich rechts durch. */}
+        <div className="pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4">
+          <WeatherBanner
+            standortLat={standortLat ?? null}
+            standortLng={standortLng ?? null}
+            trailingSlot={
+              <>
+                <OutboxBadge />
+                <UpdatesNav variant="dark" />
+              </>
+            }
+          />
+        </div>
 
-        {/* AAR-457: overflow-y-auto (statt overflow-hidden) — sonst wird
-            alles unterhalb des Viewports auf Seiten ohne eigenen Scroll-
-            Container abgeschnitten (zB /gutachter/profil/branding). Map-
-            basierte Seiten (Heute/Gebiet) setzen inner-Container auf
-            absolute inset-0 und sind nicht betroffen. */}
-        <main id="main-content" role="main" className="flex-1 overflow-y-auto p-2 sm:p-3 lg:p-4">{children}</main>
+        <div className="flex-1 pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4 overflow-hidden">
+          <main
+            id="main-content"
+            role="main"
+            className="h-full overflow-y-auto rounded-l-2xl rounded-r-none bg-[#f8f9fb] shadow-sm p-2 sm:p-3 lg:p-4"
+          >
+            {children}
+          </main>
+        </div>
       </div>
+      {/* AAR-864: Portal-Root für Modals im SV-Portal. position:fixed mit
+          left=256px (Sidebar-Breite) damit der Backdrop nur den Content-
+          Bereich überdeckt und die Sidebar nie einschließt. Modals
+          portalieren hierhin (absolute inset-0) statt nach document.body —
+          zuverlässiger als das CSS-Var-Pattern. pointer-events-none damit
+          das leere Div keine Klicks abfängt; Backdrop-Kinder überschreiben
+          das mit pointer-events-auto. */}
+      {!isFeldmodus && (
+        <div
+          id="sv-modal-root"
+          aria-hidden="true"
+          className="fixed inset-y-0 right-0 z-[1000] pointer-events-none"
+          style={{ left: '256px' }}
+        />
+      )}
+      {!isFeldmodus && <GlobalPosteingangFab currentUserId={userId} />}
+      {!isFeldmodus && <SVSpotlight />}
     </div>
   )
 }

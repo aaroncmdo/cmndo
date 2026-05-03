@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CalendarIcon, UsersIcon, MapPinIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -120,35 +121,34 @@ export default async function MitarbeiterKundentermine() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-[#0D1B3E]">Kundentermine</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          SV-Besichtigungen der Fälle, die du als Kundenbetreuer begleitest. Nur lesend — Terminänderungen erfolgen im Fall.
-        </p>
-      </div>
+      <PageHeader
+        title="Kundentermine"
+        description="SV-Besichtigungen der Fälle, die du als Kundenbetreuer begleitest. Nur lesend — Terminänderungen erfolgen im Fall."
+        size="lg"
+      />
 
       {groups.size === 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 px-6 py-16 text-center">
-          <p className="text-sm text-gray-400">Keine anstehenden Kundentermine</p>
+        <div className="bg-white rounded-ios-lg shadow-ios-md px-6 py-16 text-center">
+          <p className="text-sm text-claimondo-ondo/70">Keine anstehenden Kundentermine</p>
         </div>
       )}
 
       {Array.from(groups.entries()).map(([day, rows]) => {
         const isToday = day === nowIso.slice(0, 10)
         return (
-          <section key={day} className="bg-white rounded-xl border border-gray-200">
-            <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-900">
+          <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
+            <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-claimondo-navy">
                 {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
                   weekday: 'long',
                   day: '2-digit',
                   month: '2-digit',
                 })}
-                {isToday && <span className="ml-2 text-xs text-[#4573A2]">(heute)</span>}
+                {isToday && <span className="ml-2 text-xs text-claimondo-ondo">(heute)</span>}
               </h2>
-              <span className="text-xs text-gray-500">{rows?.length ?? 0}</span>
+              <span className="text-xs text-claimondo-ondo">{rows?.length ?? 0}</span>
             </div>
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-claimondo-border">
               {(rows ?? []).map((t) => {
                 const fall = Array.isArray(t.fall) ? t.fall[0] ?? null : (t.fall as { id: string; fall_nummer: string | null; lead_id: string | null } | null)
                 const sv = Array.isArray(t.sachverstaendige) ? t.sachverstaendige[0] ?? null : (t.sachverstaendige as { profile_id: string | null } | null)
@@ -156,34 +156,34 @@ export default async function MitarbeiterKundentermine() {
                 const svName = sv?.profile_id ? svNameMap[sv.profile_id] ?? 'SV' : 'SV'
                 const href = fall ? `/faelle/${fall.id}` : '#'
                 return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-gray-50 transition-colors">
+                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
                     <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border bg-[#4573A2]/10 text-[#4573A2] border-[#4573A2]/20">
+                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border bg-claimondo-ondo/10 text-claimondo-ondo border-claimondo-ondo/20">
                         <CalendarIcon className="w-3 h-3" />
                         SV-Termin
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-claimondo-navy truncate">
                           {fall?.fall_nummer ?? '—'} · {kundeName}
                         </p>
-                        <p className="text-xs text-gray-500 flex items-center gap-1 flex-wrap">
+                        <p className="text-xs text-claimondo-ondo flex items-center gap-1 flex-wrap">
                           <span>
                             {new Date(t.start_zeit).toLocaleTimeString('de-DE', {
                               hour: '2-digit',
                               minute: '2-digit',
                             })}
                           </span>
-                          <UsersIcon className="w-3 h-3 text-gray-400" />
+                          <UsersIcon className="w-3 h-3 text-claimondo-ondo/70" />
                           <span>{svName}</span>
                           {t.adresse && (
                             <>
-                              <MapPinIcon className="w-3 h-3 text-gray-400" />
+                              <MapPinIcon className="w-3 h-3 text-claimondo-ondo/70" />
                               <span className="truncate">{t.adresse}</span>
                             </>
                           )}
                         </p>
                       </div>
-                      <span className="text-[10px] uppercase tracking-wide text-gray-400">{t.status}</span>
+                      <span className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70">{t.status}</span>
                     </div>
                   </Link>
                 )

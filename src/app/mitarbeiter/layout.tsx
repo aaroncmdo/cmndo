@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
 import MitarbeiterNav from './_components/MitarbeiterNav'
+import TasksPill from '@/components/shared/TasksPill'
+import UpdatesNav from '@/components/shared/updates'
+import { roleToPath } from '@/lib/auth/role-redirect'
 
 export default async function MitarbeiterLayout({
   children,
@@ -19,7 +22,11 @@ export default async function MitarbeiterLayout({
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['kundenbetreuer', 'leadbearbeiter', 'admin'].includes(profile.rolle)) redirect('/login')
+  // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
+  // auf /login.
+  if (!profile || !['kundenbetreuer', 'dispatch', 'admin'].includes(profile.rolle)) {
+    redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
+  }
 
   const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
 
@@ -36,11 +43,16 @@ export default async function MitarbeiterLayout({
 
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
-      <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between">
-        <span className="text-xl font-bold tracking-tight">
-          <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>
-        </span>
+      <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-bold tracking-tight">
+            <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>
+          </span>
+          {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
+          <TasksPill userId={user.id} href="/mitarbeiter/tasks" />
+        </div>
         <div className="flex items-center gap-3">
+          <UpdatesNav variant="dark" />
           <span className="text-[#7BA3CC] text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">
             <button type="submit" className="text-[#7BA3CC] hover:text-white transition-colors">

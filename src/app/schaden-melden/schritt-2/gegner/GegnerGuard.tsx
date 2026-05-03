@@ -19,7 +19,7 @@ export function GegnerGuard({ versicherer }: { versicherer: Versicherer[] }) {
   }, [leadId, router])
 
   if (!leadId) {
-    return <p className="text-sm text-slate-500">Leite weiter …</p>
+    return <p className="text-sm text-claimondo-ondo">Leite weiter …</p>
   }
 
   return <GegnerClient leadId={leadId} versicherer={versicherer} />

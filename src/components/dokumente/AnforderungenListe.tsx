@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { ClockIcon, CheckCircle2Icon, AlertTriangleIcon, XCircleIcon, PlusIcon, FileTextIcon } from 'lucide-react'
 import AnforderungsModal, { type AnforderbarerSlot } from './AnforderungsModal'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 export type AnforderungsItem = {
   id: string
@@ -54,8 +55,8 @@ function statusBadge(status: string, frist: string | null): {
     case 'abgelehnt':
       return {
         icon: XCircleIcon,
-        bg: 'bg-gray-100 border-gray-200',
-        text: 'text-gray-500',
+        bg: 'bg-[#f8f9fb] border-claimondo-border',
+        text: 'text-claimondo-ondo',
         labelTxt: 'Abgelehnt',
       }
     case 'nachgereicht_angefordert':
@@ -89,9 +90,9 @@ export default function AnforderungenListe({
   const [modalOpen, setModalOpen] = useState(false)
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+    <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
+        <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider flex items-center gap-2">
           <FileTextIcon className="w-3.5 h-3.5" /> Meine Anforderungen an den Kunden
         </h3>
         <button
@@ -103,9 +104,9 @@ export default function AnforderungenListe({
         </button>
       </div>
 
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-claimondo-border">
         {anforderungen.length === 0 ? (
-          <p className="px-4 py-6 text-center text-gray-400 text-xs">
+          <p className="px-4 py-6 text-center text-claimondo-ondo/70 text-xs">
             Sie haben noch keine Dokumente beim Kunden angefordert.
           </p>
         ) : (
@@ -117,18 +118,16 @@ export default function AnforderungenListe({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <Icon className={`w-4 h-4 ${cfg.text} shrink-0`} />
-                    <span className="text-sm text-gray-800 truncate">{a.label}</span>
+                    <span className="text-sm text-claimondo-navy truncate">{a.label}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${cfg.bg} ${cfg.text}`}
-                    >
+                    <StatusBadge colorCls={`${cfg.bg} ${cfg.text} border`}>
                       {cfg.labelTxt}
-                    </span>
+                    </StatusBadge>
                     {a.frist && (
                       <span
                         className={`text-[10px] tabular-nums ${
-                          cfg.overdue ? 'text-red-600 font-medium' : 'text-gray-500'
+                          cfg.overdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'
                         }`}
                       >
                         Frist: {new Date(a.frist).toLocaleDateString('de-DE')}
@@ -137,7 +136,7 @@ export default function AnforderungenListe({
                   </div>
                 </div>
                 {a.begruendung && (
-                  <p className="mt-1 ml-6 text-[11px] text-gray-500 line-clamp-2">
+                  <p className="mt-1 ml-6 text-[11px] text-claimondo-ondo line-clamp-2">
                     {a.begruendung}
                   </p>
                 )}

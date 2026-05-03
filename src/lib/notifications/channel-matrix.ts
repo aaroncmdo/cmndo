@@ -248,6 +248,165 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
     priority: 'normal',
     channels: { makler: ['web_push', 'email', 'in_app'], admin: ['in_app'] },
   },
+  // 5.12 Mietwagen / Nutzungsausfall (AAR-759)
+  'mietwagen.rechnung_ausstehend': {
+    priority: 'normal',
+    channels: { kunde: ['whatsapp', 'in_app'], kundenbetreuer: ['in_app'] },
+  },
+  'mietwagen.abgabe_naht': {
+    priority: 'urgent',
+    channels: { kunde: ['whatsapp', 'email', 'in_app'], kundenbetreuer: ['in_app'] },
+  },
+  'mietwagen.ueber_limit': {
+    priority: 'urgent',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['web_push', 'in_app'],
+      admin: ['in_app'],
+    },
+  },
+  // 5.13 Airdrop (AAR-814)
+  'claim.gegner_eingeladen': {
+    priority: 'normal',
+    channels: { kunde: ['in_app'], kundenbetreuer: ['in_app'] },
+  },
+  'claim.gegner_hat_geoeffnet': {
+    priority: 'normal',
+    channels: { kunde: ['in_app', 'web_push'], kundenbetreuer: ['in_app'] },
+  },
+  'claim.gegner_hat_geantwortet': {
+    priority: 'normal',
+    channels: { kunde: ['in_app', 'web_push'], kundenbetreuer: ['in_app', 'web_push'] },
+  },
+  'claim.gegner_konvertiert_zu_voll': {
+    priority: 'normal',
+    channels: { kunde: ['in_app'], kundenbetreuer: ['in_app'], admin: ['in_app'] },
+  },
+  'claim.einladung_abgelaufen': {
+    priority: 'low',
+    channels: { kunde: ['in_app'], kundenbetreuer: ['in_app'] },
+  },
+  // 5.14 Manuelle Endzustände (AAR-840)
+  'claim.in_kommunikation_vs': {
+    priority: 'normal',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.reguliert': {
+    priority: 'urgent',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.abgelehnt': {
+    priority: 'urgent',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.storniert': {
+    priority: 'normal',
+    channels: {
+      kunde: ['in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.an_externe_kanzlei_uebergeben': {
+    priority: 'urgent',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  // 5.15 Kanzlei-Workflow (AAR-841)
+  'claim.kanzlei_paket_versendet': {
+    priority: 'normal',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.kanzlei_re_frage_due': {
+    priority: 'normal',
+    channels: {
+      kunde: ['in_app'],
+    },
+  },
+  // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844) — KB-only, keine Kunde-Notification
+  'claim.kanzlei_paket_pending': {
+    priority: 'normal',
+    channels: {
+      kundenbetreuer: ['email', 'in_app'],
+      admin:          ['in_app'],
+    },
+  },
+  // 5.17 Gutachten-OCR-Pipeline (AAR-838)
+  'gutachten.ocr_succeeded': {
+    priority: 'normal',
+    channels: {
+      kundenbetreuer: ['in_app'],
+      kunde:          ['whatsapp', 'email', 'in_app'],
+      admin:          ['in_app'],
+    },
+  },
+  'gutachten.ocr_failed': {
+    priority: 'urgent',
+    channels: {
+      kundenbetreuer: ['email', 'in_app'],
+      admin:          ['in_app'],
+    },
+  },
+  // 5.18 Termin-Verlegung (AAR-864)
+  'termin.verlegung_vorgeschlagen': {
+    priority: 'urgent',
+    channels: {
+      kunde:          ['whatsapp', 'email', 'web_push', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin:          ['in_app'],
+    },
+  },
+  'termin.verlegung_bestaetigt': {
+    priority: 'normal',
+    channels: {
+      sachverstaendiger: ['whatsapp', 'web_push', 'in_app'],
+      kundenbetreuer:    ['in_app'],
+      admin:             ['in_app'],
+    },
+  },
+  'termin.verlegung_abgelehnt': {
+    priority: 'urgent',
+    channels: {
+      sachverstaendiger: ['whatsapp', 'web_push', 'in_app'],
+      kundenbetreuer:    ['in_app'],
+      admin:             ['in_app'],
+    },
+  },
+  'termin.verlegung_eskalation': {
+    priority: 'urgent',
+    channels: {
+      kunde:          ['whatsapp', 'web_push', 'in_app'],
+      kundenbetreuer: ['web_push', 'in_app'],
+      admin:          ['in_app'],
+    },
+  },
+  'termin.verschoben_durch_kunde': {
+    priority: 'urgent',
+    channels: {
+      sachverstaendiger: ['whatsapp', 'web_push', 'in_app'],
+      kundenbetreuer:    ['in_app'],
+      admin:             ['in_app'],
+    },
+  },
 }
 
 export function getEventConfig(eventType: EventType): EventConfig {

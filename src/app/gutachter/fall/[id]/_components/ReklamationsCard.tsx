@@ -24,7 +24,7 @@ export function ReklamationsCard({ fall, id }: { fall: Fall; id?: string }) {
           Rückfrage offen
         </p>
       </div>
-      <p className="text-sm text-gray-900">
+      <p className="text-sm text-claimondo-navy">
         Die Kanzlei oder der Kundenbetreuer hat eine Rückfrage zu deinem Fall.
       </p>
       <p className="text-xs text-red-800">

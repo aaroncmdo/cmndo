@@ -1,33 +1,37 @@
 'use client'
 
-// AAR-382: Expanded Card für den aktiven Stop im Fokus-Modus.
-// Enthält Kunden-Kontakt, Fahrzeug, Adresse, Slots für Briefing (AAR-385) und
-// Dokumente (AAR-386 — Platzhalter), sowie die primären Aktionen Losfahren /
-// Angekommen / Abschließen je nach State.
+// AAR-382 / Auto-Arrive: Expanded Card für den aktiven Stop im Fokus-Modus.
+// Keine manuellen "Losfahren"/"Ich bin angekommen"-Buttons mehr — Ankunft wird
+// automatisch erkannt:
+//   1. SV im 100m-Geofence UND (Kunde nicht aktiviert ODER Kunde angekommen)
+//   2. Fallback: Terminuhrzeit erreicht und GPS nicht verfügbar
+// Beim Auslösen ruft onArrived() — FeldmodusClient setzt sessionStatus='arrived'
+// → Fallakte öffnet automatisch.
 
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   PhoneIcon,
   NavigationIcon,
   CheckCircle2Icon,
-  PlayCircleIcon,
   MapPinIcon,
   CarIcon,
 } from 'lucide-react'
-import BriefingStrukturSections from '@/components/fall/BriefingStrukturSections'
 import { formatUhrzeit } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
 import type { FeldmodusStop } from './page'
 import type { SessionStatus } from '@/lib/types/field-modus'
-import { startStop, markArrived, completeAndAdvance } from './actions'
+import { completeAndAdvance, markSvVorOrt, markBesichtigungGestartet } from './actions'
 
 export interface AktuellerStopCardProps {
   stop: FeldmodusStop
   sessionId: string
   sessionStatus: SessionStatus
   svPosition: { lat: number; lng: number } | null
+  svInGeofence: boolean
+  permissionState: 'pending' | 'granted' | 'denied'
   onAdvanced: (nextTerminId: string | null) => void
+  onArrived: (lat: number, lng: number, via: 'geofence' | 'manuell' | 'termin_uhrzeit') => void
 }
 
 function buildGoogleMapsLink(stop: FeldmodusStop): string {
@@ -46,25 +50,33 @@ export default function AktuellerStopCard({
   sessionId,
   sessionStatus,
   svPosition,
+  svInGeofence,
+  permissionState,
   onAdvanced,
+  onArrived,
 }: AktuellerStopCardProps) {
   const [pending, startTransition] = useTransition()
-  const [manuelleAnkunft, setManuelleAnkunft] = useState(false)
 
-  // AAR-384: Kunde-Tracking-State live beobachten (eigene Subscription,
-  // damit die AktuellerStopCard unabhängig vom Parent nachzieht).
+  // AAR-384 + Auto-Arrive: Termin-State live beobachten (Kunde-Tracking +
+  // sv_angekommen_am + besichtigung_gestartet_am).
   const supabase = useMemo(() => createClient(), [])
   const [kundeTracking, setKundeTracking] = useState<{
     aktiviert: boolean
     etaMinutes: number | null
     angekommenAm: string | null
   }>({ aktiviert: false, etaMinutes: null, angekommenAm: null })
+  const [svAngekommenAm, setSvAngekommenAm] = useState<string | null>(stop.sv_angekommen_am ?? null)
+  const [besichtigungGestartetAm, setBesichtigungGestartetAm] = useState<string | null>(null)
+  const svVorOrtFiredRef = useRef(false)
+  const besichtigungFiredRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
     void supabase
       .from('gutachter_termine')
-      .select('kunde_tracking_aktiviert, kunde_eta_minuten, kunde_angekommen_am')
+      .select(
+        'kunde_tracking_aktiviert, kunde_eta_minuten, kunde_angekommen_am, sv_angekommen_am, besichtigung_gestartet_am',
+      )
       .eq('id', stop.termin_id)
       .single()
       .then(({ data }) => {
@@ -74,9 +86,11 @@ export default function AktuellerStopCard({
           etaMinutes: (data.kunde_eta_minuten as number | null) ?? null,
           angekommenAm: (data.kunde_angekommen_am as string | null) ?? null,
         })
+        setSvAngekommenAm((data.sv_angekommen_am as string | null) ?? null)
+        setBesichtigungGestartetAm((data.besichtigung_gestartet_am as string | null) ?? null)
       })
     const channel = supabase
-      .channel(`sv-kunde-eta-${stop.termin_id}`)
+      .channel(`sv-termin-state-${stop.termin_id}`)
       .on(
         'postgres_changes',
         {
@@ -90,12 +104,16 @@ export default function AktuellerStopCard({
             kunde_tracking_aktiviert: boolean | null
             kunde_eta_minuten: number | null
             kunde_angekommen_am: string | null
+            sv_angekommen_am: string | null
+            besichtigung_gestartet_am: string | null
           }
           setKundeTracking({
             aktiviert: !!row.kunde_tracking_aktiviert,
             etaMinutes: row.kunde_eta_minuten ?? null,
             angekommenAm: row.kunde_angekommen_am ?? null,
           })
+          setSvAngekommenAm(row.sv_angekommen_am ?? null)
+          setBesichtigungGestartetAm(row.besichtigung_gestartet_am ?? null)
         },
       )
       .subscribe()
@@ -105,44 +123,97 @@ export default function AktuellerStopCard({
     }
   }, [supabase, stop.termin_id])
 
-  const losgefahren = Boolean(stop.losgefahren_am)
-  const angekommen = Boolean(stop.sv_angekommen_am)
+  const besichtigungLaeuft = Boolean(besichtigungGestartetAm) || sessionStatus === 'arrived'
+  const svIstDa = Boolean(svAngekommenAm)
 
-  function onLosfahren() {
-    startTransition(async () => {
-      const res = await startStop(sessionId, stop.termin_id)
-      if (res.success) {
-        toast.success(
-          res.etaMinutes != null
-            ? `Losgefahren · ETA ${res.etaMinutes} Min`
-            : 'Losgefahren',
-        )
-      } else {
-        toast.error(res.error ?? 'Losfahren fehlgeschlagen')
-      }
-    })
-  }
+  // Reset arrived-flags wenn neuer Stop geladen wird
+  useEffect(() => {
+    svVorOrtFiredRef.current = false
+    besichtigungFiredRef.current = false
+  }, [stop.termin_id])
 
-  function onAngekommen() {
-    setManuelleAnkunft(true)
-    startTransition(async () => {
-      const lat = svPosition?.lat ?? stop.lat ?? 0
-      const lng = svPosition?.lng ?? stop.lng ?? 0
-      const res = await markArrived(
-        sessionId,
-        stop.termin_id,
-        lat,
-        lng,
-        'manuell',
-      )
-      if (res.success) {
-        toast.success('Ankunft bestätigt')
-      } else {
-        toast.error(res.error ?? 'Ankunft fehlgeschlagen')
-        setManuelleAnkunft(false)
-      }
+  // Phase 1: SV im Geofence → sv_angekommen_am setzen (alleine)
+  useEffect(() => {
+    if (svIstDa || svVorOrtFiredRef.current) return
+    if (!svInGeofence) return
+    svVorOrtFiredRef.current = true
+    void markSvVorOrt(
+      stop.termin_id,
+      svPosition?.lat ?? stop.lat ?? 0,
+      svPosition?.lng ?? stop.lng ?? 0,
+      'geofence',
+    ).catch(() => {
+      svVorOrtFiredRef.current = false
     })
-  }
+  }, [svIstDa, svInGeofence, stop.termin_id, svPosition, stop.lat, stop.lng])
+
+  // Phase 2: Beide vor Ort → besichtigung_gestartet_am
+  useEffect(() => {
+    if (besichtigungLaeuft || besichtigungFiredRef.current) return
+    if (!svIstDa) return
+    if (kundeTracking.aktiviert && !kundeTracking.angekommenAm) return
+    besichtigungFiredRef.current = true
+    void markBesichtigungGestartet(sessionId, stop.termin_id, 'beide_angekommen')
+      .then((res) => {
+        if (res.success) {
+          onArrived(
+            svPosition?.lat ?? stop.lat ?? 0,
+            svPosition?.lng ?? stop.lng ?? 0,
+            'geofence',
+          )
+        } else {
+          besichtigungFiredRef.current = false
+        }
+      })
+      .catch(() => {
+        besichtigungFiredRef.current = false
+      })
+  }, [
+    besichtigungLaeuft,
+    svIstDa,
+    kundeTracking.aktiviert,
+    kundeTracking.angekommenAm,
+    sessionId,
+    stop.termin_id,
+    onArrived,
+    svPosition,
+    stop.lat,
+    stop.lng,
+  ])
+
+  // Phase 3 — Fallback: Terminuhrzeit erreicht und GPS nicht überall
+  useEffect(() => {
+    if (besichtigungLaeuft) return
+    if (permissionState === 'granted' && kundeTracking.aktiviert) return
+    const startMs = new Date(stop.start_zeit).getTime()
+    const delay = Math.max(0, startMs - Date.now())
+    const timer = setTimeout(() => {
+      if (besichtigungFiredRef.current) return
+      besichtigungFiredRef.current = true
+      void markBesichtigungGestartet(sessionId, stop.termin_id, 'termin_uhrzeit')
+        .then((res) => {
+          if (res.success) {
+            onArrived(stop.lat ?? 0, stop.lng ?? 0, 'termin_uhrzeit')
+          } else {
+            besichtigungFiredRef.current = false
+          }
+        })
+        .catch(() => {
+          besichtigungFiredRef.current = false
+        })
+    }, delay)
+    return () => clearTimeout(timer)
+  }, [
+    besichtigungLaeuft,
+    permissionState,
+    kundeTracking.aktiviert,
+    sessionId,
+    stop.termin_id,
+    stop.start_zeit,
+    stop.lat,
+    stop.lng,
+    onArrived,
+  ])
 
   function onAbschliessen() {
     startTransition(async () => {
@@ -160,15 +231,28 @@ export default function AktuellerStopCard({
 
   const mapsLink = buildGoogleMapsLink(stop)
 
+  // Status-Hinweis für den SV (ersetzt die alten Action-Buttons)
+  const statusHinweis = (() => {
+    if (besichtigungLaeuft) return null
+    if (svInGeofence && kundeTracking.aktiviert && !kundeTracking.angekommenAm) {
+      return 'Du bist vor Ort — warte auf Kunde'
+    }
+    if (svInGeofence) return 'Ankunft wird gleich bestätigt'
+    if (permissionState === 'denied') {
+      return 'GPS verweigert — Ankunft wird zur Terminuhrzeit erkannt'
+    }
+    return 'Auto-Ankunft aktiv (Geofence 100 m)'
+  })()
+
   return (
-    <div className="rounded-xl bg-white text-gray-900 p-4 shadow-sm space-y-3">
+    <div className="rounded-xl bg-white text-claimondo-navy p-4 shadow-sm space-y-3">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--brand-primary,var(--brand-secondary))]">
             Aktueller Stop
           </span>
-          <span className="text-[11px] text-gray-500">
+          <span className="text-[11px] text-claimondo-ondo">
             {formatUhrzeit(stop.start_zeit)}
           </span>
           {stop.schadentyp && (
@@ -177,23 +261,22 @@ export default function AktuellerStopCard({
             </span>
           )}
         </div>
-        <p className="text-sm font-semibold text-gray-900">
+        <p className="text-sm font-semibold text-claimondo-navy">
           {stop.kennzeichen && (
             <span className="font-mono mr-2">{stop.kennzeichen}</span>
           )}
           {stop.fahrzeug ?? stop.kunde_name}
         </p>
-        <p className="text-xs text-gray-500">{stop.kunde_name}</p>
+        <p className="text-xs text-claimondo-ondo">{stop.kunde_name}</p>
       </div>
 
       {/* Adresse */}
-      <div className="flex items-start gap-2 text-sm text-gray-800">
+      <div className="flex items-start gap-2 text-sm text-claimondo-navy">
         <MapPinIcon className="w-4 h-4 text-[color:var(--brand-primary,var(--brand-secondary))] mt-0.5" />
         <p className="flex-1">{stop.adresse}</p>
       </div>
 
-      {/* AAR-384: Kunde-Tracking-Status — zeigt dem SV ob und wann der
-          Kunde ankommt (nur bei Termin außerhalb Kunde-zuhause). */}
+      {/* Kunde-Tracking-Status */}
       {kundeTracking.angekommenAm ? (
         <div className="flex items-center gap-2 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
           <CheckCircle2Icon className="w-4 h-4" />
@@ -220,55 +303,25 @@ export default function AktuellerStopCard({
         </a>
       )}
 
-      {/* BriefingCard-Slot (AAR-385) */}
-      {(stop.briefing_text || stop.briefing_struktur) && (
-        <div className="border-t border-gray-100 pt-3 space-y-2">
-          {stop.briefing_text && (
-            <p className="text-xs leading-relaxed text-gray-700 whitespace-pre-wrap">
-              {stop.briefing_text}
-            </p>
-          )}
-          <BriefingStrukturSections
-            fallId={stop.fall_id}
-            struktur={stop.briefing_struktur}
-            canRegenerate={false}
-            defaultExpanded={false}
-          />
+      {/* SV-Briefing */}
+      {stop.briefing_text && (
+        <div className="border-t border-claimondo-border pt-3">
+          <p className="text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
+            {stop.briefing_text}
+          </p>
         </div>
       )}
 
-      {/* Dokumente-Slot (AAR-386 Platzhalter) */}
-      <div className="border-t border-gray-100 pt-3 text-[11px] text-gray-500 italic">
-        Dokumenten-Checkliste folgt in AAR-386
-      </div>
+      {/* Auto-Ankunft-Hinweis (ersetzt alte Action-Buttons) */}
+      {statusHinweis && (
+        <div className="rounded-lg bg-[color:var(--brand-primary,var(--brand-secondary))]/5 border border-[color:var(--brand-primary,var(--brand-secondary))]/20 px-3 py-2 text-[11px] text-claimondo-navy">
+          {statusHinweis}
+        </div>
+      )}
 
-      {/* Aktionen — State-Machine-abhängig */}
+      {/* Aktionen */}
       <div className="flex flex-col gap-2 pt-2">
-        {!losgefahren && sessionStatus !== 'arrived' && (
-          <button
-            type="button"
-            onClick={onLosfahren}
-            disabled={pending}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[color:var(--brand-primary,var(--brand-secondary))] text-white text-sm font-semibold py-2.5 hover:bg-[#3a6290] disabled:opacity-50"
-          >
-            <PlayCircleIcon className="w-4 h-4" />
-            {pending ? 'Starte …' : 'Losfahren & Kunde informieren'}
-          </button>
-        )}
-
-        {losgefahren && !angekommen && (
-          <button
-            type="button"
-            onClick={onAngekommen}
-            disabled={pending || manuelleAnkunft}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold py-2.5 hover:bg-emerald-700 disabled:opacity-50"
-          >
-            <CheckCircle2Icon className="w-4 h-4" />
-            {pending ? 'Bestätige …' : 'Ich bin angekommen'}
-          </button>
-        )}
-
-        {angekommen && sessionStatus !== 'finished' && (
+        {besichtigungLaeuft && sessionStatus !== 'finished' && (
           <button
             type="button"
             onClick={onAbschliessen}
@@ -284,7 +337,7 @@ export default function AktuellerStopCard({
           href={mapsLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium py-2 hover:bg-gray-50"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 hover:bg-[#f8f9fb]"
         >
           <NavigationIcon className="w-4 h-4" />
           In Google Maps öffnen

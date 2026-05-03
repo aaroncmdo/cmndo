@@ -8,6 +8,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { SvSuggestion } from './types'
+import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 
 export async function listSvSuggestionsForLead(leadId: string): Promise<{
   success: boolean
@@ -63,7 +64,7 @@ export async function reserveSvTerminForLead(
   leadId: string,
   svId: string,
   startIso: string,
-  durationMin: number = 120,
+  durationMin: number = TERMIN_DAUER_MIN,
 ): Promise<{ success: boolean; terminId?: string; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -111,6 +112,12 @@ export async function reserveSvTerminForLead(
 
   if (error || !inserted) return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
 
+  // CMM-36: Baseline-Fahrtzeit (SV-Standort → Kunde) einmalig cachen.
+  // Fire-and-forget — Mapbox-Fehler dürfen die Reservation nicht brechen.
+  void import('@/lib/termine/baseline-fahrtzeit').then(({ speichereBaselineFahrtzeit }) =>
+    speichereBaselineFahrtzeit(supabase, inserted.id as string, svId, leadId, null),
+  )
+
   // SV-Benachrichtigung (non-blocking)
   try {
     const { data: leadData } = await supabase
@@ -131,13 +138,13 @@ export async function reserveSvTerminForLead(
     console.warn('[reserveSvTerminForLead] Mitteilung fehlgeschlagen:', err)
   }
 
-  // AAR-133: Email an SV (non-blocking)
-  try {
-    const { sendSvTerminBestaetigung } = await import('@/lib/email/google/flows')
-    await sendSvTerminBestaetigung(svId, inserted.id)
-  } catch (err) {
-    console.warn('[reserveSvTerminForLead] Email fehlgeschlagen:', err)
-  }
+  // AAR-713: Keine SV-Email bei reiner Vorreservierung mehr — der SV soll
+  // erst dann per Email die finale Termin-Bestätigung bekommen, wenn der
+  // Kunde im FlowLink die SA unterschrieben hat. Vorher gab es eine
+  // verwirrende „Vorreservierung"-Mail bevor der Auftrag überhaupt feststand.
+  // Die in-App-Mitteilung (createGutachterMitteilung oben) bleibt — der SV
+  // sieht den reservierten Slot in seinem Auftragsfeed/Kalender, fährt aber
+  // nicht los bis die Bestätigungs-Email kommt.
 
   revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true, terminId: inserted.id }
@@ -287,7 +294,7 @@ export type NextFreeSlotsOpts = {
 export async function getNextFreeSlotsForSv(
   svId: string,
   count: number = 3,
-  slotDauerMin: number = 120,
+  slotDauerMin: number = TERMIN_DAUER_MIN,
   opts?: NextFreeSlotsOpts,
 ): Promise<{ success: boolean; slots?: SlotCandidate[]; error?: string }> {
   const supabase = await createClient()
@@ -410,7 +417,7 @@ export async function getSvSuggestionsWithSlots(
 }> {
   const slotsPerSv = opts?.slotsPerSv ?? 3
   const maxSvs = opts?.maxSvs ?? 3
-  const slotDauer = opts?.slotDauerMin ?? 120
+  const slotDauer = opts?.slotDauerMin ?? TERMIN_DAUER_MIN
 
   const basisResult = await listSvSuggestionsForLead(leadId)
   if (!basisResult.success) {

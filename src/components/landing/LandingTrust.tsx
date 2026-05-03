@@ -34,7 +34,7 @@ export async function LandingTrust() {
                 <h3 className="mt-4 text-lg font-semibold text-claimondo-navy">
                   {t(`${f.key}.title`)}
                 </h3>
-                <p className="mt-2 text-slate-600">{t(`${f.key}.description`)}</p>
+                <p className="mt-2 text-claimondo-ondo">{t(`${f.key}.description`)}</p>
               </div>
             )
           })}

@@ -7,6 +7,7 @@ import { useEffect, useRef } from 'react'
 import { XIcon, LightbulbIcon } from 'lucide-react'
 import { SupportProvider, useSupport } from './SupportContext'
 import { SupportChat } from './SupportChat'
+import { Drawer } from '@/components/primitives/Drawer'
 
 const DURCHDENKEN_ROLES = new Set(['admin', 'kundenbetreuer', 'dispatch'])
 
@@ -20,11 +21,11 @@ function DrawerHeader({ onClose, closeBtnRef, rolle }: {
   const hasStarted = messages.length > 0
 
   return (
-    <div className="px-4 py-3 border-b border-gray-200 shrink-0">
+    <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-[#0D1B3E]">Hilfe &amp; Support</h2>
-          <p className="text-[11px] text-gray-500">
+          <p className="text-[11px] text-claimondo-ondo">
             {mode === 'durchdenken'
               ? 'Feature durchdenken — bis zu 8 Turns, dann Ticket-Vorschlag.'
               : 'KI-Assistenz — legt bei Bedarf Linear-Tickets an.'}
@@ -35,7 +36,7 @@ function DrawerHeader({ onClose, closeBtnRef, rolle }: {
           type="button"
           onClick={onClose}
           aria-label="Schließen"
-          className="text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
+          className="text-claimondo-ondo/70 hover:text-claimondo-navy p-1 rounded-full hover:bg-[#f8f9fb]"
         >
           <XIcon className="w-5 h-5" />
         </button>
@@ -48,7 +49,7 @@ function DrawerHeader({ onClose, closeBtnRef, rolle }: {
             className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-colors ${
               mode === 'durchdenken'
                 ? 'bg-violet-50 text-violet-700 border-violet-200'
-                : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200'
+                : 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200'
             }`}
             aria-pressed={mode === 'durchdenken'}
           >
@@ -76,41 +77,20 @@ export function SupportDrawer({
   rolle?: string | null
 }) {
   const closeBtnRef = useRef<HTMLButtonElement | null>(null)
-  const drawerRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!open) return
     closeBtnRef.current?.focus()
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [open, onClose])
-
-  if (!open) return null
+  }, [open])
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex justify-end"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Hilfe und Support"
-    >
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div
-        ref={drawerRef}
-        className="relative w-full md:w-[420px] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right"
-      >
+    <Drawer open={open} onClose={onClose} width={420} noPadding hideCloseButton ariaLabel="Hilfe und Support">
+      <div className="flex flex-col h-full">
         <SupportProvider>
           <DrawerHeader onClose={onClose} closeBtnRef={closeBtnRef} rolle={rolle} />
           <SupportChat userName={userName} />
         </SupportProvider>
       </div>
-    </div>
+    </Drawer>
   )
 }

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { AlertCircleIcon, ArrowRightIcon, EuroIcon } from 'lucide-react'
+import { StatusBadge as SharedStatusBadge } from '@/components/shared/StatusBadge'
 
 // KFZ-155: Ausstehende Zahlungen Widget — top 5 Eintraege fuer das Dashboard.
 //
@@ -125,18 +126,16 @@ export default async function AusstehendeZahlungenWidget() {
   const { rows, gesamt, total } = await loadAusstehende()
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col h-full">
-      <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+    <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden flex flex-col h-full">
+      <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <EuroIcon className="w-4 h-4 text-amber-600" />
-          <h2 className="text-sm font-semibold text-gray-700">Ausstehende Zahlungen</h2>
+          <h2 className="text-sm font-semibold text-claimondo-navy">Ausstehende Zahlungen</h2>
           {total > 0 && (
-            <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-medium">
-              {total} offen
-            </span>
+            <SharedStatusBadge tone="warning">{total} offen</SharedStatusBadge>
           )}
         </div>
-        <span className="text-xs text-gray-500 tabular-nums font-medium">{fmtEur(gesamt)}</span>
+        <span className="text-xs text-claimondo-ondo tabular-nums font-medium">{fmtEur(gesamt)}</span>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -145,35 +144,35 @@ export default async function AusstehendeZahlungenWidget() {
             <div className="w-10 h-10 mx-auto bg-emerald-50 rounded-full flex items-center justify-center mb-2">
               <EuroIcon className="w-5 h-5 text-emerald-600" />
             </div>
-            <p className="text-xs text-gray-500">Keine offenen Forderungen.</p>
+            <p className="text-xs text-claimondo-ondo">Keine offenen Forderungen.</p>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-claimondo-border">
             {rows.map(e => {
               const badge = STATUS_LABEL[e.status]
               return (
                 <li key={e.key}>
                   <Link
                     href={e.href}
-                    className="block px-5 py-3 hover:bg-gray-50 transition-colors"
+                    className="block px-5 py-3 hover:bg-[#f8f9fb] transition-colors"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">{e.name}</p>
-                        {e.email && <p className="text-[11px] text-gray-500 truncate">{e.email}</p>}
+                        <p className="text-sm font-medium text-claimondo-navy truncate">{e.name}</p>
+                        {e.email && <p className="text-[11px] text-claimondo-ondo truncate">{e.email}</p>}
                         <div className="flex items-center gap-2 mt-1">
                           <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${badge.bg} ${badge.text}`}>
                             {badge.label}
                           </span>
                           {e.faelligSeitTage !== null && (
-                            <span className="text-[10px] text-gray-400">
+                            <span className="text-[10px] text-claimondo-ondo/70">
                               seit {e.faelligSeitTage} {e.faelligSeitTage === 1 ? 'Tag' : 'Tagen'}
                             </span>
                           )}
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-gray-900 tabular-nums">{fmtEur(e.betrag)}</p>
+                        <p className="text-sm font-semibold text-claimondo-navy tabular-nums">{fmtEur(e.betrag)}</p>
                       </div>
                     </div>
                   </Link>
@@ -184,7 +183,7 @@ export default async function AusstehendeZahlungenWidget() {
         )}
       </div>
 
-      <div className="px-5 py-3 border-t border-gray-100 bg-gray-50">
+      <div className="px-5 py-3 border-t border-claimondo-border bg-[#f8f9fb]">
         <Link
           href="/admin/finance/abrechnungen"
           className="flex items-center justify-center gap-1.5 text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] transition-colors"

@@ -4,6 +4,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 export default function GoogleSettingsClient({
   isConnected, googleEmail, connectedAt, success, error,
@@ -28,14 +29,10 @@ export default function GoogleSettingsClient({
 
   return (
     <div className="py-6 max-w-2xl mx-auto px-4 space-y-4">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">Google Konto verbinden</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Verbinde dein Google Konto, um Videotermine direkt aus der Fallakte zu buchen.
-          Termine werden in deinem Google Kalender erstellt und Kunden bekommen automatisch
-          eine Calendar-Einladung mit Meet-Link.
-        </p>
-      </div>
+      <PageHeader
+        title="Google Konto verbinden"
+        description="Verbinde dein Google Konto, um Videotermine direkt aus der Fallakte zu buchen. Termine werden in deinem Google Kalender erstellt und Kunden bekommen automatisch eine Calendar-Einladung mit Meet-Link."
+      />
 
       {success && (
         <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2 text-sm text-emerald-700">
@@ -54,18 +51,18 @@ export default function GoogleSettingsClient({
       )}
 
       {isConnected ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+        <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
           <div className="flex items-center gap-2">
             <CheckCircleIcon className="w-5 h-5 text-emerald-600" />
-            <p className="font-medium text-gray-900">Verbunden mit {googleEmail ?? 'Google'}</p>
+            <p className="font-medium text-claimondo-navy">Verbunden mit {googleEmail ?? 'Google'}</p>
           </div>
           {connectedAt && (
-            <p className="text-xs text-gray-500">Seit {new Date(connectedAt).toLocaleDateString('de-DE')}</p>
+            <p className="text-xs text-claimondo-ondo">Seit {new Date(connectedAt).toLocaleDateString('de-DE')}</p>
           )}
           {!confirmDisconnect ? (
             <button
               onClick={() => setConfirmDisconnect(true)}
-              className="px-4 py-2 text-sm font-medium bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium bg-white border border-claimondo-border text-claimondo-navy rounded-lg hover:bg-[#f8f9fb]"
             >
               Verbindung trennen
             </button>
@@ -78,7 +75,7 @@ export default function GoogleSettingsClient({
                   {pending ? 'Trenne...' : 'Ja, trennen'}
                 </button>
                 <button onClick={() => setConfirmDisconnect(false)} disabled={pending}
-                  className="px-4 py-2 text-sm text-gray-600">
+                  className="px-4 py-2 text-sm text-claimondo-ondo">
                   Abbrechen
                 </button>
               </div>
@@ -95,7 +92,7 @@ export default function GoogleSettingsClient({
         </a>
       )}
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-xs text-blue-900 space-y-1">
+      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-4 text-xs text-claimondo-navy space-y-1">
         <p className="font-semibold">Datenschutz:</p>
         <p>• Wir speichern nur den Refresh-Token (verschluesselt) — keine Email-Inhalte, kein Kalender-Lese-Zugriff.</p>
         <p>• Scopes: nur calendar.events (Termine erstellen) + userinfo.email (deine Google-Adresse).</p>

@@ -2,6 +2,8 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { FINANCE } from '@/lib/finance/constants'
+import PageHeader from '@/components/shared/PageHeader'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import FinanceClient from './FinanceClient'
 import AbrechnungenSection from './AbrechnungenSection'
 import AusstehendeZahlungenTable from '../../_components/AusstehendeZahlungenTable'
@@ -35,21 +37,21 @@ function GewinnverteilungSection({
   return (
     <div className="px-4 pb-8">
       <div>
-        <div className="bg-white border border-gray-200 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        <div className="bg-white border border-claimondo-border rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-4">
             Gewinnverteilung
           </h2>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
-              <p className="text-gray-500 text-xs mb-1">Gesamt Provision</p>
-              <p className="text-gray-900 text-xl font-bold tabular-nums">{eur(gesamtProvision)}</p>
+              <p className="text-claimondo-ondo text-xs mb-1">Gesamt Provision</p>
+              <p className="text-claimondo-navy text-xl font-bold tabular-nums">{eur(gesamtProvision)}</p>
             </div>
             <div className="text-center">
-              <p className="text-gray-500 text-xs mb-1">Claimondo (75%)</p>
+              <p className="text-claimondo-ondo text-xs mb-1">Claimondo (75%)</p>
               <p className="text-emerald-400 text-xl font-bold tabular-nums">{eur(claimondoGewinn)}</p>
             </div>
             <div className="text-center">
-              <p className="text-gray-500 text-xs mb-1">Kanzlei (25%)</p>
+              <p className="text-claimondo-ondo text-xs mb-1">Kanzlei (25%)</p>
               <p className="text-[#7BA3CC] text-xl font-bold tabular-nums">{eur(kanzleiGewinn)}</p>
             </div>
           </div>
@@ -58,7 +60,7 @@ function GewinnverteilungSection({
             <div className="bg-emerald-500" style={{ width: '75%' }} />
             <div className="bg-[#4573A2]" style={{ width: '25%' }} />
           </div>
-          <div className="flex justify-between mt-1 text-[10px] text-gray-400">
+          <div className="flex justify-between mt-1 text-[10px] text-claimondo-ondo/70">
             <span>Claimondo 75%</span>
             <span>Kanzlei 25%</span>
           </div>
@@ -97,60 +99,60 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
   return (
     <div className="px-4 pb-8">
       <div>
-        <div className="bg-white border border-gray-200 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        <div className="bg-white border border-claimondo-border rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-4">
             Marketing (Maik)
           </h2>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div>
-              <p className="text-gray-500 text-xs mb-1">CPA fix</p>
-              <p className="text-gray-900 text-lg font-bold tabular-nums">{eur(cpaFix)}</p>
+              <p className="text-claimondo-ondo text-xs mb-1">CPA fix</p>
+              <p className="text-claimondo-navy text-lg font-bold tabular-nums">{eur(cpaFix)}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs mb-1">Google CPL</p>
-              <p className={`text-lg font-bold tabular-nums ${cpl > 0 ? 'text-amber-400' : 'text-gray-400'}`}>
+              <p className="text-claimondo-ondo text-xs mb-1">Google CPL</p>
+              <p className={`text-lg font-bold tabular-nums ${cpl > 0 ? 'text-amber-400' : 'text-claimondo-ondo/70'}`}>
                 {cpl > 0 ? eur(cpl) : 'Nicht erfasst'}
               </p>
-              <p className="text-gray-400 text-[10px]">Manuell oder Google Ads API</p>
+              <p className="text-claimondo-ondo/70 text-[10px]">Manuell oder Google Ads API</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs mb-1">Maik Marge/Fall</p>
-              <p className={`text-lg font-bold tabular-nums ${marge > 0 ? 'text-emerald-400' : 'text-gray-400'}`}>
+              <p className="text-claimondo-ondo text-xs mb-1">Maik Marge/Fall</p>
+              <p className={`text-lg font-bold tabular-nums ${marge > 0 ? 'text-emerald-400' : 'text-claimondo-ondo/70'}`}>
                 {cpl > 0 ? eur(marge) : '—'}
               </p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs mb-1">Maik Provision</p>
-              <p className={`text-lg font-bold tabular-nums ${provision > 0 ? 'text-emerald-400' : 'text-gray-400'}`}>
+              <p className="text-claimondo-ondo text-xs mb-1">Maik Provision</p>
+              <p className={`text-lg font-bold tabular-nums ${provision > 0 ? 'text-emerald-400' : 'text-claimondo-ondo/70'}`}>
                 {provision > 0 ? eur(provision) : '—'}
               </p>
-              <p className="text-gray-400 text-[10px]">Auszahlung Mitte Folgemonat</p>
+              <p className="text-claimondo-ondo/70 text-[10px]">Auszahlung Mitte Folgemonat</p>
             </div>
           </div>
 
           {/* Monatliche CPL-Tabelle */}
           {monatsberichte.length > 0 && (
-            <div className="overflow-x-auto border-t border-gray-200 pt-4">
+            <div className="overflow-x-auto border-t border-claimondo-border pt-4">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left px-3 py-2 text-gray-500">Monat</th>
-                    <th className="text-right px-3 py-2 text-gray-500">Google CPL</th>
-                    <th className="text-right px-3 py-2 text-gray-500">Faelle</th>
-                    <th className="text-right px-3 py-2 text-gray-500">Budget netto</th>
-                    <th className="text-right px-3 py-2 text-gray-500">Maik Provision</th>
+                  <tr className="border-b border-claimondo-border">
+                    <th className="text-left px-3 py-2 text-claimondo-ondo">Monat</th>
+                    <th className="text-right px-3 py-2 text-claimondo-ondo">Google CPL</th>
+                    <th className="text-right px-3 py-2 text-claimondo-ondo">Faelle</th>
+                    <th className="text-right px-3 py-2 text-claimondo-ondo">Budget netto</th>
+                    <th className="text-right px-3 py-2 text-claimondo-ondo">Maik Provision</th>
                   </tr>
                 </thead>
                 <tbody>
                   {monatsberichte.slice(-6).map(mb => (
-                    <tr key={mb.id} className="border-b border-gray-200/50">
-                      <td className="px-3 py-2 text-gray-700">{mb.monat}/{mb.jahr}</td>
-                      <td className="px-3 py-2 text-right text-gray-700 tabular-nums">
+                    <tr key={mb.id} className="border-b border-claimondo-border/50">
+                      <td className="px-3 py-2 text-claimondo-navy">{mb.monat}/{mb.jahr}</td>
+                      <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">
                         {Number(mb.maik_google_cpl ?? 0) > 0 ? eur(Number(mb.maik_google_cpl)) : '—'}
                       </td>
-                      <td className="px-3 py-2 text-right text-gray-700 tabular-nums">{mb.neue_faelle ?? 0}</td>
-                      <td className="px-3 py-2 text-right text-gray-700 tabular-nums">
+                      <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">{mb.neue_faelle ?? 0}</td>
+                      <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">
                         {Number(mb.marketing_budget_netto ?? 0) > 0 ? eur(Number(mb.marketing_budget_netto)) : '—'}
                       </td>
                       <td className="px-3 py-2 text-right text-emerald-400 tabular-nums">
@@ -163,10 +165,10 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
             </div>
           )}
 
-          <div className="mt-4 p-3 bg-gray-100/50 rounded-xl">
-            <p className="text-gray-500 text-xs">
+          <div className="mt-4 p-3 bg-[#f8f9fb]/50 rounded-xl">
+            <p className="text-claimondo-ondo text-xs">
               Google Ads CPL-Werte können manuell in der Datenbank erfasst werden.
-              API-Endpoint <code className="text-gray-500">/api/google-ads/sync</code> ist vorbereitet.
+              API-Endpoint <code className="text-claimondo-ondo">/api/google-ads/sync</code> ist vorbereitet.
             </p>
           </div>
         </div>
@@ -200,40 +202,40 @@ function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfra
   return (
     <div className="px-4 pb-8">
       <div>
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-200">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+        <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-claimondo-border">
+            <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
               Individuelle Anfragen
             </h2>
           </div>
           {anfragen.length === 0 ? (
-            <div className="p-8 text-center"><p className="text-gray-400 text-sm">Keine Anfragen vorhanden.</p></div>
+            <div className="p-8 text-center"><p className="text-claimondo-ondo/70 text-sm">Keine Anfragen vorhanden.</p></div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left px-5 py-3 text-gray-500 font-medium">Gutachter</th>
-                    <th className="text-center px-5 py-3 text-gray-500 font-medium">Fälle</th>
-                    <th className="text-center px-5 py-3 text-gray-500 font-medium">Radius</th>
-                    <th className="text-left px-5 py-3 text-gray-500 font-medium">Nachricht</th>
-                    <th className="text-center px-5 py-3 text-gray-500 font-medium">Status</th>
-                    <th className="text-right px-5 py-3 text-gray-500 font-medium">Datum</th>
+                  <tr className="border-b border-claimondo-border">
+                    <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Gutachter</th>
+                    <th className="text-center px-5 py-3 text-claimondo-ondo font-medium">Fälle</th>
+                    <th className="text-center px-5 py-3 text-claimondo-ondo font-medium">Radius</th>
+                    <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Nachricht</th>
+                    <th className="text-center px-5 py-3 text-claimondo-ondo font-medium">Status</th>
+                    <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Datum</th>
                   </tr>
                 </thead>
                 <tbody>
                   {anfragen.map(a => (
-                    <tr key={a.id} className="border-b border-gray-200/50 hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-3 text-gray-800">{a.sv_name}</td>
-                      <td className="px-5 py-3 text-center text-gray-700">{a.gewuenschte_faelle ?? '—'}/Mo</td>
-                      <td className="px-5 py-3 text-center text-gray-700">{a.gewuenschter_radius_km ?? '—'}km</td>
-                      <td className="px-5 py-3 text-gray-600 text-xs max-w-[200px] truncate">{a.nachricht ?? '—'}</td>
+                    <tr key={a.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb] transition-colors">
+                      <td className="px-5 py-3 text-claimondo-navy">{a.sv_name}</td>
+                      <td className="px-5 py-3 text-center text-claimondo-navy">{a.gewuenschte_faelle ?? '—'}/Mo</td>
+                      <td className="px-5 py-3 text-center text-claimondo-navy">{a.gewuenschter_radius_km ?? '—'}km</td>
+                      <td className="px-5 py-3 text-claimondo-ondo text-xs max-w-[200px] truncate">{a.nachricht ?? '—'}</td>
                       <td className="px-5 py-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[a.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[a.status] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
                           {a.status}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-right text-gray-500 text-xs tabular-nums">
+                      <td className="px-5 py-3 text-right text-claimondo-ondo text-xs tabular-nums">
                         {new Date(a.erstellt_am).toLocaleDateString('de-DE')}
                       </td>
                     </tr>
@@ -270,46 +272,46 @@ function KanzleiProvisionSection({
   return (
     <div className="px-4 pb-8">
       <div>
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+        <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
               Kanzlei-Provision (150&euro; / Vollmacht)
             </h2>
-            <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full font-medium">
+            <StatusBadge colorCls="text-purple-600 bg-purple-50">
               Nur mandatstyp: kanzlei-claimondo
-            </span>
+            </StatusBadge>
           </div>
 
           <div className="p-5">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="text-center p-3 bg-gray-50 rounded-xl">
-                <p className="text-gray-500 text-xs mb-1">Vollmachten gesamt</p>
-                <p className="text-gray-900 text-2xl font-bold tabular-nums">{vollmachtenGesamt}</p>
+              <div className="text-center p-3 bg-[#f8f9fb] rounded-xl">
+                <p className="text-claimondo-ondo text-xs mb-1">Vollmachten gesamt</p>
+                <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{vollmachtenGesamt}</p>
               </div>
-              <div className="text-center p-3 bg-gray-50 rounded-xl">
-                <p className="text-gray-500 text-xs mb-1">Provision gesamt</p>
+              <div className="text-center p-3 bg-[#f8f9fb] rounded-xl">
+                <p className="text-claimondo-ondo text-xs mb-1">Provision gesamt</p>
                 <p className="text-purple-600 text-2xl font-bold tabular-nums">{eur(provisionGesamt)}</p>
               </div>
               <div className="text-center p-3 bg-purple-50 rounded-xl">
-                <p className="text-gray-500 text-xs mb-1">Dieser Monat</p>
-                <p className="text-gray-900 text-2xl font-bold tabular-nums">{vollmachtenMonat}</p>
+                <p className="text-claimondo-ondo text-xs mb-1">Dieser Monat</p>
+                <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{vollmachtenMonat}</p>
               </div>
               <div className="text-center p-3 bg-purple-50 rounded-xl">
-                <p className="text-gray-500 text-xs mb-1">Provision Monat</p>
+                <p className="text-claimondo-ondo text-xs mb-1">Provision Monat</p>
                 <p className="text-purple-600 text-2xl font-bold tabular-nums">{eur(provisionMonat)}</p>
               </div>
             </div>
 
             {letzteVollmachten.length > 0 && (
-              <div className="border-t border-gray-200 pt-4">
-                <p className="text-xs text-gray-500 font-medium mb-2">Letzte Vollmachten (Kanzlei)</p>
+              <div className="border-t border-claimondo-border pt-4">
+                <p className="text-xs text-claimondo-ondo font-medium mb-2">Letzte Vollmachten (Kanzlei)</p>
                 <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
                   {letzteVollmachten.map(v => (
-                    <div key={v.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg text-xs">
-                      <span className="text-gray-800 font-medium">{v.name}</span>
+                    <div key={v.id} className="flex items-center justify-between px-3 py-2 bg-[#f8f9fb] rounded-lg text-xs">
+                      <span className="text-claimondo-navy font-medium">{v.name}</span>
                       <div className="flex items-center gap-3">
                         <span className="text-purple-600 font-semibold tabular-nums">150,00 &euro;</span>
-                        <span className="text-gray-400 tabular-nums">{v.datum}</span>
+                        <span className="text-claimondo-ondo/70 tabular-nums">{v.datum}</span>
                       </div>
                     </div>
                   ))}
@@ -329,25 +331,25 @@ function InvestitionProFallSection() {
   return (
     <div className="px-4 pb-8">
       <div>
-        <div className="bg-white border border-gray-200 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        <div className="bg-white border border-claimondo-border rounded-2xl p-5">
+          <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-4">
             Investition pro Fall
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-gray-100/50 rounded-xl text-center">
-              <p className="text-gray-500 text-xs mb-2">Marketing-Investition / Fall</p>
-              <p className="text-gray-900 text-2xl font-bold">150,00 &euro;</p>
-              <p className="text-gray-400 text-xs mt-1">CPA fix an Maik</p>
+            <div className="p-4 bg-[#f8f9fb]/50 rounded-xl text-center">
+              <p className="text-claimondo-ondo text-xs mb-2">Marketing-Investition / Fall</p>
+              <p className="text-claimondo-navy text-2xl font-bold">150,00 &euro;</p>
+              <p className="text-claimondo-ondo/70 text-xs mt-1">CPA fix an Maik</p>
             </div>
-            <div className="p-4 bg-gray-100/50 rounded-xl text-center">
-              <p className="text-gray-500 text-xs mb-2">Ausloeser</p>
+            <div className="p-4 bg-[#f8f9fb]/50 rounded-xl text-center">
+              <p className="text-claimondo-ondo text-xs mb-2">Ausloeser</p>
               <p className="text-amber-400 text-sm font-medium">Unterschriebene SA</p>
-              <p className="text-gray-400 text-xs mt-1">Nur Faelle mit Schadensanzeige</p>
+              <p className="text-claimondo-ondo/70 text-xs mt-1">Nur Faelle mit Schadensanzeige</p>
             </div>
-            <div className="p-4 bg-gray-100/50 rounded-xl text-center">
-              <p className="text-gray-500 text-xs mb-2">Maik-Provision</p>
+            <div className="p-4 bg-[#f8f9fb]/50 rounded-xl text-center">
+              <p className="text-claimondo-ondo text-xs mb-2">Maik-Provision</p>
               <p className="text-emerald-400 text-sm font-medium">CPA (150&euro;) - Google CPL</p>
-              <p className="text-gray-400 text-xs mt-1">Differenz = seine Marge</p>
+              <p className="text-claimondo-ondo/70 text-xs mt-1">Differenz = seine Marge</p>
             </div>
           </div>
           <div className="mt-4 p-3 bg-[#4573A2]/10 border border-[#1E3A5F]/30 rounded-xl">
@@ -375,50 +377,50 @@ function GutachterAbrechnungen({ svRows, gutachterAnzahlungenGesamt }: {
   return (
     <div className="px-4 pb-8">
       <div>
-        <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+        <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
               Gutachter-Zahlungen
             </h2>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-claimondo-ondo">
               Anzahlungen gesamt: <span className="text-emerald-400 font-medium">{eur(gutachterAnzahlungenGesamt)}</span>
             </span>
           </div>
 
           {svRows.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-gray-400 text-sm">Keine aktiven Gutachter.</p>
+              <p className="text-claimondo-ondo/70 text-sm">Keine aktiven Gutachter.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left px-5 py-3 text-gray-500 font-medium">Gutachter</th>
-                    <th className="text-left px-5 py-3 text-gray-500 font-medium">Paket</th>
-                    <th className="text-right px-5 py-3 text-gray-500 font-medium">Guthaben</th>
-                    <th className="text-center px-5 py-3 text-gray-500 font-medium">Faelle</th>
-                    <th className="text-right px-5 py-3 text-gray-500 font-medium">Leadkosten Monat</th>
+                  <tr className="border-b border-claimondo-border">
+                    <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Gutachter</th>
+                    <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Paket</th>
+                    <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Guthaben</th>
+                    <th className="text-center px-5 py-3 text-claimondo-ondo font-medium">Faelle</th>
+                    <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Leadkosten Monat</th>
                   </tr>
                 </thead>
                 <tbody>
                   {svRows.map(sv => {
                     const guthabenColor = sv.guthaben <= 0 ? 'text-red-400' : sv.guthaben < 500 ? 'text-amber-400' : 'text-emerald-400'
                     return (
-                      <tr key={sv.id} className="border-b border-gray-200/50 hover:bg-gray-100/40 transition-colors">
-                        <td className="px-5 py-3 text-gray-800">{sv.name}</td>
+                      <tr key={sv.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors">
+                        <td className="px-5 py-3 text-claimondo-navy">{sv.name}</td>
                         <td className="px-5 py-3">
-                          <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700">
+                          <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-[#f8f9fb] text-claimondo-navy">
                             {sv.paket}
                           </span>
                         </td>
                         <td className={`px-5 py-3 text-right tabular-nums font-medium ${guthabenColor}`}>
                           {eur(sv.guthaben)}
                         </td>
-                        <td className="px-5 py-3 text-center text-gray-700 tabular-nums">
+                        <td className="px-5 py-3 text-center text-claimondo-navy tabular-nums">
                           {sv.faelleGenutzt} / {sv.faelleGesamt}
                         </td>
-                        <td className="px-5 py-3 text-right tabular-nums text-gray-700">
+                        <td className="px-5 py-3 text-right tabular-nums text-claimondo-navy">
                           {sv.leadkostenMonat > 0 ? eur(sv.leadkostenMonat) : '—'}
                         </td>
                       </tr>
@@ -691,18 +693,20 @@ export default async function FinancePage() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Sticky Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200 flex-shrink-0">
-        <div>
-          <h1 className="text-lg font-semibold text-gray-900">Finanzen</h1>
-          <p className="text-xs text-gray-500">Umsatz, Provision & Kennzahlen</p>
-        </div>
-        <div className="flex items-center gap-2 text-[10px] font-medium">
-          <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">MRR {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(mrr)}</span>
-          <span className="bg-[#4573A2]/5 text-[#4573A2] px-2 py-0.5 rounded-full">{(aktiveSvs ?? []).length} SVs</span>
-          {kanzleiVollmachtenDiesenMonat > 0 && (
-            <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Vollmachten</span>
-          )}
-        </div>
+      <div className="px-4 py-3 bg-white border-b border-claimondo-border flex-shrink-0">
+        <PageHeader
+          title="Finanzen"
+          description="Umsatz, Provision & Kennzahlen"
+          actions={
+            <div className="flex items-center gap-2 text-[10px] font-medium">
+              <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">MRR {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(mrr)}</span>
+              <span className="bg-[#4573A2]/5 text-[#4573A2] px-2 py-0.5 rounded-full">{(aktiveSvs ?? []).length} SVs</span>
+              {kanzleiVollmachtenDiesenMonat > 0 && (
+                <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Vollmachten</span>
+              )}
+            </div>
+          }
+        />
       </div>
       {/* Scrollbarer Content */}
       <div className="flex-1 overflow-y-auto">

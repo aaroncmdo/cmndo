@@ -1,12 +1,11 @@
 'use client'
 
 // AAR-542 (C5): Admin-Debug-Modal pro Pflicht-Matrix-Slot.
-// Zeigt die JSON-Regeln + Erklärung + aktuelle Evaluation — hilft dem Admin
-// „warum ist das hier Pflicht?" in Sekunden zu beantworten.
+// AAR-781: Migriert auf Modal-Primitive (ESC-Handling durch Modal übernommen).
 
-import { useEffect } from 'react'
-import { XIcon, AlertTriangleIcon } from 'lucide-react'
+import { AlertTriangleIcon, XIcon } from 'lucide-react'
 import type { PflichtDocMatrixEntry } from '@/lib/dokumente/pflicht-evaluator'
+import { Modal } from '@/components/primitives'
 
 function pretty(obj: unknown): string {
   if (obj == null) return '(keine Regel)'
@@ -24,62 +23,43 @@ export default function RegelDebugModal({
   entry: PflichtDocMatrixEntry | null
   onClose: () => void
 }) {
-  useEffect(() => {
-    if (!entry) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [entry, onClose])
-
   if (!entry) return null
 
   const status = !entry.freigeschaltet
-    ? { label: 'Nicht freigeschaltet', color: 'bg-gray-50 text-gray-500 border-gray-200' }
+    ? { label: 'Nicht freigeschaltet', color: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' }
     : entry.pflicht
       ? { label: 'Pflicht', color: 'bg-[#4573A2]/10 text-[#0D1B3E] border-[#4573A2]/30' }
-      : { label: 'Optional', color: 'bg-gray-50 text-gray-600 border-gray-200' }
+      : { label: 'Optional', color: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-    >
-      <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between px-5 py-4 border-b border-gray-100">
+    <Modal open onClose={onClose} maxWidth={512} noPadding hideCloseButton ariaLabel="Regel-Debug">
+      <div className="flex flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 64px)' }}>
+        <div className="flex items-start justify-between px-5 py-4 border-b border-claimondo-border">
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1">
               Slot · {entry.kategorie}
             </p>
             <h3 className="text-base font-semibold text-[#0D1B3E] truncate">{entry.label}</h3>
-            <p className="text-[11px] text-gray-500 mt-0.5 truncate">
+            <p className="text-[11px] text-claimondo-ondo mt-0.5 truncate">
               slot_id: <code className="font-mono">{entry.slot_id}</code>
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 shrink-0"
+            className="text-claimondo-ondo/70 hover:text-claimondo-ondo shrink-0"
             aria-label="Schließen"
           >
             <XIcon className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="px-5 py-4 space-y-4 overflow-y-auto">
+        <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className={`text-[11px] font-medium border rounded-full px-2.5 py-0.5 ${status.color}`}
-            >
+            <span className={`text-[11px] font-medium border rounded-full px-2.5 py-0.5 ${status.color}`}>
               {status.label}
             </span>
-            <span className="text-[11px] text-gray-500">{entry.regel_erklaerung}</span>
+            <span className="text-[11px] text-claimondo-ondo">{entry.regel_erklaerung}</span>
           </div>
 
           {entry.inkonsistenz && (
@@ -94,56 +74,46 @@ export default function RegelDebugModal({
           )}
 
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
               freigeschaltet_wenn
             </p>
-            <pre className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
+            <pre className="bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
               {pretty(entry.freigeschaltet_wenn)}
             </pre>
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
               pflicht_wenn
             </p>
-            <pre className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
+            <pre className="bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
               {pretty(entry.pflicht_wenn)}
             </pre>
           </div>
           <div className="grid grid-cols-2 gap-3 text-[11px]">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1">
-                Freigeschaltet?
-              </p>
-              <p className="text-gray-800">{entry.freigeschaltet ? 'Ja' : 'Nein'}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">Freigeschaltet?</p>
+              <p className="text-claimondo-navy">{entry.freigeschaltet ? 'Ja' : 'Nein'}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1">
-                Pflicht?
-              </p>
-              <p className="text-gray-800">{entry.pflicht ? 'Ja' : 'Nein'}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">Pflicht?</p>
+              <p className="text-claimondo-navy">{entry.pflicht ? 'Ja' : 'Nein'}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1">
-                DB-Status
-              </p>
-              <p className="text-gray-800">{entry.status}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">DB-Status</p>
+              <p className="text-claimondo-navy">{entry.status}</p>
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1">
-                DB-Row
-              </p>
-              <p className="text-gray-800">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">DB-Row</p>
+              <p className="text-claimondo-navy">
                 {entry.pflicht_row_id ? (
                   <code className="font-mono text-[10px]">{entry.pflicht_row_id}</code>
-                ) : (
-                  '—'
-                )}
+                ) : '—'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="px-5 py-3 border-t border-gray-100 flex justify-end">
+        <div className="px-5 py-3 border-t border-claimondo-border flex justify-end">
           <button
             type="button"
             onClick={onClose}
@@ -153,6 +123,6 @@ export default function RegelDebugModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

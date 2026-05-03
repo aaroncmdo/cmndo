@@ -58,6 +58,36 @@ export type EventType =
   // 5.11 Makler
   | 'makler.lead_eingegangen'
   | 'makler.provision_status'
+  // 5.12 Mietwagen / Nutzungsausfall (AAR-759)
+  | 'mietwagen.rechnung_ausstehend'
+  | 'mietwagen.abgabe_naht'
+  | 'mietwagen.ueber_limit'
+  // 5.13 Airdrop / Gegner-Einladung (AAR-814)
+  | 'claim.gegner_eingeladen'
+  | 'claim.gegner_hat_geoeffnet'
+  | 'claim.gegner_hat_geantwortet'
+  | 'claim.gegner_konvertiert_zu_voll'
+  | 'claim.einladung_abgelaufen'
+  // 5.14 Manuelle Endzustände (AAR-840) — KB/Admin-getriggerte Phase-9-Übergänge
+  | 'claim.in_kommunikation_vs'
+  | 'claim.reguliert'
+  | 'claim.abgelehnt'
+  | 'claim.storniert'
+  | 'claim.an_externe_kanzlei_uebergeben'
+  // 5.15 Kanzlei-Workflow (AAR-841)
+  | 'claim.kanzlei_paket_versendet'
+  | 'claim.kanzlei_re_frage_due'
+  // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844)
+  | 'claim.kanzlei_paket_pending'
+  // 5.17 Gutachten-OCR-Pipeline (AAR-838)
+  | 'gutachten.ocr_succeeded'
+  | 'gutachten.ocr_failed'
+  // 5.18 Termin-Verlegung (AAR-864)
+  | 'termin.verlegung_vorgeschlagen'
+  | 'termin.verlegung_bestaetigt'
+  | 'termin.verlegung_abgelehnt'
+  | 'termin.verlegung_eskalation'
+  | 'termin.verschoben_durch_kunde'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -104,6 +134,78 @@ export interface EventPayloads {
   // 5.11
   'makler.lead_eingegangen': { leadId: string; maklerId: string; promoCode: string }
   'makler.provision_status': { fallId: string; provisionId: string; maklerId: string; status: 'freigegeben' | 'storniert'; betragEur: number; grund?: string }
+  // 5.12 Mietwagen (AAR-759)
+  'mietwagen.rechnung_ausstehend': { fallId: string; seit_tage: number }
+  'mietwagen.abgabe_naht': { fallId: string; tage_rest: number; limit_datum: string }
+  'mietwagen.ueber_limit': { fallId: string; tage_ueber: number; limit_datum: string }
+  // 5.13 Airdrop (AAR-814)
+  'claim.gegner_eingeladen': { claimId: string; invitationId: string; invitedVia: string; expiresAt: string }
+  'claim.gegner_hat_geoeffnet': { claimId: string; invitationId: string; openedAt: string }
+  'claim.gegner_hat_geantwortet': { claimId: string; partyId: string; responseAt: string }
+  'claim.gegner_konvertiert_zu_voll': { claimId: string; partyId: string; userId: string; konvertiertAm: string }
+  'claim.einladung_abgelaufen': { claimId: string; invitationId: string; ablaufGrund: string }
+  // 5.14 Manuelle Endzustände (AAR-840)
+  'claim.in_kommunikation_vs': { claimId: string; fallId: string; grund: string }
+  'claim.reguliert': { claimId: string; fallId: string; betragEur: number; grund?: string }
+  'claim.abgelehnt': { claimId: string; fallId: string; vsAblehnungsGrund: string; grundFreitext?: string }
+  'claim.storniert': { claimId: string; fallId: string; grund: string }
+  'claim.an_externe_kanzlei_uebergeben': { claimId: string; fallId: string; kanzleiName: string; uebergabeDatum: string; grund?: string }
+  // 5.15 Kanzlei-Workflow (AAR-841)
+  'claim.kanzlei_paket_versendet': { claimId: string; fallId: string; empfaengerTyp: 'partnerkanzlei' | 'eigene_kanzlei'; kanzleiName: string }
+  'claim.kanzlei_re_frage_due':    { claimId: string; fallId: string }
+  // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844)
+  'claim.kanzlei_paket_pending':   { claimId: string; fallId: string; kanzleiWunsch: string; phase: string; kundenbetreuerId: string | null }
+  // 5.17 Gutachten-OCR-Pipeline (AAR-838)
+  'gutachten.ocr_succeeded':       { fallId: string; gutachtenId: string; engine: string; confidence: number }
+  'gutachten.ocr_failed':          { fallId: string; gutachtenId: string; runNummer: number; reason: string }
+  // 5.18 Termin-Verlegung (AAR-864)
+  'termin.verlegung_vorgeschlagen': {
+    fallId: string
+    terminId: string         // = neuer pending-Slot
+    alterTerminId: string
+    alterDatum: string       // formatiert (z.B. "Mo. 05.05.")
+    alterUhrzeit: string     // "10:00"
+    neuesDatum: string
+    neuesUhrzeit: string
+    svVorname: string
+    grund?: string
+  }
+  'termin.verlegung_bestaetigt': {
+    fallId: string
+    terminId: string         // = neuer (jetzt bestätigt)
+    alterTerminId: string
+    neuesDatum: string
+    neuesUhrzeit: string
+    kundenVorname: string
+    von_wem: 'kunde' | 'kundenbetreuer' | 'admin'
+  }
+  'termin.verlegung_abgelehnt': {
+    fallId: string
+    terminId: string         // = neuer (jetzt storniert)
+    alterTerminId: string
+    kundenVorname: string
+    grund?: string
+    von_wem: 'kunde' | 'kundenbetreuer' | 'admin'
+  }
+  'termin.verlegung_eskalation': {
+    fallId: string
+    terminId: string         // = neuer pending-Slot
+    alterTerminId: string
+    alterDatum: string
+    alterUhrzeit: string
+  }
+  // Kunde hat proaktiv einen bestätigten Termin eigenständig verschoben
+  'termin.verschoben_durch_kunde': {
+    fallId: string
+    terminId: string         // = neuer bestaetigt-Slot
+    alterTerminId: string
+    alterDatum: string
+    alterUhrzeit: string
+    neuesDatum: string
+    neuesUhrzeit: string
+    svVorname: string        // SV-Vorname für Anrede in WA-Nachricht
+    grund?: string
+  }
 }
 
 // ── DB-Row-Shapes ─────────────────────────────────────────────────────────

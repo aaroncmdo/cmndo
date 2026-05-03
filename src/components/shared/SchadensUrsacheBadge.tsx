@@ -1,7 +1,9 @@
-// AAR-410: Zentrale Schadens-Ursache-Badge-Primitive.
+// AAR-410 / AAR-769 Phase 3: Zentrale Schadens-Ursache-Badge-Primitive.
 // Zieht Label + Farben aus SCHADENS_URSACHE_LABELS/SCHADENS_URSACHE_COLORS
-// in src/lib/statusLabels.ts. Nutzt alle Stellen die bisher eigene
-// URSACHE_LABEL/URSACHE_COLOR-Maps hatten.
+// in src/lib/statusLabels.ts. Diese Map liefert pro Ursache einen Tailwind-
+// Color-String — der <Badge>-Primitive akzeptiert nur diskrete Tones, des-
+// halb behält diese Component den Span-Render mit dynamischer className bei.
+// Token-Sweep: gray-100/700 ist im statusLabels.ts gesweept worden.
 
 import { SCHADENS_URSACHE_LABELS, SCHADENS_URSACHE_COLORS } from '@/lib/statusLabels'
 
@@ -31,7 +33,7 @@ export default function SchadensUrsacheBadge({
   if (plain) {
     return <span className={className}>{label || '—'}</span>
   }
-  const color = SCHADENS_URSACHE_COLORS[code] ?? 'bg-gray-100 text-gray-700'
+  const color = SCHADENS_URSACHE_COLORS[code] ?? 'bg-[#f8f9fb] text-claimondo-navy'
   return (
     <span
       className={`inline-flex items-center rounded-full font-medium whitespace-nowrap ${SIZE_CLASSES[size]} ${color} ${className}`}

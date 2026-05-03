@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './actions'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Provision = {
   id: string
@@ -68,35 +69,34 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
 
   return (
     <div className="py-6 space-y-6">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Maik-Provisionen (Google Ads)</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            150&nbsp;€ pro Lead minus tatsächlicher CPL. CPL aus Google-Ads-Reports nachtragen.
-          </p>
-        </div>
-        {/* AAR-153: „Als bezahlt markieren"-Button pro Monat */}
-        <button
-          type="button"
-          disabled={pending || kpi.confirmed === 0}
-          onClick={handleMarkMonthPaid}
-          className="px-4 py-2 rounded-xl bg-[#1E3A5F] text-white text-sm font-medium hover:bg-[#4573A2] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
-          title={
-            kpi.confirmed === 0
-              ? 'Keine bestätigten Provisionen in diesem Monat'
-              : `Alle ${kpi.confirmed} bestätigten Einträge als bezahlt markieren`
-          }
-        >
-          {pending ? 'Wird gespeichert...' : `Als bezahlt markieren (${kpi.confirmed})`}
-        </button>
-      </div>
+      <PageHeader
+        title="Maik-Provisionen (Google Ads)"
+        description="150 € pro Lead minus tatsächlicher CPL. CPL aus Google-Ads-Reports nachtragen."
+        size="lg"
+        actions={
+          /* AAR-153: „Als bezahlt markieren"-Button pro Monat */
+          <button
+            type="button"
+            disabled={pending || kpi.confirmed === 0}
+            onClick={handleMarkMonthPaid}
+            className="px-4 py-2 rounded-xl bg-[#1E3A5F] text-white text-sm font-medium hover:bg-[#4573A2] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+            title={
+              kpi.confirmed === 0
+                ? 'Keine bestätigten Provisionen in diesem Monat'
+                : `Alle ${kpi.confirmed} bestätigten Einträge als bezahlt markieren`
+            }
+          >
+            {pending ? 'Wird gespeichert...' : `Als bezahlt markieren (${kpi.confirmed})`}
+          </button>
+        }
+      />
 
       {/* Monatsfilter */}
       <div className="flex gap-2 flex-wrap">
         {months.map(m => (
           <Link key={m} href={`/admin/finance/provisionen?monat=${m}`}
             className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
-              monat === m ? 'bg-[#0D1B3E] text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              monat === m ? 'bg-[#0D1B3E] text-white' : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
             }`}>
             {m}
           </Link>
@@ -112,9 +112,9 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
       </div>
 
       {/* Tabelle */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white rounded-ios-lg shadow-ios-md overflow-x-auto">
         <table className="w-full text-sm min-w-[800px]">
-          <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+          <thead className="bg-[#f8f9fb] text-xs uppercase text-claimondo-ondo">
             <tr>
               <th className="text-left px-4 py-2">Lead</th>
               <th className="text-left px-4 py-2">Quelle</th>
@@ -125,7 +125,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
               <th className="text-left px-4 py-2">Aktion</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-claimondo-border">
             {provisionen.map(p => {
               const leadJoin = Array.isArray(p.leads) ? p.leads[0] : p.leads
               const name = [leadJoin?.vorname, leadJoin?.nachname].filter(Boolean).join(' ') || p.lead_id.slice(0, 8)
@@ -136,7 +136,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
                       {name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{p.source_channel ?? '—'}</td>
+                  <td className="px-4 py-3 text-xs text-claimondo-ondo">{p.source_channel ?? '—'}</td>
                   <td className="px-4 py-3 tabular-nums">{Number(p.basis_provision).toFixed(2)}€</td>
                   <td className="px-4 py-3 tabular-nums">
                     {p.status === 'paid' || p.status === 'reversed' ? (
@@ -152,7 +152,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
                           onBlur={() => editing[p.id] !== undefined && handleSetCpl(p.id)}
                           className="w-20 px-2 py-1 border rounded text-sm"
                         />
-                        <span className="text-xs text-gray-400">€</span>
+                        <span className="text-xs text-claimondo-ondo/70">€</span>
                       </div>
                     )}
                   </td>
@@ -161,10 +161,10 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       p.status === 'pending' ? 'bg-amber-100 text-amber-700' :
                       p.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
-                      p.status === 'paid' ? 'bg-blue-100 text-blue-700' :
+                      p.status === 'paid' ? 'bg-[#f8f9fb] text-claimondo-ondo' :
                       'bg-red-100 text-red-700'
                     }`}>{p.status}</span>
-                    {p.reversed_grund && <p className="text-[10px] text-gray-400 mt-0.5">{p.reversed_grund}</p>}
+                    {p.reversed_grund && <p className="text-[10px] text-claimondo-ondo/70 mt-0.5">{p.reversed_grund}</p>}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
@@ -186,13 +186,13 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
               )
             })}
             {provisionen.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-400 text-sm">Keine Provisionen in {monat}</td></tr>
+              <tr><td colSpan={7} className="px-4 py-12 text-center text-claimondo-ondo/70 text-sm">Keine Provisionen in {monat}</td></tr>
             )}
           </tbody>
         </table>
       </div>
       {/* Reload-Trigger */}
-      {pending && <p className="text-xs text-gray-400 text-center">Speichere…</p>}
+      {pending && <p className="text-xs text-claimondo-ondo/70 text-center">Speichere…</p>}
       {!pending && <button onClick={() => router.refresh()} className="text-xs text-[#4573A2] hover:underline">Liste aktualisieren</button>}
     </div>
   )
@@ -200,7 +200,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
 
 function KpiBox({ label, value, color }: { label: string; value: string; color: 'blue' | 'amber' | 'emerald' | 'violet' }) {
   const cls = {
-    blue: 'bg-blue-50 border-blue-200 text-blue-700',
+    blue: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-ondo',
     amber: 'bg-amber-50 border-amber-200 text-amber-700',
     emerald: 'bg-emerald-50 border-emerald-200 text-emerald-700',
     violet: 'bg-violet-50 border-violet-200 text-violet-700',

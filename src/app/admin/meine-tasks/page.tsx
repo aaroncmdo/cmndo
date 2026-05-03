@@ -13,7 +13,7 @@ export default async function MeineTasksPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-  if (!profile || !['admin', 'kundenbetreuer', 'leadbearbeiter'].includes(profile.rolle)) redirect('/login')
+  if (!profile || !['admin', 'kundenbetreuer', 'dispatch'].includes(profile.rolle)) redirect('/login')
 
   const assigned = await listMyTasks('assigned')
   const created = await listMyTasks('created')

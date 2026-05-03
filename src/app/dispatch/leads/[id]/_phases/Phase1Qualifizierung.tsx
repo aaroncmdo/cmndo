@@ -72,6 +72,10 @@ type LeadFields = {
   unfallort?: string | null
   unfallort_lat?: number | null
   unfallort_lng?: number | null
+  // CMM-26: Datum + Uhrzeit aus Phase 4 nach Phase 1 gezogen — sie gehören
+  // zum Erstkontakt, nicht zu den Stammdaten.
+  unfalldatum?: string | null
+  unfall_uhrzeit?: string | null
   polizei_vor_ort?: boolean | null
   polizei_aktenzeichen?: string | null
   polizeibericht_pflicht?: boolean | null
@@ -121,44 +125,44 @@ function KundendatenEditBlock({
     }
   }
   return (
-    <details className="group border border-gray-100 rounded-lg" open>
-      <summary className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 cursor-pointer list-none select-none hover:bg-gray-50 rounded-lg">
+    <details className="group border border-claimondo-border rounded-lg" open>
+      <summary className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-claimondo-ondo cursor-pointer list-none select-none hover:bg-[#f8f9fb] rounded-lg">
         Kundendaten bearbeiten
       </summary>
       <div className="px-3 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-0.5">
-          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Vorname</label>
-          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('vorname', l.vorname)} />
+          <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">Vorname</label>
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('vorname', l.vorname)} />
         </div>
         <div className="space-y-0.5">
-          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Nachname</label>
-          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('nachname', l.nachname)} />
+          <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">Nachname</label>
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('nachname', l.nachname)} />
         </div>
         <div className="space-y-0.5">
-          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Telefon</label>
-          <input type="tel" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('telefon', l.telefon)} />
+          <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">Telefon</label>
+          <input type="tel" className="w-full text-sm px-2 py-1.5 border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('telefon', l.telefon)} />
         </div>
         <div className="space-y-0.5">
-          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">E-Mail</label>
-          <input type="email" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('email', l.email)} />
+          <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">E-Mail</label>
+          <input type="email" className="w-full text-sm px-2 py-1.5 border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('email', l.email)} />
         </div>
         <div className="space-y-0.5">
-          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Straße</label>
-          <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_strasse', l.kunde_strasse)} />
+          <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">Straße</label>
+          <input type="text" className="w-full text-sm px-2 py-1.5 border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('kunde_strasse', l.kunde_strasse)} />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-0.5">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider block">PLZ</label>
-            <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_plz', l.kunde_plz)} />
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">PLZ</label>
+            <input type="text" className="w-full text-sm px-2 py-1.5 border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('kunde_plz', l.kunde_plz)} />
           </div>
           <div className="space-y-0.5">
-            <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Stadt</label>
-            <input type="text" className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2]" {...field('kunde_stadt', l.kunde_stadt)} />
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">Stadt</label>
+            <input type="text" className="w-full text-sm px-2 py-1.5 border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo" {...field('kunde_stadt', l.kunde_stadt)} />
           </div>
         </div>
         <div className="sm:col-span-2 space-y-0.5">
-          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">Notiz (intern)</label>
-          <textarea rows={2} className="w-full text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-[#4573A2] resize-none" {...field('notiz', l.notiz)} />
+          <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">Notiz (intern)</label>
+          <textarea rows={2} className="w-full text-sm px-2 py-1.5 border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo resize-none" {...field('notiz', l.notiz)} />
         </div>
       </div>
     </details>
@@ -183,6 +187,8 @@ export default function Phase1Qualifizierung() {
     unfallort: l.unfallort ?? '',
     unfallort_lat: l.unfallort_lat ?? null,
     unfallort_lng: l.unfallort_lng ?? null,
+    unfalldatum: l.unfalldatum ?? '',
+    unfall_uhrzeit: l.unfall_uhrzeit ?? '',
     polizei_vor_ort: l.polizei_vor_ort ?? undefined,
     polizei_aktenzeichen: l.polizei_aktenzeichen ?? '',
     polizeibericht_pflicht: l.polizeibericht_pflicht ?? undefined,
@@ -260,6 +266,9 @@ export default function Phase1Qualifizierung() {
     // unfallort bewusst NICHT im Hash — Phase 2 ist Owner des Unfallorts.
     // Beide Phases zu includen führte zu Überschreib-Race wenn Phase1 Unmount-
     // Flush feuert nachdem Phase2 bereits eine neue Adresse gespeichert hat.
+    // CMM-26: Datum + Uhrzeit hingegen sind reine Phase-1-Felder.
+    unfalldatum: draft.unfalldatum,
+    unfall_uhrzeit: draft.unfall_uhrzeit,
   })
   const autoSavedHashRef = useRef<string>(draftHash)
   const draftRef = useRef(draft)
@@ -299,6 +308,9 @@ export default function Phase1Qualifizierung() {
         polizei_vor_ort: currentDraft.polizei_vor_ort,
         polizei_aktenzeichen: currentDraft.polizei_aktenzeichen,
         polizeibericht_vorhanden: currentDraft.polizeibericht_vorhanden,
+        // CMM-26: Datum + Uhrzeit auch im Unmount-Flush mitschreiben.
+        unfalldatum: currentDraft.unfalldatum,
+        unfall_uhrzeit: currentDraft.unfall_uhrzeit,
       })
       if (autoSavedHashRef.current === currentHash) return
       const { polizeibericht_vorhanden, ...toSave } = currentDraft
@@ -327,9 +339,9 @@ export default function Phase1Qualifizierung() {
   const fahrerflucht = l.fahrerflucht === true
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-6">
+    <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-900">Phase 1: Qualifizierung</h2>
+        <h2 className="text-sm font-semibold text-claimondo-navy">Phase 1: Qualifizierung</h2>
         {allComplete ? (
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium flex items-center gap-1">
             <CheckCircleIcon className="w-3 h-3" /> Komplett
@@ -346,8 +358,8 @@ export default function Phase1Qualifizierung() {
 
       {/* AAR-316: Sprache des Kunden. Steuert später FlowLink + Portal-Übersetzungen.
           Standard = Deutsch. Auto-Save on-change via saveStammdaten. */}
-      <div className="flex items-center gap-2 flex-wrap pb-3 border-b border-gray-100">
-        <span className="text-[10px] uppercase tracking-wider text-gray-400">
+      <div className="flex items-center gap-2 flex-wrap pb-3 border-b border-claimondo-border">
+        <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">
           Sprache des Kunden
         </span>
         <div className="flex gap-1 flex-wrap">
@@ -377,8 +389,8 @@ export default function Phase1Qualifizierung() {
                 disabled={pending}
                 className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors ${
                   selected
-                    ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                    ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
+                    : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
                 } disabled:opacity-60`}
                 title={s.label}
               >
@@ -393,8 +405,8 @@ export default function Phase1Qualifizierung() {
       {/* Q1 — Unfallhergang + Verantwortlichkeit */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${q1Complete ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>1</span>
-          <h3 className="text-xs font-semibold text-gray-700">Unfallhergang &amp; Verantwortlichkeit</h3>
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${q1Complete ? 'bg-green-500 text-white' : 'bg-claimondo-border text-claimondo-ondo'}`}>1</span>
+          <h3 className="text-xs font-semibold text-claimondo-navy">Unfallhergang &amp; Verantwortlichkeit</h3>
         </div>
         {/* AAR-179 P3-G: Guided Bausteine — 5 Klick-Buttons erzeugen Prompt-
             Satzanfänge die der MA im Gespräch konkret abfragt. Die Checkliste
@@ -417,7 +429,7 @@ export default function Phase1Qualifizierung() {
                   }
                 })
               }
-              className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
+              className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border hover:bg-[#f8f9fb]"
               title={`„${b.prompt.trim()}" ans Textfeld anhängen`}
             >
               + {b.label}
@@ -427,7 +439,7 @@ export default function Phase1Qualifizierung() {
         <textarea
           value={draft.unfallhergang ?? ''}
           onChange={e => setDraft(d => ({ ...d, unfallhergang: e.target.value }))}
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm h-28 resize-none font-mono"
+          className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm h-28 resize-none font-mono"
           placeholder={'Wie ist es passiert? (offene Beschreibung — Sprachregel: niemals „Schuld")'}
         />
         {/* AAR-261: Checkliste-Labels darunter entfernt — die Chips oben
@@ -444,7 +456,7 @@ export default function Phase1Qualifizierung() {
               type="button"
               onClick={() => setDraft(d => ({ ...d, schuldfrage: o.v }))}
               className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
-                draft.schuldfrage === o.v ? 'bg-[#0D1B3E] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                draft.schuldfrage === o.v ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border'
               }`}
             >
               {o.label}
@@ -483,24 +495,24 @@ export default function Phase1Qualifizierung() {
       {/* Q2 — Sichtbarer Schaden (+ Fahrbereit + Personenschaden) */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${q2Complete ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>2</span>
-          <h3 className="text-xs font-semibold text-gray-700">Wie sieht es mit Ihrem Auto aus — hat es was abgekriegt?</h3>
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${q2Complete ? 'bg-green-500 text-white' : 'bg-claimondo-border text-claimondo-ondo'}`}>2</span>
+          <h3 className="text-xs font-semibold text-claimondo-navy">Wie sieht es mit Ihrem Auto aus — hat es was abgekriegt?</h3>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: true }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === true ? 'bg-[#0D1B3E] text-white' : 'bg-gray-100 text-gray-600'}`}>Ja — sichtbarer Schaden</button>
-          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: false }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === false ? 'bg-[#0D1B3E] text-white' : 'bg-gray-100 text-gray-600'}`}>Nein / unklar</button>
+          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: true }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === true ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>Ja — sichtbarer Schaden</button>
+          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: false }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === false ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>Nein / unklar</button>
         </div>
 
         {/* Bei Ja: Fahrbereit-Toggle (Spec §3 Q2 Unterfeld) */}
         {draft.schaden_sichtbar === true && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2">
+          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
             <div className="flex items-center gap-2">
-              <CarFrontIcon className="w-3.5 h-3.5 text-gray-500" />
-              <span className="text-[11px] font-semibold text-gray-700">Fahrzeug noch fahrbereit?</span>
+              <CarFrontIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+              <span className="text-[11px] font-semibold text-claimondo-navy">Fahrzeug noch fahrbereit?</span>
             </div>
             <div className="flex gap-2">
-              <button type="button" onClick={() => setDraft(d => ({ ...d, fahrzeug_fahrbereit: true }))} className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.fahrzeug_fahrbereit === true ? 'bg-[#4573A2] text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>Ja, fahrbereit</button>
-              <button type="button" onClick={() => setDraft(d => ({ ...d, fahrzeug_fahrbereit: false }))} className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.fahrzeug_fahrbereit === false ? 'bg-[#4573A2] text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>Nein</button>
+              <button type="button" onClick={() => setDraft(d => ({ ...d, fahrzeug_fahrbereit: true }))} className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.fahrzeug_fahrbereit === true ? 'bg-claimondo-ondo text-white' : 'bg-white border border-claimondo-border text-claimondo-ondo'}`}>Ja, fahrbereit</button>
+              <button type="button" onClick={() => setDraft(d => ({ ...d, fahrzeug_fahrbereit: false }))} className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.fahrzeug_fahrbereit === false ? 'bg-claimondo-ondo text-white' : 'bg-white border border-claimondo-border text-claimondo-ondo'}`}>Nein</button>
             </div>
             {draft.fahrzeug_fahrbereit === false && (
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
@@ -512,7 +524,7 @@ export default function Phase1Qualifizierung() {
               </div>
             )}
             <label className={`flex items-center gap-1.5 text-[11px] cursor-pointer rounded-lg p-1.5 ${
-              isAuffahrunfall ? 'bg-rose-50 border border-rose-200 text-rose-900' : 'text-gray-700'
+              isAuffahrunfall ? 'bg-rose-50 border border-rose-200 text-rose-900' : 'text-claimondo-navy'
             }`}>
               <input type="checkbox" checked={draft.personenschaden_flag ?? false} onChange={e => setDraft(d => ({ ...d, personenschaden_flag: e.target.checked }))} className="w-3.5 h-3.5" />
               <UserPlusIcon className="w-3.5 h-3.5" />
@@ -524,27 +536,27 @@ export default function Phase1Qualifizierung() {
 
         {/* Bei Nein: Nachfrage-Block (wie bisher) */}
         {draft.schaden_sichtbar === false && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
-            <p className="text-[11px] font-semibold text-blue-900">Nachfrage (wörtlich stellen):</p>
-            <p className="text-xs text-blue-800 italic">
+          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
+            <p className="text-[11px] font-semibold text-claimondo-navy">Nachfrage (wörtlich stellen):</p>
+            <p className="text-xs text-claimondo-navy italic">
               „Wie geht es Ihnen — haben Sie sich verletzt oder spüren Sie körperliche Beschwerden?"
             </p>
-            <p className="text-xs text-blue-800 italic">
+            <p className="text-xs text-claimondo-navy italic">
               „Konnten Sie Ihr Auto danach noch normal nutzen, oder mussten Sie auf ein Ersatzfahrzeug zurückgreifen?"
             </p>
-            <p className="text-[10px] text-blue-700 pt-1 border-t border-blue-200">
+            <p className="text-[10px] text-claimondo-ondo pt-1 border-t border-claimondo-border">
               Mindestens eine der 3 Optionen muss angehakt werden — sonst wird disqualifiziert (kein_schaden).
             </p>
             <div className="grid grid-cols-3 gap-2 pt-1">
-              <label className="flex items-center gap-1.5 text-[10px] text-gray-700 cursor-pointer">
+              <label className="flex items-center gap-1.5 text-[10px] text-claimondo-navy cursor-pointer">
                 <input type="checkbox" checked={draft.personenschaden_flag ?? false} onChange={e => setDraft(d => ({ ...d, personenschaden_flag: e.target.checked }))} className="w-3.5 h-3.5" />
                 Personenschaden
               </label>
-              <label className="flex items-center gap-1.5 text-[10px] text-gray-700 cursor-pointer">
+              <label className="flex items-center gap-1.5 text-[10px] text-claimondo-navy cursor-pointer">
                 <input type="checkbox" checked={draft.mietwagen_flag ?? false} onChange={e => setDraft(d => ({ ...d, mietwagen_flag: e.target.checked }))} className="w-3.5 h-3.5" />
                 Mietwagen
               </label>
-              <label className="flex items-center gap-1.5 text-[10px] text-gray-700 cursor-pointer">
+              <label className="flex items-center gap-1.5 text-[10px] text-claimondo-navy cursor-pointer">
                 <input type="checkbox" checked={draft.nutzungsausfall ?? false} onChange={e => setDraft(d => ({ ...d, nutzungsausfall: e.target.checked }))} className="w-3.5 h-3.5" />
                 Nutzungsausfall
               </label>
@@ -558,13 +570,13 @@ export default function Phase1Qualifizierung() {
           „nur Personenschaden"-Fällen (schaden_sichtbar=false + personenschaden_flag)
           erscheint. */}
       {draft.personenschaden_flag === true && (
-        <div className="space-y-2 border-t border-gray-100 pt-4">
+        <div className="space-y-2 border-t border-claimondo-border pt-4">
           <div className="flex items-center gap-2">
             <UserPlusIcon className="w-4 h-4 text-rose-600" />
-            <h3 className="text-xs font-semibold text-gray-700">
+            <h3 className="text-xs font-semibold text-claimondo-navy">
               Verletzte Personen
             </h3>
-            <span className="text-[10px] text-gray-400">
+            <span className="text-[10px] text-claimondo-ondo/70">
               Name, Geburtsdatum, Verletzungsart
             </span>
           </div>
@@ -575,13 +587,13 @@ export default function Phase1Qualifizierung() {
       {/* AAR-357: Sachschäden an Dritten — unabhängig vom KFZ-Schaden.
           Leitplanke, Zaun, Handy, Brille etc. Schaltet zwei Katalog-Slots
           (sachschaden_rechnung, sachschaden_foto) frei. */}
-      <div className="space-y-2 border-t border-gray-100 pt-4">
+      <div className="space-y-2 border-t border-claimondo-border pt-4">
         <div className="flex items-center gap-2">
-          <PackageIcon className="w-4 h-4 text-[#4573A2]" />
-          <h3 className="text-xs font-semibold text-gray-700">
+          <PackageIcon className="w-4 h-4 text-claimondo-ondo" />
+          <h3 className="text-xs font-semibold text-claimondo-navy">
             Sachschäden an Dritten?
           </h3>
-          <span className="text-[10px] text-gray-400">
+          <span className="text-[10px] text-claimondo-ondo/70">
             (Leitplanke, Zaun, Handy, Brille …)
           </span>
         </div>
@@ -591,8 +603,8 @@ export default function Phase1Qualifizierung() {
             onClick={() => setDraft((d) => ({ ...d, sachschaden_flag: true }))}
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
               draft.sachschaden_flag === true
-                ? 'bg-[#0D1B3E] text-white'
-                : 'bg-gray-100 text-gray-600'
+                ? 'bg-claimondo-navy text-white'
+                : 'bg-[#f8f9fb] text-claimondo-ondo'
             }`}
           >
             Ja — Sachschaden vorhanden
@@ -608,8 +620,8 @@ export default function Phase1Qualifizierung() {
             }
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
               draft.sachschaden_flag === false
-                ? 'bg-[#0D1B3E] text-white'
-                : 'bg-gray-100 text-gray-600'
+                ? 'bg-claimondo-navy text-white'
+                : 'bg-[#f8f9fb] text-claimondo-ondo'
             }`}
           >
             Nein
@@ -634,10 +646,10 @@ export default function Phase1Qualifizierung() {
       </div>
 
       {/* Unfallort (zwischen Q2 und Q3, wie in Schritt0HardGate) */}
-      <div className="space-y-3 border-t border-gray-100 pt-4">
+      <div className="space-y-3 border-t border-claimondo-border pt-4">
         <div className="flex items-center gap-2">
-          <MapPinIcon className="w-4 h-4 text-[#4573A2]" />
-          <h3 className="text-xs font-semibold text-gray-700">Unfallort</h3>
+          <MapPinIcon className="w-4 h-4 text-claimondo-ondo" />
+          <h3 className="text-xs font-semibold text-claimondo-navy">Unfallort</h3>
         </div>
         {/* AAR-176 P2-B: Kategorie-Dropdown entfernt — wird automatisch aus
             schadentyp abgeleitet (saveSchadentyp schreibt unfallort_kategorie
@@ -653,7 +665,7 @@ export default function Phase1Qualifizierung() {
               unfallort_lng: r.lng,
             }))
           }
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+          className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
         />
         {draft.unfallort && (draft.unfallort_lat == null || draft.unfallort_lng == null) && (
           <p className="text-[10px] text-amber-700 flex items-start gap-1">
@@ -661,14 +673,44 @@ export default function Phase1Qualifizierung() {
             Koordinaten fehlen — SV-Dispatch nutzt Kunden-Adresse als Fallback. Bitte einen Autocomplete-Vorschlag wählen.
           </p>
         )}
+
+        {/* CMM-26: Datum + Uhrzeit gehören zum Erstkontakt — wandern aus
+            Phase 4 hier hin. Uhrzeit ist Freitext (Dispatcher tippt mit, was
+            der Kunde sagt: „14 Uhr", „ca. 14:30"); die Normalisierung zu
+            HH:MM:SS passiert in saveHardGate / convertLeadToClaim. */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-0.5">
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">
+              Unfalldatum
+            </label>
+            <input
+              type="date"
+              value={(draft.unfalldatum ?? '').slice(0, 10)}
+              onChange={(e) => setDraft((d) => ({ ...d, unfalldatum: e.target.value || null }))}
+              className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-claimondo-ondo"
+            />
+          </div>
+          <div className="space-y-0.5">
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">
+              Unfall-Uhrzeit (ca.)
+            </label>
+            <input
+              type="text"
+              value={draft.unfall_uhrzeit ?? ''}
+              onChange={(e) => setDraft((d) => ({ ...d, unfall_uhrzeit: e.target.value }))}
+              placeholder="z.B. 14:30, 14 Uhr, ca. 8:15"
+              className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-claimondo-ondo"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Q3 — Polizei vor Ort (KOMPLETT NEU, Spec §3 Q3) */}
-      <div className={`space-y-2 border-t border-gray-100 pt-4 ${fahrerflucht ? 'bg-red-50 -mx-5 px-5 py-3 border-t-2 border-red-200' : ''}`}>
+      <div className={`space-y-2 border-t border-claimondo-border pt-4 ${fahrerflucht ? 'bg-red-50 -mx-5 px-5 py-3 border-t-2 border-red-200' : ''}`}>
         <div className="flex items-center gap-2">
-          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${q3Complete ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>3</span>
-          <ShieldAlertIcon className={`w-3.5 h-3.5 ${fahrerflucht ? 'text-red-600' : 'text-gray-500'}`} />
-          <h3 className="text-xs font-semibold text-gray-700">War die Polizei vor Ort?</h3>
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${q3Complete ? 'bg-green-500 text-white' : 'bg-claimondo-border text-claimondo-ondo'}`}>3</span>
+          <ShieldAlertIcon className={`w-3.5 h-3.5 ${fahrerflucht ? 'text-red-600' : 'text-claimondo-ondo'}`} />
+          <h3 className="text-xs font-semibold text-claimondo-navy">War die Polizei vor Ort?</h3>
           {fahrerflucht && (
             <span className="ml-auto text-[10px] font-bold text-red-700 uppercase">
               Fahrerflucht → Polizei Pflicht!
@@ -679,7 +721,7 @@ export default function Phase1Qualifizierung() {
           <button
             type="button"
             onClick={() => setDraft(d => ({ ...d, polizei_vor_ort: true }))}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === true ? 'bg-[#0D1B3E] text-white' : 'bg-gray-100 text-gray-600'}`}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === true ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
           >
             Ja — Polizei war da
           </button>
@@ -694,15 +736,15 @@ export default function Phase1Qualifizierung() {
                 polizei_aktenzeichen: '',
               }))
             }
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === false ? 'bg-[#0D1B3E] text-white' : 'bg-gray-100 text-gray-600'}`}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === false ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
           >
             Nein
           </button>
         </div>
 
         {draft.polizei_vor_ort === true && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
-            <p className="text-[11px] font-semibold text-blue-900">Polizeibericht bereits vorhanden?</p>
+          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
+            <p className="text-[11px] font-semibold text-claimondo-navy">Polizeibericht bereits vorhanden?</p>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -713,7 +755,7 @@ export default function Phase1Qualifizierung() {
                     polizeibericht_pflicht: true,
                   }))
                 }
-                className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.polizeibericht_vorhanden === true ? 'bg-[#4573A2] text-white' : 'bg-white border border-blue-200 text-blue-800'}`}
+                className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.polizeibericht_vorhanden === true ? 'bg-claimondo-ondo text-white' : 'bg-white border border-claimondo-border text-claimondo-navy'}`}
               >
                 Ja — Kunde hat Bericht
               </button>
@@ -726,13 +768,13 @@ export default function Phase1Qualifizierung() {
                     polizeibericht_pflicht: false,
                   }))
                 }
-                className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.polizeibericht_vorhanden === false ? 'bg-[#4573A2] text-white' : 'bg-white border border-blue-200 text-blue-800'}`}
+                className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.polizeibericht_vorhanden === false ? 'bg-claimondo-ondo text-white' : 'bg-white border border-claimondo-border text-claimondo-navy'}`}
               >
                 Nein — nur Aktenzeichen
               </button>
             </div>
             {draft.polizeibericht_vorhanden === true && (
-              <p className="text-[11px] text-blue-800 italic">
+              <p className="text-[11px] text-claimondo-navy italic">
                 Portal zeigt Polizeibericht-Upload als Pflichtfeld im FlowLink.
               </p>
             )}
@@ -742,7 +784,7 @@ export default function Phase1Qualifizierung() {
                 value={draft.polizei_aktenzeichen ?? ''}
                 onChange={(e) => setDraft((d) => ({ ...d, polizei_aktenzeichen: e.target.value }))}
                 placeholder="Aktenzeichen (wenn bekannt)"
-                className="w-full px-3 py-1.5 border border-blue-200 rounded-lg text-xs bg-white"
+                className="w-full px-3 py-1.5 border border-claimondo-border rounded-lg text-xs bg-white"
               />
             )}
           </div>
@@ -759,7 +801,7 @@ export default function Phase1Qualifizierung() {
           der MA das Exit-Skript in Ruhe vorlesen kann — Disqualifikation
           erst manuell via Sidebar-Button. */}
       {!allComplete ? (
-        <p className="text-[10px] text-gray-500 flex items-center gap-1">
+        <p className="text-[10px] text-claimondo-ondo flex items-center gap-1">
           <InfoIcon className="w-3 h-3" /> Alle 3 Bereiche müssen beantwortet sein bevor Phase 2 freigeschaltet wird.
         </p>
       ) : draft.schuldfrage === 'eigenverantwortung' ? (
@@ -768,9 +810,9 @@ export default function Phase1Qualifizierung() {
           Auto-Save ausgesetzt — erst Exit-Skript vorlesen, dann manuell in der Sidebar „Disqualifizieren".
         </p>
       ) : (
-        <p className="text-[10px] text-gray-500 flex items-center gap-1">
+        <p className="text-[10px] text-claimondo-ondo flex items-center gap-1">
           {pending
-            ? <><span className="inline-block w-2 h-2 rounded-full bg-[#4573A2] animate-pulse" /> Auto-Save läuft ...</>
+            ? <><span className="inline-block w-2 h-2 rounded-full bg-claimondo-ondo animate-pulse" /> Auto-Save läuft ...</>
             : <><CheckCircleIcon className="w-3 h-3 text-green-600" /> Änderungen werden automatisch gespeichert.</>}
         </p>
       )}
@@ -781,7 +823,7 @@ export default function Phase1Qualifizierung() {
           type="button"
           disabled={pending}
           onClick={() => setPhase(2)}
-          className="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full mt-2 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-50 flex items-center justify-center gap-2"
         >
           Weiter zu Phase 2 →
         </button>

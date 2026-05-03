@@ -25,7 +25,7 @@ export default async function FaelleHubLayout({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="shrink-0 border-b border-gray-200 bg-white px-4 md:px-6">
+      <div className="shrink-0 border-b border-claimondo-border bg-white px-4 md:px-6">
         <FaelleHubTabs offeneReklamationen={offeneReklamationen} />
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>

@@ -4,6 +4,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { roleToPath } from '@/lib/auth/role-redirect'
 import { MaklerShell } from '@/components/makler/MaklerShell'
 
 export const dynamic = 'force-dynamic'
@@ -23,7 +24,8 @@ export default async function MaklerLayout({
     .eq('id', user.id)
     .single()
 
-  if (profile?.rolle !== 'makler') redirect('/')
+  // AAR-718: Bei falscher Rolle in eigenes Portal statt auf Landing-Page.
+  if (profile?.rolle !== 'makler') redirect(roleToPath(profile?.rolle as string | null | undefined))
 
   const { data: makler } = await supabase
     .from('makler')
@@ -35,7 +37,7 @@ export default async function MaklerLayout({
   if (makler.status !== 'aktiv') redirect('/makler/pending')
 
   return (
-    <MaklerShell makler={makler} email={user.email ?? ''}>
+    <MaklerShell makler={makler} email={user.email ?? ''} userId={user.id}>
       {children}
     </MaklerShell>
   )

@@ -32,6 +32,7 @@ export default function MultiChannelChat({
   defaultKanal = 'whatsapp',
   empfaengerHints,
   visibleKanaele,
+  smartReplyDefault = false,
 }: {
   fallId: string
   currentUserId: string | null
@@ -42,6 +43,11 @@ export default function MultiChannelChat({
   // Wenn gesetzt, wird die Channel-Liste ausschließlich aus dieser Menge
   // gebildet (showInternalKbSvChat bleibt zusätzlich additiv).
   visibleKanaele?: ChatKanal[]
+  // AAR-726: Smart-Reply. Wenn true, lädt beim Mount die letzte Nachricht
+  // über alle sichtbaren Kanäle und setzt den aktiven Kanal auf den Kanal
+  // dieser Nachricht. So antwortet der User automatisch im Kanal der
+  // letzten Interaktion — default-Setting das am häufigsten gewünscht ist.
+  smartReplyDefault?: boolean
 }) {
   const [activeKanal, setActiveKanal] = useState<ChatKanal>(defaultKanal)
   const [messages, setMessages] = useState<Nachricht[]>([])
@@ -89,6 +95,32 @@ export default function MultiChannelChat({
   useEffect(() => { loadMessages(activeKanal) }, [activeKanal, loadMessages])
   useEffect(() => { loadUnreadCounts() }, [loadUnreadCounts])
 
+  // AAR-726: Smart-Reply — beim ersten Mount den Kanal der letzten
+  // Nachricht über alle sichtbaren Kanäle als aktiv setzen. Wir führen
+  // das nur EINMAL aus (Ref-Guard) — danach darf der User frei wechseln.
+  const smartReplyAppliedRef = useRef(false)
+  useEffect(() => {
+    if (!smartReplyDefault || smartReplyAppliedRef.current) return
+    if (visibleChannels.length === 0) return
+    smartReplyAppliedRef.current = true
+    const supabase = createClient()
+    supabase
+      .from('nachrichten')
+      .select('kanal')
+      .eq('fall_id', fallId)
+      .in('kanal', visibleChannels.map(c => c.id))
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        const lastKanal = data?.kanal as ChatKanal | undefined
+        if (lastKanal && visibleChannels.some(c => c.id === lastKanal) && lastKanal !== activeKanal) {
+          setActiveKanal(lastKanal)
+        }
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [smartReplyDefault, fallId])
+
   // Realtime subscription
   useEffect(() => {
     const supabase = createClient()
@@ -132,9 +164,9 @@ export default function MultiChannelChat({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 flex flex-col h-[600px]">
+    <div className="bg-white rounded-2xl border border-claimondo-border flex flex-col h-[600px]">
       {/* Tabs */}
-      <div className="flex border-b border-gray-100 overflow-x-auto">
+      <div className="flex border-b border-claimondo-border overflow-x-auto">
         {visibleChannels.map(c => {
           const Icon = c.icon
           const unread = unreadCounts[c.id] ?? 0
@@ -144,7 +176,7 @@ export default function MultiChannelChat({
               key={c.id}
               onClick={() => setActiveKanal(c.id)}
               className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${
-                active ? 'border-[#4573A2] text-[#0D1B3E]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                active ? 'border-[#4573A2] text-[#0D1B3E]' : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               <Icon className="w-4 h-4" style={{ color: c.color }} />
@@ -160,23 +192,23 @@ export default function MultiChannelChat({
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f8f9fb]">
         {messages.length === 0 ? (
-          <p className="text-center text-gray-400 text-sm py-10">Noch keine Nachrichten in diesem Kanal.</p>
+          <p className="text-center text-claimondo-ondo/70 text-sm py-10">Noch keine Nachrichten in diesem Kanal.</p>
         ) : (
           messages.map(m => <MessageBubble key={m.id} message={m} currentUserId={currentUserId} />)
         )}
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-100 p-3 flex gap-2">
+      <div className="border-t border-claimondo-border p-3 flex gap-2">
         <input
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
           placeholder={`Nachricht ueber ${visibleChannels.find(c => c.id === activeKanal)?.label}...`}
-          className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+          className="flex-1 px-4 py-2.5 bg-[#f8f9fb] border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
           disabled={sending}
         />
         <button
@@ -200,7 +232,7 @@ function MessageBubble({ message, currentUserId }: { message: Nachricht; current
   if (isSystem) {
     return (
       <div className="text-center">
-        <span className="inline-block text-[10px] text-gray-500 bg-white border border-gray-200 rounded-full px-3 py-1">
+        <span className="inline-block text-[10px] text-claimondo-ondo bg-white border border-claimondo-border rounded-full px-3 py-1">
           {message.nachricht}
         </span>
       </div>
@@ -210,10 +242,10 @@ function MessageBubble({ message, currentUserId }: { message: Nachricht; current
   return (
     <div className={`flex ${alignRight ? 'justify-end' : 'justify-start'}`}>
       <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-        alignRight ? 'bg-[#4573A2] text-white' : 'bg-white border border-gray-200 text-gray-800'
+        alignRight ? 'bg-[#4573A2] text-white' : 'bg-white border border-claimondo-border text-claimondo-navy'
       }`}>
         {!alignRight && message.sender_rolle && (
-          <p className="text-[10px] font-semibold text-gray-500 mb-0.5 uppercase">{message.sender_rolle}</p>
+          <p className="text-[10px] font-semibold text-claimondo-ondo mb-0.5 uppercase">{message.sender_rolle}</p>
         )}
         <p className="text-sm whitespace-pre-wrap">{message.nachricht}</p>
         {message.hat_anhang && message.anhang_url && (
@@ -221,7 +253,7 @@ function MessageBubble({ message, currentUserId }: { message: Nachricht; current
             Anhang oeffnen
           </a>
         )}
-        <p className={`text-[10px] mt-1 ${alignRight ? 'text-white/60' : 'text-gray-400'}`}>
+        <p className={`text-[10px] mt-1 ${alignRight ? 'text-white/60' : 'text-claimondo-ondo/70'}`}>
           {new Date(message.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>

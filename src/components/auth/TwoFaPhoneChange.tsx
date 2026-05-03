@@ -7,6 +7,7 @@
 import { useState, useTransition } from 'react'
 import { ShieldCheckIcon, LoaderIcon, XIcon } from 'lucide-react'
 import { initPhoneChange, confirmPhoneChange } from '@/lib/auth/twofa/change-phone'
+import { Modal } from '@/components/primitives/Modal'
 
 export function TwoFaPhoneChange({
   aktuelleTwofaTelefon,
@@ -69,15 +70,15 @@ export function TwoFaPhoneChange({
 
   return (
     <>
-      <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
+      <div className="rounded-xl border border-claimondo-border bg-white p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-2">
           <ShieldCheckIcon className="w-4 h-4 text-[#4573A2]" />
-          <h3 className="text-sm font-semibold text-gray-900">2FA-Telefonnummer</h3>
+          <h3 className="text-sm font-semibold text-claimondo-navy">2FA-Telefonnummer</h3>
         </div>
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-claimondo-ondo">
           Aktuelle Nummer: <span className="font-mono">{aktuell ? mask(aktuell) : '—'}</span>
           {usingFallback && (
-            <span className="text-gray-400"> (Fallback auf Profil-Telefon)</span>
+            <span className="text-claimondo-ondo/70"> (Fallback auf Profil-Telefon)</span>
           )}
         </p>
         <button
@@ -92,37 +93,39 @@ export function TwoFaPhoneChange({
         </button>
       </div>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => !pending && setOpen(false)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-xl w-full max-w-md"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-gray-100 p-4">
-              <h2 className="text-base font-semibold text-gray-900">2FA-Nummer ändern</h2>
+      <Modal
+        open={open}
+        onClose={() => !pending && setOpen(false)}
+        closeOnBackdrop={!pending}
+        closeOnEsc={!pending}
+        noPadding
+        hideCloseButton
+        maxWidth={448}
+        ariaLabel="2FA-Nummer ändern"
+      >
+        <div>
+            <div className="flex items-center justify-between border-b border-claimondo-border p-4">
+              <h2 className="text-base font-semibold text-claimondo-navy">2FA-Nummer ändern</h2>
               <button
                 type="button"
                 onClick={() => !pending && setOpen(false)}
-                className="p-1.5 rounded-md hover:bg-gray-100"
+                className="p-1.5 rounded-md hover:bg-[#f8f9fb]"
                 aria-label="Schließen"
               >
-                <XIcon className="w-4 h-4 text-gray-500" />
+                <XIcon className="w-4 h-4 text-claimondo-ondo" />
               </button>
             </div>
 
             <div className="p-4 space-y-3">
               {step === 'input' && (
                 <>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-claimondo-ondo">
                     Wir senden einen 6-stelligen Code per SMS an die neue Nummer.
                     Erst nach erfolgreicher Bestätigung wird die Nummer
                     übernommen — deine aktuelle Nummer bleibt bis dahin gültig.
                   </p>
                   <div>
-                    <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+                    <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                       Neue Telefonnummer
                     </label>
                     <input
@@ -130,7 +133,7 @@ export function TwoFaPhoneChange({
                       value={neuePhone}
                       onChange={(e) => setNeuePhone(e.target.value)}
                       placeholder="+49 151 12345678 oder 0151 12345678"
-                      className="w-full text-sm rounded-md border border-gray-200 px-2 py-2 outline-none focus:border-[#4573A2]"
+                      className="w-full text-sm rounded-md border border-claimondo-border px-2 py-2 outline-none focus:border-[#4573A2]"
                     />
                   </div>
                 </>
@@ -138,12 +141,12 @@ export function TwoFaPhoneChange({
 
               {step === 'code' && (
                 <>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-claimondo-ondo">
                     Wir haben einen Code an <span className="font-mono">{mask(normalized)}</span>{' '}
                     gesendet. Bitte eingeben um die Änderung zu bestätigen.
                   </p>
                   <div>
-                    <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+                    <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                       6-stelliger Code
                     </label>
                     <input
@@ -154,7 +157,7 @@ export function TwoFaPhoneChange({
                       value={code}
                       onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
                       placeholder="123456"
-                      className="w-full text-lg font-mono tracking-widest rounded-md border border-gray-200 px-2 py-2 outline-none focus:border-[#4573A2] text-center"
+                      className="w-full text-lg font-mono tracking-widest rounded-md border border-claimondo-border px-2 py-2 outline-none focus:border-[#4573A2] text-center"
                     />
                   </div>
                   <button
@@ -164,7 +167,7 @@ export function TwoFaPhoneChange({
                       setCode('')
                       setError(null)
                     }}
-                    className="text-xs text-gray-500 hover:text-gray-700"
+                    className="text-xs text-claimondo-ondo hover:text-claimondo-navy"
                   >
                     ← andere Nummer eingeben
                   </button>
@@ -183,12 +186,12 @@ export function TwoFaPhoneChange({
               )}
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-gray-100 p-3">
+            <div className="flex justify-end gap-2 border-t border-claimondo-border p-3">
               <button
                 type="button"
                 onClick={() => !pending && setOpen(false)}
                 disabled={pending}
-                className="px-3 py-1.5 rounded-md text-xs font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb] disabled:opacity-50"
               >
                 Abbrechen
               </button>
@@ -214,9 +217,8 @@ export function TwoFaPhoneChange({
                 </button>
               )}
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </>
   )
 }

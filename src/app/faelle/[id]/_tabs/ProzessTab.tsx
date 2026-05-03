@@ -1,14 +1,14 @@
 'use client'
 
 // AAR-164 / W4: Prozess-Tab — 8 Sections phase-dynamisch.
-// AAR-543 (C6): Sichtbarkeits-Map aus prozess-section-visibility.ts statt
-// der Stammdaten-PHASE_VISIBLE_SECTIONS — Sections folgen jetzt der vom
-// Server berechneten Subphase + den Daten-Flags (vs_kuerzungs_typ,
-// Auszahlungs-Split, usw).
+// AAR-543 (C6): Sichtbarkeits-Map aus den Daten-Triggern (vs_kuerzungs_typ,
+// Auszahlungs-Split, usw.) — zentral berechnet.
+// AAR-745 (Phase A): Wechsel auf section-visibility.ts mit rolle='admin';
+// dieselbe Quelle nutzt jetzt auch die SV-Fallakte.
 
 import { useFall } from '../FallContext'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
-import { getVisibleProzessSections } from '@/lib/fall/prozess-section-visibility'
+import { getVisibleFallSections } from '@/lib/fall/section-visibility'
 import {
   KanzleiEakteSection,
   AsSection,
@@ -22,13 +22,13 @@ import {
 
 export default function ProzessTab({ subphase }: { subphase: SubphaseResult }) {
   const { fall, phase } = useFall()
-  const visible = getVisibleProzessSections(subphase, fall)
+  const visible = getVisibleFallSections(fall, 'admin', subphase)
 
   if (visible.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-2">
-        <h2 className="text-sm font-semibold text-gray-900">Prozess</h2>
-        <p className="text-xs text-gray-500">
+      <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-2">
+        <h2 className="text-sm font-semibold text-claimondo-navy">Prozess</h2>
+        <p className="text-xs text-claimondo-ondo">
           Der Prozess-Tab zeigt Kanzlei, Anspruchsschreiben, VS-Reaktion, Rüge,
           Stellungnahme, Nachbesichtigung, Klage und Auszahlung — sobald der Fall
           die jeweilige Phase erreicht. Aktueller Status:{' '}

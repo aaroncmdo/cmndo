@@ -45,7 +45,7 @@ const STATUS_BADGE: Record<DokumentSlotStatus, { label: string; className: strin
     label: 'Nachzureichen',
     className: 'bg-orange-50 text-orange-700 border-orange-200',
   },
-  optional: { label: 'Optional', className: 'bg-gray-50 text-gray-500 border-gray-200' },
+  optional: { label: 'Optional', className: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' },
 }
 
 const ACCEPTED = 'image/jpeg,image/png,image/webp,application/pdf'
@@ -116,7 +116,7 @@ export default function FeldmodusDokumentSlot({
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
+    <div className="rounded-xl border border-claimondo-border bg-white p-4">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ export default function FeldmodusDokumentSlot({
               <span className="text-[10px] font-semibold text-red-600 uppercase">Pflicht</span>
             )}
           </div>
-          {beschreibung && <p className="text-xs text-gray-500 mt-0.5">{beschreibung}</p>}
+          {beschreibung && <p className="text-xs text-claimondo-ondo mt-0.5">{beschreibung}</p>}
         </div>
         <span className={`text-[10px] font-medium px-2 py-1 rounded-full border ${badge.className}`}>
           {badge.label}
@@ -133,7 +133,7 @@ export default function FeldmodusDokumentSlot({
       </div>
 
       {hasFile && (
-        <div className="flex items-center gap-2 mb-3 text-xs text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 mb-3 text-xs text-claimondo-navy bg-[#f8f9fb] rounded-lg px-3 py-2">
           <FileIcon className="w-3.5 h-3.5 text-[var(--brand-secondary)] flex-shrink-0" />
           <span className="truncate flex-1">{localFile!.name}</span>
           {localStatus === 'hochgeladen' || localStatus === 'geprueft' ? (

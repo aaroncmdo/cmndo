@@ -7,11 +7,16 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import FallakteShell from './FallakteShell'
+// CMM-33: Zentrale Pflichtdokumente-Section für Admin/KB im DokumenteTab.
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
 // AAR-327: Katalog-driven Slot-Liste für „Dokument anfordern"-Modal
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-433 (Child 4 AAR-429): KB Phase-State-Audit oberhalb der Tabs
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
+import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
+import RegulierungCard from '@/components/kb/RegulierungCard'
+import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
 import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
 import {
@@ -28,8 +33,19 @@ import { getFallEventStream } from '@/lib/fall/event-stream'
 import { getChatTeilnehmer } from '@/lib/chatGruppe'
 // AAR-542 (C5): Pflicht-Matrix — Katalog-Regel-Auswertung serverseitig
 import { evaluatePflichtdocs } from '@/lib/dokumente/pflicht-evaluator'
+import { listAdHocAnforderungen } from '@/lib/dokumente/ad-hoc-anforderung'
+// AAR-761 Phase 3: OCR-Belege zum Review (Admin/KB)
+import { listBelegeZumReview } from '@/lib/beleg-review/actions'
 // AAR-651: Zentrale Fall-Loader-Lib (Single Source of Truth pro Rolle)
 import { getFallById } from '@/lib/fall/queries'
+// AAR-843: Timeline-Queries für den Verlaufs-Tab
+import { getClaimTimeline } from '@/lib/claims/timeline-queries'
+import { projectNextEvents } from '@/lib/claims/timeline-projection'
+// AAR-842: Kanzlei-Block — aktives Paket + Partnerkanzlei-Settings + QR-Codes
+// AAR-844: isKanzleiPaketPending für KB-Dropdown-Quick-Action
+import { getActiveKanzleiPaket, getPartnerKanzleiSettings, isKanzleiPaketPending } from '@/lib/kanzlei/queries'
+import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
+import { KanzleiAnsprechpartnerBlock } from '@/components/shared/claims'
 
 export default async function FallaktePage({
   params,
@@ -45,6 +61,26 @@ export default async function FallaktePage({
   const fall = await getFallById(supabase, id)
   if (!fall) notFound()
 
+  // AAR-840: claim_id + claims.status für Endzustand-Dropdown im Header.
+  // claim_id ist seit AAR-816 NOT NULL auf faelle. Status laden wir separat
+  // damit der Endzustand-Dropdown den aktuellen Stand zeigt.
+  const claimId = (fall as Record<string, unknown>).claim_id as string | null
+  let claimStatus: string | null = null
+  let claimPhase: string | null = null
+  let claimKanzleiWunsch: string | null = null
+  if (claimId) {
+    const { data: claimRow } = await supabase
+      .from('claims')
+      .select('status, phase, kanzlei_wunsch')
+      .eq('id', claimId)
+      .maybeSingle()
+    claimStatus        = (claimRow?.status         as string | null) ?? null
+    claimPhase         = (claimRow?.phase          as string | null) ?? null
+    claimKanzleiWunsch = (claimRow?.kanzlei_wunsch as string | null) ?? null
+  }
+  // userRolle für Timeline-Rolle und viele andere Stellen (Auth + RLS),
+  // wird unten erneut für FallakteRolle-Cast verwendet.
+
   // Rolle des eingeloggten Users für field-permissions
   const { data: profile } = await supabase
     .from('profiles')
@@ -52,6 +88,65 @@ export default async function FallaktePage({
     .eq('id', user.id)
     .single()
   const userRolle = ((profile?.rolle as FallakteRolle | null) ?? 'kunde') as FallakteRolle
+
+  // AAR-843: Timeline + Future-Projection laden (nach userRolle-Auflösung,
+  // weil RLS via security_invoker auf der View die Auth braucht).
+  const viewerRoleForTimeline =
+    userRolle === 'kundenbetreuer'    ? 'kb'    :
+    userRolle === 'admin'             ? 'admin' :
+    userRolle === 'sachverstaendiger' ? 'sv'    : 'kunde'
+  const timelineEvents = claimId
+    ? await getClaimTimeline(claimId, viewerRoleForTimeline)
+    : []
+  const futureEvents = projectNextEvents({ phase: claimPhase })
+
+  // AAR-844: Pre-Check für KB-Dropdown — zeigt "Paket jetzt versenden" wenn
+  // Wunsch + Phase passen aber kein Paket existiert.
+  const kanzleiPaketPending = claimId ? await isKanzleiPaketPending(claimId) : false
+
+  // AAR-842: Kanzlei-Block-Daten — nur laden wenn ein versendetes Paket existiert.
+  // Bei Partnerkanzlei zusätzlich Settings + QR-SVGs für WhatsApp + Termin.
+  // variant='prominent' wenn phase=9_abgelehnt (Master-Doc 9.3).
+  const kanzleiPaket = claimId ? await getActiveKanzleiPaket(claimId) : null
+  let kanzleiBlockData: {
+    kanzleiName: string
+    kontaktperson: string | null
+    telefon: string | null
+    email: string | null
+    whatsappUrl: string | null
+    terminUrl: string | null
+    whatsappQrSvg: string | null
+    terminQrSvg: string | null
+    variant: 'normal' | 'prominent'
+  } | null = null
+  if (kanzleiPaket) {
+    let whatsappUrl: string | null = null
+    let terminUrl: string | null = null
+    let whatsappQrSvg: string | null = null
+    let terminQrSvg: string | null = null
+    if (kanzleiPaket.empfaenger_typ === 'partnerkanzlei') {
+      const settings = await getPartnerKanzleiSettings()
+      if (settings) {
+        whatsappUrl = settings.whatsappUrl || null
+        terminUrl   = settings.terminUrl   || null
+        ;[whatsappQrSvg, terminQrSvg] = await Promise.all([
+          whatsappUrl ? generateQrCodeSvg(whatsappUrl) : Promise.resolve(''),
+          terminUrl   ? generateQrCodeSvg(terminUrl)   : Promise.resolve(''),
+        ])
+      }
+    }
+    kanzleiBlockData = {
+      kanzleiName:   kanzleiPaket.empfaenger_kanzlei_name,
+      kontaktperson: kanzleiPaket.empfaenger_kanzlei_kontaktperson,
+      telefon:       kanzleiPaket.empfaenger_kanzlei_telefon,
+      email:         kanzleiPaket.empfaenger_kanzlei_email,
+      whatsappUrl,
+      terminUrl,
+      whatsappQrSvg: whatsappQrSvg || null,
+      terminQrSvg:   terminQrSvg   || null,
+      variant:       claimPhase === '9_abgelehnt' ? 'prominent' : 'normal',
+    }
+  }
 
   // Die schweren Abhängigkeits-Queries (Timeline, Dokumente, Parteien, etc.)
   // werden weiterhin hier geladen und als Props an die Tabs durchgereicht.
@@ -239,6 +334,18 @@ export default async function FallaktePage({
       begruendung: r.begruendung,
       angefordert_am: r.angefordert_am,
     }))
+
+  // AAR-762 Phase 3: Ad-hoc-Anforderungen für Admin/KB laden.
+  const adHocAnforderungen =
+    userRolle === 'admin' || userRolle === 'kundenbetreuer'
+      ? await listAdHocAnforderungen(id)
+      : []
+
+  // AAR-761 Phase 3: OCR-Belege zum Review (Admin/KB).
+  const belegeZumReview =
+    userRolle === 'admin' || userRolle === 'kundenbetreuer'
+      ? await listBelegeZumReview(id)
+      : []
 
   const rolleLabelForModal: Record<string, string> = {
     admin: 'Claimondo',
@@ -444,6 +551,106 @@ export default async function FallaktePage({
     }>,
   })
 
+  // CMM-32e: Vollständigkeits-Check-Card-Daten für KB/Admin
+  let qcCardProps: React.ComponentProps<typeof VollstaendigkeitsCheckCard> | null = null
+  if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
+    const adminCli = createAdminClient()
+    const auftraegeFall = await getAlleAuftraege(supabase, id)
+    const erstgutachten = auftraegeFall.find((a) => a.typ === 'erstgutachten')
+    if (erstgutachten) {
+      if (erstgutachten.gutachten_final_freigegeben) {
+        // Bereits freigegeben — keine Doc-Queries nötig, Banner zeigt nur den Erfolgs-State.
+        qcCardProps = {
+          auftragId: erstgutachten.id,
+          hatGutachten: true,
+          bereitsFreigegeben: true,
+          hauptgutachten: null,
+          anlagen: [],
+          pflichtItems: [],
+        }
+      } else {
+      // Aktive Dokumente (nicht abgelehnt)
+      const { data: dokRows } = await adminCli
+        .from('fall_dokumente')
+        .select('id, dokument_typ, original_filename, storage_path')
+        .eq('fall_id', id)
+        .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
+        .is('geloescht_am', null)
+        .is('abgelehnt_am', null)
+        .order('hochgeladen_am', { ascending: true })
+      // Abgelehnte Dokumente (KB-Reject-Audit) — nur für KB/Admin sichtbar
+      const { data: abgelehnteRows } = await adminCli
+        .from('fall_dokumente')
+        .select('id, dokument_typ, original_filename, storage_path, abgelehnt_am')
+        .eq('fall_id', id)
+        .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
+        .is('geloescht_am', null)
+        .not('abgelehnt_am', 'is', null)
+        .order('abgelehnt_am', { ascending: false })
+      type DocRow = { id: string; dokument_typ: string; original_filename: string | null; storage_path: string }
+      const docList = ((dokRows ?? []) as DocRow[]).map((d) => ({
+        id: d.id,
+        filename: d.original_filename ?? 'Datei',
+        url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
+        istHaupt: d.dokument_typ === 'gutachten' && !d.storage_path.includes('/nachbesserung/'),
+        istNachbesserung: d.storage_path.includes('/nachbesserung/'),
+      }))
+      const abgelehnteDocList = ((abgelehnteRows ?? []) as DocRow[]).map((d) => ({
+        id: d.id,
+        filename: d.original_filename ?? 'Datei',
+        url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
+        istHaupt: false,
+        istNachbesserung: false,
+      }))
+      const haupt = docList.find((d) => d.istHaupt) ?? null
+      const anlagen = docList.filter((d) => !d.istHaupt)
+      const slotLabels = new Map(katalogAlleSlots.map((s) => [s.slot_id, s.label]))
+      const pflichtItemsList = (pflichtdokumente ?? []).map((p) => ({
+        slot_id: p.dokument_typ as string,
+        label: slotLabels.get(p.dokument_typ as string) ?? (p.dokument_typ as string),
+        vorhanden: p.status === 'hochgeladen' || p.status === 'geprueft',
+        pflicht: !!p.pflicht,
+      }))
+      qcCardProps = {
+        auftragId: erstgutachten.id,
+        hatGutachten: !!erstgutachten.gutachten_url,
+        bereitsFreigegeben: false,
+        hauptgutachten: haupt,
+        anlagen,
+        pflichtItems: pflichtItemsList,
+        zurueckgewiesenAm: (erstgutachten as { zurueckgewiesen_am?: string | null }).zurueckgewiesen_am ?? null,
+        zurueckweisungGrund: (erstgutachten as { zurueckweisung_grund?: string | null }).zurueckweisung_grund ?? null,
+        abgelehnteAnlagen: abgelehnteDocList,
+      }
+      }
+    }
+  }
+
+  // CMM-32i: Kanzlei-Fall-Lifecycle-Daten für RegulierungCard. Existiert nur
+  // nach KB-Freigabe (gibKanzleipaketFrei legt den Eintrag an).
+  let regulierungCardProps: {
+    fallId: string
+    status: 'versicherungskontakt' | 'auszahlung'
+    vsKontaktAm: string | null
+    ausgezahltAm: string | null
+  } | null = null
+  if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
+    const adminCli = createAdminClient()
+    const { data: kf } = await adminCli
+      .from('kanzlei_faelle')
+      .select('status, vs_kontakt_am, ausgezahlt_am')
+      .eq('fall_id', id)
+      .maybeSingle()
+    if (kf) {
+      regulierungCardProps = {
+        fallId: id,
+        status: (kf.status as 'versicherungskontakt' | 'auszahlung') ?? 'versicherungskontakt',
+        vsKontaktAm: (kf.vs_kontakt_am as string | null) ?? null,
+        ausgezahltAm: (kf.ausgezahlt_am as string | null) ?? null,
+      }
+    }
+  }
+
   // AAR-538 (C1): Subphase + next_hint berechnen (pure function)
   const subphase = resolveSubphase({
     fall: fall as unknown as FallRow,
@@ -454,8 +661,27 @@ export default async function FallaktePage({
 
   return (
     <>
+      {/* CMM-32e: Vollständigkeits-Check ganz oben, Handlungsbedarf-Banner */}
+      {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && qcCardProps && (
+        <div className="mb-4 sticky top-0 z-30">
+          <VollstaendigkeitsCheckCard {...qcCardProps} />
+        </div>
+      )}
+      {/* CMM-32i: Regulierungs-Lifecycle direkt unter QC-Card. */}
+      {regulierungCardProps && (
+        <div className="mb-4">
+          <RegulierungCard {...regulierungCardProps} />
+        </div>
+      )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
+      {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
+          Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}
+      {kanzleiBlockData && (
+        <div className={kanzleiBlockData.variant === 'prominent' ? 'mb-4' : 'mb-4 max-w-md'}>
+          <KanzleiAnsprechpartnerBlock {...kanzleiBlockData} />
+        </div>
+      )}
       {otherKundeFaelle.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm flex-wrap gap-2">
           <span className="text-amber-900">
@@ -485,8 +711,18 @@ export default async function FallaktePage({
         subphase={subphase}
         currentUserId={user.id}
         teilnehmer={teilnehmer}
+        claimId={claimId}
+        claimStatus={claimStatus}
+        claimKanzleiWunsch={claimKanzleiWunsch}
+        kanzleiPaketPending={kanzleiPaketPending}
+        timelineEvents={timelineEvents}
+        futureEvents={futureEvents}
         dokumenteTabProps={{
           fallId: id,
+          // CMM-33: Smart-Filter Slots als Übersichts-Section oben im Tab.
+          // Rolle bestimmt Permission (Admin/KB upload, SV/Kanzlei read-only).
+          pflichtSlots: await getPflichtdokumenteForFall(supabase, id, viewerRoleForTimeline),
+          viewerRolle: viewerRoleForTimeline,
           pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],
           dokumente: dokumenteLegacy as unknown as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['dokumente'],
           fallAS: {
@@ -501,6 +737,10 @@ export default async function FallaktePage({
           anforderbareSlots,
           anforderungenVonMir,
           rolleLabel,
+          // AAR-762 Phase 3: Ad-hoc-Anforderungen (Admin/KB-only)
+          adHocAnforderungen,
+          // AAR-761 Phase 3: OCR-Belege zum Review (Admin/KB-only)
+          belegeZumReview,
           // AAR-326: KB-Zuordnungs-UI
           unzugeordneteUploads,
           zuPruefendeUploads,

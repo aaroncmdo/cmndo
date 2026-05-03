@@ -11,6 +11,12 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { parseIsochrone } from './isochrone-parse'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
+import { checkSvFreeBusyBatch, getBusyWindows, type BusyWindow } from '@/lib/google-calendar/freebusy'
+import {
+  TERMIN_DAUER_MIN,
+  TERMIN_PUFFER_MIN,
+  naechsterWerktag10Uhr,
+} from './termin-konstanten'
 
 export type SvMatchInput = {
   fallLat: number
@@ -71,22 +77,37 @@ function pointInPolygon(point: [number, number], polygon: [number, number][]): b
 
 export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatchCandidate[]> {
   const db = createAdminClient()
-  const { fallLat, fallLng, terminDatum, wunschterminIso, wunschterminFensterMin = 30 } = input
+  const { fallLat, fallLng, terminDatum, wunschterminIso, wunschterminFensterMin } = input
 
-  // AAR-264: Wunschtermin-Fenster für Kalender-Check pro SV.
-  // Wenn der Kunde z. B. 2026-04-18 10:00 möchte, sperrt jeder bestehende
-  // SV-Termin im Fenster 09:30–10:30 die Verfügbarkeit (für 30min default).
+  // AAR-718: Kalender-Check läuft IMMER. Wenn der Aufrufer keinen Wunsch-
+  // termin übergibt, setzen wir einen impliziten Check-Zeitpunkt
+  // (nächster Werktag 10:00) — der SV darf zu dem Zeitpunkt nicht
+  // privat belegt sein, sonst kann der Dispatcher ihm realistisch keinen
+  // Termin vorschlagen.
+  //
+  // Fenster um den Check-Termin: ±TERMIN_PUFFER_MIN (60) + TERMIN_DAUER_MIN
+  // (45) = 60 min davor + 45 min Termin + 60 min danach = 165 min
+  // Blockade-Fenster im Kalender, das NICHT mit einem privaten Event
+  // überlappen darf.
+  const effektiverCheckIso = wunschterminIso ?? naechsterWerktag10Uhr()
+  const hatExplicitWunsch = !!wunschterminIso
+  // Für den gutachter_termine-Konflikt-Check nutzen wir ein halbes Fenster
+  // (vorne + Dauer) plus Puffer — strikt ±60 min UM den Termin.
+  const blockadePufferMin = wunschterminFensterMin ?? TERMIN_PUFFER_MIN
+  const terminDauerMin = TERMIN_DAUER_MIN
+
   let wunschterminStart: Date | null = null
   let wunschterminEnd: Date | null = null
   let wunschterminWindowStart: string | null = null
   let wunschterminWindowEnd: string | null = null
-  if (wunschterminIso) {
-    const wt = new Date(wunschterminIso)
+  {
+    const wt = new Date(effektiverCheckIso)
     if (!Number.isNaN(wt.getTime())) {
       wunschterminStart = wt
-      wunschterminEnd = new Date(wt.getTime() + wunschterminFensterMin * 60_000)
-      wunschterminWindowStart = new Date(wt.getTime() - wunschterminFensterMin * 60_000).toISOString()
-      wunschterminWindowEnd = new Date(wt.getTime() + wunschterminFensterMin * 60_000).toISOString()
+      wunschterminEnd = new Date(wt.getTime() + terminDauerMin * 60_000)
+      wunschterminWindowStart = new Date(wt.getTime() - blockadePufferMin * 60_000).toISOString()
+      // Ende des Blockade-Fensters = Termin-Ende + Puffer dahinter
+      wunschterminWindowEnd = new Date(wt.getTime() + (terminDauerMin + blockadePufferMin) * 60_000).toISOString()
     }
   }
 
@@ -114,6 +135,24 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
   if (svErr) console.error('[findBestSV] SV-Query:', svErr.message)
   if (!svsRaw) return []
   const svs = svsRaw as unknown as Array<Record<string, unknown>>
+
+  // AAR-694 Teil A + AAR-718: FreeBusy-Batch-Check läuft IMMER (nicht
+  // mehr nur bei explizitem Wunschtermin). Ohne Wunschtermin nutzen wir
+  // den impliziten Check-Zeitpunkt (nächster Werktag 10:00). Puffer
+  // strikt ±TERMIN_PUFFER_MIN. SVs mit „belegt" fallen raus, „unbekannt"
+  // (fail-open) bleibt Kandidat.
+  const freeBusyMap = new Map<string, 'frei' | 'belegt' | 'unbekannt'>()
+  const profileIdsForFB = svs
+    .map((sv) => sv.profile_id as string | null)
+    .filter((p): p is string => !!p)
+  if (profileIdsForFB.length > 0 && wunschterminStart) {
+    const batch = await checkSvFreeBusyBatch(
+      profileIdsForFB,
+      wunschterminStart.toISOString(),
+      blockadePufferMin,
+    )
+    for (const [id, status] of batch) freeBusyMap.set(id, status)
+  }
 
   const candidates: SvMatchCandidate[] = []
 
@@ -161,11 +200,21 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
 
     if (!imGebiet) continue
 
+    // AAR-694 Teil A: FreeBusy — SVs deren Google-Kalender laut API belegt
+    // ist, fallen aus dem Match. 'unbekannt' (fail-open) bleibt Kandidat.
+    const profileId = sv.profile_id as string | null
+    if (profileId && freeBusyMap.get(profileId) === 'belegt') {
+      continue
+    }
+
     const paket = (sv.paket as string) || 'standard'
     const paketPrio = PAKET_PRIO[paket] ?? 1
     const ablehnungen = Number(sv.ablehnungen_30_tage) || 0
 
-    // AAR-264: Wunschtermin-Verfügbarkeit prüfen
+    // AAR-264 + AAR-718: Verfügbarkeits-Check IMMER.
+    // Bei explizitem Wunschtermin: Bonus +40 für Verfügbarkeit dort.
+    // Ohne Wunschtermin: Check gegen nächsten Werktag 10:00, kein Bonus,
+    // aber Reason-String informiert ob SV dort frei ist.
     let verfuegbarAmWunschtermin: boolean | undefined
     let naechsterFreierSlot: string | null | undefined
     let wunschterminBonus = 0
@@ -178,15 +227,30 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
         .lt('start_zeit', wunschterminWindowEnd)
         .gt('end_zeit', wunschterminWindowStart)
         .limit(1)
-      verfuegbarAmWunschtermin = !konflikte || konflikte.length === 0
+      const freiInGutachterTermine = !konflikte || konflikte.length === 0
+      // AAR-718: Kombinierte Verfügbarkeit — gutachter_termine UND
+      // privater Kalender (FreeBusy aus Google/CalDAV) müssen beide frei
+      // oder 'unbekannt' liefern. Nur dann ist der SV zum Check-Zeitpunkt
+      // wirklich verfügbar.
+      const fbStatus = profileId ? freeBusyMap.get(profileId) : undefined
+      const freiImKalender = fbStatus !== 'belegt'
+      verfuegbarAmWunschtermin = freiInGutachterTermine && freiImKalender
+
       if (verfuegbarAmWunschtermin) {
-        wunschterminBonus = 40
-        reasons.push(`am Wunschtermin frei`)
+        if (hatExplicitWunsch) {
+          wunschterminBonus = 40
+          reasons.push(`am Wunschtermin frei`)
+        } else {
+          reasons.push(`am nächsten Werktag 10:00 frei`)
+        }
       } else {
-        // Nächsten freien Slot ab Wunschtermin suchen — einfacher Helper
-        // inline um keine zirkuläre Action-Abhängigkeit zu bauen.
-        naechsterFreierSlot = await findNextFreeSlotForSv(db, sv.id as string, wunschterminStart)
-        reasons.push(`am Wunschtermin belegt`)
+        naechsterFreierSlot = await findNextFreeSlotForSv(db, sv.id as string, wunschterminStart, profileId)
+        const belegtWo = !freiInGutachterTermine ? 'Claimondo-Termin' : 'Privatkalender'
+        reasons.push(
+          hatExplicitWunsch
+            ? `am Wunschtermin belegt (${belegtWo})`
+            : `am nächsten Werktag 10:00 belegt (${belegtWo})`,
+        )
       }
     }
 
@@ -217,12 +281,28 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
   return candidates.slice(0, limit)
 }
 
-// AAR-264: Sucht den nächsten freien 2h-Slot ab einem Startzeitpunkt für einen SV.
-// Werktage Mo–Fr 09:00–16:00 Start. Inline statt Action-Import um zirkuläre
-// 'use server'-Abhängigkeit zu vermeiden.
+// AAR-264 + AAR-719: Sucht den nächsten freien Slot ab einem Start-
+// zeitpunkt für einen SV. Berücksichtigt jetzt ZUSÄTZLICH zum
+// gutachter_termine-Check auch den privaten Kalender (Google + CalDAV).
+//
+// Slot-Geometrie (AAR-718):
+//   * Termin-Dauer: TERMIN_DAUER_MIN (45)
+//   * Puffer beidseitig: TERMIN_PUFFER_MIN (60)
+//   * Gesperrtes Fenster um einen Slot-Start `t`: [t - 60min, t + 45min + 60min]
+//
+// Performance: Busy-Windows werden 1x pro SV für die ganze 12-Wochen-
+// Suche vorab geladen — nicht pro Slot ein API-Call.
+//
+// Werktage Mo–Fr 09:00–16:00 Start, 30-min-Grid. Fail-open bei
+// Kalender-Fehler — dann fällt der Slot-Finder auf das vorherige
+// gutachter_termine-Only-Verhalten zurück.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function findNextFreeSlotForSv(db: any, svId: string, ab: Date): Promise<string | null> {
-  const slotDauerMin = 120
+async function findNextFreeSlotForSv(
+  db: any,
+  svId: string,
+  ab: Date,
+  profileId?: string | null,
+): Promise<string | null> {
   const inZwoelfWochen = new Date(ab.getTime() + 12 * 7 * 24 * 60 * 60 * 1000)
 
   const { data: bestehend } = await db
@@ -234,24 +314,37 @@ async function findNextFreeSlotForSv(db: any, svId: string, ab: Date): Promise<s
     .lte('start_zeit', inZwoelfWochen.toISOString())
     .order('start_zeit', { ascending: true })
 
-  const kandidat = new Date(ab)
-  // Bei Konflikt am exakten Wunschtermin → ab nächstem ganzen Stundenslot suchen
-  kandidat.setMinutes(0, 0, 0)
-  kandidat.setTime(kandidat.getTime() + 60 * 60_000)
+  // AAR-719: Private Kalender-Busy-Windows vorab laden.
+  let busyWindows: BusyWindow[] = []
+  if (profileId) {
+    busyWindows = await getBusyWindows(profileId, ab.toISOString(), inZwoelfWochen.toISOString())
+  }
 
-  const maxIter = 12 * 7 * 24
+  const kandidat = new Date(ab)
+  // Bei Konflikt am exakten Wunschtermin → ab nächstem halbstündigem Slot weiter.
+  kandidat.setMinutes(kandidat.getMinutes() >= 30 ? 60 : 30, 0, 0)
+
+  const maxIter = 12 * 7 * 24 * 2 // 30-min-Grid statt 60-min
   let i = 0
   while (kandidat < inZwoelfWochen && i < maxIter) {
     i++
     const wochentag = kandidat.getDay()
     if (wochentag !== 0 && wochentag !== 6 && kandidat.getHours() >= 9 && kandidat.getHours() < 16) {
-      const slotEnd = new Date(kandidat.getTime() + slotDauerMin * 60_000)
-      const konflikt = ((bestehend ?? []) as { start_zeit: string; end_zeit: string }[]).some((b) =>
-        new Date(b.start_zeit) < slotEnd && new Date(b.end_zeit) > kandidat,
+      // Fenster um den Slot-Start: [t-puffer, t+dauer+puffer]
+      const fensterStart = new Date(kandidat.getTime() - TERMIN_PUFFER_MIN * 60_000)
+      const fensterEnd = new Date(kandidat.getTime() + (TERMIN_DAUER_MIN + TERMIN_PUFFER_MIN) * 60_000)
+
+      const konfliktIntern = ((bestehend ?? []) as { start_zeit: string; end_zeit: string }[]).some((b) =>
+        new Date(b.start_zeit) < fensterEnd && new Date(b.end_zeit) > fensterStart,
       )
-      if (!konflikt) return kandidat.toISOString()
+      const konfliktPrivat = busyWindows.some((b) =>
+        new Date(b.start) < fensterEnd && new Date(b.end) > fensterStart,
+      )
+
+      if (!konfliktIntern && !konfliktPrivat) return kandidat.toISOString()
     }
-    kandidat.setTime(kandidat.getTime() + 60 * 60_000)
+    // Zum nächsten 30-min-Slot weiter.
+    kandidat.setTime(kandidat.getTime() + 30 * 60_000)
     if (kandidat.getHours() >= 17) {
       kandidat.setDate(kandidat.getDate() + 1)
       kandidat.setHours(9, 0, 0, 0)

@@ -1,10 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
 // AAR-449: Neue FallKarte + Shared-Loader für Termin/Aktion/LastUpdate
 import FallKarte from '@/components/kunde/FallKarte'
 import { ladeFallKartenMeta, type FallKarteMetaInput } from '@/lib/kunde/fall-karte-loader'
 import { type KundeAktion } from '@/lib/kunde/jetzt-zu-tun'
+// CMM-28: claim-zentrierter Loader ersetzt direkten v_faelle_mit_aktuellem_termin-Read
+import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 
 const AKTION_PRIO: Record<KundeAktion['prioritaet'], number> = { hoch: 3, mittel: 2, niedrig: 1 }
 
@@ -14,39 +18,30 @@ export default async function KundeStartseite() {
   if (!user) redirect('/login')
 
   try {
+  // AAR-kunde-auto-claim: Alle Fälle mit lead.email=user.email und
+  // kunde_id IS NULL auf user.id claimen, damit RLS sie freigibt. Behebt das
+  // „neuer Kunde sieht Fall + Termine nicht"-Symptom (RLS lässt nur
+  // kunde_id=auth.uid() durch, kein Email-Fallback in der Policy).
+  if (user.email) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const { claimFaelleByEmail } = await import('@/lib/kunde/auto-claim')
+    await claimFaelleByEmail(createAdminClient(), user.id, user.email)
+  }
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('vorname')
     .eq('id', user.id)
     .single()
 
-  // Alle Faelle des Kunden — inkl. der Felder, die FallKarte + getKundenJetztZuTun benötigen.
-  const FALL_SELECT =
-    'id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_datum, sa_unterschrieben, sv_id, sv_termin, gutachten_eingegangen_am, gutachter_termin_status, gutachter_termin_bestaetigt_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, kundenbetreuer_id, polizei_vor_ort, vollmacht_status, vollmacht_signiert_am, abgeschlossen_am, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, nachbesichtigung_status, created_at'
-
-  let faelle: Record<string, unknown>[] = []
-
-  const { data: directFaelle } = await supabase
-    .from('v_faelle_mit_aktuellem_termin')
-    .select(FALL_SELECT)
-    .eq('kunde_id', user.id)
-    .order('created_at', { ascending: false })
-
-  faelle = directFaelle ?? []
-
-  // Fallback via Lead-Email
-  if (faelle.length === 0) {
-    const { data: leads } = await supabase.from('leads').select('id').eq('email', user.email!)
-    const leadIds = (leads ?? []).map((l) => l.id)
-    if (leadIds.length) {
-      const { data } = await supabase
-        .from('faelle')
-        .select(FALL_SELECT)
-        .in('lead_id', leadIds)
-        .order('created_at', { ascending: false })
-      faelle = data ?? []
-    }
-  }
+  // CMM-28: Zentraler claim-Loader. Macht intern die drei-stufige Ownership-
+  // Resolution (claim_parties.user_id ODER faelle.kunde_id ODER lead.email)
+  // + lädt faelle als Lifecycle-Bridge + Termin-Snippet aus gutachter_termine
+  // + Vehicle-Snapshot. Output ist KundeFallView[] mit den Feldern die
+  // FallKarte + ladeFallKartenMeta brauchen.
+  const adminClient = createAdminClient()
+  const faelleTyped = await getKundeFaelle(adminClient, user.id, user.email ?? null)
+  const faelle: Record<string, unknown>[] = faelleTyped as unknown as Record<string, unknown>[]
 
   // KFZ-207: Auto-Reaktivierung kalt-Lead wenn Kunde Portal öffnet
   try {
@@ -88,6 +83,12 @@ export default async function KundeStartseite() {
   // Onboarding-Redirect
   const needsOnboarding = faelle.find((f) => f.onboarding_complete === false)
   if (needsOnboarding) redirect('/kunde/onboarding')
+
+  // CMM-28: Single-Fall-Kunde landet direkt auf der Detail-Page statt auf
+  // dem Liste-Dashboard. Dasselbe Verhalten wie der Sidebar-Nav-Klick.
+  if (faelle.length === 1) {
+    redirect(`/kunde/faelle/${faelle[0].id as string}`)
+  }
 
   // KFZ-128: Ungelesene Nachrichten pro Fall zählen (non-critical)
   const ungeleseneByFall = new Map<string, number>()
@@ -132,7 +133,15 @@ export default async function KundeStartseite() {
     schadens_ort: f.schadens_ort as string | null,
     nachbesichtigung_status: f.nachbesichtigung_status as string | null,
   }))
-  const metaByFall = await ladeFallKartenMeta(metaInput)
+  // AAR-705: Defensive — wenn der Karten-Loader (Termine/Timeline/Pflichtdok)
+  // crasht, soll die Seite trotzdem die Fall-Karten ohne Meta zeigen statt
+  // den großen „Fehler beim Laden"-Catch zu triggern.
+  let metaByFall: Awaited<ReturnType<typeof ladeFallKartenMeta>> = {}
+  try {
+    metaByFall = await ladeFallKartenMeta(metaInput)
+  } catch (e) {
+    console.error('[KundeStartseite] ladeFallKartenMeta:', e)
+  }
 
   // Höchst-priorisierte Aktion über alle Fälle hinweg — speist die Jetzt-zu-tun-Card oben.
   const aktionen: KundeAktion[] = []
@@ -212,6 +221,10 @@ export default async function KundeStartseite() {
     </div>
   )
   } catch (err) {
+    // CMM-28: Next.js's `redirect()` wirft einen NEXT_REDIRECT-Error den
+    // der generic Catch sonst schluckt → Onboarding-Redirect + Single-Fall-
+    // Redirect feuern dann nicht. Special-Error explizit re-throw.
+    if (isRedirectError(err)) throw err
     console.error('[KundeStartseite] Error:', err)
     return (
       <div className="w-full px-4 md:px-8 py-6">

@@ -147,8 +147,8 @@ export default async function KpiCards() {
       label: 'Gutachten → QC',
       value: fmtNumber(kpis.pendingQc),
       icon: ClipboardCheckIcon,
-      bg: kpis.pendingQc > 0 ? 'bg-red-50' : 'bg-gray-50',
-      iconColor: kpis.pendingQc > 0 ? 'text-red-600' : 'text-gray-400',
+      bg: kpis.pendingQc > 0 ? 'bg-red-50' : 'bg-[#f8f9fb]',
+      iconColor: kpis.pendingQc > 0 ? 'text-red-600' : 'text-claimondo-ondo/70',
       hint: 'warten auf Filmcheck',
       href: '/admin/faelle/statistiken',
     },
@@ -162,16 +162,16 @@ export default async function KpiCards() {
           <Link
             key={c.label}
             href={c.href}
-            className="bg-white border border-gray-200 rounded-2xl p-4 hover:border-[#4573A2] hover:shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4573A2] focus-visible:ring-offset-1"
+            className="bg-white rounded-ios-lg shadow-ios-sm p-4 hover:shadow-ios-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4573A2] focus-visible:ring-offset-1"
           >
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">{c.label}</p>
+              <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo font-semibold">{c.label}</p>
               <div className={`w-7 h-7 rounded-full ${c.bg} flex items-center justify-center`}>
                 <Icon className={`w-3.5 h-3.5 ${c.iconColor}`} />
               </div>
             </div>
-            <p className="text-2xl font-bold text-gray-900 tabular-nums">{c.value}</p>
-            <p className="text-[10px] text-gray-400 mt-1">{c.hint}</p>
+            <p className="text-2xl font-bold text-claimondo-navy tabular-nums">{c.value}</p>
+            <p className="text-[10px] text-claimondo-ondo/70 mt-1">{c.hint}</p>
           </Link>
         )
       })}

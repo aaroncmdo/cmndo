@@ -106,14 +106,14 @@ export default function SignaturePadInput({
 
   return (
     <div>
-      <div className={`relative rounded-xl overflow-hidden border-2 border-gray-300 ${height}`}>
+      <div className={`relative rounded-xl overflow-hidden border-2 border-claimondo-border ${height}`}>
         <canvas
           ref={canvasRef}
           className="w-full h-full touch-none block"
         />
         {isEmpty && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-            <p className="text-xs text-gray-400">{placeholder}</p>
+            <p className="text-xs text-claimondo-ondo/70">{placeholder}</p>
           </div>
         )}
       </div>
@@ -121,7 +121,7 @@ export default function SignaturePadInput({
         <button
           type="button"
           onClick={handleClear}
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy transition-colors"
         >
           <RotateCcwIcon className="w-3 h-3" />
           Loeschen

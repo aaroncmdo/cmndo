@@ -12,6 +12,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { FolderOpenIcon, ArrowRightIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 const STATUS_PILL: Record<string, { bg: string; text: string; label: string }> = {
   ersterfassung: { bg: '#eef4fb', text: '#1E3A5F', label: 'Ersterfassung' },
@@ -80,17 +81,16 @@ export default async function KanzleiDashboardPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold text-[#0D1B3E]">Mandate</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Alle Komplett-Pakete, bei denen Claimondo das Mandat an euch übergeben hat.
-          </p>
-        </div>
-        <span className="text-xs text-gray-500">
-          {faelle?.length ?? 0} Mandat{(faelle?.length ?? 0) === 1 ? '' : 'e'}
-        </span>
-      </div>
+      <PageHeader
+        title="Mandate"
+        description="Alle Komplett-Pakete, bei denen Claimondo das Mandat an euch übergeben hat."
+        size="lg"
+        actions={
+          <span className="text-xs text-claimondo-ondo">
+            {faelle?.length ?? 0} Mandat{(faelle?.length ?? 0) === 1 ? '' : 'e'}
+          </span>
+        }
+      />
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
@@ -99,22 +99,22 @@ export default async function KanzleiDashboardPage() {
       )}
 
       {!error && faelle && faelle.length === 0 && (
-        <div className="rounded-xl border border-[#e4e7ef] bg-white p-8 text-center">
-          <FolderOpenIcon className="w-10 h-10 mx-auto text-[#7BA3CC] mb-2" />
-          <p className="text-sm font-medium text-[#0D1B3E]">
+        <div className="rounded-xl border border-claimondo-border bg-white p-8 text-center">
+          <FolderOpenIcon className="w-10 h-10 mx-auto text-claimondo-shield mb-2" />
+          <p className="text-sm font-medium text-claimondo-navy">
             Aktuell liegt kein Komplett-Mandat vor.
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-claimondo-ondo mt-1">
             Sobald Claimondo ein Mandat an euch übergibt, erscheint es hier.
           </p>
         </div>
       )}
 
       {!error && faelle && faelle.length > 0 && (
-        <div className="rounded-xl border border-[#e4e7ef] bg-white overflow-hidden">
+        <div className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wider text-gray-500">
+              <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wider text-claimondo-ondo">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold">Fall-Nr</th>
                   <th className="text-left px-4 py-3 font-semibold">Kunde</th>
@@ -135,9 +135,9 @@ export default async function KanzleiDashboardPage() {
                   return (
                     <tr
                       key={f.id}
-                      className="border-t border-[#e4e7ef] hover:bg-[#f8f9fb] transition-colors"
+                      className="border-t border-claimondo-border hover:bg-claimondo-bg transition-colors"
                     >
-                      <td className="px-4 py-3 font-mono text-[12px] text-[#0D1B3E]">
+                      <td className="px-4 py-3 font-mono text-[12px] text-claimondo-navy">
                         <Link
                           href={`/kanzlei/fall/${f.id}`}
                           className="hover:underline"
@@ -145,11 +145,11 @@ export default async function KanzleiDashboardPage() {
                           {f.fall_nummer ?? f.id.slice(0, 8)}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-gray-900">{kunde}</td>
-                      <td className="px-4 py-3 font-mono text-[12px] text-gray-700">
+                      <td className="px-4 py-3 text-claimondo-navy">{kunde}</td>
+                      <td className="px-4 py-3 font-mono text-[12px] text-claimondo-navy">
                         {f.kennzeichen ?? '—'}
                       </td>
-                      <td className="px-4 py-3 text-gray-700">{phaseLabel}</td>
+                      <td className="px-4 py-3 text-claimondo-navy">{phaseLabel}</td>
                       <td className="px-4 py-3">
                         {statusCfg ? (
                           <span
@@ -159,16 +159,16 @@ export default async function KanzleiDashboardPage() {
                             {statusCfg.label}
                           </span>
                         ) : (
-                          <span className="text-xs text-gray-400">{f.status ?? '—'}</span>
+                          <span className="text-xs text-claimondo-ondo/70">{f.status ?? '—'}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 font-mono text-[12px] text-gray-700">
+                      <td className="px-4 py-3 font-mono text-[12px] text-claimondo-navy">
                         {f.mandatsnummer ?? '—'}
                       </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs">
+                      <td className="px-4 py-3 text-claimondo-ondo text-xs">
                         {formatDate((f.updated_at as string | null) ?? (f.created_at as string | null))}
                       </td>
-                      <td className="px-4 py-3 text-gray-400">
+                      <td className="px-4 py-3 text-claimondo-ondo/70">
                         <Link href={`/kanzlei/fall/${f.id}`} aria-label="Öffnen">
                           <ArrowRightIcon className="w-4 h-4" />
                         </Link>

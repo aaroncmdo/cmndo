@@ -4,7 +4,7 @@
 //   - admin           → volle Admin-Shell (AdminNav + NotificationBell + Spotlight)
 //   - kundenbetreuer  → Mitarbeiter-Shell (MitarbeiterNav + reduzierte Header)
 //   - kanzlei         → Kanzlei-Shell (KanzleiNav, read-only) — PR 2b
-//   - leadbearbeiter  → Mitarbeiter-Shell
+//   - dispatch  → Mitarbeiter-Shell
 //
 // AAR-kanzlei-portal (PR 2b): Kanzlei bekommt eigene Shell mit KanzleiNav,
 // damit sie nicht in der Admin-UI landen. Read-only ist über
@@ -14,10 +14,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
+import { roleToPath } from '@/lib/auth/role-redirect'
 import AdminNav from '@/app/admin/_components/AdminNav'
 import MitarbeiterNav from '@/app/mitarbeiter/_components/MitarbeiterNav'
 import KanzleiNav from '@/app/kanzlei/_components/KanzleiNav'
-import MitteilungszentralePanel from '@/components/mitteilungszentrale/MitteilungszentralePanel'
+import UpdatesNav from '@/components/shared/updates'
 import Spotlight from '@/components/Spotlight'
 import { PageContainer } from '@/components/PageContainer'
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -38,14 +39,11 @@ export default async function FaelleLayout({
     .single()
   const rolle = profile?.rolle as string | undefined
 
-  // Rollen die hier nichts zu suchen haben: dispatch, sachverstaendiger, kunde
-  // haben eigene Fall-Ansichten (/dispatch/..., /gutachter/..., /kunde/...)
-  if (rolle === 'dispatch') redirect('/dispatch/dashboard')
-  if (rolle === 'sachverstaendiger') redirect('/gutachter')
-  if (rolle === 'kunde') redirect('/kunde')
-  if (rolle === 'makler') redirect('/makler')
-  if (!rolle || !['admin', 'kanzlei', 'kundenbetreuer', 'leadbearbeiter'].includes(rolle)) {
-    redirect('/login')
+  // AAR-718: Rollen die hier nichts zu suchen haben — per zentrale
+  // roleToPath-Funktion in ihr eigenes Portal. Vorher hardcoded-Switch.
+  // Admin/Kanzlei/KB/Dispatcher dürfen drin bleiben.
+  if (!rolle || !['admin', 'kanzlei', 'kundenbetreuer', 'dispatch'].includes(rolle)) {
+    redirect(rolle ? roleToPath(rolle) : '/login')
   }
 
   const initials = user.email ? user.email.substring(0, 2).toUpperCase() : 'U'
@@ -94,8 +92,8 @@ export default async function FaelleLayout({
     )
   }
 
-  // KB / Leadbearbeiter → Mitarbeiter-Shell
-  if (rolle === 'kundenbetreuer' || rolle === 'leadbearbeiter') {
+  // KB / Dispatcher → Mitarbeiter-Shell
+  if (rolle === 'kundenbetreuer' || rolle === 'dispatch') {
     let unread = 0
     try {
       const { count } = await supabase
@@ -129,25 +127,13 @@ export default async function FaelleLayout({
     )
   }
 
-  // admin → Admin-Shell (Kopie der /admin/layout.tsx-Logik,
-  // damit Admin-User ihre gewohnte Umgebung behalten — inkl. Spotlight,
-  // NotificationBell, Task-Badge). Kanzlei wurde oben bereits abgezweigt.
-  const [
-    { count: unreadNachrichten },
-    { count: meineTasksCount },
-  ] = await Promise.all([
-    supabase
-      .from('nachrichten')
-      .select('*', { count: 'exact', head: true })
-      .eq('kanal', 'whatsapp')
-      .eq('richtung', 'inbound')
-      .eq('gelesen', false),
-    supabase
-      .from('tasks')
-      .select('*', { count: 'exact', head: true })
-      .eq('zugewiesen_an', user.id)
-      .in('status', ['offen', 'in-bearbeitung']),
-  ])
+  // admin → Admin-Shell (Kopie der /admin/layout.tsx-Logik). AAR-727:
+  // unreadNachrichten entfernt — Posteingang läuft jetzt über GlobalPosteingangFab.
+  const { count: meineTasksCount } = await supabase
+    .from('tasks')
+    .select('*', { count: 'exact', head: true })
+    .eq('zugewiesen_an', user.id)
+    .in('status', ['offen', 'in-bearbeitung'])
 
   return (
     <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">
@@ -155,7 +141,7 @@ export default async function FaelleLayout({
       <AdminNav
         email={user.email ?? ''}
         initials={initials}
-        unreadNachrichten={unreadNachrichten ?? 0}
+        userId={user.id}
         meineTasksCount={meineTasksCount ?? 0}
       />
       <div className="md:ml-56 h-screen flex flex-col relative z-10">
@@ -163,11 +149,11 @@ export default async function FaelleLayout({
           <span className="text-lg font-bold tracking-tight">
             <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>
           </span>
-          <MitteilungszentralePanel variant="dark" />
+          <UpdatesNav variant="dark" />
         </header>
         <div className="hidden md:flex items-center gap-2 fixed top-3 right-4 z-30">
           <OutboxBadge />
-          <MitteilungszentralePanel variant="light" />
+          <UpdatesNav variant="light" />
         </div>
         <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0">
           <PageContainer className="h-full">{children}</PageContainer>

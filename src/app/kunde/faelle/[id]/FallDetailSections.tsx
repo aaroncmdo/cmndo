@@ -6,6 +6,19 @@ import { markNachrichtenGelesen } from '@/lib/markNachrichtenGelesen'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { waehleGegenvorschlagSlot } from './actions'
 import Link from 'next/link'
+// AAR-727 Kandidat 1: Shared Download-Liste — Kunde zeigt flat list.
+import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/DokumenteDownloadListe'
+// AAR-746 (Phase B): Shared Identity-Header — löst die "Aktueller Status"-
+// Section ab. KB + Termin bleiben in einer separaten Detail-Section.
+import { FallIdentityHeader } from '@/components/shared/fall-header'
+// AAR-754 (Phase C): Shared Stammdaten + Kontakte.
+import { StammdatenReadSection } from '@/components/shared/stammdaten'
+import { FallKontakteCard } from '@/components/shared/fall-kontakte'
+import { Modal } from '@/components/primitives/Modal'
+// AAR-759 (Phase 1): Mietwagen-Status-Anzeige
+import { MietwagenStatusCard } from '@/components/shared/mietwagen'
+// AAR-761 Phase 2: Kunde-Upload-Card fuer Belege
+import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 
 type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
@@ -13,7 +26,7 @@ type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; 
 type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null; sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null }
 
 const ROLLE_LABEL: Record<string, string> = { kunde: 'Sie', admin: 'Claimondo', kundenbetreuer: 'Ihr Betreuer', gutachter: 'Gutachter', sachverstaendiger: 'Gutachter', system: 'System' }
-const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-[#4573A2]', admin: 'bg-[#0D1B3E]', kundenbetreuer: 'bg-[#1E3A5F]', gutachter: 'bg-[#1E3A5F]', sachverstaendiger: 'bg-[#1E3A5F]', system: 'bg-gray-400' }
+const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-claimondo-ondo', admin: 'bg-claimondo-navy', kundenbetreuer: 'bg-claimondo-shield', gutachter: 'bg-claimondo-shield', sachverstaendiger: 'bg-claimondo-shield', system: 'bg-claimondo-ondo/70' }
 
 function fmt(val: string | null): string {
   if (!val) return ''
@@ -37,11 +50,12 @@ type TabKey = (typeof TABS)[number]['key']
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function FallDetailSections({
-  fall, svName, svTelefon, kbName, dokumente, nachrichten, userId, chatTeilnehmer, aktiverTermin,
+  fall, svName, svTelefon, svVerifiziert = false, kbName, dokumente, nachrichten, userId, chatTeilnehmer, aktiverTermin,
 }: {
   fall: Record<string, unknown>
   svName: string | null
   svTelefon: string | null
+  svVerifiziert?: boolean
   kbName?: string | null
   dokumente: Dokument[]
   nachrichten: Nachricht[]
@@ -54,7 +68,7 @@ export default function FallDetailSections({
   return (
     <div>
       {/* Tab-Leiste */}
-      <div className="flex bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-5">
+      <div className="flex bg-white rounded-xl border border-claimondo-border shadow-sm overflow-hidden mb-5">
         {TABS.map(tab => (
           <button key={tab.key} onClick={() => {
             setActiveTab(tab.key)
@@ -62,8 +76,8 @@ export default function FallDetailSections({
           }}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.key
-                ? 'bg-[#4573A2] text-white'
-                : 'text-gray-500 hover:bg-gray-50'
+                ? 'bg-claimondo-ondo text-white'
+                : 'text-claimondo-ondo hover:bg-[#f8f9fb]'
             }`}>
             {tab.label}
           </button>
@@ -73,32 +87,71 @@ export default function FallDetailSections({
       {/* Tab-Inhalt */}
       {activeTab === 'uebersicht' && (
         <div className="space-y-5">
-          <Section title="Aktueller Status">
-            <InfoRow label="Fallnummer" value={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)} />
-            <InfoRow label="Status" value={(fall.status as string) ?? '—'} />
-            {kbName && <InfoRow label="Ihr Ansprechpartner" value={kbName} />}
-            {!!fall.sv_termin && <InfoRow label="Nächster Termin" value={fmtDateTime(fall.sv_termin as string)} />}
-          </Section>
+          {/* AAR-746: Shared Identity-Header statt handgerollter Aktueller-
+              Status-Section. KB + nächster Termin wandern in die Detail-
+              Section darunter. */}
+          <div className="-mx-4 sm:-mx-0 rounded-none sm:rounded-xl overflow-hidden sm:border sm:border-claimondo-border">
+            <FallIdentityHeader
+              rolle="kunde"
+              fallNummer={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)}
+              subphaseLabel={(fall.status as string) ?? null}
+              className="!border-b-0"
+            />
+          </div>
 
-          <Section title="Fahrzeug">
-            {!!fall.kennzeichen && <InfoRow label="Kennzeichen" value={fall.kennzeichen as string} />}
-            {!!fall.fahrzeug_hersteller && <InfoRow label="Marke" value={fall.fahrzeug_hersteller as string} />}
-            {!!fall.fahrzeug_modell && <InfoRow label="Modell" value={fall.fahrzeug_modell as string} />}
-            {!!fall.schadens_datum && <InfoRow label="Schadensdatum" value={fmt(fall.schadens_datum as string)} />}
-            {!!fall.schadens_beschreibung && (
-              <div className="pt-2 border-t border-gray-100">
-                <p className="text-xs text-gray-400 mb-1">Unfallhergang</p>
-                <p className="text-sm text-[#0D1B3E] whitespace-pre-wrap">{fall.schadens_beschreibung as string}</p>
-              </div>
-            )}
-          </Section>
+          {/* AAR-754: Shared FallKontakteCard — ersetzt die handgerollten
+              "Ihr Ansprechpartner" + "Ihr Gutachter" Sections. Kunde-Rolle
+              nutzt Labels "Ihr Betreuer" / "Ihr Gutachter" automatisch. */}
+          <FallKontakteCard
+            rolle="kunde"
+            kundenbetreuer={
+              kbName
+                ? { vorname: kbName, nachname: null, telefon: null, email: null }
+                : null
+            }
+            sv={
+              svName
+                ? {
+                    vorname: svName,
+                    nachname: null,
+                    telefon: svTelefon,
+                    email: null,
+                    verifiziert: svVerifiziert,
+                  }
+                : null
+            }
+          />
 
-          {svName && (
-            <Section title="Ihr Gutachter">
-              <InfoRow label="Name" value={svName} />
-              {svTelefon && <InfoRow label="Telefon" value={svTelefon} />}
-              {!!fall.sv_termin && <InfoRow label="Besichtigungstermin" value={fmtDateTime(fall.sv_termin as string)} />}
-              {!!fall.besichtigungsort_adresse && <InfoRow label="Besichtigungsort" value={fall.besichtigungsort_adresse as string} />}
+          {/* AAR-754: Shared StammdatenReadSection — ersetzt die inline
+              Fahrzeug-Section. Kunde-Rolle filtert eigenen Kontakt + Halter
+              automatisch raus. Unfallhergang bleibt separat darunter. */}
+          <StammdatenReadSection
+            rolle="kunde"
+            lead={null}
+            fall={fall}
+            title="Fahrzeug & Unfall"
+          />
+
+          {/* AAR-759: Mietwagen-Status für Kunde (Phase 1 read-only) */}
+          <MietwagenStatusCard
+            rolle="kunde"
+            fall={{
+              mietwagen_hat: (fall.mietwagen_hat as boolean | null) ?? null,
+              mietwagen_seit_datum: (fall.mietwagen_seit_datum as string | null) ?? null,
+              mietwagen_limit_tage: (fall.mietwagen_limit_tage as number | null) ?? null,
+              mietwagen_limit_grund: (fall.mietwagen_limit_grund as string | null) ?? null,
+              mietwagen_rechnung_vorhanden: (fall.mietwagen_rechnung_vorhanden as boolean | null) ?? null,
+              mietwagen_argumentations_puffer: (fall.mietwagen_argumentations_puffer as number | null) ?? null,
+              mietwagen_vermieter: (fall.mietwagen_vermieter as string | null) ?? null,
+              nutzungsausfall_tage: (fall.nutzungsausfall_tage as number | null) ?? null,
+            }}
+          />
+
+          {!!fall.schadens_beschreibung && (
+            <Section title="Unfallhergang">
+              <p className="text-sm text-claimondo-navy whitespace-pre-wrap">
+                {fall.schadens_beschreibung as string}
+              </p>
             </Section>
           )}
 
@@ -125,22 +178,25 @@ export default function FallDetailSections({
       )}
 
       {activeTab === 'dokumente' && (
-        <Section title="Dokumente">
-          {dokumente.length === 0 ? (
-            <p className="text-sm text-gray-400">Noch keine Dokumente vorhanden.</p>
-          ) : (
-            <div className="space-y-2">
-              {dokumente.map(doc => (
-                <a key={doc.id} href={doc.datei_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                  <FileTextIcon className="w-4 h-4 text-[#4573A2] shrink-0" />
-                  <span className="text-sm text-[#0D1B3E] truncate flex-1">{doc.datei_name ?? 'Dokument'}</span>
-                  <span className="text-[10px] text-gray-400">{fmt(doc.created_at)}</span>
-                </a>
-              ))}
-            </div>
-          )}
-        </Section>
+        <div className="space-y-5">
+          {/* AAR-761 Phase 2: Upload-Card mit Typ-Auswahl + OCR */}
+          <BelegUploadCard fallId={fall.id as string} />
+
+          <Section title="Hochgeladene Dokumente">
+            <DokumenteDownloadListe
+              variant="list"
+              rolle="kunde"
+              emptyTitle="Noch keine Dokumente vorhanden."
+              dokumente={dokumente.map<DokumentItem>(doc => ({
+                id: doc.id,
+                name: doc.datei_name ?? 'Dokument',
+                url: doc.datei_url,
+                typ: doc.typ,
+                createdAt: doc.created_at,
+              }))}
+            />
+          </Section>
+        </div>
       )}
 
       {activeTab === 'chat' && (
@@ -154,8 +210,8 @@ export default function FallDetailSections({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-      <h3 className="text-sm font-semibold text-[#0D1B3E] mb-3">{title}</h3>
+    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5">
+      <h3 className="text-sm font-semibold text-claimondo-navy mb-3">{title}</h3>
       {children}
     </div>
   )
@@ -163,9 +219,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between py-1.5 border-b border-gray-50 last:border-0">
-      <span className="text-sm text-gray-500">{label}</span>
-      <span className="text-sm text-[#0D1B3E] font-medium text-right">{value}</span>
+    <div className="flex justify-between py-1.5 border-b border-claimondo-border last:border-0">
+      <span className="text-sm text-claimondo-ondo">{label}</span>
+      <span className="text-sm text-claimondo-navy font-medium text-right">{value}</span>
     </div>
   )
 }
@@ -214,16 +270,16 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
   const otherTeilnehmer = teilnehmer.filter(t => t.user_id !== userId)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm overflow-hidden">
       {/* KFZ-129: Teilnehmer-Header */}
       {otherTeilnehmer.length > 0 && (
-        <div className="px-4 py-3 bg-[#0D1B3E]/5 border-b border-gray-200">
-          <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-2">Ihre Ansprechpartner</p>
+        <div className="px-4 py-3 bg-claimondo-navy/5 border-b border-claimondo-border">
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2">Ihre Ansprechpartner</p>
           <div className="flex flex-wrap gap-3">
             {otherTeilnehmer.map(t => {
               const name = [t.vorname, t.nachname].filter(Boolean).join(' ') || 'Unbekannt'
               const rolleLabel = t.rolle === 'kundenbetreuer' ? 'Kundenbetreuer' : t.rolle === 'gutachter' ? 'Gutachter' : t.rolle === 'admin' ? 'Admin' : t.rolle
-              const avatarBg = ROLLE_COLOR[t.rolle] ?? 'bg-gray-400'
+              const avatarBg = ROLLE_COLOR[t.rolle] ?? 'bg-claimondo-ondo/70'
               const initials = [t.vorname?.[0], t.nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
               return (
                 <div key={t.user_id} className="flex items-center gap-2">
@@ -235,8 +291,8 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
                     </div>
                   )}
                   <div>
-                    <p className="text-sm font-medium text-[#0D1B3E]">{name}</p>
-                    <p className="text-[10px] text-gray-400">{rolleLabel}</p>
+                    <p className="text-sm font-medium text-claimondo-navy">{name}</p>
+                    <p className="text-[10px] text-claimondo-ondo/70">{rolleLabel}</p>
                   </div>
                 </div>
               )
@@ -247,7 +303,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
 
       {/* Messages — ein Stream fuer alle */}
       <div className="space-y-3 p-4 max-h-96 overflow-y-auto">
-        {messages.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Noch keine Nachrichten. Schreiben Sie uns!</p>}
+        {messages.length === 0 && <p className="text-sm text-claimondo-ondo/70 text-center py-8">Noch keine Nachrichten. Schreiben Sie uns!</p>}
         {messages.map(msg => {
           const isOwn = msg.sender_id === userId
           const isSystem = msg.sender_rolle === 'system'
@@ -257,9 +313,9 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           if (isSystem) {
             return (
               <div key={msg.id} className="flex justify-center">
-                <div className="bg-[#f8f9fb] border border-[#7BA3CC]/30 rounded-xl px-4 py-2 max-w-[85%]">
-                  <p className="text-xs text-[#0D1B3E] text-center whitespace-pre-wrap">{msg.nachricht}</p>
-                  <p className="text-[9px] text-gray-400 text-center mt-1">
+                <div className="bg-[#f8f9fb] border border-claimondo-light-blue/30 rounded-xl px-4 py-2 max-w-[85%]">
+                  <p className="text-xs text-claimondo-navy text-center whitespace-pre-wrap">{msg.nachricht}</p>
+                  <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">
                     {new Date(msg.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
@@ -268,8 +324,8 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           }
 
           const senderName = getSenderName(msg)
-          const bubbleColor = isOwn ? 'bg-[#4573A2] text-white' : 'bg-gray-100 text-[#0D1B3E]'
-          const lightText = isOwn ? 'text-white/60' : 'text-gray-400'
+          const bubbleColor = isOwn ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-navy'
+          const lightText = isOwn ? 'text-white/60' : 'text-claimondo-ondo/70'
 
           return (
             <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
@@ -283,7 +339,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
                 <p className="text-sm whitespace-pre-wrap">{msg.nachricht}</p>
                 {msg.hat_anhang && msg.anhang_url && (
                   <a href={msg.anhang_url} target="_blank" rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-1 mt-1 text-xs underline ${isOwn ? 'text-white/70' : 'text-[#4573A2]'}`}>
+                    className={`inline-flex items-center gap-1 mt-1 text-xs underline ${isOwn ? 'text-white/70' : 'text-claimondo-ondo'}`}>
                     Anhang
                   </a>
                 )}
@@ -298,15 +354,15 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-claimondo-border">
         {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
         <form onSubmit={handleSend} className="flex gap-2">
           <input type="text" value={text} onChange={e => setText(e.target.value)}
             placeholder="Nachricht schreiben..."
             // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
-            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base text-[#0D1B3E] placeholder-gray-400 focus:outline-none focus:border-[#4573A2]" />
+            className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-xl px-4 py-3 text-base text-claimondo-navy placeholder-gray-400 focus:outline-none focus:border-claimondo-ondo" />
           <button type="submit" disabled={sending || !text.trim()}
-            className="px-4 py-3 bg-[#4573A2] hover:bg-[#1E3A5F] text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
+            className="px-4 py-3 bg-claimondo-ondo hover:bg-claimondo-shield text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
             {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}
           </button>
         </form>
@@ -360,58 +416,54 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
 
   return (
     <>
-      <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl p-5">
-        <p className="text-sm font-semibold text-[#0D1B3E] mb-2">Neuer Terminvorschlag vom Sachverständigen</p>
-        <p className="text-sm text-[#1E3A5F] mb-1">
+      <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-xl p-5">
+        <p className="text-sm font-semibold text-claimondo-navy mb-2">Neuer Terminvorschlag vom Sachverständigen</p>
+        <p className="text-sm text-claimondo-shield mb-1">
           {svName} hat einen alternativen Termin vorgeschlagen: <strong>{datumStr}</strong>
         </p>
-        {grund && <p className="text-xs text-gray-500 mb-3">Grund: {grund}</p>}
+        {grund && <p className="text-xs text-claimondo-ondo mb-3">Grund: {grund}</p>}
         {!grund && <div className="mb-3" />}
 
         <div className="space-y-2">
           <button onClick={handleAnnehmen} disabled={loading}
-            className="w-full py-3 rounded-xl bg-[#4573A2] text-white font-medium text-sm hover:bg-[#1E3A5F] transition-colors disabled:opacity-40">
+            className="w-full py-3 rounded-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-claimondo-shield transition-colors disabled:opacity-40">
             {loading ? 'Wird verarbeitet...' : 'Vorschlag annehmen'}
           </button>
           <button onClick={() => setShowModal(true)} disabled={loading}
-            className="w-full py-3 rounded-xl bg-white text-[#1E3A5F] font-medium text-sm border border-[#1E3A5F] hover:bg-[#f8f9fb] transition-colors disabled:opacity-40">
+            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-shield hover:bg-[#f8f9fb] transition-colors disabled:opacity-40">
             Anderen Termin vorschlagen
           </button>
           <Link href={`/kunde/faelle/${fallId}/kalender`}
-            className="w-full py-3 rounded-xl bg-white text-[#1E3A5F] font-medium text-sm border border-[#7BA3CC]/30 hover:bg-[#f8f9fb] transition-colors flex items-center justify-center gap-2">
+            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-light-blue/30 hover:bg-[#f8f9fb] transition-colors flex items-center justify-center gap-2">
             <CalendarIcon className="w-4 h-4" /> Kalender des Gutachters öffnen
           </Link>
         </div>
       </div>
 
       {/* Modal: Anderen Termin vorschlagen */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-lg font-semibold text-[#0D1B3E] mb-2">Anderen Termin vorschlagen</h3>
-            <p className="text-sm text-gray-500 mb-4">Wählen Sie einen für Sie passenden Termin:</p>
+      <Modal open={showModal} onClose={() => setShowModal(false)} maxWidth={384} ariaLabel="Anderen Termin vorschlagen">
+        <h3 className="text-lg font-semibold text-claimondo-navy mb-2">Anderen Termin vorschlagen</h3>
+        <p className="text-sm text-claimondo-ondo mb-4">Wählen Sie einen für Sie passenden Termin:</p>
 
-            {/* AAR-452: text-base (16px) + min-h-[44px] für iOS-Kompatibilität */}
-            <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
-              className="w-full border border-gray-200 rounded-lg px-3 min-h-[44px] text-base text-gray-800 mb-3 focus:outline-none focus:border-[#4573A2]" />
-            <textarea value={kundeGrund} onChange={e => setKundeGrund(e.target.value)}
-              placeholder="Begründung (optional)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-base text-gray-800 mb-4 focus:outline-none focus:border-[#4573A2] resize-none" rows={2} />
+        {/* AAR-452: text-base (16px) + min-h-[44px] für iOS-Kompatibilität */}
+        <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
+          min={new Date().toISOString().slice(0, 16)}
+          className="w-full border border-claimondo-border rounded-lg px-3 min-h-[44px] text-base text-claimondo-navy mb-3 focus:outline-none focus:border-claimondo-ondo" />
+        <textarea value={kundeGrund} onChange={e => setKundeGrund(e.target.value)}
+          placeholder="Begründung (optional)"
+          className="w-full border border-claimondo-border rounded-lg px-3 py-2.5 text-base text-claimondo-navy mb-4 focus:outline-none focus:border-claimondo-ondo resize-none" rows={2} />
 
-            <div className="flex gap-2">
-              <button onClick={() => setShowModal(false)}
-                className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
-                Abbrechen
-              </button>
-              <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
-                className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-white bg-[#4573A2] hover:bg-[#1E3A5F] transition-colors disabled:opacity-50">
-                {loading ? 'Wird gesendet...' : 'Vorschlag senden'}
-              </button>
-            </div>
-          </div>
+        <div className="flex gap-2">
+          <button onClick={() => setShowModal(false)}
+            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors">
+            Abbrechen
+          </button>
+          <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
+            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-white bg-claimondo-ondo hover:bg-claimondo-shield transition-colors disabled:opacity-50">
+            {loading ? 'Wird gesendet...' : 'Vorschlag senden'}
+          </button>
         </div>
-      )}
+      </Modal>
     </>
   )
 }
@@ -463,11 +515,11 @@ function SlotAuswahlBanner({
   }
 
   return (
-    <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-xl p-5">
-      <p className="text-sm font-semibold text-[#0D1B3E] mb-1">
+    <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-xl p-5">
+      <p className="text-sm font-semibold text-claimondo-navy mb-1">
         {svName} hat alternative Termine vorgeschlagen
       </p>
-      <p className="text-xs text-gray-500 mb-4">
+      <p className="text-xs text-claimondo-ondo mb-4">
         Bitte wählen Sie einen der folgenden Termine:
       </p>
       <div className="space-y-2">
@@ -486,10 +538,10 @@ function SlotAuswahlBanner({
               key={idx}
               onClick={() => handleWahl(slot)}
               disabled={loading}
-              className="w-full text-left px-4 py-3 rounded-xl border border-[#7BA3CC]/40 bg-white hover:bg-[#4573A2]/5 hover:border-[#4573A2] transition-colors disabled:opacity-40"
+              className="w-full text-left px-4 py-3 rounded-xl border border-claimondo-light-blue/40 bg-white hover:bg-claimondo-ondo/5 hover:border-claimondo-ondo transition-colors disabled:opacity-40"
             >
-              <span className="text-sm font-medium text-[#0D1B3E]">{datumStr}</span>
-              <span className="block text-xs text-[#4573A2] mt-0.5">Diesen Termin wählen →</span>
+              <span className="text-sm font-medium text-claimondo-navy">{datumStr}</span>
+              <span className="block text-xs text-claimondo-ondo mt-0.5">Diesen Termin wählen →</span>
             </button>
           )
         })}

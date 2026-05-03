@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { parseUhrzeit } from '@/lib/format/zeit'
 import type { HardGateData } from './types'
 
 export async function saveHardGate(
@@ -62,6 +63,11 @@ export async function saveHardGate(
     ...(data.unfallort_kategorie !== undefined && { unfallort_kategorie: data.unfallort_kategorie }),
     ...(data.unfallort_lat !== undefined && { unfallort_lat: data.unfallort_lat }),
     ...(data.unfallort_lng !== undefined && { unfallort_lng: data.unfallort_lng }),
+    // CMM-26: Datum (date) als ISO-Datum 1:1 durchreichen; Uhrzeit (time)
+    // freie Eingabe → HH:MM:SS normalisieren, sonst null. Beides darf null
+    // werden (Dispatcher hatte den Wert vielleicht falsch eingetippt).
+    ...(data.unfalldatum !== undefined && { unfalldatum: data.unfalldatum || null }),
+    ...(data.unfall_uhrzeit !== undefined && { unfall_uhrzeit: parseUhrzeit(data.unfall_uhrzeit) }),
     ...(data.polizei_vor_ort !== undefined && { polizei_vor_ort: data.polizei_vor_ort }),
     ...(data.polizei_aktenzeichen !== undefined && { polizei_aktenzeichen: data.polizei_aktenzeichen }),
     ...(data.fahrzeug_fahrbereit !== undefined && { fahrzeug_fahrbereit: data.fahrzeug_fahrbereit }),

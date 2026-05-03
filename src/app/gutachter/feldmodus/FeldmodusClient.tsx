@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 import type { SvTagesSession } from '@/lib/types/field-modus'
 import type { FeldmodusStop, FeldmodusSV } from './page'
 import FeldmodusMap from './FeldmodusMap'
@@ -16,7 +17,7 @@ import OfflineStatusBanner from './OfflineStatusBanner'
 import SvFallakteView from './SvFallakteView'
 import FokusChatPanel from './FokusChatPanel'
 import { useFieldTracking } from './useFieldTracking'
-import { markArrived, pauseFokusmodus } from './actions'
+import { markArrived, pauseFokusmodus, startStop } from './actions'
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
@@ -46,7 +47,8 @@ export default function FeldmodusClient({
 
   const [aktuellerStopIndex, setAktuellerStopIndex] = useState(initialIndex)
   const [sessionStatus, setSessionStatus] = useState(session.status)
-  const geofenceLockRef = useRef(false)
+  const [svInGeofence, setSvInGeofence] = useState(false)
+  const arrivedFiredRef = useRef(false)
 
   const aktuellerStop = stops[aktuellerStopIndex] ?? null
   const trackingEnabled =
@@ -54,24 +56,34 @@ export default function FeldmodusClient({
     sessionStatus !== 'finished' &&
     sessionStatus !== 'paused'
 
-  const onGeofenceReached = useCallback(
-    async (pos: { lat: number; lng: number }) => {
+  // Geofence setzt nur Flag — AktuellerStopCard entscheidet wann Akte öffnet
+  const onGeofenceReached = useCallback(() => {
+    setSvInGeofence(true)
+  }, [])
+
+  // Akte öffnen: von AktuellerStopCard gerufen wenn beide am Besichtigungsort
+  const onArrived = useCallback(
+    async (lat: number, lng: number, via: string) => {
       if (!aktuellerStop) return
-      if (geofenceLockRef.current) return
-      geofenceLockRef.current = true
+      if (arrivedFiredRef.current) return
+      arrivedFiredRef.current = true
       const res = await markArrived(
         session.id,
         aktuellerStop.termin_id,
-        pos.lat,
-        pos.lng,
-        'geofence',
+        lat,
+        lng,
+        via as 'geofence' | 'manuell' | 'termin_uhrzeit',
       )
       if (res.success) {
-        toast.success('Ankunft automatisch erkannt (100 m Radius)')
+        toast.success(
+          via === 'termin_uhrzeit'
+            ? 'Besichtigung gestartet (Terminuhrzeit)'
+            : 'Ankunft erkannt — Fallakte wird geöffnet',
+        )
         setSessionStatus('arrived')
         router.refresh()
       } else {
-        geofenceLockRef.current = false
+        arrivedFiredRef.current = false
         toast.error(res.error ?? 'Auto-Ankunft fehlgeschlagen')
       }
     },
@@ -86,6 +98,60 @@ export default function FeldmodusClient({
     targetLng: aktuellerStop?.lng ?? null,
     onGeofenceReached,
   })
+
+  // Auto-Losfahren: sobald der SV den Feldmodus für einen aktiven Stop öffnet,
+  // markieren wir den Termin als "losgefahren" — generiert Tracking-Token,
+  // berechnet ETA und benachrichtigt den Kunden via WhatsApp. Ohne diesen
+  // Auto-Trigger sähe der Kunde nichts (kein sv_unterwegs_seit), bis das
+  // Geofence-Event im Hintergrund feuert. Idempotent durch losgefahren_am-
+  // Check serverseitig + Ref clientseitig.
+  const losfahrenFiredRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!aktuellerStop) return
+    if (sessionStatus === 'arrived' || sessionStatus === 'finished' || sessionStatus === 'paused') return
+    if (aktuellerStop.losgefahren_am) return
+    if (losfahrenFiredRef.current === aktuellerStop.termin_id) return
+    losfahrenFiredRef.current = aktuellerStop.termin_id
+    void startStop(session.id, aktuellerStop.termin_id).catch(() => {
+      // Idempotent — wenn der Server sagt "bereits losgefahren", ignorieren wir.
+      losfahrenFiredRef.current = null
+    })
+  }, [aktuellerStop, sessionStatus, session.id])
+
+  // Realtime-Sub auf den aktiven Termin: wenn besichtigung_gestartet_am
+  // (z.B. durch Zeit-Fallback auf einem anderen Gerät, oder durch eine
+  // andere Tab-Instanz) gesetzt wird, schaltet die UI ohne Reload in den
+  // arrived-State und öffnet die Fallakte.
+  useEffect(() => {
+    const terminId = aktuellerStop?.termin_id
+    if (!terminId) return
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`feldmodus-termin-${terminId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'gutachter_termine',
+          filter: `id=eq.${terminId}`,
+        },
+        (payload) => {
+          const row = payload.new as {
+            besichtigung_gestartet_am: string | null
+            sv_angekommen_am: string | null
+          }
+          if (row.besichtigung_gestartet_am || row.sv_angekommen_am) {
+            arrivedFiredRef.current = true
+            setSessionStatus((prev) => (prev === 'arrived' ? prev : 'arrived'))
+          }
+        },
+      )
+      .subscribe()
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [aktuellerStop?.termin_id])
 
   // AAR-388: Beim Mount Recovery fahren + Sync-Listeners registrieren.
   // Hängengebliebene 'uploading'-Items aus Tab-Reload zurück auf 'pending'.
@@ -109,7 +175,8 @@ export default function FeldmodusClient({
       if (nextIdx >= 0) {
         setAktuellerStopIndex(nextIdx)
         setSessionStatus('idle')
-        geofenceLockRef.current = false
+        setSvInGeofence(false)
+        arrivedFiredRef.current = false
       }
       router.refresh()
     },
@@ -117,11 +184,11 @@ export default function FeldmodusClient({
   )
 
   return (
-    <div className="h-full w-full flex flex-col">
+    <div className="h-screen w-screen flex flex-col">
       <OfflineStatusBanner />
       <div className="flex-1 flex flex-col lg:flex-row min-h-0">
       {/* Karte — oben auf mobile, links auf desktop */}
-      <div className="relative h-1/2 lg:h-full lg:flex-1">
+      <div className="relative flex-1 min-h-0 lg:flex-1">
         <FeldmodusMap
           sv={sv}
           stops={stops}
@@ -142,7 +209,7 @@ export default function FeldmodusClient({
 
       {/* Sidebar — unten auf mobile, rechts auf desktop.
           AAR-386: Im arrived-State zeigt SvFallakteView statt RouteSidebar. */}
-      <div className="h-1/2 lg:h-full lg:w-[380px] lg:border-l lg:border-white/10">
+      <div className="flex-1 min-h-0 overflow-y-auto lg:flex-none lg:w-[380px] lg:border-l lg:border-white/10">
         {sessionStatus === 'arrived' && aktuellerStop ? (
           <SvFallakteView
             fallId={aktuellerStop.fall_id}
@@ -167,7 +234,10 @@ export default function FeldmodusClient({
             aktuellerStopIndex={aktuellerStopIndex}
             svPosition={position ? { lat: position.lat, lng: position.lng } : null}
             distanceMeters={distanceMeters}
+            svInGeofence={svInGeofence}
+            permissionState={permissionState}
             onAdvanced={onAdvanced}
+            onArrived={onArrived}
           />
         )}
       </div>

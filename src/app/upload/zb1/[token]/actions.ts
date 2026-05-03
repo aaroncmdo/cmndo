@@ -5,6 +5,7 @@
 // schreibt Ergebnis (nur leere Felder, H6-Regel) in leads.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { revalidatePath } from 'next/cache'
 import type { ZB1ExtractedData } from '@/lib/ocr/zb1-parser'
 
 export type ZB1UploadResult = {
@@ -204,6 +205,10 @@ export async function uploadZb1ViaToken(
       ? `OCR erkannt: ${extracted.kennzeichen}, ${extracted.fahrzeug_hersteller ?? ''} ${extracted.fahrzeug_modell ?? ''}`.trim()
       : 'OCR-Daten gefüllt.',
   }).then(() => {}, () => {})
+
+  // AAR-802: Lead-Update sichtbar in Dispatcher-UI
+  revalidatePath(`/dispatch/leads/${lead.id}`)
+  revalidatePath('/dispatch/leads')
 
   return {
     success: true,

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import AnlegenTabs from './AnlegenTabs'
+import PageHeader from '@/components/shared/PageHeader'
 
 // ARCH-1 Phase 2 (BLOCK C): Admin-Page zum Anlegen von SVs/Büros/Akademien.
 // AAR-235: Sub-SV-Tab entfernt — Sub-SVs werden direkt aus der Organisation-
@@ -21,12 +22,11 @@ export default async function SachverstaendigeAnlegen() {
   return (
     <div className="h-full overflow-y-auto py-8">
       <div>
-        {/* Header */}
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">Sachverständigen anlegen</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
-            Lege einen neuen Solo-SV, ein komplettes Büro oder eine Akademie an.
-          </p>
+          <PageHeader
+            title="Sachverständigen anlegen"
+            description="Lege einen neuen Solo-SV, ein komplettes Büro oder eine Akademie an."
+          />
         </div>
 
         <AnlegenTabs />

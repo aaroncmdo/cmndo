@@ -24,7 +24,7 @@ export function AnalyseGuard() {
   }, [leadId, fotos.length, router])
 
   if (!leadId || fotos.length < 3) {
-    return <p className="text-sm text-slate-500">Leite weiter …</p>
+    return <p className="text-sm text-claimondo-ondo">Leite weiter …</p>
   }
 
   return <AnalyseClient leadId={leadId} />

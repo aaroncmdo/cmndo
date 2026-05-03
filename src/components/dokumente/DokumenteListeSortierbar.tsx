@@ -20,6 +20,7 @@ import {
   type DropResult,
 } from '@hello-pangea/dnd'
 import { GripVerticalIcon, Loader2Icon, CheckIcon } from 'lucide-react'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { updateDokumentSortOrder } from '@/lib/dokumente/zuordnung'
@@ -93,19 +94,19 @@ export default function DokumenteListeSortierbar({
 
   if (local.length === 0) {
     return (
-      <p className="px-4 py-6 text-center text-gray-400 text-xs">
+      <p className="px-4 py-6 text-center text-claimondo-ondo/70 text-xs">
         Keine Pflichtdokumente definiert.
       </p>
     )
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+    <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
+        <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
           Reihenfolge anpassen
         </h3>
-        <span className="text-[10px] text-gray-400 flex items-center gap-1">
+        <span className="text-[10px] text-claimondo-ondo/70 flex items-center gap-1">
           {pending ? (
             <>
               <Loader2Icon className="w-3 h-3 animate-spin" /> Speichert…
@@ -122,7 +123,7 @@ export default function DokumenteListeSortierbar({
         <div className="p-3 space-y-4">
           {grouped.map(([kat, entries]) => (
             <div key={kat}>
-              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1 px-1">
+              <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-1 px-1">
                 {kat}
               </p>
               <Droppable droppableId={kat}>
@@ -141,29 +142,23 @@ export default function DokumenteListeSortierbar({
                             className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs ${
                               snap.isDragging
                                 ? 'bg-[#4573A2]/5 border-[#4573A2] shadow-sm'
-                                : 'bg-[#f8f9fb] border-gray-200'
+                                : 'bg-[#f8f9fb] border-claimondo-border'
                             }`}
                           >
                             <span
                               {...prov.dragHandleProps}
-                              className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+                              className="text-claimondo-ondo/70 hover:text-claimondo-ondo cursor-grab active:cursor-grabbing"
                             >
                               <GripVerticalIcon className="w-3.5 h-3.5" />
                             </span>
-                            <span className="flex-1 truncate text-gray-800">{it.label}</span>
-                            <span
-                              className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${
-                                it.status === 'hochgeladen' || it.status === 'geprueft'
-                                  ? 'bg-emerald-50 text-emerald-600'
-                                  : 'bg-amber-50 text-amber-600'
-                              }`}
-                            >
+                            <span className="flex-1 truncate text-claimondo-navy">{it.label}</span>
+                            <StatusBadge tone={it.status === 'hochgeladen' || it.status === 'geprueft' ? 'success' : 'warning'}>
                               {it.status === 'geprueft'
                                 ? 'Geprüft'
                                 : it.status === 'hochgeladen'
                                 ? 'Hochgeladen'
                                 : 'Ausstehend'}
-                            </span>
+                            </StatusBadge>
                           </div>
                         )}
                       </Draggable>

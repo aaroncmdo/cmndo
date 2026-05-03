@@ -7,7 +7,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SchadentypPicker from '../SchadentypPicker'
-import BkatAnalysePanel from './BkatAnalysePanel'
 import { useDispatchPhase } from '../_lib/phase-context'
 
 export default function Phase3Schadentyp() {
@@ -27,17 +26,10 @@ export default function Phase3Schadentyp() {
 
   return (
     <div className="space-y-3">
-      {/* AAR-504/505: KI-Analyse (OCR first, LLM-Fallback auf unfallhergang).
-         Zeigt Unfallart-Vorschlag + TBNR-Kandidaten. TBNRs werden nur
-         gespeichert wenn Polizei vor Ort war + OCR-Quelle. */}
-      <BkatAnalysePanel
-        leadId={lead.id}
-        polizeiVorOrt={l.polizei_vor_ort ?? null}
-        onSchadentypGesetzt={() => {
-          setShowWeiter(true)
-          router.refresh()
-        }}
-      />
+      {/* CMM-23: BkatAnalysePanel ist nach Phase 4 (Stammdaten) gewandert,
+         da der Kunde-Polizeibericht-Upload den Auto-OCR-Trigger jetzt im
+         Onboarding feuert (uploadPflichtdokument). Phase 3 fokussiert sich
+         auf Schadentyp-Auswahl. */}
       <SchadentypPicker
         leadId={lead.id}
         initialTyp={l.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
@@ -54,7 +46,7 @@ export default function Phase3Schadentyp() {
         <button
           type="button"
           onClick={() => setPhase(2)}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-semibold flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] text-sm font-semibold flex items-center justify-center gap-2"
         >
           ← Zurück zu Phase 2
         </button>
@@ -62,7 +54,7 @@ export default function Phase3Schadentyp() {
           <button
             type="button"
             onClick={() => setPhase(4)}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield flex items-center justify-center gap-2"
           >
             Weiter zu Phase 4 →
           </button>

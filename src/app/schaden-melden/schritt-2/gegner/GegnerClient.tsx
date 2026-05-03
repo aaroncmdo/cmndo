@@ -154,7 +154,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
           aria-invalid={!!errors.gegner_kennzeichen}
         />
         {auslandskennzeichen ? (
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-claimondo-ondo">
             Ausländisches Kennzeichen — geben Sie es so gut wie möglich ein.
           </p>
         ) : null}
@@ -181,7 +181,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
             />
           )}
         />
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-claimondo-ondo">
           Aus der ZB1 / Versicherungs-Karte ablesbar. Falls unbekannt, freilassen.
         </p>
       </div>
@@ -218,7 +218,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
         </div>
 
         {fields.length === 0 ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-claimondo-ondo">
             Keine Zeugen erfasst. Maximal 5 möglich.
           </p>
         ) : (
@@ -258,7 +258,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
                   size="sm"
                   onClick={() => remove(i)}
                   aria-label={`Zeuge ${i + 1} entfernen`}
-                  className="justify-self-end text-slate-500 hover:bg-red-50 hover:text-red-600"
+                  className="justify-self-end text-claimondo-ondo hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

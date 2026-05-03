@@ -12,14 +12,19 @@ import {
   completeOnboarding,
   uploadPflichtdokument,
   uploadKundenDokument,
-  markiereSpaeterNachreichen,
   markiereAlleSpaeterNachreichen,
   type PflichtdokumentStand,
   type FreierSlot,
 } from './actions'
+import type { ClaimFull } from '@/lib/claims/types'
+import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
+// CMM-33: Zentrale PflichtdokumenteSection — gleicher Bucket / Component
+// wie Detail-Page + Banner. Ersetzt die alte Per-Slot-Upload-UI im
+// Wizard-Step.
+import PflichtdokumenteSection, { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 
 type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
-type Termin = { datum: string; svName: string | null }
+type Termin = { datum: string; svName: string | null; ort: string | null }
 // AAR-323: PflichtDoc ist jetzt der Katalog-angereicherte Stand (siehe actions.ts).
 type PflichtDoc = PflichtdokumentStand
 
@@ -27,12 +32,13 @@ type PflichtDoc = PflichtdokumentStand
 // alle katalog-gefilterten, conditional freigeschalteten Slots (Attest bei
 // Personenschaden, Zeugenbericht bei zeugen_vorhanden, Mietwagenrechnung bei
 // mietwagen_flag etc.) — alle optional.
+// CMM-21: Step 'weitere-dokumente' entfernt — alle Dokumenten-Anforderungen
+// (Pflicht + optional) sammeln wir in einem Pop-over auf dem 'dokumente'-Step.
 const STEPS = [
   { id: 'welcome', label: 'Willkommen' },
   { id: 'fall', label: 'Ihr Fall' },
   { id: 'termin', label: 'Termin' },
   { id: 'dokumente', label: 'Dokumente' },
-  { id: 'weitere-dokumente', label: 'Weitere Dokumente' },
   { id: 'fertig', label: 'Fertig' },
 ] as const
 
@@ -145,25 +151,18 @@ const STATUS_PHASES = [
   { key: 'regulierung', label: 'Regulierung', description: 'Versicherung zahlt' },
 ]
 
-// AAR-231: Vorbereitungs-Flags für Termin-Step
-type VorbereitungsInfo = {
-  zb1Hochgeladen: boolean
-  polizeiVorOrt: boolean
-  polizeiberichtHochgeladen: boolean
-  personenschaden: boolean
-  attestHochgeladen: boolean
-  hatVorschaeden: boolean
-}
-
 export default function OnboardingWizard({
-  vorname, fall, termin, pflichtDocs, freieSlots, vorbereitung,
+  vorname, fall, claim, termin, pflichtDocs, pflichtSlots = [], freieSlots,
 }: {
   vorname: string
   fall: Fall | null
+  claim: ClaimFull | null
   termin: Termin | null
   pflichtDocs: PflichtDoc[]
+  /** CMM-33: Slot-Sicht (PflichtSlotForView[]) — wird für die zentrale
+   *  PflichtdokumenteSection genutzt. */
+  pflichtSlots?: PflichtSlotForView[]
   freieSlots: FreierSlot[]
-  vorbereitung?: VorbereitungsInfo
 }) {
   const router = useRouter()
   // AAR-125: Deep-Link aus Banner ("Polizeibericht hochladen") springt direkt in Step 3
@@ -197,11 +196,22 @@ export default function OnboardingWizard({
   // AAR-390: Slot-IDs die der Kunde auf „später nachreichen" gesetzt hat.
   // Server-Action setzt spaeter_nachreichen_markiert_am; UI markiert sie
   // lokal sofort, damit der Kunde visuell Feedback bekommt ohne Reload.
-  const [spaeterSlots, setSpaeterSlots] = useState<Set<string>>(new Set())
-  const [spaeterLoading, setSpaeterLoading] = useState<string | null>(null)
   const [spaeterAlleLoading, setSpaeterAlleLoading] = useState(false)
 
   const currentStep = STEPS[stepIndex]
+
+  // CMM-21: Smart-Filter — Pflichtdokumente nur zeigen wenn die Bedingung
+  // im Claim erfüllt ist (Polizeibericht nur wenn polizei_vor_ort=true,
+  // Attest nur bei Personenschaden, etc.). Die Anforderungs-Liste mappt
+  // 1:1 auf bestehende pflichtDocs — Slots die nicht relevant sind werden
+  // nicht angezeigt.
+  const dokAnforderungen = claim
+    ? getOffeneDokumentAnforderungen(claim, pflichtDocs)
+    : []
+  const relevanteSlotIds = new Set(dokAnforderungen.map((a) => a.slot_id))
+  const relevantePflichtDocs = claim
+    ? pflichtDocs.filter((d) => relevanteSlotIds.has(d.slot_id))
+    : pflichtDocs
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
 
   // AAR-166: ZB1-OCR-Ergebnis pro Dokument anzeigen (derzeit nur fahrzeugschein)
@@ -210,6 +220,24 @@ export default function OnboardingWizard({
     message: string
     fieldsFound: number
   } | null>(null)
+
+  // CMM-21: lokaler File-Counter pro Slot — wird optimistisch nach jedem
+  // erfolgreichen Upload hochgezählt damit der Kunde direktes Feedback hat,
+  // ohne page-refresh zu brauchen.
+  const [fileCountOverride, setFileCountOverride] = useState<Record<string, number>>({})
+
+  // CMM-21: Multi-File-Upload — Datei-Picker erlaubt jetzt N Files,
+  // wir loopen sequentiell durch die FileList und feuern handleFileUpload
+  // pro Datei. Bei multi_file=false greift nur die erste Datei (Replace-
+  // Semantik bleibt für Slots wie Fahrzeugschein erhalten).
+  function handleFilesUpload(dokId: string, files: FileList | File[]) {
+    const list = Array.from(files)
+    if (list.length === 0) return
+    const doc = pflichtDocs.find((d) => d.id === dokId)
+    const isMulti = !!doc?.multi_file
+    const toUpload = isMulti ? list : list.slice(0, 1)
+    for (const f of toUpload) handleFileUpload(dokId, f)
+  }
 
   function handleFileUpload(dokId: string, file: File) {
     if (!fall?.id) return
@@ -221,7 +249,14 @@ export default function OnboardingWizard({
       const base64 = typeof reader.result === 'string' ? reader.result : ''
       startTransition(async () => {
         const res = await uploadPflichtdokument(dokId, fall.id, base64, file.name, file.type)
-        if (res.success) setDocStatus((prev) => ({ ...prev, [dokId]: 'hochgeladen' }))
+        if (res.success) {
+          setDocStatus((prev) => ({ ...prev, [dokId]: 'hochgeladen' }))
+          // CMM-21: optimistisch File-Counter hochzählen
+          setFileCountOverride((prev) => ({
+            ...prev,
+            [dokId]: (prev[dokId] ?? pflichtDocs.find((d) => d.id === dokId)?.hochgeladene_anzahl ?? 0) + 1,
+          }))
+        }
         // AAR-166: wenn ZB1 → OCR triggern und Ergebnis inline anzeigen
         if (res.success && istFahrzeugschein) {
           setZb1Result(null)
@@ -283,34 +318,12 @@ export default function OnboardingWizard({
     reader.readAsDataURL(file)
   }
 
-  // AAR-390: Kunde verschiebt einen einzelnen Pflicht-Slot auf später.
-  // Status bleibt 'ausstehend' (pflichtBlocked bleibt gesetzt), Reminder-Crons
-  // überspringen den Slot aber für 48h.
-  function handleSpaeterNachreichen(pflichtdokumentId: string) {
-    if (!fall?.id) return
-    setSpaeterLoading(pflichtdokumentId)
-    startTransition(async () => {
-      const res = await markiereSpaeterNachreichen(fall.id, pflichtdokumentId)
-      if (res.success) {
-        setSpaeterSlots(prev => new Set(prev).add(pflichtdokumentId))
-      }
-      setSpaeterLoading(null)
-    })
-  }
-
   function handleAlleSpaeterNachreichen() {
     if (!fall?.id) return
     setSpaeterAlleLoading(true)
     startTransition(async () => {
       const res = await markiereAlleSpaeterNachreichen(fall.id)
-      if (res.success) {
-        const next = new Set<string>(spaeterSlots)
-        for (const d of pflichtDocs) {
-          if (docStatus[d.id] !== 'hochgeladen') next.add(d.id)
-        }
-        setSpaeterSlots(next)
-        setStepIndex(4)
-      }
+      if (res.success) setStepIndex(4)
       setSpaeterAlleLoading(false)
     })
   }
@@ -323,13 +336,20 @@ export default function OnboardingWizard({
     })
   }
 
-  const pflichtBlocked = pflichtDocs.filter(d => d.pflicht && docStatus[d.id] !== 'hochgeladen')
+  // CMM-21: Block-Logik nutzt nur die für den Claim relevanten Slots —
+  // ein Polizeibericht ist kein Blocker wenn polizei_vor_ort=false.
+  const pflichtBlocked = relevantePflichtDocs.filter(d => d.pflicht && docStatus[d.id] !== 'hochgeladen')
+
+  // CMM-33: Block-Logik auf Basis der zentralen Slot-Sicht (PflichtSlotForView).
+  // Wird parallel zur alten relevantePflichtDocs-Logik geführt; sobald CMM-35
+  // den Wizard komplett auf die Section migriert, fällt die alte Berechnung weg.
+  const pflichtBlockedSlots = pflichtSlots.filter((s) => s.pflicht && s.status !== 'erfuellt')
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Progress */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-gray-100">
-        <div className="h-full bg-[#4573A2] transition-all duration-500" style={{ width: `${progress}%` }} />
+      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-[#f8f9fb]">
+        <div className="h-full bg-claimondo-ondo transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
       {/* Step Indicator */}
@@ -339,12 +359,12 @@ export default function OnboardingWizard({
             <div key={s.id} className="flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 i < stepIndex ? 'bg-emerald-500 text-white' :
-                i === stepIndex ? 'bg-[#4573A2] text-white' :
-                'bg-gray-200 text-gray-400'
+                i === stepIndex ? 'bg-claimondo-ondo text-white' :
+                'bg-claimondo-border text-claimondo-ondo/70'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
               </div>
-              {i < STEPS.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-gray-200'}`} />}
+              {i < STEPS.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-claimondo-border'}`} />}
             </div>
           ))}
         </div>
@@ -352,19 +372,19 @@ export default function OnboardingWizard({
 
       <div className="flex-1 flex flex-col px-5 pt-16 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div className="bg-white border border-gray-200 rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
+          <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
             {/* Welcome */}
             {currentStep.id === 'welcome' && (
               <div>
-                <div className="mb-4"><SparklesIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900 leading-snug">Willkommen bei Claimondo, {vorname}!</h1>
-                <p className="mt-3 text-sm text-gray-500 leading-relaxed">
+                <div className="mb-4"><SparklesIcon className="w-10 h-10 text-claimondo-ondo" /></div>
+                <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">Willkommen bei Claimondo, {vorname}!</h1>
+                <p className="mt-3 text-sm text-claimondo-ondo leading-relaxed">
                   Wir kuemmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
                   Dieser kurze Einstieg zeigt Ihnen Ihre naechsten Schritte — dauert ca. 3 Minuten.
                 </p>
                 <button
                   onClick={() => setStepIndex(1)}
-                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Los geht&apos;s</button>
               </div>
             )}
@@ -372,563 +392,273 @@ export default function OnboardingWizard({
             {/* Fall */}
             {currentStep.id === 'fall' && (
               <div>
-                <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900">Ihr Fall</h1>
-                {fall ? (
-                  <div className="mt-4 bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 border border-[#4573A2]/20 rounded-2xl p-5">
-                    <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">Fall-Nummer</p>
-                    <p className="text-xl font-bold text-[#0D1B3E]">{fall.fall_nummer ?? fall.id.slice(0, 8)}</p>
-                    {fall.kennzeichen && <p className="text-sm text-gray-600 mt-1">{fall.kennzeichen}</p>}
-                    {fall.fahrzeug && <p className="text-xs text-gray-500">{fall.fahrzeug}</p>}
+                <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-claimondo-ondo" /></div>
+                <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Schadenfall</h1>
+                <p className="mt-2 text-sm text-claimondo-ondo">
+                  Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie kurz und bestätigen Sie unten.
+                </p>
+
+                {/* CMM-19: Fall-Header mit Fall-Nummer + Kennzeichen + Fahrzeug */}
+                {fall && (
+                  <div className="mt-5 rounded-2xl bg-claimondo-navy text-white p-5">
+                    <p className="text-[11px] uppercase tracking-wider text-white/60 mb-1">Fall-Nummer</p>
+                    <p className="text-xl font-bold">{fall.fall_nummer ?? fall.id.slice(0, 8)}</p>
+                    {(fall.kennzeichen || fall.fahrzeug) && (
+                      <p className="text-sm text-white/80 mt-2">
+                        {[fall.fahrzeug, fall.kennzeichen].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
                   </div>
-                ) : (
-                  <p className="mt-4 text-sm text-gray-500">Ihr Fall wird gerade angelegt — Sie sehen ihn in wenigen Minuten.</p>
                 )}
-                <div className="mt-6 space-y-2">
-                  <p className="text-sm font-medium text-gray-700">So laeuft es weiter:</p>
-                  {STATUS_PHASES.map((phase, i) => (
-                    <div key={phase.key} className="flex items-start gap-3 py-2">
-                      <div className="w-6 h-6 rounded-full bg-[#4573A2]/10 text-[#4573A2] flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{phase.label}</p>
-                        <p className="text-xs text-gray-500">{phase.description}</p>
-                      </div>
-                    </div>
-                  ))}
+
+                {/* CMM-19: Navy-Cards mit Schadensdaten aus Claim-SSoT */}
+                {claim && (
+                  <div className="mt-4 space-y-3">
+                    <ClaimDataCard title="Schadensereignis">
+                      {claim.schadentag && (
+                        <DataRow label="Datum" value={new Date(claim.schadentag).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })} />
+                      )}
+                      {claim.schadenzeit && <DataRow label="Uhrzeit" value={String(claim.schadenzeit).slice(0, 5)} />}
+                      {claim.schadenort_adresse && (
+                        <DataRow label="Ort" value={formatOrt(claim.schadenort_adresse, claim.schadenort_plz, claim.schadenort_ort)} />
+                      )}
+                      {claim.schadenart && <DataRow label="Schadenart" value={prettyEnum(String(claim.schadenart))} />}
+                      {claim.unfall_konstellation && <DataRow label="Konstellation" value={prettyEnum(String(claim.unfall_konstellation))} />}
+                      {claim.hergang_kunde_text && <DataRow label="Hergang" value={String(claim.hergang_kunde_text)} multiline />}
+                    </ClaimDataCard>
+
+                    {(claim.hat_personenschaden || claim.hat_sachschaden || claim.hat_mietwagen || claim.hat_nutzungsausfall) && (
+                      <ClaimDataCard title="Schadens-Umfang">
+                        {claim.hat_personenschaden && <DataRow label="Personenschaden" value="ja" />}
+                        {claim.hat_sachschaden && <DataRow label="Sachschaden" value="ja" />}
+                        {claim.hat_mietwagen && <DataRow label="Mietwagen-Bedarf" value="ja" />}
+                        {claim.hat_nutzungsausfall && <DataRow label="Nutzungsausfall" value="ja" />}
+                        {claim.sachschaden_beschreibung && <DataRow label="Sachschaden-Detail" value={String(claim.sachschaden_beschreibung)} multiline />}
+                      </ClaimDataCard>
+                    )}
+
+                    {claim.gegner_bekannt && (() => {
+                      const verursacher = (claim.parties ?? []).find(p => p.rolle === 'verursacher')
+                      const gegnerName = verursacher
+                        ? [verursacher.vorname, verursacher.nachname].filter(Boolean).join(' ').trim() || verursacher.nachname
+                        : null
+                      const gegnerVs = verursacher?.versicherung_klartext ?? null
+                      const gegnerKz = verursacher?.kennzeichen ?? null
+                      return (
+                        <ClaimDataCard title="Unfallgegner">
+                          {gegnerName && <DataRow label="Name" value={gegnerName} />}
+                          {gegnerVs && <DataRow label="Versicherung" value={gegnerVs} />}
+                          {gegnerKz && <DataRow label="Kennzeichen" value={gegnerKz} />}
+                          {claim.gegner_versicherungsnummer && <DataRow label="VS-Nummer" value={String(claim.gegner_versicherungsnummer)} />}
+                          {claim.gegner_aktenzeichen && <DataRow label="Schaden-Nr (Gegner)" value={String(claim.gegner_aktenzeichen)} />}
+                          {claim.anzahl_beteiligte_total > 1 && (
+                            <DataRow label="Beteiligte" value={String(claim.anzahl_beteiligte_total)} />
+                          )}
+                        </ClaimDataCard>
+                      )
+                    })()}
+
+                    {(claim.polizei_vor_ort || claim.polizei_aktenzeichen) && (
+                      <ClaimDataCard title="Polizei">
+                        {claim.polizei_vor_ort && <DataRow label="Vor Ort gewesen" value="ja" />}
+                        {claim.polizei_aktenzeichen && <DataRow label="Aktenzeichen" value={String(claim.polizei_aktenzeichen)} />}
+                      </ClaimDataCard>
+                    )}
+                  </div>
+                )}
+
+                {/* Korrekturhinweis */}
+                <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
+                  Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer
+                  zurück — wir tragen Korrekturen für Sie ein.
                 </div>
+
                 <button
                   onClick={() => setStepIndex(2)}
-                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
-                >Weiter</button>
+                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-navy hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
+                >
+                  Daten bestätigen und weiter
+                </button>
               </div>
             )}
 
             {/* Termin + AAR-231: Vorbereitungs-Checkliste */}
             {currentStep.id === 'termin' && (
               <div>
-                <div className="mb-4"><CalendarIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900">Ihr Termin</h1>
+                <div className="mb-4"><CalendarIcon className="w-10 h-10 text-claimondo-ondo" /></div>
+                <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Termin</h1>
                 {termin ? (
-                  <>
-                    <div className="mt-4 bg-gradient-to-br from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-2xl p-5">
-                      <p className="text-xs uppercase tracking-wider text-emerald-700 mb-1">Termin reserviert</p>
-                      <p className="text-lg font-bold text-gray-900">
-                        {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
-                      </p>
-                      {termin.svName && <p className="mt-3 text-sm text-gray-600">Sachverständiger: <strong>{termin.svName}</strong></p>}
-                      <p className="mt-3 text-xs text-gray-500">Wir erinnern Sie 24h vorher per WhatsApp.</p>
+                  <div className="mt-4 bg-gradient-to-br from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-2xl p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                        <CheckIcon className="w-4 h-4" />
+                      </div>
+                      <p className="text-xs uppercase tracking-wider text-emerald-700 font-semibold">Termin verbindlich bestätigt</p>
                     </div>
-
-                    {/* AAR-231: Vorbereitungs-Checkliste
-                        AAR-390: Auf kleinen Screens kann der Block durch die
-                        conditional CheckItems (Vorschaeden/Polizei/Attest)
-                        schnell länger werden als der Viewport und den Weiter-
-                        Button nach unten drücken. max-h + overflow-y + Sticky-
-                        Header sorgen für einen stabilen, scrollbaren Block
-                        ohne die Step-Höhe zu sprengen. */}
-                    <div className="mt-5 bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-2xl p-5 space-y-3 max-h-[60vh] overflow-y-auto">
-                      <p className="sticky top-0 -mx-5 -mt-5 px-5 pt-5 pb-2 bg-[#eef2f8] text-sm font-semibold text-[#0D1B3E] z-10">
-                        Bitte vor dem Termin vorbereiten:
+                    <p className="text-lg font-bold text-claimondo-navy">
+                      {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                    </p>
+                    <p className="text-sm font-medium text-claimondo-navy">
+                      {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                    </p>
+                    {termin.ort && (
+                      <p className="mt-3 text-sm text-claimondo-navy flex items-start gap-1.5">
+                        <span className="mt-0.5">📍</span>
+                        <span>{termin.ort}</span>
                       </p>
-                      <CheckItem emoji="📍" text="Fahrzeug an der Besichtigungsadresse bereitstellen" done />
-                      <CheckItem emoji="🔑" text="Fahrzeugschlüssel + Fahrzeugpapiere bereithalten" done />
-                      <CheckItem emoji="📞" text="Unter Ihrer Telefonnummer erreichbar sein" done />
-
-                      {vorbereitung && !vorbereitung.zb1Hochgeladen && (
-                        <CheckItem
-                          emoji="📄"
-                          text="Fahrzeugschein noch nicht hochgeladen — bitte vor dem Termin hochladen."
-                          done={false}
-                          action={() => setStepIndex(3)}
-                        />
-                      )}
-                      {vorbereitung?.polizeiVorOrt && !vorbereitung.polizeiberichtHochgeladen && (
-                        <CheckItem
-                          emoji="🚔"
-                          text="Polizeibericht hochladen (falls schon vorhanden)."
-                          done={false}
-                          action={() => setStepIndex(3)}
-                        />
-                      )}
-                      {vorbereitung?.personenschaden && !vorbereitung.attestHochgeladen && (
-                        <CheckItem
-                          emoji="🏥"
-                          text="Ärztliches Attest hochladen (falls vorhanden)."
-                          done={false}
-                          action={() => setStepIndex(3)}
-                        />
-                      )}
-                      {vorbereitung?.hatVorschaeden && (
-                        <CheckItem
-                          emoji="⚠️"
-                          text="Reparaturrechnungen für Vorschäden bereithalten."
-                          done={false}
-                          action={() => setStepIndex(3)}
-                        />
-                      )}
+                    )}
+                    {termin.svName && (
+                      <p className="mt-2 text-sm text-claimondo-navy flex items-center gap-1.5">
+                        <span>👤</span>
+                        <span>Sachverständiger: <strong>{termin.svName}</strong></span>
+                      </p>
+                    )}
+                    <div className="mt-4 pt-4 border-t border-emerald-200">
+                      <p className="text-xs text-claimondo-ondo leading-relaxed">
+                        💡 Bitte tragen Sie sich den Termin in Ihren Kalender ein. Wir erinnern Sie zusätzlich 24 Stunden vorher per WhatsApp.
+                      </p>
                     </div>
-                  </>
+                  </div>
                 ) : (
-                  <p className="mt-4 text-sm text-gray-500">Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.</p>
+                  <p className="mt-4 text-sm text-claimondo-ondo">Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.</p>
                 )}
                 <button
                   onClick={() => setStepIndex(3)}
-                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
               </div>
             )}
 
-            {/* Dokumente — AAR-323: Katalog-driven Status-Übersicht */}
+            {/* Dokumente — CMM-21: Smart-gefilterte Pflicht-Cards */}
             {currentStep.id === 'dokumente' && (
               <div>
-                <div className="mb-4"><FileTextIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900">Pflichtdokumente</h1>
-                <p className="mt-2 text-sm text-gray-500">
-                  Laden Sie Ihre Unterlagen hoch. Sie können das auch später im Dashboard nachholen.
+                <div className="mb-4"><FileTextIcon className="w-10 h-10 text-claimondo-ondo" /></div>
+                <h1 className="text-2xl font-semibold text-claimondo-navy">Dokumente</h1>
+                <p className="mt-2 text-sm text-claimondo-ondo">
+                  Aus Ihrem Schadenfall haben wir die folgenden Unterlagen vorbereitet.
+                  Sie können jetzt hochladen oder den Schritt überspringen und alles
+                  später im Portal nachreichen.
                 </p>
-                <div className="mt-5 space-y-3">
-                  {pflichtDocs.length === 0 && (
-                    <p className="text-sm text-gray-400 text-center py-4">Keine Pflichtdokumente erforderlich.</p>
-                  )}
-                  {pflichtDocs.map(doc => {
-                    const status = docStatus[doc.id] ?? 'ausstehend'
-                    const istHochgeladen = status === 'hochgeladen'
-                    const istAbgelehnt = status === 'abgelehnt'
-                    const loading = uploadingId === doc.id
-                    const label = doc.label || LEGACY_DOKTYP_LABELS[doc.slot_id] || doc.slot_id
-                    const acceptString = doc.akzeptierte_mime_types.join(',')
-                    const fristText = doc.frist ? new Date(doc.frist).toLocaleDateString('de-DE', {
-                      day: '2-digit', month: '2-digit', year: 'numeric',
-                    }) : null
-                    // AAR-365: Card-Style prominenter — Amber-Border wenn offen,
-                    // Grün wenn hochgeladen, Rose wenn abgelehnt. ⓘ oben rechts
-                    // öffnet Info-Overlay mit "Warum?" + "Wo finde ich das?".
-                    return (
-                      <div
-                        key={doc.id}
-                        className={`relative rounded-2xl border-2 p-4 transition-colors ${
-                          istHochgeladen ? 'bg-emerald-50 border-emerald-300'
-                          : istAbgelehnt ? 'bg-rose-50 border-rose-300'
-                          : 'bg-amber-50/60 border-amber-300'
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setInfoOverlay({ slotId: doc.slot_id, label })}
-                          aria-label={`Info zu ${label}`}
-                          className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/80 border border-gray-200 text-gray-500 hover:text-[#0D1B3E] hover:border-[#4573A2] flex items-center justify-center transition-colors"
-                        >
-                          <InfoIcon className="w-4 h-4" />
-                        </button>
-                        <div className="flex items-start gap-3 pr-9">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            istHochgeladen ? 'bg-emerald-500 text-white'
-                            : istAbgelehnt ? 'bg-rose-500 text-white'
-                            : 'bg-amber-500 text-white'
-                          }`}>
-                            {istHochgeladen ? <CheckIcon className="w-5 h-5" />
-                              : istAbgelehnt ? <AlertCircleIcon className="w-5 h-5" />
-                              : <UploadCloudIcon className="w-5 h-5" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-base font-semibold text-gray-900">{label}</p>
-                              {doc.pflicht && !istHochgeladen && (
-                                <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">Pflicht</span>
-                              )}
-                            </div>
-                            <p className={`text-xs mt-0.5 font-medium ${
-                              istHochgeladen ? 'text-emerald-700'
-                              : istAbgelehnt ? 'text-rose-700'
-                              : 'text-amber-700'
-                            }`}>
-                              {istHochgeladen ? '✓ Hochgeladen'
-                                : istAbgelehnt ? '✗ Abgelehnt — bitte neu hochladen'
-                                : 'Noch nicht hochgeladen'}
-                            </p>
-                            {doc.beschreibung && (
-                              <p className="text-xs text-gray-600 mt-1">{doc.beschreibung}</p>
-                            )}
-                            {doc.begruendung && (
-                              <p className="text-xs text-gray-700 mt-1 italic">„{doc.begruendung}"</p>
-                            )}
-                            {fristText && (
-                              <p className="text-xs text-amber-800 mt-1 flex items-center gap-1 font-medium">
-                                <ClockIcon className="w-3 h-3" /> Frist: {fristText}
-                              </p>
-                            )}
-                          </div>
-                        </div>
 
-                        {/* Action-Buttons — ausstehend/abgelehnt: Upload; hochgeladen: Ersetzen */}
-                        <div className="mt-3 flex gap-2">
-                          {!istHochgeladen && (
-                            <>
-                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
-                                {loading ? 'Lädt...' : <><span>📷</span> Foto aufnehmen</>}
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  capture="environment"
-                                  className="hidden"
-                                  disabled={loading}
-                                  onChange={e => {
-                                    const f = e.target.files?.[0]
-                                    if (f) handleFileUpload(doc.id, f)
-                                  }}
-                                />
-                              </label>
-                              <label className="flex-1 min-h-11 text-sm font-semibold px-3 py-2.5 rounded-xl bg-white border-2 border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 active:scale-[0.98] cursor-pointer text-center flex items-center justify-center gap-1.5 transition-all">
-                                <span>📁</span> Datei wählen
-                                <input
-                                  type="file"
-                                  accept={acceptString}
-                                  className="hidden"
-                                  disabled={loading}
-                                  onChange={e => {
-                                    const f = e.target.files?.[0]
-                                    if (f) handleFileUpload(doc.id, f)
-                                  }}
-                                />
-                              </label>
-                            </>
-                          )}
-                          {istHochgeladen && (
-                            <label className="text-xs font-medium px-3 py-2 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer inline-flex items-center gap-1.5">
-                              <RefreshCwIcon className="w-3 h-3" />
-                              {loading ? 'Lädt...' : 'Ersetzen'}
-                              <input
-                                type="file"
-                                accept={acceptString}
-                                className="hidden"
-                                disabled={loading}
-                                onChange={e => {
-                                  const f = e.target.files?.[0]
-                                  if (f) handleFileUpload(doc.id, f)
-                                }}
-                              />
-                            </label>
-                          )}
-                        </div>
-
-                        {/* AAR-390: „Später nachreichen"-Link pro offenem Pflicht-Slot.
-                            Nicht bei hochgeladenen Slots — und Text wechselt sobald markiert. */}
-                        {!istHochgeladen && (
-                          <div className="mt-2.5 text-right">
-                            {spaeterSlots.has(doc.id) ? (
-                              <span className="text-[11px] text-gray-500 italic">
-                                ✓ Auf später verschoben — wir erinnern Sie später.
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => handleSpaeterNachreichen(doc.id)}
-                                disabled={spaeterLoading === doc.id}
-                                className="text-[11px] text-gray-600 hover:text-[#0D1B3E] underline decoration-dotted underline-offset-2 disabled:opacity-50"
-                              >
-                                {spaeterLoading === doc.id ? 'Wird gespeichert…' : 'Später nachreichen'}
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-                {/* AAR-166: ZB1-OCR-Ergebnis inline anzeigen nach Fahrzeugschein-Upload */}
-                {zb1Result && (
-                  <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                    <div className="flex items-center gap-2">
-                      <SparklesIcon className="w-4 h-4 text-emerald-600" />
-                      <p className="text-sm font-semibold text-emerald-900">
-                        Fahrzeugschein automatisch ausgelesen
+                {/* CMM-33: Zentrale PflichtdokumenteSection — gleiche
+                    Drag&Drop-Slot-Cards wie Detail-Page und Banner-Pop-over.
+                    Liest und schreibt aus dem gleichen Bucket. */}
+                <div className="mt-5">
+                  {fall?.id ? (
+                    pflichtSlots.length === 0 ? (
+                      <p className="text-sm text-claimondo-ondo/70 text-center py-4 rounded-xl bg-claimondo-border/30">
+                        Keine Dokumente erforderlich — Sie sind fertig.
                       </p>
-                    </div>
-                    <p className="text-[11px] text-emerald-800 mt-1">
-                      {zb1Result.fieldsFound} Felder erkannt
+                    ) : (
+                      <PflichtdokumenteSection
+                        slots={pflichtSlots}
+                        fallId={fall.id}
+                        rolle="kunde"
+                        variant="card"
+                      />
+                    )
+                  ) : (
+                    <p className="text-sm text-amber-700 text-center py-4 rounded-xl bg-amber-50 border border-amber-200">
+                      Fall wird vorbereitet — bitte einen Moment.
                     </p>
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-                      {zb1Result.extracted.kennzeichen && (
-                        <div><span className="text-emerald-700 block">Kennzeichen</span><span className="font-medium text-gray-900">{zb1Result.extracted.kennzeichen}</span></div>
-                      )}
-                      {zb1Result.extracted.fin_vin && (
-                        <div><span className="text-emerald-700 block">FIN</span><span className="font-mono font-medium text-gray-900">{zb1Result.extracted.fin_vin}</span></div>
-                      )}
-                      {zb1Result.extracted.fahrzeug_hersteller && (
-                        <div><span className="text-emerald-700 block">Marke</span><span className="font-medium text-gray-900">{zb1Result.extracted.fahrzeug_hersteller}</span></div>
-                      )}
-                      {zb1Result.extracted.fahrzeug_modell && (
-                        <div><span className="text-emerald-700 block">Modell</span><span className="font-medium text-gray-900">{zb1Result.extracted.fahrzeug_modell}</span></div>
-                      )}
-                      {zb1Result.extracted.halter_nachname && (
-                        <div className="col-span-2"><span className="text-emerald-700 block">Halter</span><span className="font-medium text-gray-900">{zb1Result.extracted.halter_vorname} {zb1Result.extracted.halter_nachname}</span></div>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-emerald-700 mt-3 italic">
-                      Daten wurden gespeichert. Falsche Werte? Einfach über die Betreuung melden.
-                    </p>
-                  </div>
-                )}
-                {pflichtBlocked.length > 0 && (
-                  <p className="mt-4 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-2">
-                    Sie koennen jetzt fortfahren — fehlende Pflicht-Dokumente ({pflichtBlocked.length}) koennen Sie im Dashboard nachreichen.
-                  </p>
-                )}
+                  )}
+                </div>
+
+                {/* CMM-35: Reste der alten Per-Slot-UI (ZB1-OCR-Result,
+                    Foto-Aufnehmen, Info-Overlay, Optional-Slots-Section,
+                    Sonstiges-Upload, später-nachreichen pro Slot) ist
+                    auskommentiert in dieser Welle und kommt mit dem
+                    vollständigen Wizard-Refactor zurück. */}
+                {false && relevantePflichtDocs.length === 0 && null}
+
+                {/* CMM-21: zwei gleichwertige Buttons — Weiter, oder den Step
+                    skippen. handleAlleSpaeterNachreichen markiert alle offenen
+                    Pflicht-Slots als "später nachreichen" (dedupe Reminder-Welle
+                    48h) UND springt nach fertig. Wenn nichts offen ist, reicht
+                    "Weiter". */}
                 <button
                   onClick={() => setStepIndex(4)}
-                  className="mt-4 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="mt-5 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
-                {/* AAR-390: Shortcut für Kunden ohne Dokumente zur Hand — markiert
-                    alle offenen Pflicht-Slots als „später nachreichen" und springt
-                    direkt in den optionalen Step 4. pflicht bleibt pflicht, W2-Gate
-                    bleibt zu — wir dedupe nur die Reminder-Welle für 48h. */}
                 {pflichtBlocked.length > 0 && (
                   <button
                     type="button"
                     onClick={handleAlleSpaeterNachreichen}
                     disabled={spaeterAlleLoading}
-                    className="mt-2 w-full min-h-11 py-3 rounded-xl bg-white border border-gray-300 text-gray-700 hover:border-[#4573A2] hover:text-[#0D1B3E] text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
+                    className="mt-2 w-full min-h-12 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo hover:text-claimondo-navy text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
                   >
-                    {spaeterAlleLoading
-                      ? 'Wird gespeichert…'
-                      : `Alle Pflichtdokumente (${pflichtBlocked.length}) später nachreichen`}
+                    {spaeterAlleLoading ? 'Wird gespeichert…' : 'Alle später nachreichen'}
                   </button>
                 )}
               </div>
             )}
 
-            {/* Weitere Dokumente — AAR-324: conditional Slots aus dokument_katalog */}
-            {currentStep.id === 'weitere-dokumente' && (
-              <div>
-                <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-[#4573A2]" /></div>
-                <h1 className="text-2xl font-semibold text-gray-900">Weitere Dokumente</h1>
-                <p className="mt-2 text-sm text-gray-500">
-                  Optional — laden Sie weitere Dokumente oder Fotos hoch, die zu Ihrem Fall passen.
-                  Sie können diesen Schritt auch überspringen und später im Dashboard nachreichen.
-                </p>
-
-                {/* Katalog-Slots nach Kategorie gruppiert */}
-                <div className="mt-5 space-y-5">
-                  {KATEGORIE_REIHENFOLGE.map(kat => {
-                    const slotsInKat = freieSlots.filter(s => s.kategorie === kat)
-                    if (slotsInKat.length === 0) return null
-                    const katMeta = KATEGORIE_LABELS[kat]
-                    return (
-                      <div key={kat}>
-                        <p className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-2">
-                          {katMeta.emoji} {katMeta.label}
-                        </p>
-                        <div className="space-y-2.5">
-                          {slotsInKat.map(slot => {
-                            const count = slotCounts[slot.slot_id] ?? 0
-                            const hochgeladen = count > 0
-                            const loading = uploadingSlot === slot.slot_id
-                            // multi_file=false + bereits 1 hochgeladen → Upload-Button wird zu "Ersetzen"
-                            const kannMehr = slot.multi_file || count === 0
-                            const acceptString = slot.akzeptierte_mime_types.join(',')
-                            // AAR-365: Auch Optional-Slots mit ⓘ Info-Button ausstatten.
-                            const hasInfo = !!DOC_INFO[slot.slot_id]
-                            return (
-                              <div
-                                key={slot.slot_id}
-                                className={`relative rounded-xl border p-3 ${
-                                  hochgeladen ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-200'
-                                }`}
-                              >
-                                {hasInfo && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setInfoOverlay({ slotId: slot.slot_id, label: slot.label })}
-                                    aria-label={`Info zu ${slot.label}`}
-                                    className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white/80 border border-gray-200 text-gray-500 hover:text-[#0D1B3E] hover:border-[#4573A2] flex items-center justify-center transition-colors"
-                                  >
-                                    <InfoIcon className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                                <div className={`flex items-start gap-3 ${hasInfo ? 'pr-8' : ''}`}>
-                                  <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    hochgeladen ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400'
-                                  }`}>
-                                    {hochgeladen ? <CheckIcon className="w-4 h-4" /> : <UploadCloudIcon className="w-4 h-4" />}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <p className="text-sm font-medium text-gray-900">{slot.label}</p>
-                                      {hochgeladen && (
-                                        <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                                          {slot.multi_file ? `${count} hochgeladen` : 'Hochgeladen'}
-                                        </span>
-                                      )}
-                                    </div>
-                                    {slot.beschreibung && (
-                                      <p className="text-xs text-gray-500 mt-0.5">{slot.beschreibung}</p>
-                                    )}
-                                  </div>
-                                </div>
-
-                                <div className="mt-2.5 flex gap-2">
-                                  {kannMehr && (
-                                    <>
-                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer text-center">
-                                        {loading ? 'Lädt...' : '📷 Foto aufnehmen'}
-                                        <input
-                                          type="file"
-                                          accept="image/*"
-                                          capture="environment"
-                                          className="hidden"
-                                          disabled={loading}
-                                          onChange={e => {
-                                            const f = e.target.files?.[0]
-                                            if (f) handleFreiUpload(slot.slot_id, f)
-                                            e.target.value = ''
-                                          }}
-                                        />
-                                      </label>
-                                      <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 cursor-pointer text-center">
-                                        {loading ? 'Lädt...' : '📁 Datei wählen'}
-                                        <input
-                                          type="file"
-                                          accept={acceptString}
-                                          className="hidden"
-                                          disabled={loading}
-                                          onChange={e => {
-                                            const f = e.target.files?.[0]
-                                            if (f) handleFreiUpload(slot.slot_id, f)
-                                            e.target.value = ''
-                                          }}
-                                        />
-                                      </label>
-                                    </>
-                                  )}
-                                  {!kannMehr && (
-                                    <label className="text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 cursor-pointer inline-flex items-center gap-1.5">
-                                      <RefreshCwIcon className="w-3 h-3" />
-                                      {loading ? 'Lädt...' : 'Ersetzen'}
-                                      <input
-                                        type="file"
-                                        accept={acceptString}
-                                        className="hidden"
-                                        disabled={loading}
-                                        onChange={e => {
-                                          const f = e.target.files?.[0]
-                                          if (f) handleFreiUpload(slot.slot_id, f)
-                                          e.target.value = ''
-                                        }}
-                                      />
-                                    </label>
-                                  )}
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )
-                  })}
-
-                  {/* Sonstiges — immer sichtbar, nutzt kunde-nachreichung Slot */}
-                  <div>
-                    <p className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-2">
-                      📎 Sonstiges
-                    </p>
-                    <div className="rounded-xl border border-gray-200 bg-white p-3">
-                      <p className="text-sm font-medium text-gray-900">Andere Datei hochladen</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Alles was zu Ihrem Fall gehört und oben nicht auftaucht — z.B. Rechnungen, Berichte, Fotos.
-                        Ihr Betreuer ordnet die Datei anschließend zu.
-                      </p>
-                      <div className="mt-2.5">
-                        <label className="block text-[11px] font-medium text-gray-600 mb-1">
-                          Worum geht es? (optional)
-                        </label>
-                        <textarea
-                          value={sonstigesBeschreibung}
-                          onChange={e => setSonstigesBeschreibung(e.target.value)}
-                          rows={2}
-                          placeholder="z.B. 'Attest vom Hausarzt, erhalten am 15.04.'"
-                          className="w-full text-xs rounded-md border border-gray-200 px-2 py-1.5 outline-none focus:border-[#4573A2]"
-                          maxLength={500}
-                        />
-                      </div>
-                      {sonstigesCount > 0 && (
-                        <p className="mt-2 text-[11px] text-emerald-700 flex items-center gap-1">
-                          <CheckIcon className="w-3 h-3" /> {sonstigesCount} Datei{sonstigesCount === 1 ? '' : 'en'} hochgeladen
-                        </p>
-                      )}
-                      {sonstigesError && (
-                        <p className="mt-2 text-[11px] text-rose-700 flex items-center gap-1">
-                          <AlertCircleIcon className="w-3 h-3" /> {sonstigesError}
-                        </p>
-                      )}
-                      <div className="mt-2.5 flex gap-2">
-                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-[#0D1B3E] text-white hover:bg-[#1E3A5F] cursor-pointer text-center">
-                          {uploadingSlot === '__sonstiges__' ? 'Lädt...' : '📷 Foto aufnehmen'}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            className="hidden"
-                            disabled={uploadingSlot === '__sonstiges__'}
-                            onChange={e => {
-                              const f = e.target.files?.[0]
-                              if (f) handleFreiUpload(null, f, sonstigesBeschreibung)
-                              e.target.value = ''
-                            }}
-                          />
-                        </label>
-                        <label className="flex-1 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-[#0D1B3E] text-[#0D1B3E] hover:bg-blue-50 cursor-pointer text-center">
-                          {uploadingSlot === '__sonstiges__' ? 'Lädt...' : '📁 Datei wählen'}
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/heic,application/pdf"
-                            className="hidden"
-                            disabled={uploadingSlot === '__sonstiges__'}
-                            onChange={e => {
-                              const f = e.target.files?.[0]
-                              if (f) handleFreiUpload(null, f, sonstigesBeschreibung)
-                              e.target.value = ''
-                            }}
-                          />
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setStepIndex(5)}
-                  className="mt-5 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
-                >Weiter</button>
-                <button
-                  onClick={() => setStepIndex(5)}
-                  className="mt-2 w-full py-3 text-xs text-gray-500 hover:text-gray-700"
-                >Überspringen</button>
-              </div>
-            )}
+            {/* CMM-21: weitere-dokumente-Step entfernt — Optional-Slots wandern in das Pop-over auf dem dokumente-Step. */}
 
             {/* Fertig */}
-            {currentStep.id === 'fertig' && (
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5">
-                  <CheckIcon className="w-8 h-8 text-emerald-500" />
+            {currentStep.id === 'fertig' && (() => {
+              // CMM-22: zwei Endings basierend auf offenen Pflicht-Slots.
+              // Grün = alles erfüllt; Gelb = der Kunde hat geskippt (oder
+              // Pflicht-Slots existieren noch). Im gelben Fall schiebt der
+              // Banner im Layout das Re-Engagement.
+              //
+              // CMM-22 Bugfix: gleiche Smart-Filter-Sicht wie der Banner
+              // (relevanteSlotIds), Pflicht aus der DB-Row, optimistische
+              // docStatus-Override für sofortiges Feedback nach einem Upload.
+              // Vorher zählte das Ende ungefiltert über pflichtDocs und
+              // ignorierte den Smart-Filter — dadurch tauchten Slots wie
+              // gewerbenachweis/freigabe_bank auf die der Banner gar nicht
+              // anzeigt (3 vs 4-Diskrepanz).
+              const offenePflicht = pflichtDocs.filter(
+                (d) => relevanteSlotIds.has(d.slot_id)
+                  && d.pflicht
+                  && (docStatus[d.id] ?? d.status) !== 'hochgeladen',
+              ).length
+              const allesErfuellt = offenePflicht === 0
+              return (
+                <div className="text-center">
+                  {allesErfuellt ? (
+                    <>
+                      <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5">
+                        <CheckIcon className="w-8 h-8 text-emerald-500" />
+                      </div>
+                      <h1 className="text-2xl font-semibold text-claimondo-navy">Sie sind startklar!</h1>
+                      <p className="mt-3 text-sm text-claimondo-ondo">
+                        Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine.
+                        Wir melden uns bei wichtigen Updates per WhatsApp.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-5">
+                        <AlertCircleIcon className="w-8 h-8 text-amber-500" />
+                      </div>
+                      <h1 className="text-2xl font-semibold text-claimondo-navy">Alles klar</h1>
+                      <p className="mt-3 text-sm text-claimondo-ondo">
+                        Bitte reichen Sie schnellstmöglich die noch fehlenden{' '}
+                        <span className="font-semibold text-claimondo-navy">
+                          {offenePflicht}{' '}
+                          {offenePflicht === 1 ? 'Unterlage' : 'Unterlagen'}
+                        </span>{' '}
+                        nach. Sie sehen den Hinweis oben in Ihrem Portal — ein Klick
+                        bringt Sie direkt zurück in den Upload-Bereich.
+                      </p>
+                    </>
+                  )}
+                  <button
+                    onClick={handleFinish}
+                    disabled={pending}
+                    className={`mt-6 w-full min-h-14 py-4 rounded-2xl text-white font-semibold text-base disabled:opacity-50 active:scale-[0.98] transition-all ${
+                      allesErfuellt
+                        ? 'bg-claimondo-shield hover:bg-claimondo-ondo'
+                        : 'bg-amber-500 hover:bg-amber-600'
+                    }`}
+                  >
+                    {pending ? 'Moment...' : 'Zum Dashboard'}
+                  </button>
                 </div>
-                <h1 className="text-2xl font-semibold text-gray-900">Sie sind startklar!</h1>
-                <p className="mt-3 text-sm text-gray-500">
-                  Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine.
-                  Wir melden uns bei wichtigen Updates per WhatsApp.
-                </p>
-                <button
-                  onClick={handleFinish}
-                  disabled={pending}
-                  className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-50 active:scale-[0.98] transition-all"
-                >
-                  {pending ? 'Moment...' : 'Zum Dashboard'}
-                </button>
-              </div>
-            )}
+              )
+            })()}
           </div>
         </div>
 
@@ -936,7 +666,7 @@ export default function OnboardingWizard({
           <div className="pt-2">
             <button
               onClick={() => setStepIndex(stepIndex - 1)}
-              className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              className="w-full py-3 text-sm text-claimondo-ondo hover:text-claimondo-navy transition-colors"
             >Zurück</button>
           </div>
         )}
@@ -979,16 +709,16 @@ function DokumentInfoOverlay({
       >
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-[#4573A2]/10 flex items-center justify-center">
-              <InfoIcon className="w-5 h-5 text-[#4573A2]" />
+            <div className="w-9 h-9 rounded-full bg-claimondo-ondo/10 flex items-center justify-center">
+              <InfoIcon className="w-5 h-5 text-claimondo-ondo" />
             </div>
-            <p className="text-base font-semibold text-[#0D1B3E]">{label}</p>
+            <p className="text-base font-semibold text-claimondo-navy">{label}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Schließen"
-            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500"
+            className="w-8 h-8 rounded-full hover:bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo"
           >
             <XIcon className="w-5 h-5" />
           </button>
@@ -996,23 +726,23 @@ function DokumentInfoOverlay({
 
         <div className="space-y-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#4573A2] mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
               Warum benötigen wir das?
             </p>
-            <p className="text-sm text-gray-700 leading-relaxed">{info.warum}</p>
+            <p className="text-sm text-claimondo-navy leading-relaxed">{info.warum}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#4573A2] mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
               Wo finde ich das?
             </p>
-            <p className="text-sm text-gray-700 leading-relaxed">{info.wo}</p>
+            <p className="text-sm text-claimondo-navy leading-relaxed">{info.wo}</p>
           </div>
         </div>
 
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 w-full py-3 rounded-xl bg-[#0D1B3E] hover:bg-[#1E3A5F] text-white font-semibold text-sm active:scale-[0.98] transition-all"
+          className="mt-6 w-full py-3 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white font-semibold text-sm active:scale-[0.98] transition-all"
         >
           Verstanden
         </button>
@@ -1024,45 +754,42 @@ function DokumentInfoOverlay({
 // AAR-231 / AAR-365: Checkliste-Item im Termin-Step.
 // done=true → grüner Haken, done=false → Warn-Variante mit prominentem
 // Upload-Button statt dem alten kleinen blauen Textlink (Nicolas-Feedback).
-function CheckItem({
-  emoji, text, done, action,
-}: {
-  emoji: string
-  text: string
-  done: boolean
-  action?: () => void
-}) {
-  if (done) {
-    return (
-      <div className="flex items-start gap-2.5">
-        <span className="text-base shrink-0 mt-0.5">✅</span>
-        <p className="text-sm text-gray-600 flex-1 min-w-0">{text}</p>
-      </div>
-    )
-  }
-  // Offener Punkt mit Action → hervorgehobene Zeile mit CTA-Button
-  if (action) {
-    return (
-      <div className="flex items-start gap-3 rounded-xl border-2 border-amber-300 bg-amber-50 p-3">
-        <span className="text-lg shrink-0 mt-0.5">{emoji}</span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-amber-900">{text}</p>
-          <button
-            type="button"
-            onClick={action}
-            className="mt-2 inline-flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 active:scale-[0.98] transition-all"
-          >
-            Jetzt hochladen
-          </button>
-        </div>
-      </div>
-    )
-  }
-  // Offener Punkt ohne Action (z. B. „bereithalten")
+// CMM-19: Pretty-Format für Enum-Werte (auffahrunfall → Auffahrunfall, haftpflicht → Haftpflicht)
+function prettyEnum(value: string): string {
+  if (!value) return value
+  return value
+    .replace(/[_-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+// CMM-19: Schadensort-Format ohne doppelte PLZ (Lead-Free-Text enthält oft schon PLZ)
+function formatOrt(adresse: string | null, plz: string | null, ort: string | null): string {
+  const parts: string[] = []
+  if (adresse) parts.push(adresse)
+  // PLZ + Ort nur wenn die Adresse die PLZ nicht schon enthält
+  const plzOrt = [plz, ort].filter(Boolean).join(' ').trim()
+  if (plzOrt && !(plz && adresse?.includes(plz))) parts.push(plzOrt)
+  return parts.join(', ')
+}
+
+// CMM-19: Navy-Card für Step 1 — pre-filled Claim-Daten Read-only.
+function ClaimDataCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-2.5">
-      <span className="text-base shrink-0 mt-0.5">{emoji}</span>
-      <p className="text-sm text-gray-800 font-medium flex-1 min-w-0">{text}</p>
+    <div className="rounded-2xl bg-claimondo-navy/5 border border-claimondo-navy/20 p-4">
+      <p className="text-[11px] uppercase tracking-wider text-claimondo-navy/70 font-semibold mb-2">{title}</p>
+      <div className="space-y-1.5">{children}</div>
     </div>
   )
 }
+
+function DataRow({ label, value, multiline }: { label: string; value: string; multiline?: boolean }) {
+  return (
+    <div className={multiline ? 'flex flex-col gap-0.5' : 'flex items-baseline gap-2'}>
+      <span className="text-[11px] text-claimondo-ondo">{label}:</span>
+      <span className={`text-sm text-claimondo-navy ${multiline ? 'leading-snug' : 'font-medium'}`}>{value}</span>
+    </div>
+  )
+}
+

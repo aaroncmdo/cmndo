@@ -59,18 +59,18 @@ export function DokumenteUebersichtCard({
   }))
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 space-y-4">
+    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
           Dokumente
         </h3>
-        <span className="text-[10px] text-gray-400">
+        <span className="text-[10px] text-claimondo-ondo/70">
           {erfuellt}/{pflichtSlots.length} Pflicht · {totalDokumente} gesamt
         </span>
       </div>
 
       {sichtbareSlots.length === 0 ? (
-        <p className="text-xs text-gray-400 text-center py-2">
+        <p className="text-xs text-claimondo-ondo/70 text-center py-2">
           Keine Pflichtdokumente.
         </p>
       ) : (
@@ -82,7 +82,7 @@ export function DokumenteUebersichtCard({
       )}
 
       {offen > 0 && (
-        <p className="text-[11px] text-amber-700 pt-2 border-t border-gray-100 flex items-center gap-1">
+        <p className="text-[11px] text-amber-700 pt-2 border-t border-claimondo-border flex items-center gap-1">
           <FileTextIcon className="w-3 h-3" />
           {offen} {offen === 1 ? 'Pflichtdokument fehlt' : 'Pflichtdokumente fehlen'}
         </p>

@@ -20,7 +20,7 @@ export async function LandingFooter() {
               <span>Claim</span>
               <span className="text-claimondo-light-blue">ondo</span>
             </div>
-            <p className="mt-2 text-sm text-slate-300">{t('tagline')}</p>
+            <p className="mt-2 text-sm text-white/70">{t('tagline')}</p>
           </div>
 
           {/* Spalte 2: Produkt */}
@@ -28,7 +28,7 @@ export async function LandingFooter() {
             <h4 className="text-sm font-semibold uppercase tracking-wider">
               {t('product.heading')}
             </h4>
-            <ul className="mt-3 space-y-2 text-sm text-slate-300">
+            <ul className="mt-3 space-y-2 text-sm text-white/70">
               <li>
                 <Link href="/schaden-melden" className="hover:text-white">
                   {t('product.melden')}
@@ -52,7 +52,7 @@ export async function LandingFooter() {
             <h4 className="text-sm font-semibold uppercase tracking-wider">
               {t('partner.heading')}
             </h4>
-            <ul className="mt-3 space-y-2 text-sm text-slate-300">
+            <ul className="mt-3 space-y-2 text-sm text-white/70">
               <li>
                 <Link href="/makler/partner-werden" className="hover:text-white">
                   {t('partner.makler')}
@@ -76,7 +76,7 @@ export async function LandingFooter() {
             <h4 className="text-sm font-semibold uppercase tracking-wider">
               {t('legal.heading')}
             </h4>
-            <ul className="mt-3 space-y-2 text-sm text-slate-300">
+            <ul className="mt-3 space-y-2 text-sm text-white/70">
               <li>
                 <Link href="/impressum" className="hover:text-white">
                   Impressum
@@ -97,10 +97,10 @@ export async function LandingFooter() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-claimondo-ondo/70">
             © {year} Claimondo GmbH. {t('rights')}
           </p>
-          <div className="flex gap-4 text-sm text-slate-300">
+          <div className="flex gap-4 text-sm text-white/70">
             <a href="tel:+4922112345678" className="hover:text-white">
               0221 123 456 78
             </a>

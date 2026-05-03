@@ -9,8 +9,46 @@ import { generateReminderForTermin, cancelRemindersForTermin } from '@/lib/remin
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
+import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
+import { checkSvFreeBusy } from '@/lib/google-calendar/freebusy'
 
 type ActionResult = { success: boolean; error?: string }
+
+// CMM-23: Termin-Dauer in ms aus zentraler Konstante (45 Min). Vorher
+// hardcoded 90 Min an drei Stellen — fließte als 1,5h-Block in den Kalender.
+const TERMIN_DAUER_MS = TERMIN_DAUER_MIN * 60 * 1000
+
+/**
+ * CMM-23: Free/Busy-Check vor Termin-Bestätigung. Aaron-Spec: muss auch
+ * über CalDAV laufen — wird via checkSvFreeBusy geleistet (Google-First mit
+ * CalDAV-Fallback, AAR-717).
+ *
+ * Returns:
+ *   - null = frei oder Status unbekannt (kein Token / API-Timeout) → weiter
+ *   - ActionResult-Error = belegt → buchen abbrechen
+ */
+async function assertSvKalenderFrei(
+  admin: ReturnType<typeof createAdminClient>,
+  svId: string,
+  slotIso: string,
+): Promise<ActionResult | null> {
+  const { data: sv } = await admin
+    .from('sachverstaendige')
+    .select('profile_id')
+    .eq('id', svId)
+    .maybeSingle()
+  if (!sv?.profile_id) return null // ohne profile_id kein Calendar-Check möglich
+
+  const status = await checkSvFreeBusy(sv.profile_id as string, slotIso)
+  if (status === 'belegt') {
+    return {
+      success: false,
+      error: 'Sachverständiger ist zu diesem Zeitpunkt anderweitig gebucht (Kalender). Bitte einen anderen Slot wählen.',
+    }
+  }
+  // 'frei' oder 'unbekannt' (Token / API down) → fail-open, weiter buchen.
+  return null
+}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -155,6 +193,13 @@ export async function terminAblehnen({
 
   if (updateErr) return { success: false, error: updateErr.message }
 
+  // AAR-694 Teil B: SV-Kalender-Event löschen (non-critical)
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEvent }) =>
+    syncSvCalendarEvent(tId).catch((err) =>
+      console.warn('[terminAblehnen] syncSvCalendarEvent:', err instanceof Error ? err.message : err),
+    ),
+  )
+
   // KFZ-136: Reminder stornieren
   try { await cancelRemindersForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Cancel fehlgeschlagen:', err) }
 
@@ -269,11 +314,14 @@ export async function terminGegenvorschlag({
   } else if (source === 'sv_portal' && fallIdArg) {
     const auth = await authSvPortal(fallIdArg)
     if ('error' in auth) return { success: false, error: auth.error }
+    // Aaron 2026-04-30: 'bestaetigt' mit aufgenommen — Verlegung
+    // bestätigter Termine geht über denselben Pfad (status wandert
+    // zurück auf 'gegenvorschlag', Kunde muss neu bestätigen).
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id')
       .eq('fall_id', fallIdArg)
       .eq('sv_id', auth.svId)
-      .in('status', ['reserviert', 'gegenvorschlag'])
+      .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
       .order('created_at', { ascending: false })
       .limit(1)
       .single()
@@ -300,8 +348,15 @@ export async function terminGegenvorschlag({
     return { success: false, error: 'Ungültige Parameter' }
   }
 
+  // AAR-704B: Backend-Validierung — leeres oder Invalid-Datum führte zu
+  // „leerem Vorschlag" beim SV (Notification mit „Invalid Date" oder NaN).
+  // Frontend hat zwar Date-Picker, aber wir wollen den Bug-Pfad sauber
+  // schließen falls eine Action-Variante doch ohne Datum aufgerufen wird.
   const neueStartZeit = new Date(neuesDatum)
-  const neueEndZeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000)
+  if (!neuesDatum || Number.isNaN(neueStartZeit.getTime())) {
+    return { success: false, error: 'Bitte einen gültigen Termin angeben.' }
+  }
+  const neueEndZeit = new Date(neueStartZeit.getTime() + TERMIN_DAUER_MS)
 
   // 1. DB Update
   const { error: updateErr } = await admin.from('gutachter_termine').update({
@@ -355,12 +410,102 @@ export async function terminGegenvorschlag({
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
     if (vonWem === 'sv') {
-      // Notification an Kunde
+      // AAR-702: Magic-Link-Token für Kunde-Response generieren + Email senden,
+      // damit der Kunde ohne Login annehmen oder gegenvorschlagen kann.
+      try {
+        const { randomBytes } = await import('crypto')
+        const responseToken = randomBytes(24).toString('hex')
+        const tokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        await admin
+          .from('gutachter_termine')
+          .update({
+            kunde_response_token: responseToken,
+            kunde_response_token_expires_at: tokenExpiresAt,
+          })
+          .eq('id', tId)
+
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+        const responseUrl = `${baseUrl}/kunde-termin/${responseToken}`
+
+        // Kunden-Email (anhand fall.lead_id → leads.email, fallback profiles.email)
+        let kundenEmail: string | null = null
+        let kundenVorname: string | null = null
+        const { data: fallEmail } = await admin
+          .from('faelle')
+          .select('lead_id, kunde_id')
+          .eq('id', fId)
+          .single()
+        if (fallEmail?.lead_id) {
+          const { data: lead } = await admin
+            .from('leads')
+            .select('email, vorname')
+            .eq('id', fallEmail.lead_id)
+            .single()
+          kundenEmail = lead?.email ?? null
+          kundenVorname = lead?.vorname ?? null
+        }
+        if (!kundenEmail && fallEmail?.kunde_id) {
+          const { data: prof } = await admin
+            .from('profiles')
+            .select('email, vorname')
+            .eq('id', fallEmail.kunde_id)
+            .single()
+          kundenEmail = prof?.email ?? null
+          kundenVorname = kundenVorname ?? prof?.vorname ?? null
+        }
+
+        if (kundenEmail) {
+          // SV-Name + altes/neues Datum für Template
+          let svNameForMail = 'Ihr Sachverständiger'
+          if (svId) svNameForMail = await getSvName(admin, svId)
+          const { data: terminFull } = await admin
+            .from('gutachter_termine')
+            .select('start_zeit, vorgeschlagenes_datum')
+            .eq('id', tId)
+            .single()
+          const altDate = terminFull?.start_zeit ? new Date(terminFull.start_zeit) : neueStartZeit
+          const neuDate = terminFull?.vorgeschlagenes_datum
+            ? new Date(terminFull.vorgeschlagenes_datum)
+            : neueStartZeit
+
+          const props = {
+            kundenVorname: kundenVorname ?? 'Kunde',
+            fallNummer: fallData?.fall_nummer ?? '—',
+            alterTerminDatum: altDate.toLocaleDateString('de-DE', {
+              weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
+            }),
+            alterTerminUhrzeit: altDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+            neuerTerminDatum: neuDate.toLocaleDateString('de-DE', {
+              weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
+            }),
+            neuerTerminUhrzeit: neuDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+            grund: grund || null,
+            svName: svNameForMail,
+            responseUrl,
+          }
+          const { render } = await import('@react-email/render')
+          const { KundeTerminGegenvorschlagEmail, subject } = await import(
+            '@/lib/email/google/templates/KundeTerminGegenvorschlag'
+          )
+          const html = await render(KundeTerminGegenvorschlagEmail(props))
+          const { sendCommunication } = await import('@/lib/communications/send')
+          await sendCommunication('kunde_termin_gegenvorschlag', {
+            email: kundenEmail,
+            vorname: props.kundenVorname,
+            subject: subject(props),
+            html,
+          })
+        }
+      } catch (mailErr) {
+        console.warn('[AAR-702] Kunde-Response-Email fehlgeschlagen:', mailErr)
+      }
+
+      // Zusätzlich WhatsApp wie bisher
       if (fallData?.kunde_id) {
         const { data: kundeProfile } = await admin.from('profiles').select('telefon').eq('id', fallData.kunde_id).single()
         if (kundeProfile?.telefon) {
           await sendManualWhatsApp(kundeProfile.telefon,
-            `📅 Der Sachverständige schlägt einen neuen Termin vor: ${terminStr}. Bitte prüfen Sie den Vorschlag in Ihrem Portal.`,
+            `📅 Der Sachverständige schlägt einen neuen Termin vor: ${terminStr}. Sie haben eine Email mit Direktlink bekommen.`,
             fId)
         }
       }
@@ -440,13 +585,18 @@ export async function terminAnnehmen({
 
     // start_zeit = vorgeschlagenes_datum
     const neueStartZeit = termin.vorgeschlagenes_datum ? new Date(termin.vorgeschlagenes_datum) : null
+    // CMM-23: Kalender-Check vor Bestätigung
+    if (neueStartZeit && svId) {
+      const conflict = await assertSvKalenderFrei(admin, svId, neueStartZeit.toISOString())
+      if (conflict) return conflict
+    }
     const updateData: Record<string, unknown> = {
       status: 'bestaetigt',
       gegenvorschlag_von: null,
     }
     if (neueStartZeit) {
       updateData.start_zeit = neueStartZeit.toISOString()
-      updateData.end_zeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000).toISOString()
+      updateData.end_zeit = new Date(neueStartZeit.getTime() + TERMIN_DAUER_MS).toISOString()
     }
     const { error: updateErr } = await admin.from('gutachter_termine').update(updateData).eq('id', tId)
     if (updateErr) return { success: false, error: updateErr.message }
@@ -467,13 +617,18 @@ export async function terminAnnehmen({
     tId = termin.id
 
     const neueStartZeit = termin.vorgeschlagenes_datum ? new Date(termin.vorgeschlagenes_datum) : null
+    // CMM-23: Kalender-Check vor Bestätigung
+    if (neueStartZeit && svId) {
+      const conflict = await assertSvKalenderFrei(admin, svId, neueStartZeit.toISOString())
+      if (conflict) return conflict
+    }
     const updateData: Record<string, unknown> = {
       status: 'bestaetigt',
       gegenvorschlag_von: null,
     }
     if (neueStartZeit) {
       updateData.start_zeit = neueStartZeit.toISOString()
-      updateData.end_zeit = new Date(neueStartZeit.getTime() + 90 * 60 * 1000).toISOString()
+      updateData.end_zeit = new Date(neueStartZeit.getTime() + TERMIN_DAUER_MS).toISOString()
     }
     const { error: updateErr } = await admin.from('gutachter_termine').update(updateData).eq('id', tId)
     if (updateErr) return { success: false, error: updateErr.message }
@@ -483,6 +638,13 @@ export async function terminAnnehmen({
 
   // KFZ-136: Reminder neu generieren (Termin ist jetzt bestaetigt)
   try { await generateReminderForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Generierung fehlgeschlagen:', err) }
+
+  // AAR-694 Teil B: SV-Google-Kalender-Event anlegen/aktualisieren (non-critical)
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEvent }) =>
+    syncSvCalendarEvent(tId).catch((err) =>
+      console.warn('[terminAnnehmen] syncSvCalendarEvent:', err instanceof Error ? err.message : err),
+    ),
+  )
 
   // KFZ-137: SV Auftragszusammenfassung Email
   try {
@@ -620,7 +782,13 @@ export async function terminBuchen({
   if (!termin) return { success: false, error: 'Kein aktiver Termin gefunden' }
 
   const slotDate = new Date(slot)
-  const endDate = new Date(slotDate.getTime() + 90 * 60 * 1000)
+  const endDate = new Date(slotDate.getTime() + TERMIN_DAUER_MS)
+
+  // CMM-23: Kalender-Check (Google + CalDAV) gegen Doppelbuchung
+  if (svId) {
+    const conflict = await assertSvKalenderFrei(admin, svId, slotDate.toISOString())
+    if (conflict) return conflict
+  }
 
   // 1. DB Update
   const { error: updateErr } = await admin.from('gutachter_termine').update({
@@ -634,6 +802,13 @@ export async function terminBuchen({
 
   // KFZ-136: Reminder generieren (Termin gebucht)
   try { await generateReminderForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Generierung fehlgeschlagen:', err) }
+
+  // AAR-694 Teil B: SV-Google-Kalender-Event anlegen/aktualisieren (non-critical)
+  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEvent }) =>
+    syncSvCalendarEvent(termin.id).catch((err) =>
+      console.warn('[terminBuchen] syncSvCalendarEvent:', err instanceof Error ? err.message : err),
+    ),
+  )
 
   // KFZ-137: SV Auftragszusammenfassung Email
   try {

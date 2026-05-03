@@ -3,6 +3,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import TerminDetailActions from './TerminDetailActions'
+import PageHeader from '@/components/shared/PageHeader'
 import PolizeiberichtUpload from './PolizeiberichtUpload'
 import PhoneButton from '@/components/shared/PhoneButton'
 
@@ -138,10 +139,11 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
         <Link href="/gutachter/termine" className="text-sm text-[var(--brand-secondary)] hover:underline">← Alle Termine</Link>
       </div>
 
-      <h1 className="text-xl font-bold text-gray-900">
-        {datum} · {uhrzeit}
-      </h1>
-      <p className="text-sm text-gray-500 -mt-3">{referenzLabel}</p>
+      <PageHeader
+        title={`${datum} · ${uhrzeit}`}
+        description={referenzLabel}
+        size="lg"
+      />
 
       {/* AAR-133: Vorreservierung-Badge wenn Pre-FlowLink (kein Fall) */}
       {istVorreservierung && (
@@ -155,50 +157,50 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
       )}
 
       {/* Kunden-Info-Card */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide text-[11px]">Kunden-Infos</h2>
+      <div className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">
+        <h2 className="text-sm font-semibold text-claimondo-navy uppercase tracking-wide text-[11px]">Kunden-Infos</h2>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-xs text-gray-400">Name</p>
-            <p className="font-medium text-gray-900">
+            <p className="text-xs text-claimondo-ondo/70">Name</p>
+            <p className="font-medium text-claimondo-navy">
               {[lead?.vorname, lead?.nachname].filter(Boolean).join(' ') || '—'}
             </p>
           </div>
           {lead?.telefon && (
             <div>
-              <p className="text-xs text-gray-400">Telefon</p>
+              <p className="text-xs text-claimondo-ondo/70">Telefon</p>
               <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} className="!font-medium !text-[var(--brand-secondary)] hover:!underline" />
             </div>
           )}
           {lead?.email && (
             <div className="col-span-2">
-              <p className="text-xs text-gray-400">E-Mail</p>
-              <p className="font-medium text-gray-900">{lead.email}</p>
+              <p className="text-xs text-claimondo-ondo/70">E-Mail</p>
+              <p className="font-medium text-claimondo-navy">{lead.email}</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Vorab-Infos-Card */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wide text-[11px]">Vorab-Infos</h2>
+      <div className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">
+        <h2 className="text-sm font-semibold text-claimondo-navy uppercase tracking-wide text-[11px]">Vorab-Infos</h2>
         <div className="space-y-2 text-sm">
           <div>
-            <p className="text-xs text-gray-400">Adresse</p>
-            <p className="font-medium text-gray-900">{adresse}</p>
+            <p className="text-xs text-claimondo-ondo/70">Adresse</p>
+            <p className="font-medium text-claimondo-navy">{adresse}</p>
           </div>
           {(fahrzeugHersteller || fahrzeugModell) && (
             <div>
-              <p className="text-xs text-gray-400">Fahrzeug</p>
-              <p className="font-medium text-gray-900">
+              <p className="text-xs text-claimondo-ondo/70">Fahrzeug</p>
+              <p className="font-medium text-claimondo-navy">
                 {[fahrzeugHersteller, fahrzeugModell].filter(Boolean).join(' ')}
                 {kennzeichen ? ` · ${kennzeichen}` : ''}
               </p>
             </div>
           )}
           <div>
-            <p className="text-xs text-gray-400">Termin-Status</p>
-            <p className="font-medium text-gray-900 capitalize">{termin.status}</p>
+            <p className="text-xs text-claimondo-ondo/70">Termin-Status</p>
+            <p className="font-medium text-claimondo-navy capitalize">{termin.status}</p>
           </div>
         </div>
       </div>

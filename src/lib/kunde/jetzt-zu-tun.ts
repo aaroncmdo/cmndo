@@ -160,33 +160,11 @@ export function getKundenJetztZuTun(
     }
   }
 
-  // 2. Pflichtdokumente nachreichen (vom KB angefordert)
-  if (fall.hat_offene_nachreichung) {
-    return {
-      state: 'pflichtdokumente-offen',
-      prioritaet: 'hoch',
-      titel: 'Pflichtdokumente nachreichen',
-      beschreibung:
-        'Ihr Betreuer bittet um weitere Dokumente. Bitte laden Sie diese jetzt hoch, damit wir Ihren Fall zügig abschließen können.',
-      cta: { label: 'Dokumente hochladen', href: '/kunde/onboarding?step=dokumente' },
-      variant: 'default',
-      severity: 'warning',
-    }
-  }
-
-  // 3. Polizeibericht fehlt (polizei_vor_ort=true, aber kein Upload)
-  if (fall.polizei_vor_ort && !fall.polizeibericht_uploaded) {
-    return {
-      state: 'polizeibericht-fehlt',
-      prioritaet: 'mittel',
-      titel: 'Polizeibericht hochladen',
-      beschreibung:
-        'Die Polizei war bei Ihrem Unfall vor Ort. Sobald Sie den Bericht haben, laden Sie ihn bitte hoch. Falls nicht rechtzeitig verfügbar, nimmt der Gutachter die Daten vor Ort auf.',
-      cta: { label: 'Jetzt hochladen', href: '/kunde/onboarding?step=dokumente' },
-      variant: 'default',
-      severity: 'warning',
-    }
-  }
+  // CMM-22: Branches "pflichtdokumente-offen" und "polizeibericht-fehlt"
+  // entfernt — der globale OffeneDatenBanner im Kunden-Layout übernimmt das
+  // mit der Smart-Filter-Logik (claim-driven, getOffeneDokumentAnforderungen).
+  // Die JetztZuTunCard bleibt frei für nicht-dokumenten-Themen
+  // (Bankdaten, Kanzlei-Daten, etc.).
 
   // 4. Daten an Kanzlei (SLA-Breach mit blocker_rolle=kunde)
   if (kundeSlaBreach) {
@@ -204,43 +182,9 @@ export function getKundenJetztZuTun(
     }
   }
 
-  // 5. + 6. Live-Termin (SV vor Ort oder unterwegs) — basierend auf sv_angekommen_am /
-  // sv_unterwegs_seit Flags ODER auf sv_termin-Zeitfenster.
-  if (fall.sv_angekommen_am) {
-    return {
-      state: 'termin-vor-ort',
-      prioritaet: 'hoch',
-      titel: 'Ihr Gutachter ist vor Ort',
-      beschreibung: fall.sv_name
-        ? `${fall.sv_name} führt gerade die Begutachtung durch.`
-        : 'Die Begutachtung wird gerade durchgeführt.',
-      variant: 'live',
-      severity: 'success',
-      cta: null,
-      live_data: {
-        sv_name: fall.sv_name ?? undefined,
-        angekommen_seit: fall.sv_angekommen_am,
-      },
-    }
-  }
-
-  if (fall.sv_unterwegs_seit) {
-    return {
-      state: 'termin-unterwegs',
-      prioritaet: 'hoch',
-      titel: 'Ihr Gutachter ist unterwegs',
-      beschreibung: fall.sv_name
-        ? `${fall.sv_name} ist auf dem Weg zu Ihnen${fall.sv_eta_minuten ? ` — Ankunft in ca. ${fall.sv_eta_minuten} Min.` : '.'}`
-        : `Ihr Gutachter ist auf dem Weg${fall.sv_eta_minuten ? ` — Ankunft in ca. ${fall.sv_eta_minuten} Min.` : '.'}`,
-      variant: 'live',
-      severity: 'neutral',
-      cta: null,
-      live_data: {
-        sv_name: fall.sv_name ?? undefined,
-        eta_minuten: fall.sv_eta_minuten ?? null,
-      },
-    }
-  }
+  // CMM-36: 'termin-vor-ort' und 'termin-unterwegs'-States hier ausgelagert.
+  // Der Live-Status wird vom KundeSvLiveBanner ganz oben auf der Seite gezeigt
+  // (Realtime, navy/grün) — JetztZuTun zeigt nicht das gleiche dreimal.
 
   // 5b. Fallback aus sv_termin: Termin läuft gerade (±Fenster)
   if (fall.sv_termin) {

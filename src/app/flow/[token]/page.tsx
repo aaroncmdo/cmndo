@@ -34,24 +34,35 @@ export default async function FlowPage({
     // BUG-100: Token-Expiry prüfen
     if (flowLink.expires_at && new Date(flowLink.expires_at) < new Date()) {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x23F3;</div>
-            <h1 className="text-xl font-bold text-gray-900 mb-2">Link abgelaufen</h1>
-            <p className="text-gray-500">Dieser FlowLink ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Berater für einen neuen Link.</p>
+            <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link abgelaufen</h1>
+            <p className="text-claimondo-ondo">Dieser FlowLink ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Berater für einen neuen Link.</p>
           </div>
         </div>
       )
     }
 
-    // BUG-100: Bereits abgeschlossene Links blockieren
+    // CMM-14: Wenn der FlowLink schon verbraucht ist (Browser-Reload nach
+    // Konvertierung), schicken wir den Kunden direkt zum Portal-Login. Er
+    // hat seine Zugangsdaten + Magic-Link bereits per Email erhalten.
     if (flowLink.status === 'abgeschlossen') {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x2705;</div>
-            <h1 className="text-xl font-bold text-gray-900 mb-2">Bereits abgeschlossen</h1>
-            <p className="text-gray-500">Dieser FlowLink wurde bereits verwendet.</p>
+            <h1 className="text-xl font-bold text-claimondo-navy mb-2">Alles bereit</h1>
+            <p className="text-claimondo-ondo mb-6">
+              Wir haben Ihnen die Zugangsdaten und einen Login-Link per Email
+              geschickt. Bitte schauen Sie in Ihren Posteingang.
+            </p>
+            <a
+              href="/login"
+              className="inline-block w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+            >
+              Zum Login
+            </a>
           </div>
         </div>
       )
@@ -196,6 +207,8 @@ export default async function FlowPage({
           unfall_konstellation: lead.unfall_konstellation ?? null,
           gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
           gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
+          // CMM-14: steuert die LexDrive-Visitenkarte am Ende
+          service_typ: lead.service_typ ?? null,
         }}
       />
     </>

@@ -24,7 +24,7 @@ export function Schritt3Guard() {
   }, [leadId, gegnerDatenErfasst, router])
 
   if (!leadId || !gegnerDatenErfasst) {
-    return <p className="text-sm text-slate-500">Leite weiter …</p>
+    return <p className="text-sm text-claimondo-ondo">Leite weiter …</p>
   }
 
   return <Schritt3Client leadId={leadId} />

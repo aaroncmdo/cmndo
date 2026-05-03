@@ -27,6 +27,7 @@ import {
 } from './_sidebar/SidebarStubs'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
 import { PHASE_LABELS as PHASE_LABELS_CONST, PHASE_BADGES } from '../_components/leadPhaseConstants'
+import PageHeader from '@/components/shared/PageHeader'
 
 type FlowLinkRow = {
   id: string
@@ -76,7 +77,7 @@ export default function DispatchShell({
 
   const phase = lead.qualifizierungs_phase ?? 'neu'
   const phaseLabel = PHASE_LABELS_CONST[phase] ?? phase
-  const phaseColor = PHASE_BADGES[phase] ?? 'bg-gray-100 text-gray-600'
+  const phaseColor = PHASE_BADGES[phase] ?? 'bg-[#f8f9fb] text-claimondo-ondo'
 
   return (
     <DispatchPhaseProvider
@@ -87,29 +88,32 @@ export default function DispatchShell({
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-64px)]">
         {/* Hauptfläche */}
         <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
-          <div className="flex items-center gap-3 mb-6">
-            <Link href="/dispatch/leads" className="text-gray-400 hover:text-gray-600">
-              <ArrowLeftIcon className="w-5 h-5" />
-            </Link>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-900">
-                {lead.vorname ?? ''} {lead.nachname ?? ''}
-              </h1>
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                {/* AAR-276: Phase-Badge nur zeigen wenn FlowLink noch nicht
-                    versendet ist — sobald der FlowStufe-Badge greift, sagt
-                    er das Gleiche granularer (Gesendet/Geöffnet/SA/Vollmacht).
-                    Phase-Label „Flow gesendet" wäre dann doppelt. */}
-                {!flowLinkGesendet && (
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${phaseColor}`}>
-                    {phaseLabel}
+          <div className="mb-6">
+            <PageHeader
+              title={`${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || 'Lead'}
+              size="lg"
+              leadingSlot={
+                <Link href="/dispatch/leads" className="text-claimondo-ondo/70 hover:text-claimondo-ondo shrink-0">
+                  <ArrowLeftIcon className="w-5 h-5" />
+                </Link>
+              }
+              description={
+                <span className="flex items-center gap-2 flex-wrap">
+                  {/* AAR-276: Phase-Badge nur zeigen wenn FlowLink noch nicht
+                      versendet ist — sobald der FlowStufe-Badge greift, sagt
+                      er das Gleiche granularer (Gesendet/Geöffnet/SA/Vollmacht).
+                      Phase-Label „Flow gesendet" wäre dann doppelt. */}
+                  {!flowLinkGesendet && (
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${phaseColor}`}>
+                      {phaseLabel}
+                    </span>
+                  )}
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${flowStufeBadge.cls}`}>
+                    {flowStufeBadge.label}
                   </span>
-                )}
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${flowStufeBadge.cls}`}>
-                  {flowStufeBadge.label}
                 </span>
-              </div>
-            </div>
+              }
+            />
           </div>
 
           {/* AAR-631: Lead-Edit-Lockdown nach Conversion — Banner informiert
@@ -126,7 +130,7 @@ export default function DispatchShell({
                 </p>
                 <Link
                   href={`/faelle/${fallIdFuerBanner}`}
-                  className="inline-block mt-2 text-[#4573A2] hover:underline font-medium"
+                  className="inline-block mt-2 text-claimondo-ondo hover:underline font-medium"
                 >
                   Zur Fallakte →
                 </Link>
@@ -143,7 +147,7 @@ export default function DispatchShell({
         </main>
 
         {/* Sidebar */}
-        <aside className="lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-gray-200 bg-[#f8f9fb] overflow-y-auto p-4 space-y-3">
+        <aside className="lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-claimondo-border bg-[#f8f9fb] overflow-y-auto p-4 space-y-3">
           <TimerWidget />
           <DisqualifizierenButton />
           <RueckrufButton />

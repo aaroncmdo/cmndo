@@ -9,9 +9,14 @@ import { VideoIcon } from 'lucide-react'
 import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
 import { useFall } from '../FallContext'
 import { createKbVideoterminByKb } from '../_actions/termine'
-// AAR-377: Shared BriefingCard — oben in der Übersicht.
+// AAR-377 / AAR-772: Shared BriefingCard (SV-Briefing) + StrukturBriefingCard (intern).
 import BriefingCard from '@/components/fall/BriefingCard'
+import StrukturBriefingCard from '@/components/fall/StrukturBriefingCard'
 import type { StammdatenSection } from '@/lib/fall/phase-config'
+// AAR-759: Shared Mietwagen-Status-Card (read-only in Phase 1)
+import { MietwagenStatusCard } from '@/components/shared/mietwagen'
+// AAR-759 Phase 2: Admin/KB-Edit-UI (ersetzt read-only Card im Admin-Kontext)
+import { MietwagenEditCard } from '@/components/admin/fallakte/mietwagen'
 import {
   KundendatenSection,
   FahrzeugdatenSection,
@@ -73,7 +78,7 @@ export default function UebersichtTab() {
   const strukturGeneratedBy = strukturRaw?.generated_by ?? null
   const statusLabel = FALL_STATUS_LABELS[status] ?? status
   const statusCls =
-    FALL_STATUS_COLORS[status] ?? 'bg-gray-100 text-gray-600 border-gray-200'
+    FALL_STATUS_COLORS[status] ?? 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border'
 
   // AAR-169: KB-Videotermin-Buchen
   const [showBuchen, setShowBuchen] = useState(false)
@@ -115,7 +120,7 @@ export default function UebersichtTab() {
 
   return (
     <div className="space-y-4">
-      {/* AAR-377: SV-Briefing (AI) — shared Card, oben in der Übersicht */}
+      {/* AAR-377: SV-Briefing (AI) — was der Gutachter sieht */}
       <BriefingCard
         fallId={fall.id}
         briefing={briefingText}
@@ -123,15 +128,23 @@ export default function UebersichtTab() {
         model={briefingModel}
         version={briefingVersion}
         canRegenerate={canRegenerateBriefing}
-        struktur={briefingStruktur}
-        strukturGeneratedBy={strukturGeneratedBy}
       />
 
+      {/* AAR-772: Struktur-Briefing — intern für Admin/KB */}
+      {canRegenerateBriefing && (
+        <StrukturBriefingCard
+          fallId={fall.id}
+          struktur={briefingStruktur}
+          generatedBy={strukturGeneratedBy}
+          canRegenerate={canRegenerateBriefing}
+        />
+      )}
+
       {/* Status-Header */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 flex items-start justify-between gap-3 flex-wrap">
+      <div className="bg-white border border-claimondo-border rounded-xl p-5 flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-gray-400">Fall-Nummer</p>
-          <h1 className="text-xl font-bold text-gray-900">{fall.fall_nummer ?? fall.id.slice(0, 8)}</h1>
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">Fall-Nummer</p>
+          <h1 className="text-xl font-bold text-claimondo-navy">{fall.fall_nummer ?? fall.id.slice(0, 8)}</h1>
         </div>
         <div className="flex items-center gap-2">
           <span
@@ -151,39 +164,39 @@ export default function UebersichtTab() {
 
       {/* AAR-169: Videotermin-Buchen-Dialog (KB solo) */}
       {showBuchen && (
-        <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+        <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
           <div className="flex items-center gap-2">
             <VideoIcon className="w-4 h-4 text-[#4573A2]" />
-            <h3 className="text-sm font-semibold text-gray-900">Videotermin mit Kunde buchen</h3>
+            <h3 className="text-sm font-semibold text-claimondo-navy">Videotermin mit Kunde buchen</h3>
           </div>
-          <p className="text-[11px] text-gray-500">
+          <p className="text-[11px] text-claimondo-ondo">
             KB-solo-Termin (nicht mit LexDrive). Kunde bekommt WA-Einladung mit Link.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+              <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                 Datum
               </label>
               <input
                 type="date"
                 value={buchenDatum}
                 onChange={(e) => setBuchenDatum(e.target.value)}
-                className="w-full text-sm border-b border-gray-200 focus:border-[#4573A2] outline-none py-1"
+                className="w-full text-sm border-b border-claimondo-border focus:border-[#4573A2] outline-none py-1"
               />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+              <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                 Uhrzeit
               </label>
               <input
                 type="time"
                 value={buchenUhrzeit}
                 onChange={(e) => setBuchenUhrzeit(e.target.value)}
-                className="w-full text-sm border-b border-gray-200 focus:border-[#4573A2] outline-none py-1"
+                className="w-full text-sm border-b border-claimondo-border focus:border-[#4573A2] outline-none py-1"
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+              <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                 Kanal
               </label>
               <div className="flex gap-2">
@@ -195,7 +208,7 @@ export default function UebersichtTab() {
                     className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
                       buchenKanal === k
                         ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                        : 'bg-white text-claimondo-ondo border-claimondo-border hover:bg-[#f8f9fb]'
                     }`}
                   >
                     {k === 'video' ? 'Video' : 'Telefon'}
@@ -204,7 +217,7 @@ export default function UebersichtTab() {
               </div>
             </div>
             <div className="sm:col-span-2">
-              <label className="text-[10px] uppercase tracking-wider text-gray-400 block mb-1">
+              <label className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 block mb-1">
                 Notiz (intern)
               </label>
               <input
@@ -212,7 +225,7 @@ export default function UebersichtTab() {
                 value={buchenNotiz}
                 onChange={(e) => setBuchenNotiz(e.target.value)}
                 placeholder="Optional — worum geht's im Termin?"
-                className="w-full text-sm border-b border-gray-200 focus:border-[#4573A2] outline-none py-1"
+                className="w-full text-sm border-b border-claimondo-border focus:border-[#4573A2] outline-none py-1"
               />
             </div>
           </div>
@@ -220,7 +233,7 @@ export default function UebersichtTab() {
             <button
               type="button"
               onClick={() => setShowBuchen(false)}
-              className="px-3 py-1.5 rounded-md text-xs font-medium border border-gray-200 text-gray-600 hover:bg-gray-50"
+              className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]"
             >
               Abbrechen
             </button>
@@ -242,6 +255,41 @@ export default function UebersichtTab() {
         if (!Comp) return null
         return <Comp key={id} />
       })}
+
+      {/* AAR-759 Phase 2: Mietwagen — Admin/KB bekommt Edit-Card, andere Rollen read-only */}
+      {userRolle === 'admin' || userRolle === 'kundenbetreuer' ? (
+        <MietwagenEditCard
+          fallId={fall.id as string}
+          fall={{
+            mietwagen_hat: (fall.mietwagen_hat as boolean | null) ?? null,
+            mietwagen_seit_datum: (fall.mietwagen_seit_datum as string | null) ?? null,
+            mietwagen_limit_tage: (fall.mietwagen_limit_tage as number | null) ?? null,
+            mietwagen_limit_grund: (fall.mietwagen_limit_grund as string | null) ?? null,
+            mietwagen_rechnung_vorhanden:
+              (fall.mietwagen_rechnung_vorhanden as boolean | null) ?? null,
+            mietwagen_argumentations_puffer:
+              (fall.mietwagen_argumentations_puffer as number | null) ?? null,
+            mietwagen_vermieter: (fall.mietwagen_vermieter as string | null) ?? null,
+            nutzungsausfall_tage: (fall.nutzungsausfall_tage as number | null) ?? null,
+          }}
+        />
+      ) : (
+        <MietwagenStatusCard
+          rolle="kb"
+          fall={{
+            mietwagen_hat: (fall.mietwagen_hat as boolean | null) ?? null,
+            mietwagen_seit_datum: (fall.mietwagen_seit_datum as string | null) ?? null,
+            mietwagen_limit_tage: (fall.mietwagen_limit_tage as number | null) ?? null,
+            mietwagen_limit_grund: (fall.mietwagen_limit_grund as string | null) ?? null,
+            mietwagen_rechnung_vorhanden:
+              (fall.mietwagen_rechnung_vorhanden as boolean | null) ?? null,
+            mietwagen_argumentations_puffer:
+              (fall.mietwagen_argumentations_puffer as number | null) ?? null,
+            mietwagen_vermieter: (fall.mietwagen_vermieter as string | null) ?? null,
+            nutzungsausfall_tage: (fall.nutzungsausfall_tage as number | null) ?? null,
+          }}
+        />
+      )}
 
       {/* AAR-313: Nutzungsausfall — self-gating, immer rendern wenn relevant */}
       <NutzungsausfallSection />

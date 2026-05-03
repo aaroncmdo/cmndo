@@ -4,9 +4,10 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
 import VerifizierungsToggle from './VerifizierungsToggle'
-import VerifizierungsTab, { type Tier2Slot } from './VerifizierungsTab'
+import VerifizierungsTab, { type Tier2Slot, type PflichtdokumentSlot } from './VerifizierungsTab'
 import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
+import PageHeader from '@/components/shared/PageHeader'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 
 type SvSearchParams = { tab?: string }
@@ -35,6 +36,15 @@ export default async function SvDetailPage({
   if (svErr) console.error('[admin/sv-detail] SV-Query:', svErr.message)
 
   if (!sv) notFound()
+
+  // AAR-717: CalDAV-Verbindungs-Status für Admin-Banner. Wenn last_error
+  // gesetzt ist, zeigen wir einen roten Hinweis im Stammdaten-Tab.
+  const { data: caldavVerbindung } = await supabase
+    .from('sv_kalender_verbindungen')
+    .select('provider_label, calendar_display_name, last_error, last_error_at, connected_at, last_sync_at')
+    .eq('sv_id', id)
+    .eq('provider', 'caldav')
+    .maybeSingle()
 
   const profileRaw = sv.profiles as unknown
   const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
@@ -98,8 +108,9 @@ export default async function SvDetailPage({
   let verifizierungsData: {
     saVorlageSignedUrl: string | null
     tier2Slots: Tier2Slot[]
+    pflichtdokumente: PflichtdokumentSlot[]
     loadError: string | null
-  } = { saVorlageSignedUrl: null, tier2Slots: [], loadError: null }
+  } = { saVorlageSignedUrl: null, tier2Slots: [], pflichtdokumente: [], loadError: null }
 
   if (activeTab === 'verifizierung') {
     try {
@@ -119,7 +130,7 @@ export default async function SvDetailPage({
       const [alleSlots, pflichtRes] = await Promise.all([
         getAlleSlots(supabase),
         dbAdmin.from('pflichtdokumente')
-          .select('id, dokument_typ, status, hochgeladen_am')
+          .select('id, dokument_typ, status, hochgeladen_am, dokument_url, begruendung')
           .eq('sv_id', id),
       ])
       const pflichtRows = (pflichtRes.data ?? []) as Array<{
@@ -135,8 +146,25 @@ export default async function SvDetailPage({
       // Counts waren immer 0.
       const uploadCounts: Record<string, number> = {}
 
-      const verifizierungsSlots = alleSlots.filter(s =>
-        s.kategorie === 'gutachter_verifizierung' && s.slot_id !== 'sv_sa_vorlage',
+      // AAR-691 / AAR-714: Nur Tier-2-Verifizierungs-Slots (echte
+      // Qualifikations-Nachweise). SA-Vorlage + die 4 neuen Pflicht-Slots
+      // (Sicherungsabtretung, Honorarvereinbarung, Datenschutz, Widerruf)
+      // werden separat als Tier-1-Pflichtdokumente dargestellt.
+      const PFLICHT_SLOT_IDS = [
+        'sv_sicherungsabtretung',
+        'sv_honorarvereinbarung',
+        'sv_datenschutzerklaerung',
+        'sv_widerrufsbelehrung',
+      ] as const
+      const VERIFIZIERUNG_HIDDEN_SLOTS = new Set<string>([
+        'sv_sa_vorlage',
+        'sv_abtretungserklaerung',
+        ...PFLICHT_SLOT_IDS,
+      ])
+      const verifizierungsSlots = alleSlots.filter(
+        (s) =>
+          s.kategorie === 'gutachter_verifizierung' &&
+          !VERIFIZIERUNG_HIDDEN_SLOTS.has(s.slot_id),
       )
       // AAR-515: Nummer-Mapping pro Slot. Admin sieht Nummer + Dokument
       // nebeneinander beim Prüfen — Plausibilisierungs-Hilfe.
@@ -163,12 +191,49 @@ export default async function SvDetailPage({
         }
       })
 
-      verifizierungsData = { saVorlageSignedUrl: signedUrl, tier2Slots, loadError: null }
+      // AAR-714: Tier-1-Pflichtdokumente (4 Slots) zusammenstellen mit
+      // Signed-URL fürs Preview. Slots ohne pflichtdokumente-Row zeigen
+      // wir als „leer" an.
+      const pflichtSlotsAlle = alleSlots.filter((s) =>
+        (PFLICHT_SLOT_IDS as readonly string[]).includes(s.slot_id),
+      )
+      const pflichtdokumente: PflichtdokumentSlot[] = []
+      for (const slot of pflichtSlotsAlle) {
+        const row = pflichtRows.find((p) => p.dokument_typ === slot.slot_id)
+        let signed: string | null = null
+        const dokUrl = (row as { dokument_url?: string | null } | undefined)?.dokument_url ?? null
+        if (dokUrl) {
+          const { data: sig, error: sigErr } = await dbAdmin.storage
+            .from('fall-dokumente')
+            .createSignedUrl(dokUrl, 300)
+          if (sigErr) console.warn('[sv-pflichtdok] createSignedUrl:', sigErr.message)
+          signed = sig?.signedUrl ?? null
+        }
+        pflichtdokumente.push({
+          slotId: slot.slot_id,
+          label: slot.label,
+          beschreibung: slot.beschreibung,
+          pflichtdokId: row?.id ?? null,
+          status: (row?.status as PflichtdokumentSlot['status']) ?? null,
+          hochgeladenAm: row?.hochgeladen_am ?? null,
+          dokumentUrl: dokUrl,
+          signedUrl: signed,
+          adminNotiz: (row as { begruendung?: string | null } | undefined)?.begruendung ?? null,
+        })
+      }
+
+      verifizierungsData = {
+        saVorlageSignedUrl: signedUrl,
+        tier2Slots,
+        pflichtdokumente,
+        loadError: null,
+      }
     } catch (err) {
       console.error('[sv-verifizierung] Tab-Load gescheitert:', err)
       verifizierungsData = {
         saVorlageSignedUrl: null,
         tier2Slots: [],
+        pflichtdokumente: [],
         loadError: err instanceof Error ? err.message : 'Unbekannter Fehler',
       }
     }
@@ -177,21 +242,21 @@ export default async function SvDetailPage({
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* ── Sticky Header ──────────────────────────────────────────── */}
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 flex-shrink-0 px-4 py-3">
+      <div className="sticky top-0 z-20 bg-white border-b border-claimondo-border flex-shrink-0 px-4 py-3">
         <div>
-          <Link href="/admin/sachverstaendige" className="text-xs text-gray-400 hover:text-gray-600 transition-colors mb-1.5 inline-block">
+          <Link href="/admin/sachverstaendige" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo transition-colors mb-1.5 inline-block">
             &larr; Gutachter-Übersicht
           </Link>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">{name || 'Sachverständiger'}</h1>
-              <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 flex-wrap">
+          <PageHeader
+            title={name || 'Sachverständiger'}
+            description={
+              <span className="flex items-center gap-3 flex-wrap">
                 {profile?.email && <span>{profile.email}</span>}
                 {sv.gutachter_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.gutachter_typ}</span>}
-                {sv.paket && <span className="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.paket}</span>}
+                {sv.paket && <span className="bg-[#f8f9fb] px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.paket}</span>}
                 {/* AAR-659: partner_seit + werbebudget waren im SELECT aber nie gerendert — Dead-Load. */}
                 {sv.partner_seit && (
-                  <span className="text-gray-400">
+                  <span className="text-claimondo-ondo/70">
                     Partner seit {new Date(sv.partner_seit as string).toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' })}
                   </span>
                 )}
@@ -209,57 +274,59 @@ export default async function SvDetailPage({
                   const anstehend = heute < von
                   if (!aktiv && !anstehend) return null
                   return (
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${aktiv ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-600'}`}>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${aktiv ? 'bg-amber-50 text-amber-700' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
                       Urlaub {von}–{bis}
                     </span>
                   )
                 })()}
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <span className="text-sm font-bold text-gray-900 tabular-nums">{genutzt}/{maxFaelle}</span>
-                <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden mt-0.5">
-                  <div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-[#4573A2]'}`}
-                    style={{ width: `${Math.min(100, pct)}%` }} />
-                </div>
-              </div>
-              {/* ARCH-1 POLISH Befund 1: Onboarding-Status-Badge */}
-              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${onboardingStatus.bg} ${onboardingStatus.text}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${onboardingStatus.dot}`} />
-                {onboardingStatus.label}
               </span>
-              {/* AAR-425: Manueller Verifizierungs-Toggle (Whitelabel-Gate) */}
-              <VerifizierungsToggle
-                svId={sv.id}
-                verifiziert={sv.verifiziert ?? false}
-                verifiziertAm={sv.verifiziert_am ?? null}
-              />
-              {/* KFZ-153: Gutachten-Mängel Warnung */}
-              {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>
-                  {mangelCounts.formal + mangelCounts.inhaltlich} Gutachten-Mängel
+            }
+            actions={
+              <>
+                <div className="text-right">
+                  <span className="text-sm font-bold text-claimondo-navy tabular-nums">{genutzt}/{maxFaelle}</span>
+                  <div className="w-20 h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden mt-0.5">
+                    <div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-[#4573A2]'}`}
+                      style={{ width: `${Math.min(100, pct)}%` }} />
+                  </div>
+                </div>
+                {/* ARCH-1 POLISH Befund 1: Onboarding-Status-Badge */}
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${onboardingStatus.bg} ${onboardingStatus.text}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${onboardingStatus.dot}`} />
+                  {onboardingStatus.label}
                 </span>
-              )}
-              {sv.ist_aktiv ? (
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-green-50 text-green-600">Aktiv</span>
-              ) : (
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-red-50 text-red-500">Inaktiv</span>
-              )}
-            </div>
-          </div>
+                {/* AAR-425: Manueller Verifizierungs-Toggle (Whitelabel-Gate) */}
+                <VerifizierungsToggle
+                  svId={sv.id}
+                  verifiziert={sv.verifiziert ?? false}
+                  verifiziertAm={sv.verifiziert_am ?? null}
+                />
+                {/* KFZ-153: Gutachten-Mängel Warnung */}
+                {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>
+                    {mangelCounts.formal + mangelCounts.inhaltlich} Gutachten-Mängel
+                  </span>
+                )}
+                {sv.ist_aktiv ? (
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-green-50 text-green-600">Aktiv</span>
+                ) : (
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-red-50 text-red-500">Inaktiv</span>
+                )}
+              </>
+            }
+          />
         </div>
       </div>
 
       {/* ── Tab-Navigation (AAR-359 W6) ────────────────────────────── */}
-      <div className="border-b border-gray-200 bg-white flex-shrink-0 px-4">
+      <div className="border-b border-claimondo-border bg-white flex-shrink-0 px-4">
         <div className="max-w-6xl mx-auto flex gap-1">
           <Link
             href={`/admin/sachverstaendige/${id}`}
             className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
               activeTab === 'stammdaten'
                 ? 'border-[#4573A2] text-[#1E3A5F]'
-                : 'border-transparent text-gray-500 hover:text-gray-800'
+                : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
             }`}
           >
             Stammdaten
@@ -269,7 +336,7 @@ export default async function SvDetailPage({
             className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
               activeTab === 'verifizierung'
                 ? 'border-[#4573A2] text-[#1E3A5F]'
-                : 'border-transparent text-gray-500 hover:text-gray-800'
+                : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
             }`}
           >
             Verifizierung
@@ -279,7 +346,7 @@ export default async function SvDetailPage({
 
       {/* ── Tab-Content ──────────────────────────────────────────── */}
       {activeTab === 'verifizierung' ? (
-        <div className="flex-1 overflow-y-auto p-4 bg-gray-50/30">
+        <div className="flex-1 overflow-y-auto p-4 bg-[#f8f9fb]/30">
           <div className="max-w-4xl mx-auto">
             {verifizierungsData.loadError && (
               <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
@@ -301,6 +368,8 @@ export default async function SvDetailPage({
               verifizierungFristBis={sv.verifizierung_frist_bis ?? null}
               verifiziertAm={sv.verifiziert_am ?? null}
               tier2Slots={verifizierungsData.tier2Slots}
+              pflichtdokumente={verifizierungsData.pflichtdokumente}
+              svVerifiziert={sv.verifiziert ?? false}
               gesperrtSeit={sv.gesperrt_seit ?? null}
               gesperrtGrund={sv.gesperrt_grund ?? null}
             />
@@ -311,21 +380,47 @@ export default async function SvDetailPage({
         <div className="h-full max-w-6xl mx-auto flex">
           {/* LEFT: Edit Form */}
           <div className="flex-1 overflow-y-auto p-4 space-y-5 min-w-0">
+            {/* AAR-717: CalDAV-Verbindungs-Fehler-Banner */}
+            {caldavVerbindung?.last_error && (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5 text-red-600">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1 text-sm">
+                  <p className="font-semibold text-red-800">
+                    Kalender-Verbindung fehlgeschlagen
+                    {caldavVerbindung.last_error_at && (
+                      <span className="text-red-600 font-normal ml-2 text-xs">
+                        (seit {new Date(caldavVerbindung.last_error_at as string).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })})
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-red-700 text-xs mt-1">
+                    {caldavVerbindung.provider_label ?? 'CalDAV'} — {caldavVerbindung.last_error}
+                  </p>
+                  <p className="text-red-600 text-[11px] mt-1">
+                    Dispatch läuft weiter (fail-open), Termin-Überschneidungen können jedoch nicht geprüft werden bis der SV neu verbindet.
+                  </p>
+                </div>
+              </div>
+            )}
             {/* Auslastung */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-5">
-              <h2 className="text-sm font-medium text-gray-500 mb-3">Auslastung & Paket</h2>
+            <div className="bg-white border border-claimondo-border rounded-2xl p-5">
+              <h2 className="text-sm font-medium text-claimondo-ondo mb-3">Auslastung & Paket</h2>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <p className="text-2xl font-bold text-gray-900 tabular-nums">{genutzt}</p>
-                  <p className="text-[10px] text-gray-500">Aktive Fälle</p>
+                  <p className="text-2xl font-bold text-claimondo-navy tabular-nums">{genutzt}</p>
+                  <p className="text-[10px] text-claimondo-ondo">Aktive Fälle</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900 tabular-nums">{maxFaelle}</p>
-                  <p className="text-[10px] text-gray-500">Max. Kapazität</p>
+                  <p className="text-2xl font-bold text-claimondo-navy tabular-nums">{maxFaelle}</p>
+                  <p className="text-[10px] text-claimondo-ondo">Max. Kapazität</p>
                 </div>
                 <div>
                   <p className={`text-2xl font-bold tabular-nums ${pct > 80 ? 'text-red-500' : pct > 50 ? 'text-amber-500' : 'text-[#4573A2]'}`}>{pct}%</p>
-                  <p className="text-[10px] text-gray-500">Auslastung</p>
+                  <p className="text-[10px] text-claimondo-ondo">Auslastung</p>
                 </div>
               </div>
             </div>
@@ -361,14 +456,14 @@ export default async function SvDetailPage({
           </div>
 
           {/* RIGHT: Offene Fälle + Tasks Panel */}
-          <div className="w-[340px] flex-shrink-0 border-l border-gray-200 overflow-y-auto p-4 space-y-4 bg-gray-50/30">
+          <div className="w-[340px] flex-shrink-0 border-l border-claimondo-border overflow-y-auto p-4 space-y-4 bg-[#f8f9fb]/30">
             {/* Offene Fälle */}
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <div className="px-3 py-2 border-b border-gray-100">
-                <span className="text-xs font-semibold text-gray-800">Offene Fälle ({faelle.length})</span>
+            <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+              <div className="px-3 py-2 border-b border-claimondo-border">
+                <span className="text-xs font-semibold text-claimondo-navy">Offene Fälle ({faelle.length})</span>
               </div>
               {faelle.length === 0 ? (
-                <p className="py-6 text-center text-gray-400 text-xs">Keine offenen Fälle</p>
+                <p className="py-6 text-center text-claimondo-ondo/70 text-xs">Keine offenen Fälle</p>
               ) : (
                 <div className="max-h-[300px] overflow-y-auto">
                   {faelle.map(fall => {
@@ -377,14 +472,14 @@ export default async function SvDetailPage({
                     const kunde = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
                     return (
                       <Link key={fall.id} href={`/faelle/${fall.id}`}
-                        className="block px-3 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                        className="block px-3 py-2.5 border-b border-claimondo-border hover:bg-[#f8f9fb] transition-colors">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-gray-800 truncate">{kunde}</span>
+                          <span className="text-xs font-medium text-claimondo-navy truncate">{kunde}</span>
                           <FallStatusBadge status={fall.status} size="xs" />
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[10px] text-[#4573A2] font-mono">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>
-                          {fall.sv_termin && <span className="text-[10px] text-gray-400">{new Date(fall.sv_termin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</span>}
+                          {fall.sv_termin && <span className="text-[10px] text-claimondo-ondo/70">{new Date(fall.sv_termin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</span>}
                         </div>
                       </Link>
                     )
@@ -394,12 +489,12 @@ export default async function SvDetailPage({
             </div>
 
             {/* Offene Tasks */}
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-              <div className="px-3 py-2 border-b border-gray-100">
-                <span className="text-xs font-semibold text-gray-800">Offene Tasks ({tasks.length})</span>
+            <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+              <div className="px-3 py-2 border-b border-claimondo-border">
+                <span className="text-xs font-semibold text-claimondo-navy">Offene Tasks ({tasks.length})</span>
               </div>
               {tasks.length === 0 ? (
-                <p className="py-6 text-center text-gray-400 text-xs">Keine offenen Tasks</p>
+                <p className="py-6 text-center text-claimondo-ondo/70 text-xs">Keine offenen Tasks</p>
               ) : (
                 <div className="max-h-[300px] overflow-y-auto">
                   {tasks.map(t => {
@@ -408,12 +503,12 @@ export default async function SvDetailPage({
                     const overdue = t.faellig_am && new Date(t.faellig_am) < now
                     return (
                       <Link key={t.id} href={t.fall_id ? `/faelle/${t.fall_id}` : '#'}
-                        className={`block px-3 py-2.5 border-b border-gray-50 hover:bg-gray-50 transition-colors ${overdue ? 'bg-red-50/30' : ''}`}>
-                        <p className="text-xs text-gray-800 font-medium truncate">{t.titel}</p>
+                        className={`block px-3 py-2.5 border-b border-claimondo-border hover:bg-[#f8f9fb] transition-colors ${overdue ? 'bg-red-50/30' : ''}`}>
+                        <p className="text-xs text-claimondo-navy font-medium truncate">{t.titel}</p>
                         <div className="flex items-center gap-2 mt-0.5 text-[10px]">
-                          <span className="text-gray-400 font-mono">{fallNr}</span>
+                          <span className="text-claimondo-ondo/70 font-mono">{fallNr}</span>
                           {t.faellig_am && (
-                            <span className={overdue ? 'text-red-500 font-semibold' : 'text-gray-400'}>
+                            <span className={overdue ? 'text-red-500 font-semibold' : 'text-claimondo-ondo/70'}>
                               {new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                             </span>
                           )}

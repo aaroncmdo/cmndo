@@ -150,8 +150,22 @@ export default function SoloAnlegenWizard({ onSuccess }: {
     ? 'Individuell'
     : data.paket.charAt(0).toUpperCase() + data.paket.slice(1)
 
+  // AAR-sv-anlegen-step0: anschrift_lat-Anforderung entfernt — vorher
+  // blockierte das den Weiter-Button wenn der Maps-Dropdown nicht geklickt
+  // wurde. Server-Geocoding (siehe AAR-262 onBlur-Pattern) holt die Geo-
+  // Daten beim Speichern nach.
+  function missingStep0Fields(): string[] {
+    const m: string[] = []
+    if (!data.anrede) m.push('Anrede')
+    if (!data.vorname) m.push('Vorname')
+    if (!data.nachname) m.push('Nachname')
+    if (!data.email) m.push('Email')
+    if (!data.steuernummer) m.push('Steuernummer')
+    if (!data.anschrift) m.push('Anschrift')
+    return m
+  }
   function canNext(): boolean {
-    if (step === 0) return !!(data.anrede && data.vorname && data.nachname && data.email && data.steuernummer && data.anschrift && data.anschrift_lat !== null)
+    if (step === 0) return missingStep0Fields().length === 0
     if (step === 1) {
       if (data.paket === 'individuell') return !!(data.paket_override_kontingent && data.paket_override_radius_km && data.paket_override_anzahlung_eur)
       return true
@@ -217,8 +231,8 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             <CheckCircle2Icon className="w-6 h-6 text-[#4573A2]" />
           </div>
           <div className="flex-1">
-            <h2 className="text-lg font-semibold text-gray-900">{data.vorname} {data.nachname} angelegt</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="text-lg font-semibold text-claimondo-navy">{data.vorname} {data.nachname} angelegt</h2>
+            <p className="text-sm text-claimondo-ondo mt-1">
               Welcome-Mail wurde an <strong>{data.email}</strong> versendet (mit Initial-Passwort).
             </p>
             <div className="mt-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs">
@@ -231,13 +245,13 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => { setResult(null); setData(initialState); setStep(0) }}
-                className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50"
+                className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb]"
               >
                 Weiteren SV anlegen
               </button>
               <button
                 onClick={() => router.push('/admin/sachverstaendige')}
-                className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm hover:bg-gray-50"
+                className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb]"
               >
                 Zur SV-Liste
               </button>
@@ -265,12 +279,12 @@ export default function SoloAnlegenWizard({ onSuccess }: {
           return (
             <div key={s.key} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                i < step ? 'bg-[#4573A2]' : i === step ? 'bg-[#0D1B3E]' : 'bg-gray-200'
+                i < step ? 'bg-[#4573A2]' : i === step ? 'bg-[#0D1B3E]' : 'bg-claimondo-border'
               }`}>
-                <Icon className={`w-4 h-4 ${i <= step ? 'text-white' : 'text-gray-500'}`} />
+                <Icon className={`w-4 h-4 ${i <= step ? 'text-white' : 'text-claimondo-ondo'}`} />
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`w-8 h-0.5 ${i < step ? 'bg-[#4573A2]' : 'bg-gray-300'}`} />
+                <div className={`w-8 h-0.5 ${i < step ? 'bg-[#4573A2]' : 'bg-claimondo-border'}`} />
               )}
             </div>
           )
@@ -278,8 +292,8 @@ export default function SoloAnlegenWizard({ onSuccess }: {
       </div>
 
       {/* Card */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-5">{STEPS[step].label}</h2>
+      <div className="bg-white border border-claimondo-border rounded-2xl p-6">
+        <h2 className="text-lg font-semibold text-claimondo-navy mb-5">{STEPS[step].label}</h2>
 
         {/* SCHRITT 0: Person + Firma */}
         {step === 0 && (
@@ -307,7 +321,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                 <Field label="Email *" type="email" value={data.email} onChange={v => update('email', v)} />
                 {/* AAR-364 SUB-3: Email-Duplikat-Warnung */}
                 {emailChecking && (
-                  <p className="mt-1 text-[10px] text-gray-400">Prüfe, ob Email bereits vorhanden…</p>
+                  <p className="mt-1 text-[10px] text-claimondo-ondo/70">Prüfe, ob Email bereits vorhanden…</p>
                 )}
                 {!emailChecking && emailCheck?.success && emailCheck.exists && (
                   <div className="mt-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs flex items-start gap-2">
@@ -331,18 +345,18 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               </div>
               <Field label="Telefon" type="tel" value={data.telefon} onChange={v => update('telefon', v)} className="sm:col-span-2" />
             </div>
-            <div className="pt-4 mt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Firma</p>
+            <div className="pt-4 mt-4 border-t border-claimondo-border">
+              <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-2">Firma</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field label="Firmenname" value={data.firmenname} onChange={v => update('firmenname', v)} />
                 <Field label="Rechtsform" value={data.rechtsform} onChange={v => update('rechtsform', v)} placeholder="z.B. GmbH" />
                 <div className="sm:col-span-2">
-                  <label className="text-xs text-gray-500 mb-1.5 block">
+                  <label className="text-xs text-claimondo-ondo mb-1.5 block">
                     Anschrift * {data.anschrift_lat !== null && <span className="text-[#4573A2] ml-2">✓ Geo gesetzt</span>}
                   </label>
                   <GooglePlaceAutocomplete
                     defaultValue={data.anschrift}
-                    placeholder="Adresse via Auswahl wählen..."
+                    placeholder="Adresse eingeben (Auswahl optional, wird sonst beim Speichern geocoded)"
                     onSelect={place => setData(prev => ({
                       ...prev,
                       anschrift: place.adresse,
@@ -351,7 +365,15 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                       anschrift_lng: place.lng,
                       anschrift_place_id: place.place_id,
                     }))}
-                    className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                    // AAR-sv-anlegen-step0: onBlur sichert manuellen Freitext
+                    // damit der Weiter-Button auch ohne Dropdown-Auswahl
+                    // freigegeben wird. Server-Geocoding holt lat/lng nach.
+                    onBlur={(currentValue) => {
+                      if (currentValue && currentValue !== data.anschrift) {
+                        setData(prev => ({ ...prev, anschrift: currentValue }))
+                      }
+                    }}
+                    className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
                   />
                 </div>
                 <Field label="Steuernummer *" value={data.steuernummer} onChange={v => update('steuernummer', v)} />
@@ -362,10 +384,10 @@ export default function SoloAnlegenWizard({ onSuccess }: {
 
             {/* AAR-364 SUB-1: Live-Karte mit Isochrone-Preview sobald Adresse gesetzt */}
             {data.anschrift_lat !== null && data.anschrift_lng !== null && (
-              <div className="pt-4 mt-4 border-t border-gray-200">
+              <div className="pt-4 mt-4 border-t border-claimondo-border">
                 <div className="flex items-center gap-1.5 mb-2">
                   <MapPinIcon className="w-3.5 h-3.5 text-[#4573A2]" />
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Einsatzgebiet</p>
+                  <p className="text-xs text-claimondo-ondo uppercase tracking-wide">Einsatzgebiet</p>
                 </div>
                 <IsochronePreviewMap
                   lat={data.anschrift_lat}
@@ -383,7 +405,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
         {step === 1 && (
           <div className="space-y-5">
             <div>
-              <label className="text-xs text-gray-500 mb-2 block uppercase tracking-wide">Gutachter-Typ</label>
+              <label className="text-xs text-claimondo-ondo mb-2 block uppercase tracking-wide">Gutachter-Typ</label>
               <div className="grid grid-cols-2 gap-3">
                 {(['kfz-gutachter', 'dat-gutachter'] as const).map(t => (
                   <button
@@ -393,7 +415,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                     className={`px-4 py-3 rounded-xl border text-sm transition-colors ${
                       data.gutachter_typ === t
                         ? 'border-[#1E3A5F] bg-[#1E3A5F]/5 text-[#1E3A5F] font-semibold'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                        : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
                     }`}
                   >
                     {t === 'kfz-gutachter' ? 'KFZ-Gutachter' : 'DAT-Gutachter'}
@@ -403,7 +425,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             </div>
 
             <div>
-              <label className="text-xs text-gray-500 mb-2 block uppercase tracking-wide">Paket</label>
+              <label className="text-xs text-claimondo-ondo mb-2 block uppercase tracking-wide">Paket</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {(['standard', 'pro', 'premium', 'individuell'] as const).map(p => {
                   const cfg = p === 'individuell' ? null : PAKET_KONFIG[p]
@@ -415,7 +437,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                       className={`px-3 py-3 rounded-xl border text-xs transition-colors ${
                         data.paket === p
                           ? 'border-[#1E3A5F] bg-[#1E3A5F]/5 text-[#1E3A5F] font-semibold'
-                          : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                          : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
                       }`}
                     >
                       <div className="capitalize">{p}</div>
@@ -429,8 +451,8 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             </div>
 
             {/* Override-Felder bei Individuell ODER falls Aaron Sonder-Konditionen will */}
-            <div className="pt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-500 mb-3">
+            <div className="pt-4 border-t border-claimondo-border">
+              <p className="text-xs text-claimondo-ondo mb-3">
                 {data.paket === 'individuell'
                   ? 'Individuell: Werte sind Pflicht'
                   : 'Optional: Werte überschreiben für Sonder-Konditionen'}
@@ -462,14 +484,14 @@ export default function SoloAnlegenWizard({ onSuccess }: {
 
             {/* Live-Vorschau */}
             <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wide">Vorschau</p>
+              <p className="text-xs text-claimondo-ondo uppercase tracking-wide">Vorschau</p>
               <div className="grid grid-cols-2 gap-3 mt-2">
                 <div>
-                  <p className="text-[10px] text-gray-500 uppercase">Kontingent</p>
-                  <p className="text-sm font-semibold text-gray-900">{liveKontingent} Fälle/Monat</p>
+                  <p className="text-[10px] text-claimondo-ondo uppercase">Kontingent</p>
+                  <p className="text-sm font-semibold text-claimondo-navy">{liveKontingent} Fälle/Monat</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-gray-500 uppercase">Anzahlung</p>
+                  <p className="text-[10px] text-claimondo-ondo uppercase">Anzahlung</p>
                   <p className="text-sm font-semibold text-[#1E3A5F]">{liveAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}</p>
                 </div>
               </div>
@@ -524,28 +546,28 @@ export default function SoloAnlegenWizard({ onSuccess }: {
         {/* SCHRITT 3: Zusammenfassung */}
         {step === 3 && (
           <div className="space-y-4">
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm">
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Person</p>
-              <p className="text-gray-900"><strong>{data.vorname} {data.nachname}</strong></p>
-              <p className="text-gray-500">{data.email}{data.telefon && ` · ${data.telefon}`}</p>
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Firma</p>
-                <p className="text-gray-900">{data.firmenname || '—'}{data.rechtsform && ` (${data.rechtsform})`}</p>
-                <p className="text-gray-500 text-xs mt-1">{data.anschrift}</p>
-                <p className="text-gray-500 text-xs">Steuer-Nr: {data.steuernummer}</p>
+            <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 text-sm">
+              <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-2">Person</p>
+              <p className="text-claimondo-navy"><strong>{data.vorname} {data.nachname}</strong></p>
+              <p className="text-claimondo-ondo">{data.email}{data.telefon && ` · ${data.telefon}`}</p>
+              <div className="mt-3 pt-3 border-t border-claimondo-border">
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-2">Firma</p>
+                <p className="text-claimondo-navy">{data.firmenname || '—'}{data.rechtsform && ` (${data.rechtsform})`}</p>
+                <p className="text-claimondo-ondo text-xs mt-1">{data.anschrift}</p>
+                <p className="text-claimondo-ondo text-xs">Steuer-Nr: {data.steuernummer}</p>
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Konditionen</p>
-                <p className="text-gray-900">
+              <div className="mt-3 pt-3 border-t border-claimondo-border">
+                <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-2">Konditionen</p>
+                <p className="text-claimondo-navy">
                   {data.paket === 'individuell' ? 'Individuell' : data.paket.charAt(0).toUpperCase() + data.paket.slice(1)} ·
                   {' '}{liveKontingent} Fälle/Monat · {liveAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} Anzahlung
                 </p>
-                <p className="text-gray-500 text-xs mt-1">Typ: {data.gutachter_typ === 'kfz-gutachter' ? 'KFZ-Gutachter' : 'DAT-Gutachter'}</p>
+                <p className="text-claimondo-ondo text-xs mt-1">Typ: {data.gutachter_typ === 'kfz-gutachter' ? 'KFZ-Gutachter' : 'DAT-Gutachter'}</p>
                 {data.qualifikationen.length > 0 && (
-                  <p className="text-gray-500 text-xs mt-1">Qualifikationen: {data.qualifikationen.join(', ')}</p>
+                  <p className="text-claimondo-ondo text-xs mt-1">Qualifikationen: {data.qualifikationen.join(', ')}</p>
                 )}
                 {data.spezifikationen.length > 0 && (
-                  <p className="text-gray-500 text-xs mt-1">Spezifikationen: {data.spezifikationen.join(', ')}</p>
+                  <p className="text-claimondo-ondo text-xs mt-1">Spezifikationen: {data.spezifikationen.join(', ')}</p>
                 )}
                 {/* AAR-204: Schadenarten-Summary raus (Feld nicht mehr erfasst) */}
               </div>
@@ -553,7 +575,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
 
             <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-4 flex items-start gap-3">
               <MailIcon className="w-5 h-5 text-[#1E3A5F] flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-gray-700">
+              <div className="text-xs text-claimondo-navy">
                 <strong>Welcome-Mail wird versendet an:</strong> {data.email}<br/>
                 Inhalt: Initial-Passwort + Login-Link + Konditionen-Übersicht. SV wird beim ersten Login zur Passwort-Änderung gezwungen.
               </div>
@@ -574,24 +596,33 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               type="button"
               onClick={() => setStep(step - 1)}
               disabled={saving}
-              className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 text-sm hover:bg-gray-50 disabled:opacity-40"
+              className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
             >
               Zurück
             </button>
           )}
-          <LoadingButton
-            type="button"
-            onClick={() => {
-              if (step < STEPS.length - 1) setStep(step + 1)
-              else setShowPreviewModal(true) // AAR-364 SUB-2: Preview-Modal vor Anlage
-            }}
-            disabled={!canNext()}
-            isLoading={saving && !showPreviewModal}
-            loadingText="Wird angelegt..."
-            className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
-          >
-            {step < STEPS.length - 1 ? 'Weiter' : 'Welcome-Mail Vorschau anzeigen'}
-          </LoadingButton>
+          <div className="flex-1">
+            <LoadingButton
+              type="button"
+              onClick={() => {
+                if (step < STEPS.length - 1) setStep(step + 1)
+                else setShowPreviewModal(true) // AAR-364 SUB-2: Preview-Modal vor Anlage
+              }}
+              disabled={!canNext()}
+              isLoading={saving && !showPreviewModal}
+              loadingText="Wird angelegt..."
+              className="w-full py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
+            >
+              {step < STEPS.length - 1 ? 'Weiter' : 'Welcome-Mail Vorschau anzeigen'}
+            </LoadingButton>
+            {/* AAR-sv-anlegen-step0: Sichtbares Hint welche Pflichtfelder noch fehlen,
+                damit Aaron nicht ratend sucht warum der Button disabled ist. */}
+            {step === 0 && !canNext() && missingStep0Fields().length > 0 && (
+              <p className="text-[11px] text-amber-700 mt-1.5 text-center">
+                Pflichtfeld noch leer: {missingStep0Fields().join(', ')}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -632,13 +663,13 @@ function Field({
 }) {
   return (
     <div className={className}>
-      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       />
     </div>
   )
@@ -656,10 +687,10 @@ function TagSection({
   return (
     <div>
       <div className="flex items-baseline justify-between mb-2">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-        <span className="text-[10px] text-gray-400">{selected.length} gewählt</span>
+        <h3 className="text-sm font-semibold text-claimondo-navy">{title}</h3>
+        <span className="text-[10px] text-claimondo-ondo/70">{selected.length} gewählt</span>
       </div>
-      <p className="text-xs text-gray-500 mb-2">{hint}</p>
+      <p className="text-xs text-claimondo-ondo mb-2">{hint}</p>
       <div className="flex flex-wrap gap-1.5">
         {options.map(opt => {
           const active = selected.includes(opt)
@@ -671,7 +702,7 @@ function TagSection({
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 active
                   ? 'bg-[#1E3A5F] text-white'
-                  : 'bg-gray-100 text-gray-500 hover:text-gray-800'
+                  : 'bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               {opt}
@@ -695,11 +726,11 @@ function SelectField({
 }) {
   return (
     <div className={className}>
-      <label className="text-xs text-gray-500 mb-1.5 block">{label}</label>
+      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       >
         {/* Leer-Option mit Placeholder-Label nur zeigen falls noch nichts gewaehlt
             ist, ausser '' selbst ist eine valide Option (z.B. bei TITEL_OPTIONEN

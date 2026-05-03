@@ -7,7 +7,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "./glass.css";
 
 html[lang="ar"] {
   font-family: 'Noto Sans Arabic', var(--font-montserrat), system-ui, sans-serif;
@@ -68,6 +67,18 @@ html[lang="ar"] {
   --color-claimondo-bg: var(--claimondo-bg);
   --color-claimondo-card: var(--claimondo-card);
   --color-claimondo-border: var(--claimondo-border);
+
+  /* AAR-727: iOS-Tokens für Tailwind.
+     Nutzung: `rounded-ios-md`, `shadow-ios-lg`, `font-apple`, `ease-ios`. */
+  --radius-ios-sm: var(--radius-ios-sm);
+  --radius-ios-md: var(--radius-ios-md);
+  --radius-ios-lg: var(--radius-ios-lg);
+  --radius-ios-xl: var(--radius-ios-xl);
+  --shadow-ios-sm: var(--shadow-ios-sm);
+  --shadow-ios-md: var(--shadow-ios-md);
+  --shadow-ios-lg: var(--shadow-ios-lg);
+  --font-apple: var(--font-apple);
+  --ease-ios: var(--ease-ios);
 }
 
 :root {
@@ -110,7 +121,9 @@ html[lang="ar"] {
 
   /* AAR-460 F2: Claimondo-Brand-Palette als CSS-Variablen.
      Wird via @theme inline als Tailwind-Color-Utilities exponiert
-     (`bg-claimondo-navy`, `text-claimondo-ondo`, `border-claimondo-border`). */
+     (`bg-claimondo-navy`, `text-claimondo-ondo`, `border-claimondo-border`).
+     AAR-769: Diese Werte sind mit `src/lib/design-tokens.ts` synchron —
+     dort liegt die Source-of-Truth für alle Plattformen (Web + RN). */
   --claimondo-navy: #0D1B3E;
   --claimondo-ondo: #4573A2;
   --claimondo-shield: #1E3A5F;
@@ -124,6 +137,22 @@ html[lang="ar"] {
   --shadow-claimondo-sm: 0 1px 2px rgba(13, 27, 62, 0.04), 0 1px 3px rgba(13, 27, 62, 0.06);
   --shadow-claimondo-md: 0 4px 6px -1px rgba(13, 27, 62, 0.06), 0 2px 4px -2px rgba(13, 27, 62, 0.04);
   --shadow-claimondo-lg: 0 10px 25px -5px rgba(13, 27, 62, 0.1), 0 8px 10px -6px rgba(13, 27, 62, 0.06);
+
+  /* AAR-727: iOS-inspirierte Design-Tokens.
+     - Radius: weiche, konsistente Rundungen pro UI-Primitiv.
+     - Shadow: subtile Schatten (kein harter Drop-Shadow).
+     - Ease: iOS-klassisches cubic-bezier.
+     - Glass: light/dark Backdrop-Blur-Layer. */
+  --radius-ios-sm: 12px;
+  --radius-ios-md: 18px;
+  --radius-ios-lg: 24px;
+  --radius-ios-xl: 32px;
+  --shadow-ios-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-ios-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-ios-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
+  --ease-ios: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
 }
 
 .dark {
@@ -225,4 +254,187 @@ html[lang="ar"] {
 }
 .blink-highlight {
   animation: blink-highlight 1.5s ease-in-out;
+}
+
+/* AAR-727: Glass-Morphism-Utilities.
+   - glass-light: helle Popovers / Modals (weißer Hintergrund-Touch + Blur)
+   - glass-dark: dunkler Nav-Bar / Hero-Layer auf Navy
+   Die Utilities sind bewusst als eigene Klassen und nicht als Tailwind-
+   Custom-Utility modelliert — sie bündeln bg + border + backdrop-filter,
+   was in Tailwind nur über Multi-Step arbeit gehen würde. */
+.glass-light {
+  background-color: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* AAR-766: glass-dark ist nicht mehr transparent.
+   Navbar / Header-Bars müssen global opak bleiben, damit beim Scrollen
+   keine Inhalte durchscheinen (Aaron 2026-04-24). Vorher:
+   rgba(13,27,62,0.78) + backdrop-blur — wurde zu durchsichtig. */
+.glass-dark {
+  background-color: #0D1B3E;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* AAR-727: Branded-Glass — für Portale mit Whitelabel-Branding (Gutachter,
+   Makler-Custom, Kunde). Nimmt `--brand-sidebar-bg` als Basis-Farbton und
+   mischt Transluzenz dazu. backgroundColor wird weiterhin via inline-style
+   gesetzt, damit Brand-Transitions (2s Farbwechsel beim Theme-Swap) weiter
+   funktionieren — diese Klasse liefert nur blur + border. */
+.glass-branded {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* AAR-727 Cleanup: Einzige überlebende Klasse aus der alten glass.css —
+   alle anderen (.glass-card, .glass-badge-*, .glass-btn-*, .glass-input,
+   .glass-table, .glass-pipeline-card, .glass-bell, .glass-bottom-nav,
+   .kunde-* etc.) waren nicht mehr referenziert. Komplette Datei wurde
+   entfernt, .glass-bg als Body-Surface bleibt hier. */
+.glass-bg {
+  background: #f8f9fb;
+}
+
+/* ─── Droplet-UI: Tropfen-Animationen ───────────────────────────────────── */
+
+/* Teardrop-Badge: tropfenartige Form für Mitteilungs-Badges.
+   Rotation: -135° → Spitze zeigt nach unten rechts (klassischer Tropfen). */
+.badge-droplet {
+  border-radius: 50% 50% 50% 0%;
+  transform: rotate(-135deg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.badge-droplet-inner {
+  transform: rotate(135deg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Tropfen-Bounce: Badge-Zahl verzerrt sich kurz beim Update */
+@keyframes droplet-pop {
+  0%   { transform: rotate(135deg) scale(1); }
+  30%  { transform: rotate(135deg) scale(1.4) skewY(-8deg); }
+  55%  { transform: rotate(135deg) scale(0.9) skewY(4deg); }
+  75%  { transform: rotate(135deg) scale(1.05); }
+  100% { transform: rotate(135deg) scale(1); }
+}
+.badge-droplet-pop .badge-droplet-inner {
+  animation: droplet-pop 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* FAB-Ripple: Wellenring wenn Posteingang-FAB neue Nachrichten hat */
+@keyframes droplet-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(69, 115, 162, 0.5); }
+  70%  { box-shadow: 0 0 0 12px rgba(69, 115, 162, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(69, 115, 162, 0); }
+}
+.fab-ring {
+  animation: droplet-ring 2s ease-out infinite;
+}
+
+/* Tab-Transition: Inhalts-Reveal per Tropfen-Clip-Path */
+@keyframes drop-in {
+  from {
+    clip-path: ellipse(40% 10% at 50% 0%);
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    clip-path: ellipse(200% 200% at 50% 0%);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes drop-out {
+  from {
+    clip-path: ellipse(200% 200% at 50% 100%);
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    clip-path: ellipse(40% 10% at 50% 100%);
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.animate-drop-in {
+  animation: drop-in 0.32s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+.animate-drop-out {
+  animation: drop-out 0.22s cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+
+/* Slide-Fade-Variant für Tab-Content im Panel */
+@keyframes tab-slide-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-tab-in {
+  animation: tab-slide-in 0.2s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+
+/* AAR-864: Wetter-Banner-Animationen */
+@keyframes wx-rain {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  10%  { opacity: 0.6; }
+  100% { transform: translateY(100vh); opacity: 0.6; }
+}
+.wx-rain-drop {
+  position: absolute;
+  width: 1.5px;
+  height: 14px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.7));
+  border-radius: 1px;
+  animation: wx-rain 0.8s linear infinite;
+}
+
+@keyframes wx-snow {
+  0%   { transform: translate3d(0, -10%, 0); opacity: 0; }
+  10%  { opacity: 0.85; }
+  100% { transform: translate3d(20px, 100vh, 0); opacity: 0.85; }
+}
+.wx-snow-flake {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  filter: blur(0.5px);
+  animation: wx-snow 6s linear infinite;
+}
+
+@keyframes wx-flash {
+  0%, 92%, 100% { opacity: 0; }
+  93%, 95%      { opacity: 0.7; }
+  94%           { opacity: 0; }
+}
+.wx-thunder-flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  pointer-events: none;
+  animation: wx-flash 7s ease-out infinite;
+}
+
+@keyframes wx-sun-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50%      { transform: scale(1.15); opacity: 0.6; }
+}
+.wx-sun-glow {
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,225,100,0.55) 0%, transparent 70%);
+  animation: wx-sun-pulse 4s ease-in-out infinite;
+  pointer-events: none;
 }

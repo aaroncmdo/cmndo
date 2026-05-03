@@ -1,7 +1,5 @@
 // AAR-436: Admin-Dashboard für Anthropic-Token-Usage und Cache-Hit-Rate.
-// Zeigt die letzten 7 Tage pro Endpoint (faq_bot_kunde, faq_bot_kb,
-// pre_call_briefing, post_call_summary, …) mit Input-, Output-, Cache-
-// Read- und Cache-Write-Tokens plus berechneter Cache-Hit-Rate.
+import PageHeader from '@/components/shared/PageHeader'
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -35,7 +33,12 @@ export default async function KiUsagePage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-  if (profile?.rolle !== 'admin') redirect('/admin')
+  // AAR-719: Defensiv — Admin-Layout filtert eigentlich schon, aber wenn
+  // ein Nicht-Admin hier durchrutscht, ins eigene Portal statt /admin.
+  if (profile?.rolle !== 'admin') {
+    const { roleToPath } = await import('@/lib/auth/role-redirect')
+    redirect(roleToPath(profile?.rolle as string | null | undefined))
+  }
 
   const admin = createAdminClient()
   const sinceIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -87,45 +90,42 @@ export default async function KiUsagePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 space-y-6">
-      <header>
-        <h1 className="text-xl font-semibold text-[#0D1B3E]">KI-Usage & Cache-Hit-Rate</h1>
-        <p className="text-sm text-gray-500">
-          Anthropic-Token-Verbrauch der letzten 7 Tage. Cache-Hit-Rate &gt;= 80% gilt
-          als „warm" nach AAR-436.
-        </p>
-      </header>
+      <PageHeader
+        title="KI-Usage & Cache-Hit-Rate"
+        description='Anthropic-Token-Verbrauch der letzten 7 Tage. Cache-Hit-Rate >= 80% gilt als „warm" nach AAR-436.'
+      />
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-white rounded-2xl border border-gray-200 p-4">
-          <div className="text-[11px] uppercase tracking-wider text-gray-500">Calls (7 Tage)</div>
+        <div className="bg-white rounded-2xl border border-claimondo-border p-4">
+          <div className="text-[11px] uppercase tracking-wider text-claimondo-ondo">Calls (7 Tage)</div>
           <div className="text-2xl font-semibold text-[#0D1B3E]">{totalCalls.toLocaleString('de-DE')}</div>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-4">
-          <div className="text-[11px] uppercase tracking-wider text-gray-500">Cache-Hit-Rate</div>
+        <div className="bg-white rounded-2xl border border-claimondo-border p-4">
+          <div className="text-[11px] uppercase tracking-wider text-claimondo-ondo">Cache-Hit-Rate</div>
           <div className="text-2xl font-semibold text-[#0D1B3E]">
             {totalCacheHitRate != null ? `${(totalCacheHitRate * 100).toFixed(1)}%` : '—'}
           </div>
-          <div className="text-[11px] text-gray-500 mt-1">
+          <div className="text-[11px] text-claimondo-ondo mt-1">
             {totalCacheRead.toLocaleString('de-DE')} read / {totalCacheWrite.toLocaleString('de-DE')} write
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-gray-200 p-4">
-          <div className="text-[11px] uppercase tracking-wider text-gray-500">Endpoints aktiv</div>
+        <div className="bg-white rounded-2xl border border-claimondo-border p-4">
+          <div className="text-[11px] uppercase tracking-wider text-claimondo-ondo">Endpoints aktiv</div>
           <div className="text-2xl font-semibold text-[#0D1B3E]">{aggregated.length}</div>
         </div>
       </section>
 
-      <section className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-200">
-          <h2 className="text-sm font-semibold text-gray-900">Pro Endpoint</h2>
+      <section className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
+        <div className="px-4 py-3 border-b border-claimondo-border">
+          <h2 className="text-sm font-semibold text-claimondo-navy">Pro Endpoint</h2>
         </div>
         {aggregated.length === 0 ? (
-          <div className="p-6 text-sm text-gray-500 text-center">
+          <div className="p-6 text-sm text-claimondo-ondo text-center">
             Keine Usage-Daten in den letzten 7 Tagen.
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-[11px] uppercase tracking-wider text-gray-500">
+            <thead className="bg-[#f8f9fb] text-[11px] uppercase tracking-wider text-claimondo-ondo">
               <tr>
                 <th className="text-left px-4 py-2">Endpoint</th>
                 <th className="text-right px-4 py-2">Calls</th>
@@ -136,16 +136,16 @@ export default async function KiUsagePage() {
                 <th className="text-right px-4 py-2">Hit-Rate</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-claimondo-border">
               {aggregated.map((row) => (
                 <tr key={row.endpoint}>
-                  <td className="px-4 py-2 font-medium text-gray-900">{row.endpoint}</td>
-                  <td className="px-4 py-2 text-right text-gray-700">{row.calls.toLocaleString('de-DE')}</td>
-                  <td className="px-4 py-2 text-right text-gray-700">{row.inputTokens.toLocaleString('de-DE')}</td>
-                  <td className="px-4 py-2 text-right text-gray-700">{row.outputTokens.toLocaleString('de-DE')}</td>
-                  <td className="px-4 py-2 text-right text-gray-700">{row.cacheReadTokens.toLocaleString('de-DE')}</td>
-                  <td className="px-4 py-2 text-right text-gray-700">{row.cacheWriteTokens.toLocaleString('de-DE')}</td>
-                  <td className="px-4 py-2 text-right text-gray-900 font-medium">
+                  <td className="px-4 py-2 font-medium text-claimondo-navy">{row.endpoint}</td>
+                  <td className="px-4 py-2 text-right text-claimondo-navy">{row.calls.toLocaleString('de-DE')}</td>
+                  <td className="px-4 py-2 text-right text-claimondo-navy">{row.inputTokens.toLocaleString('de-DE')}</td>
+                  <td className="px-4 py-2 text-right text-claimondo-navy">{row.outputTokens.toLocaleString('de-DE')}</td>
+                  <td className="px-4 py-2 text-right text-claimondo-navy">{row.cacheReadTokens.toLocaleString('de-DE')}</td>
+                  <td className="px-4 py-2 text-right text-claimondo-navy">{row.cacheWriteTokens.toLocaleString('de-DE')}</td>
+                  <td className="px-4 py-2 text-right text-claimondo-navy font-medium">
                     {row.cacheHitRate != null ? `${(row.cacheHitRate * 100).toFixed(1)}%` : '—'}
                   </td>
                 </tr>

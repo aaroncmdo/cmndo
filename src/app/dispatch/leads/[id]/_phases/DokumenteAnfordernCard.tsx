@@ -56,10 +56,10 @@ type SonstigesEintrag = { id: number; label: string }
 
 const STATUS_UI: Record<string, { label: string; bg: string; text: string; icon: typeof CheckCircle2Icon }> = {
   gesendet: { label: 'Anfrage gesendet — warte auf Foto', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: ClockIcon },
-  geoeffnet: { label: 'Kunde hat Anfrage geöffnet', bg: 'bg-blue-50 border-blue-200', text: 'text-blue-700', icon: ClockIcon },
+  geoeffnet: { label: 'Kunde hat Anfrage geöffnet', bg: 'bg-[#f8f9fb] border-claimondo-border', text: 'text-claimondo-ondo', icon: ClockIcon },
   hochgeladen: { label: 'Foto eingegangen', bg: 'bg-green-50 border-green-200', text: 'text-green-700', icon: CheckCircle2Icon },
   fehlgeschlagen: { label: 'Upload fehlgeschlagen — manuell nacharbeiten', bg: 'bg-red-50 border-red-200', text: 'text-red-700', icon: AlertCircleIcon },
-  abgelehnt: { label: 'Manuelle Erfassung gewählt', bg: 'bg-gray-50 border-gray-200', text: 'text-gray-600', icon: XCircleIcon },
+  abgelehnt: { label: 'Manuelle Erfassung gewählt', bg: 'bg-[#f8f9fb] border-claimondo-border', text: 'text-claimondo-ondo', icon: XCircleIcon },
 }
 
 export default function DokumenteAnfordernCard({
@@ -218,9 +218,9 @@ export default function DokumenteAnfordernCard({
     sonstige.some((s) => s.label.trim().length > 0)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-      <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-        <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
+    <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-4">
+      <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
+        <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
         Dokumente beim Kunden anfordern
       </h2>
 
@@ -232,7 +232,7 @@ export default function DokumenteAnfordernCard({
             <p className={`text-[11px] font-medium flex-1 ${zb1Cfg.text}`}>
               <span className="font-semibold">Fahrzeugschein:</span> {zb1Cfg.label}
               {zb1HochgeladenAm && zb1Status === 'hochgeladen' && (
-                <span className="block text-[10px] text-gray-500 font-normal mt-0.5">
+                <span className="block text-[10px] text-claimondo-ondo font-normal mt-0.5">
                   {new Date(zb1HochgeladenAm).toLocaleString('de-DE')}
                 </span>
               )}
@@ -253,7 +253,7 @@ export default function DokumenteAnfordernCard({
             <p className={`text-[11px] font-medium flex-1 ${poliCfg.text}`}>
               <span className="font-semibold">Polizeibericht:</span> {poliCfg.label}
               {polizeiberichtHochgeladenAm && polizeiberichtStatus === 'hochgeladen' && (
-                <span className="block text-[10px] text-gray-500 font-normal mt-0.5">
+                <span className="block text-[10px] text-claimondo-ondo font-normal mt-0.5">
                   {new Date(polizeiberichtHochgeladenAm).toLocaleString('de-DE')}
                 </span>
               )}
@@ -272,25 +272,25 @@ export default function DokumenteAnfordernCard({
 
       {/* Slot-Auswahl — Checkboxen für bekannte Slots + freie „sonstige" */}
       <div className="space-y-2 pt-1">
-        <label className="text-[10px] text-gray-400 uppercase tracking-wider block">
+        <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">
           Welche Dokumente anfordern?
         </label>
 
         {/* Fahrzeugschein */}
-        <div className={`rounded-lg border p-3 ${selectFahrzeugschein ? 'border-[#4573A2] bg-blue-50/30' : 'border-gray-200'}`}>
+        <div className={`rounded-lg border p-3 ${selectFahrzeugschein ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={selectFahrzeugschein}
               onChange={(e) => setSelectFahrzeugschein(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-[#4573A2]"
+              className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
             />
             <div className="flex-1">
               <div className="flex items-center gap-1.5">
-                <FileTextIcon className="w-3.5 h-3.5 text-[#4573A2]" />
-                <span className="text-xs font-semibold text-gray-900">Fahrzeugschein (Vorderseite)</span>
+                <FileTextIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                <span className="text-xs font-semibold text-claimondo-navy">Fahrzeugschein (Vorderseite)</span>
               </div>
-              <p className="text-[10px] text-gray-500 mt-0.5">
+              <p className="text-[10px] text-claimondo-ondo mt-0.5">
                 Zulassungsbescheinigung Teil I. Daten werden automatisch per OCR ausgelesen.
               </p>
               {selectFahrzeugschein && (
@@ -299,9 +299,9 @@ export default function DokumenteAnfordernCard({
                     type="checkbox"
                     checked={fahrzeugscheinOcr}
                     onChange={(e) => setFahrzeugscheinOcr(e.target.checked)}
-                    className="w-3.5 h-3.5 accent-[#4573A2]"
+                    className="w-3.5 h-3.5 accent-claimondo-ondo"
                   />
-                  <span className="text-[10px] text-gray-600">
+                  <span className="text-[10px] text-claimondo-ondo">
                     OCR-Auswertung aktivieren (Marke, KZ, Halter automatisch befüllen)
                   </span>
                 </label>
@@ -313,7 +313,7 @@ export default function DokumenteAnfordernCard({
               type="button"
               disabled={pending}
               onClick={() => markManuell('zb1_status')}
-              className="text-[10px] text-gray-500 underline mt-2 hover:text-gray-700 disabled:opacity-30"
+              className="text-[10px] text-claimondo-ondo underline mt-2 hover:text-claimondo-navy disabled:opacity-30"
             >
               Manuell eintragen (keine Anfrage)
             </button>
@@ -322,20 +322,20 @@ export default function DokumenteAnfordernCard({
 
         {/* Polizeibericht — nur wenn polizei_vor_ort=true UND polizeibericht_pflicht=true */}
         {zeigePolizeibericht && (
-          <div className={`rounded-lg border p-3 ${selectPolizeibericht ? 'border-[#4573A2] bg-blue-50/30' : 'border-gray-200'}`}>
+          <div className={`rounded-lg border p-3 ${selectPolizeibericht ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
             <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={selectPolizeibericht}
                 onChange={(e) => setSelectPolizeibericht(e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-[#4573A2]"
+                className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
               />
               <div className="flex-1">
                 <div className="flex items-center gap-1.5">
-                  <ShieldAlertIcon className="w-3.5 h-3.5 text-[#4573A2]" />
-                  <span className="text-xs font-semibold text-gray-900">Polizeiliche Unfallmitteilung</span>
+                  <ShieldAlertIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                  <span className="text-xs font-semibold text-claimondo-navy">Polizeiliche Unfallmitteilung</span>
                 </div>
-                <p className="text-[10px] text-gray-500 mt-0.5">
+                <p className="text-[10px] text-claimondo-ondo mt-0.5">
                   Der Zettel, den der Kunde von der Polizei bekommen hat.
                 </p>
               </div>
@@ -345,7 +345,7 @@ export default function DokumenteAnfordernCard({
                 type="button"
                 disabled={pending}
                 onClick={() => markManuell('polizeibericht_status')}
-                className="text-[10px] text-gray-500 underline mt-2 hover:text-gray-700 disabled:opacity-30"
+                className="text-[10px] text-claimondo-ondo underline mt-2 hover:text-claimondo-navy disabled:opacity-30"
               >
                 Kunde reicht später im Portal nach
               </button>
@@ -356,25 +356,25 @@ export default function DokumenteAnfordernCard({
         {/* AAR-unfallfotos: Unfallfotos-Slot. Multi-File — Kunde kann mehrere
             Fotos via denselben Link hochladen. Nach Upload läuft Haiku-Vision
             und füllt leads.fahrzeugschaden_beschreibung automatisch. */}
-        <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-[#4573A2] bg-blue-50/30' : 'border-gray-200'}`}>
+        <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={selectUnfallfotos}
               onChange={(e) => setSelectUnfallfotos(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-[#4573A2]"
+              className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
             />
             <div className="flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <CameraIcon className="w-3.5 h-3.5 text-[#4573A2]" />
-                <span className="text-xs font-semibold text-gray-900">Unfallfotos</span>
+                <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                <span className="text-xs font-semibold text-claimondo-navy">Unfallfotos</span>
                 {fotosCount > 0 && (
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 font-medium">
                     {fotosCount} Foto{fotosCount === 1 ? '' : 's'} eingegangen
                   </span>
                 )}
               </div>
-              <p className="text-[10px] text-gray-500 mt-0.5">
+              <p className="text-[10px] text-claimondo-ondo mt-0.5">
                 Fotos vom Fahrzeugschaden (mehrere Ansichten möglich). Claude-
                 Vision (Haiku) wertet die Fotos aus und füllt die Schadenbeschreibung.
               </p>
@@ -393,8 +393,8 @@ export default function DokumenteAnfordernCard({
             </div>
           )}
           {unfallfotosAnalyseStatus === 'laeuft' && (
-            <div className="mt-2 flex items-center gap-2 text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded px-2 py-1.5">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
+            <div className="mt-2 flex items-center gap-2 text-[11px] text-claimondo-ondo bg-[#f8f9fb] border border-claimondo-border rounded px-2 py-1.5">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#f8f9fb]0 animate-pulse shrink-0" />
               <span>Foto{fotosCount === 1 ? '' : 's'} eingegangen — Claude analysiert den Schaden …</span>
             </div>
           )}
@@ -426,7 +426,7 @@ export default function DokumenteAnfordernCard({
                   href={url}
                   target="_blank"
                   rel="noopener"
-                  className="relative block aspect-square rounded overflow-hidden border border-gray-200 hover:border-[#4573A2] focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                  className="relative block aspect-square rounded overflow-hidden border border-claimondo-border hover:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
                   title={`Foto ${i + 1} — klicken zum Vergrößern`}
                 >
                   <img
@@ -443,19 +443,19 @@ export default function DokumenteAnfordernCard({
 
         {/* Freie „Sonstige"-Slots */}
         {sonstige.map((s) => (
-          <div key={s.id} className="rounded-lg border border-gray-200 p-3 flex items-center gap-2">
-            <PlusIcon className="w-3.5 h-3.5 text-[#4573A2] shrink-0" />
+          <div key={s.id} className="rounded-lg border border-claimondo-border p-3 flex items-center gap-2">
+            <PlusIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
             <input
               type="text"
               value={s.label}
               onChange={(e) => updateSonstiges(s.id, e.target.value)}
               placeholder="z. B. Kaufvertrag, Rechnung ..."
-              className="flex-1 text-xs px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+              className="flex-1 text-xs px-2 py-1 border border-claimondo-border rounded focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
             <button
               type="button"
               onClick={() => removeSonstiges(s.id)}
-              className="text-gray-400 hover:text-red-600"
+              className="text-claimondo-ondo/70 hover:text-red-600"
               title="Entfernen"
             >
               <XIcon className="w-4 h-4" />
@@ -466,7 +466,7 @@ export default function DokumenteAnfordernCard({
         <button
           type="button"
           onClick={addSonstiges}
-          className="w-full text-[11px] text-[#4573A2] border border-dashed border-[#4573A2]/50 rounded-lg py-1.5 hover:bg-blue-50 flex items-center justify-center gap-1"
+          className="w-full text-[11px] text-claimondo-ondo border border-dashed border-claimondo-ondo/50 rounded-lg py-1.5 hover:bg-[#f8f9fb] flex items-center justify-center gap-1"
         >
           <PlusIcon className="w-3.5 h-3.5" />
           Weiteres Dokument hinzufügen
@@ -475,8 +475,8 @@ export default function DokumenteAnfordernCard({
 
       {/* Kanal-Auswahl + Send-Button */}
       {kannAnfragen && (
-        <div className="space-y-2 pt-2 border-t border-gray-100">
-          <label className="text-[10px] text-gray-400 uppercase tracking-wider block">
+        <div className="space-y-2 pt-2 border-t border-claimondo-border">
+          <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider block">
             Versandkanal
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -485,7 +485,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('whatsapp')}
               disabled={!telefon}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                kanal === 'whatsapp' ? 'bg-[#25D366] text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                kanal === 'whatsapp' ? 'bg-[#25D366] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb]'
               } disabled:opacity-40`}
             >
               <MessageSquareIcon className="w-4 h-4" />
@@ -496,7 +496,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('sms')}
               disabled={!telefon}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                kanal === 'sms' ? 'bg-amber-500 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                kanal === 'sms' ? 'bg-amber-500 text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb]'
               } disabled:opacity-40`}
             >
               <PhoneIcon className="w-4 h-4" />
@@ -507,7 +507,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('email')}
               disabled={!email}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                kanal === 'email' ? 'bg-[#4573A2] text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                kanal === 'email' ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb]'
               } disabled:opacity-40`}
             >
               <MailIcon className="w-4 h-4" />
@@ -518,7 +518,7 @@ export default function DokumenteAnfordernCard({
             type="button"
             onClick={send}
             disabled={pending || !kannAnfragen}
-            className="w-full px-3 py-2 rounded-lg bg-[#0D1B3E] text-white text-xs font-semibold hover:bg-[#1E3A5F] disabled:opacity-50"
+            className="w-full px-3 py-2 rounded-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-navy disabled:opacity-50"
           >
             {pending ? 'Sende ...' : 'Anfrage senden'}
           </button>
@@ -527,7 +527,7 @@ export default function DokumenteAnfordernCard({
               {feedback.text}
             </p>
           )}
-          <p className="text-[10px] text-gray-500 italic">
+          <p className="text-[10px] text-claimondo-ondo italic">
             Der Kunde erhält einen Link und kann alle Dokumente in einem Flow hochladen.
             Antwortet er stattdessen per WhatsApp-Foto, wird das weiterhin über den
             Twilio-Webhook empfangen.

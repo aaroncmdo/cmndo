@@ -11,7 +11,7 @@
 
 export type Rolle =
   | 'admin'
-  | 'leadbearbeiter'
+  | 'dispatch'
   | 'kundenbetreuer'
   | 'sachverstaendiger'
   | 'kunde'
@@ -24,30 +24,30 @@ export type Rolle =
  */
 export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   // Kunden-Uploads (Basis der Fallbearbeitung — alle sehen sie)
-  fahrzeugschein: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-  schadensfotos: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-  polizeibericht: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-  polizeiliche_unfallmitteilung: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-  gewerbenachweis: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-  mietwagenrechnung: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  fahrzeugschein: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  schadensfotos: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  polizeibericht: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  polizeiliche_unfallmitteilung: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  gewerbenachweis: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  mietwagenrechnung: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   // AAR-353: Vorschaden-Dokumente (CarDentity-Trigger) + Kaufvertrag als Beleg
-  reparaturrechnung_vorschaden: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
-  kaufvertrag: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+  reparaturrechnung_vorschaden: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+  kaufvertrag: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
   // AAR-353: Freigabe der Bank bei Leasing/Finanzierung (kein SV/Kanzlei)
-  freigabe_bank: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde'],
+  freigabe_bank: ['admin', 'dispatch', 'kundenbetreuer', 'kunde'],
 
   // WhatsApp-Foto/Datei generisch (AAR-158-Webhook-Pfad)
-  'whatsapp-foto': ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-  'whatsapp-datei': ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  'whatsapp-foto': ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  'whatsapp-datei': ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
 
   // Vollmachten / Verträge → SV sieht NICHT (Mandats-interne Dokumente)
-  sa_vollmacht: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
-  kanzlei_vollmacht: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
-  mandatsvertrag: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
-  sicherungsabtretung: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
-  halter_vollmacht: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
-  halter_ausweis: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
-  gf_vollmacht: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  sa_vollmacht: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  kanzlei_vollmacht: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  mandatsvertrag: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  sicherungsabtretung: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  halter_vollmacht: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  halter_ausweis: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  gf_vollmacht: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
 
   // Personenschaden — Kunde + KB + Kanzlei
   aerztliches_attest: ['admin', 'kundenbetreuer', 'kunde', 'kanzlei'],
@@ -59,7 +59,7 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   cardentity_report: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
 
   // Gutachten-Prozess
-  gutachten: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'], // Leadbearbeiter NICHT
+  gutachten: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'], // Dispatcher NICHT
   gutachter_fotos: ['admin', 'kundenbetreuer', 'sachverstaendiger'],                 // Vor-Ort-Fotos des SV
   technische_stellungnahme: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
   nachbesichtigung_bericht: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
@@ -71,7 +71,7 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   anspruchsschreiben: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   regulierungsbescheid: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   // AAR-263: Polizeibericht-Foto via WA
-  polizeiliche_unfallmitteilung_foto: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  polizeiliche_unfallmitteilung_foto: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
 
   // Intern — SV + Kunde sehen NICHT
   ki_kalkulation: ['admin', 'kundenbetreuer', 'kanzlei'],
@@ -85,8 +85,19 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   rechnung_kanzlei: ['admin', 'kundenbetreuer', 'kanzlei'],
 
   // Sonstige Kategorien (aus Webhook-Logik)
-  kundendokument: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-  zulassung: ['admin', 'leadbearbeiter', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  kundendokument: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  zulassung: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+
+  // CMM-23 Aaron-Spec: ein Doku-Pool, alle Auftragspartien sehen + uploaden
+  // an gleicher Stelle. Catch-All-Slots werden für ALLE Akten-Beteiligten
+  // sichtbar — nicht mehr Admin-only-Fallback. Internal-only-Slots (ki_*,
+  // kanzlei_paket, abrechnung_intern, filmcheck_notizen) bleiben oben
+  // explizit eingeschränkt.
+  sonstiges: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  'kunde-nachreichung': ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  'gutachter-foto': ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  unfallfotos: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  sachschaden_rechnung: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
 }
 
 type WithTypKategorie = {

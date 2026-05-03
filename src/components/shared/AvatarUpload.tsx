@@ -82,7 +82,7 @@ export default function AvatarUpload({ currentUrl, initials, size = 'md', onChan
   return (
     <div className="flex items-center gap-3">
       <div
-        className={`${boxClass} rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-semibold overflow-hidden relative`}
+        className={`${boxClass} rounded-full bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo font-semibold overflow-hidden relative`}
       >
         {previewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -102,7 +102,7 @@ export default function AvatarUpload({ currentUrl, initials, size = 'md', onChan
           type="button"
           onClick={handlePick}
           disabled={isPending}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] text-xs font-medium hover:bg-[#4573A2]/5 transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-claimondo-ondo text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/5 transition-colors disabled:opacity-50"
         >
           <CameraIcon className="w-3.5 h-3.5" />
           {previewUrl ? 'Ändern' : 'Hochladen'}
@@ -112,7 +112,7 @@ export default function AvatarUpload({ currentUrl, initials, size = 'md', onChan
             type="button"
             onClick={handleRemove}
             disabled={isPending}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-gray-500 text-xs hover:text-red-600 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-claimondo-ondo text-xs hover:text-red-600 transition-colors disabled:opacity-50"
           >
             <Trash2Icon className="w-3.5 h-3.5" />
             Entfernen

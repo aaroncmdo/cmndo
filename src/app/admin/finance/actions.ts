@@ -3,21 +3,22 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function erfasseEinzahlung(formData: FormData) {
+export async function erfasseEinzahlung(
+  formData: FormData,
+): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const svId = formData.get('sv_id') as string
   const betrag = parseFloat(formData.get('betrag') as string)
   const typ = formData.get('typ') as string
   const beschreibung = formData.get('beschreibung') as string
 
-  if (!svId) throw new Error('Gutachter auswählen')
-  if (isNaN(betrag) || betrag <= 0) throw new Error('Gültigen Betrag eingeben')
-  if (!['anzahlung', 'nachzahlung', 'paketwechsel'].includes(typ)) throw new Error('Ungültiger Typ')
+  if (!svId) return { ok: false, error: 'Gutachter auswählen' }
+  if (isNaN(betrag) || betrag <= 0) return { ok: false, error: 'Gültigen Betrag eingeben' }
+  if (!['anzahlung', 'nachzahlung', 'paketwechsel'].includes(typ)) return { ok: false, error: 'Ungültiger Typ' }
 
-  // Create einzahlung record
   const { error: insertErr } = await supabase.from('gutachter_einzahlungen').insert({
     sv_id: svId,
     betrag,
@@ -25,9 +26,8 @@ export async function erfasseEinzahlung(formData: FormData) {
     beschreibung: beschreibung || null,
   })
 
-  if (insertErr) throw new Error(insertErr.message)
+  if (insertErr) return { ok: false, error: insertErr.message }
 
-  // Update gutachter werbebudget
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select('werbebudget_guthaben_netto')
@@ -42,4 +42,5 @@ export async function erfasseEinzahlung(formData: FormData) {
   }
 
   revalidatePath('/admin/finance')
+  return { ok: true }
 }

@@ -39,6 +39,8 @@ export type HeuteTerminFull = {
   schadens_ort: string | null
   // AAR-377 Kurz-Briefing (2 Zeilen in TerminCard)
   sv_briefing_text: string | null
+  // AAR-724: Noch nicht vom SV angesehen → roter Punkt auf der Card.
+  gesehen_am: string | null
 }
 
 function isoDate(d: Date): string {
@@ -79,9 +81,17 @@ export default async function HeutePage() {
   // fall_id), sonst sieht der SV den Termin bis zur SA-Unterschrift nicht.
   const { data: termine } = await supabase
     .from('gutachter_termine')
-    .select('id, fall_id, lead_id, start_zeit, end_zeit, status')
+    .select('id, fall_id, lead_id, start_zeit, end_zeit, status, gesehen_am')
     .eq('sv_id', sv.id)
-    .in('status', ['reserviert', 'bestaetigt', 'vorschlag', 'abgeschlossen'])
+    .in('status', [
+      'reserviert',
+      'bestaetigt',
+      'vorschlag',
+      'abgeschlossen',
+      // AAR-864: Verlegungs-Slots auch in Tagesansicht zeigen
+      'verlegung_pending',
+      'verlegt',
+    ])
     .gte('start_zeit', todayStart.toISOString())
     .lt('start_zeit', tomorrowStart.toISOString())
     .order('start_zeit', { ascending: true })
@@ -169,6 +179,7 @@ export default async function HeutePage() {
       schadens_plz: (fall?.schadens_plz as string) ?? (lead?.schadens_plz as string) ?? null,
       schadens_ort: (fall?.schadens_ort as string) ?? (lead?.schadens_ort as string) ?? null,
       sv_briefing_text: (fall?.sv_briefing_text as string) ?? null,
+      gesehen_am: (t.gesehen_am as string | null) ?? null,
     }
   })
 

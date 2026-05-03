@@ -29,17 +29,17 @@ type Normalized = {
 const TYP_META: Record<TerminTyp, { label: string; icon: typeof PhoneCallIcon; cls: string }> = {
   rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-gray-100 text-gray-700 border-gray-200' },
-  gutachter: { label: 'Gutachter', icon: HardHatIcon, cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
+  gutachter: { label: 'Gutachter', icon: HardHatIcon, cls: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' },
   kb_beratung: { label: 'KB-Beratung', icon: VideoIcon, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
 }
 
 const STATUS_CLS: Record<string, string> = {
-  offen: 'text-gray-600',
+  offen: 'text-claimondo-ondo',
   reserviert: 'text-amber-700',
   bestaetigt: 'text-emerald-700',
   gegenvorschlag: 'text-amber-700',
-  erledigt: 'text-gray-400 line-through',
+  erledigt: 'text-claimondo-ondo/70 line-through',
   abgelehnt: 'text-red-700 line-through',
   abgesagt: 'text-red-700 line-through',
 }
@@ -131,12 +131,12 @@ export default function TerminListeClient({
   }, [fallId, leadId, limit])
 
   if (rows === null) {
-    return <div className="bg-white rounded-xl border border-gray-200 p-4 text-xs text-gray-400">Lade Termine…</div>
+    return <div className="bg-white rounded-xl border border-claimondo-border p-4 text-xs text-claimondo-ondo/70">Lade Termine…</div>
   }
 
   if (rows.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-4 text-center text-xs text-gray-400">
+      <div className="bg-white rounded-xl border border-claimondo-border p-4 text-center text-xs text-claimondo-ondo/70">
         Keine Termine vorhanden
       </div>
     )
@@ -149,7 +149,7 @@ export default function TerminListeClient({
   return (
     <div className="space-y-3">
       {variant === 'full' && (
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">{title}</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">{title}</h3>
       )}
       {kommend.length > 0 && (
         <Gruppe label="Kommend" rows={kommend} dispatchLinks={dispatchLinks} />
@@ -163,12 +163,12 @@ export default function TerminListeClient({
 
 function Gruppe({ label, rows, muted, dispatchLinks }: { label: string; rows: Normalized[]; muted?: boolean; dispatchLinks?: boolean }) {
   return (
-    <section className={`bg-white rounded-xl border border-gray-200 ${muted ? 'opacity-80' : ''}`}>
-      <div className="px-3 py-2 border-b border-gray-100 flex items-center justify-between">
-        <h4 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">{label}</h4>
-        <span className="text-[10px] text-gray-400">{rows.length}</span>
+    <section className={`bg-white rounded-xl border border-claimondo-border ${muted ? 'opacity-80' : ''}`}>
+      <div className="px-3 py-2 border-b border-claimondo-border flex items-center justify-between">
+        <h4 className="text-[10px] font-semibold text-claimondo-ondo uppercase tracking-wide">{label}</h4>
+        <span className="text-[10px] text-claimondo-ondo/70">{rows.length}</span>
       </div>
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-claimondo-border">
         {rows.map(r => <Row key={`${r.quelle}-${r.id}`} r={r} dispatchLinks={dispatchLinks} />)}
       </div>
     </section>
@@ -189,20 +189,20 @@ function Row({ r, dispatchLinks }: { r: Normalized; dispatchLinks?: boolean }) {
   const datum = start.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 
   return (
-    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors">
+    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-[#f8f9fb] transition-colors">
       <span className={`flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full border shrink-0 ${meta.cls}`}>
         <Icon className="w-3 h-3" />
         {meta.label}
       </span>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-gray-800 truncate">{r.titel}</p>
-        <p className="text-[10px] text-gray-500 truncate">
+        <p className="text-xs font-medium text-claimondo-navy truncate">{r.titel}</p>
+        <p className="text-[10px] text-claimondo-ondo truncate">
           <span className={isOverdue ? 'text-red-600 font-medium' : ''}>{datum}</span>
           {r.kanal && ` · ${r.kanal === 'video' ? '📹' : '📞'}`}
           {r.notizen && ` · ${r.notizen}`}
         </p>
       </div>
-      <span className={`text-[10px] font-medium whitespace-nowrap ${STATUS_CLS[r.status] ?? 'text-gray-500'}`}>
+      <span className={`text-[10px] font-medium whitespace-nowrap ${STATUS_CLS[r.status] ?? 'text-claimondo-ondo'}`}>
         {r.status}
       </span>
     </Link>

@@ -8,11 +8,12 @@ import {
   CheckCircle2Icon,
   ExternalLinkIcon,
 } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 const PRIO_COLORS: Record<string, string> = {
   kritisch: 'bg-red-50 text-red-300 border-red-800',
   dringend: 'bg-amber-50 text-amber-300 border-amber-800',
-  normal: 'bg-gray-100 text-gray-700 border-gray-300',
+  normal: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border',
 }
 
 const PRIO_LABELS: Record<string, string> = {
@@ -66,13 +67,15 @@ export default async function GutachterTasksPage() {
   return (
     <div className="h-full overflow-y-auto py-6 sm:py-8">
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <ClipboardListIcon className="w-6 h-6 text-[var(--brand-accent)]" />
-          <h1 className="text-2xl font-semibold text-gray-900">Meine Tasks</h1>
-          <span className="ml-auto bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full">
-            {offeneTasks.length} offen
-          </span>
-        </div>
+        <PageHeader
+          title="Meine Tasks"
+          icon={ClipboardListIcon}
+          actions={
+            <span className="bg-[#f8f9fb] text-claimondo-navy text-xs font-medium px-2.5 py-1 rounded-full">
+              {offeneTasks.length} offen
+            </span>
+          }
+        />
 
         {/* Warnungen */}
         {ueberfaellige.length > 0 && (
@@ -86,9 +89,9 @@ export default async function GutachterTasksPage() {
 
         {/* Tasks */}
         {offeneTasks.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center">
+          <div className="bg-white border border-claimondo-border rounded-2xl p-12 text-center">
             <CheckCircle2Icon className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
-            <p className="text-gray-500 text-sm">Keine offenen Tasks. Alles erledigt!</p>
+            <p className="text-claimondo-ondo text-sm">Keine offenen Tasks. Alles erledigt!</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -99,21 +102,21 @@ export default async function GutachterTasksPage() {
                 <div
                   key={task.id}
                   className={`bg-white border rounded-2xl p-4 ${
-                    dl?.overdue ? 'border-red-800/60' : 'border-gray-200'
+                    dl?.overdue ? 'border-red-800/60' : 'border-claimondo-border'
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-gray-900 text-sm font-medium">{task.titel}</h3>
+                        <h3 className="text-claimondo-navy text-sm font-medium">{task.titel}</h3>
                         <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border ${PRIO_COLORS[prio]}`}>
                           {PRIO_LABELS[prio]}
                         </span>
                       </div>
                       {task.beschreibung && (
-                        <p className="text-gray-500 text-xs mt-1 line-clamp-2">{task.beschreibung}</p>
+                        <p className="text-claimondo-ondo text-xs mt-1 line-clamp-2">{task.beschreibung}</p>
                       )}
-                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-3 mt-2 text-xs text-claimondo-ondo">
                         {task.fall_id && fallMap[task.fall_id] && (
                           <Link
                             href={`/gutachter/fall/${task.fall_id}`}
@@ -124,7 +127,7 @@ export default async function GutachterTasksPage() {
                           </Link>
                         )}
                         {dl && (
-                          <span className={`flex items-center gap-1 ${dl.overdue ? 'text-red-400' : 'text-gray-500'}`}>
+                          <span className={`flex items-center gap-1 ${dl.overdue ? 'text-red-400' : 'text-claimondo-ondo'}`}>
                             <ClockIcon className="w-3 h-3" />
                             {dl.text}
                           </span>

@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { CalendarIcon, CheckIcon, XIcon, RefreshCwIcon, ClockIcon, AlertTriangleIcon } from 'lucide-react'
 import { terminAnnehmen, terminAblehnen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { formatDatumMitWochentag, formatUhrzeit } from '@/lib/format'
+import PageHeader from '@/components/shared/PageHeader'
+import { Modal } from '@/components/primitives/Modal'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 // KFZ-134: Gutachter Termine-Liste mit Akzeptieren/Ablehnen/Gegenvorschlag.
 
@@ -27,12 +30,12 @@ type TerminRow = {
 }
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  reserviert: { label: 'Reserviert', cls: 'bg-blue-50 text-blue-700' },
+  reserviert: { label: 'Reserviert', cls: 'bg-[#f8f9fb] text-claimondo-ondo' },
   vorschlag: { label: 'Vorschlag', cls: 'bg-amber-50 text-amber-700' },
   gegenvorschlag: { label: 'Gegenvorschlag', cls: 'bg-orange-50 text-orange-700' },
   bestaetigt: { label: 'Bestätigt', cls: 'bg-emerald-50 text-emerald-700' },
   abgelehnt: { label: 'Abgelehnt', cls: 'bg-red-50 text-red-700' },
-  storniert: { label: 'Storniert', cls: 'bg-gray-100 text-gray-500' },
+  storniert: { label: 'Storniert', cls: 'bg-[#f8f9fb] text-claimondo-ondo' },
 }
 
 // AAR-411: delegiert an die zentrale Formatter-Bibliothek.
@@ -80,53 +83,51 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
 
   return (
     <div className="px-4 py-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-            <CalendarIcon className="w-6 h-6 text-[var(--brand-secondary)]" /> Meine Termine
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">{offene.length} offen, {termine.length} gesamt</p>
-        </div>
-        <div className="inline-flex bg-gray-100 rounded-xl p-0.5 text-xs font-medium">
-          <button onClick={() => setFilter('offen')} className={`px-3 py-1.5 rounded-lg ${filter === 'offen' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-gray-500'}`}>
-            Offen ({offene.length})
-          </button>
-          <button onClick={() => setFilter('alle')} className={`px-3 py-1.5 rounded-lg ${filter === 'alle' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-gray-500'}`}>
-            Alle ({termine.length})
-          </button>
-        </div>
+      <div className="mb-6">
+        <PageHeader
+          title="Meine Termine"
+          description={`${offene.length} offen, ${termine.length} gesamt`}
+          icon={CalendarIcon}
+          size="lg"
+          actions={
+            <div className="inline-flex bg-[#f8f9fb] rounded-xl p-0.5 text-xs font-medium">
+              <button onClick={() => setFilter('offen')} className={`px-3 py-1.5 rounded-lg ${filter === 'offen' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
+                Offen ({offene.length})
+              </button>
+              <button onClick={() => setFilter('alle')} className={`px-3 py-1.5 rounded-lg ${filter === 'alle' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
+                Alle ({termine.length})
+              </button>
+            </div>
+          }
+        />
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-          <CalendarIcon className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm text-gray-500">Keine Termine in dieser Ansicht.</p>
+        <div className="bg-white rounded-2xl border border-claimondo-border p-12 text-center">
+          <CalendarIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-3" />
+          <p className="text-sm text-claimondo-ondo">Keine Termine in dieser Ansicht.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {filtered.map(t => {
-            const badge = STATUS_BADGE[t.status] ?? { label: t.status, cls: 'bg-gray-100 text-gray-600' }
+            const badge = STATUS_BADGE[t.status] ?? { label: t.status, cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
             const isKundenGegenvorschlag = t.status === 'gegenvorschlag' && t.gegenvorschlag_von === 'kunde'
             const needsAction = ['reserviert', 'vorschlag'].includes(t.status) || isKundenGegenvorschlag
             const displayDatum = t.vorgeschlagenes_datum && t.status === 'gegenvorschlag' ? t.vorgeschlagenes_datum : t.start_zeit
             return (
-              <div key={t.id} className={`bg-white rounded-2xl border p-5 ${needsAction ? 'border-[var(--brand-secondary)] ring-1 ring-[var(--brand-secondary)]/20' : 'border-gray-200'}`}>
+              <div key={t.id} className={`bg-white rounded-2xl border p-5 ${needsAction ? 'border-[var(--brand-secondary)] ring-1 ring-[var(--brand-secondary)]/20' : 'border-claimondo-border'}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="text-lg font-semibold text-gray-900">
+                      <span className="text-lg font-semibold text-claimondo-navy">
                         {formatDatum(displayDatum)} · {formatZeit(displayDatum)}
                       </span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.cls}`}>{badge.label}</span>
+                      <StatusBadge colorCls={badge.cls}>{badge.label}</StatusBadge>
                       {/* AAR-133: Vorreservierung-Badge wenn fall_id null (Pre-FlowLink) */}
-                      {t.istVorreservierung && (
-                        <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full font-medium">
-                          Vorreservierung
-                        </span>
-                      )}
-                      {needsAction && !t.istVorreservierung && <span className="text-[9px] bg-[var(--brand-secondary)] text-white px-1.5 py-0.5 rounded-full font-medium">Aktion nötig</span>}
+                      {t.istVorreservierung && <StatusBadge tone="warning">Vorreservierung</StatusBadge>}
+                      {needsAction && !t.istVorreservierung && <StatusBadge colorCls="bg-[var(--brand-secondary)] text-white">Aktion nötig</StatusBadge>}
                     </div>
-                    <p className="text-sm text-gray-700">{t.kunde_name}</p>
+                    <p className="text-sm text-claimondo-navy">{t.kunde_name}</p>
                     {t.gegenvorschlag_grund && (
                       <p className="text-xs text-amber-600 mt-1">Grund: {t.gegenvorschlag_grund}</p>
                     )}
@@ -169,41 +170,33 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
       )}
 
       {/* Ablehnen Modal */}
-      {modal?.type === 'ablehnen' && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-white rounded-2xl p-5 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <AlertTriangleIcon className="w-4 h-4 text-red-500" /> Termin ablehnen
-            </h3>
-            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
-            <div className="flex gap-2">
-              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-gray-100 text-gray-600">Abbrechen</button>
-              <button onClick={handleAblehnen} disabled={pending} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-red-600 text-white disabled:opacity-50">Ablehnen</button>
-            </div>
-          </div>
+      <Modal open={modal?.type === 'ablehnen'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Termin ablehnen">
+        <h3 className="text-sm font-semibold text-claimondo-navy mb-3 flex items-center gap-2">
+          <AlertTriangleIcon className="w-4 h-4 text-red-500" /> Termin ablehnen
+        </h3>
+        <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
+          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
+        <div className="flex gap-2">
+          <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
+          <button onClick={handleAblehnen} disabled={pending} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-red-600 text-white disabled:opacity-50">Ablehnen</button>
         </div>
-      )}
+      </Modal>
 
       {/* Gegenvorschlag Modal */}
-      {modal?.type === 'gegenvorschlag' && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setModal(null)}>
-          <div className="bg-white rounded-2xl p-5 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <RefreshCwIcon className="w-4 h-4 text-amber-500" /> Gegenvorschlag
-            </h3>
-            <input type="datetime-local" value={neuesDatum} onChange={e => setNeuesDatum(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:border-[var(--brand-secondary)]" />
-            <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
-            <div className="flex gap-2">
-              <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-gray-100 text-gray-600">Abbrechen</button>
-              <button onClick={handleGegenvorschlag} disabled={pending || !neuesDatum} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50">Vorschlagen</button>
-            </div>
-          </div>
+      <Modal open={modal?.type === 'gegenvorschlag'} onClose={() => setModal(null)} maxWidth={384} ariaLabel="Gegenvorschlag">
+        <h3 className="text-sm font-semibold text-claimondo-navy mb-3 flex items-center gap-2">
+          <RefreshCwIcon className="w-4 h-4 text-amber-500" /> Gegenvorschlag
+        </h3>
+        <input type="datetime-local" value={neuesDatum} onChange={e => setNeuesDatum(e.target.value)}
+          min={new Date().toISOString().slice(0, 16)}
+          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:border-[var(--brand-secondary)]" />
+        <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
+          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
+        <div className="flex gap-2">
+          <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
+          <button onClick={handleGegenvorschlag} disabled={pending || !neuesDatum} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50">Vorschlagen</button>
         </div>
-      )}
+      </Modal>
     </div>
   )
 }

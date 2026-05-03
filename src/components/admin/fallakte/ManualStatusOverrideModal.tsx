@@ -123,7 +123,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[#0D1B3E]">Aktueller Status</label>
-          <div className="w-full rounded-md border border-gray-200 bg-[#f8f9fb] px-3 py-2 text-sm font-mono text-gray-700">
+          <div className="w-full rounded-md border border-claimondo-border bg-[#f8f9fb] px-3 py-2 text-sm font-mono text-claimondo-navy">
             {currentStatus}
           </div>
         </div>
@@ -135,7 +135,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
           <select
             value={neuerStatus}
             onChange={(e) => setNeuerStatus(e.target.value as FallStatusValue | '')}
-            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
           >
             <option value="">– bitte wählen –</option>
             {ALLOWED_STATUS_VALUES.map((s) => (
@@ -149,16 +149,16 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[#0D1B3E]">
             Begründung <span className="text-red-600">*</span>
-            <span className="text-gray-500 font-normal ml-1">(min. 10 Zeichen)</span>
+            <span className="text-claimondo-ondo font-normal ml-1">(min. 10 Zeichen)</span>
           </label>
           <textarea
             value={begruendung}
             onChange={(e) => setBegruendung(e.target.value)}
             rows={4}
             placeholder="Warum wird der Status manuell überschrieben? (z.B. Legacy-Migration, außergerichtliche Einigung, …)"
-            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
           />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-claimondo-ondo">
             {begruendung.trim().length} / min. 10 Zeichen —{' '}
             {begruendungOk ? (
               <span className="text-emerald-700">ok</span>
@@ -175,7 +175,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
             onChange={(e) => setConfirmed(e.target.checked)}
             className="mt-0.5"
           />
-          <span className="text-xs text-gray-700">
+          <span className="text-xs text-claimondo-navy">
             Ich bestätige, dass ich die Konsequenzen dieser manuellen Status-Änderung verstehe und
             dass die State-Machine-Validierung bewusst umgangen wird.
           </span>
@@ -186,7 +186,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
             type="button"
             onClick={() => handleOpenChange(false)}
             disabled={pending}
-            className="text-sm rounded-md border border-gray-200 bg-white px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-[#f8f9fb] disabled:opacity-50"
           >
             Abbrechen
           </button>

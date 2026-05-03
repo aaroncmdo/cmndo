@@ -34,10 +34,13 @@ export async function GET(
       .select('kategorie, bezeichnung, beschreibung, geschaetzter_wert, reparaturkosten')
       .eq('fall_id', id)
       .order('sort_order'),
+    // CMM-32e: Abgelehnte Iterationen (KB-Reject) dürfen NICHT ins Kanzlei-Paket
+    // — bleiben aber in der KB-Fallakte für Audit-Zwecke sichtbar.
     supabase.from('fall_dokumente')
       .select('dokument_typ, storage_path, original_filename')
       .eq('fall_id', id)
-      .is('geloescht_am', null),
+      .is('geloescht_am', null)
+      .is('abgelehnt_am', null),
     supabase.from('parteien')
       .select('rolle, name, versicherung_name, versicherung_nr, telefon, email')
       .eq('fall_id', id),

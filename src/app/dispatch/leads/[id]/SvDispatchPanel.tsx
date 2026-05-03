@@ -32,12 +32,14 @@ import {
   type SlotMatchType,
 } from './actions'
 import type { DebugSvMatchingResponse } from '@/lib/dispatch/debugSvMatching'
+import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Modal } from '@/components/primitives/Modal'
 
 type SvWithSlots = SvSuggestion & { slots: SlotCandidate[] }
 
 const MATCH_BADGE: Record<SlotMatchType, { label: string; cls: string } | null> = {
   wunschtermin: { label: '✨ Wunschtermin', cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-  gleicher_tag: { label: '📅 Gleicher Tag', cls: 'bg-blue-100 text-blue-800 border-blue-200' },
+  gleicher_tag: { label: '📅 Gleicher Tag', cls: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
   nahe: { label: 'Nahe', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   nach: null,
 }
@@ -86,7 +88,10 @@ export default function SvDispatchPanel({
   const [showManual, setShowManual] = useState(false)
   const [startDatum, setStartDatum] = useState('')
   const [startZeit, setStartZeit] = useState('09:00')
-  const [dauerMin, setDauerMin] = useState(120)
+  // CMM-23: Termin-Dauer fix auf 45 Min — Aaron-Spec ein Termin = 45 Min.
+  // Selector raus; falls Sondertermine länger laufen müssen, kommt das als
+  // separates Feature dazu (z.B. Konfrontations-Termin via eigene Action).
+  const dauerMin = 45
   const [toast, setToast] = useState('')
   // AAR-195: Vorgeschlagene Slots für den manuell aus Extra-Liste gewählten SV
   const [freeSlots, setFreeSlots] = useState<SlotCandidate[]>([])
@@ -242,10 +247,10 @@ export default function SvDispatchPanel({
   }
 
   function handleCancel() {
-    if (!confirm('Termin wirklich stornieren? Der Lead verliert den SV-Slot.')) return
+    if (!confirm('Slot wirklich freigeben? Der Lead verliert den SV-Block.')) return
     startTransition(async () => {
       const r = await cancelSvTerminForLead(leadId)
-      setToast(r.success ? 'Termin storniert' : r.error ?? 'Fehler')
+      setToast(r.success ? 'Slot freigegeben' : r.error ?? 'Fehler')
       setTimeout(() => setToast(''), 2500)
     })
   }
@@ -279,7 +284,7 @@ export default function SvDispatchPanel({
           type="button"
           disabled={pending}
           onClick={handleCancel}
-          className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-[#4573A2] hover:bg-[#3a6290] text-white disabled:opacity-50"
+          className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-claimondo-ondo hover:bg-[#3a6290] text-white disabled:opacity-50"
         >
           Termin schließen + neuen SV wählen
         </button>
@@ -315,7 +320,7 @@ export default function SvDispatchPanel({
                 onClick={() => handleAcceptSlot(i)}
                 className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white hover:bg-emerald-50 border border-amber-200 hover:border-emerald-300 text-xs disabled:opacity-50"
               >
-                <span className="text-gray-800">
+                <span className="text-claimondo-navy">
                   Slot {i + 1}: {s.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} ·{' '}
                   {s.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} – {e.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
                 </span>
@@ -330,7 +335,7 @@ export default function SvDispatchPanel({
           type="button"
           disabled={pending}
           onClick={handleCancel}
-          className="w-full text-xs font-medium px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="w-full text-xs font-medium px-3 py-2 rounded-lg border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] disabled:opacity-50"
         >
           Stornieren + neuen SV wählen
         </button>
@@ -345,27 +350,26 @@ export default function SvDispatchPanel({
     const ende = new Date(aktiverTermin.end_zeit)
     const svName = [aktiverTermin.sv_vorname, aktiverTermin.sv_nachname].filter(Boolean).join(' ') || 'SV'
     return (
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 space-y-3">
+      <div className={`${aktiverTermin.status === 'bestaetigt' ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'} border rounded-xl p-5 space-y-3`}>
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-emerald-900 flex items-center gap-2">
-            <CalendarCheckIcon className="w-4 h-4" /> SV-Termin reserviert
+          <h2 className={`text-sm font-semibold flex items-center gap-2 ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>
+            <CalendarCheckIcon className="w-4 h-4" />
+            {aktiverTermin.status === 'bestaetigt'
+              ? 'Termin bestätigt (SA unterschrieben)'
+              : 'Slot geblockt — wartet auf SA-Unterschrift'}
           </h2>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-            aktiverTermin.status === 'bestaetigt'
-              ? 'bg-emerald-200 text-emerald-800'
-              : 'bg-amber-100 text-amber-700'
-          }`}>
-            {aktiverTermin.status === 'bestaetigt' ? 'Bestätigt' : 'Reserviert'}
-          </span>
+          <StatusBadge tone={aktiverTermin.status === 'bestaetigt' ? 'success' : 'warning'}>
+            {aktiverTermin.status === 'bestaetigt' ? 'Bestätigt' : 'Geblockt'}
+          </StatusBadge>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-[10px] text-emerald-700 uppercase">Sachverständiger</p>
-            <p className="font-medium text-emerald-900">{svName}</p>
+            <p className={`text-[10px] uppercase ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-700' : 'text-amber-700'}`}>Sachverständiger</p>
+            <p className={`font-medium ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>{svName}</p>
           </div>
           <div>
-            <p className="text-[10px] text-emerald-700 uppercase">Termin</p>
-            <p className="font-medium text-emerald-900">
+            <p className={`text-[10px] uppercase ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-700' : 'text-amber-700'}`}>Termin</p>
+            <p className={`font-medium ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>
               {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
               {' · '}
               {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
@@ -374,35 +378,43 @@ export default function SvDispatchPanel({
             </p>
           </div>
         </div>
+        {/* CMM-25: Hinweis auf Auto-Expire bei reservierten (=geblockten) Slots
+           ohne SA-Unterschrift. Bei `bestaetigt` greift der Cron-Job nicht mehr,
+           daher nur dort den Hinweis ausblenden. */}
+        {aktiverTermin.status === 'reserviert' && (
+          <p className="text-[11px] text-amber-800 bg-white/60 border border-amber-100 rounded-md px-2.5 py-1.5">
+            Auto-Expire: ohne SA-Unterschrift wird der Slot nach 1h automatisch freigegeben.
+            Manuell sofort freigeben mit dem Button unten.
+          </p>
+        )}
         <button
           disabled={pending}
           onClick={handleCancel}
           className="w-full text-xs font-medium text-red-700 hover:text-red-800 hover:bg-red-50 py-2 rounded-lg border border-red-200 flex items-center justify-center gap-2"
         >
-          <XIcon className="w-3.5 h-3.5" /> Reservierung stornieren
+          <XIcon className="w-3.5 h-3.5" />
+          {aktiverTermin.status === 'bestaetigt' ? 'Termin stornieren' : 'Slot freigeben'}
         </button>
-        {toast && <p className="text-xs text-emerald-800 text-center">{toast}</p>}
+        {toast && <p className={`text-xs text-center ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-800' : 'text-amber-800'}`}>{toast}</p>}
       </div>
     )
   }
 
   // ─── Noch kein Termin: SV-Auswahl + Zeitslot ─────────────────────────────
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-4">
+    <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-          <UserCheckIcon className="w-4 h-4 text-[#4573A2]" /> SV-Termin reservieren
+        <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
+          <UserCheckIcon className="w-4 h-4 text-claimondo-ondo" /> SV-Termin reservieren
         </h2>
         {!hardGateOk && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
-            Hard Gate erst abschließen
-          </span>
+          <StatusBadge tone="warning">Hard Gate erst abschließen</StatusBadge>
         )}
       </div>
 
       {!hardGateOk ? (
         <div className="space-y-2">
-          <p className="text-xs text-gray-500 flex items-start gap-2">
+          <p className="text-xs text-claimondo-ondo flex items-start gap-2">
             <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             Folgende Punkte in Schritt 0 (Hard Gate) müssen noch beantwortet werden:
           </p>
@@ -432,21 +444,24 @@ export default function SvDispatchPanel({
       ) : (
         <>
           {/* AAR-zz-SV-Trigger: Initial-CTA wenn Suche noch nicht getriggert wurde.
-              Dispatcher klickt bewusst — keine Auto-Suche beim Mount mehr. */}
-          {topSuggestions === null && !topLoading && !loadError && (
+              Dispatcher klickt bewusst — keine Auto-Suche beim Mount mehr.
+              AAR-696: bei Error bleibt der Button sichtbar (als „Erneut
+              suchen"), damit der Dispatcher nach dem Fix noch einmal
+              triggern kann ohne die Sektion zu verlieren. */}
+          {topSuggestions === null && !topLoading && (
             <button
               type="button"
               onClick={triggerSearch}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#4573A2] hover:bg-[#3a6290] text-white text-sm font-medium"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-claimondo-ondo hover:bg-[#3a6290] text-white text-sm font-medium"
             >
               <SearchIcon className="w-4 h-4" />
-              Gutachter suchen
+              {loadError ? 'Erneut suchen' : 'Gutachter suchen'}
             </button>
           )}
 
           {topLoading && (
-            <p className="text-xs text-gray-500 flex items-center gap-2">
-              <span className="inline-block w-3 h-3 rounded-full bg-[#4573A2] animate-pulse" />
+            <p className="text-xs text-claimondo-ondo flex items-center gap-2">
+              <span className="inline-block w-3 h-3 rounded-full bg-claimondo-ondo animate-pulse" />
               Suche passende Gutachter …
             </p>
           )}
@@ -474,14 +489,14 @@ export default function SvDispatchPanel({
           {topSuggestions && topSuggestions.length > 0 && !showManual && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] text-gray-500 uppercase font-medium">
+                <p className="text-[10px] text-claimondo-ondo uppercase font-medium">
                   {topSuggestions.length} Vorschläge · Klick auf Slot reserviert sofort
                 </p>
                 <button
                   type="button"
                   onClick={triggerSearch}
                   disabled={pending || topLoading}
-                  className="text-[10px] text-[#4573A2] hover:text-[#3a6290] flex items-center gap-1"
+                  className="text-[10px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
                 >
                   <RefreshCwIcon className="w-3 h-3" /> neu suchen
                 </button>
@@ -510,7 +525,7 @@ export default function SvDispatchPanel({
                     type="button"
                     onClick={loadExtraSvs}
                     disabled={extraLoading}
-                    className="text-[11px] text-[#4573A2] hover:underline flex items-center gap-1"
+                    className="text-[11px] text-claimondo-ondo hover:underline flex items-center gap-1"
                   >
                     <MapPinIcon className="w-3 h-3" />
                     {extraLoading ? 'Lade …' : '+ Weitere SVs anzeigen'}
@@ -519,7 +534,7 @@ export default function SvDispatchPanel({
                 <button
                   type="button"
                   onClick={() => setShowManual(true)}
-                  className="text-[11px] text-gray-500 hover:underline flex items-center gap-1"
+                  className="text-[11px] text-claimondo-ondo hover:underline flex items-center gap-1"
                 >
                   <ClockIcon className="w-3 h-3" />
                   Manuelle Zeit-Auswahl
@@ -528,8 +543,8 @@ export default function SvDispatchPanel({
 
               {/* Extra-Liste (SV 4-8 ohne inline Slots) */}
               {extraSuggestions && extraSuggestions.length > 0 && (
-                <div className="border-t border-gray-100 pt-2 space-y-1.5">
-                  <p className="text-[10px] text-gray-500 uppercase font-medium">
+                <div className="border-t border-claimondo-border pt-2 space-y-1.5">
+                  <p className="text-[10px] text-claimondo-ondo uppercase font-medium">
                     Weitere Kandidaten
                   </p>
                   <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
@@ -542,23 +557,19 @@ export default function SvDispatchPanel({
                           onClick={() => setSelectedSv(s)}
                           className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
                             isSel
-                              ? 'bg-[#0D1B3E] text-white border-[#0D1B3E]'
-                              : 'bg-white border-gray-200 hover:border-[#4573A2] hover:bg-blue-50'
+                              ? 'bg-claimondo-navy text-white border-claimondo-navy'
+                              : 'bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-[#f8f9fb]'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-sm font-medium">{s.name}</span>
-                            <span
-                              className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                                isSel ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'
-                              }`}
-                            >
+                            <StatusBadge colorCls={isSel ? 'bg-white/20 text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}>
                               {s.paket}
-                            </span>
+                            </StatusBadge>
                           </div>
                           <div
                             className={`flex items-center gap-3 mt-1 text-[11px] ${
-                              isSel ? 'text-white/80' : 'text-gray-500'
+                              isSel ? 'text-white/80' : 'text-claimondo-ondo'
                             }`}
                           >
                             <span>{s.distanzKm.toFixed(1)} km</span>
@@ -572,7 +583,7 @@ export default function SvDispatchPanel({
                 </div>
               )}
               {extraSuggestions && extraSuggestions.length === 0 && (
-                <p className="text-[11px] text-gray-400 italic">
+                <p className="text-[11px] text-claimondo-ondo/70 italic">
                   Keine weiteren Kandidaten in Reichweite.
                 </p>
               )}
@@ -581,24 +592,24 @@ export default function SvDispatchPanel({
 
           {/* Slot-Auswahl für Extra-SV (kein inline Cache → lade nach) */}
           {selectedSv && !topSuggestions?.some((t) => t.svId === selectedSv.svId) && !showManual && (
-            <div className="space-y-3 border-t border-gray-200 pt-4">
+            <div className="space-y-3 border-t border-claimondo-border pt-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <ClockIcon className="w-4 h-4 text-gray-400" />
-                  <p className="text-xs font-medium text-gray-700">
-                    Slots bei <span className="text-[#0D1B3E]">{selectedSv.name}</span>
+                  <ClockIcon className="w-4 h-4 text-claimondo-ondo/70" />
+                  <p className="text-xs font-medium text-claimondo-navy">
+                    Slots bei <span className="text-claimondo-navy">{selectedSv.name}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedSv(null)}
-                  className="text-[10px] text-[#4573A2] hover:underline"
+                  className="text-[10px] text-claimondo-ondo hover:underline"
                 >
                   Zurück
                 </button>
               </div>
               {slotsLoading ? (
-                <p className="text-[11px] text-gray-400 italic">Lade Slots …</p>
+                <p className="text-[11px] text-claimondo-ondo/70 italic">Lade Slots …</p>
               ) : freeSlots.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {freeSlots.map((slot) => (
@@ -611,7 +622,7 @@ export default function SvDispatchPanel({
                   ))}
                 </div>
               ) : (
-                <p className="text-[11px] text-gray-400 italic">
+                <p className="text-[11px] text-claimondo-ondo/70 italic">
                   Keine Slots verfügbar — Manuelle Zeit-Auswahl nutzen.
                 </p>
               )}
@@ -620,23 +631,23 @@ export default function SvDispatchPanel({
 
           {/* Manuelle Zeit-Auswahl (Toggle) */}
           {showManual && (
-            <div className="space-y-3 border-t border-gray-200 pt-4">
+            <div className="space-y-3 border-t border-claimondo-border pt-4">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-medium text-gray-700">Manuelle Zeit-Auswahl</p>
+                <p className="text-xs font-medium text-claimondo-navy">Manuelle Zeit-Auswahl</p>
                 <button
                   type="button"
                   onClick={() => {
                     setShowManual(false)
                     setSelectedSv(null)
                   }}
-                  className="text-[10px] text-[#4573A2] hover:underline"
+                  className="text-[10px] text-claimondo-ondo hover:underline"
                 >
                   Zurück zu Vorschlägen
                 </button>
               </div>
               {!selectedSv && topSuggestions && (
                 <div className="space-y-1.5">
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider">
+                  <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider">
                     SV auswählen
                   </p>
                   <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
@@ -646,10 +657,10 @@ export default function SvDispatchPanel({
                           key={s.svId}
                           type="button"
                           onClick={() => setSelectedSv(s)}
-                          className="w-full text-left px-3 py-2 rounded-lg border bg-white border-gray-200 hover:border-[#4573A2] hover:bg-blue-50 transition-colors"
+                          className="w-full text-left px-3 py-2 rounded-lg border bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-[#f8f9fb] transition-colors"
                         >
                           <span className="text-sm font-medium">{s.name}</span>
-                          <span className="ml-2 text-[10px] text-gray-500">
+                          <span className="ml-2 text-[10px] text-claimondo-ondo">
                             {s.distanzKm.toFixed(1)} km · {s.kontingentFrei} frei
                           </span>
                         </button>
@@ -660,7 +671,7 @@ export default function SvDispatchPanel({
               )}
               {selectedSv && (
                 <>
-                  <p className="text-[11px] text-gray-600">
+                  <p className="text-[11px] text-claimondo-ondo">
                     Termin bei <span className="font-medium">{selectedSv.name}</span>
                   </p>
                   <div className="grid grid-cols-3 gap-2">
@@ -668,27 +679,16 @@ export default function SvDispatchPanel({
                       type="date"
                       value={startDatum}
                       onChange={(e) => setStartDatum(e.target.value)}
-                      className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                      className="px-3 py-2 border border-claimondo-border rounded-lg text-sm"
                     />
                     <input
                       type="time"
                       value={startZeit}
                       onChange={(e) => setStartZeit(e.target.value)}
-                      className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                      className="px-3 py-2 border border-claimondo-border rounded-lg text-sm"
                       step={900}
                     />
-                    <select
-                      value={dauerMin}
-                      onChange={(e) => setDauerMin(Number(e.target.value))}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm appearance-none bg-white"
-                    >
-                      <option value={60}>60 min</option>
-                      <option value={90}>90 min</option>
-                      <option value={120}>120 min</option>
-                      <option value={150}>150 min</option>
-                      <option value={180}>180 min</option>
-                      <option value={240}>240 min</option>
-                    </select>
+                    {/* CMM-23: Dauer-Selector raus — Termin = fix 45 Min. */}
                   </div>
                   <button
                     type="button"
@@ -714,27 +714,20 @@ export default function SvDispatchPanel({
         </>
       )}
 
-      {debugOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-          onClick={() => setDebugOpen(false)}
-        >
-          <div
-            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200">
-              <h3 className="text-sm font-semibold text-[#0D1B3E]">SV-Matching Debug</h3>
+      <Modal open={debugOpen} onClose={() => setDebugOpen(false)} noPadding hideCloseButton maxWidth={672} ariaLabel="SV-Matching Debug">
+        <div className="max-h-[85vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border">
+              <h3 className="text-sm font-semibold text-claimondo-navy">SV-Matching Debug</h3>
               <button
                 type="button"
                 onClick={() => setDebugOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-claimondo-ondo/70 hover:text-claimondo-ondo"
               >
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
             <div className="overflow-y-auto px-5 py-3 space-y-3">
-              {debugLoading && <p className="text-xs text-gray-500">Lade Debug-Daten…</p>}
+              {debugLoading && <p className="text-xs text-claimondo-ondo">Lade Debug-Daten…</p>}
               {debugError && (
                 <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg p-2">
                   {debugError}
@@ -742,7 +735,7 @@ export default function SvDispatchPanel({
               )}
               {debugData && (
                 <>
-                  <div className="text-xs text-gray-600 bg-gray-50 rounded-lg p-2">
+                  <div className="text-xs text-claimondo-ondo bg-[#f8f9fb] rounded-lg p-2">
                     <div>Fall-Koordinaten: {debugData.fallLat.toFixed(5)}, {debugData.fallLng.toFixed(5)}</div>
                     <div>
                       {debugData.passend} von {debugData.gesamt} aktiven SVs passen.
@@ -757,20 +750,18 @@ export default function SvDispatchPanel({
                           className={`text-xs rounded-lg border p-2 ${
                             ok
                               ? 'border-emerald-200 bg-emerald-50'
-                              : 'border-gray-200 bg-white'
+                              : 'border-claimondo-border bg-white'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-medium text-[#0D1B3E]">{r.name}</span>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                              {r.paket}
-                            </span>
+                            <span className="font-medium text-claimondo-navy">{r.name}</span>
+                            <StatusBadge tone="neutral">{r.paket}</StatusBadge>
                           </div>
-                          <div className={`mt-0.5 ${ok ? 'text-emerald-800' : 'text-gray-700'}`}>
+                          <div className={`mt-0.5 ${ok ? 'text-emerald-800' : 'text-claimondo-navy'}`}>
                             {ok ? '✓ ' : '✕ '}
                             {r.grund}
                           </div>
-                          <div className="mt-1 text-[10px] text-gray-500 flex flex-wrap gap-x-2 gap-y-0.5">
+                          <div className="mt-1 text-[10px] text-claimondo-ondo flex flex-wrap gap-x-2 gap-y-0.5">
                             <span>Distanz: {r.distanzKm != null ? `${r.distanzKm}km` : '—'}</span>
                             <span>Radius: {r.radius}km</span>
                             <span>Kontingent frei: {r.kontingentFrei}</span>
@@ -792,9 +783,8 @@ export default function SvDispatchPanel({
                 </>
               )}
             </div>
-          </div>
         </div>
-      )}
+      </Modal>
     </div>
   )
 }
@@ -823,29 +813,27 @@ function SvCard({
       className={`rounded-lg border p-3 space-y-2 ${
         isEmpfehlung
           ? 'border-amber-300 bg-amber-50/40 shadow-sm ring-1 ring-amber-200'
-          : 'border-gray-200 bg-white'
+          : 'border-claimondo-border bg-white'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-medium text-[#0D1B3E] truncate">{sv.name}</p>
+            <p className="text-sm font-medium text-claimondo-navy truncate">{sv.name}</p>
             {isEmpfehlung && (
-              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-white font-semibold shrink-0">
+              <StatusBadge colorCls="bg-amber-500 text-white font-semibold">
                 ★ Empfehlung
-              </span>
+              </StatusBadge>
             )}
           </div>
-          <div className="flex items-center gap-3 mt-0.5 text-[11px] text-gray-500">
+          <div className="flex items-center gap-3 mt-0.5 text-[11px] text-claimondo-ondo">
             <span>{sv.distanzKm.toFixed(1)} km</span>
             <span>Score {sv.score.toFixed(1)}</span>
             <span>{sv.kontingentFrei} frei</span>
             {sv.offeneFaelle > 0 && <span>{sv.offeneFaelle} offen</span>}
           </div>
         </div>
-        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium whitespace-nowrap shrink-0">
-          {sv.paket}
-        </span>
+        <StatusBadge tone="neutral" className="whitespace-nowrap shrink-0">{sv.paket}</StatusBadge>
       </div>
 
       {/* Wunschtermin-Indikator auf Card-Ebene */}
@@ -911,7 +899,7 @@ function SlotKachel({
         <CalendarCheckIcon className="w-3 h-3" />
         {tag}
       </span>
-      <span className="text-[11px] text-gray-700">
+      <span className="text-[11px] text-claimondo-navy">
         {von} – {bis}
       </span>
     </button>

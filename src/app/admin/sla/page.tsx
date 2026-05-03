@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { AlertTriangleIcon, ClockIcon, CheckCircleIcon } from 'lucide-react'
 import { SLA_LABEL, type SlaTyp } from '@/lib/sla/tracker'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,12 +28,10 @@ export default async function SlaMonitoringPage() {
 
   return (
     <div className="py-6 space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">SLA-Monitoring</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Pipeline-Fristen ab SA-Unterschrift. Cron alle 15 Min, automatische Eskalations-Tasks bei Verletzung.
-        </p>
-      </div>
+      <PageHeader
+        title="SLA-Monitoring"
+        description="Pipeline-Fristen ab SA-Unterschrift. Cron alle 15 Min, automatische Eskalations-Tasks bei Verletzung."
+      />
 
       {/* KPI-Boxen */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -50,20 +49,20 @@ export default async function SlaMonitoringPage() {
           </div>
           <p className="text-3xl font-bold text-amber-900 mt-2">{atRisk.length}</p>
         </div>
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-blue-700">
+        <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
+          <div className="flex items-center gap-2 text-claimondo-ondo">
             <CheckCircleIcon className="w-5 h-5" />
             <span className="text-xs font-semibold uppercase">Offen</span>
           </div>
-          <p className="text-3xl font-bold text-blue-900 mt-2">{pending.length}</p>
+          <p className="text-3xl font-bold text-claimondo-navy mt-2">{pending.length}</p>
         </div>
       </div>
 
       {/* Tabelle */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr className="text-xs uppercase text-gray-500">
+          <thead className="bg-[#f8f9fb]">
+            <tr className="text-xs uppercase text-claimondo-ondo">
               <th className="text-left px-4 py-3">Fall</th>
               <th className="text-left px-4 py-3">SLA-Typ</th>
               <th className="text-left px-4 py-3">Frist</th>
@@ -71,7 +70,7 @@ export default async function SlaMonitoringPage() {
               <th className="text-left px-4 py-3">Aktion</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-claimondo-border">
             {(slas ?? []).map((sla) => {
               const fallJoin = sla.faelle as unknown as { fall_nummer: string | null } | { fall_nummer: string | null }[] | null
               const fallRow = Array.isArray(fallJoin) ? fallJoin[0] : fallJoin
@@ -87,12 +86,12 @@ export default async function SlaMonitoringPage() {
                       {fallNr}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{SLA_LABEL[sla.sla_typ as SlaTyp]}</td>
-                  <td className="px-4 py-3 text-gray-500">
+                  <td className="px-4 py-3 text-claimondo-navy">{SLA_LABEL[sla.sla_typ as SlaTyp]}</td>
+                  <td className="px-4 py-3 text-claimondo-ondo">
                     {breach.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     {!isBreached && (
-                      <span className={`ml-2 text-xs ${restMin < 30 ? 'text-amber-600 font-medium' : 'text-gray-400'}`}>
-                        {restMin > 0 ? `noch ${restMin} Min` : 'ueberfaellig'}
+                      <span className={`ml-2 text-xs ${restMin < 30 ? 'text-amber-600 font-medium' : 'text-claimondo-ondo/70'}`}>
+                        {restMin > 0 ? `noch ${restMin} Min` : 'überfällig'}
                       </span>
                     )}
                   </td>
@@ -102,7 +101,7 @@ export default async function SlaMonitoringPage() {
                     ) : restMin < 30 ? (
                       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Risiko</span>
                     ) : (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Offen</span>
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo">Offen</span>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -111,7 +110,7 @@ export default async function SlaMonitoringPage() {
                         Task ansehen
                       </Link>
                     ) : (
-                      <span className="text-xs text-gray-300">—</span>
+                      <span className="text-xs text-claimondo-ondo/50">—</span>
                     )}
                   </td>
                 </tr>
@@ -119,7 +118,7 @@ export default async function SlaMonitoringPage() {
             })}
             {(!slas || slas.length === 0) && (
               <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-gray-400 text-sm">
+                <td colSpan={5} className="px-4 py-12 text-center text-claimondo-ondo/70 text-sm">
                   Aktuell keine offenen oder verletzten SLAs
                 </td>
               </tr>
