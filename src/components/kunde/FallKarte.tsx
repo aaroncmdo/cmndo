@@ -1,11 +1,9 @@
 'use client'
 
-// CMM-32 Polish: FallKarte mit Brand-Hero (dunkler Gradient + Markenlogo in
-// Originalfarben + Glow-Effekt) + 4-Phasen-Progress + 3D-Kennzeichenhalter.
+// CMM-32 Polish: FallKarte — kompakter Header mit Logo-Square (wie ClaimSummary)
+// + 4-Phasen-Progress + 3D-Kennzeichenhalter. Kein großer Hero-Bereich mehr.
 
-import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   CheckIcon,
   ClockIcon,
@@ -13,125 +11,10 @@ import {
   AlertTriangleIcon,
   ChevronRightIcon,
   CircleCheckIcon,
-  CarIcon,
 } from 'lucide-react'
 import Kennzeichenhalter from './Kennzeichenhalter'
+import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import type { KundeAktion } from '@/lib/kunde/jetzt-zu-tun'
-
-// SimpleIcons-Slug-Map (ohne Farb-Override → echte Brand-Farben)
-const SI_SLUG: Record<string, string | null> = {
-  audi:            'audi',
-  bmw:             'bmw',
-  mercedes:        'mercedes',
-  'mercedes-benz': 'mercedes',
-  volkswagen:      'volkswagen',
-  vw:              'volkswagen',
-  porsche:         'porsche',
-  ford:            'ford',
-  toyota:          'toyota',
-  honda:           'honda',
-  hyundai:         'hyundai',
-  kia:             'kia',
-  renault:         'renault',
-  peugeot:         'peugeot',
-  citroen:         'citroen',
-  fiat:            'fiat',
-  seat:            'seat',
-  skoda:           'skoda',
-  cupra:           'cupra',
-  volvo:           'volvo',
-  mazda:           'mazda',
-  nissan:          'nissan',
-  mitsubishi:      'mitsubishi',
-  suzuki:          'suzuki',
-  tesla:           'tesla',
-  mini:            'mini',
-  'land rover':    'landrover',
-  jaguar:          'jaguar',
-  'alfa romeo':    'alfaromeo',
-  lexus:           'lexus',
-  infiniti:        'infiniti',
-  jeep:            'jeep',
-  chevrolet:       'chevrolet',
-  ferrari:         'ferrari',
-  maserati:        'maserati',
-  opel:            null,
-  smart:           null,
-  dacia:           null,
-  subaru:          null,
-}
-
-const CLEARBIT_DOMAIN: Record<string, string> = {
-  opel:    'opel.com',
-  smart:   'smart.com',
-  dacia:   'dacia.com',
-  subaru:  'subaru.com',
-}
-
-// ─── Brand-Hero-Image ─────────────────────────────────────────────────────────
-// Läuft auf dunklem Hintergrund. SimpleIcons ohne Farb-Override → originale
-// Brand-Farben. Glow via CSS drop-shadow filter.
-
-function BrandHeroImage({ hersteller }: { hersteller: string | null }) {
-  const [failed, setFailed] = useState(false)
-  const [siOk, setSiOk] = useState(true)
-
-  if (!hersteller) {
-    return <CarIcon className="w-14 h-14 text-white/30" />
-  }
-
-  const key = hersteller.toLowerCase().trim()
-  const siSlug = key in SI_SLUG ? SI_SLUG[key] : null
-  // Keine Farbe angeben → SimpleIcons liefert echte Brand-Farben (SVG)
-  const siUrl = siSlug ? `https://cdn.simpleicons.org/${siSlug}` : null
-  const clearbitDomain = CLEARBIT_DOMAIN[key] ?? null
-  const clearbitUrl = clearbitDomain ? `https://logo.clearbit.com/${clearbitDomain}` : null
-
-  if (!failed && siOk && siUrl) {
-    return (
-      <Image
-        src={siUrl}
-        alt={`${hersteller} Logo`}
-        width={80}
-        height={80}
-        unoptimized
-        className="object-contain"
-        style={{
-          // Glow-Effekt: macht das Logo leuchtend auf dem dunklen BG
-          filter: 'drop-shadow(0 0 18px rgba(255,255,255,0.35)) drop-shadow(0 0 6px rgba(255,255,255,0.55)) brightness(1.15)',
-        }}
-        onError={() => setSiOk(false)}
-      />
-    )
-  }
-
-  if (!failed && clearbitUrl) {
-    return (
-      <Image
-        src={clearbitUrl}
-        alt={`${hersteller} Logo`}
-        width={72}
-        height={72}
-        unoptimized
-        className="object-contain rounded-lg"
-        style={{
-          filter: 'drop-shadow(0 0 16px rgba(255,255,255,0.30)) brightness(1.1)',
-        }}
-        onError={() => setFailed(true)}
-      />
-    )
-  }
-
-  // Fallback: Car-Icon + Hersteller-Initial
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <CarIcon className="w-10 h-10 text-white/40" />
-      <span className="text-[11px] font-semibold text-white/50 tracking-widest uppercase">
-        {hersteller.slice(0, 3)}
-      </span>
-    </div>
-  )
-}
 
 // ─── Typen ────────────────────────────────────────────────────────────────────
 
@@ -259,113 +142,90 @@ export default function FallKarte({
   return (
     <Link
       href={`/kunde/faelle/${fall.id}`}
-      className="block rounded-3xl overflow-hidden shadow-[0_2px_12px_rgba(13,27,62,0.08),0_8px_32px_rgba(13,27,62,0.06)] border border-claimondo-border/50 transition-all hover:shadow-[0_6px_24px_rgba(13,27,62,0.14),0_16px_48px_rgba(13,27,62,0.10)] hover:-translate-y-0.5 active:scale-[0.99]"
+      className="block rounded-2xl overflow-hidden bg-white border border-claimondo-border transition-all hover:-translate-y-0.5 active:scale-[0.99]"
+      style={{
+        boxShadow: [
+          /* Glas-Kante oben + links — weißer Inset-Highlight */
+          'inset 0 1px 0 rgba(255,255,255,0.95)',
+          'inset 1px 0 0 rgba(255,255,255,0.65)',
+          /* Glas-Kante unten + rechts — subtile Abdunkelung */
+          'inset 0 -1px 0 rgba(13,27,62,0.06)',
+          'inset -1px 0 0 rgba(13,27,62,0.04)',
+          /* Outer Drop-Shadow */
+          '0 2px 12px rgba(13,27,62,0.07)',
+          '0 6px 24px rgba(13,27,62,0.05)',
+        ].join(', '),
+      }}
     >
-      {/* ── Hero: Markenlogo auf Werkstatt-Hintergrund ── */}
-      <div
-        className="relative h-[140px] flex items-center justify-center overflow-hidden"
-        style={{
-          /* Werkstatt-Atmosphäre: dunkle Halle mit Overhead-Deckenstrahler */
-          background: [
-            /* Deckenstrahler links */
-            'radial-gradient(ellipse 55% 100% at 18% -10%, rgba(255,220,140,0.18) 0%, transparent 55%)',
-            /* Deckenstrahler mitte (direkt über Logo) */
-            'radial-gradient(ellipse 50% 90% at 50% -10%, rgba(255,235,180,0.14) 0%, transparent 55%)',
-            /* Deckenstrahler rechts */
-            'radial-gradient(ellipse 55% 100% at 82% -10%, rgba(255,220,140,0.16) 0%, transparent 55%)',
-            /* Boden-Reflex: glänzender Betonboden spiegelt Licht zurück */
-            'radial-gradient(ellipse 80% 35% at 50% 110%, rgba(80,110,170,0.22) 0%, transparent 70%)',
-            /* Seitenwände: leicht heller als Decke */
-            'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, transparent 25%, transparent 75%, rgba(255,255,255,0.03) 100%)',
-            /* Basis: fast schwarz, dunkler als normales navy */
-            'linear-gradient(180deg, #080c14 0%, #0a0f1c 50%, #060810 100%)',
-          ].join(', '),
-        }}
-      >
-        {/* Leuchtstreifen an der Decke: schmale Linie oben = Neonröhre */}
+      {/* ── Header: Logo-Square + Fahrzeuginfo + Phase-Dots ── */}
+      <div className="px-4 py-4 flex items-center gap-3 border-b border-claimondo-navy/10 bg-[#f8f9fb]">
+        {/* Logo-Square — gleiche Sprache wie ClaimSummary-Header */}
         <div
-          className="absolute top-0 inset-x-0"
-          style={{
-            height: '2px',
-            background: 'linear-gradient(90deg, transparent 5%, rgba(255,230,150,0.4) 30%, rgba(255,240,180,0.55) 50%, rgba(255,230,150,0.4) 70%, transparent 95%)',
-          }}
-        />
-        {/* Boden-Lichtlinie: Spiegelung der Neonröhre */}
-        <div
-          className="absolute bottom-0 inset-x-0"
-          style={{
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent 15%, rgba(80,110,200,0.25) 40%, rgba(100,130,220,0.30) 50%, rgba(80,110,200,0.25) 60%, transparent 85%)',
-          }}
-        />
-        {/* Bodenseitige Aufhellung für Übergang zum weißen Card-Body */}
-        <div
-          className="absolute bottom-0 inset-x-0 h-10"
-          style={{
-            background: 'linear-gradient(to top, rgba(248,249,251,0.10) 0%, transparent 100%)',
-          }}
-        />
-
-        {/* Logo */}
-        <div className="relative z-10 flex items-center justify-center">
-          <BrandHeroImage hersteller={fall.fahrzeug_hersteller} />
+          className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #0D1B3E 0%, #14254f 100%)' }}
+        >
+          <FahrzeugRenderImage
+            hersteller={fall.fahrzeug_hersteller}
+            modell={fall.fahrzeug_modell}
+            lackfarbe={null}
+            width={44}
+            dark
+          />
         </div>
 
-        {/* Phase-Dots top-right */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 z-10">
-          {PHASEN.map((phase, idx) => {
-            const done   = idx < aktiveIdx
-            const active = idx === aktiveIdx
-            return (
-              <div key={phase.key} className="flex items-center gap-1">
-                {idx > 0 && (
-                  <div
-                    className={`w-2.5 h-px rounded-full ${
-                      done || active ? 'bg-white/60' : 'bg-white/20'
-                    }`}
-                  />
-                )}
-                <div
-                  className={`rounded-full flex items-center justify-center transition-all ${
-                    done
-                      ? 'w-3 h-3 bg-white/80'
-                      : active
-                        ? 'w-3 h-3 bg-white ring-2 ring-white/30'
-                        : 'w-2 h-2 bg-white/20'
-                  }`}
-                  title={phase.label}
-                >
-                  {done && <CheckIcon className="w-1.5 h-1.5 text-claimondo-navy" strokeWidth={3.5} />}
-                </div>
-              </div>
-            )
-          })}
+        {/* Fahrzeuginfo */}
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold truncate">
+            {fall.fall_nummer ?? fall.id.slice(0, 8)}
+          </p>
+          <p className="text-sm font-bold text-claimondo-navy leading-tight truncate">
+            {fahrzeug || 'Fahrzeug'}
+          </p>
+          {fall.schadens_datum && (
+            <p className="text-[11px] text-claimondo-ondo/60 mt-0.5">
+              Unfall {new Date(fall.schadens_datum).toLocaleDateString('de-DE')}
+            </p>
+          )}
         </div>
 
-        {/* Ungelesene-Badge top-left */}
-        {typeof ungeleseneNachrichten === 'number' && ungeleseneNachrichten > 0 && (
-          <div className="absolute top-3 left-3 z-10">
+        {/* Rechts: Ungelesene-Badge + Phase-Dots */}
+        <div className="shrink-0 flex flex-col items-end gap-2">
+          {typeof ungeleseneNachrichten === 'number' && ungeleseneNachrichten > 0 && (
             <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold bg-claimondo-ondo text-white leading-none">
               {ungeleseneNachrichten}
             </span>
+          )}
+          {/* Phase-Dots — navy auf hellem BG */}
+          <div className="flex items-center gap-0.5">
+            {PHASEN.map((phase, idx) => {
+              const done   = idx < aktiveIdx
+              const active = idx === aktiveIdx
+              return (
+                <div key={phase.key} className="flex items-center gap-0.5">
+                  {idx > 0 && (
+                    <div className={`w-2.5 h-px rounded-full ${done || active ? 'bg-claimondo-navy/50' : 'bg-claimondo-border'}`} />
+                  )}
+                  <div
+                    className={`rounded-full flex items-center justify-center transition-all ${
+                      done
+                        ? 'w-3 h-3 bg-claimondo-navy'
+                        : active
+                          ? 'w-3 h-3 bg-claimondo-navy ring-2 ring-claimondo-navy/20'
+                          : 'w-2 h-2 bg-claimondo-border'
+                    }`}
+                    title={phase.label}
+                  >
+                    {done && <CheckIcon className="w-1.5 h-1.5 text-white" strokeWidth={3.5} />}
+                  </div>
+                </div>
+              )
+            })}
           </div>
-        )}
-
-        {/* Fall-Nummer bottom-left */}
-        <div className="absolute bottom-2.5 left-3.5 z-10">
-          <p className="text-[10px] font-semibold text-white/50 tracking-wide">
-            {fall.fall_nummer ?? fall.id.slice(0, 8)}
-          </p>
         </div>
       </div>
 
-      {/* ── Body: Kennzeichen + Fahrzeugname ── */}
-      <div
-        className="px-4 pt-4 pb-3 space-y-3"
-        style={{
-          background: 'linear-gradient(180deg, #f8f9fb 0%, #ffffff 40%)',
-        }}
-      >
+      {/* ── Body: Kennzeichenhalter + Termin ── */}
+      <div className="px-4 pt-4 pb-3 space-y-3">
         {fall.kennzeichen && (
           <div className="flex justify-center">
             <Kennzeichenhalter
@@ -377,17 +237,6 @@ export default function FallKarte({
             />
           </div>
         )}
-
-        <div className="text-center space-y-0.5">
-          {fahrzeug && (
-            <p className="text-sm font-semibold text-claimondo-navy leading-tight">{fahrzeug}</p>
-          )}
-          {fall.schadens_datum && (
-            <p className="text-[11px] text-claimondo-ondo/60">
-              Unfall {new Date(fall.schadens_datum).toLocaleDateString('de-DE')}
-            </p>
-          )}
-        </div>
 
         {/* Nächster Termin */}
         {nextTermin && !abgeschlossen && (

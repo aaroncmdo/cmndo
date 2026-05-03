@@ -137,7 +137,19 @@ export default function ClaimSummary({
   const subtitelTeile = [data.claim_nummer, data.kennzeichen].filter(Boolean)
 
   return (
-    <section className="rounded-2xl bg-white border border-claimondo-border overflow-hidden">
+    <section
+      className="rounded-2xl bg-white border border-claimondo-border overflow-hidden"
+      style={{
+        boxShadow: [
+          'inset 0 1px 0 rgba(255,255,255,0.95)',
+          'inset 1px 0 0 rgba(255,255,255,0.65)',
+          'inset 0 -1px 0 rgba(13,27,62,0.06)',
+          'inset -1px 0 0 rgba(13,27,62,0.04)',
+          '0 2px 16px rgba(13,27,62,0.07)',
+          '0 8px 32px rgba(13,27,62,0.05)',
+        ].join(', '),
+      }}
+    >
       {/* Header — gleiche Sprache wie ClaimStepper */}
       <header className="px-4 sm:px-6 py-4 sm:py-5 border-b border-claimondo-navy/10 flex items-center gap-3">
         <div className="flex-1 min-w-0">
