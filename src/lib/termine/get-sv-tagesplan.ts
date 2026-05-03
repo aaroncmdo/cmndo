@@ -19,9 +19,10 @@ export type TagesplanTermin = {
 
 /**
  * Lädt alle aktiven Termine eines SV im Zeitfenster, sortiert nach
- * start_zeit. "Aktiv" = bestaetigt | verlegung_pending. verlegt-Slots
- * sind absichtlich draußen — sie blocken zwar den Slot im SV-Kalender,
- * sind aber für die Routen-Planung des neuen Vorschlags irrelevant.
+ * start_zeit. "Aktiv" = bestaetigt | reserviert | verlegung_pending.
+ * verlegt-Slots sind absichtlich draußen — sie blocken zwar den Slot im
+ * SV-Kalender, sind aber für die Routen-Planung des neuen Vorschlags
+ * irrelevant (istSlotFrei fängt sie beim Submit ab).
  *
  * Adresse wird zu einem String komponiert: "<strasse>, <plz> <ort>".
  */
@@ -53,7 +54,7 @@ export async function getSvTagesplan(
     .eq('sv_id', svId)
     .gte('start_zeit', vonIso)
     .lte('start_zeit', bisIso)
-    .in('status', ['bestaetigt', 'verlegung_pending'])
+    .in('status', ['bestaetigt', 'reserviert', 'verlegung_pending'])
     .order('start_zeit', { ascending: true })
 
   if (error) {

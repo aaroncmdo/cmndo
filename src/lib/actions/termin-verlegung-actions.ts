@@ -536,33 +536,12 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   // weiter verschieben, schlägt er seinerseits vor (SV-Flow → verlegung_pending
   // beim Kunden). So entsteht der Loop Kunde↔SV bei Bedarf.
 
-  // 1) Neuen Slot anlegen — sofort 'bestaetigt', Initiator=Kunde
-  const { data: neu, error: insErr } = await admin
-    .from('gutachter_termine')
-    .insert({
-      sv_id: alt.sv_id,
-      fall_id: alt.fall_id,
-      kb_id: alt.kb_id,
-      kanal: alt.kanal,
-      typ: alt.typ ?? 'sv_begutachtung',
-      start_zeit: wunschStart.toISOString(),
-      end_zeit: wunschEnde.toISOString(),
-      status: 'bestaetigt',
-      verlegung_quelle_id: alt.id,
-      verlegung_grund: input.grund?.trim() || null,
-      verlegung_initiator_kunde: true,
-    })
-    .select('id')
-    .single()
+  // Reihenfolge: erst alten Termin schliessen, DANN neuen inserieren.
+  // Grund: EXCLUSION CONSTRAINT greift auf bestaetigt|reserviert|verlegt|verlegung_pending.
+  // Wenn wir erst inserieren (neuer = bestaetigt), ist der alte noch bestaetigt
+  // → bei zweitem Verschieben vom gleichen Slot feuert der CONSTRAINT (AAR-864 Bug).
 
-  if (insErr || !neu) {
-    return {
-      ok: false,
-      error: `Neuer Slot anlegen fehlgeschlagen: ${insErr?.message ?? 'unbekannt'}`,
-    }
-  }
-
-  // 2) Alter Termin schliessen.
+  // 1) Alter Termin schliessen.
   // Wenn der Termin bereits verstrichen ist, gilt er als 'verpasst' —
   // sonst 'verschoben'. Wer schuld ist (SV vs Kunde) ergibt sich aus
   // sv_angekommen_am: war der SV nicht vor Ort, ist er der No-Show;
@@ -584,9 +563,38 @@ export async function kundeTerminVerlegungVorschlagen(input: {
     .eq('id', alt.id)
     .eq('status', 'bestaetigt')
   if (updErr) {
-    // Rollback neuer Termin
-    await admin.from('gutachter_termine').delete().eq('id', neu.id)
     return { ok: false, error: `Alter Termin lässt sich nicht abschließen: ${updErr.message}` }
+  }
+
+  // 2) Neuen Slot anlegen — sofort 'bestaetigt', Initiator=Kunde
+  const { data: neu, error: insErr } = await admin
+    .from('gutachter_termine')
+    .insert({
+      sv_id: alt.sv_id,
+      fall_id: alt.fall_id,
+      kb_id: alt.kb_id,
+      kanal: alt.kanal,
+      typ: alt.typ ?? 'sv_begutachtung',
+      start_zeit: wunschStart.toISOString(),
+      end_zeit: wunschEnde.toISOString(),
+      status: 'bestaetigt',
+      verlegung_quelle_id: alt.id,
+      verlegung_grund: input.grund?.trim() || null,
+      verlegung_initiator_kunde: true,
+    })
+    .select('id')
+    .single()
+
+  if (insErr || !neu) {
+    // Rollback: alter Termin zurück auf bestaetigt
+    await admin
+      .from('gutachter_termine')
+      .update({ status: 'bestaetigt', verlegung_grund: null, verlegung_initiator_kunde: null })
+      .eq('id', alt.id)
+    return {
+      ok: false,
+      error: `Neuer Slot anlegen fehlgeschlagen: ${insErr?.message ?? 'unbekannt'}`,
+    }
   }
 
   // Timeline-Eintrag fuer Audit
