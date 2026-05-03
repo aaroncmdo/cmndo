@@ -107,7 +107,7 @@ export default function NeuLeadDrawer() {
             <InputField label="Nachname" value={data.nachname} onChange={v => setData({ ...data, nachname: v })} />
           </div>
           <InputField label="Telefon *" value={data.telefon} onChange={v => setData({ ...data, telefon: v })} type="tel" placeholder="+49..." />
-          <InputField label="E-Mail" value={data.email} onChange={v => setData({ ...data, email: v })} type="email" />
+          <InputField label="E-Mail *" value={data.email} onChange={v => setData({ ...data, email: v })} type="email" placeholder="kunde@beispiel.de" />
           {/* CMM-32: Fahrzeug-Daten direkt erfassen — der Render im SV-Banner
               und in der Auftrags-Card baut auf diesen Feldern auf. */}
           <div className="grid grid-cols-2 gap-3">
