@@ -35,8 +35,6 @@ import type { ClaimTimelineEvent } from '@/lib/claims/timeline-queries'
 import type { ProjectedEvent } from '@/lib/claims/timeline-projection'
 // AAR-746 (Phase B): Shared Identity-Header — neu auch im Admin-Portal.
 import { FallIdentityHeader } from '@/components/shared/fall-header'
-// AAR-770: Mitteilungs-Banner ganz oben in der Fallakte
-import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 // AAR-776: Shared Tab-Bar
 import { FallakteTabs } from '@/components/shared/fall-tabs'
 
@@ -178,9 +176,7 @@ export default function FallakteShell({
               FallIdentityHeader zeigt Fallnummer · Kunde · Ort, die ActionBar-
               Buttons landen im actions-Slot rechts. Phase-Label weggelassen —
               steht bereits in der Aside-Phasen-Pipeline, keine Dopplung mehr. */}
-          {/* AAR-770: Mitteilungs-Banner ganz oben — vor dem Identity-Header */}
           <div className="px-4 sm:px-6 pt-4 space-y-2">
-            <FallMitteilungenBanner fallId={fall.id} rolle={userRolle} />
             {/* No-Show-Banner aus claim.kunde_no_show_count */}
             {kundeNoShowCount > 0 && (
               <div className="rounded-2xl border-2 border-rose-300 bg-rose-50 p-4">

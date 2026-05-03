@@ -53,6 +53,7 @@ export type TaskSpec = {
  * AAR-761, AAR-762). Neue Events werden hier ergänzt statt in Call-Site-
  * Logic.
  */
+// Event-To-Task-Resolver für Go-Live deaktiviert — wird nach Launch reaktiviert.
 export const EVENT_TO_TASK: Partial<Record<EventType, TaskSpec[]>> = {
   // ─── 5.9 Dokumente ──────────────────────────────────────────────────
   'dokument.fehlt': [
