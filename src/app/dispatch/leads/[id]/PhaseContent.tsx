@@ -9,7 +9,6 @@
 import { useDispatchPhase } from './_lib/phase-context'
 import Phase1Qualifizierung from './_phases/Phase1Qualifizierung'
 import Phase2TerminServiceTyp from './_phases/Phase2TerminServiceTyp'
-import Phase3Schadentyp from './_phases/Phase3Schadentyp'
 import Phase4Stammdaten from './_phases/Phase4Stammdaten'
 import Phase5Zusammenfassung from './_phases/Phase5Zusammenfassung'
 import Phase6StatusTracking from './_phases/Phase6StatusTracking'
@@ -56,8 +55,7 @@ export default function PhaseContent({
       return <Phase1Qualifizierung />
     case 2:
       return <Phase2TerminServiceTyp />
-    case 3:
-      return <Phase3Schadentyp />
+    case 3: // Legacy-Redirect: alte Bookmarks landen direkt in Phase 4
     case 4:
       return <Phase4Stammdaten />
     case 5:
