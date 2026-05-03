@@ -224,6 +224,17 @@ export async function uploadDokumentViaAnfrageToken(
     await insertFallDokument(db, fallId, 'kunde-nachreichung', path, contentType, buf.length, slot.label)
   }
 
+  // 4b. Pflichtdokument-Sync (non-critical) — Wenn für diesen Fall bereits
+  //     eine pflichtdokumente-Row existiert (z.B. nach SA-Abschluss via
+  //     Schritt 11 in convert-lead-to-claim), wird sie auf 'hochgeladen' gesetzt.
+  if (fallId && (slotId === 'fahrzeugschein' || slotId === 'polizeibericht')) {
+    try {
+      await syncPflichtdokument(db, fallId, slotId, publicUrl)
+    } catch (err) {
+      console.error('[pflichtdokument-sync] Fehler beim Syncing:', err)
+    }
+  }
+
   // 5. Slot im JSONB-Array auf hochgeladen=true
   const now = new Date().toISOString()
   const updatedSlots = anfrage.slots.map((s, i) =>
@@ -273,6 +284,30 @@ export async function uploadDokumentViaAnfrageToken(
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 type AdminDb = ReturnType<typeof createAdminClient>
+
+async function syncPflichtdokument(
+  db: AdminDb,
+  fallId: string,
+  dokumentTyp: string,
+  dateiUrl: string,
+): Promise<void> {
+  const { data: pd } = await db
+    .from('pflichtdokumente')
+    .select('id')
+    .eq('fall_id', fallId)
+    .eq('dokument_typ', dokumentTyp)
+    .neq('status', 'hochgeladen')
+    .maybeSingle()
+  if (!pd) return
+  await db
+    .from('pflichtdokumente')
+    .update({
+      status: 'hochgeladen',
+      datei_url: dateiUrl,
+      hochgeladen_am: new Date().toISOString(),
+    })
+    .eq('id', pd.id)
+}
 
 async function insertFallDokument(
   db: AdminDb,
