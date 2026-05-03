@@ -34,10 +34,7 @@ export default async function DispatchLeads({
       <PageHeader
         title="Leads"
         actions={
-          <>
-            <span className="text-sm text-claimondo-ondo">{leads?.length ?? 0} Ergebnisse</span>
-            <NeuLeadDrawer />
-          </>
+          <span className="text-sm text-claimondo-ondo">{leads?.length ?? 0} Ergebnisse</span>
         }
       />
 
@@ -60,6 +57,11 @@ export default async function DispatchLeads({
 
       {/* Liste / Kanban Toggle + View */}
       <LeadsViewToggle leads={leads ?? []} />
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+        <NeuLeadDrawer fab />
+      </div>
     </div>
   )
 }
