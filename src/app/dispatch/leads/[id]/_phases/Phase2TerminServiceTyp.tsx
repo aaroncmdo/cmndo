@@ -11,8 +11,8 @@ import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../_lib/phase-context'
 import { setServiceTyp, saveStammdaten } from '../actions'
-// GooglePlaceAutocomplete nach Phase 1 verschoben (Besichtigungsadresse dort)
-import { CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import { CheckCircle2Icon, CheckCircleIcon, ScaleIcon, CalendarIcon, MapPinIcon } from 'lucide-react'
 
 export default function Phase2TerminServiceTyp() {
   const router = useRouter()
@@ -46,6 +46,9 @@ export default function Phase2TerminServiceTyp() {
   const [wochentage, setWochentage] = useState<number[]>(l.wunschtermin_wochentage ?? [])
   const wunschterminDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [toast, setToast] = useState('')
+  const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState(
+    l.besichtigungsort_adresse ?? '',
+  )
 
   // AAR-264: Debounced auto-save (500ms) für Wunschtermin
   useEffect(() => {
@@ -83,6 +86,44 @@ export default function Phase2TerminServiceTyp() {
   const hasKoordinaten =
     (l.besichtigungsort_lat != null && l.besichtigungsort_lng != null) ||
     (l.unfallort_lat != null && l.unfallort_lng != null)
+
+  function saveBesichtigungsort(place: PlaceResult) {
+    setBesichtigungsortAdresse(place.adresse)
+    patchLead({
+      besichtigungsort_adresse: place.adresse,
+      besichtigungsort_lat: place.lat,
+      besichtigungsort_lng: place.lng,
+      besichtigungsort_place_id: place.place_id,
+    } as Partial<typeof lead>)
+    startTransition(async () => {
+      await saveStammdaten(lead.id, {
+        besichtigungsort_adresse: place.adresse,
+        besichtigungsort_lat: place.lat,
+        besichtigungsort_lng: place.lng,
+        besichtigungsort_place_id: place.place_id,
+      })
+      router.refresh()
+    })
+  }
+  function clearBesichtigungsort() {
+    if (!besichtigungsortAdresse) return
+    setBesichtigungsortAdresse('')
+    patchLead({
+      besichtigungsort_adresse: null,
+      besichtigungsort_lat: null,
+      besichtigungsort_lng: null,
+      besichtigungsort_place_id: null,
+    } as Partial<typeof lead>)
+    startTransition(async () => {
+      await saveStammdaten(lead.id, {
+        besichtigungsort_adresse: null,
+        besichtigungsort_lat: null,
+        besichtigungsort_lng: null,
+        besichtigungsort_place_id: null,
+      })
+      router.refresh()
+    })
+  }
 
   function chooseServiceTyp(typ: 'komplett' | 'nur_gutachter') {
     startTransition(async () => {
@@ -212,6 +253,28 @@ export default function Phase2TerminServiceTyp() {
             SV-Matching bevorzugt Gutachter die zu diesem Termin verfügbar sind.
           </p>
         )}
+      </div>
+
+      {/* Besichtigungsadresse — spiegelt dasselbe Feld wie Phase 1.
+          Hier immer sichtbar: Phase 2 = SV-Terminplanung, Ort immer nötig. */}
+      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 space-y-2">
+        <div className="flex items-center gap-2">
+          <MapPinIcon className="w-4 h-4 text-claimondo-ondo" />
+          <span className="text-xs font-semibold text-claimondo-navy">Wo steht das Fahrzeug?</span>
+          {besichtigungsortAdresse && (
+            <CheckCircleIcon className="w-3.5 h-3.5 text-green-500 ml-auto shrink-0" />
+          )}
+        </div>
+        <p className="text-[10px] text-claimondo-ondo">
+          Adresse wo der Gutachter das Fahrzeug besichtigen soll (Werkstatt, Stellplatz o.ä.)
+        </p>
+        <GooglePlaceAutocomplete
+          defaultValue={besichtigungsortAdresse}
+          placeholder="Werkstatt / Stellplatz-Adresse"
+          onSelect={saveBesichtigungsort}
+          onBlur={(current) => { if (!current.trim()) clearBesichtigungsort() }}
+          className="w-full px-2 py-1.5 border border-claimondo-border rounded-lg text-xs"
+        />
       </div>
 
       {/* SV + Termin */}
