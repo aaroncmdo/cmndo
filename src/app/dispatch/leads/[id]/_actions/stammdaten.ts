@@ -11,7 +11,7 @@ import { revalidatePath } from 'next/cache'
 const STAMMDATEN_ALLOWED_FIELDS = new Set([
   // Kunde — Kontakt + Adresse + Notiz
   'vorname', 'nachname', 'telefon', 'email',
-  'kunde_plz', 'kunde_strasse', 'kunde_stadt',
+  'kunde_adresse', 'kunde_plz', 'kunde_strasse', 'kunde_stadt', 'kunde_lat', 'kunde_lng',
   'notiz',
   // Fahrzeug
   'kennzeichen', 'fahrzeug_hersteller', 'fahrzeug_modell',

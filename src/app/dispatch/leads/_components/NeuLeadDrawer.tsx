@@ -7,7 +7,6 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { PlusIcon, XIcon } from 'lucide-react'
-import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { createManualLead, type CreateManualLeadInput } from '../actions'
 import { Drawer } from '@/components/primitives/Drawer'
 
@@ -29,6 +28,7 @@ const INITIAL: CreateManualLeadInput = {
   kunde_lat: null,
   kunde_lng: null,
   source_channel: 'manuell',
+  // Adresse wird in Phase 4 Stammdaten erfasst
   notizen: '',
 }
 
@@ -54,18 +54,6 @@ export default function NeuLeadDrawer({ fab = false }: { fab?: boolean }) {
       setOpen(false)
       router.push(`/dispatch/leads/${result.leadId}`)
     })
-  }
-
-  function handlePlaceSelect(p: PlaceResult) {
-    setData((d) => ({
-      ...d,
-      kunde_adresse: p.adresse,
-      kunde_strasse: p.strasse || d.kunde_strasse,
-      kunde_plz: p.plz || d.kunde_plz,
-      kunde_stadt: p.stadt || d.kunde_stadt,
-      kunde_lat: p.lat,
-      kunde_lng: p.lng,
-    }))
   }
 
   return (
@@ -113,29 +101,7 @@ export default function NeuLeadDrawer({ fab = false }: { fab?: boolean }) {
           <InputField label="Telefon *" value={data.telefon} onChange={v => setData({ ...data, telefon: v })} type="tel" placeholder="+49..." />
           <InputField label="E-Mail *" value={data.email} onChange={v => setData({ ...data, email: v })} type="email" placeholder="kunde@beispiel.de" />
 
-          {/* AAR-695: Google-Maps-Autocomplete für die Kunden-Adresse.
-              Liefert direkt Adresse + PLZ + Lat/Lng — wird in Phase 1 ohnehin
-              für Isochrone-Matching gebraucht. */}
-          <div>
-            <label className="block text-xs text-claimondo-ondo mb-1.5">Adresse</label>
-            <GooglePlaceAutocomplete
-              defaultValue={data.kunde_adresse}
-              placeholder="Straße, PLZ, Stadt"
-              onSelect={handlePlaceSelect}
-              // CMM-23: onChange synchron — wenn User tippt aber direkt
-              // auf "Lead anlegen" klickt (ohne Maps-Suggestion zu wählen
-              // und ohne blur durchlaufen zu lassen), bleibt der Wert
-              // permanent im Parent-State.
-              onChange={(text) => setData((d) => ({ ...d, kunde_adresse: text }))}
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
-            />
-            {data.kunde_lat && data.kunde_lng && (
-              <p className="text-[10px] text-claimondo-ondo/70 mt-1">
-                ✓ Koordinaten {data.kunde_lat.toFixed(4)}, {data.kunde_lng.toFixed(4)}
-                {data.kunde_plz && ` · PLZ ${data.kunde_plz}`}
-              </p>
-            )}
-          </div>
+          {/* Adresse wird in Phase 4 Stammdaten erfasst */}
 
           {/* AAR-216: Schadentyp-Dropdown wird in Phase 2 erfasst. */}
           {/* AAR-695: Service-Typ-Dropdown raus — wird im Lead-Flow festgelegt
