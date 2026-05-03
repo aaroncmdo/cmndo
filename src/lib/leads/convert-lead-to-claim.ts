@@ -35,6 +35,7 @@ import {
   resolveFallEntityFks,
 } from '@/lib/lead-fall-mapping'
 import { parseUhrzeit } from '@/lib/format/zeit'
+import { parseKennzeichen } from '@/lib/format/kennzeichen'
 import type { ClaimInsert } from '@/lib/claims/types'
 
 export type ConvertLeadToClaimInput = {
@@ -338,6 +339,10 @@ export async function convertLeadToClaim(
       hat_personenschaden: Boolean(lead.personenschaden_flag ?? false),
       vehicle_id: (lead.vehicle_id as string | null) ?? null,
       kennzeichen: (lead.kennzeichen as string | null) ?? null,
+      kennzeichen_kreis: (lead.kennzeichen_kreis as string | null) ?? null,
+      kennzeichen_buchstaben: (lead.kennzeichen_buchstaben as string | null) ?? null,
+      kennzeichen_zahl: (lead.kennzeichen_zahl as string | null) ?? null,
+      kennzeichen_suffix: (lead.kennzeichen_suffix as string | null) ?? null,
       quelle: 'lead_konvertierung',
       created_by_user_id: input.triggerByUserId ?? null,
     },
@@ -367,6 +372,15 @@ export async function convertLeadToClaim(
       // Kann null sein, wenn der Gegner nur per KZ/Versicherung erfasst wurde.
       nachname: (lead.gegner_name as string | null) ?? null,
       kennzeichen: (lead.gegner_kennzeichen as string | null) ?? null,
+      ...(() => {
+        const parts = parseKennzeichen(lead.gegner_kennzeichen as string | null)
+        return parts ? {
+          kennzeichen_kreis: parts.kreis,
+          kennzeichen_buchstaben: parts.buchstaben,
+          kennzeichen_zahl: parts.zahl,
+          kennzeichen_suffix: parts.suffix,
+        } : {}
+      })(),
       fahrzeugtyp_klartext: (lead.gegner_fahrzeugtyp as string | null) ?? null,
       versicherung_id: (lead.gegner_versicherung_id as string | null) ?? null,
       versicherung_klartext: (lead.gegner_versicherung as string | null) ?? null,

@@ -19,6 +19,43 @@ export function formatKennzeichen(raw: string | null | undefined): string {
 }
 
 /**
+ * Zerlegt ein formatiertes Kennzeichen in seine Bestandteile.
+ * "K-AS 1234E" → { kreis: "K", buchstaben: "AS", zahl: "1234", suffix: "E" }
+ */
+export function parseKennzeichen(raw: string | null | undefined): {
+  kreis: string
+  buchstaben: string
+  zahl: string
+  suffix: 'E' | 'H' | null
+} | null {
+  if (!raw) return null
+  const trimmed = raw.replace(/\s+/g, ' ').trim().toUpperCase()
+  const m = /^([A-ZÄÖÜ]{1,3})[\s-]*([A-Z]{1,2})[\s-]*(\d{1,4})\s*([EH])?$/.exec(trimmed)
+  if (!m) return { kreis: trimmed, buchstaben: '', zahl: '', suffix: null }
+  return {
+    kreis: m[1],
+    buchstaben: m[2],
+    zahl: m[3],
+    suffix: (m[4] === 'E' || m[4] === 'H') ? m[4] : null,
+  }
+}
+
+/**
+ * Baut aus den Einzelteilen das kombinierte Kennzeichen-String.
+ * { kreis: "K", buchstaben: "AS", zahl: "1234", suffix: "E" } → "K-AS 1234E"
+ */
+export function buildKennzeichen(
+  kreis: string,
+  buchstaben: string,
+  zahl: string,
+  suffix?: string | null,
+): string {
+  if (!kreis && !buchstaben && !zahl) return ''
+  const base = `${kreis.toUpperCase()}${buchstaben ? `-${buchstaben.toUpperCase()}` : ''} ${zahl}`
+  return suffix ? `${base.trim()}${suffix.toUpperCase()}` : base.trim()
+}
+
+/**
  * Maskiert ein Kennzeichen für Datenschutz-Anzeigen:
  *   "K-JB 2025" → "K-XX 25"
  * Unvollständige Kennzeichen werden so gut wie möglich maskiert.

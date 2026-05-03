@@ -14,7 +14,8 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'kunde_adresse', 'kunde_plz', 'kunde_strasse', 'kunde_stadt', 'kunde_lat', 'kunde_lng',
   'notiz',
   // Fahrzeug
-  'kennzeichen', 'fahrzeug_hersteller', 'fahrzeug_modell',
+  'kennzeichen', 'kennzeichen_kreis', 'kennzeichen_buchstaben', 'kennzeichen_zahl', 'kennzeichen_suffix',
+  'fahrzeug_hersteller', 'fahrzeug_modell',
   'lackfarbe_code', 'fahrzeug_farbe',
   // AAR-181: Baujahr ist Pflichtfeld in Phase 4, muss in der Allowlist sein
   'fahrzeug_baujahr', 'erstzulassung',
