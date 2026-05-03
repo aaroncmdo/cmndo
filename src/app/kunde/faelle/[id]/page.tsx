@@ -915,11 +915,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
-        {/* CMM-36 + CMM-32f: SV-Live-Banner — nur sichtbar wenn der SV
-            tatsaechlich unterwegs ist (sv_unterwegs_seit gesetzt) und
-            der Termin noch nicht durchgefuehrt wurde. */}
+        {/* CMM-36 + CMM-32f: SV-Live-Banner — immer gemountet solange ein
+            aktiver Termin existiert (kein sv_unterwegs_seit-Guard hier,
+            damit die Realtime-Subscription den "unterwegs"-Trigger live
+            einfängt auch wenn der Kunde die Seite vor dem Start geladen hat). */}
         {svTermin?.id &&
-          !!(svTermin.sv_unterwegs_seit as string | null) &&
           !(svTermin.durchgefuehrt_am as string | null) && (
           <KundeSvLiveBanner
             terminId={svTermin.id as string}
