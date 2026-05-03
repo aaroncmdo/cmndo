@@ -468,6 +468,54 @@ export async function convertLeadToClaim(
     console.error('[convertLeadToClaim] fall_dokumente-Migration fehlgeschlagen:', err)
   }
 
+  // ─── Schritt 11: Pflichtdokumente initialisieren (non-critical) ─────────────
+  // ZB1 ist immer Pflicht. Polizeibericht wenn Polizei vor Ort + Bericht pflicht.
+  // Bereits hochgeladene Dokumente werden nicht nochmals angefordert.
+  try {
+    const frist = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+    const pflichtInserts: Array<Record<string, unknown>> = []
+
+    const zb1Url = (lead.zb1_url as string | null) ?? null
+    if (!zb1Url) {
+      pflichtInserts.push({
+        fall_id: fallId,
+        dokument_typ: 'fahrzeugschein',
+        status: 'ausstehend',
+        pflicht: true,
+        quelle: 'system',
+        angefordert_von_rolle: 'system',
+        angefordert_am: now,
+        frist,
+        sort_order: 1,
+        begruendung: 'Fahrzeugschein wird für die Gutachtenerstellung benötigt.',
+      })
+    }
+
+    const polizeiUrl = (lead.polizeibericht_url as string | null) ?? null
+    const polizeiVorOrt = Boolean(lead.polizei_vor_ort ?? false)
+    const polizeibrichtPflicht = Boolean(lead.polizeibericht_pflicht ?? false)
+    if (polizeiVorOrt && polizeibrichtPflicht && !polizeiUrl) {
+      pflichtInserts.push({
+        fall_id: fallId,
+        dokument_typ: 'polizeibericht',
+        status: 'ausstehend',
+        pflicht: true,
+        quelle: 'system',
+        angefordert_von_rolle: 'system',
+        angefordert_am: now,
+        frist,
+        sort_order: 2,
+        begruendung: 'Polizeiliche Unfallmitteilung erforderlich.',
+      })
+    }
+
+    if (pflichtInserts.length > 0) {
+      await admin.from('pflichtdokumente').insert(pflichtInserts)
+    }
+  } catch (err) {
+    console.error('[convertLeadToClaim] pflichtdokumente-Init fehlgeschlagen:', err)
+  }
+
   return {
     ok: true,
     claimId,

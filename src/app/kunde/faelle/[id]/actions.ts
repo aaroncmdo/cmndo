@@ -116,16 +116,24 @@ export async function uploadPflichtdokumentKunde(fallId: string, pflichtdokument
   if (uploadErr) throw new Error(uploadErr.message)
 
   const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
-  const { data: pd } = await supabase.from('pflichtdokumente').select('titel').eq('id', pflichtdokumentId).single()
+  const { data: pd } = await supabase
+    .from('pflichtdokumente')
+    .select('titel, dokument_typ')
+    .eq('id', pflichtdokumentId)
+    .single()
 
+  const now = new Date().toISOString()
   await supabase.from('pflichtdokumente').update({
-    status: 'hochgeladen', datei_url: urlData.publicUrl, datei_name: file.name,
+    status: 'hochgeladen',
+    datei_url: urlData.publicUrl,
+    datei_name: file.name,
+    hochgeladen_am: now,
   }).eq('id', pflichtdokumentId)
 
   // AAR-553: fall_dokumente statt dokumente
   await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
-    dokument_typ: pd?.titel ?? 'kundendokument',
+    dokument_typ: pd?.dokument_typ ?? pd?.titel ?? 'kundendokument',
     storage_path: path,
     original_filename: file.name,
     groesse_bytes: file.size,
