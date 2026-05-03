@@ -48,6 +48,7 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'fahrzeug_hersteller',
   'fahrzeug_modell',
   'fahrzeug_farbe',
+  'lackfarbe_code',
   'erstzulassung',
   // AAR-181: Baujahr wird jetzt in Phase 4 als Pflichtfeld erfasst und muss
   // beim Fall-Erstellen übernommen werden
