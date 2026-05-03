@@ -65,7 +65,7 @@ export default async function LeaderboardPage() {
     }
   }).sort((a, b) => b.faelle_abgeschlossen - a.faelle_abgeschlossen)
 
-  const monatLabel = now.toLocaleString('de-DE', { month: 'long' }) + ' ' + now.getFullYear()
+  const monatLabel = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', month: 'long' }) + ' ' + now.getFullYear()
 
   return <LeaderboardClient dispatch={dispatchStats} kundenbetreuer={kundenStats} monatLabel={monatLabel} />
 }

@@ -14,11 +14,11 @@ type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit:
 
 function fmt(val: string | null): string {
   if (!val) return ''
-  return new Date(val).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return new Date(val).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 function fmtDateTime(val: string | null): string {
   if (!val) return ''
-  return new Date(val).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return new Date(val).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
 // Tab-System entfernt — Übersicht + Dokumente werden direkt
@@ -131,7 +131,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
   const [kundeGrund, setKundeGrund] = useState('')
   const [done, setDone] = useState<string | null>(null)
 
-  const datumStr = new Date(vorgeschlagenesDatum).toLocaleString('de-DE', {
+  const datumStr = new Date(vorgeschlagenesDatum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
     weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 
@@ -242,7 +242,7 @@ function SlotAuswahlBanner({
     if (result.success) {
       const datumStr = (() => {
         try {
-          return new Date(`${slot.datum}T${slot.uhrzeit}`).toLocaleString('de-DE', {
+          return new Date(`${slot.datum}T${slot.uhrzeit}`).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
             weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
           })
         } catch {
@@ -275,7 +275,7 @@ function SlotAuswahlBanner({
         {slots.map((slot, idx) => {
           const datumStr = (() => {
             try {
-              return new Date(`${slot.datum}T${slot.uhrzeit}`).toLocaleString('de-DE', {
+              return new Date(`${slot.datum}T${slot.uhrzeit}`).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
                 weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
               })
             } catch {

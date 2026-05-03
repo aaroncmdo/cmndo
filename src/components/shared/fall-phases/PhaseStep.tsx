@@ -84,7 +84,7 @@ export function PhaseStep({
         )}
         {showTimestamps && data.reachedAt && (
           <span className="block mt-0.5 text-[11px] text-claimondo-ondo/70">
-            {new Date(data.reachedAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
+            {new Date(data.reachedAt).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })}
           </span>
         )}
       </span>

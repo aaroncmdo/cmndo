@@ -130,7 +130,7 @@ export default function AnforderungenListe({
                           cfg.overdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'
                         }`}
                       >
-                        Frist: {new Date(a.frist).toLocaleDateString('de-DE')}
+                        Frist: {new Date(a.frist).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
                       </span>
                     )}
                   </div>

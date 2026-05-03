@@ -25,7 +25,7 @@ export default async function LeadpreisePage() {
   const paketLabel = paketLabelMitKontingent(sv)
 
   const standDatum = tabelle?.[0]?.created_at
-    ? new Date(tabelle[0].created_at).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
+    ? new Date(tabelle[0].created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', month: 'long', year: 'numeric' })
     : 'März 2026'
 
   function eur(val: number) { return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }

@@ -147,7 +147,7 @@ export default async function MitarbeiterTermine() {
           <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
             <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
               <h2 className="text-sm font-semibold text-claimondo-navy">
-                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
+                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                   weekday: 'long',
                   day: '2-digit',
                   month: '2-digit',
@@ -179,7 +179,7 @@ export default async function MitarbeiterTermine() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-claimondo-navy truncate">{subject}</p>
                         <p className={`text-xs ${overdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
-                          {new Date(t.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(t.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
                           {t.notizen && ` · ${t.notizen}`}
                           {overdue && ' (überfällig)'}
                         </p>

@@ -321,8 +321,8 @@ export default function SvDispatchPanel({
                 className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white hover:bg-emerald-50 border border-amber-200 hover:border-emerald-300 text-xs disabled:opacity-50"
               >
                 <span className="text-claimondo-navy">
-                  Slot {i + 1}: {s.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} ·{' '}
-                  {s.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} – {e.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  Slot {i + 1}: {s.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })} ·{' '}
+                  {s.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} – {e.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
                 </span>
                 <span className="flex items-center gap-1 text-emerald-600 font-medium">
                   <CheckIcon className="w-3.5 h-3.5" /> Akzeptieren
@@ -370,11 +370,11 @@ export default function SvDispatchPanel({
           <div>
             <p className={`text-[10px] uppercase ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-700' : 'text-amber-700'}`}>Termin</p>
             <p className={`font-medium ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>
-              {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+              {start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })}
               {' · '}
-              {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+              {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
               {' – '}
-              {ende.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+              {ende.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
         </div>
@@ -840,7 +840,7 @@ function SvCard({
       {sv.verfuegbarAmWunschtermin === true && wunschterminIso && (
         <p className="text-[10px] text-emerald-700 flex items-center gap-1">
           <CheckIcon className="w-3 h-3" />
-          Am Wunschtermin {new Date(wunschterminIso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} verfügbar
+          Am Wunschtermin {new Date(wunschterminIso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} verfügbar
         </p>
       )}
 
@@ -875,13 +875,13 @@ function SlotKachel({
 }) {
   const start = new Date(slot.start)
   const end = new Date(slot.end)
-  const tag = start.toLocaleDateString('de-DE', {
+  const tag = start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
   })
-  const von = start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-  const bis = end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const von = start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+  const bis = end.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
   const badge = MATCH_BADGE[slot.matchType]
   return (
     <button

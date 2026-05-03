@@ -349,12 +349,12 @@ export default function TerminBuchungClient({
           {eigeneTermine.map((t) => {
             const start = new Date(t.start_zeit)
             const end = new Date(t.end_zeit)
-            const dateStr = start.toLocaleDateString('de-DE', {
+            const dateStr = start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
               weekday: 'short',
               day: '2-digit',
               month: '2-digit',
             })
-            const timeStr = `${start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} – ${end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+            const timeStr = `${start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} – ${end.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
             return (
               <div
                 key={t.id}

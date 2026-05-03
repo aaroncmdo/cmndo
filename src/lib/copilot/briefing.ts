@@ -59,7 +59,7 @@ async function loadBriefingContext(opts: { fallId?: string; leadId?: string }): 
       status = fall.status
       fahrzeug = [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—'
       schadenhoehe = fall.gutachten_betrag ? `${Number(fall.gutachten_betrag).toLocaleString('de-DE')} €` : null
-      terminDatum = fall.sv_termin ? new Date(fall.sv_termin).toLocaleDateString('de-DE') : null
+      terminDatum = fall.sv_termin ? new Date(fall.sv_termin).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : null
 
       if (fall.lead_id) {
         const { data: lead } = await db.from('leads').select('vorname, nachname').eq('id', fall.lead_id).single()

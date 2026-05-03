@@ -61,7 +61,7 @@ function pickIcon(e: FallEvent): typeof FileTextIcon {
 function fmtDateHeader(iso: string): string {
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('de-DE', {
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     weekday: 'long',
     day: '2-digit',
     month: 'long',
@@ -72,7 +72,7 @@ function fmtDateHeader(iso: string): string {
 function fmtTime(iso: string): string {
   const d = new Date(iso)
   if (isNaN(d.getTime())) return ''
-  return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 }
 
 function dateKey(iso: string): string {

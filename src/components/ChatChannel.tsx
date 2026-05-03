@@ -52,7 +52,7 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
               <div key={m.id} className="flex justify-center">
                 <div className="bg-[#f8f9fb] border border-[#7BA3CC]/30 rounded-xl px-4 py-2 max-w-[85%]">
                   <p className="text-xs text-[#0D1B3E] text-center whitespace-pre-wrap">{m.nachricht}</p>
-                  <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">{new Date(m.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">{new Date(m.created_at).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
               </div>
             )
@@ -63,7 +63,7 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
               <div className={`max-w-[75%] px-3 py-2 rounded-xl text-sm ${isOwn ? 'bg-[#1E3A5F] text-white rounded-br-sm' : 'bg-[#f8f9fb] text-claimondo-navy rounded-bl-sm'}`}>
                 {!isOwn && <p className="text-[10px] font-medium mb-0.5 opacity-70">{m.sender_rolle ?? ''}</p>}
                 <p className="whitespace-pre-wrap">{m.nachricht}</p>
-                <p className={`text-[9px] mt-1 ${isOwn ? 'text-[#7BA3CC]' : 'text-claimondo-ondo/70'}`}>{new Date(m.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
+                <p className={`text-[9px] mt-1 ${isOwn ? 'text-[#7BA3CC]' : 'text-claimondo-ondo/70'}`}>{new Date(m.created_at).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}</p>
               </div>
             </div>
           )

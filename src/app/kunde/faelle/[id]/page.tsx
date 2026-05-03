@@ -226,7 +226,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
       const fmtD = (iso: string | null) =>
         iso
-          ? new Date(iso).toLocaleDateString('de-DE', {
+          ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
               weekday: 'long',
               day: '2-digit',
               month: '2-digit',
@@ -235,7 +235,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           : ''
       const fmtT = (iso: string | null) =>
         iso
-          ? new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+          ? new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
           : ''
       verlegungBannerProps = {
         pendingTerminId: verlegungPendingRow.id as string,
@@ -664,13 +664,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                     ? 'kunde'
                     : 'sv'
                 ) as 'sv' | 'kunde',
-                datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
+                datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                   weekday: 'long',
                   day: '2-digit',
                   month: '2-digit',
                   year: 'numeric',
                 }),
-                uhrzeit: new Date(aktiverSv.start_zeit as string).toLocaleTimeString('de-DE', {
+                uhrzeit: new Date(aktiverSv.start_zeit as string).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
                   hour: '2-digit',
                   minute: '2-digit',
                 }),

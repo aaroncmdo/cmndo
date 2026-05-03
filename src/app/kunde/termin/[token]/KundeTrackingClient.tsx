@@ -218,7 +218,7 @@ export default function KundeTrackingClient({
 
   if (!losgefahren) {
     const terminDatum = vorgeschlagenesDatum ?? ''
-    const terminDisplay = terminDatum ? new Date(terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
+    const terminDisplay = terminDatum ? new Date(terminDatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
 
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-10">
@@ -269,7 +269,7 @@ export default function KundeTrackingClient({
               return new Date(tz).toISOString().slice(0, 16)
             }
             const formatDe = (d: Date) =>
-              d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+              d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
             type Vorschlag = { key: string; label: string; sub: string; datum: Date }
             const vorschlaege: Vorschlag[] = []
             if (base && !Number.isNaN(base.getTime())) {

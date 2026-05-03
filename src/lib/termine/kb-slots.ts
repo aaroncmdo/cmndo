@@ -152,7 +152,7 @@ export async function getAvailableKbSlots(
           )
           if (!busyOverlap && !adminOverlap) {
             const datum = slotTime.toISOString().split('T')[0]
-            const uhrzeit = slotTime.toLocaleTimeString('de-DE', {
+            const uhrzeit = slotTime.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
               hour: '2-digit',
               minute: '2-digit',
               hour12: false,

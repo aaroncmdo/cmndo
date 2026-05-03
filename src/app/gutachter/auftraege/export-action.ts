@@ -23,7 +23,7 @@ type Result =
 function fmtDate(iso: string | null): string {
   if (!iso) return ''
   try {
-    return new Date(iso).toLocaleDateString('de-DE')
+    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
   } catch {
     return iso
   }
@@ -32,7 +32,7 @@ function fmtDate(iso: string | null): string {
 function fmtTime(iso: string | null): string {
   if (!iso) return ''
   try {
-    return new Date(iso).toLocaleTimeString('de-DE', {
+    return new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
       hour: '2-digit',
       minute: '2-digit',
     })

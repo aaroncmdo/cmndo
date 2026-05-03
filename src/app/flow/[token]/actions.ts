@@ -64,7 +64,7 @@ export async function generateSAPdf(
   // Lead-Daten laden
   const { data: lead } = await admin.from('leads').select('vorname, nachname, email, telefon, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_standort_adresse').eq('id', leadId).single()
   const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : 'Kunde'
-  const datum = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const datum = new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
   const fahrzeug = lead ? [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ') : ''
 
   // Einfaches SA-Text-Dokument als HTML → in Storage als .html speichern
@@ -960,8 +960,8 @@ export async function signSAandCreateFall(
 
         if (svTelefon) {
           const terminDate = new Date(lead.gutachter_termin)
-          const datum = terminDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
-          const uhrzeit = terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+          const datum = terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+          const uhrzeit = terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
           const kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
           const adresse = lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz || 'Adresse folgt'
           const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
@@ -1028,7 +1028,7 @@ export async function signSAandCreateFall(
         | null
       const svName = (profile?.vorname ?? '').trim() || 'Ihrem Gutachter'
       const terminDate = new Date(lead.gutachter_termin)
-      const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+      const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
       const { sendCommunication } = await import('@/lib/communications/send')
       // AAR-193: vorname-Key entfernt (Redundanz wie in AAR-175 P0-C — das
       // Template nutzt nur die nummerierten Placeholder, der vorname-Key

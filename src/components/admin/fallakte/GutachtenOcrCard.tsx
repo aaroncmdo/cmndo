@@ -89,7 +89,7 @@ const formatNumber = (n: number | null, suffix = '') =>
 const formatDate = (s: string | null) => {
   if (!s) return '–'
   const d = new Date(s)
-  return Number.isNaN(d.getTime()) ? s : d.toLocaleDateString('de-DE')
+  return Number.isNaN(d.getTime()) ? s : d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
 }
 
 type FieldDef = {

@@ -250,10 +250,10 @@ export default function BeratungBuchenSheet({
                             }`}
                           >
                             <span className="text-xs text-claimondo-ondo uppercase">
-                              {date.toLocaleDateString('de-DE', { weekday: 'short' })}
+                              {date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short' })}
                             </span>
                             <span className="text-sm font-semibold text-[#0D1B3E]">
-                              {date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                              {date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}
                             </span>
                           </button>
                         )
@@ -299,7 +299,7 @@ export default function BeratungBuchenSheet({
                 {beschreibung.trim() && <Row label="Beschreibung" value={beschreibung} />}
                 <Row
                   label="Datum"
-                  value={new Date(selectedDatum).toLocaleDateString('de-DE', {
+                  value={new Date(selectedDatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
                   })}
                 />

@@ -126,7 +126,7 @@ export default async function MitarbeiterDashboard() {
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
                         <p className={`text-xs ${overdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
-                          {new Date(r.start_zeit).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                          {new Date(r.start_zeit).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                           {overdue && ' (überfällig)'}
                         </p>
                       </div>
@@ -162,7 +162,7 @@ export default async function MitarbeiterDashboard() {
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-claimondo-navy truncate">{t.titel}</p>
                         <p className="text-xs text-claimondo-ondo">
-                          {new Date(t.start_zeit).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                          {new Date(t.start_zeit).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                           {fall?.fall_nummer ? ` · ${fall.fall_nummer}` : ''}
                         </p>
                       </div>
@@ -221,7 +221,7 @@ export default async function MitarbeiterDashboard() {
                 <span className="truncate text-claimondo-navy">{t.titel}</span>
               </div>
               <span className="text-xs text-claimondo-ondo/70 flex-shrink-0 ml-2">
-                {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '—'}
+                {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }) : '—'}
               </span>
             </div>
           ))}

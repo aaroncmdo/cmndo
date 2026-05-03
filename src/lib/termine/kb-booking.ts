@@ -267,7 +267,7 @@ export async function cancelKbTermin(terminId: string): Promise<CancelResult> {
     fall_id: termin.fall_id,
     typ: 'termin',
     titel: 'KB-Beratungstermin storniert (Kunde)',
-    beschreibung: `Termin am ${new Date(termin.start_zeit).toLocaleDateString('de-DE')} wurde vom Kunden storniert.`,
+    beschreibung: `Termin am ${new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} wurde vom Kunden storniert.`,
   })
   if (tlErr) console.error('[cancelKbTermin] Timeline-Insert:', tlErr.message)
 

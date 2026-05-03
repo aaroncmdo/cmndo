@@ -21,11 +21,11 @@ const admin = () => createAdminClient()
 
 function fmtDate(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 function fmtTime(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 }
 function fmtCurrency(val: number | null): string {
   if (val == null) return '0,00 EUR'
@@ -120,8 +120,8 @@ export async function sendKundeWelcome(
       }
     }
     terminInfo = {
-      datum: tDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }),
-      uhrzeit: tDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      datum: tDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }),
+      uhrzeit: tDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
       adresse: fall.besichtigungsort_adresse ?? '—',
       svName: terminSvName,
     }
@@ -510,7 +510,7 @@ export async function sendMarketingAbrechnung(abrechnungId: string): Promise<voi
   if (!abr) return
 
   const monat = abr.abrechnungs_zeitraum_start.slice(0, 7)
-  const monatLabel = new Date(abr.abrechnungs_zeitraum_start).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
+  const monatLabel = new Date(abr.abrechnungs_zeitraum_start).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', month: 'long', year: 'numeric' })
   const positionen = abr.positionen as Array<{ beschreibung?: string }>
 
   const props = {
@@ -650,7 +650,7 @@ export async function sendKanzleiMonatsAbrechnung(abrechnungId: string): Promise
   const { data: abr } = await db.from('abrechnungen').select('*').eq('id', abrechnungId).single()
   if (!abr) return
 
-  const monatLabel = new Date(abr.abrechnungs_zeitraum_start).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
+  const monatLabel = new Date(abr.abrechnungs_zeitraum_start).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', month: 'long', year: 'numeric' })
   const positionen = abr.positionen as Array<{ beschreibung?: string }>
 
   const props = {
@@ -740,8 +740,8 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
   }
 
   const tDate = new Date(termin.start_zeit)
-  const datum = tDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
-  const uhrzeit = tDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const datum = tDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+  const uhrzeit = tDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 
   // Helper — leere Strings → undefined (für saubere ??-Fallbacks)
   // [a, b].filter(Boolean).join(', ') liefert '' wenn alle Felder leer/null,
@@ -866,8 +866,8 @@ async function loadTerminContext(terminId: string) {
     kundenName,
     fallId: termin.fall_id as string | null,
     leadId: termin.lead_id as string | null,
-    datum: tDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }),
-    uhrzeit: tDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+    datum: tDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }),
+    uhrzeit: tDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
   }
 }
 
@@ -918,8 +918,8 @@ export async function sendDispatcherGegenvorschlag(
   const slotInfo = slots.map((s) => {
     const d = new Date(s.start)
     return {
-      datum: d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }),
-      uhrzeit: d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      datum: d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }),
+      uhrzeit: d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
     }
   })
 
@@ -987,10 +987,10 @@ export async function sendFlowLinkVersand(
     svVorname: profile?.vorname ?? '',
     svNachname: profile?.nachname ?? '',
     terminDatum: termin?.start_zeit
-      ? new Date(termin.start_zeit).toLocaleDateString('de-DE')
+      ? new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
       : '—',
     terminUhrzeit: termin?.start_zeit
-      ? new Date(termin.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+      ? new Date(termin.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
       : '—',
     flowUrl,
   }

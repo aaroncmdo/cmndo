@@ -74,12 +74,12 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <p className="text-sm font-medium text-claimondo-navy">{svNameMap[r.sv_id] ?? '—'} — Fall {fallNrMap[r.fall_id] ?? r.fall_id.slice(0, 8)}</p>
-                    <p className="text-xs text-claimondo-ondo">{GRUND_LABELS[r.grund] ?? r.grund} · {new Date(r.eingereicht_am).toLocaleDateString('de-DE')}</p>
+                    <p className="text-xs text-claimondo-ondo">{GRUND_LABELS[r.grund] ?? r.grund} · {new Date(r.eingereicht_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}</p>
                   </div>
                   <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
                 </div>
                 <p className="text-xs text-claimondo-navy mb-2">{r.begruendung}</p>
-                <p className="text-[10px] text-claimondo-ondo/70">Frist bis: {new Date(r.frist_bis).toLocaleDateString('de-DE')}</p>
+                <p className="text-[10px] text-claimondo-ondo/70">Frist bis: {new Date(r.frist_bis).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}</p>
 
                 {r.admin_begruendung && <p className="text-xs text-claimondo-ondo mt-2 italic">Admin: {r.admin_begruendung}</p>}
 

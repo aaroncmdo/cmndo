@@ -1164,6 +1164,7 @@ export default function Phase4Stammdaten() {
                     <strong>
                       {new Date(l.gegner_versicherung_anfrage_datum).toLocaleDateString(
                         'de-DE',
+                        { timeZone: 'Europe/Berlin' },
                       )}
                     </strong>{' '}
                     — KB-Reminder wurde für{' '}
@@ -1171,7 +1172,7 @@ export default function Phase4Stammdaten() {
                       {new Date(
                         new Date(l.gegner_versicherung_anfrage_datum).getTime() +
                           10 * 24 * 60 * 60 * 1000,
-                      ).toLocaleDateString('de-DE')}
+                      ).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
                     </strong>{' '}
                     gesetzt.
                   </div>

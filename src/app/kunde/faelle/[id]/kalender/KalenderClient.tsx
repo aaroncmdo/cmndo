@@ -78,7 +78,7 @@ export default function KalenderClient({
       <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
         <p className="text-lg font-semibold text-green-700 mb-2">Termin gebucht!</p>
         <p className="text-sm text-green-600 mb-4">
-          {confirmSlot && new Date(confirmSlot).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          {confirmSlot && new Date(confirmSlot).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
         </p>
         <button onClick={() => router.push(`/kunde/faelle/${fallId}`)}
           className="px-4 py-2 bg-claimondo-ondo text-white rounded-lg text-sm font-medium hover:bg-claimondo-shield transition-colors">
@@ -98,9 +98,9 @@ export default function KalenderClient({
         <div className="grid grid-cols-7 gap-1.5">
           {arbeitsTage.map(day => {
             const isSelected = selectedDay?.toDateString() === day.toDateString()
-            const dayName = day.toLocaleDateString('de-DE', { weekday: 'short' })
+            const dayName = day.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short' })
             const dayNum = day.getDate()
-            const monthName = day.toLocaleDateString('de-DE', { month: 'short' })
+            const monthName = day.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', month: 'short' })
             return (
               <button key={day.toISOString()} onClick={() => { setSelectedDay(day); setConfirmSlot(null) }}
                 className={`flex flex-col items-center py-2 px-1 rounded-lg text-xs transition-colors ${
@@ -121,7 +121,7 @@ export default function KalenderClient({
       {selectedDay && (
         <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-3 font-semibold">
-            Verfügbare Zeiten — {selectedDay.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
+            Verfügbare Zeiten — {selectedDay.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long' })}
           </p>
           {selectedSlots.length === 0 ? (
             <p className="text-sm text-claimondo-ondo/70 text-center py-4">Keine verfügbaren Zeiten an diesem Tag.</p>
@@ -129,7 +129,7 @@ export default function KalenderClient({
             <div className="grid grid-cols-3 gap-2">
               {selectedSlots.map(slot => {
                 const time = new Date(slot.time)
-                const timeStr = time.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                const timeStr = time.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
                 const isSelected = confirmSlot === slot.time
                 return (
                   <button key={slot.time} disabled={slot.belegt}
@@ -159,7 +159,7 @@ export default function KalenderClient({
         <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-xl p-4">
           <p className="text-sm text-claimondo-navy mb-3">
             <strong>Gewählter Termin:</strong>{' '}
-            {new Date(confirmSlot).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr
+            {new Date(confirmSlot).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr
           </p>
           <button onClick={handleBuchen} disabled={loading}
             className="w-full py-3 rounded-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-claimondo-shield transition-colors disabled:opacity-40">

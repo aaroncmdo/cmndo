@@ -75,7 +75,7 @@ function Info({ label, value }: { label: string; value: string | number | null |
 function fmtDate(v: unknown): string | null {
   if (typeof v !== 'string' || !v) return null
   try {
-    return new Date(v).toLocaleDateString('de-DE', {
+    return new Date(v).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',

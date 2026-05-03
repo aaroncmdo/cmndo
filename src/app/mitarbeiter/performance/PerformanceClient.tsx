@@ -57,7 +57,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
           <div className="space-y-2">
             {timeline.map((item, i) => {
               const d = new Date(item.zeit)
-              const zeit = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+              const zeit = d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
               const style = TL_COLORS[item.typ] ?? TL_COLORS.task
               const content = (
                 <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-[#f8f9fb]/50 transition-colors">

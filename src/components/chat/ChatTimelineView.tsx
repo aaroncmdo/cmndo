@@ -118,9 +118,9 @@ export default function ChatTimelineView({
     const d = new Date(iso)
     const today = new Date()
     if (d.toDateString() === today.toDateString()) {
-      return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+      return d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
     }
-    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+    return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
   }
 
   async function handleSend() {

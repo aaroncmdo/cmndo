@@ -19,8 +19,8 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
   const [doneSuccess, setDoneSuccess] = useState(true)
 
   const terminDate = new Date(termin.start_zeit)
-  const datum = terminDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
-  const uhrzeit = terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const datum = terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+  const uhrzeit = terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(termin.adresse)}`
 
   const canAct = termin.status === 'reserviert' || termin.status === 'gegenvorschlag'
@@ -41,7 +41,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
     } else if (termin.status === 'abgelehnt') {
       icon = '❌'
       title = 'Termin abgelehnt'
-      const abDatum = termin.abgelehnt_am ? new Date(termin.abgelehnt_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''
+      const abDatum = termin.abgelehnt_am ? new Date(termin.abgelehnt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }) : ''
       message = `Du hast diesen Termin${abDatum ? ` am ${abDatum}` : ''} abgelehnt. Claimondo wird einen neuen Gutachter zuweisen.`
     } else if (termin.status === 'abgesagt' || termin.status === 'storniert') {
       icon = '🚫'
@@ -141,7 +141,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4">
             <p className="text-sm font-medium text-amber-800 mb-1">Kunde hat einen Gegenvorschlag gemacht</p>
             <p className="text-sm text-amber-700">
-              Neues Datum: {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              Neues Datum: {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </p>
             {termin.gegenvorschlag_grund && <p className="text-xs text-amber-600 mt-1">Grund: {termin.gegenvorschlag_grund}</p>}
           </div>
@@ -152,7 +152,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
           <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-2xl p-4 mb-4">
             <p className="text-sm font-medium text-[#0D1B3E]">Du hast einen Gegenvorschlag gemacht</p>
             <p className="text-sm text-[#1E3A5F]">
-              Vorgeschlagenes Datum: {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              Vorgeschlagenes Datum: {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </p>
             <p className="text-xs text-claimondo-ondo mt-1">Wir warten auf Rückmeldung vom Kunden.</p>
           </div>

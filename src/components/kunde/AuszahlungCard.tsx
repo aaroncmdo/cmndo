@@ -24,7 +24,7 @@ function formatEuro(n: number): string {
 
 function formatDate(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 export default function AuszahlungCard({ betrag, eingegangenAm, zahlungsweg }: Props) {

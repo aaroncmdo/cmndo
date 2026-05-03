@@ -264,13 +264,13 @@ export default async function AbrechnungPage() {
                           ? abr.leadpreis.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
                           : '—'
                         const datum = fall.gutachten_eingegangen_am
-                          ? new Date(fall.gutachten_eingegangen_am).toLocaleDateString('de-DE', {
+                          ? new Date(fall.gutachten_eingegangen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                               day: '2-digit',
                               month: '2-digit',
                               year: 'numeric',
                             })
                           : fall.created_at
-                            ? new Date(fall.created_at).toLocaleDateString('de-DE', {
+                            ? new Date(fall.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric',
@@ -326,13 +326,13 @@ export default async function AbrechnungPage() {
                     ? abr.leadpreis.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
                     : '—'
                   const datum = fall.gutachten_eingegangen_am
-                    ? new Date(fall.gutachten_eingegangen_am).toLocaleDateString('de-DE', {
+                    ? new Date(fall.gutachten_eingegangen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
                       })
                     : fall.created_at
-                      ? new Date(fall.created_at).toLocaleDateString('de-DE', {
+                      ? new Date(fall.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
@@ -410,7 +410,7 @@ export default async function AbrechnungPage() {
                       'bg-[#f8f9fb] text-claimondo-navy'
                     const fmt = (iso: string | null) =>
                       iso
-                        ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                        ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
                         : '—'
                     return (
                       <tr key={s.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors">
@@ -455,7 +455,7 @@ export default async function AbrechnungPage() {
                   'bg-[#f8f9fb] text-claimondo-navy'
                 const fmt = (iso: string | null) =>
                   iso
-                    ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
                     : '—'
                 return (
                   <div key={s.id} className="bg-white rounded-2xl p-4 border border-claimondo-border">
@@ -515,7 +515,7 @@ export default async function AbrechnungPage() {
                       </td>
                       <td className="px-4 py-3 text-claimondo-ondo text-xs">{e.beschreibung ?? '—'}</td>
                       <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">
-                        {new Date(e.eingezahlt_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                        {new Date(e.eingezahlt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </td>
                     </tr>
                   ))}

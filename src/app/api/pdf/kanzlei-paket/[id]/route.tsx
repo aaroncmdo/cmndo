@@ -86,7 +86,7 @@ export async function GET(
   const data: KanzleiPaketData = {
     fallNummer: fall.fall_nummer ?? id.slice(0, 8),
     mandatsnummer: fall.mandatsnummer ?? null,
-    datum: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    datum: new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }),
     status: fall.status,
     geschaedigter,
     schaediger,

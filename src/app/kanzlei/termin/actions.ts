@@ -194,7 +194,7 @@ export async function createKanzleiAdminTermin(
       [auth.profile?.vorname, auth.profile?.nachname].filter(Boolean).join(' ') ||
       (auth.profile?.email as string | null) ||
       'Kanzlei-Partner'
-    const zeitStr = start.toLocaleString('de-DE', {
+    const zeitStr = start.toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
       day: '2-digit',
       month: '2-digit',
       hour: '2-digit',

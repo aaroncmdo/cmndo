@@ -90,7 +90,7 @@ function isOverdue(faelligAm: string | null): boolean {
 
 function fmtDate(d: string | null) {
   if (!d) return null
-  return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+  return new Date(d).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })
 }
 
 /**
@@ -439,7 +439,7 @@ function TaskCard({
       {isAutoResolved && (
         <div
           className="mb-2 inline-flex items-center gap-1 text-[10px] text-claimondo-ondo/70"
-          title={`Automatisch erledigt am ${task.auto_resolved_am ? new Date(task.auto_resolved_am).toLocaleString('de-DE') : ''} weil ${task.auto_resolved_grund ?? ''}`}
+          title={`Automatisch erledigt am ${task.auto_resolved_am ? new Date(task.auto_resolved_am).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }) : ''} weil ${task.auto_resolved_grund ?? ''}`}
         >
           <svg
             width="10"

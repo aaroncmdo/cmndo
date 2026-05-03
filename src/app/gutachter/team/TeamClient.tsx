@@ -160,7 +160,7 @@ export default function TeamClient({
                       {!l.spezifikation && !l.schadens_art && <span className="text-claimondo-ondo/70">—</span>}
                     </td>
                     <td className="px-4 py-3 text-[10px] text-claimondo-ondo/70">
-                      {l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE') : '—'}
+                      {l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">

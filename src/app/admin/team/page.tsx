@@ -4,7 +4,7 @@ import TeamClient from './TeamClient'
 export default async function TeamPage() {
   const supabase = await createClient()
   const now = new Date()
-  const monat = now.toLocaleString('de-DE', { month: 'long' })
+  const monat = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', month: 'long' })
   const jahr = now.getFullYear()
   const monatStr = `${jahr}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
 

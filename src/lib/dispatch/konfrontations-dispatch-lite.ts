@@ -148,7 +148,7 @@ export async function triggerKonfrontationsDispatch(
     payload: {
       termin_id: inserted.id,
       termin_datum: startDate.toISOString(),
-      beschreibung: `Konfrontations-Termin angefragt für ${startDate.toLocaleString('de-DE')}`,
+      beschreibung: `Konfrontations-Termin angefragt für ${startDate.toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`,
     },
     externalEventId: null,
     source: 'manual',

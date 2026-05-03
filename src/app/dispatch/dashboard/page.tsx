@@ -126,7 +126,7 @@ export default async function DispatchDashboard() {
               <div key={task.id} className="px-5 py-3 flex items-center gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-claimondo-navy truncate">{task.titel}</p>
-                  <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE') : ''}</p>
+                  <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : ''}</p>
                 </div>
                 {task.prioritaet === 'dringend' && (
                   <span className="text-[10px] font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Dringend</span>

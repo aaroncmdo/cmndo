@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 
   for (const termin of termine ?? []) {
     const startDate = new Date(termin.start_zeit)
-    const uhrzeit = startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    const uhrzeit = startDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 
     // Lade Kundendaten
     let telefon: string | null = null

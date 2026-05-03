@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
         telefon: svProfile.telefon,
         vorname: svName,
         '1': String(minBisLos),
-        '2': terminTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        '2': terminTime.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
         '3': kundeName,
         '4': addr,
         '5': String(fahrzeitMin ?? 30),

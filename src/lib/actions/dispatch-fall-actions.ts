@@ -81,8 +81,8 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     if (fallInfo?.sv_id) {
       const terminDate = fallInfo.sv_termin ? new Date(fallInfo.sv_termin) : null
       createGutachterMitteilung(fallInfo.sv_id, 'termin_bestaetigt', fallId, {
-        datum: terminDate?.toLocaleDateString('de-DE') ?? undefined,
-        uhrzeit: terminDate?.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) ?? undefined,
+        datum: terminDate?.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) ?? undefined,
+        uhrzeit: terminDate?.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) ?? undefined,
         fall_nummer: fallInfo.fall_nummer ?? undefined,
       }).catch(() => {})
     }
@@ -461,9 +461,9 @@ export async function sendFlowLink(leadId: string) {
       console.warn('[sendFlowLink] SV-Name nicht auflösbar für Termin', { leadId, svId: termin.sv_id })
     }
     const terminDate = termin?.start_zeit ? new Date(termin.start_zeit) : null
-    const datum = terminDate ? terminDate.toLocaleDateString('de-DE') : ''
+    const datum = terminDate ? terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : ''
     const uhrzeit = terminDate
-      ? terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+      ? terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
       : ''
 
     if (!termin) {

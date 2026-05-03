@@ -97,7 +97,7 @@ export async function POST(req: Request) {
         : `Kunde hat Besichtigungstermin abgesagt (${fall.fall_nummer ?? fall.id.slice(0, 8)})`
     const beschreibung = [
       grund ? `Grund: ${grund}` : 'Kein Grund angegeben.',
-      termin.start_zeit ? `War geplant: ${new Date(termin.start_zeit).toLocaleString('de-DE')}` : null,
+      termin.start_zeit ? `War geplant: ${new Date(termin.start_zeit).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}` : null,
     ]
       .filter(Boolean)
       .join('\n')

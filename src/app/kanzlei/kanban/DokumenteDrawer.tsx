@@ -61,7 +61,7 @@ function formatBytes(n: number | null): string {
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('de-DE', {
+  return new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

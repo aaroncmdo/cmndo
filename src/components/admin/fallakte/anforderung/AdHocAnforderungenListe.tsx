@@ -158,7 +158,7 @@ export function AdHocAnforderungenListe({ anforderungen }: Props) {
                       </span>
                       <Text variant="bodyXs" color="ondo">
                         Gesendet:{' '}
-                        {new Date(a.gesendet_am).toLocaleDateString('de-DE', {
+                        {new Date(a.gesendet_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
@@ -167,7 +167,7 @@ export function AdHocAnforderungenListe({ anforderungen }: Props) {
                       {canAct && (
                         <Text variant="bodyXs" color={expired ? 'danger' : 'ondo'}>
                           Läuft ab:{' '}
-                          {new Date(a.expires_at).toLocaleDateString('de-DE', {
+                          {new Date(a.expires_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                             day: '2-digit',
                             month: '2-digit',
                           })}

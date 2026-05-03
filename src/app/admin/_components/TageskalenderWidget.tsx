@@ -27,14 +27,14 @@ export default async function TageskalenderWidget() {
   const events = [
     ...(svTermine ?? []).map(f => ({
       id: `sv-${f.id}`,
-      zeit: new Date(f.sv_termin!).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      zeit: new Date(f.sv_termin!).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
       titel: `SV-Termin: ${f.fall_nummer ?? f.kennzeichen ?? 'Fall'}`,
       typ: 'gutachter' as const,
       link: `/faelle/${f.id}`,
     })),
     ...(termine ?? []).map(t => ({
       id: `t-${t.id}`,
-      zeit: new Date(t.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      zeit: new Date(t.datum).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
       titel: t.betreff ?? t.typ,
       typ: t.typ as 'telefonat' | 'video-call' | 'intern',
       link: t.fall_id ? `/faelle/${t.fall_id}` : '/admin/kalender',

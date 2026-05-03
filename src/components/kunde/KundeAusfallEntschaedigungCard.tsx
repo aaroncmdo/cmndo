@@ -55,7 +55,7 @@ function formatDate(iso: string | null): string {
   const d = new Date(iso)
   return Number.isNaN(d.getTime())
     ? iso
-    : d.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
+    : d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: 'long', year: 'numeric' })
 }
 
 function formatEuro(n: number | null): string {

@@ -395,10 +395,10 @@ export default function FlowWizardKfz({
                       <div className="mt-4 pt-4 border-t border-[#4573A2]/20">
                         <p className="text-xs text-claimondo-ondo mb-1">Termin reserviert</p>
                         <p className="text-sm font-semibold text-[#0D1B3E]">
-                          {new Date(gutachter.terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                          {new Date(gutachter.terminDatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                         </p>
                         <p className="text-sm text-claimondo-ondo">
-                          {new Date(gutachter.terminDatum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                          {new Date(gutachter.terminDatum).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} Uhr
                         </p>
                         {/* AAR-341: Besichtigungsort + optional Treffpunkt */}
                         {gutachter.besichtigungsAdresse && (

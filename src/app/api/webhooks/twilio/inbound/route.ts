@@ -539,7 +539,7 @@ export async function POST(req: NextRequest) {
           kategorie,
           quelle: 'whatsapp',
           storage_path: path,
-          original_filename: `WhatsApp ${new Date(ts).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}.${ext}`,
+          original_filename: `WhatsApp ${new Date(ts).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}.${ext}`,
           groesse_bytes: buf.byteLength,
           mime_type: contentType,
           uploaded_by_kunde: true,

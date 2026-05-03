@@ -13,7 +13,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 
 // Datum/Uhrzeit-Formatter für Notifikations-Payloads (de-DE)
 function fmtDatum(iso: string): string {
-  return new Date(iso).toLocaleDateString('de-DE', {
+  return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
@@ -21,7 +21,7 @@ function fmtDatum(iso: string): string {
   })
 }
 function fmtUhrzeit(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', {
+  return new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
     hour: '2-digit',
     minute: '2-digit',
   })

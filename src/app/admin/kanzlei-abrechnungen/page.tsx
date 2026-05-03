@@ -178,12 +178,12 @@ export default async function KanzleiAbrechnungenPage() {
                     <td className="px-4 py-3"><StatusBadge status={row.status} /></td>
                     <td className="px-4 py-3 text-claimondo-ondo text-xs">
                       {row.faelligkeitsdatum
-                        ? new Date(row.faelligkeitsdatum).toLocaleDateString('de-DE')
+                        ? new Date(row.faelligkeitsdatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
                         : '—'}
                     </td>
                     <td className="px-4 py-3 text-claimondo-ondo text-xs">
                       {row.bezahlt_am
-                        ? new Date(row.bezahlt_am).toLocaleDateString('de-DE')
+                        ? new Date(row.bezahlt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
                         : '—'}
                     </td>
                   </tr>

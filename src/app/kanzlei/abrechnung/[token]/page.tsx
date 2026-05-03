@@ -99,7 +99,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
               <span className="text-3xl">✅</span>
               <div>
                 <h1 className="text-2xl font-bold text-claimondo-navy">Bereits bezahlt</h1>
-                <p className="text-claimondo-ondo">Diese Rechnung wurde am {abrechnung.bezahlt_am ? new Date(abrechnung.bezahlt_am as string).toLocaleDateString('de-DE') : '—'} bezahlt.</p>
+                <p className="text-claimondo-ondo">Diese Rechnung wurde am {abrechnung.bezahlt_am ? new Date(abrechnung.bezahlt_am as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'} bezahlt.</p>
               </div>
             </div>
             <div className="border rounded-xl p-4 bg-green-50 border-green-200">
@@ -172,7 +172,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
                     <td className="px-4 py-3 text-claimondo-navy">{pos.kunde_name}</td>
                     <td className="px-4 py-3 text-claimondo-ondo">
                       {pos.vollmacht_unterschrieben_am
-                        ? new Date(pos.vollmacht_unterschrieben_am as string).toLocaleDateString('de-DE')
+                        ? new Date(pos.vollmacht_unterschrieben_am as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
                         : '—'}
                     </td>
                     <td className="px-4 py-3 text-right text-claimondo-navy">
@@ -199,7 +199,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
               <span>{Number(abrechnung.endbetrag_brutto).toFixed(2).replace('.', ',')} €</span>
             </div>
             <p className="text-xs text-claimondo-ondo/70 pt-1">
-              Faellig am: {abrechnung.faelligkeitsdatum ? new Date(abrechnung.faelligkeitsdatum as string).toLocaleDateString('de-DE') : '—'}
+              Faellig am: {abrechnung.faelligkeitsdatum ? new Date(abrechnung.faelligkeitsdatum as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
             </p>
           </div>
         </div>

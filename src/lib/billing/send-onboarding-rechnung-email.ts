@@ -100,7 +100,7 @@ export async function sendOnboardingRechnungEmail({
       typ,
       orgName: orgName ?? null,
       rechnungs_nr,
-      rechnungs_datum: new Date().toLocaleDateString('de-DE'),
+      rechnungs_datum: new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
       paket: paket ?? null,
       brutto: bruttoFormatted,
       portalUrl: portalUrl ?? null,

@@ -236,7 +236,7 @@ function HistorieDetail({
       {letzterDatum && (
         <Field
           label="Letzter Vorschaden"
-          value={new Date(letzterDatum).toLocaleDateString('de-DE')}
+          value={new Date(letzterDatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
         />
       )}
       {beschreibung && <Field label="Beschreibung" value={beschreibung} />}
@@ -340,7 +340,7 @@ function UnfallDetail({ data }: { data: StammdatenAccordionData }) {
           datum && (
             <span className="inline-flex items-center gap-1.5">
               <CalendarIcon className="w-3.5 h-3.5 text-claimondo-ondo/70" />
-              {new Date(datum).toLocaleDateString('de-DE')}
+              {new Date(datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
               {uhrzeit && <span className="text-claimondo-ondo">· {uhrzeit}</span>}
             </span>
           )

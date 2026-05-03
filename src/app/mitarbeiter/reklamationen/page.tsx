@@ -61,10 +61,10 @@ export default async function MitarbeiterReklamationen() {
                     }`}>{r.status ?? '—'}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                    {r.eingereicht_am ? new Date(r.eingereicht_am).toLocaleDateString('de-DE') : '—'}
+                    {r.eingereicht_am ? new Date(r.eingereicht_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                    {r.frist_bis ? new Date(r.frist_bis).toLocaleDateString('de-DE') : '—'}
+                    {r.frist_bis ? new Date(r.frist_bis).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
                   </td>
                 </tr>
               )

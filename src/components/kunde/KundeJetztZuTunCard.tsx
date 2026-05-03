@@ -97,7 +97,7 @@ export default function KundeJetztZuTunCard({ aktion }: Props) {
 
 function formatDeadline(iso: string): string {
   try {
-    return new Date(iso).toLocaleString('de-DE', {
+    return new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
       weekday: 'short',
       day: '2-digit',
       month: '2-digit',

@@ -131,7 +131,7 @@ export default function DokumenteQcModal({
                 )}
               </div>
               <p className="mt-1 text-[10px] text-claimondo-ondo">
-                Hochgeladen: {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE')}
+                Hochgeladen: {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
               </p>
             </div>
 

@@ -268,7 +268,7 @@ export default function DokumenteAnfordernCard({
               <span className="font-semibold">Fahrzeugschein:</span> {zb1Cfg.label}
               {zb1HochgeladenAm && zb1Status === 'hochgeladen' && (
                 <span className="block text-[10px] text-claimondo-ondo font-normal mt-0.5">
-                  {new Date(zb1HochgeladenAm).toLocaleString('de-DE')}
+                  {new Date(zb1HochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
                 </span>
               )}
             </p>
@@ -289,7 +289,7 @@ export default function DokumenteAnfordernCard({
               <span className="font-semibold">Polizeibericht:</span> {poliCfg.label}
               {polizeiberichtHochgeladenAm && polizeiberichtStatus === 'hochgeladen' && (
                 <span className="block text-[10px] text-claimondo-ondo font-normal mt-0.5">
-                  {new Date(polizeiberichtHochgeladenAm).toLocaleString('de-DE')}
+                  {new Date(polizeiberichtHochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
                 </span>
               )}
             </p>

@@ -177,7 +177,7 @@ export default function KundeKbChat({
 
   function fmtTime(iso: string | null) {
     if (!iso) return ''
-    return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    return new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
   }
 
   function fallNummerOf(id: string | null) {

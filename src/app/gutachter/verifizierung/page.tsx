@@ -417,7 +417,7 @@ function QualiSlotBadge({ status, hochgeladenAm }: { status: string | null; hoch
 
 function formatDatum(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('de-DE', {
+    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',

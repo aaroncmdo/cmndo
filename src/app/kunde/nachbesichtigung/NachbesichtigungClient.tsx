@@ -43,7 +43,7 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
           <CheckCircleIcon className="w-12 h-12 text-green-500 mx-auto" />
           <h1 className="text-lg font-semibold text-claimondo-navy">Termin gewählt</h1>
           <p className="text-sm text-claimondo-ondo">
-            Ihr Nachbesichtigungstermin am {new Date(selectedDate).toLocaleDateString('de-DE')} wurde bestätigt.
+            Ihr Nachbesichtigungstermin am {new Date(selectedDate).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} wurde bestätigt.
             Der Gutachter der Versicherung wird sich bei Ihnen melden.
           </p>
         </div>
