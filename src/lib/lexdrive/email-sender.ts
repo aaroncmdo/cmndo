@@ -31,10 +31,10 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
 
   const db = createAdminClient()
 
-  // Fall + Lead laden
+  // Fall + Lead laden (inkl. claim_id für Unfallskizze)
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, lead_id, gegner_kennzeichen, gegner_name, gegner_versicherung, gegner_schadennummer, zeugen_kontakte')
+    .select('id, fall_nummer, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, gegner_schadennummer, zeugen_kontakte')
     .eq('id', fallId)
     .single()
 
@@ -62,6 +62,26 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   for (const d of attachmentsToFetch) {
     const att = await fetchPdfFromUrl(d.datei_url as string, (d.datei_name as string) ?? `${d.typ}.pdf`)
     if (att) attachments.push(att)
+  }
+
+  // Unfallskizze laden — aus claims (bestaetigt + URL oder inline SVG)
+  if (fall.claim_id) {
+    const { data: claimData } = await db
+      .from('claims')
+      .select('unfallskizze_svg, unfallskizze_url, unfallskizze_bestaetigt')
+      .eq('id', fall.claim_id as string)
+      .single()
+    if (claimData?.unfallskizze_bestaetigt) {
+      if (claimData.unfallskizze_url) {
+        const att = await fetchPdfFromUrl(claimData.unfallskizze_url as string, 'Unfallskizze.svg')
+        if (att) attachments.push(att)
+      } else if (claimData.unfallskizze_svg) {
+        attachments.push({
+          filename: 'Unfallskizze.svg',
+          content: Buffer.from(claimData.unfallskizze_svg as string, 'utf-8'),
+        })
+      }
+    }
   }
 
   // Email-Body

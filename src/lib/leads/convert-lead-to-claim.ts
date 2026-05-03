@@ -259,6 +259,30 @@ export async function convertLeadToClaim(
   const claimId = claim.id as string
   const claimNummer = (claim.claim_nummer as string | null) ?? null
 
+  // ─── Schritt 3b: Unfallskizze SVG → fall-dokumente Bucket (non-critical) ─
+  // Die SVG liegt als Inline-Text in claims.unfallskizze_svg. Für das
+  // Kanzleipaket und Downloads brauchen wir eine öffentliche URL.
+  // Nur hochladen wenn die Skizze auch freigegeben ist (bestaetigt=true).
+  const skizzeSvg = (lead.unfallskizze_svg as string | null) ?? null
+  const skizzeBestaetigt = (lead.unfallskizze_bestaetigt as boolean | null) === true
+  if (skizzeSvg && skizzeBestaetigt) {
+    try {
+      const skizzePath = `claim/${claimId}/unfallskizze/unfallskizze.svg`
+      const { error: uploadErr } = await admin.storage
+        .from('fall-dokumente')
+        .upload(skizzePath, Buffer.from(skizzeSvg, 'utf-8'), {
+          contentType: 'image/svg+xml',
+          upsert: true,
+        })
+      if (!uploadErr) {
+        const { data: urlData } = admin.storage.from('fall-dokumente').getPublicUrl(skizzePath)
+        await admin.from('claims').update({ unfallskizze_url: urlData.publicUrl }).eq('id', claimId)
+      }
+    } catch {
+      /* non-critical — Skizze bleibt als SVG-Text im Claim erhalten */
+    }
+  }
+
   // ─── Cleanup-Wrapper ────────────────────────────────────────────────────
   // Bei Fehler in den Folge-Steps löschen wir den Claim wieder. Sub-Entities
   // werden via FK CASCADE entfernt.
