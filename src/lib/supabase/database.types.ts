@@ -1795,6 +1795,13 @@ export type Database = {
           entdeckt_am: string | null
           fahrerflucht: boolean | null
           fall_typ: string | null
+          finanzierung_bank: string | null
+          finanzierung_leasing: string
+          finanzierungsgeber_adresse: string | null
+          finanzierungsgeber_name: string | null
+          finanzierungsgeber_vertragsnr: string | null
+          firma_name: string | null
+          firma_ustid: string | null
           gegner_aktenzeichen: string | null
           gegner_bekannt: boolean
           gegner_versicherung_id: string | null
@@ -1802,6 +1809,7 @@ export type Database = {
           gegnerisches_vehicle_id: string | null
           geschaedigter_party_id: string | null
           geschaedigter_user_id: string | null
+          gewerbe_flag: boolean
           gutachten_datum: string | null
           gutachten_erstzulassung: string | null
           gutachten_fahrzeug_typ: string | null
@@ -1856,6 +1864,7 @@ export type Database = {
           kunden_konstellation: string | null
           kundenbetreuer_id: string | null
           lead_id: string | null
+          leasinggeber_name: string | null
           letzter_no_show_am: string | null
           letzter_sv_no_show_am: string | null
           minderwert: number | null
@@ -1895,6 +1904,7 @@ export type Database = {
           verjaehrt_am: string | null
           verursacher_party_id: string | null
           verursacher_user_id: string | null
+          vorsteuerabzugsberechtigt: boolean
           vs_ablehnungs_grund: string | null
           wiederbeschaffungsdauer_tage: number | null
           wiederbeschaffungswert: number | null
@@ -1914,6 +1924,13 @@ export type Database = {
           entdeckt_am?: string | null
           fahrerflucht?: boolean | null
           fall_typ?: string | null
+          finanzierung_bank?: string | null
+          finanzierung_leasing?: string
+          finanzierungsgeber_adresse?: string | null
+          finanzierungsgeber_name?: string | null
+          finanzierungsgeber_vertragsnr?: string | null
+          firma_name?: string | null
+          firma_ustid?: string | null
           gegner_aktenzeichen?: string | null
           gegner_bekannt?: boolean
           gegner_versicherung_id?: string | null
@@ -1921,6 +1938,7 @@ export type Database = {
           gegnerisches_vehicle_id?: string | null
           geschaedigter_party_id?: string | null
           geschaedigter_user_id?: string | null
+          gewerbe_flag?: boolean
           gutachten_datum?: string | null
           gutachten_erstzulassung?: string | null
           gutachten_fahrzeug_typ?: string | null
@@ -1975,6 +1993,7 @@ export type Database = {
           kunden_konstellation?: string | null
           kundenbetreuer_id?: string | null
           lead_id?: string | null
+          leasinggeber_name?: string | null
           letzter_no_show_am?: string | null
           letzter_sv_no_show_am?: string | null
           minderwert?: number | null
@@ -2014,6 +2033,7 @@ export type Database = {
           verjaehrt_am?: string | null
           verursacher_party_id?: string | null
           verursacher_user_id?: string | null
+          vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
           wiederbeschaffungsdauer_tage?: number | null
           wiederbeschaffungswert?: number | null
@@ -2033,6 +2053,13 @@ export type Database = {
           entdeckt_am?: string | null
           fahrerflucht?: boolean | null
           fall_typ?: string | null
+          finanzierung_bank?: string | null
+          finanzierung_leasing?: string
+          finanzierungsgeber_adresse?: string | null
+          finanzierungsgeber_name?: string | null
+          finanzierungsgeber_vertragsnr?: string | null
+          firma_name?: string | null
+          firma_ustid?: string | null
           gegner_aktenzeichen?: string | null
           gegner_bekannt?: boolean
           gegner_versicherung_id?: string | null
@@ -2040,6 +2067,7 @@ export type Database = {
           gegnerisches_vehicle_id?: string | null
           geschaedigter_party_id?: string | null
           geschaedigter_user_id?: string | null
+          gewerbe_flag?: boolean
           gutachten_datum?: string | null
           gutachten_erstzulassung?: string | null
           gutachten_fahrzeug_typ?: string | null
@@ -2094,6 +2122,7 @@ export type Database = {
           kunden_konstellation?: string | null
           kundenbetreuer_id?: string | null
           lead_id?: string | null
+          leasinggeber_name?: string | null
           letzter_no_show_am?: string | null
           letzter_sv_no_show_am?: string | null
           minderwert?: number | null
@@ -2133,6 +2162,7 @@ export type Database = {
           verjaehrt_am?: string | null
           verursacher_party_id?: string | null
           verursacher_user_id?: string | null
+          vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
           wiederbeschaffungsdauer_tage?: number | null
           wiederbeschaffungswert?: number | null
@@ -12750,7 +12780,6 @@ export type Database = {
           kanzlei_wunsch: string | null
           kanzlei_wunsch_gefragt_am: string | null
           kanzlei_wunsch_gefragt_in_phase: string | null
-          kunde_email: string | null
           kunden_konstellation: string | null
           kundenbetreuer_id: string | null
           lead_id: string | null
