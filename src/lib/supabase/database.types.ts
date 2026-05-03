@@ -1851,6 +1851,7 @@ export type Database = {
           kanzlei_wunsch: string
           kanzlei_wunsch_gefragt_am: string | null
           kanzlei_wunsch_gefragt_in_phase: string | null
+          kunde_email: string | null
           kunde_no_show_count: number
           kunden_konstellation: string | null
           kundenbetreuer_id: string | null
@@ -1969,6 +1970,7 @@ export type Database = {
           kanzlei_wunsch?: string
           kanzlei_wunsch_gefragt_am?: string | null
           kanzlei_wunsch_gefragt_in_phase?: string | null
+          kunde_email?: string | null
           kunde_no_show_count?: number
           kunden_konstellation?: string | null
           kundenbetreuer_id?: string | null
@@ -2087,6 +2089,7 @@ export type Database = {
           kanzlei_wunsch?: string
           kanzlei_wunsch_gefragt_am?: string | null
           kanzlei_wunsch_gefragt_in_phase?: string | null
+          kunde_email?: string | null
           kunde_no_show_count?: number
           kunden_konstellation?: string | null
           kundenbetreuer_id?: string | null
@@ -12747,6 +12750,7 @@ export type Database = {
           kanzlei_wunsch: string | null
           kanzlei_wunsch_gefragt_am: string | null
           kanzlei_wunsch_gefragt_in_phase: string | null
+          kunde_email: string | null
           kunden_konstellation: string | null
           kundenbetreuer_id: string | null
           lead_id: string | null

@@ -241,6 +241,9 @@ export async function convertLeadToClaim(
     // später vom Dispatcher (am Telefon) oder vom Kunden im Portal
     // (KanzleiWunschModal) gesetzt.
     kanzlei_wunsch: 'nicht_gefragt',
+
+    // Direktes Email-Feld auf claims — kein JOIN über claim_parties nötig
+    kunde_email: (lead.email as string | null) ?? null,
   }
 
   const { data: claim, error: claimErr } = await admin

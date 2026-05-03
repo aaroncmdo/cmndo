@@ -41,6 +41,8 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   if (!fall) return { success: false, error: `Fall ${fallId} nicht gefunden` }
 
   let kunde: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null; kunde_strasse: string | null; kunde_plz: string | null; kunde_stadt: string | null } | null = null
+
+  // Kontaktdaten aus leads (Stammdaten liegen dort vollständig)
   if (fall.lead_id) {
     const { data: lead } = await db
       .from('leads')
@@ -48,6 +50,28 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
       .eq('id', fall.lead_id)
       .single()
     kunde = lead
+  }
+
+  // Email aus claims.kunde_email bevorzugen — direktes Feld, immer aktuell
+  // (Lead-Email kann veraltet sein wenn Kunde seine Email nach Konvertierung geändert hat)
+  if (fall.claim_id) {
+    const { data: claimEmail } = await db
+      .from('claims')
+      .select('kunde_email')
+      .eq('id', fall.claim_id as string)
+      .single()
+    if (claimEmail?.kunde_email) {
+      kunde = {
+        ...kunde,
+        vorname: kunde?.vorname ?? null,
+        nachname: kunde?.nachname ?? null,
+        telefon: kunde?.telefon ?? null,
+        kunde_strasse: kunde?.kunde_strasse ?? null,
+        kunde_plz: kunde?.kunde_plz ?? null,
+        kunde_stadt: kunde?.kunde_stadt ?? null,
+        email: claimEmail.kunde_email as string,
+      }
+    }
   }
 
   // Pflichtdokumente laden — Gutachten, Vollmacht, Sicherungsabtretung, Polizeibericht
