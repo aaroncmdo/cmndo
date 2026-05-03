@@ -678,6 +678,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 // AAR-858: nur Vorname für Anonymität
                 svVorname: svKontakt?.name?.split(' ')[0] ?? null,
                 kundeVorname: kundeVorname ?? null,
+                svAngekommen: (aktiverSv.sv_angekommen_am as string | null) ?? null,
               }
             : null
           // Gutachten-URL fuer den gruenen Erfolgs-Banner — Quelle ist der

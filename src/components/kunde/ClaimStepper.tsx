@@ -78,6 +78,8 @@ type TerminInfo = {
   verstrichen?: boolean
   /** Termin wurde wahrgenommen (durchgefuehrt_am gesetzt). */
   durchgefuehrt?: boolean
+  /** SV ist angekommen (sv_angekommen_am gesetzt) — Initialwert für SSR. */
+  svAngekommen?: string | null
   /** CMM-32 Polish: Wer war (laut Geo) nicht da? 'sv' wenn der SV nicht
    *  vor Ort war (sv_angekommen_am IS NULL), 'kunde' wenn der SV da war
    *  aber nichts passiert ist, 'unklar' wenn keine Geo-Daten — dann
@@ -219,6 +221,9 @@ export default function ClaimStepper({
   const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
   const terminVerstrichen = !!terminInfo?.verstrichen
+  const [besichtigungAktiv, setBesichtigungAktiv] = useState(
+    !!(terminInfo?.svAngekommen) && !terminInfo?.durchgefuehrt
+  )
 
   // CMM-32 Polish: Klickbare Phase-Auswahl. Default = aktuelle Phase.
   const [selectedPhase, setSelectedPhase] = useState<ClaimMainPhase>(
@@ -882,76 +887,89 @@ export default function ClaimStepper({
       {selectedPhase === 'begutachtung' &&
         terminInfo &&
         !terminInfo.durchgefuehrt &&
+        !terminVerstrichen &&
         !bottomSlot && (
-        <div
-          className={`border-t px-4 sm:px-6 py-3.5 ${
-            terminVerstrichen ? 'border-rose-300 bg-rose-50/40' : 'border-claimondo-navy/10'
-          }`}
-        >
-          {terminVerstrichen && (
-            <div className="flex items-start gap-1.5 text-[11px] font-semibold text-rose-700 mb-1.5">
-              <AlertTriangleIcon className="w-3 h-3 mt-0.5 shrink-0" />
-              <span>
-                {terminInfo.verstrichenInitiator === 'sv'
-                  ? 'Gutachter ist nicht erschienen — du kannst einen neuen Termin wählen'
-                  : terminInfo.verstrichenInitiator === 'kunde'
-                    ? 'Termin verpasst — du warst nicht vor Ort'
-                    : 'Termin verstrichen — kein Status erfasst'}
-              </span>
-            </div>
-          )}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <CalendarIcon className={`w-4 h-4 shrink-0 ${terminVerstrichen ? 'text-rose-700' : 'text-claimondo-navy'}`} />
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <p
-                    className={`text-sm font-semibold ${
-                      terminVerstrichen ? 'text-rose-700 line-through' : 'text-claimondo-navy'
-                    }`}
-                  >
-                    {terminInfo.datum}, {terminInfo.uhrzeit} Uhr
-                  </p>
-                  {!terminVerstrichen && (
-                    <TerminLiveStatus
-                      terminId={terminInfo.terminId}
-                      svVorname={terminInfo.svVorname}
-                      kundeVorname={terminInfo.kundeVorname}
-                    />
+        besichtigungAktiv ? (
+          <div className="border-t border-emerald-200 bg-emerald-50/50 px-4 sm:px-6 py-3.5 flex items-center gap-3">
+            <span className="relative flex h-2.5 w-2.5 shrink-0">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            </span>
+            <p className="text-sm font-semibold text-emerald-800">Besichtigung läuft</p>
+            <p className="text-xs text-emerald-700 ml-1">· Ihr Gutachter ist gerade vor Ort</p>
+          </div>
+        ) : (
+          <div
+            className={`border-t px-4 sm:px-6 py-3.5 ${
+              terminVerstrichen ? 'border-rose-300 bg-rose-50/40' : 'border-claimondo-navy/10'
+            }`}
+          >
+            {terminVerstrichen && (
+              <div className="flex items-start gap-1.5 text-[11px] font-semibold text-rose-700 mb-1.5">
+                <AlertTriangleIcon className="w-3 h-3 mt-0.5 shrink-0" />
+                <span>
+                  {terminInfo.verstrichenInitiator === 'sv'
+                    ? 'Gutachter ist nicht erschienen — du kannst einen neuen Termin wählen'
+                    : terminInfo.verstrichenInitiator === 'kunde'
+                      ? 'Termin verpasst — du warst nicht vor Ort'
+                      : 'Termin verstrichen — kein Status erfasst'}
+                </span>
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <CalendarIcon className={`w-4 h-4 shrink-0 ${terminVerstrichen ? 'text-rose-700' : 'text-claimondo-navy'}`} />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <p
+                      className={`text-sm font-semibold ${
+                        terminVerstrichen ? 'text-rose-700 line-through' : 'text-claimondo-navy'
+                      }`}
+                    >
+                      {terminInfo.datum}, {terminInfo.uhrzeit} Uhr
+                    </p>
+                    {!terminVerstrichen && (
+                      <TerminLiveStatus
+                        terminId={terminInfo.terminId}
+                        svVorname={terminInfo.svVorname}
+                        kundeVorname={terminInfo.kundeVorname}
+                        onBesichtigungAktiv={setBesichtigungAktiv}
+                      />
+                    )}
+                  </div>
+                  {terminInfo.adresse && (
+                    <p className="text-xs text-claimondo-ondo truncate">
+                      {terminInfo.adresse}
+                      {terminInfo.svVorname && ` · ${terminInfo.svVorname}`}
+                    </p>
                   )}
                 </div>
-                {terminInfo.adresse && (
-                  <p className="text-xs text-claimondo-ondo truncate">
-                    {terminInfo.adresse}
-                    {terminInfo.svVorname && ` · ${terminInfo.svVorname}`}
-                  </p>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                {terminVerstrichen ? (
+                  <KundeTerminVerschiebenButton
+                    terminId={terminInfo.terminId}
+                    label="Neuen Termin vereinbaren"
+                    variant="primary"
+                  />
+                ) : terminInfo.status === 'bestaetigt' ? (
+                  <KundeTerminVerschiebenButton terminId={terminInfo.terminId} />
+                ) : null}
+                {!terminVerstrichen && terminInfo.adresse && (
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(terminInfo.adresse)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-sm font-medium px-3 py-1.5 transition-colors"
+                  >
+                    <NavigationIcon className="w-3.5 h-3.5" />
+                    Navigation
+                  </a>
                 )}
               </div>
             </div>
-            <div className="ml-auto flex items-center gap-2">
-              {terminVerstrichen ? (
-                <KundeTerminVerschiebenButton
-                  terminId={terminInfo.terminId}
-                  label="Neuen Termin vereinbaren"
-                  variant="primary"
-                />
-              ) : terminInfo.status === 'bestaetigt' ? (
-                <KundeTerminVerschiebenButton terminId={terminInfo.terminId} />
-              ) : null}
-              {!terminVerstrichen && terminInfo.adresse && (
-                <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(terminInfo.adresse)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-sm font-medium px-3 py-1.5 transition-colors"
-                >
-                  <NavigationIcon className="w-3.5 h-3.5" />
-                  Navigation
-                </a>
-              )}
-            </div>
           </div>
-        </div>
+        )
       )}
 
       {/* CMM-32 Polish: Begutachtungs-Historie — alle Events mit Datum

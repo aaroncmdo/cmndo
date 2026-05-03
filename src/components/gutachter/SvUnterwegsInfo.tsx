@@ -19,12 +19,11 @@ export function SvUnterwegsInfo({ tracking }: { tracking: GeoTrackingState }) {
       <NavigationIcon className="w-4 h-4 shrink-0 text-[#7BA3CC]" />
       <div className="flex-1 min-w-0">
         <span className="text-sm font-semibold">Sie sind unterwegs</span>
-        {ankunft && (
-          <span className="text-sm text-[#7BA3CC] ml-2">
-            · Ankunft ca. {ankunft}
-            {tracking.etaMinuten && ` (${tracking.etaMinuten} Min.)`}
-          </span>
-        )}
+        <span className="text-sm text-[#7BA3CC] ml-2">
+          {ankunft
+            ? `· Ankunft ca. ${ankunft}${tracking.etaMinuten ? ` (${tracking.etaMinuten} Min.)` : ''}`
+            : '· Ankunft wird berechnet…'}
+        </span>
       </div>
     </div>
   )
