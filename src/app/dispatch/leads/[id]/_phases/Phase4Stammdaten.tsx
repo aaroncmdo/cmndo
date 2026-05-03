@@ -110,6 +110,9 @@ type LeadFields = {
   // AAR-318: Geburtsdatum manuell oder aus Kunde übernommen (nicht in ZB1)
   halter_geburtsdatum?: string | null
   ist_fahrzeughalter?: boolean | null
+  kunde_strasse?: string | null
+  kunde_plz?: string | null
+  kunde_stadt?: string | null
   hsn?: string | null
   tsn?: string | null
   // AAR-298: Zeugen-Kontaktdaten als JSONB-Array (zeugen-Flag schon weiter oben)
@@ -461,6 +464,30 @@ export default function Phase4Stammdaten() {
     })
   }, [l.gegner_kennzeichen])
   const [, startTransition] = useTransition()
+
+  // Halter-Daten aus Kundendaten zusammenstellen
+  function halterAusKunde() {
+    return {
+      ist_fahrzeughalter: true,
+      halter_vorname: l.vorname ?? null,
+      halter_nachname: l.nachname ?? null,
+      halter_strasse: l.kunde_strasse ?? null,
+      halter_plz: l.kunde_plz ?? null,
+      halter_stadt: l.kunde_stadt ?? null,
+    }
+  }
+
+  // Standard: wenn ist_fahrzeughalter noch nie gesetzt wurde (null) und
+  // Kundendaten vorhanden sind → automatisch als Halter übernehmen.
+  useEffect(() => {
+    if (l.ist_fahrzeughalter == null && (l.vorname || l.nachname)) {
+      const fields = halterAusKunde()
+      patchLead(fields as Partial<typeof lead>)
+      startTransition(async () => { await saveStammdaten(leadId, fields) })
+    }
+    // Nur beim Mount ausführen
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // AAR-217 Bug 2: Gegner-KZ wird beim Blur formatiert (gleicher Pfad wie
   // Eigenes-KZ via formatKennzeichen) — vorher wurde nur uppercase + trim
@@ -964,16 +991,23 @@ export default function Phase4Stammdaten() {
             <button
               type="button"
               onClick={() => {
-                const useKunde = !(l.ist_fahrzeughalter === true)
-                if (useKunde) {
-                  // „Gleich wie Kunde" → Halter = Kunde übernehmen
-                  saveStammdaten(leadId, {
-                    ist_fahrzeughalter: true,
-                    halter_vorname: l.vorname ?? null,
-                    halter_nachname: l.nachname ?? null,
-                  })
+                if (l.ist_fahrzeughalter === true) {
+                  // Abwählen → Felder leeren
+                  const fields = {
+                    ist_fahrzeughalter: false,
+                    halter_vorname: null,
+                    halter_nachname: null,
+                    halter_strasse: null,
+                    halter_plz: null,
+                    halter_stadt: null,
+                  }
+                  patchLead(fields as Partial<typeof lead>)
+                  startTransition(async () => { await saveStammdaten(leadId, fields) })
                 } else {
-                  saveStammdaten(leadId, { ist_fahrzeughalter: false })
+                  // Anwählen → mit Kundendaten befüllen
+                  const fields = halterAusKunde()
+                  patchLead(fields as Partial<typeof lead>)
+                  startTransition(async () => { await saveStammdaten(leadId, fields) })
                 }
               }}
               className={`px-2 py-1 rounded-md text-[11px] font-medium border ${
