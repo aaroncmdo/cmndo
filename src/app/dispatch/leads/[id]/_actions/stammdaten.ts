@@ -28,7 +28,7 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'gegner_bekannt', 'gegner_kennzeichen', 'gegner_versicherung',
   // AAR-265: FK auf versicherungen-Stammdaten (Autocomplete in Phase 4)
   'gegner_versicherung_id',
-  'gegner_schadennummer', 'unfalldatum', 'unfall_uhrzeit',
+  'gegner_schadennummer', 'gegner_versicherungsnummer', 'unfalldatum', 'unfall_uhrzeit',
   // AAR-264: Wunschtermin in Phase 2 — wird auch fürs SV-Matching genutzt
   'wunschtermin',
   // AAR-270: Wochentag-Präferenz für SV-Slot-Filter (ISO 1=Mo..7=So)

@@ -100,6 +100,7 @@ type LeadFields = {
   // AAR-265: FK auf versicherungen-Stammdaten (Autocomplete)
   gegner_versicherung_id?: string | null
   gegner_schadennummer?: string | null
+  gegner_versicherungsnummer?: string | null
   unfalldatum?: string | null
   unfall_uhrzeit?: string | null
   unfallort?: string | null
@@ -1485,6 +1486,14 @@ export default function Phase4Stammdaten() {
             value={l.gegner_schadennummer}
             fieldName="gegner_schadennummer"
             leadId={leadId}
+          />
+          <InlineField
+            label="Versicherungsnummer Gegner (optional)"
+            value={l.gegner_versicherungsnummer}
+            fieldName="gegner_versicherungsnummer"
+            leadId={leadId}
+            placeholder="Versicherungsschein-Nr."
+            hint="Steht auf der Grünen Karte / dem Versicherungsausweis"
           />
           {/* CMM-26: Unfalldatum, Unfall-Uhrzeit und Unfallort sind in Phase 1
               (Erstkontakt) Owner. Phase 4 bezieht sich nur noch auf Gegner +
