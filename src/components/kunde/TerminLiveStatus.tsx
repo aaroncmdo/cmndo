@@ -15,6 +15,8 @@ type Props = {
   terminId: string
   svVorname?: string | null
   kundeVorname?: string | null
+  /** Wird aufgerufen wenn sv_angekommen_am oder besichtigung_gestartet_am sich ändert. */
+  onBesichtigungAktiv?: (aktiv: boolean) => void
 }
 
 type State = {
@@ -23,7 +25,7 @@ type State = {
   kundeAngekommenAm: string | null
 }
 
-export default function TerminLiveStatus({ terminId, svVorname, kundeVorname }: Props) {
+export default function TerminLiveStatus({ terminId, svVorname, kundeVorname, onBesichtigungAktiv }: Props) {
   const [state, setState] = useState<State>({
     besichtigungGestartetAm: null,
     svAngekommenAm: null,
@@ -75,6 +77,10 @@ export default function TerminLiveStatus({ terminId, svVorname, kundeVorname }: 
       void supabase.removeChannel(channel)
     }
   }, [terminId])
+
+  useEffect(() => {
+    onBesichtigungAktiv?.(!!(state.besichtigungGestartetAm ?? state.svAngekommenAm))
+  }, [state.besichtigungGestartetAm, state.svAngekommenAm, onBesichtigungAktiv])
 
   if (state.besichtigungGestartetAm) {
     return (
