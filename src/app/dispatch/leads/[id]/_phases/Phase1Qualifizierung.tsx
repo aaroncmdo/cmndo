@@ -29,7 +29,7 @@ import {
   UserPlusIcon,
   PackageIcon,
 } from 'lucide-react'
-import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 // AAR-175 P1-B: ExitSkript inline rendern sobald die MA Eigenverantwortung
 // auswählt — vorher nur roter Einzeiler ohne konkrete Ausstiegsschritte,
 // jetzt das volle 4-Punkte-Skript mit Copy-Button (Notion-Spec §2.Q1).
@@ -84,6 +84,11 @@ type LeadFields = {
   fahrerflucht?: boolean | null
   // AAR-316: Sprache des Kunden (ISO-Code)
   sprache?: string | null
+  // Besichtigungsort — wird hier aus Phase 2 gezogen (sichtbar wenn nicht fahrbereit)
+  besichtigungsort_adresse?: string | null
+  besichtigungsort_lat?: number | null
+  besichtigungsort_lng?: number | null
+  besichtigungsort_place_id?: string | null
 }
 
 // AAR-316: Dropdown-Optionen — nur die 7 CHECK-Constraint-erlaubten Werte.
@@ -197,6 +202,46 @@ export default function Phase1Qualifizierung() {
       l.polizei_vor_ort === true ? (l.polizeibericht_pflicht ?? null) : null,
   })
   const [toast, setToast] = useState('')
+  const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState(
+    l.besichtigungsort_adresse ?? ''
+  )
+
+  function saveBesichtigungsort(place: PlaceResult) {
+    setBesichtigungsortAdresse(place.adresse)
+    patchLead({
+      besichtigungsort_adresse: place.adresse,
+      besichtigungsort_lat: place.lat,
+      besichtigungsort_lng: place.lng,
+      besichtigungsort_place_id: place.place_id || null,
+    } as Partial<typeof lead>)
+    startTransition(async () => {
+      await saveStammdaten(lead.id, {
+        besichtigungsort_adresse: place.adresse,
+        besichtigungsort_lat: place.lat,
+        besichtigungsort_lng: place.lng,
+        besichtigungsort_place_id: place.place_id || null,
+      })
+    })
+  }
+
+  function clearBesichtigungsort() {
+    if (!besichtigungsortAdresse) return
+    setBesichtigungsortAdresse('')
+    patchLead({
+      besichtigungsort_adresse: null,
+      besichtigungsort_lat: null,
+      besichtigungsort_lng: null,
+      besichtigungsort_place_id: null,
+    } as Partial<typeof lead>)
+    startTransition(async () => {
+      await saveStammdaten(lead.id, {
+        besichtigungsort_adresse: null,
+        besichtigungsort_lat: null,
+        besichtigungsort_lng: null,
+        besichtigungsort_place_id: null,
+      })
+    })
+  }
 
   const q1Complete =
     !!draft.unfallhergang?.trim() &&
@@ -515,13 +560,36 @@ export default function Phase1Qualifizierung() {
               <button type="button" onClick={() => setDraft(d => ({ ...d, fahrzeug_fahrbereit: false }))} className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.fahrzeug_fahrbereit === false ? 'bg-claimondo-ondo text-white' : 'bg-white border border-claimondo-border text-claimondo-ondo'}`}>Nein</button>
             </div>
             {draft.fahrzeug_fahrbereit === false && (
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
-                <p className="text-[11px] text-orange-800 font-medium">Mietwagen jetzt ansprechen — Anspruch gilt ab Unfalltag!</p>
-                <label className="flex items-center gap-1.5 text-[11px] text-orange-900 cursor-pointer mt-1.5">
-                  <input type="checkbox" checked={draft.mietwagen_flag ?? false} onChange={e => setDraft(d => ({ ...d, mietwagen_flag: e.target.checked }))} className="w-3.5 h-3.5" />
-                  Kunde will Mietwagen
-                </label>
-              </div>
+              <>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
+                  <p className="text-[11px] text-orange-800 font-medium">Mietwagen jetzt ansprechen — Anspruch gilt ab Unfalltag!</p>
+                  <label className="flex items-center gap-1.5 text-[11px] text-orange-900 cursor-pointer mt-1.5">
+                    <input type="checkbox" checked={draft.mietwagen_flag ?? false} onChange={e => setDraft(d => ({ ...d, mietwagen_flag: e.target.checked }))} className="w-3.5 h-3.5" />
+                    Kunde will Mietwagen
+                  </label>
+                </div>
+                {/* Besichtigungsadresse: Fahrzeug steht irgendwo — SV muss hinfahren */}
+                <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <MapPinIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                    <span className="text-[11px] font-semibold text-claimondo-navy">Wo steht das Fahrzeug?</span>
+                    {besichtigungsortAdresse && (
+                      <CheckCircleIcon className="w-3.5 h-3.5 text-green-500 ml-auto shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-[10px] text-claimondo-ondo">
+                    Adresse wo der Gutachter das Fahrzeug besichtigen soll (Werkstatt, Stellplatz …).
+                    Leer lassen = SV fährt zum Unfallort.
+                  </p>
+                  <GooglePlaceAutocomplete
+                    defaultValue={besichtigungsortAdresse}
+                    placeholder="Werkstatt / Stellplatz-Adresse"
+                    onSelect={saveBesichtigungsort}
+                    onBlur={(current) => { if (!current.trim()) clearBesichtigungsort() }}
+                    className="w-full px-2 py-1.5 border border-claimondo-border rounded-lg text-xs"
+                  />
+                </div>
+              </>
             )}
             <label className={`flex items-center gap-1.5 text-[11px] cursor-pointer rounded-lg p-1.5 ${
               isAuffahrunfall ? 'bg-rose-50 border border-rose-200 text-rose-900' : 'text-claimondo-navy'

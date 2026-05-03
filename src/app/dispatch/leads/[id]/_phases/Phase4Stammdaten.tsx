@@ -19,6 +19,8 @@ import { useCarQuery } from '../_hooks/useCarQuery'
 // AAR-352: Zb1UploadCard + PolizeiberichtUploadCard ersetzt durch
 // DokumenteAnfordernCard (kombinierte Multi-Slot-Anfrage in einem Link).
 import DokumenteAnfordernCard from './DokumenteAnfordernCard'
+import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
+import { LACKFARBE_OPTIONS, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 import BkatAnalysePanel from './BkatAnalysePanel'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
 import { requestCardentityTypBForLead } from '../_actions/cardentity'
@@ -115,6 +117,8 @@ type LeadFields = {
   kunde_strasse?: string | null
   kunde_plz?: string | null
   kunde_stadt?: string | null
+  lackfarbe_code?: string | null
+  fahrzeug_farbe?: string | null
   hsn?: string | null
   tsn?: string | null
   // AAR-298: Zeugen-Kontaktdaten als JSONB-Array (zeugen-Flag schon weiter oben)
@@ -754,6 +758,49 @@ export default function Phase4Stammdaten() {
               ))}
             </datalist>
           </div>
+
+          {/* Lackfarbe — Dropdown mit LACKFARBE_OPTIONS, auto-save on change */}
+          <div className="space-y-0.5">
+            <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider">
+              Lackfarbe
+            </label>
+            <select
+              value={l.lackfarbe_code ?? ''}
+              onChange={(e) => {
+                const v = (e.target.value || null) as LackfarbeCode | null
+                saveToggle('lackfarbe_code', v)
+              }}
+              className="text-sm font-medium bg-transparent border-b border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo w-full py-0.5 outline-none"
+            >
+              <option value="">— bitte wählen —</option>
+              {LACKFARBE_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </div>
+
+          <InlineField
+            label="Lack-Detail (optional)"
+            value={l.fahrzeug_farbe}
+            fieldName="fahrzeug_farbe"
+            leadId={leadId}
+            placeholder="z. B. Saphirschwarz Metallic"
+          />
+
+          {/* Live-Render-Preview — sichtbar sobald Marke gesetzt ist */}
+        </div>
+        {marke && (
+          <div className="flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/15 py-3 mt-1">
+            <FahrzeugRenderImage
+              hersteller={marke}
+              modell={l.fahrzeug_modell || null}
+              lackfarbe={(l.lackfarbe_code as LackfarbeCode | null) ?? null}
+              baujahr={l.fahrzeug_baujahr ?? null}
+              width={260}
+            />
+          </div>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
           {/* AAR-347: FIN/HSN/TSN manuell eintragbar als OCR-Fallback —
               werden normalerweise aus der ZB1 automatisch extrahiert, aber

@@ -10,8 +10,6 @@ import { PlusIcon, XIcon } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { createManualLead, type CreateManualLeadInput } from '../actions'
 import { Drawer } from '@/components/primitives/Drawer'
-import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
-import type { LackfarbeCode } from '@/lib/fahrzeug/imagin'
 
 const INITIAL: CreateManualLeadInput = {
   anrede: null,
@@ -33,6 +31,9 @@ const INITIAL: CreateManualLeadInput = {
   source_channel: 'manuell',
   notizen: '',
 }
+
+// Fahrzeugfelder (Hersteller/Modell/Kennzeichen/Lackfarbe/Render) werden
+// in Phase 4 Stammdaten erfasst — nicht beim schnellen Lead-Anlegen.
 
 export default function NeuLeadDrawer() {
   const router = useRouter()
@@ -108,60 +109,6 @@ export default function NeuLeadDrawer() {
           </div>
           <InputField label="Telefon *" value={data.telefon} onChange={v => setData({ ...data, telefon: v })} type="tel" placeholder="+49..." />
           <InputField label="E-Mail *" value={data.email} onChange={v => setData({ ...data, email: v })} type="email" placeholder="kunde@beispiel.de" />
-          {/* CMM-32: Fahrzeug-Daten direkt erfassen — der Render im SV-Banner
-              und in der Auftrags-Card baut auf diesen Feldern auf. */}
-          <div className="grid grid-cols-2 gap-3">
-            <InputField label="Hersteller" value={data.fahrzeug_hersteller ?? ''} onChange={v => setData({ ...data, fahrzeug_hersteller: v })} placeholder="z. B. BMW" />
-            <InputField label="Modell" value={data.fahrzeug_modell ?? ''} onChange={v => setData({ ...data, fahrzeug_modell: v })} placeholder="z. B. 3er" />
-          </div>
-          {/* Live-Render-Preview als visuelle Bestätigung — sobald Hersteller
-              eingetippt ist, sieht der Dispatcher das Fahrzeug. */}
-          {data.fahrzeug_hersteller && (
-            <div className="flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/15 py-3">
-              <FahrzeugRenderImage
-                hersteller={data.fahrzeug_hersteller}
-                modell={data.fahrzeug_modell || null}
-                lackfarbe={(data.lackfarbe_code as LackfarbeCode | null) ?? null}
-                width={240}
-              />
-            </div>
-          )}
-          <InputField label="Kennzeichen" value={data.kennzeichen ?? ''} onChange={v => setData({ ...data, kennzeichen: v.toUpperCase() })} placeholder="K-AB 1234" />
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-claimondo-ondo mb-1.5">Lackfarbe</label>
-              <select
-                value={data.lackfarbe_code ?? ''}
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    lackfarbe_code: (e.target.value || null) as typeof data.lackfarbe_code,
-                  })
-                }
-                className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm bg-white focus:outline-none focus:border-claimondo-ondo"
-              >
-                <option value="">— bitte wählen —</option>
-                <option value="schwarz">Schwarz</option>
-                <option value="weiss">Weiß</option>
-                <option value="silber">Silber</option>
-                <option value="grau">Grau</option>
-                <option value="blau">Blau</option>
-                <option value="rot">Rot</option>
-                <option value="gruen">Grün</option>
-                <option value="gelb">Gelb</option>
-                <option value="orange">Orange</option>
-                <option value="braun">Braun</option>
-                <option value="beige">Beige</option>
-                <option value="sonstige">Sonstige</option>
-              </select>
-            </div>
-            <InputField
-              label="Lack-Detail (optional)"
-              value={data.fahrzeug_farbe ?? ''}
-              onChange={(v) => setData({ ...data, fahrzeug_farbe: v })}
-              placeholder="z. B. Saphirschwarz Metallic"
-            />
-          </div>
 
           {/* AAR-695: Google-Maps-Autocomplete für die Kunden-Adresse.
               Liefert direkt Adresse + PLZ + Lat/Lng — wird in Phase 1 ohnehin

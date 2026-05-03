@@ -11,8 +11,8 @@ import { useRouter } from 'next/navigation'
 import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../_lib/phase-context'
 import { setServiceTyp, saveStammdaten } from '../actions'
-import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
-import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
+// GooglePlaceAutocomplete nach Phase 1 verschoben (Besichtigungsadresse dort)
+import { CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
 
 export default function Phase2TerminServiceTyp() {
   const router = useRouter()
@@ -34,9 +34,6 @@ export default function Phase2TerminServiceTyp() {
     wunschtermin_wochentage?: number[] | null
   }
   const [pending, startTransition] = useTransition()
-  const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState<string>(
-    l.besichtigungsort_adresse ?? '',
-  )
   const [serviceTyp, setServiceTypLocal] = useState<'komplett' | 'nur_gutachter'>(
     l.service_typ ?? 'komplett',
   )
@@ -86,40 +83,6 @@ export default function Phase2TerminServiceTyp() {
   const hasKoordinaten =
     (l.besichtigungsort_lat != null && l.besichtigungsort_lng != null) ||
     (l.unfallort_lat != null && l.unfallort_lng != null)
-
-  function saveBesichtigungsort(place: PlaceResult) {
-    setBesichtigungsortAdresse(place.adresse)
-    // AAR-realtime: Provider sofort patchen
-    patchLead({
-      besichtigungsort_adresse: place.adresse,
-      besichtigungsort_lat: place.lat,
-      besichtigungsort_lng: place.lng,
-      besichtigungsort_place_id: place.place_id || null,
-    } as Partial<typeof lead>)
-    startTransition(async () => {
-      const r = await saveStammdaten(lead.id, {
-        besichtigungsort_adresse: place.adresse,
-        besichtigungsort_lat: place.lat,
-        besichtigungsort_lng: place.lng,
-        besichtigungsort_place_id: place.place_id || null,
-      })
-      setToast(r.success ? 'Besichtigungsort gespeichert' : r.error ?? 'Fehler')
-      setTimeout(() => setToast(''), 2000)
-    })
-  }
-
-  function clearBesichtigungsort() {
-    if (!besichtigungsortAdresse) return
-    setBesichtigungsortAdresse('')
-    startTransition(async () => {
-      await saveStammdaten(lead.id, {
-        besichtigungsort_adresse: null,
-        besichtigungsort_lat: null,
-        besichtigungsort_lng: null,
-        besichtigungsort_place_id: null,
-      })
-    })
-  }
 
   function chooseServiceTyp(typ: 'komplett' | 'nur_gutachter') {
     startTransition(async () => {
@@ -247,43 +210,6 @@ export default function Phase2TerminServiceTyp() {
         {wunschtermin && (
           <p className="text-[10px] text-claimondo-ondo">
             SV-Matching bevorzugt Gutachter die zu diesem Termin verfügbar sind.
-          </p>
-        )}
-      </div>
-
-      {/* Besichtigungsadresse für SV-Dispatch — CMM-26: nur EIN Picker, der
-         in besichtigungsort_* schreibt. Der Unfallort gehört zu Phase 1
-         (Schadenereignis) und wird hier nicht mehr editiert. Wenn kein
-         expliziter Besichtigungsort gesetzt ist, fällt SV-Matching auf
-         unfallort_lat/lng (Phase 1) bzw. kunde_lat/lng zurück
-         (siehe listSvSuggestionsForLead). */}
-      <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-3">
-        <div className="flex items-center gap-2">
-          <MapPinIcon className="w-4 h-4 text-claimondo-ondo" />
-          <h3 className="text-sm font-semibold text-claimondo-navy">Besichtigungsadresse</h3>
-          {hasKoordinaten && (
-            <span className="ml-auto text-[10px] text-green-600 font-medium flex items-center gap-1">
-              <CheckCircle2Icon className="w-3 h-3" /> Koordinaten ok
-            </span>
-          )}
-        </div>
-        <p className="text-[11px] text-claimondo-ondo">
-          Wo soll der Gutachter das Fahrzeug besichtigen? Leer lassen = SV fährt
-          zum Unfallort aus Phase 1. Bei abweichender Werkstatt / Halter-Adresse
-          hier eintragen — SV-Vorschläge werden anhand dieser Adresse gerankt.
-        </p>
-        <GooglePlaceAutocomplete
-          defaultValue={besichtigungsortAdresse}
-          placeholder='z. B. „Werkstatt Müller, Musterstr. 1, 80331 München" oder leer = Unfallort'
-          onSelect={saveBesichtigungsort}
-          onBlur={(current) => {
-            if (!current.trim()) clearBesichtigungsort()
-          }}
-          className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
-        />
-        {l.unfallort && !besichtigungsortAdresse && (
-          <p className="text-[10px] text-claimondo-ondo italic">
-            Fallback aktiv: SV-Matching nutzt Unfallort aus Phase 1 ({l.unfallort}).
           </p>
         )}
       </div>

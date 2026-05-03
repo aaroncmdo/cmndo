@@ -15,6 +15,7 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'notiz',
   // Fahrzeug
   'kennzeichen', 'fahrzeug_hersteller', 'fahrzeug_modell',
+  'lackfarbe_code', 'fahrzeug_farbe',
   // AAR-181: Baujahr ist Pflichtfeld in Phase 4, muss in der Allowlist sein
   'fahrzeug_baujahr', 'erstzulassung',
   // AAR-347: OCR-Fallback — FIN/HSN/TSN manuell im Dispatch eintragbar,
