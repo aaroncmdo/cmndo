@@ -28,6 +28,7 @@ import { requestCardentityTypBForLead } from '../_actions/cardentity'
 // AAR-314: Auslandskennzeichen — Anfrage an Deutsches Büro Grüne Karte mit Reminder
 import { setGrueneKarteAngefragt } from '../_actions/gruene-karte'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import {
   CarIcon,
   ShieldIcon,
@@ -39,6 +40,7 @@ import {
   CheckIcon,
   InfoIcon,
   UserCheckIcon,
+  MapPinIcon,
 } from 'lucide-react'
 
 // Top-20 KFZ-Marken in Deutschland nach Zulassungen (KBA 2024) + Sonstiges
@@ -116,9 +118,12 @@ type LeadFields = {
   // AAR-318: Geburtsdatum manuell oder aus Kunde übernommen (nicht in ZB1)
   halter_geburtsdatum?: string | null
   ist_fahrzeughalter?: boolean | null
+  kunde_adresse?: string | null
   kunde_strasse?: string | null
   kunde_plz?: string | null
   kunde_stadt?: string | null
+  kunde_lat?: number | null
+  kunde_lng?: number | null
   lackfarbe_code?: string | null
   fahrzeug_farbe?: string | null
   hsn?: string | null
@@ -678,6 +683,45 @@ export default function Phase4Stammdaten() {
           (Vorname/Nachname/Telefon/Email) werden bereits in Phase 1/5
           erfasst bzw. editiert. Doppelte Eingabe verwirrt den MA. */}
 
+      {/* Kundenadresse — wird hier in Phase 4 erfasst (nicht beim Lead-Anlegen) */}
+      <Card icon={<MapPinIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Kundenadresse">
+        <div className="space-y-1.5">
+          <p className="text-[11px] text-claimondo-ondo">
+            Wohnadresse des Kunden — wird für Isochrone-Matching und Gutachter-Zuweisung genutzt.
+          </p>
+          <GooglePlaceAutocomplete
+            defaultValue={l.kunde_adresse ?? ''}
+            placeholder="Straße, PLZ, Stadt"
+            onSelect={(p: PlaceResult) => {
+              const fields = {
+                kunde_adresse: p.adresse,
+                kunde_strasse: p.strasse || null,
+                kunde_plz: p.plz || null,
+                kunde_stadt: p.stadt || null,
+                kunde_lat: p.lat,
+                kunde_lng: p.lng,
+              }
+              patchLead(fields as Partial<typeof lead>)
+              startTransition(async () => { await saveStammdaten(leadId, fields) })
+            }}
+            onChange={(text) => {
+              if (!text.trim()) {
+                const fields = { kunde_adresse: null, kunde_strasse: null, kunde_plz: null, kunde_stadt: null, kunde_lat: null, kunde_lng: null }
+                patchLead(fields as Partial<typeof lead>)
+                startTransition(async () => { await saveStammdaten(leadId, fields) })
+              }
+            }}
+            className="w-full px-3 py-2 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
+          />
+          {l.kunde_lat && l.kunde_lng && (
+            <p className="text-[10px] text-claimondo-ondo/70">
+              ✓ Koordinaten {l.kunde_lat.toFixed(4)}, {l.kunde_lng.toFixed(4)}
+              {l.kunde_plz ? ` · PLZ ${l.kunde_plz}` : ''}
+              {l.kunde_stadt ? ` · ${l.kunde_stadt}` : ''}
+            </p>
+          )}
+        </div>
+      </Card>
 
       {/* 1. Fahrzeugdaten — AAR-194: Baujahr OBEN, dann Marke + Modell
           dynamisch via CarQuery (gefiltert nach Baujahr falls gesetzt). */}
