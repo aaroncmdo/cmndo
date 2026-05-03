@@ -27,7 +27,6 @@ import BankdatenBanner from '@/components/kunde/BankdatenBanner'
 import PflichtdokumenteSection from '@/components/fall/PflichtdokumenteSection'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
-import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
@@ -935,9 +934,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             }}
           />
         )}
-
-        {/* AAR-770: Mitteilungs-Banner — ganz oben mit Quick-Action */}
-        <FallMitteilungenBanner fallId={fall.id as string} rolle="kunde" />
 
         {/* CMM-33: Banner-Click-Tile → öffnet Pop-over mit allen Slot-
             Drag&Drop-Cards. Kompakt in der Detail-Page, voller Upload-
