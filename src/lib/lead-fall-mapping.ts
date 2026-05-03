@@ -44,7 +44,7 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'gegner_anzahl_beteiligte',
   'gegner_fahrzeugtyp',
   // Fahrzeug
-  'kennzeichen',
+  'kennzeichen', 'kennzeichen_kreis', 'kennzeichen_buchstaben', 'kennzeichen_zahl', 'kennzeichen_suffix',
   'fahrzeug_hersteller',
   'fahrzeug_modell',
   'fahrzeug_farbe',

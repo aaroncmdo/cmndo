@@ -29,6 +29,7 @@ import { requestCardentityTypBForLead } from '../_actions/cardentity'
 import { setGrueneKarteAngefragt } from '../_actions/gruene-karte'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import { parseKennzeichen, buildKennzeichen } from '@/lib/format/kennzeichen'
 import {
   CarIcon,
   ShieldIcon,
@@ -56,6 +57,10 @@ type LeadFields = {
   telefon?: string | null
   email?: string | null
   kennzeichen?: string | null
+  kennzeichen_kreis?: string | null
+  kennzeichen_buchstaben?: string | null
+  kennzeichen_zahl?: string | null
+  kennzeichen_suffix?: string | null
   fahrzeug_hersteller?: string | null
   fahrzeug_modell?: string | null
   fahrzeug_baujahr?: number | null
@@ -95,6 +100,7 @@ type LeadFields = {
   // AAR-265: FK auf versicherungen-Stammdaten (Autocomplete)
   gegner_versicherung_id?: string | null
   gegner_schadennummer?: string | null
+  gegner_versicherungsnummer?: string | null
   unfalldatum?: string | null
   unfall_uhrzeit?: string | null
   unfallort?: string | null
@@ -458,6 +464,134 @@ function Card({
   )
 }
 
+function KennzeichenPartsField({
+  leadId,
+  lead: l,
+  saveToggle,
+  patchLead,
+  lead_ref,
+}: {
+  leadId: string
+  lead: LeadFields
+  saveToggle: (field: string, value: boolean | string | null) => void
+  patchLead: (fields: Record<string, unknown>) => void
+  lead_ref: Record<string, unknown>
+}) {
+  const [kreis, setKreis] = useState((l.kennzeichen_kreis ?? '').toUpperCase())
+  const [buchstaben, setBuchstaben] = useState((l.kennzeichen_buchstaben ?? '').toUpperCase())
+  const [zahl, setZahl] = useState(l.kennzeichen_zahl ?? '')
+  const [suffix, setSuffix] = useState<'E' | 'H' | ''>(
+    (l.kennzeichen_suffix === 'E' || l.kennzeichen_suffix === 'H') ? l.kennzeichen_suffix : ''
+  )
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [, startTransition] = useTransition()
+
+  // Sync wenn Server neue Werte liefert
+  useEffect(() => { if (status === 'idle') setKreis((l.kennzeichen_kreis ?? '').toUpperCase()) }, [l.kennzeichen_kreis, status])
+  useEffect(() => { if (status === 'idle') setBuchstaben((l.kennzeichen_buchstaben ?? '').toUpperCase()) }, [l.kennzeichen_buchstaben, status])
+  useEffect(() => { if (status === 'idle') setZahl(l.kennzeichen_zahl ?? '') }, [l.kennzeichen_zahl, status])
+  useEffect(() => {
+    if (status === 'idle') setSuffix((l.kennzeichen_suffix === 'E' || l.kennzeichen_suffix === 'H') ? l.kennzeichen_suffix : '')
+  }, [l.kennzeichen_suffix, status])
+
+  function save(k: string, b: string, z: string, s: string) {
+    const combined = buildKennzeichen(k, b, z, s || null)
+    const fields = {
+      kennzeichen: combined || null,
+      kennzeichen_kreis: k.toUpperCase() || null,
+      kennzeichen_buchstaben: b.toUpperCase() || null,
+      kennzeichen_zahl: z || null,
+      kennzeichen_suffix: (s === 'E' || s === 'H') ? s : null,
+    }
+    patchLead(fields as Parameters<typeof patchLead>[0])
+    setStatus('saving')
+    startTransition(async () => {
+      const r = await saveStammdaten(leadId, fields)
+      if (r.success) { setStatus('saved'); setTimeout(() => setStatus('idle'), 2000) }
+      else { setStatus('error'); setTimeout(() => setStatus('idle'), 3000) }
+    })
+  }
+
+  const inputCls = 'text-sm font-medium bg-transparent border-b border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo w-full py-0.5 outline-none uppercase tracking-wide text-center'
+
+  return (
+    <div className="space-y-0.5">
+      <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1">
+        Kennzeichen
+        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
+        {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
+        {status === 'error' && <span className="text-red-500">Fehler</span>}
+      </label>
+      <div className="flex items-end gap-1">
+        {/* Stadt / Kreis */}
+        <div className="flex-[1.5] space-y-0.5">
+          <span className="text-[9px] text-claimondo-ondo/50 block text-center">Stadt</span>
+          <input
+            type="text"
+            value={kreis}
+            maxLength={3}
+            onChange={(e) => setKreis(e.target.value.toUpperCase().replace(/[^A-ZÄÖÜ]/g, ''))}
+            onBlur={() => save(kreis, buchstaben, zahl, suffix)}
+            placeholder="K"
+            className={inputCls}
+          />
+        </div>
+        <span className="text-claimondo-ondo/40 pb-0.5 text-sm font-light">–</span>
+        {/* Kennung / Buchstaben */}
+        <div className="flex-[1.5] space-y-0.5">
+          <span className="text-[9px] text-claimondo-ondo/50 block text-center">Kennung</span>
+          <input
+            type="text"
+            value={buchstaben}
+            maxLength={2}
+            onChange={(e) => setBuchstaben(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
+            onBlur={() => save(kreis, buchstaben, zahl, suffix)}
+            placeholder="AS"
+            className={inputCls}
+          />
+        </div>
+        <span className="pb-0.5 text-claimondo-ondo/20 text-sm"> </span>
+        {/* Zahl */}
+        <div className="flex-[2] space-y-0.5">
+          <span className="text-[9px] text-claimondo-ondo/50 block text-center">Zahl</span>
+          <input
+            type="text"
+            value={zahl}
+            maxLength={4}
+            onChange={(e) => setZahl(e.target.value.replace(/\D/g, ''))}
+            onBlur={() => save(kreis, buchstaben, zahl, suffix)}
+            placeholder="1234"
+            className={inputCls}
+          />
+        </div>
+        {/* Suffix E / H */}
+        <div className="space-y-0.5">
+          <span className="text-[9px] text-claimondo-ondo/50 block text-center">Typ</span>
+          <select
+            value={suffix}
+            onChange={(e) => {
+              const v = e.target.value as 'E' | 'H' | ''
+              setSuffix(v)
+              save(kreis, buchstaben, zahl, v)
+            }}
+            className="text-sm font-medium bg-transparent border-b border-claimondo-border focus:border-claimondo-ondo py-0.5 outline-none w-14"
+            title="E = Elektro, H = Oldtimer"
+          >
+            <option value="">–</option>
+            <option value="E">E ⚡</option>
+            <option value="H">H 🏛</option>
+          </select>
+        </div>
+      </div>
+      {kreis && zahl && (
+        <p className="text-[10px] text-claimondo-ondo/60 font-mono pt-0.5">
+          {buildKennzeichen(kreis, buchstaben, zahl, suffix || null)}
+        </p>
+      )}
+    </div>
+  )
+}
+
 export default function Phase4Stammdaten() {
   const { lead, qualification, setPhase, patchLead } = useDispatchPhase()
   const router = useRouter()
@@ -743,14 +877,8 @@ export default function Phase4Stammdaten() {
               : 'Filtert die Marken-Liste'}
           />
 
-          <InlineField
-            label="Eigenes Kennzeichen"
-            value={l.kennzeichen}
-            fieldName="kennzeichen"
-            leadId={leadId}
-            transform={formatKennzeichen}
-            placeholder="XX-XX 1234"
-          />
+          {/* Kennzeichen — aufgeteilt in Stadt / Kennung / Zahl / Spezifikation */}
+          <KennzeichenPartsField leadId={leadId} lead={l} saveToggle={saveToggle} patchLead={patchLead} lead_ref={lead} />
 
           {/* Marke — CarQuery-Dropdown (gefiltert nach Baujahr) mit Freitext-
               Fallback. Wenn CarQuery nichts liefert (Offline/Error), zeigen
@@ -1358,6 +1486,14 @@ export default function Phase4Stammdaten() {
             value={l.gegner_schadennummer}
             fieldName="gegner_schadennummer"
             leadId={leadId}
+          />
+          <InlineField
+            label="Versicherungsnummer Gegner (optional)"
+            value={l.gegner_versicherungsnummer}
+            fieldName="gegner_versicherungsnummer"
+            leadId={leadId}
+            placeholder="Versicherungsschein-Nr."
+            hint="Steht auf der Grünen Karte / dem Versicherungsausweis"
           />
           {/* CMM-26: Unfalldatum, Unfall-Uhrzeit und Unfallort sind in Phase 1
               (Erstkontakt) Owner. Phase 4 bezieht sich nur noch auf Gegner +
