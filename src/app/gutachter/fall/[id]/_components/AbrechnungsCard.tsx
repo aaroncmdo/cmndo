@@ -62,7 +62,7 @@ export function AbrechnungsCard({
         {ausgezahlt ? (
           <>
             <p className="font-semibold">
-              Überwiesen am {new Date(abrechnung!.abgerechnetAm!).toLocaleDateString('de-DE')}
+              Überwiesen am {new Date(abrechnung!.abgerechnetAm!).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
             </p>
             <p className="mt-0.5">Bitte prüfe deinen Bankeingang.</p>
           </>

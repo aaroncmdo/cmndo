@@ -67,7 +67,7 @@ async function loadForecast() {
     tageBisher,
     tageImMonat,
     restTage,
-    monatName: now.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }),
+    monatName: now.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', month: 'long', year: 'numeric' }),
   }
 }
 

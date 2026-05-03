@@ -108,8 +108,8 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
                 </div>
               )}
               <p className="text-[10px] text-claimondo-ondo/70">
-                Eingereicht: {new Date(r.eingereicht_am).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                {r.bearbeitet_am && ` · Bearbeitet: ${new Date(r.bearbeitet_am).toLocaleDateString('de-DE')}`}
+                Eingereicht: {new Date(r.eingereicht_am).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                {r.bearbeitet_am && ` · Bearbeitet: ${new Date(r.bearbeitet_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}`}
               </p>
             </div>
           )

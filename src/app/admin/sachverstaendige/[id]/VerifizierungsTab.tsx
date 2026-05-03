@@ -253,7 +253,7 @@ function PflichtdokumenteCard({
               </div>
               {d.hochgeladenAm && (
                 <p className="text-[10px] text-claimondo-ondo mt-0.5">
-                  Hochgeladen: {new Date(d.hochgeladenAm).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
+                  Hochgeladen: {new Date(d.hochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })}
                 </p>
               )}
               {d.status === 'abgelehnt' && d.adminNotiz && (
@@ -381,7 +381,7 @@ function SaVorlageCard({
 
   const hochgeladen = Boolean(saVorlageStoragePath)
   const hochgeladenDatum = saVorlageHochgeladenAm
-    ? new Date(saVorlageHochgeladenAm).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })
+    ? new Date(saVorlageHochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })
     : null
 
   function handleFreigeben() {
@@ -535,10 +535,10 @@ function Tier2Card({
   }
 
   const fristDatum = verifizierungFristBis
-    ? new Date(verifizierungFristBis).toLocaleDateString('de-DE')
+    ? new Date(verifizierungFristBis).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
     : null
   const verifiziertDatum = verifiziertAm
-    ? new Date(verifiziertAm).toLocaleDateString('de-DE')
+    ? new Date(verifiziertAm).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
     : null
 
   function handleFreigeben() {
@@ -787,7 +787,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
           <div className="px-3 py-2 rounded-lg bg-white border border-red-200 text-xs">
             <p className="text-red-800">
               <span className="font-semibold">Gesperrt seit:</span>{' '}
-              {gesperrtSeit ? new Date(gesperrtSeit).toLocaleDateString('de-DE') : '—'}
+              {gesperrtSeit ? new Date(gesperrtSeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
             </p>
             {gesperrtGrund && <p className="text-red-700 mt-1 whitespace-pre-line"><span className="font-semibold">Grund:</span> {gesperrtGrund}</p>}
           </div>

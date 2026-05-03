@@ -200,7 +200,7 @@ function buildContextText(
   const status = (fall.status as string | null) ?? '—'
   const fahrzeug = [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')
   const schadentyp = (fall.schadens_art as string | null) ?? (lead?.schadentyp as string | null) ?? '—'
-  const svTermin = fall.sv_termin ? new Date(fall.sv_termin as string).toLocaleString('de-DE') : 'nicht gesetzt'
+  const svTermin = fall.sv_termin ? new Date(fall.sv_termin as string).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }) : 'nicht gesetzt'
   const gegnerVS = (fall.gegner_versicherung as string | null) ?? '—'
   const reparaturkosten = (fall.reparaturkosten as number | null) ?? null
   const regulierungBetrag = (fall.regulierung_betrag as number | null) ?? null
@@ -224,7 +224,7 @@ function buildContextText(
       for (const t of tasks) {
         lines.push(
           `- [${t.prioritaet ?? 'normal'}] ${t.titel} (${t.empfaenger_rolle ?? '—'}${
-            t.faellig_am ? `, fällig ${new Date(t.faellig_am as string).toLocaleDateString('de-DE')}` : ''
+            t.faellig_am ? `, fällig ${new Date(t.faellig_am as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}` : ''
           })`,
         )
       }

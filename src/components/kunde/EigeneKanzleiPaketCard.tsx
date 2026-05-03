@@ -51,7 +51,7 @@ export default function EigeneKanzleiPaketCard({
 
   if (bereitsVersendet) {
     const datum = uebergebenAm
-      ? new Date(uebergebenAm).toLocaleDateString('de-DE', {
+      ? new Date(uebergebenAm).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
           day: '2-digit',
           month: 'long',
           year: 'numeric',

@@ -1138,10 +1138,10 @@ function BegutachtungEventRow({ ev }: { ev: BegutachtungEvent }) {
   const datum = new Date(ev.datum)
   const datumStr = Number.isNaN(datum.getTime())
     ? ev.datum
-    : datum.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : datum.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
   const uhrzeit = Number.isNaN(datum.getTime())
     ? null
-    : datum.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    : datum.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
   return (
     <li className="flex items-start gap-2.5">
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${dotCls}`} />
@@ -1178,7 +1178,7 @@ function ChecklistItem({
       <span className={done ? 'text-claimondo-navy' : 'text-claimondo-ondo'}>{label}</span>
       {datum && (
         <span className="ml-auto text-[10px] text-claimondo-ondo/70">
-          {new Date(datum).toLocaleDateString('de-DE')}
+          {new Date(datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
         </span>
       )}
     </li>
@@ -1767,7 +1767,7 @@ function KanzleiSubStep({
         </span>
         {datum && (
           <span className="text-[10px] text-claimondo-ondo/70">
-            {new Date(datum).toLocaleDateString('de-DE')}
+            {new Date(datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
           </span>
         )}
       </div>

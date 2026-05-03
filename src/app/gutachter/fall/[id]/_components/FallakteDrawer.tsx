@@ -302,7 +302,7 @@ function DateienListe({ dokumente }: { dokumente: DocLite[] }) {
               <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
               <p className="text-[11px] text-claimondo-ondo">
                 {typ}
-                {datum ? ` · ${new Date(datum).toLocaleDateString('de-DE')}` : ''}
+                {datum ? ` · ${new Date(datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}` : ''}
               </p>
             </div>
             {url && (
@@ -346,7 +346,7 @@ function TimelineListe({ events }: { events: TimelineEventLite[] }) {
             )}
             {datum && (
               <p className="text-[10px] text-claimondo-ondo/70 mt-1">
-                {new Date(datum).toLocaleString('de-DE')}
+                {new Date(datum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
               </p>
             )}
           </li>
@@ -390,7 +390,7 @@ function ChatListe({
                   </p>
                   {datum && (
                     <p className="text-[10px] text-claimondo-ondo/70">
-                      {new Date(datum).toLocaleString('de-DE')}
+                      {new Date(datum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
                     </p>
                   )}
                 </div>

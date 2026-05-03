@@ -215,7 +215,7 @@ export default function Phase5Zusammenfassung() {
       : l.polizei_vor_ort === false ? 'Nein' : '—'
 
   const terminDetail = termin
-    ? `${new Date(termin.start_zeit).toLocaleDateString('de-DE')} ${new Date(termin.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} — ${termin.sv_vorname ?? ''} ${termin.sv_nachname ?? ''}`.trim()
+    ? `${new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} ${new Date(termin.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} — ${termin.sv_vorname ?? ''} ${termin.sv_nachname ?? ''}`.trim()
     : '—'
 
   const fahrzeugText = [l.fahrzeug_hersteller, l.fahrzeug_modell].filter(Boolean).join(' ') || '—'

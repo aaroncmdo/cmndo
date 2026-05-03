@@ -35,7 +35,7 @@ export type TerminSectionProps = {
 function fmtDatum(iso: string | null): string {
   if (!iso) return ''
   try {
-    return new Date(iso).toLocaleDateString('de-DE', {
+    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
       weekday: 'long',
       day: '2-digit',
       month: 'long',
@@ -50,10 +50,10 @@ function fmtZeitRange(startIso: string | null, endIso: string | null): string {
   if (!startIso) return ''
   try {
     const s = new Date(startIso)
-    const sTxt = s.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    const sTxt = s.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
     if (!endIso) return `${sTxt} Uhr`
     const e = new Date(endIso)
-    const eTxt = e.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    const eTxt = e.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
     return `${sTxt} — ${eTxt} Uhr`
   } catch {
     return ''

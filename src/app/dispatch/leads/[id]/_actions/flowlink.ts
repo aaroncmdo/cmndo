@@ -64,9 +64,9 @@ export async function sendFlowLinkMultiChannel(
   const svVorname = profile?.vorname ?? ''
   const svNachname = profile?.nachname ?? ''
   const terminDate = termin?.start_zeit ? new Date(termin.start_zeit) : null
-  const datum = terminDate ? terminDate.toLocaleDateString('de-DE') : ''
+  const datum = terminDate ? terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : ''
   const uhrzeit = terminDate
-    ? terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    ? terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
     : ''
 
   if (kanal === 'whatsapp') {

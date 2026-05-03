@@ -26,7 +26,7 @@ export default function KundeTerminClient({
   const neuDate = termin.vorgeschlagenes_datum ? new Date(termin.vorgeschlagenes_datum) : null
 
   function fmt(d: Date) {
-    return d.toLocaleString('de-DE', {
+    return d.toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
       weekday: 'long',
       day: '2-digit',
       month: '2-digit',

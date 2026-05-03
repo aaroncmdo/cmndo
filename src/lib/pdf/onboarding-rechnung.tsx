@@ -106,7 +106,7 @@ const s = StyleSheet.create({
 })
 
 function fmtDate(d: Date): string {
-  return d.toLocaleDateString('de-DE', {
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

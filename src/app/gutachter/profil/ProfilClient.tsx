@@ -549,11 +549,11 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
     <div className="bg-[#f8f9fb]/50 rounded-xl p-4 border border-claimondo-border">
       <div className="flex items-center justify-between mb-2">
         <p className="text-claimondo-navy text-sm font-medium">
-          {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+          {start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })}
           {' '}
-          {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+          {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
           –
-          {end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+          {end.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
         </p>
         <span className="text-amber-400 text-[10px] font-medium bg-amber-50 px-2 py-0.5 rounded-full">Anfrage</span>
       </div>

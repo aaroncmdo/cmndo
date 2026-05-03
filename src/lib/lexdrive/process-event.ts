@@ -456,7 +456,7 @@ async function sendSvKonfrontationsAnfrage(
   const terminDatumRaw = (payload as Record<string, unknown>).termin_datum
   const terminLabel =
     typeof terminDatumRaw === 'string' && terminDatumRaw
-      ? new Date(terminDatumRaw).toLocaleString('de-DE', {
+      ? new Date(terminDatumRaw).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
@@ -518,7 +518,7 @@ async function sendKundeKonfrontationBestaetigt(
   const datumIso = (fall.nachbesichtigung_sv_termin_vereinbart_am as string | null) ??
     (payload.bestaetigt_am as string | undefined) ??
     new Date().toISOString()
-  const datumLabel = new Date(datumIso).toLocaleDateString('de-DE', {
+  const datumLabel = new Date(datumIso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

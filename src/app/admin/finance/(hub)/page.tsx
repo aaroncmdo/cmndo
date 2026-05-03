@@ -236,7 +236,7 @@ function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfra
                         </span>
                       </td>
                       <td className="px-5 py-3 text-right text-claimondo-ondo text-xs tabular-nums">
-                        {new Date(a.erstellt_am).toLocaleDateString('de-DE')}
+                        {new Date(a.erstellt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
                       </td>
                     </tr>
                   ))}
@@ -745,7 +745,7 @@ export default async function FinancePage() {
         letzteVollmachten={(kanzleiVollmachtenGesamt ?? []).slice(0, 20).map(l => ({
           id: l.id,
           name: `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || '\u2014',
-          datum: l.vollmacht_datum ? new Date(l.vollmacht_datum).toLocaleDateString('de-DE') : l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE') : '\u2014',
+          datum: l.vollmacht_datum ? new Date(l.vollmacht_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '\u2014',
         }))}
       />
       <GutachterAbrechnungen svRows={svRows} gutachterAnzahlungenGesamt={gutachterAnzahlungenGesamt} />

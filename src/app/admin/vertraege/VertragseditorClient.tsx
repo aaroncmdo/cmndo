@@ -235,7 +235,7 @@ function SlotCard({
           {entry && (
             <>
               <span className="text-[10px] text-claimondo-ondo">
-                · v{new Date(entry.ts).toLocaleString('de-DE')}
+                · v{new Date(entry.ts).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
               </span>
               <span
                 className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${

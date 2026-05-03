@@ -675,7 +675,7 @@ export async function storniereTermin(
       const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', svProf.profile_id).single()
       if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ')
     }
-    const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+    const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
     if (lead?.telefon) {
       await sendCommunication('termin_storniert', { telefon: lead.telefon, vorname: lead.vorname ?? 'Kunde', '1': lead.vorname ?? 'Kunde', '2': svName, '3': datum }).catch(() => {})
     }
@@ -686,7 +686,7 @@ export async function storniereTermin(
     fall_id: termin.fall_id,
     typ: 'termin',
     titel: 'Termin storniert',
-    beschreibung: `Termin am ${new Date(termin.start_zeit).toLocaleDateString('de-DE')} wurde storniert.`,
+    beschreibung: `Termin am ${new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} wurde storniert.`,
   })
 
   revalidatePath(`/gutachter/fall/${termin.fall_id}`)

@@ -168,7 +168,7 @@ export default function KundeTermineClient({
               <ChevronLeftIcon className="w-4 h-4" />
             </button>
             <span className="text-sm font-semibold text-claimondo-navy capitalize">
-              {month.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
+              {month.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', month: 'long', year: 'numeric' })}
             </span>
             <button
               type="button"
@@ -209,7 +209,7 @@ export default function KundeTermineClient({
                         : 'hover:bg-[#f8f9fb] text-claimondo-navy'
                   } ${dayTermine.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
                   disabled={dayTermine.length === 0}
-                  aria-label={`${cell.date.toLocaleDateString('de-DE')}: ${dayTermine.length} Termin(e)`}
+                  aria-label={`${cell.date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}: ${dayTermine.length} Termin(e)`}
                 >
                   <span className="text-xs leading-none">{cell.date.getDate()}</span>
                   {dayTermine.length > 0 && (
@@ -238,7 +238,7 @@ export default function KundeTermineClient({
           {selectedKey && selectedTermine.length > 0 && (
             <div className="border-t border-claimondo-border px-4 py-3 space-y-2">
               <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
-                {new Date(selectedKey + 'T12:00:00').toLocaleDateString('de-DE', {
+                {new Date(selectedKey + 'T12:00:00').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                   weekday: 'long', day: '2-digit', month: 'long',
                 })}
               </p>
@@ -329,9 +329,9 @@ function TerminCard({
             </span>
           </div>
           <p className="text-sm text-claimondo-navy mt-1">
-            {start.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
+            {start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long' })}
             {' · '}
-            {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+            {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
           </p>
           {fall && (
             <p className="text-xs text-claimondo-ondo mt-0.5">

@@ -224,7 +224,7 @@ export async function GET() {
         abrechnungsNr,
         monat: `${String(monat).padStart(2, '0')}/${jahr}`,
         betragBrutto: endbetragBrutto,
-        faelligAm: faellig.toLocaleDateString('de-DE'),
+        faelligAm: faellig.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
       }
       const html = await render(SvMonatsabrechnungVersandEmail(abrProps))
       await sendCommunication('sv_monatsabrechnung', {
@@ -315,7 +315,7 @@ export async function GET() {
         svName: verwalterName,
         abrechnungsNr,
         betragBrutto: totalBrutto,
-        faelligAm: faellig.toLocaleDateString('de-DE'),
+        faelligAm: faellig.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
         anzahlPositionen: acc.positions.length,
         anzahlSubSvs: subSvCount,
         orgTyp: acc.org_typ as 'buero' | 'akademie',

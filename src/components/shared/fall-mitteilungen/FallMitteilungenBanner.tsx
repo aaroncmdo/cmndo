@@ -146,7 +146,7 @@ export function FallMitteilungenBanner({ fallId }: Props) {
                       </Text>
                     )}
                     <Text variant="bodyXs" color="ondo">
-                      {new Date(m.created_at).toLocaleString('de-DE', {
+                      {new Date(m.created_at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
                         day: '2-digit',
                         month: '2-digit',
                         hour: '2-digit',

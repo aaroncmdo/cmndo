@@ -111,7 +111,7 @@ export async function vsBrauchtMehrZeit(fallId: string, fristBis: string) {
     fall_id: fallId,
     typ: 'system',
     titel: 'VS benötigt mehr Zeit',
-    beschreibung: `Neue Frist: ${new Date(fristBis).toLocaleDateString('de-DE')}`,
+    beschreibung: `Neue Frist: ${new Date(fristBis).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}`,
     erstellt_von: user.id,
   })
 
@@ -288,7 +288,7 @@ export async function asVersandManuell(fallId: string, datum: string) {
     fall_id: fallId,
     typ: 'status-change',
     titel: 'Anschlussschreiben manuell eingetragen',
-    beschreibung: `AS-Versand am ${new Date(datum || Date.now()).toLocaleDateString('de-DE')}`,
+    beschreibung: `AS-Versand am ${new Date(datum || Date.now()).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}`,
     erstellt_von: user.id,
   })
 
@@ -319,7 +319,7 @@ export async function zahlungEingegangen(fallId: string, betrag: number, datum: 
     fall_id: fallId,
     typ: 'abrechnung',
     titel: `Schlussabrechnung erstellen: Fall ${fallInfo?.fall_nummer ?? fallId.slice(0, 8)}`,
-    beschreibung: `Zahlungseingang ${fmt(betrag)} am ${new Date(datum || Date.now()).toLocaleDateString('de-DE')}. Bitte Schlussabrechnung erstellen und versenden.`,
+    beschreibung: `Zahlungseingang ${fmt(betrag)} am ${new Date(datum || Date.now()).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}. Bitte Schlussabrechnung erstellen und versenden.`,
     status: 'offen',
     prioritaet: 'normal',
     zugewiesen_an: fallInfo?.kundenbetreuer_id ?? null,

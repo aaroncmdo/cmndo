@@ -115,7 +115,7 @@ export function UnfallskizzeCard({
           />
           {generiertAm && (
             <p className="text-[10px] text-claimondo-ondo/70">
-              Generiert am {new Date(generiertAm).toLocaleString('de-DE')}
+              Generiert am {new Date(generiertAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
             </p>
           )}
           {!bestaetigt && (

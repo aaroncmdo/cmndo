@@ -13,7 +13,7 @@ export async function triggerSV01(fallId: string, svUserId: string, kundeName: s
     empfaenger_rolle: 'gutachter',
     task_typ: 'sv-termin-bestaetigen',
     titel: 'Neuer Auftrag — Termin bestätigen',
-    beschreibung: `Kunde: ${kundeName}, Adresse: ${adresse}, Kennzeichen: ${kennzeichen ?? '—'}, Schadentyp: ${schadentyp ?? '—'}${wunschtermin ? `, Wunschtermin: ${new Date(wunschtermin).toLocaleDateString('de-DE')}` : ''}. Bitte bestätigen oder Gegenvorschlag machen.`,
+    beschreibung: `Kunde: ${kundeName}, Adresse: ${adresse}, Kennzeichen: ${kennzeichen ?? '—'}, Schadentyp: ${schadentyp ?? '—'}${wunschtermin ? `, Wunschtermin: ${new Date(wunschtermin).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}` : ''}. Bitte bestätigen oder Gegenvorschlag machen.`,
     deadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
     prioritaet: 'dringend',
     phase: 'gutachter',

@@ -43,7 +43,7 @@ function fmtEuro(n: number | null): string {
 function fmtDatum(iso: string | null): string {
   if (!iso) return '—'
   try {
-    return new Date(iso).toLocaleDateString('de-DE', {
+    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
       day: '2-digit', month: 'long', year: 'numeric',
     })
   } catch {

@@ -97,7 +97,7 @@ export default async function DispatchRueckrufe() {
                     <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
                   )}
                   <span className={isOverdue ? 'text-red-600 font-medium' : ''}>
-                    {new Date(t.start_zeit).toLocaleString('de-DE', {
+                    {new Date(t.start_zeit).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
                       day: '2-digit',
                       month: '2-digit',
                       hour: '2-digit',
@@ -113,7 +113,7 @@ export default async function DispatchRueckrufe() {
                   <span>Versuche: {lead.anruf_versuche ?? 0}</span>
                   {lead.letzter_anruf_am && (
                     <span>
-                      Letzter: {new Date(lead.letzter_anruf_am).toLocaleDateString('de-DE')} (
+                      Letzter: {new Date(lead.letzter_anruf_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} (
                       {lead.letzter_anruf_status ?? '?'})
                     </span>
                   )}

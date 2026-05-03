@@ -42,9 +42,9 @@ function formatRelativeOrDate(iso: string): string {
   if (diffH < 24)   return `vor ${diffH} Std`
   if (diffD < 7)    return `vor ${diffD} Tag${diffD === 1 ? '' : 'en'}`
 
-  return d.toLocaleDateString('de-DE', {
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     day: '2-digit', month: '2-digit', year: 'numeric',
-  }) + ' · ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  }) + ' · ' + d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 }
 
 export function TimelineEventCard({ event, viewerRole, showKategorieBadge = false }: Props) {

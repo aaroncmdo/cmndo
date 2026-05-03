@@ -77,7 +77,7 @@ export function AbrechnungsartCard({
   }
 
   const datum = savedAt
-    ? new Date(savedAt).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    ? new Date(savedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
     : null
 
   return (

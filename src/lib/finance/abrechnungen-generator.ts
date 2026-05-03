@@ -109,7 +109,7 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
 
     positionen.push({
       fall_id: fall?.id ?? null,
-      beschreibung: `CPA für Fall ${fallNr} — ${name} (SA ${new Date(lead.vollmacht_datum!).toLocaleDateString('de-DE')})`,
+      beschreibung: `CPA für Fall ${fallNr} — ${name} (SA ${new Date(lead.vollmacht_datum!).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })})`,
       betrag_netto: CPA,
       betrag_brutto: Math.round(CPA * (1 + FINANCE.MWST_PROZENT / 100) * 100) / 100,
     })

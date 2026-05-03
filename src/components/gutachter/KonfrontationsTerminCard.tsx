@@ -25,7 +25,7 @@ interface Props {
 function formatSlot(s: { datum: string; uhrzeit: string }): string {
   const d = new Date(`${s.datum}T${s.uhrzeit}`)
   if (Number.isNaN(d.getTime())) return `${s.datum} ${s.uhrzeit}`
-  return d.toLocaleDateString('de-DE', {
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -97,7 +97,7 @@ export function KonfrontationsTerminCard({
       {bestaetigt ? (
         <p className="text-sm text-emerald-800">
           Termin bestätigt am{' '}
-          {new Date(terminVereinbartAm!).toLocaleDateString('de-DE', {
+          {new Date(terminVereinbartAm!).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',

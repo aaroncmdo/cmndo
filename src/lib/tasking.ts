@@ -79,7 +79,7 @@ export async function createAutoTask(params: AutoTaskParams): Promise<{ id: stri
     fall_id: params.fall_id,
     typ: 'system',
     titel: `Auto-Task: ${params.titel}`,
-    beschreibung: `Zugewiesen an ${params.empfaenger_rolle}. Deadline: ${params.deadline.toLocaleDateString('de-DE')}.`,
+    beschreibung: `Zugewiesen an ${params.empfaenger_rolle}. Deadline: ${params.deadline.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}.`,
   })
 
   // AAR-430: Reminder-Kaskade generieren

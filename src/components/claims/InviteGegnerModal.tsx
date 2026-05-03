@@ -130,7 +130,7 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   )}
                   <p className="text-sm text-muted-foreground text-center">
                     Halten Sie das Display dem Gegner hin. Code gültig bis{' '}
-                    <strong>{new Date(result.expires_at).toLocaleDateString('de-DE')}</strong>.
+                    <strong>{new Date(result.expires_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}</strong>.
                   </p>
                 </div>
               </TabsContent>

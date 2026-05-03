@@ -45,11 +45,11 @@ function fmtTime(iso: string): string {
   const d = new Date(iso)
   const today = new Date()
   if (d.toDateString() === today.toDateString()) {
-    return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    return d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
   }
   const diff = Math.floor((today.getTime() - d.getTime()) / (1000 * 60 * 60 * 24))
-  if (diff < 7) return d.toLocaleDateString('de-DE', { weekday: 'short' })
-  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+  if (diff < 7) return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short' })
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })
 }
 
 export default function ChatInboxLayout({

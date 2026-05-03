@@ -179,7 +179,7 @@ function BelegReviewRow({ item }: { item: BelegReviewItem }) {
             </Text>
             <Text variant="bodyXs" color="ondo">
               {item.original_filename ?? 'OCR-Extrakt'} ·{' '}
-              {new Date(item.hochgeladen_am).toLocaleDateString('de-DE')}
+              {new Date(item.hochgeladen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
             </Text>
           </div>
         </div>

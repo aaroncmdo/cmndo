@@ -86,7 +86,7 @@ export default async function KanzleiBoard() {
                     <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-navy">{fall?.status ?? '—'}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
-                    {p.created_at ? new Date(p.created_at).toLocaleDateString('de-DE') : '—'}
+                    {p.created_at ? new Date(p.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
                   </td>
                 </tr>
               )
@@ -121,7 +121,7 @@ export default async function KanzleiBoard() {
                   'bg-[#f8f9fb] text-claimondo-ondo'
                 }`}>{e.status}</span>
                 <span className="text-xs text-claimondo-ondo/70">
-                  {new Date(e.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  {new Date(e.created_at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
             </div>

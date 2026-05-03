@@ -57,7 +57,7 @@ export default function GoogleSettingsClient({
             <p className="font-medium text-claimondo-navy">Verbunden mit {googleEmail ?? 'Google'}</p>
           </div>
           {connectedAt && (
-            <p className="text-xs text-claimondo-ondo">Seit {new Date(connectedAt).toLocaleDateString('de-DE')}</p>
+            <p className="text-xs text-claimondo-ondo">Seit {new Date(connectedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}</p>
           )}
           {!confirmDisconnect ? (
             <button

@@ -199,7 +199,7 @@ function AbrechnungPDF({ data }: { data: AbrechnungData }) {
 // ─── Public API ────────────────────────────────────────────────────────────
 
 function fmtDate(d: string): string {
-  return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return new Date(d).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 export async function generateAbrechnungPDF(abrechnungId: string): Promise<string | null> {

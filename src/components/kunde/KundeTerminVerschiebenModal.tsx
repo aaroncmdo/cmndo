@@ -39,11 +39,11 @@ type Props = {
 
 function fmtDateTime(iso: string): string {
   const d = new Date(iso)
-  return `${d.toLocaleDateString('de-DE', {
+  return `${d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
-  })}, ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`
+  })}, ${d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} Uhr`
 }
 
 export default function KundeTerminVerschiebenModal({ open, onClose, terminId }: Props) {

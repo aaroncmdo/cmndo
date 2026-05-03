@@ -154,7 +154,7 @@ export default async function DispatchSvDetailPage({
                     <FallStatusBadge status={f.status} size="sm" />
                     {f.sv_termin && (
                       <span className="text-[10px] text-claimondo-ondo tabular-nums">
-                        {new Date(f.sv_termin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                        {new Date(f.sv_termin).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}
                       </span>
                     )}
                   </div>

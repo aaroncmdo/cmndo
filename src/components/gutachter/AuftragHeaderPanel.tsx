@@ -80,13 +80,13 @@ function fmtTermin(iso: string | null): { datum: string; uhrzeit: string } | nul
   try {
     const d = new Date(iso)
     return {
-      datum: d.toLocaleDateString('de-DE', {
+      datum: d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
         weekday: 'long',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
       }),
-      uhrzeit: d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      uhrzeit: d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
     }
   } catch {
     return null

@@ -121,8 +121,8 @@ export async function GET(request: Request) {
 
     const startZeit = new Date(termin.start_zeit)
     await sendFallCommunication(termin.fall_id, 'reminder_24h', {
-      termin_uhrzeit: startZeit.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-      '3': startZeit.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      termin_uhrzeit: startZeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
+      '3': startZeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
     })
 
     await supabase

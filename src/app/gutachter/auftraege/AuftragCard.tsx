@@ -79,7 +79,7 @@ function deriveTerminMeta(t: AuftragCardProps['aktiverTermin']): TerminMeta {
 function fmtDateShort(iso: string | null | undefined): string {
   if (!iso) return '—'
   try {
-    return new Date(iso).toLocaleString('de-DE', {
+    return new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
       weekday: 'short',
       day: '2-digit',
       month: '2-digit',

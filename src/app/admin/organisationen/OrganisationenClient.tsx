@@ -110,7 +110,7 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                      {new Date(o.created_at).toLocaleDateString('de-DE')}
+                      {new Date(o.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
                     </td>
                   </tr>
                 )

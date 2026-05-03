@@ -47,7 +47,7 @@ export default async function MitarbeiterFaelle() {
                   <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo">{f.status}</span>
                 </td>
                 <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
-                  {new Date(f.created_at).toLocaleDateString('de-DE')}
+                  {new Date(f.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
                 </td>
               </tr>
             ))}

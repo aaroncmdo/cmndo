@@ -75,7 +75,7 @@ export default function CommunitiesListClient({ communities }: { communities: Co
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                    {new Date(c.created_at).toLocaleDateString('de-DE')}
+                    {new Date(c.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
                   </td>
                 </tr>
               ))}

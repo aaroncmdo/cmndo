@@ -70,7 +70,7 @@ export function CardentityTypBButton({
 
   if (fetched) {
     const datum = state.fetchedAt
-      ? new Date(state.fetchedAt).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      ? new Date(state.fetchedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
       : '—'
     const vorhanden = state.vorschadenVorhanden === true
     return (
@@ -94,7 +94,7 @@ export function CardentityTypBButton({
         <p className="text-[10px] text-claimondo-ondo">
           Typ-B abgefragt am {datum}
           {vorhanden && state.letzterVorschadenDatum
-            ? ` · letzter Eintrag ${new Date(state.letzterVorschadenDatum).toLocaleDateString('de-DE')}`
+            ? ` · letzter Eintrag ${new Date(state.letzterVorschadenDatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}`
             : ''}
         </p>
       </div>

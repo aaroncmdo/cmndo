@@ -49,7 +49,7 @@ export async function waehleNachbesichtigungsTermin(
     fall_id: fallId,
     typ: 'system',
     titel: 'Nachbesichtigungstermin gewählt',
-    beschreibung: `Kunde hat ${new Date(datum).toLocaleDateString('de-DE')} gewählt.`,
+    beschreibung: `Kunde hat ${new Date(datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} gewählt.`,
   })
 
   // WA: Termin bestaetigt

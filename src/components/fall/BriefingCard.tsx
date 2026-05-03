@@ -39,7 +39,7 @@ function formatGeneratedAt(iso: string | null): string {
   if (!iso) return '—'
   try {
     const d = new Date(iso)
-    return `${d.toLocaleDateString('de-DE')} ${d.toLocaleTimeString('de-DE', {
+    return `${d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} ${d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
       hour: '2-digit',
       minute: '2-digit',
     })}`

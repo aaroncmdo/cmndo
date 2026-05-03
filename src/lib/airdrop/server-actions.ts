@@ -399,7 +399,7 @@ function cleanPhone(phone: string): string {
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('de-DE', {
+    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
       day: '2-digit', month: '2-digit', year: 'numeric',
     })
   } catch { return iso }

@@ -87,7 +87,7 @@ export default function Phase6StatusTracking({
   const stepSent: Step = {
     label: 'Token-Link gesendet',
     sub: latestFlow
-      ? `Erstellt ${new Date(latestFlow.created_at).toLocaleString('de-DE')}`
+      ? `Erstellt ${new Date(latestFlow.created_at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`
       : 'Noch nicht gesendet',
     state: latestFlow ? 'done' : 'pending',
     icon: <ClockIcon className="w-4 h-4" />,
@@ -112,7 +112,7 @@ export default function Phase6StatusTracking({
   const stepOpened: Step = {
     label: 'Link geöffnet',
     sub: latestFlow?.geoeffnet_am
-      ? `Geöffnet ${new Date(latestFlow.geoeffnet_am).toLocaleString('de-DE')}`
+      ? `Geöffnet ${new Date(latestFlow.geoeffnet_am).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`
       : alarm
         ? 'Inaktiv seit >2h'
         : 'Kunde hat noch nicht geöffnet',

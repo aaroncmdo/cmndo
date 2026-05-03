@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
       const svName = svP ? `${svP.vorname ?? ''} ${svP.nachname ?? ''}`.trim() : 'Unbekannt'
 
       const { data: fallData } = await svc.from('faelle').select('fall_nummer, lead_id').eq('id', termin.fall_id).single()
-      const terminDatum = termin.start_zeit ? new Date(termin.start_zeit).toLocaleDateString('de-DE') : '?'
+      const terminDatum = termin.start_zeit ? new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '?'
 
       const { sendManualWhatsApp } = await import('@/lib/whatsapp')
       const { data: admins } = await svc.from('profiles').select('telefon').eq('rolle', 'admin')

@@ -32,7 +32,7 @@ export default function VerifizierungsToggle({ svId, verifiziert, verifiziertAm 
   }
 
   const datum = verifiziertAm
-    ? new Date(verifiziertAm).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
+    ? new Date(verifiziertAm).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: '2-digit' })
     : null
 
   if (verifiziert) {

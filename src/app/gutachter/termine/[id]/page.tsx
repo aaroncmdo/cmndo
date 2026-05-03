@@ -126,10 +126,10 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
       ? `Lead ${termin.lead_id.slice(0, 8)}`
       : id.slice(0, 8)
 
-  const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', {
+  const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
   })
-  const uhrzeit = new Date(termin.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const uhrzeit = new Date(termin.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 
   return (
     <div className="px-4 py-6 max-w-2xl mx-auto space-y-4">

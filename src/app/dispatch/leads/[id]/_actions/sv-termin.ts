@@ -205,8 +205,8 @@ export async function reserveSvTerminForLead(
       kunde_name: l ? `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() : '—',
       schadentyp: l?.schadentyp ?? undefined,
       adresse: l?.kunde_plz ?? undefined,
-      datum: startDate.toLocaleDateString('de-DE'),
-      uhrzeit: startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      datum: startDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
+      uhrzeit: startDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
     })
   } catch (err) {
     console.warn('[reserveSvTerminForLead] Mitteilung fehlgeschlagen:', err)
@@ -290,7 +290,7 @@ export async function acceptGegenvorschlag(
     lead_id: !termin.fall_id ? termin.lead_id : null,
     typ: 'termin',
     titel: 'Dispatcher hat SV-Gegenvorschlag akzeptiert',
-    beschreibung: `Slot ${slotIndex + 1} angenommen: ${new Date(slot.start).toLocaleString('de-DE')}`,
+    beschreibung: `Slot ${slotIndex + 1} angenommen: ${new Date(slot.start).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`,
     erstellt_von: user.id,
   }).then(() => {}, () => {})
 
@@ -307,7 +307,7 @@ export async function acceptGegenvorschlag(
         .single()
       if (leadData?.telefon) {
         const slotStart = new Date(slot.start)
-        const datumUhrzeit = `${slotStart.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${slotStart.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+        const datumUhrzeit = `${slotStart.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${slotStart.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
 
         // SV-Name aus Termin nachladen (wenn Typ-Relations unterstützt)
         let svName = 'Ihrem Gutachter'

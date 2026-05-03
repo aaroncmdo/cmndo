@@ -48,7 +48,7 @@ function fmtRelative(iso: string) {
   if (h < 24) return `vor ${h} Std`
   const days = Math.floor(h / 24)
   if (days < 7) return `vor ${days} Tg`
-  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })
 }
 
 export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) {

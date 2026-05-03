@@ -36,7 +36,7 @@ function getDrivingHint(id: number): { text: string; color: string } {
 }
 
 function formatForecastTime(unix: number): string {
-  return new Date(unix * 1000).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return new Date(unix * 1000).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 }
 
 export default function WeatherWidget({ lat, lng }: { lat: number | null; lng: number | null }) {

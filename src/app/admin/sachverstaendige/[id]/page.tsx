@@ -257,7 +257,7 @@ export default async function SvDetailPage({
                 {/* AAR-659: partner_seit + werbebudget waren im SELECT aber nie gerendert — Dead-Load. */}
                 {sv.partner_seit && (
                   <span className="text-claimondo-ondo/70">
-                    Partner seit {new Date(sv.partner_seit as string).toLocaleDateString('de-DE', { month: '2-digit', year: 'numeric' })}
+                    Partner seit {new Date(sv.partner_seit as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', month: '2-digit', year: 'numeric' })}
                   </span>
                 )}
                 {sv.werbebudget_guthaben_netto != null && Number(sv.werbebudget_guthaben_netto) > 0 && (
@@ -393,7 +393,7 @@ export default async function SvDetailPage({
                     Kalender-Verbindung fehlgeschlagen
                     {caldavVerbindung.last_error_at && (
                       <span className="text-red-600 font-normal ml-2 text-xs">
-                        (seit {new Date(caldavVerbindung.last_error_at as string).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })})
+                        (seit {new Date(caldavVerbindung.last_error_at as string).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })})
                       </span>
                     )}
                   </p>
@@ -479,7 +479,7 @@ export default async function SvDetailPage({
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[10px] text-[#4573A2] font-mono">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>
-                          {fall.sv_termin && <span className="text-[10px] text-claimondo-ondo/70">{new Date(fall.sv_termin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</span>}
+                          {fall.sv_termin && <span className="text-[10px] text-claimondo-ondo/70">{new Date(fall.sv_termin).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}</span>}
                         </div>
                       </Link>
                     )
@@ -509,7 +509,7 @@ export default async function SvDetailPage({
                           <span className="text-claimondo-ondo/70 font-mono">{fallNr}</span>
                           {t.faellig_am && (
                             <span className={overdue ? 'text-red-500 font-semibold' : 'text-claimondo-ondo/70'}>
-                              {new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                              {new Date(t.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}
                             </span>
                           )}
                           {t.prioritaet === 'kritisch' && <span className="bg-red-50 text-red-500 px-1 rounded font-semibold">!</span>}

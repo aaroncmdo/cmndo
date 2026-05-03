@@ -20,7 +20,7 @@ export function EventDetailModal({
   const ts = new Date(event.timestamp)
   const tsLabel = isNaN(ts.getTime())
     ? event.timestamp
-    : ts.toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' })
+    : ts.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'medium', timeStyle: 'short' })
 
   return (
     <Modal open onClose={onClose} maxWidth={512} noPadding hideCloseButton ariaLabel="Event-Details">

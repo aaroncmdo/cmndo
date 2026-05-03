@@ -74,9 +74,9 @@ function fmtTermin(iso: string): string {
   try {
     const d = new Date(iso)
     return (
-      d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }) +
+      d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }) +
       ' · ' +
-      d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) +
+      d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) +
       ' Uhr'
     )
   } catch {
@@ -183,7 +183,7 @@ export default function FallKarte({
           </p>
           {fall.schadens_datum && (
             <p className="text-[11px] text-claimondo-ondo/60 mt-0.5">
-              Unfall {new Date(fall.schadens_datum).toLocaleDateString('de-DE')}
+              Unfall {new Date(fall.schadens_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
             </p>
           )}
         </div>

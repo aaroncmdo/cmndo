@@ -11,7 +11,7 @@ import { CreditCardIcon, AlertTriangleIcon, CheckCircle2Icon } from 'lucide-reac
 
 function fmtTime(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleString('de-DE', {
+  return d.toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
     day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
   })
 }
@@ -156,7 +156,7 @@ export default async function StripeConnectStatusWidget() {
                         <td className="py-2 text-claimondo-ondo truncate max-w-[280px]">{e.beschreibung ?? '—'}</td>
                         <td className="py-2 text-right text-emerald-600 font-semibold tabular-nums">{fmtEur(Number(e.betrag))}</td>
                         <td className="py-2 text-right text-claimondo-ondo/70 tabular-nums">
-                          {e.eingezahlt_am ? new Date(e.eingezahlt_am).toLocaleDateString('de-DE') : '—'}
+                          {e.eingezahlt_am ? new Date(e.eingezahlt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
                         </td>
                       </tr>
                     ))}

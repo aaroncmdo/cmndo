@@ -234,8 +234,8 @@ function VorlageCard({
             )}
           </div>
           <p className="text-xs text-claimondo-ondo">
-            Erstellt {new Date(vorlage.created_at).toLocaleDateString('de-DE')}
-            {vorlage.aktiv && ` · Aktiv seit ${new Date(vorlage.gueltig_ab).toLocaleDateString('de-DE')}`}
+            Erstellt {new Date(vorlage.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+            {vorlage.aktiv && ` · Aktiv seit ${new Date(vorlage.gueltig_ab).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}`}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">

@@ -254,7 +254,7 @@ function MessageBubble({ message, currentUserId }: { message: Nachricht; current
           </a>
         )}
         <p className={`text-[10px] mt-1 ${alignRight ? 'text-white/60' : 'text-claimondo-ondo/70'}`}>
-          {new Date(message.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+          {new Date(message.created_at).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>
     </div>

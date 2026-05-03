@@ -73,7 +73,7 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
               <span className="text-claimondo-ondo">Sendedatum (OCR)</span>
               <p className="text-claimondo-navy font-medium">
                 {fallAS.anschlussschreiben_sendedatum
-                  ? new Date(fallAS.anschlussschreiben_sendedatum).toLocaleDateString('de-DE')
+                  ? new Date(fallAS.anschlussschreiben_sendedatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
                   : 'Nicht erkannt'}
               </p>
             </div>

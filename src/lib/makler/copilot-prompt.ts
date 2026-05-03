@@ -20,7 +20,7 @@ function fmtEur(n: number | null | undefined): string {
 
 function fmtDate(iso: string | null | undefined): string {
   if (!iso) return '–'
-  return new Date(iso).toLocaleDateString('de-DE')
+  return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
 }
 
 export const MAKLER_COPILOT_SYSTEM_STATIC = `Du bist der Claimondo-Copilot für Makler. Du hilfst dem Makler, Kunden-Fragen

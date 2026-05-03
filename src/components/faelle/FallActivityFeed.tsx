@@ -42,7 +42,7 @@ function formatRelativ(dateStr: string): string {
   const days = Math.floor(hours / 24)
   if (days === 1) return 'gestern'
   if (days < 7) return `vor ${days} Tagen`
-  return new Date(dateStr).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+  return new Date(dateStr).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })
 }
 
 export default function FallActivityFeed({

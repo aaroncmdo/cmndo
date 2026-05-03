@@ -416,7 +416,7 @@ export default function OnboardingWizard({
                   <div className="mt-4 space-y-3">
                     <ClaimDataCard title="Schadensereignis">
                       {claim.schadentag && (
-                        <DataRow label="Datum" value={new Date(claim.schadentag).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })} />
+                        <DataRow label="Datum" value={new Date(claim.schadentag).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: 'long', year: 'numeric' })} />
                       )}
                       {claim.schadenzeit && <DataRow label="Uhrzeit" value={String(claim.schadenzeit).slice(0, 5)} />}
                       {claim.schadenort_adresse && (
@@ -496,10 +496,10 @@ export default function OnboardingWizard({
                       <p className="text-xs uppercase tracking-wider text-emerald-700 font-semibold">Termin verbindlich bestätigt</p>
                     </div>
                     <p className="text-lg font-bold text-claimondo-navy">
-                      {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                      {new Date(termin.datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                     </p>
                     <p className="text-sm font-medium text-claimondo-navy">
-                      {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                      {new Date(termin.datum).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} Uhr
                     </p>
                     {termin.ort && (
                       <p className="mt-3 text-sm text-claimondo-navy flex items-start gap-1.5">

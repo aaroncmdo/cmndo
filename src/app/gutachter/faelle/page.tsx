@@ -206,7 +206,7 @@ export default async function GutachterFaellePage({
                         </td>
                         <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">
                           {k.erstellt_am
-                            ? new Date(k.erstellt_am as string).toLocaleDateString('de-DE', {
+                            ? new Date(k.erstellt_am as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric',

@@ -35,7 +35,7 @@ export function PhaseTimeline({
             </span>
             <time className="text-[11px] text-claimondo-ondo/70 shrink-0">
               {p.reachedAt
-                ? new Date(p.reachedAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })
+                ? new Date(p.reachedAt).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })
                 : '—'}
             </time>
           </div>
