@@ -36,10 +36,19 @@ export type TbtVoiceInstruction = {
   ssmlAnnouncement?: string
 }
 
+export type TbtLane = {
+  /** True wenn diese Lane für den nächsten Maneuver genutzt werden muss. */
+  active: boolean
+  /** Erlaubte Richtungen aus dieser Spur (z.B. ['straight'], ['left', 'straight']). */
+  directions: string[]
+}
+
 export type TbtBannerInstruction = {
   distanceAlongGeometry: number
   primary: { text: string; type?: string; modifier?: string }
   secondary?: { text: string } | null
+  /** Spur-Anweisungen aus dem `sub`-Banner. Leer wenn die Route keine Spuren hat. */
+  lanes?: TbtLane[]
 }
 
 export type TbtStep = {
@@ -92,6 +101,14 @@ type RawStep = {
     distanceAlongGeometry: number
     primary: { text: string; type?: string; modifier?: string }
     secondary?: { text: string } | null
+    sub?: {
+      text?: string
+      components?: Array<{
+        type?: string
+        active?: boolean
+        directions?: string[]
+      }>
+    } | null
   }>
 }
 
@@ -135,7 +152,21 @@ export async function fetchTurnByTurnRoute(
       duration: s.duration,
       name: s.name ?? null,
       voiceInstructions: s.voiceInstructions ?? [],
-      bannerInstructions: s.bannerInstructions ?? [],
+      bannerInstructions: (s.bannerInstructions ?? []).map((b) => {
+        const components = b.sub?.components ?? []
+        const lanes: TbtLane[] = components
+          .filter((c) => c.type === 'lane')
+          .map((c) => ({
+            active: c.active === true,
+            directions: c.directions ?? [],
+          }))
+        return {
+          distanceAlongGeometry: b.distanceAlongGeometry,
+          primary: b.primary,
+          secondary: b.secondary ?? null,
+          lanes: lanes.length > 0 ? lanes : undefined,
+        }
+      }),
     }))
     return {
       distance: route.distance,
