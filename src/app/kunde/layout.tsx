@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { LogOutIcon } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import KundeNav from './_components/KundeNav'
+import KundeMobileDrawer from './_components/KundeMobileDrawer'
 import KundenbetreuerCard from './_components/KundenbetreuerCard'
 import GutachterCard from './_components/GutachterCard'
 import EskalierterAdminCard from './_components/EskalierterAdminCard'
@@ -238,6 +239,65 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   const sidebarBg = branding.useBrand ? 'var(--brand-sidebar-bg, #0D1B3E)' : '#0D1B3E'
   const accentBg = branding.useBrand ? 'var(--brand-secondary, #4573A2)' : '#4573A2'
 
+  // Sidebar-Cards (KB / SV / Admin / LexDrive) als wiederverwendbares Fragment.
+  // Wird sowohl in der Desktop-Sidebar gerendert als auch in den Mobile-Drawer
+  // durchgereicht, damit der Kunde auf Mobile dieselben Kontakt-Cards sieht.
+  const sidebarCards = (
+    <>
+      {lexdriveQr && (
+        <LexDriveCard
+          qrSvg={lexdriveQr.qrSvg}
+          qrUrl={lexdriveQr.qrUrl}
+          accentBg={accentBg}
+        />
+      )}
+      {svCard && (
+        <GutachterCard
+          vorname={svCard.vorname}
+          nachname={svCard.nachname}
+          telefon={svCard.telefon}
+          avatarUrl={svCard.avatarUrl}
+          accentBg={accentBg}
+          fallId={singleFallId}
+          currentUserId={user.id}
+          svUserId={svCard.id}
+          kbUserId={kbCard?.id ?? null}
+          kbName={kbCard ? [kbCard.vorname, kbCard.nachname].filter(Boolean).join(' ') || null : null}
+          kbAvatarUrl={kbCard?.avatarUrl ?? null}
+          adminUserId={adminCard?.id ?? null}
+          adminName={adminCard ? [adminCard.vorname, adminCard.nachname].filter(Boolean).join(' ') || null : null}
+          adminAvatarUrl={adminCard?.avatarUrl ?? null}
+          fallOptions={fallOptionsForChat}
+        />
+      )}
+      {kbCard && (
+        <KundenbetreuerCard
+          vorname={kbCard.vorname}
+          nachname={kbCard.nachname}
+          telefon={kbCard.telefon}
+          avatarUrl={kbCard.avatarUrl}
+          accentBg={accentBg}
+          fallId={singleFallId}
+          currentUserId={user.id}
+          kbUserId={kbCard.id}
+          kbRolle={kbCard.rolle}
+          adminUserId={adminCard?.id ?? null}
+          adminName={adminCard ? [adminCard.vorname, adminCard.nachname].filter(Boolean).join(' ') || null : null}
+          adminAvatarUrl={adminCard?.avatarUrl ?? null}
+          fallOptions={fallOptionsForChat}
+        />
+      )}
+      {adminCard && (
+        <EskalierterAdminCard
+          vorname={adminCard.vorname}
+          nachname={adminCard.nachname}
+          avatarUrl={adminCard.avatarUrl}
+          accentBg={accentBg}
+        />
+      )}
+    </>
+  )
+
   return (
     <div className="flex min-h-screen bg-[#f8f9fb]" style={themeStyle}>
       {/* Desktop Sidebar — hidden on mobile */}
@@ -271,62 +331,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           <KundeNav singleFallId={singleFallId} />
         </div>
 
-        {/* LexDrive-Card: nur wenn LexDrive-Pfad + Vollmacht signiert. */}
-        {lexdriveQr && (
-          <LexDriveCard
-            qrSvg={lexdriveQr.qrSvg}
-            qrUrl={lexdriveQr.qrUrl}
-            accentBg={accentBg}
-          />
-        )}
-
-        {/* Gutachter-Card oberhalb der KB-Card — Gruppenchat (Kunde+SV+KB+Admin) */}
-        {svCard && (
-          <GutachterCard
-            vorname={svCard.vorname}
-            nachname={svCard.nachname}
-            telefon={svCard.telefon}
-            avatarUrl={svCard.avatarUrl}
-            accentBg={accentBg}
-            fallId={singleFallId}
-            currentUserId={user.id}
-            svUserId={svCard.id}
-            kbUserId={kbCard?.id ?? null}
-            kbName={kbCard ? [kbCard.vorname, kbCard.nachname].filter(Boolean).join(' ') || null : null}
-            kbAvatarUrl={kbCard?.avatarUrl ?? null}
-            adminUserId={adminCard?.id ?? null}
-            adminName={adminCard ? [adminCard.vorname, adminCard.nachname].filter(Boolean).join(' ') || null : null}
-            adminAvatarUrl={adminCard?.avatarUrl ?? null}
-            fallOptions={fallOptionsForChat}
-          />
-        )}
-        {/* KB-Card direkt über Profil/Logout */}
-        {kbCard && (
-          <KundenbetreuerCard
-            vorname={kbCard.vorname}
-            nachname={kbCard.nachname}
-            telefon={kbCard.telefon}
-            avatarUrl={kbCard.avatarUrl}
-            accentBg={accentBg}
-            fallId={singleFallId}
-            currentUserId={user.id}
-            kbUserId={kbCard.id}
-            kbRolle={kbCard.rolle}
-            adminUserId={adminCard?.id ?? null}
-            adminName={adminCard ? [adminCard.vorname, adminCard.nachname].filter(Boolean).join(' ') || null : null}
-            adminAvatarUrl={adminCard?.avatarUrl ?? null}
-            fallOptions={fallOptionsForChat}
-          />
-        )}
-        {/* Eskalierter Admin (read-only — KB hat eskaliert) */}
-        {adminCard && (
-          <EskalierterAdminCard
-            vorname={adminCard.vorname}
-            nachname={adminCard.nachname}
-            avatarUrl={adminCard.avatarUrl}
-            accentBg={accentBg}
-          />
-        )}
+        {/* Sidebar-Cards (KB / SV / Admin / LexDrive) — auf Desktop und im
+            Mobile-Drawer identisch (sidebarCards-Fragment). */}
+        {sidebarCards}
 
         {/* Profil-Klick + Support + Abmelden unten — Updates raus
             (kommt zurueck wenn B2B). */}
@@ -388,15 +395,12 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         </Link>
         <div className="flex items-center gap-2">
           <OutboxBadge />
-          <form action="/api/auth/logout" method="POST">
-            <button
-              type="submit"
-              className="text-[#7BA3CC] hover:text-white p-1.5"
-              aria-label="Abmelden"
-            >
-              <LogOutIcon style={{ width: 18, height: 18 }} />
-            </button>
-          </form>
+          <KundeMobileDrawer
+            initials={initials}
+            displayName={displayName}
+            accentBg={accentBg}
+            cards={sidebarCards}
+          />
         </div>
       </header>
 

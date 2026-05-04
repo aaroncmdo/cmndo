@@ -396,7 +396,7 @@ export default function ClaimStepper({
           </p>
         </div>
       )}
-      <div className="flex items-center w-full">
+      <div className="flex items-center w-full overflow-x-auto -mx-1 px-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
         {MAIN_PHASES.map((p, i) => {
           // Optimistisch: Kanzlei-Step (= Begutachtung-Slot) gilt als
           // erledigt sobald die Vollmacht signiert ODER der Selbst-Pfad
@@ -505,7 +505,7 @@ export default function ClaimStepper({
                     : MAIN_PHASE_LABEL[p.key]}
                   </p>
                   {isCurrent && (
-                    <p className="text-[11px] text-claimondo-ondo whitespace-nowrap mt-0.5">
+                    <p className="text-[11px] text-claimondo-ondo truncate max-w-[140px] sm:max-w-none sm:whitespace-nowrap mt-0.5">
                       {SUBPHASE_LABEL[lifecycle.subPhase]}
                     </p>
                   )}
