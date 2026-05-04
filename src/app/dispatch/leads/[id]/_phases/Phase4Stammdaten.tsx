@@ -821,7 +821,7 @@ export default function Phase4Stammdaten() {
       <Card icon={<MapPinIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Kundenadresse">
         <div className="space-y-1.5">
           <p className="text-[11px] text-claimondo-ondo">
-            Wohnadresse des Kunden — wird für Isochrone-Matching und Gutachter-Zuweisung genutzt.
+            Wohnadresse des Kunden — nur als letzter Fallback für die Gutachter-Zuweisung (Priorität: Besichtigungsort → Fahrzeug-Standort → Unfallort → Wohnadresse).
           </p>
           <GooglePlaceAutocomplete
             defaultValue={l.kunde_adresse ?? ''}
