@@ -23,6 +23,45 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
+// Mapbox-Matrix-API: ETA von einem Origin zu N Destinations in einem Call.
+// Max 25 Koordinaten (1 Origin + 24 Destinations) pro Request — wir batchen.
+async function mapboxEtaMatrix(
+  originLat: number,
+  originLng: number,
+  destinations: Array<{ lat: number; lng: number }>,
+): Promise<Array<number | null>> {
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? process.env.MAPBOX_TOKEN ?? ''
+  if (!token || destinations.length === 0) return destinations.map(() => null)
+
+  const result: Array<number | null> = new Array(destinations.length).fill(null)
+  const CHUNK = 24
+  for (let i = 0; i < destinations.length; i += CHUNK) {
+    const slice = destinations.slice(i, i + CHUNK)
+    const coords = [
+      `${originLng},${originLat}`,
+      ...slice.map((d) => `${d.lng},${d.lat}`),
+    ].join(';')
+    try {
+      const url =
+        `https://api.mapbox.com/directions-matrix/v1/mapbox/driving/${coords}` +
+        `?annotations=duration&sources=0&access_token=${token}`
+      const res = await fetch(url)
+      if (!res.ok) continue
+      const data = await res.json()
+      const row = data?.durations?.[0] as Array<number | null> | undefined
+      if (!row) continue
+      // row[0] = origin → origin = 0, row[1..] = ETA in Sekunden zu destinations
+      for (let j = 0; j < slice.length; j++) {
+        const sec = row[j + 1]
+        result[i + j] = typeof sec === 'number' ? Math.ceil(sec / 60) : null
+      }
+    } catch (err) {
+      console.warn('[mapboxEtaMatrix] Chunk fehlgeschlagen:', err)
+    }
+  }
+  return result
+}
+
 export type SpontanInput = {
   vorname: string
   nachname: string
@@ -102,6 +141,7 @@ export type SvDistanceVorschlag = {
   name: string
   standort: string | null
   distanzKm: number
+  etaMinuten: number | null
   belegt: boolean
   paketUmkreisKm: number
 }
@@ -145,7 +185,7 @@ export async function listSvsByDistance(
 
   const blockierteSvs = new Set((konflikte ?? []).map((k) => k.sv_id as string))
 
-  const list = (svRows as unknown as Array<{
+  const svParsed = (svRows as unknown as Array<{
     id: string
     standort_adresse: string | null
     standort_lat: number
@@ -162,12 +202,39 @@ export async function listSvsByDistance(
       svId: sv.id,
       name,
       standort: sv.standort_adresse ?? null,
-      distanzKm: haversine(sv.standort_lat, sv.standort_lng, besichtigungsortLat, besichtigungsortLng),
-      belegt: blockierteSvs.has(sv.id),
+      lat: sv.standort_lat,
+      lng: sv.standort_lng,
       paketUmkreisKm: Number(sv.paket_umkreis_km) || 40,
     }
   })
 
-  list.sort((a, b) => a.distanzKm - b.distanzKm)
+  // Mapbox-Matrix für echte Fahrtzeit (vom SV-Standort → Besichtigungsort).
+  // Origin = Besichtigungsort, Destinations = SV-Standorte (Mapbox-Matrix
+  // mit sources=0 liefert Origin→Destination — die Fahrtzeit ist symmetrisch
+  // genug für ETA-Anzeige; bei Einbahnstraßen-Sonderfällen leichte Abweichung
+  // akzeptabel).
+  const etas = await mapboxEtaMatrix(
+    besichtigungsortLat,
+    besichtigungsortLng,
+    svParsed.map((sv) => ({ lat: sv.lat, lng: sv.lng })),
+  )
+
+  const list: SvDistanceVorschlag[] = svParsed.map((sv, i) => ({
+    svId: sv.svId,
+    name: sv.name,
+    standort: sv.standort,
+    distanzKm: haversine(sv.lat, sv.lng, besichtigungsortLat, besichtigungsortLng),
+    etaMinuten: etas[i],
+    belegt: blockierteSvs.has(sv.svId),
+    paketUmkreisKm: sv.paketUmkreisKm,
+  }))
+
+  // Primär nach ETA sortieren (wenn vorhanden), Fallback Distanz.
+  list.sort((a, b) => {
+    if (a.etaMinuten != null && b.etaMinuten != null) return a.etaMinuten - b.etaMinuten
+    if (a.etaMinuten != null) return -1
+    if (b.etaMinuten != null) return 1
+    return a.distanzKm - b.distanzKm
+  })
   return { ok: true, vorschlaege: list }
 }
