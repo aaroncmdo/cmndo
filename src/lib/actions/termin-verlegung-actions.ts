@@ -521,12 +521,25 @@ export async function kundeTerminVerlegungVorschlagen(input: {
     alt.id as string,
   )
   if (!frei) {
+    // AAR-CMM PR B: Candidate-Location für ETA-Reachability der Alternativen
+    const { data: fallLoc } = await admin
+      .from('faelle')
+      .select('besichtigungsort_lat, besichtigungsort_lng')
+      .eq('id', alt.fall_id as string)
+      .maybeSingle()
+    const candLat = (fallLoc as { besichtigungsort_lat: number | null } | null)?.besichtigungsort_lat ?? null
+    const candLng = (fallLoc as { besichtigungsort_lng: number | null } | null)?.besichtigungsort_lng ?? null
+    const candidate = candLat != null && candLng != null
+      ? { lat: Number(candLat), lng: Number(candLng) }
+      : null
+
     const alternatives = await findAlternativenZuWunschslot(
       admin,
       alt.sv_id as string,
       input.neuesStartIso,
       slotDauerMin,
       alt.id as string,
+      candidate,
     )
     return { ok: false, error: 'Der gewünschte Termin ist beim Gutachter belegt.', alternatives }
   }

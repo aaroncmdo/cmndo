@@ -416,9 +416,26 @@ export async function findAlternativenZuWunschslot(
   wunschStartIso: string,
   slotDauerMin: number,
   exkludiereTerminId?: string,
+  /** AAR-CMM PR B: Optional — Besichtigungsort des zu verlegenden Termins.
+   * Wenn übergeben, werden ETA-unerreichbare Slots ausgefiltert (Vorgänger/
+   * Nachfolger im SV-Kalender prüfen). */
+  candidate?: { lat: number; lng: number } | null,
 ): Promise<KundenAlternative[]> {
   const wunschStart = new Date(wunschStartIso)
   const out: KundenAlternative[] = []
+
+  // ETA-Vorberechnung — eine Mapbox-Matrix-Call für die ganze Suche
+  const { precomputeSvSlotEtas, isSlotReachable } = await import('@/lib/dispatch/reachability')
+  const sucheBis = new Date(wunschStart)
+  sucheBis.setDate(sucheBis.getDate() + KUNDE_ALTERNATIVE_MAX_TAGE_VORWAERTS + 1)
+  const slotEtaCtx = candidate
+    ? await precomputeSvSlotEtas(supabase, svId, candidate, wunschStart.toISOString(), sucheBis.toISOString())
+    : null
+
+  function reachable(start: Date, end: Date): boolean {
+    if (!slotEtaCtx) return true
+    return isSlotReachable(start, end, slotEtaCtx).reachable
+  }
 
   function fmtTag(d: Date): string {
     return d.toISOString().slice(0, 10)
@@ -447,7 +464,10 @@ export async function findAlternativenZuWunschslot(
     const candStart = new Date(probe.getTime() - KUNDE_ALTERNATIVE_OFFSET_MIN * 60_000)
     if (candStart.getTime() < heuteStart.getTime()) break
     const candEnd = new Date(candStart.getTime() + slotDauerMin * 60_000)
-    if (await istSlotFrei(supabase, svId, candStart.toISOString(), candEnd.toISOString(), exkludiereTerminId)) {
+    if (
+      (await istSlotFrei(supabase, svId, candStart.toISOString(), candEnd.toISOString(), exkludiereTerminId)) &&
+      reachable(candStart, candEnd)
+    ) {
       out.push({
         start: candStart.toISOString(),
         end: candEnd.toISOString(),
@@ -471,7 +491,10 @@ export async function findAlternativenZuWunschslot(
     const candStart = new Date(probe.getTime() + KUNDE_ALTERNATIVE_OFFSET_MIN * 60_000)
     const candEnd = new Date(candStart.getTime() + slotDauerMin * 60_000)
     if (candEnd.getTime() > heuteEnde.getTime()) break
-    if (await istSlotFrei(supabase, svId, candStart.toISOString(), candEnd.toISOString(), exkludiereTerminId)) {
+    if (
+      (await istSlotFrei(supabase, svId, candStart.toISOString(), candEnd.toISOString(), exkludiereTerminId)) &&
+      reachable(candStart, candEnd)
+    ) {
       out.push({
         start: candStart.toISOString(),
         end: candEnd.toISOString(),
@@ -489,7 +512,10 @@ export async function findAlternativenZuWunschslot(
     const candStart = new Date(wunschStart)
     candStart.setDate(candStart.getDate() + tagOffset)
     const candEnd = new Date(candStart.getTime() + slotDauerMin * 60_000)
-    if (await istSlotFrei(supabase, svId, candStart.toISOString(), candEnd.toISOString(), exkludiereTerminId)) {
+    if (
+      (await istSlotFrei(supabase, svId, candStart.toISOString(), candEnd.toISOString(), exkludiereTerminId)) &&
+      reachable(candStart, candEnd)
+    ) {
       out.push({
         start: candStart.toISOString(),
         end: candEnd.toISOString(),
