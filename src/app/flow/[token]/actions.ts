@@ -104,8 +104,14 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
 </div>
 </body></html>`
 
-  // Als HTML in Storage speichern
-  const path = `sa-dokumente/${fallId}/sicherungsabtretung_${Date.now()}.html`
+  // claim_id laden damit signiertes Dokument in den Claim-Bucket geht
+  const { data: fallRow } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (fallRow?.claim_id as string | null) ?? null
+
+  // Als HTML in Storage speichern — bevorzugt claim/{claimId}/signed/, Fallback sa-dokumente/
+  const path = claimId
+    ? `claim/${claimId}/signed/sicherungsabtretung_${Date.now()}.html`
+    : `sa-dokumente/${fallId}/sicherungsabtretung_${Date.now()}.html`
   const blob = new Blob([html], { type: 'text/html' })
   await admin.storage.from('fall-dokumente').upload(path, blob, { contentType: 'text/html' })
   const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
@@ -123,7 +129,7 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
     kategorie: 'unterschrift',
     quelle: 'flowlink',
     uploaded_by_kunde: true,
-    sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei'],
+    sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei', 'kunde'],
   })
 
   return { pdfUrl: publicUrl }
