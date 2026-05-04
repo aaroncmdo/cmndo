@@ -807,6 +807,51 @@ export type Database = {
           },
         ]
       }
+      anruf_log: {
+        Row: {
+          created_at: string
+          erstellt_von: string | null
+          id: string
+          lead_id: string
+          notiz: string | null
+          status: string
+          zeitpunkt: string
+        }
+        Insert: {
+          created_at?: string
+          erstellt_von?: string | null
+          id?: string
+          lead_id: string
+          notiz?: string | null
+          status: string
+          zeitpunkt?: string
+        }
+        Update: {
+          created_at?: string
+          erstellt_von?: string | null
+          id?: string
+          lead_id?: string
+          notiz?: string | null
+          status?: string
+          zeitpunkt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anruf_log_erstellt_von_fkey"
+            columns: ["erstellt_von"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anruf_log_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auftraege: {
         Row: {
           abgeschlossen_am: string | null
@@ -1443,6 +1488,10 @@ export type Database = {
           ist_gewerbe: boolean
           ist_halter: boolean
           kennzeichen: string | null
+          kennzeichen_buchstaben: string | null
+          kennzeichen_kreis: string | null
+          kennzeichen_suffix: string | null
+          kennzeichen_zahl: string | null
           krankenhaus_name: string | null
           mobil: string | null
           nachname: string | null
@@ -1495,6 +1544,10 @@ export type Database = {
           ist_gewerbe?: boolean
           ist_halter?: boolean
           kennzeichen?: string | null
+          kennzeichen_buchstaben?: string | null
+          kennzeichen_kreis?: string | null
+          kennzeichen_suffix?: string | null
+          kennzeichen_zahl?: string | null
           krankenhaus_name?: string | null
           mobil?: string | null
           nachname?: string | null
@@ -1547,6 +1600,10 @@ export type Database = {
           ist_gewerbe?: boolean
           ist_halter?: boolean
           kennzeichen?: string | null
+          kennzeichen_buchstaben?: string | null
+          kennzeichen_kreis?: string | null
+          kennzeichen_suffix?: string | null
+          kennzeichen_zahl?: string | null
           krankenhaus_name?: string | null
           mobil?: string | null
           nachname?: string | null
@@ -2744,6 +2801,7 @@ export type Database = {
           besichtigungsort_adresse: string | null
           besichtigungsort_lat: number | null
           besichtigungsort_lng: number | null
+          besichtigungsort_notiz: string | null
           besichtigungsort_place_id: string | null
           betreuungspaket: Database["public"]["Enums"]["betreuungspaket"] | null
           bevorzugter_kanal: string | null
@@ -2818,6 +2876,7 @@ export type Database = {
           geschlossen_grund: string | null
           gewerbe_flag: boolean | null
           google_review_gesendet: boolean | null
+          google_review_prompt_gezeigt_am: string | null
           gutachten_betrag: number | null
           gutachten_eingegangen_am: string | null
           gutachten_hochgeladen_am: string | null
@@ -3085,6 +3144,7 @@ export type Database = {
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
+          besichtigungsort_notiz?: string | null
           besichtigungsort_place_id?: string | null
           betreuungspaket?:
             | Database["public"]["Enums"]["betreuungspaket"]
@@ -3161,6 +3221,7 @@ export type Database = {
           geschlossen_grund?: string | null
           gewerbe_flag?: boolean | null
           google_review_gesendet?: boolean | null
+          google_review_prompt_gezeigt_am?: string | null
           gutachten_betrag?: number | null
           gutachten_eingegangen_am?: string | null
           gutachten_hochgeladen_am?: string | null
@@ -3428,6 +3489,7 @@ export type Database = {
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
+          besichtigungsort_notiz?: string | null
           besichtigungsort_place_id?: string | null
           betreuungspaket?:
             | Database["public"]["Enums"]["betreuungspaket"]
@@ -3504,6 +3566,7 @@ export type Database = {
           geschlossen_grund?: string | null
           gewerbe_flag?: boolean | null
           google_review_gesendet?: boolean | null
+          google_review_prompt_gezeigt_am?: string | null
           gutachten_betrag?: number | null
           gutachten_eingegangen_am?: string | null
           gutachten_hochgeladen_am?: string | null
@@ -4544,6 +4607,44 @@ export type Database = {
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisationen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_bewertungen_cache: {
+        Row: {
+          anzahl_bewertungen: number | null
+          created_at: string
+          durchschnitt: number | null
+          id: string
+          photo_reference: string | null
+          profile_id: string
+          zuletzt_aktualisiert_am: string
+        }
+        Insert: {
+          anzahl_bewertungen?: number | null
+          created_at?: string
+          durchschnitt?: number | null
+          id?: string
+          photo_reference?: string | null
+          profile_id: string
+          zuletzt_aktualisiert_am?: string
+        }
+        Update: {
+          anzahl_bewertungen?: number | null
+          created_at?: string
+          durchschnitt?: number | null
+          id?: string
+          photo_reference?: string | null
+          profile_id?: string
+          zuletzt_aktualisiert_am?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_bewertungen_cache_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -6621,6 +6722,7 @@ export type Database = {
           besichtigungsort_adresse: string | null
           besichtigungsort_lat: number | null
           besichtigungsort_lng: number | null
+          besichtigungsort_notiz: string | null
           besichtigungsort_place_id: string | null
           bevorzugter_kanal: string | null
           bkat_unfallart: Database["public"]["Enums"]["bkat_unfallart"] | null
@@ -6821,6 +6923,7 @@ export type Database = {
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
+          besichtigungsort_notiz?: string | null
           besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
           bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
@@ -7021,6 +7124,7 @@ export type Database = {
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
+          besichtigungsort_notiz?: string | null
           besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
           bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
@@ -8745,6 +8849,7 @@ export type Database = {
           google_access_token: string | null
           google_connected_at: string | null
           google_email: string | null
+          google_place_id: string | null
           google_refresh_token: string | null
           google_token_expires_at: string | null
           id: string
@@ -8799,6 +8904,7 @@ export type Database = {
           google_access_token?: string | null
           google_connected_at?: string | null
           google_email?: string | null
+          google_place_id?: string | null
           google_refresh_token?: string | null
           google_token_expires_at?: string | null
           id: string
@@ -8853,6 +8959,7 @@ export type Database = {
           google_access_token?: string | null
           google_connected_at?: string | null
           google_email?: string | null
+          google_place_id?: string | null
           google_refresh_token?: string | null
           google_token_expires_at?: string | null
           id?: string
@@ -14165,3 +14272,4 @@ export const Constants = {
     },
   },
 } as const
+
