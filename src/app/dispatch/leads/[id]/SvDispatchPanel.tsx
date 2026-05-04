@@ -34,6 +34,8 @@ import {
 import type { DebugSvMatchingResponse } from '@/lib/dispatch/debugSvMatching'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Modal } from '@/components/primitives/Modal'
+import SvKalenderVergleichModal from './SvKalenderVergleichModal'
+import { CalendarDaysIcon } from 'lucide-react'
 
 type SvWithSlots = SvSuggestion & { slots: SlotCandidate[] }
 
@@ -96,6 +98,8 @@ export default function SvDispatchPanel({
   // AAR-195: Vorgeschlagene Slots für den manuell aus Extra-Liste gewählten SV
   const [freeSlots, setFreeSlots] = useState<SlotCandidate[]>([])
   const [slotsLoading, setSlotsLoading] = useState(false)
+  // SV-Kalender-Vergleichsmodal (Tabs pro SV mit Termin-Liste + Routen)
+  const [kalenderOpen, setKalenderOpen] = useState(false)
   // AAR-521: Debug-Modal für "Warum keine SVs?"
   const [debugOpen, setDebugOpen] = useState(false)
   const [debugData, setDebugData] = useState<DebugSvMatchingResponse | null>(null)
@@ -493,14 +497,23 @@ export default function SvDispatchPanel({
                 <p className="text-[10px] text-claimondo-ondo uppercase font-medium">
                   {topSuggestions.length} Vorschläge · Klick auf Slot reserviert sofort
                 </p>
-                <button
-                  type="button"
-                  onClick={triggerSearch}
-                  disabled={pending || topLoading}
-                  className="text-[10px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
-                >
-                  <RefreshCwIcon className="w-3 h-3" /> neu suchen
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setKalenderOpen(true)}
+                    className="text-[10px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
+                  >
+                    <CalendarDaysIcon className="w-3 h-3" /> Kalender vergleichen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={triggerSearch}
+                    disabled={pending || topLoading}
+                    className="text-[10px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
+                  >
+                    <RefreshCwIcon className="w-3 h-3" /> neu suchen
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -714,6 +727,17 @@ export default function SvDispatchPanel({
           )}
         </>
       )}
+
+      <SvKalenderVergleichModal
+        open={kalenderOpen}
+        onClose={() => setKalenderOpen(false)}
+        leadId={leadId}
+        svIds={[
+          ...((topSuggestions ?? []).map((s) => s.svId)),
+          ...((extraSuggestions ?? []).map((s) => s.svId)),
+        ]}
+        wunschterminIso={wunschterminIso ?? null}
+      />
 
       <Modal open={debugOpen} onClose={() => setDebugOpen(false)} noPadding hideCloseButton maxWidth={672} ariaLabel="SV-Matching Debug">
         <div className="max-h-[85vh] overflow-hidden flex flex-col">
