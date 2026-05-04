@@ -13,6 +13,10 @@ export interface KundeMarkerOptions {
 function buildKundeMarkerElement(opts: KundeMarkerOptions): HTMLDivElement {
   const el = document.createElement('div')
   el.className = 'kunde-marker'
+  // AAR-marker-instant: keine CSS-transition — Pin sitzt fest an der
+  // Mapbox-Marker-Position. Der Active-Stop-Highlight (scale 1.5 +
+  // box-shadow) wechselt damit hart, was visuell klarer ist als ein
+  // sanftes „Nachgleiten".
   el.style.cssText = [
     'width: 24px',
     'height: 24px',
@@ -27,7 +31,6 @@ function buildKundeMarkerElement(opts: KundeMarkerOptions): HTMLDivElement {
     'font-weight: 700',
     'font-size: 10px',
     'pointer-events: none',
-    'transition: transform 0.2s ease',
   ].join(';')
   el.textContent = (opts.initials ?? 'K').slice(0, 2).toUpperCase()
   return el

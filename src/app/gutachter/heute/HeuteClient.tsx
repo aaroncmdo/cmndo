@@ -82,8 +82,9 @@ export default function HeuteClient({
   }, [aktiveTermine])
 
   return (
-    <div className="relative w-full h-[calc(100vh-64px)] overflow-hidden">
-      {/* Mapbox füllt den ganzen Bereich */}
+    <div className="relative w-full h-full overflow-hidden">
+      {/* Mapbox füllt den ganzen Bereich — GutachterShell entfernt Padding
+          + Rounded für die Heute-Page (siehe isFullscreenMap dort). */}
       <div className="absolute inset-0">
         <TagesrouteMap
           svOrigin={origin}
