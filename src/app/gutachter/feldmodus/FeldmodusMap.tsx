@@ -83,9 +83,37 @@ export default function FeldmodusMap({
         })
         stopMarkersRef.current.push(marker)
       })
+      // Initial-fit auf alle Stops sobald Style geladen ist — verhindert,
+      // dass die Map auf dem Default-Center stehen bleibt wenn der Container
+      // bei der Init noch keine finale Höhe hatte.
+      const stopsWithCoords = stops.filter((s) => s.lat != null && s.lng != null)
+      if (stopsWithCoords.length > 0) {
+        const bounds = new mapboxgl.LngLatBounds()
+        stopsWithCoords.forEach((s) => bounds.extend([s.lng as number, s.lat as number]))
+        if (sv.standort_lng != null && sv.standort_lat != null) {
+          bounds.extend([sv.standort_lng, sv.standort_lat])
+        }
+        map.fitBounds(bounds, { padding: 60, duration: 0, maxZoom: 14 })
+      }
     })
 
+    // ResizeObserver: Mapbox rendert sich winzig wenn der Container beim
+    // Mount 0×0 ist (typisch bei flex-Layouts). map.resize() bei jeder
+    // Container-Größenänderung triggert ein neues Canvas-Sizing.
+    const ro = new ResizeObserver(() => {
+      try { map.resize() } catch { /* map noch nicht initialisiert */ }
+    })
+    ro.observe(containerRef.current)
+
+    // Auch beim Window-Resize neu rechnen (Mobile-Browser-URL-Bar Toggle).
+    const onWindowResize = () => {
+      try { map.resize() } catch { /* noop */ }
+    }
+    window.addEventListener('resize', onWindowResize)
+
     return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', onWindowResize)
       svMarkerRef.current?.remove()
       svMarkerRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())

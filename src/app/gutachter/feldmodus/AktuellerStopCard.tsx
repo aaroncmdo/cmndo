@@ -16,6 +16,8 @@ import {
   CheckCircle2Icon,
   MapPinIcon,
   CarIcon,
+  AlertTriangleIcon,
+  FileTextIcon,
 } from 'lucide-react'
 import { formatUhrzeit } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
@@ -303,9 +305,63 @@ export default function AktuellerStopCard({
         </a>
       )}
 
+      {/* Vorschäden-Hinweis (Cardentity) */}
+      {stop.hat_vorschaeden && (stop.vorschaden_anzahl ?? 0) > 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs flex items-start gap-2">
+          <AlertTriangleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-amber-900">
+              {stop.vorschaden_anzahl} Vorschaden{stop.vorschaden_anzahl === 1 ? '' : '-Einträge'} im Cardentity-Bericht
+            </p>
+            {stop.vorschaden_letzter_datum && (
+              <p className="text-amber-800 mt-0.5">
+                Letzter Eintrag: {new Date(stop.vorschaden_letzter_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+              </p>
+            )}
+            <p className="text-amber-800/80 mt-0.5">
+              → Vor Ort prüfen ob die Beschädigungen sich überschneiden.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Einzusammelnde Pflichtdokumente */}
+      {stop.einzusammelnde_dokumente.length > 0 && (
+        <div className="rounded-lg border border-[color:var(--brand-primary,var(--brand-secondary))]/20 bg-[color:var(--brand-primary,var(--brand-secondary))]/5 px-3 py-2 space-y-1.5">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-claimondo-navy">
+            <FileTextIcon className="w-3.5 h-3.5" />
+            Einzusammeln vor Ort
+            <span className="text-[10px] font-normal text-claimondo-ondo">
+              ({stop.einzusammelnde_dokumente.length} offen)
+            </span>
+          </div>
+          <ul className="space-y-0.5 text-xs text-claimondo-navy">
+            {stop.einzusammelnde_dokumente.map((d) => (
+              <li key={d.slot_id} className="flex items-start gap-1.5">
+                <span className="text-claimondo-ondo mt-0.5">•</span>
+                <span>{d.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Auftrag-Typ-Badge (wenn nicht erstgutachten) */}
+      {stop.auftrag_typ && stop.auftrag_typ !== 'erstgutachten' && (
+        <p className="text-[11px] text-claimondo-ondo">
+          Auftrag:{' '}
+          <span className="font-semibold uppercase text-claimondo-navy">
+            {stop.auftrag_typ === 'nachbesichtigung' ? 'Nachbesichtigung' : stop.auftrag_typ === 'stellungnahme' ? 'Stellungnahme' : stop.auftrag_typ}
+          </span>
+        </p>
+      )}
+
       {/* SV-Briefing */}
       {stop.briefing_text && (
         <div className="border-t border-claimondo-border pt-3">
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo mb-1">
+            Briefing
+          </p>
           <p className="text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
             {stop.briefing_text}
           </p>
