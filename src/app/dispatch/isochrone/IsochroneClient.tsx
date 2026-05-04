@@ -154,7 +154,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                   <div className="px-5 py-2 bg-[#f8f9fb] text-[10px] uppercase tracking-wider text-claimondo-ondo grid grid-cols-[2fr_1fr_1fr_1fr_1fr_2fr] gap-3">
                     <span>Name</span>
                     <span>Paket</span>
-                    <span>Distanz</span>
+                    <span>Fahrtzeit</span>
                     <span>Score</span>
                     <span>Frei</span>
                     <span>Gründe</span>
@@ -165,7 +165,16 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                         {s.name}
                       </Link>
                       <span className="text-xs text-claimondo-ondo">{s.paket}</span>
-                      <span className="text-xs tabular-nums">{s.distanzKm.toFixed(1)} km</span>
+                      <span className="text-xs tabular-nums">
+                        {s.etaFromBueroMin != null ? (
+                          <>
+                            <span className="font-semibold">{s.etaFromBueroMin} min</span>
+                            <span className="text-[10px] text-claimondo-ondo/70 ml-1">({s.distanzKm.toFixed(1)} km)</span>
+                          </>
+                        ) : (
+                          <>{s.distanzKm.toFixed(1)} km</>
+                        )}
+                      </span>
                       <span className="text-xs tabular-nums font-semibold">{s.score.toFixed(1)}</span>
                       <span className={`text-xs tabular-nums ${s.kontingentFrei <= 2 ? 'text-red-600 font-semibold' : 'text-claimondo-navy'}`}>
                         {s.kontingentFrei}
