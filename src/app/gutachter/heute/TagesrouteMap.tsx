@@ -9,10 +9,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ensureMapboxInitialized,
   mapboxgl,
-  addSvAvatarMarker,
+  addSvCarMarker,
   addKundeMarker,
   upsertRouteLayer,
-  MAPBOX_STYLE_STREETS,
+  MAPBOX_STYLE_STANDARD,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import { NavigationIcon } from 'lucide-react'
@@ -102,15 +102,24 @@ export default function TagesrouteMap({
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: MAPBOX_STYLE_STREETS,
+      style: MAPBOX_STYLE_STANDARD, // 3D Buildings + moderne Topographie out of the box
       center: fallbackCenter,
-      zoom: 10,
-      pitch: 0,
+      zoom: 11,
+      pitch: 45, // leicht 3D
+      bearing: 0,
       attributionControl: false,
     })
 
+    // Mapbox Standard config: Light-Preset für sexier Look + 3D-Modelle aktiv
+    map.on('style.load', () => {
+      try {
+        map.setConfigProperty('basemap', 'lightPreset', 'day')
+        map.setConfigProperty('basemap', 'show3dObjects', true)
+      } catch { /* fail silent — fallback auf Default */ }
+    })
+
     map.addControl(
-      new mapboxgl.NavigationControl({ showCompass: false, visualizePitch: false }),
+      new mapboxgl.NavigationControl({ showCompass: true, visualizePitch: true }),
       'top-right',
     )
 
@@ -141,13 +150,13 @@ export default function TagesrouteMap({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // SV-Marker setzen + aktualisieren
+  // SV-Marker setzen + aktualisieren — Auto-Skin (Top-Down PKW)
   useEffect(() => {
     const map = mapRef.current
     if (!map || !svOrigin) return
     const place = () => {
       if (!svMarkerRef.current) {
-        svMarkerRef.current = addSvAvatarMarker(map, [svOrigin.lng, svOrigin.lat], { initials: 'Sie', heading: null })
+        svMarkerRef.current = addSvCarMarker(map, [svOrigin.lng, svOrigin.lat], { heading: null })
       } else {
         svMarkerRef.current.setLngLat([svOrigin.lng, svOrigin.lat])
       }
@@ -205,11 +214,21 @@ export default function TagesrouteMap({
           ])
           setRouteStats(null)
         }
-        // fitBounds auf alle Punkte
+        // fitBounds auf die ganze Route-Geometry — nicht nur Stops/Origin,
+        // damit gewundene Fahrten (Autobahn-Schleifen) auch sichtbar sind.
         const bounds = new mapboxgl.LngLatBounds()
-        bounds.extend([svOrigin.lng, svOrigin.lat])
-        validStops.forEach((s) => bounds.extend([s.lng, s.lat]))
-        m.fitBounds(bounds, { padding: 80, duration: 500, maxZoom: 14 })
+        if (route && route.coords.length > 1) {
+          for (const c of route.coords) bounds.extend(c)
+        } else {
+          bounds.extend([svOrigin.lng, svOrigin.lat])
+          validStops.forEach((s) => bounds.extend([s.lng, s.lat]))
+        }
+        m.fitBounds(bounds, {
+          padding: { top: 80, right: 420, bottom: 80, left: 80 },
+          duration: 800,
+          maxZoom: 14,
+          pitch: 45, // 3D-Tilt beim Fit beibehalten
+        })
       }
       if (mapRef.current.isStyleLoaded()) draw()
       else mapRef.current.once('load', draw)
@@ -225,11 +244,13 @@ export default function TagesrouteMap({
     stopMarkersRef.current.forEach((m, id) => {
       const el = m.getElement()
       if (id === activeStopId) {
-        el.style.transform = `${el.style.transform.replace(/scale\([^)]*\)/, '')} scale(1.25)`
+        el.style.transform = `${el.style.transform.replace(/scale\([^)]*\)/, '')} scale(1.5)`
         el.style.zIndex = '10'
+        el.style.boxShadow = '0 0 0 4px rgba(13,27,62,0.25), 0 4px 10px rgba(13,27,62,0.45)'
       } else {
         el.style.transform = el.style.transform.replace(/scale\([^)]*\)/, '')
         el.style.zIndex = ''
+        el.style.boxShadow = '0 2px 6px rgba(13,27,62,0.35)'
       }
     })
   }, [activeStopId])

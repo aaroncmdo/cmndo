@@ -51,20 +51,48 @@ export function upsertRouteLayer(
 
   map.addSource(ids.sourceId, { type: 'geojson', data: feature })
 
-  // Glow (breiter, transparenter) — muss UNTER der Hauptlinie liegen
+  // Outer Glow (breit, sehr transparent) — Halo-Effekt
+  map.addLayer({
+    id: `${ids.glowLayerId}-outer`,
+    type: 'line',
+    source: ids.sourceId,
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: {
+      'line-color': '#4573A2',
+      'line-width': 22,
+      'line-opacity': 0.15,
+      'line-blur': 8,
+    },
+  })
+
+  // Inner Glow (mittlerer Glow) — kräftigerer Halo
   map.addLayer({
     id: ids.glowLayerId,
     type: 'line',
     source: ids.sourceId,
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: {
-      'line-color': '#4573A2',
-      'line-width': 14,
-      'line-opacity': 0.25,
-      'line-blur': 4,
+      'line-color': '#7BA3CC',
+      'line-width': 12,
+      'line-opacity': 0.45,
+      'line-blur': 3,
     },
   })
 
+  // White-Casing unter der Hauptlinie — gibt Tiefe (sieht wie iOS Maps aus)
+  map.addLayer({
+    id: `${ids.lineLayerId}-casing`,
+    type: 'line',
+    source: ids.sourceId,
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: {
+      'line-color': '#FFFFFF',
+      'line-width': 8,
+      'line-opacity': 0.95,
+    },
+  })
+
+  // Hauptlinie — kräftiges Navy
   map.addLayer({
     id: ids.lineLayerId,
     type: 'line',
@@ -72,7 +100,7 @@ export function upsertRouteLayer(
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: {
       'line-color': '#0D1B3E',
-      'line-width': 6,
+      'line-width': 5,
     },
   })
 }
@@ -82,7 +110,14 @@ export function removeRouteLayer(
   map: MapboxMap,
   ids: RouteLayerIds = DEFAULT_IDS,
 ): void {
-  if (map.getLayer(ids.lineLayerId)) map.removeLayer(ids.lineLayerId)
-  if (map.getLayer(ids.glowLayerId)) map.removeLayer(ids.glowLayerId)
+  const layers = [
+    ids.lineLayerId,
+    `${ids.lineLayerId}-casing`,
+    ids.glowLayerId,
+    `${ids.glowLayerId}-outer`,
+  ]
+  for (const id of layers) {
+    if (map.getLayer(id)) map.removeLayer(id)
+  }
   if (map.getSource(ids.sourceId)) map.removeSource(ids.sourceId)
 }

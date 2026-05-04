@@ -7,7 +7,7 @@ export {
   MAPBOX_STYLE_NAVIGATION_DAY,
   MAPBOX_STYLE_NAVIGATION_NIGHT,
 } from './styles'
-export { addSvAvatarMarker, type SvMarkerOptions } from './sv-marker'
+export { addSvAvatarMarker, addSvCarMarker, type SvMarkerOptions, type SvCarMarkerOptions } from './sv-marker'
 export { addKundeMarker, type KundeMarkerOptions } from './kunde-marker'
 export {
   upsertRouteLayer,
