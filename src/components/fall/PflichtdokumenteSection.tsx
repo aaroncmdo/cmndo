@@ -74,7 +74,7 @@ function StatusPill({ status, pflicht }: { status: PflichtSlotForView['status'];
   if (status === 'erfuellt') {
     return (
       <span className="inline-flex items-center gap-1 text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-        <CheckCircle2Icon className="w-3 h-3" /> Hochgeladen
+        <CheckCircle2Icon className="w-3 h-3" /> {pflicht ? 'Pflicht hochgeladen' : 'Hochgeladen'}
       </span>
     )
   }
