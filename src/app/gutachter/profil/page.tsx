@@ -27,7 +27,7 @@ export default async function ProfilPage() {
       .eq('sv_id', user!.id),
     supabase
       .from('google_bewertungen_cache')
-      .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am')
+      .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am, photo_reference')
       .eq('profile_id', user!.id)
       .maybeSingle(),
   ])
@@ -48,6 +48,9 @@ export default async function ProfilPage() {
   const googleConnected = user ? await isGoogleConnected(user.id) : false
 
   const bewertung = bewertungRes.data ?? null
+  const googleAvatarUrl = bewertung?.photo_reference
+    ? `/api/place-photo?ref=${encodeURIComponent(bewertung.photo_reference as string)}`
+    : null
 
   return (
     <>
@@ -76,6 +79,7 @@ export default async function ProfilPage() {
         }
       }
       googleConnected={googleConnected}
+      googleAvatarUrl={googleAvatarUrl}
     />
     </>
   )

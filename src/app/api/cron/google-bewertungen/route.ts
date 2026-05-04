@@ -40,11 +40,15 @@ export async function GET(request: Request) {
 
   for (const sv of svs) {
     try {
-      const url = `${PLACES_API_BASE}?place_id=${encodeURIComponent(sv.google_place_id)}&fields=rating,user_ratings_total&key=${apiKey}`
+      const url = `${PLACES_API_BASE}?place_id=${encodeURIComponent(sv.google_place_id)}&fields=rating,user_ratings_total,photos&key=${apiKey}`
       const res = await fetch(url)
       const json = await res.json() as {
         status: string
-        result?: { rating?: number; user_ratings_total?: number }
+        result?: {
+          rating?: number
+          user_ratings_total?: number
+          photos?: Array<{ photo_reference: string }>
+        }
       }
 
       if (json.status !== 'OK' || !json.result) {
@@ -59,6 +63,7 @@ export async function GET(request: Request) {
           profile_id: sv.id,
           durchschnitt: json.result.rating ?? null,
           anzahl_bewertungen: json.result.user_ratings_total ?? null,
+          photo_reference: json.result.photos?.[0]?.photo_reference ?? null,
           zuletzt_aktualisiert_am: new Date().toISOString(),
         }, { onConflict: 'profile_id' })
 
