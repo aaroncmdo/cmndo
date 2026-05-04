@@ -60,6 +60,7 @@ export default function ProfilClient({
   pendingTermine,
   notificationPrefs,
   googleConnected,
+  googleAvatarUrl,
 }: {
   email: string
   profile: Profile
@@ -69,6 +70,8 @@ export default function ProfilClient({
   notificationPrefs: NotificationPreferencesFormValue
   // AAR-707: echter OAuth-Status aus profiles.google_refresh_token
   googleConnected: boolean
+  // CMM-29: Fallback-Avatar aus Google Places (nur wenn kein eigenes Bild hochgeladen)
+  googleAvatarUrl?: string | null
 }) {
   const router = useRouter()
   const [editing, setEditing] = useState(false)
@@ -207,7 +210,7 @@ export default function ProfilClient({
             {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis */}
             <div className="flex items-center gap-4 pb-4 border-b border-claimondo-border">
               <AvatarUpload
-                currentUrl={profile.avatar_url ?? null}
+                currentUrl={profile.avatar_url ?? googleAvatarUrl ?? null}
                 initials={initials || '??'}
                 size="md"
               />

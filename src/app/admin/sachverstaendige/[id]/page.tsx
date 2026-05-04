@@ -9,6 +9,7 @@ import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
+import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 
 type SvSearchParams = { tab?: string }
 
@@ -30,7 +31,7 @@ export default async function SvDetailPage({
   // AAR-659: urlaub_von/bis mitladen — für Header-Badge.
   const { data: sv, error: svErr } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon)')
+    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon, google_place_id)')
     .eq('id', id)
     .single()
   if (svErr) console.error('[admin/sv-detail] SV-Query:', svErr.message)
@@ -48,8 +49,18 @@ export default async function SvDetailPage({
 
   const profileRaw = sv.profiles as unknown
   const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
-    vorname: string | null; nachname: string | null; email: string | null; telefon: string | null
+    vorname: string | null; nachname: string | null; email: string | null; telefon: string | null; google_place_id: string | null
   } | null
+
+  // Google-Bewertung aus Cache laden (profile_id = sv.profile_id)
+  const { data: bewertungRow } = sv.profile_id
+    ? await supabase
+        .from('google_bewertungen_cache')
+        .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am')
+        .eq('profile_id', sv.profile_id)
+        .maybeSingle()
+    : { data: null }
+  const bewertung = bewertungRow ?? null
 
   // Fälle + Tasks parallel laden
   const [faelleRes, tasksRes] = await Promise.all([
@@ -301,6 +312,15 @@ export default async function SvDetailPage({
                   verifiziert={sv.verifiziert ?? false}
                   verifiziertAm={sv.verifiziert_am ?? null}
                 />
+                {/* CMM-31: Google-Bewertung aus Cache */}
+                {bewertung?.durchschnitt != null && (
+                  <GoogleBewertungBadge
+                    durchschnitt={bewertung.durchschnitt as number}
+                    anzahl={bewertung.anzahl_bewertungen as number | null}
+                    zuletztAktualisiert={bewertung.zuletzt_aktualisiert_am as string | null}
+                    size="sm"
+                  />
+                )}
                 {/* KFZ-153: Gutachten-Mängel Warnung */}
                 {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>
@@ -451,6 +471,7 @@ export default async function SvDetailPage({
                 bvskMitgliedsnummer: sv.bvsk_mitgliedsnummer ?? '',
                 ihkZertifikatNummer: sv.ihk_zertifikat_nummer ?? '',
                 oebuvBestellungsnummer: sv.oebuv_bestellungsnummer ?? '',
+                googlePlaceId: profile?.google_place_id ?? null,
               }}
             />
           </div>

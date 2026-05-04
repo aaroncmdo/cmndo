@@ -43,6 +43,7 @@ export type FallKarteProps = {
     regulierung_am?: string | null
     abgeschlossen_am?: string | null
     vollmacht_signiert_am?: string | null
+    kanzlei_wunsch?: string | null
   }
   aktion: KundeAktion | null
   nextTermin: FallKarteTermin | null
@@ -139,10 +140,52 @@ export default function FallKarte({
   const abgeschlossen = aktivePhase === 'abschluss'
   const svLive = nextTermin?.sv_unterwegs_seit || nextTermin?.sv_angekommen_am
 
+  // Wrapper-Border: 1:1 aus ClaimStepper (gleiche Priority-Reihenfolge).
+  // Drei Termin-Zustände:
+  //   • Bevorstehend   → nextTermin gesetzt, Zeit in der Zukunft → normal anzeigen
+  //   • Verstrichen    → nextTermin gesetzt, Zeit abgelaufen, durchgefuehrt_am = null
+  //                      (kein No-Show markiert) → rose Warnung
+  //   • Abgeschlossen  → durchgefuehrt_am gesetzt → ladeFallKartenMeta filtert raus
+  //                      → nextTermin = null → nichts anzeigen (DB ist Quelle der Wahrheit)
+  //
+  //   1. Termin verstrichen (start+60min in Vergangenheit, kein SV live)  → rose
+  //   2. Nachbesichtigung ausstehend                                       → amber
+  //   3. Kanzlei-Wunsch offen (nach Gutachten, noch nicht entschieden)    → violet
+  //   4. LexDrive-Vollmacht ausstehend                                     → #0e5be9
+  //   5. Fall abgeschlossen                                                → emerald
+  //   6. Default                                                           → neutral
+  const terminVerstrichen =
+    !!nextTermin &&
+    !svLive &&
+    new Date(nextTermin.start_zeit).getTime() + 60 * 60 * 1000 < Date.now()
+
+  const nachbesichtigungPending = aktion?.state === 'nachbesichtigung-waehlen'
+
+  const kanzleiWunschOffen =
+    aktivePhase === 'regulierung' &&
+    !fall.vollmacht_signiert_am &&
+    (!fall.kanzlei_wunsch ||
+      fall.kanzlei_wunsch === 'noch_unentschieden' ||
+      fall.kanzlei_wunsch === 'nicht_gefragt')
+
+  const lexdriveAusstehend = aktion?.state === 'vollmacht-unterschreiben'
+
+  const wrapperBorder = terminVerstrichen
+    ? 'border-2 border-rose-400'
+    : nachbesichtigungPending
+      ? 'border-2 border-amber-400'
+      : kanzleiWunschOffen
+      ? 'border-2 border-violet-400'
+      : lexdriveAusstehend
+        ? 'border-2 border-[#0e5be9]'
+        : abgeschlossen
+          ? 'border-2 border-emerald-400'
+          : 'border border-claimondo-border'
+
   return (
     <Link
       href={`/kunde/faelle/${fall.id}`}
-      className="block rounded-2xl overflow-hidden bg-white border border-claimondo-border transition-all hover:-translate-y-0.5 active:scale-[0.99]"
+      className={`block rounded-2xl overflow-hidden bg-white ${wrapperBorder} transition-all hover:-translate-y-0.5 active:scale-[0.99]`}
       style={{
         boxShadow: [
           /* Glas-Kante oben + links — weißer Inset-Highlight */
@@ -238,8 +281,8 @@ export default function FallKarte({
           </div>
         )}
 
-        {/* Nächster Termin */}
-        {nextTermin && !abgeschlossen && (
+        {/* Bevorstehender Termin — nur wenn noch nicht verstrichen */}
+        {nextTermin && !abgeschlossen && !terminVerstrichen && (
           <div className="rounded-xl bg-white border border-claimondo-border/60 shadow-sm px-3 py-2">
             {svLive ? (
               <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
@@ -257,6 +300,15 @@ export default function FallKarte({
                 {fmtTermin(nextTermin.start_zeit)}
               </p>
             )}
+          </div>
+        )}
+        {/* Verstrichen — Termin in Vergangenheit, durchgefuehrt_am noch nicht gesetzt */}
+        {nextTermin && !abgeschlossen && terminVerstrichen && (
+          <div className="rounded-xl bg-rose-50 border border-rose-200 px-3 py-2">
+            <p className="flex items-center gap-1.5 text-xs font-medium text-rose-700">
+              <AlertTriangleIcon className="w-3.5 h-3.5 shrink-0" />
+              Termin verstrichen · {fmtTermin(nextTermin.start_zeit)}
+            </p>
           </div>
         )}
       </div>

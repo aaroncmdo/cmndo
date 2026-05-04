@@ -6,12 +6,13 @@ import { getMyNotificationPreferences } from '@/lib/actions/notification-prefere
 // AAR-707: Google-Verbindungs-Status aus profiles.google_refresh_token (Single
 // Source of Truth — sachverstaendige.kalender_sync_aktiv ist Legacy-Drift).
 import { isGoogleConnected } from '@/lib/google/oauth-client'
+import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
 
-  const [{ data: profile }, sv, faelleResult] = await Promise.all([
+  const [{ data: profile }, sv, faelleResult, bewertungRes] = await Promise.all([
     supabase
       .from('profiles')
       // AAR-344: twofa_telefon für „Nummer ändern"-Komponente
@@ -24,6 +25,11 @@ export default async function ProfilPage() {
       .from('faelle')
       .select('id', { count: 'exact', head: true })
       .eq('sv_id', user!.id),
+    supabase
+      .from('google_bewertungen_cache')
+      .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am, photo_reference')
+      .eq('profile_id', user!.id)
+      .maybeSingle(),
   ])
 
   // Pending termine (need confirmation)
@@ -41,7 +47,22 @@ export default async function ProfilPage() {
   const prefsRes = await getMyNotificationPreferences()
   const googleConnected = user ? await isGoogleConnected(user.id) : false
 
+  const bewertung = bewertungRes.data ?? null
+  const googleAvatarUrl = bewertung?.photo_reference
+    ? `/api/place-photo?ref=${encodeURIComponent(bewertung.photo_reference as string)}`
+    : null
+
   return (
+    <>
+    {bewertung?.durchschnitt != null && (
+      <div className="px-4 pt-4 max-w-2xl mx-auto">
+        <GoogleBewertungBadge
+          durchschnitt={bewertung.durchschnitt as number}
+          anzahl={bewertung.anzahl_bewertungen as number | null}
+          zuletztAktualisiert={bewertung.zuletzt_aktualisiert_am as string | null}
+        />
+      </div>
+    )}
     <ProfilClient
       email={user!.email ?? ''}
       profile={profile ?? { anrede: null, titel: null, vorname: null, nachname: null, telefon: null, rolle: 'sachverstaendiger', twofa_telefon: null, avatar_url: null, anzeigename: null, profilbeschreibung: null }}
@@ -58,6 +79,8 @@ export default async function ProfilPage() {
         }
       }
       googleConnected={googleConnected}
+      googleAvatarUrl={googleAvatarUrl}
     />
+    </>
   )
 }

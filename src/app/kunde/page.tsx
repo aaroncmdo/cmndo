@@ -214,6 +214,7 @@ export default async function KundeStartseite() {
                   regulierung_am: fall.regulierung_am as string | null,
                   abgeschlossen_am: fall.abgeschlossen_am as string | null,
                   vollmacht_signiert_am: fall.vollmacht_signiert_am as string | null,
+                  kanzlei_wunsch: fall.kanzlei_wunsch as string | null,
                 }}
                 aktion={meta.aktion}
                 nextTermin={meta.nextTermin}

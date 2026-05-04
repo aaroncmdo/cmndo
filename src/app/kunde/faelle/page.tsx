@@ -114,6 +114,7 @@ export default async function KundeFaelleListe() {
                 regulierung_am: f.regulierung_am as string | null,
                 abgeschlossen_am: f.abgeschlossen_am as string | null,
                 vollmacht_signiert_am: f.vollmacht_signiert_am as string | null,
+                kanzlei_wunsch: f.kanzlei_wunsch as string | null,
               }}
               aktion={meta.aktion}
               nextTermin={meta.nextTermin}
