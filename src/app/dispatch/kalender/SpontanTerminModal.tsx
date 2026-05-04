@@ -6,8 +6,13 @@
 // erlaubt — Lead kann später via Phase4 nachgepflegt werden.
 
 import { useState, useTransition, useEffect, useRef } from 'react'
-import { XIcon, MapPinIcon, CheckCircleIcon, AlertTriangleIcon } from 'lucide-react'
-import { createSpontanTermin, type SpontanInput } from './_actions/spontan'
+import { XIcon, MapPinIcon, CheckCircleIcon, AlertTriangleIcon, NavigationIcon } from 'lucide-react'
+import {
+  createSpontanTermin,
+  listSvsByDistance,
+  type SpontanInput,
+  type SvDistanceVorschlag,
+} from './_actions/spontan'
 import type { KalenderSv } from './KalenderClient'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -72,6 +77,9 @@ export default function SpontanTerminModal({
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const adresseDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [vorschlaege, setVorschlaege] = useState<SvDistanceVorschlag[]>([])
+  const [loadingVorschlaege, setLoadingVorschlaege] = useState(false)
+  const vorschlaegeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Reset bei jedem Öffnen mit neuen Initial-Werten
   useEffect(() => {
@@ -82,6 +90,26 @@ export default function SpontanTerminModal({
       setError(null)
     }
   }, [open, initialDate, initialTime, initialSvId])
+
+  // Stufe 3: SV-Vorschläge nach Distanz vom Besichtigungsort.
+  // Trigger sobald Geocode + Datum + Uhrzeit + Dauer da sind.
+  useEffect(() => {
+    if (vorschlaegeDebounceRef.current) clearTimeout(vorschlaegeDebounceRef.current)
+    if (!geocode || !date || !time) {
+      setVorschlaege([])
+      return
+    }
+    setLoadingVorschlaege(true)
+    vorschlaegeDebounceRef.current = setTimeout(async () => {
+      const startIso = toLocalIso(date, time)
+      const r = await listSvsByDistance(geocode.lat, geocode.lng, startIso, duration)
+      setVorschlaege(r.ok ? r.vorschlaege ?? [] : [])
+      setLoadingVorschlaege(false)
+    }, 300)
+    return () => {
+      if (vorschlaegeDebounceRef.current) clearTimeout(vorschlaegeDebounceRef.current)
+    }
+  }, [geocode, date, time, duration])
 
   // Debounced Auto-Geocode bei Adress-Änderung
   useEffect(() => {
@@ -206,7 +234,67 @@ export default function SpontanTerminModal({
               </div>
             </div>
             <div>
-              <label className="block text-[11px] text-claimondo-ondo mb-1">Sachverständiger *</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[11px] text-claimondo-ondo">Sachverständiger *</label>
+                {geocode && (
+                  <span className="inline-flex items-center gap-1 text-[10px] text-claimondo-ondo">
+                    <NavigationIcon className="w-2.5 h-2.5" />
+                    Distanz vom Besichtigungsort
+                  </span>
+                )}
+              </div>
+
+              {/* Stufe 3: Distanz-sortierte Vorschläge wenn Geocode da */}
+              {geocode && (
+                <div className="mb-2 max-h-44 overflow-y-auto rounded border border-claimondo-border bg-claimondo-bg/30">
+                  {loadingVorschlaege && (
+                    <p className="px-2 py-1.5 text-[11px] text-claimondo-ondo">Berechne Distanzen …</p>
+                  )}
+                  {!loadingVorschlaege && vorschlaege.length === 0 && (
+                    <p className="px-2 py-1.5 text-[11px] text-claimondo-ondo">
+                      Keine SVs mit Standort-Koordinaten verfügbar.
+                    </p>
+                  )}
+                  {!loadingVorschlaege &&
+                    vorschlaege.map((v) => {
+                      const active = svId === v.svId
+                      const ausserhalb = v.distanzKm > v.paketUmkreisKm
+                      return (
+                        <button
+                          key={v.svId}
+                          type="button"
+                          onClick={() => setSvId(v.svId)}
+                          className={`w-full flex items-center justify-between gap-2 px-2 py-1.5 text-left text-[11px] border-b border-claimondo-border/50 last:border-b-0 transition-colors ${
+                            active
+                              ? 'bg-claimondo-ondo/10 ring-1 ring-claimondo-ondo'
+                              : 'hover:bg-claimondo-ondo/5'
+                          } ${v.belegt ? 'opacity-50' : ''}`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-claimondo-navy truncate">
+                              {v.name}
+                              {v.belegt && (
+                                <span className="ml-1.5 text-[9px] text-red-600 font-semibold">BELEGT</span>
+                              )}
+                            </p>
+                            {v.standort && (
+                              <p className="text-claimondo-ondo/70 truncate text-[10px]">{v.standort}</p>
+                            )}
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className={`font-semibold ${ausserhalb ? 'text-amber-700' : 'text-claimondo-navy'}`}>
+                              {v.distanzKm.toFixed(1)} km
+                            </p>
+                            {ausserhalb && (
+                              <p className="text-[9px] text-amber-700">außerh. Radius</p>
+                            )}
+                          </div>
+                        </button>
+                      )
+                    })}
+                </div>
+              )}
+
               <select
                 value={svId}
                 onChange={(e) => setSvId(e.target.value)}
@@ -220,6 +308,11 @@ export default function SpontanTerminModal({
                   </option>
                 ))}
               </select>
+              {!geocode && (
+                <p className="mt-1 text-[10px] text-claimondo-ondo/70">
+                  Tipp: Adresse oben eingeben → SVs werden nach Distanz vorgeschlagen.
+                </p>
+              )}
             </div>
           </Section>
 
