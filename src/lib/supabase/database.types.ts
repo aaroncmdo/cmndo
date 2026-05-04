@@ -2807,6 +2807,7 @@ export type Database = {
           bevorzugter_kanal: string | null
           bic: string | null
           bkat_unfallart: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn: string | null
           cardentity_abfrage_am: string | null
           cardentity_enriched_at: string | null
           cardentity_report: Json | null
@@ -3152,6 +3153,7 @@ export type Database = {
           bevorzugter_kanal?: string | null
           bic?: string | null
           bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn?: string | null
           cardentity_abfrage_am?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
@@ -3497,6 +3499,7 @@ export type Database = {
           bevorzugter_kanal?: string | null
           bic?: string | null
           bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn?: string | null
           cardentity_abfrage_am?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
@@ -6726,6 +6729,7 @@ export type Database = {
           besichtigungsort_place_id: string | null
           bevorzugter_kanal: string | null
           bkat_unfallart: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn: string | null
           cardentity_enriched_at: string | null
           cardentity_report: Json | null
           claude_vision_analyse: Json | null
@@ -6927,6 +6931,7 @@ export type Database = {
           besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
           bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
           claude_vision_analyse?: Json | null
@@ -7128,6 +7133,7 @@ export type Database = {
           besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
           bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
           claude_vision_analyse?: Json | null
@@ -14272,4 +14278,3 @@ export const Constants = {
     },
   },
 } as const
-

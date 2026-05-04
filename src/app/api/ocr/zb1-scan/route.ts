@@ -95,6 +95,8 @@ export async function POST(req: NextRequest) {
           fahrzeug_baujahr: extracted.fahrzeug_baujahr ?? null,
           fahrzeug_hersteller: extracted.fahrzeug_hersteller ?? null,
           fahrzeug_modell: extracted.fahrzeug_modell ?? null,
+          fahrzeug_farbe: extracted.fahrzeug_farbe ?? null,
+          brn: extracted.brn ?? null,
         })
         .eq('id', leadId)
       if (updateError) {

@@ -115,7 +115,41 @@ export async function POST(request: Request) {
     })
     .eq('id', dokumentId)
 
+  // AAR-CMM: Geburtsdatum aus Personalausweis/Führerschein-OCR nach
+  // faelle.halter_geburtsdatum schreiben — H6-Regel: nur wenn Feld leer.
+  // ZB1 enthält selbst kein Geburtsdatum, daher kommt es aus den
+  // Personendokumenten und befüllt das Halter-Feld (Halter=Fahrer im
+  // Standardfall, sonst korrigiert der Dispatcher manuell).
+  if (
+    (dok.dokument_typ === 'personalausweis' || dok.dokument_typ === 'fuehrerschein') &&
+    dok.fall_id
+  ) {
+    const parsed = (extractedData as { parsed?: { geburtsdatum?: string | null } }).parsed
+    const geb = parsed?.geburtsdatum ? toIsoDate(parsed.geburtsdatum) : null
+    if (geb) {
+      const { data: fall } = await db
+        .from('faelle')
+        .select('halter_geburtsdatum')
+        .eq('id', dok.fall_id)
+        .single()
+      if (fall && !fall.halter_geburtsdatum) {
+        await db
+          .from('faelle')
+          .update({ halter_geburtsdatum: geb })
+          .eq('id', dok.fall_id)
+      }
+    }
+  }
+
   return NextResponse.json({ success: true, extracted: extractedData })
+}
+
+// DD.MM.YYYY oder DD/MM/YYYY → YYYY-MM-DD (Postgres-date-Format)
+function toIsoDate(raw: string): string | null {
+  const m = raw.match(/^(\d{2})[./](\d{2})[./](\d{4})$/)
+  if (!m) return null
+  const [, dd, mm, yyyy] = m
+  return `${yyyy}-${mm}-${dd}`
 }
 
 // ─── Typ-spezifisches Parsing ──────────────────────────────────────────────
@@ -127,6 +161,7 @@ function parseByType(typ: string, text: string): Record<string, string | null> {
     case 'versicherungsschein_eigener':
       return parseVersicherungsschein(text) as unknown as Record<string, string | null>
     case 'personalausweis':
+    case 'fuehrerschein':
       return parseFuehrerschein(text) as unknown as Record<string, string | null>
     case 'unfallbericht_polizei':
       return parseUnfallbericht(text) as unknown as Record<string, string | null>
