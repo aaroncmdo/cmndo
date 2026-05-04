@@ -16,8 +16,11 @@ import RouteSidebar from './RouteSidebar'
 import OfflineStatusBanner from './OfflineStatusBanner'
 import SvFallakteView from './SvFallakteView'
 import FokusChatPanel from './FokusChatPanel'
+import MobileBottomSheet from '@/components/sv/MobileBottomSheet'
 import { useFieldTracking } from './useFieldTracking'
 import { markArrived, pauseFokusmodus, startStop } from './actions'
+import { CarIcon, ClockIcon, ChevronUpIcon } from 'lucide-react'
+import { formatUhrzeit } from '@/lib/format'
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
@@ -183,11 +186,45 @@ export default function FeldmodusClient({
     [stops, router],
   )
 
+  // Sidebar-Inhalt einmal definiert, in Desktop-Sidebar + Mobile-Sheet wiederverwendet
+  const sidebarContent =
+    sessionStatus === 'arrived' && aktuellerStop ? (
+      <SvFallakteView
+        fallId={aktuellerStop.fall_id}
+        sessionId={session.id}
+        terminId={aktuellerStop.termin_id}
+        onAdvanced={onAdvanced}
+        onPauseBackToRoute={async () => {
+          const res = await pauseFokusmodus(session.id)
+          if (res.success) {
+            setSessionStatus('paused')
+            router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+          } else {
+            toast.error(res.error ?? 'Pausieren fehlgeschlagen')
+          }
+        }}
+      />
+    ) : (
+      <RouteSidebar
+        sessionId={session.id}
+        sessionStatus={sessionStatus}
+        stops={stops}
+        aktuellerStopIndex={aktuellerStopIndex}
+        svPosition={position ? { lat: position.lat, lng: position.lng } : null}
+        distanceMeters={distanceMeters}
+        svInGeofence={svInGeofence}
+        permissionState={permissionState}
+        onAdvanced={onAdvanced}
+        onArrived={onArrived}
+      />
+    )
+
   return (
     <div className="h-screen w-screen flex flex-col">
       <OfflineStatusBanner />
       <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-      {/* Karte — oben auf mobile, links auf desktop */}
+      {/* Karte — auf Mobile volle Höhe (Sidebar ist Bottom-Sheet);
+          auf Desktop links, Sidebar rechts. */}
       <div className="relative flex-1 min-h-0 lg:flex-1">
         <FeldmodusMap
           sv={sv}
@@ -207,44 +244,55 @@ export default function FeldmodusClient({
         )}
       </div>
 
-      {/* Sidebar — unten auf mobile, rechts auf desktop.
-          AAR-386: Im arrived-State zeigt SvFallakteView statt RouteSidebar. */}
-      <div className="flex-1 min-h-0 overflow-y-auto lg:flex-none lg:w-[380px] lg:border-l lg:border-white/10">
-        {sessionStatus === 'arrived' && aktuellerStop ? (
-          <SvFallakteView
-            fallId={aktuellerStop.fall_id}
-            sessionId={session.id}
-            terminId={aktuellerStop.termin_id}
-            onAdvanced={onAdvanced}
-            onPauseBackToRoute={async () => {
-              const res = await pauseFokusmodus(session.id)
-              if (res.success) {
-                setSessionStatus('paused')
-                router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
-              } else {
-                toast.error(res.error ?? 'Pausieren fehlgeschlagen')
-              }
-            }}
-          />
-        ) : (
-          <RouteSidebar
-            sessionId={session.id}
-            sessionStatus={sessionStatus}
-            stops={stops}
-            aktuellerStopIndex={aktuellerStopIndex}
-            svPosition={position ? { lat: position.lat, lng: position.lng } : null}
-            distanceMeters={distanceMeters}
-            svInGeofence={svInGeofence}
-            permissionState={permissionState}
-            onAdvanced={onAdvanced}
-            onArrived={onArrived}
-          />
-        )}
+      {/* Desktop-Sidebar — auf Mobile hidden (Bottom-Sheet ersetzt sie). */}
+      <div className="hidden lg:flex flex-none lg:w-[380px] lg:border-l lg:border-white/10 min-h-0 overflow-y-auto">
+        {sidebarContent}
       </div>
       </div>
 
+      {/* Mobile-Bottom-Sheet (lg:hidden) — collapsed zeigt Auto + Name +
+          Uhrzeit; expanded zeigt die volle Auftrag-Übersicht (Fallakte
+          oder RouteSidebar je nach Session-Status). */}
+      {aktuellerStop && (
+        <MobileBottomSheet
+          className="lg:hidden"
+          collapsedHeightPx={88}
+          expandedRatio={0.85}
+          header={
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-claimondo-navy flex items-center justify-center">
+                <CarIcon className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 leading-tight">
+                  Aktueller Stop
+                </p>
+                <p className="text-sm font-semibold text-claimondo-navy truncate leading-tight">
+                  {aktuellerStop.kunde_name}
+                </p>
+                <p className="text-[11px] text-claimondo-ondo flex items-center gap-1 leading-tight">
+                  <ClockIcon className="w-3 h-3" />
+                  {formatUhrzeit(aktuellerStop.start_zeit)}
+                  {aktuellerStop.fahrzeug && (
+                    <span className="ml-1 truncate">· {aktuellerStop.fahrzeug}</span>
+                  )}
+                  {aktuellerStop.kennzeichen && (
+                    <span className="font-mono ml-1">· {aktuellerStop.kennzeichen}</span>
+                  )}
+                </p>
+              </div>
+              <ChevronUpIcon className="w-4 h-4 text-claimondo-ondo/60 shrink-0" />
+            </div>
+          }
+        >
+          {sidebarContent}
+        </MobileBottomSheet>
+      )}
+
       {/* AAR-383: Fokus-Chat als fixes Bottom-Panel — immer sichtbar
-          solange Session aktiv, Auto-Collapse beim arrived-State. */}
+          solange Session aktiv, Auto-Collapse beim arrived-State.
+          Auf Mobile sitzt der Chat-Trigger-Button unter dem BottomSheet
+          (das z-Index-Stacking handhabt FokusChatPanel über z-40 selbst). */}
       {aktuellerStop && sessionStatus !== 'finished' && (
         <FokusChatPanel
           fallId={aktuellerStop.fall_id}

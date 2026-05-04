@@ -1,16 +1,19 @@
 'use client'
 
-// Heute-Tab: Mapbox füllt komplett, Cards (Tagesvorbereitung oben rechts,
-// Termin-Liste mittig rechts mit interner Scroll-Höhe, Tagesroute-Start
-// unten rechts) schweben darüber. Keine Page-Scrollbar — das Browser-
-// Viewport bleibt fix, nur die Termin-Liste scrollt intern wenn lang.
-// GPS opportunistisch — Fallback auf SV-Home-Basis (sachverstaendige.standort_*).
+// Heute-Tab:
+//   • Desktop: Cards-Spalte rechts (Tagesvorbereitung / Termine / Tagesroute)
+//   • Mobile: Bottom-Sheet (collapsed = Name nächster Kunde; expanded =
+//     alle Termine + Tagesroute starten)
+// In beiden Fällen füllt Mapbox den Hintergrund komplett.
 
 import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
+import { ClockIcon, ChevronUpIcon, UserIcon } from 'lucide-react'
 import TagesrouteSidebar, { type TagesroutePflichtStat } from './TagesrouteSidebar'
 import TagesrouteStartCard from './TagesrouteStartCard'
 import TagesvorbereitungButton from '../auftraege/TagesvorbereitungButton'
+import MobileBottomSheet from '@/components/sv/MobileBottomSheet'
+import { formatUhrzeit } from '@/lib/format'
 import type { HeuteTerminFull } from './page'
 import type { TagesrouteStop } from './TagesrouteMap'
 
@@ -70,6 +73,14 @@ export default function HeuteClient({
 
   const disabledReason = aktiveTermine.length === 0 ? 'Heute keine offenen Termine' : null
 
+  // Nächster aktiver Termin für den Bottom-Sheet-Header
+  const naechsterStop = useMemo(() => {
+    const now = Date.now()
+    return [...aktiveTermine]
+      .sort((a, b) => new Date(a.start_zeit).getTime() - new Date(b.start_zeit).getTime())
+      .find((t) => new Date(t.start_zeit).getTime() >= now - 60 * 60_000) ?? aktiveTermine[0] ?? null
+  }, [aktiveTermine])
+
   return (
     <div className="relative w-full h-[calc(100vh-64px)] overflow-hidden">
       {/* Mapbox füllt den ganzen Bereich */}
@@ -82,11 +93,9 @@ export default function HeuteClient({
         />
       </div>
 
-      {/* Floating-Spalte rechts: Tagesvorbereitung oben, Termin-Liste mittig
-          (scrollbar wenn lang), Tagesroute-Card unten. Alle Cards sind
-          shadow-lg + bg-white/95 mit backdrop-blur damit sie über der Map
-          gut lesbar sind. */}
-      <div className="absolute top-4 right-4 bottom-4 z-10 w-[380px] max-w-[calc(100vw-2rem)] flex flex-col gap-3 pointer-events-none">
+      {/* Desktop: Floating-Spalte rechts (md+). Mobile: hidden — wir
+          nutzen stattdessen den Bottom-Sheet darunter. */}
+      <div className="hidden md:flex absolute top-4 right-4 bottom-4 z-10 w-[380px] max-w-[calc(100vw-2rem)] flex-col gap-3 pointer-events-none">
         {/* Tagesvorbereitung — oben, kompakt */}
         <div className="bg-white/95 backdrop-blur border border-claimondo-border rounded-xl px-3 py-2 shadow-lg flex items-center gap-2 text-xs text-claimondo-navy pointer-events-auto shrink-0">
           <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
@@ -113,6 +122,67 @@ export default function HeuteClient({
           />
         </div>
       </div>
+
+      {/* Mobile-Bottom-Sheet (md:hidden) — collapsed zeigt nur den nächsten
+          Kunden, expanded zeigt Termin-Liste + Tagesroute-Start. */}
+      <MobileBottomSheet
+        className="md:hidden"
+        header={
+          naechsterStop ? (
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 shrink-0 rounded-full bg-claimondo-ondo/10 flex items-center justify-center">
+                <UserIcon className="w-4 h-4 text-claimondo-ondo" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 leading-tight">
+                  Nächster Termin
+                </p>
+                <p className="text-sm font-semibold text-claimondo-navy truncate leading-tight">
+                  {naechsterStop.kunde_name}
+                </p>
+                <p className="text-[11px] text-claimondo-ondo flex items-center gap-1 leading-tight">
+                  <ClockIcon className="w-3 h-3" />
+                  {formatUhrzeit(naechsterStop.start_zeit)}
+                  {naechsterStop.fahrzeug && (
+                    <span className="ml-1 truncate">· {naechsterStop.fahrzeug}</span>
+                  )}
+                </p>
+              </div>
+              <ChevronUpIcon className="w-4 h-4 text-claimondo-ondo/60 shrink-0" />
+            </div>
+          ) : (
+            <p className="text-sm text-claimondo-ondo text-center py-2">
+              Heute keine offenen Termine
+            </p>
+          )
+        }
+      >
+        <div className="flex flex-col h-full">
+          {/* Tagesroute-Start oben (sticky-feel im Sheet) */}
+          <div className="shrink-0 p-3 border-b border-claimondo-border">
+            <TagesrouteStartCard
+              terminIds={terminIds}
+              hasActiveSession={hasActiveSession}
+              disabledReason={disabledReason}
+            />
+          </div>
+          {/* Termin-Liste — scrollt intern */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <TagesrouteSidebar
+              termine={termine}
+              pflichtStats={pflichtStats}
+              svOrigin={origin}
+              activeStopId={activeStopId}
+              onStopClick={setActiveStopId}
+            />
+          </div>
+          {/* Tagesvorbereitung unten */}
+          <div className="shrink-0 p-3 border-t border-claimondo-border bg-[#f8f9fb] flex items-center gap-2 text-xs text-claimondo-navy">
+            <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
+            <TagesvorbereitungButton />
+          </div>
+        </div>
+      </MobileBottomSheet>
     </div>
   )
 }
