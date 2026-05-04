@@ -10,7 +10,7 @@
 
 import { useState, useTransition } from 'react'
 import GespraechsleitfadenTimer from '../GespraechsleitfadenTimer'
-import RueckrufSection from '../RueckrufSection'
+import RueckrufTerminPanel from '../RueckrufTerminPanel'
 import TerminListeClient from '@/components/termine/TerminListeClient'
 import { useDispatchPhase, type Phase } from '../_lib/phase-context'
 import { Modal } from '@/components/primitives/Modal'
@@ -154,9 +154,23 @@ export function DisqualifizierenButton() {
 
 export function RueckrufButton() {
   const { lead } = useDispatchPhase()
-  // AAR-637: Rückruf-Daten kommen jetzt aus admin_termine, nicht mehr vom
-  // Lead-Snapshot. RueckrufSection lädt den offenen Termin selbst.
-  return <RueckrufSection leadId={lead.id} />
+  const l = lead as unknown as {
+    anruf_versuche?: number | null
+    letzter_anruf_am?: string | null
+    letzter_anruf_status?: string | null
+  }
+  return (
+    <div className="bg-white rounded-2xl border border-claimondo-border p-4">
+      <RueckrufTerminPanel
+        leadId={lead.id}
+        initial={{
+          anrufVersuche: l.anruf_versuche ?? 0,
+          letzterAnrufAm: l.letzter_anruf_am ?? null,
+          letzterAnrufStatus: l.letzter_anruf_status ?? null,
+        }}
+      />
+    </div>
+  )
 }
 
 // AAR-638: zeigt alle Termine zum Lead (Rückrufe aus admin_termine + ggf.
