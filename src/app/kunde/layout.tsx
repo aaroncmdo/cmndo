@@ -47,6 +47,21 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // auf /login — sonst wirkt die Seite „rausgeworfen".
   if (profile?.rolle !== 'kunde') redirect(roleToPath(profile?.rolle as string | null | undefined))
 
+  // AAR-kunde-onboarding-claim: claimFaelleByEmail einmal im Layout
+  // aufrufen — deckt alle /kunde/* Pages ab. Sonst muss der User „einmal
+  // reloaden" wenn er via Magic-Link direkt auf /kunde/onboarding landet,
+  // weil der Fall bis zum ersten Aufruf von /kunde noch kunde_id=NULL hat
+  // → Page findet nichts → redirect zu /kunde → claim → Layout redirected
+  // zurück zu /kunde/onboarding → erst dann rendert der Wizard.
+  if (user.email) {
+    try {
+      const { claimFaelleByEmail } = await import('@/lib/kunde/auto-claim')
+      await claimFaelleByEmail(createAdminClient(), user.id, user.email)
+    } catch {
+      /* non-critical — Page-Loader fängt fehlende Fälle ab */
+    }
+  }
+
   // Onboarding-Redirect ist jetzt pro Fall (nicht mehr pro User-Profil).
   // Sobald ein Fall onboarding_complete=false hat, soll der Kunde dorthin —
   // egal ob er für einen früheren Fall schon mal durchgelaufen ist.
