@@ -38,6 +38,12 @@ export type FeldmodusStop = {
   // Briefing
   briefing_text: string | null
   briefing_struktur: SvBriefingStruktur | null
+  // Auftrag-Kontext für die Vor-Ort-Vorbereitung
+  auftrag_typ: string | null
+  einzusammelnde_dokumente: Array<{ slot_id: string; label: string }>
+  hat_vorschaeden: boolean | null
+  vorschaden_anzahl: number | null
+  vorschaden_letzter_datum: string | null
 }
 
 export type FeldmodusSV = {
@@ -133,7 +139,7 @@ export default async function FeldmodusPage() {
     const { data: faelle } = await admin
       .from('faelle')
       .select(
-        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, sv_briefing_struktur',
+        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, sv_briefing_struktur, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum',
       )
       .in('id', fallIds)
     for (const f of (faelle ?? []) as unknown as Record<string, unknown>[]) {
@@ -155,6 +161,57 @@ export default async function FeldmodusPage() {
       .select('id, vorname, nachname, telefon')
       .in('id', leadIds)
     for (const l of leads ?? []) leadMap.set(l.id, l)
+  }
+
+  // Aufträge pro Fall (CMM-32f) — für Auftrag-Typ + Pflichtdokumente
+  const auftragMap = new Map<string, { typ: string; status: string }>()
+  if (fallIds.length) {
+    const { data: auftraege } = await admin
+      .from('auftraege')
+      .select('fall_id, typ, status, reihenfolge')
+      .in('fall_id', fallIds)
+      .eq('sv_id', sv.id)
+      .order('reihenfolge', { ascending: false })
+    // Höchster Reihenfolge-Wert = aktiver Auftrag
+    for (const a of (auftraege ?? []) as Array<{ fall_id: string; typ: string; status: string }>) {
+      if (!auftragMap.has(a.fall_id)) auftragMap.set(a.fall_id, { typ: a.typ, status: a.status })
+    }
+  }
+
+  // Pflichtdokumente pro Fall — Slots die der SV vor Ort einsammeln soll.
+  // Filter: pflicht=true UND status nicht 'erfuellt'/'geprueft' UND
+  // (uploadbar_von enthält 'kunde' oder 'sachverstaendiger' — ignorieren wir
+  // hier weil der SV alles einsammelt was offen ist).
+  const pflichtMap = new Map<string, Array<{ slot_id: string; label: string }>>()
+  if (fallIds.length) {
+    const [{ data: pflichtRows }, { data: katalogRows }] = await Promise.all([
+      admin
+        .from('pflichtdokumente')
+        .select('fall_id, dokument_typ, status, pflicht')
+        .in('fall_id', fallIds)
+        .eq('pflicht', true),
+      admin
+        .from('dokument_katalog')
+        .select('slot_id, label'),
+    ])
+    const labelMap = new Map<string, string>()
+    for (const k of (katalogRows ?? []) as Array<{ slot_id: string; label: string }>) {
+      labelMap.set(k.slot_id, k.label)
+    }
+    for (const p of (pflichtRows ?? []) as Array<{
+      fall_id: string
+      dokument_typ: string
+      status: string
+      pflicht: boolean
+    }>) {
+      // Nur „offen" — schon erfüllte/geprüfte werden ausgeblendet
+      if (p.status === 'erfuellt' || p.status === 'geprueft') continue
+      if (!pflichtMap.has(p.fall_id)) pflichtMap.set(p.fall_id, [])
+      pflichtMap.get(p.fall_id)!.push({
+        slot_id: p.dokument_typ,
+        label: labelMap.get(p.dokument_typ) ?? p.dokument_typ,
+      })
+    }
   }
 
   // Stops in session-Reihenfolge
@@ -180,9 +237,11 @@ export default async function FeldmodusPage() {
         fall?.besichtigungsort_lng != null
           ? Number(fall.besichtigungsort_lng)
           : null
+      const fallId = t.fall_id as string
+      const auftrag = auftragMap.get(fallId) ?? null
       const stop: FeldmodusStop = {
         termin_id: t.id as string,
-        fall_id: t.fall_id as string,
+        fall_id: fallId,
         index: idx,
         start_zeit: t.start_zeit as string,
         status: t.status as string,
@@ -209,6 +268,11 @@ export default async function FeldmodusPage() {
         lng,
         briefing_text: (fall?.sv_briefing_text as string | null) ?? null,
         briefing_struktur: normalizeStruktur(fall?.sv_briefing_struktur),
+        auftrag_typ: auftrag?.typ ?? null,
+        einzusammelnde_dokumente: pflichtMap.get(fallId) ?? [],
+        hat_vorschaeden: (fall?.hat_vorschaeden as boolean | null) ?? null,
+        vorschaden_anzahl: (fall?.vorschaden_anzahl as number | null) ?? null,
+        vorschaden_letzter_datum: (fall?.vorschaden_letzter_datum as string | null) ?? null,
       }
       return stop
     })
