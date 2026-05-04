@@ -6,7 +6,9 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import HeuteClient from './HeuteClient'
+import type { TagesroutePflichtStat } from './TagesrouteSidebar'
 
 export const dynamic = 'force-dynamic'
 
@@ -183,9 +185,29 @@ export default async function HeutePage() {
     }
   })
 
+  // Pflichtdokumente-Counts pro Fall parallel laden — damit die Sidebar
+  // pro Termin „X von Y offen" anzeigen kann. Pre-FlowLink-Termine ohne
+  // fall_id werden übersprungen.
+  const fallIdsForPflicht = Array.from(
+    new Set(heuteTermine.map((t) => t.fall_id).filter((x): x is string => !!x)),
+  )
+  const pflichtStats: TagesroutePflichtStat[] = await Promise.all(
+    fallIdsForPflicht.map(async (fallId) => {
+      try {
+        const slots = await getPflichtdokumenteForFall(supabase, fallId, 'sv')
+        const pflichtSlots = slots.filter((s) => s.pflicht)
+        const offen = pflichtSlots.filter((s) => s.status === 'offen').length
+        return { fallId, offen, gesamt: pflichtSlots.length }
+      } catch {
+        return { fallId, offen: 0, gesamt: 0 }
+      }
+    }),
+  )
+
   return (
     <HeuteClient
       termine={heuteTermine}
+      pflichtStats={pflichtStats}
       svStandort={{
         lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
         lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
