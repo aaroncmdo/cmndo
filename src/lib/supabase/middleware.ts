@@ -84,7 +84,9 @@ export async function updateSession(request: NextRequest) {
     const has2faCookie = request.cookies.get('claimondo_2fa_verified')?.value === '1'
     const hasRememberCookie = !!request.cookies.get('claimondo_remember')?.value
 
-    if (!isGoogleUser && !has2faCookie && !hasRememberCookie) {
+    // /gutachter-Portal hat kein 2FA — SVs werden direkt durchgelassen
+    const isGutachterPath = request.nextUrl.pathname.startsWith('/gutachter')
+    if (!isGoogleUser && !has2faCookie && !hasRememberCookie && !isGutachterPath) {
       response = NextResponse.redirect(new URL('/login/2fa', request.url))
     } else if (request.nextUrl.pathname.startsWith('/admin')) {
       // 2FA OK → Admin-Rollen-Check (KFZ-203: Dispatch-User darf nicht auf /admin/*)

@@ -14,6 +14,7 @@ import {
   UserIcon,
   PenToolIcon,
   Trash2Icon,
+  XIcon,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -129,6 +130,7 @@ export default function FlowWizardKfz({
   const [datenschutz, setDatenschutz] = useState(false)
   const [signatureBlob, setSignatureBlob] = useState<Blob | null>(null)
   const [saAccepted, setSaAccepted] = useState(false)
+  const [saVolltextOffen, setSaVolltextOffen] = useState(false)
   const [submittingSA, setSubmittingSA] = useState(false)
   const [fallId, setFallId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -451,14 +453,66 @@ export default function FlowWizardKfz({
                   Versicherung getragen.</p>
                 </div>
 
-                <a
-                  href="/sa-volltext"
-                  target="_blank"
+                <button
+                  type="button"
+                  onClick={() => setSaVolltextOffen(true)}
                   className="flex items-center gap-2 text-sm text-[#4573A2] hover:underline mb-5"
                 >
                   <FileTextIcon className="w-4 h-4" />
                   Vollständige Sicherungsabtretung lesen
-                </a>
+                </button>
+
+                {/* SA-Volltext-Popover */}
+                {saVolltextOffen && (
+                  <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40" onClick={() => setSaVolltextOffen(false)} />
+                    <div className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[90dvh]">
+                      {/* Header */}
+                      <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-claimondo-border flex-shrink-0">
+                        <h2 className="text-sm font-semibold text-claimondo-navy">Sicherungsabtretung</h2>
+                        <button type="button" onClick={() => setSaVolltextOffen(false)} className="p-1.5 rounded-lg hover:bg-[#f8f9fb]">
+                          <XIcon className="w-4 h-4 text-claimondo-ondo" />
+                        </button>
+                      </div>
+                      {/* Scrollbarer Text */}
+                      <div className="flex-1 overflow-y-auto px-5 py-4 text-sm text-claimondo-navy space-y-4 leading-relaxed">
+                        <h3 className="font-semibold">1. Abtretungserklärung</h3>
+                        <p>Hiermit trete ich sämtliche mir aus dem nachfolgend bezeichneten Schadensereignis zustehenden Schadensersatzansprüche — insbesondere die Ansprüche auf Erstattung der Sachverständigenkosten — erfüllungshalber an die <strong>Claimondo GmbH</strong> ab.</p>
+                        <ul className="list-disc pl-5 space-y-1 text-sm">
+                          <li>Sachschadenersatzansprüche</li>
+                          <li>Anspruch auf Erstattung der Gutachtervergütung</li>
+                          <li>Nebenkosten (Auslagenpauschale, Nutzungsausfall, Mietwagenkosten)</li>
+                          <li>Anspruch auf Erstattung vorgerichtlicher Rechtsanwaltskosten</li>
+                        </ul>
+                        <h3 className="font-semibold">2. Kostenfreiheit</h3>
+                        <p>Dem Auftraggeber entstehen durch die Beauftragung der Claimondo GmbH <strong>keine Kosten</strong>. Die Sachverständigenkosten werden im Rahmen der Sicherungsabtretung direkt von der gegnerischen Haftpflichtversicherung getragen. Im Falle einer Kürzung oder Ablehnung trägt die Claimondo GmbH das wirtschaftliche Risiko.</p>
+                        <h3 className="font-semibold">3. Vollmacht</h3>
+                        <p>Der Auftraggeber bevollmächtigt die Claimondo GmbH, in seinem Namen:</p>
+                        <ul className="list-disc pl-5 space-y-1 text-sm">
+                          <li>einen qualifizierten Kfz-Sachverständigen mit der Erstellung eines Schadengutachtens zu beauftragen,</li>
+                          <li>die abgetretenen Ansprüche außergerichtlich gegenüber der Versicherung geltend zu machen,</li>
+                          <li>Zahlungen entgegenzunehmen und weiterzuleiten,</li>
+                          <li>erforderliche Korrespondenz mit der gegnerischen Versicherung zu führen.</li>
+                        </ul>
+                        <h3 className="font-semibold">4. Widerrufsbelehrung</h3>
+                        <p>Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsschlusses.</p>
+                        <h3 className="font-semibold">5. Datenschutz</h3>
+                        <p>Die Erhebung und Verarbeitung Ihrer personenbezogenen Daten erfolgt ausschließlich zum Zweck der Schadensabwicklung (Art. 6 Abs. 1 lit. b DSGVO). Ihre Daten werden nur an den beauftragten Sachverständigen und die gegnerische Versicherung weitergegeben.</p>
+                        <p className="text-xs text-claimondo-ondo/70 pt-2 border-t border-claimondo-border">Claimondo GmbH · Die rechtlich bindende Fassung wird im Rahmen der digitalen Unterschrift erstellt.</p>
+                      </div>
+                      {/* Footer */}
+                      <div className="px-5 py-4 border-t border-claimondo-border flex-shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => { setSaAccepted(true); setSaVolltextOffen(false) }}
+                          className="w-full py-3.5 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-sm transition-all active:scale-[0.98]"
+                        >
+                          Akzeptieren und weiter
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Unterschrifts-Canvas */}
                 <div className="mb-4">
