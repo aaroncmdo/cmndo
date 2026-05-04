@@ -76,8 +76,8 @@ export default function TagesrouteSidebar({
   const aktiv = termine.filter((t) => t.status !== 'abgeschlossen' && t.status !== 'abgelehnt')
 
   return (
-    <aside className="bg-white border border-claimondo-border rounded-xl flex flex-col overflow-hidden">
-      <div className="px-4 py-3 border-b border-claimondo-border">
+    <aside className="flex flex-col flex-1 min-h-0">
+      <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
         <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider">Termine heute</p>
         <div className="flex items-baseline gap-2 mt-0.5">
           <span className="text-2xl font-semibold text-claimondo-navy">{aktiv.length}</span>

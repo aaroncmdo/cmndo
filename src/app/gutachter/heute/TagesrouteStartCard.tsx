@@ -51,7 +51,7 @@ export default function TagesrouteStartCard({
       : `${terminIds.length} Stops`
 
   return (
-    <div className="rounded-xl border border-claimondo-border bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)] p-4 text-white shadow-sm">
+    <div className="bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)] p-4 text-white">
       <div className="flex items-center gap-2 mb-2">
         <MapIcon className="w-4 h-4 text-[var(--brand-accent)]" />
         <h3 className="text-sm font-semibold">Tagesroute</h3>

@@ -1,6 +1,9 @@
 'use client'
 
-// Heute-Tab: Mapbox-Tagesroute zentral, rechts Termin-Liste mit Pflichtinfos.
+// Heute-Tab: Mapbox füllt komplett, Cards (Tagesvorbereitung oben rechts,
+// Termin-Liste mittig rechts mit interner Scroll-Höhe, Tagesroute-Start
+// unten rechts) schweben darüber. Keine Page-Scrollbar — das Browser-
+// Viewport bleibt fix, nur die Termin-Liste scrollt intern wenn lang.
 // GPS opportunistisch — Fallback auf SV-Home-Basis (sachverstaendige.standort_*).
 
 import { useEffect, useMemo, useState } from 'react'
@@ -68,43 +71,48 @@ export default function HeuteClient({
   const disabledReason = aktiveTermine.length === 0 ? 'Heute keine offenen Termine' : null
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-4 p-4 h-[calc(100vh-100px)]">
-      {/* Karte zentral — nimmt die meiste Fläche ein */}
-      <div className="flex flex-col gap-3 min-h-[400px]">
-        <div className="flex-1 min-h-[400px]">
-          <TagesrouteMap
+    <div className="relative w-full h-[calc(100vh-64px)] overflow-hidden">
+      {/* Mapbox füllt den ganzen Bereich */}
+      <div className="absolute inset-0">
+        <TagesrouteMap
+          svOrigin={origin}
+          stops={stops}
+          activeStopId={activeStopId}
+          onStopClick={setActiveStopId}
+        />
+      </div>
+
+      {/* Floating-Spalte rechts: Tagesvorbereitung oben, Termin-Liste mittig
+          (scrollbar wenn lang), Tagesroute-Card unten. Alle Cards sind
+          shadow-lg + bg-white/95 mit backdrop-blur damit sie über der Map
+          gut lesbar sind. */}
+      <div className="absolute top-4 right-4 bottom-4 z-10 w-[380px] max-w-[calc(100vw-2rem)] flex flex-col gap-3 pointer-events-none">
+        {/* Tagesvorbereitung — oben, kompakt */}
+        <div className="bg-white/95 backdrop-blur border border-claimondo-border rounded-xl px-3 py-2 shadow-lg flex items-center gap-2 text-xs text-claimondo-navy pointer-events-auto shrink-0">
+          <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
+          <TagesvorbereitungButton />
+        </div>
+
+        {/* Termin-Liste — füllt den Rest, scrollt intern */}
+        <div className="flex-1 min-h-0 bg-white/95 backdrop-blur border border-claimondo-border rounded-xl shadow-lg overflow-hidden flex flex-col pointer-events-auto">
+          <TagesrouteSidebar
+            termine={termine}
+            pflichtStats={pflichtStats}
             svOrigin={origin}
-            stops={stops}
             activeStopId={activeStopId}
             onStopClick={setActiveStopId}
           />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+        {/* Tagesroute-Start — unten */}
+        <div className="bg-white/95 backdrop-blur border border-claimondo-border rounded-xl shadow-lg overflow-hidden pointer-events-auto shrink-0">
           <TagesrouteStartCard
             terminIds={terminIds}
             hasActiveSession={hasActiveSession}
             disabledReason={disabledReason}
           />
-          <div className="bg-white border border-claimondo-border rounded-xl p-3">
-            <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider mb-1.5">
-              Tagesvorbereitung
-            </p>
-            <TagesvorbereitungButton />
-            <p className="text-[10px] text-claimondo-ondo/70 mt-1.5 leading-tight">
-              CSV-Export für AutoiXpert / Audatex / Excel.
-            </p>
-          </div>
         </div>
       </div>
-
-      {/* Termin-Liste rechts mit Pflicht-Infos */}
-      <TagesrouteSidebar
-        termine={termine}
-        pflichtStats={pflichtStats}
-        svOrigin={origin}
-        activeStopId={activeStopId}
-        onStopClick={setActiveStopId}
-      />
     </div>
   )
 }
