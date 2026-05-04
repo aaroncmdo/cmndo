@@ -13,6 +13,7 @@ import { revalidatePath } from 'next/cache'
 import { reserveSvTerminForLead } from '@/app/dispatch/leads/[id]/_actions/sv-termin'
 import { sendFlowLinkMultiChannel } from '@/app/dispatch/leads/[id]/_actions/flowlink'
 import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
+import { checkSvReachability } from '@/lib/dispatch/reachability'
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371
@@ -108,6 +109,9 @@ export type SvDistanceVorschlag = {
   distanzKm: number
   etaMinuten: number | null
   belegt: boolean
+  /** AAR-CMM: SV ist im Slot frei, kann ihn aber wegen Vor-/Nachtermin nicht erreichen. */
+  unerreichbar: boolean
+  unerreichbarGrund: string | null
   paketUmkreisKm: number
 }
 
@@ -183,6 +187,21 @@ export async function listSvsByDistance(
     svParsed.map((sv) => ({ lat: sv.lat, lng: sv.lng })),
   )
 
+  // Reachability-Check parallel für alle SVs die im Slot nicht direkt belegt
+  // sind. Belegte SVs überspringen wir (Konflikt steht ohnehin schon).
+  const reachChecks = await Promise.all(
+    svParsed.map(async (sv) => {
+      if (blockierteSvs.has(sv.svId)) return { reachable: true, grund: undefined }
+      return checkSvReachability(supabase, {
+        svId: sv.svId,
+        candidateLat: besichtigungsortLat,
+        candidateLng: besichtigungsortLng,
+        candidateStartIso: startDate.toISOString(),
+        candidateEndIso: endDate.toISOString(),
+      })
+    }),
+  )
+
   const list: SvDistanceVorschlag[] = svParsed.map((sv, i) => ({
     svId: sv.svId,
     name: sv.name,
@@ -190,6 +209,8 @@ export async function listSvsByDistance(
     distanzKm: haversine(sv.lat, sv.lng, besichtigungsortLat, besichtigungsortLng),
     etaMinuten: etas[i],
     belegt: blockierteSvs.has(sv.svId),
+    unerreichbar: !reachChecks[i].reachable,
+    unerreichbarGrund: reachChecks[i].grund ?? null,
     paketUmkreisKm: sv.paketUmkreisKm,
   }))
 

@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { SvSuggestion } from './types'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
+import { checkSvReachability } from '@/lib/dispatch/reachability'
 
 /**
  * Sticky-SV: gibt den sv_id zurueck der einen frueheren Fall fuer denselben
@@ -164,6 +165,34 @@ export async function reserveSvTerminForLead(
     return { success: false, error: 'SV hat bereits einen Termin im gewählten Zeitfenster' }
   }
 
+  // AAR-CMM: Reachability-Hard-Check — SV muss zum Slot anfahren UND nach
+  // dem Slot zum nächsten Termin kommen können. Nutzt Mapbox-ETA gegen
+  // Vorgänger-/Nachfolge-Termin.
+  const { data: leadLoc } = await supabase
+    .from('leads')
+    .select('besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng')
+    .eq('id', leadId)
+    .single()
+  const candidateLat =
+    (leadLoc as { besichtigungsort_lat: number | null; fahrzeug_standort_lat: number | null } | null)
+      ?.besichtigungsort_lat ?? (leadLoc as { fahrzeug_standort_lat: number | null } | null)?.fahrzeug_standort_lat ?? null
+  const candidateLng =
+    (leadLoc as { besichtigungsort_lng: number | null; fahrzeug_standort_lng: number | null } | null)
+      ?.besichtigungsort_lng ?? (leadLoc as { fahrzeug_standort_lng: number | null } | null)?.fahrzeug_standort_lng ?? null
+
+  if (candidateLat != null && candidateLng != null) {
+    const reach = await checkSvReachability(supabase, {
+      svId,
+      candidateLat: Number(candidateLat),
+      candidateLng: Number(candidateLng),
+      candidateStartIso: startDate.toISOString(),
+      candidateEndIso: endDate.toISOString(),
+    })
+    if (!reach.reachable) {
+      return { success: false, error: reach.grund ?? 'SV kann den Termin nicht erreichen' }
+    }
+  }
+
   // AAR-134: 'abgelehnt' auch stornieren — verhindert Doppel-Termine nach SV-Ablehnung.
   await supabase
     .from('gutachter_termine')
@@ -255,7 +284,7 @@ export async function acceptGegenvorschlag(
 
   const { data: termin } = await supabase
     .from('gutachter_termine')
-    .select('id, status, sv_vorgeschlagene_slots, lead_id, fall_id')
+    .select('id, sv_id, status, sv_vorgeschlagene_slots, lead_id, fall_id')
     .eq('id', terminId)
     .single()
 
@@ -271,6 +300,44 @@ export async function acceptGegenvorschlag(
   const slot = slots[slotIndex]
   if (!slot?.start || !slot?.end) {
     return { success: false, error: 'Slot ist leer' }
+  }
+
+  // AAR-CMM Reachability-Hard-Check: SV-Gegenvorschlag muss erreichbar sein.
+  // Wenn der SV inzwischen einen Vor-/Nachfolge-Termin bekommen hat, blocken
+  // wir die Annahme.
+  if (termin.sv_id) {
+    let candLat: number | null = null
+    let candLng: number | null = null
+    if (termin.fall_id) {
+      const { data: f } = await supabase
+        .from('faelle')
+        .select('besichtigungsort_lat, besichtigungsort_lng')
+        .eq('id', termin.fall_id)
+        .single()
+      candLat = (f as { besichtigungsort_lat: number | null } | null)?.besichtigungsort_lat ?? null
+      candLng = (f as { besichtigungsort_lng: number | null } | null)?.besichtigungsort_lng ?? null
+    } else if (termin.lead_id) {
+      const { data: l } = await supabase
+        .from('leads')
+        .select('besichtigungsort_lat, besichtigungsort_lng')
+        .eq('id', termin.lead_id)
+        .single()
+      candLat = (l as { besichtigungsort_lat: number | null } | null)?.besichtigungsort_lat ?? null
+      candLng = (l as { besichtigungsort_lng: number | null } | null)?.besichtigungsort_lng ?? null
+    }
+    if (candLat != null && candLng != null) {
+      const reach = await checkSvReachability(supabase, {
+        svId: termin.sv_id,
+        candidateLat: Number(candLat),
+        candidateLng: Number(candLng),
+        candidateStartIso: slot.start,
+        candidateEndIso: slot.end,
+        ignoreTerminIds: [terminId],
+      })
+      if (!reach.reachable) {
+        return { success: false, error: reach.grund ?? 'SV-Gegenvorschlag ist nicht mehr erreichbar' }
+      }
+    }
   }
 
   const { error } = await supabase
