@@ -10,7 +10,8 @@
 // Damit kann der Dispatcher am Telefon mit dem Kunden visuell sehen wo der
 // SV Lücken hat und ob der Besichtigungsort dazwischen passt.
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Modal } from '@/components/primitives/Modal'
 import {
   CalendarIcon,
@@ -19,12 +20,14 @@ import {
   XIcon,
   RefreshCwIcon,
   ClockIcon,
+  CalendarPlusIcon,
 } from 'lucide-react'
 import {
   getSvKalenderVergleich,
   type SvKalenderResult,
   type SvKalenderTermin,
 } from './_actions/sv-kalender'
+import { reserveSvTerminForLead } from './actions'
 
 type Props = {
   open: boolean
@@ -33,7 +36,11 @@ type Props = {
   svIds: string[]
   /** Wunschtermin als visueller Marker im Kalender. */
   wunschterminIso?: string | null
+  /** Wird nach erfolgreicher Reservierung aufgerufen — typischerweise um die Lead-Page zu refreshen. */
+  onReserved?: () => void
 }
+
+const TERMIN_DAUER_DEFAULT = 45
 
 const HOUR_START = 7
 const HOUR_END = 20
@@ -71,13 +78,20 @@ export default function SvKalenderVergleichModal({
   leadId,
   svIds,
   wunschterminIso,
+  onReserved,
 }: Props) {
+  const router = useRouter()
   const [data, setData] = useState<SvKalenderResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [activeSvId, setActiveSvId] = useState<string | null>(null)
   const [activeDayKey, setActiveDayKey] = useState<string | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
+  // Reservieren-Confirm
+  const [reservePending, startReserve] = useTransition()
+  const [reserveDraft, setReserveDraft] = useState<{ startIso: string; dauerMin: number } | null>(null)
+  const [reserveError, setReserveError] = useState<string | null>(null)
+  const railRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!open || svIds.length === 0) return
@@ -196,6 +210,63 @@ export default function SvKalenderVergleichModal({
     return arr
   }, [])
 
+  // ─── Klick-zu-Reservieren: Y-Position → 15-min-gerundete Zeit ──────────
+  function handleRailClick(e: React.MouseEvent<HTMLDivElement>) {
+    if (!activeDayKey || !activeSvId) return
+    // Klicks auf bestehende Termin-Blöcke ignorieren
+    const target = e.target as HTMLElement
+    if (target.closest('[data-termin-block]')) return
+    if (!railRef.current) return
+    const rect = railRef.current.getBoundingClientRect()
+    const y = e.clientY - rect.top
+    if (y < 0 || y > RAIL_HEIGHT) return
+    const minFromStart = Math.round(y / PX_PER_MIN / 15) * 15
+    const totalMinutes = HOUR_START * 60 + minFromStart
+    const hh = Math.floor(totalMinutes / 60)
+    const mm = totalMinutes % 60
+    if (hh < HOUR_START || hh >= HOUR_END) return
+    // ISO-String aus activeDayKey + Uhrzeit (lokale Zeit)
+    const [yyyy, mo, dd] = activeDayKey.split('-').map(Number)
+    const dt = new Date(yyyy, mo - 1, dd, hh, mm, 0, 0)
+    if (dt.getTime() < Date.now()) {
+      setReserveError('Liegt in der Vergangenheit')
+      setTimeout(() => setReserveError(null), 2500)
+      return
+    }
+    setReserveDraft({ startIso: dt.toISOString(), dauerMin: TERMIN_DAUER_DEFAULT })
+    setReserveError(null)
+  }
+
+  function ueberlapptMitTermin(startIso: string, dauerMin: number): boolean {
+    const start = new Date(startIso).getTime()
+    const end = start + dauerMin * 60_000
+    return termineHeute.some((t) => {
+      const ts = new Date(t.startIso).getTime()
+      const te = new Date(t.endIso).getTime()
+      return start < te && end > ts
+    })
+  }
+
+  function handleReserveBestaetigen() {
+    if (!reserveDraft || !activeSvId) return
+    if (ueberlapptMitTermin(reserveDraft.startIso, reserveDraft.dauerMin)) {
+      setReserveError('Slot überlappt mit einem bestehenden Termin')
+      return
+    }
+    setReserveError(null)
+    startReserve(async () => {
+      const r = await reserveSvTerminForLead(leadId, activeSvId, reserveDraft.startIso, reserveDraft.dauerMin)
+      if (r.success) {
+        setReserveDraft(null)
+        onReserved?.()
+        router.refresh()
+        onClose()
+      } else {
+        setReserveError(r.error ?? 'Reservierung fehlgeschlagen')
+      }
+    })
+  }
+
   return (
     <Modal open={open} onClose={onClose} maxWidth={1080} hideCloseButton noPadding ariaLabel="SV-Kalender vergleichen">
       <div className="flex flex-col max-h-[88vh]">
@@ -260,7 +331,7 @@ export default function SvKalenderVergleichModal({
         )}
 
         {/* Body: Kalender (links) + Tag-Liste (rechts) */}
-        <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-[1fr_180px]">
+        <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-[1fr_180px] relative">
           {/* Tageskalender */}
           <div className="overflow-y-auto px-4 py-4 border-r border-claimondo-border">
             {loading && (
@@ -297,14 +368,18 @@ export default function SvKalenderVergleichModal({
                 </div>
 
                 {/* Legende */}
-                <div className="flex items-center gap-4 mb-2 text-[10px] text-claimondo-ondo">
+                <div className="flex items-center gap-4 mb-2 text-[10px] text-claimondo-ondo flex-wrap">
                   <span className="flex items-center gap-1.5">
                     <span className="inline-block w-3 h-3 rounded bg-amber-200 border border-amber-400" />
-                    Termin
+                    Termin (belegt)
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="inline-block w-3 h-3 rounded bg-blue-100 border border-blue-400 border-dashed" />
                     Route von/zum Besichtigungsort
+                  </span>
+                  <span className="flex items-center gap-1.5 text-claimondo-ondo">
+                    <CalendarPlusIcon className="w-3 h-3" />
+                    Klick auf freien Bereich → Termin reservieren
                   </span>
                 </div>
 
@@ -323,8 +398,14 @@ export default function SvKalenderVergleichModal({
                   </div>
                 )}
 
-                {/* Tageskalender-Rail */}
-                <div className="relative ml-12" style={{ height: `${RAIL_HEIGHT}px` }}>
+                {/* Tageskalender-Rail — Klick auf freie Bereiche reserviert Slot */}
+                <div
+                  ref={railRef}
+                  onClick={handleRailClick}
+                  className="relative ml-12 cursor-pointer"
+                  style={{ height: `${RAIL_HEIGHT}px` }}
+                  title="Klick auf einen freien Bereich reserviert einen 45-Min-Termin"
+                >
                   {/* Stunden-Linien */}
                   {hours.map((h) => {
                     const top = (h - HOUR_START) * 60 * PX_PER_MIN
@@ -388,13 +469,14 @@ export default function SvKalenderVergleichModal({
                     return (
                       <div
                         key={t.id}
-                        className={`absolute left-0 right-2 rounded-lg border-2 px-2 py-1.5 shadow-sm overflow-hidden ${
+                        data-termin-block
+                        className={`absolute left-0 right-2 rounded-lg border-2 px-2 py-1.5 shadow-sm overflow-hidden cursor-not-allowed ${
                           istWunsch
                             ? 'bg-amber-300 border-amber-500'
                             : 'bg-amber-100 border-amber-400'
                         }`}
                         style={{ top, height }}
-                        title={t.ortAdresse ?? ''}
+                        title={`Belegt: ${t.ortAdresse ?? 'kein Ort'}`}
                       >
                         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-900">
                           <ClockIcon className="w-3 h-3" />
@@ -447,6 +529,84 @@ export default function SvKalenderVergleichModal({
               </>
             )}
           </div>
+
+          {/* Reserve-Confirm als Floating-Card im Body */}
+          {reserveDraft && activeTab && (
+            <div
+              className="absolute inset-0 z-20 flex items-center justify-center bg-claimondo-navy/30 backdrop-blur-[2px] p-4"
+              onClick={() => !reservePending && setReserveDraft(null)}
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-2xl shadow-xl border border-claimondo-border p-5 max-w-sm w-full space-y-3"
+              >
+                <div className="flex items-center gap-2">
+                  <CalendarPlusIcon className="w-4 h-4 text-claimondo-ondo" />
+                  <h4 className="text-sm font-semibold text-claimondo-navy">Termin reservieren</h4>
+                </div>
+                <p className="text-xs text-claimondo-ondo">
+                  Bei <span className="font-medium text-claimondo-navy">{activeTab.name}</span>
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-claimondo-ondo uppercase tracking-wider block mb-1">Start</label>
+                    <input
+                      type="datetime-local"
+                      value={(() => {
+                        const d = new Date(reserveDraft.startIso)
+                        const p = (n: number) => String(n).padStart(2, '0')
+                        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
+                      })()}
+                      onChange={(e) => {
+                        if (!e.target.value) return
+                        setReserveDraft({ ...reserveDraft, startIso: new Date(e.target.value).toISOString() })
+                      }}
+                      className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-xs rounded-lg px-2 py-1.5"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-claimondo-ondo uppercase tracking-wider block mb-1">Dauer</label>
+                    <select
+                      value={reserveDraft.dauerMin}
+                      onChange={(e) => setReserveDraft({ ...reserveDraft, dauerMin: Number(e.target.value) })}
+                      className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-xs rounded-lg px-2 py-1.5"
+                    >
+                      <option value={30}>30 min</option>
+                      <option value={45}>45 min</option>
+                      <option value={60}>60 min</option>
+                      <option value={90}>90 min</option>
+                    </select>
+                  </div>
+                </div>
+
+                {reserveError && (
+                  <p className="text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-md px-2 py-1.5">
+                    {reserveError}
+                  </p>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={reservePending}
+                    onClick={() => setReserveDraft(null)}
+                    className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
+                  >
+                    Abbrechen
+                  </button>
+                  <button
+                    type="button"
+                    disabled={reservePending}
+                    onClick={handleReserveBestaetigen}
+                    className="flex-1 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    <CalendarPlusIcon className="w-3.5 h-3.5" />
+                    {reservePending ? 'Reserviere …' : 'Reservieren'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Tag-Liste rechts */}
           {data && (

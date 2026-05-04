@@ -737,6 +737,14 @@ export default function SvDispatchPanel({
           ...((extraSuggestions ?? []).map((s) => s.svId)),
         ]}
         wunschterminIso={wunschterminIso ?? null}
+        onReserved={() => {
+          setToast('Termin reserviert')
+          setTopSuggestions(null)
+          setExtraSuggestions(null)
+          setSelectedSv(null)
+          setShowManual(false)
+          setTimeout(() => setToast(''), 3000)
+        }}
       />
 
       <Modal open={debugOpen} onClose={() => setDebugOpen(false)} noPadding hideCloseButton maxWidth={672} ariaLabel="SV-Matching Debug">
