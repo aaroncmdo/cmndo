@@ -14,19 +14,20 @@ function buildKundeMarkerElement(opts: KundeMarkerOptions): HTMLDivElement {
   const el = document.createElement('div')
   el.className = 'kunde-marker'
   el.style.cssText = [
-    'width: 32px',
-    'height: 32px',
+    'width: 24px',
+    'height: 24px',
     'border-radius: 9999px',
     'background: #4573A2',
-    'border: 3px solid #FFFFFF',
-    'box-shadow: 0 2px 8px rgba(0,0,0,0.25)',
+    'border: 2px solid #FFFFFF',
+    'box-shadow: 0 2px 6px rgba(13,27,62,0.35)',
     'display: flex',
     'align-items: center',
     'justify-content: center',
     'color: #FFFFFF',
-    'font-weight: 600',
-    'font-size: 11px',
+    'font-weight: 700',
+    'font-size: 10px',
     'pointer-events: none',
+    'transition: transform 0.2s ease',
   ].join(';')
   el.textContent = (opts.initials ?? 'K').slice(0, 2).toUpperCase()
   return el
