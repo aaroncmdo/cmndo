@@ -704,30 +704,60 @@ async function generateFallNummer(
 }
 
 // ─── Helper: KB Round-Robin (min aktive Fälle gewinnt) ──────────────────────
+// Priorität: kundenbetreuer zuerst. Admin nur als Fallback wenn kein aktiver
+// KB unter der Schwelle von 100 Fällen verfügbar ist.
+const KB_ADMIN_FALLBACK_SCHWELLE = 100
+
+async function countAktiveFaelle(
+  admin: ReturnType<typeof createAdminClient>,
+  profileId: string,
+): Promise<number> {
+  const { count } = await admin
+    .from('faelle')
+    .select('id', { count: 'exact', head: true })
+    .eq('kundenbetreuer_id', profileId)
+    .not('status', 'in', '("abgeschlossen","storniert","reguliert","abgelehnt")')
+  return count ?? 0
+}
+
 async function pickKundenbetreuerRoundRobin(
   admin: ReturnType<typeof createAdminClient>,
 ): Promise<string | null> {
-  const { data: betreuer } = await admin
+  // 1. Alle aktiven KBs laden
+  const { data: kbList } = await admin
     .from('profiles')
     .select('id')
-    .in('rolle', ['kundenbetreuer', 'admin'])
-    .limit(20)
+    .eq('rolle', 'kundenbetreuer')
+    .eq('aktiv', true)
+    .limit(50)
 
-  if (!betreuer || betreuer.length === 0) return null
+  const kbs = (kbList ?? []) as Array<{ id: string }>
 
-  const counts: Record<string, number> = {}
-  for (const b of betreuer) {
-    const { count } = await admin
-      .from('faelle')
-      .select('id', { count: 'exact', head: true })
-      .eq('kundenbetreuer_id', b.id as string)
-      .not('status', 'in', '("abgeschlossen","storniert","reguliert","abgelehnt")')
-    counts[b.id as string] = count ?? 0
+  if (kbs.length > 0) {
+    // Aktive Fälle pro KB zählen
+    const counts: Record<string, number> = {}
+    for (const kb of kbs) {
+      counts[kb.id] = await countAktiveFaelle(admin, kb.id)
+    }
+
+    // KBs unter Schwelle bevorzugen; falls alle drüber → trotzdem least-busy KB nehmen
+    const unterSchwelle = kbs.filter(kb => counts[kb.id] < KB_ADMIN_FALLBACK_SCHWELLE)
+    const pool = unterSchwelle.length > 0 ? unterSchwelle : kbs
+    return pool.reduce(
+      (m, kb) => (counts[kb.id] < counts[m.id] ? kb : m),
+      pool[0],
+    ).id
   }
 
-  return betreuer.reduce(
-    (m, b) =>
-      (counts[b.id as string] ?? 0) < (counts[m.id as string] ?? 0) ? b : m,
-    betreuer[0],
-  ).id as string
+  // 2. Kein aktiver KB → Admin als Fallback (erster aktiver Admin, ältester zuerst)
+  const { data: adminList } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('rolle', 'admin')
+    .eq('aktiv', true)
+    .order('created_at', { ascending: true })
+    .limit(1)
+
+  const admins = (adminList ?? []) as Array<{ id: string }>
+  return admins[0]?.id ?? null
 }
