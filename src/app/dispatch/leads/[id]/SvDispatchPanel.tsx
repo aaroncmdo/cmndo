@@ -135,6 +135,7 @@ export default function SvDispatchPanel({
     getNextFreeSlotsForSv(selectedSv.svId, 3, dauerMin, {
       wunschterminIso: wunschterminIso ?? null,
       wunschterminWochentage: wunschterminWochentage ?? null,
+      leadId,
     })
       .then((r) => {
         if (!cancelled) setFreeSlots(r.success ? r.slots ?? [] : [])

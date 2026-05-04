@@ -181,3 +181,167 @@ export async function checkSvReachability(
     etaToNextMin: etaToNextMin ?? undefined,
   }
 }
+
+// ─── PR B: Slot-Iterator-Reachability ──────────────────────────────────────
+//
+// Die Slot-Finder iterieren bis zu ~2400 Kandidat-Slots über 12 Wochen.
+// Mapbox-Calls pro Slot wären zu teuer. Strategie:
+//   1. Einmal pro SV: alle Termine im Suchzeitraum laden + Locations (Lead/Fall)
+//   2. Eine Matrix-Call: Origin = Candidate-Location, Destinations = alle
+//      Termin-Locations dieses SV → ETA-Map
+//   3. Pro Slot rein lokal mit der ETA-Map prüfen: ist Vorgänger/Nachfolger
+//      erreichbar?
+
+export type TerminMitEta = {
+  id: string
+  startZeit: string
+  endZeit: string
+  /** Mapbox-ETA candidate ↔ Termin-Location in Minuten. null wenn nicht ermittelbar. */
+  etaMin: number | null
+}
+
+export type SlotEtaContext = {
+  termine: TerminMitEta[]
+}
+
+/**
+ * Lädt alle Termine eines SV im Suchzeitraum + Mapbox-ETAs zur Candidate-
+ * Location. Wird einmal aufgerufen, dann beliebig oft an `isSlotReachable`
+ * weitergegeben — kein Mapbox-Call pro Slot.
+ */
+export async function precomputeSvSlotEtas(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
+  svId: string,
+  candidate: { lat: number; lng: number },
+  fromIso: string,
+  toIso: string,
+): Promise<SlotEtaContext> {
+  const { data: termineRaw } = await db
+    .from('gutachter_termine')
+    .select('id, lead_id, fall_id, start_zeit, end_zeit')
+    .eq('sv_id', svId)
+    .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
+    .gte('end_zeit', fromIso)
+    .lte('start_zeit', toIso)
+    .order('start_zeit', { ascending: true })
+
+  const termine = (termineRaw ?? []) as Array<{
+    id: string
+    lead_id: string | null
+    fall_id: string | null
+    start_zeit: string
+    end_zeit: string
+  }>
+
+  if (termine.length === 0) return { termine: [] }
+
+  const leadIds = Array.from(new Set(termine.map((t) => t.lead_id).filter((x): x is string => !!x)))
+  const fallIds = Array.from(new Set(termine.map((t) => t.fall_id).filter((x): x is string => !!x)))
+
+  const [{ data: leadLocs }, { data: fallLocs }] = await Promise.all([
+    leadIds.length
+      ? db.from('leads').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', leadIds)
+      : Promise.resolve({ data: [] }),
+    fallIds.length
+      ? db.from('faelle').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', fallIds)
+      : Promise.resolve({ data: [] }),
+  ])
+
+  const leadLocMap = new Map(
+    ((leadLocs ?? []) as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>)
+      .map((l) => [l.id, { lat: l.besichtigungsort_lat, lng: l.besichtigungsort_lng }]),
+  )
+  const fallLocMap = new Map(
+    ((fallLocs ?? []) as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>)
+      .map((f) => [f.id, { lat: f.besichtigungsort_lat, lng: f.besichtigungsort_lng }]),
+  )
+
+  // Lokationen pro Termin auflösen
+  const terminLocs: Array<{ idx: number; lat: number; lng: number }> = []
+  const terminMitEta: TerminMitEta[] = []
+  termine.forEach((t, idx) => {
+    let lat: number | null = null
+    let lng: number | null = null
+    if (t.fall_id) {
+      const l = fallLocMap.get(t.fall_id)
+      if (l?.lat != null && l?.lng != null) {
+        lat = l.lat
+        lng = l.lng
+      }
+    }
+    if (lat == null && t.lead_id) {
+      const l = leadLocMap.get(t.lead_id)
+      if (l?.lat != null && l?.lng != null) {
+        lat = l.lat
+        lng = l.lng
+      }
+    }
+    terminMitEta.push({ id: t.id, startZeit: t.start_zeit, endZeit: t.end_zeit, etaMin: null })
+    if (lat != null && lng != null) {
+      terminLocs.push({ idx, lat, lng })
+    }
+  })
+
+  // Eine Matrix-Call: candidate ↔ alle Termin-Locations
+  if (terminLocs.length > 0) {
+    const etas = await mapboxEtaMatrix(
+      candidate,
+      terminLocs.map((tl) => ({ lat: tl.lat, lng: tl.lng })),
+    )
+    terminLocs.forEach((tl, k) => {
+      terminMitEta[tl.idx].etaMin = etas[k]
+    })
+  }
+
+  return { termine: terminMitEta }
+}
+
+/**
+ * Pure Funktion: Ist der Slot-Kandidat vom direkten Vorgänger erreichbar
+ * UND der direkte Nachfolger noch erreichbar? Nutzt nur die in `ctx`
+ * vorgewärmten ETAs — kein I/O.
+ */
+export function isSlotReachable(
+  slotStart: Date,
+  slotEnd: Date,
+  ctx: SlotEtaContext,
+): { reachable: boolean; grund?: string } {
+  const slotStartMs = slotStart.getTime()
+  const slotEndMs = slotEnd.getTime()
+
+  // Vorgänger: spätester Termin der vor slotStart endet
+  let prev: TerminMitEta | null = null
+  for (const t of ctx.termine) {
+    if (new Date(t.endZeit).getTime() <= slotStartMs) {
+      if (!prev || new Date(t.endZeit).getTime() > new Date(prev.endZeit).getTime()) prev = t
+    }
+  }
+  // Nachfolger: frühester Termin der nach slotEnd beginnt
+  let next: TerminMitEta | null = null
+  for (const t of ctx.termine) {
+    if (new Date(t.startZeit).getTime() >= slotEndMs) {
+      if (!next || new Date(t.startZeit).getTime() < new Date(next.startZeit).getTime()) next = t
+    }
+  }
+
+  if (prev && prev.etaMin != null) {
+    const verfMin = (slotStartMs - new Date(prev.endZeit).getTime()) / 60_000
+    if (prev.etaMin + ETA_SICHERHEITS_PUFFER_MIN > verfMin) {
+      return {
+        reachable: false,
+        grund: `${prev.etaMin} min Fahrt vom Vortermin, nur ${Math.round(verfMin)} min Lücke`,
+      }
+    }
+  }
+  if (next && next.etaMin != null) {
+    const verfMin = (new Date(next.startZeit).getTime() - slotEndMs) / 60_000
+    if (next.etaMin + ETA_SICHERHEITS_PUFFER_MIN > verfMin) {
+      return {
+        reachable: false,
+        grund: `${next.etaMin} min Fahrt zum Folgetermin, nur ${Math.round(verfMin)} min Lücke`,
+      }
+    }
+  }
+  return { reachable: true }
+}

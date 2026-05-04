@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { SvSuggestion } from './types'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
-import { checkSvReachability } from '@/lib/dispatch/reachability'
+import { checkSvReachability, precomputeSvSlotEtas, isSlotReachable } from '@/lib/dispatch/reachability'
 
 /**
  * Sticky-SV: gibt den sv_id zurueck der einen frueheren Fall fuer denselben
@@ -430,6 +430,8 @@ export type NextFreeSlotsOpts = {
   wunschterminIso?: string | null
   wunschterminWochentage?: number[] | null
   prioritizeAroundWunschtermin?: boolean
+  /** AAR-CMM PR B: Wenn übergeben, werden ETA-unerreichbare Slots ausgefiltert. */
+  leadId?: string | null
 }
 
 export async function getNextFreeSlotsForSv(
@@ -453,6 +455,33 @@ export async function getNextFreeSlotsForSv(
     .gte('start_zeit', now.toISOString())
     .lte('start_zeit', inZwoelfWochen.toISOString())
     .order('start_zeit', { ascending: true })
+
+  // AAR-CMM PR B: ETA-Reachability-Vorberechnung. Wenn leadId übergeben,
+  // laden wir Lead-Besichtigungsort und berechnen ETAs zu allen Termin-
+  // Locations dieses SV in einer einzigen Mapbox-Matrix-Call.
+  let slotEtaCtx: Awaited<ReturnType<typeof precomputeSvSlotEtas>> | null = null
+  if (opts?.leadId) {
+    const { data: lead } = await supabase
+      .from('leads')
+      .select('besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng')
+      .eq('id', opts.leadId)
+      .single()
+    const lat =
+      (lead as { besichtigungsort_lat: number | null } | null)?.besichtigungsort_lat ??
+      (lead as { fahrzeug_standort_lat: number | null } | null)?.fahrzeug_standort_lat ?? null
+    const lng =
+      (lead as { besichtigungsort_lng: number | null } | null)?.besichtigungsort_lng ??
+      (lead as { fahrzeug_standort_lng: number | null } | null)?.fahrzeug_standort_lng ?? null
+    if (lat != null && lng != null) {
+      slotEtaCtx = await precomputeSvSlotEtas(
+        supabase,
+        svId,
+        { lat: Number(lat), lng: Number(lng) },
+        now.toISOString(),
+        inZwoelfWochen.toISOString(),
+      )
+    }
+  }
 
   const wunschterminIso = opts?.wunschterminIso ?? null
   const wunschtermin = wunschterminIso ? new Date(wunschterminIso) : null
@@ -491,6 +520,19 @@ export async function getNextFreeSlotsForSv(
         (b) => new Date(b.start_zeit) < slotEnd && new Date(b.end_zeit) > kandidat,
       )
       if (!konflikt) {
+        // AAR-CMM PR B: ETA-Reachability — Slot nur vorschlagen wenn SV
+        // ihn vom Vortermin erreichen UND zum Folgetermin weiterfahren kann.
+        if (slotEtaCtx) {
+          const reach = isSlotReachable(kandidat, slotEnd, slotEtaCtx)
+          if (!reach.reachable) {
+            kandidat.setTime(kandidat.getTime() + 60 * 60_000)
+            if (kandidat.getHours() >= 17) {
+              kandidat.setDate(kandidat.getDate() + 1)
+              kandidat.setHours(9, 0, 0, 0)
+            }
+            continue
+          }
+        }
         alleKandidaten.push({
           start: kandidat.toISOString(),
           end: slotEnd.toISOString(),
@@ -586,6 +628,7 @@ export async function getSvSuggestionsWithSlots(
         wunschterminIso,
         wunschterminWochentage,
         prioritizeAroundWunschtermin: true,
+        leadId,
       })
       return { cand, slots: r.success ? r.slots ?? [] : [] }
     }),

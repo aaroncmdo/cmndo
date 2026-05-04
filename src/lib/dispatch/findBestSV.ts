@@ -13,6 +13,7 @@ import { parseIsochrone } from './isochrone-parse'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { checkSvFreeBusyBatch, getBusyWindows, type BusyWindow } from '@/lib/google-calendar/freebusy'
 import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
+import { precomputeSvSlotEtas, isSlotReachable } from './reachability'
 import {
   TERMIN_DAUER_MIN,
   TERMIN_PUFFER_MIN,
@@ -421,7 +422,13 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
           reasons.push(`am nächsten Werktag 10:00 frei`)
         }
       } else {
-        naechsterFreierSlot = await findNextFreeSlotForSv(db, sv.id as string, wunschterminStart, profileId)
+        naechsterFreierSlot = await findNextFreeSlotForSv(
+          db,
+          sv.id as string,
+          wunschterminStart,
+          profileId,
+          { lat: fallLat, lng: fallLng },
+        )
         if (reachableGrund) {
           reasons.push(reachableGrund)
         } else {
@@ -502,6 +509,7 @@ async function findNextFreeSlotForSv(
   svId: string,
   ab: Date,
   profileId?: string | null,
+  candidate?: { lat: number; lng: number } | null,
 ): Promise<string | null> {
   const inZwoelfWochen = new Date(ab.getTime() + 12 * 7 * 24 * 60 * 60 * 1000)
 
@@ -519,6 +527,13 @@ async function findNextFreeSlotForSv(
   if (profileId) {
     busyWindows = await getBusyWindows(profileId, ab.toISOString(), inZwoelfWochen.toISOString())
   }
+
+  // AAR-CMM PR B: ETA-Vorberechnung — eine Mapbox-Matrix-Call statt
+  // pro-Slot-Lookup. Wenn keine Candidate-Location übergeben wird, läuft
+  // die Suche wie bisher (nur direkte Konflikt-Checks ohne ETA).
+  const slotEtaCtx = candidate
+    ? await precomputeSvSlotEtas(db, svId, candidate, ab.toISOString(), inZwoelfWochen.toISOString())
+    : null
 
   const kandidat = new Date(ab)
   // Bei Konflikt am exakten Wunschtermin → ab nächstem halbstündigem Slot weiter.
@@ -541,7 +556,23 @@ async function findNextFreeSlotForSv(
         new Date(b.start) < fensterEnd && new Date(b.end) > fensterStart,
       )
 
-      if (!konfliktIntern && !konfliktPrivat) return kandidat.toISOString()
+      if (!konfliktIntern && !konfliktPrivat) {
+        // ETA-Reachability als zusätzlicher Filter
+        if (slotEtaCtx) {
+          const slotEnde = new Date(kandidat.getTime() + TERMIN_DAUER_MIN * 60_000)
+          const reach = isSlotReachable(kandidat, slotEnde, slotEtaCtx)
+          if (!reach.reachable) {
+            // Slot frei aber unerreichbar — weitersuchen
+            kandidat.setTime(kandidat.getTime() + 30 * 60_000)
+            if (kandidat.getHours() >= 17) {
+              kandidat.setDate(kandidat.getDate() + 1)
+              kandidat.setHours(9, 0, 0, 0)
+            }
+            continue
+          }
+        }
+        return kandidat.toISOString()
+      }
     }
     // Zum nächsten 30-min-Slot weiter.
     kandidat.setTime(kandidat.getTime() + 30 * 60_000)
