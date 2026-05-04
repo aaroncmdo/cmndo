@@ -141,17 +141,14 @@ export default function FallKarte({
   const svLive = nextTermin?.sv_unterwegs_seit || nextTermin?.sv_angekommen_am
 
   // Wrapper-Border: 1:1 aus ClaimStepper übernommen (gleiche Priority-Reihenfolge).
-  //   1. Termin verstrichen (start+60min in Vergangenheit, kein SV live)  → rose
-  //   2. Nachbesichtigung ausstehend                                       → amber
-  //   3. Kanzlei-Wunsch offen (nach Gutachten, noch nicht entschieden)    → violet
-  //   4. LexDrive-Vollmacht ausstehend                                     → #0e5be9
-  //   5. Fall abgeschlossen                                                → emerald
-  //   6. Default                                                           → neutral
-  const terminVerstrichen =
-    !!nextTermin &&
-    !svLive &&
-    new Date(nextTermin.start_zeit).getTime() + 60 * 60 * 1000 < Date.now()
-
+  // Kein zeitbasierter terminVerstrichen-Check — die DB ist Quelle der Wahrheit:
+  // Termin durchgeführt → durchgefuehrt_am gesetzt → ladeFallKartenMeta filtert ihn
+  // raus → nextTermin = null. Alles andere wäre eine unzuverlässige Heuristik.
+  //   1. Nachbesichtigung ausstehend                                       → amber
+  //   2. Kanzlei-Wunsch offen (nach Gutachten, noch nicht entschieden)    → violet
+  //   3. LexDrive-Vollmacht ausstehend                                     → #0e5be9
+  //   4. Fall abgeschlossen                                                → emerald
+  //   5. Default                                                           → neutral
   const nachbesichtigungPending = aktion?.state === 'nachbesichtigung-waehlen'
 
   const kanzleiWunschOffen =
@@ -163,17 +160,15 @@ export default function FallKarte({
 
   const lexdriveAusstehend = aktion?.state === 'vollmacht-unterschreiben'
 
-  const wrapperBorder = terminVerstrichen
-    ? 'border-2 border-rose-400'
-    : nachbesichtigungPending
-      ? 'border-2 border-amber-400'
-      : kanzleiWunschOffen
-        ? 'border-2 border-violet-400'
-        : lexdriveAusstehend
-          ? 'border-2 border-[#0e5be9]'
-          : abgeschlossen
-            ? 'border-2 border-emerald-400'
-            : 'border border-claimondo-border'
+  const wrapperBorder = nachbesichtigungPending
+    ? 'border-2 border-amber-400'
+    : kanzleiWunschOffen
+      ? 'border-2 border-violet-400'
+      : lexdriveAusstehend
+        ? 'border-2 border-[#0e5be9]'
+        : abgeschlossen
+          ? 'border-2 border-emerald-400'
+          : 'border border-claimondo-border'
 
   return (
     <Link
@@ -274,8 +269,9 @@ export default function FallKarte({
           </div>
         )}
 
-        {/* Nächster Termin — nur anzeigen wenn Termin noch bevorsteht oder SV live */}
-        {nextTermin && !abgeschlossen && !terminVerstrichen && (
+        {/* Termin — DB ist Quelle der Wahrheit: sobald durchgefuehrt_am gesetzt,
+            filtert ladeFallKartenMeta ihn raus → nextTermin = null → nichts gezeigt. */}
+        {nextTermin && !abgeschlossen && (
           <div className="rounded-xl bg-white border border-claimondo-border/60 shadow-sm px-3 py-2">
             {svLive ? (
               <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
@@ -293,15 +289,6 @@ export default function FallKarte({
                 {fmtTermin(nextTermin.start_zeit)}
               </p>
             )}
-          </div>
-        )}
-        {/* Verstrichen-Hinweis — Termin in Vergangenheit, kein SV live */}
-        {nextTermin && !abgeschlossen && terminVerstrichen && (
-          <div className="rounded-xl bg-rose-50 border border-rose-200 px-3 py-2">
-            <p className="flex items-center gap-1.5 text-xs font-medium text-rose-700">
-              <AlertTriangleIcon className="w-3.5 h-3.5 shrink-0" />
-              Termin verstrichen · {fmtTermin(nextTermin.start_zeit)}
-            </p>
           </div>
         )}
       </div>
