@@ -24,7 +24,7 @@ import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import { LACKFARBE_OPTIONS, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 import BkatAnalysePanel from './BkatAnalysePanel'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
-import { requestCardentityTypBForLead } from '../_actions/cardentity'
+import { requestCardentityTypBForLead, enrichLeadCardentity } from '../_actions/cardentity'
 // AAR-314: Auslandskennzeichen — Anfrage an Deutsches Büro Grüne Karte mit Reminder
 import { setGrueneKarteAngefragt } from '../_actions/gruene-karte'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
@@ -1332,21 +1332,32 @@ export default function Phase4Stammdaten() {
         {/* AAR-177 Fix #1: CardentityButton (Typ-A) entfernt — Anreicherung
             läuft automatisch nach ZB1-OCR.
             AAR-311: Cardentity Typ-B (15€/Detailbericht) als manueller Trigger
-            für Vorschadenverdacht im Erstgespräch. */}
-        <div className="sm:col-span-2 pt-2 border-t border-claimondo-border">
-          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1.5">
-            Vorschaden-Detailbericht
-          </p>
-          <CardentityTypBButton
-            action={() => requestCardentityTypBForLead(leadId)}
+            für Vorschadenverdacht im Erstgespräch.
+            AAR-cardentity-fetch: Typ-A-Manual-Trigger wieder hinzu — bei
+            FIN-Eingabe ohne ZB1-Upload muss der Dispatcher es explizit
+            triggern können. */}
+        <div className="sm:col-span-2 pt-2 border-t border-claimondo-border space-y-3">
+          <CardentityTypAButton
+            leadId={leadId}
             finVorhanden={!!l.fin}
-            initial={{
-              fetchedAt: l.cardentity_abfrage_am ?? null,
-              vorschadenVorhanden: l.hat_vorschaeden ?? null,
-              vorschadenAnzahl: l.vorschaden_anzahl ?? null,
-              letzterVorschadenDatum: l.vorschaden_letzter_datum ?? null,
-            }}
+            enrichedAt={l.cardentity_enriched_at ?? null}
           />
+
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1.5">
+              Vorschaden-Detailbericht
+            </p>
+            <CardentityTypBButton
+              action={() => requestCardentityTypBForLead(leadId)}
+              finVorhanden={!!l.fin}
+              initial={{
+                fetchedAt: l.cardentity_abfrage_am ?? null,
+                vorschadenVorhanden: l.hat_vorschaeden ?? null,
+                vorschadenAnzahl: l.vorschaden_anzahl ?? null,
+                letzterVorschadenDatum: l.vorschaden_letzter_datum ?? null,
+              }}
+            />
+          </div>
         </div>
       </Card>
 
@@ -1575,6 +1586,86 @@ export default function Phase4Stammdaten() {
           Weiter zu Phase 5 →
         </button>
       </div>
+    </div>
+  )
+}
+
+// ─── Cardentity Typ-A — Manual Trigger ─────────────────────────────────────
+// Standardpfad: läuft automatisch nach ZB1-OCR. Wenn der Dispatcher die FIN
+// aber manuell erfasst hat (kein ZB1-Upload), kann er hier explizit triggern.
+function CardentityTypAButton({
+  leadId,
+  finVorhanden,
+  enrichedAt,
+}: {
+  leadId: string
+  finVorhanden: boolean
+  enrichedAt: string | null
+}) {
+  const [pending, startTransition] = useTransition()
+  const [enrichtAm, setEnrichtAm] = useState<string | null>(enrichedAt)
+  const [error, setError] = useState<string | null>(null)
+  const [updatedFields, setUpdatedFields] = useState<string[] | null>(null)
+
+  function trigger() {
+    setError(null)
+    startTransition(async () => {
+      const r = await enrichLeadCardentity(leadId)
+      if (!r.success) {
+        setError(r.error ?? 'Fehler')
+        return
+      }
+      setEnrichtAm(new Date().toISOString())
+      setUpdatedFields(r.updatedFields ?? [])
+    })
+  }
+
+  if (!finVorhanden) {
+    return (
+      <p className="text-[11px] text-claimondo-ondo/70">
+        Cardentity Typ-A verfügbar sobald die FIN erfasst ist.
+      </p>
+    )
+  }
+
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1.5">
+        Fahrzeug-Anreicherung (Typ-A)
+      </p>
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={trigger}
+          disabled={pending}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-claimondo-border bg-white text-xs font-medium text-claimondo-navy hover:bg-[#f8f9fb] disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {pending ? (
+            <LoaderIcon className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <CarIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+          )}
+          {enrichtAm ? 'Cardentity Typ-A erneut abfragen' : 'Cardentity Typ-A abfragen'}
+        </button>
+        {enrichtAm && !pending && (
+          <span className="text-[10px] text-emerald-700">
+            ✓ angereichert {new Date(enrichtAm).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+          </span>
+        )}
+      </div>
+      {updatedFields && updatedFields.length > 0 && (
+        <p className="text-[10px] text-emerald-700">
+          Aktualisiert: {updatedFields.join(', ')}
+        </p>
+      )}
+      {updatedFields && updatedFields.length === 0 && !error && (
+        <p className="text-[10px] text-claimondo-ondo/70">
+          Keine neuen Felder — Lead war bereits vollständig.
+        </p>
+      )}
+      {error && (
+        <p className="text-[11px] text-red-600 leading-snug">{error}</p>
+      )}
     </div>
   )
 }
