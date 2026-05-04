@@ -434,7 +434,12 @@ async function sendWelcomeWithLogin(
 ): Promise<{ magicLink: string | null }> {
   let magicLink: string | null = null
   try {
-    const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/kunde/onboarding`
+    // PKCE-Fix: Supabase hängt ?code=XXX an die redirectTo-URL — das muss
+    // auf /api/auth/callback landen (exchangeCodeForSession), nicht direkt
+    // auf /kunde/onboarding (die Page kann keinen Code einlösen).
+    // next=/kunde/onboarding wird vom Callback nach erfolgreichem Login genutzt.
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+    const redirectTo = `${base}/api/auth/callback?next=/kunde/onboarding`
     const { data, error } = await adminDb.auth.admin.generateLink({
       type: 'magiclink',
       email,
