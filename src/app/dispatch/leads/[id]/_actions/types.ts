@@ -47,6 +47,8 @@ export type SvSuggestion = {
   name: string
   paket: string
   distanzKm: number
+  /** AAR-CMM: Echte Mapbox-Driving-ETA Büro → Fall in Minuten. null bei API-Fehler. */
+  etaFromBueroMin: number | null
   offeneFaelle: number
   kontingentFrei: number
   ablehnungen30d: number

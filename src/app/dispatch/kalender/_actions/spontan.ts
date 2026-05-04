@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { reserveSvTerminForLead } from '@/app/dispatch/leads/[id]/_actions/sv-termin'
 import { sendFlowLinkMultiChannel } from '@/app/dispatch/leads/[id]/_actions/flowlink'
+import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371
@@ -23,44 +24,8 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-// Mapbox-Matrix-API: ETA von einem Origin zu N Destinations in einem Call.
-// Max 25 Koordinaten (1 Origin + 24 Destinations) pro Request — wir batchen.
-async function mapboxEtaMatrix(
-  originLat: number,
-  originLng: number,
-  destinations: Array<{ lat: number; lng: number }>,
-): Promise<Array<number | null>> {
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? process.env.MAPBOX_TOKEN ?? ''
-  if (!token || destinations.length === 0) return destinations.map(() => null)
-
-  const result: Array<number | null> = new Array(destinations.length).fill(null)
-  const CHUNK = 24
-  for (let i = 0; i < destinations.length; i += CHUNK) {
-    const slice = destinations.slice(i, i + CHUNK)
-    const coords = [
-      `${originLng},${originLat}`,
-      ...slice.map((d) => `${d.lng},${d.lat}`),
-    ].join(';')
-    try {
-      const url =
-        `https://api.mapbox.com/directions-matrix/v1/mapbox/driving/${coords}` +
-        `?annotations=duration&sources=0&access_token=${token}`
-      const res = await fetch(url)
-      if (!res.ok) continue
-      const data = await res.json()
-      const row = data?.durations?.[0] as Array<number | null> | undefined
-      if (!row) continue
-      // row[0] = origin → origin = 0, row[1..] = ETA in Sekunden zu destinations
-      for (let j = 0; j < slice.length; j++) {
-        const sec = row[j + 1]
-        result[i + j] = typeof sec === 'number' ? Math.ceil(sec / 60) : null
-      }
-    } catch (err) {
-      console.warn('[mapboxEtaMatrix] Chunk fehlgeschlagen:', err)
-    }
-  }
-  return result
-}
+// mapboxEtaMatrix lebt jetzt in @/lib/mapbox/matrix — wird auch von
+// findBestSV genutzt.
 
 export type SpontanInput = {
   vorname: string
@@ -214,8 +179,7 @@ export async function listSvsByDistance(
   // genug für ETA-Anzeige; bei Einbahnstraßen-Sonderfällen leichte Abweichung
   // akzeptabel).
   const etas = await mapboxEtaMatrix(
-    besichtigungsortLat,
-    besichtigungsortLng,
+    { lat: besichtigungsortLat, lng: besichtigungsortLng },
     svParsed.map((sv) => ({ lat: sv.lat, lng: sv.lng })),
   )
 
