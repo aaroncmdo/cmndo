@@ -754,7 +754,7 @@ export default function Phase1Qualifizierung() {
         {draft.unfallort && (draft.unfallort_lat == null || draft.unfallort_lng == null) && (
           <p className="text-[10px] text-amber-700 flex items-start gap-1">
             <InfoIcon className="w-3 h-3 mt-0.5 shrink-0" />
-            Koordinaten fehlen — SV-Dispatch nutzt Kunden-Adresse als Fallback. Bitte einen Autocomplete-Vorschlag wählen.
+            Koordinaten fehlen — SV-Dispatch nutzt Besichtigungsort als primären Standort. Bitte einen Autocomplete-Vorschlag wählen.
           </p>
         )}
 
