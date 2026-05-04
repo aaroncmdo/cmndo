@@ -9,6 +9,7 @@ import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
+import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 
 type SvSearchParams = { tab?: string }
 
@@ -50,6 +51,16 @@ export default async function SvDetailPage({
   const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
     vorname: string | null; nachname: string | null; email: string | null; telefon: string | null
   } | null
+
+  // Google-Bewertung aus Cache laden (profile_id = sv.profile_id)
+  const { data: bewertungRow } = sv.profile_id
+    ? await supabase
+        .from('google_bewertungen_cache')
+        .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am')
+        .eq('profile_id', sv.profile_id)
+        .maybeSingle()
+    : { data: null }
+  const bewertung = bewertungRow ?? null
 
   // Fälle + Tasks parallel laden
   const [faelleRes, tasksRes] = await Promise.all([
@@ -301,6 +312,15 @@ export default async function SvDetailPage({
                   verifiziert={sv.verifiziert ?? false}
                   verifiziertAm={sv.verifiziert_am ?? null}
                 />
+                {/* CMM-31: Google-Bewertung aus Cache */}
+                {bewertung?.durchschnitt != null && (
+                  <GoogleBewertungBadge
+                    durchschnitt={bewertung.durchschnitt as number}
+                    anzahl={bewertung.anzahl_bewertungen as number | null}
+                    zuletztAktualisiert={bewertung.zuletzt_aktualisiert_am as string | null}
+                    size="sm"
+                  />
+                )}
                 {/* KFZ-153: Gutachten-Mängel Warnung */}
                 {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>

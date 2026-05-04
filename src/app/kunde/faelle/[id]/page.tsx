@@ -38,6 +38,7 @@ import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntsc
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import SmokeKanzleiButton from '@/components/kunde/SmokeKanzleiButton'
 import ClaimSummary from '@/components/kunde/ClaimSummary'
+import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
 import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
@@ -100,6 +101,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     let svName: string | null = null
     let svTelefon: string | null = null
     let svVerifiziert = false
+    let svGooglePlaceId: string | null = null
     if (fall.sv_id) {
       const { data: sv } = await admin
         .from('sachverstaendige')
@@ -107,8 +109,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         .eq('id', fall.sv_id as string)
         .single()
       if (sv?.profile_id) {
-        const { data: p } = await admin.from('profiles').select('vorname, nachname, telefon').eq('id', sv.profile_id).single()
-        if (p) { svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || null; svTelefon = p.telefon }
+        const { data: p } = await admin
+          .from('profiles')
+          .select('vorname, nachname, telefon, google_place_id')
+          .eq('id', sv.profile_id)
+          .single()
+        if (p) {
+          svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || null
+          svTelefon = p.telefon
+          svGooglePlaceId = (p.google_place_id as string | null) ?? null
+        }
       }
       svVerifiziert = sv?.verifizierung_status === 'geprueft'
     }
@@ -628,6 +638,19 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* Smoke-Helper (sichtbar fuer Aaron's Test-Walkthrough) */}
         <SmokeKanzleiButton fallId={fall.id as string} />
+
+        {/* CMM-43: Google-Bewertungs-Prompt — nach durchgeführtem SV-Termin,
+            einmalig, nur wenn SV eine google_place_id hat. */}
+        {svGooglePlaceId &&
+          svName &&
+          !!(svTermin as { durchgefuehrt_am?: string | null } | null)?.durchgefuehrt_am &&
+          !(fall.google_review_prompt_gezeigt_am as string | null) && (
+            <GoogleReviewPrompt
+              fallId={fall.id as string}
+              svName={svName}
+              googlePlaceId={svGooglePlaceId}
+            />
+          )}
 
         {/* CMM-32f: Claim-Stepper — 4 Hauptphasen + aktive Subphase + Termin-
             Sektion (Datum/Uhrzeit/Adresse/Navi). Termin lebt NUR hier, keine
