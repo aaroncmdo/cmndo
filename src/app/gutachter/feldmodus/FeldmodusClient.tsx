@@ -16,8 +16,10 @@ import RouteSidebar from './RouteSidebar'
 import OfflineStatusBanner from './OfflineStatusBanner'
 import SvFallakteView from './SvFallakteView'
 import FokusChatPanel from './FokusChatPanel'
+import TbtBanner from './TbtBanner'
 import MobileBottomSheet from '@/components/sv/MobileBottomSheet'
 import { useFieldTracking } from './useFieldTracking'
+import { useTurnByTurn } from './useTurnByTurn'
 import { markArrived, pauseFokusmodus, startStop } from './actions'
 import { CarIcon, ClockIcon, ChevronUpIcon } from 'lucide-react'
 import { formatUhrzeit } from '@/lib/format'
@@ -100,6 +102,24 @@ export default function FeldmodusClient({
     targetLat: aktuellerStop?.lat ?? null,
     targetLng: aktuellerStop?.lng ?? null,
     onGeofenceReached,
+  })
+
+  // Turn-by-Turn-Navigation: aktiv solange wir unterwegs sind (nicht arrived).
+  // Voice ist standardmäßig an, kann via Banner-Button toggled werden.
+  const [tbtVoiceOn, setTbtVoiceOn] = useState(true)
+  const tbtActive =
+    sessionStatus !== 'arrived' &&
+    sessionStatus !== 'finished' &&
+    !!aktuellerStop?.lat &&
+    !!aktuellerStop?.lng
+  const tbt = useTurnByTurn({
+    origin: tbtActive && position ? { lat: position.lat, lng: position.lng } : null,
+    destination:
+      tbtActive && aktuellerStop?.lat != null && aktuellerStop?.lng != null
+        ? { lat: aktuellerStop.lat, lng: aktuellerStop.lng }
+        : null,
+    position: position ? { lat: position.lat, lng: position.lng } : null,
+    voiceEnabled: tbtVoiceOn,
   })
 
   // Auto-Losfahren: sobald der SV den Feldmodus für einen aktiven Stop öffnet,
@@ -232,13 +252,24 @@ export default function FeldmodusClient({
           aktuellerStopIndex={aktuellerStopIndex}
           svPosition={position}
         />
+        {/* TbT-Banner — nur während Anfahrt zum Stop (vor arrived) */}
+        {tbtActive && tbt.upcomingStep && (
+          <TbtBanner
+            step={tbt.upcomingStep}
+            distanceToManeuverMeters={tbt.distanceToNextManeuver}
+            voiceEnabled={tbtVoiceOn}
+            onToggleVoice={() => setTbtVoiceOn((v) => !v)}
+            totalDurationSec={tbt.route?.duration ?? null}
+            totalDistanceMeters={tbt.route?.distance ?? null}
+          />
+        )}
         {permissionState === 'denied' && (
-          <div className="absolute top-2 left-2 right-2 rounded-md bg-red-600/90 text-white text-xs px-3 py-2">
+          <div className="absolute top-20 left-2 right-2 rounded-md bg-red-600/90 text-white text-xs px-3 py-2 z-10">
             GPS-Zugriff verweigert — Auto-Ankunft und Live-Tracking deaktiviert.
           </div>
         )}
         {error && permissionState !== 'denied' && (
-          <div className="absolute top-2 left-2 right-2 rounded-md bg-amber-600/90 text-white text-xs px-3 py-2">
+          <div className="absolute top-20 left-2 right-2 rounded-md bg-amber-600/90 text-white text-xs px-3 py-2 z-10">
             GPS-Warnung: {error}
           </div>
         )}
