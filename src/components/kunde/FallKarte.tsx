@@ -274,8 +274,8 @@ export default function FallKarte({
           </div>
         )}
 
-        {/* Nächster Termin */}
-        {nextTermin && !abgeschlossen && (
+        {/* Nächster Termin — nur anzeigen wenn Termin noch bevorsteht oder SV live */}
+        {nextTermin && !abgeschlossen && !terminVerstrichen && (
           <div className="rounded-xl bg-white border border-claimondo-border/60 shadow-sm px-3 py-2">
             {svLive ? (
               <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
@@ -293,6 +293,15 @@ export default function FallKarte({
                 {fmtTermin(nextTermin.start_zeit)}
               </p>
             )}
+          </div>
+        )}
+        {/* Verstrichen-Hinweis — Termin in Vergangenheit, kein SV live */}
+        {nextTermin && !abgeschlossen && terminVerstrichen && (
+          <div className="rounded-xl bg-rose-50 border border-rose-200 px-3 py-2">
+            <p className="flex items-center gap-1.5 text-xs font-medium text-rose-700">
+              <AlertTriangleIcon className="w-3.5 h-3.5 shrink-0" />
+              Termin verstrichen · {fmtTermin(nextTermin.start_zeit)}
+            </p>
           </div>
         )}
       </div>
