@@ -9,7 +9,7 @@
 // dann ins fall_dokumente.ocr_result). Andernfalls koennte Kanzlei die TBNR
 // als Polizei-bestaetigt missverstehen.
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { SparklesIcon, AlertTriangleIcon, CheckCircleIcon, ScaleIcon } from 'lucide-react'
 import {
   analyzeBkatForLead,
@@ -47,16 +47,30 @@ const SCHULD_LABEL: Record<string, { label: string; cls: string }> = {
 export default function BkatAnalysePanel({
   leadId,
   polizeiVorOrt,
+  initialUnfallart,
   onSchadentypGesetzt,
 }: {
   leadId: string
   polizeiVorOrt: boolean | null
+  initialUnfallart?: string | null
   onSchadentypGesetzt?: () => void
 }) {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<Result | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [autoSaved, setAutoSaved] = useState(false)
+  const autoStartedRef = useRef(false)
+
+  // Auto-Trigger beim Mount: wenn noch kein bkat_unfallart auf dem Lead
+  // gespeichert ist, läuft die Analyse direkt los — der Mitarbeiter muss
+  // nicht mehr „Analysieren" klicken. Verhindert Doppelausführung über Ref.
+  useEffect(() => {
+    if (autoStartedRef.current) return
+    if (initialUnfallart) return
+    autoStartedRef.current = true
+    void analyze()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function analyze() {
     setLoading(true)
@@ -104,22 +118,33 @@ export default function BkatAnalysePanel({
         <span className="text-[10px] text-claimondo-ondo uppercase tracking-wider">BKat</span>
       </div>
 
-      {!result && (
-        <>
-          <p className="text-xs text-claimondo-ondo">
-            Analysiert den Unfallhergang + ggf. den Polizeibericht und wählt
-            den Schadentyp automatisch aus.
-          </p>
+      {/* Bereits gespeicherter Schadentyp (vor Auto-Analyse oder aus früherer
+         Sitzung) — direkt anzeigen, keine Re-Analyse triggern. */}
+      {!result && initialUnfallart && (
+        <div className="bg-white rounded-lg border border-claimondo-ondo/30 p-3 flex items-center justify-between gap-2">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">Schadentyp</p>
+            <p className="text-sm font-semibold text-claimondo-navy">
+              {UNFALLART_LABEL[initialUnfallart] ?? initialUnfallart}
+            </p>
+          </div>
           <button
             type="button"
             onClick={analyze}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-claimondo-ondo/30 text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/10 disabled:opacity-50"
           >
             <SparklesIcon className="w-3.5 h-3.5" />
-            {loading ? 'Analysiere …' : 'Unfallart analysieren'}
+            {loading ? 'Analysiere …' : 'Erneut analysieren'}
           </button>
-        </>
+        </div>
+      )}
+
+      {!result && !initialUnfallart && loading && (
+        <div className="flex items-center gap-2 text-xs text-claimondo-ondo">
+          <SparklesIcon className="w-3.5 h-3.5 animate-pulse" />
+          Analysiere Unfallhergang …
+        </div>
       )}
 
       {result && !result.success && (

@@ -112,6 +112,7 @@ type LeadFields = {
   // AAR-314: Datum der Anfrage beim Deutschen Büro Grüne Karte (10-Tage-Wartezeit)
   gegner_versicherung_anfrage_datum?: string | null
   schadentyp?: string | null
+  bkat_unfallart?: string | null
   schadentyp_freitext?: string | null
   parkplatz_kamera?: boolean | null
   zeugen?: boolean | null
@@ -758,6 +759,7 @@ export default function Phase4Stammdaten() {
       <BkatAnalysePanel
         leadId={lead.id}
         polizeiVorOrt={l.polizei_vor_ort ?? null}
+        initialUnfallart={l.bkat_unfallart ?? null}
         onSchadentypGesetzt={() => router.refresh()}
       />
 
