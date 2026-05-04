@@ -239,7 +239,7 @@ export async function saveKanzleiAnsprechpartner(
   if (error) throw new Error(error.message)
 
   revalidatePath(`/faelle/${fallId}`)
-  revalidatePath(`/kunde/fall/${fallId}`)
+  revalidatePath(`/kunde/faelle/${fallId}`)
 }
 
 // KFZ-65: Zahlungseingang-Erfassung mit Positionen
