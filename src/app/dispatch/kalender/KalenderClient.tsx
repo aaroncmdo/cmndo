@@ -7,7 +7,8 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { ChevronLeftIcon, ChevronRightIcon, FilterIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, FilterIcon, PlusIcon } from 'lucide-react'
+import SpontanTerminModal from './SpontanTerminModal'
 
 export type KalenderSv = {
   id: string
@@ -97,6 +98,24 @@ export default function KalenderClient({
   }, [searchParams, svList])
 
   const [filterOpen, setFilterOpen] = useState(false)
+  const [spontanModal, setSpontanModal] = useState<{
+    open: boolean
+    date: string
+    time: string
+    svId?: string | null
+  }>({ open: false, date: '', time: '' })
+
+  function openSpontan(prefill?: { date?: string; time?: string; svId?: string | null }) {
+    const now = new Date()
+    const fallbackDate = isoDate(now)
+    const fallbackTime = `${String(Math.max(now.getHours(), HOUR_START)).padStart(2, '0')}:00`
+    setSpontanModal({
+      open: true,
+      date: prefill?.date ?? fallbackDate,
+      time: prefill?.time ?? fallbackTime,
+      svId: prefill?.svId ?? null,
+    })
+  }
 
   function setVisibleSvs(ids: Set<string>) {
     const params = new URLSearchParams(searchParams.toString())
@@ -217,6 +236,14 @@ export default function KalenderClient({
             <FilterIcon className="w-3.5 h-3.5" />
             SV-Filter ({visibleSvIds.size}/{svList.length})
           </button>
+          <button
+            type="button"
+            onClick={() => openSpontan()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-shield"
+          >
+            <PlusIcon className="w-3.5 h-3.5" />
+            Spontan-Termin
+          </button>
         </div>
       </div>
 
@@ -313,8 +340,26 @@ export default function KalenderClient({
             return (
               <div
                 key={d.toISOString()}
-                className="relative border-l border-claimondo-border"
+                className="relative border-l border-claimondo-border cursor-pointer"
                 style={{ height: gridHeight }}
+                onClick={(e) => {
+                  // Nur reagieren wenn Klick auf den Container (leerer Slot),
+                  // nicht auf einen Termin-Block (der hat eigenes onClick).
+                  if (e.target !== e.currentTarget) return
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  const y = e.clientY - rect.top
+                  const slot = Math.floor(y / SLOT_PX) // 5-Min-Slot-Index
+                  // Auf 15-Min-Raster runden für saubere Termine
+                  const rounded = Math.round(slot / 3) * 3
+                  const totalMins = HOUR_START * 60 + rounded * 5
+                  const h = Math.floor(totalMins / 60)
+                  const m = totalMins % 60
+                  openSpontan({
+                    date: isoDate(d),
+                    time: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
+                  })
+                }}
+                title="Klick: Spontan-Termin anlegen"
               >
                 {/* Stundenlinien */}
                 {Array.from({ length: HOUR_END - HOUR_START }, (_, i) => i + 1).map((i) => (
@@ -368,6 +413,18 @@ export default function KalenderClient({
       {svList.length === 0 && (
         <p className="text-xs text-claimondo-ondo">Keine aktiven Sachverständigen.</p>
       )}
+
+      <SpontanTerminModal
+        open={spontanModal.open}
+        onClose={() => {
+          setSpontanModal({ open: false, date: '', time: '' })
+          router.refresh()
+        }}
+        svList={svList}
+        initialDate={spontanModal.date}
+        initialTime={spontanModal.time}
+        initialSvId={spontanModal.svId ?? null}
+      />
     </div>
   )
 }
