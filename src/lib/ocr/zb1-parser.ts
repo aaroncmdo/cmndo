@@ -52,18 +52,28 @@ export interface ZB1ExtractedData {
   halter_stadt: string | null
   fahrzeug_hersteller: string | null
   fahrzeug_modell: string | null
+  fahrzeug_farbe: string | null
   fin_vin: string | null
   hsn: string | null
   tsn: string | null
+  brn: string | null
 }
+
+// AAR-CMM: ZB1-Feld R = Farbe des Fahrzeugs. Vision-OCR liefert die Farbe
+// meist in Großbuchstaben als Klartext direkt nach dem "R"-Label.
+const FARBE_KEYWORDS = [
+  'SCHWARZ', 'WEISS', 'WEIß', 'GRAU', 'SILBER', 'BLAU', 'ROT', 'GRÜN', 'GRUEN',
+  'GELB', 'BRAUN', 'BEIGE', 'GOLD', 'ORANGE', 'VIOLETT', 'LILA', 'BORDEAUX',
+  'ANTHRAZIT', 'BRONZE', 'KUPFER', 'CHAMPAGNER', 'CREME', 'TÜRKIS', 'TUERKIS',
+] as const
 
 export function parseZB1Fields(fullText: string): ZB1ExtractedData {
   const result: ZB1ExtractedData = {
     kennzeichen: null, erstzulassung: null, fahrzeug_baujahr: null,
     halter_nachname: null, halter_vorname: null,
     halter_strasse: null, halter_plz: null, halter_stadt: null,
-    fahrzeug_hersteller: null, fahrzeug_modell: null,
-    fin_vin: null, hsn: null, tsn: null,
+    fahrzeug_hersteller: null, fahrzeug_modell: null, fahrzeug_farbe: null,
+    fin_vin: null, hsn: null, tsn: null, brn: null,
   }
 
   const lines = fullText.split('\n').map(l => l.trim()).filter(Boolean)
@@ -84,14 +94,16 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
       const dateMatch = nextLine.match(DATE_REGEX)
       if (dateMatch) result.erstzulassung = dateMatch[1]
     }
-    if (/^C\.?1$/i.test(trimmed) && nextLine) {
-      const parts = nextLine.split(/[,;]/).map(p => p.trim())
-      if (parts.length >= 2) {
-        result.halter_nachname = parts[0]
-        result.halter_vorname = parts[1]
-      } else {
-        result.halter_nachname = nextLine.trim()
-      }
+    if (/^C\.?1(\.1)?$/i.test(trimmed) && nextLine) {
+      // ZB1-Konvention: "NACHNAME, VORNAME" — OCR verschluckt das Komma
+      // aber häufig. Daher: Komma bevorzugt, sonst Whitespace-Heuristik.
+      const split = splitHalterName(nextLine.trim())
+      result.halter_nachname = split.nachname
+      result.halter_vorname = split.vorname
+    }
+    if (/^C\.?1\.2$/i.test(trimmed) && nextLine && !result.halter_vorname) {
+      // ZB1 listet C.1.2 = Vorname(n) als eigenes Subfeld
+      result.halter_vorname = nextLine.trim()
     }
     if (/^C\.?[34]$/i.test(trimmed) && nextLine) {
       result.halter_strasse = nextLine.trim()
@@ -105,8 +117,17 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
     if (/^D\.?1$/i.test(trimmed) && nextLine) {
       result.fahrzeug_hersteller = nextLine.trim()
     }
-    if (/^D\.?[23]$/i.test(trimmed) && nextLine && !result.fahrzeug_modell) {
+    // D.3 = Handelsbezeichnung (z.B. "GOLF VII") — bevorzugt, weil
+    // D.2 oft kryptische Typcodes ("AUV") liefert.
+    if (/^D\.?3$/i.test(trimmed) && nextLine) {
       result.fahrzeug_modell = nextLine.trim()
+    }
+    if (/^D\.?2$/i.test(trimmed) && nextLine && !result.fahrzeug_modell) {
+      result.fahrzeug_modell = nextLine.trim()
+    }
+    // R = Farbe des Fahrzeugs
+    if (/^R$/i.test(trimmed) && nextLine && !result.fahrzeug_farbe) {
+      result.fahrzeug_farbe = nextLine.trim()
     }
     if (/^2\.?1$/i.test(trimmed) && nextLine) {
       const hsnMatch = nextLine.match(HSN_REGEX)
@@ -212,6 +233,41 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
     }
   }
 
+  // Lackfarbe-Fallback: Keyword-Suche im Fließtext
+  if (!result.fahrzeug_farbe) {
+    for (const farbe of FARBE_KEYWORDS) {
+      const re = new RegExp(`\\b${farbe}\\b`, 'i')
+      if (re.test(fullText)) {
+        result.fahrzeug_farbe = farbe
+          .replace('WEIß', 'WEISS')
+          .replace('GRUEN', 'GRÜN')
+          .replace('TUERKIS', 'TÜRKIS')
+        break
+      }
+    }
+  }
+
+  // BRN-Fallback: Label "BRN" oder "Bundesweite Registriernummer" gefolgt
+  // von alphanumerischem 7-9-stelligem Code. ZB1 druckt die BRN i.d.R. als
+  // eigenständige Zeile direkt nach dem Label im Sicherheitsdruck.
+  if (!result.brn) {
+    const brnLabel = fullText.match(
+      /\b(?:BRN|Bundesweite\s+Registriernummer)\b[:\s]*([A-Z0-9]{7,12})\b/i,
+    )
+    if (brnLabel) result.brn = brnLabel[1].toUpperCase()
+  }
+
+  // Vor/Nachname-Fallback: wenn nur Nachname-Feld gefüllt aber whitespace-
+  // separierte Tokens enthält (OCR hat Komma verschluckt), Split nochmal
+  // mit Whitespace-Heuristik.
+  if (result.halter_nachname && !result.halter_vorname) {
+    const split = splitHalterName(result.halter_nachname)
+    if (split.vorname) {
+      result.halter_nachname = split.nachname
+      result.halter_vorname = split.vorname
+    }
+  }
+
   // AAR-181: Baujahr aus Erstzulassung ableiten (DD.MM.YYYY → YYYY)
   if (result.erstzulassung) {
     const m = result.erstzulassung.match(/(\d{4})\s*$/)
@@ -223,6 +279,63 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
   }
 
   return result
+}
+
+/**
+ * Splittet einen Halter-Namen wie er aus ZB1-OCR kommt in Vor/Nachname.
+ *
+ * Regel: ZB1 schreibt offiziell "NACHNAME, VORNAME". Vision-API verschluckt
+ * Kommas oft → Fallback über Whitespace + Großbuchstaben-Heuristik.
+ *
+ * Beispiele:
+ *   "Mustermann, Max"        → { nachname: "Mustermann", vorname: "Max" }
+ *   "MUSTERMANN MAX"         → { nachname: "MUSTERMANN", vorname: "MAX" } (UPPERCASE = Nachname)
+ *   "Max Mustermann"         → { nachname: "Mustermann", vorname: "Max" } (Mixedcase = letzter Token Nachname)
+ *   "Müller-Schmidt, Hans"   → { nachname: "Müller-Schmidt", vorname: "Hans" }
+ *   "von der Heide, Peter"   → { nachname: "von der Heide", vorname: "Peter" }
+ *   "Mustermann"             → { nachname: "Mustermann", vorname: null }
+ */
+export function splitHalterName(raw: string): {
+  nachname: string | null
+  vorname: string | null
+} {
+  const cleaned = raw.replace(/\s+/g, ' ').trim()
+  if (!cleaned) return { nachname: null, vorname: null }
+
+  // 1) Komma/Semikolon-Split (ZB1-Standard)
+  if (/[,;]/.test(cleaned)) {
+    const parts = cleaned.split(/[,;]/).map((p) => p.trim()).filter(Boolean)
+    if (parts.length >= 2) return { nachname: parts[0], vorname: parts[1] }
+    if (parts.length === 1) return { nachname: parts[0], vorname: null }
+  }
+
+  // 2) Whitespace-Split: 2+ Tokens
+  const tokens = cleaned.split(/\s+/)
+  if (tokens.length === 1) return { nachname: tokens[0], vorname: null }
+
+  // Wenn alle Tokens UPPERCASE → ZB1-Layout "NACHNAME VORNAME"
+  // (DIN-Schreibweise auf Behördendokumenten)
+  const allUpper = tokens.every((t) => t === t.toUpperCase() && /[A-ZÄÖÜß]/.test(t))
+  if (allUpper) {
+    // Erstes Token = Nachname (kann Bindestrich-Doppelname sein, schon im Token)
+    return { nachname: tokens[0], vorname: tokens.slice(1).join(' ') }
+  }
+
+  // Mixedcase ("Max Mustermann"): letztes Token = Nachname.
+  // Adelstitel/Präfixe (von, van, de, zu, ten) bleiben am Nachnamen kleben:
+  // "von der Heide" → vorname=erste Tokens, nachname=ab erstem Präfix.
+  const PREFIXES = new Set(['von', 'van', 'de', 'der', 'den', 'zu', 'ten', 'le', 'la', 'di', 'da', 'del'])
+  const prefixIdx = tokens.findIndex((t, i) => i > 0 && PREFIXES.has(t.toLowerCase()))
+  if (prefixIdx > 0) {
+    return {
+      vorname: tokens.slice(0, prefixIdx).join(' '),
+      nachname: tokens.slice(prefixIdx).join(' '),
+    }
+  }
+  return {
+    vorname: tokens.slice(0, -1).join(' '),
+    nachname: tokens[tokens.length - 1],
+  }
 }
 
 /**

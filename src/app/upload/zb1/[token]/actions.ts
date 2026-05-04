@@ -172,6 +172,8 @@ export async function uploadZb1ViaToken(
   setIfEmpty('halter_stadt', extracted.halter_stadt)
   setIfEmpty('hsn', extracted.hsn)
   setIfEmpty('tsn', extracted.tsn)
+  setIfEmpty('fahrzeug_farbe', extracted.fahrzeug_farbe)
+  setIfEmpty('brn', extracted.brn)
 
   await db.from('leads').update(leadUpdate).eq('id', lead.id)
 
