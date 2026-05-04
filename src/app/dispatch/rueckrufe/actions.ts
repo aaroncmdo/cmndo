@@ -36,6 +36,13 @@ export async function markAngerufen(leadId: string) {
 
   if (error) throw new Error(error.message)
 
+  await supabase.from('anruf_log').insert({
+    lead_id: leadId,
+    zeitpunkt: now,
+    status: 'erreicht',
+    erstellt_von: user.id,
+  })
+
   revalidatePath('/dispatch/rueckrufe')
   revalidatePath(`/dispatch/leads/${leadId}`)
   revalidatePath('/dispatch/dashboard')
@@ -72,6 +79,13 @@ export async function markNichtErreicht(leadId: string) {
   const { error } = await supabase.from('leads').update(updates).eq('id', leadId)
 
   if (error) throw new Error(error.message)
+
+  await supabase.from('anruf_log').insert({
+    lead_id: leadId,
+    zeitpunkt: now,
+    status: 'nicht_erreicht',
+    erstellt_von: user.id,
+  })
 
   revalidatePath('/dispatch/rueckrufe')
   revalidatePath(`/dispatch/leads/${leadId}`)

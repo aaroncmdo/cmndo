@@ -17,9 +17,11 @@ import {
   CheckIcon,
   XIcon,
   ArrowRightIcon,
-  ClockIcon,
   HistoryIcon,
   Loader2Icon,
+  CalendarClockIcon,
+  PhoneIncomingIcon,
+  PhoneMissedIcon,
 } from 'lucide-react'
 
 export type RueckrufInitialData = {
@@ -32,11 +34,13 @@ export type RueckrufInitialData = {
   qualifizierungsPhase?: string | null
 }
 
-type HistorieEntry = {
+type VerlaufEntry = {
   id: string
-  start_zeit: string
+  zeitpunkt: string
+  /** 'termin' = admin_termine-Eintrag; 'anruf' = anruf_log-Eintrag */
+  typ: 'termin' | 'anruf'
   status: string
-  notizen: string | null
+  notiz: string | null
 }
 
 function fmtDt(iso: string) {
@@ -76,10 +80,49 @@ export default function RueckrufTerminPanel({
   const [anrufVersuche, setAnrufVersuche] = useState(initial?.anrufVersuche ?? 0)
   const [letzterAnrufAm, setLetzterAnrufAm] = useState(initial?.letzterAnrufAm ?? null)
   const [letzterAnrufStatus, setLetzterAnrufStatus] = useState(initial?.letzterAnrufStatus ?? null)
-  const [history, setHistory] = useState<HistorieEntry[]>([])
+  const [history, setHistory] = useState<VerlaufEntry[]>([])
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const loadVerlauf = useCallback(async () => {
+    const supabase = createClient()
+    const [termineRes, anrufRes] = await Promise.all([
+      supabase
+        .from('admin_termine')
+        .select('id, start_zeit, status, notizen')
+        .eq('lead_id', leadId)
+        .eq('typ', 'rueckruf')
+        .neq('status', 'offen')
+        .order('start_zeit', { ascending: false })
+        .limit(20),
+      supabase
+        .from('anruf_log')
+        .select('id, zeitpunkt, status, notiz')
+        .eq('lead_id', leadId)
+        .order('zeitpunkt', { ascending: false })
+        .limit(30),
+    ])
+    const termine: VerlaufEntry[] = (termineRes.data ?? []).map((t) => ({
+      id: t.id as string,
+      zeitpunkt: t.start_zeit as string,
+      typ: 'termin' as const,
+      status: t.status as string,
+      notiz: t.notizen as string | null,
+    }))
+    const anrufe: VerlaufEntry[] = (anrufRes.data ?? []).map((a) => ({
+      id: a.id as string,
+      zeitpunkt: a.zeitpunkt as string,
+      typ: 'anruf' as const,
+      status: a.status as string,
+      notiz: a.notiz as string | null,
+    }))
+    // Zusammenführen, absteigend nach Zeitpunkt sortieren
+    const merged = [...termine, ...anrufe].sort(
+      (a, b) => new Date(b.zeitpunkt).getTime() - new Date(a.zeitpunkt).getTime(),
+    )
+    setHistory(merged)
+  }, [leadId])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -99,7 +142,7 @@ export default function RueckrufTerminPanel({
         .maybeSingle(),
     ])
 
-    const alle = (termineRes.data ?? []) as HistorieEntry[]
+    const alle = (termineRes.data ?? []) as Array<{ id: string; start_zeit: string; status: string; notizen: string | null }>
     const offener = alle.find((t) => t.status === 'offen') ?? null
 
     if (offener) {
@@ -112,31 +155,21 @@ export default function RueckrufTerminPanel({
       setTerminStatus(null)
     }
 
-    setHistory(alle.filter((t) => t.status !== 'offen'))
-
     if (leadRes.data) {
       setAnrufVersuche(leadRes.data.anruf_versuche ?? 0)
       setLetzterAnrufAm(leadRes.data.letzter_anruf_am ?? null)
       setLetzterAnrufStatus(leadRes.data.letzter_anruf_status ?? null)
     }
+
+    await loadVerlauf()
     setLoading(false)
-  }, [leadId])
+  }, [leadId, loadVerlauf])
 
   useEffect(() => {
-    // Wenn keine initial-Daten: sofort laden. Ansonsten nur Verlauf nachladen.
     if (!initial) {
       void load()
     } else {
-      const supabase = createClient()
-      supabase
-        .from('admin_termine')
-        .select('id, start_zeit, status, notizen')
-        .eq('lead_id', leadId)
-        .eq('typ', 'rueckruf')
-        .neq('status', 'offen')
-        .order('start_zeit', { ascending: false })
-        .limit(20)
-        .then(({ data }) => setHistory((data ?? []) as HistorieEntry[]))
+      void loadVerlauf()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leadId])
@@ -179,6 +212,9 @@ export default function RueckrufTerminPanel({
     startTransition(async () => {
       try {
         await markAngerufen(leadId)
+        // Versuche + letzter Anruf optimistisch aktualisieren
+        setLetzterAnrufAm(new Date().toISOString())
+        setLetzterAnrufStatus('erreicht')
         await load()
         router.refresh()
         onActionDone?.()
@@ -193,6 +229,10 @@ export default function RueckrufTerminPanel({
     startTransition(async () => {
       try {
         await markNichtErreicht(leadId)
+        // Versuche + letzter Anruf optimistisch aktualisieren
+        setAnrufVersuche((v) => v + 1)
+        setLetzterAnrufAm(new Date().toISOString())
+        setLetzterAnrufStatus('nicht_erreicht')
         await load()
         router.refresh()
         onActionDone?.()
@@ -336,41 +376,66 @@ export default function RueckrufTerminPanel({
               </p>
             </div>
             <ul className="space-y-1.5">
-              {history.map((h) => (
-                <li
-                  key={h.id}
-                  className="flex items-start gap-2 rounded-xl bg-[#f8f9fb] border border-claimondo-border px-3 py-2"
-                >
-                  <ClockIcon className="w-3.5 h-3.5 text-claimondo-ondo/50 mt-0.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[11px] font-medium text-claimondo-navy">
-                        {fmtDt(h.start_zeit)}
-                      </span>
-                      <span
-                        className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${
-                          h.status === 'erledigt'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : h.status === 'abgesagt'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-amber-100 text-amber-700'
-                        }`}
-                      >
-                        {h.status === 'erledigt'
-                          ? 'Erledigt'
-                          : h.status === 'abgesagt'
-                            ? 'Abgesagt'
-                            : 'Offen'}
-                      </span>
+              {history.map((h) => {
+                const isAnruf = h.typ === 'anruf'
+                const Icon = isAnruf
+                  ? h.status === 'erreicht'
+                    ? PhoneIncomingIcon
+                    : PhoneMissedIcon
+                  : CalendarClockIcon
+                const iconColor = isAnruf
+                  ? h.status === 'erreicht'
+                    ? 'text-emerald-600'
+                    : 'text-red-500'
+                  : 'text-claimondo-ondo/50'
+
+                let badgeText: string
+                let badgeClass: string
+                if (isAnruf) {
+                  if (h.status === 'erreicht') {
+                    badgeText = 'Erreicht'
+                    badgeClass = 'bg-emerald-100 text-emerald-800'
+                  } else {
+                    badgeText = 'Nicht erreicht'
+                    badgeClass = 'bg-red-100 text-red-700'
+                  }
+                } else {
+                  if (h.status === 'erledigt') {
+                    badgeText = 'Termin erledigt'
+                    badgeClass = 'bg-emerald-100 text-emerald-800'
+                  } else if (h.status === 'abgesagt') {
+                    badgeText = 'Termin abgesagt'
+                    badgeClass = 'bg-red-100 text-red-700'
+                  } else {
+                    badgeText = 'Termin'
+                    badgeClass = 'bg-amber-100 text-amber-700'
+                  }
+                }
+
+                return (
+                  <li
+                    key={`${h.typ}-${h.id}`}
+                    className="flex items-start gap-2 rounded-xl bg-[#f8f9fb] border border-claimondo-border px-3 py-2"
+                  >
+                    <Icon className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${iconColor}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[11px] font-medium text-claimondo-navy">
+                          {fmtDt(h.zeitpunkt)}
+                        </span>
+                        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${badgeClass}`}>
+                          {badgeText}
+                        </span>
+                      </div>
+                      {h.notiz && (
+                        <p className="text-[11px] text-claimondo-ondo mt-0.5 whitespace-pre-line">
+                          {h.notiz}
+                        </p>
+                      )}
                     </div>
-                    {h.notizen && (
-                      <p className="text-[11px] text-claimondo-ondo mt-0.5 whitespace-pre-line">
-                        {h.notizen}
-                      </p>
-                    )}
-                  </div>
-                </li>
-              ))}
+                  </li>
+                )
+              })}
             </ul>
           </div>
         </>
