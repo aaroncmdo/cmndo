@@ -51,7 +51,7 @@ export type PflichtSlotForView = {
 }
 
 export type PflichtSectionRolle = 'kunde' | 'kb' | 'admin' | 'sv' | 'kanzlei'
-export type PflichtSectionVariant = 'banner' | 'card' | 'popover'
+export type PflichtSectionVariant = 'banner' | 'card' | 'popover' | 'embedded'
 
 const UPLOAD_ALLOWED: Record<PflichtSectionRolle, boolean> = {
   kunde: true,
@@ -286,7 +286,7 @@ export default function PflichtdokumenteSection({
   const offenPflicht = offen.filter((s) => s.pflicht).length
 
   // Banner verschwindet automatisch wenn alle Slots erfüllt sind.
-  if (variant === 'banner' && offen.length === 0) return null
+  if ((variant === 'banner' || variant === 'embedded') && offen.length === 0) return null
   // Bei card / popover: nichts rendern wenn keine Slots existieren.
   if (slots.length === 0) return null
 
@@ -349,19 +349,22 @@ export default function PflichtdokumenteSection({
   }
 
   // ─── Banner-Variante: Click-Tile → Pop-over ────────────────────────────
-  if (variant === 'banner') {
+  if (variant === 'banner' || variant === 'embedded') {
     const headline =
       offenPflicht > 0
         ? `${offenPflicht} Pflichtdokument${offenPflicht === 1 ? '' : 'e'} fehlen noch`
         : `${offen.length} Dokument${offen.length === 1 ? '' : 'e'} können hochgeladen werden`
 
+    // Embedded: kein eigener border/rounded — sitzt in einem Outer-Wrapper
+    // (z.B. ClaimStepper). Banner: mit eigenem Card-Style.
+    const buttonCls =
+      variant === 'embedded'
+        ? 'w-full text-left bg-amber-50 px-4 py-3 hover:bg-amber-100/60 transition-colors'
+        : 'w-full text-left rounded-2xl bg-amber-50 border border-amber-200 p-4 hover:bg-amber-100/60 hover:border-amber-300 transition-colors'
+
     return (
       <>
-        <button
-          type="button"
-          onClick={() => setPopoverOpen(true)}
-          className="w-full text-left rounded-2xl bg-amber-50 border border-amber-200 p-4 hover:bg-amber-100/60 hover:border-amber-300 transition-colors"
-        >
+        <button type="button" onClick={() => setPopoverOpen(true)} className={buttonCls}>
           <div className="flex items-center gap-3">
             <AlertCircleIcon className="w-5 h-5 text-amber-600 shrink-0" />
             <div className="flex-1 min-w-0">

@@ -123,6 +123,7 @@ export type StepperNotice = {
 
 export default function ClaimStepper({
   lifecycle,
+  topSlot,
   bottomSlot,
   notices,
   terminInfo,
@@ -143,6 +144,10 @@ export default function ClaimStepper({
   bankdatenFehlen,
 }: {
   lifecycle: ClaimLifecycle
+  /** Inhalt der innerhalb der Stepper-Card OBERHALB des Phasen-Headers
+   *  gerendert wird — z.B. Pflichtdokumente-Banner als embedded variant.
+   *  Border-Bottom als visuelle Trennung wird automatisch gesetzt. */
+  topSlot?: React.ReactNode
   /** Legacy: einzelne Verlegungs-Banner-Sektion. Wird durch notices
    *  abgelöst, bleibt für Rückwärtskompatibilität. */
   bottomSlot?: React.ReactNode
@@ -352,6 +357,11 @@ export default function ClaimStepper({
 
   return (
     <div className={outerCls}>
+      {topSlot && (
+        <div className="border-b border-claimondo-border">
+          {topSlot}
+        </div>
+      )}
       <div className="px-4 sm:px-6 py-5 sm:py-6 space-y-4">
       {gutachtenFertig && (
         <a
