@@ -86,6 +86,14 @@ export default function DokumenteAnfordernCard({
   hatPersonenschaden,
   hatZeugen,
 }: Props) {
+  // Echter „Anfrage offen"-State aus dokument_upload_anfragen.
+  // Wird beim Mount + bei jedem Polling-Tick neu geladen, damit die UI
+  // sich nicht durch bloßes Setzen der Checkbox falsch zeigt.
+  const [serverAnfrageOffen, setServerAnfrageOffen] = useState(false)
+  // Lokaler Override für die Sekunden direkt nach „Anfrage senden" — damit
+  // der „warte auf Fotos"-Hinweis sofort erscheint, ohne auf Server-Refresh
+  // zu warten.
+  const [eigeneAnfrageEbenGesendet, setEigeneAnfrageEbenGesendet] = useState(false)
   const router = useRouter()
 
   // Slot-Auswahl — Fahrzeugschein vorausgewählt wenn noch nicht hochgeladen
@@ -126,7 +134,40 @@ export default function DokumenteAnfordernCard({
   // hoch und Haiku braucht ein paar Sekunden, beides soll automatisch
   // aktualisiert angezeigt werden.
   const fotosCount = Array.isArray(schadensfotoUrls) ? schadensfotoUrls.length : 0
-  const unfallfotosPollingAktiv = selectUnfallfotos || fotosCount > 0
+  const unfallfotosPollingAktiv =
+    serverAnfrageOffen || eigeneAnfrageEbenGesendet || fotosCount > 0
+
+  // Lädt aus dokument_upload_anfragen ob eine offene unfallfotos-Anfrage
+  // existiert. Re-loadet beim Mount + jeden Polling-Tick (10s).
+  useEffect(() => {
+    let cancelled = false
+    async function check() {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('dokument_upload_anfragen')
+        .select('slots, status')
+        .eq('lead_id', leadId)
+        .eq('status', 'gesendet')
+        .order('erstellt_am', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (cancelled) return
+      if (!data) {
+        setServerAnfrageOffen(false)
+        return
+      }
+      const slots = (data.slots as Array<{ slot_id: string; hochgeladen?: boolean }> | null) ?? []
+      const offen = slots.some((s) => s.slot_id === 'unfallfotos' && !s.hochgeladen)
+      setServerAnfrageOffen(offen)
+    }
+    void check()
+    const iv = setInterval(check, 10_000)
+    return () => {
+      cancelled = true
+      clearInterval(iv)
+    }
+  }, [leadId])
   useEffect(() => {
     const läuft =
       (zb1Status === 'gesendet' || zb1Status === 'geoeffnet') ||
@@ -138,15 +179,21 @@ export default function DokumenteAnfordernCard({
   }, [zb1Status, polizeiberichtStatus, unfallfotosPollingAktiv, router])
 
   // Analyse-Status des Unfallfoto-Slots:
-  // - fotosCount === 0  → „warte auf Fotos" (falls angefragt) / nichts
+  // - fotosCount === 0 + Anfrage gesendet → „warte auf Fotos"
+  // - fotosCount === 0 + keine Anfrage    → kein Status (nur Checkbox-Vorauswahl)
   // - fotosCount > 0 + keine Beschreibung → „Analyse läuft"
-  // - fotosCount > 0 + Beschreibung → „Analyse erfolgreich"
+  // - fotosCount > 0 + Beschreibung       → „Analyse erfolgreich"
   // - fotosCount > 0 + Beschreibung startet mit „Schaden auf Foto nicht" → „Analyse unklar"
+  // BUGFIX (Aaron): vorher reichte selectUnfallfotos (UI-Checkbox) aus, was
+  // beim bloßen Vor-Auswählen der Checkbox bereits „Anfrage gesendet" zeigte.
+  // Jetzt wird nur ein echter Server-Status oder ein gerade abgesendeter
+  // lokaler State akzeptiert.
+  const istAnfrageOffen = serverAnfrageOffen || eigeneAnfrageEbenGesendet
   const haikuBeschreibung = sachschadenBeschreibung?.trim() ?? ''
   const haikuUnklar = haikuBeschreibung.toLowerCase().startsWith('schaden auf foto nicht')
   const unfallfotosAnalyseStatus: 'warte' | 'laeuft' | 'erfolg' | 'unklar' | null =
     fotosCount === 0
-      ? selectUnfallfotos
+      ? istAnfrageOffen
         ? 'warte'
         : null
       : haikuBeschreibung.length === 0
@@ -226,6 +273,7 @@ export default function DokumenteAnfordernCard({
     }
 
     setFeedback(null)
+    const enthaeltUnfallfotos = slots.some((s) => s.slot_id === 'unfallfotos')
     startTransition(async () => {
       const r = await triggerDokumenteUploadRequest(leadId, slots, kanal)
       if (r.success) {
@@ -234,6 +282,9 @@ export default function DokumenteAnfordernCard({
           text: `Anfrage per ${kanal === 'whatsapp' ? 'WhatsApp' : kanal === 'sms' ? 'SMS' : 'Email'} versendet — ${slots.length} ${slots.length === 1 ? 'Dokument' : 'Dokumente'} angefragt`,
         })
         setSonstige([])
+        // Sofortiger Override damit „warte auf Fotos" zwischen Versand und
+        // Server-Refresh sichtbar wird, falls unfallfotos im Slot-Set war.
+        if (enthaeltUnfallfotos) setEigeneAnfrageEbenGesendet(true)
         router.refresh()
       } else {
         setFeedback({ ok: false, text: r.error ?? 'Versand fehlgeschlagen' })

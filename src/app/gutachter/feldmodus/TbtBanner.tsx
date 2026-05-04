@@ -15,7 +15,41 @@ import {
   VolumeXIcon,
   Loader2Icon,
 } from 'lucide-react'
-import type { TbtStep } from '@/lib/mapbox/turn-by-turn'
+import type { TbtLane, TbtStep } from '@/lib/mapbox/turn-by-turn'
+
+// Mappt eine Lane-Direction auf das passende lucide-Icon (Top-Down).
+function laneIconFor(directions: string[]): typeof ArrowUpIcon {
+  const set = new Set(directions.map((d) => d.toLowerCase()))
+  if (set.has('left') || set.has('sharp left')) return CornerUpLeftIcon
+  if (set.has('right') || set.has('sharp right')) return CornerUpRightIcon
+  if (set.has('slight left')) return ArrowUpLeftIcon
+  if (set.has('slight right')) return ArrowUpRightIcon
+  if (set.has('uturn')) return RotateCwIcon
+  return ArrowUpIcon
+}
+
+function LaneStrip({ lanes }: { lanes: TbtLane[] }) {
+  return (
+    <div className="bg-claimondo-navy/80 border-t border-white/10 px-3 py-2 flex items-center justify-center gap-2">
+      {lanes.map((lane, i) => {
+        const Icon = laneIconFor(lane.directions)
+        return (
+          <div
+            key={i}
+            className={`flex items-center justify-center w-8 h-8 rounded-md border ${
+              lane.active
+                ? 'bg-white border-white text-claimondo-navy'
+                : 'bg-claimondo-navy/30 border-white/20 text-white/40'
+            }`}
+            title={lane.directions.join(' / ')}
+          >
+            <Icon className="w-4 h-4" />
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 function pickIcon(step: TbtStep): typeof ArrowUpIcon {
   const t = step.maneuverType
@@ -64,10 +98,12 @@ export default function TbtBanner({
 }: TbtBannerProps) {
   if (!step) return null
   const Icon = pickIcon(step)
-  const primary = step.bannerInstructions[0]?.primary
-  const secondary = step.bannerInstructions[0]?.secondary
+  const banner0 = step.bannerInstructions[0]
+  const primary = banner0?.primary
+  const secondary = banner0?.secondary
   const headline = primary?.text ?? step.instruction
   const subline = secondary?.text ?? step.name
+  const lanes = banner0?.lanes ?? null
 
   return (
     <div className="absolute top-3 left-3 right-3 z-20 pointer-events-none space-y-2">
@@ -125,6 +161,8 @@ export default function TbtBanner({
             )}
           </button>
         </div>
+        {/* Lane-Strip — nur wenn Mapbox Spurinformationen für diesen Step liefert */}
+        {lanes && lanes.length > 0 && <LaneStrip lanes={lanes} />}
       </div>
     </div>
   )
