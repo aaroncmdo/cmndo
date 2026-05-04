@@ -116,7 +116,21 @@ export default function TagesrouteMap({
 
     mapRef.current = map
 
+    // ResizeObserver: Mapbox rendert sich winzig wenn der Container beim
+    // Mount 0×0 ist (typisch bei flex-Layouts). map.resize() bei jeder
+    // Container-Größenänderung triggert ein neues Canvas-Sizing.
+    const ro = new ResizeObserver(() => {
+      try { map.resize() } catch { /* noop */ }
+    })
+    ro.observe(containerRef.current)
+    const onWindowResize = () => {
+      try { map.resize() } catch { /* noop */ }
+    }
+    window.addEventListener('resize', onWindowResize)
+
     return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', onWindowResize)
       svMarkerRef.current?.remove()
       svMarkerRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())

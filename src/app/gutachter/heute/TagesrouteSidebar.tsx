@@ -176,32 +176,80 @@ export default function TagesrouteSidebar({
               {/* Aufgeklappt: Pflichtinfos + Aktionen */}
               {isExpanded && (
                 <div className="px-4 pb-3 pt-1 space-y-2 border-t border-claimondo-border/60 bg-[#f8f9fb]">
-                  {/* Schadentyp */}
-                  {t.schadentyp && (
-                    <div className="text-[11px]">
-                      <span className="text-claimondo-ondo uppercase tracking-wider mr-1.5">Schadentyp:</span>
-                      <span className="font-medium text-claimondo-navy">{t.schadentyp}</span>
+                  {/* Schadentyp + Auftrag-Typ */}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+                    {t.schadentyp && (
+                      <span>
+                        <span className="text-claimondo-ondo uppercase tracking-wider mr-1.5">Schadentyp:</span>
+                        <span className="font-medium text-claimondo-navy">{t.schadentyp}</span>
+                      </span>
+                    )}
+                    {t.auftrag_typ && t.auftrag_typ !== 'erstgutachten' && (
+                      <span>
+                        <span className="text-claimondo-ondo uppercase tracking-wider mr-1.5">Auftrag:</span>
+                        <span className="font-medium text-claimondo-navy uppercase">
+                          {t.auftrag_typ === 'nachbesichtigung' ? 'Nachbesichtigung' : t.auftrag_typ === 'stellungnahme' ? 'Stellungnahme' : t.auftrag_typ}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Vorschäden (Cardentity) */}
+                  {t.hat_vorschaeden && (t.vorschaden_anzahl ?? 0) > 0 && (
+                    <div className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] flex items-start gap-1.5">
+                      <AlertTriangleIcon className="w-3 h-3 text-amber-700 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-amber-900">
+                          {t.vorschaden_anzahl} Vorschaden{t.vorschaden_anzahl === 1 ? '' : '-Einträge'} (Cardentity)
+                        </p>
+                        {t.vorschaden_letzter_datum && (
+                          <p className="text-amber-800/80">
+                            Letzter: {new Date(t.vorschaden_letzter_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   )}
 
-                  {/* Pflichtdokumente */}
-                  {pflicht && pflicht.gesamt > 0 && (
+                  {/* Einzusammelnde Pflichtdokumente */}
+                  {t.einzusammelnde_dokumente.length > 0 && (
+                    <div className="rounded-md border border-claimondo-border bg-white px-2 py-1.5 space-y-1">
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-claimondo-navy">
+                        <FileTextIcon className="w-3 h-3" />
+                        Einzusammeln vor Ort ({t.einzusammelnde_dokumente.length})
+                      </div>
+                      <ul className="space-y-0.5 text-[11px] text-claimondo-navy">
+                        {t.einzusammelnde_dokumente.map((d) => (
+                          <li key={d.slot_id} className="flex items-start gap-1.5">
+                            <span className="text-claimondo-ondo mt-0.5">•</span>
+                            <span>{d.label}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Counter-Pflichtdokumente (zusätzlich zur Liste —
+                      schneller Überblick wenn viele Slots vorhanden sind) */}
+                  {pflicht && pflicht.gesamt > 0 && t.einzusammelnde_dokumente.length === 0 && (
                     <div className="text-[11px] flex items-center gap-2">
-                      <FileTextIcon className="w-3 h-3 text-claimondo-ondo" />
-                      <span className="text-claimondo-navy">
-                        Pflichtdokumente:{' '}
-                        <span className={pflicht.offen > 0 ? 'text-amber-700 font-medium' : 'text-emerald-700 font-medium'}>
-                          {pflicht.gesamt - pflicht.offen}/{pflicht.gesamt}
-                        </span>
+                      <CheckCircle2Icon className="w-3 h-3 text-emerald-700" />
+                      <span className="text-emerald-700 font-medium">
+                        Alle {pflicht.gesamt} Pflichtdokumente erfüllt
                       </span>
                     </div>
                   )}
 
                   {/* Briefing */}
                   {briefingKurz && (
-                    <p className="text-[11px] text-claimondo-ondo bg-white border border-claimondo-border rounded-lg p-2 leading-relaxed">
-                      {briefingKurz}
-                    </p>
+                    <div className="bg-white border border-claimondo-border rounded-lg p-2">
+                      <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo mb-0.5">
+                        Briefing
+                      </p>
+                      <p className="text-[11px] text-claimondo-navy leading-relaxed">
+                        {briefingKurz}
+                      </p>
+                    </div>
                   )}
 
                   {/* Aktionen */}

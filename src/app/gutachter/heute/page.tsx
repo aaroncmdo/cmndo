@@ -43,6 +43,12 @@ export type HeuteTerminFull = {
   sv_briefing_text: string | null
   // AAR-724: Noch nicht vom SV angesehen → roter Punkt auf der Card.
   gesehen_am: string | null
+  // Auftrag-Kontext (CMM-32f) für Vor-Ort-Vorbereitung
+  auftrag_typ: string | null
+  einzusammelnde_dokumente: Array<{ slot_id: string; label: string }>
+  hat_vorschaeden: boolean | null
+  vorschaden_anzahl: number | null
+  vorschaden_letzter_datum: string | null
 }
 
 function isoDate(d: Date): string {
@@ -107,7 +113,7 @@ export default async function HeutePage() {
     const { data: faelle } = await supabase
       .from('faelle')
       .select(
-        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text',
+        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum',
       )
       .in('id', fallIds)
     const faelleRows = (faelle ?? []) as unknown as Record<string, unknown>[]
@@ -132,6 +138,55 @@ export default async function HeutePage() {
       .in('id', leadIds)
     for (const l of (leads ?? []) as unknown as Record<string, unknown>[]) {
       leadMap.set(l.id as string, l)
+    }
+  }
+
+  // Aufträge pro Fall (CMM-32f) — für Auftrag-Typ-Anzeige
+  const auftragMap = new Map<string, { typ: string; status: string }>()
+  if (fallIds.length) {
+    const { data: auftraege } = await supabase
+      .from('auftraege')
+      .select('fall_id, typ, status, reihenfolge')
+      .in('fall_id', fallIds)
+      .eq('sv_id', sv.id)
+      .order('reihenfolge', { ascending: false })
+    for (const a of (auftraege ?? []) as Array<{ fall_id: string; typ: string; status: string }>) {
+      if (!auftragMap.has(a.fall_id)) auftragMap.set(a.fall_id, { typ: a.typ, status: a.status })
+    }
+  }
+
+  // Pflichtdokumente pro Fall (offen + Pflicht) mit Katalog-Labels —
+  // damit der SV vor Ort sieht was er einsammeln muss.
+  const pflichtListMap = new Map<string, Array<{ slot_id: string; label: string }>>()
+  if (fallIds.length) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    const [{ data: pflichtRows }, { data: katalogRows }] = await Promise.all([
+      admin
+        .from('pflichtdokumente')
+        .select('fall_id, dokument_typ, status, pflicht')
+        .in('fall_id', fallIds)
+        .eq('pflicht', true),
+      admin
+        .from('dokument_katalog')
+        .select('slot_id, label'),
+    ])
+    const labelMap = new Map<string, string>()
+    for (const k of (katalogRows ?? []) as Array<{ slot_id: string; label: string }>) {
+      labelMap.set(k.slot_id, k.label)
+    }
+    for (const p of (pflichtRows ?? []) as Array<{
+      fall_id: string
+      dokument_typ: string
+      status: string
+      pflicht: boolean
+    }>) {
+      if (p.status === 'erfuellt' || p.status === 'geprueft') continue
+      if (!pflichtListMap.has(p.fall_id)) pflichtListMap.set(p.fall_id, [])
+      pflichtListMap.get(p.fall_id)!.push({
+        slot_id: p.dokument_typ,
+        label: labelMap.get(p.dokument_typ) ?? p.dokument_typ,
+      })
     }
   }
 
@@ -182,6 +237,13 @@ export default async function HeutePage() {
       schadens_ort: (fall?.schadens_ort as string) ?? (lead?.schadens_ort as string) ?? null,
       sv_briefing_text: (fall?.sv_briefing_text as string) ?? null,
       gesehen_am: (t.gesehen_am as string | null) ?? null,
+      auftrag_typ: auftragMap.get((t.fall_id ?? '') as string)?.typ ?? null,
+      einzusammelnde_dokumente:
+        pflichtListMap.get((t.fall_id ?? '') as string) ?? [],
+      hat_vorschaeden: (fall?.hat_vorschaeden as boolean | null) ?? null,
+      vorschaden_anzahl: (fall?.vorschaden_anzahl as number | null) ?? null,
+      vorschaden_letzter_datum:
+        (fall?.vorschaden_letzter_datum as string | null) ?? null,
     }
   })
 
