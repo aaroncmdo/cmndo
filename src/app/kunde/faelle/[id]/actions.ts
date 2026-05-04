@@ -110,8 +110,17 @@ export async function uploadPflichtdokumentKunde(fallId: string, pflichtdokument
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
   if (!ownership.ok) throw new Error('Nicht autorisiert')
 
+  // Claim-Pfad wenn claim_id vorhanden, sonst Fallback auf Legacy-Pfad
+  const { data: fall } = await admin
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .single()
+  const claimId = fall?.claim_id as string | null
   const ext = file.name.split('.').pop() ?? 'bin'
-  const path = `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
+  const path = claimId
+    ? `claim/${claimId}/kundendokumente/${Date.now()}.${ext}`
+    : `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
   const { error: uploadErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
   if (uploadErr) throw new Error(uploadErr.message)
 
