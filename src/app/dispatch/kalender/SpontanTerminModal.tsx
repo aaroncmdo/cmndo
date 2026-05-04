@@ -259,6 +259,7 @@ export default function SpontanTerminModal({
                     vorschlaege.map((v) => {
                       const active = svId === v.svId
                       const ausserhalb = v.distanzKm > v.paketUmkreisKm
+                      const blockiert = v.belegt || v.unerreichbar
                       return (
                         <button
                           key={v.svId}
@@ -268,7 +269,8 @@ export default function SpontanTerminModal({
                             active
                               ? 'bg-claimondo-ondo/10 ring-1 ring-claimondo-ondo'
                               : 'hover:bg-claimondo-ondo/5'
-                          } ${v.belegt ? 'opacity-50' : ''}`}
+                          } ${blockiert ? 'opacity-50' : ''}`}
+                          title={v.unerreichbarGrund ?? undefined}
                         >
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-claimondo-navy truncate">
@@ -276,9 +278,15 @@ export default function SpontanTerminModal({
                               {v.belegt && (
                                 <span className="ml-1.5 text-[9px] text-red-600 font-semibold">BELEGT</span>
                               )}
+                              {!v.belegt && v.unerreichbar && (
+                                <span className="ml-1.5 text-[9px] text-amber-700 font-semibold">UNERREICHBAR</span>
+                              )}
                             </p>
                             {v.standort && (
                               <p className="text-claimondo-ondo/70 truncate text-[10px]">{v.standort}</p>
+                            )}
+                            {v.unerreichbar && v.unerreichbarGrund && (
+                              <p className="text-amber-700 text-[10px] truncate">{v.unerreichbarGrund}</p>
                             )}
                           </div>
                           <div className="text-right shrink-0">
