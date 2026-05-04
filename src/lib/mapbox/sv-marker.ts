@@ -123,12 +123,15 @@ export interface SvCarMarkerOptions {
 function buildCarMarkerElement(opts: SvCarMarkerOptions): HTMLDivElement {
   const wrapper = document.createElement('div')
   wrapper.className = 'sv-car-marker'
+  // AAR-marker-instant: keine CSS-transition mehr — Aaron-Spec: „kreise und
+  // das auto sollen nicht mit latenz nachziehen, fest verankert an der
+  // position". Mapbox setLngLat() ist instant, aber transform-rotate hatte
+  // 300ms ease-out → sichtbares „Nachschwingen" bei jedem GPS-Update.
   wrapper.style.cssText = [
     'position: relative',
     'width: 40px',
     'height: 64px',
     'pointer-events: none',
-    'transition: transform 0.3s ease-out',
     opts.heading != null ? `transform: rotate(${opts.heading}deg)` : '',
   ]
     .filter(Boolean)
