@@ -49,6 +49,7 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'besichtigungsort_lat',
   'besichtigungsort_lng',
   'besichtigungsort_place_id',
+  'besichtigungsort_notiz',
   // AAR-182 Audit-Fix #2: zb1_status damit „Nein — manuell eintragen" in
   // Zb1UploadCard persistiert werden kann (Wert 'abgelehnt').
   'zb1_status',

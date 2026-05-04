@@ -137,10 +137,9 @@ export default async function FlowPage({
     .limit(1)
     .maybeSingle()
 
-  // AAR-341: Besichtigungsort im FlowWizard Schritt 2 anzeigen —
-  // Adresse aus lead.unfallort (Dispatch-Phase 1) oder fahrzeug_standort_adresse
-  // (nicht fahrbereit / Werkstatt), strukturierter SV-Treffpunkt aus
-  // lead.besichtigungsort_adresse (AAR-581 N4, ersetzt Legacy-sv_treffpunkt).
+  // Besichtigungsort im FlowWizard Schritt 2: primär besichtigungsort_adresse
+  // (Dispatch setzt den konkreten Inspektions-Ort), Fallback fahrzeug_standort,
+  // letzter Ausweg unfallort. Treffpunkt-Notiz ist ein separates Freitext-Feld.
   let gutachter: {
     vorname: string
     avatarUrl: string | null
@@ -159,10 +158,11 @@ export default async function FlowPage({
         avatarUrl: profileRow.avatar_url ?? null,
         terminDatum: (terminMitSv.start_zeit as string | null) ?? null,
         besichtigungsAdresse:
-          (lead.unfallort as string | null) ??
+          (lead.besichtigungsort_adresse as string | null) ??
           (lead.fahrzeug_standort_adresse as string | null) ??
+          (lead.unfallort as string | null) ??
           null,
-        svTreffpunkt: (lead.besichtigungsort_adresse as string | null) ?? null,
+        svTreffpunkt: (lead.besichtigungsort_notiz as string | null) ?? null,
       }
     }
   }

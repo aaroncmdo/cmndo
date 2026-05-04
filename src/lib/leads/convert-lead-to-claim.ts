@@ -161,7 +161,7 @@ export async function convertLeadToClaim(
     ursache: (lead.schadensursache as string | null) ?? null,
     unfall_konstellation: (lead.unfall_konstellation as string | null) ?? null,
 
-    // — Schadensort (aus unfallort + Geo)
+    // — Schadensort (Unfallort)
     schadenort_adresse:
       (lead.unfallort as string | null) ??
       (lead.fahrzeug_standort_adresse as string | null) ??
@@ -172,6 +172,7 @@ export async function convertLeadToClaim(
     schadenort_lng: (lead.kunde_lng as number | null) ?? null,
     schadenort_kategorie: (lead.unfallort_kategorie as string | null) ?? null,
     schadenort_land: 'DE',
+
 
     // — Hergang
     hergang_kunde_text:

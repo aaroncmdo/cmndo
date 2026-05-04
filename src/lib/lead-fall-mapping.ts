@@ -140,6 +140,7 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'besichtigungsort_lat',
   'besichtigungsort_lng',
   'besichtigungsort_place_id',
+  'besichtigungsort_notiz',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
