@@ -27,7 +27,7 @@ export async function analyzeBkatForLead(
 
   const { data: lead } = await supabase
     .from('leads')
-    .select('id, unfallhergang, schadens_hergang, polizei_vor_ort')
+    .select('id, unfallhergang, schadens_hergang, polizei_vor_ort, polizei_aktenzeichen')
     .eq('id', leadId)
     .single()
 
@@ -68,6 +68,15 @@ export async function analyzeBkatForLead(
     polizeibericht_urls,
     unfallhergang,
   })
+
+  // Aktenzeichen automatisch auf Lead speichern wenn noch keins gesetzt ist
+  if (result.aktenzeichen && !lead.polizei_aktenzeichen) {
+    await supabase
+      .from('leads')
+      .update({ polizei_aktenzeichen: result.aktenzeichen })
+      .eq('id', leadId)
+    revalidatePath(`/dispatch/leads/${leadId}`)
+  }
 
   return { success: true, data: result }
 }

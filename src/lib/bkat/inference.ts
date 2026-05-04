@@ -39,6 +39,10 @@ export type BkatInferenzErgebnis = {
   alle_gefundenen_tbnrs?: string[]
   /** Zusammengefasste Schuld-Einschätzung für UI-Badge. */
   schuld_hint?: 'gegner_klar' | 'gegner_wahrscheinlich' | 'geteilt' | 'kunde_verdacht' | null
+  /** Polizeiliches Aktenzeichen — aus Vision wenn eindeutig lesbar, sonst aus unfallhergang. */
+  aktenzeichen: string | null
+  /** Woher das Aktenzeichen stammt. */
+  aktenzeichen_quelle: 'vision' | 'hergang' | null
 }
 
 /**
@@ -49,12 +53,12 @@ export async function inferBkatFromPolizeibericht(
   bildUrls: string[],
 ): Promise<BkatInferenzErgebnis> {
   if (bildUrls.length === 0) {
-    return { source: 'keine_daten', unfallart: null, vorschlaege: [] }
+    return { source: 'keine_daten', unfallart: null, vorschlaege: [], aktenzeichen: null, aktenzeichen_quelle: null }
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
-    return { source: 'keine_daten', unfallart: null, vorschlaege: [] }
+    return { source: 'keine_daten', unfallart: null, vorschlaege: [], aktenzeichen: null, aktenzeichen_quelle: null }
   }
 
   try {
@@ -68,16 +72,19 @@ export async function inferBkatFromPolizeibericht(
       model: AI_MODELS.bkat_ocr,
       max_tokens: 1024,
       system:
-        'Du bist ein OCR-Assistent für deutsche Polizeiberichte. Deine einzige Aufgabe: ' +
-        'Extrahiere alle 6-stelligen Tatbestandsnummern (TBNR) die im Bericht genannt werden. ' +
-        'TBNR-Format: [1-9][0-9]{5}. Antwort NUR als JSON: {"tbnrs":["123456","234567"]}. ' +
-        'Wenn keine TBNR gefunden: {"tbnrs":[]}.',
+        'Du bist ein OCR-Assistent für deutsche Polizeiberichte. Extrahiere:\n' +
+        '1. Alle 6-stelligen Tatbestandsnummern (TBNR, Format [1-9][0-9]{5}).\n' +
+        '2. Das polizeiliche Aktenzeichen (z.B. "3 BM 123456/24", "VP-1234/24", "8 UJs 234/24").\n' +
+        '   Setze aktenzeichen_lesbar auf true nur wenn du es eindeutig lesen kannst.\n' +
+        'Antwort NUR als JSON:\n' +
+        '{"tbnrs":["123456"],"aktenzeichen":"3 BM 123456/24","aktenzeichen_lesbar":true}\n' +
+        'Wenn keine TBNR: {"tbnrs":[]}. Wenn Aktenzeichen nicht lesbar: "aktenzeichen":null,"aktenzeichen_lesbar":false.',
       messages: [
         {
           role: 'user',
           content: [
             ...imageBlocks,
-            { type: 'text', text: 'Extrahiere alle TBNRs aus diesem Polizeibericht.' },
+            { type: 'text', text: 'Extrahiere TBNRs und Aktenzeichen aus diesem Polizeibericht.' },
           ],
         },
       ],
@@ -86,12 +93,20 @@ export async function inferBkatFromPolizeibericht(
     const textBlock = response.content.find((b) => b.type === 'text')
     const raw = textBlock?.type === 'text' ? textBlock.text : ''
     const match = raw.match(/\{[\s\S]*"tbnrs"[\s\S]*\}/)
-    if (!match) return { source: 'keine_daten', unfallart: null, vorschlaege: [] }
+    if (!match) return { source: 'keine_daten', unfallart: null, vorschlaege: [], aktenzeichen: null, aktenzeichen_quelle: null }
 
-    const parsed = JSON.parse(match[0]) as { tbnrs?: string[] }
+    const parsed = JSON.parse(match[0]) as {
+      tbnrs?: string[]
+      aktenzeichen?: string | null
+      aktenzeichen_lesbar?: boolean
+    }
     const tbnrs = Array.isArray(parsed.tbnrs) ? parsed.tbnrs : []
+    const visionAktenzeichen = parsed.aktenzeichen_lesbar && parsed.aktenzeichen
+      ? parsed.aktenzeichen.trim()
+      : null
+
     if (tbnrs.length === 0) {
-      return { source: 'keine_daten', unfallart: null, vorschlaege: [] }
+      return { source: 'keine_daten', unfallart: null, vorschlaege: [], aktenzeichen: visionAktenzeichen, aktenzeichen_quelle: visionAktenzeichen ? 'vision' : null }
     }
 
     const tatbestaende = (await Promise.all(tbnrs.map(lookupTbnr))).filter(
@@ -112,10 +127,12 @@ export async function inferBkatFromPolizeibericht(
       vorschlaege,
       alle_gefundenen_tbnrs: tbnrs,
       schuld_hint: deriveSchuldHint(tatbestaende),
+      aktenzeichen: visionAktenzeichen,
+      aktenzeichen_quelle: visionAktenzeichen ? 'vision' : null,
     }
   } catch (err) {
     console.error('[AAR-504] OCR-Inferenz fehlgeschlagen:', err)
-    return { source: 'keine_daten', unfallart: null, vorschlaege: [] }
+    return { source: 'keine_daten', unfallart: null, vorschlaege: [], aktenzeichen: null, aktenzeichen_quelle: null }
   }
 }
 
@@ -128,12 +145,12 @@ export async function inferBkatFromHergangText(
 ): Promise<BkatInferenzErgebnis> {
   const text = unfallhergang?.trim() ?? ''
   if (text.length < 20) {
-    return { source: 'keine_daten', unfallart: null, vorschlaege: [] }
+    return { source: 'keine_daten', unfallart: null, vorschlaege: [], aktenzeichen: null, aktenzeichen_quelle: null }
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
-    return { source: 'keine_daten', unfallart: null, vorschlaege: [] }
+    return { source: 'keine_daten', unfallart: null, vorschlaege: [], aktenzeichen: null, aktenzeichen_quelle: null }
   }
 
   try {
@@ -159,7 +176,7 @@ export async function inferBkatFromHergangText(
     const textBlock = response.content.find((b) => b.type === 'text')
     const raw = textBlock?.type === 'text' ? textBlock.text : ''
     const match = raw.match(/\{[\s\S]*?\}/)
-    if (!match) return { source: 'keine_daten', unfallart: null, vorschlaege: [] }
+    if (!match) return { source: 'keine_daten', unfallart: null, vorschlaege: [], aktenzeichen: null, aktenzeichen_quelle: null }
 
     const parsed = JSON.parse(match[0]) as {
       unfallart?: string
@@ -186,27 +203,48 @@ export async function inferBkatFromHergangText(
       unfallart,
       vorschlaege,
       schuld_hint: deriveSchuldHint(tatbestaende),
+      aktenzeichen: null,
+      aktenzeichen_quelle: null,
     }
   } catch (err) {
     console.error('[AAR-505] LLM-Inferenz fehlgeschlagen:', err)
-    return { source: 'keine_daten', unfallart: null, vorschlaege: [] }
+    return { source: 'keine_daten', unfallart: null, vorschlaege: [], aktenzeichen: null, aktenzeichen_quelle: null }
   }
 }
 
 /**
  * Kombinierter Workflow: versucht zuerst OCR, fällt auf LLM zurück wenn OCR
  * leer oder keine Polizeibilder vorhanden. Konsument ist die Dispatcher-UI.
+ *
+ * Aktenzeichen-Logik:
+ * - Vision liest Polizeibericht → aktenzeichen_lesbar=true → direkt nutzen
+ * - Vision liest es nicht eindeutig → Regex-Fallback auf unfallhergang-Text
  */
 export async function inferBkat(input: {
   polizeibericht_urls?: string[]
   unfallhergang?: string | null
 }): Promise<BkatInferenzErgebnis> {
   const bilder = input.polizeibericht_urls ?? []
+  const hergang = input.unfallhergang ?? ''
+
   if (bilder.length > 0) {
     const ocr = await inferBkatFromPolizeibericht(bilder)
-    if (ocr.source === 'ocr' && ocr.vorschlaege.length > 0) return ocr
+    // Wenn Vision kein sicheres Aktenzeichen liefert → Regex-Fallback auf Unfallhergang
+    const aktenzeichen = ocr.aktenzeichen ?? extractAktenzeichenFromText(hergang)
+    const aktenzeichen_quelle = ocr.aktenzeichen
+      ? 'vision'
+      : aktenzeichen ? 'hergang' : null
+    if (ocr.source === 'ocr' && ocr.vorschlaege.length > 0) {
+      return { ...ocr, aktenzeichen, aktenzeichen_quelle }
+    }
+    // OCR lieferte keine TBNRs — aber Aktenzeichen ggf. schon, mitnehmen
+    const llm = await inferBkatFromHergangText(hergang)
+    return { ...llm, aktenzeichen, aktenzeichen_quelle }
   }
-  return inferBkatFromHergangText(input.unfallhergang ?? '')
+
+  const llm = await inferBkatFromHergangText(hergang)
+  const aktenzeichen = extractAktenzeichenFromText(hergang)
+  return { ...llm, aktenzeichen, aktenzeichen_quelle: aktenzeichen ? 'hergang' : null }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────
@@ -238,6 +276,26 @@ function deriveSchuldHint(
   if (tatbestaende.some((t) => t.schuldindiz === 'kunde_verdacht')) return 'kunde_verdacht'
   if (tatbestaende.some((t) => t.schuldindiz === 'geteilt')) return 'geteilt'
   return null
+}
+
+/**
+ * Extrahiert das polizeiliche Aktenzeichen aus dem Unfallhergang-Text.
+ * Greift wenn Vision das Aktenzeichen nicht eindeutig lesen konnte.
+ * Typische deutsche Formate: "3 BM 123456/24", "VP-1234/24", "8 UJs 234/24",
+ * "Az.: 1234/2024", plain "123456/24".
+ */
+function extractAktenzeichenFromText(text: string): string | null {
+  if (!text) return null
+  // Explizite Nennung: "Aktenzeichen 1234/24" oder "Az.: ..."
+  const explicitMatch = text.match(
+    /(?:aktenzeichen|az\.?:?)\s*([A-ZÜÄÖ\d][\w\s\/\-]{2,30}\d{2,4})/i,
+  )
+  if (explicitMatch) return explicitMatch[1].trim()
+  // Strukturiertes Format: optionale Buchstaben + Ziffernblock + Slash/Bindestrich + Jahreszahl
+  const structuredMatch = text.match(
+    /\b(?:[A-ZÜÄÖ]{1,5}[-\s]?){0,2}\d{4,8}[\/\-]\d{2,4}\b/,
+  )
+  return structuredMatch ? structuredMatch[0].trim() : null
 }
 
 // Re-export für konsumenten-UI
