@@ -4,6 +4,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { getTagesSession } from '@/lib/sv/tages-session'
 import FeldmodusClient from './FeldmodusClient'
@@ -103,13 +104,22 @@ export default async function FeldmodusPage() {
     redirect('/gutachter/heute?info=Keine+Stops+in+Session')
   }
 
-  // Termine in Reihenfolge laden
-  const { data: termine } = await supabase
+  // CMM-32f: Termine + Fälle + Leads via Admin-Client laden — RLS auf
+  // faelle/leads matchen ggf. nur faelle.sv_id (legacy), nach Migration
+  // läuft die Zuordnung aber über auftraege.sv_id. Die Auth ist bereits
+  // über die Tages-Session (sv_id) erfolgt — hier reichen wir die SV-
+  // gefilterte Termin-Liste durch und laden die zugehörigen Daten
+  // RLS-frei nach.
+  const admin = createAdminClient()
+
+  // Termine in Reihenfolge laden — sv_id-Filter als Defense-in-Depth
+  const { data: termine } = await admin
     .from('gutachter_termine')
     .select(
       'id, fall_id, start_zeit, status, losgefahren_am, sv_angekommen_am, abschluss_zeit',
     )
     .in('id', terminIds)
+    .eq('sv_id', sv.id)
 
   const terminById = new Map<string, Record<string, unknown>>()
   for (const t of termine ?? []) terminById.set(t.id as string, t)
@@ -120,7 +130,7 @@ export default async function FeldmodusPage() {
     .filter(Boolean) as string[]
   const fallMap = new Map<string, Record<string, unknown>>()
   if (fallIds.length) {
-    const { data: faelle } = await supabase
+    const { data: faelle } = await admin
       .from('faelle')
       .select(
         'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, sv_briefing_struktur',
@@ -140,7 +150,7 @@ export default async function FeldmodusPage() {
     { vorname: string | null; nachname: string | null; telefon: string | null }
   >()
   if (leadIds.length) {
-    const { data: leads } = await supabase
+    const { data: leads } = await admin
       .from('leads')
       .select('id, vorname, nachname, telefon')
       .in('id', leadIds)
