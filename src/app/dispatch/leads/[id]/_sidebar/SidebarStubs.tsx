@@ -176,16 +176,36 @@ export function RueckrufButton() {
 // AAR-638: zeigt alle Termine zum Lead (Rückrufe aus admin_termine + ggf.
 // SV-Termine aus gutachter_termine, falls der Lead bereits zu einem Fall
 // konvertiert wurde und gutachter_termine.lead_id gesetzt ist).
+// Rückruf-Zeilen öffnen das RueckrufTerminPanel als Modal statt zu navigieren.
 export function TerminListeSidebar() {
   const { lead } = useDispatchPhase()
+  const [rueckrufLeadId, setRueckrufLeadId] = useState<string | null>(null)
+
   return (
-    <TerminListeClient
-      leadId={lead.id}
-      variant="compact"
-      title="Termine zum Lead"
-      dispatchLinks
-      limit={8}
-    />
+    <>
+      <TerminListeClient
+        leadId={lead.id}
+        variant="compact"
+        title="Termine zum Lead"
+        dispatchLinks
+        limit={8}
+        onRueckrufClick={(lId) => setRueckrufLeadId(lId)}
+      />
+      <Modal
+        open={!!rueckrufLeadId}
+        onClose={() => setRueckrufLeadId(null)}
+        maxWidth={520}
+        ariaLabel="Rückruftermin"
+        placement="bottom-sheet"
+      >
+        {rueckrufLeadId && (
+          <RueckrufTerminPanel
+            leadId={rueckrufLeadId}
+            onActionDone={() => setRueckrufLeadId(null)}
+          />
+        )}
+      </Modal>
+    </>
   )
 }
 
