@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import TwoFaClient from './TwoFaClient'
+import TwoFaSkipRedirect from './TwoFaSkipRedirect'
 import { roleToPath } from '@/lib/auth/role-redirect'
 
 // KFZ-184: 2FA SMS-Code Eingabe nach Email+Passwort Login.
@@ -31,17 +32,16 @@ export default async function TwoFaPage() {
   // Wenn Google-Login: 2FA ueberspringen — direkt ins Rollen-Portal.
   if (user.app_metadata?.provider === 'google') redirect(targetPath)
 
-  // AAR-2fa-fix: 2FA-aktiv-Check explizit auf `=== true` (nicht `=== false`).
-  // Der vorige Strict-Check `!== false` erzeugte einen Loop wenn die DB-
-  // Felder NULL sind: Page hat sich nicht zur 2FA-Eingabe entschlossen,
-  // useEffect im Client startete Code-Send → fail → User sah „immer wieder
-  // reload"-Verhalten weil der next.js-router refresh die Page neu rendert.
-  // Jetzt: nur wenn EINER der beiden 2FA-Methoden explizit aktiv ist,
-  // wird die 2FA-Eingabe gerendert. Sonst direkt ins Portal.
+  // AAR-2fa-loop-fix: Wenn der User keine 2FA aktiv hat, KEIN redirect()
+  // hier — Server-Components können kein Cookie setzen, und der Middleware-
+  // Check (!claimondo_2fa_verified) würde sofort wieder zurück zu /login/2fa
+  // schicken → Endlos-Loop in production. Stattdessen rendern wir einen
+  // Client-Bridge der via Server-Action das Skip-Cookie zuverlässig setzt
+  // + dann hart navigiert.
   const zweiFaAktiv =
     profile?.twofa_aktiviert === true || profile?.twofa_email_aktiviert === true
   if (!zweiFaAktiv) {
-    redirect(targetPath)
+    return <TwoFaSkipRedirect targetPath={targetPath} />
   }
 
   const telefon = profile?.twofa_telefon ?? profile?.telefon
