@@ -181,16 +181,9 @@ export async function uploadDokumentViaAnfrageToken(
       polizeibericht_hochgeladen_am: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }).eq('id', anfrage.lead_id)
-    // AAR-504: Auto-OCR im Hintergrund. Keine UI für den Kunden — nur intern
-    // für den Dispatcher. Fire-and-forget, errors werden geloggt.
-    try {
-      const { triggerAutoBkatOcr } = await import('@/lib/bkat/auto-trigger')
-      triggerAutoBkatOcr(db, anfrage.lead_id, publicUrl).catch((err) =>
-        console.error('[AAR-504] auto-bkat upload-dokumente:', err),
-      )
-    } catch (err) {
-      console.error('[AAR-504] auto-bkat module load:', err)
-    }
+    // AAR-504: Auto-OCR via after() — läuft garantiert nach Response-Send.
+    const { scheduleBkatAnalyseAfterUpload } = await import('@/lib/bkat/auto-trigger')
+    scheduleBkatAnalyseAfterUpload(db, anfrage.lead_id, publicUrl)
   } else if (slotId === 'unfallfotos') {
     // AAR-unfallfotos: Foto landet in fall_dokumente (typ=schadensfotos —
     // matcht den bestehenden Dokument-Katalog-Slot, siehe

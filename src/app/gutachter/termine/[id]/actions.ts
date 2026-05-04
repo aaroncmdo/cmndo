@@ -275,6 +275,21 @@ export async function uploadPolizeiberichtAsSv(
       .eq('id', fallId)
   }
 
+  // AAR-504: BKat-Auto-Analyse via after() auch beim SV-Upload anstoßen.
+  // Lead-ID kommt über faelle.lead_id (post-Konvertierung) — gleicher Trigger
+  // wie Kunde-Upload damit `bkat_unfallart` für Kanzlei-Reports konsistent
+  // gefüllt wird, egal wer den Bericht hochgeladen hat.
+  const { data: fallLead } = await adminDb
+    .from('faelle')
+    .select('lead_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const leadIdForBkat = (fallLead?.lead_id as string | null) ?? null
+  if (leadIdForBkat) {
+    const { scheduleBkatAnalyseAfterUpload } = await import('@/lib/bkat/auto-trigger')
+    scheduleBkatAnalyseAfterUpload(adminDb, leadIdForBkat, dokumentUrl)
+  }
+
   // Timeline-Eintrag
   await adminDb.from('timeline').insert({
     fall_id: fallId,
