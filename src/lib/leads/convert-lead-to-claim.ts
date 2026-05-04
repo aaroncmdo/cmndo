@@ -263,6 +263,13 @@ export async function convertLeadToClaim(
 
     // Direktes Email-Feld auf claims — kein JOIN über claim_parties nötig
     kunde_email: (lead.email as string | null) ?? null,
+
+    // — Neu nachgezogen (vorher fehlende Felder)
+    brn: (lead.brn as string | null) ?? null,
+    eigene_versicherung: (lead.eigene_versicherung as string | null) ?? null,
+    eigene_policennr: (lead.eigene_policennr as string | null) ?? null,
+    zeugen_kontakte: (lead.zeugen_kontakte as import('@/lib/supabase/database.types').Json | null) ?? null,
+    spezifikation: (lead.spezifikation as string | null) ?? null,
   }
 
   const { data: claim, error: claimErr } = await admin

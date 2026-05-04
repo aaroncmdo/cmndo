@@ -1842,10 +1842,13 @@ export type Database = {
           anzahl_beteiligte_total: number
           auslandskennzeichen: boolean | null
           bkat_unfallart: string | null
+          brn: string | null
           claim_nummer: string | null
           created_at: string
           created_by_user_id: string | null
           created_via: string
+          eigene_policennr: string | null
+          eigene_versicherung: string | null
           endzustand_gesetzt_am: string | null
           endzustand_gesetzt_durch_user_id: string | null
           endzustand_grund: string | null
@@ -1946,6 +1949,7 @@ export type Database = {
           schadenort_plz: string | null
           schadentag: string
           schadenzeit: string | null
+          spezifikation: string | null
           status: string
           sv_no_show_count: number
           totalschaden: boolean | null
@@ -1965,16 +1969,20 @@ export type Database = {
           vs_ablehnungs_grund: string | null
           wiederbeschaffungsdauer_tage: number | null
           wiederbeschaffungswert: number | null
+          zeugen_kontakte: Json | null
         }
         Insert: {
           abgeschlossen_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
           bkat_unfallart?: string | null
+          brn?: string | null
           claim_nummer?: string | null
           created_at?: string
           created_by_user_id?: string | null
           created_via?: string
+          eigene_policennr?: string | null
+          eigene_versicherung?: string | null
           endzustand_gesetzt_am?: string | null
           endzustand_gesetzt_durch_user_id?: string | null
           endzustand_grund?: string | null
@@ -2075,6 +2083,7 @@ export type Database = {
           schadenort_plz?: string | null
           schadentag: string
           schadenzeit?: string | null
+          spezifikation?: string | null
           status?: string
           sv_no_show_count?: number
           totalschaden?: boolean | null
@@ -2094,16 +2103,20 @@ export type Database = {
           vs_ablehnungs_grund?: string | null
           wiederbeschaffungsdauer_tage?: number | null
           wiederbeschaffungswert?: number | null
+          zeugen_kontakte?: Json | null
         }
         Update: {
           abgeschlossen_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
           bkat_unfallart?: string | null
+          brn?: string | null
           claim_nummer?: string | null
           created_at?: string
           created_by_user_id?: string | null
           created_via?: string
+          eigene_policennr?: string | null
+          eigene_versicherung?: string | null
           endzustand_gesetzt_am?: string | null
           endzustand_gesetzt_durch_user_id?: string | null
           endzustand_grund?: string | null
@@ -2204,6 +2217,7 @@ export type Database = {
           schadenort_plz?: string | null
           schadentag?: string
           schadenzeit?: string | null
+          spezifikation?: string | null
           status?: string
           sv_no_show_count?: number
           totalschaden?: boolean | null
@@ -2223,6 +2237,7 @@ export type Database = {
           vs_ablehnungs_grund?: string | null
           wiederbeschaffungsdauer_tage?: number | null
           wiederbeschaffungswert?: number | null
+          zeugen_kontakte?: Json | null
         }
         Relationships: [
           {
