@@ -239,7 +239,7 @@ export default function SpontanTerminModal({
                 {geocode && (
                   <span className="inline-flex items-center gap-1 text-[10px] text-claimondo-ondo">
                     <NavigationIcon className="w-2.5 h-2.5" />
-                    Distanz vom Besichtigungsort
+                    Fahrtzeit zum Besichtigungsort
                   </span>
                 )}
               </div>
@@ -283,11 +283,16 @@ export default function SpontanTerminModal({
                           </div>
                           <div className="text-right shrink-0">
                             <p className={`font-semibold ${ausserhalb ? 'text-amber-700' : 'text-claimondo-navy'}`}>
-                              {v.distanzKm.toFixed(1)} km
+                              {v.etaMinuten != null
+                                ? `${v.etaMinuten} min`
+                                : `${v.distanzKm.toFixed(1)} km`}
                             </p>
-                            {ausserhalb && (
-                              <p className="text-[9px] text-amber-700">außerh. Radius</p>
-                            )}
+                            <p className="text-[9px] text-claimondo-ondo/70">
+                              {v.etaMinuten != null
+                                ? `${v.distanzKm.toFixed(1)} km`
+                                : 'ETA n/a'}
+                              {ausserhalb && <span className="text-amber-700"> · außerh. Radius</span>}
+                            </p>
                           </div>
                         </button>
                       )
