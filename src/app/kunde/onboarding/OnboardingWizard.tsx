@@ -602,17 +602,13 @@ export default function OnboardingWizard({
               // Pflicht-Slots existieren noch). Im gelben Fall schiebt der
               // Banner im Layout das Re-Engagement.
               //
-              // CMM-22 Bugfix: gleiche Smart-Filter-Sicht wie der Banner
-              // (relevanteSlotIds), Pflicht aus der DB-Row, optimistische
-              // docStatus-Override für sofortiges Feedback nach einem Upload.
-              // Vorher zählte das Ende ungefiltert über pflichtDocs und
-              // ignorierte den Smart-Filter — dadurch tauchten Slots wie
-              // gewerbenachweis/freigabe_bank auf die der Banner gar nicht
-              // anzeigt (3 vs 4-Diskrepanz).
-              const offenePflicht = pflichtDocs.filter(
-                (d) => relevanteSlotIds.has(d.slot_id)
-                  && d.pflicht
-                  && (docStatus[d.id] ?? d.status) !== 'hochgeladen',
+              // CMM-33 Fix: pflichtSlots nutzen statt pflichtDocs + docStatus.
+              // PflichtdokumenteSection-Uploads aktualisieren docStatus nicht —
+              // sie rufen router.refresh(), wodurch pflichtSlots als Prop neu
+              // vom Server kommt. d.status via ?? war nie erreichbar weil
+              // docStatus[d.id] immer defined ist (initialisiert als 'ausstehend').
+              const offenePflicht = pflichtSlots.filter(
+                (s) => s.pflicht && s.status !== 'erfuellt',
               ).length
               const allesErfuellt = offenePflicht === 0
               return (
