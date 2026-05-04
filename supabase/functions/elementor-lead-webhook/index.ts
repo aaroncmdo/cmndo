@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
         notiz: body.message || null,
         source_channel: body.source_channel || "elementor",
         source_domain: body.source_domain || null,
-        schadens_datum: schadensDatum,
+        unfalldatum: schadensDatum,
         status: "neu",
         qualifizierungs_phase: "neu",
         service_typ: "komplett",
