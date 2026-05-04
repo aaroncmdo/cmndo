@@ -400,14 +400,14 @@ export default function FlowWizardKfz({
                         <p className="text-sm text-claimondo-ondo">
                           {new Date(gutachter.terminDatum).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} Uhr
                         </p>
-                        {/* AAR-341: Besichtigungsort + optional Treffpunkt */}
+                        {/* Besichtigungsort prominent — NICHT der Unfallort */}
                         {gutachter.besichtigungsAdresse && (
                           <div className="mt-3 pt-3 border-t border-[#4573A2]/10">
-                            <p className="text-xs text-claimondo-ondo mb-0.5">Besichtigungsort</p>
-                            <p className="text-sm text-[#0D1B3E]">{gutachter.besichtigungsAdresse}</p>
+                            <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wide mb-1">Besichtigungsort</p>
+                            <p className="text-base font-bold text-[#0D1B3E] leading-snug">{gutachter.besichtigungsAdresse}</p>
                             {gutachter.svTreffpunkt && (
-                              <p className="text-xs text-claimondo-ondo mt-0.5">
-                                Treffpunkt: {gutachter.svTreffpunkt}
+                              <p className="text-xs text-claimondo-ondo mt-1.5">
+                                <span className="font-medium">Treffpunkt:</span> {gutachter.svTreffpunkt}
                               </p>
                             )}
                           </div>

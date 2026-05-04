@@ -205,6 +205,9 @@ export default function Phase1Qualifizierung() {
   const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState(
     l.besichtigungsort_adresse ?? ''
   )
+  const [besichtigungsortNotiz, setBesichtigungsortNotiz] = useState(
+    (l as { besichtigungsort_notiz?: string | null }).besichtigungsort_notiz ?? ''
+  )
 
   function saveBesichtigungsort(place: PlaceResult) {
     setBesichtigungsortAdresse(place.adresse)
@@ -587,6 +590,19 @@ export default function Phase1Qualifizierung() {
                     onSelect={saveBesichtigungsort}
                     onBlur={(current) => { if (!current.trim()) clearBesichtigungsort() }}
                     className="w-full px-2 py-1.5 border border-claimondo-border rounded-lg text-xs"
+                  />
+                  <textarea
+                    value={besichtigungsortNotiz}
+                    onChange={e => setBesichtigungsortNotiz(e.target.value)}
+                    onBlur={() => {
+                      const notiz = besichtigungsortNotiz.trim() || null
+                      startTransition(async () => {
+                        await saveStammdaten(lead.id, { besichtigungsort_notiz: notiz })
+                      })
+                    }}
+                    rows={2}
+                    placeholder="Treffpunkt-Notiz (z.B. Hintereingang, Schlüssel bei Werkstatt …)"
+                    className="w-full px-2 py-1.5 border border-claimondo-border rounded-lg text-xs resize-none mt-1"
                   />
                 </div>
               </>
