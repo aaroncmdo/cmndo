@@ -43,6 +43,7 @@ export type FallKarteProps = {
     regulierung_am?: string | null
     abgeschlossen_am?: string | null
     vollmacht_signiert_am?: string | null
+    kanzlei_wunsch?: string | null
   }
   aktion: KundeAktion | null
   nextTermin: FallKarteTermin | null
@@ -139,10 +140,45 @@ export default function FallKarte({
   const abgeschlossen = aktivePhase === 'abschluss'
   const svLive = nextTermin?.sv_unterwegs_seit || nextTermin?.sv_angekommen_am
 
+  // Wrapper-Border: 1:1 aus ClaimStepper übernommen (gleiche Priority-Reihenfolge).
+  //   1. Termin verstrichen (start+60min in Vergangenheit, kein SV live)  → rose
+  //   2. Nachbesichtigung ausstehend                                       → amber
+  //   3. Kanzlei-Wunsch offen (nach Gutachten, noch nicht entschieden)    → violet
+  //   4. LexDrive-Vollmacht ausstehend                                     → #0e5be9
+  //   5. Fall abgeschlossen                                                → emerald
+  //   6. Default                                                           → neutral
+  const terminVerstrichen =
+    !!nextTermin &&
+    !svLive &&
+    new Date(nextTermin.start_zeit).getTime() + 60 * 60 * 1000 < Date.now()
+
+  const nachbesichtigungPending = aktion?.state === 'nachbesichtigung-waehlen'
+
+  const kanzleiWunschOffen =
+    aktivePhase === 'regulierung' &&
+    !fall.vollmacht_signiert_am &&
+    (!fall.kanzlei_wunsch ||
+      fall.kanzlei_wunsch === 'noch_unentschieden' ||
+      fall.kanzlei_wunsch === 'nicht_gefragt')
+
+  const lexdriveAusstehend = aktion?.state === 'vollmacht-unterschreiben'
+
+  const wrapperBorder = terminVerstrichen
+    ? 'border-2 border-rose-400'
+    : nachbesichtigungPending
+      ? 'border-2 border-amber-400'
+      : kanzleiWunschOffen
+        ? 'border-2 border-violet-400'
+        : lexdriveAusstehend
+          ? 'border-2 border-[#0e5be9]'
+          : abgeschlossen
+            ? 'border-2 border-emerald-400'
+            : 'border border-claimondo-border'
+
   return (
     <Link
       href={`/kunde/faelle/${fall.id}`}
-      className="block rounded-2xl overflow-hidden bg-white border border-claimondo-border transition-all hover:-translate-y-0.5 active:scale-[0.99]"
+      className={`block rounded-2xl overflow-hidden bg-white ${wrapperBorder} transition-all hover:-translate-y-0.5 active:scale-[0.99]`}
       style={{
         boxShadow: [
           /* Glas-Kante oben + links — weißer Inset-Highlight */
