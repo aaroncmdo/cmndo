@@ -1,177 +1,58 @@
 'use client'
 
-// AAR-110: Lead manuell anlegen Drawer
-// AAR-695: service_typ raus (wird im Lead-Flow gesetzt, ist Endpoint-Sender
-// für die Kanzlei). Google-Maps-Autocomplete für die Adresse rein.
+// Quick-Create-Button: legt einen leeren Lead-Stub an und navigiert direkt
+// in die Lead-Maske. Kein Drawer-Modal mehr — der Dispatcher füllt alle
+// Daten in der Maske, wo er auch alle Phase-Inputs sieht.
+//
+// Aaron-Spec:
+//   „lass es weg und leg bei klick auf+ neuer lead halt einfach einen
+//    neuen lead an und öffne die maske"
 
-import { useState, useTransition } from 'react'
+import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { PlusIcon, XIcon } from 'lucide-react'
-import { createManualLead, type CreateManualLeadInput } from '../actions'
-import { Drawer } from '@/components/primitives/Drawer'
-
-const INITIAL: CreateManualLeadInput = {
-  anrede: null,
-  vorname: '',
-  nachname: '',
-  telefon: '',
-  email: '',
-  fahrzeug_hersteller: '',
-  fahrzeug_modell: '',
-  kennzeichen: '',
-  lackfarbe_code: null,
-  fahrzeug_farbe: '',
-  kunde_adresse: '',
-  kunde_strasse: '',
-  kunde_plz: '',
-  kunde_stadt: '',
-  kunde_lat: null,
-  kunde_lng: null,
-  source_channel: 'manuell',
-  // Adresse wird in Phase 4 Stammdaten erfasst
-  notizen: '',
-}
-
-// Fahrzeugfelder (Hersteller/Modell/Kennzeichen/Lackfarbe/Render) werden
-// in Phase 4 Stammdaten erfasst — nicht beim schnellen Lead-Anlegen.
+import { PlusIcon } from 'lucide-react'
+import { createManualLead } from '../actions'
 
 export default function NeuLeadDrawer({ fab = false }: { fab?: boolean }) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
-  const [data, setData] = useState<CreateManualLeadInput>(INITIAL)
 
-  function handleSubmit() {
-    setError(null)
+  function handleClick() {
     startTransition(async () => {
-      const result = await createManualLead(data)
-      if (!result.success || !result.leadId) {
-        setError(result.error ?? 'Fehler')
-        return
+      const result = await createManualLead({
+        anrede: null,
+        vorname: '',
+        nachname: '',
+        telefon: '',
+        email: '',
+        kunde_adresse: '',
+        kunde_strasse: '',
+        kunde_plz: '',
+        kunde_stadt: '',
+        kunde_lat: null,
+        kunde_lng: null,
+        source_channel: 'manuell',
+        notizen: '',
+      })
+      if (result.success && result.leadId) {
+        router.push(`/dispatch/leads/${result.leadId}`)
+      } else {
+        alert(result.error ?? 'Lead konnte nicht angelegt werden')
       }
-      setData(INITIAL)
-      setOpen(false)
-      router.push(`/dispatch/leads/${result.leadId}`)
     })
   }
 
   return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className={fab
-          ? 'flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-semibold bg-claimondo-navy hover:bg-claimondo-shield text-white shadow-lg shadow-claimondo-navy/30 transition-colors'
-          : 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-colors'
-        }
-      >
-        <PlusIcon className="w-4 h-4" />
-        Neuer Lead
-      </button>
-
-      <Drawer open={open} onClose={() => setOpen(false)} width={448} noPadding hideCloseButton ariaLabel="Neuer Lead">
-        <div className="sticky top-0 bg-white border-b border-claimondo-border px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-lg font-semibold text-claimondo-navy">Neuer Lead</h2>
-          <button onClick={() => setOpen(false)} className="text-claimondo-ondo/70 hover:text-claimondo-navy">
-            <XIcon className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="p-6 space-y-4">
-          {/* CMM-32: Anrede-Dropdown für saubere WhatsApp/Email-Anrede */}
-          <div>
-            <label className="block text-xs text-claimondo-ondo mb-1.5">Anrede</label>
-            <select
-              value={data.anrede ?? ''}
-              onChange={(e) =>
-                setData({ ...data, anrede: (e.target.value || null) as 'herr' | 'frau' | 'divers' | null })
-              }
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm bg-white focus:outline-none focus:border-claimondo-ondo"
-            >
-              <option value="">— bitte wählen —</option>
-              <option value="herr">Herr</option>
-              <option value="frau">Frau</option>
-              <option value="divers">Divers</option>
-            </select>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <InputField label="Vorname" value={data.vorname} onChange={v => setData({ ...data, vorname: v })} />
-            <InputField label="Nachname" value={data.nachname} onChange={v => setData({ ...data, nachname: v })} />
-          </div>
-          <InputField label="Telefon *" value={data.telefon} onChange={v => setData({ ...data, telefon: v })} type="tel" placeholder="+49..." />
-          <InputField label="E-Mail *" value={data.email} onChange={v => setData({ ...data, email: v })} type="email" placeholder="kunde@beispiel.de" />
-
-          {/* Adresse wird in Phase 4 Stammdaten erfasst */}
-
-          {/* AAR-216: Schadentyp-Dropdown wird in Phase 2 erfasst. */}
-          {/* AAR-695: Service-Typ-Dropdown raus — wird im Lead-Flow festgelegt
-              (service_typ ist u. a. Endpoint-Sender für die Kanzlei). */}
-
-          <div>
-            <label className="block text-xs text-claimondo-ondo mb-1.5">Quelle</label>
-            <select
-              value={data.source_channel}
-              onChange={e => setData({ ...data, source_channel: e.target.value })}
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
-            >
-              <option value="manuell">Manuell angelegt</option>
-              <option value="telefon">Telefon (kein Aircall)</option>
-              <option value="email">E-Mail</option>
-              <option value="empfehlung">Empfehlung</option>
-              <option value="google-ads">Google Ads</option>
-              <option value="website">Website</option>
-              <option value="test">Test-Lead</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs text-claimondo-ondo mb-1.5">Notizen</label>
-            <textarea
-              value={data.notizen}
-              onChange={e => setData({ ...data, notizen: e.target.value })}
-              rows={3}
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
-              placeholder="Optionale Notizen zum Lead..."
-            />
-          </div>
-
-          {error && <p className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</p>}
-
-          <div className="flex gap-2 pt-2">
-            <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-[#f8f9fb] rounded-xl">
-              Abbrechen
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={pending || !data.telefon}
-              className="flex-1 py-2.5 text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white rounded-xl disabled:opacity-40"
-            >
-              {pending ? 'Erstelle...' : 'Lead anlegen'}
-            </button>
-          </div>
-        </div>
-      </Drawer>
-    </>
-  )
-}
-
-function InputField({ label, value, onChange, type = 'text', placeholder }: {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  type?: string
-  placeholder?: string
-}) {
-  return (
-    <div>
-      <label className="block text-xs text-claimondo-ondo mb-1.5">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
-      />
-    </div>
+    <button
+      onClick={handleClick}
+      disabled={pending}
+      className={fab
+        ? 'flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-semibold bg-claimondo-navy hover:bg-claimondo-shield text-white shadow-lg shadow-claimondo-navy/30 transition-colors disabled:opacity-60'
+        : 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-colors disabled:opacity-60'
+      }
+    >
+      <PlusIcon className="w-4 h-4" />
+      {pending ? 'Erstelle …' : 'Neuer Lead'}
+    </button>
   )
 }

@@ -58,8 +58,16 @@ export default async function DispatchLeads({
       {/* Liste / Kanban Toggle + View */}
       <LeadsViewToggle leads={leads ?? []} />
 
-      {/* Floating Action Button */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+      {/* Floating Action Button — zentriert im Content-Bereich rechts der
+          Sidebar. --app-sidebar-width wird vom PortalNav auf <html> gesetzt
+          und ist auf Mobile 0px (Sidebar versteckt). */}
+      <div
+        className="fixed bottom-6 z-50"
+        style={{
+          left: 'calc(var(--app-sidebar-width, 0px) + (100vw - var(--app-sidebar-width, 0px)) / 2)',
+          transform: 'translateX(-50%)',
+        }}
+      >
         <NeuLeadDrawer fab />
       </div>
     </div>
