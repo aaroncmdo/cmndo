@@ -19,3 +19,4 @@ export {
   type FieldModusMapConfig,
   type MarkerSkin,
 } from './types'
+export { getMapboxLightPreset, type MapboxLightPreset } from './light-preset'

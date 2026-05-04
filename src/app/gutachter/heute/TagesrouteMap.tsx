@@ -13,6 +13,7 @@ import {
   addKundeMarker,
   upsertRouteLayer,
   MAPBOX_STYLE_STANDARD,
+  getMapboxLightPreset,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import { NavigationIcon } from 'lucide-react'
@@ -110,13 +111,18 @@ export default function TagesrouteMap({
       attributionControl: false,
     })
 
-    // Mapbox Standard config: Light-Preset für sexier Look + 3D-Modelle aktiv
-    map.on('style.load', () => {
+    // Mapbox Standard-Config: uhrzeitabhängiger Light-Preset + 3D-Modelle.
+    // dawn (5-7h) / day (7-18h) / dusk (18-21h) / night (21-5h)
+    const applyLightPreset = () => {
       try {
-        map.setConfigProperty('basemap', 'lightPreset', 'day')
+        map.setConfigProperty('basemap', 'lightPreset', getMapboxLightPreset())
         map.setConfigProperty('basemap', 'show3dObjects', true)
       } catch { /* fail silent — fallback auf Default */ }
-    })
+    }
+    map.on('style.load', applyLightPreset)
+    // Alle 5 Minuten re-applyn — falls die App offen bleibt während sich
+    // die Tageszeit ändert (Übergang dawn→day, dusk→night, …).
+    const presetTick = setInterval(applyLightPreset, 5 * 60_000)
 
     map.addControl(
       new mapboxgl.NavigationControl({ showCompass: true, visualizePitch: true }),
@@ -138,6 +144,7 @@ export default function TagesrouteMap({
     window.addEventListener('resize', onWindowResize)
 
     return () => {
+      clearInterval(presetTick)
       ro.disconnect()
       window.removeEventListener('resize', onWindowResize)
       svMarkerRef.current?.remove()

@@ -12,11 +12,12 @@ import { useEffect, useRef } from 'react'
 import {
   ensureMapboxInitialized,
   mapboxgl,
-  addSvAvatarMarker,
+  addSvCarMarker,
   addKundeMarker,
   upsertRouteLayer,
   MAPBOX_STYLE_STANDARD,
   DEFAULT_FIELD_MAP_CONFIG,
+  getMapboxLightPreset,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
@@ -74,6 +75,16 @@ export default function FeldmodusMap({
 
     mapRef.current = map
 
+    // Uhrzeitabhängiger Light-Preset (dawn/day/dusk/night) + 3D-Modelle.
+    const applyLightPreset = () => {
+      try {
+        map.setConfigProperty('basemap', 'lightPreset', getMapboxLightPreset())
+        map.setConfigProperty('basemap', 'show3dObjects', true)
+      } catch { /* fail silent */ }
+    }
+    map.on('style.load', applyLightPreset)
+    const presetTick = setInterval(applyLightPreset, 5 * 60_000)
+
     map.on('load', () => {
       // Stop-Pins setzen (Nummer im Marker als Initials verwendet)
       stops.forEach((stop, idx) => {
@@ -112,6 +123,7 @@ export default function FeldmodusMap({
     window.addEventListener('resize', onWindowResize)
 
     return () => {
+      clearInterval(presetTick)
       ro.disconnect()
       window.removeEventListener('resize', onWindowResize)
       svMarkerRef.current?.remove()
@@ -133,19 +145,20 @@ export default function FeldmodusMap({
     if (!svPosition) return
 
     if (!svMarkerRef.current) {
-      svMarkerRef.current = addSvAvatarMarker(
+      svMarkerRef.current = addSvCarMarker(
         map,
         [svPosition.lng, svPosition.lat],
-        {
-          avatarUrl: sv.avatar_url,
-          initials: sv.anzeigename,
-          heading: svPosition.heading,
-        },
+        { heading: svPosition.heading },
       )
     } else {
       svMarkerRef.current.setLngLat([svPosition.lng, svPosition.lat])
+      // Heading live updaten — Auto rotiert mit Fahrtrichtung
+      if (svPosition.heading != null) {
+        svMarkerRef.current.getElement().style.transform =
+          `${svMarkerRef.current.getElement().style.transform.replace(/rotate\([^)]*\)/, '')} rotate(${svPosition.heading}deg)`
+      }
     }
-  }, [svPosition, sv.avatar_url, sv.anzeigename])
+  }, [svPosition])
 
   // Kamera auf aktuellen Stop + SV zentrieren (wenn beide vorhanden)
   useEffect(() => {
