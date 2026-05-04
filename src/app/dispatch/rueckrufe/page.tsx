@@ -26,7 +26,13 @@ type RueckrufRow = {
   } | null
 }
 
-export default async function DispatchRueckrufe() {
+export default async function DispatchRueckrufe({
+  searchParams,
+}: {
+  searchParams?: Promise<{ open?: string }>
+}) {
+  const sp = (await searchParams) ?? {}
+  const openParam = sp.open ?? null
   const supabase = await createClient()
 
   const { data: raw } = await supabase
@@ -79,6 +85,7 @@ export default async function DispatchRueckrufe() {
               notizen={t.notizen}
               isNew={!t.gesehen_am}
               lead={lead}
+              defaultOpen={openParam === t.id}
             />
           )
         })}

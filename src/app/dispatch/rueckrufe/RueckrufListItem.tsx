@@ -17,6 +17,8 @@ type Props = {
   startZeit: string
   notizen: string | null
   isNew: boolean
+  /** Wenn true, ist das Popover initial offen (Deeplink via ?open=). */
+  defaultOpen?: boolean
   lead: {
     id: string
     vorname: string | null
@@ -29,8 +31,8 @@ type Props = {
   }
 }
 
-export default function RueckrufListItem({ terminId, startZeit, notizen, isNew, lead }: Props) {
-  const [open, setOpen] = useState(false)
+export default function RueckrufListItem({ terminId, startZeit, notizen, isNew, lead, defaultOpen = false }: Props) {
+  const [open, setOpen] = useState(defaultOpen)
 
   const isOverdue = new Date(startZeit) < new Date()
 
