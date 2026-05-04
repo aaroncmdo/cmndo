@@ -34,7 +34,7 @@ export default async function DispatchDashboard() {
     // Meine offenen Tasks
     supabase
       .from('tasks')
-      .select('id, titel, typ, prioritaet, faellig_am, fall_id, created_at')
+      .select('id, titel, typ, prioritaet, faellig_am, fall_id, lead_id, created_at')
       .eq('typ', 'dispatch')
       .eq('status', 'offen')
       .order('created_at', { ascending: false })
@@ -66,6 +66,26 @@ export default async function DispatchDashboard() {
 
   const tasks = myTasksRes.data ?? []
   const recentLeads = recentLeadsRes.data ?? []
+
+  // Tasks mit fall_id aber ohne lead_id → Bulk-Resolve via faelle.lead_id,
+  // damit das Dashboard direkt in die Lead-Maske linkt (Aaron-Wunsch).
+  const fallOnlyTasks = tasks.filter((t) => !t.lead_id && t.fall_id)
+  const fallToLeadMap = new Map<string, string>()
+  if (fallOnlyTasks.length > 0) {
+    const fallIds = Array.from(new Set(fallOnlyTasks.map((t) => t.fall_id as string)))
+    const { data: faelleRows } = await supabase
+      .from('faelle')
+      .select('id, lead_id')
+      .in('id', fallIds)
+    for (const f of (faelleRows ?? []) as Array<{ id: string; lead_id: string | null }>) {
+      if (f.lead_id) fallToLeadMap.set(f.id, f.lead_id)
+    }
+  }
+  function leadIdForTask(t: { lead_id: string | null; fall_id: string | null }): string | null {
+    if (t.lead_id) return t.lead_id
+    if (t.fall_id && fallToLeadMap.has(t.fall_id)) return fallToLeadMap.get(t.fall_id)!
+    return null
+  }
   type RueckrufRow = {
     id: string
     start_zeit: string
@@ -215,17 +235,39 @@ export default async function DispatchDashboard() {
             </h2>
           </div>
           <div className="divide-y divide-claimondo-border max-h-[400px] overflow-y-auto">
-            {tasks.map((task) => (
-              <div key={task.id} className="px-5 py-3 flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-claimondo-navy truncate">{task.titel}</p>
-                  <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : ''}</p>
+            {tasks.map((task) => {
+              const leadId = leadIdForTask(task)
+              const fallId = !leadId && task.fall_id ? task.fall_id : null
+              const href = leadId
+                ? `/dispatch/leads/${leadId}`
+                : fallId
+                  ? `/faelle/${fallId}`
+                  : null
+              const inner = (
+                <>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-claimondo-navy truncate">{task.titel}</p>
+                    <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : ''}</p>
+                  </div>
+                  {task.prioritaet === 'dringend' && (
+                    <span className="text-[10px] font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Dringend</span>
+                  )}
+                </>
+              )
+              return href ? (
+                <Link
+                  key={task.id}
+                  href={href}
+                  className="px-5 py-3 flex items-center gap-3 hover:bg-[#f8f9fb] transition-colors"
+                >
+                  {inner}
+                </Link>
+              ) : (
+                <div key={task.id} className="px-5 py-3 flex items-center gap-3">
+                  {inner}
                 </div>
-                {task.prioritaet === 'dringend' && (
-                  <span className="text-[10px] font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Dringend</span>
-                )}
-              </div>
-            ))}
+              )
+            })}
             {tasks.length === 0 && (
               <p className="px-5 py-8 text-sm text-claimondo-ondo/70 text-center">Keine offenen Tasks</p>
             )}

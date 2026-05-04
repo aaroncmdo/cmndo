@@ -27,6 +27,8 @@ export interface FeldmodusMapProps {
   stops: FeldmodusStop[]
   aktuellerStopIndex: number
   svPosition: { lat: number; lng: number; heading: number | null } | null
+  /** Wenn true → Map folgt SV-Position mit bearing=heading + close zoom (TbT). */
+  followSv?: boolean
 }
 
 export default function FeldmodusMap({
@@ -34,6 +36,7 @@ export default function FeldmodusMap({
   stops,
   aktuellerStopIndex,
   svPosition,
+  followSv = false,
 }: FeldmodusMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
@@ -160,12 +163,27 @@ export default function FeldmodusMap({
     }
   }, [svPosition])
 
-  // Kamera auf aktuellen Stop + SV zentrieren (wenn beide vorhanden)
+  // Kamera-Follow oder Bounds-Fit
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !aktuellerStop) return
-    if (aktuellerStop.lat == null || aktuellerStop.lng == null) return
+    if (!map) return
 
+    // TbT-Modus: Map folgt SV mit Heading-Rotation, nahem Zoom, hohem Pitch
+    if (followSv && svPosition) {
+      map.easeTo({
+        center: [svPosition.lng, svPosition.lat],
+        zoom: 16.5,
+        bearing: svPosition.heading ?? 0,
+        pitch: 60,
+        duration: 800,
+        essential: true,
+      })
+      return
+    }
+
+    // Bounds-Mode: SV + aktueller Stop in den Sichtbereich
+    if (!aktuellerStop) return
+    if (aktuellerStop.lat == null || aktuellerStop.lng == null) return
     if (svPosition) {
       const bounds = new mapboxgl.LngLatBounds()
       bounds.extend([svPosition.lng, svPosition.lat])
@@ -178,7 +196,7 @@ export default function FeldmodusMap({
         duration: 700,
       })
     }
-  }, [aktuellerStop, svPosition])
+  }, [aktuellerStop, svPosition, followSv])
 
   // Route-Polyline: Luftlinie zwischen SV und aktuellem Stop
   useEffect(() => {

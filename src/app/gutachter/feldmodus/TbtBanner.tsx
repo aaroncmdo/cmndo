@@ -13,6 +13,7 @@ import {
   FlagIcon,
   Volume2Icon,
   VolumeXIcon,
+  Loader2Icon,
 } from 'lucide-react'
 import type { TbtStep } from '@/lib/mapbox/turn-by-turn'
 
@@ -48,6 +49,8 @@ export interface TbtBannerProps {
   /** Gesamt-ETA bis Ziel in Sekunden (optional) */
   totalDurationSec?: number | null
   totalDistanceMeters?: number | null
+  /** Wenn true → Re-Routing läuft, Banner zeigt einen Indikator */
+  rerouting?: boolean
 }
 
 export default function TbtBanner({
@@ -57,6 +60,7 @@ export default function TbtBanner({
   onToggleVoice,
   totalDurationSec,
   totalDistanceMeters,
+  rerouting = false,
 }: TbtBannerProps) {
   if (!step) return null
   const Icon = pickIcon(step)
@@ -66,7 +70,14 @@ export default function TbtBanner({
   const subline = secondary?.text ?? step.name
 
   return (
-    <div className="absolute top-3 left-3 right-3 z-20 pointer-events-none">
+    <div className="absolute top-3 left-3 right-3 z-20 pointer-events-none space-y-2">
+      {/* Re-Routing-Pill — schmaler Hinweis über dem Haupt-Banner */}
+      {rerouting && (
+        <div className="bg-amber-500/95 backdrop-blur-sm text-white rounded-full shadow-lg px-4 py-1.5 text-xs font-medium flex items-center justify-center gap-2 mx-auto w-fit pointer-events-auto">
+          <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
+          Neue Route wird berechnet …
+        </div>
+      )}
       <div className="bg-claimondo-navy/95 backdrop-blur-sm text-white rounded-2xl shadow-xl pointer-events-auto overflow-hidden">
         <div className="flex items-stretch">
           {/* Icon + Distance */}

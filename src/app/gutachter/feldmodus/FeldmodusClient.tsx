@@ -251,6 +251,7 @@ export default function FeldmodusClient({
           stops={stops}
           aktuellerStopIndex={aktuellerStopIndex}
           svPosition={position}
+          followSv={tbtActive && !!tbt.route}
         />
         {/* TbT-Banner — nur während Anfahrt zum Stop (vor arrived) */}
         {tbtActive && tbt.upcomingStep && (
@@ -261,6 +262,7 @@ export default function FeldmodusClient({
             onToggleVoice={() => setTbtVoiceOn((v) => !v)}
             totalDurationSec={tbt.route?.duration ?? null}
             totalDistanceMeters={tbt.route?.distance ?? null}
+            rerouting={tbt.rerouting}
           />
         )}
         {permissionState === 'denied' && (

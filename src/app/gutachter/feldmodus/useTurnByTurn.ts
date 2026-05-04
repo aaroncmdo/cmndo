@@ -27,6 +27,8 @@ export interface UseTurnByTurnArgs {
   voiceEnabled?: boolean
   /** Distance in Metern bei der next-step ausgelöst wird. Default 30. */
   stepAdvanceMeters?: number
+  /** Distance in Metern bei der Off-Route erkannt + Re-Routing getriggert wird. Default 60. */
+  offRouteThresholdMeters?: number
 }
 
 export interface UseTurnByTurnResult {
@@ -38,8 +40,28 @@ export interface UseTurnByTurnResult {
   upcomingStep: TbtStep | null
   /** Distance in Metern zum nächsten Maneuver-Punkt. */
   distanceToNextManeuver: number | null
+  /** Wird aktuell automatisch neu geroutet (kurzfristig nach Off-Route). */
+  rerouting: boolean
   /** Manuell neu fetchen. */
   refresh: () => void
+}
+
+/**
+ * Distance vom Punkt p zum nächsten Punkt einer Polyline (geometry).
+ * Approximation: minimale Haversine-Distance zu den Vertex-Punkten —
+ * gut genug für Off-Route-Detection bei dichten Routen-Geometrien.
+ */
+function distanceToRoute(
+  p: { lat: number; lng: number },
+  geometry: Array<[number, number]>,
+): number {
+  if (geometry.length === 0) return Infinity
+  let min = Infinity
+  for (const [lng, lat] of geometry) {
+    const d = haversineMetersLngLat([p.lng, p.lat], [lng, lat])
+    if (d < min) min = d
+  }
+  return min
 }
 
 export function useTurnByTurn({
@@ -48,13 +70,20 @@ export function useTurnByTurn({
   position,
   voiceEnabled = true,
   stepAdvanceMeters = 30,
+  offRouteThresholdMeters = 60,
 }: UseTurnByTurnArgs): UseTurnByTurnResult {
   const [route, setRoute] = useState<TbtRoute | null>(null)
   const [loading, setLoading] = useState(false)
+  const [rerouting, setRerouting] = useState(false)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [refreshTick, setRefreshTick] = useState(0)
   // Trackt gesprochene Voice-IDs damit jede nur einmal kommt
   const spokenVoiceKeys = useRef<Set<string>>(new Set())
+  // Off-Route-State: wann zuletzt Re-Routing getriggert (Throttle 15s)
+  const lastReroutedAt = useRef<number>(0)
+  // Trackt N-aufeinanderfolgende Off-Route-Frames damit ein einzelner GPS-
+  // Jitter nicht direkt re-routet
+  const offRouteCount = useRef<number>(0)
 
   // Route laden bei Origin/Destination-Wechsel oder Refresh-Trigger
   useEffect(() => {
@@ -84,9 +113,46 @@ export function useTurnByTurn({
   }, [origin?.lat, origin?.lng, destination?.lat, destination?.lng, refreshTick])
 
   // Step-Tracking: bei jeder Position-Änderung Distance zum nächsten Maneuver
-  // prüfen und ggf. Step weiter. Voice-Instructions auswerten.
+  // prüfen und ggf. Step weiter. Voice-Instructions auswerten + Off-Route
+  // detect → Re-Routing nach 3 aufeinanderfolgenden Off-Route-Frames mit
+  // mind. 15s Cooldown zwischen Re-Routes.
   useEffect(() => {
     if (!route || !position) return
+
+    // Off-Route-Detection
+    const dRoute = distanceToRoute(position, route.geometry)
+    if (dRoute > offRouteThresholdMeters) {
+      offRouteCount.current += 1
+      const cooldownOk = Date.now() - lastReroutedAt.current > 15_000
+      if (offRouteCount.current >= 3 && cooldownOk && destination) {
+        offRouteCount.current = 0
+        lastReroutedAt.current = Date.now()
+        setRerouting(true)
+        if (voiceEnabled) speakInstruction('Neue Route wird berechnet')
+        fetchTurnByTurnRoute(
+          { lat: position.lat, lng: position.lng },
+          destination,
+          'de',
+        ).then((r) => {
+          setRerouting(false)
+          if (r) {
+            setRoute(r)
+            setCurrentStepIndex(0)
+            spokenVoiceKeys.current.clear()
+            // Erste Voice der neuen Route direkt
+            if (voiceEnabled && r.steps[0]?.voiceInstructions[0]) {
+              const v = r.steps[0].voiceInstructions[0]
+              speakInstruction(v.announcement)
+              spokenVoiceKeys.current.add(`0-${v.distanceAlongGeometry}`)
+            }
+          }
+        })
+        return // Beim Re-Routing aktuelle Step-Logik überspringen
+      }
+    } else {
+      offRouteCount.current = 0
+    }
+
     const nextStep = route.steps[currentStepIndex + 1]
     if (!nextStep) return // Letzter Step — Ziel wird erreicht
 
@@ -116,7 +182,7 @@ export function useTurnByTurn({
     if (dist < stepAdvanceMeters) {
       setCurrentStepIndex((idx) => idx + 1)
     }
-  }, [position, route, currentStepIndex, voiceEnabled, stepAdvanceMeters])
+  }, [position, route, currentStepIndex, voiceEnabled, stepAdvanceMeters, offRouteThresholdMeters, destination])
 
   // Voice abschalten cancelt alle pending Utterances
   useEffect(() => {
@@ -147,6 +213,7 @@ export function useTurnByTurn({
   return {
     route,
     loading,
+    rerouting,
     currentStepIndex,
     upcomingStep,
     distanceToNextManeuver,
