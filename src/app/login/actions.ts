@@ -88,9 +88,16 @@ export async function login(formData: FormData) {
   // AAR-2fa-fix: Alte 2FA-Bestätigung beim Login-Submit IMMER löschen.
   // Aaron-Spec: 2FA soll bei jeder Anmeldung getriggert werden — außer
   // der User hat „Angemeldet bleiben" gewählt (claimondo_remember-Token).
-  // Wenn das alte 3-Tage-Cookie weiterläuft, würde die Middleware bei
-  // diesem Login die 2FA überspringen — das wollen wir nicht.
-  cookieStore.delete('claimondo_2fa_verified')
+  // Wir nutzen explizit `set` mit `maxAge: 0` statt `delete()` — letzteres
+  // hatte in Production Race-Conditions mit dem Supabase-Cookie-Adapter,
+  // der parallel auf demselben cookieStore arbeitet.
+  cookieStore.set('claimondo_2fa_verified', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  })
 
   // 2FA aktiv? → direkt nach /login/2fa, nicht über Browser-Roundtrip
   // via Middleware. Spart eine Redirect-Runde + verhindert Race-Conditions
@@ -102,16 +109,17 @@ export async function login(formData: FormData) {
     redirect('/login/2fa')
   }
 
-  // 2FA inaktiv → Cookie setzen damit Middleware nicht ständig zu
-  // /login/2fa schickt. Session-Cookie (kein maxAge) — beim Browser-
-  // Close erlischt es; ein Folge-Login triggert dann ohnehin den
-  // delete oben.
+  // 2FA inaktiv → Cookie setzen damit Middleware nicht zu /login/2fa
+  // schickt. 3-Tage-Persistenz statt Session-Cookie: Mobile-Browser und
+  // Vercel-Edge können Session-Cookies in seltenen Fällen verlieren →
+  // Loop. Beim nächsten echten Login wird das Cookie ohnehin durch das
+  // explicit set(maxAge=0) oben weggeräumt → „2FA pro Anmeldung" bleibt.
   cookieStore.set('claimondo_2fa_verified', '1', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    // kein maxAge → Session-Cookie
+    maxAge: 3 * 24 * 60 * 60,
   })
 
   // BUG-82: revalidatePath vor dem redirect() ist NOTWENDIG damit der

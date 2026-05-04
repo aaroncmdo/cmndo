@@ -43,12 +43,12 @@ export async function verifyTwoFaCode(code: string): Promise<{ success: boolean;
   // Reset fail count
   failCountMap.delete(key)
 
-  // AAR-2fa-fix: 2FA-Cookie als Session-Cookie (kein maxAge). Aaron-Spec:
-  // 2FA bei jeder Anmeldung erzwingen — die 3-Tage-Lebensdauer hat dieses
-  // Verhalten verhindert. Wer 2FA länger skippen möchte, nutzt
-  // „Angemeldet bleiben" (claimondo_remember-Token, 30 Tage). Innerhalb
-  // einer Browser-Session bleibt der Cookie aktiv → Multi-Tab-Navigation
-  // funktioniert weiter ohne erneutes 2FA pro Tab.
+  // AAR-2fa-loop-fix: 3-Tage-Persistenz statt Session-Cookie. Session-
+  // Cookies waren in Production unzuverlässig (Mobile-Browser, Vercel-Edge)
+  // und führten zu Reload-Loops wenn das Cookie zwischen Set und nächstem
+  // Request verloren ging. Aarons „2FA pro Anmeldung"-Spec bleibt intakt:
+  // Login-Action löscht das Cookie explizit beim nächsten Login-Submit,
+  // bevor zur 2FA-Page weitergeleitet wird.
   const { cookies } = await import('next/headers')
   const cookieStore = await cookies()
   cookieStore.set('claimondo_2fa_verified', '1', {
@@ -56,7 +56,7 @@ export async function verifyTwoFaCode(code: string): Promise<{ success: boolean;
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    // kein maxAge → Session-Cookie, wird beim Browser-Close gelöscht
+    maxAge: 3 * 24 * 60 * 60,
   })
 
   return { success: true }
