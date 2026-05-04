@@ -2,24 +2,23 @@
 // vorhandenen SV-Pflichtdokumente (Sicherungsabtretung ODER
 // Honorarvereinbarung + Datenschutzerklärung + Widerrufsbelehrung)
 // mit der Kunden-Unterschrift versehen, im Storage abgelegt und in
-// fall_dokumente eingetragen — sichtbar nur für SV / Admin / KB /
-// Kanzlei (NICHT Kunde — der Kunde sieht in seiner Fallakte stattdessen
-// die Claimondo-eigenen Standard-Dokumente).
+// fall_dokumente eingetragen — sichtbar für Kunde / SV / Admin / KB /
+// Kanzlei (der Kunde kann seine unterschriebenen Verträge in der Fallakte
+// abrufen).
 //
 // Strategie:
 //  - Pro Slot eine `pflichtdokumente`-Row mit status='hochgeladen' oder
 //    'geprueft' und gesetztem `dokument_url` laden
 //  - Original-PDF aus `fall-dokumente/sv-pflicht/{svId}/{slotId}/...`
 //    runterladen
-//  - Eine zusätzliche Signatur-Seite anhängen (Datum + Name + PNG-
-//    Unterschrift). Anhang statt Position-Konfig, weil pro Slot pro SV
-//    eine Position-Konfig zu pflegen Wochen Onboarding-Aufwand wäre und
-//    rechtlich keine Pflicht ist (eine separate Signatur-Seite mit klarer
-//    Bezugnahme auf das Dokument ist gangbar)
+//  - Klick-Konfig aus dem Vertragseditor laden (Lookup: SV-spezifisch
+//    → _default → Legacy-Top-Level). Wenn vorhanden: Unterschrift +
+//    Datum + Name an den admin-konfigurierten Koordinaten platzieren.
+//    Sonst: Fallback zu separater Signatur-Seite.
 //  - Output landet in `claim/{claim_id}/signed/{slotId}_{ts}.pdf` damit
 //    er klar zum Claim gehört (CMM-34 Storage-Architektur am Claim)
 //  - fall_dokumente-Row mit kategorie='vertrag-signiert', sichtbar_fuer
-//    OHNE 'kunde'
+//    inkl. 'kunde'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
@@ -51,32 +50,46 @@ type KlickKonfig = {
   name_y?: number
 }
 
-/** Liest die jüngste Klick-Editor-Konfig für den Slot (JSON-Sidecar im
- *  Storage). Liefert null wenn kein Editor-Eintrag vorhanden. */
+/** Liest die jüngste Klick-Editor-Konfig (JSON-Sidecar) zum Slot. Lookup-
+ *  Reihenfolge identisch zum Editor-Loader (listVertragsVorlagen):
+ *    1. vertraege-vorlagen/{slot}/{svId}/   (SV-spezifisch)
+ *    2. vertraege-vorlagen/{slot}/_default/ (Default)
+ *    3. vertraege-vorlagen/{slot}/          (Legacy flat)
+ */
 async function loadKlickKonfig(
   admin: SupabaseClient,
   svSlotId: (typeof PFLICHT_SLOTS)[number],
+  svId: string | null,
 ): Promise<KlickKonfig | null> {
   const shortSlot = svSlotId.replace(/^sv_/, '')
-  const dir = `vertraege-vorlagen/${shortSlot}`
-  const { data: files, error } = await admin.storage
-    .from('fall-dokumente')
-    .list(dir, { sortBy: { column: 'name', order: 'desc' }, limit: 50 })
-  if (error || !files) return null
-  const json = files.find((f) => f.name.endsWith('.json'))
-  if (!json) return null
-  const { data: blob } = await admin.storage
-    .from('fall-dokumente')
-    .download(`${dir}/${json.name}`)
-  if (!blob) return null
-  try {
-    const text = await blob.text()
-    const parsed = JSON.parse(text) as KlickKonfig
-    if (typeof parsed.x !== 'number' || typeof parsed.y !== 'number') return null
-    return parsed
-  } catch {
-    return null
+  const dirsToCheck: string[] = []
+  if (svId) dirsToCheck.push(`vertraege-vorlagen/${shortSlot}/${svId}`)
+  dirsToCheck.push(`vertraege-vorlagen/${shortSlot}/_default`)
+  dirsToCheck.push(`vertraege-vorlagen/${shortSlot}`) // Legacy
+
+  for (const dir of dirsToCheck) {
+    const { data: files, error } = await admin.storage
+      .from('fall-dokumente')
+      .list(dir, { sortBy: { column: 'name', order: 'desc' }, limit: 50 })
+    if (error || !files) continue
+    // Nur direkte JSON-Dateien (keine Sub-Ordner-Listings) — der Storage-
+    // .list() liefert auch Sub-Ordner als virtuelle Einträge zurück.
+    const json = files.find((f) => f.name.endsWith('.json'))
+    if (!json) continue
+    const { data: blob } = await admin.storage
+      .from('fall-dokumente')
+      .download(`${dir}/${json.name}`)
+    if (!blob) continue
+    try {
+      const text = await blob.text()
+      const parsed = JSON.parse(text) as KlickKonfig
+      if (typeof parsed.x !== 'number' || typeof parsed.y !== 'number') continue
+      return parsed
+    } catch {
+      continue
+    }
   }
+  return null
 }
 
 export type GeneratePflichtdokResult =
@@ -171,9 +184,9 @@ export async function generateGutachterPflichtdokumente(
 
     try {
       // Klick-Konfig aus dem Vertragseditor laden (falls Admin gepflegt).
-      // Wenn vorhanden: Position-Merge direkt aufs Original-PDF;
-      // sonst: Fallback auf Anhang-Seite.
-      const klickKonfig = await loadKlickKonfig(args.admin, slotId)
+      // Lookup-Order: SV-spezifisch → _default → Legacy. Wenn vorhanden:
+      // Position-Merge direkt aufs Original-PDF; sonst: Anhang-Seite.
+      const klickKonfig = await loadKlickKonfig(args.admin, slotId, args.svId)
 
       const result = await mergeOneDoc({
         admin: args.admin,
@@ -458,7 +471,7 @@ async function persistMerged({
       original_filename: dateiName,
       groesse_bytes: outBytes.byteLength,
       mime_type: 'application/pdf',
-      sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
+      sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
       beschreibung: `${slotLabel} mit Kunden-Unterschrift (SV ${svId})`,
     })
     .select('id')
