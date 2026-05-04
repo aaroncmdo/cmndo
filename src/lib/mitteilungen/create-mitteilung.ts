@@ -73,16 +73,36 @@ function autoIcon(kategorie: MitteilungKategorie, kontextTyp?: KontextTyp): stri
   return '🔔'
 }
 
-// Mitteilungs-System für Go-Live deaktiviert — wird nach Launch reaktiviert.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function createMitteilung(_input: CreateMitteilungInput): Promise<{ id: string } | null> {
-  return null
+export async function createMitteilung(input: CreateMitteilungInput): Promise<{ id: string } | null> {
+  const admin = createAdminClient()
+  const routeUrl = input.route_url ?? autoRouteUrl(input.kontext_typ, input.kontext_id, input.empfaenger_rolle)
+  const icon = input.icon ?? autoIcon(input.kategorie, input.kontext_typ)
+  const { data, error } = await admin.from('mitteilungen').insert({
+    empfaenger_id: input.empfaenger_id,
+    empfaenger_rolle: input.empfaenger_rolle,
+    kategorie: input.kategorie,
+    titel: input.titel,
+    inhalt: input.inhalt ?? null,
+    kontext_typ: input.kontext_typ ?? null,
+    kontext_id: input.kontext_id ?? null,
+    route_url: routeUrl,
+    absender_id: input.absender_id ?? null,
+    absender_name: input.absender_name ?? null,
+    icon,
+    prioritaet: input.prioritaet ?? 'normal',
+  }).select('id').single()
+  if (error) {
+    console.error('[createMitteilung] insert error:', error.message)
+    return null
+  }
+  return data
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function createMitteilungMulti(
-  _empfaenger: Array<{ id: string; rolle: EmpfaengerRolle }>,
-  _base: Omit<CreateMitteilungInput, 'empfaenger_id' | 'empfaenger_rolle'>,
+  empfaenger: Array<{ id: string; rolle: EmpfaengerRolle }>,
+  base: Omit<CreateMitteilungInput, 'empfaenger_id' | 'empfaenger_rolle'>,
 ): Promise<void> {
-  // no-op
+  await Promise.allSettled(
+    empfaenger.map(e => createMitteilung({ ...base, empfaenger_id: e.id, empfaenger_rolle: e.rolle }))
+  )
 }
