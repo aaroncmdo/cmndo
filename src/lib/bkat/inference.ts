@@ -73,18 +73,19 @@ export async function inferBkatFromPolizeibericht(
       max_tokens: 1024,
       system:
         'Du bist ein OCR-Assistent für deutsche Polizeiberichte. Extrahiere:\n' +
-        '1. Alle 6-stelligen Tatbestandsnummern (TBNR, Format [1-9][0-9]{5}).\n' +
-        '2. Das polizeiliche Aktenzeichen (z.B. "3 BM 123456/24", "VP-1234/24", "8 UJs 234/24").\n' +
+        '1. Alle 6-stelligen Tatbestandsnummern / Behördenkennungen (TBNR, Format [1-9][0-9]{5}).\n' +
+        '   Setze tbnrs_eindeutig auf true NUR wenn du die Ziffern klar lesen kannst.\n' +
+        '2. Das polizeiliche Aktenzeichen (z.B. "3 BM 123456/24", "VP-1234/24").\n' +
         '   Setze aktenzeichen_lesbar auf true nur wenn du es eindeutig lesen kannst.\n' +
         'Antwort NUR als JSON:\n' +
-        '{"tbnrs":["123456"],"aktenzeichen":"3 BM 123456/24","aktenzeichen_lesbar":true}\n' +
-        'Wenn keine TBNR: {"tbnrs":[]}. Wenn Aktenzeichen nicht lesbar: "aktenzeichen":null,"aktenzeichen_lesbar":false.',
+        '{"tbnrs":["123456"],"tbnrs_eindeutig":true,"aktenzeichen":"3 BM 123456/24","aktenzeichen_lesbar":true}\n' +
+        'Wenn keine TBNR lesbar: "tbnrs":[],"tbnrs_eindeutig":false. Wenn Aktenzeichen nicht lesbar: "aktenzeichen":null,"aktenzeichen_lesbar":false.',
       messages: [
         {
           role: 'user',
           content: [
             ...imageBlocks,
-            { type: 'text', text: 'Extrahiere TBNRs und Aktenzeichen aus diesem Polizeibericht.' },
+            { type: 'text', text: 'Extrahiere TBNRs (Behördenkennungen) und Aktenzeichen aus diesem Polizeibericht.' },
           ],
         },
       ],
@@ -97,15 +98,19 @@ export async function inferBkatFromPolizeibericht(
 
     const parsed = JSON.parse(match[0]) as {
       tbnrs?: string[]
+      tbnrs_eindeutig?: boolean
       aktenzeichen?: string | null
       aktenzeichen_lesbar?: boolean
     }
     const tbnrs = Array.isArray(parsed.tbnrs) ? parsed.tbnrs : []
+    const tbnrsEindeutig = parsed.tbnrs_eindeutig === true && tbnrs.length > 0
     const visionAktenzeichen = parsed.aktenzeichen_lesbar && parsed.aktenzeichen
       ? parsed.aktenzeichen.trim()
       : null
 
-    if (tbnrs.length === 0) {
+    if (!tbnrsEindeutig) {
+      // Vision konnte TBNRs nicht eindeutig lesen — Aufrufer (inferBkat) soll
+      // Unfallhergang als Fallback nutzen.
       return { source: 'keine_daten', unfallart: null, vorschlaege: [], aktenzeichen: visionAktenzeichen, aktenzeichen_quelle: visionAktenzeichen ? 'vision' : null }
     }
 
@@ -229,15 +234,40 @@ export async function inferBkat(input: {
 
   if (bilder.length > 0) {
     const ocr = await inferBkatFromPolizeibericht(bilder)
-    // Wenn Vision kein sicheres Aktenzeichen liefert → Regex-Fallback auf Unfallhergang
     const aktenzeichen = ocr.aktenzeichen ?? extractAktenzeichenFromText(hergang)
-    const aktenzeichen_quelle = ocr.aktenzeichen
+    const aktenzeichen_quelle: BkatInferenzErgebnis['aktenzeichen_quelle'] = ocr.aktenzeichen
       ? 'vision'
       : aktenzeichen ? 'hergang' : null
+
     if (ocr.source === 'ocr' && ocr.vorschlaege.length > 0) {
+      // Vision hat TBNRs eindeutig gelesen — direkt nutzen
       return { ...ocr, aktenzeichen, aktenzeichen_quelle }
     }
-    // OCR lieferte keine TBNRs — aber Aktenzeichen ggf. schon, mitnehmen
+
+    // Vision konnte TBNRs nicht eindeutig lesen → Unfallhergang als Fallback:
+    // 1. Erst explizit genannte TBNRs im Text suchen (Regex + DB-Lookup)
+    // 2. Nur wenn nichts gefunden → LLM-Inferenz (rät aus dem Hergang)
+    if (hergang.length >= 20) {
+      // extractTbnrsFromText gibt bereits BkatTatbestand[] zurück (mit DB-Lookup)
+      const tatbestaende = await extractTbnrsFromText(hergang)
+      if (tatbestaende.length > 0) {
+        return {
+          source: 'ocr',
+          unfallart: pickPrimaryUnfallart(tatbestaende),
+          vorschlaege: tatbestaende.slice(0, 3).map((t) => ({
+            tbnr: t.tbnr,
+            tatbestand: t,
+            confidence: 'mittel' as const,
+            begruendung: 'TBNR aus Unfallhergang-Text extrahiert',
+          })),
+          alle_gefundenen_tbnrs: tatbestaende.map((t) => t.tbnr),
+          schuld_hint: deriveSchuldHint(tatbestaende),
+          aktenzeichen,
+          aktenzeichen_quelle,
+        }
+      }
+    }
+
     const llm = await inferBkatFromHergangText(hergang)
     return { ...llm, aktenzeichen, aktenzeichen_quelle }
   }
