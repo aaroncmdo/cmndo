@@ -17,6 +17,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { inferBkatFromPolizeibericht } from './inference'
+import { bkatToLegacySchadentyp } from './lookup'
 
 /**
  * Fire-and-forget BKat-Analyse nach einem Polizeibericht-Upload.
@@ -41,10 +42,15 @@ export async function triggerAutoBkatOcr(
     // Nur bkat_unfallart speichern. TBNRs sind transient im Result und
     // werden bei späterem Dispatcher-Review erneut extrahiert (gleiches
     // Bild, gleicher deterministischer Prompt).
+    // Auch den Legacy-schadentyp schreiben, damit der SchadentypPicker
+    // sofort den passenden Eintrag highlightet (statt erst nach Dispatcher-
+    // Übernahme).
+    const legacy = bkatToLegacySchadentyp(result.unfallart)
     await supabase
       .from('leads')
       .update({
         bkat_unfallart: result.unfallart,
+        ...(legacy ? { schadentyp: legacy } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq('id', leadId)
