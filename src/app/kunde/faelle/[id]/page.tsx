@@ -800,9 +800,33 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           }
           begutachtungEvents.sort((a, b) => new Date(a.datum).getTime() - new Date(b.datum).getTime())
 
+          // Pflichtdokumente-Banner als embedded variant — wird OBEN im
+          // ClaimStepper-Wrapper gerendert. Sichtbarkeit: wie zuvor —
+          // hidden während QC läuft (besichtigung/gutachten unfreigegeben),
+          // außer in Auszahlungs-Phase mit signierter Vollmacht.
+          const erstQc = auftraege.find((a) => a.typ === 'erstgutachten')
+          const qcLaeuft =
+            !!erstQc && (erstQc.status === 'besichtigung' || erstQc.status === 'gutachten') &&
+            !erstQc.gutachten_final_freigegeben
+          const inAuszahlungsPhase =
+            (claimLifecycle.mainPhase === 'regulierung' || claimLifecycle.mainPhase === 'abschluss') &&
+            !!(fall.vollmacht_signiert_am as string | null)
+          const pflichtBannerEmbedded =
+            qcLaeuft && !inAuszahlungsPhase
+              ? null
+              : (
+                  <PflichtdokumenteSection
+                    slots={pflichtSlots}
+                    fallId={fall.id as string}
+                    rolle="kunde"
+                    variant="embedded"
+                  />
+                )
+
           return (
             <ClaimStepper
               lifecycle={claimLifecycle}
+              topSlot={pflichtBannerEmbedded}
               terminInfo={terminInfo}
               gutachtenUrl={gutachtenUrlFuerStepper}
               anspruchVsEur={gutachtenFreigegeben ? anspruchVsEur : null}
@@ -959,35 +983,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
-        {/* CMM-33: Banner-Click-Tile → öffnet Pop-over mit allen Slot-
-            Drag&Drop-Cards. Kompakt in der Detail-Page, voller Upload-
-            Workflow im Pop-over.
-            CMM-32e: Während Besichtigung + Vollständigkeits-Check
-            (Auftrag-Status besichtigung/gutachten + nicht freigegeben)
-            ist der Banner ausgeblendet — der Kunde soll währenddessen
-            keine neuen Dokumente nachladen. Nach QC-Freigabe erscheint
-            er wieder für Nachreichungen. */}
-        {(() => {
-          const erst = auftraege.find((a) => a.typ === 'erstgutachten')
-          const qcLaeuft =
-            !!erst && (erst.status === 'besichtigung' || erst.status === 'gutachten') &&
-            !erst.gutachten_final_freigegeben
-          // Sobald wir in der Regulierung sind und eine Vollmacht haben,
-          // wollen wir den Banner garantiert wieder anzeigen — bis zum
-          // Abschluss. Ueberschreibt das qcLaeuft-Hide.
-          const inAuszahlungsPhase =
-            (claimLifecycle.mainPhase === 'regulierung' || claimLifecycle.mainPhase === 'abschluss') &&
-            !!(fall.vollmacht_signiert_am as string | null)
-          if (qcLaeuft && !inAuszahlungsPhase) return null
-          return (
-            <PflichtdokumenteSection
-              slots={pflichtSlots}
-              fallId={fall.id as string}
-              rolle="kunde"
-              variant="banner"
-            />
-          )
-        })()}
+        {/* CMM-merge: Pflichtdokumente-Banner ist jetzt embedded oben im
+            ClaimStepper-Wrapper (siehe topSlot). Separater Render hier
+            entfernt damit der Kunde EINEN visuellen Card-Block sieht
+            statt zweier gestapelter Banner. */}
 
         {/* CMM-36: KundeJetztZuTunCard entfernt — die Kanzlei-Flow-Aktionen
             sind nicht mehr relevant, Live-Tracking läuft via SV-Live-Banner
