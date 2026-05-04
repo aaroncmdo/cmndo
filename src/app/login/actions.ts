@@ -85,37 +85,39 @@ export async function login(formData: FormData) {
     redirect('/passwort-aendern')
   }
 
-  // AAR-562: Wenn der User kein 2FA aktiviert hat, setzen wir das
-  // claimondo_2fa_verified-Cookie hier direkt (Server Action darf Cookies
-  // schreiben, /login/2fa-Page als Server Component in Next.js 16 nicht
-  // zuverlässig). Ohne diesen Cookie redirected die Middleware jede
-  // /admin/*-Navigation zurück auf /login/2fa → /-Loop.
-  // Google-OAuth-User durchlaufen diesen Flow nicht — für sie wird das
-  // Cookie beim OAuth-Callback gesetzt (bzw. der 2FA-Flow übersprungen).
-  const zweiFaInaktiv =
-    profile.twofa_aktiviert === false && profile.twofa_email_aktiviert === false
-  if (zweiFaInaktiv) {
-    cookieStore.set('claimondo_2fa_verified', '1', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 3 * 24 * 60 * 60,
-    })
+  // AAR-2fa-fix: Alte 2FA-Bestätigung beim Login-Submit IMMER löschen.
+  // Aaron-Spec: 2FA soll bei jeder Anmeldung getriggert werden — außer
+  // der User hat „Angemeldet bleiben" gewählt (claimondo_remember-Token).
+  // Wenn das alte 3-Tage-Cookie weiterläuft, würde die Middleware bei
+  // diesem Login die 2FA überspringen — das wollen wir nicht.
+  cookieStore.delete('claimondo_2fa_verified')
+
+  // 2FA aktiv? → direkt nach /login/2fa, nicht über Browser-Roundtrip
+  // via Middleware. Spart eine Redirect-Runde + verhindert Race-Conditions
+  // mit Cookie-Setzen in Server Action.
+  const zweiFaAktiv =
+    profile.twofa_aktiviert === true || profile.twofa_email_aktiviert === true
+  if (zweiFaAktiv) {
+    revalidatePath('/login/2fa', 'layout')
+    redirect('/login/2fa')
   }
+
+  // 2FA inaktiv → Cookie setzen damit Middleware nicht ständig zu
+  // /login/2fa schickt. Session-Cookie (kein maxAge) — beim Browser-
+  // Close erlischt es; ein Folge-Login triggert dann ohnehin den
+  // delete oben.
+  cookieStore.set('claimondo_2fa_verified', '1', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    // kein maxAge → Session-Cookie
+  })
 
   // BUG-82: revalidatePath vor dem redirect() ist NOTWENDIG damit der
   // Next.js Router-Cache die alte RSC-Payload fuer den Ziel-Pfad
   // (z.B. /gutachter, das vor dem Login als 'redirect to /login' gecached
-  // wurde) verwirft. Ohne diesen Aufruf rendert der Target direkt nach
-  // dem Login einen White-Screen und nur ein Hard-Reload behebt es.
-  //
-  // AAR-621: Scope von `'/'` + `'layout'` auf den konkreten Target-Pfad
-  // reduziert. Vorher invalidierte der Call den KOMPLETTEN App-Tree
-  // (jeder Layout-Cache, jeder Route-Segment-Cache) — bei 25+ Routes auf
-  // Nano-Tier ein merklicher Fixed-Cost pro Login. Jetzt nur der Pfad
-  // den der User tatsächlich sieht. Andere Routes werden bei ihrer ersten
-  // Navigation ohnehin frisch geladen.
+  // wurde) verwirft.
   revalidatePath(targetPath, 'layout')
   redirect(targetPath)
 }

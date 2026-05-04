@@ -146,6 +146,7 @@ export async function verifyEmailOtp(code: string): Promise<{ success: boolean; 
 
   failCountMap.delete(key)
 
+  // AAR-2fa-fix: Session-Cookie statt 3-Tage-Cookie — siehe verify-code.ts.
   const { cookies } = await import('next/headers')
   const cookieStore = await cookies()
   cookieStore.set('claimondo_2fa_verified', '1', {
@@ -153,7 +154,7 @@ export async function verifyEmailOtp(code: string): Promise<{ success: boolean; 
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 3 * 24 * 60 * 60,
+    // kein maxAge → Session-Cookie
   })
 
   return { success: true }

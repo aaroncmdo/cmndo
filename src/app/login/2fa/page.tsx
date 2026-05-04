@@ -31,11 +31,16 @@ export default async function TwoFaPage() {
   // Wenn Google-Login: 2FA ueberspringen — direkt ins Rollen-Portal.
   if (user.app_metadata?.provider === 'google') redirect(targetPath)
 
-  // 2FA nicht aktiviert: direkt ins Rollen-Portal (Middleware-Cookie wird in
-  // der Login-Action gesetzt, AAR-562). Wenn der Cookie abgelaufen ist und
-  // der User hier landet, sendet er sich selbst in den nächsten Loop — deshalb
-  // redirect auf das echte Portal, nicht auf `/` (sonst Landing-Page).
-  if (profile?.twofa_aktiviert === false && profile?.twofa_email_aktiviert === false) {
+  // AAR-2fa-fix: 2FA-aktiv-Check explizit auf `=== true` (nicht `=== false`).
+  // Der vorige Strict-Check `!== false` erzeugte einen Loop wenn die DB-
+  // Felder NULL sind: Page hat sich nicht zur 2FA-Eingabe entschlossen,
+  // useEffect im Client startete Code-Send → fail → User sah „immer wieder
+  // reload"-Verhalten weil der next.js-router refresh die Page neu rendert.
+  // Jetzt: nur wenn EINER der beiden 2FA-Methoden explizit aktiv ist,
+  // wird die 2FA-Eingabe gerendert. Sonst direkt ins Portal.
+  const zweiFaAktiv =
+    profile?.twofa_aktiviert === true || profile?.twofa_email_aktiviert === true
+  if (!zweiFaAktiv) {
     redirect(targetPath)
   }
 
