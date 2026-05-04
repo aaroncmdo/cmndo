@@ -1,5 +1,6 @@
 // AAR-84: Cardentity API Client (OAuth2 Client Credentials).
-// Env-Vars (Vercel only): CARDENTITY_CLIENT_ID, CARDENTITY_CLIENT_SECRET, CARDENTITY_API_URL.
+// Env-Vars (Vercel only): CARDENTITY_CLIENT_ID, CARDENTITY_CLIENT_SECRET,
+//   CARDENTITY_API_URL (Pflicht — kein verlässlicher Default vorhanden).
 
 const API_URL = process.env.CARDENTITY_API_URL ?? 'https://api.cardentity.com'
 
@@ -25,6 +26,31 @@ export class CardentityError extends Error {
 }
 
 /**
+ * Wrapper um globalThis.fetch der Connection-Errors (DNS, TCP, TLS) auf
+ * eine sprechende CardentityError mappt statt dem nodejs-internen
+ * „fetch failed" — wird in der UI sonst 1:1 dem Dispatcher angezeigt
+ * und ist nutzlos.
+ */
+async function safeFetch(url: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init)
+  } catch (err) {
+    const cause = err instanceof Error ? (err.cause ?? err.message) : String(err)
+    const causeStr =
+      typeof cause === 'object' && cause && 'code' in cause
+        ? `${(cause as { code: string }).code}`
+        : String(cause)
+    const apiUrlHinweis = !process.env.CARDENTITY_API_URL
+      ? ` — CARDENTITY_API_URL ist nicht gesetzt, Default „${API_URL}" wird verwendet`
+      : ''
+    throw new CardentityError(
+      0,
+      `Cardentity-API nicht erreichbar (${causeStr})${apiUrlHinweis}`,
+    )
+  }
+}
+
+/**
  * OAuth2 Client Credentials. In-Memory-Cache mit 60s-Puffer vor Ablauf.
  */
 export async function getAccessToken(): Promise<string> {
@@ -38,7 +64,7 @@ export async function getAccessToken(): Promise<string> {
     throw new CardentityError(0, 'CARDENTITY_CLIENT_ID/SECRET nicht konfiguriert')
   }
 
-  const res = await fetch(`${API_URL}/oauth/token`, {
+  const res = await safeFetch(`${API_URL}/oauth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -63,7 +89,7 @@ export async function getAccessToken(): Promise<string> {
 
 export async function checkVinAvailability(vin: string): Promise<boolean> {
   const token = await getAccessToken()
-  const res = await fetch(`${API_URL}/v1/reports/${encodeURIComponent(vin)}/availability`, {
+  const res = await safeFetch(`${API_URL}/v1/reports/${encodeURIComponent(vin)}/availability`, {
     headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
   })
   if (res.status === 404) return false
@@ -85,7 +111,7 @@ export async function getVehicleReport(
   if (options.mileage != null) params.set('mileage', String(options.mileage))
   if (options.firstRegistrationDate) params.set('firstRegistrationDate', options.firstRegistrationDate)
 
-  const res = await fetch(
+  const res = await safeFetch(
     `${API_URL}/v1/reports/${encodeURIComponent(vin)}?${params.toString()}`,
     { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } },
   )
