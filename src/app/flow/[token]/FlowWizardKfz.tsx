@@ -16,6 +16,7 @@ import {
   Trash2Icon,
   XIcon,
 } from 'lucide-react'
+import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -79,10 +80,15 @@ const GEGNER_FAHRZEUGTYP_LABELS: Record<string, string> = {
 export type GutachterInfo = {
   vorname: string
   avatarUrl: string | null
+  firma: string | null
   terminDatum: string | null
   // AAR-341: Besichtigungsort + SV-Treffpunkt für Schritt 2
   besichtigungsAdresse: string | null
   svTreffpunkt: string | null
+  // CMM: Google-Bewertungs-Cache für Trust-Signal
+  googleDurchschnitt: number | null
+  googleAnzahl: number | null
+  googleAktualisiertAm: string | null
 }
 
 // CMM-14: 4-Step Flow. Step 'weitere-angaben' (Werkstatt + Schadenfotos)
@@ -128,6 +134,11 @@ export default function FlowWizardKfz({
 }) {
   const [stepIndex, setStepIndex] = useState(0)
   const [datenschutz, setDatenschutz] = useState(false)
+  // SV-Schritt: Akzeptanz Widerrufsbelehrung + Datenschutz des SVs (Pflicht
+  // bevor „Weiter" zum SA-Step). Modale für die zwei Texte.
+  const [svRechtsakzeptanz, setSvRechtsakzeptanz] = useState(false)
+  const [svWiderrufOffen, setSvWiderrufOffen] = useState(false)
+  const [svDatenschutzOffen, setSvDatenschutzOffen] = useState(false)
   const [signatureBlob, setSignatureBlob] = useState<Blob | null>(null)
   const [saAccepted, setSaAccepted] = useState(false)
   const [saVolltextOffen, setSaVolltextOffen] = useState(false)
@@ -391,7 +402,21 @@ export default function FlowWizardKfz({
                       </div>
                     )}
                     <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">Ihr Sachverständiger</p>
-                    <h2 className="text-2xl font-bold text-[#0D1B3E] mb-2">{gutachter.vorname}</h2>
+                    <h2 className="text-2xl font-bold text-[#0D1B3E] mb-1">{gutachter.vorname}</h2>
+                    {gutachter.firma && (
+                      <p className="text-sm font-medium text-[#4573A2] mb-2">{gutachter.firma}</p>
+                    )}
+                    {/* Google-Bewertung als Trust-Signal */}
+                    {gutachter.googleDurchschnitt != null && gutachter.googleAnzahl != null && (
+                      <div className="flex justify-center mb-2">
+                        <GoogleBewertungBadge
+                          durchschnitt={gutachter.googleDurchschnitt}
+                          anzahl={gutachter.googleAnzahl}
+                          zuletztAktualisiert={gutachter.googleAktualisiertAm}
+                          size="md"
+                        />
+                      </div>
+                    )}
                     <p className="text-sm text-claimondo-ondo">Wird sich bei Ihnen melden</p>
                     {gutachter.terminDatum && (
                       <div className="mt-4 pt-4 border-t border-[#4573A2]/20">
@@ -425,10 +450,185 @@ export default function FlowWizardKfz({
 
                 <button
                   onClick={() => setStepIndex(stepIndexById('sa'))}
-                  className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  disabled={!!gutachter && !svRechtsakzeptanz}
+                  className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Weiter
                 </button>
+
+                {/* Rechts-Akzeptanz: Widerrufsbelehrung + Datenschutz des SVs.
+                    Pflicht-Häkchen unter dem Button — Pop-over-Modale beim
+                    Klick auf die jeweiligen Links. */}
+                {gutachter && (
+                  <label className="mt-4 flex items-start gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={svRechtsakzeptanz}
+                      onChange={(e) => setSvRechtsakzeptanz(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-[#4573A2] shrink-0"
+                    />
+                    <span className="text-sm text-claimondo-ondo leading-relaxed">
+                      Ich akzeptiere die{' '}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); setSvWiderrufOffen(true) }}
+                        className="text-[#4573A2] underline hover:text-[#1E3A5F]"
+                      >
+                        Widerrufsbelehrung
+                      </button>{' '}
+                      und{' '}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); setSvDatenschutzOffen(true) }}
+                        className="text-[#4573A2] underline hover:text-[#1E3A5F]"
+                      >
+                        Datenschutzerklärung
+                      </button>
+                      {gutachter.firma && (
+                        <> von <span className="font-medium text-claimondo-navy">{gutachter.firma}</span></>
+                      )}
+                      . <span className="text-red-400">*</span>
+                    </span>
+                  </label>
+                )}
+
+                {/* Pop-over: Widerrufsbelehrung */}
+                {svWiderrufOffen && (
+                  <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[1px]"
+                    onClick={() => setSvWiderrufOffen(false)}
+                  >
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col"
+                    >
+                      <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border">
+                        <h3 className="text-sm font-semibold text-claimondo-navy">
+                          Widerrufsbelehrung{gutachter?.firma ? ` — ${gutachter.firma}` : ''}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setSvWiderrufOffen(false)}
+                          className="text-claimondo-ondo/70 hover:text-claimondo-ondo"
+                          aria-label="Schließen"
+                        >
+                          <XIcon className="w-5 h-5" />
+                        </button>
+                      </div>
+                      <div className="flex-1 overflow-y-auto px-5 py-4 text-sm text-claimondo-navy leading-relaxed space-y-3">
+                        <h4 className="font-semibold">Widerrufsrecht</h4>
+                        <p>
+                          Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen
+                          diesen Vertrag zu widerrufen. Die Widerrufsfrist beträgt vierzehn
+                          Tage ab dem Tag des Vertragsabschlusses.
+                        </p>
+                        <p>
+                          Um Ihr Widerrufsrecht auszuüben, müssen Sie {gutachter?.firma ?? 'den Sachverständigen'} mittels einer
+                          eindeutigen Erklärung (z.B. ein mit der Post versandter Brief oder
+                          E-Mail) über Ihren Entschluss, diesen Vertrag zu widerrufen,
+                          informieren.
+                        </p>
+                        <h4 className="font-semibold pt-2">Folgen des Widerrufs</h4>
+                        <p>
+                          Wenn Sie diesen Vertrag widerrufen, werden Ihnen alle Zahlungen,
+                          die wir von Ihnen erhalten haben, einschließlich der Lieferkosten
+                          (mit Ausnahme der zusätzlichen Kosten, die sich daraus ergeben,
+                          dass Sie eine andere Art der Lieferung als die von uns angebotene,
+                          günstigste Standardlieferung gewählt haben), unverzüglich und
+                          spätestens binnen vierzehn Tagen ab dem Tag zurückgezahlt, an
+                          dem die Mitteilung über Ihren Widerruf dieses Vertrags bei uns
+                          eingegangen ist.
+                        </p>
+                        <h4 className="font-semibold pt-2">Vorzeitiges Erlöschen</h4>
+                        <p>
+                          Ihr Widerrufsrecht erlischt vorzeitig, wenn der Sachverständige
+                          die Dienstleistung mit Ihrer ausdrücklichen Zustimmung vor Ablauf
+                          der Widerrufsfrist vollständig erbracht hat und Sie gleichzeitig
+                          bestätigt haben, dass Sie Ihr Widerrufsrecht bei vollständiger
+                          Vertragserfüllung verlieren.
+                        </p>
+                      </div>
+                      <div className="px-5 py-3 border-t border-claimondo-border bg-[#f8f9fb]">
+                        <button
+                          type="button"
+                          onClick={() => setSvWiderrufOffen(false)}
+                          className="w-full px-4 py-2 rounded-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium"
+                        >
+                          Verstanden
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Pop-over: Datenschutzerklärung */}
+                {svDatenschutzOffen && (
+                  <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-[1px]"
+                    onClick={() => setSvDatenschutzOffen(false)}
+                  >
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col"
+                    >
+                      <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border">
+                        <h3 className="text-sm font-semibold text-claimondo-navy">
+                          Datenschutzerklärung{gutachter?.firma ? ` — ${gutachter.firma}` : ''}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setSvDatenschutzOffen(false)}
+                          className="text-claimondo-ondo/70 hover:text-claimondo-ondo"
+                          aria-label="Schließen"
+                        >
+                          <XIcon className="w-5 h-5" />
+                        </button>
+                      </div>
+                      <div className="flex-1 overflow-y-auto px-5 py-4 text-sm text-claimondo-navy leading-relaxed space-y-3">
+                        <h4 className="font-semibold">Verantwortlicher</h4>
+                        <p>
+                          Verantwortlich für die Verarbeitung Ihrer personenbezogenen Daten
+                          im Rahmen der Schadensbegutachtung ist {gutachter?.firma ?? 'der Sachverständige'}.
+                        </p>
+                        <h4 className="font-semibold pt-2">Zweck der Verarbeitung</h4>
+                        <p>
+                          Ihre Daten werden ausschließlich zum Zweck der Schadensbegutachtung,
+                          Erstellung des Gutachtens und Abrechnung der Sachverständigen-
+                          Leistungen verarbeitet. Eine Weitergabe an die gegnerische
+                          Versicherung erfolgt nur im Rahmen der Schadensregulierung.
+                        </p>
+                        <h4 className="font-semibold pt-2">Rechtsgrundlage</h4>
+                        <p>
+                          Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b
+                          DSGVO (Vertragserfüllung) und Ihrer Einwilligung gemäß Art. 6
+                          Abs. 1 lit. a DSGVO.
+                        </p>
+                        <h4 className="font-semibold pt-2">Speicherdauer</h4>
+                        <p>
+                          Ihre Daten werden für die Dauer der gesetzlichen
+                          Aufbewahrungspflichten (in der Regel 10 Jahre nach
+                          Vertragsende) gespeichert.
+                        </p>
+                        <h4 className="font-semibold pt-2">Ihre Rechte</h4>
+                        <p>
+                          Sie haben das Recht auf Auskunft, Berichtigung, Löschung,
+                          Einschränkung der Verarbeitung, Datenübertragbarkeit und
+                          Widerspruch gegen die Verarbeitung Ihrer Daten. Bitte wenden
+                          Sie sich für die Ausübung dieser Rechte an den Sachverständigen.
+                        </p>
+                      </div>
+                      <div className="px-5 py-3 border-t border-claimondo-border bg-[#f8f9fb]">
+                        <button
+                          type="button"
+                          onClick={() => setSvDatenschutzOffen(false)}
+                          className="w-full px-4 py-2 rounded-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium"
+                        >
+                          Verstanden
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
