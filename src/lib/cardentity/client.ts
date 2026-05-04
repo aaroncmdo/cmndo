@@ -1,8 +1,9 @@
 // AAR-84: Cardentity API Client (OAuth2 Client Credentials).
 // Env-Vars (Vercel only): CARDENTITY_CLIENT_ID, CARDENTITY_CLIENT_SECRET,
-//   CARDENTITY_API_URL (Pflicht — kein verlässlicher Default vorhanden).
+//   CARDENTITY_API_URL (Default: https://api.cardentity.eu),
+//   CARDENTITY_ACCESS_TOKEN (Smoke-Test-Override, 1h gültig).
 
-const API_URL = process.env.CARDENTITY_API_URL ?? 'https://api.cardentity.com'
+const API_URL = process.env.CARDENTITY_API_URL ?? 'https://api.cardentity.eu'
 
 type TokenCache = { token: string; expiresAt: number } | null
 let tokenCache: TokenCache = null
@@ -51,9 +52,46 @@ async function safeFetch(url: string, init?: RequestInit): Promise<Response> {
 }
 
 /**
+ * Liest die exp-Claim aus einem JWT. Returns null wenn das Format kein
+ * gültiger JWT ist. Kein Verify — wir vertrauen dem Token selbst, der
+ * Provider-Server validiert ihn beim API-Call.
+ */
+function decodeJwtExp(token: string): number | null {
+  try {
+    const [, payloadB64] = token.split('.')
+    if (!payloadB64) return null
+    // base64url → base64
+    const b64 = payloadB64.replace(/-/g, '+').replace(/_/g, '/')
+    const json = Buffer.from(b64, 'base64').toString('utf8')
+    const parsed = JSON.parse(json) as { exp?: number }
+    return typeof parsed.exp === 'number' ? parsed.exp * 1000 : null
+  } catch {
+    return null
+  }
+}
+
+/**
  * OAuth2 Client Credentials. In-Memory-Cache mit 60s-Puffer vor Ablauf.
+ *
+ * Override: Wenn `CARDENTITY_ACCESS_TOKEN` in der env gesetzt ist, wird
+ * der OAuth-Flow komplett übersprungen und der Direct-Token genutzt.
+ * Praktisch für Smoke-Tests bevor der OAuth-Endpoint stimmt — der Token
+ * gilt 1h, danach wieder neu setzen oder OAuth-Setup fertigstellen.
  */
 export async function getAccessToken(): Promise<string> {
+  // Direct-Token-Override (Test/Onboarding-Phase)
+  const directToken = process.env.CARDENTITY_ACCESS_TOKEN
+  if (directToken) {
+    const expMs = decodeJwtExp(directToken)
+    if (expMs && expMs < Date.now() + 60_000) {
+      throw new CardentityError(
+        401,
+        `CARDENTITY_ACCESS_TOKEN ist abgelaufen (exp=${new Date(expMs).toISOString()}) — neuen Token aus dem Cardentity-Dashboard setzen oder CARDENTITY_CLIENT_ID/SECRET konfigurieren`,
+      )
+    }
+    return directToken
+  }
+
   if (tokenCache && tokenCache.expiresAt > Date.now() + 60_000) {
     return tokenCache.token
   }
@@ -61,7 +99,10 @@ export async function getAccessToken(): Promise<string> {
   const clientId = process.env.CARDENTITY_CLIENT_ID
   const clientSecret = process.env.CARDENTITY_CLIENT_SECRET
   if (!clientId || !clientSecret) {
-    throw new CardentityError(0, 'CARDENTITY_CLIENT_ID/SECRET nicht konfiguriert')
+    throw new CardentityError(
+      0,
+      'CARDENTITY_CLIENT_ID/SECRET nicht konfiguriert (alternativ CARDENTITY_ACCESS_TOKEN für Smoke-Test setzen)',
+    )
   }
 
   const res = await safeFetch(`${API_URL}/oauth/token`, {
