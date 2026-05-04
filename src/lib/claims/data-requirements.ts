@@ -142,7 +142,11 @@ export function getOffeneDokumentAnforderungen(
     const pflichtdoc = pflichtDocs.find((d) => d.slot_id === slotId)
 
     let status: DokumentStatus
-    if (pflichtdoc?.dokument_url) {
+    if (
+      pflichtdoc?.dokument_url ||
+      pflichtdoc?.status === 'hochgeladen' ||
+      pflichtdoc?.status === 'geprueft'
+    ) {
       status = 'erfuellt'
     } else if (pflichtdoc?.status === 'spaeter') {
       status = 'spaeter'
@@ -169,7 +173,11 @@ export function getOffeneDokumentAnforderungen(
     if (DOC_DEFINITIONS[pflichtdoc.slot_id]) continue // schon behandelt
 
     let status: DokumentStatus
-    if (pflichtdoc.dokument_url) {
+    if (
+      pflichtdoc.dokument_url ||
+      pflichtdoc.status === 'hochgeladen' ||
+      pflichtdoc.status === 'geprueft'
+    ) {
       status = 'erfuellt'
     } else if (pflichtdoc.status === 'spaeter') {
       status = 'spaeter'
