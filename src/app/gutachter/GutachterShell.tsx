@@ -126,13 +126,13 @@ export default function GutachterShell({
   svId?: string | null
 }) {
   const pathname = usePathname()
-  // Feldmodus übernimmt den vollen Viewport — Sidebar + FAB ausblenden damit
-  // sie nicht über der Mapbox-Karte rendern (Sidebar hat lg:z-[1100] > z-50).
-  const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
-  // AAR-heute-fullscreen: Heute-Tab will die Map fullscreen — Padding +
-  // Rounded-Corner-Wrapper auf <main> entfernen damit Mapbox bis zum Rand
-  // läuft (gleicher Look wie Feldmodus).
-  const isFullscreenMap = isFeldmodus || pathname === '/gutachter/heute'
+  // CMM-32-mapbox: /heute und /feldmodus laufen wieder im normalen Wrapper.
+  // Map+Termine-Layout ist Sache der Page-Komponenten — Shell behandelt sie
+  // wie jede andere Route (Sidebar links, navy-Outer drumherum, rounded-l-2xl
+  // Content-Wrapper). Vorher: isFullscreenMap-Flag entfernte Padding/Rounded
+  // und der Sidebar-Hide für Feldmodus überlagerte die Karte mit dem
+  // FeldmodusLayout — beides gefiel Aaron nicht.
+  const isFeldmodus = false
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showSupport, setShowSupport] = useState(false)
   // CMM-36: Geo-Tracking beim App-Öffnen starten — feuert watchPosition
@@ -510,33 +510,21 @@ export default function GutachterShell({
           />
         </div>
 
-        <div className={`flex-1 overflow-hidden ${
-          isFullscreenMap
-            ? ''
-            : 'pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4'
-        }`}>
+        <div className="flex-1 overflow-hidden pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4">
           <main
             id="main-content"
             role="main"
-            className={`h-full overflow-y-auto bg-[#f8f9fb] ${
-              isFullscreenMap
-                ? ''
-                : 'rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4'
-            }`}
+            className="h-full overflow-y-auto bg-[#f8f9fb] rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4"
           >
             {/* CMM-32 Polish: Standort-CTA — sichtbar wenn Browser-Permission
                 noch 'prompt' oder 'denied' ist; bei 'granted' rendert die
-                Komponente null. Sitzt oberhalb der Page damit der SV bei
-                jedem Aufruf einer Seite (Heute, Fall, Termin, ...) den
-                Hinweis sieht solange er Standort noch nicht freigegeben hat. */}
-            {!isFullscreenMap && (
-              <div className="mb-3">
-                <GeoPermissionPrompt
-                  permission={geoState.permission}
-                  onRequest={geoState.requestPermission}
-                />
-              </div>
-            )}
+                Komponente null. */}
+            <div className="mb-3">
+              <GeoPermissionPrompt
+                permission={geoState.permission}
+                onRequest={geoState.requestPermission}
+              />
+            </div>
             {children}
           </main>
         </div>
