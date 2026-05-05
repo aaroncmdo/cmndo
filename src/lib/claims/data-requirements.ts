@@ -1,20 +1,22 @@
-// CMM-21: Smart-Erkennung der für einen Claim relevanten Dokumenten-
-// Anforderungen. Aus den Claim-Daten leiten wir ab was wir vom Kunden
-// brauchen — der Kunde sieht nur die wirklich relevanten Slots.
+// Lead-Bucket → Claim-Bucket: Eine Quelle der Wahrheit.
 //
-// Aaron-Spec aus CMM-17:
-//   polizei_vor_ort=true       → Polizeibericht
-//   leads.zb1_status!='bestaetigt' → ZB1 (Fahrzeugschein)
-//   hat_personenschaden=true   → Atteste / Diagnoseberichte
-//   hat_sachschaden=true       → Sachschaden-Fotos + Rechnung
-//   immer                      → Schaden-Fotos vom Auto
-//   immer                      → Unfall-Fotos
+// Vorher (CMM-21): hier lebten Smart-Filter-Conditions die zu UI-Banner-
+// Slots gemappt wurden. Diese Conditions duplizierten die Logik aus
+// lib/dokumente/erwartung.ts (Backend) und konnten driften — z.B. zeigte
+// das Banner Polizeibericht für jeden polizei_vor_ort=true, aber das
+// Backend legte ihn nur an wenn polizeibericht_pflicht=true.
+//
+// Jetzt: Backend (createPflichtdokumenteFromKatalog) entscheidet via
+// berechneErwartung welche Slots als pflichtdokumente-Rows angelegt
+// werden. UI iteriert NUR diese Rows und reichert sie mit Label/
+// Beschreibung aus dem statischen DOC_LABELS-Lookup an. Wenn ein Slot
+// nicht in pflichtdokumente steht → wird nicht angezeigt.
 //
 // Status pro Slot:
-//   - 'offen': muss der Kunde noch hochladen
-//   - 'erfüllt': ist da (Pflichtdokument-URL vorhanden)
-//   - 'spaeter': Kunde hat "später nachreichen" gewählt
-//   - 'nicht_relevant': Bedingung trifft nicht zu (z.B. polizei_vor_ort=false)
+//   - 'offen':         pflichtdokumente-Row existiert, kein File
+//   - 'erfüllt':       File hochgeladen / dokument_url gesetzt
+//   - 'spaeter':       Kunde hat „später nachreichen" gewählt
+//   - 'nicht_relevant': existiert nicht mehr (Slot wäre einfach nicht angelegt)
 
 import type { ClaimFull } from './types'
 import type { PflichtdokumentStand } from '@/app/kunde/onboarding/actions'
@@ -31,68 +33,89 @@ export type DokumentAnforderung = {
   pflichtdoc?: PflichtdokumentStand
 }
 
-type SlotConfig = {
+// UI-Lookup für die bekannten Slots. Conditions sind raus — Backend
+// (berechneErwartung + createPflichtdokumenteFromKatalog) entscheidet
+// welche Slots angelegt werden. Hier nur label/beschreibung + Pflicht-
+// Default für Slots ohne expliziten Pflicht-Wert in pflichtdokumente.
+type SlotLabel = {
   label: string
   beschreibung: string
-  /** Pflicht ja/nein. Pflicht = Banner bleibt bis erfüllt. */
-  pflicht: boolean
-  /** Welche Claim-Bedingung muss zutreffen damit das Slot relevant ist? */
-  condition: (claim: ClaimFull, leadZb1Status?: string | null) => boolean
+  /** Default-Pflicht wenn pflichtdokumente.pflicht NULL ist. */
+  pflicht_default: boolean
 }
 
-// CMM-23 Aaron-Spec (final): 8 Pflicht-Slots, alle bei matchender Bedingung
-// Pflicht. Single Source mit dokument_katalog (siehe Migration
-// cmm23_pflichtdokumente_katalog_fix). Render-seitig hier gespiegelt für
-// die Banner/Liste-Logik solange wir noch nicht 1:1 auf den DB-Katalog
-// umgestellt haben (eigenes Konsolidierungs-Ticket).
-const DOC_DEFINITIONS: Record<string, SlotConfig> = {
+const DOC_LABELS: Record<string, SlotLabel> = {
   fahrzeugschein: {
     label: 'Fahrzeugschein (ZB1)',
     beschreibung: 'Vorder- und Rückseite. Bestätigt Halter und Fahrzeugdaten.',
-    pflicht: true,
-    condition: (_claim, leadZb1Status) => leadZb1Status !== 'bestaetigt',
+    pflicht_default: true,
   },
   schadensfotos: {
     label: 'Fotos vom Fahrzeugschaden',
     beschreibung: 'Mehrere Perspektiven, Nah- und Übersichtsaufnahmen.',
-    pflicht: true,
-    condition: () => true,
+    pflicht_default: true,
   },
   unfallfotos: {
     label: 'Fotos vom Unfall-Ort',
     beschreibung: 'Übersicht der Unfallstelle, Endpositionen der Fahrzeuge.',
-    pflicht: true,
-    condition: () => true,
+    pflicht_default: true,
   },
   polizeibericht: {
     label: 'Polizeibericht',
     beschreibung: 'Foto der polizeilichen Unfallmitteilung — beschleunigt die Regulierung.',
-    pflicht: true,
-    condition: (claim) => claim.polizei_vor_ort === true,
+    pflicht_default: true,
   },
   aerztliches_attest: {
     label: 'Ärztliches Attest',
     beschreibung: 'Bei Personenschaden — dokumentiert Verletzungen und Behandlungsdauer.',
-    pflicht: true,
-    condition: (claim) => claim.hat_personenschaden === true,
+    pflicht_default: true,
   },
   diagnosebericht: {
     label: 'Diagnosebericht',
     beschreibung: 'Bei Personenschaden — ärztliche Diagnose mit Heilungsverlauf.',
-    pflicht: true,
-    condition: (claim) => claim.hat_personenschaden === true,
+    pflicht_default: true,
   },
   sachschaden_foto: {
     label: 'Foto Sachschaden',
     beschreibung: 'Bei beschädigten Gegenständen — Foto des Schadens.',
-    pflicht: true,
-    condition: (claim) => claim.hat_sachschaden === true,
+    pflicht_default: true,
   },
   sachschaden_rechnung: {
     label: 'Rechnung Sachschaden',
     beschreibung: 'Bei beschädigten Gegenständen — Reparatur- oder Neukauf-Rechnung.',
-    pflicht: true,
-    condition: (claim) => claim.hat_sachschaden === true,
+    pflicht_default: true,
+  },
+  // Backoffice-Slots (Kanzlei / Halter-Vollmacht etc.) bekommen ihr Label
+  // entweder hier ergänzt oder fallback zum slot_id-Wert.
+  zeugenaussage: {
+    label: 'Zeugenaussage',
+    beschreibung: 'Schriftliche Zeugenaussage oder Kontaktdaten.',
+    pflicht_default: false,
+  },
+  gewerbenachweis: {
+    label: 'Gewerbenachweis',
+    beschreibung: 'Bei Gewerbe / vorsteuerabzugsberechtigt.',
+    pflicht_default: true,
+  },
+  gf_vollmacht: {
+    label: 'Geschäftsführer-Vollmacht',
+    beschreibung: 'Bei Gewerbe / vorsteuerabzugsberechtigt.',
+    pflicht_default: true,
+  },
+  halter_vollmacht: {
+    label: 'Halter-Vollmacht',
+    beschreibung: 'Wenn Halter ≠ Anrufer.',
+    pflicht_default: true,
+  },
+  halter_ausweis: {
+    label: 'Halter-Ausweis',
+    beschreibung: 'Wenn Halter ≠ Anrufer.',
+    pflicht_default: true,
+  },
+  freigabe_bank: {
+    label: 'Freigabe Bank / Leasinggesellschaft',
+    beschreibung: 'Bei Leasing- oder Finanzierungsfahrzeugen.',
+    pflicht_default: true,
   },
 }
 
@@ -108,69 +131,35 @@ const SLOT_REIHENFOLGE = [
 ] as const
 
 /**
- * Liefert alle für diesen Claim relevanten Dokument-Anforderungen mit
- * Status. Slots die nicht relevant sind (z.B. Polizeibericht ohne
- * polizei_vor_ort) werden komplett rausgefiltert.
+ * Liefert alle Dokument-Anforderungen für einen Claim mit Status.
  *
- * @param claim — der vollständige Claim aus getClaimForRole
- * @param pflichtDocs — bestehende pflichtdokumente für den Fall (Status-Source)
- * @param leadZb1Status — Conditional Override für ZB1: wenn der Lead via
- *                        Dispatch Phase 4 schon einen ZB1 hat, ist das
- *                        Slot nicht relevant.
+ * Lead-Bucket-Migration: keine eigenen Smart-Filter-Conditions mehr.
+ * Backend (createPflichtdokumenteFromKatalog via berechneErwartung)
+ * legt die richtigen Slots als pflichtdokumente-Rows an, diese Funktion
+ * iteriert nur die existierenden Rows und reichert sie mit Label /
+ * Beschreibung aus DOC_LABELS an. Wenn ein Slot nicht angelegt ist,
+ * wird er nicht angezeigt — das war vorher Drift-Quelle (UI zeigte
+ * mehr/anderes als das Backend wirklich erwartete).
+ *
+ * @param _claim — wird nicht mehr für Conditions genutzt, bleibt in der
+ *                  Signatur damit Konsumenten unverändert sind.
+ * @param pflichtDocs — pflichtdokumente-Rows = Single Source of Truth
+ *                      für „welche Slots sind erwartet"
+ * @param _leadZb1Status — wird nicht mehr genutzt (Backend setzt
+ *                          fahrzeugschein.pflicht je nach zb1_status).
  */
 export function getOffeneDokumentAnforderungen(
-  claim: ClaimFull,
+  _claim: ClaimFull,
   pflichtDocs: PflichtdokumentStand[],
-  leadZb1Status?: string | null,
+  _leadZb1Status?: string | null,
 ): DokumentAnforderung[] {
-  // CMM-23: zwei Iterationen — alle bekannten Smart-Filter-Slots
-  // (DOC_DEFINITIONS) die conditional matchen + alle DB-Slots die NICHT
-  // in DOC_DEFINITIONS sind (Legacy / KB-Anforderungen). Damit zeigen
-  // wir auch Slots an, für die die DB-Row noch nicht angelegt wurde
-  // (häufig wenn createPflichtdokumenteFromKatalog Slots übersprungen
-  // hat) — Status fällt dann auf 'offen', sobald File hochgeladen wird,
-  // legt der Upload-Pfad die Row an.
   const result: DokumentAnforderung[] = []
-  const seen = new Set<string>()
 
-  // 1. Bekannte Smart-Filter-Slots in fester Reihenfolge.
-  for (const slotId of SLOT_REIHENFOLGE) {
-    const config = DOC_DEFINITIONS[slotId]
-    if (!config) continue
-    if (!config.condition(claim, leadZb1Status)) continue
-
-    const pflichtdoc = pflichtDocs.find((d) => d.slot_id === slotId)
-
-    let status: DokumentStatus
-    if (
-      pflichtdoc?.dokument_url ||
-      pflichtdoc?.status === 'hochgeladen' ||
-      pflichtdoc?.status === 'geprueft'
-    ) {
-      status = 'erfuellt'
-    } else if (pflichtdoc?.status === 'spaeter') {
-      status = 'spaeter'
-    } else {
-      status = 'offen'
-    }
-
-    result.push({
-      slot_id: slotId,
-      label: config.label,
-      beschreibung: config.beschreibung,
-      // OR-Logic: Katalog-Default oder DB-Pflicht-Flag — kein Override
-      // nach unten. KB kann hochstufen, kann aber nicht entpflichten.
-      pflicht: !!(pflichtdoc?.pflicht || config.pflicht),
-      status,
-      pflichtdoc,
-    })
-    seen.add(slotId)
-  }
-
-  // 2. Legacy- und KB-Slots aus DB die NICHT in DOC_DEFINITIONS sind.
+  // Eine Iteration: alle pflichtdokumente-Rows. Bekannte Slots mit
+  // Label/Beschreibung aus DOC_LABELS, unbekannte (KB-Custom oder
+  // Backoffice) mit slot_id als Fallback-Label.
   for (const pflichtdoc of pflichtDocs) {
-    if (seen.has(pflichtdoc.slot_id)) continue
-    if (DOC_DEFINITIONS[pflichtdoc.slot_id]) continue // schon behandelt
+    const labels = DOC_LABELS[pflichtdoc.slot_id]
 
     let status: DokumentStatus
     if (
@@ -187,9 +176,13 @@ export function getOffeneDokumentAnforderungen(
 
     result.push({
       slot_id: pflichtdoc.slot_id,
-      label: pflichtdoc.label ?? pflichtdoc.slot_id ?? '',
-      beschreibung: pflichtdoc.beschreibung ?? '',
-      pflicht: !!pflichtdoc.pflicht,
+      // Label-Lookup: DOC_LABELS (bekannte Slots) > pflichtdoc.label (KB-
+      // gesetzt) > slot_id als Fallback.
+      label: labels?.label ?? pflichtdoc.label ?? pflichtdoc.slot_id ?? '',
+      beschreibung: labels?.beschreibung ?? pflichtdoc.beschreibung ?? '',
+      // OR-Logic: DB-Pflicht oder DOC_LABELS-Default — KB kann hochstufen,
+      // kann aber nicht entpflichten.
+      pflicht: !!(pflichtdoc.pflicht || labels?.pflicht_default),
       status,
       pflichtdoc,
     })
