@@ -59,8 +59,11 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
   const db = createAdminClient()
 
   // KFZ-202: no_show_count inkrementieren
+  // CMM-39: re_termin_token mitlesen — falls schon einer existiert (z.B. weil
+  // SV den No-Show zweimal innerhalb des 5-Werktage-Fensters meldet), behalten
+  // wir ihn bei. Sonst generieren wir unten einen neuen.
   const { data: fall } = await db.from('faelle')
-    .select('no_show_count, lead_id')
+    .select('no_show_count, lead_id, re_termin_token')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
@@ -97,17 +100,72 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
     entity_id: fallId,
   })
 
-  // KFZ-202: WA an Kunden bei 1x No-Show
+  // CMM-39: Re-Termin-Token generieren (oder bestehenden behalten) und an
+  // Kunde via WhatsApp + Email senden. Der Storno-Cron skipt Faelle, deren
+  // re_termin_token_eingelaufen_am gesetzt ist — der Kunde hat damit das
+  // Fenster, sich selber einen neuen Slot zu picken (CMM-40 baut die Page).
+  let reTerminToken = (fall.re_termin_token as string | null) ?? null
+  if (!reTerminToken) {
+    reTerminToken = crypto.randomUUID()
+    const { error: tokenErr } = await db.from('faelle')
+      .update({ re_termin_token: reTerminToken, re_termin_token_eingelaufen_am: null })
+      .eq('id', fallId)
+    if (tokenErr) console.error('[CMM-39] Re-Termin-Token konnte nicht gespeichert werden:', tokenErr.message)
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+  const reTerminUrl = `${baseUrl}/kunde/re-termin/${reTerminToken}`
+
+  // KFZ-202 + CMM-39: WA an Kunde mit Re-Termin-Link (Var 2)
   if (fall.lead_id) {
-    const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
+    const { data: lead } = await db.from('leads').select('vorname, nachname, telefon, email').eq('id', fall.lead_id).single()
     if (lead?.telefon) {
       const { sendCommunication } = await import('@/lib/communications/send')
       sendCommunication('no_show_kunde', {
         telefon: lead.telefon,
         vorname: lead.vorname ?? '',
+        '1': lead.vorname ?? '',
+        '2': reTerminUrl,
         fall_id: fallId,
-      }).catch(() => {})
+      }).catch((err) => console.error('[CMM-39] WA-Send fehlgeschlagen (non-critical):', err))
     }
+
+    // CMM-39: Email an Kunde mit Re-Termin-Link — non-critical, separat
+    // gewrappt damit ein Resend/SMTP-Fail den No-Show-Update nicht bricht.
+    if (lead?.email) {
+      try {
+        const { sendEmail } = await import('@/lib/email/google/client')
+        const greeting = lead.vorname ? `Hallo ${lead.vorname},` : 'Hallo,'
+        await sendEmail({
+          to: lead.email,
+          subject: 'Neuer Termin für Ihre Fahrzeugbegutachtung',
+          html: `<p>${greeting}</p>
+<p>leider konnten wir Sie beim vereinbarten Gutachtertermin nicht antreffen. Damit Ihr Schaden zügig weiter bearbeitet werden kann, wählen Sie bitte einen neuen Termin:</p>
+<p><a href="${reTerminUrl}" style="display:inline-block;padding:12px 20px;background:#0D1B3E;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:600">Neuen Termin wählen</a></p>
+<p>Falls der Button nicht funktioniert: <br><a href="${reTerminUrl}">${reTerminUrl}</a></p>
+<p>Sollten Sie keinen passenden Termin finden, melden Sie sich bei Ihrem Kundenbetreuer.</p>
+<p>Ihr Claimondo-Team</p>`,
+          template: 're_termin_einladung',
+          empfaengerTyp: 'kunde',
+          fallId,
+        })
+      } catch (err) {
+        console.error('[CMM-39] Email-Send fehlgeschlagen (non-critical):', err)
+      }
+    }
+  }
+
+  // CMM-39: Timeline-Eintrag — fuer KB-Sicht in der Fallakte
+  try {
+    await db.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'kommunikation',
+      titel: 'Re-Termin-Einladung versendet',
+      beschreibung: `Kunde wurde nach No-Show per WhatsApp und Email zum Re-Termin-Link eingeladen.`,
+      erstellt_von: user.id,
+    })
+  } catch (err) {
+    console.error('[CMM-39] Timeline-Insert fehlgeschlagen (non-critical):', err)
   }
 
   revalidatePath(`/gutachter/fall/${fallId}`)
