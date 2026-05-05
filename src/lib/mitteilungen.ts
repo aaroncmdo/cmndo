@@ -18,6 +18,8 @@ type MitteilungTyp =
   | 'paket_fast_voll'
   | 'guthaben_niedrig'
   | 'auftrag_storniert'  // AAR-91
+  | 'nachbesichtigung_beauftragt'  // CMM Phase 1.5d
+  | 'stellungnahme_beauftragt'     // CMM Phase 1.5d
 
 interface MitteilungExtras {
   kunde_name?: string
@@ -165,6 +167,18 @@ function buildMessage(
       return {
         titel: 'Guthaben niedrig',
         nachricht: `Aktuelles Guthaben nur noch ${e.guthaben?.toLocaleString('de-DE') ?? '?'} EUR. Bitte aufstocken.`,
+      }
+
+    case 'nachbesichtigung_beauftragt':
+      return {
+        titel: 'Nachbesichtigung beauftragt',
+        nachricht: `Nachbesichtigung wurde angefordert${fallRef}${e.grund ? `: ${e.grund}` : '.'} Bitte Termin vereinbaren.`,
+      }
+
+    case 'stellungnahme_beauftragt':
+      return {
+        titel: 'Stellungnahme angefordert',
+        nachricht: `Schriftliche Stellungnahme angefordert${fallRef}${e.grund ? `: ${e.grund}` : '.'} Bitte zeitnah einreichen.`,
       }
 
     default:
