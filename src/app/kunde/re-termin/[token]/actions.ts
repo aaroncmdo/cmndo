@@ -41,7 +41,7 @@ export async function waehleReTerminSlot(
   // Token-Lookup
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, re_termin_token_eingelaufen_am, storniert_am')
+    .select('id, sv_id, lead_id, re_termin_token_eingelaufen_am, storniert_am')
     .eq('re_termin_token', token)
     .single()
 
@@ -100,6 +100,28 @@ export async function waehleReTerminSlot(
     })
   } catch (err) {
     console.error('[CMM-40] Timeline-Insert fehlgeschlagen (non-critical):', err)
+  }
+
+  // CMM-41: SV-Mitteilung — der SV soll im Portal sehen, dass ein neuer
+  // Slot-Vorschlag eingetroffen ist. Non-critical: Mitteilungs-Fehler darf
+  // den Slot-Pick nicht abbrechen.
+  try {
+    const { data: lead } = fall.lead_id != null
+      ? await db.from('leads').select('vorname, nachname').eq('id', fall.lead_id as string).single()
+      : { data: null }
+    const { createGutachterMitteilung } = await import('@/lib/mitteilungen')
+    const datum = start.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    const uhrzeit = start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    const kundeName = lead
+      ? `${(lead.vorname as string | null) ?? ''} ${(lead.nachname as string | null) ?? ''}`.trim() || 'Kunde'
+      : 'Kunde'
+    await createGutachterMitteilung(fall.sv_id as string, 're_termin_kundenwahl', fall.id as string, {
+      kunde_name: kundeName,
+      datum,
+      uhrzeit,
+    })
+  } catch (err) {
+    console.error('[CMM-41] SV-Mitteilung fehlgeschlagen (non-critical):', err)
   }
 
   revalidatePath(`/faelle/${fall.id}`)
