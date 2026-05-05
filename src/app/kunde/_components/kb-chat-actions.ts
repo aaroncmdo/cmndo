@@ -6,7 +6,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { revalidatePath } from 'next/cache'
 
 export type KundeChatKanal = 'chat_kb_kunde' | 'gruppenchat'
 
@@ -43,8 +42,15 @@ export async function sendKundeChatMessage(params: {
     return { ok: false, error: error.message }
   }
 
-  revalidatePath('/kunde')
-  if (params.fallId) revalidatePath(`/kunde/faelle/${params.fallId}`)
+  // BUGFIX: Kein revalidatePath mehr — der Chat ist eine Client-Komponente
+  // mit Optimistic-Add + Realtime-Sub. revalidatePath('/kunde') hat den
+  // KundenbetreuerCard-Server-Component neu gerendert, was neue Prop-
+  // Referenzen (additionalSenderIds-Array) an KundeKbChat propagiert hat.
+  // Dessen useEffect-Dependency hat sich damit "geaendert", die Subscription
+  // wurde abgerissen + ein Re-Fetch ausgeloest, der das frisch gesendete
+  // Insert nicht zuverlaessig zurueck-las (Race) — Effekt: Nachricht
+  // verschwand kurz nach dem Senden aus der UI. Realtime + Optimistic
+  // reichen vollstaendig, der Server muss den /kunde-Cache nicht anfassen.
   return { ok: true }
 }
 

@@ -6,7 +6,7 @@
 // kein /kunde/chat-Iframe). Videotermin-Button öffnet das BeratungBuchen-
 // Sheet mit Google-Meet-Slot-Picker.
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { PhoneIcon, MessageSquareIcon, VideoIcon, XIcon } from 'lucide-react'
 import BeratungBuchenSheet from '@/components/kunde/BeratungBuchenSheet'
@@ -246,20 +246,16 @@ export default function KundenbetreuerCard({
               </div>
             </div>
             <div className="flex-1 min-h-0">
-              <KundeKbChat
+              <ChatBlock
                 currentUserId={currentUserId}
-                partnerUserId={kbUserId}
-                additionalSenderIds={adminUserId ? [adminUserId] : []}
-                kanal="chat_kb_kunde"
+                kbUserId={kbUserId}
+                adminUserId={adminUserId ?? null}
                 fallOptions={fallOptions}
-                defaultFallId={fallId}
-                placeholder="Nachricht an deinen Betreuer …"
-                senderLabels={{
-                  [kbUserId]: { name, rolle: 'kb', avatarUrl },
-                  ...(adminUserId && adminName
-                    ? { [adminUserId]: { name: adminName, rolle: 'kb' as const, avatarUrl: adminAvatarUrl ?? null } }
-                    : {}),
-                }}
+                fallId={fallId}
+                kbName={name}
+                kbAvatarUrl={avatarUrl}
+                adminName={adminName ?? null}
+                adminAvatarUrl={adminAvatarUrl ?? null}
               />
             </div>
           </div>
@@ -291,5 +287,58 @@ export default function KundenbetreuerCard({
         />
       )}
     </div>
+  )
+}
+
+// Stabilisiert die Props an KundeKbChat: additionalSenderIds + senderLabels
+// werden mit useMemo cached, sodass Parent-Re-Renders (z.B. nach
+// revalidatePath an anderer Stelle, oder Sibling-State-Changes) NICHT die
+// useEffect-Dependency-Identitaet veraendern und die Realtime-Subscription
+// damit unnoetig zerlegen + neu aufbauen.
+function ChatBlock({
+  currentUserId,
+  kbUserId,
+  adminUserId,
+  fallOptions,
+  fallId,
+  kbName,
+  kbAvatarUrl,
+  adminName,
+  adminAvatarUrl,
+}: {
+  currentUserId: string
+  kbUserId: string
+  adminUserId: string | null
+  fallOptions: Array<{ id: string; fall_nummer: string | null }>
+  fallId: string | null
+  kbName: string
+  kbAvatarUrl: string | null
+  adminName: string | null
+  adminAvatarUrl: string | null
+}) {
+  const additionalSenderIds = useMemo(
+    () => (adminUserId ? [adminUserId] : []),
+    [adminUserId],
+  )
+  const senderLabels = useMemo(
+    () => ({
+      [kbUserId]: { name: kbName, rolle: 'kb' as const, avatarUrl: kbAvatarUrl },
+      ...(adminUserId && adminName
+        ? { [adminUserId]: { name: adminName, rolle: 'kb' as const, avatarUrl: adminAvatarUrl ?? null } }
+        : {}),
+    }),
+    [kbUserId, kbName, kbAvatarUrl, adminUserId, adminName, adminAvatarUrl],
+  )
+  return (
+    <KundeKbChat
+      currentUserId={currentUserId}
+      partnerUserId={kbUserId}
+      additionalSenderIds={additionalSenderIds}
+      kanal="chat_kb_kunde"
+      fallOptions={fallOptions}
+      defaultFallId={fallId}
+      placeholder="Nachricht an deinen Betreuer …"
+      senderLabels={senderLabels}
+    />
   )
 }
