@@ -83,6 +83,45 @@ async function createSideQuest(
     }
   }
 
+  // CMM-35: WhatsApp-Push an den Kunden bei Nachbesichtigung — der Kunde
+  // muss aktiv werden (Termin abstimmen, Fahrzeug bereitstellen). Stellung-
+  // nahme ist eine interne SV-Schreibaufgabe ohne Kunden-Beteiligung —
+  // hier kein Push.
+  if (typ === 'nachbesichtigung' && fallId) {
+    try {
+      const admin2 = createAdminClient()
+      const { data: fallRow } = await admin2
+        .from('faelle')
+        .select('lead_id')
+        .eq('id', fallId)
+        .maybeSingle()
+      const leadId = (fallRow?.lead_id as string | null) ?? null
+      if (leadId) {
+        const { data: lead } = await admin2
+          .from('leads')
+          .select('vorname, telefon')
+          .eq('id', leadId)
+          .maybeSingle()
+        if (lead?.telefon) {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+          const portalUrl = `${baseUrl}/kunde/faelle/${fallId}`
+          const { sendCommunication } = await import('@/lib/communications/send')
+          sendCommunication('nachbesichtigung_angefordert', {
+            telefon: lead.telefon as string,
+            vorname: (lead.vorname as string | null) ?? '',
+            '1': (lead.vorname as string | null) ?? '',
+            '2': portalUrl,
+            fall_id: fallId,
+          }).catch((err: unknown) =>
+            console.error('[CMM-35] Nachbesichtigung-WA fehlgeschlagen (non-critical):', err),
+          )
+        }
+      }
+    } catch (err) {
+      console.error('[CMM-35] Kunde-WA-Setup fehlgeschlagen (non-critical):', err)
+    }
+  }
+
   if (fallId) {
     revalidatePath(`/faelle/${fallId}`)
     revalidatePath(`/gutachter/fall/${fallId}`)
