@@ -6,7 +6,7 @@
 // für diesen Fall existiert (also nach KB-Freigabe).
 
 import { useState, useTransition } from 'react'
-import { CheckIcon, MailIcon, EuroIcon, BriefcaseIcon, RotateCwIcon, FileTextIcon } from 'lucide-react'
+import { CheckIcon, MailIcon, EuroIcon, BriefcaseIcon, RotateCwIcon, FileTextIcon, AlertTriangleIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {
   kanzleiVsKontaktErfasst,
@@ -26,6 +26,23 @@ type Props = {
    *  nach Kanzleipaket-Versand. */
   kanzleiWunsch: 'partnerkanzlei' | 'eigene_kanzlei' | 'keine_kanzlei' | 'noch_unentschieden' | 'nicht_gefragt' | null
   kanzleiUebergebenAm: string | null
+  /** A2: VS-Reaktions-Snapshot vom Fall — kommt aus LexDrive-Webhook-Updates. */
+  vsReaktion?: {
+    typ: 'gekuerzt' | 'voll_reguliert' | 'abgelehnt' | 'mehr_zeit' | 'nachbesichtigung' | 'quotiert' | null
+    am: string | null
+    kuerzungGrund: string | null
+    ablehnungsgrund: string | null
+    quoteProzent: number | null
+  }
+}
+
+const VS_REAKTION_LABEL: Record<string, { label: string; tone: 'amber' | 'rose' | 'emerald' | 'violet' }> = {
+  gekuerzt: { label: 'VS hat gekürzt', tone: 'amber' },
+  abgelehnt: { label: 'VS hat abgelehnt', tone: 'rose' },
+  quotiert: { label: 'VS hat quotiert', tone: 'amber' },
+  mehr_zeit: { label: 'VS bittet um Fristverlängerung', tone: 'amber' },
+  nachbesichtigung: { label: 'VS fordert Nachbesichtigung', tone: 'violet' },
+  voll_reguliert: { label: 'VS hat voll reguliert', tone: 'emerald' },
 }
 
 function fmt(iso: string | null): string | null {
@@ -49,6 +66,7 @@ export default function RegulierungCard({
   ausgezahltAm,
   kanzleiWunsch,
   kanzleiUebergebenAm,
+  vsReaktion,
 }: Props) {
   const router = useRouter()
   const [betrag, setBetrag] = useState<string>('')
@@ -65,6 +83,36 @@ export default function RegulierungCard({
   const istEigeneKanzlei = kanzleiWunsch === 'eigene_kanzlei'
   const istKeineKanzlei = kanzleiWunsch === 'keine_kanzlei'
   const istUebergeben = !!kanzleiUebergebenAm
+
+  // A2: Empfehlung welcher Side-Quest sinnvoll ist abhängig von VS-Reaktion.
+  const vsTyp = vsReaktion?.typ ?? null
+  const vsLabel = vsTyp ? VS_REAKTION_LABEL[vsTyp] : null
+  const empfehlung: { typ: 'nachbesichtigung' | 'stellungnahme' | null; grundPrefill: string } = (() => {
+    if (vsTyp === 'nachbesichtigung') {
+      return { typ: 'nachbesichtigung', grundPrefill: 'VS fordert Nachbesichtigung.' }
+    }
+    if (vsTyp === 'gekuerzt') {
+      const grund = vsReaktion?.kuerzungGrund?.trim()
+      return { typ: 'stellungnahme', grundPrefill: grund ? `VS-Kürzung: ${grund}` : 'VS hat gekürzt — bitte Stellungnahme einreichen.' }
+    }
+    if (vsTyp === 'abgelehnt') {
+      const grund = vsReaktion?.ablehnungsgrund?.trim()
+      return { typ: 'stellungnahme', grundPrefill: grund ? `VS-Ablehnung: ${grund}` : 'VS hat abgelehnt — bitte Stellungnahme einreichen.' }
+    }
+    if (vsTyp === 'quotiert') {
+      const quote = vsReaktion?.quoteProzent
+      return {
+        typ: 'stellungnahme',
+        grundPrefill: quote != null
+          ? `VS hat mit ${quote}% Quote reguliert — bitte Stellungnahme einreichen.`
+          : 'VS hat quotiert — bitte Stellungnahme einreichen.',
+      }
+    }
+    if (vsTyp === 'mehr_zeit') {
+      return { typ: 'stellungnahme', grundPrefill: 'VS bittet um Fristverlängerung — Reaktion dokumentieren.' }
+    }
+    return { typ: null, grundPrefill: '' }
+  })()
 
   function handleToggleEigeneKanzlei(naechsterWunsch: 'eigene_kanzlei' | 'partnerkanzlei') {
     if (!claimId) {
@@ -189,6 +237,60 @@ export default function RegulierungCard({
           <span className="font-medium text-claimondo-navy">eigene Kanzlei</span>
         </label>
       </div>
+
+      {/* A2: VS-Reaktions-Sektion — sichtbar sobald LexDrive eine Reaktion
+          gemeldet hat. Bei kontroversen Reaktionen (gekürzt, abgelehnt,
+          quotiert, mehr_zeit) Quick-CTA für Stellungnahme; bei
+          nachbesichtigung CTA für Nachbesichtigung. Voll reguliert ist
+          neutral, kein Action nötig. */}
+      {vsLabel && !auszahlungDone && !istKeineKanzlei && (
+        <div
+          className={`flex items-start gap-2.5 rounded-lg border px-3 py-2.5 ${
+            vsLabel.tone === 'rose' ? 'border-rose-300 bg-rose-50' :
+            vsLabel.tone === 'amber' ? 'border-amber-300 bg-amber-50' :
+            vsLabel.tone === 'emerald' ? 'border-emerald-300 bg-emerald-50' :
+            'border-violet-300 bg-violet-50'
+          }`}
+        >
+          <AlertTriangleIcon className={`w-4 h-4 shrink-0 mt-0.5 ${
+            vsLabel.tone === 'rose' ? 'text-rose-700' :
+            vsLabel.tone === 'amber' ? 'text-amber-700' :
+            vsLabel.tone === 'emerald' ? 'text-emerald-700' :
+            'text-violet-700'
+          }`} />
+          <div className="flex-1 min-w-0">
+            <p className={`text-xs font-semibold ${
+              vsLabel.tone === 'rose' ? 'text-rose-900' :
+              vsLabel.tone === 'amber' ? 'text-amber-900' :
+              vsLabel.tone === 'emerald' ? 'text-emerald-900' :
+              'text-violet-900'
+            }`}>{vsLabel.label}{vsReaktion?.am ? ` am ${fmt(vsReaktion.am)}` : ''}</p>
+            {(vsReaktion?.kuerzungGrund || vsReaktion?.ablehnungsgrund || vsReaktion?.quoteProzent != null) && (
+              <p className="text-[11px] text-claimondo-ondo mt-0.5 truncate">
+                {vsReaktion?.kuerzungGrund || vsReaktion?.ablehnungsgrund ||
+                  (vsReaktion?.quoteProzent != null ? `Quote: ${vsReaktion.quoteProzent}%` : '')}
+              </p>
+            )}
+            {empfehlung.typ && claimId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSideQuestModal(empfehlung.typ)
+                  setSideQuestGrund(empfehlung.grundPrefill)
+                }}
+                disabled={pendingSideQuest}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-xs font-medium px-2.5 py-1.5 transition-colors"
+              >
+                {empfehlung.typ === 'nachbesichtigung' ? (
+                  <><RotateCwIcon className="w-3 h-3" />Nachbesichtigung anfordern</>
+                ) : (
+                  <><FileTextIcon className="w-3 h-3" />Stellungnahme anfordern</>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* A3: „Keine Kanzlei"-Hinweis — Kunde reguliert selbst, kein
           Kanzlei-Lifecycle auf unserer Seite. */}
