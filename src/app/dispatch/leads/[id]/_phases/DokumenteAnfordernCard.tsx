@@ -10,10 +10,11 @@
 // Action gespiegelt, damit der Twilio-Inbound-Webhook weiter funktioniert,
 // wenn der Kunde mit Foto per WA antwortet statt den Link zu nutzen.
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { triggerDokumenteUploadRequest, saveStammdaten } from '../actions'
 import type { SlotEingabe } from '../_actions/dokumente-anfordern'
+import { berechneErwartung } from '@/lib/dokumente/erwartung'
 import {
   FileTextIcon,
   ShieldAlertIcon,
@@ -34,29 +35,24 @@ import {
 
 type Props = {
   leadId: string
-  zb1Status: string | null
+  // AAR-erwartung: Lead-Datensatz wird durchgereicht — die Card berechnet
+  // ihre Slot-Visibility selbst aus berechneErwartung(lead) statt aus
+  // mehreren bool-Props. Eine Quelle der Wahrheit für „welche Slots
+  // erwartet werden".
+  lead: Record<string, unknown>
   zb1HochgeladenAm: string | null
-  polizeiberichtStatus: string | null
   polizeiberichtHochgeladenAm: string | null
-  zeigePolizeibericht: boolean
   telefon: string | null
   email: string | null
   // AAR-unfallfotos: Wenn bereits Fotos im Lead liegen, Checkbox nicht auto-
   // vorwählen; Dispatcher kann sie trotzdem manuell setzen (Nachreichung).
   unfallfotosVorhanden: boolean
   // AAR-unfallfotos: Extern gesetzter „Kunde hat Unfallfotos"-Trigger aus der
-  // Schadenbeschreibung-Card in Phase 4. Wenn true → unfallfotos-Checkbox
-  // wird vorgewählt und die Schadenbeschreibungs-Card scrollt zum Button.
+  // Schadenbeschreibung-Card in Phase 4.
   unfallfotosAnfragenDefault?: boolean
   // AAR-unfallfotos-callback: Thumbnails + Analyse-Status für den Dispatcher.
-  // Kommt direkt aus den Lead-Spalten — Parent reicht sie durch, damit der
-  // Polling-Refresh den Haiku-Status sichtbar macht.
   schadensfotoUrls?: string[] | null
   sachschadenBeschreibung?: string | null
-  // Bedingte Slots: werden nur angezeigt wenn das Lead-Flag gesetzt ist.
-  hatSachschaden?: boolean
-  hatPersonenschaden?: boolean
-  hatZeugen?: boolean
 }
 
 type SonstigesEintrag = { id: number; label: string }
@@ -71,21 +67,35 @@ const STATUS_UI: Record<string, { label: string; bg: string; text: string; icon:
 
 export default function DokumenteAnfordernCard({
   leadId,
-  zb1Status,
+  lead,
   zb1HochgeladenAm,
-  polizeiberichtStatus,
   polizeiberichtHochgeladenAm,
-  zeigePolizeibericht,
   telefon,
   email,
   unfallfotosVorhanden,
   unfallfotosAnfragenDefault,
   schadensfotoUrls,
   sachschadenBeschreibung,
-  hatSachschaden,
-  hatPersonenschaden,
-  hatZeugen,
 }: Props) {
+  const zb1Status = (lead.zb1_status as string | null) ?? null
+  const polizeiberichtStatus = (lead.polizeibericht_status as string | null) ?? null
+
+  // AAR-erwartung: Eine Quelle der Wahrheit. Welche Slots der Dispatcher
+  // sieht, ergibt sich aus berechneErwartung(lead) — kein verteiltes
+  // Conditional pro Slot. Override-Toggle weiter unten zeigt zusätzlich
+  // alle möglichen Slots, falls das Lead-Form unvollständig war.
+  const erwartet = useMemo(
+    () => berechneErwartung(lead as Parameters<typeof berechneErwartung>[0]),
+    [lead],
+  )
+  const erwarteteIds = useMemo(() => new Set(erwartet.map((s) => s.slot_id)), [erwartet])
+
+  const zeigePolizeibericht = erwarteteIds.has('polizeibericht')
+  const sichtbarSachschadenFoto_initial = erwarteteIds.has('sachschaden_foto')
+  const sichtbarSachschadenRechnung_initial = erwarteteIds.has('sachschaden_rechnung')
+  const sichtbarAttest_initial = erwarteteIds.has('aerztliches_attest')
+  const sichtbarDiagnose_initial = erwarteteIds.has('diagnosebericht')
+  const sichtbarZeugen_initial = erwarteteIds.has('zeugenaussage')
   // Echter „Anfrage offen"-State aus dokument_upload_anfragen.
   // Wird beim Mount + bei jedem Polling-Tick neu geladen, damit die UI
   // sich nicht durch bloßes Setzen der Checkbox falsch zeigt.
@@ -122,9 +132,9 @@ export default function DokumenteAnfordernCard({
   // kann manuell aktivieren wenn er im Call merkt dass es z.B. einen Zeugen
   // gibt obwohl das im Lead-Form nicht ausgefüllt war.
   const [zeigeAlleSlots, setZeigeAlleSlots] = useState(false)
-  const sichtbarSachschaden = !!hatSachschaden || zeigeAlleSlots
-  const sichtbarPersonenschaden = !!hatPersonenschaden || zeigeAlleSlots
-  const sichtbarZeugen = !!hatZeugen || zeigeAlleSlots
+  const sichtbarSachschaden = sichtbarSachschadenFoto_initial || sichtbarSachschadenRechnung_initial || zeigeAlleSlots
+  const sichtbarPersonenschaden = sichtbarAttest_initial || sichtbarDiagnose_initial || zeigeAlleSlots
+  const sichtbarZeugen = sichtbarZeugen_initial || zeigeAlleSlots
 
   // Parent-Trigger „Kunde hat Unfallfotos" nachträglich aktivieren
   useEffect(() => {
@@ -654,7 +664,7 @@ export default function DokumenteAnfordernCard({
         {/* Manueller Override: alle conditional Slots zeigen — falls die
             Lead-Flags (sachschaden_flag, personenschaden_flag, zeugen) nicht
             gesetzt sind, der Dispatcher sie aber im Telefonat braucht. */}
-        {!zeigeAlleSlots && (!hatSachschaden || !hatPersonenschaden || !hatZeugen) && (
+        {!zeigeAlleSlots && (!sichtbarSachschadenFoto_initial || !sichtbarAttest_initial || !sichtbarZeugen_initial) && (
           <button
             type="button"
             onClick={() => setZeigeAlleSlots(true)}

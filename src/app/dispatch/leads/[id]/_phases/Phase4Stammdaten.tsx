@@ -735,22 +735,15 @@ export default function Phase4Stammdaten() {
           er in die Stammdaten einsteigt, Kunde lädt parallel hoch. */}
       <DokumenteAnfordernCard
         leadId={leadId}
-        zb1Status={l.zb1_status ?? null}
+        lead={l as Record<string, unknown>}
         zb1HochgeladenAm={l.zb1_hochgeladen_am ?? null}
-        polizeiberichtStatus={l.polizeibericht_status ?? null}
         polizeiberichtHochgeladenAm={l.polizeibericht_hochgeladen_am ?? null}
-        zeigePolizeibericht={l.polizei_vor_ort === true && l.polizeibericht_pflicht === true}
         telefon={l.telefon ?? null}
         email={l.email ?? null}
         unfallfotosVorhanden={hatUnfallfotos}
         unfallfotosAnfragenDefault={unfallfotosAnfragen}
         schadensfotoUrls={l.schadensfoto_urls ?? null}
         sachschadenBeschreibung={l.fahrzeugschaden_beschreibung ?? null}
-        hatSachschaden={l.sachschaden_flag === true}
-        hatPersonenschaden={l.personenschaden_flag === true}
-        // AAR-zeugen-flag: Zwei Felder im Schema (legacy `zeugen` und neueres
-        // `zeugen_vorhanden`) — OR-en damit der Slot in beiden Fällen sichtbar ist
-        hatZeugen={(l as Record<string, unknown>).zeugen === true || (l as Record<string, unknown>).zeugen_vorhanden === true}
       />
 
       {/* CMM-23: KI-Analyse (OCR first, LLM-Fallback). Hier in Phase 4 statt
