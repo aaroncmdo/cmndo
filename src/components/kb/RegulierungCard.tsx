@@ -92,6 +92,27 @@ export default function RegulierungCard({
   const istKeineKanzlei = kanzleiWunsch === 'keine_kanzlei'
   const istUebergeben = !!kanzleiUebergebenAm
 
+  // A4 P2: SF-Reminder-Banner — wenn Kanzleifall seit > 7 Tagen offen ist
+  // (kanzlei_uebergeben_am gesetzt) und noch keine VS-Reaktion da ist,
+  // KB an Salesforce-Lookup erinnern. Liefert keine harten Action, ist
+  // ein „check-in"-Hinweis.
+  const ueberbergangsAlter = (() => {
+    if (!kanzleiUebergebenAm) return null
+    try {
+      const ms = Date.now() - new Date(kanzleiUebergebenAm).getTime()
+      return Math.floor(ms / (1000 * 60 * 60 * 24))
+    } catch {
+      return null
+    }
+  })()
+  const zeigeSfReminder =
+    !auszahlungDone &&
+    !istKeineKanzlei &&
+    !istEigeneKanzlei &&
+    !vsReaktion?.typ &&
+    ueberbergangsAlter !== null &&
+    ueberbergangsAlter >= 7
+
   // A2: Empfehlung welcher Side-Quest sinnvoll ist abhängig von VS-Reaktion.
   const vsTyp = vsReaktion?.typ ?? null
   const vsLabel = vsTyp ? VS_REAKTION_LABEL[vsTyp] : null
@@ -326,6 +347,24 @@ export default function RegulierungCard({
                 )}
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* A4 P2: SF-Reminder — Status seit > 7 Tagen unverändert, KB soll
+          in Salesforce nachsehen ob die VS schon geantwortet hat. */}
+      {zeigeSfReminder && (
+        <div className="flex items-start gap-2.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5">
+          <AlertTriangleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-amber-900">
+              Seit {ueberbergangsAlter} Tagen keine VS-Reaktion erfasst
+            </p>
+            <p className="text-[11px] text-amber-800 mt-0.5">
+              Akte ist {ueberbergangsAlter} Tage in der Kanzlei. Bitte in
+              Salesforce nachschauen ob die Versicherung schon geantwortet hat —
+              wenn ja, hier unten eintragen.
+            </p>
           </div>
         </div>
       )}
