@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import FaelleKanban from './FaelleKanban'
+import KanbanUploadsRealtime from './KanbanUploadsRealtime'
 
 export default async function AdminFaellePage() {
   const supabase = await createClient()
@@ -158,5 +159,11 @@ export default async function AdminFaellePage() {
     mitteilung: mitteilungMap[f.id] ?? null,
   }))
 
-  return <FaelleKanban faelle={enriched} />
+  return (
+    <>
+      {/* CMM-33: Live-Aktualisierung der KB-Upload-Badge ohne manuellen Reload */}
+      <KanbanUploadsRealtime fallIds={fallIds} />
+      <FaelleKanban faelle={enriched} />
+    </>
+  )
 }
