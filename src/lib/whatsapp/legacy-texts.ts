@@ -101,9 +101,9 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
   kb_termin_reminder_1h: (v) =>
     `${v['1'] ?? ''}, in ca. 1 Stunde (${v['2'] ?? ''} Uhr) ${v['3'] ? `startet Ihr Video-Gespräch. Link: ${v['3']}` : 'ruft Ihr Claimondo-Betreuer Sie an. Bitte halten Sie Ihr Telefon bereit.'}`,
 
-  // KFZ-202: No-Show
+  // KFZ-202: No-Show — CMM-39: zusaetzlich Re-Termin-FlowLink (Variable 2)
   no_show_kunde: (v) =>
-    `Hallo ${v['1'] ?? ''}, wir haben Sie leider beim vereinbarten Gutachtertermin nicht angetroffen. Bitte melden Sie sich, damit wir einen neuen Termin fuer Sie vereinbaren koennen.`,
+    `Hallo ${v['1'] ?? ''}, wir haben Sie leider beim vereinbarten Gutachtertermin nicht angetroffen. Bitte waehlen Sie hier einen neuen Termin: ${v['2'] ?? ''}`,
 
   // KFZ-207: Eskalation Tag 21
   eskalation_tag21: (v) =>
