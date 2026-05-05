@@ -41,9 +41,11 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
         env:
-          # tsc --noEmit OOMt im Default-2-GB-Heap auf GH-Runnern, seit die
-          # Codebase die Schwelle gerissen hat. 4 GB gibt Puffer.
-          NODE_OPTIONS: --max-old-space-size=4096
+          # tsc --noEmit + next build OOMen im Default-Heap auf GH-Runnern.
+          # Codebase ist über die 4-GB-Schwelle gewachsen (Mai 2026, PR #480/#481
+          # mergte mit grünem Vercel-Build aber rotem CI-Build wegen OOM).
+          # ubuntu-latest hat 16 GB RAM → 8 GB Puffer ist sicher.
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Lint
         run: npm run lint
@@ -52,7 +54,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          NODE_OPTIONS: --max-old-space-size=4096
+          NODE_OPTIONS: --max-old-space-size=8192
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
