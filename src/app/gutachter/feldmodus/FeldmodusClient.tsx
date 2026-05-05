@@ -17,12 +17,9 @@ import OfflineStatusBanner from './OfflineStatusBanner'
 import SvFallakteView from './SvFallakteView'
 import FokusChatPanel from './FokusChatPanel'
 import TbtBanner from './TbtBanner'
-import MobileBottomSheet from '@/components/sv/MobileBottomSheet'
 import { useFieldTracking } from './useFieldTracking'
 import { useTurnByTurn } from './useTurnByTurn'
 import { markArrived, pauseFokusmodus, startStop } from './actions'
-import { CarIcon, ClockIcon, ChevronUpIcon } from 'lucide-react'
-import { formatUhrzeit } from '@/lib/format'
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
@@ -240,12 +237,23 @@ export default function FeldmodusClient({
     )
 
   return (
-    <div className="h-screen w-screen flex flex-col">
+    // CMM-32-mapbox: Feldmodus läuft im normalen GutachterShell-Wrapper.
+    // -m-* kompensiert main-padding damit die Karte oben/unten/rechts bündig
+    // zum Wrapper-Außenrand abschließt; nur die Sidebar-Spalte links nutzt
+    // das main-padding selbst.
+    <div className="-m-2 sm:-m-3 lg:-m-4 flex flex-col md:flex-row min-h-full md:h-full">
       <OfflineStatusBanner />
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-      {/* Karte — auf Mobile volle Höhe (Sidebar ist Bottom-Sheet);
-          auf Desktop links, Sidebar rechts. */}
-      <div className="relative flex-1 min-h-0 lg:flex-1">
+
+      {/* Sidebar-Spalte — links auf Desktop, unter Map auf Mobile. */}
+      <aside className="order-2 md:order-1 md:w-[400px] md:shrink-0 md:flex md:flex-col md:h-full p-2 sm:p-3 lg:p-4 md:overflow-y-auto bg-[#f8f9fb]">
+        <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden flex flex-col flex-1 min-h-0">
+          {sidebarContent}
+        </div>
+      </aside>
+
+      {/* Karten-Spalte — rechts auf Desktop, oben auf Mobile. Bündig zum
+          Bildschirmrand (kein right-padding) und zum Wrapper oben/unten. */}
+      <div className="order-1 md:order-2 relative flex-1 min-h-[55vh] md:min-h-0 md:h-full">
         <FeldmodusMap
           sv={sv}
           stops={stops}
@@ -253,7 +261,6 @@ export default function FeldmodusClient({
           svPosition={position}
           followSv={tbtActive && !!tbt.route}
         />
-        {/* TbT-Banner — nur während Anfahrt zum Stop (vor arrived) */}
         {tbtActive && tbt.upcomingStep && (
           <TbtBanner
             step={tbt.upcomingStep}
@@ -277,55 +284,8 @@ export default function FeldmodusClient({
         )}
       </div>
 
-      {/* Desktop-Sidebar — auf Mobile hidden (Bottom-Sheet ersetzt sie). */}
-      <div className="hidden lg:flex flex-none lg:w-[380px] lg:border-l lg:border-white/10 min-h-0 overflow-y-auto">
-        {sidebarContent}
-      </div>
-      </div>
-
-      {/* Mobile-Bottom-Sheet (lg:hidden) — collapsed zeigt Auto + Name +
-          Uhrzeit; expanded zeigt die volle Auftrag-Übersicht (Fallakte
-          oder RouteSidebar je nach Session-Status). */}
-      {aktuellerStop && (
-        <MobileBottomSheet
-          className="lg:hidden"
-          collapsedHeightPx={88}
-          expandedRatio={0.85}
-          header={
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-claimondo-navy flex items-center justify-center">
-                <CarIcon className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 leading-tight">
-                  Aktueller Stop
-                </p>
-                <p className="text-sm font-semibold text-claimondo-navy truncate leading-tight">
-                  {aktuellerStop.kunde_name}
-                </p>
-                <p className="text-[11px] text-claimondo-ondo flex items-center gap-1 leading-tight">
-                  <ClockIcon className="w-3 h-3" />
-                  {formatUhrzeit(aktuellerStop.start_zeit)}
-                  {aktuellerStop.fahrzeug && (
-                    <span className="ml-1 truncate">· {aktuellerStop.fahrzeug}</span>
-                  )}
-                  {aktuellerStop.kennzeichen && (
-                    <span className="font-mono ml-1">· {aktuellerStop.kennzeichen}</span>
-                  )}
-                </p>
-              </div>
-              <ChevronUpIcon className="w-4 h-4 text-claimondo-ondo/60 shrink-0" />
-            </div>
-          }
-        >
-          {sidebarContent}
-        </MobileBottomSheet>
-      )}
-
-      {/* AAR-383: Fokus-Chat als fixes Bottom-Panel — immer sichtbar
-          solange Session aktiv, Auto-Collapse beim arrived-State.
-          Auf Mobile sitzt der Chat-Trigger-Button unter dem BottomSheet
-          (das z-Index-Stacking handhabt FokusChatPanel über z-40 selbst). */}
+      {/* AAR-383: Fokus-Chat als fixes Bottom-Panel — bleibt im normalen
+          Wrapper als floating Panel über allem. */}
       {aktuellerStop && sessionStatus !== 'finished' && (
         <FokusChatPanel
           fallId={aktuellerStop.fall_id}
