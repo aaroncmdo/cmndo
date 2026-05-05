@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation'
 import {
   kanzleiVsKontaktErfasst,
   kanzleiAuszahlungEingegangen,
+  setVsReaktionManuell,
 } from '@/lib/kanzlei-fall/actions'
 import { setKanzleiWunsch } from '@/lib/kanzlei-wunsch/actions'
 import { createNachbesichtigung, createStellungnahme } from '@/lib/auftrag/side-quest'
@@ -77,6 +78,13 @@ export default function RegulierungCard({
   const [pendingSideQuest, startSideQuest] = useTransition()
   const [sideQuestModal, setSideQuestModal] = useState<null | 'nachbesichtigung' | 'stellungnahme'>(null)
   const [sideQuestGrund, setSideQuestGrund] = useState<string>('')
+  // A4 P1: Manuelle VS-Reaktions-Erfassung
+  const [pendingVsReaktion, startVsReaktion] = useTransition()
+  const [vsReaktionModal, setVsReaktionModal] = useState(false)
+  const [vsReaktionTyp, setVsReaktionTyp] = useState<'gekuerzt' | 'abgelehnt' | 'voll_reguliert' | 'quotiert'>('gekuerzt')
+  const [vsBetrag, setVsBetrag] = useState<string>('')
+  const [vsGrund, setVsGrund] = useState<string>('')
+  const [vsQuote, setVsQuote] = useState<string>('')
 
   const vsKontaktDone = !!vsKontaktAm
   const auszahlungDone = !!ausgezahltAm
@@ -147,6 +155,36 @@ export default function RegulierungCard({
       const r = await kanzleiAuszahlungEingegangen(fallId, parsed)
       if (!r.ok) setError(r.error ?? 'Fehler')
       else router.refresh()
+    })
+  }
+
+  function handleVsReaktionSubmit() {
+    setError(null)
+    const betrag = vsBetrag.trim() ? Number(vsBetrag.replace(',', '.')) : undefined
+    if (betrag !== undefined && (Number.isNaN(betrag) || betrag < 0)) {
+      setError('Betrag ungültig')
+      return
+    }
+    const quote = vsQuote.trim() ? Number(vsQuote.replace(',', '.')) : undefined
+    if (quote !== undefined && (Number.isNaN(quote) || quote < 0 || quote > 100)) {
+      setError('Quote ungültig (0-100)')
+      return
+    }
+    startVsReaktion(async () => {
+      const r = await setVsReaktionManuell(fallId, {
+        typ: vsReaktionTyp,
+        grund: vsGrund.trim() || null,
+        kuerzungs_betrag: vsReaktionTyp === 'gekuerzt' ? (betrag ?? null) : null,
+        regulierung_betrag: vsReaktionTyp === 'voll_reguliert' || vsReaktionTyp === 'gekuerzt' ? (betrag ?? null) : null,
+        quote_prozent: vsReaktionTyp === 'quotiert' ? (quote ?? null) : null,
+      })
+      if (!r.ok) {
+        setError(r.error ?? 'Speichern fehlgeschlagen')
+        return
+      }
+      setVsReaktionModal(false)
+      setVsBetrag(''); setVsGrund(''); setVsQuote('')
+      router.refresh()
     })
   }
 
@@ -288,6 +326,104 @@ export default function RegulierungCard({
                 )}
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* A4 P1: VS-Reaktion manuell erfassen — sichtbar wenn keine Reaktion
+          via LexDrive eingegangen ist. KB trägt nach Salesforce-Lookup
+          Kürzungsbetrag + Grund manuell ein. */}
+      {!vsLabel && !auszahlungDone && !istKeineKanzlei && claimId && (
+        <button
+          type="button"
+          onClick={() => setVsReaktionModal(true)}
+          disabled={pendingVsReaktion}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-claimondo-border bg-white hover:bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium px-3 py-2 transition-colors"
+        >
+          <FileTextIcon className="w-3.5 h-3.5" />
+          VS-Reaktion eintragen (aus Salesforce)
+        </button>
+      )}
+
+      {vsReaktionModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 space-y-4">
+            <h3 className="text-base font-semibold text-claimondo-navy">VS-Reaktion eintragen</h3>
+            <p className="text-xs text-claimondo-ondo">
+              Was hat die Versicherung in Salesforce geantwortet?
+            </p>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-claimondo-navy block">Reaktions-Typ</label>
+              <select
+                value={vsReaktionTyp}
+                onChange={(e) => setVsReaktionTyp(e.target.value as typeof vsReaktionTyp)}
+                className="w-full rounded-lg border border-claimondo-border px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+              >
+                <option value="gekuerzt">Gekürzt</option>
+                <option value="abgelehnt">Abgelehnt</option>
+                <option value="voll_reguliert">Voll reguliert</option>
+                <option value="quotiert">Quotiert</option>
+              </select>
+            </div>
+            {(vsReaktionTyp === 'gekuerzt' || vsReaktionTyp === 'voll_reguliert') && (
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-claimondo-navy block">
+                  {vsReaktionTyp === 'gekuerzt' ? 'Anerkannter Betrag (€)' : 'Auszahlungs-Betrag (€)'}
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={vsBetrag}
+                  onChange={(e) => setVsBetrag(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full rounded-lg border border-claimondo-border px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+                />
+              </div>
+            )}
+            {vsReaktionTyp === 'quotiert' && (
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-claimondo-navy block">Quote (%)</label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={vsQuote}
+                  onChange={(e) => setVsQuote(e.target.value)}
+                  placeholder="0-100"
+                  className="w-full rounded-lg border border-claimondo-border px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+                />
+              </div>
+            )}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-claimondo-navy block">
+                Grund / Begründung (optional)
+              </label>
+              <textarea
+                value={vsGrund}
+                onChange={(e) => setVsGrund(e.target.value)}
+                rows={3}
+                placeholder="z.B. Reparaturkosten gekürzt wegen Vorschäden"
+                className="w-full rounded-lg border border-claimondo-border px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => { setVsReaktionModal(false); setVsBetrag(''); setVsGrund(''); setVsQuote('') }}
+                disabled={pendingVsReaktion}
+                className="px-3 py-1.5 text-sm text-claimondo-ondo hover:text-claimondo-navy"
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                onClick={handleVsReaktionSubmit}
+                disabled={pendingVsReaktion}
+                className="rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 disabled:bg-claimondo-navy/40 text-white text-sm font-medium px-4 py-1.5 transition-colors"
+              >
+                {pendingVsReaktion ? 'Wird gespeichert…' : 'Eintragen'}
+              </button>
+            </div>
+            {error && <p className="text-xs text-red-700">{error}</p>}
           </div>
         </div>
       )}
