@@ -63,6 +63,7 @@ export default function RegulierungCard({
   const vsKontaktDone = !!vsKontaktAm
   const auszahlungDone = !!ausgezahltAm
   const istEigeneKanzlei = kanzleiWunsch === 'eigene_kanzlei'
+  const istKeineKanzlei = kanzleiWunsch === 'keine_kanzlei'
   const istUebergeben = !!kanzleiUebergebenAm
 
   function handleToggleEigeneKanzlei(naechsterWunsch: 'eigene_kanzlei' | 'partnerkanzlei') {
@@ -189,8 +190,26 @@ export default function RegulierungCard({
         </label>
       </div>
 
-      {/* Aktionen — bei eigene-Kanzlei verschwinden VS-Kontakt/Auszahlung */}
-      {!istEigeneKanzlei && !auszahlungDone && (
+      {/* A3: „Keine Kanzlei"-Hinweis — Kunde reguliert selbst, kein
+          Kanzlei-Lifecycle auf unserer Seite. */}
+      {istKeineKanzlei && (
+        <div className="flex items-start gap-2.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5">
+          <BriefcaseIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-amber-900">
+              Kunde reguliert selbst
+            </p>
+            <p className="text-[11px] text-amber-800 mt-0.5">
+              Kunde hat „Keine Kanzlei" gewählt. Es wird keine VS-Kommunikation auf unserer
+              Seite geführt und kein Folge-Auftrag (Nachbesichtigung/Stellungnahme) ist
+              möglich, solange diese Wahl steht.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Aktionen — bei eigene-Kanzlei oder keine-Kanzlei keine VS-Kontakt/Auszahlung */}
+      {!istEigeneKanzlei && !istKeineKanzlei && !auszahlungDone && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-claimondo-border/60">
           {!vsKontaktDone && (
             <button
@@ -233,8 +252,10 @@ export default function RegulierungCard({
       )}
 
       {/* Side-Quest-Aktionen — sichtbar während aktiver Regulierung. Beide
-          erfordern einen existierenden Kanzleifall (DB-Trigger 1.5c). */}
-      {!auszahlungDone && claimId && (
+          erfordern einen existierenden Kanzleifall (DB-Trigger 1.5c).
+          Bei keine_kanzlei wurde der Kanzleifall gelöscht → Trigger blockt eh,
+          aber UI versteckt die Buttons sofort. */}
+      {!auszahlungDone && !istKeineKanzlei && claimId && (
         <div className="pt-2 border-t border-claimondo-border/60">
           <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2">
             Folge-Aufträge anstoßen
