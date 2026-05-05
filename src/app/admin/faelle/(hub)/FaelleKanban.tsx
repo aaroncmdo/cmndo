@@ -32,6 +32,8 @@ type Fall = {
   sv_name: string | null
   ungelesene_nachrichten?: number
   ungelesene_updates?: number
+  /** A4 P0: rote Badge wenn Kunde Dokumente hochgeladen hat die der KB nicht gesehen hat */
+  ungesehene_kunde_uploads?: number
   aktuelle_phase?: string | null
   abgeschlossen_am?: string | null
   // AAR-770: Jüngste offene Mitteilung für Hover-Preview
@@ -323,7 +325,11 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
         <Link href={`/faelle/${fall.id}`} onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-2">
             {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-claimondo-ondo/70 line-through' : 'text-claimondo-navy'}`}>{fall.kunde_name}</p>}
-            <FallCardBadges chatCount={fall.ungelesene_nachrichten ?? 0} updateCount={fall.ungelesene_updates ?? 0} />
+            <FallCardBadges
+              chatCount={fall.ungelesene_nachrichten ?? 0}
+              updateCount={fall.ungelesene_updates ?? 0}
+              kundeUploadCount={fall.ungesehene_kunde_uploads ?? 0}
+            />
             {/* AAR-770: Mitteilungs-Pulse — kleiner Punkt wenn offene Mitteilung anliegt */}
             {fall.mitteilung && (
               <span

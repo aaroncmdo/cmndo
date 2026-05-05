@@ -45,6 +45,7 @@ export default async function AdminFaellePage() {
     { data: svs },
     { data: unreadMsgs },
     { data: readStates },
+    { data: ungeseheneKundeUploads },
   ] = await Promise.all([
     leadIds.length > 0
       ? supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
@@ -60,6 +61,14 @@ export default async function AdminFaellePage() {
       : Promise.resolve(emptyRes),
     fallIds.length > 0 && user
       ? admin.from('fall_read_state').select('fall_id, last_read_update_at').eq('user_id', user.id).in('fall_id', fallIds)
+      : Promise.resolve(emptyRes),
+    // A4 P0: ungesehene Kunde-Uploads pro Fall — wird als rote Badge angezeigt
+    fallIds.length > 0
+      ? admin.from('fall_dokumente').select('fall_id')
+          .eq('uploaded_by_kunde', true)
+          .is('kb_gesehen_am', null)
+          .is('geloescht_am', null)
+          .in('fall_id', fallIds)
       : Promise.resolve(emptyRes),
   ])
 
@@ -99,6 +108,12 @@ export default async function AdminFaellePage() {
     unreadMap[msg.fall_id] = (unreadMap[msg.fall_id] ?? 0) + 1
   }
 
+  // A4 P0: pro Fall die Anzahl der ungesehenen Kunde-Uploads
+  const kundeUploadMap: Record<string, number> = {}
+  for (const doc of (ungeseheneKundeUploads ?? []) as Array<{ fall_id: string }>) {
+    kundeUploadMap[doc.fall_id] = (kundeUploadMap[doc.fall_id] ?? 0) + 1
+  }
+
   // Ungelesene Updates: count_unread_updates RPC für alle Fälle parallel
   const readStateMap = new Map((readStates ?? []).map(s => [s.fall_id, s.last_read_update_at as string | null]))
   const updateCounts = fallIds.length > 0
@@ -136,6 +151,9 @@ export default async function AdminFaellePage() {
     sv_name: f.sv_id ? (svMap[f.sv_id] ?? null) : null,
     ungelesene_nachrichten: unreadMap[f.id] ?? 0,
     ungelesene_updates: updateMap[f.id] ?? 0,
+    // A4 P0: rote Badge im Kanban wenn der Kunde Dokumente hochgeladen
+    // hat die der KB noch nicht gesehen hat.
+    ungesehene_kunde_uploads: kundeUploadMap[f.id] ?? 0,
     // AAR-770: Jüngste offene Mitteilung für Hover-Preview
     mitteilung: mitteilungMap[f.id] ?? null,
   }))

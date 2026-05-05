@@ -145,6 +145,25 @@ export default async function FallaktePage({
     .single()
   const userRolle = ((profile?.rolle as FallakteRolle | null) ?? 'kunde') as FallakteRolle
 
+  // A4 P0: KB öffnet die Fallakte → alle ungesehenen Kunde-Uploads
+  // markieren. Analog admin_termine.gesehen_am (AAR-724) — der Counter
+  // im Kanban verschwindet beim nächsten Reload. Best-effort, kein Block
+  // wenn Update fehlschlägt.
+  if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
+    try {
+      const seenAdmin = createAdminClient()
+      await seenAdmin
+        .from('fall_dokumente')
+        .update({ kb_gesehen_am: new Date().toISOString() })
+        .eq('fall_id', id)
+        .eq('uploaded_by_kunde', true)
+        .is('kb_gesehen_am', null)
+        .is('geloescht_am', null)
+    } catch (err) {
+      console.error('[A4 P0] mark-seen kunde-uploads failed:', err)
+    }
+  }
+
   // OCR-Auswertung NUR für Admin laden — andere Rollen bekommen `null`
   // und damit keinen Render-Pfad.
   if (userRolle === 'admin') {
