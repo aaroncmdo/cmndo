@@ -16,6 +16,7 @@ import { getAlleSlots } from '@/lib/dokumente/katalog'
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
 import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
 import RegulierungCard from '@/components/kb/RegulierungCard'
+import VsKorrespondenzCard, { type VsKorrespondenzEintrag } from '@/components/kb/VsKorrespondenzCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
 import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
@@ -746,6 +747,35 @@ export default async function FallaktePage({
       quoteProzent: number | null
     }
   } | null = null
+  // CMM-42: VS-Korrespondenz-Liste fuer die VsKorrespondenzCard (admin/kb).
+  let vsKorrespondenzEintraege: VsKorrespondenzEintrag[] = []
+  let vsVersicherungVorgabe: string | null = null
+  if ((userRolle === 'admin' || userRolle === 'kundenbetreuer') && claimId) {
+    const adminCli = createAdminClient()
+    const { data: vsk } = await adminCli
+      .from('vs_korrespondenz')
+      .select('id, datum, richtung, kanal, versicherung, aktenzeichen, betreff, notiz, naechste_frist')
+      .eq('claim_id', claimId)
+      .order('datum', { ascending: false })
+      .limit(50)
+    vsKorrespondenzEintraege = (vsk ?? []).map((row) => ({
+      id: row.id as string,
+      datum: row.datum as string,
+      richtung: row.richtung as 'eingehend' | 'ausgehend',
+      kanal: row.kanal as 'email' | 'post' | 'fax' | 'telefon' | 'portal',
+      versicherung: (row.versicherung as string | null) ?? null,
+      aktenzeichen: (row.aktenzeichen as string | null) ?? null,
+      betreff: (row.betreff as string | null) ?? null,
+      notiz: (row.notiz as string | null) ?? null,
+      naechste_frist: (row.naechste_frist as string | null) ?? null,
+    }))
+    // Versicherungs-Name als Vorgabe — erst aus juengstem Eintrag, sonst aus claim_parties
+    const juengsterMitVS = vsKorrespondenzEintraege.find((e) => e.versicherung)
+    if (juengsterMitVS?.versicherung) {
+      vsVersicherungVorgabe = juengsterMitVS.versicherung
+    }
+  }
+
   if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
     const adminCli = createAdminClient()
     // CMM-37: Read via claim_id (kanonisch).
@@ -816,6 +846,17 @@ export default async function FallaktePage({
       {regulierungCardProps && (
         <div className="mb-4">
           <RegulierungCard {...regulierungCardProps} />
+        </div>
+      )}
+      {/* CMM-42: VS-Korrespondenz erfassen + anzeigen (admin/kb) */}
+      {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && claimId && (
+        <div className="mb-4">
+          <VsKorrespondenzCard
+            fallId={id}
+            claimId={claimId}
+            eintraege={vsKorrespondenzEintraege}
+            versicherungVorgabe={vsVersicherungVorgabe}
+          />
         </div>
       )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
