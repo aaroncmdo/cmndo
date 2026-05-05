@@ -9,6 +9,11 @@
 //   3. Tertiär  → weder KB noch Admin verfügbar: Timeline-Eintrag + Error-Log,
 //                  Fall bleibt unbezogen (kundenbetreuer_id = NULL)
 //
+// CMM/SoT-Konvention: claim ist die Single Source of Truth. Jeder Write der
+// kundenbetreuer_id muss auf BEIDEN Tabellen passieren (claims + faelle),
+// solange faelle.kundenbetreuer_id noch existiert. Helper updateKbOnFallAndClaim()
+// kapselt das. Vor diesem Sweep wurde nur faelle geschrieben → Drift in 6/13 Fällen.
+//
 // Wird aufgerufen aus admin/dispatch/actions.ts (signSAandCreateFall-Flow)
 // und kann später für Re-Assignments wiederverwendet werden.
 //
@@ -35,6 +40,42 @@ export type KbAssignmentResult = {
 }
 
 type ProfileLite = { id: string; email: string | null; kapazitaet_max: number | null }
+
+/**
+ * SoT-Sync-Helper: schreibt kundenbetreuer_id + Begleit-Felder auf faelle UND
+ * claims. Damit bleibt das denormalisierte Feld faelle.kundenbetreuer_id
+ * synchron zur SoT claims.kundenbetreuer_id (CMM-Migration mid-state).
+ *
+ * `fallback_flag` und `zugewiesen_am` werden nur auf faelle geschrieben —
+ * claims hat (Stand Mai 2026) keine separaten Spalten dafür.
+ */
+async function updateKbOnFallAndClaim(
+  supabase: AnySupabase,
+  fallId: string,
+  kbId: string,
+  fallbackFlag: boolean,
+): Promise<void> {
+  const now = new Date().toISOString()
+  const { data: fall } = await supabase
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+
+  await supabase
+    .from('faelle')
+    .update({
+      kundenbetreuer_id: kbId,
+      kundenbetreuer_fallback_flag: fallbackFlag,
+      kundenbetreuer_zugewiesen_am: now,
+    })
+    .eq('id', fallId)
+
+  const claimId = (fall?.claim_id as string | null) ?? null
+  if (claimId) {
+    await supabase.from('claims').update({ kundenbetreuer_id: kbId }).eq('id', claimId)
+  }
+}
 
 /**
  * Findet den KB mit den wenigsten offenen Fällen unter der Kapazitätsgrenze.
@@ -221,14 +262,7 @@ export async function assignKundenbetreuer(
     const sticky = await findStickyKb(supabase, options.stickyHints)
     if (sticky) {
       if (options.writeToFall) {
-        await supabase
-          .from('faelle')
-          .update({
-            kundenbetreuer_id: sticky.kb_id,
-            kundenbetreuer_fallback_flag: false,
-            kundenbetreuer_zugewiesen_am: new Date().toISOString(),
-          })
-          .eq('id', fallId)
+        await updateKbOnFallAndClaim(supabase, fallId, sticky.kb_id, false)
       }
       if (options.logToTimeline) {
         await supabase.from('timeline').insert({
@@ -246,14 +280,7 @@ export async function assignKundenbetreuer(
   const kb = await findAvailableKB(supabase)
   if (kb) {
     if (options.writeToFall) {
-      await supabase
-        .from('faelle')
-        .update({
-          kundenbetreuer_id: kb.id,
-          kundenbetreuer_fallback_flag: false,
-          kundenbetreuer_zugewiesen_am: new Date().toISOString(),
-        })
-        .eq('id', fallId)
+      await updateKbOnFallAndClaim(supabase, fallId, kb.id, false)
     }
     return { success: true, kundenbetreuer_id: kb.id, fallback_used: 'none' }
   }
@@ -262,14 +289,7 @@ export async function assignKundenbetreuer(
   const admin = await findFirstActiveAdmin(supabase)
   if (admin) {
     if (options.writeToFall) {
-      await supabase
-        .from('faelle')
-        .update({
-          kundenbetreuer_id: admin.id,
-          kundenbetreuer_fallback_flag: true,
-          kundenbetreuer_zugewiesen_am: new Date().toISOString(),
-        })
-        .eq('id', fallId)
+      await updateKbOnFallAndClaim(supabase, fallId, admin.id, true)
     }
     if (options.logToTimeline) {
       await supabase.from('timeline').insert({
