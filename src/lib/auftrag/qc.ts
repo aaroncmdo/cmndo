@@ -49,12 +49,17 @@ export async function gibKanzleipaketFrei(
 
   const { data: auftrag } = await db
     .from('auftraege')
-    .select('id, fall_id, gutachten_url, gutachten_final_freigegeben, status')
+    .select('id, fall_id, claim_id, gutachten_url, gutachten_final_freigegeben, status')
     .eq('id', auftragId)
     .maybeSingle()
   if (!auftrag) return { ok: false, error: 'Auftrag nicht gefunden' }
   if (auftrag.gutachten_final_freigegeben) return { ok: true }
   if (!auftrag.gutachten_url) return { ok: false, error: 'Kein Gutachten hochgeladen' }
+
+  // Phase 1.5b: auftraege.claim_id ist NOT NULL (Trigger füllt aus faelle).
+  // Defensive Prüfung trotzdem — falls historische Daten oder Trigger-Drift.
+  const claimIdForKanzleifall = auftrag.claim_id as string | null
+  if (!claimIdForKanzleifall) return { ok: false, error: 'Auftrag hat keinen Claim' }
 
   const now = new Date().toISOString()
 
@@ -68,15 +73,6 @@ export async function gibKanzleipaketFrei(
     })
     .eq('id', auftragId)
   if (aErr) return { ok: false, error: aErr.message }
-
-  // Kanzlei-Fall anlegen falls noch keiner existiert.
-  // CMM-37: Lookup + Insert via claim_id (kanonisch). fall_id wird vom
-  // DB-Trigger weiter gespiegelt, damit Phase-2-Konsumenten parallel
-  // funktionieren — den fuellt der Trigger BEFORE INSERT aus claim_id.
-  const { data: fallForClaim } = await db
-    .from('faelle').select('claim_id').eq('id', auftrag.fall_id).maybeSingle()
-  const claimIdForKanzleifall = (fallForClaim as { claim_id?: string | null } | null)?.claim_id ?? null
-  if (!claimIdForKanzleifall) return { ok: false, error: 'Fall hat keinen Claim — kanzlei_faelle nicht anlegbar' }
 
   const { data: existing } = await db
     .from('kanzlei_faelle')
@@ -142,7 +138,7 @@ export async function gutachtenAbgeben(
 
   const { data: auftrag } = await db
     .from('auftraege')
-    .select('id, fall_id, sv_id, gutachten_url, gutachten_final_freigegeben, zurueckweisung_grund')
+    .select('id, fall_id, claim_id, sv_id, gutachten_url, gutachten_final_freigegeben, zurueckweisung_grund')
     .eq('id', auftragId)
     .maybeSingle()
   if (!auftrag) return { ok: false, error: 'Auftrag nicht gefunden' }
@@ -150,13 +146,8 @@ export async function gutachtenAbgeben(
     return { ok: false, error: 'Auftrag ist bereits final freigegeben' }
   }
 
-  // Auftrag-zu-Claim-Pfad ermitteln
-  const { data: fall } = await db
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', auftrag.fall_id)
-    .maybeSingle()
-  const claimId = fall?.claim_id as string | null
+  // Phase 1.5b: auftrag.claim_id direkt verfügbar (Trigger befüllt aus faelle.claim_id).
+  const claimId = auftrag.claim_id as string | null
   if (!claimId) return { ok: false, error: 'Claim nicht gefunden' }
 
   // CMM-32e: Pick die jüngste Datei für diesen Auftrag (egal ob als

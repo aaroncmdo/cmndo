@@ -162,22 +162,17 @@ export async function extractGutachtenAndSaveToClaim(
   const force = opts?.force === true
   const admin = createAdminClient()
 
-  // Auftrag → Fall → Claim
+  // Phase 1.5b: auftrag.claim_id direkt verfügbar — kein faelle-Hop mehr nötig.
   const { data: auftrag } = await admin
     .from('auftraege')
-    .select('id, fall_id, gutachten_url')
+    .select('id, fall_id, claim_id, gutachten_url')
     .eq('id', auftragId)
     .maybeSingle()
   if (!auftrag) return { ok: false, error: 'Auftrag nicht gefunden' }
   if (!auftrag.gutachten_url) return { ok: false, error: 'Kein Gutachten-URL' }
 
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', auftrag.fall_id as string)
-    .maybeSingle()
-  const claimId = (fall?.claim_id as string | null) ?? null
-  if (!claimId) return { ok: false, error: 'Fall hat keinen Claim' }
+  const claimId = (auftrag.claim_id as string | null) ?? null
+  if (!claimId) return { ok: false, error: 'Auftrag hat keinen Claim' }
 
   // Idempotenz: bereits verarbeitet?
   const { data: existing } = await admin
