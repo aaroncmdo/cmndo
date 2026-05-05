@@ -229,6 +229,15 @@ Deno.serve(async (req) => {
         zugewiesen_an: assigneeId,
         status: "offen",
       });
+
+      // Migration 20260501085948 (AAR-637): denormalisiertes Feld
+      // leads.rueckruf_geplant_am für Dispatch-Listen-Schnell-Lookup
+      // synchron schreiben. saveRueckruf() macht das im Web-Flow,
+      // hier in der Edge Function müssen wir es selbst nachziehen.
+      await supabase
+        .from("leads")
+        .update({ rueckruf_geplant_am: terminStart.toISOString() })
+        .eq("id", lead.id);
     }
 
     // 4. Timeline-Eintrag
