@@ -75,10 +75,14 @@ async function resolveAssignee(
   supabase: ReturnType<typeof createClient>,
   rueckrufTermin: string | null
 ): Promise<string | null> {
+  // Rückruftermine gehen ausschließlich an Dispatch — KB/Admin sind kein
+  // Fallback. Wenn kein Dispatch verfügbar ist, läuft der Lead unassigned
+  // ins System (zugewiesen_an = null) und wird in der Dispatch-Lead-Liste
+  // sichtbar damit ihn der nächste verfügbare Dispatcher selbst greift.
   const { data: profiles, error } = await supabase
     .from("profiles")
-    .select("id, rolle, working_hours, kapazitaet_max")
-    .in("rolle", ["dispatch", "kundenbetreuer", "admin"])
+    .select("id, working_hours")
+    .eq("rolle", "dispatch")
     .eq("aktiv", true);
 
   if (error || !profiles?.length) return null;
@@ -98,24 +102,18 @@ async function resolveAssignee(
     countMap[l.zugewiesen_an] = (countMap[l.zugewiesen_an] || 0) + 1;
   });
 
-  const rolePriority: Record<string, number> = {
-    dispatch: 1,
-    kundenbetreuer: 2,
-    admin: 3,
-  };
-
+  // Sortierung: zuerst Dispatcher die zum Rückrufzeitpunkt verfügbar sind
+  // (working_hours-Match), dann nach offenen Leads aufsteigend (load-balanced).
   const sorted = profiles
     .map((p) => ({
-      ...p,
+      id: p.id,
       openLeads: countMap[p.id] || 0,
-      priority: rolePriority[p.rolle] || 99,
       available: rueckrufTermin
         ? isWithinWorkingHours(rueckrufTermin, p.working_hours)
         : true,
     }))
     .sort((a, b) => {
       if (a.available !== b.available) return a.available ? -1 : 1;
-      if (a.priority !== b.priority) return a.priority - b.priority;
       return a.openLeads - b.openLeads;
     });
 
