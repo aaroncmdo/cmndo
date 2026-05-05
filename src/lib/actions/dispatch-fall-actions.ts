@@ -774,6 +774,15 @@ async function convertLeadToFall(
 
   // 6. Pflichtdokumente erstellen (AAR-322: Katalog-driven)
   await createPflichtdokumenteFromKatalog(supabase, fall.id, lead)
+  // AAR-pflicht-sync: Lead-URLs (zb1_url, polizeibericht_url, schadensfoto_urls,
+  // unfallskizze_url) auf die frisch angelegten pflicht-Slots anwenden,
+  // damit der Stand „bereits hochgeladen" sofort sichtbar ist.
+  try {
+    const { syncLeadDokumenteAnPflicht } = await import('@/lib/dokumente/sync-lead-zu-pflicht')
+    await syncLeadDokumenteAnPflicht(supabase, fall.id, lead as Record<string, unknown>)
+  } catch (err) {
+    console.warn('[AAR-pflicht-sync] dispatch-fall-actions:', err instanceof Error ? err.message : err)
+  }
 
   // AAR-90: Cardentity-Anreicherung wenn Lead FIN hat (kopiert vom Lead in Fall)
   if (lead.fin) {

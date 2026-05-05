@@ -411,6 +411,23 @@ async function finalizeKundeSetup(
     console.warn('[finalizeKundeSetup] Lead-Relation für Fall', fallId, 'nicht gefunden — Pflichtdokumente-Katalog übersprungen')
   } else {
     await createPflichtdokumenteFromKatalog(admin, fallId, leadDocs)
+    // AAR-pflicht-sync: bereits vorhandene Lead-URLs auf pflichtdokumente
+    // anwenden — Kunde soll nicht „X fehlen" sehen für Dokumente die schon
+    // im Lead waren.
+    try {
+      const leadId = (leadForDocs as { lead_id: string | null } | null)?.lead_id
+      if (leadId) {
+        const { syncLeadDokumenteAnPflicht } = await import('@/lib/dokumente/sync-lead-zu-pflicht')
+        const { data: leadFull } = await admin
+          .from('leads')
+          .select('zb1_url, polizeibericht_url, unfallskizze_url, schadensfoto_urls')
+          .eq('id', leadId)
+          .maybeSingle()
+        if (leadFull) await syncLeadDokumenteAnPflicht(admin, fallId, leadFull)
+      }
+    } catch (err) {
+      console.warn('[AAR-pflicht-sync] finalizeKundeSetup:', err instanceof Error ? err.message : err)
+    }
   }
 
   // KFZ-129 / AAR-310: Chat-Teilnehmer werden seit AAR-102 aus faelle abgeleitet
@@ -738,6 +755,11 @@ export async function signSAandCreateFall(
   // 6d. KFZ-140 / AAR-322: Pflichtdokumente Katalog-driven erstellen
   try {
     await createPflichtdokumenteFromKatalog(admin, fall.id, lead as Record<string, unknown>)
+    // AAR-pflicht-sync: Lead-URLs sofort auf die frisch angelegten
+    // pflicht-Slots anwenden — der Lead hat zu diesem Zeitpunkt das volle
+    // Objekt, also können wir direkt durchreichen.
+    const { syncLeadDokumenteAnPflicht } = await import('@/lib/dokumente/sync-lead-zu-pflicht')
+    await syncLeadDokumenteAnPflicht(admin, fall.id, lead as Record<string, unknown>)
   } catch (err) { console.error('[KFZ-140] Pflichtdokumente im FlowLink-Pfad:', err) }
 
   // 6e. AAR-263 + AAR-182 + AAR-553: Dispatch-Uploads (ZB1 + Polizeibericht)
