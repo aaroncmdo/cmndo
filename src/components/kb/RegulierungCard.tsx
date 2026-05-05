@@ -6,13 +6,14 @@
 // für diesen Fall existiert (also nach KB-Freigabe).
 
 import { useState, useTransition } from 'react'
-import { CheckIcon, MailIcon, EuroIcon, BriefcaseIcon } from 'lucide-react'
+import { CheckIcon, MailIcon, EuroIcon, BriefcaseIcon, RotateCwIcon, FileTextIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {
   kanzleiVsKontaktErfasst,
   kanzleiAuszahlungEingegangen,
 } from '@/lib/kanzlei-fall/actions'
 import { setKanzleiWunsch } from '@/lib/kanzlei-wunsch/actions'
+import { createNachbesichtigung, createStellungnahme } from '@/lib/auftrag/side-quest'
 
 type Props = {
   fallId: string
@@ -55,6 +56,9 @@ export default function RegulierungCard({
   const [pendingKontakt, startKontakt] = useTransition()
   const [pendingAuszahlung, startAuszahlung] = useTransition()
   const [pendingWunsch, startWunsch] = useTransition()
+  const [pendingSideQuest, startSideQuest] = useTransition()
+  const [sideQuestModal, setSideQuestModal] = useState<null | 'nachbesichtigung' | 'stellungnahme'>(null)
+  const [sideQuestGrund, setSideQuestGrund] = useState<string>('')
 
   const vsKontaktDone = !!vsKontaktAm
   const auszahlungDone = !!ausgezahltAm
@@ -94,6 +98,25 @@ export default function RegulierungCard({
       const r = await kanzleiAuszahlungEingegangen(fallId, parsed)
       if (!r.ok) setError(r.error ?? 'Fehler')
       else router.refresh()
+    })
+  }
+
+  function handleSideQuestSubmit() {
+    if (!claimId || !sideQuestModal) return
+    const typ = sideQuestModal
+    const grund = sideQuestGrund.trim() || undefined
+    setError(null)
+    startSideQuest(async () => {
+      const r = typ === 'nachbesichtigung'
+        ? await createNachbesichtigung(claimId, grund)
+        : await createStellungnahme(claimId, grund)
+      if (!r.ok) {
+        setError(r.error ?? 'Fehler')
+        return
+      }
+      setSideQuestModal(null)
+      setSideQuestGrund('')
+      router.refresh()
     })
   }
 
@@ -209,7 +232,78 @@ export default function RegulierungCard({
         </div>
       )}
 
-      {error && <p className="text-xs text-red-700">{error}</p>}
+      {/* Side-Quest-Aktionen — sichtbar während aktiver Regulierung. Beide
+          erfordern einen existierenden Kanzleifall (DB-Trigger 1.5c). */}
+      {!auszahlungDone && claimId && (
+        <div className="pt-2 border-t border-claimondo-border/60">
+          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2">
+            Folge-Aufträge anstoßen
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              type="button"
+              onClick={() => { setSideQuestModal('nachbesichtigung'); setSideQuestGrund('') }}
+              disabled={pendingSideQuest}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-claimondo-border bg-white hover:bg-[#f8f9fb] text-claimondo-navy text-sm font-medium px-3 py-2 transition-colors"
+            >
+              <RotateCwIcon className="w-3.5 h-3.5" />
+              Nachbesichtigung anfordern
+            </button>
+            <button
+              type="button"
+              onClick={() => { setSideQuestModal('stellungnahme'); setSideQuestGrund('') }}
+              disabled={pendingSideQuest}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-claimondo-border bg-white hover:bg-[#f8f9fb] text-claimondo-navy text-sm font-medium px-3 py-2 transition-colors"
+            >
+              <FileTextIcon className="w-3.5 h-3.5" />
+              Stellungnahme anfordern
+            </button>
+          </div>
+        </div>
+      )}
+
+      {sideQuestModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 space-y-4">
+            <h3 className="text-base font-semibold text-claimondo-navy">
+              {sideQuestModal === 'nachbesichtigung' ? 'Nachbesichtigung anfordern' : 'Stellungnahme anfordern'}
+            </h3>
+            <p className="text-xs text-claimondo-ondo">
+              {sideQuestModal === 'nachbesichtigung'
+                ? 'Der Sachverständige bekommt einen neuen Auftrag und vereinbart einen Termin. Der ursprüngliche SV wird automatisch zugewiesen.'
+                : 'Der Sachverständige bekommt einen neuen Auftrag mit Schreibarbeit (z.B. Antwort auf VS-Kürzung). Kein Termin nötig.'}
+            </p>
+            <textarea
+              value={sideQuestGrund}
+              onChange={(e) => setSideQuestGrund(e.target.value)}
+              placeholder="Grund / Hintergrund (optional, wird dem SV mitgeteilt)"
+              rows={3}
+              className="w-full rounded-lg border border-claimondo-border px-3 py-2 text-sm focus:border-violet-500 focus:outline-none"
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => { setSideQuestModal(null); setSideQuestGrund('') }}
+                disabled={pendingSideQuest}
+                className="px-3 py-1.5 text-sm text-claimondo-ondo hover:text-claimondo-navy"
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                onClick={handleSideQuestSubmit}
+                disabled={pendingSideQuest}
+                className="rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-medium px-4 py-1.5 transition-colors"
+              >
+                {pendingSideQuest ? 'Wird angelegt…' : 'Auftrag anlegen'}
+              </button>
+            </div>
+            {error && <p className="text-xs text-red-700">{error}</p>}
+          </div>
+        </div>
+      )}
+
+      {error && !sideQuestModal && <p className="text-xs text-red-700">{error}</p>}
     </div>
   )
 }
