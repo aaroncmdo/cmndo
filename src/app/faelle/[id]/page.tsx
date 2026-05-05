@@ -701,6 +701,10 @@ export default async function FallaktePage({
 
   // CMM-32i: Kanzlei-Fall-Lifecycle-Daten für RegulierungCard. Existiert nur
   // nach KB-Freigabe (gibKanzleipaketFrei legt den Eintrag an).
+  // A2: VS-Reaktions-Daten (gekuerzt, abgelehnt, quotiert, nachbesichtigung)
+  // werden mitgegeben damit KB einen Quick-Action-Button für Stellungnahme/
+  // Nachbesichtigung sieht.
+  type VsReaktionTyp = 'gekuerzt' | 'voll_reguliert' | 'abgelehnt' | 'mehr_zeit' | 'nachbesichtigung' | 'quotiert'
   let regulierungCardProps: {
     fallId: string
     claimId: string | null
@@ -715,6 +719,13 @@ export default async function FallaktePage({
       | 'nicht_gefragt'
       | null
     kanzleiUebergebenAm: string | null
+    vsReaktion: {
+      typ: VsReaktionTyp | null
+      am: string | null
+      kuerzungGrund: string | null
+      ablehnungsgrund: string | null
+      quoteProzent: number | null
+    }
   } | null = null
   if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
     const adminCli = createAdminClient()
@@ -730,6 +741,12 @@ export default async function FallaktePage({
       .select('kanzlei_wunsch, kanzlei_uebergeben_am')
       .eq('id', claimId)
       .maybeSingle() : { data: null }
+    // A2: VS-Reaktions-Daten (LexDrive-Webhooks setzen diese auf faelle).
+    const { data: vsRaw } = await adminCli
+      .from('faelle')
+      .select('vs_reaktion_typ, vs_reaktion_am, vs_kuerzung_grund, vs_ablehnungsgrund, vs_quote_prozent')
+      .eq('id', id)
+      .maybeSingle()
     // Card immer rendern wenn Admin/KB + Claim vorhanden ist — der
     // KB-Toggle muss auch ohne Kanzlei-Fall sichtbar sein, sonst kann
     // niemand den eigene-Kanzlei-Pfad anstossen.
@@ -749,6 +766,13 @@ export default async function FallaktePage({
             | 'nicht_gefragt'
             | null) ?? null,
         kanzleiUebergebenAm: (claimForWunsch?.kanzlei_uebergeben_am as string | null) ?? null,
+        vsReaktion: {
+          typ: (vsRaw?.vs_reaktion_typ as VsReaktionTyp | null) ?? null,
+          am: (vsRaw?.vs_reaktion_am as string | null) ?? null,
+          kuerzungGrund: (vsRaw?.vs_kuerzung_grund as string | null) ?? null,
+          ablehnungsgrund: (vsRaw?.vs_ablehnungsgrund as string | null) ?? null,
+          quoteProzent: (vsRaw?.vs_quote_prozent as number | null) ?? null,
+        },
       }
     }
   }
