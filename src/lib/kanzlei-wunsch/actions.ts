@@ -123,6 +123,44 @@ export async function setKanzleiWunsch(
     .eq('id', claimId)
   if (error) return { ok: false, error: error.message }
 
+  // A3 (CMM Phase 1.5e): Bei 'keine_kanzlei' den Kanzleifall entfernen.
+  // Wenn der Kunde selbst regelt, gibt es keinen Regulierungs-Lifecycle
+  // (versicherungskontakt → auszahlung) auf unserer Seite — also kein
+  // kanzlei_faelle. SV-„Meine Fälle" zeigt den Fall dadurch nicht mehr
+  // (Phase 1.5b query joint via kanzlei_faelle). Bei späterer Wahl
+  // 'partnerkanzlei' oder 'eigene_kanzlei' wird er durch ensureKanzleiFall
+  // unten wieder angelegt.
+  //
+  // Side-Quests (Nachbesichtigung, Stellungnahme) sind danach via DB-Trigger
+  // 1.5c automatisch blockiert — solange kein kanzlei_faelle existiert,
+  // kann nichts angefordert werden. Korrektes Verhalten: wer selbst regelt,
+  // braucht keine SV-Folgeleistung.
+  if (wunsch === 'keine_kanzlei') {
+    // Defensive: nur löschen wenn noch nicht ausgezahlt — eine bereits
+    // abgeschlossene Regulierung darf nicht historisch verschwinden.
+    const { error: delErr } = await admin
+      .from('kanzlei_faelle')
+      .delete()
+      .eq('claim_id', claimId)
+      .is('ausgezahlt_am', null)
+    if (delErr) {
+      console.warn('[setKanzleiWunsch] kanzlei_faelle delete:', delErr.message)
+    }
+  } else if (wunsch === 'partnerkanzlei' || wunsch === 'eigene_kanzlei') {
+    // Idempotent re-create wenn vorher gelöscht (Kunde hat von 'keine_kanzlei'
+    // gewechselt). Status startet wieder bei versicherungskontakt.
+    const { data: existing } = await admin
+      .from('kanzlei_faelle').select('id').eq('claim_id', claimId).maybeSingle()
+    if (!existing) {
+      const { error: insErr } = await admin
+        .from('kanzlei_faelle')
+        .insert({ claim_id: claimId, status: 'versicherungskontakt' })
+      if (insErr) {
+        console.warn('[setKanzleiWunsch] kanzlei_faelle re-insert:', insErr.message)
+      }
+    }
+  }
+
   // Timeline-Audit
   try {
     const { data: fall } = await admin

@@ -74,21 +74,34 @@ export async function gibKanzleipaketFrei(
     .eq('id', auftragId)
   if (aErr) return { ok: false, error: aErr.message }
 
-  const { data: existing } = await db
-    .from('kanzlei_faelle')
-    .select('id')
-    .eq('claim_id', claimIdForKanzleifall)
+  // A3: wenn der Kunde bereits VOR der QC-Freigabe 'keine_kanzlei' gewählt
+  // hat (selten — Banner erscheint normalerweise erst hier), keinen
+  // kanzlei_faelle anlegen. Der Kunde reguliert selbst. Bei späterem
+  // Wechsel auf partnerkanzlei/eigene_kanzlei legt setKanzleiWunsch ihn nach.
+  const { data: claimWunsch } = await db
+    .from('claims')
+    .select('kanzlei_wunsch')
+    .eq('id', claimIdForKanzleifall)
     .maybeSingle()
+  const istKeineKanzlei = (claimWunsch?.kanzlei_wunsch as string | null) === 'keine_kanzlei'
 
-  if (!existing) {
-    const { error: kErr } = await db
+  if (!istKeineKanzlei) {
+    const { data: existing } = await db
       .from('kanzlei_faelle')
-      .insert({
-        claim_id: claimIdForKanzleifall,
-        // fall_id wird vom Sync-Trigger nachgezogen.
-        status: 'versicherungskontakt',
-      })
-    if (kErr) return { ok: false, error: kErr.message }
+      .select('id')
+      .eq('claim_id', claimIdForKanzleifall)
+      .maybeSingle()
+
+    if (!existing) {
+      const { error: kErr } = await db
+        .from('kanzlei_faelle')
+        .insert({
+          claim_id: claimIdForKanzleifall,
+          // fall_id wird vom Sync-Trigger nachgezogen.
+          status: 'versicherungskontakt',
+        })
+      if (kErr) return { ok: false, error: kErr.message }
+    }
   }
 
   // CMM-32 Polish: Auto-Trigger Kanzlei-Wunsch-Frage. Sobald die QC durch

@@ -156,6 +156,25 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
     }
   }
 
+  // A3: Kunde reguliert selbst — kanzlei_faelle wurde durch setKanzleiWunsch
+  // gelöscht, claim.kanzlei_wunsch='keine_kanzlei'. Sobald das Erstgutachten
+  // QC-freigegeben ist (alle auftraege abgeschlossen), ist Claimondo durch.
+  if (
+    claim?.kanzlei_wunsch === 'keine_kanzlei' &&
+    !kanzleiFall &&
+    auftraege.length > 0 &&
+    auftraege.every((a) => a.status === 'abgeschlossen')
+  ) {
+    return {
+      mainPhase: 'abschluss',
+      subPhase: 'abgeschlossen',
+      aktiveSideQuests: [],
+      aktiverAuftrag: null,
+      kundeNoShowCount,
+      letzterNoShowAm,
+    }
+  }
+
   // ── Regulierung ─────────────────────────────────────────────────────────
   // Sobald Kanzlei-Fall existiert ist die Hauptphase regulierung.
   // Side-Quests (Nachbesichtigung/Stellungnahme) laufen parallel sichtbar,
