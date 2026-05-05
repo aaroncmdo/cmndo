@@ -73,6 +73,46 @@ export async function approveUnfallskizze(
   return { success: true }
 }
 
+/**
+ * Speichert eine vom Dispatcher manuell editierte Skizze (Drag-and-Drop
+ * Element-Repositionierung). Setzt Bestätigt+Generiert-Felder zurück
+ * damit nach Edit eine erneute Freigabe nötig ist.
+ */
+export async function saveEditedUnfallskizze(
+  leadId: string,
+  svg: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .single()
+  const rolle = profile?.rolle as string | undefined
+  if (!['admin', 'dispatch', 'kundenbetreuer'].includes(rolle ?? '')) {
+    return { success: false, error: 'Nicht autorisiert' }
+  }
+
+  // Defensive Größen-Limit — verhindert dass durch Bug eine 5MB-SVG
+  // in der DB-Spalte landet
+  if (svg.length > 200_000) return { success: false, error: 'SVG zu groß' }
+  if (!svg.trim().startsWith('<svg')) return { success: false, error: 'Ungültiges SVG' }
+
+  const { error } = await supabase
+    .from('leads')
+    .update({
+      unfallskizze_svg: svg,
+      unfallskizze_bestaetigt: false, // Edit → erneute Freigabe nötig
+    })
+    .eq('id', leadId)
+  if (error) return { success: false, error: error.message }
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  return { success: true }
+}
+
 export async function clearUnfallskizze(
   leadId: string,
   grund?: string,
