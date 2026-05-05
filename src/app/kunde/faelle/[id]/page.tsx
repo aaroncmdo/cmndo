@@ -798,6 +798,52 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               variant: 'done',
             })
           }
+          // Side-Quest-Auftraege (Nachbesichtigung, Stellungnahme):
+          // Beauftragung, optionale Zurückweisung mit Grund, Freigabe.
+          // Erstgutachten-Zurückweisung ist auch sichtbar — hilft dem Kunden
+          // zu verstehen wenn das Erstgutachten überarbeitet werden musste.
+          const TYP_LABEL: Record<typeof auftraege[number]['typ'], string> = {
+            erstgutachten: 'Gutachten',
+            nachbesichtigung: 'Nachbesichtigung',
+            stellungnahme: 'Stellungnahme',
+          }
+          for (const a of auftraege) {
+            // Beauftragung — nur für Side-Quests anzeigen, das Erstgutachten
+            // ist die implizite Geburtsstunde des Falls und braucht kein
+            // separates Created-Event.
+            if (a.typ !== 'erstgutachten') {
+              begutachtungEvents.push({
+                key: `a-${a.id}-created`,
+                label: `${TYP_LABEL[a.typ]} beauftragt`,
+                datum: a.erstellt_am,
+                variant: 'neutral',
+              })
+            }
+            // Zurückweisung mit Grund — für alle Auftrags-Typen sichtbar.
+            if (a.zurueckgewiesen_am) {
+              begutachtungEvents.push({
+                key: `a-${a.id}-rejected`,
+                label: `${TYP_LABEL[a.typ]} zurückgewiesen`,
+                detail: a.zurueckweisung_grund ?? null,
+                datum: a.zurueckgewiesen_am,
+                variant: 'warn',
+              })
+            }
+            // Freigabe — Erstgutachten-Freigabe ist bereits oben als
+            // 'qc-bestanden' enthalten, hier nur die Side-Quests.
+            if (
+              a.typ !== 'erstgutachten' &&
+              a.gutachten_final_freigegeben &&
+              a.abgeschlossen_am
+            ) {
+              begutachtungEvents.push({
+                key: `a-${a.id}-done`,
+                label: `${TYP_LABEL[a.typ]} freigegeben`,
+                datum: a.abgeschlossen_am,
+                variant: 'done',
+              })
+            }
+          }
           begutachtungEvents.sort((a, b) => new Date(a.datum).getTime() - new Date(b.datum).getTime())
 
           // Pflichtdokumente-Banner als embedded variant — wird OBEN im
