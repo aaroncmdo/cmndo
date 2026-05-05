@@ -192,6 +192,94 @@ export function berechneErwartung(lead: LeadDaten | null | undefined): SlotErwar
   return out
 }
 
+// ─── Stand-API: erwartet ↔ vorhanden ↔ fehlt ────────────────────────────
+
+export type SlotVorhanden = {
+  slot_id: string
+  url: string
+  hochgeladen_am: string | null
+  status: string | null
+}
+
+export type DokumentenStand = {
+  erwartet: SlotErwartet[]
+  vorhanden: SlotVorhanden[]
+  fehlt: SlotErwartet[]
+  /** Nur Pflicht-Slots die fehlen — für Banner-Counter. */
+  fehltPflicht: SlotErwartet[]
+}
+
+/**
+ * Lädt erwartet (aus Lead-Flags via berechneErwartung) + vorhanden (aus
+ * pflichtdokumente.dokument_url befüllt) und liefert die Diff zurück.
+ *
+ * Ein Slot gilt als „vorhanden" wenn `dokument_url` gesetzt ist (status
+ * ist nur sekundär — der Banner soll sich an „URL da" orientieren, nicht
+ * an einem Workflow-Status der noch in QC sein kann).
+ *
+ * Akzeptiert sowohl `SupabaseClient<Database>` als auch den Admin-Client.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getDokumentenStand(supabase: any, fallId: string): Promise<DokumentenStand> {
+  // Fall → Lead-Daten (für berechneErwartung). Felder die wir brauchen
+  // müssen entweder am Fall oder am Lead liegen — wir mergen Fall (Stand
+  // nach Konvertierung) über Lead (Original).
+  const fallRes = await supabase
+    .from('faelle')
+    .select(
+      'lead_id, personenschaden_flag, sachschaden_flag, zeugen_vorhanden, polizei_vor_ort, polizeibericht_pflicht, fahrerflucht, gewerbe_flag, vorsteuerabzugsberechtigt, finanzierung_leasing, ist_fahrzeughalter, halter_ungleich_fahrer_flag, nachname, halter_nachname',
+    )
+    .eq('id', fallId)
+    .maybeSingle()
+  const fall = (fallRes.data ?? {}) as Record<string, unknown>
+
+  let lead: Record<string, unknown> = {}
+  const leadId = fall.lead_id as string | null | undefined
+  if (leadId) {
+    const leadRes = await supabase
+      .from('leads')
+      .select(
+        'zb1_status, polizei_vor_ort, polizeibericht_pflicht, fahrerflucht, personenschaden_flag, sachschaden_flag, zeugen, zeugen_vorhanden, gewerbe_flag, vorsteuerabzugsberechtigt, finanzierung_leasing, ist_fahrzeughalter, halter_ungleich_fahrer_flag, nachname, halter_nachname',
+      )
+      .eq('id', leadId)
+      .maybeSingle()
+    lead = (leadRes.data ?? {}) as Record<string, unknown>
+  }
+
+  // Fall-Felder überschreiben Lead-Felder (Fall ist „aktueller Stand")
+  const merged = {
+    ...lead,
+    ...Object.fromEntries(Object.entries(fall).filter(([, v]) => v !== null && v !== undefined)),
+  }
+  const erwartet = berechneErwartung(merged as Parameters<typeof berechneErwartung>[0])
+
+  // Vorhandene Dokumente
+  const pdRes = await supabase
+    .from('pflichtdokumente')
+    .select('dokument_typ, dokument_url, hochgeladen_am, status')
+    .eq('fall_id', fallId)
+  const rows = (pdRes.data ?? []) as Array<{
+    dokument_typ: string
+    dokument_url: string | null
+    hochgeladen_am: string | null
+    status: string | null
+  }>
+  const vorhanden: SlotVorhanden[] = rows
+    .filter((r) => !!r.dokument_url)
+    .map((r) => ({
+      slot_id: r.dokument_typ,
+      url: r.dokument_url as string,
+      hochgeladen_am: r.hochgeladen_am,
+      status: r.status,
+    }))
+
+  const vorhandenIds = new Set(vorhanden.map((v) => v.slot_id))
+  const fehlt = erwartet.filter((e) => !vorhandenIds.has(e.slot_id))
+  const fehltPflicht = fehlt.filter((e) => e.pflicht)
+
+  return { erwartet, vorhanden, fehlt, fehltPflicht }
+}
+
 /**
  * Filter-Helper für die UI: gruppiert die erwarteten Slots nach Kategorie.
  */
