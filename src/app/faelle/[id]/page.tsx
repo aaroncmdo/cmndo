@@ -17,6 +17,7 @@ import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
 import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
 import RegulierungCard from '@/components/kb/RegulierungCard'
 import VsKorrespondenzCard, { type VsKorrespondenzEintrag } from '@/components/kb/VsKorrespondenzCard'
+import KanzleiSlaStatusCard from '@/components/kb/KanzleiSlaStatusCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
 import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
@@ -846,6 +847,12 @@ export default async function FallaktePage({
       {regulierungCardProps && (
         <div className="mb-4">
           <RegulierungCard {...regulierungCardProps} />
+        </div>
+      )}
+      {/* CMM-38: Kanzlei-SLA-Status (offene Fristen + Mahnungs-Stand) */}
+      {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && (
+        <div className="mb-4">
+          <KanzleiSlaStatusCard fallId={id} />
         </div>
       )}
       {/* CMM-42: VS-Korrespondenz erfassen + anzeigen (admin/kb) */}
