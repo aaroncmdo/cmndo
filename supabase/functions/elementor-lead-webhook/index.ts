@@ -20,19 +20,27 @@ function parseGermanDateTime(input: string): string | null {
   return new Date(dateStr + offset).toISOString();
 }
 
-// Erwartet "DD.MM.YYYY" → "YYYY-MM-DD" (Unfalldatum, kein Timestamp)
+// Erwartet "DD.MM.YYYY" oder "DD.MM.YYYY HH:MM" → "YYYY-MM-DD" (Unfalldatum, kein Timestamp).
+// Elementor sendet Date-Felder je nach Konfig mit Zeit-Suffix; wir matchen tolerant
+// und ignorieren die Zeit hier, weil unfalldatum ein DATE ist.
 function parseGermanDate(input: string): string | null {
   if (!input) return null;
-  const match = input.trim().match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  const match = input.trim().match(/^(\d{2})\.(\d{2})\.(\d{4})(?:\s+\d{2}:\d{2})?$/);
   if (!match) return null;
   const [, day, month, year] = match;
   return `${year}-${month}-${day}`;
 }
 
-// Kombiniert Datum "DD.MM.YYYY" + Uhrzeit "HH:MM" zu ISO-Timestamp
+// Kombiniert Datum (mit oder ohne Zeit-Suffix) + separate Uhrzeit zu ISO-Timestamp.
+// Elementor schickt field_rueckrufdatum oft als "DD.MM.YYYY HH:MM" (datetime-Field)
+// und field_rueckrufzeit als reine Uhrzeit "HH:MM". Wir nehmen nur das Datum aus
+// rueckrufdatum und kombinieren es mit rueckrufzeit (= echte Wunsch-Uhrzeit).
 function parseRueckrufTermin(datum: string, zeit: string): string | null {
   if (!datum || !zeit) return null;
-  return parseGermanDateTime(`${datum.trim()} ${zeit.trim()}`);
+  const datumMatch = datum.trim().match(/^(\d{2})\.(\d{2})\.(\d{4})/);
+  if (!datumMatch) return null;
+  const [, day, month, year] = datumMatch;
+  return parseGermanDateTime(`${day}.${month}.${year} ${zeit.trim()}`);
 }
 
 // Vollständiger Name → { vorname, nachname }
