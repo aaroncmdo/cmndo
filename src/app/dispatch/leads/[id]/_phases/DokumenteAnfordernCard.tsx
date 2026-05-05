@@ -117,6 +117,14 @@ export default function DokumenteAnfordernCard({
   const [selectZeugenaussage, setSelectZeugenaussage] = useState(false)
   const [sonstige, setSonstige] = useState<SonstigesEintrag[]>([])
   const [nextId, setNextId] = useState(1)
+  // Override-Toggle: zeigt conditional Slots (Sachschaden/Personenschaden/
+  // Zeugen) auch dann wenn die Lead-Flags nicht gesetzt sind. Dispatcher
+  // kann manuell aktivieren wenn er im Call merkt dass es z.B. einen Zeugen
+  // gibt obwohl das im Lead-Form nicht ausgefüllt war.
+  const [zeigeAlleSlots, setZeigeAlleSlots] = useState(false)
+  const sichtbarSachschaden = !!hatSachschaden || zeigeAlleSlots
+  const sichtbarPersonenschaden = !!hatPersonenschaden || zeigeAlleSlots
+  const sichtbarZeugen = !!hatZeugen || zeigeAlleSlots
 
   // Parent-Trigger „Kunde hat Unfallfotos" nachträglich aktivieren
   useEffect(() => {
@@ -527,8 +535,8 @@ export default function DokumenteAnfordernCard({
           )}
         </div>
 
-        {/* Sachschaden-Slots — nur wenn hat_sachschaden=true */}
-        {hatSachschaden && (
+        {/* Sachschaden-Slots — wenn hat_sachschaden=true ODER manuell aufgeklappt */}
+        {sichtbarSachschaden && (
           <>
             <div className={`rounded-lg border p-3 ${selectSachschadenFoto ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
               <label className="flex items-start gap-2 cursor-pointer">
@@ -573,8 +581,8 @@ export default function DokumenteAnfordernCard({
           </>
         )}
 
-        {/* Personenschaden-Slots — nur wenn hat_personenschaden=true */}
-        {hatPersonenschaden && (
+        {/* Personenschaden-Slots — wenn hat_personenschaden=true ODER manuell aufgeklappt */}
+        {sichtbarPersonenschaden && (
           <>
             <div className={`rounded-lg border p-3 ${selectAttest ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
               <label className="flex items-start gap-2 cursor-pointer">
@@ -619,8 +627,8 @@ export default function DokumenteAnfordernCard({
           </>
         )}
 
-        {/* Zeugenaussage — nur wenn zeugen=true */}
-        {hatZeugen && (
+        {/* Zeugenaussage — wenn zeugen=true ODER manuell aufgeklappt */}
+        {sichtbarZeugen && (
           <div className={`rounded-lg border p-3 ${selectZeugenaussage ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
             <label className="flex items-start gap-2 cursor-pointer">
               <input
@@ -641,6 +649,19 @@ export default function DokumenteAnfordernCard({
               </div>
             </label>
           </div>
+        )}
+
+        {/* Manueller Override: alle conditional Slots zeigen — falls die
+            Lead-Flags (sachschaden_flag, personenschaden_flag, zeugen) nicht
+            gesetzt sind, der Dispatcher sie aber im Telefonat braucht. */}
+        {!zeigeAlleSlots && (!hatSachschaden || !hatPersonenschaden || !hatZeugen) && (
+          <button
+            type="button"
+            onClick={() => setZeigeAlleSlots(true)}
+            className="text-[11px] text-claimondo-ondo hover:text-claimondo-navy underline self-start"
+          >
+            + Weitere Anforderungen einblenden (Sachschaden / Personenschaden / Zeugenaussage)
+          </button>
         )}
 
         {/* Freie „Sonstige"-Slots */}

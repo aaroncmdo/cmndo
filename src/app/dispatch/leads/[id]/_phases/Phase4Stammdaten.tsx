@@ -748,7 +748,9 @@ export default function Phase4Stammdaten() {
         sachschadenBeschreibung={l.fahrzeugschaden_beschreibung ?? null}
         hatSachschaden={l.sachschaden_flag === true}
         hatPersonenschaden={l.personenschaden_flag === true}
-        hatZeugen={l.zeugen === true}
+        // AAR-zeugen-flag: Zwei Felder im Schema (legacy `zeugen` und neueres
+        // `zeugen_vorhanden`) — OR-en damit der Slot in beiden Fällen sichtbar ist
+        hatZeugen={(l as Record<string, unknown>).zeugen === true || (l as Record<string, unknown>).zeugen_vorhanden === true}
       />
 
       {/* CMM-23: KI-Analyse (OCR first, LLM-Fallback). Hier in Phase 4 statt
