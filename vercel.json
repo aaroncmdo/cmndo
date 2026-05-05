@@ -81,6 +81,10 @@
       "schedule": "5 10 * * *"
     },
     {
+      "path": "/api/cron/re-termin-eskalation",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/cron/kb-termin-reminder",
       "schedule": "30 * * * *"
     },
