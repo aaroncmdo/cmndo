@@ -32,9 +32,8 @@ export function Drawer({
   // wird ab md+ angewandt (max-w override über Tailwind-Klassen).
   const slideClass =
     side === 'right' ? 'animate-in slide-in-from-right' : 'animate-in slide-in-from-left'
-  // Tailwind 4-Syntax für CSS-Custom-Properties: `w-(--drawer-w)` — vorherige
-  // `w-[var(--drawer-w)]`-Notation produziert in v4 ein leeres `width: var()`,
-  // was den globals.css-Build zerschossen hat.
+  // Tailwind 4-Syntax fuer CSS-Custom-Properties: w-(--drawer-w).
+  // Vorherige Bracket-Notation produziert in v4 ein leeres width.
   const widthClass = mobileFullscreen ? 'w-full md:w-(--drawer-w)' : ''
 
   return (
@@ -65,8 +64,8 @@ export function Drawer({
             borderLeft: side === 'right' ? `1px solid ${tokens.glass.light.border}` : undefined,
             borderRight: side === 'left' ? `1px solid ${tokens.glass.light.border}` : undefined,
             padding: noPadding ? 0 : tokens.spacing[6],
-            // CSS-Custom-Property für md+ Breite (Tailwind w-[var()] kann zur
-            // Build-Time keine numerischen JS-Werte einbauen).
+            // CSS-Custom-Property fuer md+ Breite. Tailwind kann zur Build-
+            // Time keine numerischen JS-Werte als arbitrary value einbauen.
             '--drawer-w': `${width}px`,
           } as React.CSSProperties
         }
