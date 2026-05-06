@@ -11,12 +11,17 @@ import { PhoneIcon, MessageSquareIcon, XIcon } from 'lucide-react'
 import KundeKbChat from './KundeKbChat'
 import { useActiveContactStore } from './useActiveContactStore'
 import { useKundeUnreadByKanal } from './useKundeUnreadByKanal'
+import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 
 type Props = {
   vorname: string | null
   nachname: string | null
   telefon: string | null
   avatarUrl: string | null
+  /** Google-Bewertung (Trust-Signal). Aus google_bewertungen_cache. */
+  googleDurchschnitt?: number | null
+  googleAnzahl?: number | null
+  googleAktualisiertAm?: string | null
   /** Akzent-Farbe der Sidebar (Brand-Primary mit Fallback) */
   accentBg: string
   /** Single-Fall-ID — Default-Fall im Fall-Bezug-Picker */
@@ -44,6 +49,9 @@ export default function GutachterCard({
   nachname,
   telefon,
   avatarUrl,
+  googleDurchschnitt,
+  googleAnzahl,
+  googleAktualisiertAm,
   accentBg,
   fallId,
   currentUserId,
@@ -156,6 +164,16 @@ export default function GutachterCard({
             >
               Sachverständiger
             </p>
+            {googleDurchschnitt != null && googleAnzahl != null && (
+              <div className="mt-1">
+                <GoogleBewertungBadge
+                  durchschnitt={googleDurchschnitt}
+                  anzahl={googleAnzahl}
+                  zuletztAktualisiert={googleAktualisiertAm ?? null}
+                  size="sm"
+                />
+              </div>
+            )}
           </div>
         </div>
       </button>

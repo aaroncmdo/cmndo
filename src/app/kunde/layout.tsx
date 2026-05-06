@@ -188,6 +188,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     nachname: string | null
     telefon: string | null
     avatarUrl: string | null
+    googleDurchschnitt: number | null
+    googleAnzahl: number | null
+    googleAktualisiertAm: string | null
   } | null = null
   if (navFaelle.length > 0) {
     const { data: svFall } = await adminForNav
@@ -215,12 +218,24 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         if (profileRow) {
           // AAR-858: Anonymitaet — anzeigename oder Vorname, kein Nachname
           const anzeige = (profileRow.anzeigename as string | null) ?? null
+
+          // CMM-31 / Aaron-Wunsch: Google-Bewertung des SVs als Trust-Signal
+          // im Kunde-Portal. Cache-Read, kein Live-API-Call.
+          const { data: bewertungRow } = await adminForNav
+            .from('google_bewertungen_cache')
+            .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am')
+            .eq('profile_id', svProfileId)
+            .maybeSingle()
+
           svCard = {
             id: svProfileId,
             vorname: anzeige ?? (profileRow.vorname as string | null) ?? null,
             nachname: null,
             telefon: (profileRow.telefon as string | null) ?? null,
             avatarUrl: (profileRow.avatar_url as string | null) ?? null,
+            googleDurchschnitt: (bewertungRow?.durchschnitt as number | null) ?? null,
+            googleAnzahl: (bewertungRow?.anzahl_bewertungen as number | null) ?? null,
+            googleAktualisiertAm: (bewertungRow?.zuletzt_aktualisiert_am as string | null) ?? null,
           }
         }
       }
@@ -272,6 +287,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           nachname={svCard.nachname}
           telefon={svCard.telefon}
           avatarUrl={svCard.avatarUrl}
+          googleDurchschnitt={svCard.googleDurchschnitt}
+          googleAnzahl={svCard.googleAnzahl}
+          googleAktualisiertAm={svCard.googleAktualisiertAm}
           accentBg={accentBg}
           fallId={singleFallId}
           currentUserId={user.id}
