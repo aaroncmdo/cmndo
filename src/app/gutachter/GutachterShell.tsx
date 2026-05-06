@@ -514,18 +514,22 @@ export default function GutachterShell({
           <main
             id="main-content"
             role="main"
-            className="h-full overflow-y-auto bg-[#f8f9fb] rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4"
+            className="h-full overflow-y-auto bg-[#f8f9fb] rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4 flex flex-col"
           >
             {/* CMM-32 Polish: Standort-CTA — sichtbar wenn Browser-Permission
                 noch 'prompt' oder 'denied' ist; bei 'granted' rendert die
-                Komponente null. */}
-            <div className="mb-3">
+                Komponente null.
+                shrink-0 + flex-col im main: Banner nimmt seine Eigenhöhe,
+                Page-Content darunter bekommt flex-1 + min-h-0 — sonst kann
+                z. B. die Heute-Map (h-full bezogen auf main) nicht wissen,
+                dass der Banner Höhe konsumiert, und kollabiert auf ~80px. */}
+            <div className="mb-3 shrink-0">
               <GeoPermissionPrompt
                 permission={geoState.permission}
                 onRequest={geoState.requestPermission}
               />
             </div>
-            {children}
+            <div className="flex-1 min-h-0">{children}</div>
           </main>
         </div>
       </div>
