@@ -352,15 +352,30 @@ export async function acceptGegenvorschlag(
 
   if (error) return { success: false, error: error.message }
 
-  // 2026-05-06: SV-Termin in den Google-Kalender des SVs schreiben.
-  // Non-critical — Sync-Fehler darf den Termin-Update nicht brechen.
+  // 2026-05-06: SV-Termin in den Google- + CalDAV-Kalender des SVs
+  // schreiben. Non-critical, parallel — Sync-Fehler darf den Termin-Update
+  // nicht brechen. Beide no-op'en wenn der jeweilige Provider nicht
+  // verbunden ist.
   if (termin.fall_id) {
-    try {
-      const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
-      await syncSvTerminToGoogle(terminId, termin.fall_id as string)
-    } catch (err) {
-      console.error('[sv-termin-sync] Dispatch-Gegenvorschlag-Sync:', err)
-    }
+    const fallId = termin.fall_id as string
+    await Promise.all([
+      (async () => {
+        try {
+          const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
+          await syncSvTerminToGoogle(terminId, fallId)
+        } catch (err) {
+          console.error('[sv-termin-sync] Google Dispatch-Gegenvorschlag:', err)
+        }
+      })(),
+      (async () => {
+        try {
+          const { syncSvTerminToCalDav } = await import('@/lib/kalender/caldav/sv-termin-sync')
+          await syncSvTerminToCalDav(terminId, fallId)
+        } catch (err) {
+          console.error('[sv-termin-sync] CalDAV Dispatch-Gegenvorschlag:', err)
+        }
+      })(),
+    ])
   }
 
   await supabase.from('timeline').insert({

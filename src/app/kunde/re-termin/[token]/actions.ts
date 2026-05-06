@@ -79,16 +79,30 @@ export async function waehleReTerminSlot(
     return { ok: false, error: insertErr.message }
   }
 
-  // 2026-05-06: SV-Termin direkt in Google-Kalender (Status reserviert
-  // wird auch gesynct, damit der SV den Vorschlag im Kalender sieht).
-  // Non-critical try/catch.
+  // 2026-05-06: SV-Termin direkt in Google- + CalDAV-Kalender. Status
+  // reserviert wird auch gesynct, damit der SV den Vorschlag im Kalender
+  // sieht. Non-critical, parallel.
   if (inserted?.id) {
-    try {
-      const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
-      await syncSvTerminToGoogle(inserted.id as string, fall.id as string)
-    } catch (err) {
-      console.error('[sv-termin-sync] Re-Termin-Slot-Sync:', err)
-    }
+    const tid = inserted.id as string
+    const fid = fall.id as string
+    await Promise.all([
+      (async () => {
+        try {
+          const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
+          await syncSvTerminToGoogle(tid, fid)
+        } catch (err) {
+          console.error('[sv-termin-sync] Google Re-Termin-Slot:', err)
+        }
+      })(),
+      (async () => {
+        try {
+          const { syncSvTerminToCalDav } = await import('@/lib/kalender/caldav/sv-termin-sync')
+          await syncSvTerminToCalDav(tid, fid)
+        } catch (err) {
+          console.error('[sv-termin-sync] CalDAV Re-Termin-Slot:', err)
+        }
+      })(),
+    ])
   }
 
   // Token entwerten (verhindert Doppel-Wahl + Storno-Cron skipt)
