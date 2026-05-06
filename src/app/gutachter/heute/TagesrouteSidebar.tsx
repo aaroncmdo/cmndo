@@ -252,13 +252,19 @@ export default function TagesrouteSidebar({
                     )}
                   </div>
 
-                  {/* Zeile 2: Kunde / Fahrzeug */}
-                  <p className={`text-sm text-claimondo-navy mt-1 truncate ${verlegtTextClass}`}>
-                    {t.kennzeichen && <span className="font-mono mr-2">{t.kennzeichen}</span>}
-                    {t.fahrzeug ?? t.kunde_name}
+                  {/* Zeile 2: Kundenname (mit Anrede) — prominent, das wichtigste */}
+                  <p className={`text-sm font-semibold text-claimondo-navy mt-1 truncate ${verlegtTextClass}`}>
+                    {t.kunde_anrede === 'herr' && 'Herr '}
+                    {t.kunde_anrede === 'frau' && 'Frau '}
+                    {t.kunde_name}
                   </p>
-                  {t.kennzeichen && t.fahrzeug && (
-                    <p className={`text-xs text-claimondo-ondo truncate ${verlegtTextClass}`}>{t.kunde_name}</p>
+
+                  {/* Zeile 3: Kennzeichen + Fahrzeug */}
+                  {(t.kennzeichen || t.fahrzeug) && (
+                    <p className={`text-xs text-claimondo-ondo mt-0.5 truncate ${verlegtTextClass}`}>
+                      {t.kennzeichen && <span className="font-mono mr-2">{t.kennzeichen}</span>}
+                      {t.fahrzeug}
+                    </p>
                   )}
 
                   {/* Zeile 3: Adresse + Wetter */}

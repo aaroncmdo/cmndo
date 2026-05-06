@@ -25,6 +25,7 @@ export type HeuteTerminFull = {
   status: string
   // Kunden-Infos
   kunde_name: string
+  kunde_anrede: 'herr' | 'frau' | 'divers' | null
   kunde_telefon: string | null
   // 2026-05-06: Profilbild für Termin-Card-Polish
   kunde_avatar_url: string | null
@@ -138,7 +139,7 @@ export default async function HeutePage() {
   if (leadIds.length) {
     const { data: leads } = await supabase
       .from('leads')
-      .select('id, vorname, nachname, telefon, kunde_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort')
+      .select('id, vorname, nachname, anrede, telefon, kunde_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort')
       .in('id', leadIds)
     for (const l of (leads ?? []) as unknown as Record<string, unknown>[]) {
       leadMap.set(l.id as string, l)
@@ -276,6 +277,7 @@ export default async function HeutePage() {
       kunde_name: lead
         ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
         : '—',
+      kunde_anrede: ((lead?.anrede as string | null) as 'herr' | 'frau' | 'divers' | null) ?? null,
       kunde_telefon: (lead?.telefon as string | null) ?? null,
       kunde_avatar_url: lead?.kunde_id
         ? avatarMap.get(lead.kunde_id as string) ?? null
