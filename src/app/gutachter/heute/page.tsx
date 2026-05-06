@@ -146,15 +146,49 @@ export default async function HeutePage() {
     }
   }
 
+  // 2026-05-06: claim_parties als Fallback-Quelle für Kunde-Daten —
+  // bei Claim-getriebenen Aufträgen (CMM-Phase 2+) liegen vorname/
+  // nachname/anrede/telefon nicht im lead sondern in
+  // claim_parties.rolle='geschaedigter'. Für jeden Fall den
+  // geschaedigter-Snapshot laden.
+  const claimIds = Array.from(
+    new Set(
+      [...fallMap.values()]
+        .map((f) => f.claim_id as string | null)
+        .filter((x): x is string => !!x),
+    ),
+  )
+  const partyMap = new Map<string, { vorname: string | null; nachname: string | null; anrede: string | null; telefon: string | null; user_id: string | null }>()
+  if (claimIds.length) {
+    const { data: parties } = await supabase
+      .from('claim_parties')
+      .select('claim_id, rolle, vorname, nachname, anrede, telefon, mobil, user_id, reihenfolge')
+      .in('claim_id', claimIds)
+      .eq('rolle', 'geschaedigter')
+      .order('reihenfolge', { ascending: true })
+    for (const p of (parties ?? []) as Array<Record<string, unknown>>) {
+      const cId = p.claim_id as string
+      if (partyMap.has(cId)) continue // erste/primäre geschaedigter-Row gewinnt
+      partyMap.set(cId, {
+        vorname: (p.vorname as string | null) ?? null,
+        nachname: (p.nachname as string | null) ?? null,
+        anrede: (p.anrede as string | null) ?? null,
+        telefon: ((p.telefon as string | null) ?? (p.mobil as string | null)) ?? null,
+        user_id: (p.user_id as string | null) ?? null,
+      })
+    }
+  }
+
   // 2026-05-06: Kunden-Avatare laden (lead.kunde_id → profiles.avatar_url).
   // Wichtig: admin-client benutzen, da RLS dem SV nicht erlaubt fremde
   // profiles-Rows zu lesen — wir nehmen nur die avatar_url (nicht-sensitiv,
   // public im avatare-Bucket eh).
   const kundeIds = Array.from(
     new Set(
-      [...leadMap.values()]
-        .map((l) => l.kunde_id as string | null)
-        .filter((x): x is string => !!x),
+      [
+        ...[...leadMap.values()].map((l) => l.kunde_id as string | null),
+        ...[...partyMap.values()].map((p) => p.user_id),
+      ].filter((x): x is string => !!x),
     ),
   )
   const avatarMap = new Map<string, string | null>()
@@ -274,14 +308,33 @@ export default async function HeutePage() {
       start_zeit: t.start_zeit as string,
       end_zeit: (t.end_zeit as string) ?? null,
       status: t.status as string,
-      kunde_name: lead
-        ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
-        : '—',
-      kunde_anrede: ((lead?.anrede as string | null) as 'herr' | 'frau' | 'divers' | null) ?? null,
-      kunde_telefon: (lead?.telefon as string | null) ?? null,
-      kunde_avatar_url: lead?.kunde_id
-        ? avatarMap.get(lead.kunde_id as string) ?? null
-        : null,
+      // 2026-05-06: Kunde-Daten Fallback-Chain: claim_parties >
+      // lead — bei Claim-getriebenen Aufträgen ist die Party-Snapshot
+      // die Source-of-Truth.
+      kunde_name: (() => {
+        const party = fall?.claim_id ? partyMap.get(fall.claim_id as string) : null
+        const partyName = party
+          ? [party.vorname, party.nachname].filter(Boolean).join(' ')
+          : ''
+        if (partyName) return partyName
+        return lead
+          ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
+          : '—'
+      })(),
+      kunde_anrede: (() => {
+        const party = fall?.claim_id ? partyMap.get(fall.claim_id as string) : null
+        const a = (party?.anrede as string | null) ?? (lead?.anrede as string | null) ?? null
+        return (a as 'herr' | 'frau' | 'divers' | null) ?? null
+      })(),
+      kunde_telefon: (() => {
+        const party = fall?.claim_id ? partyMap.get(fall.claim_id as string) : null
+        return party?.telefon ?? (lead?.telefon as string | null) ?? null
+      })(),
+      kunde_avatar_url: (() => {
+        const party = fall?.claim_id ? partyMap.get(fall.claim_id as string) : null
+        const userId = party?.user_id ?? (lead?.kunde_id as string | null) ?? null
+        return userId ? avatarMap.get(userId) ?? null : null
+      })(),
       stop_weather: weatherMap.get(t.id as string) ?? null,
       fall_nummer:
         (fall?.fall_nummer as string) ??
