@@ -172,7 +172,15 @@ export default function SVKalenderClient({
   const ohneTermin = faelle.filter(f => !f.sv_termin)
 
   function getEntriesForDay(day: Date) {
-    return terminFaelle.filter(f => isSameDay(new Date(f.sv_termin!), day))
+    // 2026-05-06: ASC nach Uhrzeit sortieren — sonst stehen 16:00 oben
+    // und 08:00 unten (zufällig in DB-Reihenfolge). User-Erwartung:
+    // 8 oben, 16 unten.
+    return terminFaelle
+      .filter((f) => isSameDay(new Date(f.sv_termin!), day))
+      .sort(
+        (a, b) =>
+          new Date(a.sv_termin!).getTime() - new Date(b.sv_termin!).getTime(),
+      )
   }
 
   async function handleSetTermin() {
@@ -251,50 +259,40 @@ export default function SVKalenderClient({
 
                   {/* Entries */}
                   <div className="p-1.5 space-y-1">
-                    {/* AAR-google-cal-drift: externe Google-Termine als geblockte Slots anzeigen */}
+                    {/* AAR-google-cal-drift: externe Google-/CalDAV-Termine
+                        als geblockte Slots anzeigen.
+                        2026-05-06: Wenn ein externer Termin zeitlich zu einem
+                        internen gutachter_termine matched (CalDAV-Readback
+                        unseres eigenen Sync-Writes), wird er hier UNTER-
+                        DRÜCKT — die interne Termin-Card unten rendert die
+                        Auftrag-Daten klickbar. Sonst Doppel-Render. */}
                     {(externalBusy ?? [])
                       .filter((b) => {
                         const bs = new Date(b.start)
-                        return bs.getFullYear() === day.getFullYear()
-                          && bs.getMonth() === day.getMonth()
-                          && bs.getDate() === day.getDate()
+                        const sameDay =
+                          bs.getFullYear() === day.getFullYear() &&
+                          bs.getMonth() === day.getMonth() &&
+                          bs.getDate() === day.getDate()
+                        if (!sameDay) return false
+                        // Match auf interne Termine → unterdrücken (Card
+                        // rendert eh).
+                        const internalMatch = findMatchingFallId(b.start, claimondoTermineByStart)
+                        return internalMatch == null
                       })
                       .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
                       .map((b, idx) => {
                         const bs = new Date(b.start)
                         const be = new Date(b.end)
-                        const fallId = findMatchingFallId(b.start, claimondoTermineByStart)
-                        const baseClass =
-                          'px-2 py-1 rounded-lg text-[10px] leading-tight bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border'
-                        const inner = (
-                          <>
-                            <div className="font-medium">
-                              {formatBerlinTime(bs)}–{formatBerlinTime(be)}
-                            </div>
-                            <div className="truncate">
-                              {fallId ? 'Auftrag · öffnen' : 'Gebucht'}
-                            </div>
-                          </>
-                        )
-                        if (fallId) {
-                          return (
-                            <Link
-                              key={`busy-${idx}`}
-                              href={`/gutachter/fall/${fallId}`}
-                              className={`${baseClass} block hover:bg-claimondo-ondo/10 hover:border-claimondo-ondo transition-colors`}
-                              title="Externer Termin — zum Claimondo-Auftrag"
-                            >
-                              {inner}
-                            </Link>
-                          )
-                        }
                         return (
                           <div
                             key={`busy-${idx}`}
-                            className={baseClass}
-                            title="Externer Termin — blockiert"
+                            className="px-2 py-1 rounded-lg text-[10px] leading-tight bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border"
+                            title="Externer Privattermin — blockiert"
                           >
-                            {inner}
+                            <div className="font-medium">
+                              {formatBerlinTime(bs)}–{formatBerlinTime(be)}
+                            </div>
+                            <div className="truncate">Gebucht</div>
                           </div>
                         )
                       })}
