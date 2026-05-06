@@ -29,11 +29,18 @@ export default async function SVKalenderPage({
   const { isGoogleConnected } = await import('@/lib/google/oauth-client')
   const gcalConnected = await isGoogleConnected(user.id)
 
-  // AAR-google-cal-drift: Externe Google-Termine der aktuellen + nächsten
-  // Woche als Busy-Slots laden, damit SV im Kalender-Tab seine private
-  // Belegung sieht. Fail-silent — leerer Array bei nicht-verbunden.
+  // 2026-05-06 (Kelvin Gall-Fix): Externe Termine als Busy-Slots laden —
+  // Google + CalDAV (Apple). Vorher nur bei gcalConnected, dadurch sahen
+  // Apple-only-SVs ihre privaten Termine nicht im SV-Kalender.
+  // getSvBusySlots prueft selbst auf vorhandene Quellen.
+  const { data: hatCaldav } = await supabase
+    .from('sv_kalender_verbindungen')
+    .select('id')
+    .eq('sv_id', sv.id)
+    .eq('provider', 'caldav')
+    .maybeSingle()
   let externalBusy: { start: string; end: string }[] = []
-  if (gcalConnected) {
+  if (gcalConnected || hatCaldav) {
     const now = new Date()
     const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
     const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
