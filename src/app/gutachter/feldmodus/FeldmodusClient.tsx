@@ -19,6 +19,7 @@ import FokusChatPanel from './FokusChatPanel'
 import TbtBanner from './TbtBanner'
 import { useFieldTracking } from './useFieldTracking'
 import { useTurnByTurn } from './useTurnByTurn'
+import { useWakeLock } from '@/hooks/useWakeLock'
 import { markArrived, pauseFokusmodus, startStop } from './actions'
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
@@ -57,6 +58,13 @@ export default function FeldmodusClient({
     sv.live_tracking_enabled &&
     sessionStatus !== 'finished' &&
     sessionStatus !== 'paused'
+
+  // Portal-Review SV1: Screen bleibt an solange der Modus läuft.
+  // Wichtig wenn der SV das Telefon im Auto-Halter hat — sonst muss er
+  // alle paar Minuten entsperren um auf die Karte zu schauen.
+  const wakeLockActive =
+    sessionStatus !== 'finished' && sessionStatus !== 'paused'
+  const wakeLockStatus = useWakeLock(wakeLockActive)
 
   // Geofence setzt nur Flag — AktuellerStopCard entscheidet wann Akte öffnet
   const onGeofenceReached = useCallback(() => {
@@ -280,6 +288,16 @@ export default function FeldmodusClient({
         {error && permissionState !== 'denied' && (
           <div className="absolute top-20 left-2 right-2 rounded-md bg-amber-600/90 text-white text-xs px-3 py-2 z-10">
             GPS-Warnung: {error}
+          </div>
+        )}
+        {/* Portal-Review SV1: Hinweis wenn Wake-Lock NICHT verfügbar ist —
+            sonst geht das Display nach Geräte-Default aus, SV muss
+            ständig entsperren. „active" wird nicht angezeigt (wenn alles
+            funktioniert, kein UI-Klutter). */}
+        {(wakeLockStatus === 'unsupported' || wakeLockStatus === 'failed') && (
+          <div className="absolute bottom-2 left-2 right-2 sm:left-auto sm:max-w-xs rounded-md bg-claimondo-navy/85 text-white/90 text-[11px] px-3 py-1.5 z-10">
+            Hinweis: Display bleibt nicht automatisch an. Geräte-Auto-Sperre
+            in den Einstellungen verlängern.
           </div>
         )}
       </div>
