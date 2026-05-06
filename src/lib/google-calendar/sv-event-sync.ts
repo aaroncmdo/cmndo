@@ -11,6 +11,7 @@
 import { google } from 'googleapis'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { toBerlinWallClock } from './timezone'
 
 type TerminShape = {
   id: string
@@ -174,8 +175,8 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
         requestBody: {
           summary: title,
           description: descriptionLines.join('\n'),
-          start: { dateTime: startDate.toISOString(), timeZone: 'Europe/Berlin' },
-          end: { dateTime: endDate.toISOString(), timeZone: 'Europe/Berlin' },
+          start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: 'Europe/Berlin' },
+          end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: 'Europe/Berlin' },
           location: t.adresse ?? undefined,
         },
       })
@@ -191,8 +192,8 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
         requestBody: {
           summary: title,
           description: descriptionLines.join('\n'),
-          start: { dateTime: startDate.toISOString(), timeZone: 'Europe/Berlin' },
-          end: { dateTime: endDate.toISOString(), timeZone: 'Europe/Berlin' },
+          start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: 'Europe/Berlin' },
+          end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: 'Europe/Berlin' },
           location: t.adresse ?? undefined,
           reminders: {
             useDefault: false,
