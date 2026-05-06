@@ -147,12 +147,19 @@ const PORTALS = {
 }
 
 async function login(page, email) {
-  await page.goto(`${BASE_URL}/login`)
-  await page.waitForLoadState('domcontentloaded')
-  // Email + Passwort-Felder via Label finden — fallback auf type-Selektoren
-  const emailInput = page.locator('input[type="email"], input[name="email"]').first()
-  const pwInput = page.locator('input[type="password"], input[name="password"]').first()
+  // Erste Compile in Next 16 Turbopack kann 10-20s dauern — entsprechende Geduld.
+  await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+  // Defensiv: falls nicht der Email-Tab vorausgewaehlt ist, Tab anklicken.
+  const emailTab = page.locator('button:has-text("E-Mail")').first()
+  if (await emailTab.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await emailTab.click().catch(() => {})
+  }
+  // Auf den Email-Input warten — bis zu 60s, dann erst fuellen.
+  const emailInput = page.locator('input#email, input[name="email"], input[type="email"]').first()
+  await emailInput.waitFor({ state: 'visible', timeout: 60000 })
   await emailInput.fill(email)
+  const pwInput = page.locator('input#password, input[name="password"], input[type="password"]').first()
+  await pwInput.waitFor({ state: 'visible', timeout: 5000 })
   await pwInput.fill(PASSWORD)
   await Promise.all([
     page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {}),
