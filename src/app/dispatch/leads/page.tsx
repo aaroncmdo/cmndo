@@ -2,11 +2,11 @@
 // Server-Page lädt die Leads + rendert Phase-Filter-Chips. Die Darstellung
 // (Tabelle oder Kanban) wandert in die Client-Component LeadsViewToggle.
 import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
 import NeuLeadDrawer from './_components/NeuLeadDrawer'
 import LeadsViewToggle from './_components/LeadsViewToggle'
 import { PHASE_OPTIONS } from './_components/leadPhaseConstants'
 import PageHeader from '@/components/shared/PageHeader'
+import { Chip, ChipRow } from '@/components/ui/Chip'
 
 export default async function DispatchLeads({
   searchParams,
@@ -38,22 +38,18 @@ export default async function DispatchLeads({
         }
       />
 
-      {/* Filter */}
-      <div className="flex flex-wrap gap-1.5">
+      {/* Filter — Touch-friendly Chips (Portal-Review C3) */}
+      <ChipRow>
         {PHASE_OPTIONS.map((opt) => (
-          <Link
+          <Chip
             key={opt.value}
             href={opt.value ? `/dispatch/leads?phase=${opt.value}` : '/dispatch/leads'}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
-              activePhase === opt.value
-                ? 'bg-claimondo-navy text-white'
-                : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
-            }`}
+            variant={activePhase === opt.value ? 'selected' : 'default'}
           >
             {opt.label}
-          </Link>
+          </Chip>
         ))}
-      </div>
+      </ChipRow>
 
       {/* Liste / Kanban Toggle + View */}
       <LeadsViewToggle leads={leads ?? []} />

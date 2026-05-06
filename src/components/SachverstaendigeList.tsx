@@ -6,6 +6,7 @@ import { SearchIcon, HardHatIcon, MapPinIcon } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
 import { KundeAvatar } from '@/components/shared/KundeAvatar'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Chip } from '@/components/ui/Chip'
 
 // AAR-54: Tabellen-Ansicht für Sachverständige (statt Karte).
 // AAR-151: Aus src/app/admin/sachverstaendige/ verschoben in src/components/,
@@ -116,18 +117,17 @@ export default function SachverstaendigeList({
         </div>
       </div>
 
-      {/* Filter-Tabs */}
-      <div className="px-4 py-2 border-b border-claimondo-border bg-white flex gap-1 flex-shrink-0">
+      {/* Filter-Tabs — Touch-friendly Chips (Portal-Review C3) */}
+      <div className="px-4 py-2 border-b border-claimondo-border bg-white flex gap-2 flex-shrink-0 overflow-x-auto [&::-webkit-scrollbar]:hidden">
         {tabs.map(t => (
-          <button
+          <Chip
             key={t.k}
+            variant={svFilter === t.k ? 'selected' : 'ghost'}
+            count={t.count}
             onClick={() => setSvFilter(t.k)}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              svFilter === t.k ? 'bg-[#f8f9fb] text-claimondo-navy' : 'text-claimondo-ondo hover:text-claimondo-navy'
-            }`}
           >
-            {t.label} <span className="text-claimondo-ondo/70 ml-1">{t.count}</span>
-          </button>
+            {t.label}
+          </Chip>
         ))}
       </div>
 
