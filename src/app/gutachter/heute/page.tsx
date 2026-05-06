@@ -145,7 +145,10 @@ export default async function HeutePage() {
     }
   }
 
-  // 2026-05-06: Kunden-Avatare laden (lead.kunde_id → profiles.avatar_url)
+  // 2026-05-06: Kunden-Avatare laden (lead.kunde_id → profiles.avatar_url).
+  // Wichtig: admin-client benutzen, da RLS dem SV nicht erlaubt fremde
+  // profiles-Rows zu lesen — wir nehmen nur die avatar_url (nicht-sensitiv,
+  // public im avatare-Bucket eh).
   const kundeIds = Array.from(
     new Set(
       [...leadMap.values()]
@@ -155,7 +158,9 @@ export default async function HeutePage() {
   )
   const avatarMap = new Map<string, string | null>()
   if (kundeIds.length) {
-    const { data: profiles } = await supabase
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    const { data: profiles } = await admin
       .from('profiles')
       .select('id, avatar_url')
       .in('id', kundeIds)
