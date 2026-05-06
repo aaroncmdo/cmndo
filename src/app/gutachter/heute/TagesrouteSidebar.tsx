@@ -173,12 +173,12 @@ export default function TagesrouteSidebar({
           return (
             <li
               key={t.id}
-              className={`transition-colors ${
+              className={`transition-colors backdrop-blur-sm ${
                 isActive
-                  ? 'bg-claimondo-ondo/15'
+                  ? 'bg-claimondo-ondo/25'
                   : istVerlegt
-                  ? 'bg-claimondo-border/20 hover:bg-claimondo-border/30'
-                  : 'bg-transparent hover:bg-white/40'
+                  ? 'bg-slate-400/30 hover:bg-slate-400/40'
+                  : 'bg-white/40 hover:bg-white/60'
               }`}
             >
               <button
