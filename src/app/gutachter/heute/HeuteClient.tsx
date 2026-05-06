@@ -7,7 +7,7 @@
 // abschließt (oben/unten/rechts) und nur die Termine-Spalte das main-padding
 // nutzt.
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import TagesrouteSidebar, { type TagesroutePflichtStat } from './TagesrouteSidebar'
 import TagesrouteStartCard from './TagesrouteStartCard'
@@ -38,39 +38,13 @@ export default function HeuteClient({
   )
   const [activeStopId, setActiveStopId] = useState<string | null>(null)
 
-  // 2026-05-06 (Versuch 4 — endgültig): Map-Spalte misst sich JS-side
-  // gegen Viewport. Kein CSS-Chain mehr, kein flex-stretch-Mystery,
-  // keine Mapbox-Resize-Race. Wir nehmen die DOM-Position des Column-
-  // Refs (top-Offset im Viewport) und berechnen `viewport - top - 16px`
-  // als Pixel-Höhe. Das funktioniert garantiert weil:
-  //   1. Pixel-Wert ist explicit, kein Percentage-Resolution-Problem
-  //   2. Bei Resize wird neu gemessen
-  //   3. Mapbox-ResizeObserver triggert auf den Style-Change und
-  //      synchronisiert seinen Canvas
-  const mapColumnRef = useRef<HTMLDivElement>(null)
-  const [mapHeightPx, setMapHeightPx] = useState<number | null>(null)
-  useEffect(() => {
-    function measure() {
-      const el = mapColumnRef.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      const available = window.innerHeight - rect.top - 16
-      // Floor 400px damit selbst bei winzigem Viewport Map sichtbar bleibt
-      setMapHeightPx(Math.max(400, Math.round(available)))
-    }
-    measure()
-    window.addEventListener('resize', measure)
-    // Auch bei Layout-Settling nach Hydration nochmal messen
-    const t1 = setTimeout(measure, 50)
-    const t2 = setTimeout(measure, 250)
-    const t3 = setTimeout(measure, 800)
-    return () => {
-      window.removeEventListener('resize', measure)
-      clearTimeout(t1)
-      clearTimeout(t2)
-      clearTimeout(t3)
-    }
-  }, [])
+  // 2026-05-06 (Versuch 5): Outer kriegt inline `height: calc(100dvh - 130px)`.
+  // Nicht via Tailwind-Klasse (die ggf. ohne Spaces invalid kompiliert) sondern
+  // direkt als inline-style — Browser parst das deterministisch. 100dvh =
+  // dynamic viewport height (mobile-chrome-aware). 130px deckt Header +
+  // WeatherBanner + main-Padding ab. JS-Mess-Komplexität raus, weil
+  // explizite Pixel-Berechnung via calc reicht.
+  const wrapperHeight = 'calc(100dvh - 130px)'
 
   // Opportunistisch GPS holen
   useEffect(() => {
@@ -106,14 +80,15 @@ export default function HeuteClient({
   const disabledReason = aktiveTermine.length === 0 ? 'Heute keine offenen Termine' : null
 
   return (
-    // 2026-05-06: Robust-Fix für Map-Höhen-Kollaps. Statt `min-h-full
-    // md:h-full` (das via Percentage-Chain durch flex-1 + min-h-0 + neg.
-    // Margin nicht zuverlässig propagiert) ein `absolute inset-0` gegen
-    // den `relative` children-Wrapper im GutachterShell. Damit hat die
-    // Map deterministisch full-Height der verbleibenden Main-Fläche.
-    // Negative Margins kompensieren weiter das main-padding damit die
-    // Map oben/unten/rechts bündig abschließt.
-    <div className="absolute inset-0 -m-2 sm:-m-3 lg:-m-4 flex flex-col md:flex-row">
+    // 2026-05-06 (Versuch 5): Reset auf simples Flex mit inline-calc-Height.
+    // Keine `absolute inset-0`, keine `min-h-full md:h-full`, keine JS-
+    // Messung. Inline `height: calc(100dvh - 130px)` ist deterministisch
+    // (Browser parst calc direkt, kein Tailwind-Compile-Bug, kein Chain).
+    // Negative Margins bleiben für bündigen Map-zum-Wrapper-Rand.
+    <div
+      className="-m-2 sm:-m-3 lg:-m-4 flex flex-col md:flex-row"
+      style={{ height: wrapperHeight }}
+    >
       {/* Termine-Spalte — links auf Desktop, unter der Karte auf Mobile.
           Hat eigenes padding damit die Cards normal abgesetzt sind. */}
       <aside className="order-2 md:order-1 md:w-[400px] md:shrink-0 md:flex md:flex-col md:h-full p-2 sm:p-3 lg:p-4 md:overflow-y-auto bg-[#f8f9fb] space-y-3">
@@ -141,13 +116,9 @@ export default function HeuteClient({
         </div>
       </aside>
 
-      {/* Karten-Spalte — Höhe wird JS-side gemessen + per inline-style
-          gesetzt. Bypassed CSS-Chain-Mystery komplett. */}
-      <div
-        ref={mapColumnRef}
-        className="order-1 md:order-2 relative flex-1"
-        style={mapHeightPx ? { height: `${mapHeightPx}px` } : { minHeight: '60vh' }}
-      >
+      {/* Karten-Spalte — flex-1 nimmt Restbreite, h-full erbt vom calc-
+          Wrapper (deterministische Pixel-Höhe). */}
+      <div className="order-1 md:order-2 relative flex-1 h-full">
         <TagesrouteMap
           svOrigin={origin}
           stops={stops}
