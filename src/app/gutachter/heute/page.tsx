@@ -137,7 +137,12 @@ export default async function HeutePage() {
   const leadIds = Array.from(new Set([...leadIdsFromFaelle, ...leadIdsFromTermine]))
   const leadMap = new Map<string, Record<string, unknown>>()
   if (leadIds.length) {
-    const { data: leads } = await supabase
+    // 2026-05-06: admin-client damit RLS uns nicht aussperrt — die
+    // Termine sind bereits per sv_id gefiltert, leads dazu zu laden ist
+    // legitim (kein Cross-Tenant-Risiko).
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    const { data: leads } = await admin
       .from('leads')
       .select('id, vorname, nachname, anrede, telefon, kunde_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort')
       .in('id', leadIds)
@@ -160,7 +165,9 @@ export default async function HeutePage() {
   )
   const partyMap = new Map<string, { vorname: string | null; nachname: string | null; anrede: string | null; telefon: string | null; user_id: string | null }>()
   if (claimIds.length) {
-    const { data: parties } = await supabase
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    const { data: parties } = await admin
       .from('claim_parties')
       .select('claim_id, rolle, vorname, nachname, anrede, telefon, mobil, user_id, reihenfolge')
       .in('claim_id', claimIds)

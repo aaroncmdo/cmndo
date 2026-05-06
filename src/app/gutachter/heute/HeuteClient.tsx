@@ -113,18 +113,20 @@ export default function HeuteClient({
       />
 
       {/* Termine-Overlay — Mobile: gestackt unter Map (mt-4).
-          Desktop (lg+): floating absolute top-right über der Map. */}
+          Desktop (lg+): floating absolute top-right über der Map.
+          2026-05-06: alle Cards mit IDENTISCHEM Glassy-Style:
+          bg-white/65 + backdrop-blur-xl + shadow-ios-md. Konsistenz. */}
       <div
         className="space-y-4 mt-4 lg:mt-0 lg:absolute lg:top-4 lg:right-4 lg:bottom-4 lg:w-[420px] lg:overflow-y-auto lg:z-10"
       >
         {/* Tagesvorbereitung-Header */}
-        <div className="glass-light rounded-xl px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy shadow-ios-md">
+        <div className="bg-white/65 backdrop-blur-xl border border-white/40 rounded-xl px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy shadow-ios-md">
           <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
           <TagesvorbereitungButton />
         </div>
 
         {/* Termine-Liste */}
-        <div className="glass-light rounded-xl overflow-hidden shadow-ios-md">
+        <div className="bg-white/65 backdrop-blur-xl border border-white/40 rounded-xl overflow-hidden shadow-ios-md">
           <TagesrouteSidebar
             termine={termine}
             pflichtStats={pflichtStats}
@@ -134,8 +136,9 @@ export default function HeuteClient({
           />
         </div>
 
-        {/* Tagesroute-Start-Card */}
-        <div className="rounded-xl overflow-hidden shadow-ios-md">
+        {/* Tagesroute-Start-Card — Wrapper jetzt glassy wie die anderen,
+            innen behält die Card ihren Navy-Akzent für den CTA-Look. */}
+        <div className="bg-white/65 backdrop-blur-xl border border-white/40 rounded-xl overflow-hidden shadow-ios-md">
           <TagesrouteStartCard
             terminIds={terminIds}
             hasActiveSession={hasActiveSession}
