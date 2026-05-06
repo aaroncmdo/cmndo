@@ -507,27 +507,17 @@ export default function GutachterShell({
           <main
             id="main-content"
             role="main"
-            className="h-full overflow-y-auto bg-[#f8f9fb] rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4 flex flex-col"
+            className="h-full overflow-y-auto bg-[#f8f9fb] rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4"
           >
             {/* CMM-32 Polish: Standort-CTA — sichtbar wenn Browser-Permission
-                noch 'prompt' oder 'denied' ist; bei 'granted' rendert die
-                Komponente null.
-                shrink-0 + flex-col im main: Banner nimmt seine Eigenhöhe,
-                Page-Content darunter bekommt flex-1 + min-h-0 — sonst kann
-                z. B. die Heute-Map (h-full bezogen auf main) nicht wissen,
-                dass der Banner Höhe konsumiert, und kollabiert auf ~80px. */}
-            <div className="mb-3 shrink-0">
+                noch 'prompt' oder 'denied' ist; sonst rendert null. */}
+            <div className="mb-3">
               <GeoPermissionPrompt
                 permission={geoState.permission}
                 onRequest={geoState.requestPermission}
               />
             </div>
-            {/* relative damit Pages die ein absolutes Full-Bleed-Layout
-                brauchen (Heute-Map, künftig auch /route) sich per
-                `absolute inset-0` exakt in den verbleibenden Platz
-                einklinken können. min-h-0 + flex-1 ist der Standard-Trick
-                damit ein Flex-Child schrumpfen darf statt zu overflow'n. */}
-            <div className="flex-1 min-h-0 relative">{children}</div>
+            {children}
           </main>
         </div>
       </div>
