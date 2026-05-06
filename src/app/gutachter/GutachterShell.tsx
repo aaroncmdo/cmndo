@@ -305,7 +305,7 @@ export default function GutachterShell({
       {!isFeldmodus && <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] relative overflow-hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] overflow-hidden ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
