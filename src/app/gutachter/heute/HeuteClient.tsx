@@ -93,17 +93,17 @@ export default function HeuteClient({
 
   const disabledReason = aktiveTermine.length === 0 ? 'Heute keine offenen Termine' : null
 
-  // Map-Höhe je nach Viewport. Auf Desktop: 100% des fixed-Containers
-  // (top-3 bottom-3 → calc(100vh - 24px) effektiv, aber via 100% einfacher).
-  // Mobile: feste Pixel-Höhe.
+  // Map-Höhe je nach Viewport. Auf Desktop: 100% des absolute-Containers
+  // (= main-content-box-Höhe nach Banner). Mobile: feste Pixel-Höhe.
   const mapHeight: number | string = isLargeScreen ? '100%' : MAP_HEIGHT_MOBILE
 
   return (
-    // 2026-05-06: Auf Desktop (lg+) komplett aus dem Shell-Wrapping
-    // ausbrechen via position:fixed — Map füllt den ganzen Content-
-    // Bereich (Sidebar 256px + 12px Gap links, ansonsten bündig zum
-    // navy-Outer). Mobile bleibt im normalen Flow als Stack.
-    <div className="relative lg:fixed lg:top-3 lg:right-3 lg:bottom-3 lg:left-[268px]">
+    // 2026-05-06: Map füllt das main-Content-Innen (im navy-Wrapper).
+    // -m-2/-m-3/-m-4 cancelt main's p-2/p-3/p-4 → Inhalt extends bis
+    // zum main-rounded-Rand (Map flush zur Edge der weißen Bühne).
+    // h-full erbt von children-wrapper = main's flex-1-Slot, also
+    // genau die volle main-Content-Höhe nach Banner.
+    <div className="relative -m-2 sm:-m-3 lg:-m-4 lg:h-full">
       {/* Map-Layer — full-width auf Desktop, voller Hintergrund */}
       <div className="lg:absolute lg:inset-0">
         <TagesrouteMap
