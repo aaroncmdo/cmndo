@@ -73,19 +73,14 @@ export default function HeuteClient({
   )
   const terminIds = aktiveTermine.map((t) => t.id)
 
-  // 2026-05-06: Verlegte Stops (status='verlegt' / 'verlegung_pending')
-  // werden NICHT in der Route-Berechnung berücksichtigt — der Mapbox-
-  // Directions-Call läuft nur durch die ECHT aktiven Stops. Verlegte
-  // bleiben aber als gedimmte Marker auf der Karte sichtbar.
+  // 2026-05-06: ALLE aktiven Termine als Stops durchreichen (inklusive
+  // verlegt/verlegung_pending). TagesrouteMap rendert intern:
+  //   - Active-Route (gold-solid): nur durch nicht-verlegte Stops
+  //   - Verlegt-Stubs (dashed): straight-line vom Origin zu jedem verlegten
+  // Damit sieht der SV: was die Route IST und was wäre gewesen.
   const stops: TagesrouteStop[] = useMemo(() => {
     return [...aktiveTermine]
-      .filter(
-        (t) =>
-          t.besichtigungsort_lat != null &&
-          t.besichtigungsort_lng != null &&
-          t.status !== 'verlegt' &&
-          t.status !== 'verlegung_pending',
-      )
+      .filter((t) => t.besichtigungsort_lat != null && t.besichtigungsort_lng != null)
       .sort((a, b) => new Date(a.start_zeit).getTime() - new Date(b.start_zeit).getTime())
       .map((t) => ({
         id: t.id,

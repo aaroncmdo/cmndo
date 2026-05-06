@@ -96,6 +96,24 @@ export default function TagesrouteMap({
 
   const validStops = useMemo(() => stops.filter((s) => s.lat != null && s.lng != null), [stops])
 
+  // 2026-05-06: Aktive vs verlegte Stops trennen für Doppel-Route.
+  // Active → gold solid Multi-Stop-Route via Mapbox-Directions
+  // Verlegt → dashed gray Stub-Linien (straight) vom Origin zu jedem
+  const aktivStops = useMemo(
+    () =>
+      validStops.filter(
+        (s) => s.status !== 'verlegt' && s.status !== 'verlegung_pending',
+      ),
+    [validStops],
+  )
+  const verlegteStops = useMemo(
+    () =>
+      validStops.filter(
+        (s) => s.status === 'verlegt' || s.status === 'verlegung_pending',
+      ),
+    [validStops],
+  )
+
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -220,42 +238,50 @@ export default function TagesrouteMap({
     else map.once('load', place)
   }, [validStops, onStopClick])
 
-  // Route
+  // Active-Route — gold-solid Multi-Stop-Route durch nicht-verlegte Stops
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
-    if (!svOrigin || validStops.length === 0) {
+    if (!svOrigin || aktivStops.length === 0) {
       setRouteStats(null)
       onRouteStatsChange?.(null)
       return
     }
     let cancelled = false
 
-    fetchMultiStopRoute(svOrigin, validStops).then((route) => {
+    fetchMultiStopRoute(svOrigin, aktivStops).then((route) => {
       if (cancelled || !mapRef.current) return
       const draw = () => {
         const m = mapRef.current
         if (!m) return
         if (route && route.coords.length > 1) {
-          upsertRouteLayer(m, route.coords)
+          upsertRouteLayer(m, route.coords, 'primary')
           const stats = { distanzKm: route.distanzKm, dauerMin: route.dauerMin }
           setRouteStats(stats)
-          onRouteStatsChange?.({ ...stats, stops: validStops.length })
+          onRouteStatsChange?.({ ...stats, stops: aktivStops.length })
         } else {
-          upsertRouteLayer(m, [
-            [svOrigin.lng, svOrigin.lat],
-            ...validStops.map<[number, number]>((s) => [s.lng, s.lat]),
-          ])
+          upsertRouteLayer(
+            m,
+            [
+              [svOrigin.lng, svOrigin.lat],
+              ...aktivStops.map<[number, number]>((s) => [s.lng, s.lat]),
+            ],
+            'primary',
+          )
           setRouteStats(null)
           onRouteStatsChange?.(null)
         }
+        // fitBounds berücksichtigt ALLE Stops (auch verlegte) damit verlegte
+        // Pins nicht aus dem Viewport rutschen — der SV soll sehen wo der
+        // aussortierte Stop war.
         const bounds = new mapboxgl.LngLatBounds()
         if (route && route.coords.length > 1) {
           for (const c of route.coords) bounds.extend(c)
         } else {
           bounds.extend([svOrigin.lng, svOrigin.lat])
-          validStops.forEach((s) => bounds.extend([s.lng, s.lat]))
+          aktivStops.forEach((s) => bounds.extend([s.lng, s.lat]))
         }
+        verlegteStops.forEach((s) => bounds.extend([s.lng, s.lat]))
         m.fitBounds(bounds, {
           padding: { top: 60, right: 60, bottom: 60, left: 60 },
           duration: 800,
@@ -268,7 +294,37 @@ export default function TagesrouteMap({
     })
 
     return () => { cancelled = true }
-  }, [svOrigin, validStops])
+  }, [svOrigin, aktivStops, verlegteStops, onRouteStatsChange])
+
+  // Verlegt-Stub-Linien — dashed gray Geraden vom Origin zu jedem
+  // verlegten Stop. Signalisiert „würde der SV theoretisch hier hin fahren,
+  // aber Termin ist verlegt".
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    const draw = () => {
+      const m = mapRef.current
+      if (!m) return
+      if (!svOrigin || verlegteStops.length === 0) {
+        // Sekundär-Layer leeren wenn keine verlegten Stops vorhanden
+        const src = m.getSource('field-route-secondary') as mapboxgl.GeoJSONSource | undefined
+        if (src) src.setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [] } })
+        return
+      }
+      // MultiLineString: pro verlegtem Stop ein Segment vom Origin → Stop.
+      // Wir bauen eine flat LineString-Sequenz mit Origin als Mittelpunkt.
+      // Damit alle Stub-Linien EIN Source-Feature teilen, nutzen wir
+      // Vor-/Zurück-Pattern: O → A → O → B → O → C ...
+      const coords: Array<[number, number]> = []
+      for (const v of verlegteStops) {
+        coords.push([svOrigin.lng, svOrigin.lat])
+        coords.push([v.lng, v.lat])
+      }
+      upsertRouteLayer(m, coords, 'secondary')
+    }
+    if (map.isStyleLoaded()) draw()
+    else map.once('load', draw)
+  }, [svOrigin, verlegteStops])
 
   // Active-Stop Highlight
   useEffect(() => {
