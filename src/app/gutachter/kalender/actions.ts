@@ -56,15 +56,29 @@ export async function setTermin(fallId: string, termin: string) {
     syncTerminId = (inserted?.id as string | null) ?? null
   }
 
-  // 2026-05-06: SV-Termin in Google-Kalender schreiben (Apple-CalDAV-Write
-  // existiert noch nicht — eigene Session). Non-critical try/catch.
+  // 2026-05-06: SV-Termin in Google- + CalDAV-Kalender schreiben.
+  // Non-critical, parallel — beide no-op'en wenn der jeweilige Provider
+  // nicht verbunden ist.
   if (syncTerminId) {
-    try {
-      const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
-      await syncSvTerminToGoogle(syncTerminId, fallId)
-    } catch (err) {
-      console.error('[sv-termin-sync] SV-Selbst-Eintrag-Sync:', err)
-    }
+    const tid = syncTerminId
+    await Promise.all([
+      (async () => {
+        try {
+          const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
+          await syncSvTerminToGoogle(tid, fallId)
+        } catch (err) {
+          console.error('[sv-termin-sync] Google SV-Selbst-Eintrag:', err)
+        }
+      })(),
+      (async () => {
+        try {
+          const { syncSvTerminToCalDav } = await import('@/lib/kalender/caldav/sv-termin-sync')
+          await syncSvTerminToCalDav(tid, fallId)
+        } catch (err) {
+          console.error('[sv-termin-sync] CalDAV SV-Selbst-Eintrag:', err)
+        }
+      })(),
+    ])
   }
 
   // AAR-704C: ältere aktive Termine cancellen damit nur einer aktiv bleibt
