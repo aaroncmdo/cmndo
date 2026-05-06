@@ -9,7 +9,7 @@
 // Renderer rein.
 
 import { useState, type ReactNode } from 'react'
-import { UserIcon, SearchIcon, MessageCircleIcon } from 'lucide-react'
+import { UserIcon, SearchIcon, MessageCircleIcon, ArrowLeftIcon } from 'lucide-react'
 import { DropletBadge } from '@/components/primitives'
 
 export type InboxThread = {
@@ -66,6 +66,15 @@ export default function ChatInboxLayout({
       ? initialThreadId
       : threads[0]?.id ?? null,
   )
+  // 2026-05-06 SV6: Mobile-Master/Detail. Auf Mobile (< md) wird entweder
+  // Liste ODER Detail angezeigt — nicht beides nebeneinander (war auf 390px
+  // unbenutzbar: Sidebar 320px ließ nur 70px für den Chat). Tap auf Thread
+  // → Detail-View; Back-Button → Liste. Auf Desktop bleibt's Side-by-Side.
+  const [mobileView, setMobileView] = useState<'list' | 'detail'>(
+    initialThreadId ? 'detail' : 'list',
+  )
+
+  const activeThread = activeId ? threads.find((t) => t.id === activeId) ?? null : null
 
   const filtered = threads.filter((t) => {
     if (!search) return true
@@ -74,8 +83,13 @@ export default function ChatInboxLayout({
 
   return (
     <div className="h-full flex min-h-0">
-      {/* Sidebar */}
-      <aside className="w-80 border-r border-claimondo-border flex flex-col bg-white shrink-0">
+      {/* Sidebar — Mobile: full-width wenn Liste sichtbar, sonst hidden;
+          Desktop: feste 320px Spalte. */}
+      <aside
+        className={`${
+          mobileView === 'list' ? 'flex' : 'hidden'
+        } md:flex w-full md:w-80 border-r border-claimondo-border flex-col bg-white shrink-0`}
+      >
         <div className="px-4 py-3 border-b border-claimondo-border sticky top-0 bg-white z-10">
           <h2 className="text-lg font-semibold text-claimondo-navy">{title}</h2>
           <div className="relative mt-2">
@@ -104,7 +118,10 @@ export default function ChatInboxLayout({
               return (
                 <button
                   key={t.id}
-                  onClick={() => setActiveId(t.id)}
+                  onClick={() => {
+                    setActiveId(t.id)
+                    setMobileView('detail')
+                  }}
                   className={`w-full text-left px-3 py-3 border-b border-claimondo-border hover:bg-[#f8f9fb] transition-colors ${
                     active ? 'bg-claimondo-ondo/5' : ''
                   }`}
@@ -141,10 +158,36 @@ export default function ChatInboxLayout({
         </div>
       </aside>
 
-      {/* Detail-Panel */}
-      <main className="flex-1 min-w-0 min-h-0 overflow-hidden bg-[#f8f9fb] flex flex-col">
+      {/* Detail-Panel — Mobile: full-width wenn Detail sichtbar, sonst hidden;
+          Desktop: flex-1. Mobile zeigt Back-Button + Thread-Titel als Header. */}
+      <main
+        className={`${
+          mobileView === 'detail' ? 'flex' : 'hidden'
+        } md:flex flex-1 min-w-0 min-h-0 overflow-hidden bg-[#f8f9fb] flex-col`}
+      >
         {activeId ? (
-          <div className="flex-1 min-h-0 p-4 overflow-y-auto">{renderDetail(activeId)}</div>
+          <>
+            {/* Mobile-Header mit Back-Button — Desktop versteckt */}
+            <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-claimondo-border bg-white shrink-0">
+              <button
+                type="button"
+                onClick={() => setMobileView('list')}
+                aria-label="Zurück zur Liste"
+                className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-[#f8f9fb] active:bg-claimondo-ondo/10 transition-colors"
+              >
+                <ArrowLeftIcon className="w-4 h-4 text-claimondo-navy" />
+              </button>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-claimondo-navy truncate">
+                  {activeThread?.title ?? '—'}
+                </p>
+                <p className="text-[11px] text-claimondo-ondo truncate">
+                  {activeThread?.subtitle ?? ''}
+                </p>
+              </div>
+            </div>
+            <div className="flex-1 min-h-0 p-4 overflow-y-auto">{renderDetail(activeId)}</div>
+          </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-center px-4">
             <div>
