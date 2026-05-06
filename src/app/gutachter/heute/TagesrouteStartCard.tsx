@@ -61,12 +61,17 @@ export default function TagesrouteStartCard({
   const subLabel = subLabelParts.join(' · ')
 
   return (
-    <div className="bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)] p-4 text-white">
+    // 2026-05-06: glassy navy statt solid — backdrop-blur sodass Map-Tiles
+    // dahinter durchscheinen.
+    <div
+      className="p-4 text-white backdrop-blur-md"
+      style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary) 70%, transparent)' }}
+    >
       <div className="flex items-center gap-2 mb-2">
         <MapIcon className="w-4 h-4 text-[var(--brand-accent)]" />
         <h3 className="text-sm font-semibold">Tagesroute</h3>
       </div>
-      <p className="text-xs text-claimondo-ondo/50 mb-3">{subLabel}</p>
+      <p className="text-xs text-white/70 mb-3">{subLabel}</p>
       <button
         type="button"
         disabled={disabled}
@@ -74,7 +79,7 @@ export default function TagesrouteStartCard({
         title={disabledReason ?? undefined}
         className={`w-full inline-flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
           disabled
-            ? 'bg-white/10 text-claimondo-ondo/50 cursor-not-allowed'
+            ? 'bg-white/10 text-white/40 cursor-not-allowed'
             : 'bg-[var(--brand-secondary)] hover:bg-[var(--brand-accent)] text-white'
         }`}
       >

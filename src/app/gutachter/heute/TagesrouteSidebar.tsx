@@ -175,10 +175,10 @@ export default function TagesrouteSidebar({
               key={t.id}
               className={`transition-colors ${
                 isActive
-                  ? 'bg-claimondo-ondo/5'
+                  ? 'bg-claimondo-ondo/15'
                   : istVerlegt
-                  ? 'bg-claimondo-border/10 hover:bg-claimondo-border/20'
-                  : 'bg-white hover:bg-[#f8f9fb]'
+                  ? 'bg-claimondo-border/20 hover:bg-claimondo-border/30'
+                  : 'bg-transparent hover:bg-white/40'
               }`}
             >
               <button
@@ -292,7 +292,7 @@ export default function TagesrouteSidebar({
 
               {/* Aufgeklappt: Pflichtinfos + Aktionen */}
               {isExpanded && (
-                <div className="px-4 pb-3 pt-1 space-y-2 border-t border-claimondo-border/60 bg-[#f8f9fb]">
+                <div className="px-4 pb-3 pt-1 space-y-2 border-t border-claimondo-border/60 bg-white/30">
                   {/* Schadentyp + Auftrag-Typ */}
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
                     {t.schadentyp && (
