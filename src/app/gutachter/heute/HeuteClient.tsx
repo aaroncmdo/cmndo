@@ -108,8 +108,11 @@ export default function HeuteClient({
       </aside>
 
       {/* Karten-Spalte — rechts auf Desktop, oben auf Mobile. Bündig zum
-          Bildschirmrand (kein right-padding) und zum Wrapper oben/unten. */}
-      <div className="order-1 md:order-2 relative flex-1 min-h-[55vh] md:min-h-0 md:h-full">
+          Bildschirmrand (kein right-padding) und zum Wrapper oben/unten.
+          2026-05-06 (Versuch 3): vh-basierte Mindesthöhe als Belt-and-
+          Suspenders gegen den h-full-Chain-Kollaps. Auch wenn der Flex-
+          Stretch ausfällt, hat die Map mind. ~70vh sichtbar. */}
+      <div className="order-1 md:order-2 relative flex-1 min-h-[60vh] md:min-h-[calc(100vh-130px)]">
         <TagesrouteMap
           svOrigin={origin}
           stops={stops}
