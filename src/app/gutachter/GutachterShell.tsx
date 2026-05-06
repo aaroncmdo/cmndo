@@ -492,23 +492,15 @@ export default function GutachterShell({
           <UpdatesNav variant="dark" />
         </header>
 
-        {/* 2026-05-06: WeatherBanner entfernt — Wetter ist jetzt pro Stop
-            in der Heute-Sidebar sichtbar (Open-Weather-Map pro Termin),
-            global-Wetter am Standort ist obsolet.
-            Stattdessen schmaler TopBar mit OutboxBadge + UpdatesNav,
-            damit Notification-/Outbox-Zugriff weiter sichtbar bleibt. */}
-        <div className="pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 hidden lg:block">
-          <div
-            className="flex items-center justify-end gap-2 px-4 py-2 rounded-l-2xl shadow-ios-md"
-            style={{
-              backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 90%, transparent)',
-              color: 'var(--brand-text-on-primary)',
-              ...transitionStyle,
-            }}
-          >
-            <OutboxBadge />
-            <UpdatesNav variant="dark" />
-          </div>
+        {/* 2026-05-06: WeatherBanner entfernt + Action-Items free-floating.
+            OutboxBadge + UpdatesNav schweben oben-rechts ohne Background-
+            Wrapper. position:fixed pinnt sie an Viewport-Edge, z-20 damit
+            sie über Main-Content rendern (Sidebar lg:z-[1100] ist drüber,
+            Modale auch — passt). Hidden auf Mobile, da gibt's eine eigene
+            Header-Bar (lg:hidden Mobile-Header oben). */}
+        <div className="hidden lg:flex items-center gap-2 fixed top-3 right-4 z-20">
+          <OutboxBadge />
+          <UpdatesNav variant="dark" />
         </div>
 
         <div className="flex-1 overflow-hidden pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4">
