@@ -18,7 +18,7 @@ import TagesrouteSidebar, { type TagesroutePflichtStat } from './TagesrouteSideb
 import TagesrouteStartCard from './TagesrouteStartCard'
 import TagesvorbereitungButton from '../auftraege/TagesvorbereitungButton'
 import type { HeuteTerminFull } from './page'
-import type { TagesrouteStop } from './TagesrouteMap'
+import type { RouteStats, TagesrouteStop } from './TagesrouteMap'
 
 const TagesrouteMap = dynamic(() => import('./TagesrouteMap'), { ssr: false })
 
@@ -44,6 +44,7 @@ export default function HeuteClient({
       : null,
   )
   const [activeStopId, setActiveStopId] = useState<string | null>(null)
+  const [routeStats, setRouteStats] = useState<RouteStats | null>(null)
 
   // Viewport-Detection für Map-Höhe + Layout-Switch
   const [isLargeScreen, setIsLargeScreen] = useState(false)
@@ -82,6 +83,7 @@ export default function HeuteClient({
         lat: t.besichtigungsort_lat as number,
         lng: t.besichtigungsort_lng as number,
         label: t.kunde_name,
+        status: t.status,
       }))
   }, [aktiveTermine])
 
@@ -104,6 +106,7 @@ export default function HeuteClient({
           activeStopId={activeStopId}
           onStopClick={setActiveStopId}
           height={mapHeight}
+          onRouteStatsChange={setRouteStats}
         />
       </div>
 
@@ -136,6 +139,8 @@ export default function HeuteClient({
             terminIds={terminIds}
             hasActiveSession={hasActiveSession}
             disabledReason={disabledReason}
+            geschaetzteFahrzeitMinuten={routeStats?.dauerMin ?? null}
+            distanzKm={routeStats?.distanzKm ?? null}
           />
         </div>
       </div>

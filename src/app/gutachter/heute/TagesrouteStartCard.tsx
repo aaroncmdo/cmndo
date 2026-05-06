@@ -16,6 +16,8 @@ export interface TagesrouteStartCardProps {
   disabledReason?: string | null
   /** Grobe Schätzung der Fahrzeit (Minuten) — null zeigt einfach Stop-Count. */
   geschaetzteFahrzeitMinuten?: number | null
+  /** 2026-05-06: Live-Distanz aus Mapbox-Directions, optional. */
+  distanzKm?: number | null
 }
 
 export default function TagesrouteStartCard({
@@ -23,6 +25,7 @@ export default function TagesrouteStartCard({
   hasActiveSession,
   disabledReason,
   geschaetzteFahrzeitMinuten = null,
+  distanzKm = null,
 }: TagesrouteStartCardProps) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
@@ -45,10 +48,17 @@ export default function TagesrouteStartCard({
     ? 'Fokus-Modus fortsetzen'
     : 'Tagesroute starten'
 
-  const subLabel =
-    geschaetzteFahrzeitMinuten != null
-      ? `${terminIds.length} Stops · ca. ${Math.round(geschaetzteFahrzeitMinuten / 60)}h ${geschaetzteFahrzeitMinuten % 60}min`
-      : `${terminIds.length} Stops`
+  // 2026-05-06: Mit Distanz-Anteil falls vorhanden — „3 Stops · 87 km · 4h 20min"
+  const subLabelParts: string[] = [`${terminIds.length} Stop${terminIds.length === 1 ? '' : 's'}`]
+  if (distanzKm != null && distanzKm > 0) {
+    subLabelParts.push(`${distanzKm.toFixed(1)} km`)
+  }
+  if (geschaetzteFahrzeitMinuten != null && geschaetzteFahrzeitMinuten > 0) {
+    const h = Math.floor(geschaetzteFahrzeitMinuten / 60)
+    const m = geschaetzteFahrzeitMinuten % 60
+    subLabelParts.push(h > 0 ? `${h}h ${m}min` : `${m} min`)
+  }
+  const subLabel = subLabelParts.join(' · ')
 
   return (
     <div className="bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)] p-4 text-white">

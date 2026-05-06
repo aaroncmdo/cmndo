@@ -30,7 +30,11 @@ export type TagesrouteStop = {
   lat: number
   lng: number
   label: string
+  /** Status für Marker-Farbe (bestaetigt → grün, reserviert → amber etc.) */
+  status?: string
 }
+
+export type RouteStats = { distanzKm: number; dauerMin: number; stops: number }
 
 export type TagesrouteMapProps = {
   svOrigin: { lat: number; lng: number } | null
@@ -39,6 +43,8 @@ export type TagesrouteMapProps = {
   onStopClick?: (stopId: string) => void
   /** Pflicht — Pixel-Höhe in Number oder CSS-String */
   height: number | string
+  /** 2026-05-06: Lift Route-Stats nach oben damit StartCard sie nutzen kann */
+  onRouteStatsChange?: (stats: RouteStats | null) => void
 }
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -78,6 +84,7 @@ export default function TagesrouteMap({
   activeStopId,
   onStopClick,
   height,
+  onRouteStatsChange,
 }: TagesrouteMapProps) {
   // EINE Ref. Mapbox attached sein Canvas direkt in diesem Element.
   const containerRef = useRef<HTMLDivElement>(null)
@@ -199,7 +206,10 @@ export default function TagesrouteMap({
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current.clear()
       validStops.forEach((stop, idx) => {
-        const m = addKundeMarker(map, [stop.lng, stop.lat], { initials: String(idx + 1) })
+        const m = addKundeMarker(map, [stop.lng, stop.lat], {
+          initials: String(idx + 1),
+          status: stop.status,
+        })
         const el = m.getElement()
         el.style.cursor = 'pointer'
         el.addEventListener('click', () => onStopClick?.(stop.id))
@@ -216,6 +226,7 @@ export default function TagesrouteMap({
     if (!map) return
     if (!svOrigin || validStops.length === 0) {
       setRouteStats(null)
+      onRouteStatsChange?.(null)
       return
     }
     let cancelled = false
@@ -227,13 +238,16 @@ export default function TagesrouteMap({
         if (!m) return
         if (route && route.coords.length > 1) {
           upsertRouteLayer(m, route.coords)
-          setRouteStats({ distanzKm: route.distanzKm, dauerMin: route.dauerMin })
+          const stats = { distanzKm: route.distanzKm, dauerMin: route.dauerMin }
+          setRouteStats(stats)
+          onRouteStatsChange?.({ ...stats, stops: validStops.length })
         } else {
           upsertRouteLayer(m, [
             [svOrigin.lng, svOrigin.lat],
             ...validStops.map<[number, number]>((s) => [s.lng, s.lat]),
           ])
           setRouteStats(null)
+          onRouteStatsChange?.(null)
         }
         const bounds = new mapboxgl.LngLatBounds()
         if (route && route.coords.length > 1) {
