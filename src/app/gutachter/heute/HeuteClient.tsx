@@ -116,19 +116,19 @@ export default function HeuteClient({
       </div>
 
       {/* Termine-Spalte — Mobile: Stack unten. Desktop: rechts 420px,
-          eigene Scroll-Region damit Cards unabhängig von Page-Scroll. */}
+          eigene Scroll-Region. 2026-05-06: alle Cards glassy. */}
       <div
         className="lg:w-[420px] lg:shrink-0 lg:overflow-y-auto space-y-4"
         style={sidebarStyle}
       >
         {/* Tagesvorbereitung-Header */}
-        <div className="bg-white border border-claimondo-border rounded-xl px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy">
+        <div className="glass-light rounded-xl px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy shadow-ios-md">
           <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
           <TagesvorbereitungButton />
         </div>
 
         {/* Termine-Liste */}
-        <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+        <div className="glass-light rounded-xl overflow-hidden shadow-ios-md">
           <TagesrouteSidebar
             termine={termine}
             pflichtStats={pflichtStats}
@@ -139,7 +139,7 @@ export default function HeuteClient({
         </div>
 
         {/* Tagesroute-Start-Card */}
-        <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+        <div className="rounded-xl overflow-hidden shadow-ios-md">
           <TagesrouteStartCard
             terminIds={terminIds}
             hasActiveSession={hasActiveSession}

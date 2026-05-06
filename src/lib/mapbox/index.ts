@@ -9,11 +9,7 @@ export {
 } from './styles'
 export { addSvAvatarMarker, addSvCarMarker, type SvMarkerOptions, type SvCarMarkerOptions } from './sv-marker'
 export { addKundeMarker, type KundeMarkerOptions } from './kunde-marker'
-export {
-  upsertRouteLayer,
-  removeRouteLayer,
-  type RouteLayerIds,
-} from './route-layer'
+export { upsertRouteLayer, removeRouteLayer } from './route-layer'
 export {
   DEFAULT_FIELD_MAP_CONFIG,
   type FieldModusMapConfig,

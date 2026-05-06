@@ -96,20 +96,12 @@ export default function TagesrouteMap({
 
   const validStops = useMemo(() => stops.filter((s) => s.lat != null && s.lng != null), [stops])
 
-  // 2026-05-06: Aktive vs verlegte Stops trennen für Doppel-Route.
-  // Active → gold solid Multi-Stop-Route via Mapbox-Directions
-  // Verlegt → dashed gray Stub-Linien (straight) vom Origin zu jedem
+  // Active-only: verlegte Stops aus Route-Berechnung raus, bleiben aber
+  // als graue Marker auf der Karte sichtbar.
   const aktivStops = useMemo(
     () =>
       validStops.filter(
         (s) => s.status !== 'verlegt' && s.status !== 'verlegung_pending',
-      ),
-    [validStops],
-  )
-  const verlegteStops = useMemo(
-    () =>
-      validStops.filter(
-        (s) => s.status === 'verlegt' || s.status === 'verlegung_pending',
       ),
     [validStops],
   )
@@ -255,25 +247,20 @@ export default function TagesrouteMap({
         const m = mapRef.current
         if (!m) return
         if (route && route.coords.length > 1) {
-          upsertRouteLayer(m, route.coords, 'primary')
+          upsertRouteLayer(m, route.coords)
           const stats = { distanzKm: route.distanzKm, dauerMin: route.dauerMin }
           setRouteStats(stats)
           onRouteStatsChange?.({ ...stats, stops: aktivStops.length })
         } else {
-          upsertRouteLayer(
-            m,
-            [
-              [svOrigin.lng, svOrigin.lat],
-              ...aktivStops.map<[number, number]>((s) => [s.lng, s.lat]),
-            ],
-            'primary',
-          )
+          upsertRouteLayer(m, [
+            [svOrigin.lng, svOrigin.lat],
+            ...aktivStops.map<[number, number]>((s) => [s.lng, s.lat]),
+          ])
           setRouteStats(null)
           onRouteStatsChange?.(null)
         }
-        // fitBounds berücksichtigt ALLE Stops (auch verlegte) damit verlegte
-        // Pins nicht aus dem Viewport rutschen — der SV soll sehen wo der
-        // aussortierte Stop war.
+        // fitBounds berücksichtigt ALLE Stops (auch verlegte) damit graue
+        // Pins nicht aus dem Viewport rutschen.
         const bounds = new mapboxgl.LngLatBounds()
         if (route && route.coords.length > 1) {
           for (const c of route.coords) bounds.extend(c)
@@ -281,7 +268,7 @@ export default function TagesrouteMap({
           bounds.extend([svOrigin.lng, svOrigin.lat])
           aktivStops.forEach((s) => bounds.extend([s.lng, s.lat]))
         }
-        verlegteStops.forEach((s) => bounds.extend([s.lng, s.lat]))
+        validStops.forEach((s) => bounds.extend([s.lng, s.lat]))
         m.fitBounds(bounds, {
           padding: { top: 60, right: 60, bottom: 60, left: 60 },
           duration: 800,
@@ -294,37 +281,7 @@ export default function TagesrouteMap({
     })
 
     return () => { cancelled = true }
-  }, [svOrigin, aktivStops, verlegteStops, onRouteStatsChange])
-
-  // Verlegt-Stub-Linien — dashed gray Geraden vom Origin zu jedem
-  // verlegten Stop. Signalisiert „würde der SV theoretisch hier hin fahren,
-  // aber Termin ist verlegt".
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
-    const draw = () => {
-      const m = mapRef.current
-      if (!m) return
-      if (!svOrigin || verlegteStops.length === 0) {
-        // Sekundär-Layer leeren wenn keine verlegten Stops vorhanden
-        const src = m.getSource('field-route-secondary') as mapboxgl.GeoJSONSource | undefined
-        if (src) src.setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [] } })
-        return
-      }
-      // MultiLineString: pro verlegtem Stop ein Segment vom Origin → Stop.
-      // Wir bauen eine flat LineString-Sequenz mit Origin als Mittelpunkt.
-      // Damit alle Stub-Linien EIN Source-Feature teilen, nutzen wir
-      // Vor-/Zurück-Pattern: O → A → O → B → O → C ...
-      const coords: Array<[number, number]> = []
-      for (const v of verlegteStops) {
-        coords.push([svOrigin.lng, svOrigin.lat])
-        coords.push([v.lng, v.lat])
-      }
-      upsertRouteLayer(m, coords, 'secondary')
-    }
-    if (map.isStyleLoaded()) draw()
-    else map.once('load', draw)
-  }, [svOrigin, verlegteStops])
+  }, [svOrigin, aktivStops, validStops, onRouteStatsChange])
 
   // Active-Stop Highlight
   useEffect(() => {
@@ -356,18 +313,18 @@ export default function TagesrouteMap({
     )
   }
 
-  // EINE einzige Div. containerRef direkt drauf, Mapbox attached Canvas
-  // hier rein. Kein outer/inner. Inline-style height ist die einzige
-  // Höhen-Quelle — deterministisch, kein Chain.
+  // 2026-05-06: Map ohne Wrapper-Border/Bg — nackte Map-Fläche, RouteStats
+  // schweben als Glass-Pill oben. containerRef direkt auf das gestylte
+  // Element für deterministisches Sizing.
   return (
     <div className="relative">
       <div
         ref={containerRef}
-        className="rounded-xl overflow-hidden border border-claimondo-border bg-[#f8f9fb] w-full"
+        className="w-full"
         style={{ height: typeof height === 'number' ? `${height}px` : height }}
       />
       {routeStats && (
-        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm border border-claimondo-border rounded-xl px-3 py-2 shadow-sm flex items-center gap-3 text-xs z-10">
+        <div className="absolute top-3 left-3 glass-light rounded-xl px-3 py-2 shadow-ios-md flex items-center gap-3 text-xs z-10">
           <NavigationIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
           <span className="font-semibold text-claimondo-navy">{routeStats.distanzKm.toFixed(1)} km</span>
           <span className="text-claimondo-ondo">·</span>
@@ -377,7 +334,7 @@ export default function TagesrouteMap({
           </span>
           <span className="text-claimondo-ondo">·</span>
           <span className="text-claimondo-ondo">
-            {validStops.length} {validStops.length === 1 ? 'Stop' : 'Stops'}
+            {aktivStops.length} {aktivStops.length === 1 ? 'Stop' : 'Stops'}
           </span>
         </div>
       )}
