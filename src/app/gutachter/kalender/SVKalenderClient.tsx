@@ -33,6 +33,20 @@ type GutachterTermin = {
 type DailyW = { date: string; tempMax: number; tempMin: number; code: number }
 function wEmoji(c: number) { return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️' }
 
+// 2026-05-06: HH:mm in Europe/Berlin formatieren — stabil zwischen
+// Vercel-SSR (UTC) und Browser. date-fns format() nutzt die jeweilige
+// Local-TZ, was bei SSR zu 2h-Versatz im Sommer führte (UTC-Wall ≠
+// Berlin-Wall). Intl.DateTimeFormat mit explicit timeZone löst das.
+function formatBerlinTime(input: Date | string): string {
+  const d = typeof input === 'string' ? new Date(input) : input
+  return new Intl.DateTimeFormat('de-DE', {
+    timeZone: 'Europe/Berlin',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(d)
+}
+
 export default function SVKalenderClient({
   faelle,
   leadMap,
@@ -235,12 +249,12 @@ export default function SVKalenderClient({
                           <div
                             key={`busy-${idx}`}
                             className="px-2 py-1 rounded-lg text-[10px] leading-tight bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border"
-                            title="Externer Google-Termin — blockiert"
+                            title="Externer Termin — blockiert"
                           >
                             <div className="font-medium">
-                              {format(bs, 'HH:mm')}–{format(be, 'HH:mm')}
+                              {formatBerlinTime(bs)}–{formatBerlinTime(be)}
                             </div>
-                            <div className="truncate">Privat (Google)</div>
+                            <div className="truncate">Gebucht</div>
                           </div>
                         )
                       })}
@@ -263,14 +277,14 @@ export default function SVKalenderClient({
                             title="Verlegung beantragt — Slot blockiert bis Kunde entscheidet"
                           >
                             <div className="font-medium not-italic">
-                              {format(vs, 'HH:mm')}–{format(ve, 'HH:mm')}
+                              {formatBerlinTime(vs)}–{formatBerlinTime(ve)}
                             </div>
-                            <div className="truncate">Privater Termin</div>
+                            <div className="truncate">Gebucht</div>
                           </div>
                         )
                       })}
                     {entries.map(fall => {
-                      const time = fall.sv_termin ? format(new Date(fall.sv_termin), 'HH:mm') : ''
+                      const time = fall.sv_termin ? formatBerlinTime(fall.sv_termin) : ''
                       const overdue = fall.sv_termin && isBefore(new Date(fall.sv_termin), startOfDay(new Date()))
                       const isReserviert = fall.gutachter_termin_status === 'reserviert'
                       // AAR-864: pending Verlegung — gestrichelt amber
