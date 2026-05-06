@@ -105,7 +105,7 @@ export default function AuftragCard(props: AuftragCardProps) {
     .trim() || null
 
   return (
-    <div className="relative bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-ondo transition-colors group">
+    <div className="relative bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-ondo transition-colors group min-h-[112px]">
       {/* CMM-25: Stretched-Link über die ganze Card. Card-Click ist die
           einzige Aktion — der SV öffnet seinen Auftrag, sonst nichts. */}
       <Link
@@ -114,8 +114,35 @@ export default function AuftragCard(props: AuftragCardProps) {
         className="absolute inset-0 z-0 rounded-2xl"
       />
 
-      {/* Header — CMM-32 Walkthrough: Kennzeichen prominent + Kunde, Fall-Nr klein */}
-      <div className="relative z-10 flex items-start justify-between gap-2 pointer-events-none">
+      {/* Mobile-Header (<lg) — Portal-Review SV4: Name prominent oben,
+          Kennzeichen + Fahrzeug + Fall-Nr klein darunter. Status-Pill
+          rechts. Verhindert Truncate des Namens auf 390 px. */}
+      <div className="relative z-10 flex items-start justify-between gap-2 pointer-events-none lg:hidden">
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="text-base font-semibold text-[var(--brand-primary)] flex items-center gap-1.5 min-w-0">
+            <UserIcon className="w-4 h-4 text-claimondo-ondo/70 shrink-0" />
+            <span className="truncate">{kundeName}</span>
+          </p>
+          <div className="flex items-center gap-2 flex-wrap text-[11px] text-claimondo-ondo">
+            {props.fall.kennzeichen && (
+              <span className="inline-flex items-center rounded-md border border-claimondo-navy/70 bg-white px-1.5 py-0 font-mono text-[10px] tracking-wide text-claimondo-navy">
+                {props.fall.kennzeichen}
+              </span>
+            )}
+            {fahrzeug && <span className="truncate">{fahrzeug}</span>}
+            <span className="font-mono text-[var(--brand-secondary)]">
+              {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
+            </span>
+          </div>
+        </div>
+        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo whitespace-nowrap">
+          {props.statusLabel}
+        </span>
+      </div>
+
+      {/* Desktop-Header (lg+) — CMM-32 Walkthrough: Kennzeichen prominent
+          + Kunde in derselben Zeile, Fall-Nr klein darunter */}
+      <div className="relative z-10 hidden lg:flex items-start justify-between gap-2 pointer-events-none">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             {props.fall.kennzeichen && (
