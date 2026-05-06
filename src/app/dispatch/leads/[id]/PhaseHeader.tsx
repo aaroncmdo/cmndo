@@ -51,7 +51,7 @@ export default function PhaseHeader({
                 onClick={() => canNavigate && setPhase(nr)}
                 disabled={!canNavigate}
                 aria-current={isActive ? 'step' : undefined}
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                className={`flex items-center gap-2 min-h-11 px-3 rounded-lg text-xs font-medium transition-colors ${
                   isActive
                     ? 'bg-claimondo-ondo text-white shadow-sm'
                     : isDone
