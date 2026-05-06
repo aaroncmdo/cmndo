@@ -1,16 +1,21 @@
 /**
- * Einmaliger Re-Sync aller aktiven Google-Calendar-Events nach dem
- * Timezone-Fix in PR #530. Geht alle gutachter_termine + admin_termine
- * mit gesetzter google_event_id durch und triggert ein Update — damit
- * der neue toBerlinWallClock()-Pfad greift.
+ * Re-Sync aller aktiven Kalender-Events.
+ *
+ * Triggert syncSvTerminToGoogle + syncSvTerminToCalDav (gutachter_termine)
+ * und syncAdminTerminCalendarEvent (admin_termine) für alle aktiven
+ * Termine. Bei bestehendem google_event_id/caldav_object_url → Update,
+ * sonst Create. Sync ist fail-soft, no-op bei fehlender Verbindung.
  *
  * Aufruf: npx tsx src/scripts/resync-google-calendar.ts
  *
  * Optional: --only=gutachter|admin   nur eine Kategorie
  *           --sv=<svId>              nur ein bestimmter SV
  *           --dry                    keine Calls, nur Liste ausgeben
+ *           --include-unsynced       auch Termine ohne google_event_id /
+ *                                    caldav_object_url (Default: nur die
+ *                                    bereits gesynct waren)
  *
- * Lädt .env.local automatisch (gleicher Mechanismus wie password-reset-link.ts).
+ * Lädt .env.local automatisch.
  */
 
 import { readFileSync } from 'node:fs'
@@ -38,6 +43,7 @@ const args = process.argv.slice(2)
 const onlyArg = args.find((a) => a.startsWith('--only='))?.split('=')[1] as 'gutachter' | 'admin' | undefined
 const svFilter = args.find((a) => a.startsWith('--sv='))?.split('=')[1]
 const isDryRun = args.includes('--dry')
+const includeUnsynced = args.includes('--include-unsynced')
 
 async function main() {
   const { createClient } = await import('@supabase/supabase-js')
@@ -50,35 +56,43 @@ async function main() {
   const stats = { gutachter: { ok: 0, fail: 0, skip: 0 }, admin: { ok: 0, fail: 0, skip: 0 } }
 
   if (!onlyArg || onlyArg === 'gutachter') {
-    console.log('=== gutachter_termine ===')
+    console.log('=== gutachter_termine (Google + CalDAV) ===')
     let query = db
       .from('gutachter_termine')
-      .select('id, sv_id, fall_id, status, start_zeit, google_event_id')
-      .not('google_event_id', 'is', null)
+      .select('id, sv_id, fall_id, status, start_zeit, google_event_id, caldav_object_url')
       .in('status', ['reserviert', 'bestaetigt', 'verlegung_pending'])
       .gte('start_zeit', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+    if (!includeUnsynced) {
+      query = query.or('google_event_id.not.is.null,caldav_object_url.not.is.null')
+    }
     if (svFilter) query = query.eq('sv_id', svFilter)
     const { data: termine, error } = await query
     if (error) {
       console.error('Query-Fehler:', error.message)
       process.exit(1)
     }
-    console.log(`${termine?.length ?? 0} aktive SV-Termine mit google_event_id gefunden`)
+    console.log(`${termine?.length ?? 0} aktive SV-Termine gefunden`)
     for (const t of termine ?? []) {
-      const ref = `${t.id} (sv=${t.sv_id}, ${t.start_zeit})`
+      const ref = `${t.id} (sv=${(t.sv_id as string).slice(0, 8)}, ${t.start_zeit})`
       if (!t.fall_id) {
-        console.log(`  SKIP ${ref} — ohne fall_id (Pre-FlowLink-Reservierung)`)
+        console.log(`  SKIP ${ref} — ohne fall_id (Pre-FlowLink)`)
         stats.gutachter.skip++
         continue
       }
       if (isDryRun) {
-        console.log(`  DRY  ${ref}`)
+        console.log(`  DRY  ${ref} gcal=${t.google_event_id ? 'YES' : 'no'} caldav=${t.caldav_object_url ? 'YES' : 'no'}`)
         stats.gutachter.ok++
         continue
       }
+      const fallId = t.fall_id as string
+      const tid = t.id as string
       try {
         const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
-        await syncSvTerminToGoogle(t.id as string, t.fall_id as string)
+        const { syncSvTerminToCalDav } = await import('@/lib/kalender/caldav/sv-termin-sync')
+        await Promise.all([
+          syncSvTerminToGoogle(tid, fallId),
+          syncSvTerminToCalDav(tid, fallId),
+        ])
         console.log(`  OK   ${ref}`)
         stats.gutachter.ok++
       } catch (err) {
