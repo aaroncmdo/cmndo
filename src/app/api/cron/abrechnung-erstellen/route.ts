@@ -20,7 +20,11 @@ export const dynamic = 'force-dynamic'
  * abrechnung_positionen-Tabelle existiert weiterhin (aus kfz149 angelegt) und
  * dient als Audit-Trail mit FK auf abrechnungen(id).
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   // Ist heute der letzte Tag des Monats?
   const now = new Date()
   const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1)

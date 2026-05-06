@@ -10,7 +10,6 @@ export type EmpfaengerRolle =
   | 'admin'
   | 'dispatch'
   | 'kundenbetreuer'
-  | 'dispatch'
   | 'sachverstaendiger'
   | 'kanzlei'
   | 'kunde'

@@ -10,7 +10,11 @@ export const dynamic = 'force-dynamic'
  * KFZ-150 Block H: No-Show Timeout Cron (täglich 10:00).
  * Fälle mit no_show_gemeldet_am > 5 Werktage → storno_kunde_no_show.
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const db = createAdminClient()
   // CMM-40: re_termin_token_eingelaufen_am mitlesen — wenn der Kunde ueber
   // den Re-Termin-Link einen neuen Slot vorgeschlagen hat, kein Storno.

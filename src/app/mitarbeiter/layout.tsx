@@ -24,8 +24,9 @@ export default async function MitarbeiterLayout({
     .single()
 
   // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
-  // auf /login.
-  if (!profile || !['kundenbetreuer', 'dispatch', 'admin'].includes(profile.rolle)) {
+  // auf /login. Audit 2026-05-06: 'dispatch' raus — Dispatch hat eigenes
+  // Portal /dispatch und sollte nicht im KB-Portal landen.
+  if (!profile || !['kundenbetreuer', 'admin'].includes(profile.rolle)) {
     redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
   }
 

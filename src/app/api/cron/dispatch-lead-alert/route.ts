@@ -8,7 +8,11 @@ export const dynamic = 'force-dynamic'
  * Leads mit status='neu' > 5 Min alt ohne existierende Dispatch-Task
  * → automatisch Task erstellen.
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const db = createAdminClient()
   const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
 

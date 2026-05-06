@@ -6,6 +6,11 @@ import { logFallEvent } from '@/lib/fall/log-event'
 import { requireRole } from '@/lib/auth/guards'
 
 export async function createTask(formData: FormData) {
+  // Audit 2026-05-06: requireRole war importiert aber nicht aufgerufen —
+  // jeder authentifizierte User konnte Tasks fuer beliebige Faelle anlegen,
+  // Layout-Guard schuetzte nur die UI nicht die Action selber.
+  await requireRole(['admin'])
+
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
