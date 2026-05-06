@@ -110,6 +110,18 @@ export default async function SVKalenderPage({
     .filter(f => f.sv_termin)
     .sort((a, b) => new Date(a.sv_termin!).getTime() - new Date(b.sv_termin!).getTime())
 
+  // 2026-05-06: Map start_zeit → fall_id für Time-Match-Clickability der
+  // externalBusy-Events. Damit wird ein „Gebucht"-Pill der via Google
+  // FreeBusy/CalDAV gelesen wurde, klickbar zum Claimondo-Auftrag, wenn
+  // er zeitlich zu einem internen gutachter_termine matched (±2 Minuten
+  // Toleranz, da Google-Events teils mit Sekunden-Drift zurückkommen).
+  const claimondoTermineByStart = (faelle ?? [])
+    .filter((f) => f.sv_termin)
+    .map((f) => ({
+      fallId: f.id as string,
+      startMs: new Date(f.sv_termin as string).getTime(),
+    }))
+
   return (
     <div className="h-full flex flex-col">
       {/* View-Toggle */}
@@ -151,6 +163,7 @@ export default async function SVKalenderPage({
           }))}
           externalBusy={externalBusy}
           verlegteSlots={verlegteSlots}
+          claimondoTermineByStart={claimondoTermineByStart}
         />
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
