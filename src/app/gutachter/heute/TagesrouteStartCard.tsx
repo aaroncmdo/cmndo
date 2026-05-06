@@ -16,6 +16,8 @@ export interface TagesrouteStartCardProps {
   disabledReason?: string | null
   /** Grobe Schätzung der Fahrzeit (Minuten) — null zeigt einfach Stop-Count. */
   geschaetzteFahrzeitMinuten?: number | null
+  /** 2026-05-06: Live-Distanz aus Mapbox-Directions, optional. */
+  distanzKm?: number | null
 }
 
 export default function TagesrouteStartCard({
@@ -23,6 +25,7 @@ export default function TagesrouteStartCard({
   hasActiveSession,
   disabledReason,
   geschaetzteFahrzeitMinuten = null,
+  distanzKm = null,
 }: TagesrouteStartCardProps) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
@@ -45,18 +48,30 @@ export default function TagesrouteStartCard({
     ? 'Fokus-Modus fortsetzen'
     : 'Tagesroute starten'
 
-  const subLabel =
-    geschaetzteFahrzeitMinuten != null
-      ? `${terminIds.length} Stops · ca. ${Math.round(geschaetzteFahrzeitMinuten / 60)}h ${geschaetzteFahrzeitMinuten % 60}min`
-      : `${terminIds.length} Stops`
+  // 2026-05-06: Mit Distanz-Anteil falls vorhanden — „3 Stops · 87 km · 4h 20min"
+  const subLabelParts: string[] = [`${terminIds.length} Stop${terminIds.length === 1 ? '' : 's'}`]
+  if (distanzKm != null && distanzKm > 0) {
+    subLabelParts.push(`${distanzKm.toFixed(1)} km`)
+  }
+  if (geschaetzteFahrzeitMinuten != null && geschaetzteFahrzeitMinuten > 0) {
+    const h = Math.floor(geschaetzteFahrzeitMinuten / 60)
+    const m = geschaetzteFahrzeitMinuten % 60
+    subLabelParts.push(h > 0 ? `${h}h ${m}min` : `${m} min`)
+  }
+  const subLabel = subLabelParts.join(' · ')
 
   return (
-    <div className="bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)] p-4 text-white">
+    // 2026-05-06: glassy navy statt solid — backdrop-blur sodass Map-Tiles
+    // dahinter durchscheinen.
+    <div
+      className="p-4 text-white backdrop-blur-md"
+      style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary) 70%, transparent)' }}
+    >
       <div className="flex items-center gap-2 mb-2">
         <MapIcon className="w-4 h-4 text-[var(--brand-accent)]" />
         <h3 className="text-sm font-semibold">Tagesroute</h3>
       </div>
-      <p className="text-xs text-claimondo-ondo/50 mb-3">{subLabel}</p>
+      <p className="text-xs text-white/70 mb-3">{subLabel}</p>
       <button
         type="button"
         disabled={disabled}
@@ -64,7 +79,7 @@ export default function TagesrouteStartCard({
         title={disabledReason ?? undefined}
         className={`w-full inline-flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
           disabled
-            ? 'bg-white/10 text-claimondo-ondo/50 cursor-not-allowed'
+            ? 'bg-white/10 text-white/40 cursor-not-allowed'
             : 'bg-[var(--brand-secondary)] hover:bg-[var(--brand-accent)] text-white'
         }`}
       >

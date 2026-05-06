@@ -1,19 +1,16 @@
 'use client'
 
-// 2026-05-06: Kompletter Rewrite. Keine flex-row-Side-by-Side mehr,
-// keine h-full-Chains, keine -m-* Negative-Margins, keine absolute-
-// Positionierung. Stattdessen einfache vertikale Stapelung:
+// 2026-05-06: Side-by-Side-Cockpit auf Desktop, Stack auf Mobile.
 //
-//   1. TagesrouteMap (Hero) — full-width, explizite Pixel-Höhe (540px)
-//   2. Tagesvorbereitung-Header (kompakter Streifen)
-//   3. TagesrouteSidebar (Liste der Termine, normales Block-Layout)
-//   4. TagesrouteStartCard (CTA-Button am Ende)
+// Aufbau:
+//   - Mobile (< lg): vertikaler Stack — Map oben (540px), Termine-Liste,
+//     Tagesvorbereitung-Header, Start-Card, alles full-width
+//   - Desktop (lg+): flex-row — Map links flex-1, Termine-Spalte rechts
+//     420px breit, beide Spalten mit calc(100vh - 130px) Höhe
 //
-// Begründung: 6 vorherige Versuche eine side-by-side-Map auf voller
-// Höhe zu rendern sind alle gescheitert (h-full-Chain, absolute inset-0,
-// vh-min-h, JS-Messung, calc-inline, position:fixed). Mit Stapelung
-// gibt's keinen Layout-Chain mehr — Map kriegt 540px per inline-style,
-// Browser parst das deterministisch, Mapbox-Container füllt korrekt.
+// Map-Höhe ist die einzige Höhen-Quelle: `mapHeight` State wird je nach
+// Viewport gesetzt (lg = calc-string, < lg = 540px). TagesrouteMap
+// rendert das Element mit dieser inline-Höhe — kein Layout-Chain.
 
 import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
@@ -21,7 +18,7 @@ import TagesrouteSidebar, { type TagesroutePflichtStat } from './TagesrouteSideb
 import TagesrouteStartCard from './TagesrouteStartCard'
 import TagesvorbereitungButton from '../auftraege/TagesvorbereitungButton'
 import type { HeuteTerminFull } from './page'
-import type { TagesrouteStop } from './TagesrouteMap'
+import type { RouteStats, TagesrouteStop } from './TagesrouteMap'
 
 const TagesrouteMap = dynamic(() => import('./TagesrouteMap'), { ssr: false })
 
@@ -32,7 +29,7 @@ export interface HeuteClientProps {
   hasActiveSession: boolean
 }
 
-const MAP_HEIGHT_PX = 540
+const MAP_HEIGHT_MOBILE = 540
 
 export default function HeuteClient({
   termine,
@@ -46,6 +43,18 @@ export default function HeuteClient({
       : null,
   )
   const [activeStopId, setActiveStopId] = useState<string | null>(null)
+  const [routeStats, setRouteStats] = useState<RouteStats | null>(null)
+
+  // Viewport-Detection für Map-Höhe + Layout-Switch
+  const [isLargeScreen, setIsLargeScreen] = useState(false)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mq = window.matchMedia('(min-width: 1024px)')
+    setIsLargeScreen(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsLargeScreen(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   // Opportunistisch GPS holen
   useEffect(() => {
@@ -63,6 +72,11 @@ export default function HeuteClient({
   )
   const terminIds = aktiveTermine.map((t) => t.id)
 
+  // 2026-05-06: ALLE aktiven Termine als Stops durchreichen (inklusive
+  // verlegt/verlegung_pending). TagesrouteMap rendert intern:
+  //   - Active-Route (gold-solid): nur durch nicht-verlegte Stops
+  //   - Verlegt-Stubs (dashed): straight-line vom Origin zu jedem verlegten
+  // Damit sieht der SV: was die Route IST und was wäre gewesen.
   const stops: TagesrouteStop[] = useMemo(() => {
     return [...aktiveTermine]
       .filter((t) => t.besichtigungsort_lat != null && t.besichtigungsort_lng != null)
@@ -73,46 +87,63 @@ export default function HeuteClient({
         lat: t.besichtigungsort_lat as number,
         lng: t.besichtigungsort_lng as number,
         label: t.kunde_name,
+        status: t.status,
       }))
   }, [aktiveTermine])
 
   const disabledReason = aktiveTermine.length === 0 ? 'Heute keine offenen Termine' : null
 
+  // Map-Höhe je nach Viewport. Auf Desktop: 100% des absolute-Containers
+  // (= main-content-box-Höhe nach Banner). Mobile: feste Pixel-Höhe.
+  const mapHeight: number | string = isLargeScreen ? '100%' : MAP_HEIGHT_MOBILE
+
   return (
-    <div className="space-y-4">
-      {/* 1. Map als Hero — explizite Pixel-Höhe, full-width */}
+    // 2026-05-06: Map = Background. Auf Desktop (lg+) füllt sie den
+    // gesamten Bereich rechts der Sidebar (256px), bündig zu allen
+    // Viewport-Kanten. Cards floaten oben-rechts darüber. Mobile: Stack.
+    <div className="relative lg:fixed lg:top-0 lg:right-0 lg:bottom-0 lg:left-64 lg:z-10">
+      {/* Map als Background — füllt den gesamten Container */}
       <TagesrouteMap
         svOrigin={origin}
         stops={stops}
         activeStopId={activeStopId}
         onStopClick={setActiveStopId}
-        height={MAP_HEIGHT_PX}
+        height={mapHeight}
+        onRouteStatsChange={setRouteStats}
       />
 
-      {/* 2. Tagesvorbereitung-Header */}
-      <div className="bg-white border border-claimondo-border rounded-xl px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy">
-        <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
-        <TagesvorbereitungButton />
-      </div>
+      {/* Termine-Overlay — Mobile: gestackt unter Map (mt-4).
+          Desktop (lg+): floating absolute top-right über der Map. */}
+      <div
+        className="space-y-4 mt-4 lg:mt-0 lg:absolute lg:top-4 lg:right-4 lg:bottom-4 lg:w-[420px] lg:overflow-y-auto lg:z-10"
+      >
+        {/* Tagesvorbereitung-Header */}
+        <div className="glass-light rounded-xl px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy shadow-ios-md">
+          <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
+          <TagesvorbereitungButton />
+        </div>
 
-      {/* 3. Termine-Liste */}
-      <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
-        <TagesrouteSidebar
-          termine={termine}
-          pflichtStats={pflichtStats}
-          svOrigin={origin}
-          activeStopId={activeStopId}
-          onStopClick={setActiveStopId}
-        />
-      </div>
+        {/* Termine-Liste */}
+        <div className="glass-light rounded-xl overflow-hidden shadow-ios-md">
+          <TagesrouteSidebar
+            termine={termine}
+            pflichtStats={pflichtStats}
+            svOrigin={origin}
+            activeStopId={activeStopId}
+            onStopClick={setActiveStopId}
+          />
+        </div>
 
-      {/* 4. Tagesroute-Start-Card */}
-      <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
-        <TagesrouteStartCard
-          terminIds={terminIds}
-          hasActiveSession={hasActiveSession}
-          disabledReason={disabledReason}
-        />
+        {/* Tagesroute-Start-Card */}
+        <div className="rounded-xl overflow-hidden shadow-ios-md">
+          <TagesrouteStartCard
+            terminIds={terminIds}
+            hasActiveSession={hasActiveSession}
+            disabledReason={disabledReason}
+            geschaetzteFahrzeitMinuten={routeStats?.dauerMin ?? null}
+            distanzKm={routeStats?.distanzKm ?? null}
+          />
+        </div>
       </div>
     </div>
   )

@@ -8,20 +8,40 @@ import type { Map as MapboxMap } from 'mapbox-gl'
 
 export interface KundeMarkerOptions {
   initials?: string
+  /**
+   * 2026-05-06: Optionale Status-Farbe für Map-Pins.
+   *   bestaetigt    → emerald (#16a34a)
+   *   reserviert    → amber (#f59e0b)
+   *   verlegung_pending → amber-darker (#d97706)
+   *   default       → ondo (#4573A2)
+   */
+  status?: 'bestaetigt' | 'reserviert' | 'verlegung_pending' | 'verlegt' | string
+}
+
+function colorForStatus(status?: string): string {
+  switch (status) {
+    case 'bestaetigt':
+      return '#16a34a' // emerald-600
+    case 'reserviert':
+      return '#f59e0b' // amber-500
+    case 'verlegung_pending':
+      return '#d97706' // amber-600 darker
+    case 'verlegt':
+      return '#94a3b8' // slate-400 dimmed
+    default:
+      return '#4573A2' // claimondo-ondo
+  }
 }
 
 function buildKundeMarkerElement(opts: KundeMarkerOptions): HTMLDivElement {
   const el = document.createElement('div')
   el.className = 'kunde-marker'
-  // AAR-marker-instant: keine CSS-transition — Pin sitzt fest an der
-  // Mapbox-Marker-Position. Der Active-Stop-Highlight (scale 1.5 +
-  // box-shadow) wechselt damit hart, was visuell klarer ist als ein
-  // sanftes „Nachgleiten".
+  const bg = colorForStatus(opts.status)
   el.style.cssText = [
     'width: 24px',
     'height: 24px',
     'border-radius: 9999px',
-    'background: #4573A2',
+    `background: ${bg}`,
     'border: 2px solid #FFFFFF',
     'box-shadow: 0 2px 6px rgba(13,27,62,0.35)',
     'display: flex',

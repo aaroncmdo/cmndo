@@ -5,7 +5,7 @@
 // Aufgeklappt zeigt die Card: Kunde, Fahrzeug, Schadentyp, Pflichtdokumente,
 // Briefing, Telefon-Button + Route-starten.
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   ClockIcon,
@@ -36,6 +36,53 @@ export type TagesrouteSidebarProps = {
   svOrigin: { lat: number | null; lng: number | null } | null
   activeStopId?: string | null
   onStopClick?: (stopId: string) => void
+}
+
+// 2026-05-06: „Jetzt"-Indikator — zeigt zeitliche Nähe zum Start-Zeit.
+// Aktualisiert sich automatisch alle 30 Sek.
+function useJetztRelative(startIso: string, endIso: string | null): string {
+  const [tick, setTick] = useState(() => Date.now())
+  useEffect(() => {
+    const i = setInterval(() => setTick(Date.now()), 30_000)
+    return () => clearInterval(i)
+  }, [])
+  return useMemo(() => {
+    const startMs = new Date(startIso).getTime()
+    const endMs = endIso ? new Date(endIso).getTime() : startMs + 60 * 60_000
+    const diffStartMin = Math.round((startMs - tick) / 60_000)
+    if (tick >= startMs && tick < endMs) return 'läuft jetzt'
+    if (diffStartMin === 0) return 'jetzt'
+    if (diffStartMin > 0 && diffStartMin < 60) return `in ${diffStartMin} Min`
+    if (diffStartMin >= 60 && diffStartMin < 24 * 60) {
+      const h = Math.floor(diffStartMin / 60)
+      const m = diffStartMin % 60
+      return m === 0 ? `in ${h}h` : `in ${h}h ${m}min`
+    }
+    if (diffStartMin < 0) {
+      const past = Math.abs(diffStartMin)
+      if (past < 60) return `vor ${past} Min`
+      const h = Math.floor(past / 60)
+      return `vor ${h}h`
+    }
+    return ''
+  }, [startIso, endIso, tick])
+}
+
+function JetztPill({ startIso, endIso }: { startIso: string; endIso: string | null }) {
+  const label = useJetztRelative(startIso, endIso)
+  if (!label) return null
+  const isJetzt = label === 'läuft jetzt' || label === 'jetzt'
+  const isPast = label.startsWith('vor ')
+  const cls = isJetzt
+    ? 'bg-emerald-100 text-emerald-800 border-emerald-300 animate-pulse'
+    : isPast
+    ? 'bg-claimondo-border/40 text-claimondo-ondo/70 border-claimondo-border/60'
+    : 'bg-claimondo-ondo/10 text-claimondo-navy border-claimondo-ondo/20'
+  return (
+    <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${cls}`}>
+      {label}
+    </span>
+  )
 }
 
 function badgeForStatus(status: string): { label: string; cls: string } {
@@ -74,15 +121,32 @@ export default function TagesrouteSidebar({
   }, [pflichtStats])
 
   const aktiv = termine.filter((t) => t.status !== 'abgeschlossen' && t.status !== 'abgelehnt')
+  const erledigt = termine.length - aktiv.length
+
+  // Tages-Stats — auf einen Blick: Termine + Pflicht-Dokumente offen
+  const offeneDokuTotal = useMemo(
+    () => pflichtStats.reduce((acc, p) => acc + p.offen, 0),
+    [pflichtStats],
+  )
 
   return (
     <aside className="flex flex-col flex-1 min-h-0">
+      {/* Stats-Header */}
       <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
         <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider">Termine heute</p>
         <div className="flex items-baseline gap-2 mt-0.5">
           <span className="text-2xl font-semibold text-claimondo-navy">{aktiv.length}</span>
-          <span className="text-[11px] text-claimondo-ondo">{termine.length - aktiv.length > 0 && `(${termine.length - aktiv.length} erledigt)`}</span>
+          {erledigt > 0 && (
+            <span className="text-[11px] text-claimondo-ondo">({erledigt} erledigt)</span>
+          )}
         </div>
+        {/* Quick-Stats — Pflicht-Dokumente offen, Anzahl Stops mit Adresse */}
+        {offeneDokuTotal > 0 && (
+          <div className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-full">
+            <AlertTriangleIcon className="w-3 h-3" />
+            <span>{offeneDokuTotal} {offeneDokuTotal === 1 ? 'Pflichtdokument' : 'Pflichtdokumente'} offen</span>
+          </div>
+        )}
       </div>
 
       <ol className="flex-1 overflow-y-auto divide-y divide-claimondo-border">
@@ -101,11 +165,20 @@ export default function TagesrouteSidebar({
             .join(' ')
           const link = googleMapsLink(t, svOrigin)
 
+          // 2026-05-06: Verlegte Termine werden visuell durchgestrichen +
+          // gedimmt. Route ignoriert sie zusätzlich (HeuteClient filtert
+          // sie aus den Map-Stops raus).
+          const istVerlegt = t.status === 'verlegt' || t.status === 'verlegung_pending'
+          const verlegtTextClass = istVerlegt ? 'line-through opacity-60' : ''
           return (
             <li
               key={t.id}
-              className={`transition-colors ${
-                isActive ? 'bg-claimondo-ondo/5' : 'bg-white hover:bg-[#f8f9fb]'
+              className={`transition-colors backdrop-blur-sm ${
+                isActive
+                  ? 'bg-claimondo-ondo/25'
+                  : istVerlegt
+                  ? 'bg-slate-400/30 hover:bg-slate-400/40'
+                  : 'bg-white/40 hover:bg-white/60'
               }`}
             >
               <button
@@ -116,27 +189,54 @@ export default function TagesrouteSidebar({
                 }}
                 className="w-full text-left px-4 py-3 flex items-start gap-3"
               >
-                {/* Stop-Nummer */}
-                <span
-                  className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 ${
-                    isActive
-                      ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                      : 'bg-white text-claimondo-navy border-claimondo-border'
-                  }`}
-                >
-                  {idx + 1}
-                </span>
+                {/* 2026-05-06: Avatar mit eingebackener Stop-Nummer.
+                    Wenn Kunde ein Profilbild hat, zeigen — sonst Initialen-
+                    Fallback aus dem Namen. Stop-Nummer als Badge unten-rechts. */}
+                <div className="relative shrink-0">
+                  {t.kunde_avatar_url ? (
+                    <img
+                      src={t.kunde_avatar_url}
+                      alt={t.kunde_name}
+                      className={`w-11 h-11 rounded-full object-cover border-2 ${
+                        isActive ? 'border-claimondo-ondo' : 'border-claimondo-border'
+                      }`}
+                    />
+                  ) : (
+                    <div
+                      className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold border-2 bg-claimondo-ondo/10 text-claimondo-navy ${
+                        isActive ? 'border-claimondo-ondo' : 'border-claimondo-border'
+                      }`}
+                    >
+                      {(t.kunde_name || '?')
+                        .split(' ')
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((n) => n[0]?.toUpperCase())
+                        .join('') || '?'}
+                    </div>
+                  )}
+                  <span
+                    className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white ${
+                      isActive
+                        ? 'bg-claimondo-ondo text-white'
+                        : 'bg-claimondo-navy text-white'
+                    }`}
+                  >
+                    {idx + 1}
+                  </span>
+                </div>
 
                 <div className="flex-1 min-w-0">
                   {/* Zeile 1: Zeit + Status + Pflicht-Indikator */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-claimondo-navy flex items-center gap-1">
+                    <span className={`text-sm font-semibold text-claimondo-navy flex items-center gap-1 ${verlegtTextClass}`}>
                       <ClockIcon className="w-3 h-3 text-claimondo-ondo" />
                       {formatUhrzeit(t.start_zeit)}
                       {t.end_zeit && (
                         <span className="text-claimondo-ondo">– {formatUhrzeit(t.end_zeit)}</span>
                       )}
                     </span>
+                    {!istVerlegt && <JetztPill startIso={t.start_zeit} endIso={t.end_zeit} />}
                     <StatusBadge colorCls={badge.cls}>{badge.label}</StatusBadge>
                     {pflicht && pflicht.offen > 0 && (
                       <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full border border-amber-200">
@@ -152,20 +252,37 @@ export default function TagesrouteSidebar({
                     )}
                   </div>
 
-                  {/* Zeile 2: Kunde / Fahrzeug */}
-                  <p className="text-sm text-claimondo-navy mt-1 truncate">
-                    {t.kennzeichen && <span className="font-mono mr-2">{t.kennzeichen}</span>}
-                    {t.fahrzeug ?? t.kunde_name}
+                  {/* Zeile 2: Kundenname (mit Anrede) — prominent, das wichtigste */}
+                  <p className={`text-sm font-semibold text-claimondo-navy mt-1 truncate ${verlegtTextClass}`}>
+                    {t.kunde_anrede === 'herr' && 'Herr '}
+                    {t.kunde_anrede === 'frau' && 'Frau '}
+                    {t.kunde_name}
                   </p>
-                  {t.kennzeichen && t.fahrzeug && (
-                    <p className="text-xs text-claimondo-ondo truncate">{t.kunde_name}</p>
+
+                  {/* Zeile 3: Kennzeichen + Fahrzeug */}
+                  {(t.kennzeichen || t.fahrzeug) && (
+                    <p className={`text-xs text-claimondo-ondo mt-0.5 truncate ${verlegtTextClass}`}>
+                      {t.kennzeichen && <span className="font-mono mr-2">{t.kennzeichen}</span>}
+                      {t.fahrzeug}
+                    </p>
                   )}
 
-                  {/* Zeile 3: Adresse */}
-                  <p className="text-xs text-claimondo-ondo mt-1 flex items-start gap-1">
-                    <MapPinIcon className="w-3 h-3 mt-0.5 shrink-0" />
-                    <span className="truncate">{adresse || '—'}</span>
-                  </p>
+                  {/* Zeile 3: Adresse + Wetter */}
+                  <div className="flex items-center justify-between gap-2 mt-1">
+                    <p className={`text-xs text-claimondo-ondo flex items-start gap-1 min-w-0 flex-1 ${verlegtTextClass}`}>
+                      <MapPinIcon className="w-3 h-3 mt-0.5 shrink-0" />
+                      <span className="truncate">{adresse || '—'}</span>
+                    </p>
+                    {t.stop_weather && !istVerlegt && (
+                      <span
+                        className="inline-flex items-center gap-0.5 text-[11px] text-claimondo-ondo shrink-0"
+                        title={t.stop_weather.description}
+                      >
+                        <span>{t.stop_weather.emoji}</span>
+                        <span className="font-medium tabular-nums">{t.stop_weather.temp}°</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <span className="text-claimondo-ondo/60 mt-0.5">
@@ -175,7 +292,7 @@ export default function TagesrouteSidebar({
 
               {/* Aufgeklappt: Pflichtinfos + Aktionen */}
               {isExpanded && (
-                <div className="px-4 pb-3 pt-1 space-y-2 border-t border-claimondo-border/60 bg-[#f8f9fb]">
+                <div className="px-4 pb-3 pt-1 space-y-2 border-t border-claimondo-border/60 bg-white/30">
                   {/* Schadentyp + Auftrag-Typ */}
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
                     {t.schadentyp && (

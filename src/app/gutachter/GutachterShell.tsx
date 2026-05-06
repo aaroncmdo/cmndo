@@ -31,7 +31,7 @@ import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 import SVSpotlight from './_components/SVSpotlight'
-import WeatherBanner from '@/components/shared/WeatherBanner'
+// 2026-05-06: WeatherBanner-Import entfernt — pro-Stop-Wetter ersetzt globalen Banner
 import { toInitials } from '@/components/shared/KundeAvatar'
 // CMM-36: Geo-Tracking startet beim App-Öffnen
 import { useGeoPosition } from '@/hooks/useGeoPosition'
@@ -492,49 +492,32 @@ export default function GutachterShell({
           <UpdatesNav variant="dark" />
         </header>
 
-        {/* AAR-864 Polish: beide Wrapper (Wetter + Content) öffnen sich nach
-            rechts (rounded-r-none, kein right-padding) und schließen links
-            bündig zur Sidebar mit gleichem Abstand ab (pl-2 sm:pl-3 lg:pl-4
-            + rounded-l-2xl). Der navy-Hintergrund des Outer-Containers zieht
-            sich rechts durch. */}
-        <div className="pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4">
-          <WeatherBanner
-            standortLat={standortLat ?? null}
-            standortLng={standortLng ?? null}
-            trailingSlot={
-              <>
-                <OutboxBadge />
-                <UpdatesNav variant="dark" />
-              </>
-            }
-          />
+        {/* 2026-05-06: WeatherBanner entfernt + Action-Items free-floating.
+            OutboxBadge + UpdatesNav schweben oben-rechts ohne Background-
+            Wrapper. position:fixed pinnt sie an Viewport-Edge, z-20 damit
+            sie über Main-Content rendern (Sidebar lg:z-[1100] ist drüber,
+            Modale auch — passt). Hidden auf Mobile, da gibt's eine eigene
+            Header-Bar (lg:hidden Mobile-Header oben). */}
+        <div className="hidden lg:flex items-center gap-2 fixed top-3 right-4 z-20">
+          <OutboxBadge />
+          <UpdatesNav variant="dark" />
         </div>
 
         <div className="flex-1 overflow-hidden pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4">
           <main
             id="main-content"
             role="main"
-            className="h-full overflow-y-auto bg-[#f8f9fb] rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4 flex flex-col"
+            className="h-full overflow-y-auto bg-[#f8f9fb] rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4"
           >
             {/* CMM-32 Polish: Standort-CTA — sichtbar wenn Browser-Permission
-                noch 'prompt' oder 'denied' ist; bei 'granted' rendert die
-                Komponente null.
-                shrink-0 + flex-col im main: Banner nimmt seine Eigenhöhe,
-                Page-Content darunter bekommt flex-1 + min-h-0 — sonst kann
-                z. B. die Heute-Map (h-full bezogen auf main) nicht wissen,
-                dass der Banner Höhe konsumiert, und kollabiert auf ~80px. */}
-            <div className="mb-3 shrink-0">
+                noch 'prompt' oder 'denied' ist; sonst rendert null. */}
+            <div className="mb-3">
               <GeoPermissionPrompt
                 permission={geoState.permission}
                 onRequest={geoState.requestPermission}
               />
             </div>
-            {/* relative damit Pages die ein absolutes Full-Bleed-Layout
-                brauchen (Heute-Map, künftig auch /route) sich per
-                `absolute inset-0` exakt in den verbleibenden Platz
-                einklinken können. min-h-0 + flex-1 ist der Standard-Trick
-                damit ein Flex-Child schrumpfen darf statt zu overflow'n. */}
-            <div className="flex-1 min-h-0 relative">{children}</div>
+            {children}
           </main>
         </div>
       </div>

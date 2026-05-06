@@ -30,7 +30,11 @@ export type TagesrouteStop = {
   lat: number
   lng: number
   label: string
+  /** Status für Marker-Farbe (bestaetigt → grün, reserviert → amber etc.) */
+  status?: string
 }
+
+export type RouteStats = { distanzKm: number; dauerMin: number; stops: number }
 
 export type TagesrouteMapProps = {
   svOrigin: { lat: number; lng: number } | null
@@ -39,6 +43,8 @@ export type TagesrouteMapProps = {
   onStopClick?: (stopId: string) => void
   /** Pflicht — Pixel-Höhe in Number oder CSS-String */
   height: number | string
+  /** 2026-05-06: Lift Route-Stats nach oben damit StartCard sie nutzen kann */
+  onRouteStatsChange?: (stats: RouteStats | null) => void
 }
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -78,6 +84,7 @@ export default function TagesrouteMap({
   activeStopId,
   onStopClick,
   height,
+  onRouteStatsChange,
 }: TagesrouteMapProps) {
   // EINE Ref. Mapbox attached sein Canvas direkt in diesem Element.
   const containerRef = useRef<HTMLDivElement>(null)
@@ -88,6 +95,16 @@ export default function TagesrouteMap({
   const [routeStats, setRouteStats] = useState<{ distanzKm: number; dauerMin: number } | null>(null)
 
   const validStops = useMemo(() => stops.filter((s) => s.lat != null && s.lng != null), [stops])
+
+  // Active-only: verlegte Stops aus Route-Berechnung raus, bleiben aber
+  // als graue Marker auf der Karte sichtbar.
+  const aktivStops = useMemo(
+    () =>
+      validStops.filter(
+        (s) => s.status !== 'verlegt' && s.status !== 'verlegung_pending',
+      ),
+    [validStops],
+  )
 
   useEffect(() => {
     const el = containerRef.current
@@ -199,7 +216,10 @@ export default function TagesrouteMap({
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current.clear()
       validStops.forEach((stop, idx) => {
-        const m = addKundeMarker(map, [stop.lng, stop.lat], { initials: String(idx + 1) })
+        const m = addKundeMarker(map, [stop.lng, stop.lat], {
+          initials: String(idx + 1),
+          status: stop.status,
+        })
         const el = m.getElement()
         el.style.cursor = 'pointer'
         el.addEventListener('click', () => onStopClick?.(stop.id))
@@ -210,38 +230,45 @@ export default function TagesrouteMap({
     else map.once('load', place)
   }, [validStops, onStopClick])
 
-  // Route
+  // Active-Route — gold-solid Multi-Stop-Route durch nicht-verlegte Stops
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
-    if (!svOrigin || validStops.length === 0) {
+    if (!svOrigin || aktivStops.length === 0) {
       setRouteStats(null)
+      onRouteStatsChange?.(null)
       return
     }
     let cancelled = false
 
-    fetchMultiStopRoute(svOrigin, validStops).then((route) => {
+    fetchMultiStopRoute(svOrigin, aktivStops).then((route) => {
       if (cancelled || !mapRef.current) return
       const draw = () => {
         const m = mapRef.current
         if (!m) return
         if (route && route.coords.length > 1) {
           upsertRouteLayer(m, route.coords)
-          setRouteStats({ distanzKm: route.distanzKm, dauerMin: route.dauerMin })
+          const stats = { distanzKm: route.distanzKm, dauerMin: route.dauerMin }
+          setRouteStats(stats)
+          onRouteStatsChange?.({ ...stats, stops: aktivStops.length })
         } else {
           upsertRouteLayer(m, [
             [svOrigin.lng, svOrigin.lat],
-            ...validStops.map<[number, number]>((s) => [s.lng, s.lat]),
+            ...aktivStops.map<[number, number]>((s) => [s.lng, s.lat]),
           ])
           setRouteStats(null)
+          onRouteStatsChange?.(null)
         }
+        // fitBounds berücksichtigt ALLE Stops (auch verlegte) damit graue
+        // Pins nicht aus dem Viewport rutschen.
         const bounds = new mapboxgl.LngLatBounds()
         if (route && route.coords.length > 1) {
           for (const c of route.coords) bounds.extend(c)
         } else {
           bounds.extend([svOrigin.lng, svOrigin.lat])
-          validStops.forEach((s) => bounds.extend([s.lng, s.lat]))
+          aktivStops.forEach((s) => bounds.extend([s.lng, s.lat]))
         }
+        validStops.forEach((s) => bounds.extend([s.lng, s.lat]))
         m.fitBounds(bounds, {
           padding: { top: 60, right: 60, bottom: 60, left: 60 },
           duration: 800,
@@ -254,7 +281,7 @@ export default function TagesrouteMap({
     })
 
     return () => { cancelled = true }
-  }, [svOrigin, validStops])
+  }, [svOrigin, aktivStops, validStops, onRouteStatsChange])
 
   // Active-Stop Highlight
   useEffect(() => {
@@ -286,18 +313,19 @@ export default function TagesrouteMap({
     )
   }
 
-  // EINE einzige Div. containerRef direkt drauf, Mapbox attached Canvas
-  // hier rein. Kein outer/inner. Inline-style height ist die einzige
-  // Höhen-Quelle — deterministisch, kein Chain.
+  // 2026-05-06: Map ohne Wrapper-Border/Bg — nackte Map-Fläche, RouteStats
+  // schweben als Glass-Pill oben. containerRef direkt auf das gestylte
+  // Element. Outer mit h-full damit 100%-Strings vom parent korrekt
+  // resolven (für Desktop fixed-fill-Setup).
   return (
-    <div className="relative">
+    <div className="relative h-full w-full">
       <div
         ref={containerRef}
-        className="rounded-xl overflow-hidden border border-claimondo-border bg-[#f8f9fb] w-full"
+        className="w-full h-full"
         style={{ height: typeof height === 'number' ? `${height}px` : height }}
       />
       {routeStats && (
-        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm border border-claimondo-border rounded-xl px-3 py-2 shadow-sm flex items-center gap-3 text-xs z-10">
+        <div className="absolute top-3 left-3 glass-light rounded-xl px-3 py-2 shadow-ios-md flex items-center gap-3 text-xs z-10">
           <NavigationIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
           <span className="font-semibold text-claimondo-navy">{routeStats.distanzKm.toFixed(1)} km</span>
           <span className="text-claimondo-ondo">·</span>
@@ -307,7 +335,7 @@ export default function TagesrouteMap({
           </span>
           <span className="text-claimondo-ondo">·</span>
           <span className="text-claimondo-ondo">
-            {validStops.length} {validStops.length === 1 ? 'Stop' : 'Stops'}
+            {aktivStops.length} {aktivStops.length === 1 ? 'Stop' : 'Stops'}
           </span>
         </div>
       )}
