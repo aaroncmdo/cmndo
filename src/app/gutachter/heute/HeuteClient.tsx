@@ -98,12 +98,13 @@ export default function HeuteClient({
   const mapHeight: number | string = isLargeScreen ? '100%' : MAP_HEIGHT_MOBILE
 
   return (
-    // 2026-05-06: Map füllt das main-Content-Innen (im navy-Wrapper).
-    // -m-2/-m-3/-m-4 cancelt main's p-2/p-3/p-4 → Inhalt extends bis
-    // zum main-rounded-Rand (Map flush zur Edge der weißen Bühne).
-    // h-full erbt von children-wrapper = main's flex-1-Slot, also
-    // genau die volle main-Content-Höhe nach Banner.
-    <div className="relative -m-2 sm:-m-3 lg:-m-4 lg:h-full">
+    // 2026-05-06: Auf Desktop (lg+) komplett aus main raus via fixed —
+    // der weiße main-Wrapper (bg + rounded + shadow + p-4) blockiert
+    // das Layout. Position fixed nimmt nur den navy-Rand als Bezug.
+    //   top/right/bottom 3 = 12px Navy-Rand zum Outer
+    //   left 264 = Sidebar (256px) + 8px Navy-Gap
+    // Mobile: normaler Flow als Stack.
+    <div className="relative lg:fixed lg:top-3 lg:right-3 lg:bottom-3 lg:left-[264px] lg:z-10">
       {/* Map-Layer — full-width auf Desktop, voller Hintergrund */}
       <div className="lg:absolute lg:inset-0">
         <TagesrouteMap
