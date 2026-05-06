@@ -38,13 +38,12 @@ export default function HeuteClient({
   )
   const [activeStopId, setActiveStopId] = useState<string | null>(null)
 
-  // 2026-05-06 (Versuch 5): Outer kriegt inline `height: calc(100dvh - 130px)`.
-  // Nicht via Tailwind-Klasse (die ggf. ohne Spaces invalid kompiliert) sondern
-  // direkt als inline-style — Browser parst das deterministisch. 100dvh =
-  // dynamic viewport height (mobile-chrome-aware). 130px deckt Header +
-  // WeatherBanner + main-Padding ab. JS-Mess-Komplexität raus, weil
-  // explizite Pixel-Berechnung via calc reicht.
-  const wrapperHeight = 'calc(100dvh - 130px)'
+  // 2026-05-06 (Versuch 6 — position: fixed nuklear): nach 5 fehlgeschlagenen
+  // CSS-Layout-Versuchen wird die Map jetzt komplett aus dem Flow gezogen
+  // und am Viewport festgenagelt. Auf Mobile bleibt sie im normalen Stack
+  // mit expliziter Höhe (h-[60vh]). Auf Desktop (lg+) wird sie und die
+  // Aside per `position: fixed` mit hartcodierten Pixel-Offsets vom
+  // Viewport-Rand angedockt — kein Parent-Chain mehr, deterministisch.
 
   // Opportunistisch GPS holen
   useEffect(() => {
@@ -80,18 +79,24 @@ export default function HeuteClient({
   const disabledReason = aktiveTermine.length === 0 ? 'Heute keine offenen Termine' : null
 
   return (
-    // 2026-05-06 (Versuch 5): Reset auf simples Flex mit inline-calc-Height.
-    // Keine `absolute inset-0`, keine `min-h-full md:h-full`, keine JS-
-    // Messung. Inline `height: calc(100dvh - 130px)` ist deterministisch
-    // (Browser parst calc direkt, kein Tailwind-Compile-Bug, kein Chain).
-    // Negative Margins bleiben für bündigen Map-zum-Wrapper-Rand.
-    <div
-      className="-m-2 sm:-m-3 lg:-m-4 flex flex-col md:flex-row"
-      style={{ height: wrapperHeight }}
-    >
-      {/* Termine-Spalte — links auf Desktop, unter der Karte auf Mobile.
-          Hat eigenes padding damit die Cards normal abgesetzt sind. */}
-      <aside className="order-2 md:order-1 md:w-[400px] md:shrink-0 md:flex md:flex-col md:h-full p-2 sm:p-3 lg:p-4 md:overflow-y-auto bg-[#f8f9fb] space-y-3">
+    <>
+      {/* Karten-Spalte — Mobile: gestackt oben, 60vh.
+          Desktop (lg+): position:fixed angedockt an Viewport.
+          - top:110 = Header (~80) + Padding (~30)
+          - right:16, bottom:16 = main-Padding-Margin
+          - left:688 = Sidebar (256) + main-pl (16) + aside-Breite (416) */}
+      <div className="rounded-xl overflow-hidden border border-claimondo-border bg-[#f8f9fb] mb-4 h-[60vh] lg:h-auto lg:mb-0 lg:fixed lg:top-[110px] lg:right-4 lg:bottom-4 lg:left-[688px]">
+        <TagesrouteMap
+          svOrigin={origin}
+          stops={stops}
+          activeStopId={activeStopId}
+          onStopClick={setActiveStopId}
+        />
+      </div>
+
+      {/* Termine-Spalte — Mobile: normal Flow unter der Map.
+          Desktop (lg+): position:fixed links neben der Map. */}
+      <aside className="space-y-3 lg:fixed lg:top-[110px] lg:left-[272px] lg:bottom-4 lg:w-[400px] lg:overflow-y-auto lg:flex lg:flex-col">
         <div className="bg-white border border-claimondo-border rounded-xl px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy">
           <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
           <TagesvorbereitungButton />
@@ -115,17 +120,6 @@ export default function HeuteClient({
           />
         </div>
       </aside>
-
-      {/* Karten-Spalte — flex-1 nimmt Restbreite, h-full erbt vom calc-
-          Wrapper (deterministische Pixel-Höhe). */}
-      <div className="order-1 md:order-2 relative flex-1 h-full">
-        <TagesrouteMap
-          svOrigin={origin}
-          stops={stops}
-          activeStopId={activeStopId}
-          onStopClick={setActiveStopId}
-        />
-      </div>
-    </div>
+    </>
   )
 }
