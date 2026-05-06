@@ -66,17 +66,29 @@ export async function waehleReTerminSlot(
 
   // Insert: kunde-vorgeschlagener Termin als 'reserviert'. SV bestaetigt
   // ueber sein Portal — dann wird daraus 'bestaetigt'.
-  const { error: insertErr } = await db.from('gutachter_termine').insert({
+  const { data: inserted, error: insertErr } = await db.from('gutachter_termine').insert({
     fall_id: fall.id,
     sv_id: fall.sv_id,
     start_zeit: start.toISOString(),
     end_zeit: end.toISOString(),
     status: 'reserviert',
     typ: 'besichtigung',
-  })
+  }).select('id').single()
 
   if (insertErr) {
     return { ok: false, error: insertErr.message }
+  }
+
+  // 2026-05-06: SV-Termin direkt in Google-Kalender (Status reserviert
+  // wird auch gesynct, damit der SV den Vorschlag im Kalender sieht).
+  // Non-critical try/catch.
+  if (inserted?.id) {
+    try {
+      const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
+      await syncSvTerminToGoogle(inserted.id as string, fall.id as string)
+    } catch (err) {
+      console.error('[sv-termin-sync] Re-Termin-Slot-Sync:', err)
+    }
   }
 
   // Token entwerten (verhindert Doppel-Wahl + Storno-Cron skipt)
