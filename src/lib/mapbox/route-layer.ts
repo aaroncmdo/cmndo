@@ -1,16 +1,33 @@
 'use client'
 
-// Route-Polyline als Mapbox Source + Layer.
-// 2026-05-06: Gold-solid (kein dashed mehr, kein Variant-System).
-// Active-Route geht NUR durch nicht-verlegte Stops; verlegte Stops
-// werden visuell durch graue Marker dargestellt — keine Stub-Linie
-// nötig (war zu komplex und brach das Rendering).
+// Route-Polyline Helpers — zwei separate Layer-Sets:
+//   'main' (default) — solid claimondo-navy. Wird genutzt wenn keine
+//      Verlegung vorliegt (Single-Route-Use-Case).
+//   'active-green' — solid grün. Die NEUE Route nach Verlegung.
+//   'original-dashed' — dashed slate. Die URSPRÜNGLICHE Route durch
+//      alle Stops inkl. verlegte (Vergleichs-Visualisierung).
 
 import type { Map as MapboxMap } from 'mapbox-gl'
 
-const SOURCE_ID = 'field-route'
-const LINE_LAYER_ID = 'field-route-line'
-const GLOW_LAYER_ID = 'field-route-glow'
+type Variant = 'main' | 'active-green' | 'original-dashed'
+
+const SOURCES: Record<Variant, string> = {
+  'main': 'route-main',
+  'active-green': 'route-active-green',
+  'original-dashed': 'route-original-dashed',
+}
+
+const LINE_LAYERS: Record<Variant, string> = {
+  'main': 'route-main-line',
+  'active-green': 'route-active-green-line',
+  'original-dashed': 'route-original-dashed-line',
+}
+
+const CASING_LAYERS: Record<Variant, string> = {
+  'main': 'route-main-casing',
+  'active-green': 'route-active-green-casing',
+  'original-dashed': 'route-original-dashed-casing',
+}
 
 function toGeoJson(coords: Array<[number, number]>): GeoJSON.Feature {
   return {
@@ -23,9 +40,14 @@ function toGeoJson(coords: Array<[number, number]>): GeoJSON.Feature {
 export function upsertRouteLayer(
   map: MapboxMap,
   coords: Array<[number, number]>,
+  variant: Variant = 'main',
 ): void {
+  const sourceId = SOURCES[variant]
+  const lineId = LINE_LAYERS[variant]
+  const casingId = CASING_LAYERS[variant]
+
   const feature = toGeoJson(coords)
-  const existingSource = map.getSource(SOURCE_ID) as
+  const existingSource = map.getSource(sourceId) as
     | mapboxgl.GeoJSONSource
     | undefined
 
@@ -34,37 +56,33 @@ export function upsertRouteLayer(
     return
   }
 
-  map.addSource(SOURCE_ID, { type: 'geojson', data: feature })
+  map.addSource(sourceId, { type: 'geojson', data: feature })
 
-  // Gold-Halo (warm, breit, semi-transparent)
+  if (variant === 'original-dashed') {
+    // Dashed slate — die Original-Route, dezent als Vergleich
+    map.addLayer({
+      id: lineId,
+      type: 'line',
+      source: sourceId,
+      layout: { 'line-join': 'round', 'line-cap': 'butt' },
+      paint: {
+        'line-color': '#64748B', // slate-500
+        'line-width': 4,
+        'line-opacity': 0.7,
+        'line-dasharray': [3, 2],
+      },
+    })
+    return
+  }
+
+  // 'main' (claimondo-blau) und 'active-green' bekommen White-Casing +
+  // Solid-Linie für maximalen Kontrast.
+  const lineColor = variant === 'active-green' ? '#16A34A' : '#0D1B3E' // emerald-600 / claimondo-navy
+
   map.addLayer({
-    id: `${GLOW_LAYER_ID}-outer`,
+    id: casingId,
     type: 'line',
-    source: SOURCE_ID,
-    layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: {
-      'line-color': '#D4AF37',
-      'line-width': 22,
-      'line-opacity': 0.18,
-      'line-blur': 8,
-    },
-  })
-  map.addLayer({
-    id: GLOW_LAYER_ID,
-    type: 'line',
-    source: SOURCE_ID,
-    layout: { 'line-join': 'round', 'line-cap': 'round' },
-    paint: {
-      'line-color': '#E5C158',
-      'line-width': 12,
-      'line-opacity': 0.45,
-      'line-blur': 3,
-    },
-  })
-  map.addLayer({
-    id: `${LINE_LAYER_ID}-casing`,
-    type: 'line',
-    source: SOURCE_ID,
+    source: sourceId,
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: {
       'line-color': '#FFFFFF',
@@ -72,27 +90,22 @@ export function upsertRouteLayer(
       'line-opacity': 0.95,
     },
   })
-  // Hauptlinie — gold solid
   map.addLayer({
-    id: LINE_LAYER_ID,
+    id: lineId,
     type: 'line',
-    source: SOURCE_ID,
+    source: sourceId,
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: {
-      'line-color': '#D4AF37',
+      'line-color': lineColor,
       'line-width': 5,
     },
   })
 }
 
-export function removeRouteLayer(map: MapboxMap): void {
-  for (const id of [
-    LINE_LAYER_ID,
-    `${LINE_LAYER_ID}-casing`,
-    GLOW_LAYER_ID,
-    `${GLOW_LAYER_ID}-outer`,
-  ]) {
+export function removeRouteLayer(map: MapboxMap, variant: Variant = 'main'): void {
+  const sourceId = SOURCES[variant]
+  for (const id of [LINE_LAYERS[variant], CASING_LAYERS[variant]]) {
     if (map.getLayer(id)) map.removeLayer(id)
   }
-  if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID)
+  if (map.getSource(sourceId)) map.removeSource(sourceId)
 }

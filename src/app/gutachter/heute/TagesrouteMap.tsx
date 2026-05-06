@@ -18,6 +18,7 @@ import {
   addSvCarMarker,
   addKundeMarker,
   upsertRouteLayer,
+  removeRouteLayer,
   MAPBOX_STYLE_STANDARD,
   getMapboxLightPreset,
 } from '@/lib/mapbox'
@@ -230,40 +231,88 @@ export default function TagesrouteMap({
     else map.once('load', place)
   }, [validStops, onStopClick])
 
-  // Active-Route — gold-solid Multi-Stop-Route durch nicht-verlegte Stops
+  // Route-Rendering — drei Modi:
+  //   keine Verlegung → main (claimondo-blau, solid)
+  //   mit Verlegung → original-dashed (alle Stops, slate dashed) +
+  //                   active-green (nur aktive Stops, grün solid)
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
     if (!svOrigin || aktivStops.length === 0) {
       setRouteStats(null)
       onRouteStatsChange?.(null)
+      // Alle Layer aufräumen wenn keine Stops
+      if (map.isStyleLoaded()) {
+        removeRouteLayer(map, 'main')
+        removeRouteLayer(map, 'active-green')
+        removeRouteLayer(map, 'original-dashed')
+      }
       return
     }
     let cancelled = false
 
-    fetchMultiStopRoute(svOrigin, aktivStops).then((route) => {
+    const hasVerlegung = aktivStops.length < validStops.length
+
+    // Active-Route holen (nur nicht-verlegte Stops). Wenn keine Verlegung:
+    // = main blau. Wenn Verlegung: = active-green.
+    const aktivPromise = fetchMultiStopRoute(svOrigin, aktivStops)
+    // Original-Route holen (alle Stops inkl. verlegte). Nur wenn Verlegung
+    // existiert.
+    const originalPromise = hasVerlegung
+      ? fetchMultiStopRoute(svOrigin, validStops)
+      : Promise.resolve(null)
+
+    Promise.all([aktivPromise, originalPromise]).then(([aktivRoute, originalRoute]) => {
       if (cancelled || !mapRef.current) return
       const draw = () => {
         const m = mapRef.current
         if (!m) return
-        if (route && route.coords.length > 1) {
-          upsertRouteLayer(m, route.coords)
-          const stats = { distanzKm: route.distanzKm, dauerMin: route.dauerMin }
+
+        const aktivCoords =
+          aktivRoute?.coords && aktivRoute.coords.length > 1
+            ? aktivRoute.coords
+            : [
+                [svOrigin.lng, svOrigin.lat] as [number, number],
+                ...aktivStops.map<[number, number]>((s) => [s.lng, s.lat]),
+              ]
+
+        if (hasVerlegung) {
+          // Original (alle Stops) als dashed
+          const originalCoords =
+            originalRoute?.coords && originalRoute.coords.length > 1
+              ? originalRoute.coords
+              : [
+                  [svOrigin.lng, svOrigin.lat] as [number, number],
+                  ...validStops.map<[number, number]>((s) => [s.lng, s.lat]),
+                ]
+          upsertRouteLayer(m, originalCoords, 'original-dashed')
+          // New (active only) als grün
+          upsertRouteLayer(m, aktivCoords, 'active-green')
+          // Main-Layer (blau) entfernen falls vorher gesetzt
+          removeRouteLayer(m, 'main')
+        } else {
+          // Single-Route in claimondo-blau
+          upsertRouteLayer(m, aktivCoords, 'main')
+          // Verlegt-Layer entfernen falls vorher gesetzt
+          removeRouteLayer(m, 'active-green')
+          removeRouteLayer(m, 'original-dashed')
+        }
+
+        // Stats kommen immer von der aktiven Route (das ist die echte Tagesroute)
+        if (aktivRoute && aktivRoute.coords.length > 1) {
+          const stats = { distanzKm: aktivRoute.distanzKm, dauerMin: aktivRoute.dauerMin }
           setRouteStats(stats)
           onRouteStatsChange?.({ ...stats, stops: aktivStops.length })
         } else {
-          upsertRouteLayer(m, [
-            [svOrigin.lng, svOrigin.lat],
-            ...aktivStops.map<[number, number]>((s) => [s.lng, s.lat]),
-          ])
           setRouteStats(null)
           onRouteStatsChange?.(null)
         }
+
         // fitBounds berücksichtigt ALLE Stops (auch verlegte) damit graue
         // Pins nicht aus dem Viewport rutschen.
         const bounds = new mapboxgl.LngLatBounds()
-        if (route && route.coords.length > 1) {
-          for (const c of route.coords) bounds.extend(c)
+        if (aktivRoute && aktivRoute.coords.length > 1) {
+          for (const c of aktivRoute.coords) bounds.extend(c)
         } else {
           bounds.extend([svOrigin.lng, svOrigin.lat])
           aktivStops.forEach((s) => bounds.extend([s.lng, s.lat]))
