@@ -165,11 +165,20 @@ export default function TagesrouteSidebar({
             .join(' ')
           const link = googleMapsLink(t, svOrigin)
 
+          // 2026-05-06: Verlegte Termine werden visuell durchgestrichen +
+          // gedimmt. Route ignoriert sie zusätzlich (HeuteClient filtert
+          // sie aus den Map-Stops raus).
+          const istVerlegt = t.status === 'verlegt' || t.status === 'verlegung_pending'
+          const verlegtTextClass = istVerlegt ? 'line-through opacity-60' : ''
           return (
             <li
               key={t.id}
               className={`transition-colors ${
-                isActive ? 'bg-claimondo-ondo/5' : 'bg-white hover:bg-[#f8f9fb]'
+                isActive
+                  ? 'bg-claimondo-ondo/5'
+                  : istVerlegt
+                  ? 'bg-claimondo-border/10 hover:bg-claimondo-border/20'
+                  : 'bg-white hover:bg-[#f8f9fb]'
               }`}
             >
               <button
@@ -220,14 +229,14 @@ export default function TagesrouteSidebar({
                 <div className="flex-1 min-w-0">
                   {/* Zeile 1: Zeit + Status + Pflicht-Indikator */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-claimondo-navy flex items-center gap-1">
+                    <span className={`text-sm font-semibold text-claimondo-navy flex items-center gap-1 ${verlegtTextClass}`}>
                       <ClockIcon className="w-3 h-3 text-claimondo-ondo" />
                       {formatUhrzeit(t.start_zeit)}
                       {t.end_zeit && (
                         <span className="text-claimondo-ondo">– {formatUhrzeit(t.end_zeit)}</span>
                       )}
                     </span>
-                    <JetztPill startIso={t.start_zeit} endIso={t.end_zeit} />
+                    {!istVerlegt && <JetztPill startIso={t.start_zeit} endIso={t.end_zeit} />}
                     <StatusBadge colorCls={badge.cls}>{badge.label}</StatusBadge>
                     {pflicht && pflicht.offen > 0 && (
                       <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full border border-amber-200">
@@ -244,16 +253,16 @@ export default function TagesrouteSidebar({
                   </div>
 
                   {/* Zeile 2: Kunde / Fahrzeug */}
-                  <p className="text-sm text-claimondo-navy mt-1 truncate">
+                  <p className={`text-sm text-claimondo-navy mt-1 truncate ${verlegtTextClass}`}>
                     {t.kennzeichen && <span className="font-mono mr-2">{t.kennzeichen}</span>}
                     {t.fahrzeug ?? t.kunde_name}
                   </p>
                   {t.kennzeichen && t.fahrzeug && (
-                    <p className="text-xs text-claimondo-ondo truncate">{t.kunde_name}</p>
+                    <p className={`text-xs text-claimondo-ondo truncate ${verlegtTextClass}`}>{t.kunde_name}</p>
                   )}
 
                   {/* Zeile 3: Adresse */}
-                  <p className="text-xs text-claimondo-ondo mt-1 flex items-start gap-1">
+                  <p className={`text-xs text-claimondo-ondo mt-1 flex items-start gap-1 ${verlegtTextClass}`}>
                     <MapPinIcon className="w-3 h-3 mt-0.5 shrink-0" />
                     <span className="truncate">{adresse || '—'}</span>
                   </p>

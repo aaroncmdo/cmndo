@@ -92,15 +92,22 @@ export function upsertRouteLayer(
     },
   })
 
-  // Hauptlinie — kräftiges Navy
+  // Hauptlinie — kräftiges Navy, gestrichelt (2026-05-06: dashed-Style
+  // signalisiert dass die Route bei Verlegungen neu berechnet wird —
+  // visuell leichter als solide Linie, weniger „starr").
+  // line-dasharray nimmt zwei Floats: [dash-length, gap-length] in
+  // line-width-Multiplikatoren. [3, 2] = 3 LineWidths Strich, 2
+  // LineWidths Lücke. line-cap MUSS 'butt' sein damit Dashes nicht
+  // ineinander gerundet werden.
   map.addLayer({
     id: ids.lineLayerId,
     type: 'line',
     source: ids.sourceId,
-    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    layout: { 'line-join': 'round', 'line-cap': 'butt' },
     paint: {
       'line-color': '#0D1B3E',
       'line-width': 5,
+      'line-dasharray': [3, 2],
     },
   })
 }
