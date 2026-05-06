@@ -406,7 +406,10 @@ export default function ClaimStepper({
           </p>
         </div>
       )}
-      <div className="flex items-center w-full overflow-x-auto -mx-1 px-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+      {/* Portal-Review K2: Auf Mobile + Tablet (<lg) vertikaler Stepper,
+          ab lg horizontal mit Scroll. Vertikal-Layout: jede Phase als eigene
+          Zeile mit verbindender Linie zwischen Icon-Reihen. */}
+      <div className="flex flex-col lg:flex-row lg:items-center w-full lg:overflow-x-auto -mx-1 px-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
         {MAIN_PHASES.map((p, i) => {
           // Optimistisch: Kanzlei-Step (= Begutachtung-Slot) gilt als
           // erledigt sobald die Vollmacht signiert ODER der Selbst-Pfad
@@ -534,7 +537,10 @@ export default function ClaimStepper({
                   : isDone
                     ? 'bg-emerald-300'
                     : 'bg-claimondo-border'
-                return <div className={`flex-1 h-px mx-2 sm:mx-4 transition-colors duration-300 ${lineCls}`} />
+                // Vertikal (<lg): 24px hohe, 2px breite Linie unter dem
+                // Icon, indented damit sie unter dem Avatar-Kreis sitzt.
+                // Horizontal (lg+): flex-1 1px-Linie zwischen den Steps.
+                return <div className={`w-0.5 h-6 ml-[18px] my-0.5 lg:flex-1 lg:h-px lg:w-auto lg:ml-0 lg:my-0 lg:mx-2 sm:lg:mx-4 transition-colors duration-300 ${lineCls}`} />
               })()}
             </React.Fragment>
           )
