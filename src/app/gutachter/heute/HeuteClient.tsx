@@ -97,14 +97,14 @@ export default function HeuteClient({
   // Map-Höhe je nach Viewport. Auf Desktop: Cockpit-Mode (volle Restfläche).
   const mapHeight: number | string = isLargeScreen ? COCKPIT_HEIGHT_DESKTOP : MAP_HEIGHT_MOBILE
 
-  // Sidebar-Höhe auf Desktop = identisch zur Map-Höhe damit beide
-  // Spalten exakt am unteren Rand abschließen.
-  const sidebarStyle = isLargeScreen ? { height: COCKPIT_HEIGHT_DESKTOP } : undefined
-
   return (
-    <div className="lg:flex lg:flex-row lg:gap-4 space-y-4 lg:space-y-0">
-      {/* Map-Spalte — Mobile: oben full-width. Desktop: links flex-1. */}
-      <div className="lg:flex-1 lg:min-w-0">
+    // 2026-05-06: Map = Full-Bleed Background. Cards floating absolute
+    // oben-rechts auf Desktop. Mobile fällt auf Stack zurück.
+    // Negative Margins kompensieren main-padding damit Map den
+    // kompletten Shell-Wrapper-Innenbereich ausfüllt.
+    <div className="relative -m-2 sm:-m-3 lg:-m-4" style={isLargeScreen ? { height: COCKPIT_HEIGHT_DESKTOP } : undefined}>
+      {/* Map-Layer — full-width auf Desktop, voller Hintergrund */}
+      <div className="lg:absolute lg:inset-0">
         <TagesrouteMap
           svOrigin={origin}
           stops={stops}
@@ -115,11 +115,10 @@ export default function HeuteClient({
         />
       </div>
 
-      {/* Termine-Spalte — Mobile: Stack unten. Desktop: rechts 420px,
-          eigene Scroll-Region. 2026-05-06: alle Cards glassy. */}
+      {/* Termine-Overlay — Mobile: gestackt unter Map (mt-4).
+          Desktop (lg+): floating absolute top-right über der Map. */}
       <div
-        className="lg:w-[420px] lg:shrink-0 lg:overflow-y-auto space-y-4"
-        style={sidebarStyle}
+        className="space-y-4 mt-4 lg:mt-0 lg:absolute lg:top-4 lg:right-4 lg:bottom-4 lg:w-[420px] lg:overflow-y-auto lg:z-10"
       >
         {/* Tagesvorbereitung-Header */}
         <div className="glass-light rounded-xl px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy shadow-ios-md">
