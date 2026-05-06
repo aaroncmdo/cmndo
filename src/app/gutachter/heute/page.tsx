@@ -28,6 +28,8 @@ export type HeuteTerminFull = {
   kunde_telefon: string | null
   // 2026-05-06: Profilbild für Termin-Card-Polish
   kunde_avatar_url: string | null
+  // 2026-05-06: Stop-Wetter für Termin-Card (Open-Weather-Map)
+  stop_weather: { temp: number; emoji: string; description: string } | null
   // Fall-Infos (evtl. leer bei pre_flowlink=true)
   fall_nummer: string
   kennzeichen: string | null
@@ -162,6 +164,39 @@ export default async function HeutePage() {
     }
   }
 
+  // 2026-05-06: Wetter pro besichtigungsort. Parallel-Fetch über alle
+  // Termine mit gültigen Koordinaten. Cache lebt im Lib-Modul (5 min TTL),
+  // doppelte Coords kollidieren auf den Cache-Key.
+  const { getWeatherSnapshot, weatherEmoji } = await import('@/lib/weather/get-weather')
+  const weatherEntries = await Promise.all(
+    (termine ?? []).map(async (t) => {
+      const fall = t.fall_id ? fallMap.get(t.fall_id as string) : null
+      const lead = t.lead_id ? leadMap.get(t.lead_id as string) : null
+      const lat =
+        (fall?.besichtigungsort_lat as number | null) ??
+        (lead?.besichtigungsort_lat as number | null) ??
+        null
+      const lng =
+        (fall?.besichtigungsort_lng as number | null) ??
+        (lead?.besichtigungsort_lng as number | null) ??
+        null
+      if (lat == null || lng == null) return [t.id as string, null] as const
+      const snap = await getWeatherSnapshot(Number(lat), Number(lng))
+      if (!snap) return [t.id as string, null] as const
+      return [
+        t.id as string,
+        {
+          temp: snap.temp,
+          emoji: weatherEmoji(snap.weather_id),
+          description: snap.description,
+        },
+      ] as const
+    }),
+  )
+  const weatherMap = new Map<string, { temp: number; emoji: string; description: string } | null>(
+    weatherEntries,
+  )
+
   // Aufträge pro Fall (CMM-32f) — für Auftrag-Typ-Anzeige
   const auftragMap = new Map<string, { typ: string; status: string }>()
   if (fallIds.length) {
@@ -240,6 +275,7 @@ export default async function HeutePage() {
       kunde_avatar_url: lead?.kunde_id
         ? avatarMap.get(lead.kunde_id as string) ?? null
         : null,
+      stop_weather: weatherMap.get(t.id as string) ?? null,
       fall_nummer:
         (fall?.fall_nummer as string) ??
         (preFlowlink ? 'Provisorisch' : ((t.fall_id as string) ?? '').slice(0, 8)),

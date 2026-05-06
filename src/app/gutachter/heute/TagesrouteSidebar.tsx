@@ -261,11 +261,22 @@ export default function TagesrouteSidebar({
                     <p className={`text-xs text-claimondo-ondo truncate ${verlegtTextClass}`}>{t.kunde_name}</p>
                   )}
 
-                  {/* Zeile 3: Adresse */}
-                  <p className={`text-xs text-claimondo-ondo mt-1 flex items-start gap-1 ${verlegtTextClass}`}>
-                    <MapPinIcon className="w-3 h-3 mt-0.5 shrink-0" />
-                    <span className="truncate">{adresse || '—'}</span>
-                  </p>
+                  {/* Zeile 3: Adresse + Wetter */}
+                  <div className="flex items-center justify-between gap-2 mt-1">
+                    <p className={`text-xs text-claimondo-ondo flex items-start gap-1 min-w-0 flex-1 ${verlegtTextClass}`}>
+                      <MapPinIcon className="w-3 h-3 mt-0.5 shrink-0" />
+                      <span className="truncate">{adresse || '—'}</span>
+                    </p>
+                    {t.stop_weather && !istVerlegt && (
+                      <span
+                        className="inline-flex items-center gap-0.5 text-[11px] text-claimondo-ondo shrink-0"
+                        title={t.stop_weather.description}
+                      >
+                        <span>{t.stop_weather.emoji}</span>
+                        <span className="font-medium tabular-nums">{t.stop_weather.temp}°</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <span className="text-claimondo-ondo/60 mt-0.5">
