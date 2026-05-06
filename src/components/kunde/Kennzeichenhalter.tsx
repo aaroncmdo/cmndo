@@ -149,12 +149,18 @@ export default function Kennzeichenhalter({
 
 // ─── Subcomponents ────────────────────────────────────────────────────────
 
+// Math.cos/sin koennen zwischen Node (SSR) und Browser leicht unterschiedliche
+// Float-Precision liefern (V8-Internals), was bei der Hydration als
+// Mismatch-Warning erscheint. round4 normalisiert auf 4 Nachkommastellen
+// — visuell ohnehin unsichtbar, aber stabil.
+const round4 = (n: number): number => Math.round(n * 10000) / 10000
+
 function Star({ cx, cy, r, fill }: { cx: number; cy: number; r: number; fill: string }) {
   const points: string[] = []
   for (let i = 0; i < 10; i++) {
     const angle = (i * 36 - 90) * (Math.PI / 180)
     const radius = i % 2 === 0 ? r : r * 0.42
-    points.push(`${cx + Math.cos(angle) * radius},${cy + Math.sin(angle) * radius}`)
+    points.push(`${round4(cx + Math.cos(angle) * radius)},${round4(cy + Math.sin(angle) * radius)}`)
   }
   return <polygon points={points.join(' ')} fill={fill} />
 }
