@@ -47,6 +47,20 @@ function formatBerlinTime(input: Date | string): string {
   }).format(d)
 }
 
+// 2026-05-06: Time-Match — externalBusy-Event auf internen Claimondo-
+// Termin mappen damit der „Gebucht"-Pill klickbar zum Auftrag wird.
+// Toleranz 2 Min (Google FreeBusy gibt teils Sekunden-Drift zurück).
+const TIME_MATCH_TOLERANCE_MS = 2 * 60 * 1000
+function findMatchingFallId(
+  externalStart: string,
+  candidates: Array<{ fallId: string; startMs: number }> | undefined,
+): string | null {
+  if (!candidates || candidates.length === 0) return null
+  const externalMs = new Date(externalStart).getTime()
+  const hit = candidates.find((c) => Math.abs(c.startMs - externalMs) < TIME_MATCH_TOLERANCE_MS)
+  return hit?.fallId ?? null
+}
+
 export default function SVKalenderClient({
   faelle,
   leadMap,
@@ -56,6 +70,7 @@ export default function SVKalenderClient({
   termine,
   externalBusy,
   verlegteSlots,
+  claimondoTermineByStart,
 }: {
   faelle: Fall[]
   leadMap: Record<string, string>
@@ -69,6 +84,9 @@ export default function SVKalenderClient({
   // AAR-864: verlegt-Slots — gedimmter „Privater Termin"-Block, blockt
   // weiter den Slot bis der Kunde entscheidet
   verlegteSlots?: { id: string; start: string; end: string }[]
+  // 2026-05-06: Time-Match damit externalBusy-Pills klickbar zum Auftrag
+  // werden wenn sie zeitlich zu einem internen gutachter_termine matchen.
+  claimondoTermineByStart?: Array<{ fallId: string; startMs: number }>
 }) {
   const router = useRouter()
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -245,16 +263,38 @@ export default function SVKalenderClient({
                       .map((b, idx) => {
                         const bs = new Date(b.start)
                         const be = new Date(b.end)
-                        return (
-                          <div
-                            key={`busy-${idx}`}
-                            className="px-2 py-1 rounded-lg text-[10px] leading-tight bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border"
-                            title="Externer Termin — blockiert"
-                          >
+                        const fallId = findMatchingFallId(b.start, claimondoTermineByStart)
+                        const baseClass =
+                          'px-2 py-1 rounded-lg text-[10px] leading-tight bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border'
+                        const inner = (
+                          <>
                             <div className="font-medium">
                               {formatBerlinTime(bs)}–{formatBerlinTime(be)}
                             </div>
-                            <div className="truncate">Gebucht</div>
+                            <div className="truncate">
+                              {fallId ? 'Auftrag · öffnen' : 'Gebucht'}
+                            </div>
+                          </>
+                        )
+                        if (fallId) {
+                          return (
+                            <Link
+                              key={`busy-${idx}`}
+                              href={`/gutachter/fall/${fallId}`}
+                              className={`${baseClass} block hover:bg-claimondo-ondo/10 hover:border-claimondo-ondo transition-colors`}
+                              title="Externer Termin — zum Claimondo-Auftrag"
+                            >
+                              {inner}
+                            </Link>
+                          )
+                        }
+                        return (
+                          <div
+                            key={`busy-${idx}`}
+                            className={baseClass}
+                            title="Externer Termin — blockiert"
+                          >
+                            {inner}
                           </div>
                         )
                       })}
