@@ -30,7 +30,6 @@ export interface HeuteClientProps {
 }
 
 const MAP_HEIGHT_MOBILE = 540
-const COCKPIT_HEIGHT_DESKTOP = 'calc(100vh - 130px)'
 
 export default function HeuteClient({
   termine,
@@ -94,15 +93,17 @@ export default function HeuteClient({
 
   const disabledReason = aktiveTermine.length === 0 ? 'Heute keine offenen Termine' : null
 
-  // Map-Höhe je nach Viewport. Auf Desktop: Cockpit-Mode (volle Restfläche).
-  const mapHeight: number | string = isLargeScreen ? COCKPIT_HEIGHT_DESKTOP : MAP_HEIGHT_MOBILE
+  // Map-Höhe je nach Viewport. Auf Desktop: 100% des fixed-Containers
+  // (top-3 bottom-3 → calc(100vh - 24px) effektiv, aber via 100% einfacher).
+  // Mobile: feste Pixel-Höhe.
+  const mapHeight: number | string = isLargeScreen ? '100%' : MAP_HEIGHT_MOBILE
 
   return (
-    // 2026-05-06: Map = Full-Bleed Background. Cards floating absolute
-    // oben-rechts auf Desktop. Mobile fällt auf Stack zurück.
-    // Negative Margins kompensieren main-padding damit Map den
-    // kompletten Shell-Wrapper-Innenbereich ausfüllt.
-    <div className="relative -m-2 sm:-m-3 lg:-m-4" style={isLargeScreen ? { height: COCKPIT_HEIGHT_DESKTOP } : undefined}>
+    // 2026-05-06: Auf Desktop (lg+) komplett aus dem Shell-Wrapping
+    // ausbrechen via position:fixed — Map füllt den ganzen Content-
+    // Bereich (Sidebar 256px + 12px Gap links, ansonsten bündig zum
+    // navy-Outer). Mobile bleibt im normalen Flow als Stack.
+    <div className="relative lg:fixed lg:top-3 lg:right-3 lg:bottom-3 lg:left-[268px]">
       {/* Map-Layer — full-width auf Desktop, voller Hintergrund */}
       <div className="lg:absolute lg:inset-0">
         <TagesrouteMap
