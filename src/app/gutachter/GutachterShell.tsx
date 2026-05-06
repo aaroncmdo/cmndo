@@ -529,7 +529,12 @@ export default function GutachterShell({
                 onRequest={geoState.requestPermission}
               />
             </div>
-            <div className="flex-1 min-h-0">{children}</div>
+            {/* relative damit Pages die ein absolutes Full-Bleed-Layout
+                brauchen (Heute-Map, künftig auch /route) sich per
+                `absolute inset-0` exakt in den verbleibenden Platz
+                einklinken können. min-h-0 + flex-1 ist der Standard-Trick
+                damit ein Flex-Child schrumpfen darf statt zu overflow'n. */}
+            <div className="flex-1 min-h-0 relative">{children}</div>
           </main>
         </div>
       </div>
