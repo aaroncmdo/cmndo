@@ -8,7 +8,11 @@ export const dynamic = 'force-dynamic'
  * KFZ-148 Block F: SV Payment Reminder Cron (täglich 09:00).
  * Vercel Cron Schedule: 0 9 * * *
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const db = createAdminClient()
 
   // Alle SVs mit offener Anzahlung
