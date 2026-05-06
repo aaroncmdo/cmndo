@@ -26,6 +26,8 @@ export type HeuteTerminFull = {
   // Kunden-Infos
   kunde_name: string
   kunde_telefon: string | null
+  // 2026-05-06: Profilbild für Termin-Card-Polish
+  kunde_avatar_url: string | null
   // Fall-Infos (evtl. leer bei pre_flowlink=true)
   fall_nummer: string
   kennzeichen: string | null
@@ -134,10 +136,29 @@ export default async function HeutePage() {
   if (leadIds.length) {
     const { data: leads } = await supabase
       .from('leads')
-      .select('id, vorname, nachname, telefon, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort')
+      .select('id, vorname, nachname, telefon, kunde_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort')
       .in('id', leadIds)
     for (const l of (leads ?? []) as unknown as Record<string, unknown>[]) {
       leadMap.set(l.id as string, l)
+    }
+  }
+
+  // 2026-05-06: Kunden-Avatare laden (lead.kunde_id → profiles.avatar_url)
+  const kundeIds = Array.from(
+    new Set(
+      [...leadMap.values()]
+        .map((l) => l.kunde_id as string | null)
+        .filter((x): x is string => !!x),
+    ),
+  )
+  const avatarMap = new Map<string, string | null>()
+  if (kundeIds.length) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, avatar_url')
+      .in('id', kundeIds)
+    for (const p of (profiles ?? []) as Array<{ id: string; avatar_url: string | null }>) {
+      avatarMap.set(p.id, p.avatar_url ?? null)
     }
   }
 
@@ -216,6 +237,9 @@ export default async function HeutePage() {
         ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
         : '—',
       kunde_telefon: (lead?.telefon as string | null) ?? null,
+      kunde_avatar_url: lead?.kunde_id
+        ? avatarMap.get(lead.kunde_id as string) ?? null
+        : null,
       fall_nummer:
         (fall?.fall_nummer as string) ??
         (preFlowlink ? 'Provisorisch' : ((t.fall_id as string) ?? '').slice(0, 8)),

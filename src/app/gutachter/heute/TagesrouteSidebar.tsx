@@ -116,16 +116,42 @@ export default function TagesrouteSidebar({
                 }}
                 className="w-full text-left px-4 py-3 flex items-start gap-3"
               >
-                {/* Stop-Nummer */}
-                <span
-                  className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 ${
-                    isActive
-                      ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                      : 'bg-white text-claimondo-navy border-claimondo-border'
-                  }`}
-                >
-                  {idx + 1}
-                </span>
+                {/* 2026-05-06: Avatar mit eingebackener Stop-Nummer.
+                    Wenn Kunde ein Profilbild hat, zeigen — sonst Initialen-
+                    Fallback aus dem Namen. Stop-Nummer als Badge unten-rechts. */}
+                <div className="relative shrink-0">
+                  {t.kunde_avatar_url ? (
+                    <img
+                      src={t.kunde_avatar_url}
+                      alt={t.kunde_name}
+                      className={`w-11 h-11 rounded-full object-cover border-2 ${
+                        isActive ? 'border-claimondo-ondo' : 'border-claimondo-border'
+                      }`}
+                    />
+                  ) : (
+                    <div
+                      className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold border-2 bg-claimondo-ondo/10 text-claimondo-navy ${
+                        isActive ? 'border-claimondo-ondo' : 'border-claimondo-border'
+                      }`}
+                    >
+                      {(t.kunde_name || '?')
+                        .split(' ')
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((n) => n[0]?.toUpperCase())
+                        .join('') || '?'}
+                    </div>
+                  )}
+                  <span
+                    className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-white ${
+                      isActive
+                        ? 'bg-claimondo-ondo text-white'
+                        : 'bg-claimondo-navy text-white'
+                    }`}
+                  >
+                    {idx + 1}
+                  </span>
+                </div>
 
                 <div className="flex-1 min-w-0">
                   {/* Zeile 1: Zeit + Status + Pflicht-Indikator */}
