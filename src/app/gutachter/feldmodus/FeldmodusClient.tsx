@@ -237,11 +237,11 @@ export default function FeldmodusClient({
     )
 
   return (
-    // CMM-32-mapbox: Feldmodus läuft im normalen GutachterShell-Wrapper.
-    // -m-* kompensiert main-padding damit die Karte oben/unten/rechts bündig
-    // zum Wrapper-Außenrand abschließt; nur die Sidebar-Spalte links nutzt
-    // das main-padding selbst.
-    <div className="-m-2 sm:-m-3 lg:-m-4 flex flex-col md:flex-row min-h-full md:h-full">
+    // 2026-05-06: Feldmodus ist Full-Bleed-Overlay (FeldmodusLayout = fixed
+    // inset-0 z-[1200]). Keine negativen Margins nötig — Wrapper ist schon
+    // 100vw × 100vh ohne Padding. Layout: Karte oben/rechts, Stop-Liste
+    // unten/links, beides bündig zum Viewport-Rand.
+    <div className="flex flex-col md:flex-row h-full w-full">
       <OfflineStatusBanner />
 
       {/* Sidebar-Spalte — links auf Desktop, unter Map auf Mobile. */}
