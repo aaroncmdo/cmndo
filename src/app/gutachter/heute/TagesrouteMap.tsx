@@ -1,9 +1,14 @@
 'use client'
 
-// SV-Tagesroute-Karte: Mapbox mit Multi-Stop-Route durch alle Termine.
-// Zentrale Komponente — keine Einbettung mehr in seitliche Sidebar.
-// Stops sind nach Termin-Zeit sortiert, nummeriert (1,2,3,…) und mit echter
-// Directions-Route verbunden (nicht Luftlinie).
+// 2026-05-06: Kompletter Rewrite nach 6 fehlgeschlagenen Layout-Versuchen.
+// Pragmatischer Ansatz statt Layout-Acrobatics:
+//   1. Container kriegt EXPLIZITE Pixel-Höhe via `height` Prop
+//   2. Mapbox-Container füllt Container exakt
+//   3. Resize wird nach Init + bei jeder Höhen-Prop-Änderung erzwungen
+//
+// Kein `h-full`, kein `absolute inset-0`, kein flex-stretch-Magic.
+// Eltern-Component (HeuteClient) entscheidet die Höhe und gibt sie als
+// Number rein — wir verbauen sie 1:1.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -32,21 +37,21 @@ export type TagesrouteMapProps = {
   /** ID des selektierten Stops — wird visuell hervorgehoben */
   activeStopId?: string | null
   onStopClick?: (stopId: string) => void
+  /**
+   * Explizite Pixel-Höhe für den Map-Container. Pflicht — keine Default-
+   * Vererbung mehr, weil h-full-Chains sich als unzuverlässig erwiesen
+   * haben. HeuteClient misst und gibt rein.
+   */
+  height: number | string
 }
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
-/**
- * Holt eine echte Mapbox-Directions-Route durch alle Waypoints.
- * Returns: GeoJSON-LineString-Koordinaten + Gesamtdistanz/Dauer.
- * fail-open: bei Fehler null.
- */
 async function fetchMultiStopRoute(
   origin: { lat: number; lng: number },
   stops: TagesrouteStop[],
 ): Promise<{ coords: Array<[number, number]>; distanzKm: number; dauerMin: number } | null> {
   if (!MAPBOX_TOKEN || stops.length === 0) return null
-  // Mapbox Directions erlaubt bis zu 25 waypoints
   const allPoints: Array<[number, number]> = [
     [origin.lng, origin.lat],
     ...stops.map<[number, number]>((s) => [s.lng, s.lat]),
@@ -76,6 +81,7 @@ export default function TagesrouteMap({
   stops,
   activeStopId,
   onStopClick,
+  height,
 }: TagesrouteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
@@ -84,10 +90,11 @@ export default function TagesrouteMap({
   const [tokenMissing, setTokenMissing] = useState(false)
   const [routeStats, setRouteStats] = useState<{ distanzKm: number; dauerMin: number } | null>(null)
 
-  // Memoize Stops mit gültigen Koordinaten für stabile Effekt-Deps
   const validStops = useMemo(() => stops.filter((s) => s.lat != null && s.lng != null), [stops])
 
-  // Map-Init einmalig
+  // Map-Init einmalig — Container hat in dieser Component-Strategie schon
+  // beim Mount eine konkrete Höhe (per inline-style), also keine 0×0-
+  // Initialisierung mehr.
   useEffect(() => {
     if (!containerRef.current) return
     if (!ensureMapboxInitialized()) {
@@ -103,25 +110,21 @@ export default function TagesrouteMap({
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: MAPBOX_STYLE_STANDARD, // 3D Buildings + moderne Topographie out of the box
+      style: MAPBOX_STYLE_STANDARD,
       center: fallbackCenter,
       zoom: 11,
-      pitch: 45, // leicht 3D
+      pitch: 45,
       bearing: 0,
       attributionControl: false,
     })
 
-    // Mapbox Standard-Config: uhrzeitabhängiger Light-Preset + 3D-Modelle.
-    // dawn (5-7h) / day (7-18h) / dusk (18-21h) / night (21-5h)
     const applyLightPreset = () => {
       try {
         map.setConfigProperty('basemap', 'lightPreset', getMapboxLightPreset())
         map.setConfigProperty('basemap', 'show3dObjects', true)
-      } catch { /* fail silent — fallback auf Default */ }
+      } catch { /* noop */ }
     }
     map.on('style.load', applyLightPreset)
-    // Alle 5 Minuten re-applyn — falls die App offen bleibt während sich
-    // die Tageszeit ändert (Übergang dawn→day, dusk→night, …).
     const presetTick = setInterval(applyLightPreset, 5 * 60_000)
 
     map.addControl(
@@ -131,9 +134,9 @@ export default function TagesrouteMap({
 
     mapRef.current = map
 
-    // ResizeObserver: Mapbox rendert sich winzig wenn der Container beim
-    // Mount 0×0 ist (typisch bei flex-Layouts). map.resize() bei jeder
-    // Container-Größenänderung triggert ein neues Canvas-Sizing.
+    // Resize-Strategie: Window-Resize + ResizeObserver am Container.
+    // Im neuen Setup hat der Container von Anfang an die korrekte Höhe,
+    // sodass die Initial-Map-Init nicht in einem 0×0-State landet.
     const ro = new ResizeObserver(() => {
       try { map.resize() } catch { /* noop */ }
     })
@@ -143,26 +146,8 @@ export default function TagesrouteMap({
     }
     window.addEventListener('resize', onWindowResize)
 
-    // 2026-05-06: Belt-and-Suspenders gegen den Initial-Render-Bug —
-    // ResizeObserver feuert NICHT zuverlässig wenn der Container schon
-    // beim Mount eine endgültige Größe hat (kein „resize" stattfindet).
-    // Heute-Page Symptom: Canvas bleibt bei ~80-150px stehen obwohl
-    // Container bei 800px+ ist. Mehrfach-Resize über RAF + setTimeout
-    // erzwingt Canvas-Sync auf die tatsächliche Container-Größe nach
-    // Layout-Settling.
-    const forceResize = () => {
-      try { map.resize() } catch { /* noop */ }
-    }
-    requestAnimationFrame(forceResize)
-    const t1 = setTimeout(forceResize, 100)
-    const t2 = setTimeout(forceResize, 500)
-    const t3 = setTimeout(forceResize, 1500)
-
     return () => {
       clearInterval(presetTick)
-      clearTimeout(t1)
-      clearTimeout(t2)
-      clearTimeout(t3)
       ro.disconnect()
       window.removeEventListener('resize', onWindowResize)
       svMarkerRef.current?.remove()
@@ -175,7 +160,14 @@ export default function TagesrouteMap({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // SV-Marker setzen + aktualisieren — Auto-Skin (Top-Down PKW)
+  // Wenn die `height`-Prop sich ändert, Mapbox synchronisieren
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    try { map.resize() } catch { /* noop */ }
+  }, [height])
+
+  // SV-Marker
   useEffect(() => {
     const map = mapRef.current
     if (!map || !svOrigin) return
@@ -190,19 +182,15 @@ export default function TagesrouteMap({
     else map.once('load', place)
   }, [svOrigin])
 
-  // Stop-Marker setzen (mit Nummer) + Klick-Handler
+  // Stop-Marker mit Nummer
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
-
     const place = () => {
-      // alte Marker entfernen
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current.clear()
-
       validStops.forEach((stop, idx) => {
         const m = addKundeMarker(map, [stop.lng, stop.lat], { initials: String(idx + 1) })
-        // Klick auf Marker-Element via DOM
         const el = m.getElement()
         el.style.cursor = 'pointer'
         el.addEventListener('click', () => onStopClick?.(stop.id))
@@ -232,15 +220,12 @@ export default function TagesrouteMap({
           upsertRouteLayer(m, route.coords)
           setRouteStats({ distanzKm: route.distanzKm, dauerMin: route.dauerMin })
         } else {
-          // Fallback: Luftlinien-Polyline
           upsertRouteLayer(m, [
             [svOrigin.lng, svOrigin.lat],
             ...validStops.map<[number, number]>((s) => [s.lng, s.lat]),
           ])
           setRouteStats(null)
         }
-        // fitBounds auf die ganze Route-Geometry — nicht nur Stops/Origin,
-        // damit gewundene Fahrten (Autobahn-Schleifen) auch sichtbar sind.
         const bounds = new mapboxgl.LngLatBounds()
         if (route && route.coords.length > 1) {
           for (const c of route.coords) bounds.extend(c)
@@ -249,22 +234,20 @@ export default function TagesrouteMap({
           validStops.forEach((s) => bounds.extend([s.lng, s.lat]))
         }
         m.fitBounds(bounds, {
-          padding: { top: 80, right: 420, bottom: 80, left: 80 },
+          padding: { top: 60, right: 60, bottom: 60, left: 60 },
           duration: 800,
           maxZoom: 14,
-          pitch: 45, // 3D-Tilt beim Fit beibehalten
+          pitch: 45,
         })
       }
       if (mapRef.current.isStyleLoaded()) draw()
       else mapRef.current.once('load', draw)
     })
 
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [svOrigin, validStops])
 
-  // Active-Stop highlighten via DOM-Klasse
+  // Active-Stop highlighten
   useEffect(() => {
     stopMarkersRef.current.forEach((m, id) => {
       const el = m.getElement()
@@ -281,7 +264,11 @@ export default function TagesrouteMap({
   }, [activeStopId])
 
   return (
-    <div className="relative w-full h-full rounded-xl overflow-hidden border border-claimondo-border bg-[#f8f9fb]">
+    // Outer hat EXPLIZITE Höhe via inline-style. Keine Vererbung mehr.
+    <div
+      className="relative w-full rounded-xl overflow-hidden border border-claimondo-border bg-[#f8f9fb]"
+      style={{ height: typeof height === 'number' ? `${height}px` : height }}
+    >
       <div ref={containerRef} className="absolute inset-0" />
       {tokenMissing && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/95 text-center px-6 z-10">
