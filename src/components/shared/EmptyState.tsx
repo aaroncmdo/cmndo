@@ -1,7 +1,13 @@
+'use client'
+
 // AAR-414 / AAR-769 Phase 3: Zentrale Empty-State-Primitive. Vollständig
 // auf Primitives migriert (Card, Stack, Icon, Text, Button) — kein Tailwind
 // mehr im Render. Action mit `href` wird per <a>-Wrapper außerhalb des
 // Buttons unterstützt, weil <Button>-Primitive keinen Link-Modus hat.
+//
+// Muss 'use client' sein weil <Button> (auch 'use client') einen onPress-
+// Handler-Function erwartet — Server-Components duerfen keine Functions
+// als Props an Client-Components durchreichen (Next.js App-Router-Regel).
 
 import type { LucideIcon } from 'lucide-react'
 import { Button, Card, Icon, Stack, Text } from '@/components/primitives'
