@@ -223,8 +223,8 @@ export default function ProfilClient({
             {/* Fields */}
             <div className="space-y-0">
               {/* E-Mail read-only mit Hinweis */}
-              <div className="flex gap-2 py-2.5 border-b border-claimondo-border/50">
-                <span className="text-claimondo-ondo text-sm w-36 shrink-0">E-Mail</span>
+              <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 border-b border-claimondo-border/50">
+                <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0">E-Mail</span>
                 <div className="flex-1">
                   <span className="text-claimondo-navy text-sm">{email}</span>
                   <p className="text-claimondo-ondo/70 text-[10px] mt-0.5 flex items-center gap-1">
@@ -252,8 +252,8 @@ export default function ProfilClient({
                   <ControlledRow label="Vorname" value={form.vorname} onChange={v => updateField('vorname', v)} />
                   <ControlledRow label="Nachname" value={form.nachname} onChange={v => updateField('nachname', v)} />
                   <ControlledRow label="Telefon" type="tel" value={form.telefon} onChange={v => updateField('telefon', v)} />
-                  <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
-                    <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">Anschrift</span>
+                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2 border-b border-claimondo-border/50">
+                    <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0 sm:pt-2">Anschrift</span>
                     <div className="flex-1 space-y-2">
                       {mapsReady ? (
                         <GooglePlaceAutocomplete
@@ -287,8 +287,8 @@ export default function ProfilClient({
                     onChange={v => updateField('anzeigename', v)}
                     placeholder="z.B. Max M. — Fallback: Vor- + Nachname"
                   />
-                  <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
-                    <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">Profiltext</span>
+                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2 border-b border-claimondo-border/50">
+                    <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0 sm:pt-2">Profiltext</span>
                     <textarea
                       value={form.profilbeschreibung}
                       onChange={e => updateField('profilbeschreibung', e.target.value)}
@@ -791,27 +791,64 @@ function SpezSection({
 
 function FieldRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-2 py-2.5 border-b border-claimondo-border/50 last:border-0">
-      <span className="text-claimondo-ondo text-sm w-36 shrink-0">{label}</span>
+    <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 border-b border-claimondo-border/50 last:border-0">
+      <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0">{label}</span>
       <span className="text-claimondo-navy text-sm">{value}</span>
     </div>
   )
 }
 
+// 2026-05-06 SV7 (Form-Audit): drei Verbesserungen pro Form-Row:
+//   1) Mobile-Stack: flex-col auf <sm, flex-row ab sm — Label nimmt nicht
+//      mehr 144px vom 390px-Mobile-Viewport, Input bekommt full-width.
+//   2) Implicit-Label: <label> wrapt Input — keine htmlFor/id-Plumbing,
+//      Klick aufs Label fokussiert das Feld.
+//   3) Auto-inferred autoComplete + inputMode aus type-Prop:
+//      type=tel   → inputMode=tel,    autoComplete=tel
+//      type=email → inputMode=email,  autoComplete=email
+//      type=number→ inputMode=decimal
+//      Mobile-Tastatur springt damit auf die richtige Variante (Ziffern-
+//      Pad bei Telefon, @-Tastatur bei Email).
+
+function inferInputMode(type: string): 'text' | 'tel' | 'email' | 'numeric' | 'decimal' | undefined {
+  if (type === 'tel') return 'tel'
+  if (type === 'email') return 'email'
+  if (type === 'number') return 'decimal'
+  return undefined
+}
+
+function inferAutoComplete(type: string, label: string): string | undefined {
+  if (type === 'tel') return 'tel'
+  if (type === 'email') return 'email'
+  const l = label.toLowerCase()
+  if (l.startsWith('vorname')) return 'given-name'
+  if (l.startsWith('nachname')) return 'family-name'
+  if (l.startsWith('firmenname')) return 'organization'
+  return undefined
+}
+
+const ROW_WRAPPER_CLS =
+  'flex flex-col sm:flex-row gap-1 sm:gap-2 py-2 border-b border-claimondo-border/50'
+const ROW_LABEL_CLS = 'text-claimondo-ondo text-sm sm:w-36 sm:shrink-0 sm:pt-2'
+const ROW_INPUT_CLS =
+  'flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]'
+
 function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
   label: string; name: string; defaultValue: string; type?: string; placeholder?: string
 }) {
   return (
-    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
-      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
+    <label className={ROW_WRAPPER_CLS}>
+      <span className={ROW_LABEL_CLS}>{label}</span>
       <input
         type={type}
         name={name}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+        autoComplete={inferAutoComplete(type, label)}
+        inputMode={inferInputMode(type)}
+        className={ROW_INPUT_CLS}
       />
-    </div>
+    </label>
   )
 }
 
@@ -822,16 +859,18 @@ function ControlledRow({ label, value, onChange, type = 'text', placeholder }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string
 }) {
   return (
-    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
-      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
+    <label className={ROW_WRAPPER_CLS}>
+      <span className={ROW_LABEL_CLS}>{label}</span>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+        autoComplete={inferAutoComplete(type, label)}
+        inputMode={inferInputMode(type)}
+        className={ROW_INPUT_CLS}
       />
-    </div>
+    </label>
   )
 }
 
@@ -842,17 +881,17 @@ function SelectRow({ label, value, onChange, options }: {
   options: ReadonlyArray<{ value: string; label: string }>
 }) {
   return (
-    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
-      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
+    <label className={ROW_WRAPPER_CLS}>
+      <span className={ROW_LABEL_CLS}>{label}</span>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+        className={ROW_INPUT_CLS}
       >
         {options.map(o => (
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
-    </div>
+    </label>
   )
 }
