@@ -1,14 +1,15 @@
 'use client'
 
-// 2026-05-06: Kompletter Rewrite nach 6 fehlgeschlagenen Layout-Versuchen.
-// Pragmatischer Ansatz statt Layout-Acrobatics:
-//   1. Container kriegt EXPLIZITE Pixel-Höhe via `height` Prop
-//   2. Mapbox-Container füllt Container exakt
-//   3. Resize wird nach Init + bei jeder Höhen-Prop-Änderung erzwungen
+// 2026-05-06 (kompletter Rewrite): Wrapper-Bug fix.
 //
-// Kein `h-full`, kein `absolute inset-0`, kein flex-stretch-Magic.
-// Eltern-Component (HeuteClient) entscheidet die Höhe und gibt sie als
-// Number rein — wir verbauen sie 1:1.
+// VORHER: outer div (relative, w-full, height-style) + inner div
+// (absolute inset-0) als Mapbox-Container. Mapbox-Init las den Inner-
+// Container aus, aber der war zwischen Mount und Style-Application
+// inkonsistent → Canvas blieb klein.
+//
+// JETZT: containerRef direkt auf die EINZIGE Wrapper-Div. Inline-style
+// height. Keine Verschachtelung mehr. Mapbox attached seine Canvas
+// direkt in diese Div, deren Größe von Anfang an deterministisch ist.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -34,14 +35,9 @@ export type TagesrouteStop = {
 export type TagesrouteMapProps = {
   svOrigin: { lat: number; lng: number } | null
   stops: TagesrouteStop[]
-  /** ID des selektierten Stops — wird visuell hervorgehoben */
   activeStopId?: string | null
   onStopClick?: (stopId: string) => void
-  /**
-   * Explizite Pixel-Höhe für den Map-Container. Pflicht — keine Default-
-   * Vererbung mehr, weil h-full-Chains sich als unzuverlässig erwiesen
-   * haben. HeuteClient misst und gibt rein.
-   */
+  /** Pflicht — Pixel-Höhe in Number oder CSS-String */
   height: number | string
 }
 
@@ -83,6 +79,7 @@ export default function TagesrouteMap({
   onStopClick,
   height,
 }: TagesrouteMapProps) {
+  // EINE Ref. Mapbox attached sein Canvas direkt in diesem Element.
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
   const svMarkerRef = useRef<Marker | null>(null)
@@ -92,11 +89,9 @@ export default function TagesrouteMap({
 
   const validStops = useMemo(() => stops.filter((s) => s.lat != null && s.lng != null), [stops])
 
-  // Map-Init einmalig — Container hat in dieser Component-Strategie schon
-  // beim Mount eine konkrete Höhe (per inline-style), also keine 0×0-
-  // Initialisierung mehr.
   useEffect(() => {
-    if (!containerRef.current) return
+    const el = containerRef.current
+    if (!el) return
     if (!ensureMapboxInitialized()) {
       setTokenMissing(true)
       return
@@ -109,7 +104,7 @@ export default function TagesrouteMap({
     })()
 
     const map = new mapboxgl.Map({
-      container: containerRef.current,
+      container: el, // direkt das wrapper-Element
       style: MAPBOX_STYLE_STANDARD,
       center: fallbackCenter,
       zoom: 11,
@@ -134,13 +129,10 @@ export default function TagesrouteMap({
 
     mapRef.current = map
 
-    // Resize-Strategie: Window-Resize + ResizeObserver am Container.
-    // Im neuen Setup hat der Container von Anfang an die korrekte Höhe,
-    // sodass die Initial-Map-Init nicht in einem 0×0-State landet.
     const ro = new ResizeObserver(() => {
       try { map.resize() } catch { /* noop */ }
     })
-    ro.observe(containerRef.current)
+    ro.observe(el)
     const onWindowResize = () => {
       try { map.resize() } catch { /* noop */ }
     }
@@ -157,14 +149,13 @@ export default function TagesrouteMap({
       map.remove()
       mapRef.current = null
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Wenn die `height`-Prop sich ändert, Mapbox synchronisieren
+  // Resize wenn height-Prop wechselt
   useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
-    try { map.resize() } catch { /* noop */ }
+    const m = mapRef.current
+    if (m) try { m.resize() } catch { /* noop */ }
   }, [height])
 
   // SV-Marker
@@ -182,7 +173,7 @@ export default function TagesrouteMap({
     else map.once('load', place)
   }, [svOrigin])
 
-  // Stop-Marker mit Nummer
+  // Stop-Marker
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -201,7 +192,7 @@ export default function TagesrouteMap({
     else map.once('load', place)
   }, [validStops, onStopClick])
 
-  // Route-Polyline + fitBounds
+  // Route
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -247,7 +238,7 @@ export default function TagesrouteMap({
     return () => { cancelled = true }
   }, [svOrigin, validStops])
 
-  // Active-Stop highlighten
+  // Active-Stop Highlight
   useEffect(() => {
     stopMarkersRef.current.forEach((m, id) => {
       const el = m.getElement()
@@ -263,23 +254,32 @@ export default function TagesrouteMap({
     })
   }, [activeStopId])
 
-  return (
-    // Outer hat EXPLIZITE Höhe via inline-style. Keine Vererbung mehr.
-    <div
-      className="relative w-full rounded-xl overflow-hidden border border-claimondo-border bg-[#f8f9fb]"
-      style={{ height: typeof height === 'number' ? `${height}px` : height }}
-    >
-      <div ref={containerRef} className="absolute inset-0" />
-      {tokenMissing && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/95 text-center px-6 z-10">
-          <div>
-            <p className="text-sm font-semibold text-claimondo-navy mb-2">Mapbox-Token fehlt</p>
-            <p className="text-xs text-claimondo-ondo">NEXT_PUBLIC_MAPBOX_TOKEN setzen.</p>
-          </div>
+  if (tokenMissing) {
+    return (
+      <div
+        className="flex items-center justify-center bg-white border border-claimondo-border rounded-xl"
+        style={{ height: typeof height === 'number' ? `${height}px` : height }}
+      >
+        <div className="text-center px-6">
+          <p className="text-sm font-semibold text-claimondo-navy mb-2">Mapbox-Token fehlt</p>
+          <p className="text-xs text-claimondo-ondo">NEXT_PUBLIC_MAPBOX_TOKEN setzen.</p>
         </div>
-      )}
+      </div>
+    )
+  }
+
+  // EINE einzige Div. containerRef direkt drauf, Mapbox attached Canvas
+  // hier rein. Kein outer/inner. Inline-style height ist die einzige
+  // Höhen-Quelle — deterministisch, kein Chain.
+  return (
+    <div className="relative">
+      <div
+        ref={containerRef}
+        className="rounded-xl overflow-hidden border border-claimondo-border bg-[#f8f9fb] w-full"
+        style={{ height: typeof height === 'number' ? `${height}px` : height }}
+      />
       {routeStats && (
-        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm border border-claimondo-border rounded-xl px-3 py-2 shadow-sm flex items-center gap-3 text-xs">
+        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm border border-claimondo-border rounded-xl px-3 py-2 shadow-sm flex items-center gap-3 text-xs z-10">
           <NavigationIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
           <span className="font-semibold text-claimondo-navy">{routeStats.distanzKm.toFixed(1)} km</span>
           <span className="text-claimondo-ondo">·</span>
