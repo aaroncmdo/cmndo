@@ -66,10 +66,12 @@ export default function ChatInboxLayout({
       ? initialThreadId
       : threads[0]?.id ?? null,
   )
-  // 2026-05-06 SV6: Mobile-Master/Detail. Auf Mobile (< md) wird entweder
-  // Liste ODER Detail angezeigt — nicht beides nebeneinander (war auf 390px
-  // unbenutzbar: Sidebar 320px ließ nur 70px für den Chat). Tap auf Thread
-  // → Detail-View; Back-Button → Liste. Auf Desktop bleibt's Side-by-Side.
+  // 2026-05-06 SV6: Mobile-Master/Detail. Auf Mobile + Tablet (< lg) wird
+  // entweder Liste ODER Detail angezeigt — nicht beides nebeneinander (war
+  // auf 390px unbenutzbar: Sidebar 320px ließ nur 70px für den Chat). Tap
+  // auf Thread → Detail-View; Back-Button → Liste. Auf Desktop bleibt's
+  // Side-by-Side. Breakpoint lg: konsistent mit GutachterShell + Kunde-
+  // Layout (Tablet bekommt Mobile-Behandlung).
   const [mobileView, setMobileView] = useState<'list' | 'detail'>(
     initialThreadId ? 'detail' : 'list',
   )
@@ -88,7 +90,7 @@ export default function ChatInboxLayout({
       <aside
         className={`${
           mobileView === 'list' ? 'flex' : 'hidden'
-        } md:flex w-full md:w-80 border-r border-claimondo-border flex-col bg-white shrink-0`}
+        } lg:flex w-full lg:w-80 border-r border-claimondo-border flex-col bg-white shrink-0`}
       >
         <div className="px-4 py-3 border-b border-claimondo-border sticky top-0 bg-white z-10">
           <h2 className="text-lg font-semibold text-claimondo-navy">{title}</h2>
@@ -163,12 +165,12 @@ export default function ChatInboxLayout({
       <main
         className={`${
           mobileView === 'detail' ? 'flex' : 'hidden'
-        } md:flex flex-1 min-w-0 min-h-0 overflow-hidden bg-[#f8f9fb] flex-col`}
+        } lg:flex flex-1 min-w-0 min-h-0 overflow-hidden bg-[#f8f9fb] flex-col`}
       >
         {activeId ? (
           <>
             {/* Mobile-Header mit Back-Button — Desktop versteckt */}
-            <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-claimondo-border bg-white shrink-0">
+            <div className="lg:hidden flex items-center gap-2 px-3 py-2 border-b border-claimondo-border bg-white shrink-0">
               <button
                 type="button"
                 onClick={() => setMobileView('list')}
