@@ -12,6 +12,7 @@ import { PhoneIcon, MessageSquareIcon, VideoIcon, XIcon } from 'lucide-react'
 import BeratungBuchenSheet from '@/components/kunde/BeratungBuchenSheet'
 import KundeKbChat from './KundeKbChat'
 import { useActiveContactStore } from './useActiveContactStore'
+import { useKundeUnreadByKanal } from './useKundeUnreadByKanal'
 
 type Props = {
   vorname: string | null
@@ -64,7 +65,11 @@ export default function KundenbetreuerCard({
   const active = useActiveContactStore((s) => s.active)
   const setActive = useActiveContactStore((s) => s.setActive)
   const chatOpen = active === 'kb'
-  const setChatOpen = (open: boolean) => setActive(open ? 'kb' : null)
+  const { count: unreadKb, reset: resetKbUnread } = useKundeUnreadByKanal(currentUserId, 'chat_kb_kunde')
+  const setChatOpen = (open: boolean) => {
+    if (open) resetKbUnread()
+    setActive(open ? 'kb' : null)
+  }
   const [videoOpen, setVideoOpen] = useState(false)
   const [bookingKanal, setBookingKanal] = useState<'video' | 'telefon'>('video')
   const cardRef = useRef<HTMLDivElement>(null)
@@ -129,14 +134,24 @@ export default function KundenbetreuerCard({
           Ihr Betreuer
         </p>
         <div className="flex items-center gap-2.5">
-          <div
-            className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white shrink-0"
-            style={{ backgroundColor: accentBg }}
-          >
-            {avatarUrl ? (
-              <Image src={avatarUrl} alt={name} width={36} height={36} className="w-full h-full object-cover" unoptimized />
-            ) : (
-              initials
+          <div className="relative shrink-0">
+            <div
+              className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white"
+              style={{ backgroundColor: accentBg }}
+            >
+              {avatarUrl ? (
+                <Image src={avatarUrl} alt={name} width={36} height={36} className="w-full h-full object-cover" unoptimized />
+              ) : (
+                initials
+              )}
+            </div>
+            {unreadKb > 0 && (
+              <span
+                className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none ring-2 ring-[#0D1B3E]"
+                aria-label={`${unreadKb} ungelesene Nachricht${unreadKb === 1 ? '' : 'en'}`}
+              >
+                {unreadKb > 99 ? '99+' : unreadKb}
+              </span>
             )}
           </div>
           <div className="flex-1 min-w-0">
