@@ -3,7 +3,7 @@
 // Mobile-Drawer: zeigt alle Sidebar-Inhalte (KB-Card, SV-Card, LexDrive,
 // Profil, Support, Logout) hinter einem Hamburger-Icon im Mobile-Header.
 // Auf Desktop wird die Sidebar links direkt gerendert — der Drawer ist
-// reine Mobile-Lösung und hidden md:hidden.
+// reine Mobile-Lösung und hidden lg:hidden.
 
 'use client'
 
@@ -48,14 +48,14 @@ export default function KundeMobileDrawer({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="md:hidden text-[#7BA3CC] hover:text-white p-1.5"
+        className="lg:hidden text-[#7BA3CC] hover:text-white p-1.5"
         aria-label="Menü öffnen"
       >
         <MenuIcon style={{ width: 20, height: 20 }} />
       </button>
 
       {open && (
-        <div className="md:hidden fixed inset-0 z-[60]">
+        <div className="lg:hidden fixed inset-0 z-[60]">
           {/* Backdrop */}
           <button
             type="button"
