@@ -72,11 +72,14 @@ export default function HeuteClient({
   const disabledReason = aktiveTermine.length === 0 ? 'Heute keine offenen Termine' : null
 
   return (
-    // Outer-Wrapper: kompensiert das main-padding (p-2 sm:p-3 lg:p-4) per
-    // negativem Margin — die Karte schließt damit oben/unten/rechts bündig
-    // zum Wrapper-Außenrand ab. Links setzen wir das padding für die
-    // Termine-Spalte selbst.
-    <div className="-m-2 sm:-m-3 lg:-m-4 flex flex-col md:flex-row min-h-full md:h-full">
+    // 2026-05-06: Robust-Fix für Map-Höhen-Kollaps. Statt `min-h-full
+    // md:h-full` (das via Percentage-Chain durch flex-1 + min-h-0 + neg.
+    // Margin nicht zuverlässig propagiert) ein `absolute inset-0` gegen
+    // den `relative` children-Wrapper im GutachterShell. Damit hat die
+    // Map deterministisch full-Height der verbleibenden Main-Fläche.
+    // Negative Margins kompensieren weiter das main-padding damit die
+    // Map oben/unten/rechts bündig abschließt.
+    <div className="absolute inset-0 -m-2 sm:-m-3 lg:-m-4 flex flex-col md:flex-row">
       {/* Termine-Spalte — links auf Desktop, unter der Karte auf Mobile.
           Hat eigenes padding damit die Cards normal abgesetzt sind. */}
       <aside className="order-2 md:order-1 md:w-[400px] md:shrink-0 md:flex md:flex-col md:h-full p-2 sm:p-3 lg:p-4 md:overflow-y-auto bg-[#f8f9fb] space-y-3">
