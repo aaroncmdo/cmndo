@@ -375,16 +375,17 @@ export default function AktuellerStopCard({
         </div>
       )}
 
-      {/* Aktionen */}
+      {/* Aktionen — Portal-Review SV1: Primary-CTA min-h-14 (56px Daumen-
+          Reach beim Fahren) statt vorher py-2.5 (~36px). */}
       <div className="flex flex-col gap-2 pt-2">
         {besichtigungLaeuft && sessionStatus !== 'finished' && (
           <button
             type="button"
             onClick={onAbschliessen}
             disabled={pending}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold py-2.5 hover:bg-[var(--brand-primary)] disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-primary)] text-white text-base font-semibold min-h-14 px-4 hover:bg-[var(--brand-primary)] disabled:opacity-50"
           >
-            <CheckCircle2Icon className="w-4 h-4" />
+            <CheckCircle2Icon className="w-5 h-5" />
             {pending ? 'Schließe ab …' : 'Besichtigung abschließen'}
           </button>
         )}
@@ -393,7 +394,7 @@ export default function AktuellerStopCard({
           href={mapsLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 hover:bg-[#f8f9fb]"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium min-h-12 px-4 hover:bg-[#f8f9fb]"
         >
           <NavigationIcon className="w-4 h-4" />
           In Google Maps öffnen

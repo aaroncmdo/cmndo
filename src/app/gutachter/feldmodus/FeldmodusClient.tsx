@@ -66,6 +66,15 @@ export default function FeldmodusClient({
     sessionStatus !== 'finished' && sessionStatus !== 'paused'
   const wakeLockStatus = useWakeLock(wakeLockActive)
 
+  // Portal-Review SV1: Mobile-Bottom-Sheet für die Stop-Liste damit die
+  // Map auf 390-px-Geräten Full-Bleed bleibt statt halb von der Sidebar
+  // geschluckt zu werden. Default expanded damit der SV beim Einstieg in
+  // den Modus seine Stops sieht; Toggle via Chevron oben am Sheet.
+  // SvFallakteView (sessionStatus='arrived') bleibt full-screen — das
+  // ist ein längerer Interaction-Mode, kein Sheet.
+  const [mobileSheetExpanded, setMobileSheetExpanded] = useState(true)
+  const mobileSheetEnabled = sessionStatus !== 'arrived'
+
   // Geofence setzt nur Flag — AktuellerStopCard entscheidet wann Akte öffnet
   const onGeofenceReached = useCallback(() => {
     setSvInGeofence(true)
@@ -249,19 +258,45 @@ export default function FeldmodusClient({
     // inset-0 z-[1200]). Keine negativen Margins nötig — Wrapper ist schon
     // 100vw × 100vh ohne Padding. Layout: Karte oben/rechts, Stop-Liste
     // unten/links, beides bündig zum Viewport-Rand.
-    <div className="flex flex-col md:flex-row h-full w-full">
+    <div className="flex flex-col lg:flex-row h-full w-full">
       <OfflineStatusBanner />
 
-      {/* Sidebar-Spalte — links auf Desktop, unter Map auf Mobile. */}
-      <aside className="order-2 md:order-1 md:w-[400px] md:shrink-0 md:flex md:flex-col md:h-full p-2 sm:p-3 lg:p-4 md:overflow-y-auto bg-[#f8f9fb]">
+      {/* Sidebar-Spalte
+          - Desktop (lg+): linke Spalte 400px, full-height, scrollbar
+          - Mobile/Tablet (<lg): Bottom-Sheet als Overlay über der Karte;
+            wenn sessionStatus='arrived' deckt die SvFallakteView den
+            ganzen Viewport ab (kein Sheet, full-screen Interaction).
+          Toggle-Chevron oben am Sheet schaltet zwischen peek (~96 px,
+          nur Header sichtbar) und expanded (~70 vh). */}
+      <aside
+        className={`bg-[#f8f9fb] lg:order-1 lg:w-[400px] lg:shrink-0 lg:flex lg:flex-col lg:h-full lg:p-4 lg:overflow-y-auto lg:relative lg:inset-auto lg:rounded-none lg:shadow-none ${
+          mobileSheetEnabled
+            ? // Bottom-Sheet im Driving-/Idle-Modus: peek 96px / expanded 72vh
+              `fixed bottom-0 inset-x-0 z-30 px-2 pb-2 pt-1 rounded-t-2xl shadow-ios-lg transition-[max-height] duration-300 ease-out ${
+                mobileSheetExpanded ? 'max-h-[72vh]' : 'max-h-[96px]'
+              }`
+            : // Arrived-Modus: SvFallakteView füllt den ganzen Mobile-Viewport
+              'fixed inset-0 z-40 p-2 sm:p-3'
+        }`}
+      >
+        {/* Mobile-Toggle-Chevron — nur im Driving-Modus auf <lg */}
+        {mobileSheetEnabled && (
+          <button
+            type="button"
+            onClick={() => setMobileSheetExpanded((v) => !v)}
+            aria-label={mobileSheetExpanded ? 'Stops einklappen' : 'Stops aufklappen'}
+            className="lg:hidden flex items-center justify-center w-full py-1 text-claimondo-ondo/70 hover:text-claimondo-navy transition-colors"
+          >
+            <span className="block w-10 h-1 rounded-full bg-claimondo-ondo/30" />
+          </button>
+        )}
         <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden flex flex-col flex-1 min-h-0">
           {sidebarContent}
         </div>
       </aside>
 
-      {/* Karten-Spalte — rechts auf Desktop, oben auf Mobile. Bündig zum
-          Bildschirmrand (kein right-padding) und zum Wrapper oben/unten. */}
-      <div className="order-1 md:order-2 relative flex-1 min-h-[55vh] md:min-h-0 md:h-full">
+      {/* Karten-Spalte — rechts auf Desktop, full-bleed Background auf Mobile */}
+      <div className="order-1 lg:order-2 relative flex-1 h-full lg:min-h-0">
         <FeldmodusMap
           sv={sv}
           stops={stops}
