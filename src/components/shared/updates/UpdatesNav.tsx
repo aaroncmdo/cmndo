@@ -138,10 +138,25 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
     return unreadRelevant.filter(m => m.kategorie === mapping[key as Exclude<TabKey, 'kritisch'>]).length
   }
 
+  // 2026-05-06: Portal-Präfix aus Pathname ableiten — UpdatesNav läuft in
+  // /gutachter, /admin, /dispatch, /kb, /faelle, /makler. Fallback-Routes
+  // müssen zum jeweiligen Portal passen.
+  const portalPrefix = useMemo(() => {
+    const m = pathname?.match(/^\/(gutachter|admin|dispatch|kb|faelle|makler)/)
+    return m?.[1] ? `/${m[1]}` : '/'
+  }, [pathname])
+
   async function jumpTo(m: Mitteilung) {
     if (!m.gelesen) await markAsRead(m.id)
     setOpen(false)
-    if (m.route_url) router.push(m.route_url)
+    // Fallback wenn route_url fehlt: User soll nie auf einen Update klicken
+    // und „im Nirgendwo landen". Bei Nachrichten-Kategorie versuchen wir
+    // den Posteingang des Portals (nur SV hat einen) — sonst Portal-Root.
+    const fallback =
+      m.kategorie === 'nachricht' && portalPrefix === '/gutachter'
+        ? '/gutachter/posteingang'
+        : portalPrefix
+    router.push(m.route_url || fallback)
   }
 
   // Button-Farben
@@ -166,10 +181,13 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
 
   return (
     <div className="relative">
-      {/* AAR-725: Backdrop-blur auf Main-Content wenn Popover offen. */}
+      {/* AAR-725: Backdrop-blur auf Main-Content wenn Popover offen.
+          2026-05-06: bg-black/30 (vorher /10) damit der Popover sich klar
+          vom Hintergrund abhebt — sonst auf Whitelabel-/Dark-Themes zu
+          unleserlich. */}
       {open && (
         <div
-          className="fixed inset-0 z-30 backdrop-blur-sm bg-black/10 pointer-events-none"
+          className="fixed inset-0 z-30 backdrop-blur-sm bg-black/30 pointer-events-none"
           aria-hidden
         />
       )}
@@ -201,9 +219,9 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: -4 }}
             transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-            className="absolute right-0 mt-2 w-[360px] max-w-[92vw] glass-light rounded-ios-lg shadow-ios-lg z-40 overflow-hidden"
+            className="absolute right-0 mt-2 w-[360px] max-w-[92vw] bg-white border border-claimondo-border rounded-ios-lg shadow-ios-lg z-40 overflow-hidden"
           >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/40">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border bg-white">
             <h2 className="text-sm font-semibold text-[#0D1B3E]">Updates</h2>
             <button
               onClick={() => setOpen(false)}
@@ -247,11 +265,14 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
             })}
           </div>
 
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-[400px] overflow-y-auto bg-white">
             {filtered.length === 0 ? (
               <div className="px-6 py-10 text-center">
-                <BellIcon className="w-8 h-8 mx-auto text-claimondo-ondo/50 mb-2" />
-                <p className="text-xs text-claimondo-ondo/70">Keine Einträge in dieser Kategorie</p>
+                <BellIcon className="w-8 h-8 mx-auto text-claimondo-ondo/40 mb-2" />
+                <p className="text-sm font-medium text-claimondo-navy">Alles erledigt</p>
+                <p className="text-xs text-claimondo-ondo/70 mt-1">
+                  Keine offenen Einträge in „{TABS.find((t) => t.key === activeTab)?.label}"
+                </p>
               </div>
             ) : (
               filtered.map(m => (
