@@ -31,7 +31,7 @@ import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 import SVSpotlight from './_components/SVSpotlight'
-import WeatherBanner from '@/components/shared/WeatherBanner'
+// 2026-05-06: WeatherBanner-Import entfernt — pro-Stop-Wetter ersetzt globalen Banner
 import { toInitials } from '@/components/shared/KundeAvatar'
 // CMM-36: Geo-Tracking startet beim App-Öffnen
 import { useGeoPosition } from '@/hooks/useGeoPosition'
@@ -492,22 +492,23 @@ export default function GutachterShell({
           <UpdatesNav variant="dark" />
         </header>
 
-        {/* AAR-864 Polish: beide Wrapper (Wetter + Content) öffnen sich nach
-            rechts (rounded-r-none, kein right-padding) und schließen links
-            bündig zur Sidebar mit gleichem Abstand ab (pl-2 sm:pl-3 lg:pl-4
-            + rounded-l-2xl). Der navy-Hintergrund des Outer-Containers zieht
-            sich rechts durch. */}
-        <div className="pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4">
-          <WeatherBanner
-            standortLat={standortLat ?? null}
-            standortLng={standortLng ?? null}
-            trailingSlot={
-              <>
-                <OutboxBadge />
-                <UpdatesNav variant="dark" />
-              </>
-            }
-          />
+        {/* 2026-05-06: WeatherBanner entfernt — Wetter ist jetzt pro Stop
+            in der Heute-Sidebar sichtbar (Open-Weather-Map pro Termin),
+            global-Wetter am Standort ist obsolet.
+            Stattdessen schmaler TopBar mit OutboxBadge + UpdatesNav,
+            damit Notification-/Outbox-Zugriff weiter sichtbar bleibt. */}
+        <div className="pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 hidden lg:block">
+          <div
+            className="flex items-center justify-end gap-2 px-4 py-2 rounded-l-2xl shadow-ios-md"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 90%, transparent)',
+              color: 'var(--brand-text-on-primary)',
+              ...transitionStyle,
+            }}
+          >
+            <OutboxBadge />
+            <UpdatesNav variant="dark" />
+          </div>
         </div>
 
         <div className="flex-1 overflow-hidden pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4">
