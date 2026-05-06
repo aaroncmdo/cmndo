@@ -141,15 +141,19 @@ export default function AuftragCard(props: AuftragCardProps) {
         </span>
       </div>
 
-      {/* CMM-32: Fahrzeug-Render-Vorschau */}
+      {/* CMM-32: Fahrzeug-Render-Vorschau — kompakter Render im 130px-
+          Format. Auftragskarte braucht keinen 180px-Hero, das hat im
+          Visual-Review zu uebermaessigem Whitespace gefuehrt (besonders
+          im Logo-Fallback wo das Marken-Icon dominanter wirkt als die
+          eigentliche Auftrag-Information). */}
       {props.fall.fahrzeug_hersteller && (
-        <div className="relative z-10 flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/10 py-2 pointer-events-none">
+        <div className="relative z-10 flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/10 py-1 pointer-events-none">
           <FahrzeugRenderImage
             hersteller={props.fall.fahrzeug_hersteller}
             modell={props.fall.fahrzeug_modell ?? null}
             lackfarbe={(props.fall.lackfarbe_code as LackfarbeCode | null) ?? null}
             baujahr={props.fall.fahrzeug_baujahr ?? null}
-            width={180}
+            width={130}
           />
         </div>
       )}
