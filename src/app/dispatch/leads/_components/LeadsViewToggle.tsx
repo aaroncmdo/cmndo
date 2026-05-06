@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon } from 'lucide-react'
 import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
 import PhoneButton from '@/components/shared/PhoneButton'
+import { Chip } from '@/components/ui/Chip'
 
 type Lead = {
   id: string
@@ -38,28 +39,22 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
 
   return (
     <div className="space-y-3">
-      {/* Toggle */}
-      <div className="flex items-center gap-1 bg-[#f8f9fb] rounded-lg p-0.5 w-fit">
-        <button
-          type="button"
+      {/* Toggle — Touch-friendly Segmented-Chips (Portal-Review C3) */}
+      <div className="flex items-center gap-2 w-fit">
+        <Chip
+          variant={view === 'liste' ? 'selected' : 'default'}
           onClick={() => setView('liste')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'
-          }`}
         >
           <ListIcon className="w-3.5 h-3.5" />
           Liste
-        </button>
-        <button
-          type="button"
+        </Chip>
+        <Chip
+          variant={view === 'kanban' ? 'selected' : 'default'}
           onClick={() => setView('kanban')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            view === 'kanban' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'
-          }`}
         >
           <LayoutGridIcon className="w-3.5 h-3.5" />
           Kanban
-        </button>
+        </Chip>
       </div>
 
       {view === 'liste' ? <ListView leads={leads} /> : <KanbanView leads={leads} />}
