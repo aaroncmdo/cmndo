@@ -10,7 +10,7 @@ npx playwright install chromium
 
 # 2. Test-User mit Daten seeden (falls noch nicht passiert)
 #    Erzeugt test-sv@/test-dispatch@/test-kunde@claimondo.de mit Passwort Test1234!
-npx dotenv -e .env.local -- npx tsx src/scripts/seed-test-data.ts
+npx tsx src/scripts/seed-test-data.ts
 ```
 
 ## Screenshots erzeugen
@@ -108,7 +108,7 @@ Pro Portal gibt es ein Markdown-Doc mit:
 
 ## Empfohlener Review-Ablauf
 
-1. **Setup einmal** — `npx playwright install chromium` + `npx dotenv -e .env.local -- npx tsx src/scripts/seed-test-data.ts`
+1. **Setup einmal** — `npx playwright install chromium` + `npx tsx src/scripts/seed-test-data.ts`
 2. **Screenshots erzeugen** — `npm run screenshots`
 3. **Visual-Review starten** — Variante A oder B (siehe oben)
 4. **Code-Review parallel** — `/ultrareview` in eigener Session laufen lassen
@@ -126,7 +126,7 @@ Pro Portal gibt es ein Markdown-Doc mit:
 
 | Symptom | Ursache | Fix |
 |---|---|---|
-| `Login redirected to /login` | Test-User existiert nicht | `npx dotenv -e .env.local -- npx tsx src/scripts/seed-test-data.ts` |
+| `Login redirected to /login` | Test-User existiert nicht | `npx tsx src/scripts/seed-test-data.ts` |
 | Leere Listen-Pages | Keine Test-Fälle in der DB | Seed-Script ausführen, ggf. erweitern |
 | Timeouts auf Realtime-Pages | networkidle wird nicht erreicht | Script wartet 10s, dann Screenshot ohnehin — meist OK |
 | Browser-Launch-Fehler | Chromium nicht installiert | `npx playwright install chromium` |

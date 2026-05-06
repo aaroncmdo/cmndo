@@ -3,16 +3,40 @@
  * Idempotent — kann mehrfach ausgeführt werden.
  *
  * Ausfuehren: npx tsx src/scripts/seed-test-data.ts
+ *
+ * Laedt .env.local automatisch wenn die Supabase-Env-Vars nicht
+ * bereits gesetzt sind (kein dotenv-cli noetig).
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  try {
+    const envFile = readFileSync(join(process.cwd(), '.env.local'), 'utf8')
+    for (const line of envFile.split(/\r?\n/)) {
+      const m = line.match(/^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$/)
+      if (!m) continue
+      const key = m[1]
+      let value = m[2]
+      // Umschliessende Quotes entfernen
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1)
+      }
+      if (!process.env[key]) process.env[key] = value
+    }
+  } catch (err) {
+    console.error('Konnte .env.local nicht lesen:', err instanceof Error ? err.message : err)
+  }
+}
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error('NEXT_PUBLIC_SUPABASE_URL und SUPABASE_SERVICE_ROLE_KEY muessen gesetzt sein.')
-  console.error('Tipp: npx dotenv -e .env.local -- npx tsx src/scripts/seed-test-data.ts')
+  console.error('.env.local mit den beiden Werten in den Project-Root legen (oder via Shell exportieren).')
   process.exit(1)
 }
 
