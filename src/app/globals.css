@@ -516,11 +516,7 @@ aside.kunde-sidebar[data-chat-open] .kunde-sidebar-rest {
 /* Tailwind-4-Workaround: in seltenen Faellen generiert der JIT-Compiler eine
    kaputte .w-[var()]-Klasse mit leerem var() — z.B. wenn ein vorheriger
    Source-Scan ein w-[var(--something)]-Token gesehen hat das spaeter
-   migriert wurde. Override mit safe-default damit der CSS-Parser nicht
-   bricht. Layer: utilities (Tailwind-Utility-Order). */
-@layer utilities {
-  .\31 {
-    width: auto;
-  }
-}
+   migriert wurde (Drawer.web.tsx pre-fix). Override mit safe-default damit
+   der CSS-Parser nicht bricht. width:auto ist neutral und greift nirgends
+   tatsaechlich (es gibt keinen Caller fuer diese Klasse). */
 .w-\[var\(\)\] { width: auto !important; }
