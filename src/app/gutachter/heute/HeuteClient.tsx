@@ -98,24 +98,19 @@ export default function HeuteClient({
   const mapHeight: number | string = isLargeScreen ? '100%' : MAP_HEIGHT_MOBILE
 
   return (
-    // 2026-05-06: Auf Desktop (lg+) komplett aus main raus via fixed —
-    // der weiße main-Wrapper (bg + rounded + shadow + p-4) blockiert
-    // das Layout. Position fixed nimmt nur den navy-Rand als Bezug.
-    //   top/right/bottom 3 = 12px Navy-Rand zum Outer
-    //   left 264 = Sidebar (256px) + 8px Navy-Gap
-    // Mobile: normaler Flow als Stack.
-    <div className="relative lg:fixed lg:top-3 lg:right-3 lg:bottom-3 lg:left-[264px] lg:z-10">
-      {/* Map-Layer — full-width auf Desktop, voller Hintergrund */}
-      <div className="lg:absolute lg:inset-0">
-        <TagesrouteMap
-          svOrigin={origin}
-          stops={stops}
-          activeStopId={activeStopId}
-          onStopClick={setActiveStopId}
-          height={mapHeight}
-          onRouteStatsChange={setRouteStats}
-        />
-      </div>
+    // 2026-05-06: Map = Background. Auf Desktop (lg+) füllt sie den
+    // gesamten Bereich rechts der Sidebar (256px), bündig zu allen
+    // Viewport-Kanten. Cards floaten oben-rechts darüber. Mobile: Stack.
+    <div className="relative lg:fixed lg:top-0 lg:right-0 lg:bottom-0 lg:left-64 lg:z-10">
+      {/* Map als Background — füllt den gesamten Container */}
+      <TagesrouteMap
+        svOrigin={origin}
+        stops={stops}
+        activeStopId={activeStopId}
+        onStopClick={setActiveStopId}
+        height={mapHeight}
+        onRouteStatsChange={setRouteStats}
+      />
 
       {/* Termine-Overlay — Mobile: gestackt unter Map (mt-4).
           Desktop (lg+): floating absolute top-right über der Map. */}

@@ -315,12 +315,13 @@ export default function TagesrouteMap({
 
   // 2026-05-06: Map ohne Wrapper-Border/Bg — nackte Map-Fläche, RouteStats
   // schweben als Glass-Pill oben. containerRef direkt auf das gestylte
-  // Element für deterministisches Sizing.
+  // Element. Outer mit h-full damit 100%-Strings vom parent korrekt
+  // resolven (für Desktop fixed-fill-Setup).
   return (
-    <div className="relative">
+    <div className="relative h-full w-full">
       <div
         ref={containerRef}
-        className="w-full"
+        className="w-full h-full"
         style={{ height: typeof height === 'number' ? `${height}px` : height }}
       />
       {routeStats && (
