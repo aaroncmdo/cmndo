@@ -352,6 +352,17 @@ export async function acceptGegenvorschlag(
 
   if (error) return { success: false, error: error.message }
 
+  // 2026-05-06: SV-Termin in den Google-Kalender des SVs schreiben.
+  // Non-critical — Sync-Fehler darf den Termin-Update nicht brechen.
+  if (termin.fall_id) {
+    try {
+      const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
+      await syncSvTerminToGoogle(terminId, termin.fall_id as string)
+    } catch (err) {
+      console.error('[sv-termin-sync] Dispatch-Gegenvorschlag-Sync:', err)
+    }
+  }
+
   await supabase.from('timeline').insert({
     fall_id: termin.fall_id ?? null,
     lead_id: !termin.fall_id ? termin.lead_id : null,

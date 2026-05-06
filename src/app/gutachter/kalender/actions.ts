@@ -38,17 +38,33 @@ export async function setTermin(fallId: string, termin: string) {
   const primary = aktive[0] ?? null
   const altere = aktive.slice(1)
 
+  let syncTerminId: string | null = null
   if (primary) {
     const { error } = await supabase
       .from('gutachter_termine')
       .update({ start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
       .eq('id', primary.id)
     if (error) throw new Error(error.message)
+    syncTerminId = primary.id as string
   } else {
-    const { error } = await supabase
+    const { data: inserted, error } = await supabase
       .from('gutachter_termine')
       .insert({ fall_id: fallId, sv_id: sv.id, start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
+      .select('id')
+      .single()
     if (error) throw new Error(error.message)
+    syncTerminId = (inserted?.id as string | null) ?? null
+  }
+
+  // 2026-05-06: SV-Termin in Google-Kalender schreiben (Apple-CalDAV-Write
+  // existiert noch nicht — eigene Session). Non-critical try/catch.
+  if (syncTerminId) {
+    try {
+      const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
+      await syncSvTerminToGoogle(syncTerminId, fallId)
+    } catch (err) {
+      console.error('[sv-termin-sync] SV-Selbst-Eintrag-Sync:', err)
+    }
   }
 
   // AAR-704C: ältere aktive Termine cancellen damit nur einer aktiv bleibt
