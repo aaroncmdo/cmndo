@@ -5,7 +5,7 @@
 // Aufgeklappt zeigt die Card: Kunde, Fahrzeug, Schadentyp, Pflichtdokumente,
 // Briefing, Telefon-Button + Route-starten.
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   ClockIcon,
@@ -36,6 +36,53 @@ export type TagesrouteSidebarProps = {
   svOrigin: { lat: number | null; lng: number | null } | null
   activeStopId?: string | null
   onStopClick?: (stopId: string) => void
+}
+
+// 2026-05-06: „Jetzt"-Indikator — zeigt zeitliche Nähe zum Start-Zeit.
+// Aktualisiert sich automatisch alle 30 Sek.
+function useJetztRelative(startIso: string, endIso: string | null): string {
+  const [tick, setTick] = useState(() => Date.now())
+  useEffect(() => {
+    const i = setInterval(() => setTick(Date.now()), 30_000)
+    return () => clearInterval(i)
+  }, [])
+  return useMemo(() => {
+    const startMs = new Date(startIso).getTime()
+    const endMs = endIso ? new Date(endIso).getTime() : startMs + 60 * 60_000
+    const diffStartMin = Math.round((startMs - tick) / 60_000)
+    if (tick >= startMs && tick < endMs) return 'läuft jetzt'
+    if (diffStartMin === 0) return 'jetzt'
+    if (diffStartMin > 0 && diffStartMin < 60) return `in ${diffStartMin} Min`
+    if (diffStartMin >= 60 && diffStartMin < 24 * 60) {
+      const h = Math.floor(diffStartMin / 60)
+      const m = diffStartMin % 60
+      return m === 0 ? `in ${h}h` : `in ${h}h ${m}min`
+    }
+    if (diffStartMin < 0) {
+      const past = Math.abs(diffStartMin)
+      if (past < 60) return `vor ${past} Min`
+      const h = Math.floor(past / 60)
+      return `vor ${h}h`
+    }
+    return ''
+  }, [startIso, endIso, tick])
+}
+
+function JetztPill({ startIso, endIso }: { startIso: string; endIso: string | null }) {
+  const label = useJetztRelative(startIso, endIso)
+  if (!label) return null
+  const isJetzt = label === 'läuft jetzt' || label === 'jetzt'
+  const isPast = label.startsWith('vor ')
+  const cls = isJetzt
+    ? 'bg-emerald-100 text-emerald-800 border-emerald-300 animate-pulse'
+    : isPast
+    ? 'bg-claimondo-border/40 text-claimondo-ondo/70 border-claimondo-border/60'
+    : 'bg-claimondo-ondo/10 text-claimondo-navy border-claimondo-ondo/20'
+  return (
+    <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${cls}`}>
+      {label}
+    </span>
+  )
 }
 
 function badgeForStatus(status: string): { label: string; cls: string } {
@@ -74,15 +121,32 @@ export default function TagesrouteSidebar({
   }, [pflichtStats])
 
   const aktiv = termine.filter((t) => t.status !== 'abgeschlossen' && t.status !== 'abgelehnt')
+  const erledigt = termine.length - aktiv.length
+
+  // Tages-Stats — auf einen Blick: Termine + Pflicht-Dokumente offen
+  const offeneDokuTotal = useMemo(
+    () => pflichtStats.reduce((acc, p) => acc + p.offen, 0),
+    [pflichtStats],
+  )
 
   return (
     <aside className="flex flex-col flex-1 min-h-0">
+      {/* Stats-Header */}
       <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
         <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider">Termine heute</p>
         <div className="flex items-baseline gap-2 mt-0.5">
           <span className="text-2xl font-semibold text-claimondo-navy">{aktiv.length}</span>
-          <span className="text-[11px] text-claimondo-ondo">{termine.length - aktiv.length > 0 && `(${termine.length - aktiv.length} erledigt)`}</span>
+          {erledigt > 0 && (
+            <span className="text-[11px] text-claimondo-ondo">({erledigt} erledigt)</span>
+          )}
         </div>
+        {/* Quick-Stats — Pflicht-Dokumente offen, Anzahl Stops mit Adresse */}
+        {offeneDokuTotal > 0 && (
+          <div className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-full">
+            <AlertTriangleIcon className="w-3 h-3" />
+            <span>{offeneDokuTotal} {offeneDokuTotal === 1 ? 'Pflichtdokument' : 'Pflichtdokumente'} offen</span>
+          </div>
+        )}
       </div>
 
       <ol className="flex-1 overflow-y-auto divide-y divide-claimondo-border">
@@ -163,6 +227,7 @@ export default function TagesrouteSidebar({
                         <span className="text-claimondo-ondo">– {formatUhrzeit(t.end_zeit)}</span>
                       )}
                     </span>
+                    <JetztPill startIso={t.start_zeit} endIso={t.end_zeit} />
                     <StatusBadge colorCls={badge.cls}>{badge.label}</StatusBadge>
                     {pflicht && pflicht.offen > 0 && (
                       <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full border border-amber-200">
