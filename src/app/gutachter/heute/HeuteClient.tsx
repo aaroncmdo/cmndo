@@ -4,7 +4,7 @@
 // keine h-full-Chains, keine -m-* Negative-Margins, keine absolute-
 // Positionierung. Stattdessen einfache vertikale Stapelung:
 //
-//   1. TagesrouteMap (Hero) — full-width, explizite Pixel-Höhe (60vh)
+//   1. TagesrouteMap (Hero) — full-width, explizite Pixel-Höhe (540px)
 //   2. Tagesvorbereitung-Header (kompakter Streifen)
 //   3. TagesrouteSidebar (Liste der Termine, normales Block-Layout)
 //   4. TagesrouteStartCard (CTA-Button am Ende)
@@ -12,7 +12,7 @@
 // Begründung: 6 vorherige Versuche eine side-by-side-Map auf voller
 // Höhe zu rendern sind alle gescheitert (h-full-Chain, absolute inset-0,
 // vh-min-h, JS-Messung, calc-inline, position:fixed). Mit Stapelung
-// gibt's keinen Layout-Chain mehr — Map kriegt 60vh per inline-style,
+// gibt's keinen Layout-Chain mehr — Map kriegt 540px per inline-style,
 // Browser parst das deterministisch, Mapbox-Container füllt korrekt.
 
 import { useEffect, useMemo, useState } from 'react'
@@ -32,8 +32,6 @@ export interface HeuteClientProps {
   hasActiveSession: boolean
 }
 
-// Map-Höhe als Konstante — kann später zu prop/setting werden falls
-// Density-Toggle gewünscht.
 const MAP_HEIGHT_PX = 540
 
 export default function HeuteClient({
@@ -97,7 +95,7 @@ export default function HeuteClient({
         <TagesvorbereitungButton />
       </div>
 
-      {/* 3. Termine-Liste — eigener Card mit normaler Höhe (kein flex-1) */}
+      {/* 3. Termine-Liste */}
       <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
         <TagesrouteSidebar
           termine={termine}
@@ -108,7 +106,7 @@ export default function HeuteClient({
         />
       </div>
 
-      {/* 4. Tagesroute-Start-Card am Ende */}
+      {/* 4. Tagesroute-Start-Card */}
       <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
         <TagesrouteStartCard
           terminIds={terminIds}

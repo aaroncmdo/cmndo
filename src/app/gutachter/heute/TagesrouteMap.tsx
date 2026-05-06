@@ -138,8 +138,26 @@ export default function TagesrouteMap({
     }
     window.addEventListener('resize', onWindowResize)
 
+    // 2026-05-06: Belt-and-Suspenders gegen den Initial-Render-Bug —
+    // ResizeObserver feuert NICHT zuverlässig wenn der Container schon
+    // beim Mount eine endgültige Größe hat (kein „resize" stattfindet).
+    // Heute-Page Symptom: Canvas bleibt bei ~80-150px stehen obwohl
+    // Container bei 800px+ ist. Mehrfach-Resize über RAF + setTimeout
+    // erzwingt Canvas-Sync auf die tatsächliche Container-Größe nach
+    // Layout-Settling.
+    const forceResize = () => {
+      try { map.resize() } catch { /* noop */ }
+    }
+    requestAnimationFrame(forceResize)
+    const t1 = setTimeout(forceResize, 100)
+    const t2 = setTimeout(forceResize, 500)
+    const t3 = setTimeout(forceResize, 1500)
+
     return () => {
       clearInterval(presetTick)
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
       ro.disconnect()
       window.removeEventListener('resize', onWindowResize)
       svMarkerRef.current?.remove()
