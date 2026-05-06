@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { PhoneIcon, MessageSquareIcon, XIcon } from 'lucide-react'
 import KundeKbChat from './KundeKbChat'
 import { useActiveContactStore } from './useActiveContactStore'
+import { useKundeUnreadByKanal } from './useKundeUnreadByKanal'
 
 type Props = {
   vorname: string | null
@@ -58,7 +59,11 @@ export default function GutachterCard({
   const active = useActiveContactStore((s) => s.active)
   const setActive = useActiveContactStore((s) => s.setActive)
   const chatOpen = active === 'sv'
-  const setChatOpen = (open: boolean) => setActive(open ? 'sv' : null)
+  const { count: unreadGruppe, reset: resetGruppeUnread } = useKundeUnreadByKanal(currentUserId, 'gruppenchat')
+  const setChatOpen = (open: boolean) => {
+    if (open) resetGruppeUnread()
+    setActive(open ? 'sv' : null)
+  }
   const cardRef = useRef<HTMLDivElement>(null)
   const [cardRect, setCardRect] = useState<{ top: number; bottom: number; right: number } | null>(null)
 
@@ -116,14 +121,24 @@ export default function GutachterCard({
           Ihr Gutachter
         </p>
         <div className="flex items-center gap-2.5">
-          <div
-            className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white shrink-0"
-            style={{ backgroundColor: accentBg }}
-          >
-            {avatarUrl ? (
-              <Image src={avatarUrl} alt={name} width={36} height={36} className="w-full h-full object-cover" unoptimized />
-            ) : (
-              initials
+          <div className="relative shrink-0">
+            <div
+              className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white"
+              style={{ backgroundColor: accentBg }}
+            >
+              {avatarUrl ? (
+                <Image src={avatarUrl} alt={name} width={36} height={36} className="w-full h-full object-cover" unoptimized />
+              ) : (
+                initials
+              )}
+            </div>
+            {unreadGruppe > 0 && (
+              <span
+                className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none ring-2 ring-[#0D1B3E]"
+                aria-label={`${unreadGruppe} ungelesene Nachricht${unreadGruppe === 1 ? '' : 'en'}`}
+              >
+                {unreadGruppe > 99 ? '99+' : unreadGruppe}
+              </span>
             )}
           </div>
           <div className="flex-1 min-w-0">
