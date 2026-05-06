@@ -1,0 +1,6 @@
+# Screenshots werden lokal von scripts/screenshot-portals.mjs generiert.
+# Nicht committen — Binaries sind groß und reproduzierbar.
+# INDEX.md ist Output-Manifest, ebenfalls gitignored.
+
+*
+!.gitignore

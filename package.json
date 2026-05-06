@@ -13,7 +13,11 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
-    "email:dev": "email dev -p 3001 -d src/lib/email/google/templates"
+    "email:dev": "email dev -p 3001 -d src/lib/email/google/templates",
+    "screenshots": "node scripts/screenshot-portals.mjs",
+    "screenshots:gutachter": "node scripts/screenshot-portals.mjs gutachter",
+    "screenshots:dispatch": "node scripts/screenshot-portals.mjs dispatch",
+    "screenshots:kunde": "node scripts/screenshot-portals.mjs kunde"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
