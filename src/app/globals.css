@@ -513,3 +513,14 @@ aside.kunde-sidebar[data-chat-open] .kunde-sidebar-rest {
   animation: wx-sun-pulse 4s ease-in-out infinite;
   pointer-events: none;
 }
+/* Tailwind-4-Workaround: in seltenen Faellen generiert der JIT-Compiler eine
+   kaputte .w-[var()]-Klasse mit leerem var() — z.B. wenn ein vorheriger
+   Source-Scan ein w-[var(--something)]-Token gesehen hat das spaeter
+   migriert wurde. Override mit safe-default damit der CSS-Parser nicht
+   bricht. Layer: utilities (Tailwind-Utility-Order). */
+@layer utilities {
+  .\31 {
+    width: auto;
+  }
+}
+.w-\[var\(\)\] { width: auto !important; }
