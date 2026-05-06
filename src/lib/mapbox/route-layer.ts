@@ -1,32 +1,26 @@
 'use client'
 
-// Route-Polyline Helpers — zwei separate Layer-Sets:
-//   'main' (default) — solid claimondo-navy. Wird genutzt wenn keine
-//      Verlegung vorliegt (Single-Route-Use-Case).
-//   'active-green' — solid grün. Die NEUE Route nach Verlegung.
-//   'original-dashed' — dashed slate. Die URSPRÜNGLICHE Route durch
-//      alle Stops inkl. verlegte (Vergleichs-Visualisierung).
+// Route-Polyline Helpers — eine Variante pro Use-Case:
+//   'main' (default) — solid claimondo-navy. Default Tagesroute.
+//   'active-green' — solid grün. Reserviert für Live-Modus / Fokus.
 
 import type { Map as MapboxMap } from 'mapbox-gl'
 
-type Variant = 'main' | 'active-green' | 'original-dashed'
+type Variant = 'main' | 'active-green'
 
 const SOURCES: Record<Variant, string> = {
   'main': 'route-main',
   'active-green': 'route-active-green',
-  'original-dashed': 'route-original-dashed',
 }
 
 const LINE_LAYERS: Record<Variant, string> = {
   'main': 'route-main-line',
   'active-green': 'route-active-green-line',
-  'original-dashed': 'route-original-dashed-line',
 }
 
 const CASING_LAYERS: Record<Variant, string> = {
   'main': 'route-main-casing',
   'active-green': 'route-active-green-casing',
-  'original-dashed': 'route-original-dashed-casing',
 }
 
 function toGeoJson(coords: Array<[number, number]>): GeoJSON.Feature {
@@ -58,25 +52,6 @@ export function upsertRouteLayer(
 
   map.addSource(sourceId, { type: 'geojson', data: feature })
 
-  if (variant === 'original-dashed') {
-    // Dashed slate — die Original-Route, dezent als Vergleich
-    map.addLayer({
-      id: lineId,
-      type: 'line',
-      source: sourceId,
-      layout: { 'line-join': 'round', 'line-cap': 'butt' },
-      paint: {
-        'line-color': '#64748B', // slate-500
-        'line-width': 4,
-        'line-opacity': 0.7,
-        'line-dasharray': [3, 2],
-      },
-    })
-    return
-  }
-
-  // 'main' (claimondo-blau) und 'active-green' bekommen White-Casing +
-  // Solid-Linie für maximalen Kontrast.
   const lineColor = variant === 'active-green' ? '#16A34A' : '#0D1B3E' // emerald-600 / claimondo-navy
 
   map.addLayer({

@@ -118,7 +118,7 @@ export default async function HeutePage() {
     const { data: faelle } = await supabase
       .from('faelle')
       .select(
-        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum',
+        'id, fall_nummer, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum',
       )
       .in('id', fallIds)
     const faelleRows = (faelle ?? []) as unknown as Record<string, unknown>[]
@@ -144,7 +144,7 @@ export default async function HeutePage() {
     const admin = createAdminClient()
     const { data: leads } = await admin
       .from('leads')
-      .select('id, vorname, nachname, anrede, telefon, kunde_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort')
+      .select('id, vorname, nachname, anrede, telefon, kunde_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng')
       .in('id', leadIds)
     for (const l of (leads ?? []) as unknown as Record<string, unknown>[]) {
       leadMap.set(l.id as string, l)

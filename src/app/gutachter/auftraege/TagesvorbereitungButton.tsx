@@ -44,14 +44,14 @@ export default function TagesvorbereitungButton() {
         type="date"
         value={tag}
         onChange={(e) => setTag(e.target.value)}
-        className="h-9 px-2 rounded-lg border border-claimondo-border text-xs text-claimondo-navy bg-white"
+        className="h-9 px-2 rounded-lg border border-white/40 text-xs text-claimondo-navy bg-white/55 backdrop-blur-md"
         disabled={pending}
       />
       <button
         type="button"
         onClick={trigger}
         disabled={pending}
-        className={`h-9 inline-flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium border border-claimondo-border bg-white text-claimondo-navy hover:bg-[#f8f9fb] transition-colors ${
+        className={`h-9 inline-flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium border border-white/40 bg-white/55 backdrop-blur-md text-claimondo-navy hover:bg-white/70 transition-colors ${
           pending ? 'opacity-60 pointer-events-none' : ''
         }`}
       >

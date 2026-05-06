@@ -37,6 +37,14 @@ function buildKundeMarkerElement(opts: KundeMarkerOptions): HTMLDivElement {
   const el = document.createElement('div')
   el.className = 'kunde-marker'
   const bg = colorForStatus(opts.status)
+  // Verlegte/abgelehnte/abgeschlossene Stops sind nicht Teil der heutigen
+  // Route — visuell zurückdimmen damit der SV sie auf einen Blick als
+  // „kein Stop heute" liest.
+  const istInaktiv =
+    opts.status === 'verlegt' ||
+    opts.status === 'verlegung_pending' ||
+    opts.status === 'abgelehnt' ||
+    opts.status === 'abgeschlossen'
   el.style.cssText = [
     'width: 24px',
     'height: 24px',
@@ -51,6 +59,7 @@ function buildKundeMarkerElement(opts: KundeMarkerOptions): HTMLDivElement {
     'font-weight: 700',
     'font-size: 10px',
     'pointer-events: none',
+    `opacity: ${istInaktiv ? '0.4' : '1'}`,
   ].join(';')
   el.textContent = (opts.initials ?? 'K').slice(0, 2).toUpperCase()
   return el
