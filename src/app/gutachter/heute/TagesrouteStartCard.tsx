@@ -61,17 +61,14 @@ export default function TagesrouteStartCard({
   const subLabel = subLabelParts.join(' · ')
 
   return (
-    // 2026-05-06: glassy navy statt solid — backdrop-blur sodass Map-Tiles
-    // dahinter durchscheinen.
-    <div
-      className="p-4 text-white backdrop-blur-md"
-      style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary) 70%, transparent)' }}
-    >
-      <div className="flex items-center gap-2 mb-2">
-        <MapIcon className="w-4 h-4 text-[var(--brand-accent)]" />
+    // 2026-05-06: Card-Innen transparent — Wrapper im HeuteClient bringt
+    // den glassy-Look. Hier nur Padding + Text + Button.
+    <div className="p-4">
+      <div className="flex items-center gap-2 mb-2 text-claimondo-navy">
+        <MapIcon className="w-4 h-4" />
         <h3 className="text-sm font-semibold">Tagesroute</h3>
       </div>
-      <p className="text-xs text-white/70 mb-3">{subLabel}</p>
+      <p className="text-xs text-claimondo-ondo mb-3">{subLabel}</p>
       <button
         type="button"
         disabled={disabled}
@@ -79,15 +76,15 @@ export default function TagesrouteStartCard({
         title={disabledReason ?? undefined}
         className={`w-full inline-flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
           disabled
-            ? 'bg-white/10 text-white/40 cursor-not-allowed'
-            : 'bg-[var(--brand-secondary)] hover:bg-[var(--brand-accent)] text-white'
+            ? 'bg-claimondo-border/40 text-claimondo-ondo/50 cursor-not-allowed'
+            : 'bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white shadow-ios-sm'
         }`}
       >
         <PlayCircleIcon className="w-4 h-4" />
         {pending ? 'Starte …' : label}
       </button>
       {error && (
-        <p className="text-[11px] text-red-300 mt-2">Fehler: {error}</p>
+        <p className="text-[11px] text-red-600 mt-2">Fehler: {error}</p>
       )}
     </div>
   )
