@@ -5,6 +5,7 @@
 import { google } from 'googleapis'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { toBerlinWallClock } from './timezone'
 
 type AdminTerminShape = {
   id: string
@@ -111,8 +112,8 @@ export async function syncAdminTerminCalendarEvent(terminId: string): Promise<vo
         requestBody: {
           summary: title,
           description: descLines.join('\n'),
-          start: { dateTime: startDate.toISOString(), timeZone: 'Europe/Berlin' },
-          end: { dateTime: endDate.toISOString(), timeZone: 'Europe/Berlin' },
+          start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: 'Europe/Berlin' },
+          end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: 'Europe/Berlin' },
         },
       })
       await db
@@ -126,8 +127,8 @@ export async function syncAdminTerminCalendarEvent(terminId: string): Promise<vo
         requestBody: {
           summary: title,
           description: descLines.join('\n'),
-          start: { dateTime: startDate.toISOString(), timeZone: 'Europe/Berlin' },
-          end: { dateTime: endDate.toISOString(), timeZone: 'Europe/Berlin' },
+          start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: 'Europe/Berlin' },
+          end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: 'Europe/Berlin' },
           reminders: {
             useDefault: false,
             overrides: [

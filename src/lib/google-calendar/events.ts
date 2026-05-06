@@ -5,6 +5,7 @@
 // auf den neuen Helper gemapt.
 import { google } from 'googleapis'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
+import { toBerlinWallClock } from './timezone'
 
 export interface CreateMeetEventInput {
   /** Wessen Kalender den Event hostet (muss per OAuth verbunden sein). */
@@ -51,8 +52,8 @@ export async function createMeetEvent(
     requestBody: {
       summary: input.title,
       description: input.description,
-      start: { dateTime: startDate.toISOString(), timeZone: 'Europe/Berlin' },
-      end: { dateTime: endDate.toISOString(), timeZone: 'Europe/Berlin' },
+      start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: 'Europe/Berlin' },
+      end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: 'Europe/Berlin' },
       attendees: input.attendees.map((a) => ({
         email: a.email,
         displayName: a.displayName,
@@ -129,8 +130,8 @@ export async function createVideoEvent(input: CreateVideoEventInput): Promise<Cr
     requestBody: {
       summary: `Beratungstermin Fall ${input.fallNummer}`,
       description: input.beschreibung || `Videotermin mit ${input.kundeName} zur Besprechung des Falls ${input.fallNummer}.`,
-      start: { dateTime: startDate.toISOString(), timeZone: 'Europe/Berlin' },
-      end: { dateTime: endDate.toISOString(), timeZone: 'Europe/Berlin' },
+      start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: 'Europe/Berlin' },
+      end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: 'Europe/Berlin' },
       attendees: [
         { email: input.kbEmail, responseStatus: 'accepted' },
         { email: input.kundeEmail, responseStatus: 'needsAction' },

@@ -21,6 +21,7 @@
 import { google } from 'googleapis'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { GOOGLE_CALENDAR_TIMEZONE, toBerlinWallClock } from './timezone'
 
 type GutachterTerminRow = {
   id: string
@@ -44,7 +45,7 @@ type FallContext = {
   kunde_telefon: string | null
 }
 
-const TIMEZONE = 'Europe/Berlin'
+const TIMEZONE = GOOGLE_CALENDAR_TIMEZONE
 
 async function getSvProfileId(svId: string): Promise<string | null> {
   const db = createAdminClient()
@@ -192,8 +193,8 @@ export async function syncSvTerminToGoogle(terminId: string, fallId: string): Pr
     summary,
     description,
     location: adresse || undefined,
-    start: { dateTime: t.start_zeit, timeZone: TIMEZONE },
-    end: { dateTime: t.end_zeit, timeZone: TIMEZONE },
+    start: { dateTime: toBerlinWallClock(t.start_zeit), timeZone: TIMEZONE },
+    end: { dateTime: toBerlinWallClock(t.end_zeit), timeZone: TIMEZONE },
     reminders: {
       useDefault: false,
       overrides: [
