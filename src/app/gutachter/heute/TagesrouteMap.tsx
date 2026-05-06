@@ -231,38 +231,24 @@ export default function TagesrouteMap({
     else map.once('load', place)
   }, [validStops, onStopClick])
 
-  // Route-Rendering — drei Modi:
-  //   keine Verlegung → main (claimondo-blau, solid)
-  //   mit Verlegung → original-dashed (alle Stops, slate dashed) +
-  //                   active-green (nur aktive Stops, grün solid)
+  // Route-Rendering:
+  //   Eine einzige navy Route durch alle aktiven (nicht-verlegten) Stops.
+  //   Verlegte Termine fliegen komplett aus der Route — ihre Pins bleiben
+  //   aber via validStops als graue Marker sichtbar.
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
     if (!svOrigin || aktivStops.length === 0) {
       setRouteStats(null)
       onRouteStatsChange?.(null)
-      // Alle Layer aufräumen wenn keine Stops
       if (map.isStyleLoaded()) {
         removeRouteLayer(map, 'main')
-        removeRouteLayer(map, 'active-green')
-        removeRouteLayer(map, 'original-dashed')
       }
       return
     }
     let cancelled = false
 
-    const hasVerlegung = aktivStops.length < validStops.length
-
-    // Active-Route holen (nur nicht-verlegte Stops). Wenn keine Verlegung:
-    // = main blau. Wenn Verlegung: = active-green.
-    const aktivPromise = fetchMultiStopRoute(svOrigin, aktivStops)
-    // Original-Route holen (alle Stops inkl. verlegte). Nur wenn Verlegung
-    // existiert.
-    const originalPromise = hasVerlegung
-      ? fetchMultiStopRoute(svOrigin, validStops)
-      : Promise.resolve(null)
-
-    Promise.all([aktivPromise, originalPromise]).then(([aktivRoute, originalRoute]) => {
+    fetchMultiStopRoute(svOrigin, aktivStops).then((aktivRoute) => {
       if (cancelled || !mapRef.current) return
       const draw = () => {
         const m = mapRef.current
@@ -276,27 +262,7 @@ export default function TagesrouteMap({
                 ...aktivStops.map<[number, number]>((s) => [s.lng, s.lat]),
               ]
 
-        if (hasVerlegung) {
-          // Original (alle Stops) als dashed
-          const originalCoords =
-            originalRoute?.coords && originalRoute.coords.length > 1
-              ? originalRoute.coords
-              : [
-                  [svOrigin.lng, svOrigin.lat] as [number, number],
-                  ...validStops.map<[number, number]>((s) => [s.lng, s.lat]),
-                ]
-          upsertRouteLayer(m, originalCoords, 'original-dashed')
-          // New (active only) als grün
-          upsertRouteLayer(m, aktivCoords, 'active-green')
-          // Main-Layer (blau) entfernen falls vorher gesetzt
-          removeRouteLayer(m, 'main')
-        } else {
-          // Single-Route in claimondo-blau
-          upsertRouteLayer(m, aktivCoords, 'main')
-          // Verlegt-Layer entfernen falls vorher gesetzt
-          removeRouteLayer(m, 'active-green')
-          removeRouteLayer(m, 'original-dashed')
-        }
+        upsertRouteLayer(m, aktivCoords, 'main')
 
         // Stats kommen immer von der aktiven Route (das ist die echte Tagesroute)
         if (aktivRoute && aktivRoute.coords.length > 1) {
@@ -374,7 +340,7 @@ export default function TagesrouteMap({
         style={{ height: typeof height === 'number' ? `${height}px` : height }}
       />
       {routeStats && (
-        <div className="absolute top-3 left-3 glass-light rounded-xl px-3 py-2 shadow-ios-md flex items-center gap-3 text-xs z-10">
+        <div className="absolute top-3 left-3 bg-white/55 backdrop-blur-md border border-white/40 rounded-xl px-3 py-2 shadow-ios-md flex items-center gap-3 text-xs z-10">
           <NavigationIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
           <span className="font-semibold text-claimondo-navy">{routeStats.distanzKm.toFixed(1)} km</span>
           <span className="text-claimondo-ondo">·</span>
