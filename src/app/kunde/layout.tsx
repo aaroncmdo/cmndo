@@ -335,7 +335,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     <div className="flex min-h-screen bg-[#f8f9fb]" style={themeStyle}>
       {/* Desktop Sidebar — hidden on mobile */}
       <aside
-        className="kunde-sidebar hidden md:flex md:flex-col md:w-64 md:shrink-0 fixed top-0 left-0 h-screen z-40"
+        className="kunde-sidebar hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 fixed top-0 left-0 h-screen z-40"
         style={{ backgroundColor: sidebarBg }}
       >
         <div className="kunde-sidebar-rest px-5 py-5 transition-opacity duration-200">
@@ -404,10 +404,10 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
       {/* Mobile Header — hidden on desktop */}
       <header
-        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-3 shadow-ios-md glass-branded"
+        className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between gap-3 px-5 py-3 shadow-ios-md glass-branded"
         style={{ backgroundColor: sidebarBg }}
       >
-        <Link href="/kunde">
+        <Link href="/kunde" className="flex-shrink-0 min-w-0">
           {branding.useBrand && branding.logoUrl ? (
             <div className="bg-white rounded-md px-2 py-1 flex items-center">
               <Image
@@ -415,18 +415,18 @@ export default async function KundeLayout({ children }: { children: React.ReactN
                 alt={branding.firmenname ?? 'Logo'}
                 width={140}
                 height={32}
-                className="max-h-8 w-auto object-contain"
+                className="max-h-8 w-auto max-w-[140px] object-contain"
                 unoptimized
               />
             </div>
           ) : (
-            <span className="text-xl font-bold tracking-tight">
+            <span className="text-xl font-bold tracking-tight whitespace-nowrap">
               <span className="text-white">Claim</span>
               <span style={{ color: accentBg }}>ondo</span>
             </span>
           )}
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <OutboxBadge />
           <KundeMobileDrawer
             initials={initials}
@@ -438,7 +438,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       </header>
 
       {/* Hauptinhalt — offset by sidebar on desktop, offset by header on mobile */}
-      <main className="flex-1 md:ml-64 pt-14 md:pt-0 pb-20 md:pb-6">
+      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 pb-20 lg:pb-6 overflow-x-hidden">
         {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
         <SprachBanner sprache={kundenSprache} />
         {/* CMM-33: Globaler Pflichtdaten-Banner ist raus — die Detail-Page
@@ -449,7 +449,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
       {/* Mobile Bottom-Nav — hidden on desktop */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-branded shadow-ios-md"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-branded shadow-ios-md"
         style={{
           backgroundColor: sidebarBg,
           paddingTop: 8,

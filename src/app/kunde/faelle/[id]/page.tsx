@@ -636,8 +636,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
-        {/* Smoke-Helper (sichtbar fuer Aaron's Test-Walkthrough) */}
-        <SmokeKanzleiButton fallId={fall.id as string} />
+        {/* Smoke-Helper (Aaron's Test-Walkthrough) — nur in Dev oder
+            wenn explizit aktiviert via Env. Sonst erscheint der Banner
+            in Production-ähnlichen Demos und verzerrt jeden Visual-Review
+            (Design-Handoff-Finding K3). */}
+        {(process.env.NODE_ENV === 'development' ||
+          process.env.NEXT_PUBLIC_ENABLE_SMOKE_TOOLS === 'true') && (
+          <SmokeKanzleiButton fallId={fall.id as string} />
+        )}
 
         {/* CMM-43: Google-Bewertungs-Prompt — nach durchgeführtem SV-Termin,
             einmalig, nur wenn SV eine google_place_id hat. */}
