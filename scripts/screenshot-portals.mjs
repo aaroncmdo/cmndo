@@ -146,7 +146,7 @@ const PORTALS = {
   },
 }
 
-async function login(page, email) {
+async function login(page, email, landingMatch) {
   // Erste Compile in Next 16 Turbopack kann 10-20s dauern — entsprechende Geduld.
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'domcontentloaded', timeout: 60000 })
   // Defensiv: falls nicht der Email-Tab vorausgewaehlt ist, Tab anklicken.
@@ -161,10 +161,23 @@ async function login(page, email) {
   const pwInput = page.locator('input#password, input[name="password"], input[type="password"]').first()
   await pwInput.waitFor({ state: 'visible', timeout: 5000 })
   await pwInput.fill(PASSWORD)
-  await Promise.all([
-    page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {}),
-    page.locator('button[type="submit"], button:has-text("Anmelden"), button:has-text("Login")').first().click(),
-  ])
+  await page.locator('button[type="submit"], button:has-text("Anmelden"), button:has-text("Login")').first().click()
+  // Nach Submit kann der Login zwei Sprünge machen:
+  //   1) Direkt zum Portal-URL (wenn 2FA bereits geskipt)
+  //   2) Über /login/2fa → TwoFaSkipRedirect setzt Cookie + macht harte
+  //      window.location-Navigation (siehe AAR-2fa-loop-fix). Erst danach
+  //      sind wir am Portal-URL. networkidle alleine wuerde vor dem zweiten
+  //      Hop schon feuern — also explizit auf das finale Portal-URL warten.
+  await page.waitForURL(landingMatch, { timeout: 60000 }).catch(async () => {
+    const here = page.url()
+    if (/\/login\/2fa/.test(here)) {
+      // Bridge braucht ein paar hundert ms zum Cookie-Setzen + Navigation
+      await page.waitForURL(landingMatch, { timeout: 30000 }).catch(() => {})
+    }
+  })
+  if (!landingMatch.test(page.url())) {
+    throw new Error(`Login fuer ${email} blieb auf ${page.url()} — vermutlich 2FA-Page oder Fehler.`)
+  }
 }
 
 async function disableAnimations(page) {
@@ -215,7 +228,7 @@ async function processPortal(browser, portalKey, portal) {
   // Dynamische Routes auflösen — separater context fuer login + resolve
   const resolveContext = await browser.newContext({ viewport: VIEWPORTS[0] })
   const resolvePage = await resolveContext.newPage()
-  await login(resolvePage, portal.email)
+  await login(resolvePage, portal.email, portal.landingMatch)
   const dynamicResolved = {}
   for (const [slug, cfg] of Object.entries(portal.dynamic ?? {})) {
     try {
@@ -237,7 +250,7 @@ async function processPortal(browser, portalKey, portal) {
     indexLines.push(`### Viewport: ${viewport.name} (${viewport.width}×${viewport.height})`, '')
     const context = await browser.newContext({ viewport })
     const page = await context.newPage()
-    await login(page, portal.email)
+    await login(page, portal.email, portal.landingMatch)
     await page.close()
 
     for (const [slug, url] of portal.routes) {
