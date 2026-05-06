@@ -32,7 +32,10 @@ export function Drawer({
   // wird ab md+ angewandt (max-w override über Tailwind-Klassen).
   const slideClass =
     side === 'right' ? 'animate-in slide-in-from-right' : 'animate-in slide-in-from-left'
-  const widthClass = mobileFullscreen ? 'w-full md:w-[var(--drawer-w)]' : ''
+  // Tailwind 4-Syntax für CSS-Custom-Properties: `w-(--drawer-w)` — vorherige
+  // `w-[var(--drawer-w)]`-Notation produziert in v4 ein leeres `width: var()`,
+  // was den globals.css-Build zerschossen hat.
+  const widthClass = mobileFullscreen ? 'w-full md:w-(--drawer-w)' : ''
 
   return (
     <div
