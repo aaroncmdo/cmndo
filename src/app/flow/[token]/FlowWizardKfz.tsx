@@ -17,6 +17,7 @@ import {
   XIcon,
 } from 'lucide-react'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import LegalDocPopover from '@/components/legal/LegalDocPopover'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -121,16 +122,26 @@ const SCHADENTYP_LABELS: Record<string, string> = {
 
 // ─── Wizard ──────────────────────────────────────────────────────────────────
 
+type LegalDoc = { slug: string; titel: string; markdown: string }
+type LegalDocsProp = {
+  agb: LegalDoc
+  datenschutz: LegalDoc
+  impressum: LegalDoc
+  nutzungsbedingungen: LegalDoc
+}
+
 export default function FlowWizardKfz({
   token,
   flowLinkId,
   lead,
   gutachter,
+  legalDocs,
 }: {
   token: string
   flowLinkId?: string | null
   lead: LeadData
   gutachter?: GutachterInfo | null
+  legalDocs: LegalDocsProp
 }) {
   const [stepIndex, setStepIndex] = useState(0)
   const [datenschutz, setDatenschutz] = useState(false)
@@ -370,7 +381,9 @@ export default function FlowWizardKfz({
                     />
                     <span className="text-sm text-claimondo-ondo leading-relaxed">
                       Ich habe die{' '}
-                      <a href="/datenschutz" target="_blank" className="text-[#4573A2] underline">Datenschutzerklärung</a>{' '}
+                      <LegalDocPopover titel={legalDocs.datenschutz.titel} markdown={legalDocs.datenschutz.markdown}>
+                        Datenschutzerklärung
+                      </LegalDocPopover>{' '}
                       gelesen und stimme der Verarbeitung meiner Daten zu. <span className="text-red-400">*</span>
                     </span>
                   </label>
@@ -730,7 +743,11 @@ export default function FlowWizardKfz({
                   />
                   <span className="text-sm text-claimondo-ondo leading-relaxed">
                     Ja, ich möchte den kostenlosen Service nutzen. Alle Kosten trägt die gegnerische Versicherung.
-                    Ich stimme den Vertragsbedingungen und der Widerrufsbelehrung zu. <span className="text-red-400">*</span>
+                    Ich stimme den{' '}
+                    <LegalDocPopover titel={legalDocs.agb.titel} markdown={legalDocs.agb.markdown}>
+                      AGB
+                    </LegalDocPopover>{' '}
+                    und der Widerrufsbelehrung zu. <span className="text-red-400">*</span>
                   </span>
                 </label>
 

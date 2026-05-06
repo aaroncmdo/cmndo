@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
+import { getAllLegalDocs } from '@/lib/legal/get-doc'
 // AAR-316 W2: Sprach-Banner für nicht-deutsche Kunden
 import { SprachBanner } from '@/components/i18n/SprachBanner'
 
@@ -239,6 +240,7 @@ export default async function FlowPage({
           // CMM-14: steuert die LexDrive-Visitenkarte am Ende
           service_typ: lead.service_typ ?? null,
         }}
+        legalDocs={getAllLegalDocs()}
       />
     </>
   )
