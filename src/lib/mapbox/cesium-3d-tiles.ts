@@ -19,7 +19,11 @@
 
 import type { Map as MapboxMap } from 'mapbox-gl'
 
-const DEFAULT_ASSET_ID = '2275207' // Cesium OSM Buildings
+// 2026-05-07 (Korrektur nach EEA-Test): Asset 2275207 ist nicht „OSM
+// Buildings" sondern Google Photorealistic 3D Tiles via Cesium-Proxy →
+// EEA-blockiert wie der direkte Google-Pfad. Asset 96188 ist Cesium's
+// eigenes 3D-Tiles-Asset (OSM-basiert, EU-fähig, gratis).
+const DEFAULT_ASSET_ID = '96188' // Cesium OSM Buildings (EU-fähig)
 
 export type Cesium3dTilesHandle = {
   remove: () => void
@@ -87,8 +91,12 @@ export async function attachCesium3dTiles(
     // nutzen die explicite resolution oben für robustere Fehlerbehandlung.
     const { Tiles3DLoader } = loaders3d as unknown as { Tiles3DLoader: unknown }
 
+    // 2026-05-07: interleaved: false → deck.gl rendert in eigenem Canvas
+    // ÜBER der Mapbox-Karte. Mit interleaved: true gab es WebGL-Context-
+    // Conflicts → die Mapbox-Karte rendert dann gar nicht mehr (Aaron-
+    // Smoke MAP1.jpg: leere weiße Karte trotz Cesium-Aktivierung).
     const overlay = new MapboxOverlay({
-      interleaved: true,
+      interleaved: false,
       layers: [
         new Tile3DLayer({
           id: 'cesium-3d-tiles',
