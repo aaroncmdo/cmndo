@@ -20,6 +20,8 @@ import {
   getMapboxLightPreset,
   tryAddSvCar3dModel,
   type SvCar3dHandle,
+  attachHeroPin3d,
+  type HeroPin3dHandle,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
@@ -44,6 +46,7 @@ export default function FeldmodusMap({
   const mapRef = useRef<MapboxMap | null>(null)
   const svMarkerRef = useRef<Marker | null>(null)
   const sv3dHandleRef = useRef<SvCar3dHandle | null>(null)
+  const heroPinRef = useRef<HeroPin3dHandle | null>(null)
   const stopMarkersRef = useRef<Marker[]>([])
   const tokenMissing = useRef(false)
 
@@ -161,6 +164,17 @@ export default function FeldmodusMap({
         })
         stopMarkersRef.current.push(marker)
       })
+
+      // 2026-05-07 Phase 2: Hero-Pin 3D-Glow am aktuellen Ziel.
+      // Schwebt 25 m über dem Stop, pulsiert in claimondo-light-blue.
+      const heroStop = stops[Math.max(0, aktuellerStopIndex)] ?? null
+      if (heroStop && heroStop.lat != null && heroStop.lng != null) {
+        try {
+          heroPinRef.current = attachHeroPin3d(map, [heroStop.lng, heroStop.lat])
+        } catch (err) {
+          console.error('[FeldmodusMap] hero-pin attach failed:', err)
+        }
+      }
       // Initial-Camera: nahtlose Fortsetzung der Heute→Feldmodus-Intro-
       // Animation. Pitch 60 + enger Zoom + Bearing Richtung erstem Stop —
       // KEIN Wide-Bounds-Fit (würde den Pitch auf 0 reseten und das
@@ -215,6 +229,8 @@ export default function FeldmodusMap({
       svMarkerRef.current = null
       sv3dHandleRef.current?.remove()
       sv3dHandleRef.current = null
+      heroPinRef.current?.remove()
+      heroPinRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current = []
       map.remove()
@@ -224,6 +240,17 @@ export default function FeldmodusMap({
     // dupliziert anlegen. Bei dynamischen Stops müsste ein Update-Effect rein.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // 2026-05-07 Phase 2: Hero-Pin folgt dem aktuellen Ziel-Stop. Wenn der
+  // SV einen Stop abschließt und der Index weiterspringt, wandert der
+  // glühende Pin auf den nächsten Stop.
+  useEffect(() => {
+    const handle = heroPinRef.current
+    if (!handle) return
+    const target = stops[aktuellerStopIndex]
+    if (!target || target.lat == null || target.lng == null) return
+    handle.update([target.lng, target.lat])
+  }, [aktuellerStopIndex, stops])
 
   // SV-Marker aktualisieren wenn svPosition sich ändert.
   // 2026-05-07: 3D-Modell-Pfad bevorzugt — wenn `sv3dHandleRef` da ist,

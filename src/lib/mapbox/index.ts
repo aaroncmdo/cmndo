@@ -17,6 +17,11 @@ export {
   type SvCar3dHandle,
   type SvCar3dPose,
 } from './sv-3d-car'
+export {
+  attachHeroPin3d,
+  HERO_PIN_LAYER_ID,
+  type HeroPin3dHandle,
+} from './hero-pin-3d'
 export { addKundeMarker, type KundeMarkerOptions } from './kunde-marker'
 export { upsertRouteLayer, removeRouteLayer } from './route-layer'
 export {
