@@ -510,13 +510,13 @@ export default function GutachterShell({
             className="h-full overflow-y-auto bg-[#f8f9fb] rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4"
           >
             {/* CMM-32 Polish: Standort-CTA — sichtbar wenn Browser-Permission
-                noch 'prompt' oder 'denied' ist; sonst rendert null. */}
-            <div className="mb-3">
-              <GeoPermissionPrompt
-                permission={geoState.permission}
-                onRequest={geoState.requestPermission}
-              />
-            </div>
+                noch 'prompt' oder 'denied' ist; sonst rendert null.
+                2026-05-07: Banner steuert seine `mb-3` selbst, damit kein
+                Wrapper-Whitespace bleibt wenn die Component null rendert. */}
+            <GeoPermissionPrompt
+              permission={geoState.permission}
+              onRequest={geoState.requestPermission}
+            />
             {children}
           </main>
         </div>
