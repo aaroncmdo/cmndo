@@ -19,7 +19,7 @@ import {
   addKundeMarker,
   upsertRouteLayer,
   removeRouteLayer,
-  MAPBOX_STYLE_STANDARD,
+  MAPBOX_STYLE_STANDARD_SATELLITE,
   getMapboxLightPreset,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
@@ -158,7 +158,7 @@ export default function TagesrouteMap({
 
     const map = new mapboxgl.Map({
       container: el, // direkt das wrapper-Element
-      style: MAPBOX_STYLE_STANDARD,
+      style: MAPBOX_STYLE_STANDARD_SATELLITE,
       center: fallbackCenter,
       zoom: 11,
       pitch: 45,
@@ -170,6 +170,14 @@ export default function TagesrouteMap({
       try {
         map.setConfigProperty('basemap', 'lightPreset', getMapboxLightPreset())
         map.setConfigProperty('basemap', 'show3dObjects', true)
+        // 2026-05-07: Hyperrealismus-Boost — Standard-Satellite-Style
+        // bekommt zusaetzlich Strassen-Decorations + POI-Labels + Place-
+        // Labels. Die Defaults sind true, aber explizit setzen vermeidet
+        // Drift wenn Mapbox die Defaults aendert.
+        map.setConfigProperty('basemap', 'showRoadLabels', true)
+        map.setConfigProperty('basemap', 'showPlaceLabels', true)
+        map.setConfigProperty('basemap', 'showPointOfInterestLabels', true)
+        map.setConfigProperty('basemap', 'showTransitLabels', true)
       } catch { /* noop */ }
     }
     map.on('style.load', applyLightPreset)
