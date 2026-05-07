@@ -36,6 +36,7 @@ import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
+import KundeBetreuerStrip from '@/components/kunde/KundeBetreuerStrip'
 import SmokeKanzleiButton from '@/components/kunde/SmokeKanzleiButton'
 import ClaimSummary from '@/components/kunde/ClaimSummary'
 import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
@@ -102,6 +103,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     let svTelefon: string | null = null
     let svVerifiziert = false
     let svGooglePlaceId: string | null = null
+    let svAvatarUrl: string | null = null
+    let svBeschreibung: string | null = null
     if (fall.sv_id) {
       const { data: sv } = await admin
         .from('sachverstaendige')
@@ -111,13 +114,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       if (sv?.profile_id) {
         const { data: p } = await admin
           .from('profiles')
-          .select('vorname, nachname, telefon, google_place_id')
+          .select('vorname, nachname, telefon, google_place_id, avatar_url, profilbeschreibung')
           .eq('id', sv.profile_id)
           .single()
         if (p) {
           svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || null
           svTelefon = p.telefon
           svGooglePlaceId = (p.google_place_id as string | null) ?? null
+          svAvatarUrl = (p.avatar_url as string | null) ?? null
+          svBeschreibung = (p.profilbeschreibung as string | null) ?? null
         }
       }
       svVerifiziert = sv?.verifizierung_status === 'geprueft'
@@ -644,6 +649,20 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           process.env.NEXT_PUBLIC_ENABLE_SMOKE_TOOLS === 'true') && (
           <SmokeKanzleiButton fallId={fall.id as string} />
         )}
+
+        {/* 2026-05-07 Design-Review 5b: Trust-Cards-Strip — KB + SV mit
+            Avatar, Name, Rolle und Chat-Button. Vermittelt sofort wer
+            für den Fall verantwortlich ist. */}
+        <KundeBetreuerStrip
+          fallId={fall.id as string}
+          kbName={kbName}
+          kbAvatarUrl={kbAvatarUrl}
+          kbBeschreibung={kbBeschreibung}
+          svName={svName}
+          svAvatarUrl={svAvatarUrl}
+          svBeschreibung={svBeschreibung}
+          svVerifiziert={svVerifiziert}
+        />
 
         {/* CMM-43: Google-Bewertungs-Prompt — nach durchgeführtem SV-Termin,
             einmalig, nur wenn SV eine google_place_id hat. */}
