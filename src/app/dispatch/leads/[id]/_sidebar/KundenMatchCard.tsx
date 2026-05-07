@@ -164,12 +164,12 @@ export default function KundenMatchCard({ leadId, initialMatchedKundeId }: Props
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Schließen"
-                className="text-claimondo-ondo hover:text-claimondo-navy p-1 rounded hover:bg-[#f8f9fb]"
+                className="text-claimondo-ondo hover:text-claimondo-navy p-1 rounded hover:bg-claimondo-bg"
               >
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f8f9fb]">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-claimondo-bg">
               <p className="text-xs text-claimondo-ondo mb-2">
                 Wähle den Kunden, mit dem dieser Lead verknüpft werden soll. Wenn keiner passt,
                 bleibt es ein neuer Kunde.
@@ -249,7 +249,7 @@ function KandidatCard({
               {match.faelle.map((f) => (
                 <div
                   key={f.fall_id}
-                  className="flex items-center gap-2 rounded-lg bg-[#f8f9fb] border border-claimondo-border px-2.5 py-1.5"
+                  className="flex items-center gap-2 rounded-lg bg-claimondo-bg border border-claimondo-border px-2.5 py-1.5"
                 >
                   <FileTextIcon className="w-3 h-3 text-claimondo-ondo shrink-0" />
                   <span className="text-[11px] font-mono font-semibold text-claimondo-navy">

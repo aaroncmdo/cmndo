@@ -269,7 +269,7 @@ export default function FeldmodusClient({
           Toggle-Chevron oben am Sheet schaltet zwischen peek (~96 px,
           nur Header sichtbar) und expanded (~70 vh). */}
       <aside
-        className={`bg-[#f8f9fb] lg:order-1 lg:w-[400px] lg:shrink-0 lg:flex lg:flex-col lg:h-full lg:p-4 lg:overflow-y-auto lg:relative lg:inset-auto lg:rounded-none lg:shadow-none ${
+        className={`bg-claimondo-bg lg:order-1 lg:w-[400px] lg:shrink-0 lg:flex lg:flex-col lg:h-full lg:p-4 lg:overflow-y-auto lg:relative lg:inset-auto lg:rounded-none lg:shadow-none ${
           mobileSheetEnabled
             ? // Bottom-Sheet im Driving-/Idle-Modus: peek 96px / expanded 72vh
               `fixed bottom-0 inset-x-0 z-30 px-2 pb-2 pt-1 rounded-t-2xl shadow-ios-lg transition-[max-height] duration-300 ease-out ${

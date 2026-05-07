@@ -190,7 +190,7 @@ export default function TerminVerlegungBanner({
           <button
             onClick={() => setModal(null)}
             disabled={busy === 'ablehnen'}
-            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors disabled:opacity-50"
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors disabled:opacity-50"
           >
             Doch nicht
           </button>

@@ -246,7 +246,7 @@ export default function PrivatStopAddSheet({
           )}
         </div>
 
-        <div className="px-4 py-2 border-t border-claimondo-border bg-[#f8f9fb] text-[10px] text-claimondo-ondo">
+        <div className="px-4 py-2 border-t border-claimondo-border bg-claimondo-bg text-[10px] text-claimondo-ondo">
           Quelle: GCal (Google) + CalDAV (Apple/Nextcloud/Fastmail) — verbinde unter{' '}
           <a href="/gutachter/einstellungen/kalender" className="underline">Einstellungen → Kalender</a>.
         </div>

@@ -179,11 +179,11 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
             {loading ? 'Wird verarbeitet...' : 'Vorschlag annehmen'}
           </button>
           <button onClick={() => setShowModal(true)} disabled={loading}
-            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-shield hover:bg-[#f8f9fb] transition-colors disabled:opacity-40">
+            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-shield hover:bg-claimondo-bg transition-colors disabled:opacity-40">
             Anderen Termin vorschlagen
           </button>
           <Link href={`/kunde/faelle/${fallId}/kalender`}
-            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-light-blue/30 hover:bg-[#f8f9fb] transition-colors flex items-center justify-center gap-2">
+            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-light-blue/30 hover:bg-claimondo-bg transition-colors flex items-center justify-center gap-2">
             <CalendarIcon className="w-4 h-4" /> Kalender des Gutachters öffnen
           </Link>
         </div>
@@ -204,7 +204,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
 
         <div className="flex gap-2">
           <button onClick={() => setShowModal(false)}
-            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors">
+            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors">
             Abbrechen
           </button>
           <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}

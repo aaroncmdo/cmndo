@@ -37,7 +37,7 @@ export default function EskalierterAdminCard({ vorname, nachname, avatarUrl, acc
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-white truncate leading-tight">{name}</p>
-          <p className="text-[10px] text-[#7BA3CC] leading-tight mt-0.5">Admin · liest mit</p>
+          <p className="text-[10px] text-claimondo-light-blue leading-tight mt-0.5">Admin · liest mit</p>
         </div>
       </div>
     </div>

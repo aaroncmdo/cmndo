@@ -169,7 +169,7 @@ export function SvToolsCard({
               onChange={(e) => setFinInput(e.target.value.toUpperCase())}
               placeholder="WBA1234567890ABCD"
               maxLength={17}
-              className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             />
             <button
               onClick={handleFinSave}
@@ -283,7 +283,7 @@ export function SvToolsCard({
               name="gutachten"
               accept=".pdf"
               required
-              className="text-xs text-claimondo-ondo file:mr-2 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f8f9fb] file:text-claimondo-navy file:text-xs file:font-medium hover:file:bg-claimondo-border"
+              className="text-xs text-claimondo-ondo file:mr-2 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-claimondo-bg file:text-claimondo-navy file:text-xs file:font-medium hover:file:bg-claimondo-border"
             />
             <button
               type="submit"
@@ -310,7 +310,7 @@ export function SvToolsCard({
           <select
             value={dateiKategorie}
             onChange={(e) => setDateiKategorie(e.target.value)}
-            className="bg-[#f8f9fb] border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy focus:outline-none focus:border-claimondo-ondo"
+            className="bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy focus:outline-none focus:border-claimondo-ondo"
           >
             {DATEI_KATEGORIEN.map((k) => (
               <option key={k.key} value={k.key}>
@@ -323,7 +323,7 @@ export function SvToolsCard({
             type="file"
             onChange={handleDateiUpload}
             disabled={dateiUploading}
-            className="text-xs text-claimondo-ondo file:mr-2 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-[#f8f9fb] file:text-claimondo-navy file:text-xs file:font-medium hover:file:bg-claimondo-border"
+            className="text-xs text-claimondo-ondo file:mr-2 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-claimondo-bg file:text-claimondo-navy file:text-xs file:font-medium hover:file:bg-claimondo-border"
           />
           {dateiUploading && <Loader2Icon className="w-4 h-4 animate-spin text-claimondo-ondo" />}
         </div>

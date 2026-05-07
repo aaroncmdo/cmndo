@@ -60,7 +60,7 @@ export default function QualiSlotUpload({ slotId, disabled, label = 'Hochladen' 
         type="button"
         onClick={pick}
         disabled={disabled || pending}
-        className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg border border-[#4573A2] text-[#4573A2] hover:bg-[#4573A2]/5 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-lg border border-claimondo-ondo text-claimondo-ondo hover:bg-claimondo-ondo/5 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {pending ? (
           <>

@@ -54,7 +54,7 @@ export default function ReTerminPickerClient({ token, vorname, kennzeichen, scha
 
   if (done) {
     return (
-      <main className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-4 py-8">
+      <main className="min-h-screen bg-claimondo-bg flex items-center justify-center px-4 py-8">
         <div className="bg-white rounded-2xl border border-claimondo-border p-6 max-w-md w-full text-center">
           <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-3">
             <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -71,7 +71,7 @@ export default function ReTerminPickerClient({ token, vorname, kennzeichen, scha
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f9fb] px-4 py-6">
+    <main className="min-h-screen bg-claimondo-bg px-4 py-6">
       <div className="max-w-2xl mx-auto">
         <header className="mb-5">
           <h1 className="text-xl font-semibold text-claimondo-navy">
@@ -105,7 +105,7 @@ export default function ReTerminPickerClient({ token, vorname, kennzeichen, scha
                   const isSelected = selectedIso === s.startIso
                   const base = 'rounded-lg px-3 py-2 text-sm font-medium border transition-colors'
                   const cls = !s.available
-                    ? `${base} bg-[#f8f9fb] text-claimondo-ondo/40 border-claimondo-border line-through cursor-not-allowed`
+                    ? `${base} bg-claimondo-bg text-claimondo-ondo/40 border-claimondo-border line-through cursor-not-allowed`
                     : isSelected
                       ? `${base} bg-claimondo-navy text-white border-claimondo-navy`
                       : `${base} bg-white text-claimondo-navy border-claimondo-border hover:border-claimondo-ondo`

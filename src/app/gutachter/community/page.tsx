@@ -132,7 +132,7 @@ export default async function CommunityDashboardPage() {
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wide text-claimondo-ondo">
+            <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
               <tr>
                 <th className="text-left px-4 py-3 w-16">Rang</th>
                 <th className="text-left px-4 py-3">Mitglied</th>
@@ -150,9 +150,9 @@ export default async function CommunityDashboardPage() {
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
                         row.rang === 1 ? 'bg-amber-100 text-amber-700'
-                        : row.rang === 2 ? 'bg-[#f8f9fb] text-claimondo-navy'
+                        : row.rang === 2 ? 'bg-claimondo-bg text-claimondo-navy'
                         : row.rang === 3 ? 'bg-orange-100 text-orange-700'
-                        : 'bg-[#f8f9fb] text-claimondo-ondo'
+                        : 'bg-claimondo-bg text-claimondo-ondo'
                       }`}>
                         {row.rang ?? '—'}
                       </span>

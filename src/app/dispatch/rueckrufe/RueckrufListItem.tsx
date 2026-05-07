@@ -115,7 +115,7 @@ export default function RueckrufListItem({ terminId, startZeit, notizen, isNew, 
           type="button"
           onClick={() => setOpen(true)}
           title="Termin öffnen"
-          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-claimondo-border text-claimondo-navy text-xs font-medium hover:border-claimondo-ondo hover:bg-[#f8f9fb] transition-colors"
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-claimondo-border text-claimondo-navy text-xs font-medium hover:border-claimondo-ondo hover:bg-claimondo-bg transition-colors"
         >
           <CalendarClockIcon className="w-3.5 h-3.5" />
           Termin

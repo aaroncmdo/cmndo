@@ -117,7 +117,7 @@ export default function Kennzeichenhalter({
 
       {/* Hauptbereich — flat black text, keine Embossed-Shadows */}
       <div
-        className={`flex items-center ${sizeCfg.gap} ${sizeCfg.pad} font-extrabold tracking-[0.04em] text-[#0D1B3E] ${sizeCfg.mainText} flex-1`}
+        className={`flex items-center ${sizeCfg.gap} ${sizeCfg.pad} font-extrabold tracking-[0.04em] text-claimondo-navy ${sizeCfg.mainText} flex-1`}
         style={{ fontFamily: PLATE_FONT }}
       >
         <span>{parts.kreis}</span>

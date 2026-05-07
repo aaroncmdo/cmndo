@@ -131,7 +131,7 @@ function KundendatenEditBlock({
   }
   return (
     <details className="group border border-claimondo-border rounded-lg" open>
-      <summary className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-claimondo-ondo cursor-pointer list-none select-none hover:bg-[#f8f9fb] rounded-lg">
+      <summary className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-claimondo-ondo cursor-pointer list-none select-none hover:bg-claimondo-bg rounded-lg">
         Kundendaten bearbeiten
       </summary>
       <div className="px-3 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -438,7 +438,7 @@ export default function Phase1Qualifizierung() {
                 className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors ${
                   selected
                     ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                    : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
+                    : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-claimondo-bg'
                 } disabled:opacity-60`}
                 title={s.label}
               >
@@ -477,7 +477,7 @@ export default function Phase1Qualifizierung() {
                   }
                 })
               }
-              className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border hover:bg-[#f8f9fb]"
+              className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-claimondo-bg text-claimondo-ondo border border-claimondo-border hover:bg-claimondo-bg"
               title={`„${b.prompt.trim()}" ans Textfeld anhängen`}
             >
               + {b.label}
@@ -504,7 +504,7 @@ export default function Phase1Qualifizierung() {
               type="button"
               onClick={() => setDraft(d => ({ ...d, schuldfrage: o.v }))}
               className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
-                draft.schuldfrage === o.v ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border'
+                draft.schuldfrage === o.v ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border'
               }`}
             >
               {o.label}
@@ -547,13 +547,13 @@ export default function Phase1Qualifizierung() {
           <h3 className="text-xs font-semibold text-claimondo-navy">Wie sieht es mit Ihrem Auto aus — hat es was abgekriegt?</h3>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: true }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === true ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>Ja — sichtbarer Schaden</button>
-          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: false }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === false ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>Nein / unklar</button>
+          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: true }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === true ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo'}`}>Ja — sichtbarer Schaden</button>
+          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: false }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === false ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo'}`}>Nein / unklar</button>
         </div>
 
         {/* Bei Ja: Fahrbereit-Toggle (Spec §3 Q2 Unterfeld) */}
         {draft.schaden_sichtbar === true && (
-          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-lg p-3 space-y-2">
             <div className="flex items-center gap-2">
               <CarFrontIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
               <span className="text-[11px] font-semibold text-claimondo-navy">Fahrzeug noch fahrbereit?</span>
@@ -572,7 +572,7 @@ export default function Phase1Qualifizierung() {
                   </label>
                 </div>
                 {/* Besichtigungsadresse: Fahrzeug steht irgendwo — SV muss hinfahren */}
-                <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
+                <div className="bg-claimondo-bg border border-claimondo-border rounded-lg p-3 space-y-2">
                   <div className="flex items-center gap-2">
                     <MapPinIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                     <span className="text-[11px] font-semibold text-claimondo-navy">Wo steht das Fahrzeug?</span>
@@ -620,7 +620,7 @@ export default function Phase1Qualifizierung() {
 
         {/* Bei Nein: Nachfrage-Block (wie bisher) */}
         {draft.schaden_sichtbar === false && (
-          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-lg p-3 space-y-2">
             <p className="text-[11px] font-semibold text-claimondo-navy">Nachfrage (wörtlich stellen):</p>
             <p className="text-xs text-claimondo-navy italic">
               „Wie geht es Ihnen — haben Sie sich verletzt oder spüren Sie körperliche Beschwerden?"
@@ -688,7 +688,7 @@ export default function Phase1Qualifizierung() {
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
               draft.sachschaden_flag === true
                 ? 'bg-claimondo-navy text-white'
-                : 'bg-[#f8f9fb] text-claimondo-ondo'
+                : 'bg-claimondo-bg text-claimondo-ondo'
             }`}
           >
             Ja — Sachschaden vorhanden
@@ -705,7 +705,7 @@ export default function Phase1Qualifizierung() {
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
               draft.sachschaden_flag === false
                 ? 'bg-claimondo-navy text-white'
-                : 'bg-[#f8f9fb] text-claimondo-ondo'
+                : 'bg-claimondo-bg text-claimondo-ondo'
             }`}
           >
             Nein
@@ -805,7 +805,7 @@ export default function Phase1Qualifizierung() {
           <button
             type="button"
             onClick={() => setDraft(d => ({ ...d, polizei_vor_ort: true }))}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === true ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === true ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo'}`}
           >
             Ja — Polizei war da
           </button>
@@ -820,14 +820,14 @@ export default function Phase1Qualifizierung() {
                 polizei_aktenzeichen: '',
               }))
             }
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === false ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === false ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo'}`}
           >
             Nein
           </button>
         </div>
 
         {draft.polizei_vor_ort === true && (
-          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-lg p-3 space-y-2">
             <p className="text-[11px] font-semibold text-claimondo-navy">Polizeibericht bereits vorhanden?</p>
             <div className="flex gap-2">
               <button

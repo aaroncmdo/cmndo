@@ -90,7 +90,7 @@ export default function MeinFallStatusCard(props: Props) {
       {(props.geforderteGesamtsumme != null ||
         props.geforderterGrundhonorarBetrag != null ||
         props.gutachtenUrl) && (
-        <div className="rounded-xl bg-[#f8f9fb] border border-claimondo-border p-3 space-y-2">
+        <div className="rounded-xl bg-claimondo-bg border border-claimondo-border p-3 space-y-2">
           {props.geforderteGesamtsumme != null && (
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-claimondo-ondo flex items-center gap-1.5">

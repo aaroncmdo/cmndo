@@ -178,7 +178,7 @@ export default async function GutachterFaellePage({
                     return (
                       <tr
                         key={k.id}
-                        className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors"
+                        className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors"
                       >
                         <td className="px-4 py-3">
                           <Link

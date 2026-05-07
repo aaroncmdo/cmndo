@@ -300,7 +300,7 @@ export default function SvKalenderVergleichModal({
 
         {/* SV-Tabs */}
         {data && data.tabs.length > 0 && (
-          <div className="flex items-center gap-1 px-3 pt-2 border-b border-claimondo-border overflow-x-auto bg-[#f8f9fb]">
+          <div className="flex items-center gap-1 px-3 pt-2 border-b border-claimondo-border overflow-x-auto bg-claimondo-bg">
             {data.tabs.map((tab) => {
               const isActive = activeTab?.svId === tab.svId
               return (
@@ -315,7 +315,7 @@ export default function SvKalenderVergleichModal({
                   }`}
                 >
                   <span>{tab.name}</span>
-                  <span className="text-[10px] bg-[#f8f9fb] text-claimondo-ondo px-1.5 py-0.5 rounded-full border border-claimondo-border">
+                  <span className="text-[10px] bg-claimondo-bg text-claimondo-ondo px-1.5 py-0.5 rounded-full border border-claimondo-border">
                     {tab.termine.length}
                   </span>
                   {tab.etaLeadZuBueroMin != null && (
@@ -561,7 +561,7 @@ export default function SvKalenderVergleichModal({
                         if (!e.target.value) return
                         setReserveDraft({ ...reserveDraft, startIso: new Date(e.target.value).toISOString() })
                       }}
-                      className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-xs rounded-lg px-2 py-1.5"
+                      className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-xs rounded-lg px-2 py-1.5"
                     />
                   </div>
                   <div>
@@ -569,7 +569,7 @@ export default function SvKalenderVergleichModal({
                     <select
                       value={reserveDraft.dauerMin}
                       onChange={(e) => setReserveDraft({ ...reserveDraft, dauerMin: Number(e.target.value) })}
-                      className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-xs rounded-lg px-2 py-1.5"
+                      className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-xs rounded-lg px-2 py-1.5"
                     >
                       <option value={30}>30 min</option>
                       <option value={45}>45 min</option>
@@ -590,7 +590,7 @@ export default function SvKalenderVergleichModal({
                     type="button"
                     disabled={reservePending}
                     onClick={() => setReserveDraft(null)}
-                    className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
+                    className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
                   >
                     Abbrechen
                   </button>
@@ -610,7 +610,7 @@ export default function SvKalenderVergleichModal({
 
           {/* Tag-Liste rechts */}
           {data && (
-            <div className="overflow-y-auto bg-[#f8f9fb]">
+            <div className="overflow-y-auto bg-claimondo-bg">
               <ul className="divide-y divide-claimondo-border">
                 {tage.map((tag) => {
                   const isActive = tag.key === activeDayKey

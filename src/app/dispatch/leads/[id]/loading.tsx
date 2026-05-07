@@ -7,12 +7,12 @@ export default function LeadDetailLoading() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
-            <div className="h-6 w-48 bg-[#f8f9fb] rounded-lg animate-pulse" />
-            <div className="h-4 w-32 bg-[#f8f9fb]/50 rounded-lg animate-pulse" />
+            <div className="h-6 w-48 bg-claimondo-bg rounded-lg animate-pulse" />
+            <div className="h-4 w-32 bg-claimondo-bg/50 rounded-lg animate-pulse" />
           </div>
           <div className="flex gap-2">
-            <div className="h-8 w-24 bg-[#f8f9fb] rounded-xl animate-pulse" />
-            <div className="h-8 w-8 bg-[#f8f9fb] rounded-xl animate-pulse" />
+            <div className="h-8 w-24 bg-claimondo-bg rounded-xl animate-pulse" />
+            <div className="h-8 w-8 bg-claimondo-bg rounded-xl animate-pulse" />
           </div>
         </div>
         {/* Phase-Stepper */}

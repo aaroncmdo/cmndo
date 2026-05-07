@@ -394,7 +394,7 @@ export default function AktuellerStopCard({
           href={mapsLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium min-h-12 px-4 hover:bg-[#f8f9fb]"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium min-h-12 px-4 hover:bg-claimondo-bg"
         >
           <NavigationIcon className="w-4 h-4" />
           In Google Maps öffnen

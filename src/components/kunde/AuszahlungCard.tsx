@@ -37,7 +37,7 @@ export default function AuszahlungCard({ betrag, eingegangenAm, zahlungsweg }: P
     <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 space-y-2">
       <div className="flex items-center gap-2">
         <BanknoteIcon className="w-4 h-4 text-emerald-700" />
-        <p className="text-sm font-semibold text-[#0D1B3E]">Ihre Auszahlung</p>
+        <p className="text-sm font-semibold text-claimondo-navy">Ihre Auszahlung</p>
         <span
           className={`ml-auto text-[10px] font-medium rounded-full px-2 py-0.5 ${
             eingegangen ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
@@ -49,20 +49,20 @@ export default function AuszahlungCard({ betrag, eingegangenAm, zahlungsweg }: P
 
       <div>
         <p className="text-xs text-claimondo-ondo">Netto-Betrag (Ihr Anteil)</p>
-        <p className="text-2xl font-bold text-[#0D1B3E]">{formatEuro(n)}</p>
+        <p className="text-2xl font-bold text-claimondo-navy">{formatEuro(n)}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-xs pt-1">
         {eingegangen && eingegangenAm && (
           <div>
             <p className="text-claimondo-ondo">Eingang</p>
-            <p className="text-[#0D1B3E] font-medium">{formatDate(eingegangenAm)}</p>
+            <p className="text-claimondo-navy font-medium">{formatDate(eingegangenAm)}</p>
           </div>
         )}
         {zahlungsweg && (
           <div>
             <p className="text-claimondo-ondo">Zahlungsweg</p>
-            <p className="text-[#0D1B3E] font-medium">
+            <p className="text-claimondo-navy font-medium">
               {ZAHLUNGSWEG_LABEL[zahlungsweg] ?? zahlungsweg}
             </p>
           </div>

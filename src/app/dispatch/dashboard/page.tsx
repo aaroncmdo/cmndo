@@ -59,7 +59,7 @@ export default async function DispatchDashboard() {
   ])
 
   const stats = [
-    { label: 'Neue Leads heute', value: newLeadsRes.count ?? 0, icon: UsersIcon, color: 'text-claimondo-ondo', bg: 'bg-[#f8f9fb]', href: '/dispatch/leads' },
+    { label: 'Neue Leads heute', value: newLeadsRes.count ?? 0, icon: UsersIcon, color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', href: '/dispatch/leads' },
     { label: 'Offene Rückrufe', value: openRueckrufeRes.count ?? 0, icon: PhoneIcon, color: 'text-amber-600', bg: 'bg-amber-50', href: '/dispatch/rueckrufe' },
     { label: 'FlowLinks versendet', value: flowLinksRes.count ?? 0, icon: LinkIcon, color: 'text-emerald-600', bg: 'bg-emerald-50', href: '/dispatch/leads' },
   ]
@@ -157,7 +157,7 @@ export default async function DispatchDashboard() {
               <li key={r.id}>
                 <Link
                   href={`/dispatch/rueckrufe?open=${r.id}`}
-                  className="flex items-center gap-3 px-5 py-3 hover:bg-[#f8f9fb] transition-colors"
+                  className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-bg transition-colors"
                 >
                   {!r.gesehen_am && (
                     <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-label="Neu" />
@@ -204,14 +204,14 @@ export default async function DispatchDashboard() {
           </div>
           <div className="divide-y divide-claimondo-border max-h-[400px] overflow-y-auto">
             {recentLeads.map((lead) => (
-              <Link key={lead.id} href={`/dispatch/leads/${lead.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-[#f8f9fb] transition-colors">
+              <Link key={lead.id} href={`/dispatch/leads/${lead.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-bg transition-colors">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-claimondo-navy truncate">
                     {lead.vorname} {lead.nachname}
                   </p>
                   <p className="text-xs text-claimondo-ondo">{lead.telefon} {lead.schadens_fall_typ ? `· ${lead.schadens_fall_typ}` : ''}</p>
                 </div>
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${PHASE_BADGES[lead.qualifizierungs_phase] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
+                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${PHASE_BADGES[lead.qualifizierungs_phase] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                   {PHASE_LABELS[lead.qualifizierungs_phase] ?? lead.qualifizierungs_phase}
                 </span>
                 <span className="text-[10px] text-claimondo-ondo/70 whitespace-nowrap">{timeSince(lead.created_at)}</span>
@@ -258,7 +258,7 @@ export default async function DispatchDashboard() {
                 <Link
                   key={task.id}
                   href={href}
-                  className="px-5 py-3 flex items-center gap-3 hover:bg-[#f8f9fb] transition-colors"
+                  className="px-5 py-3 flex items-center gap-3 hover:bg-claimondo-bg transition-colors"
                 >
                   {inner}
                 </Link>

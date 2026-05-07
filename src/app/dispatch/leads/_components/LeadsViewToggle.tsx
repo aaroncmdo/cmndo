@@ -85,7 +85,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
             <Link
               key={lead.id}
               href={`/dispatch/leads/${lead.id}`}
-              className={`flex items-start justify-between gap-3 hover:bg-[#f8f9fb] active:bg-claimondo-ondo/5 transition-colors ${rowPadCls}`}
+              className={`flex items-start justify-between gap-3 hover:bg-claimondo-bg active:bg-claimondo-ondo/5 transition-colors ${rowPadCls}`}
             >
               <div className={`flex-1 min-w-0 ${compact ? 'space-y-0.5' : 'space-y-1.5'}`}>
                 <div className="flex items-center justify-between gap-2">
@@ -97,7 +97,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                     {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
                   </span>
                   <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
@@ -129,7 +129,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
       <div className="overflow-x-auto hidden lg:block">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-claimondo-border bg-[#f8f9fb]/50">
+            <tr className="border-b border-claimondo-border bg-claimondo-bg/50">
               <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Name</th>
               <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Telefon</th>
               <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Status</th>
@@ -143,7 +143,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
             {leads.map((lead) => {
               const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
               return (
-                <tr key={lead.id} className="hover:bg-[#f8f9fb]/50 transition-colors">
+                <tr key={lead.id} className="hover:bg-claimondo-bg/50 transition-colors">
                   <td className={cellPadCls}>
                     <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-claimondo-ondo">
                       {lead.vorname} {lead.nachname}
@@ -160,7 +160,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                     )}
                   </td>
                   <td className={cellPadCls}>
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                       {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
                     </span>
                   </td>
@@ -219,7 +219,7 @@ function KanbanView({ leads }: { leads: Lead[] }) {
       {phasenOrder.map((phase) => {
         const bucket = gruppen[phase] ?? []
         return (
-          <div key={phase} className="min-w-[260px] w-[260px] bg-[#f8f9fb] rounded-xl p-2 space-y-2 flex-shrink-0">
+          <div key={phase} className="min-w-[260px] w-[260px] bg-claimondo-bg rounded-xl p-2 space-y-2 flex-shrink-0">
             <div className="flex items-center justify-between px-1">
               <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${PHASE_BADGES[phase] ?? 'bg-claimondo-border text-claimondo-ondo'}`}>
                 {PHASE_LABELS[phase] ?? phase}

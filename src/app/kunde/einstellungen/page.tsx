@@ -40,7 +40,7 @@ export default async function KundeEinstellungenPage() {
 
       <section className="bg-white rounded-2xl border border-[#e4e7ef] overflow-hidden">
         <div className="flex items-start gap-3 px-5 py-4 border-b border-[#e4e7ef]">
-          <span className="shrink-0 w-9 h-9 rounded-xl bg-[#f8f9fb] text-claimondo-ondo border border-[#e4e7ef] flex items-center justify-center">
+          <span className="shrink-0 w-9 h-9 rounded-xl bg-claimondo-bg text-claimondo-ondo border border-[#e4e7ef] flex items-center justify-center">
             <BellIcon width={16} height={16} />
           </span>
           <div className="min-w-0 flex-1">

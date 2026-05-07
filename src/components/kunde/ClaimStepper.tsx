@@ -308,7 +308,7 @@ export default function ClaimStepper({
   const PHASE_BG: Record<ClaimMainPhase, string> = {
     erfassung: 'bg-emerald-50',
     begutachtung: 'bg-claimondo-navy/[0.06]',
-    regulierung: 'bg-[#7BA3CC]/15',
+    regulierung: 'bg-claimondo-light-blue/15',
     abschluss: 'bg-emerald-50',
   }
   const noShowCount = lifecycle.kundeNoShowCount ?? 0
@@ -713,7 +713,7 @@ export default function ClaimStepper({
                   {selbstPending ? 'Wird abgeschlossen…' : 'Gutachten herunterladen'}
                 </button>
               ) : (
-                <p className="text-[11px] text-claimondo-ondo bg-[#f8f9fb] border border-claimondo-border rounded px-2 py-1.5">
+                <p className="text-[11px] text-claimondo-ondo bg-claimondo-bg border border-claimondo-border rounded px-2 py-1.5">
                   Gutachten-Download wird verfügbar sobald die Vollständigkeitsprüfung durch ist.
                 </p>
               )}
@@ -1249,7 +1249,7 @@ function ResetKanzleiWunschButton({
     })
   }
   return (
-    <div className="border-t border-claimondo-border/40 px-4 sm:px-6 py-2 flex items-center justify-between bg-[#f8f9fb]">
+    <div className="border-t border-claimondo-border/40 px-4 sm:px-6 py-2 flex items-center justify-between bg-claimondo-bg">
       <p className="text-[11px] text-claimondo-ondo">
         Gewählt: <span className="font-medium text-claimondo-navy">{label[kanzleiWunsch] ?? kanzleiWunsch}</span>
       </p>
@@ -1314,7 +1314,7 @@ function LexDriveBestaetigenPanel({
             </p>
           </div>
           {anspruchPositionen && anspruchPositionen.length > 0 && (
-            <div className="rounded-lg border border-claimondo-border/60 bg-[#f8f9fb] p-3">
+            <div className="rounded-lg border border-claimondo-border/60 bg-claimondo-bg p-3">
               <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-1.5">
                 Wie sich der Anspruch zusammensetzt
               </p>

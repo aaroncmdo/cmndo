@@ -201,7 +201,7 @@ export default function FallKarte({
       }}
     >
       {/* ── Header: Logo-Square + Fahrzeuginfo + Phase-Dots ── */}
-      <div className="px-4 py-4 flex items-center gap-3 border-b border-claimondo-navy/10 bg-[#f8f9fb]">
+      <div className="px-4 py-4 flex items-center gap-3 border-b border-claimondo-navy/10 bg-claimondo-bg">
         {/* Logo-Square — gleiche Sprache wie ClaimSummary-Header */}
         <div
           className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"

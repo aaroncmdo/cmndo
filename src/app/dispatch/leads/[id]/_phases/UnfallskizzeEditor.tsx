@@ -227,7 +227,7 @@ export function UnfallskizzeEditor({
           type="button"
           onClick={reset}
           disabled={pending || !hasChanges}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
         >
           <RotateCcwIcon className="w-3.5 h-3.5" />
           Zurücksetzen
@@ -236,7 +236,7 @@ export function UnfallskizzeEditor({
           type="button"
           onClick={onCancel}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-claimondo-ondo text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
         >
           <XIcon className="w-3.5 h-3.5" />
           Abbrechen

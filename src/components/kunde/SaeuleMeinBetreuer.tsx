@@ -24,8 +24,8 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
   return (
     <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-4">
       <div className="flex items-center gap-2">
-        <HeadphonesIcon className="w-5 h-5 text-[#4573A2]" />
-        <h2 className="text-sm font-semibold text-[#0D1B3E]">Mein Betreuer</h2>
+        <HeadphonesIcon className="w-5 h-5 text-claimondo-ondo" />
+        <h2 className="text-sm font-semibold text-claimondo-navy">Mein Betreuer</h2>
       </div>
 
       <div className="space-y-3">
@@ -40,7 +40,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
         <div className="flex flex-col gap-2">
           <Link
             href="/kunde/chat"
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[#4573A2] text-white text-xs font-medium hover:bg-[#3a6290] transition-colors"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-[#3a6290] transition-colors"
           >
             <MessageSquareIcon className="w-4 h-4" />
             Chat öffnen
@@ -48,7 +48,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
           <button
             type="button"
             onClick={() => setTerminSheetOpen(true)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-[#4573A2] text-[#4573A2] text-xs font-medium hover:bg-[#4573A2]/5 transition-colors"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-claimondo-ondo text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/5 transition-colors"
           >
             <CalendarPlusIcon className="w-4 h-4" />
             Termin buchen
@@ -60,7 +60,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
         {kbTelefon && (
           <a
             href={`tel:${kbTelefon}`}
-            className="inline-flex items-center min-h-[44px] text-xs text-[#4573A2] hover:underline"
+            className="inline-flex items-center min-h-[44px] text-xs text-claimondo-ondo hover:underline"
           >
             {kbTelefon}
           </a>

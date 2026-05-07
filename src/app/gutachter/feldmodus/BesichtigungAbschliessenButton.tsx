@@ -73,7 +73,7 @@ export default function BesichtigungAbschliessenButton({
           confirming
             ? 'bg-amber-500 hover:bg-amber-600 text-white'
             : 'bg-green-600 hover:bg-green-700 text-white'
-        } disabled:bg-[#f8f9fb]0 disabled:text-white/70`}
+        } disabled:bg-claimondo-bg0 disabled:text-white/70`}
       >
         {isPending ? (
           <Loader2Icon className="w-4 h-4 animate-spin" />
