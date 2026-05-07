@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
+import KundeWillkommensHero from '@/components/kunde/KundeWillkommensHero'
 // AAR-449: Neue FallKarte + Shared-Loader für Termin/Aktion/LastUpdate
 import FallKarte from '@/components/kunde/FallKarte'
 import { ladeFallKartenMeta, type FallKarteMetaInput } from '@/lib/kunde/fall-karte-loader'
@@ -174,26 +175,7 @@ export default async function KundeStartseite() {
       <KundeJetztZuTunCard aktion={topAktion} />
 
       {faelle.length === 0 ? (
-        <div
-          className="rounded-xl border p-8 text-center shadow-sm"
-          style={{
-            background: 'var(--brand-surface, #ffffff)',
-            borderColor: 'var(--brand-border, #e5e7eb)',
-          }}
-        >
-          <p
-            className="font-semibold"
-            style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
-          >
-            Noch kein Schadensfall
-          </p>
-          <p
-            className="mt-1 text-sm"
-            style={{ color: 'var(--brand-text-secondary, #6b7280)' }}
-          >
-            Sobald ein Fall für Sie angelegt wird, erscheint er hier.
-          </p>
-        </div>
+        <KundeWillkommensHero vorname={vorname} />
       ) : (
         <div className="space-y-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
           {faelle.map((fall) => {
