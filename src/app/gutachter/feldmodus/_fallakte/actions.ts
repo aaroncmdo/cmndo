@@ -117,8 +117,14 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     pflichtById.set(p.dokument_typ as string, p)
   }
 
+  // 2026-05-07 (Aaron-Smoke MAP3): Vorher landeten SV-Onboarding-Pflichten
+  // (Sicherungsabtretung, SA-Vorlage, Honorarvereinbarung, Berufshaft-
+  // pflicht, Gewerbeanmeldung, Bestellungsurkunde, BVSK …) im Feldmodus-
+  // Dokument-Tab. Die gehören NICHT zum Fall, sondern zum SV-Onboarding —
+  // Slot-Kategorie 'gutachter_verifizierung'. Filter raus.
   const slots: FeldmodusSlot[] = katalog
     .filter((k) => k.uploadbar_von?.includes(SV_UPLOAD_ROLE))
+    .filter((k) => k.kategorie !== 'gutachter_verifizierung')
     .filter((k) => evaluateKatalogRule(k.freigeschaltet_wenn, ctx))
     .map((k) => {
       const existing = pflichtById.get(k.slot_id)
