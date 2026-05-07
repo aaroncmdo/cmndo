@@ -18,6 +18,7 @@ import TagesrouteSidebar, { type TagesroutePflichtStat } from './TagesrouteSideb
 import TagesrouteStartCard from './TagesrouteStartCard'
 import TagesvorbereitungButton from '../auftraege/TagesvorbereitungButton'
 import PrivatStopAddSheet from './PrivatStopAddSheet'
+import GlassPanel from '@/components/shared/GlassPanel'
 import { removePrivatStop, type PrivatStopRow } from './private-stops-actions'
 import { toast } from 'sonner'
 import type { HeuteTerminFull } from './page'
@@ -180,13 +181,13 @@ export default function HeuteClient({
         className="space-y-4 mt-4 lg:mt-0 lg:absolute lg:top-4 lg:right-4 lg:bottom-4 lg:w-[420px] lg:overflow-y-auto lg:z-10"
       >
         {/* Tagesvorbereitung-Header */}
-        <div className="bg-white/55 backdrop-blur-md border border-white/40 rounded-xl px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy shadow-ios-md">
+        <GlassPanel className="px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy">
           <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
           <TagesvorbereitungButton />
-        </div>
+        </GlassPanel>
 
         {/* Termine-Liste */}
-        <div className="bg-white/55 backdrop-blur-md border border-white/40 rounded-xl overflow-hidden shadow-ios-md">
+        <GlassPanel className="overflow-hidden">
           <TagesrouteSidebar
             termine={termine}
             pflichtStats={pflichtStats}
@@ -197,11 +198,11 @@ export default function HeuteClient({
             onAddPrivatStop={() => setAddSheetOpen(true)}
             onRemovePrivatStop={handlePrivatStopRemove}
           />
-        </div>
+        </GlassPanel>
 
-        {/* Tagesroute-Start-Card — Wrapper jetzt glassy wie die anderen,
-            innen behält die Card ihren Navy-Akzent für den CTA-Look. */}
-        <div className="bg-white/55 backdrop-blur-md border border-white/40 rounded-xl overflow-hidden shadow-ios-md">
+        {/* Tagesroute-Start-Card — Wrapper glassy wie die anderen, Innen behält
+            die Card ihren Navy-Akzent für den CTA-Look. */}
+        <GlassPanel className="overflow-hidden">
           <TagesrouteStartCard
             terminIds={terminIds}
             hasActiveSession={hasActiveSession}
@@ -210,7 +211,7 @@ export default function HeuteClient({
             distanzKm={routeStats?.distanzKm ?? null}
             onIntroAnimate={triggerIntroAnimation}
           />
-        </div>
+        </GlassPanel>
       </div>
 
       <PrivatStopAddSheet
