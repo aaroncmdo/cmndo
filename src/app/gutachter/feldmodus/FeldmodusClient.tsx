@@ -321,6 +321,7 @@ export default function FeldmodusClient({
               aktuellerIndex={aktuellerStopIndex}
               totalStops={stops.length}
               distanceMeters={distanceMeters}
+              variant="light"
             />
           </div>
 
@@ -403,21 +404,22 @@ export default function FeldmodusClient({
           />
         </div>
       )}
+      {/* GPS-Banner ist Information (Auto-Ankunft deaktiviert), kein
+          Critical-Error → Amber statt Red, kompakter (max-w-sm Desktop). */}
       {permissionState === 'denied' && (
-        <div className="absolute top-4 right-4 left-4 lg:left-auto lg:max-w-md rounded-xl bg-red-600/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+        <div className="absolute top-4 right-4 left-4 lg:left-auto lg:max-w-sm rounded-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS-Zugriff verweigert — Auto-Ankunft und Live-Tracking deaktiviert.
         </div>
       )}
       {error && permissionState !== 'denied' && (
-        <div className="absolute top-4 right-4 left-4 lg:left-auto lg:max-w-md rounded-xl bg-amber-600/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+        <div className="absolute top-4 right-4 left-4 lg:left-auto lg:max-w-sm rounded-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS-Warnung: {error}
         </div>
       )}
-      {/* Portal-Review SV1: Hinweis wenn Wake-Lock NICHT verfügbar ist —
-          sonst geht das Display nach Geräte-Default aus, SV muss
-          ständig entsperren. „active" wird nicht angezeigt. */}
+      {/* Wake-Lock-Hinweis: bottom-20 (above Inbox-FAB der bottom-4 right-4
+          sitzt) damit nichts überlappt. */}
       {(wakeLockStatus === 'unsupported' || wakeLockStatus === 'failed') && (
-        <div className="absolute bottom-4 right-4 sm:max-w-xs rounded-xl bg-claimondo-navy/75 backdrop-blur-md border border-white/20 text-white/90 text-[11px] px-3 py-1.5 z-20 shadow-ios-md">
+        <div className="absolute bottom-20 right-4 sm:max-w-xs rounded-xl bg-claimondo-navy/75 backdrop-blur-md border border-white/20 text-white/90 text-[11px] px-3 py-1.5 z-20 shadow-ios-md">
           Hinweis: Display bleibt nicht automatisch an. Geräte-Auto-Sperre
           in den Einstellungen verlängern.
         </div>
