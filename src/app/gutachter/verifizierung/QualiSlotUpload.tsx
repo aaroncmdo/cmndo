@@ -36,12 +36,15 @@ export default function QualiSlotUpload({ slotId, disabled, label = 'Hochladen' 
     fd.append('slot_id', slotId)
     fd.append('datei', file)
     startTransition(async () => {
-      try {
-        await uploadSvPflichtdokument(fd)
+      // 2026-05-07: uploadSvPflichtdokument liefert jetzt Result-Object —
+      // konkrete Server-Fehler kommen 1:1 beim Client an statt vom
+      // Production-Build zu generischem „Error" maskiert zu werden.
+      const result = await uploadSvPflichtdokument(fd)
+      if (result.ok) {
         setSuccess(true)
         router.refresh()
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+      } else {
+        setError(result.error)
       }
       if (fileRef.current) fileRef.current.value = ''
     })
@@ -76,7 +79,11 @@ export default function QualiSlotUpload({ slotId, disabled, label = 'Hochladen' 
           </>
         )}
       </button>
-      {error && <span className="text-[10px] text-red-600 max-w-[180px] text-right">{error}</span>}
+      {error && (
+        <span className="text-[10px] text-red-600 max-w-[260px] text-right leading-snug">
+          {error}
+        </span>
+      )}
     </div>
   )
 }
