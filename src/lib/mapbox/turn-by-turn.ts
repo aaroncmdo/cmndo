@@ -219,22 +219,46 @@ function pickGermanVoice(): SpeechSynthesisVoice | null {
  * 2026-05-07: ElevenLabs als Premium-Voice (wenn NEXT_PUBLIC_ELEVENLABS_
  * API_KEY gesetzt) → Fallback auf Web Speech API.
  * Failt silent wenn beide nicht verfügbar.
+ *
+ * 2026-05-08 Repeat-Guard: Aaron-Smoke-Test ergab dass speakInstruction()
+ * bei manchen Render-Cycles dieselbe Anweisung mehrfach sprach (z.B. der
+ * Blitzer-Effect feuerte erneut bei jedem GPS-Tick mit unverändertem Set,
+ * weil set-mutations in einem Ref nicht automatisch die useEffect-Closure
+ * neu evaluieren). Hier eine letzte Verteidigungslinie: identische Texte
+ * innerhalb von 8 Sekunden nicht doppelt aussprechen — egal ob Caller-
+ * Dedup vergeigt war.
  */
+const recentlySpoken = new Map<string, number>()
+const REPEAT_COOLDOWN_MS = 8_000
+
 export function speakInstruction(text: string): void {
   if (typeof window === 'undefined') return
-  if (!text.trim()) return
+  const trimmed = text.trim()
+  if (!trimmed) return
+
+  const now = Date.now()
+  const lastAt = recentlySpoken.get(trimmed)
+  if (lastAt != null && now - lastAt < REPEAT_COOLDOWN_MS) return
+  recentlySpoken.set(trimmed, now)
+  // Map nicht beliebig wachsen lassen — alte Einträge nach Cooldown-Ablauf
+  // wegputzen wenn der Map-Footprint > 64 Einträge ist.
+  if (recentlySpoken.size > 64) {
+    for (const [k, ts] of recentlySpoken) {
+      if (now - ts > REPEAT_COOLDOWN_MS) recentlySpoken.delete(k)
+    }
+  }
 
   // ElevenLabs zuerst probieren — fire-and-forget. Bei Fehler oder
   // disabled Feature fällt fastSpeechSynthesis() unten als Fallback ein.
   void import('./elevenlabs-tts').then(({ speakViaElevenLabs, isElevenLabsEnabled }) => {
     if (isElevenLabsEnabled()) {
-      void speakViaElevenLabs(text).then((ok) => {
-        if (!ok) fastSpeechSynthesis(text)
+      void speakViaElevenLabs(trimmed).then((ok) => {
+        if (!ok) fastSpeechSynthesis(trimmed)
       })
     } else {
-      fastSpeechSynthesis(text)
+      fastSpeechSynthesis(trimmed)
     }
-  }).catch(() => fastSpeechSynthesis(text))
+  }).catch(() => fastSpeechSynthesis(trimmed))
 }
 
 function fastSpeechSynthesis(text: string): void {
