@@ -33,8 +33,15 @@ export {
   type Cesium3dTilesHandle,
 } from './cesium-3d-tiles'
 export { addKundeMarker, type KundeMarkerOptions } from './kunde-marker'
-export { upsertRouteLayer, removeRouteLayer } from './route-layer'
-export { fetchDrivingRoute } from './directions'
+export { upsertRouteLayer, upsertTrafficRouteLayer, removeRouteLayer } from './route-layer'
+export {
+  fetchDrivingRoute,
+  routeToCongestionFeatures,
+  type CongestionLevel,
+  type RouteSegment,
+  type TrafficRoute,
+  type DirectionsResult,
+} from './directions'
 export {
   fetchBlitzerInBbox,
   bboxForRoute,
