@@ -268,7 +268,11 @@ export default function FeldmodusClient({
     // Glass-Pattern (siehe AAR-769 GlassPanel + Heute-Sidebar): bg-white/65
     // + backdrop-blur-md + border-white/40 + shadow-ios-lg. Map bleibt
     // 100vw × 100vh, Overlays schweben über ihr.
-    <div className="relative h-full w-full">
+    // 2026-05-07 Fix: h-full cascadet nicht durch von FeldmodusLayout
+    // (fixed inset-0). Debug-Skript zeigte: mapboxgl-map.height = 0 → Map
+    // rendert nicht. h-screen (100vh) macht die Höhe explizit, dadurch
+    // greift h-full im Map-Wrapper darunter.
+    <div className="relative h-screen w-screen">
       <OfflineStatusBanner />
 
       {/* Karte als Background-Layer — full-bleed, absolut positioniert
@@ -292,9 +296,12 @@ export default function FeldmodusClient({
           TbtBanner top-center (rendert weiter unten in eigenem Block).
           GPS-/Wake-Lock-Banner bleiben rechts. */}
       {sessionStatus === 'arrived' && aktuellerStop ? (
-        // Arrived: Fallakte als Hauptpanel — auf Desktop floating-card,
-        // auf Mobile full-screen (siehe Mobile-Sheet-Branch unten).
-        <div className="hidden lg:flex lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:w-[420px] lg:flex-col lg:rounded-2xl lg:bg-white/85 lg:backdrop-blur-md lg:border lg:border-white/40 lg:shadow-ios-lg lg:overflow-hidden z-30">
+        // Arrived: Fallakte als Hauptpanel — ab md (≥ 768px) floating-card,
+        // auf Mobile <md full-screen (siehe Mobile-Sheet-Branch unten).
+        // 2026-05-07 Fix: war lg:hidden — Tablet-Range (768-1023) bekam dann
+        // weder Floating-Card noch Mobile-Sheet, die Mobile-Aside verdeckte
+        // die ganze Map (bg-white/95 backdrop-blur).
+        <div className="hidden md:flex md:absolute md:left-4 md:top-4 md:bottom-4 md:w-[420px] md:flex-col md:rounded-2xl md:bg-white/85 md:backdrop-blur-md md:border md:border-white/40 md:shadow-ios-lg md:overflow-hidden z-30">
           <SvFallakteView
             fallId={aktuellerStop.fall_id}
             sessionId={session.id}
@@ -313,8 +320,8 @@ export default function FeldmodusClient({
         </div>
       ) : (
         <>
-          {/* Floating Header-Pill — top-left, kompakt */}
-          <div className="hidden lg:block absolute top-4 left-4 z-30 rounded-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
+          {/* Floating Header-Pill — top-left, kompakt (ab md sichtbar) */}
+          <div className="hidden md:block absolute top-4 left-4 z-30 rounded-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
             <FokusHeader
               sessionId={session.id}
               sessionStatus={sessionStatus}
@@ -325,9 +332,9 @@ export default function FeldmodusClient({
             />
           </div>
 
-          {/* AktuellerStopCard — mid-left, Hauptinteraktion */}
+          {/* AktuellerStopCard — mid-left, Hauptinteraktion (ab md) */}
           {aktuellerStop && (
-            <div className="hidden lg:block absolute left-4 top-24 w-[380px] z-30 rounded-2xl bg-white/85 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
+            <div className="hidden md:block absolute left-4 top-24 w-[380px] z-30 rounded-2xl bg-white/85 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
               <AktuellerStopCard
                 stop={aktuellerStop}
                 sessionId={session.id}
@@ -341,9 +348,9 @@ export default function FeldmodusClient({
             </div>
           )}
 
-          {/* Kommende Stops — bottom-left als kompakte Liste, max 3 sichtbar */}
+          {/* Kommende Stops — bottom-left als kompakte Liste (ab md) */}
           {stops.length - aktuellerStopIndex - 1 > 0 && (
-            <div className="hidden lg:block absolute left-4 bottom-4 w-[380px] max-h-[280px] z-30 rounded-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
+            <div className="hidden md:block absolute left-4 bottom-4 w-[380px] max-h-[280px] z-30 rounded-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
               <div className="px-3 py-2 border-b border-white/40">
                 <p className="text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo">
                   Kommende Stops ({stops.length - aktuellerStopIndex - 1})
@@ -364,7 +371,7 @@ export default function FeldmodusClient({
           glassy (bg-white/65 + backdrop-blur-md). Im arrived-Modus deckt
           SvFallakteView den ganzen Mobile-Viewport ab. */}
       <aside
-        className={`lg:hidden z-30 ${
+        className={`md:hidden z-30 ${
           mobileSheetEnabled
             ? `fixed bottom-0 inset-x-0 px-2 pb-2 pt-1 rounded-t-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-lg transition-[max-height] duration-300 ease-out ${
                 mobileSheetExpanded ? 'max-h-[72vh]' : 'max-h-[96px]'
@@ -392,7 +399,7 @@ export default function FeldmodusClient({
           links bleibt frei für FokusHeader/AktuellerStopCard.
           Mobile: oben über der Karte. */}
       {tbtActive && tbt.upcomingStep && (
-        <div className="absolute top-4 right-4 left-4 lg:left-auto lg:max-w-md z-20">
+        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-md z-20">
           <TbtBanner
             step={tbt.upcomingStep}
             distanceToManeuverMeters={tbt.distanceToNextManeuver}
@@ -407,12 +414,12 @@ export default function FeldmodusClient({
       {/* GPS-Banner ist Information (Auto-Ankunft deaktiviert), kein
           Critical-Error → Amber statt Red, kompakter (max-w-sm Desktop). */}
       {permissionState === 'denied' && (
-        <div className="absolute top-4 right-4 left-4 lg:left-auto lg:max-w-sm rounded-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS-Zugriff verweigert — Auto-Ankunft und Live-Tracking deaktiviert.
         </div>
       )}
       {error && permissionState !== 'denied' && (
-        <div className="absolute top-4 right-4 left-4 lg:left-auto lg:max-w-sm rounded-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS-Warnung: {error}
         </div>
       )}
