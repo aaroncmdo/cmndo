@@ -254,29 +254,42 @@ export default function FeldmodusClient({
     )
 
   return (
-    // 2026-05-06: Feldmodus ist Full-Bleed-Overlay (FeldmodusLayout = fixed
-    // inset-0 z-[1200]). Keine negativen Margins nötig — Wrapper ist schon
-    // 100vw × 100vh ohne Padding. Layout: Karte oben/rechts, Stop-Liste
-    // unten/links, beides bündig zum Viewport-Rand.
-    <div className="flex flex-col lg:flex-row h-full w-full">
+    // 2026-05-07: Echtes Full-Bleed-Layout. Map ist Bühne unter ALLEM (auch
+    // auf Desktop), Sidebar wird zur schwebenden Glass-Card. Vorher war die
+    // Sidebar auf Desktop eine 400px-Spalte die der Map die Hälfte vom
+    // Viewport gefressen hat — der Premium-Feel kam nicht durch.
+    //
+    // Glass-Pattern (siehe AAR-769 GlassPanel + Heute-Sidebar): bg-white/65
+    // + backdrop-blur-md + border-white/40 + shadow-ios-lg. Map bleibt
+    // 100vw × 100vh, Overlays schweben über ihr.
+    <div className="relative h-full w-full">
       <OfflineStatusBanner />
 
-      {/* Sidebar-Spalte
-          - Desktop (lg+): linke Spalte 400px, full-height, scrollbar
-          - Mobile/Tablet (<lg): Bottom-Sheet als Overlay über der Karte;
-            wenn sessionStatus='arrived' deckt die SvFallakteView den
-            ganzen Viewport ab (kein Sheet, full-screen Interaction).
-          Toggle-Chevron oben am Sheet schaltet zwischen peek (~96 px,
-          nur Header sichtbar) und expanded (~70 vh). */}
+      {/* Karte als Background-Layer — full-bleed, absolut positioniert
+          unter allen Overlays. */}
+      <div className="absolute inset-0 z-0">
+        <FeldmodusMap
+          sv={sv}
+          stops={stops}
+          aktuellerStopIndex={aktuellerStopIndex}
+          svPosition={position}
+          followSv={tbtActive && !!tbt.route}
+        />
+      </div>
+
+      {/* Sidebar als Glass-Overlay
+          - Desktop (lg+): floating Card links, 400px breit, mit margin zum
+            Viewport-Rand (so dass die Map durch die Glass-Wand schimmert)
+          - Mobile/Tablet (<lg): Bottom-Sheet — peek 96px / expanded 72vh
+          - Arrived-Modus auf Mobile: SvFallakteView füllt den ganzen Viewport
+            (kein Sheet — längerer Interaction-Mode) */}
       <aside
-        className={`bg-claimondo-bg lg:order-1 lg:w-[400px] lg:shrink-0 lg:flex lg:flex-col lg:h-full lg:p-4 lg:overflow-y-auto lg:relative lg:inset-auto lg:rounded-none lg:shadow-none ${
+        className={`z-30 lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:w-[400px] lg:p-3 lg:rounded-2xl lg:bg-white/65 lg:backdrop-blur-md lg:border lg:border-white/40 lg:shadow-ios-lg lg:flex lg:flex-col lg:overflow-hidden ${
           mobileSheetEnabled
-            ? // Bottom-Sheet im Driving-/Idle-Modus: peek 96px / expanded 72vh
-              `fixed bottom-0 inset-x-0 z-30 px-2 pb-2 pt-1 rounded-t-2xl shadow-ios-lg transition-[max-height] duration-300 ease-out ${
+            ? `fixed bottom-0 inset-x-0 px-2 pb-2 pt-1 rounded-t-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-lg transition-[max-height] duration-300 ease-out lg:transition-none ${
                 mobileSheetExpanded ? 'max-h-[72vh]' : 'max-h-[96px]'
               }`
-            : // Arrived-Modus: SvFallakteView füllt den ganzen Mobile-Viewport
-              'fixed inset-0 z-40 p-2 sm:p-3'
+            : 'fixed inset-0 z-40 p-2 sm:p-3 bg-white/95 backdrop-blur-md'
         }`}
       >
         {/* Mobile-Toggle-Chevron — nur im Driving-Modus auf <lg */}
@@ -287,24 +300,18 @@ export default function FeldmodusClient({
             aria-label={mobileSheetExpanded ? 'Stops einklappen' : 'Stops aufklappen'}
             className="lg:hidden flex items-center justify-center w-full py-1 text-claimondo-ondo/70 hover:text-claimondo-navy transition-colors"
           >
-            <span className="block w-10 h-1 rounded-full bg-claimondo-ondo/30" />
+            <span className="block w-10 h-1 rounded-full bg-claimondo-ondo/40" />
           </button>
         )}
-        <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden flex flex-col flex-1 min-h-0">
+        <div className="bg-white/85 border border-white/50 rounded-xl overflow-hidden flex flex-col flex-1 min-h-0 shadow-ios-sm">
           {sidebarContent}
         </div>
       </aside>
 
-      {/* Karten-Spalte — rechts auf Desktop, full-bleed Background auf Mobile */}
-      <div className="order-1 lg:order-2 relative flex-1 h-full lg:min-h-0">
-        <FeldmodusMap
-          sv={sv}
-          stops={stops}
-          aktuellerStopIndex={aktuellerStopIndex}
-          svPosition={position}
-          followSv={tbtActive && !!tbt.route}
-        />
-        {tbtActive && tbt.upcomingStep && (
+      {/* Banner-Overlays — z-20 zwischen Map und Sidebar.
+          Auf Desktop links neben der Sidebar (left-[428px] = 400 + 16 + 12) */}
+      {tbtActive && tbt.upcomingStep && (
+        <div className="absolute top-4 right-4 left-4 lg:left-[428px] z-20">
           <TbtBanner
             step={tbt.upcomingStep}
             distanceToManeuverMeters={tbt.distanceToNextManeuver}
@@ -314,28 +321,27 @@ export default function FeldmodusClient({
             totalDistanceMeters={tbt.route?.distance ?? null}
             rerouting={tbt.rerouting}
           />
-        )}
-        {permissionState === 'denied' && (
-          <div className="absolute top-20 left-2 right-2 rounded-md bg-red-600/90 text-white text-xs px-3 py-2 z-10">
-            GPS-Zugriff verweigert — Auto-Ankunft und Live-Tracking deaktiviert.
-          </div>
-        )}
-        {error && permissionState !== 'denied' && (
-          <div className="absolute top-20 left-2 right-2 rounded-md bg-amber-600/90 text-white text-xs px-3 py-2 z-10">
-            GPS-Warnung: {error}
-          </div>
-        )}
-        {/* Portal-Review SV1: Hinweis wenn Wake-Lock NICHT verfügbar ist —
-            sonst geht das Display nach Geräte-Default aus, SV muss
-            ständig entsperren. „active" wird nicht angezeigt (wenn alles
-            funktioniert, kein UI-Klutter). */}
-        {(wakeLockStatus === 'unsupported' || wakeLockStatus === 'failed') && (
-          <div className="absolute bottom-2 left-2 right-2 sm:left-auto sm:max-w-xs rounded-md bg-claimondo-navy/85 text-white/90 text-[11px] px-3 py-1.5 z-10">
-            Hinweis: Display bleibt nicht automatisch an. Geräte-Auto-Sperre
-            in den Einstellungen verlängern.
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+      {permissionState === 'denied' && (
+        <div className="absolute top-4 right-4 left-4 lg:left-[428px] rounded-xl bg-red-600/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+          GPS-Zugriff verweigert — Auto-Ankunft und Live-Tracking deaktiviert.
+        </div>
+      )}
+      {error && permissionState !== 'denied' && (
+        <div className="absolute top-4 right-4 left-4 lg:left-[428px] rounded-xl bg-amber-600/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+          GPS-Warnung: {error}
+        </div>
+      )}
+      {/* Portal-Review SV1: Hinweis wenn Wake-Lock NICHT verfügbar ist —
+          sonst geht das Display nach Geräte-Default aus, SV muss
+          ständig entsperren. „active" wird nicht angezeigt. */}
+      {(wakeLockStatus === 'unsupported' || wakeLockStatus === 'failed') && (
+        <div className="absolute bottom-4 right-4 sm:max-w-xs rounded-xl bg-claimondo-navy/75 backdrop-blur-md border border-white/20 text-white/90 text-[11px] px-3 py-1.5 z-20 shadow-ios-md">
+          Hinweis: Display bleibt nicht automatisch an. Geräte-Auto-Sperre
+          in den Einstellungen verlängern.
+        </div>
+      )}
 
       {/* AAR-383: Fokus-Chat als fixes Bottom-Panel — bleibt im normalen
           Wrapper als floating Panel über allem. */}
