@@ -855,6 +855,7 @@ export type Database = {
       auftraege: {
         Row: {
           abgeschlossen_am: string | null
+          claim_id: string
           erstellt_am: string
           fall_id: string
           grundhonorar_brutto: number | null
@@ -873,6 +874,7 @@ export type Database = {
         }
         Insert: {
           abgeschlossen_am?: string | null
+          claim_id: string
           erstellt_am?: string
           fall_id: string
           grundhonorar_brutto?: number | null
@@ -891,6 +893,7 @@ export type Database = {
         }
         Update: {
           abgeschlossen_am?: string | null
+          claim_id?: string
           erstellt_am?: string
           fall_id?: string
           grundhonorar_brutto?: number | null
@@ -908,6 +911,34 @@ export type Database = {
           zurueckweisung_grund?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "auftraege_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auftraege_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auftraege_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auftraege_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
           {
             foreignKeyName: "auftraege_fall_id_fkey"
             columns: ["fall_id"]
@@ -3013,6 +3044,9 @@ export type Database = {
           polizei_vor_ort: boolean | null
           polizeibericht_status: string | null
           prioritaet: string | null
+          re_termin_eskalation_an_kb_am: string | null
+          re_termin_token: string | null
+          re_termin_token_eingelaufen_am: string | null
           regulierung_am: string | null
           regulierung_angekuendigt_am: string | null
           regulierung_betrag: number | null
@@ -3359,6 +3393,9 @@ export type Database = {
           polizei_vor_ort?: boolean | null
           polizeibericht_status?: string | null
           prioritaet?: string | null
+          re_termin_eskalation_an_kb_am?: string | null
+          re_termin_token?: string | null
+          re_termin_token_eingelaufen_am?: string | null
           regulierung_am?: string | null
           regulierung_angekuendigt_am?: string | null
           regulierung_betrag?: number | null
@@ -3705,6 +3742,9 @@ export type Database = {
           polizei_vor_ort?: boolean | null
           polizeibericht_status?: string | null
           prioritaet?: string | null
+          re_termin_eskalation_an_kb_am?: string | null
+          re_termin_token?: string | null
+          re_termin_token_eingelaufen_am?: string | null
           regulierung_am?: string | null
           regulierung_angekuendigt_am?: string | null
           regulierung_betrag?: number | null
@@ -3973,6 +4013,7 @@ export type Database = {
           idempotency_key: string | null
           ist_pflicht: boolean
           kategorie: string | null
+          kb_gesehen_am: string | null
           lead_id: string | null
           mime_type: string | null
           ocr_extracted_data: Json | null
@@ -4005,6 +4046,7 @@ export type Database = {
           idempotency_key?: string | null
           ist_pflicht?: boolean
           kategorie?: string | null
+          kb_gesehen_am?: string | null
           lead_id?: string | null
           mime_type?: string | null
           ocr_extracted_data?: Json | null
@@ -4037,6 +4079,7 @@ export type Database = {
           idempotency_key?: string | null
           ist_pflicht?: boolean
           kategorie?: string | null
+          kb_gesehen_am?: string | null
           lead_id?: string | null
           mime_type?: string | null
           ocr_extracted_data?: Json | null
@@ -5391,6 +5434,9 @@ export type Database = {
           auftrag_id: string | null
           besichtigung_gestartet_am: string | null
           bezahlt: boolean
+          caldav_event_uid: string | null
+          caldav_object_url: string | null
+          caldav_synced_at: string | null
           cancelled_at: string | null
           created_at: string | null
           durchgefuehrt_am: string | null
@@ -5471,6 +5517,9 @@ export type Database = {
           auftrag_id?: string | null
           besichtigung_gestartet_am?: string | null
           bezahlt?: boolean
+          caldav_event_uid?: string | null
+          caldav_object_url?: string | null
+          caldav_synced_at?: string | null
           cancelled_at?: string | null
           created_at?: string | null
           durchgefuehrt_am?: string | null
@@ -5551,6 +5600,9 @@ export type Database = {
           auftrag_id?: string | null
           besichtigung_gestartet_am?: string | null
           bezahlt?: boolean
+          caldav_event_uid?: string | null
+          caldav_object_url?: string | null
+          caldav_synced_at?: string | null
           cancelled_at?: string | null
           created_at?: string | null
           durchgefuehrt_am?: string | null
@@ -11021,6 +11073,65 @@ export type Database = {
           },
         ]
       }
+      sv_private_stops: {
+        Row: {
+          address: string
+          created_at: string
+          datum: string
+          end_zeit: string
+          external_event_id: string
+          id: string
+          lat: number
+          lng: number
+          place_id: string | null
+          source: string
+          start_zeit: string
+          sv_id: string
+          titel: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          datum: string
+          end_zeit: string
+          external_event_id: string
+          id?: string
+          lat: number
+          lng: number
+          place_id?: string | null
+          source: string
+          start_zeit: string
+          sv_id: string
+          titel?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          datum?: string
+          end_zeit?: string
+          external_event_id?: string
+          id?: string
+          lat?: number
+          lng?: number
+          place_id?: string | null
+          source?: string
+          start_zeit?: string
+          sv_id?: string
+          titel?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sv_private_stops_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sv_tages_session: {
         Row: {
           aktueller_termin_id: string | null
@@ -12026,6 +12137,7 @@ export type Database = {
           datum: string
           id: string
           kanal: string
+          naechste_frist: string | null
           notiz: string | null
           richtung: string
           status: string
@@ -12043,6 +12155,7 @@ export type Database = {
           datum?: string
           id?: string
           kanal: string
+          naechste_frist?: string | null
           notiz?: string | null
           richtung: string
           status?: string
@@ -12060,6 +12173,7 @@ export type Database = {
           datum?: string
           id?: string
           kanal?: string
+          naechste_frist?: string | null
           notiz?: string | null
           richtung?: string
           status?: string

@@ -257,6 +257,93 @@ export async function listCalendarEvents(
   return events
 }
 
+// AAR-872: Vollstaendigere Event-Daten (UID, Titel, Location) fuer den
+// „Stop hinzufuegen"-Flow auf der Heute-Page. Wir koennen `listCalendarEvents`
+// nicht direkt erweitern weil er in busy-slots-Hot-Paths laeuft — hier eine
+// Sibling-Variante mit zusaetzlichem Property-Parsing.
+export type CalDavEventFull = {
+  uid: string
+  summary: string | null
+  location: string | null
+  start: string
+  end: string
+}
+
+const UID_RE = /^UID(?:;[^:]*)?:(.+)$/m
+const SUMMARY_RE = /^SUMMARY(?:;[^:]*)?:(.+)$/m
+const LOCATION_RE = /^LOCATION(?:;[^:]*)?:(.+)$/m
+
+function unfoldIcal(s: string): string {
+  // RFC 5545: lange Lines werden mit CRLF + Whitespace umgebrochen.
+  return s.replace(/\r?\n[ \t]/g, '')
+}
+
+function unescapeIcalText(s: string): string {
+  // RFC 5545: \\, \,, \;, \n im TEXT-Wert.
+  return s.replace(/\\([\\,;nN])/g, (_, c) => (c === 'n' || c === 'N' ? '\n' : c))
+}
+
+export async function listCalendarEventsFull(
+  creds: CalDavCredentials,
+  calendarUrl: string,
+  rangeStartIso: string,
+  rangeEndIso: string,
+): Promise<CalDavEventFull[]> {
+  const client = await createClient(creds)
+  const calendars = await client.fetchCalendars()
+  const cal = calendars.find((c) => String(c.url) === calendarUrl) ?? calendars[0]
+  if (!cal) return []
+
+  let objects: unknown[]
+  try {
+    objects = (await Promise.race([
+      client.fetchCalendarObjects({
+        calendar: cal,
+        timeRange: { start: rangeStartIso, end: rangeEndIso },
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), REQUEST_TIMEOUT_MS * 3),
+      ),
+    ])) as unknown[]
+  } catch (err) {
+    throw new CalDavError(
+      `Event-Liste konnte nicht geladen werden: ${err instanceof Error ? err.message : String(err)}`,
+      'other',
+      err,
+    )
+  }
+
+  const events: CalDavEventFull[] = []
+  for (const obj of objects) {
+    const raw = (obj as { data?: string }).data
+    if (typeof raw !== 'string' || !raw.includes('BEGIN:VEVENT')) continue
+    const data = unfoldIcal(raw)
+    const blocks = data.split('BEGIN:VEVENT')
+    for (let i = 1; i < blocks.length; i++) {
+      const block = blocks[i].split('END:VEVENT')[0]
+      const startMatch = DTSTART_RE.exec(block)
+      const endMatch = DTEND_RE.exec(block)
+      if (!startMatch) continue
+      const start = parseIcalDateTime(startMatch[1])
+      const end = endMatch
+        ? parseIcalDateTime(endMatch[1])
+        : (start ? new Date(new Date(start).getTime() + 60 * 60_000).toISOString() : null)
+      if (!start || !end) continue
+      const uidMatch = UID_RE.exec(block)
+      const summaryMatch = SUMMARY_RE.exec(block)
+      const locationMatch = LOCATION_RE.exec(block)
+      events.push({
+        uid: (uidMatch?.[1] ?? '').trim() || `caldav-${start}-${i}`,
+        summary: summaryMatch ? unescapeIcalText(summaryMatch[1].trim()) : null,
+        location: locationMatch ? unescapeIcalText(locationMatch[1].trim()) : null,
+        start,
+        end,
+      })
+    }
+  }
+  return events
+}
+
 // ===== AAR-716: Write-Operationen ============================================
 //
 // CalDAV-PUT pattern (Apple iCloud + Fastmail + Nextcloud):

@@ -17,6 +17,9 @@ import dynamic from 'next/dynamic'
 import TagesrouteSidebar, { type TagesroutePflichtStat } from './TagesrouteSidebar'
 import TagesrouteStartCard from './TagesrouteStartCard'
 import TagesvorbereitungButton from '../auftraege/TagesvorbereitungButton'
+import PrivatStopAddSheet from './PrivatStopAddSheet'
+import { removePrivatStop, type PrivatStopRow } from './private-stops-actions'
+import { toast } from 'sonner'
 import type { HeuteTerminFull } from './page'
 import type { RouteStats, TagesrouteMapHandle, TagesrouteStop } from './TagesrouteMap'
 
@@ -27,6 +30,8 @@ export interface HeuteClientProps {
   pflichtStats: TagesroutePflichtStat[]
   svStandort: { lat: number | null; lng: number | null }
   hasActiveSession: boolean
+  /** AAR-872: bereits gespeicherte Privat-Stops fuer heute. */
+  initialPrivatStops: PrivatStopRow[]
 }
 
 const MAP_HEIGHT_MOBILE = 540
@@ -36,6 +41,7 @@ export default function HeuteClient({
   pflichtStats,
   svStandort,
   hasActiveSession,
+  initialPrivatStops,
 }: HeuteClientProps) {
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(
     svStandort.lat != null && svStandort.lng != null
@@ -55,6 +61,36 @@ export default function HeuteClient({
   const triggerIntroAnimation = useCallback(
     () => mapHandleRef.current?.animateIntro() ?? Promise.resolve(),
     [],
+  )
+
+  // AAR-872: Privat-Stops aus GCal/CalDAV. State im Client damit Add/Remove
+  // sofort die Karte + Sidebar updaten ohne Server-Roundtrip.
+  const [privatStops, setPrivatStops] = useState<PrivatStopRow[]>(initialPrivatStops)
+  const [addSheetOpen, setAddSheetOpen] = useState(false)
+  const handlePrivatStopAdded = useCallback((stop: PrivatStopRow) => {
+    setPrivatStops((prev) => {
+      // Idempotent — wenn der Event schon drin ist, ersetzen, sonst pushen.
+      const idx = prev.findIndex((p) => p.id === stop.id)
+      if (idx >= 0) {
+        const next = [...prev]
+        next[idx] = stop
+        return next
+      }
+      return [...prev, stop]
+    })
+  }, [])
+  const handlePrivatStopRemove = useCallback(async (id: string) => {
+    const prev = privatStops
+    setPrivatStops((cur) => cur.filter((p) => p.id !== id))
+    const res = await removePrivatStop(id)
+    if (!res.ok) {
+      toast.error(`Stop konnte nicht entfernt werden: ${res.error ?? 'Unbekannt'}`)
+      setPrivatStops(prev) // rollback
+    }
+  }, [privatStops])
+  const existingExternalIds = useMemo(
+    () => new Set(privatStops.map((p) => p.external_event_id)),
+    [privatStops],
   )
 
   // Viewport-Detection für Map-Höhe + Layout-Switch
@@ -90,10 +126,9 @@ export default function HeuteClient({
   //   - Verlegt-Stubs (dashed): straight-line vom Origin zu jedem verlegten
   // Damit sieht der SV: was die Route IST und was wäre gewesen.
   const stops: TagesrouteStop[] = useMemo(() => {
-    return [...aktiveTermine]
+    const terminStops = [...aktiveTermine]
       .filter((t) => t.besichtigungsort_lat != null && t.besichtigungsort_lng != null)
-      .sort((a, b) => new Date(a.start_zeit).getTime() - new Date(b.start_zeit).getTime())
-      .map((t) => ({
+      .map<TagesrouteStop>((t) => ({
         id: t.id,
         startIso: t.start_zeit,
         lat: t.besichtigungsort_lat as number,
@@ -101,7 +136,19 @@ export default function HeuteClient({
         label: t.kunde_name,
         status: t.status,
       }))
-  }, [aktiveTermine])
+    // AAR-872: Privat-Stops als status='privat'-Marker einreihen.
+    const privatStopsAsRoute = privatStops.map<TagesrouteStop>((p) => ({
+      id: `privat:${p.id}`,
+      startIso: p.start_zeit,
+      lat: p.lat,
+      lng: p.lng,
+      label: p.titel ?? 'Privat',
+      status: 'privat',
+    }))
+    return [...terminStops, ...privatStopsAsRoute].sort(
+      (a, b) => new Date(a.startIso).getTime() - new Date(b.startIso).getTime(),
+    )
+  }, [aktiveTermine, privatStops])
 
   const disabledReason = aktiveTermine.length === 0 ? 'Heute keine offenen Termine' : null
 
@@ -146,6 +193,9 @@ export default function HeuteClient({
             svOrigin={origin}
             activeStopId={activeStopId}
             onStopClick={setActiveStopId}
+            privatStops={privatStops}
+            onAddPrivatStop={() => setAddSheetOpen(true)}
+            onRemovePrivatStop={handlePrivatStopRemove}
           />
         </div>
 
@@ -162,6 +212,13 @@ export default function HeuteClient({
           />
         </div>
       </div>
+
+      <PrivatStopAddSheet
+        open={addSheetOpen}
+        onClose={() => setAddSheetOpen(false)}
+        existingExternalIds={existingExternalIds}
+        onAdded={handlePrivatStopAdded}
+      />
     </div>
   )
 }

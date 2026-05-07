@@ -18,7 +18,11 @@ import {
   AlertTriangleIcon,
   FileTextIcon,
   CheckCircle2Icon,
+  PlusCircleIcon,
+  CalendarClockIcon,
+  XIcon,
 } from 'lucide-react'
+import type { PrivatStopRow } from './private-stops-actions'
 import { googleMapsLink } from './googleMapsLink'
 import type { HeuteTerminFull } from './page'
 import { formatUhrzeit } from '@/lib/format'
@@ -37,6 +41,10 @@ export type TagesrouteSidebarProps = {
   svOrigin: { lat: number | null; lng: number | null } | null
   activeStopId?: string | null
   onStopClick?: (stopId: string) => void
+  /** AAR-872: Privat-Stops aus GCal/CalDAV. */
+  privatStops?: PrivatStopRow[]
+  onAddPrivatStop?: () => void
+  onRemovePrivatStop?: (id: string) => void
 }
 
 // 2026-05-06: „Jetzt"-Indikator — zeigt zeitliche Nähe zum Start-Zeit.
@@ -113,6 +121,9 @@ export default function TagesrouteSidebar({
   svOrigin,
   activeStopId,
   onStopClick,
+  privatStops = [],
+  onAddPrivatStop,
+  onRemovePrivatStop,
 }: TagesrouteSidebarProps) {
   const [expanded, setExpanded] = useState<string | null>(null)
   const pflichtMap = useMemo(() => {
@@ -134,11 +145,27 @@ export default function TagesrouteSidebar({
     <aside className="flex flex-col flex-1 min-h-0">
       {/* Stats-Header */}
       <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
-        <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider">Termine heute</p>
-        <div className="flex items-baseline gap-2 mt-0.5">
-          <span className="text-2xl font-semibold text-claimondo-navy">{aktiv.length}</span>
-          {erledigt > 0 && (
-            <span className="text-[11px] text-claimondo-ondo">({erledigt} erledigt)</span>
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider">Termine heute</p>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-2xl font-semibold text-claimondo-navy">{aktiv.length}</span>
+              {erledigt > 0 && (
+                <span className="text-[11px] text-claimondo-ondo">({erledigt} erledigt)</span>
+              )}
+            </div>
+          </div>
+          {/* AAR-872: Stop hinzufügen — Privat-Termin aus GCal/CalDAV */}
+          {onAddPrivatStop && (
+            <button
+              type="button"
+              onClick={onAddPrivatStop}
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-claimondo-navy bg-white hover:bg-[#f8f9fb] border border-claimondo-border rounded-lg px-2 py-1.5"
+              title="Privat-Termin als Tagesroute-Stop hinzufügen"
+            >
+              <PlusCircleIcon className="w-3.5 h-3.5" />
+              Stop
+            </button>
           )}
         </div>
         {/* Quick-Stats — Pflicht-Dokumente offen, Anzahl Stops mit Adresse */}
@@ -417,6 +444,51 @@ export default function TagesrouteSidebar({
           </li>
         )}
       </ol>
+
+      {/* AAR-872: Privat-Stops Sektion — visuell vom SV-Termin-Block getrennt */}
+      {privatStops.length > 0 && (
+        <div className="border-t border-claimondo-border bg-claimondo-ondo/5">
+          <p className="px-4 pt-3 pb-1 text-[10px] uppercase tracking-wider text-claimondo-ondo">
+            Privat-Stops ({privatStops.length})
+          </p>
+          <ul className="divide-y divide-claimondo-border/60">
+            {privatStops
+              .slice()
+              .sort((a, b) => new Date(a.start_zeit).getTime() - new Date(b.start_zeit).getTime())
+              .map((p) => (
+                <li key={p.id} className="px-4 py-2.5 flex items-start gap-3">
+                  <CalendarClockIcon className="w-4 h-4 text-claimondo-ondo shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-claimondo-navy truncate">
+                      {p.titel ?? 'Privat-Termin'}
+                    </p>
+                    <p className="text-[11px] text-claimondo-ondo">
+                      {formatUhrzeit(p.start_zeit)}
+                      {p.end_zeit ? `–${formatUhrzeit(p.end_zeit)}` : ''}
+                      <span className="mx-1">·</span>
+                      <span className="uppercase tracking-wider text-[9px]">{p.source}</span>
+                    </p>
+                    <p className="text-[11px] text-claimondo-ondo flex items-start gap-1 mt-0.5">
+                      <MapPinIcon className="w-3 h-3 mt-0.5 shrink-0" />
+                      <span className="truncate">{p.address}</span>
+                    </p>
+                  </div>
+                  {onRemovePrivatStop && (
+                    <button
+                      type="button"
+                      onClick={() => onRemovePrivatStop(p.id)}
+                      className="text-claimondo-ondo/60 hover:text-red-600 p-1"
+                      title="Privat-Stop entfernen"
+                      aria-label="Privat-Stop entfernen"
+                    >
+                      <XIcon className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
     </aside>
   )
 }
