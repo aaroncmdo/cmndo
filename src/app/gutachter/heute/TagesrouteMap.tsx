@@ -37,6 +37,16 @@ export type TagesrouteStop = {
 
 export type RouteStats = { distanzKm: number; dauerMin: number; stops: number }
 
+/**
+ * Imperatives Handle für den Heute→Feldmodus-Übergang. Parent ruft
+ * animateIntro() auf, bevor er per router.push in den Feldmodus navigiert —
+ * die Heute-Map zoomt + tiltet auf Pitch 60 mit Bearing zum ersten Stop, sodass
+ * der Wechsel als ein durchgehender Kamera-Zug wirkt.
+ */
+export type TagesrouteMapHandle = {
+  animateIntro: () => Promise<void>
+}
+
 export type TagesrouteMapProps = {
   svOrigin: { lat: number; lng: number } | null
   stops: TagesrouteStop[]
@@ -46,6 +56,21 @@ export type TagesrouteMapProps = {
   height: number | string
   /** 2026-05-06: Lift Route-Stats nach oben damit StartCard sie nutzen kann */
   onRouteStatsChange?: (stats: RouteStats | null) => void
+  /** Handle für Heute→Feldmodus-Intro-Animation. Wird einmal nach Mount gerufen. */
+  onReady?: (handle: TagesrouteMapHandle) => void
+}
+
+/** Initial-Bearing zwischen zwei LngLat-Punkten (Grad, 0=Nord, im Uhrzeigersinn). */
+function computeBearing(
+  from: [number, number],
+  to: [number, number],
+): number {
+  const φ1 = (from[1] * Math.PI) / 180
+  const φ2 = (to[1] * Math.PI) / 180
+  const Δλ = ((to[0] - from[0]) * Math.PI) / 180
+  const y = Math.sin(Δλ) * Math.cos(φ2)
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ)
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
 }
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -86,6 +111,7 @@ export default function TagesrouteMap({
   onStopClick,
   height,
   onRouteStatsChange,
+  onReady,
 }: TagesrouteMapProps) {
   // EINE Ref. Mapbox attached sein Canvas direkt in diesem Element.
   const containerRef = useRef<HTMLDivElement>(null)
@@ -94,6 +120,11 @@ export default function TagesrouteMap({
   const stopMarkersRef = useRef<Map<string, Marker>>(new Map())
   const [tokenMissing, setTokenMissing] = useState(false)
   const [routeStats, setRouteStats] = useState<{ distanzKm: number; dauerMin: number } | null>(null)
+
+  // Live-Refs für die Intro-Animation: das Handle wird einmal nach Mount
+  // exponiert und liest svOrigin/aktivStops über diese Refs aus.
+  const svOriginRef = useRef(svOrigin)
+  const aktivStopsRef = useRef<TagesrouteStop[]>([])
 
   const validStops = useMemo(() => stops.filter((s) => s.lat != null && s.lng != null), [stops])
 
@@ -106,6 +137,10 @@ export default function TagesrouteMap({
       ),
     [validStops],
   )
+
+  // Refs synchron halten, damit das Intro-Handle immer den aktuellen Stand sieht.
+  useEffect(() => { svOriginRef.current = svOrigin }, [svOrigin])
+  useEffect(() => { aktivStopsRef.current = aktivStops }, [aktivStops])
 
   useEffect(() => {
     const el = containerRef.current
@@ -297,6 +332,52 @@ export default function TagesrouteMap({
 
     return () => { cancelled = true }
   }, [svOrigin, aktivStops, validStops, onRouteStatsChange])
+
+  // Intro-Handle für Heute→Feldmodus-Übergang: nach Mount einmalig
+  // exponieren. Animiert auf Pitch 60 + Zoom 15 mit Bearing zum ersten
+  // aktiven Stop, sodass FeldmodusMap (das ebenfalls bei Pitch 60 startet)
+  // visuell als nahtlose Fortsetzung wirkt.
+  useEffect(() => {
+    if (!onReady) return
+    const handle: TagesrouteMapHandle = {
+      animateIntro: () =>
+        new Promise<void>((resolve) => {
+          const map = mapRef.current
+          const svO = svOriginRef.current
+          const stopsList = [...aktivStopsRef.current].sort(
+            (a, b) => new Date(a.startIso).getTime() - new Date(b.startIso).getTime(),
+          )
+          const firstStop = stopsList[0]
+          if (!map || !svO || !firstStop) {
+            resolve()
+            return
+          }
+          const from: [number, number] = [svO.lng, svO.lat]
+          const to: [number, number] = [firstStop.lng, firstStop.lat]
+          const bearing = computeBearing(from, to)
+          // Center 30/70-gewichtet Richtung erster Stop — Kamera „beschleunigt" optisch.
+          const center: [number, number] = [
+            from[0] * 0.3 + to[0] * 0.7,
+            from[1] * 0.3 + to[1] * 0.7,
+          ]
+          const duration = 1100
+          try {
+            map.easeTo({
+              center,
+              zoom: 15,
+              pitch: 60,
+              bearing,
+              duration,
+              essential: true,
+            })
+          } catch { /* noop */ }
+          // Resolve etwas nach Animations-Ende, damit der nächste Frame
+          // mit Endzustand gerendert wurde, bevor router.push feuert.
+          window.setTimeout(resolve, duration + 80)
+        }),
+    }
+    onReady(handle)
+  }, [onReady])
 
   // Active-Stop Highlight
   useEffect(() => {

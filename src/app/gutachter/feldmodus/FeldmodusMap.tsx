@@ -97,17 +97,35 @@ export default function FeldmodusMap({
         })
         stopMarkersRef.current.push(marker)
       })
-      // Initial-fit auf alle Stops sobald Style geladen ist — verhindert,
-      // dass die Map auf dem Default-Center stehen bleibt wenn der Container
-      // bei der Init noch keine finale Höhe hatte.
-      const stopsWithCoords = stops.filter((s) => s.lat != null && s.lng != null)
-      if (stopsWithCoords.length > 0) {
-        const bounds = new mapboxgl.LngLatBounds()
-        stopsWithCoords.forEach((s) => bounds.extend([s.lng as number, s.lat as number]))
+      // Initial-Camera: nahtlose Fortsetzung der Heute→Feldmodus-Intro-
+      // Animation. Pitch 60 + enger Zoom + Bearing Richtung erstem Stop —
+      // KEIN Wide-Bounds-Fit (würde den Pitch auf 0 reseten und das
+      // Driving-Gefühl zerstören). Gibt es keinen Stop mit Koordinaten,
+      // bleibt die Map auf dem fallbackCenter.
+      const startStop =
+        stops[Math.max(0, aktuellerStopIndex)] ??
+        stops.find((s) => s.lat != null && s.lng != null) ??
+        null
+      if (startStop && startStop.lat != null && startStop.lng != null) {
+        const stopLng = startStop.lng
+        const stopLat = startStop.lat
+        let bearing = DEFAULT_FIELD_MAP_CONFIG.bearing
         if (sv.standort_lng != null && sv.standort_lat != null) {
-          bounds.extend([sv.standort_lng, sv.standort_lat])
+          const φ1 = (sv.standort_lat * Math.PI) / 180
+          const φ2 = (stopLat * Math.PI) / 180
+          const Δλ = ((stopLng - sv.standort_lng) * Math.PI) / 180
+          const y = Math.sin(Δλ) * Math.cos(φ2)
+          const x =
+            Math.cos(φ1) * Math.sin(φ2) -
+            Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ)
+          bearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
         }
-        map.fitBounds(bounds, { padding: 60, duration: 0, maxZoom: 14 })
+        map.jumpTo({
+          center: [stopLng, stopLat],
+          zoom: 15,
+          pitch: DEFAULT_FIELD_MAP_CONFIG.pitch,
+          bearing,
+        })
       }
     })
 
@@ -181,18 +199,26 @@ export default function FeldmodusMap({
       return
     }
 
-    // Bounds-Mode: SV + aktueller Stop in den Sichtbereich
+    // Bounds-Mode: SV + aktueller Stop in den Sichtbereich. Pitch bleibt
+    // auf 60 — fitBounds würde sonst auf 0 zurücksetzen und den durch
+    // die Heute→Feldmodus-Intro etablierten Driving-Look brechen.
     if (!aktuellerStop) return
     if (aktuellerStop.lat == null || aktuellerStop.lng == null) return
     if (svPosition) {
       const bounds = new mapboxgl.LngLatBounds()
       bounds.extend([svPosition.lng, svPosition.lat])
       bounds.extend([aktuellerStop.lng, aktuellerStop.lat])
-      map.fitBounds(bounds, { padding: 80, duration: 700, maxZoom: 15 })
+      map.fitBounds(bounds, {
+        padding: 80,
+        duration: 700,
+        maxZoom: 15,
+        pitch: DEFAULT_FIELD_MAP_CONFIG.pitch,
+      })
     } else {
       map.easeTo({
         center: [aktuellerStop.lng, aktuellerStop.lat],
         zoom: 14,
+        pitch: DEFAULT_FIELD_MAP_CONFIG.pitch,
         duration: 700,
       })
     }
