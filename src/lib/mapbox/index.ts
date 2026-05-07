@@ -44,6 +44,13 @@ export {
   type BlitzerLayerHandle,
 } from './blitzer'
 export {
+  fetchHereHazards,
+  attachHazardLayer,
+  HAZARD_LAYER_ID,
+  type HazardFeature,
+  type HazardLayerHandle,
+} from './hazards'
+export {
   DEFAULT_FIELD_MAP_CONFIG,
   type FieldModusMapConfig,
   type MarkerSkin,

@@ -216,11 +216,29 @@ function pickGermanVoice(): SpeechSynthesisVoice | null {
 
 /**
  * Liest einen Text laut vor. Cancelt vorherigen Speech.
- * Failt silent wenn die API nicht verfügbar ist.
+ * 2026-05-07: ElevenLabs als Premium-Voice (wenn NEXT_PUBLIC_ELEVENLABS_
+ * API_KEY gesetzt) → Fallback auf Web Speech API.
+ * Failt silent wenn beide nicht verfügbar.
  */
 export function speakInstruction(text: string): void {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return
+  if (typeof window === 'undefined') return
   if (!text.trim()) return
+
+  // ElevenLabs zuerst probieren — fire-and-forget. Bei Fehler oder
+  // disabled Feature fällt fastSpeechSynthesis() unten als Fallback ein.
+  void import('./elevenlabs-tts').then(({ speakViaElevenLabs, isElevenLabsEnabled }) => {
+    if (isElevenLabsEnabled()) {
+      void speakViaElevenLabs(text).then((ok) => {
+        if (!ok) fastSpeechSynthesis(text)
+      })
+    } else {
+      fastSpeechSynthesis(text)
+    }
+  }).catch(() => fastSpeechSynthesis(text))
+}
+
+function fastSpeechSynthesis(text: string): void {
+  if (!window.speechSynthesis) return
   try {
     window.speechSynthesis.cancel()
     const utter = new SpeechSynthesisUtterance(text)
@@ -237,10 +255,9 @@ export function speakInstruction(text: string): void {
 }
 
 export function stopSpeaking(): void {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return
+  if (typeof window === 'undefined') return
   try {
-    window.speechSynthesis.cancel()
-  } catch {
-    /* noop */
-  }
+    window.speechSynthesis?.cancel()
+  } catch { /* noop */ }
+  void import('./elevenlabs-tts').then(({ stopElevenLabs }) => stopElevenLabs()).catch(() => { /* noop */ })
 }
