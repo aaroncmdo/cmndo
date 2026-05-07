@@ -9782,6 +9782,7 @@ export type Database = {
           anzahlung_status: string | null
           arbeitet_eigenstaendig: boolean
           bestellungs_kammer: string | null
+          blockierte_wochentage: number[]
           brand_accent: string | null
           brand_extracted_at: string | null
           brand_primary: string | null
@@ -9881,6 +9882,7 @@ export type Database = {
           anzahlung_status?: string | null
           arbeitet_eigenstaendig?: boolean
           bestellungs_kammer?: string | null
+          blockierte_wochentage?: number[]
           brand_accent?: string | null
           brand_extracted_at?: string | null
           brand_primary?: string | null
@@ -9980,6 +9982,7 @@ export type Database = {
           anzahlung_status?: string | null
           arbeitet_eigenstaendig?: boolean
           bestellungs_kammer?: string | null
+          blockierte_wochentage?: number[]
           brand_accent?: string | null
           brand_extracted_at?: string | null
           brand_primary?: string | null
