@@ -138,9 +138,44 @@ export async function checkVinAvailability(vin: string): Promise<boolean> {
     tokenCache = null
     throw new CardentityError(401, 'Token abgelaufen — bitte erneut versuchen')
   }
+  // 2026-05-07 (Bug-Smoke): Vorher generisches „Availability-Fehler 403".
+  // Cardentity sendet 403 wenn der Account/Plan keine Berechtigung für die
+  // VIN hat — die Fehlermeldung soll dem Dispatcher klar sagen, dass nicht
+  // er ein Problem hat sondern unsere Subscription.
+  if (res.status === 403) {
+    throw new CardentityError(403, 'Cardentity: Account hat keine Berechtigung für diese VIN — bitte Subscription/Region prüfen')
+  }
   if (!res.ok) throw new CardentityError(res.status, `Availability-Fehler ${res.status}`)
   const data = (await res.json()) as { available?: boolean }
   return data.available !== false
+}
+
+/**
+ * 2026-05-07 (Bug-Smoke): Cardentity erwartet `firstRegistrationDate` strikt
+ * als YYYY-MM-DD oder den Literal-String "estimate". Unsere DB-Spalte
+ * `erstzulassung` ist freier Text und enthält oft Deutsche Formate
+ * (DD.MM.YYYY) oder Monatsangaben (MM/YYYY). Diese Normalisierung
+ * verhindert das beobachtete „Report-Fehler 400: First registration date
+ * must be in YYYY-MM-DD format or estimate".
+ *
+ * Akzeptierte Inputs:
+ *   - "2020-06-15"        → durchreichen
+ *   - "15.06.2020"        → "2020-06-15"
+ *   - "06.2020", "6/2020" → "2020-06-01"  (Monat-genau, Tag=01)
+ *   - "2020"              → "2020-01-01"
+ *   - alles andere        → "estimate" (Cardentity-Sonderwert)
+ */
+export function normalizeFirstRegistrationDate(raw: string | null | undefined): string | undefined {
+  if (!raw) return undefined
+  const s = raw.trim()
+  if (!s) return undefined
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s
+  const dmY = s.match(/^(\d{2})\.(\d{2})\.(\d{4})$/)
+  if (dmY) return `${dmY[3]}-${dmY[2]}-${dmY[1]}`
+  const mY = s.match(/^(\d{1,2})[./](\d{4})$/)
+  if (mY) return `${mY[2]}-${mY[1].padStart(2, '0')}-01`
+  if (/^\d{4}$/.test(s)) return `${s}-01-01`
+  return 'estimate'
 }
 
 export async function getVehicleReport(
@@ -150,7 +185,10 @@ export async function getVehicleReport(
   const token = await getAccessToken()
   const params = new URLSearchParams({ format: 'json', lang: options.lang ?? 'de' })
   if (options.mileage != null) params.set('mileage', String(options.mileage))
-  if (options.firstRegistrationDate) params.set('firstRegistrationDate', options.firstRegistrationDate)
+  // 2026-05-07: Format-Normalisierung damit Cardentity nicht 400 wirft
+  // wenn der DE-Formatierte Datums-String aus der DB kommt.
+  const normalizedDate = normalizeFirstRegistrationDate(options.firstRegistrationDate)
+  if (normalizedDate) params.set('firstRegistrationDate', normalizedDate)
 
   const res = await safeFetch(
     `${API_URL}/v1/reports/${encodeURIComponent(vin)}?${params.toString()}`,
