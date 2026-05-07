@@ -10,13 +10,35 @@ Den Fokus-Modus auf ein Premium-Outdoor-Navigationserlebnis heben — vergleichb
 
 Cross-Plattform: Web-First, später React Native (`@rnmapbox/maps` + `@react-three/fiber/native`) — daher Stack-Wahl auf maximales Code-Sharing.
 
-## Status-Quo (Stand 2026-05-07)
+## Status-Quo (Stand 2026-05-07, nach 4 PRs)
 
-`FeldmodusMap.tsx` nutzt bereits:
+**Phase 1 ✅ gemerged (PR #586):** Atmosphäre + Terrain
+- `setFog(...)` mit claimondo-Navy Space-Color
+- `setTerrain({ source: mapbox-dem, exaggeration: 1.2 })`
+- POI/Transit-Labels aus, Road-Labels an
+- Plus Layout: Map full-bleed + Glass-Overlays statt Sidebar
+
+**Phase 2 ✅ gemerged (PR #589):** Hero-Pin 3D-Glow
+- `attachHeroPin3d(map, lngLat)` — Mapbox-Native CustomLayer mit Three.js
+- Pulsierende emissive Sphere + transparente Halo
+- claimondo-light-blue glüht, folgt Stop-Wechsel
+- R3F-Deps installiert für Phase 4 (Showrooms)
+
+**Phase 3 ✅ gemerged (PR #590):** Time-of-Day-Sync mit Termin-Slot
+- `lightPreset` folgt `aktuellerStop.start_zeit` statt Wall-Clock
+- Fog-Tinting passend zum Preset (dawn/dusk warm, night dunkel mit Sternen)
+- `getMapboxLightPreset(at?: Date)` Helper
+
+**Phase 3b ✅ gemerged (PR #591):** Wetter-reaktive Atmosphäre
+- `/api/weather`-Fetch beim Stop-Wechsel
+- `applyWeatherToFog(base, weatherId)` — Modifier auf Tageszeit
+- Regen → grauer dichter Fog, Schnee → Blauschimmer, Nebel → MAX horizon-blend, Bewölkt → Grau-Tint
+
+`FeldmodusMap.tsx` Setup:
 - Mapbox GL JS v3.22 mit `mapbox://styles/mapbox/standard`
-- Uhrzeitabhängiger `lightPreset` (`dawn`/`day`/`dusk`/`night`) — alle 5 Min refreshed
-- `show3dObjects: true` — Mapbox-Standard-Buildings + Bäume
-- 3D-Auto-Modell-Load-Versuch (GLB) mit Fallback auf 2D-SVG-Marker
+- Light + Fog + Terrain reagieren auf Termin-Zeit + Wetter
+- 3D-Auto-Modell-Load (GLB) mit Fallback auf 2D-SVG-Marker
+- Hero-Pin via Custom-Layer (Three.js direkt)
 
 ## Roadmap
 
@@ -58,14 +80,22 @@ Cross-Plattform: Web-First, später React Native (`@rnmapbox/maps` + `@react-thr
 - Custom-Layer-Performance bei vielen Markern → Lösung: nur SV-Hero und Ziel-Pin in R3F, restliche Marker bleiben als HTML-Marker.
 - Camera-Sync-Drift bei schnellen Map-Movements → bekanntes R3F-Mapbox-Pattern, in der Praxis stable.
 
-### Phase 3 — Photorealistic Tiles + Wet-Roads (Optional)
+### Phase 3 — Time-of-Day + Wetter ✅ GEMERGED (PR #590, #591)
 
-**Aufwand:** 3-5 Tage. **Effekt:** echte Mesh-Daten in Großstädten, Wetter-Reaktivität.
+Time-of-Day-Sync mit Termin-Slot + Wetter-Atmosphäre durch. Ohne Custom-Shader-Komplexität, voll auf Mapbox-Standard-Properties + Fog-Modifier.
 
-**Komponenten:**
-- **Google Photorealistic 3D Tiles** als zusätzlicher Layer-Source. Cost-Modell: ~$10/1000 Tile-Requests (Google Maps Platform Tier). Aaron-Decision nötig vor Launch.
-- **Custom-Shader** für Roads bei Regen-Wetter (Wet-Look, Reflections). Wetter-Daten sind bereits via `WeatherBanner.tsx` verfügbar.
-- **Time-of-Day-Sync mit Termin-Slot**: `lightPreset` aus `gutachter_termine.start_zeit` ableiten statt nur Wall-Clock.
+### Phase 4 — Photorealistic 3D Tiles (Optional, braucht Cost-Approval)
+
+**Aufwand:** 2-3 Tage. **Effekt:** echte Mesh-Daten in Großstädten, fotorealistische Fassaden.
+
+- **Google Photorealistic 3D Tiles** als zusätzlicher Layer-Source via Mapbox 3D-Tiles-Layer-API (Mapbox v3 unterstützt externe 3D-Tiles).
+- Cost-Modell: ~$10/1000 Tile-Requests (Google Maps Platform Tier).
+- **Aaron-Decision nötig vor Aktivierung** — Cost-Burn pro SV-Termin schwer zu modellieren ohne Production-Daten.
+- Code-Stub kann angelegt werden, Activation hinter Feature-Flag.
+
+### Phase 5 — Custom-Shader (zurückgestellt)
+
+Wet-Roads-Shader kommt zurück sobald reine Atmosphäre-Reaktivität (3b) nicht mehr reicht. Aufwand: ~3-5 Tage. Aktueller Stand: 3b deckt 90% des „Wow"-Effekts ab, Custom-Shader gibt ~10% mehr.
 
 ### Was nicht empfohlen wird
 
