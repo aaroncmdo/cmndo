@@ -201,6 +201,7 @@ export function attachFlowLayer(map: MapboxMap, initial: FlowFeature[] = []): Fl
       id: FLOW_LAYER_ID,
       type: 'line',
       source: FLOW_SOURCE_ID,
+      slot: 'middle', // unter Labels, über Roads
       paint: {
         // Farbskala: jamFactor 0-3 = grün, 4-6 = amber, 7-10 = rot
         // (Mapbox Standard interpoliert linear)
@@ -214,17 +215,17 @@ export function attachFlowLayer(map: MapboxMap, initial: FlowFeature[] = []): Fl
         ],
         'line-width': [
           'interpolate', ['linear'], ['zoom'],
-          12, 2,
-          16, 5,
-          18, 8,
+          12, 3,
+          16, 7,
+          18, 12,
         ],
-        'line-opacity': 0.85,
+        'line-opacity': 0.9,
       },
       layout: {
         'line-cap': 'round',
         'line-join': 'round',
       },
-    }, 'road-label-navigation') // unter den Road-Labels rendern
+    } as Parameters<typeof map.addLayer>[0])
   }
 
   return {
@@ -249,29 +250,34 @@ export function attachHazardLayer(map: MapboxMap, initial: HazardFeature[] = [])
   }
 
   if (!map.getLayer(HAZARD_LAYER_ID)) {
-    // Amber/orange Pulse-Marker, kleiner als Blitzer (rote sind kritischer)
+    // 2026-05-08: Hazards (Baustellen/Unfälle/Sperrungen) deutlich größer
+    // gerendert + slot='top' damit sie auch in der Navi-Sicht (Pitch 70,
+    // Zoom 18+) sofort auffallen. Halo + Stroke verstärken Sichtbarkeit
+    // gegen die hellen Mapbox-Standard-Tiles.
     map.addLayer({
       id: `${HAZARD_LAYER_ID}-halo`,
       type: 'circle',
       source: HAZARD_SOURCE_ID,
+      slot: 'top',
       paint: {
-        'circle-radius': 12,
+        'circle-radius': 22,
         'circle-color': '#f59e0b', // amber-500
-        'circle-opacity': 0.25,
-        'circle-blur': 0.5,
+        'circle-opacity': 0.4,
+        'circle-blur': 0.6,
       },
-    })
+    } as Parameters<typeof map.addLayer>[0])
     map.addLayer({
       id: HAZARD_LAYER_ID,
       type: 'circle',
       source: HAZARD_SOURCE_ID,
+      slot: 'top',
       paint: {
-        'circle-radius': 4,
+        'circle-radius': 8,
         'circle-color': '#d97706', // amber-600
         'circle-stroke-color': '#ffffff',
-        'circle-stroke-width': 1.5,
+        'circle-stroke-width': 2.5,
       },
-    })
+    } as Parameters<typeof map.addLayer>[0])
   }
 
   return {

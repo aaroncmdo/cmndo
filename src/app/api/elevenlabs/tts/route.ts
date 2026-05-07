@@ -39,11 +39,18 @@ export async function POST(request: Request) {
   const apiKey = process.env.ELEVENLABS_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'TTS nicht konfiguriert' }, { status: 503 })
 
-  const body = (await request.json().catch(() => null)) as { text?: string; voice?: string } | null
+  const body = (await request.json().catch(() => null)) as { text?: string; voice?: string; probe?: boolean } | null
   const text = body?.text?.trim()
   const voice = body?.voice ?? VOICE_DEFAULT
-  // Empty body = Probe-Call (Client-Side check ob Service konfiguriert ist).
-  if (!text) return NextResponse.json({ ok: true, voice }, { status: 200 })
+  // 2026-05-08: Expliziter Probe-Path. Vorher hat ein leerer Body einen
+  // 200 zurückgegeben, was auch dann passierte wenn ELEVENLABS_API_KEY
+  // fehlte — Client cached availability=true → erste echte Anweisung
+  // brachte 502, fiel auf Web Speech zurück, aber wirkte wie „ElevenLabs
+  // funktioniert nicht". Probe gibt jetzt 200 nur wenn Key real da ist
+  // (oben schon gechecked) und der Voice-ID existiert (Best-Effort).
+  if (body?.probe || !text) {
+    return NextResponse.json({ ok: true, voice, configured: true }, { status: 200 })
+  }
   if (text.length > 500) return NextResponse.json({ error: 'text too long' }, { status: 400 })
 
   const key = `${voice}:${text}`

@@ -21,12 +21,20 @@ let elevenLabsAvailable: boolean | null = null
 async function probeAvailability(): Promise<boolean> {
   if (elevenLabsAvailable != null) return elevenLabsAvailable
   try {
-    // POST mit kurzem Test-Text und cache-friendly check via empty body
-    // → wenn 401/503 zurückkommt, ist Server nicht konfiguriert.
-    const res = await fetch('/api/elevenlabs/tts', { method: 'POST', body: JSON.stringify({}), headers: { 'Content-Type': 'application/json' } })
+    // 2026-05-08: Expliziter probe-Flag damit der Server bewusst zwischen
+    // „Configuration-OK" und „nur leerer Body" unterscheidet.
+    const res = await fetch('/api/elevenlabs/tts', {
+      method: 'POST',
+      body: JSON.stringify({ probe: true }),
+      headers: { 'Content-Type': 'application/json' },
+    })
     elevenLabsAvailable = res.status !== 503 && res.status !== 401
+    if (!elevenLabsAvailable) {
+      console.warn('[elevenlabs-client] probe failed, status', res.status)
+    }
     return elevenLabsAvailable
-  } catch {
+  } catch (err) {
+    console.warn('[elevenlabs-client] probe error:', err)
     elevenLabsAvailable = false
     return false
   }

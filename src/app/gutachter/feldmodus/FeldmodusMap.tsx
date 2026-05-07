@@ -324,11 +324,13 @@ export default function FeldmodusMap({
         }
         map.jumpTo({
           center: carCenter,
-          // Navi-Modus-Look: enger Zoom (17) + steiler Pitch (65) damit der
-          // SV-Pin groß in der Mitte ist und die Strecke vor ihm sichtbar.
-          zoom: 17,
-          pitch: 65,
+          // 2026-05-08: Navi-Look enger gezogen — zoom 18.5, pitch 70.
+          // Mit bottom-heavy padding sitzt der Pin nicht in der Mitte,
+          // sondern im unteren Drittel; Strecke davor.
+          zoom: 18.5,
+          pitch: 70,
           bearing,
+          padding: { top: 320, bottom: 80, left: 40, right: 40 },
         })
       }
     })
@@ -490,6 +492,10 @@ export default function FeldmodusMap({
     // wenn kein heading da), nahem Zoom, hohem Pitch. 2026-05-07: bei
     // missing heading berechnen wir das Bearing vom SV → Stop, sonst
     // zeigt die Camera nordwärts statt in Fahrtrichtung.
+    // 2026-05-08: Zoom 18.5 + Pitch 70 + bottom-heavy padding für den
+    // Google-Maps-Navi-Look. Der SV-Pin sitzt im unteren Drittel, davor die
+    // Strecke. Vorher (zoom 17, kein padding) wirkte die Karte „aus dem
+    // Hubschrauber" — Aaron-Feedback nach dem 08.05. Smoke-Test.
     if (followSv && svPosition) {
       let bearing = svPosition.heading ?? 0
       if (svPosition.heading == null && aktuellerStop?.lat != null && aktuellerStop?.lng != null) {
@@ -502,9 +508,12 @@ export default function FeldmodusMap({
       }
       map.easeTo({
         center: [svPosition.lng, svPosition.lat],
-        zoom: 17,
+        zoom: 18.5,
         bearing,
-        pitch: 65,
+        pitch: 70,
+        // bottom-heavy padding → SV-Pin landet im unteren Drittel,
+        // Strecke davor sichtbar (GMaps-Navi-Look).
+        padding: { top: 320, bottom: 80, left: 40, right: 40 },
         duration: 800,
         essential: true,
       })

@@ -133,36 +133,41 @@ export function attachBlitzerLayer(map: MapboxMap, initial: BlitzerFeature[] = [
   if (!map.getLayer(BLITZER_LAYER_ID)) {
     // 2026-05-08: Type-1 (mobil) → lila Pulse, Rest (stationär) → rot.
     // Macht Mobile-Blitzer auf den ersten Blick unterscheidbar.
+    // slot='top' damit die Marker über 3D-Buildings + Labels rendern.
+    // Größerer Halo + dickerer Stroke damit auch im Pitch-70-Navi-Look gut
+    // sichtbar (vorher gingen die Punkte auf der Karte unter).
     map.addLayer({
       id: `${BLITZER_LAYER_ID}-halo`,
       type: 'circle',
       source: BLITZER_SOURCE_ID,
+      slot: 'top',
       paint: {
-        'circle-radius': 18,
+        'circle-radius': 24,
         'circle-color': [
           'case',
           ['==', ['get', 'type'], '1'], '#a855f7', // purple-500 mobil
           '#ef4444', // red-500 stationär
         ],
-        'circle-opacity': 0.3,
-        'circle-blur': 0.5,
+        'circle-opacity': 0.4,
+        'circle-blur': 0.6,
       },
-    })
+    } as Parameters<typeof map.addLayer>[0])
     map.addLayer({
       id: BLITZER_LAYER_ID,
       type: 'circle',
       source: BLITZER_SOURCE_ID,
+      slot: 'top',
       paint: {
-        'circle-radius': 6,
+        'circle-radius': 9,
         'circle-color': [
           'case',
           ['==', ['get', 'type'], '1'], '#9333ea', // purple-600 mobil
           '#dc2626', // red-600 stationär
         ],
         'circle-stroke-color': '#ffffff',
-        'circle-stroke-width': 2,
+        'circle-stroke-width': 3,
       },
-    })
+    } as Parameters<typeof map.addLayer>[0])
   }
 
   return {

@@ -30,10 +30,13 @@ export type Cesium3dTilesHandle = {
 }
 
 export function isCesium3dTilesEnabled(): boolean {
-  if (typeof window === 'undefined') return false
-  const flag = process.env.NEXT_PUBLIC_FELDMODUS_CESIUM_TILES
-  const token = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN
-  return flag === 'true' && !!token
+  // 2026-05-08: Hart deaktiviert. Asset 96188 (Cesium OSM Buildings) liefert
+  // flache, ungeshadete Block-Geometrie und überlagert die Mapbox-Standard-
+  // 3D-Buildings, die mit Light-Preset echte Tageszeit-Schatten bekommen.
+  // Ergebnis im Feldmodus war „graue Klötze ohne Shadow". Cesium-Pfad
+  // bleibt als Code-Asset erhalten falls wir später Pro-Tier-Photorealistic-
+  // Tiles einbinden, aber im Default-Render aus.
+  return false
 }
 
 /**
