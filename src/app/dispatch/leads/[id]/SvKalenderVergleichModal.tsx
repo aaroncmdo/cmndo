@@ -421,21 +421,39 @@ export default function SvKalenderVergleichModal({
                   {/* Route-Marker zwischen Terminen (BLAU) — werden VOR den
                       gelben Termin-Blöcken gerendert, damit sie im Hintergrund
                       sind und sich nicht überlappen. */}
+                  {/* 2026-05-07 (Aaron-Smoke): Lücken-Boxen sind jetzt
+                      klickbar — Click ins Slot-Mitte legt einen reserveDraft
+                      mit Slot-Anfang+ETA-hin als optimaler Termin-Start.
+                      Damit „klick zum legen" direkt aus dem visuellen
+                      Lücken-Hinweis funktioniert ohne Rail-Hit-Test. */}
                   {lueckenHeute.map((l) => {
                     const startMin = minutesOfDay(l.vonIso) - HOUR_START * 60
                     const endMin = minutesOfDay(l.bisIso) - HOUR_START * 60
                     if (endMin <= 0 || startMin >= TOTAL_MIN) return null
                     const top = Math.max(0, startMin) * PX_PER_MIN
                     const height = Math.max(20, (Math.min(TOTAL_MIN, endMin) - Math.max(0, startMin)) * PX_PER_MIN)
+                    const handleSlotClick = () => {
+                      if (!l.reicht) return
+                      // Optimaler Slot-Start: Vortermin-Ende + ETA hin (auf 5 min gerundet)
+                      const startMs = new Date(l.vonIso).getTime() + (l.etaHinMin ?? 0) * 60_000
+                      const rounded = Math.round(startMs / (5 * 60_000)) * 5 * 60_000
+                      setReserveDraft({ startIso: new Date(rounded).toISOString(), dauerMin: TERMIN_DAUER_DEFAULT })
+                      setReserveError(null)
+                    }
                     return (
-                      <div
+                      <button
+                        type="button"
                         key={l.key}
-                        className={`absolute left-0 right-2 rounded-lg border-2 border-dashed flex items-center justify-center text-[10px] px-2 ${
+                        onClick={handleSlotClick}
+                        disabled={!l.reicht}
+                        data-termin-block
+                        className={`absolute left-0 right-2 rounded-lg border-2 border-dashed flex items-center justify-center text-[10px] px-2 transition-colors ${
                           l.reicht
-                            ? 'bg-blue-50 border-blue-300 text-blue-800'
-                            : 'bg-red-50 border-red-300 text-red-700'
+                            ? 'bg-blue-50 border-blue-300 text-blue-800 cursor-pointer hover:bg-blue-100 hover:border-blue-400'
+                            : 'bg-red-50 border-red-300 text-red-700 cursor-not-allowed'
                         }`}
                         style={{ top, height }}
+                        title={l.reicht ? 'Tippen zum Reservieren' : 'Zu kurz für Anfahrt + Besichtigung'}
                       >
                         <div className="text-center leading-tight">
                           {l.etaHinMin != null && l.etaZurueckMin != null ? (
@@ -444,16 +462,48 @@ export default function SvKalenderVergleichModal({
                                 {l.etaHinMin} min hin · {l.etaZurueckMin} min zurück
                               </div>
                               <div className="opacity-80">
-                                {l.luckeMin} min Lücke {l.reicht ? '· passt' : '· zu kurz'}
+                                {l.luckeMin} min Lücke {l.reicht ? '· passt — tippen' : '· zu kurz'}
                               </div>
                             </>
                           ) : (
                             <div className="opacity-80">{l.luckeMin} min Lücke</div>
                           )}
                         </div>
-                      </div>
+                      </button>
                     )
                   })}
+
+                  {/* 2026-05-07: Provisorischer Lead-Termin-Block (BLAU
+                      gefüllt) sobald reserveDraft an dem Tag liegt. So
+                      sieht der Dispatcher visuell wo der neue Termin
+                      hingelegt wird, vor der Bestätigung. */}
+                  {reserveDraft && dayKey(reserveDraft.startIso) === activeDayKey && (() => {
+                    const startMin = minutesOfDay(reserveDraft.startIso) - HOUR_START * 60
+                    const endMin = startMin + reserveDraft.dauerMin
+                    if (endMin <= 0 || startMin >= TOTAL_MIN) return null
+                    const top = Math.max(0, startMin) * PX_PER_MIN
+                    const heightPx = Math.max(28, (Math.min(TOTAL_MIN, endMin) - Math.max(0, startMin)) * PX_PER_MIN)
+                    return (
+                      <div
+                        className="absolute left-0 right-2 rounded-lg border-2 border-blue-600 bg-blue-500/85 text-white px-2 py-1.5 shadow-lg z-10"
+                        style={{ top, height: heightPx }}
+                      >
+                        <div className="flex items-center gap-1.5 text-[11px] font-semibold">
+                          <ClockIcon className="w-3 h-3" />
+                          {fmtTime(reserveDraft.startIso)} — Neuer Termin
+                        </div>
+                        {data?.leadAdresse && (
+                          <p className="text-[10px] opacity-90 truncate flex items-center gap-1 mt-0.5">
+                            <MapPinIcon className="w-2.5 h-2.5 shrink-0" />
+                            {data.leadAdresse}
+                          </p>
+                        )}
+                        <p className="text-[10px] opacity-90 mt-0.5">
+                          Bitte unten bestätigen
+                        </p>
+                      </div>
+                    )
+                  })()}
 
                   {/* Termin-Blöcke (GELB) */}
                   {termineHeute.map((t) => {
