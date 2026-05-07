@@ -75,6 +75,7 @@ export default function ProfilClient({
 }) {
   const router = useRouter()
   const [editing, setEditing] = useState(false)
+  const [showEmptyFields, setShowEmptyFields] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -314,25 +315,71 @@ export default function ProfilClient({
                   <ControlledRow label="HRB" value={form.hrb} onChange={v => updateField('hrb', v)} placeholder="z.B. HRB 12345 (Berlin)" />
                 </>
               ) : (
-                <>
-                  <FieldRow label="Anrede" value={profile.anrede ?? '—'} />
-                  <FieldRow label="Titel" value={profile.titel || '—'} />
-                  <FieldRow label="Vorname" value={profile.vorname ?? '—'} />
-                  <FieldRow label="Nachname" value={profile.nachname ?? '—'} />
-                  <FieldRow label="Telefon" value={profile.telefon ?? '—'} />
-                  <FieldRow label="Anschrift" value={sv.standort_adresse ?? '—'} />
-                  {/* AAR-369 */}
-                  <FieldRow label="Anzeigename" value={profile.anzeigename ?? '—'} />
-                  <FieldRow label="Profiltext" value={profile.profilbeschreibung ?? '—'} />
-                  <div className="pt-3 mt-3 border-t border-claimondo-border">
-                    <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
-                  </div>
-                  <FieldRow label="Firmenname" value={sv.firmenname ?? '—'} />
-                  <FieldRow label="Rechtsform" value={sv.rechtsform ?? '—'} />
-                  <FieldRow label="Steuernummer" value={sv.steuernummer ?? '—'} />
-                  <FieldRow label="USt-IdNr" value={sv.ust_id ?? '—'} />
-                  <FieldRow label="HRB" value={sv.hrb ?? '—'} />
-                </>
+                (() => {
+                  // 2026-05-07 Design-Review: leere Felder per Default
+                  // verstecken — sonst sieht der Read-State wie ein
+                  // Daten-Verlust-Bug aus (7+ "—" untereinander). Toggle
+                  // unten expandiert sie als ergänzbare Liste.
+                  const isEmpty = (v: string | null | undefined) =>
+                    v == null || (typeof v === 'string' && v.trim() === '')
+                  const personalFields = [
+                    { label: 'Anrede', value: profile.anrede },
+                    { label: 'Titel', value: profile.titel },
+                    { label: 'Vorname', value: profile.vorname },
+                    { label: 'Nachname', value: profile.nachname },
+                    { label: 'Telefon', value: profile.telefon },
+                    { label: 'Anschrift', value: sv.standort_adresse },
+                    { label: 'Anzeigename', value: profile.anzeigename },
+                    { label: 'Profiltext', value: profile.profilbeschreibung },
+                  ]
+                  const firmaFields = [
+                    { label: 'Firmenname', value: sv.firmenname },
+                    { label: 'Rechtsform', value: sv.rechtsform },
+                    { label: 'Steuernummer', value: sv.steuernummer },
+                    { label: 'USt-IdNr', value: sv.ust_id },
+                    { label: 'HRB', value: sv.hrb },
+                  ]
+                  const filledPersonal = personalFields.filter((f) => !isEmpty(f.value))
+                  const emptyPersonal = personalFields.filter((f) => isEmpty(f.value))
+                  const filledFirma = firmaFields.filter((f) => !isEmpty(f.value))
+                  const emptyFirma = firmaFields.filter((f) => isEmpty(f.value))
+                  const totalEmpty = emptyPersonal.length + emptyFirma.length
+
+                  return (
+                    <>
+                      {filledPersonal.map((f) => (
+                        <FieldRow key={f.label} label={f.label} value={f.value as string} />
+                      ))}
+                      {showEmptyFields && emptyPersonal.map((f) => (
+                        <FieldRow key={f.label} label={f.label} value="—" />
+                      ))}
+                      {(filledFirma.length > 0 || (showEmptyFields && emptyFirma.length > 0)) && (
+                        <div className="pt-3 mt-3 border-t border-claimondo-border">
+                          <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wide mb-1 px-1">
+                            Firma / Steuerliches
+                          </p>
+                        </div>
+                      )}
+                      {filledFirma.map((f) => (
+                        <FieldRow key={f.label} label={f.label} value={f.value as string} />
+                      ))}
+                      {showEmptyFields && emptyFirma.map((f) => (
+                        <FieldRow key={f.label} label={f.label} value="—" />
+                      ))}
+                      {totalEmpty > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowEmptyFields((s) => !s)}
+                          className="mt-2 text-[11px] text-claimondo-ondo hover:text-claimondo-navy underline-offset-2 hover:underline self-start"
+                        >
+                          {showEmptyFields
+                            ? 'Leere Felder ausblenden'
+                            : `${totalEmpty} ${totalEmpty === 1 ? 'Feld' : 'Felder'} ergänzen ▾`}
+                        </button>
+                      )}
+                    </>
+                  )
+                })()
               )}
 
               <div className="pt-3 mt-3 border-t border-claimondo-border">
