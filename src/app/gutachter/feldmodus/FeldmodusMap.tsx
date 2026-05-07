@@ -33,7 +33,9 @@ import {
   fetchBlitzerInBbox,
   bboxForRoute,
   type BlitzerLayerHandle,
+  type BlitzerFeature,
 } from '@/lib/mapbox'
+import { haversineMetersLngLat, speakInstruction } from '@/lib/mapbox/turn-by-turn'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
 import type { MapboxLightPreset } from '@/lib/mapbox/light-preset'
@@ -122,6 +124,10 @@ export default function FeldmodusMap({
   const google3dTilesRef = useRef<Google3dTilesHandle | null>(null)
   const cesium3dTilesRef = useRef<Cesium3dTilesHandle | null>(null)
   const blitzerRef = useRef<BlitzerLayerHandle | null>(null)
+  // 2026-05-07: Blitzer-Features für Voice-Distanz-Check.
+  const blitzerFeaturesRef = useRef<BlitzerFeature[]>([])
+  // Set der bereits gewarnten Blitzer-IDs damit nicht jeder Frame ne Stimme ausspuckt.
+  const warnedBlitzerIdsRef = useRef<Set<string>>(new Set())
   const stopMarkersRef = useRef<Marker[]>([])
   const tokenMissing = useRef(false)
   // 2026-05-07 Phase 3b: Wetter-Code (OpenWeatherMap weather_id) am
@@ -396,6 +402,30 @@ export default function FeldmodusMap({
     } catch { /* style not ready yet */ }
   }, [aktuellerStopIndex, stops, weatherId])
 
+  // 2026-05-07 Blitzer-Voice: bei jedem position-Update Distance zu allen
+  // Blitzern in der Route-Bbox checken. Wenn < 500m und nicht schon gewarnt
+  // → speakInstruction. Stufen: 500m / 200m je Blitzer einmal.
+  useEffect(() => {
+    if (!svPosition) return
+    const features = blitzerFeaturesRef.current
+    if (features.length === 0) return
+    for (const f of features) {
+      const [lng, lat] = f.geometry.coordinates
+      const distM = haversineMetersLngLat([svPosition.lng, svPosition.lat], [lng, lat])
+      const id = (f.properties as { id: string }).id
+      const key500 = `${id}-500`
+      const key200 = `${id}-200`
+      if (distM <= 200 && !warnedBlitzerIdsRef.current.has(key200)) {
+        speakInstruction('Achtung, Blitzer in 200 Metern')
+        warnedBlitzerIdsRef.current.add(key200)
+        warnedBlitzerIdsRef.current.add(key500) // 500er-Warnung wäre redundant
+      } else if (distM <= 500 && !warnedBlitzerIdsRef.current.has(key500)) {
+        speakInstruction('Achtung, Blitzer in 500 Metern')
+        warnedBlitzerIdsRef.current.add(key500)
+      }
+    }
+  }, [svPosition])
+
   // SV-Marker aktualisieren wenn svPosition sich ändert.
   // 2026-05-07: 3D-Modell-Pfad bevorzugt — wenn `sv3dHandleRef` da ist,
   // wird die Pose ueber den ModelSource gesetzt (echter 3D-Render mit
@@ -501,6 +531,10 @@ export default function FeldmodusMap({
         // Blitzer in der Route-Bbox laden + Layer mounten/aktualisieren.
         if (coords.length >= 2) {
           const blitzerFeatures = await fetchBlitzerInBbox(bboxForRoute(coords, 0.5))
+          blitzerFeaturesRef.current = blitzerFeatures
+          // Warn-Set bei neuer Route reset — der SV beginnt eine neue
+          // Anfahrt, frühere Warnungen sind nicht mehr relevant.
+          warnedBlitzerIdsRef.current.clear()
           if (!blitzerRef.current && map.isStyleLoaded()) {
             blitzerRef.current = attachBlitzerLayer(map, blitzerFeatures)
           } else if (blitzerRef.current) {
