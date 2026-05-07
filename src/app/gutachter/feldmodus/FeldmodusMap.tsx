@@ -8,7 +8,7 @@
 // Fehlerbehandlung: Wenn NEXT_PUBLIC_MAPBOX_TOKEN fehlt, wird ein Fallback-
 // Platzhalter gerendert. Die Komponente crasht nie.
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ensureMapboxInitialized,
   mapboxgl,
@@ -25,6 +25,67 @@ import {
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
+import type { MapboxLightPreset } from '@/lib/mapbox/light-preset'
+
+type FogSpec = {
+  color: string
+  'high-color': string
+  'horizon-blend': number
+  'space-color': string
+  'star-intensity': number
+}
+
+/**
+ * Phase-3-Atmosphäre. Liefert Fog-Spec passend zur Tageszeit.
+ */
+function fogForLightPreset(preset: MapboxLightPreset): FogSpec {
+  switch (preset) {
+    case 'dawn':
+      return { color: 'rgb(255, 220, 200)', 'high-color': 'rgb(255, 195, 165)', 'horizon-blend': 0.08, 'space-color': 'rgb(60, 30, 70)', 'star-intensity': 0.05 }
+    case 'dusk':
+      return { color: 'rgb(245, 195, 195)', 'high-color': 'rgb(180, 140, 175)', 'horizon-blend': 0.08, 'space-color': 'rgb(40, 20, 70)', 'star-intensity': 0.1 }
+    case 'night':
+      return { color: 'rgb(60, 80, 120)', 'high-color': 'rgb(40, 60, 100)', 'horizon-blend': 0.04, 'space-color': 'rgb(5, 8, 25)', 'star-intensity': 0.55 }
+    default:
+      return { color: 'rgb(220, 230, 240)', 'high-color': 'rgb(200, 210, 230)', 'horizon-blend': 0.05, 'space-color': 'rgb(13, 27, 62)', 'star-intensity': 0.05 }
+  }
+}
+
+/**
+ * Phase-3b-Wetter-Modifier. Verändert die Tageszeit-Fog-Spec basierend auf
+ * OpenWeatherMap weather_id. Visuelle Effekte:
+ *   - Gewitter (2xx): dichter Fog, dunkler Cast
+ *   - Drizzle/Regen (3xx, 5xx): grauer dichter Fog
+ *   - Schnee (6xx): heller Blauschimmer
+ *   - Nebel/Dunst (7xx): MAX horizon-blend, fast-weiß
+ *   - Bewölkt (80x mit x>0): subtler Grau-Tint
+ *   - Klar (800): unverändert
+ */
+function applyWeatherToFog(base: FogSpec, weatherId: number | null): FogSpec {
+  if (weatherId == null) return base
+  if (weatherId >= 200 && weatherId < 300) {
+    // Gewitter
+    return { ...base, color: 'rgb(110, 120, 140)', 'high-color': 'rgb(70, 80, 100)', 'horizon-blend': 0.16, 'space-color': 'rgb(15, 20, 35)' }
+  }
+  if (weatherId >= 300 && weatherId < 600) {
+    // Drizzle + Regen
+    return { ...base, color: 'rgb(180, 190, 200)', 'high-color': 'rgb(140, 150, 170)', 'horizon-blend': 0.12 }
+  }
+  if (weatherId >= 600 && weatherId < 700) {
+    // Schnee
+    return { ...base, color: 'rgb(225, 235, 245)', 'high-color': 'rgb(200, 215, 235)', 'horizon-blend': 0.10 }
+  }
+  if (weatherId >= 700 && weatherId < 800) {
+    // Nebel/Dunst — fast komplett verschwommen
+    return { ...base, color: 'rgb(220, 220, 220)', 'high-color': 'rgb(200, 200, 200)', 'horizon-blend': 0.25, 'space-color': 'rgb(150, 150, 160)' }
+  }
+  if (weatherId > 800 && weatherId < 900) {
+    // Bewölkt — leichter Grau-Tint
+    return { ...base, color: 'rgb(200, 210, 220)', 'high-color': 'rgb(170, 180, 200)' }
+  }
+  // 800: Klar
+  return base
+}
 
 export interface FeldmodusMapProps {
   sv: FeldmodusSV
@@ -49,6 +110,10 @@ export default function FeldmodusMap({
   const heroPinRef = useRef<HeroPin3dHandle | null>(null)
   const stopMarkersRef = useRef<Marker[]>([])
   const tokenMissing = useRef(false)
+  // 2026-05-07 Phase 3b: Wetter-Code (OpenWeatherMap weather_id) am
+  // aktuellen Stop. Modifiziert Fog-Tinting (dichter bei Regen, hellgrau
+  // bei Schnee, fast-blind bei Nebel).
+  const [weatherId, setWeatherId] = useState<number | null>(null)
 
   const aktuellerStop = stops[aktuellerStopIndex] ?? null
 
@@ -108,49 +173,12 @@ export default function FeldmodusMap({
       } catch { /* fail silent */ }
     }
     const applyAtmosphere = () => {
-      // 2026-05-07 Phase 3: Fog-Tinting folgt dem Termin-Light-Preset.
-      // dawn → warmes Pfirsich, day → klares Blau, dusk → Magenta-Violett,
-      // night → tiefes Indigo + sichtbare Sterne.
+      // 2026-05-07 Phase 3 + 3b: Fog-Tinting folgt Termin-Light-Preset
+      // (Tageszeit) UND Wetter-Code (Regen/Schnee/Nebel/Bewölkung).
       const targetStop = stops[Math.max(0, aktuellerStopIndex)] ?? null
       const lightAt = targetStop?.start_zeit ? new Date(targetStop.start_zeit) : new Date()
       const preset = getMapboxLightPreset(lightAt)
-      const fog = (() => {
-        switch (preset) {
-          case 'dawn':
-            return {
-              color: 'rgb(255, 220, 200)',
-              'high-color': 'rgb(255, 195, 165)',
-              'horizon-blend': 0.08,
-              'space-color': 'rgb(60, 30, 70)',
-              'star-intensity': 0.05,
-            }
-          case 'dusk':
-            return {
-              color: 'rgb(245, 195, 195)',
-              'high-color': 'rgb(180, 140, 175)',
-              'horizon-blend': 0.08,
-              'space-color': 'rgb(40, 20, 70)',
-              'star-intensity': 0.1,
-            }
-          case 'night':
-            return {
-              color: 'rgb(60, 80, 120)',
-              'high-color': 'rgb(40, 60, 100)',
-              'horizon-blend': 0.04,
-              'space-color': 'rgb(5, 8, 25)',
-              'star-intensity': 0.55,
-            }
-          case 'day':
-          default:
-            return {
-              color: 'rgb(220, 230, 240)',
-              'high-color': 'rgb(200, 210, 230)',
-              'horizon-blend': 0.05,
-              'space-color': 'rgb(13, 27, 62)', // #0D1B3E claimondo-navy
-              'star-intensity': 0.05,
-            }
-        }
-      })()
+      const fog = applyWeatherToFog(fogForLightPreset(preset), weatherId)
       try {
         map.setFog(fog as Parameters<typeof map.setFog>[0])
         // Terrain: globale Höhendaten für plastische Berge/Täler.
@@ -296,6 +324,21 @@ export default function FeldmodusMap({
     handle.update([target.lng, target.lat])
   }, [aktuellerStopIndex, stops])
 
+  // 2026-05-07 Phase 3b: Wetter-Fetch beim Stop-Wechsel. Cached über den
+  // /api/weather-Endpoint (5-min TTL).
+  useEffect(() => {
+    const target = stops[aktuellerStopIndex]
+    if (!target?.lat || !target?.lng) return
+    const ctrl = new AbortController()
+    fetch(`/api/weather?lat=${target.lat}&lng=${target.lng}`, { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && typeof data.weather_id === 'number') setWeatherId(data.weather_id)
+      })
+      .catch(() => { /* abort or offline — Fog bleibt clear */ })
+    return () => ctrl.abort()
+  }, [aktuellerStopIndex, stops])
+
   // 2026-05-07 Phase 3: Light-Preset + Fog-Tinting folgen der Termin-Zeit.
   // Bei Stop-Wechsel werden Beleuchtung UND atmosphärische Töne sanft
   // umgestellt — Mapbox Standard interpoliert die Übergänge selbständig.
@@ -307,21 +350,10 @@ export default function FeldmodusMap({
     const preset = getMapboxLightPreset(new Date(target.start_zeit))
     try {
       map.setConfigProperty('basemap', 'lightPreset', preset)
-      const fog = (() => {
-        switch (preset) {
-          case 'dawn':
-            return { color: 'rgb(255, 220, 200)', 'high-color': 'rgb(255, 195, 165)', 'horizon-blend': 0.08, 'space-color': 'rgb(60, 30, 70)', 'star-intensity': 0.05 }
-          case 'dusk':
-            return { color: 'rgb(245, 195, 195)', 'high-color': 'rgb(180, 140, 175)', 'horizon-blend': 0.08, 'space-color': 'rgb(40, 20, 70)', 'star-intensity': 0.1 }
-          case 'night':
-            return { color: 'rgb(60, 80, 120)', 'high-color': 'rgb(40, 60, 100)', 'horizon-blend': 0.04, 'space-color': 'rgb(5, 8, 25)', 'star-intensity': 0.55 }
-          default:
-            return { color: 'rgb(220, 230, 240)', 'high-color': 'rgb(200, 210, 230)', 'horizon-blend': 0.05, 'space-color': 'rgb(13, 27, 62)', 'star-intensity': 0.05 }
-        }
-      })()
+      const fog = applyWeatherToFog(fogForLightPreset(preset), weatherId)
       map.setFog(fog as Parameters<typeof map.setFog>[0])
     } catch { /* style not ready yet */ }
-  }, [aktuellerStopIndex, stops])
+  }, [aktuellerStopIndex, stops, weatherId])
 
   // SV-Marker aktualisieren wenn svPosition sich ändert.
   // 2026-05-07: 3D-Modell-Pfad bevorzugt — wenn `sv3dHandleRef` da ist,
