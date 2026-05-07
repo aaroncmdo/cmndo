@@ -22,6 +22,9 @@ import {
   type SvCar3dHandle,
   attachHeroPin3d,
   type HeroPin3dHandle,
+  attachGoogle3dTiles,
+  isGoogle3dTilesEnabled,
+  type Google3dTilesHandle,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
@@ -108,6 +111,7 @@ export default function FeldmodusMap({
   const svMarkerRef = useRef<Marker | null>(null)
   const sv3dHandleRef = useRef<SvCar3dHandle | null>(null)
   const heroPinRef = useRef<HeroPin3dHandle | null>(null)
+  const google3dTilesRef = useRef<Google3dTilesHandle | null>(null)
   const stopMarkersRef = useRef<Marker[]>([])
   const tokenMissing = useRef(false)
   // 2026-05-07 Phase 3b: Wetter-Code (OpenWeatherMap weather_id) am
@@ -247,6 +251,18 @@ export default function FeldmodusMap({
           console.error('[FeldmodusMap] hero-pin attach failed:', err)
         }
       }
+
+      // 2026-05-07 Phase 4: Google Photorealistic 3D Tiles — nur aktiv wenn
+      // beide Env-Vars gesetzt sind (Cost-Schutz, siehe lib/mapbox/google-
+      // 3d-tiles.ts). Lazy-Import damit deck.gl + loaders.gl nicht ins
+      // initial Bundle gehen wenn das Feature deaktiviert ist.
+      if (isGoogle3dTilesEnabled()) {
+        attachGoogle3dTiles(map).then((handle) => {
+          if (handle) google3dTilesRef.current = handle
+        }).catch((err) => {
+          console.error('[FeldmodusMap] google-3d-tiles attach failed:', err)
+        })
+      }
       // Initial-Camera: nahtlose Fortsetzung der Heute→Feldmodus-Intro-
       // Animation. Pitch 60 + enger Zoom + Bearing Richtung erstem Stop —
       // KEIN Wide-Bounds-Fit (würde den Pitch auf 0 reseten und das
@@ -303,6 +319,8 @@ export default function FeldmodusMap({
       sv3dHandleRef.current = null
       heroPinRef.current?.remove()
       heroPinRef.current = null
+      google3dTilesRef.current?.remove()
+      google3dTilesRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current = []
       map.remove()
