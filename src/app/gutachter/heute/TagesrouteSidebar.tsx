@@ -23,6 +23,7 @@ import { googleMapsLink } from './googleMapsLink'
 import type { HeuteTerminFull } from './page'
 import { formatUhrzeit } from '@/lib/format'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { resolveKundeAvatarUrl } from '@/lib/avatars/default-kunde-avatar'
 
 export type TagesroutePflichtStat = {
   fallId: string
@@ -164,6 +165,7 @@ export default function TagesrouteSidebar({
             .slice(0, 3)
             .join(' ')
           const link = googleMapsLink(t, svOrigin)
+          const avatarUrl = resolveKundeAvatarUrl(t.kunde_avatar_url, t.kunde_anrede)
 
           // 2026-05-06: Verlegte Termine werden visuell durchgestrichen +
           // gedimmt. Route ignoriert sie zusätzlich (HeuteClient filtert
@@ -190,12 +192,13 @@ export default function TagesrouteSidebar({
                 className="w-full text-left px-4 py-3 flex items-start gap-3"
               >
                 {/* 2026-05-06: Avatar mit eingebackener Stop-Nummer.
-                    Wenn Kunde ein Profilbild hat, zeigen — sonst Initialen-
-                    Fallback aus dem Namen. Stop-Nummer als Badge unten-rechts. */}
+                    2026-05-07: Hat der Kunde kein Profilbild, zeigen wir das
+                    Anrede-spezifische Default (Herr/Frau, Aaron-Standard).
+                    Bleibt Anrede null oder „divers" → Initialen-Fallback. */}
                 <div className="relative shrink-0">
-                  {t.kunde_avatar_url ? (
+                  {avatarUrl ? (
                     <img
-                      src={t.kunde_avatar_url}
+                      src={avatarUrl}
                       alt={t.kunde_name}
                       className={`w-11 h-11 rounded-full object-cover border-2 ${
                         isActive ? 'border-claimondo-ondo' : 'border-claimondo-border'
