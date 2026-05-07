@@ -208,16 +208,21 @@ export default function ProfilClient({
 
         <form onSubmit={handleSave} className="max-w-4xl">
           <div className="bg-white rounded-2xl p-6 border border-claimondo-border space-y-4">
-            {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis */}
-            <div className="flex items-center gap-4 pb-4 border-b border-claimondo-border">
+            {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis.
+                2026-05-07 Mobile-Polish: min-w-0 + truncate damit lange Namen
+                den Avatar nicht überlappen, „Sachverständiger" als Rolle-Pill
+                statt Subtitle-Text (verhindert Overflow auf 390er-Mobile). */}
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4 pb-4 border-b border-claimondo-border">
               <AvatarUpload
                 currentUrl={profile.avatar_url ?? googleAvatarUrl ?? null}
                 initials={initials || '??'}
                 size="md"
               />
-              <div>
-                <p className="text-claimondo-navy font-medium text-lg">{fullName}</p>
-                <p className="text-claimondo-ondo text-sm">Sachverständiger</p>
+              <div className="flex-1 min-w-0 w-full">
+                <p className="text-claimondo-navy font-medium text-lg break-words">{fullName}</p>
+                <span className="inline-block mt-1 text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo bg-[#f8f9fb] border border-claimondo-border rounded-full px-2 py-0.5">
+                  Sachverständiger
+                </span>
               </div>
             </div>
 
