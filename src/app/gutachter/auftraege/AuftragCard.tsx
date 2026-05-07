@@ -168,16 +168,14 @@ export default function AuftragCard(props: AuftragCardProps) {
         </span>
       </div>
 
-      {/* 2026-05-07 (Aaron-Spec): Showroom-Hintergrund mit Marken-Logo /
-          Fahrzeug-Render im Zentrum. Quadratisches Display, Vignette +
-          Spotlight-Glow hinter dem Logo geben dem Panel räumliche Tiefe.
-          Imagin-Renders schweben dadurch wie auf einer Showroom-Drehbuehne;
-          im SimpleIcons-Fallback wirkt das Marken-Logo wie ein
-          beleuchtetes Wand-Display. */}
+      {/* 2026-05-07 (Aaron-Spec, Iteration 2): Showroom-Banner full-width
+          statt mittiges Quadrat. 16:9-Verhältnis fühlt sich auf Card-Breite
+          besser an, der Showroom-Render hat mehr Platz, Logo zentriert
+          floatet als Wand-Display. Vignette + Spotlight bleiben für Tiefe. */}
       {props.fall.fahrzeug_hersteller && (
         <div className="relative z-10 pointer-events-none">
           <div
-            className="relative aspect-square w-full max-w-[280px] mx-auto rounded-xl overflow-hidden border border-claimondo-navy/20 shadow-md"
+            className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-claimondo-navy/20 shadow-md"
             style={{
               backgroundImage: 'url(/auftrag/showroom-bg.webp)',
               backgroundSize: 'cover',
@@ -191,7 +189,7 @@ export default function AuftragCard(props: AuftragCardProps) {
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  'radial-gradient(circle at 50% 45%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 55%)',
+                  'radial-gradient(circle at 50% 45%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0) 55%)',
               }}
             />
             {/* Marken-Logo / Fahrzeug-Render — dark=true → Logo in Weiß */}
@@ -201,7 +199,7 @@ export default function AuftragCard(props: AuftragCardProps) {
                 modell={props.fall.fahrzeug_modell ?? null}
                 lackfarbe={(props.fall.lackfarbe_code as LackfarbeCode | null) ?? null}
                 baujahr={props.fall.fahrzeug_baujahr ?? null}
-                width={170}
+                width={180}
                 dark
               />
             </div>
