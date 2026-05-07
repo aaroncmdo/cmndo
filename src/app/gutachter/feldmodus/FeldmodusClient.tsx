@@ -269,11 +269,10 @@ export default function FeldmodusClient({
     // Glass-Pattern (siehe AAR-769 GlassPanel + Heute-Sidebar): bg-white/65
     // + backdrop-blur-md + border-white/40 + shadow-ios-lg. Map bleibt
     // 100vw × 100vh, Overlays schweben über ihr.
-    // 2026-05-07 Fix: h-full cascadet nicht durch von FeldmodusLayout
-    // (fixed inset-0). Debug-Skript zeigte: mapboxgl-map.height = 0 → Map
-    // rendert nicht. h-screen (100vh) macht die Höhe explizit, dadurch
-    // greift h-full im Map-Wrapper darunter.
-    <div className="relative h-screen w-screen">
+    // 2026-05-07 Fix: Tailwind h-screen greift nicht durch zur mapboxgl-map
+    // (Debug-Skript: height = 0). Inline-Style mit absoluten Werten setzt
+    // die Höhe deterministisch — keine cascade-Abhängigkeit.
+    <div className="relative" style={{ height: '100vh', width: '100vw' }}>
       <OfflineStatusBanner />
 
       {/* Karte als Background-Layer — full-bleed, absolut positioniert
