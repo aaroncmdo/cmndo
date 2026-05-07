@@ -54,6 +54,9 @@ export type AuftragCardProps = {
   statusLabel: string
   /** CMM-24: Anzahl offener Pflicht-Dokumente — gelber Badge wenn >0. */
   offeneDokumente?: number
+  /** 2026-05-07 Design-Review Item 1.5: Density-Mode. Compact = ohne Showroom-
+   *  Banner, weniger Padding, knappere Meta-Zeilen. */
+  density?: 'comfortable' | 'compact'
 }
 
 type TerminMeta =
@@ -104,8 +107,12 @@ export default function AuftragCard(props: AuftragCardProps) {
     .join(' ')
     .trim() || null
 
+  const compact = props.density === 'compact'
+  const cardPad = compact ? 'p-3 sm:p-3.5' : 'p-4 sm:p-5'
+  const cardSpacing = compact ? 'space-y-1.5' : 'space-y-3'
+
   return (
-    <div className="relative bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-ondo transition-colors group min-h-[112px]">
+    <div className={`relative bg-white rounded-2xl border border-claimondo-border ${cardPad} ${cardSpacing} hover:border-claimondo-ondo transition-colors group min-h-[80px]`}>
       {/* CMM-25: Stretched-Link über die ganze Card. Card-Click ist die
           einzige Aktion — der SV öffnet seinen Auftrag, sonst nichts. */}
       <Link
@@ -172,7 +179,7 @@ export default function AuftragCard(props: AuftragCardProps) {
           statt mittiges Quadrat. 16:9-Verhältnis fühlt sich auf Card-Breite
           besser an, der Showroom-Render hat mehr Platz, Logo zentriert
           floatet als Wand-Display. Vignette + Spotlight bleiben für Tiefe. */}
-      {props.fall.fahrzeug_hersteller && (
+      {props.fall.fahrzeug_hersteller && !compact && (
         <div className="relative z-10 pointer-events-none">
           <div
             className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-claimondo-navy/20 shadow-md"
