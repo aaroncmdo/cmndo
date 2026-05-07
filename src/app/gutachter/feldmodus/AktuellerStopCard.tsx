@@ -8,7 +8,7 @@
 // Beim Auslösen ruft onArrived() — FeldmodusClient setzt sessionStatus='arrived'
 // → Fallakte öffnet automatisch.
 
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   PhoneIcon,
@@ -62,6 +62,10 @@ export default function AktuellerStopCard({
   // AAR-384 + Auto-Arrive: Termin-State live beobachten (Kunde-Tracking +
   // sv_angekommen_am + besichtigung_gestartet_am).
   const supabase = useMemo(() => createClient(), [])
+  // 2026-05-07: useId-Suffix verhindert „cannot add postgres_changes
+  // callbacks after subscribe()"-Crash bei Strict-Mode-Doppel-Mount oder
+  // Layout-bedingt parallelem Render. Memory feedback_realtime_channel_ids.
+  const channelSuffix = useId()
   const [kundeTracking, setKundeTracking] = useState<{
     aktiviert: boolean
     etaMinutes: number | null
@@ -92,7 +96,7 @@ export default function AktuellerStopCard({
         setBesichtigungGestartetAm((data.besichtigung_gestartet_am as string | null) ?? null)
       })
     const channel = supabase
-      .channel(`sv-termin-state-${stop.termin_id}`)
+      .channel(`sv-termin-state-${stop.termin_id}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -123,7 +127,7 @@ export default function AktuellerStopCard({
       cancelled = true
       void supabase.removeChannel(channel)
     }
-  }, [supabase, stop.termin_id])
+  }, [supabase, stop.termin_id, channelSuffix])
 
   const besichtigungLaeuft = Boolean(besichtigungGestartetAm) || sessionStatus === 'arrived'
   const svIstDa = Boolean(svAngekommenAm)

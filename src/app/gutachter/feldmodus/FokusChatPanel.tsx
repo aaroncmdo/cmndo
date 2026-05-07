@@ -10,7 +10,7 @@
 // und Swipe-Gesten bewusst geschnitten — Tap-Toggle reicht für MVP.
 // Auto-Collapse bei sessionStatus='arrived' (Fallakten-View braucht Platz).
 
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   ChevronUpIcon,
@@ -63,6 +63,9 @@ export default function FokusChatPanel({
   empfaengerId,
 }: Props) {
   const supabase = useMemo(() => createClient(), [])
+  // useId-Suffix gegen Strict-Mode-Doppel-Mount-Crash (Memory
+  // feedback_realtime_channel_ids).
+  const channelSuffix = useId()
   const [expanded, setExpanded] = useState(false)
   const [messages, setMessages] = useState<Nachricht[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -85,7 +88,7 @@ export default function FokusChatPanel({
       })
 
     const channel = supabase
-      .channel(`fokus-chat-${fallId}`)
+      .channel(`fokus-chat-${fallId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -105,7 +108,7 @@ export default function FokusChatPanel({
       cancelled = true
       void supabase.removeChannel(channel)
     }
-  }, [supabase, fallId])
+  }, [supabase, fallId, channelSuffix])
 
   // Ungelesene zählen (inbound + nicht-gelesen + nicht eigene).
   useEffect(() => {
@@ -202,17 +205,23 @@ export default function FokusChatPanel({
     .find((m) => m.richtung === 'inbound')
 
   if (!expanded) {
+    // 2026-05-07 Polish: kollabierter Chat-Pill ist jetzt auch eine Glass-
+    // Floating-Card analog zu FokusHeader/AktuellerStopCard. Mobile bleibt
+    // full-width Bottom-Bar (Mobile-UX), Desktop ist eine Pill bottom-left
+    // mit Glass-Tokens.
     return (
       <button
         type="button"
         onClick={() => setExpanded(true)}
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[var(--brand-primary)]/20 shadow-lg px-4 py-2 flex items-center gap-3 hover:bg-claimondo-bg"
+        className="fixed z-40 px-3 py-2 flex items-center gap-3 bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md hover:bg-white/80 transition-colors
+          bottom-0 left-0 right-0 border-t border-l-0 border-r-0 border-b-0 rounded-t-2xl
+          lg:bottom-4 lg:left-4 lg:right-auto lg:w-[380px] lg:rounded-2xl lg:border"
         aria-label="Chat öffnen"
       >
         <div className="relative">
-          <MessageCircleIcon className="w-5 h-5 text-[var(--brand-secondary)]" />
+          <MessageCircleIcon className="w-5 h-5 text-claimondo-ondo" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-[#FF4444] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -221,7 +230,7 @@ export default function FokusChatPanel({
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo leading-tight">
             Chat mit {customerName || 'Kunde'}
           </p>
-          <p className="text-xs text-[var(--brand-primary)] truncate">
+          <p className="text-xs text-claimondo-navy truncate">
             {lastInbound
               ? lastInbound.nachricht
               : 'Tippen zum Öffnen · Quick-Replies verfügbar'}
