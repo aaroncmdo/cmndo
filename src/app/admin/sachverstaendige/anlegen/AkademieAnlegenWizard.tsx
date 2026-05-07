@@ -171,7 +171,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
             </p>
             <div className="mt-6 flex gap-3">
               <button onClick={() => router.push('/admin/sachverstaendige')}
-                className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold">
+                className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold">
                 Zur SV-Liste
               </button>
             </div>
@@ -190,7 +190,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
           return (
             <div key={s.key} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                i < step ? 'bg-emerald-500' : i === step ? 'bg-[#4573A2]' : 'bg-claimondo-border'
+                i < step ? 'bg-emerald-500' : i === step ? 'bg-claimondo-ondo' : 'bg-claimondo-border'
               }`}>
                 <Icon className="w-4 h-4 text-white" />
               </div>
@@ -229,7 +229,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
                       setAnschriftLng(place.lng)
                       setAnschriftPlaceId(place.place_id)
                     }}
-                    className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                    className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
                   />
                 </div>
                 <Field label="USt-IdNr (optional)" value={ustId} onChange={setUstId} />
@@ -268,7 +268,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
                 Mitglieder können auch nachträglich via Sub-SV-Tab hinzugefügt werden — Phase 1 erlaubt 0 Sub-SVs.
               </p>
               <button type="button" onClick={addSubSv}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#4573A2]/5 hover:bg-[#4573A2]/10 text-[#4573A2] text-xs font-medium">
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-claimondo-ondo/5 hover:bg-claimondo-ondo/10 text-claimondo-ondo text-xs font-medium">
                 <PlusIcon className="w-3.5 h-3.5" />
                 Sub-SV
               </button>
@@ -302,7 +302,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
                     {(['standard', 'pro', 'premium'] as const).map(p => (
                       <button key={p} type="button" onClick={() => updateSubSv(s.id, 'paket', p)}
                         className={`px-3 py-2 rounded-lg border text-xs transition-colors ${
-                          s.paket === p ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#4573A2] font-semibold' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
+                          s.paket === p ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-ondo font-semibold' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
                         }`}>
                         <div className="capitalize">{p}</div>
                         <div className="text-[10px] mt-0.5 opacity-70">{PAKET_KONFIG[p].kontingent} F · {PAKET_KONFIG[p].preis_anzahlung_eur}€</div>
@@ -313,9 +313,9 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
               </div>
             ))}
             {subSvs.length > 0 && (
-              <div className="bg-[#4573A2]/5 border border-[#4573A2]/10 rounded-xl p-4">
+              <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/10 rounded-xl p-4">
                 <p className="text-xs text-claimondo-ondo">Sub-SVs Gesamt-Kontingent</p>
-                <p className="text-2xl font-bold text-[#4573A2] mt-1">{gesamtKontingentSubSvs} Fälle/Monat</p>
+                <p className="text-2xl font-bold text-claimondo-ondo mt-1">{gesamtKontingentSubSvs} Fälle/Monat</p>
               </div>
             )}
           </div>
@@ -324,7 +324,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
         {/* SCHRITT 2: Zusammenfassung */}
         {step === 2 && (
           <div className="space-y-4">
-            <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 text-sm">
+            <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 text-sm">
               <p className="text-xs text-claimondo-ondo uppercase mb-2">Akademie</p>
               <p className="text-claimondo-navy"><strong>{akademieName}</strong>{rechtsform && ` (${rechtsform})`}</p>
               <p className="text-claimondo-ondo text-xs mt-1">{anschrift}</p>
@@ -350,8 +350,8 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
               </div>
             </div>
 
-            <div className="bg-[#4573A2]/5 border border-[#4573A2]/10 rounded-xl p-4 flex items-start gap-3">
-              <MailIcon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
+            <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/10 rounded-xl p-4 flex items-start gap-3">
+              <MailIcon className="w-5 h-5 text-claimondo-ondo flex-shrink-0 mt-0.5" />
               <div className="text-xs text-claimondo-navy">
                 <strong>{1 + subSvs.length} Welcome-Mail(s) werden versendet:</strong>
                 <ul className="mt-2 ml-4 list-disc space-y-1">
@@ -372,14 +372,14 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
         <div className="flex items-center gap-3 mt-6">
           {step > 0 && (
             <button type="button" onClick={() => setStep(step - 1)} disabled={saving}
-              className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40">
+              className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40">
               Zurück
             </button>
           )}
           <button type="button"
             onClick={() => { if (step < STEPS.length - 1) setStep(step + 1); else handleSubmit() }}
             disabled={saving || !canNext()}
-            className="flex-1 py-2.5 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-semibold transition-colors disabled:opacity-40">
+            className="flex-1 py-2.5 rounded-xl bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-semibold transition-colors disabled:opacity-40">
             {saving ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Akademie anlegen + Welcome-Mails senden'}
           </button>
         </div>
@@ -398,7 +398,7 @@ function Field({
     <div className={className}>
       <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
+        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" />
     </div>
   )
 }
@@ -408,7 +408,7 @@ function NumField({ label, value, onChange }: { label: string; value: number; on
     <div>
       <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <input type="number" value={value} onChange={e => onChange(Number(e.target.value) || 0)}
-        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
+        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" />
     </div>
   )
 }
@@ -423,7 +423,7 @@ function SelectField({
     <div>
       <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <select value={value} onChange={e => onChange(e.target.value)}
-        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]">
+        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo">
         {!options.includes('') && <option value="" disabled>{placeholder ?? 'Bitte wählen...'}</option>}
         {options.map(opt => (
           <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>
@@ -450,7 +450,7 @@ function TagSection({
           return (
             <button key={opt} type="button" onClick={() => onToggle(opt)}
               className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
-                active ? 'bg-[#4573A2] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy'
+                active ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy'
               }`}>
               {opt}
             </button>

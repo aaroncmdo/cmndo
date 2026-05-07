@@ -104,12 +104,12 @@ export default async function MonatsUmsatzForecast() {
                 Provision: {fmtEur(f.provisionLaufend)}
               </p>
             </div>
-            <div className="p-4 bg-[#4573A2]/10 rounded-xl">
-              <p className="text-[10px] text-[#1E3A5F] uppercase tracking-wide font-semibold mb-1">
+            <div className="p-4 bg-claimondo-ondo/10 rounded-xl">
+              <p className="text-[10px] text-claimondo-shield uppercase tracking-wide font-semibold mb-1">
                 Geplant (Forecast Monatsende)
               </p>
-              <p className="text-3xl font-bold text-[#1E3A5F] tabular-nums">{fmtEur(f.gesamtForecast)}</p>
-              <p className="text-[11px] text-[#4573A2] mt-1">
+              <p className="text-3xl font-bold text-claimondo-shield tabular-nums">{fmtEur(f.gesamtForecast)}</p>
+              <p className="text-[11px] text-claimondo-ondo mt-1">
                 Provision: {fmtEur(f.provisionForecast)} · noch {f.restTage} {f.restTage === 1 ? 'Tag' : 'Tage'}
               </p>
             </div>
@@ -126,13 +126,13 @@ export default async function MonatsUmsatzForecast() {
                 )}
               </span>
             </div>
-            <div className="h-3 bg-[#f8f9fb] rounded-full overflow-hidden flex">
+            <div className="h-3 bg-claimondo-bg rounded-full overflow-hidden flex">
               <div
                 className="bg-emerald-500"
                 style={{ width: `${f.gesamtForecast > 0 ? Math.min(100, (f.gesamtLaufend / f.gesamtForecast) * 100) : 0}%` }}
               />
               <div
-                className="bg-[#4573A2]/30"
+                className="bg-claimondo-ondo/30"
                 style={{ width: `${f.gesamtForecast > 0 ? Math.max(0, ((f.gesamtForecast - f.gesamtLaufend) / f.gesamtForecast) * 100) : 0}%` }}
               />
             </div>

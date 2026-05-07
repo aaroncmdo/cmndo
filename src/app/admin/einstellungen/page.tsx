@@ -14,8 +14,8 @@ const SECTIONS = [
     icon: FileSignatureIcon,
     title: 'Vertragstexte',
     description: 'SV-Vertrag, AGB und Nutzungsbedingungen verwalten.',
-    iconBg: 'bg-[#4573A2]/10',
-    iconColor: 'text-[#4573A2]',
+    iconBg: 'bg-claimondo-ondo/10',
+    iconColor: 'text-claimondo-ondo',
   },
   {
     href: '/admin/einstellungen/google',
@@ -62,14 +62,14 @@ export default async function EinstellungenPage() {
             <Link
               key={s.href}
               href={s.href}
-              className="group bg-white border border-claimondo-border rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+              className="group bg-white border border-claimondo-border rounded-2xl p-5 hover:border-claimondo-ondo hover:shadow-sm transition-all"
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-xl ${s.iconBg} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-5 h-5 ${s.iconColor}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1 text-sm font-semibold text-[#0D1B3E]">
+                  <div className="flex items-center gap-1 text-sm font-semibold text-claimondo-navy">
                     {s.title}
                     <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>

@@ -32,7 +32,7 @@ export default async function AdminDashboardPage() {
   if (!user) redirect('/login')
 
   return (
-    <div className="h-full overflow-y-auto bg-[#f8f9fb]">
+    <div className="h-full overflow-y-auto bg-claimondo-bg">
       <div className="py-5 space-y-4 min-h-full flex flex-col">
         {/* Header */}
         <div className="flex-shrink-0">

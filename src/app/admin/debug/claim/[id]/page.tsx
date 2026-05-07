@@ -76,7 +76,7 @@ export default async function DebugClaimPage({ params }: PageProps) {
               <span className="ml-2 text-red-700 text-xs">✗ kein Claim sichtbar</span>
             )}
           </summary>
-          <pre className="mt-2 max-h-[600px] overflow-auto rounded bg-[#f8f9fb] p-2 text-[11px] font-mono leading-tight">
+          <pre className="mt-2 max-h-[600px] overflow-auto rounded bg-claimondo-bg p-2 text-[11px] font-mono leading-tight">
             {JSON.stringify(claim, null, 2)}
           </pre>
         </details>

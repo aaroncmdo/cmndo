@@ -187,7 +187,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
     }
   }
 
-  const inputCls = 'w-full bg-white border border-claimondo-border rounded-xl px-4 py-2.5 text-claimondo-navy text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#4573A2]'
+  const inputCls = 'w-full bg-white border border-claimondo-border rounded-xl px-4 py-2.5 text-claimondo-navy text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo'
 
   return (
     <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
@@ -216,7 +216,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
         </div>
 
         {/* Standort mit Google Places Autocomplete */}
-        <div className="border border-claimondo-border rounded-xl p-4 bg-[#f8f9fb]/50">
+        <div className="border border-claimondo-border rounded-xl p-4 bg-claimondo-bg/50">
           <label className="flex items-center gap-1.5 text-claimondo-ondo text-xs mb-2">
             <MapPinIcon className="w-3.5 h-3.5" /> Standort (Google Places)
           </label>
@@ -255,7 +255,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             läuft über gesperrt_seit (deactivateGutachter / reactivateGutachter). */}
         <div>
           <label className="block text-claimondo-ondo text-xs mb-1">Status</label>
-          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl px-4 py-2.5 text-sm">
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-xl px-4 py-2.5 text-sm">
             {istGesperrt ? (
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -319,7 +319,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
                 <button
                   type="button"
                   onClick={() => { setShowSperrDialog(false); setSperrGrund('') }}
-                  className="px-3 py-1.5 rounded-lg text-xs text-claimondo-ondo hover:bg-[#f8f9fb]"
+                  className="px-3 py-1.5 rounded-lg text-xs text-claimondo-ondo hover:bg-claimondo-bg"
                 >
                   Abbrechen
                 </button>
@@ -341,7 +341,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             + Nummern-Felder (conditional bei Gruppe-B-Qualis). Migriert vom
             gelöschten GutachterProfilPanel — hier ist jetzt der zentrale
             Edit-Ort für alle Profil-Daten. */}
-        <div className="border border-claimondo-border rounded-xl p-4 bg-[#f8f9fb]/30 space-y-4">
+        <div className="border border-claimondo-border rounded-xl p-4 bg-claimondo-bg/30 space-y-4">
           <h3 className="text-xs font-semibold text-claimondo-navy uppercase tracking-wide">Qualifikationen &amp; Spezialisierungen</h3>
 
           <TagGroup
@@ -354,10 +354,10 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
 
           {/* Conditional Nummern-Felder für Gruppe-B-Qualis */}
           {(qualifikationen.includes('BVSK-Mitglied') || qualifikationen.includes('IHK-zertifiziert') || qualifikationen.includes('Öffentlich bestellt und vereidigt')) && (
-            <div className="rounded-lg border border-[#4573A2]/20 bg-[#4573A2]/5 px-3 py-2.5 space-y-2">
+            <div className="rounded-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 px-3 py-2.5 space-y-2">
               <div className="flex items-center gap-1.5">
-                <IdCardIcon className="w-3 h-3 text-[#4573A2]" />
-                <span className="text-[11px] font-semibold text-[#0D1B3E]">Quali-Nummern (optional)</span>
+                <IdCardIcon className="w-3 h-3 text-claimondo-ondo" />
+                <span className="text-[11px] font-semibold text-claimondo-navy">Quali-Nummern (optional)</span>
               </div>
               <div className="grid gap-2 md:grid-cols-2">
                 {qualifikationen.includes('BVSK-Mitglied') && (
@@ -422,7 +422,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           type="submit"
           isLoading={saving}
           loadingText="Speichert + berechnet Isochrone ..."
-          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 bg-[#1E3A5F] hover:bg-[#4573A2] text-white"
+          className="w-full py-3 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 bg-claimondo-shield hover:bg-claimondo-ondo text-white"
         >
           Änderungen speichern
         </LoadingButton>
@@ -432,8 +432,8 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
       <div className="mt-6 pt-5 border-t border-claimondo-border">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#4573A2]/10 flex items-center justify-center flex-shrink-0">
-              <MailIcon className="w-4 h-4 text-[#4573A2]" />
+            <div className="w-8 h-8 rounded-lg bg-claimondo-ondo/10 flex items-center justify-center flex-shrink-0">
+              <MailIcon className="w-4 h-4 text-claimondo-ondo" />
             </div>
             <div className="text-xs text-claimondo-ondo leading-relaxed">
               <strong className="text-claimondo-navy block mb-0.5">Willkommens-Mail erneut senden</strong>
@@ -446,7 +446,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             onClick={handleResendWelcome}
             isLoading={resending}
             loadingText="Sendet…"
-            className="flex-shrink-0 px-3 py-2 rounded-xl border border-[#4573A2]/40 text-[#1E3A5F] text-xs font-semibold hover:bg-[#4573A2]/5 disabled:opacity-40"
+            className="flex-shrink-0 px-3 py-2 rounded-xl border border-claimondo-ondo/40 text-claimondo-shield text-xs font-semibold hover:bg-claimondo-ondo/5 disabled:opacity-40"
           >
             Erneut senden
           </LoadingButton>
@@ -497,7 +497,7 @@ function TagGroup({
               onClick={() => onToggle(opt)}
               className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
                 active
-                  ? 'bg-[#4573A2] text-white border-[#4573A2]'
+                  ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
                   : 'bg-white text-claimondo-ondo border-claimondo-border hover:border-claimondo-border'
               }`}
             >
