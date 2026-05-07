@@ -113,7 +113,7 @@ export default function FeldmodusClient({
     [aktuellerStop, session.id, router],
   )
 
-  const { position, distanceMeters, permissionState, error } = useFieldTracking({
+  const { position: livePosition, distanceMeters, permissionState, error } = useFieldTracking({
     enabled: trackingEnabled,
     svId: sv.id,
     terminId: aktuellerStop?.termin_id ?? null,
@@ -121,6 +121,17 @@ export default function FeldmodusClient({
     targetLng: aktuellerStop?.lng ?? null,
     onGeofenceReached,
   })
+
+  // 2026-05-07 (Aaron-Smoke MAP3): TBT braucht eine Position. Wenn GPS
+  // denied/timeout, fallback auf sv.standort_lat/lng (Heimat-Standort aus
+  // DB) damit TBT-Banner + Camera-follow + Routing zumindest aktiv sind.
+  // Im echten Live-Mode überschreibt livePosition den Fallback sobald
+  // verfügbar.
+  const position = livePosition ?? (
+    sv.standort_lat != null && sv.standort_lng != null
+      ? { lat: sv.standort_lat, lng: sv.standort_lng, heading: null }
+      : null
+  )
 
   // Turn-by-Turn-Navigation: aktiv solange wir unterwegs sind (nicht arrived).
   // Voice ist standardmäßig an, kann via Banner-Button toggled werden.
@@ -283,7 +294,12 @@ export default function FeldmodusClient({
           stops={stops}
           aktuellerStopIndex={aktuellerStopIndex}
           svPosition={position}
-          followSv={tbtActive && !!tbt.route}
+          // 2026-05-07 (Aaron-Smoke MAP3): Camera folgt der SV-Position
+          // sobald sie verfügbar ist — nicht abhängig von TBT-Route.
+          // Vorher musste TBT-Routing erfolgreich laden bevor follow-mode
+          // aktiv war; bei kaltem Start ohne GPS sah das wie eine static
+          // map aus.
+          followSv={!!position}
         />
       </div>
 
@@ -296,14 +312,17 @@ export default function FeldmodusClient({
           TbtBanner top-center (rendert weiter unten in eigenem Block).
           GPS-/Wake-Lock-Banner bleiben rechts. */}
       {sessionStatus === 'arrived' && aktuellerStop ? (
-        // Arrived: Fallakte als Hauptpanel — ab md floating-card via shared
-        // GlassPanel (Heute-Pattern), Mobile <md weiter als full-screen
-        // Bottom-Sheet-Branch unten.
-        <GlassPanel
-          variant="prominent"
-          className="hidden md:flex md:absolute md:left-4 md:top-4 md:bottom-4 md:w-[420px] md:flex-col md:overflow-hidden z-30"
-        >
-          <SvFallakteView
+        // 2026-05-07 (Aaron-Smoke MAP3): Vor-Ort = Modal-Popover. Vorher
+        // war SvFallakteView ein 420px-Floating-Side-Panel — Aaron will
+        // einen vollwertigen Popover der den Fallakte-Detail überlagert
+        // weil die echte Vor-Ort-Erfassung noch nicht da ist.
+        // Mit Backdrop-Dim damit der SV den Modus-Wechsel klar wahrnimmt.
+        <div className="hidden md:block fixed inset-0 z-40 bg-claimondo-navy/30 backdrop-blur-sm">
+          <GlassPanel
+            variant="prominent"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(720px,92vw)] h-[min(85vh,800px)] flex flex-col overflow-hidden"
+          >
+            <SvFallakteView
             fallId={aktuellerStop.fall_id}
             sessionId={session.id}
             terminId={aktuellerStop.termin_id}
@@ -318,7 +337,8 @@ export default function FeldmodusClient({
               }
             }}
           />
-        </GlassPanel>
+          </GlassPanel>
+        </div>
       ) : (
         <>
           {/* Floating Header-Pill — top-left, kompakt (ab md sichtbar) */}

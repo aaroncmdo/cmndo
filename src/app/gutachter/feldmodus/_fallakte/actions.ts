@@ -122,6 +122,9 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
   // pflicht, Gewerbeanmeldung, Bestellungsurkunde, BVSK …) im Feldmodus-
   // Dokument-Tab. Die gehören NICHT zum Fall, sondern zum SV-Onboarding —
   // Slot-Kategorie 'gutachter_verifizierung'. Filter raus.
+  // Plus: nur OFFENE Slots zeigen (ausstehend / nachgereicht_angefordert).
+  // Erledigte verstopfen die Liste — der SV will sehen was noch zu tun ist.
+  const FALL_RELEVANT_OFFEN_STATUS = new Set(['ausstehend', 'nachgereicht_angefordert'])
   const slots: FeldmodusSlot[] = katalog
     .filter((k) => k.uploadbar_von?.includes(SV_UPLOAD_ROLE))
     .filter((k) => k.kategorie !== 'gutachter_verifizierung')
@@ -157,6 +160,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
           : null,
       }
     })
+    .filter((s) => FALL_RELEVANT_OFFEN_STATUS.has(s.status))
 
   const fallData: FeldmodusFallakteFall = {
     id: fall.id,
