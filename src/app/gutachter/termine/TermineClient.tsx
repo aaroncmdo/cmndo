@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CalendarIcon, CheckIcon, XIcon, RefreshCwIcon, ClockIcon, AlertTriangleIcon } from 'lucide-react'
+import { CalendarIcon, CheckIcon, XIcon, RefreshCwIcon, ClockIcon, AlertTriangleIcon, CalendarPlusIcon } from 'lucide-react'
+import EmptyState from '@/components/shared/EmptyState'
 import { terminAnnehmen, terminAblehnen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { formatDatumMitWochentag, formatUhrzeit } from '@/lib/format'
 import PageHeader from '@/components/shared/PageHeader'
@@ -111,10 +112,22 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-claimondo-border p-12 text-center">
-          <CalendarIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-3" />
-          <p className="text-sm text-claimondo-ondo">Keine Termine in dieser Ansicht.</p>
-        </div>
+        // 2026-05-07 EmptyState-Iter-2: Vorher nur Icon + Satz. Jetzt Shared-
+        // EmptyState mit klaren CTAs — der SV soll sofort wissen WO er aktiv
+        // werden kann (Aufträge annehmen, Tagesplanung ansehen).
+        <EmptyState
+          icon={CalendarPlusIcon}
+          title={filter === 'offen' ? 'Keine offenen Termine' : 'Noch keine Termine'}
+          description={
+            filter === 'offen'
+              ? 'Sobald ein Kunde einen FlowLink öffnet und einen Vorschlag macht, erscheint hier ein Eintrag. Aktive Aufträge findest du in der Aufträge-Liste.'
+              : 'Termine entstehen automatisch, wenn ein Kunde über den FlowLink einen Vorschlag bestätigt oder du selbst einen Vorschlag machst.'
+          }
+          actions={[
+            { label: 'Aufträge ansehen', href: '/gutachter/auftraege', variant: 'primary' },
+            { label: 'Heute öffnen', href: '/gutachter/heute', variant: 'secondary' },
+          ]}
+        />
       ) : (
         <div className="space-y-3">
           {filtered.map(t => {

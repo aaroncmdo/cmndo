@@ -3,12 +3,13 @@
 // AAR-93: SV-Portal Reklamations-Liste + Dialog
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircleIcon, PlusIcon, XIcon } from 'lucide-react'
+import { PlusIcon, XIcon, ShieldCheckIcon } from 'lucide-react'
 import { createReklamation } from './actions'
 // AAR-664 (Folge): Konstante aus non-`'use server'`-Datei.
 import { REKLAMATIONS_GRUENDE } from './constants'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
+import EmptyState from '@/components/shared/EmptyState'
 
 type Reklamation = {
   id: string
@@ -78,6 +79,25 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
         </button>
       </div>
 
+      {reklamationen.length === 0 ? (
+        // 2026-05-07 EmptyState-Iter-2: Vorher kahles Card mit Icon + Satz.
+        // Reklamationen sind ein erwünschter Empty-State („alles läuft gut!")
+        // — die Komposition kommuniziert das klar und bietet trotzdem einen
+        // Pfad, falls der SV doch eine einreichen will.
+        <EmptyState
+          icon={ShieldCheckIcon}
+          title="Keine Reklamationen — alles läuft sauber"
+          description="Hier siehst du Reklamationen zu deinen Aufträgen (z.B. Kunde war nicht da, Schaden anders als gemeldet, Mehraufwand). Nutze den Button oben rechts, sobald ein Fall einen Mehraufwand rechtfertigt."
+          actions={
+            faelle.length > 0
+              ? [
+                  { label: 'Neue Reklamation', onClick: () => setShowDialog(true), variant: 'primary' },
+                  { label: 'Meine Fälle', href: '/gutachter/faelle', variant: 'secondary' },
+                ]
+              : [{ label: 'Aufträge ansehen', href: '/gutachter/auftraege', variant: 'primary' }]
+          }
+        />
+      ) : (
       <div className="bg-white rounded-xl border border-claimondo-border divide-y divide-claimondo-border">
         {reklamationen.map(r => {
           const fall = Array.isArray(r.faelle) ? r.faelle[0] : r.faelle
@@ -114,13 +134,8 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
             </div>
           )
         })}
-        {reklamationen.length === 0 && (
-          <div className="p-12 text-center">
-            <AlertCircleIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-2" />
-            <p className="text-sm text-claimondo-ondo/70">Keine Reklamationen vorhanden.</p>
-          </div>
-        )}
       </div>
+      )}
 
       {/* Dialog */}
       <Modal open={showDialog} onClose={() => setShowDialog(false)} noPadding hideCloseButton maxWidth={512} ariaLabel="Neue Reklamation">
