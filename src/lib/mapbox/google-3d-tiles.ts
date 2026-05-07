@@ -42,9 +42,36 @@ export function isGoogle3dTilesEnabled(): boolean {
 }
 
 /**
+ * Pre-Flight: prüft ob der Google-Maps-API-Key tatsächlich Berechtigung für
+ * die Map Tiles API hat. Wenn der Key nicht autorisiert ist, gibt Google
+ * 403 zurück — wir wollen das BEVOR der deck.gl-Layer mounted und uncaught
+ * Promise-Rejects in der UI verursacht.
+ */
+async function preflightCheck(apiKey: string): Promise<boolean> {
+  try {
+    const res = await fetch(GOOGLE_TILES_URL(apiKey), { method: 'GET', cache: 'no-store' })
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      console.warn(
+        `[google-3d-tiles] Preflight ${res.status} — Map Tiles API nicht aktiviert oder Key-Restriction blockiert. ` +
+          `Aktivieren in Google Cloud Console > APIs > „Map Tiles API". Body: ${body.slice(0, 200)}`,
+      )
+      return false
+    }
+    return true
+  } catch (err) {
+    console.warn('[google-3d-tiles] Preflight Network-Error:', err)
+    return false
+  }
+}
+
+/**
  * Attached den Google-3D-Tiles-Layer als deck.gl-Overlay an die Mapbox-
  * Karte. Lazy-Import damit deck.gl + loaders.gl nicht ins initial Bundle
  * gehen wenn die Feature deaktiviert ist.
+ *
+ * Robust gegen Key-Probleme: Pre-Flight-Check verhindert dass ein 403
+ * uncaught die Feldmodus-Page crasht.
  */
 export async function attachGoogle3dTiles(
   map: MapboxMap,
@@ -52,14 +79,17 @@ export async function attachGoogle3dTiles(
   if (!isGoogle3dTilesEnabled()) return null
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_3D_TILES_KEY!
+
+  // Pre-Flight: ohne aktive Map Tiles API → leise zurückfallen, KEIN attach.
+  const ok = await preflightCheck(apiKey)
+  if (!ok) return null
+
   try {
     const [{ MapboxOverlay }, { Tile3DLayer }, { CesiumIonLoader, Tiles3DLoader }] = await Promise.all([
       import('@deck.gl/mapbox'),
       import('@deck.gl/geo-layers'),
       import('@loaders.gl/3d-tiles'),
     ])
-    // Google 3D Tiles nutzen den Cesium-Tiles-Loader (Tiles3DLoader). Wir
-    // setzen den Loader explizit damit Tree-Shaking nicht überrascht.
     void CesiumIonLoader
 
     const overlay = new MapboxOverlay({
@@ -69,17 +99,17 @@ export async function attachGoogle3dTiles(
           id: 'google-3d-tiles',
           data: GOOGLE_TILES_URL(apiKey),
           loader: Tiles3DLoader,
-          // Subtile Klang-Eigenschaften: keine Click-Outline, dezenter
-          // Pick-Highlight nur falls jemand Click-Handler hinzufügt.
           pickable: false,
+          // 2026-05-07: onTileError schluckt Tile-Loading-Fehler damit
+          // einzelne fehlgeschlagene Tiles nicht zum globalen Page-Error
+          // werden (deck.gl propagiert sonst zur Page hoch).
+          onTileError: (err: unknown) => {
+            console.warn('[google-3d-tiles] tile-error', err)
+          },
         }),
       ],
     })
 
-    // mapbox-gl IControl-Type ist mit deck.gl-MapboxOverlay strukturell
-    // kompatibel — der deck.gl-Type spezifiziert `onAdd/onRemove` mit
-    // einem `Map`-Generic, mapbox-gl erwartet ein konkretes Map-Argument.
-    // Hier ist ein bewusster Cast nötig.
     map.addControl(overlay as unknown as Parameters<typeof map.addControl>[0])
 
     return {
