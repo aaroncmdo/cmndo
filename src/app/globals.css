@@ -513,16 +513,15 @@ aside.kunde-sidebar[data-chat-open] .kunde-sidebar-rest {
   animation: wx-sun-pulse 4s ease-in-out infinite;
   pointer-events: none;
 }
-/* Tailwind-4-Workaround: der JIT-Compiler kann eine kaputte
-   width-arbitrary-value-Klasse mit leerem CSS-var-Aufruf erzeugen, die
-   PostCSS dann mit "Unexpected end of input" abbrechen laesst — und mit
-   ihr die ganze restliche Datei. Der Trigger ist haeufig ein anderes
-   Source-Token das spaeter migriert/entfernt wurde und nur noch im
-   Source-Cache steht. Override mit safe-default + den triggernden String
-   bewusst aus dem Comment heraushalten, damit der Tailwind-Scanner ihn
-   nicht in seine Klassen-Liste aufnimmt (sonst beisst sich der Workaround
-   selbst in den Schwanz: 2026-05-08 lokales Repro bei Aaron — der Comment
-   selbst war die Quelle der Klasse, weil Tailwind 4 auch CSS-Files mit
-   scannt). 2026-05-08 Aaron-Repro: dev/login crashte mit dem Parse-Error,
-   sobald irgendwer hier landete. */
-.w-\[var\(\)\] { width: auto !important; }
+/* 2026-05-08: Der frühere Override-Block wurde komplett entfernt.
+   Begründung: PR #519 hat einen Workaround eingeführt, der die kaputte
+   width-arbitrary-value-Klasse mit leerem CSS-var-Aufruf neutralisierte.
+   PR #611-Repro bei Aaron hat aber gezeigt, dass der Override-Block
+   selbst (Selektor + erläuternder Comment + Doku in audit-findings.md)
+   das defekte Klassen-Pattern als Such-Token enthielt — Tailwind 4
+   scannt CSS-Files und Markdown im Repo nach Klassen-Tokens, generierte
+   die kaputte Klasse zurück, Parser brach ab, Override greift nie.
+   Self-perpetuating Bug. Lösung: alle Vorkommen des Pattern-Strings
+   aus dem Source genommen (Comment, Markdown), Override entfernt.
+   Falls die Klasse je wieder erscheint: eigene Source suchen statt
+   patchen — nicht die Datei selbst zur Quelle machen. */

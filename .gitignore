@@ -58,3 +58,13 @@ supabase/.temp/
 # Handoff-ZIP, nicht in Git versionieren (zu gross + flicker zwischen Runs).
 docs/portals-review/07.05.2026 Design Review/
 tmp/
+
+# 2026-05-08: Screenshot-Runner-Output (scripts/screenshot-feldmodus.mjs).
+# Nicht-versionieren weil:
+#   1. Generated PNGs wiegen schnell 5+ MB pro Run und ändern sich bei jedem Run
+#   2. browser.log/INDEX.md enthalten ggf. roh-Tailwind-Error-Strings —
+#      und Tailwind 4 scannt MD/Logs nach Klassen-Tokens. Wenn ein Run einen
+#      Build-Error mit `w-\[var\(\)\]`-Pattern in den Logs ablegt, triggert
+#      der String beim nächsten Build wieder dieselbe kaputte Klasse →
+#      self-perpetuating Loop. Repro 2026-05-08 (PR #611-Followup).
+docs/portals-review/screenshots/feldmodus/
