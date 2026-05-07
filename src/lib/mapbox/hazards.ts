@@ -215,11 +215,16 @@ export function attachFlowLayer(map: MapboxMap, initial: FlowFeature[] = []): Fl
         ],
         'line-width': [
           'interpolate', ['linear'], ['zoom'],
-          12, 3,
-          16, 7,
-          18, 12,
+          12, 2,
+          16, 4,
+          18, 6,
         ],
-        'line-opacity': 0.9,
+        // 2026-05-08 PR B: Off-Route-Flow ist reduzierter Kontext-Layer,
+        // weil die Hauptroute jetzt selbst farblich nach Stau segmentiert
+        // wird. Width + Opacity gedimmt damit die primary Navi-Linie
+        // optisch dominiert. Off-Route-Stau bleibt sichtbar genug um zu
+        // sehen wohin Alternativen führen würden.
+        'line-opacity': 0.55,
       },
       layout: {
         'line-cap': 'round',

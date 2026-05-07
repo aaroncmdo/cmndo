@@ -14,8 +14,9 @@ import {
   mapboxgl,
   addSvCarMarker,
   addKundeMarker,
-  upsertRouteLayer,
+  upsertTrafficRouteLayer,
   fetchDrivingRoute,
+  type TrafficRoute,
   MAPBOX_STYLE_STANDARD,
   DEFAULT_FIELD_MAP_CONFIG,
   getMapboxLightPreset,
@@ -556,22 +557,31 @@ export default function FeldmodusMap({
     const svLng = svPosition.lng
     const svLat = svPosition.lat
 
-    // 2026-05-07: Echte Auto-Route über Mapbox Directions statt Luftlinie.
-    // fetchDrivingRoute hat in-memory-Cache (5 min) — bei GPS-Jitter wird
-    // dieselbe Route wiederverwendet ohne Re-Fetch.
-    // Plus: Blitzer entlang der Route via OSM Overpass (BBox + 0.5 km Puffer).
+    // 2026-05-08 PR B: Echtzeit-Traffic-Route mit Stau-Färbung.
+    // fetchDrivingRoute liefert jetzt {primary, alternatives} mit per-
+    // Segment-congestion. upsertTrafficRouteLayer rendert die primary-
+    // Route GMaps-style farbig segmentiert (low=blau, moderate=amber,
+    // heavy=orange, severe=rot).
+    // Cache 60s — Traffic ändert sich schneller als statische Routen.
+    // Alternativen werden hier (noch) nicht visualisiert — kommen mit dem
+    // Live-Reroute-Toast in PR B2.
     const ctrl = new AbortController()
-    const drawRoute = (coords: Array<[number, number]>) => {
+    const drawRoute = (route: TrafficRoute) => {
       if (!map.isStyleLoaded()) {
-        map.once('load', () => upsertRouteLayer(map, coords))
+        map.once('load', () => upsertTrafficRouteLayer(map, route))
       } else {
-        upsertRouteLayer(map, coords)
+        upsertTrafficRouteLayer(map, route)
       }
     }
     void fetchDrivingRoute([svLng, svLat], [stopLng, stopLat], { signal: ctrl.signal })
-      .then(async (coords) => {
-        drawRoute(coords)
-        // Blitzer (OSM) + Verkehrshindernisse (HERE) parallel laden.
+      .then(async ({ primary }) => {
+        drawRoute(primary)
+        // Blitzer (Atudo) + Verkehrshindernisse (HERE) + Off-Route-Stau-
+        // Lines (HERE Flow) parallel laden. Off-Route-Flow bleibt als
+        // Kontext-Layer drin — die Stau-Färbung der Hauptroute reicht
+        // nicht aus um zu sehen wohin der Stau auf einer Alternative
+        // führt. Opacity der Flow-Linie ist über hazards.ts definiert.
+        const coords = primary.coords
         if (coords.length >= 2) {
           const bbox = bboxForRoute(coords, 0.5)
           const [blitzerFeatures, hazardFeatures, flowFeatures] = await Promise.all([
