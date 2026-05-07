@@ -72,7 +72,16 @@ export default async function AuftraegePage({
             <PageHeader title="Meine Aufträge" description="0 Aufträge" icon={BriefcaseIcon} />
             <TagesvorbereitungButton />
           </div>
-          <EmptyState title="Keine Aufträge gefunden." />
+          <EmptyState
+            icon={BriefcaseIcon}
+            title="Heute keine Aufträge zugewiesen"
+            description="Sobald das Dispatching dir einen Auftrag zuteilt, erscheint er hier."
+            actions={[
+              { label: 'Kalender prüfen', href: '/gutachter/kalender', variant: 'secondary' },
+              { label: 'Profil ergänzen', href: '/gutachter/profil', variant: 'secondary' },
+              { label: 'Gebiet anpassen', href: '/gutachter/gebiet', variant: 'secondary' },
+            ]}
+          />
         </div>
       </div>
     )
@@ -179,7 +188,16 @@ export default async function AuftraegePage({
         </div>
 
         {sichtbareAuftraege.length === 0 ? (
-          <EmptyState title="Keine Aufträge gefunden." />
+          <EmptyState
+            icon={BriefcaseIcon}
+            title="Heute keine Aufträge zugewiesen"
+            description="Sobald das Dispatching dir einen Auftrag zuteilt, erscheint er hier."
+            actions={[
+              { label: 'Kalender prüfen', href: '/gutachter/kalender', variant: 'secondary' },
+              { label: 'Profil ergänzen', href: '/gutachter/profil', variant: 'secondary' },
+              { label: 'Gebiet anpassen', href: '/gutachter/gebiet', variant: 'secondary' },
+            ]}
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             {sichtbareAuftraege.map((auftrag) => {

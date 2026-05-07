@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { MessageCircleIcon } from 'lucide-react'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
 import PageHeader from '@/components/shared/PageHeader'
+import EmptyState from '@/components/shared/EmptyState'
 
 // AAR-730: Kunde-Chat auf MultiChannelChat-Basis migriert.
 // Sichtbare Kanäle für Kunde: direkter Chat mit KB, direkter Chat mit SV,
@@ -66,12 +68,14 @@ export default async function KundeChatPage({
     return (
       <div className="px-5 py-8 max-w-lg mx-auto space-y-4">
         <PageHeader title="Chat" size="lg" />
-        <div className="bg-white rounded-2xl border border-claimondo-border shadow-sm p-8 text-center">
-          <p className="text-claimondo-ondo text-sm">
-            Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier
-            mit Ihrem Kundenbetreuer und dem Gutachter chatten.
-          </p>
-        </div>
+        <EmptyState
+          icon={MessageCircleIcon}
+          title="Chat startet mit Ihrem Schadensfall"
+          description="Sobald Ihr Fall angelegt ist, können Sie hier direkt mit Ihrem Kundenbetreuer und Sachverständigen chatten — auch in Gruppe."
+          actions={[
+            { label: 'Schaden melden', href: '/schaden-melden/schritt-1' },
+          ]}
+        />
       </div>
     )
   }
