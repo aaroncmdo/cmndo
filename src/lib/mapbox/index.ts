@@ -36,6 +36,14 @@ export { addKundeMarker, type KundeMarkerOptions } from './kunde-marker'
 export { upsertRouteLayer, removeRouteLayer } from './route-layer'
 export { fetchDrivingRoute } from './directions'
 export {
+  fetchBlitzerInBbox,
+  bboxForRoute,
+  attachBlitzerLayer,
+  BLITZER_LAYER_ID,
+  type BlitzerFeature,
+  type BlitzerLayerHandle,
+} from './blitzer'
+export {
   DEFAULT_FIELD_MAP_CONFIG,
   type FieldModusMapConfig,
   type MarkerSkin,

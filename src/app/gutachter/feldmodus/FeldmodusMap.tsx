@@ -29,6 +29,10 @@ import {
   attachCesium3dTiles,
   isCesium3dTilesEnabled,
   type Cesium3dTilesHandle,
+  attachBlitzerLayer,
+  fetchBlitzerInBbox,
+  bboxForRoute,
+  type BlitzerLayerHandle,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
@@ -117,6 +121,7 @@ export default function FeldmodusMap({
   const heroPinRef = useRef<HeroPin3dHandle | null>(null)
   const google3dTilesRef = useRef<Google3dTilesHandle | null>(null)
   const cesium3dTilesRef = useRef<Cesium3dTilesHandle | null>(null)
+  const blitzerRef = useRef<BlitzerLayerHandle | null>(null)
   const stopMarkersRef = useRef<Marker[]>([])
   const tokenMissing = useRef(false)
   // 2026-05-07 Phase 3b: Wetter-Code (OpenWeatherMap weather_id) am
@@ -334,6 +339,8 @@ export default function FeldmodusMap({
       google3dTilesRef.current = null
       cesium3dTilesRef.current?.remove()
       cesium3dTilesRef.current = null
+      blitzerRef.current?.remove()
+      blitzerRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current = []
       map.remove()
@@ -479,6 +486,7 @@ export default function FeldmodusMap({
     // 2026-05-07: Echte Auto-Route über Mapbox Directions statt Luftlinie.
     // fetchDrivingRoute hat in-memory-Cache (5 min) — bei GPS-Jitter wird
     // dieselbe Route wiederverwendet ohne Re-Fetch.
+    // Plus: Blitzer entlang der Route via OSM Overpass (BBox + 0.5 km Puffer).
     const ctrl = new AbortController()
     const drawRoute = (coords: Array<[number, number]>) => {
       if (!map.isStyleLoaded()) {
@@ -488,7 +496,18 @@ export default function FeldmodusMap({
       }
     }
     void fetchDrivingRoute([svLng, svLat], [stopLng, stopLat], { signal: ctrl.signal })
-      .then((coords) => drawRoute(coords))
+      .then(async (coords) => {
+        drawRoute(coords)
+        // Blitzer in der Route-Bbox laden + Layer mounten/aktualisieren.
+        if (coords.length >= 2) {
+          const blitzerFeatures = await fetchBlitzerInBbox(bboxForRoute(coords, 0.5))
+          if (!blitzerRef.current && map.isStyleLoaded()) {
+            blitzerRef.current = attachBlitzerLayer(map, blitzerFeatures)
+          } else if (blitzerRef.current) {
+            blitzerRef.current.update(blitzerFeatures)
+          }
+        }
+      })
     return () => ctrl.abort()
   }, [svPosition, aktuellerStop])
 
