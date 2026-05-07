@@ -37,6 +37,7 @@ import ClaimStepper from '@/components/kunde/ClaimStepper'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import KundeBetreuerStrip from '@/components/kunde/KundeBetreuerStrip'
+import KundeAbschlussCard from '@/components/kunde/KundeAbschlussCard'
 import SmokeKanzleiButton from '@/components/kunde/SmokeKanzleiButton'
 import ClaimSummary from '@/components/kunde/ClaimSummary'
 import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
@@ -649,6 +650,22 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           process.env.NEXT_PUBLIC_ENABLE_SMOKE_TOOLS === 'true') && (
           <SmokeKanzleiButton fallId={fall.id as string} />
         )}
+
+        {/* 2026-05-07 Design-Review 5c: Abschluss-Aktionen — rendert nur
+            wenn fall.abgeschlossen_am gesetzt. Drei CTAs: PDF Gutachten,
+            Reklamation, Bewerten. Component returns null wenn nicht
+            abgeschlossen. */}
+        <KundeAbschlussCard
+          fallId={fall.id as string}
+          fallNummer={(fall.fall_nummer as string | null) ?? null}
+          abgeschlossenAm={(fall.abgeschlossen_am as string | null) ?? null}
+          gutachtenUrl={gutachtenUrlFuerSummary}
+          googleReviewUrl={
+            svGooglePlaceId
+              ? `https://search.google.com/local/writereview?placeid=${svGooglePlaceId}`
+              : null
+          }
+        />
 
         {/* 2026-05-07 Design-Review 5b: Trust-Cards-Strip — KB + SV mit
             Avatar, Name, Rolle und Chat-Button. Vermittelt sofort wer
