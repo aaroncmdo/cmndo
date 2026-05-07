@@ -4,9 +4,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { FolderOpenIcon } from 'lucide-react'
 import FallKarte from '@/components/kunde/FallKarte'
 import { ladeFallKartenMeta } from '@/lib/kunde/fall-karte-loader'
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
+import EmptyState from '@/components/shared/EmptyState'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,20 +37,14 @@ export default async function KundeFaelleListe() {
         >
           Meine Fälle
         </h1>
-        <div
-          className="rounded-2xl border p-8 text-center"
-          style={{
-            background: 'var(--brand-surface, #ffffff)',
-            borderColor: 'var(--brand-border, #e5e7eb)',
-          }}
-        >
-          <p
-            className="text-sm"
-            style={{ color: 'var(--brand-text-secondary, #6b7280)' }}
-          >
-            Noch keine Fälle vorhanden.
-          </p>
-        </div>
+        <EmptyState
+          icon={FolderOpenIcon}
+          title="Noch kein Schadensfall"
+          description="Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung."
+          actions={[
+            { label: 'Schaden melden', href: '/schaden-melden/schritt-1' },
+          ]}
+        />
       </div>
     )
   }
