@@ -20,6 +20,7 @@ import TbtBanner from './TbtBanner'
 import FokusHeader from './FokusHeader'
 import AktuellerStopCard from './AktuellerStopCard'
 import StopListItem from './StopListItem'
+import GlassPanel from '@/components/shared/GlassPanel'
 import { useFieldTracking } from './useFieldTracking'
 import { useTurnByTurn } from './useTurnByTurn'
 import { useWakeLock } from '@/hooks/useWakeLock'
@@ -296,12 +297,13 @@ export default function FeldmodusClient({
           TbtBanner top-center (rendert weiter unten in eigenem Block).
           GPS-/Wake-Lock-Banner bleiben rechts. */}
       {sessionStatus === 'arrived' && aktuellerStop ? (
-        // Arrived: Fallakte als Hauptpanel — ab md (≥ 768px) floating-card,
-        // auf Mobile <md full-screen (siehe Mobile-Sheet-Branch unten).
-        // 2026-05-07 Fix: war lg:hidden — Tablet-Range (768-1023) bekam dann
-        // weder Floating-Card noch Mobile-Sheet, die Mobile-Aside verdeckte
-        // die ganze Map (bg-white/95 backdrop-blur).
-        <div className="hidden md:flex md:absolute md:left-4 md:top-4 md:bottom-4 md:w-[420px] md:flex-col md:rounded-2xl md:bg-white/85 md:backdrop-blur-md md:border md:border-white/40 md:shadow-ios-lg md:overflow-hidden z-30">
+        // Arrived: Fallakte als Hauptpanel — ab md floating-card via shared
+        // GlassPanel (Heute-Pattern), Mobile <md weiter als full-screen
+        // Bottom-Sheet-Branch unten.
+        <GlassPanel
+          variant="prominent"
+          className="hidden md:flex md:absolute md:left-4 md:top-4 md:bottom-4 md:w-[420px] md:flex-col md:overflow-hidden z-30"
+        >
           <SvFallakteView
             fallId={aktuellerStop.fall_id}
             sessionId={session.id}
@@ -317,11 +319,11 @@ export default function FeldmodusClient({
               }
             }}
           />
-        </div>
+        </GlassPanel>
       ) : (
         <>
           {/* Floating Header-Pill — top-left, kompakt (ab md sichtbar) */}
-          <div className="hidden md:block absolute top-4 left-4 z-30 rounded-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
+          <GlassPanel className="hidden md:block absolute top-4 left-4 z-30 overflow-hidden">
             <FokusHeader
               sessionId={session.id}
               sessionStatus={sessionStatus}
@@ -330,11 +332,14 @@ export default function FeldmodusClient({
               distanceMeters={distanceMeters}
               variant="light"
             />
-          </div>
+          </GlassPanel>
 
           {/* AktuellerStopCard — mid-left, Hauptinteraktion (ab md) */}
           {aktuellerStop && (
-            <div className="hidden md:block absolute left-4 top-24 w-[380px] z-30 rounded-2xl bg-white/85 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
+            <GlassPanel
+              variant="prominent"
+              className="hidden md:block absolute left-4 top-24 w-[380px] z-30 overflow-hidden"
+            >
               <AktuellerStopCard
                 stop={aktuellerStop}
                 sessionId={session.id}
@@ -345,12 +350,12 @@ export default function FeldmodusClient({
                 onAdvanced={onAdvanced}
                 onArrived={onArrived}
               />
-            </div>
+            </GlassPanel>
           )}
 
           {/* Kommende Stops — bottom-left als kompakte Liste (ab md) */}
           {stops.length - aktuellerStopIndex - 1 > 0 && (
-            <div className="hidden md:block absolute left-4 bottom-4 w-[380px] max-h-[280px] z-30 rounded-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
+            <GlassPanel className="hidden md:block absolute left-4 bottom-4 w-[380px] max-h-[280px] z-30 overflow-hidden">
               <div className="px-3 py-2 border-b border-white/40">
                 <p className="text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo">
                   Kommende Stops ({stops.length - aktuellerStopIndex - 1})
@@ -361,7 +366,7 @@ export default function FeldmodusClient({
                   <StopListItem key={stop.termin_id} stop={stop} variant="kommend" />
                 ))}
               </div>
-            </div>
+            </GlassPanel>
           )}
         </>
       )}
