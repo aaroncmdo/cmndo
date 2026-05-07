@@ -206,7 +206,7 @@ export default function FokusChatPanel({
       <button
         type="button"
         onClick={() => setExpanded(true)}
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[var(--brand-primary)]/20 shadow-lg px-4 py-2 flex items-center gap-3 hover:bg-[#f8f9fb]"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[var(--brand-primary)]/20 shadow-lg px-4 py-2 flex items-center gap-3 hover:bg-claimondo-bg"
         aria-label="Chat öffnen"
       >
         <div className="relative">
@@ -246,7 +246,7 @@ export default function FokusChatPanel({
         <button
           type="button"
           onClick={() => setExpanded(false)}
-          className="p-1.5 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo"
+          className="p-1.5 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo"
           aria-label="Chat schließen"
         >
           <XIcon className="w-4 h-4" />
@@ -256,7 +256,7 @@ export default function FokusChatPanel({
       {/* Messages */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#f8f9fb]"
+        className="flex-1 overflow-y-auto p-4 space-y-2 bg-claimondo-bg"
       >
         {messages.length === 0 ? (
           <p className="text-xs text-claimondo-ondo/70 italic text-center mt-8">

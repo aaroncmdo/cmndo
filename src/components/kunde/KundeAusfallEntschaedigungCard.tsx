@@ -157,7 +157,7 @@ export default function KundeAusfallEntschaedigungCard({
           </p>
         )}
 
-        <div className="rounded-lg bg-[#f8f9fb] border border-claimondo-border p-3 text-xs text-claimondo-ondo space-y-1.5">
+        <div className="rounded-lg bg-claimondo-bg border border-claimondo-border p-3 text-xs text-claimondo-ondo space-y-1.5">
           <p className="font-medium text-claimondo-navy">Nach Rückgabe</p>
           <p>
             Bitte lade die Mietwagen-Rechnung in der Fallakte hoch. Wir leiten sie für dich an die
@@ -185,7 +185,7 @@ export default function KundeAusfallEntschaedigungCard({
   if (!effDauerTage || !tagessatz) {
     // Werte fehlen — wir zeigen einen Hinweis statt einer Pseudo-Zahl.
     return (
-      <section className="rounded-2xl border border-dashed border-claimondo-border bg-[#f8f9fb] p-5 space-y-2 text-xs text-claimondo-ondo">
+      <section className="rounded-2xl border border-dashed border-claimondo-border bg-claimondo-bg p-5 space-y-2 text-xs text-claimondo-ondo">
         <header className="flex items-center gap-2">
           <EuroIcon className="w-4 h-4 text-claimondo-shield" />
           <h3 className="text-sm font-semibold text-claimondo-navy">
@@ -217,7 +217,7 @@ export default function KundeAusfallEntschaedigungCard({
         {formatEuro(tagessatz)} pro Tag
       </p>
 
-      <div className="rounded-lg bg-[#f8f9fb] border border-claimondo-border p-3 text-xs text-claimondo-ondo space-y-1.5">
+      <div className="rounded-lg bg-claimondo-bg border border-claimondo-border p-3 text-xs text-claimondo-ondo space-y-1.5">
         <p className="font-medium text-claimondo-navy">Voraussetzungen</p>
         {totalschaden ? (
           <ul className="space-y-1 list-disc list-inside">

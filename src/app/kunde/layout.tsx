@@ -332,7 +332,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   )
 
   return (
-    <div className="flex min-h-screen bg-[#f8f9fb]" style={themeStyle}>
+    <div className="flex min-h-screen bg-claimondo-bg" style={themeStyle}>
       {/* Desktop Sidebar — hidden on mobile */}
       <aside
         className="kunde-sidebar hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 fixed top-0 left-0 h-screen z-40"
@@ -383,7 +383,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate">{displayName}</p>
-              <p className="text-[10px] text-[#7BA3CC] leading-tight">Profil ansehen</p>
+              <p className="text-[10px] text-claimondo-light-blue leading-tight">Profil ansehen</p>
             </div>
             <OutboxBadge />
           </Link>
@@ -393,7 +393,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-[#7BA3CC] hover:bg-white/5 hover:text-white"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
             >
               <LogOutIcon style={{ width: 17, height: 17 }} />
               Abmelden

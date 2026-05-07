@@ -38,7 +38,7 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-8 max-w-md text-center space-y-4">
           <CheckCircleIcon className="w-12 h-12 text-green-500 mx-auto" />
           <h1 className="text-lg font-semibold text-claimondo-navy">Termin gewählt</h1>
@@ -52,7 +52,7 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-8 max-w-md w-full space-y-6">
         <div className="text-center">
           <CalendarIcon className="w-10 h-10 text-claimondo-ondo mx-auto mb-3" />

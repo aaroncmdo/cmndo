@@ -48,7 +48,7 @@ export default async function ProfilPage() {
         className="flex items-center justify-between gap-3 bg-white rounded-xl border border-claimondo-border shadow-sm p-4 hover:border-claimondo-ondo"
       >
         <span className="flex items-center gap-3">
-          <span className="shrink-0 w-9 h-9 rounded-xl bg-[#f8f9fb] text-claimondo-ondo border border-[#e4e7ef] flex items-center justify-center">
+          <span className="shrink-0 w-9 h-9 rounded-xl bg-claimondo-bg text-claimondo-ondo border border-[#e4e7ef] flex items-center justify-center">
             <BellIcon width={16} height={16} />
           </span>
           <span>

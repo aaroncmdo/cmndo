@@ -149,7 +149,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={() => setEditing(true)}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
               >
                 <MoveIcon className="w-3.5 h-3.5" />
                 Bearbeiten
@@ -158,7 +158,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={generate}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
               >
                 <RefreshCwIcon className="w-3.5 h-3.5" />
                 Neu generieren
@@ -167,7 +167,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={clear}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
               >
                 <XIcon className="w-3.5 h-3.5" />
                 Verwerfen

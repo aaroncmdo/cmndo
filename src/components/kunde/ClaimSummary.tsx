@@ -180,7 +180,7 @@ export default function ClaimSummary({
       {/* Body — zwei Spalten ab lg */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(240px,280px)_1fr]">
         {/* ─── Linke Spalte: Fahrzeug-Stammdaten ─── */}
-        <div className="px-4 sm:px-6 py-5 lg:border-r border-claimondo-navy/10 bg-[#f8f9fb] space-y-4">
+        <div className="px-4 sm:px-6 py-5 lg:border-r border-claimondo-navy/10 bg-claimondo-bg space-y-4">
           {/* Kennzeichenhalter zentriert */}
           <div className="flex justify-center pt-1">
             <Kennzeichenhalter

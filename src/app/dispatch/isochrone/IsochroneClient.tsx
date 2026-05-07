@@ -57,7 +57,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Lead suchen (Name, PLZ, Schadentyp)"
-              className="w-full pl-7 pr-2 py-1.5 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+              className="w-full pl-7 pr-2 py-1.5 text-xs bg-claimondo-bg border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
           </div>
           <p className="text-[10px] text-claimondo-ondo/70 mt-1.5">{filtered.length} / {leads.length} Leads mit Koordinaten</p>
@@ -74,7 +74,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                 type="button"
                 onClick={() => pickLead(l)}
                 className={`w-full text-left px-4 py-3 transition-colors ${
-                  sel ? 'bg-claimondo-ondo/10 border-l-2 border-claimondo-ondo' : 'hover:bg-[#f8f9fb]'
+                  sel ? 'bg-claimondo-ondo/10 border-l-2 border-claimondo-ondo' : 'hover:bg-claimondo-bg'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -100,7 +100,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
       {/* SV-Vorschlaege */}
       <div className="lg:col-span-2 space-y-4">
         {!selectedLead ? (
-          <div className="bg-[#f8f9fb] rounded-xl border-2 border-dashed border-claimondo-border p-12 text-center">
+          <div className="bg-claimondo-bg rounded-xl border-2 border-dashed border-claimondo-border p-12 text-center">
             <TargetIcon className="w-10 h-10 text-claimondo-ondo/50 mx-auto mb-2" />
             <p className="text-sm text-claimondo-ondo">Wähle einen Lead links um die SV-Vorschläge zu laden.</p>
           </div>
@@ -151,7 +151,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
 
               {!pending && suggestions && suggestions.length > 0 && (
                 <>
-                  <div className="px-5 py-2 bg-[#f8f9fb] text-[10px] uppercase tracking-wider text-claimondo-ondo grid grid-cols-[2fr_1fr_1fr_1fr_1fr_2fr] gap-3">
+                  <div className="px-5 py-2 bg-claimondo-bg text-[10px] uppercase tracking-wider text-claimondo-ondo grid grid-cols-[2fr_1fr_1fr_1fr_1fr_2fr] gap-3">
                     <span>Name</span>
                     <span>Paket</span>
                     <span>Fahrtzeit</span>
@@ -160,7 +160,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                     <span>Gründe</span>
                   </div>
                   {suggestions.map((s) => (
-                    <div key={s.svId} className="px-5 py-3 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_2fr] gap-3 items-center text-sm hover:bg-[#f8f9fb]">
+                    <div key={s.svId} className="px-5 py-3 grid grid-cols-[2fr_1fr_1fr_1fr_1fr_2fr] gap-3 items-center text-sm hover:bg-claimondo-bg">
                       <Link href={`/dispatch/sachverstaendige/${s.svId}`} className="text-claimondo-ondo hover:underline font-medium truncate">
                         {s.name}
                       </Link>
@@ -181,7 +181,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {(s.reasons ?? []).slice(0, 3).map((r, i) => (
-                          <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-[#f8f9fb] text-claimondo-ondo">{r}</span>
+                          <span key={i} className="text-[9px] px-1.5 py-0.5 rounded bg-claimondo-bg text-claimondo-ondo">{r}</span>
                         ))}
                       </div>
                     </div>

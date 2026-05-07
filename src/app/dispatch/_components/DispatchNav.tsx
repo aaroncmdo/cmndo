@@ -53,21 +53,21 @@ export default function DispatchNav({
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold tracking-tight">
               <span className="text-white">Claim</span>
-              <span className="text-[#7BA3CC]">ondo</span>
+              <span className="text-claimondo-light-blue">ondo</span>
             </span>
             <TasksPill userId={userId} href="/dispatch/dashboard" />
           </div>
-          <p className="text-[10px] mt-1 uppercase tracking-wider text-[#7BA3CC] bg-[#1E3A5F] inline-block px-2 py-0.5 rounded">
+          <p className="text-[10px] mt-1 uppercase tracking-wider text-claimondo-light-blue bg-claimondo-shield inline-block px-2 py-0.5 rounded">
             Dispatch
           </p>
-          <p className="text-xs mt-1 text-[#7BA3CC]">{email}</p>
+          <p className="text-xs mt-1 text-claimondo-light-blue">{email}</p>
         </>
       }
       footerSlot={
         <>
           <SupportButton userName={email} rolle="dispatch" />
           <div className="flex items-center gap-3 px-3 py-2.5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-[#4573A2] text-white">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-claimondo-ondo text-white">
               {initials}
             </div>
             <div className="flex-1 min-w-0">
@@ -77,7 +77,7 @@ export default function DispatchNav({
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-[#7BA3CC] hover:bg-white/5 hover:text-white"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
             >
               <LogOutIcon style={{ width: 17, height: 17 }} />
               Abmelden

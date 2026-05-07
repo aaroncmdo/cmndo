@@ -631,7 +631,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           {hatMehrereFaelle && (
             <Link
               href="/kunde"
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy mb-3 px-2.5 py-1.5 rounded-lg border border-claimondo-border bg-white hover:bg-[#f8f9fb] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy mb-3 px-2.5 py-1.5 rounded-lg border border-claimondo-border bg-white hover:bg-claimondo-bg transition-colors"
             >
               <span aria-hidden>&larr;</span> Meine Fälle
             </Link>

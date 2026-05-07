@@ -345,7 +345,7 @@ export default function KundeKbChat({
                 className={`shrink-0 w-9 h-9 rounded-full inline-flex items-center justify-center transition-colors ${
                   selectedFall
                     ? 'bg-claimondo-navy/10 text-claimondo-navy hover:bg-claimondo-navy/15'
-                    : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-ondo/10'
+                    : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-ondo/10'
                 }`}
                 aria-label="Fall-Bezug waehlen"
               >
@@ -359,7 +359,7 @@ export default function KundeKbChat({
                       setSelectedFallId(null)
                       setPickerOpen(false)
                     }}
-                    className={`w-full text-left px-3 py-2 text-xs hover:bg-[#f8f9fb] ${
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-claimondo-bg ${
                       selectedFallId === null ? 'bg-claimondo-navy/5 font-semibold' : ''
                     }`}
                   >
@@ -373,7 +373,7 @@ export default function KundeKbChat({
                         setSelectedFallId(f.id)
                         setPickerOpen(false)
                       }}
-                      className={`w-full text-left px-3 py-2 text-xs font-mono hover:bg-[#f8f9fb] border-t border-claimondo-border/30 ${
+                      className={`w-full text-left px-3 py-2 text-xs font-mono hover:bg-claimondo-bg border-t border-claimondo-border/30 ${
                         selectedFallId === f.id ? 'bg-claimondo-navy/5 font-semibold' : ''
                       }`}
                     >

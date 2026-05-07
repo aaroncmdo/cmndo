@@ -65,7 +65,7 @@ export default function RueckrufActions({
   }
 
   return (
-    <div className="rounded-xl border border-claimondo-border bg-[#f8f9fb] p-3 space-y-2.5 w-72">
+    <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-3 space-y-2.5 w-72">
       {/* Ergebnis */}
       <div className="flex gap-2">
         <button

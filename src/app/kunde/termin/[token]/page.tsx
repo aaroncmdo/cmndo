@@ -39,7 +39,7 @@ export default async function KundeTerminPage({
 
   if (hoursUntil > 2 || hoursAfter > 4) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-6">
+      <div className="min-h-screen flex items-center justify-center bg-claimondo-bg px-6">
         <div className="max-w-md text-center">
           <h1 className="text-2xl font-bold text-claimondo-navy mb-4">Link nicht mehr gültig</h1>
           <p className="text-claimondo-ondo">Dieser Tracking-Link ist nur rund um den Termin gültig.</p>
@@ -59,7 +59,7 @@ export default async function KundeTerminPage({
         if (p) svName = p.vorname ?? 'Gutachter'
       }
       return (
-        <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-6">
+        <div className="min-h-screen flex items-center justify-center bg-claimondo-bg px-6">
           <div className="max-w-md text-center">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">✓</span>
@@ -166,7 +166,7 @@ export default async function KundeTerminPage({
 
   return (
     <KundenLightBrandingProvider enabled={brandEnabled} theme={lightTheme}>
-      <div className="min-h-screen flex flex-col bg-[#f8f9fb]">
+      <div className="min-h-screen flex flex-col bg-claimondo-bg">
         <ClaimondoKundenHeader
           svAnzeigename={svAnzeigename || `${svVorname} ${svNachname}`.trim()}
           svAvatarUrl={svAvatarUrl}

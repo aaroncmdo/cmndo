@@ -58,7 +58,7 @@ export default async function LeadpreisePage() {
         {/* Tabelle */}
         <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
           <table className="w-full text-xs">
-            <thead className="bg-[#f8f9fb] border-b border-claimondo-border">
+            <thead className="bg-claimondo-bg border-b border-claimondo-border">
               <tr>
                 <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Schadenhöhe (Netto-RK bis)</th>
                 <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Paket-Preis (im Kontingent)</th>
@@ -67,7 +67,7 @@ export default async function LeadpreisePage() {
             </thead>
             <tbody>
               {(tabelle ?? []).map((row, i) => (
-                <tr key={i} className="border-b border-claimondo-border hover:bg-[#f8f9fb]">
+                <tr key={i} className="border-b border-claimondo-border hover:bg-claimondo-bg">
                   <td className="px-4 py-2.5 text-claimondo-navy font-medium tabular-nums">{eur(Number(row.schadenhoehe_bis_netto))} EUR</td>
                   <td className="px-4 py-2.5 text-right text-claimondo-navy tabular-nums">{eur(Number(row.paketpreis_netto))} EUR</td>
                   <td className="px-4 py-2.5 text-right text-claimondo-navy tabular-nums">{eur(Number(row.einzelpreis_netto))} EUR</td>
@@ -75,7 +75,7 @@ export default async function LeadpreisePage() {
               ))}
             </tbody>
           </table>
-          <div className="px-4 py-3 bg-[#f8f9fb] border-t border-claimondo-border">
+          <div className="px-4 py-3 bg-claimondo-bg border-t border-claimondo-border">
             <p className="text-[10px] text-claimondo-ondo/70">{tabelle?.length ?? 0} Einträge · Alle Preise netto zzgl. 19% MwSt</p>
           </div>
         </div>

@@ -118,7 +118,7 @@ export default function VertragPage() {
   // Bereits unterschriebener Vertrag: read-only Anzeige mit grünem Banner.
   if (alreadySigned) {
     return (
-      <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-8 space-y-4">
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
             <CheckIcon className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
@@ -147,7 +147,7 @@ export default function VertragPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-primary)] px-8 py-6 text-white text-center">
@@ -179,7 +179,7 @@ export default function VertragPage() {
 
           <div>
             <p className="text-xs text-claimondo-ondo mb-2">Unterschrift (mit Finger oder Maus zeichnen):</p>
-            <canvas ref={canvasRef} className="w-full h-[120px] border-2 border-dashed border-claimondo-border rounded-xl bg-[#f8f9fb] cursor-crosshair" />
+            <canvas ref={canvasRef} className="w-full h-[120px] border-2 border-dashed border-claimondo-border rounded-xl bg-claimondo-bg cursor-crosshair" />
             {signed && <p className="text-[10px] text-green-600 mt-1">Unterschrift erfasst</p>}
           </div>
 

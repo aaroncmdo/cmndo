@@ -173,7 +173,7 @@ export default function VorOrtClient({
           Vom Kunden bereits erhalten
         </h2>
         {kundeDokumente.length === 0 ? (
-          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 text-sm text-claimondo-ondo text-center">
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 text-sm text-claimondo-ondo text-center">
             Keine Dokumente vom Kunden vorhanden.
           </div>
         ) : (
@@ -207,7 +207,7 @@ export default function VorOrtClient({
             return (
               <div key={doc.key} className={`bg-white border rounded-xl p-3 ${isDone ? 'border-emerald-200' : doc.required ? 'border-claimondo-border' : 'border-claimondo-border'}`}>
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isDone ? 'bg-emerald-100' : 'bg-[#f8f9fb]'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isDone ? 'bg-emerald-100' : 'bg-claimondo-bg'}`}>
                     {isDone ? (
                       <CheckCircleIcon className="w-5 h-5 text-emerald-600" />
                     ) : (
@@ -242,7 +242,7 @@ export default function VorOrtClient({
                       <select
                         value={schadenPositions[doc.key] ?? ''}
                         onChange={e => setSchadenPositions(prev => ({ ...prev, [doc.key]: e.target.value }))}
-                        className="w-full text-xs border border-claimondo-border rounded-lg px-2 py-1.5 appearance-none bg-[#f8f9fb] focus:outline-none focus:border-[var(--brand-secondary)]"
+                        className="w-full text-xs border border-claimondo-border rounded-lg px-2 py-1.5 appearance-none bg-claimondo-bg focus:outline-none focus:border-[var(--brand-secondary)]"
                       >
                         <option value="">Schaden-Position wählen...</option>
                         {SCHADEN_POSITIONEN.map(p => (
@@ -310,7 +310,7 @@ export default function VorOrtClient({
             <span>{completedRequired}/{totalRequired} Pflichtdokumente</span>
             <span>{progressPct}%</span>
           </div>
-          <div className="h-2 bg-[#f8f9fb] rounded-full">
+          <div className="h-2 bg-claimondo-bg rounded-full">
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{
@@ -359,7 +359,7 @@ export default function VorOrtClient({
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmModal(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo font-medium"
+                className="flex-1 py-2.5 rounded-xl text-sm bg-claimondo-bg text-claimondo-ondo font-medium"
               >
                 Abbrechen
               </button>

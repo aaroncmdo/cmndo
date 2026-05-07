@@ -99,13 +99,13 @@ function badgeForStatus(status: string): { label: string; cls: string } {
     case 'bestaetigt':
       return { label: 'Bestätigt', cls: 'bg-emerald-50 text-emerald-700' }
     case 'abgeschlossen':
-      return { label: 'Abgeschlossen', cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
+      return { label: 'Abgeschlossen', cls: 'bg-claimondo-bg text-claimondo-ondo' }
     case 'abgelehnt':
       return { label: 'Abgelehnt', cls: 'bg-red-50 text-red-600' }
     case 'no_show':
       return { label: 'No-Show', cls: 'bg-amber-50 text-amber-700' }
     case 'reserviert':
-      return { label: 'Reserviert', cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
+      return { label: 'Reserviert', cls: 'bg-claimondo-bg text-claimondo-ondo' }
     case 'verlegung_pending':
       return { label: 'Verlegung pending', cls: 'bg-amber-50 text-amber-700' }
     case 'verlegt':
@@ -160,7 +160,7 @@ export default function TagesrouteSidebar({
             <button
               type="button"
               onClick={onAddPrivatStop}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-claimondo-navy bg-white hover:bg-[#f8f9fb] border border-claimondo-border rounded-lg px-2 py-1.5"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-claimondo-navy bg-white hover:bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1.5"
               title="Privat-Termin als Tagesroute-Stop hinzufügen"
             >
               <PlusCircleIcon className="w-3.5 h-3.5" />
@@ -414,7 +414,7 @@ export default function TagesrouteSidebar({
                       <a
                         href={`tel:${t.kunde_telefon}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 text-xs text-claimondo-navy bg-white hover:bg-[#f8f9fb] border border-claimondo-border rounded-lg px-2.5 py-1.5 font-medium"
+                        className="inline-flex items-center gap-1 text-xs text-claimondo-navy bg-white hover:bg-claimondo-bg border border-claimondo-border rounded-lg px-2.5 py-1.5 font-medium"
                       >
                         <PhoneIcon className="w-3 h-3" /> Anrufen
                       </a>

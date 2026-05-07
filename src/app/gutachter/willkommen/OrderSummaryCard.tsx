@@ -98,7 +98,7 @@ export default function OrderSummaryCard({
         </p>
 
         {organisationName && !istBuero && (
-          <div className="mt-3 px-3 py-2 rounded-lg bg-[#f8f9fb] border border-claimondo-border text-[11px] text-claimondo-ondo">
+          <div className="mt-3 px-3 py-2 rounded-lg bg-claimondo-bg border border-claimondo-border text-[11px] text-claimondo-ondo">
             Du gehoerst zu <strong>{organisationName}</strong>
           </div>
         )}

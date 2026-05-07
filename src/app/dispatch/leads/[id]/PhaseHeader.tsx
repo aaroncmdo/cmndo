@@ -44,8 +44,8 @@ function classesFor({
     : isDone
       ? 'bg-green-50 text-green-700 hover:bg-green-100 cursor-pointer'
       : canNavigate
-        ? 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border cursor-pointer'
-        : 'bg-[#f8f9fb] text-claimondo-ondo/50 cursor-not-allowed'
+        ? 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border cursor-pointer'
+        : 'bg-claimondo-bg text-claimondo-ondo/50 cursor-not-allowed'
   const circle = isActive
     ? 'bg-white text-claimondo-ondo'
     : isDone

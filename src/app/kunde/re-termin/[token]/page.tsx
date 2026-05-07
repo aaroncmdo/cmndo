@@ -142,7 +142,7 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
 
 function Bestaetigung({ fallNummer }: { fallNummer: string | null }) {
   return (
-    <main className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-4 py-8">
+    <main className="min-h-screen bg-claimondo-bg flex items-center justify-center px-4 py-8">
       <div className="bg-white rounded-2xl border border-claimondo-border p-6 max-w-md w-full text-center">
         <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-3">
           <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

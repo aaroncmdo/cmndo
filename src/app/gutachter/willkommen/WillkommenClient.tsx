@@ -409,7 +409,7 @@ export default function WillkommenClient({
   // ────────────────────────────────────────────────────────────────────────
   if (warteAufInhaber) {
     return (
-      <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
+      <div className="h-full overflow-y-auto bg-claimondo-bg flex items-start justify-center px-4 py-10">
         <div className="w-full max-w-4xl">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-semibold text-claimondo-navy">
@@ -457,7 +457,7 @@ export default function WillkommenClient({
   const wrapperWidth = currentKey === 'anzahlung' && r !== 'sub_mitarbeiter' ? 'max-w-5xl' : 'max-w-4xl'
 
   return (
-    <div className="h-full overflow-y-auto bg-[#f8f9fb] flex items-start justify-center px-4 py-10">
+    <div className="h-full overflow-y-auto bg-claimondo-bg flex items-start justify-center px-4 py-10">
       <div className={`w-full ${wrapperWidth}`}>
         {/* Header */}
         <div className="text-center mb-8">
@@ -580,7 +580,7 @@ export default function WillkommenClient({
               </div>
 
               {/* Stammdaten-Card (read-only) */}
-              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-5">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-5">
                 <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
@@ -612,7 +612,7 @@ export default function WillkommenClient({
               {/* Sub-Standort-Tabelle */}
               {subSvs.length > 0 ? (
                 <div className="border border-claimondo-border rounded-xl overflow-hidden">
-                  <div className="bg-[#f8f9fb] px-4 py-2.5 border-b border-claimondo-border">
+                  <div className="bg-claimondo-bg px-4 py-2.5 border-b border-claimondo-border">
                     <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wide">
                       Sub-Standorte ({subSvs.length})
                     </p>
@@ -658,7 +658,7 @@ export default function WillkommenClient({
               </div>
 
               {/* Inhaber-Stammdaten */}
-              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-5">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-5">
                 <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Inhaber-Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
@@ -692,7 +692,7 @@ export default function WillkommenClient({
               )}
 
               {/* Eigenes Paket */}
-              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-5">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-5">
                 <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Dein Paket</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
@@ -706,7 +706,7 @@ export default function WillkommenClient({
               </div>
 
               {/* Stammdaten */}
-              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-5">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-5">
                 <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
@@ -741,7 +741,7 @@ export default function WillkommenClient({
 
               {/* Hinweis fuer Buero-Inhaber: stellvertretend fuer alle Sub-Standorte */}
               {r === 'buero_inhaber' && organisation && (
-                <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 flex items-start gap-3">
+                <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 flex items-start gap-3">
                   <Building2Icon className="w-5 h-5 text-[var(--brand-secondary)] flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-claimondo-navy">
                     Du unterzeichnest stellvertretend fuer <strong>{organisation.name}</strong> und alle{' '}
@@ -751,7 +751,7 @@ export default function WillkommenClient({
               )}
 
               {/* Stammdaten kompakt — BUG-96: Firma + Steuernummer ergaenzt */}
-              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
                 <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-2">
                   Stammdaten
                 </p>
@@ -801,7 +801,7 @@ export default function WillkommenClient({
                   type="text"
                   value={unterschriftName}
                   onChange={e => setUnterschriftName(e.target.value)}
-                  className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                  className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                 />
               </div>
 
@@ -867,7 +867,7 @@ export default function WillkommenClient({
           {/* SCHRITT 1 — Sub-Mitarbeiter: nur Checkbox + Name (kein PDF, keine Sig) */}
           {currentKey === 'agb' && r === 'sub_mitarbeiter' && (
             <div className="space-y-5">
-              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 text-xs text-claimondo-ondo leading-relaxed">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 text-xs text-claimondo-ondo leading-relaxed">
                 Bitte bestätige unsere{' '}
                 <Link href="/nutzungsbedingungen" target="_blank" className="text-[var(--brand-primary)] underline">Nutzungsbedingungen</Link>,
                 die <Link href="/agb" target="_blank" className="text-[var(--brand-primary)] underline">AGB</Link>{' '}
@@ -887,7 +887,7 @@ export default function WillkommenClient({
                   type="text"
                   value={unterschriftName}
                   onChange={e => setUnterschriftName(e.target.value)}
-                  className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                  className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                 />
               </div>
 
@@ -979,7 +979,7 @@ export default function WillkommenClient({
                       </button>
                     </div>
                   ) : !clientSecret ? (
-                    <div className="rounded-xl border border-claimondo-border bg-[#f8f9fb] p-8 text-center text-sm text-claimondo-ondo">
+                    <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-8 text-center text-sm text-claimondo-ondo">
                       Checkout wird geladen ...
                     </div>
                   ) : (
@@ -1071,7 +1071,7 @@ export default function WillkommenClient({
                   type="button"
                   onClick={() => setStep(step - 1)}
                   disabled={saving}
-                  className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
+                  className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
                 >
                   Zurück
                 </button>

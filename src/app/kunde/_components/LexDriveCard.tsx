@@ -28,7 +28,7 @@ export default function LexDriveCard({ qrSvg, qrUrl }: Props) {
         className="w-full px-3 py-2.5 text-left flex flex-col gap-1.5"
         aria-label="LexDrive QR-Code anzeigen"
       >
-        <p className="text-[9px] uppercase tracking-wider leading-tight text-[#7BA3CC]">
+        <p className="text-[9px] uppercase tracking-wider leading-tight text-claimondo-light-blue">
           Ihre Kanzlei
         </p>
         <div className="flex items-center gap-2.5">
@@ -40,7 +40,7 @@ export default function LexDriveCard({ qrSvg, qrUrl }: Props) {
             <p className="text-sm font-semibold truncate leading-tight text-white">
               LexDrive
             </p>
-            <p className="text-[10px] leading-tight mt-0.5 text-[#7BA3CC]">
+            <p className="text-[10px] leading-tight mt-0.5 text-claimondo-light-blue">
               QR-Code für Kontakt
             </p>
           </div>

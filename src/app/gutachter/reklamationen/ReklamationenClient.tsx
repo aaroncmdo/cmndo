@@ -115,14 +115,14 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
                 </div>
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
                   r.status === 'offen' ? 'bg-amber-100 text-amber-700' :
-                  r.status === 'in-bearbeitung' ? 'bg-[#f8f9fb] text-claimondo-ondo' :
+                  r.status === 'in-bearbeitung' ? 'bg-claimondo-bg text-claimondo-ondo' :
                   r.status === 'erledigt' ? 'bg-emerald-100 text-emerald-700' :
                   'bg-red-100 text-red-700'
                 }`}>{r.status}</span>
               </div>
               <p className="text-sm text-claimondo-navy">{r.begruendung}</p>
               {r.admin_begruendung && (
-                <div className="bg-[#f8f9fb] rounded p-2 text-xs">
+                <div className="bg-claimondo-bg rounded p-2 text-xs">
                   <p className="font-semibold text-claimondo-navy mb-0.5">Antwort vom Kundenbetreuer:</p>
                   <p className="text-claimondo-ondo">{r.admin_begruendung}</p>
                 </div>
