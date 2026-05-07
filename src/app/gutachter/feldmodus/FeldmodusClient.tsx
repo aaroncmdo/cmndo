@@ -17,6 +17,9 @@ import OfflineStatusBanner from './OfflineStatusBanner'
 import SvFallakteView from './SvFallakteView'
 import FokusChatPanel from './FokusChatPanel'
 import TbtBanner from './TbtBanner'
+import FokusHeader from './FokusHeader'
+import AktuellerStopCard from './AktuellerStopCard'
+import StopListItem from './StopListItem'
 import { useFieldTracking } from './useFieldTracking'
 import { useTurnByTurn } from './useTurnByTurn'
 import { useWakeLock } from '@/hooks/useWakeLock'
@@ -277,28 +280,100 @@ export default function FeldmodusClient({
         />
       </div>
 
-      {/* Sidebar als Glass-Overlay
-          - Desktop (lg+): floating Card links, 400px breit, mit margin zum
-            Viewport-Rand (so dass die Map durch die Glass-Wand schimmert)
-          - Mobile/Tablet (<lg): Bottom-Sheet — peek 96px / expanded 72vh
-          - Arrived-Modus auf Mobile: SvFallakteView füllt den ganzen Viewport
-            (kein Sheet — längerer Interaction-Mode) */}
+      {/* Desktop (lg+): keine Sidebar mehr — die einzelnen Bedien-Elemente
+          schweben als individuelle Glass-Cards über der Map.
+          Layout:
+            top-left   FokusHeader-Pill (Exit + Stop-Counter + Status)
+            mid-left   AktuellerStopCard / SvFallakteView (Hauptinteraktion)
+            bottom-left  Stops-Liste collapsed (kommend + erledigt)
+          TbtBanner top-center (rendert weiter unten in eigenem Block).
+          GPS-/Wake-Lock-Banner bleiben rechts. */}
+      {sessionStatus === 'arrived' && aktuellerStop ? (
+        // Arrived: Fallakte als Hauptpanel — auf Desktop floating-card,
+        // auf Mobile full-screen (siehe Mobile-Sheet-Branch unten).
+        <div className="hidden lg:flex lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:w-[420px] lg:flex-col lg:rounded-2xl lg:bg-white/85 lg:backdrop-blur-md lg:border lg:border-white/40 lg:shadow-ios-lg lg:overflow-hidden z-30">
+          <SvFallakteView
+            fallId={aktuellerStop.fall_id}
+            sessionId={session.id}
+            terminId={aktuellerStop.termin_id}
+            onAdvanced={onAdvanced}
+            onPauseBackToRoute={async () => {
+              const res = await pauseFokusmodus(session.id)
+              if (res.success) {
+                setSessionStatus('paused')
+                router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+              } else {
+                toast.error(res.error ?? 'Pausieren fehlgeschlagen')
+              }
+            }}
+          />
+        </div>
+      ) : (
+        <>
+          {/* Floating Header-Pill — top-left, kompakt */}
+          <div className="hidden lg:block absolute top-4 left-4 z-30 rounded-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
+            <FokusHeader
+              sessionId={session.id}
+              sessionStatus={sessionStatus}
+              aktuellerIndex={aktuellerStopIndex}
+              totalStops={stops.length}
+              distanceMeters={distanceMeters}
+            />
+          </div>
+
+          {/* AktuellerStopCard — mid-left, Hauptinteraktion */}
+          {aktuellerStop && (
+            <div className="hidden lg:block absolute left-4 top-24 w-[380px] z-30 rounded-2xl bg-white/85 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
+              <AktuellerStopCard
+                stop={aktuellerStop}
+                sessionId={session.id}
+                sessionStatus={sessionStatus}
+                svPosition={position ? { lat: position.lat, lng: position.lng } : null}
+                svInGeofence={svInGeofence}
+                permissionState={permissionState}
+                onAdvanced={onAdvanced}
+                onArrived={onArrived}
+              />
+            </div>
+          )}
+
+          {/* Kommende Stops — bottom-left als kompakte Liste, max 3 sichtbar */}
+          {stops.length - aktuellerStopIndex - 1 > 0 && (
+            <div className="hidden lg:block absolute left-4 bottom-4 w-[380px] max-h-[280px] z-30 rounded-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md overflow-hidden">
+              <div className="px-3 py-2 border-b border-white/40">
+                <p className="text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo">
+                  Kommende Stops ({stops.length - aktuellerStopIndex - 1})
+                </p>
+              </div>
+              <div className="overflow-y-auto max-h-[230px] p-2 space-y-1.5">
+                {stops.slice(aktuellerStopIndex + 1).map((stop) => (
+                  <StopListItem key={stop.termin_id} stop={stop} variant="kommend" />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Mobile (<lg): Bottom-Sheet bleibt — Mobile-UX funktioniert mit
+          einem Sheet besser als mit verstreuten Floating-Cards. Sheet ist
+          glassy (bg-white/65 + backdrop-blur-md). Im arrived-Modus deckt
+          SvFallakteView den ganzen Mobile-Viewport ab. */}
       <aside
-        className={`z-30 lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:w-[400px] lg:p-3 lg:rounded-2xl lg:bg-white/65 lg:backdrop-blur-md lg:border lg:border-white/40 lg:shadow-ios-lg lg:flex lg:flex-col lg:overflow-hidden ${
+        className={`lg:hidden z-30 ${
           mobileSheetEnabled
-            ? `fixed bottom-0 inset-x-0 px-2 pb-2 pt-1 rounded-t-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-lg transition-[max-height] duration-300 ease-out lg:transition-none ${
+            ? `fixed bottom-0 inset-x-0 px-2 pb-2 pt-1 rounded-t-2xl bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-lg transition-[max-height] duration-300 ease-out ${
                 mobileSheetExpanded ? 'max-h-[72vh]' : 'max-h-[96px]'
               }`
             : 'fixed inset-0 z-40 p-2 sm:p-3 bg-white/95 backdrop-blur-md'
         }`}
       >
-        {/* Mobile-Toggle-Chevron — nur im Driving-Modus auf <lg */}
         {mobileSheetEnabled && (
           <button
             type="button"
             onClick={() => setMobileSheetExpanded((v) => !v)}
             aria-label={mobileSheetExpanded ? 'Stops einklappen' : 'Stops aufklappen'}
-            className="lg:hidden flex items-center justify-center w-full py-1 text-claimondo-ondo/70 hover:text-claimondo-navy transition-colors"
+            className="flex items-center justify-center w-full py-1 text-claimondo-ondo/70 hover:text-claimondo-navy transition-colors"
           >
             <span className="block w-10 h-1 rounded-full bg-claimondo-ondo/40" />
           </button>
@@ -308,10 +383,12 @@ export default function FeldmodusClient({
         </div>
       </aside>
 
-      {/* Banner-Overlays — z-20 zwischen Map und Sidebar.
-          Auf Desktop links neben der Sidebar (left-[428px] = 400 + 16 + 12) */}
+      {/* Banner-Overlays — z-20 schweben über der Map.
+          Desktop: oben rechts neben den Floating-Cards links (lg:right-4),
+          links bleibt frei für FokusHeader/AktuellerStopCard.
+          Mobile: oben über der Karte. */}
       {tbtActive && tbt.upcomingStep && (
-        <div className="absolute top-4 right-4 left-4 lg:left-[428px] z-20">
+        <div className="absolute top-4 right-4 left-4 lg:left-auto lg:max-w-md z-20">
           <TbtBanner
             step={tbt.upcomingStep}
             distanceToManeuverMeters={tbt.distanceToNextManeuver}
@@ -324,12 +401,12 @@ export default function FeldmodusClient({
         </div>
       )}
       {permissionState === 'denied' && (
-        <div className="absolute top-4 right-4 left-4 lg:left-[428px] rounded-xl bg-red-600/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+        <div className="absolute top-4 right-4 left-4 lg:left-auto lg:max-w-md rounded-xl bg-red-600/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS-Zugriff verweigert — Auto-Ankunft und Live-Tracking deaktiviert.
         </div>
       )}
       {error && permissionState !== 'denied' && (
-        <div className="absolute top-4 right-4 left-4 lg:left-[428px] rounded-xl bg-amber-600/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+        <div className="absolute top-4 right-4 left-4 lg:left-auto lg:max-w-md rounded-xl bg-amber-600/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS-Warnung: {error}
         </div>
       )}
