@@ -15,8 +15,11 @@ import { addGpsPosition } from '@/lib/offline/outbox'
 import { syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
 
 const TRACK_INTERVAL_MS = 10_000
-const GEOFENCE_RADIUS_M = 100
-const GEOFENCE_DURATION_MS = 30_000
+// 2026-05-07 (Aaron-Smoke): 100m war zu großzügig — der SV-Pin schaltete
+// auf arrived sobald Anfahrt < 100m, auch wenn er noch nicht beim Termin
+// war. Aaron-Wunsch: 50m und KEINE Duration (sofort triggern wenn drin).
+const GEOFENCE_RADIUS_M = 50
+const GEOFENCE_DURATION_MS = 0
 
 export interface UseFieldTrackingArgs {
   enabled: boolean
