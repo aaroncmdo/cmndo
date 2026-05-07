@@ -146,7 +146,7 @@ function KanbanCard({
               e.stopPropagation()
               setMenuOpen((o) => !o)
             }}
-            className="p-1 -m-1 rounded hover:bg-[#f8f9fb] text-claimondo-ondo/70 hover:text-claimondo-navy"
+            className="p-1 -m-1 rounded hover:bg-claimondo-bg text-claimondo-ondo/70 hover:text-claimondo-navy"
             aria-label="Aktionen"
           >
             <MoreVerticalIcon className="w-4 h-4" />

@@ -165,7 +165,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
         </span>
         <div className="flex-1 min-w-0">
           <h2 className="text-base font-semibold">Claimondo Copilot</h2>
-          <p className="text-xs text-[#7BA3CC] mt-0.5">
+          <p className="text-xs text-claimondo-light-blue mt-0.5">
             KI-Assistent mit vollem Fall-Kontext — hilft bei Kunden-Fragen
           </p>
         </div>
@@ -180,7 +180,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
       {/* Messages */}
       <div
         ref={scrollRef}
-        className="overflow-y-auto p-4 space-y-4 bg-[#f8f9fb] min-h-[400px] max-h-[60vh]"
+        className="overflow-y-auto p-4 space-y-4 bg-claimondo-bg min-h-[400px] max-h-[60vh]"
       >
         {/* Greeting + Chips nur wenn noch keine Konversation laeuft */}
         {messages.length === 0 ? (
@@ -192,7 +192,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
                 Gruppenchat. Fragen Sie mich einfach, was der Kunde wissen
                 möchte.
               </p>
-              <p className="mt-2 text-[13px] text-[#4573A2]">
+              <p className="mt-2 text-[13px] text-claimondo-ondo">
                 Starten Sie mit einer der Vorschläge oder stellen Sie eine eigene
                 Frage.
               </p>
@@ -205,9 +205,9 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
                   type="button"
                   onClick={() => void ask(s.query)}
                   disabled={streaming}
-                  className="text-left px-3 py-2.5 rounded-xl border border-[#e4e7ef] bg-white hover:border-[#4573A2] hover:bg-[#4573A2]/5 text-sm text-[#0D1B3E] inline-flex items-center gap-2 disabled:opacity-50"
+                  className="text-left px-3 py-2.5 rounded-xl border border-[#e4e7ef] bg-white hover:border-claimondo-ondo hover:bg-claimondo-ondo/5 text-sm text-claimondo-navy inline-flex items-center gap-2 disabled:opacity-50"
                 >
-                  <span className="text-[#4573A2]">{s.icon}</span>
+                  <span className="text-claimondo-ondo">{s.icon}</span>
                   <span className="flex-1">{s.label}</span>
                 </button>
               ))}
@@ -249,13 +249,13 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
           rows={1}
           maxLength={2000}
           placeholder="Fragen Sie den Copilot …"
-          className="flex-1 resize-none rounded-lg border border-[#e4e7ef] bg-white px-3 py-2 text-sm text-[#0D1B3E] placeholder:text-[#7BA3CC] focus:outline-none focus:ring-2 focus:ring-[#4573A2]/40 min-h-[40px] max-h-32"
+          className="flex-1 resize-none rounded-lg border border-[#e4e7ef] bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
           disabled={streaming}
         />
         <button
           type="submit"
           disabled={!input.trim() || streaming}
-          className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 h-10 rounded-lg bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {streaming ? (
             <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -273,12 +273,12 @@ function AssistantBubble({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3">
       <div
-        className="shrink-0 w-8 h-8 rounded-full bg-[#4573A2] text-white flex items-center justify-center"
+        className="shrink-0 w-8 h-8 rounded-full bg-claimondo-ondo text-white flex items-center justify-center"
         aria-hidden
       >
         <SparklesIcon width={16} height={16} />
       </div>
-      <div className="flex-1 max-w-[85%] bg-white border border-[#e4e7ef] rounded-2xl rounded-bl-md px-4 py-3 text-sm text-[#0D1B3E] leading-relaxed">
+      <div className="flex-1 max-w-[85%] bg-white border border-[#e4e7ef] rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
         {children}
       </div>
     </div>
@@ -296,12 +296,12 @@ function MessageRow({
     return (
       <div className="flex items-start gap-3 flex-row-reverse">
         <div
-          className="shrink-0 w-8 h-8 rounded-full bg-[#0D1B3E] text-white flex items-center justify-center"
+          className="shrink-0 w-8 h-8 rounded-full bg-claimondo-navy text-white flex items-center justify-center"
           aria-hidden
         >
           <UserIcon width={14} height={14} />
         </div>
-        <div className="max-w-[85%] bg-[#0D1B3E] text-white rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap">
+        <div className="max-w-[85%] bg-claimondo-navy text-white rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap">
           {message.content}
         </div>
       </div>
@@ -312,14 +312,14 @@ function MessageRow({
   return (
     <div className="flex items-start gap-3">
       <div
-        className="shrink-0 w-8 h-8 rounded-full bg-[#4573A2] text-white flex items-center justify-center"
+        className="shrink-0 w-8 h-8 rounded-full bg-claimondo-ondo text-white flex items-center justify-center"
         aria-hidden
       >
         <SparklesIcon width={16} height={16} />
       </div>
-      <div className="flex-1 max-w-[85%] bg-white border border-[#e4e7ef] rounded-2xl rounded-bl-md px-4 py-3 text-sm text-[#0D1B3E] leading-relaxed">
+      <div className="flex-1 max-w-[85%] bg-white border border-[#e4e7ef] rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
         {empty && isLastAssistant ? (
-          <span className="inline-flex items-center gap-2 text-[#4573A2]">
+          <span className="inline-flex items-center gap-2 text-claimondo-ondo">
             <Loader2Icon width={14} height={14} className="animate-spin" />
             Copilot denkt nach …
           </span>
@@ -333,7 +333,7 @@ function MessageRow({
 
 function MarkdownBlock({ children }: { children: string }) {
   return (
-    <div className="prose prose-sm max-w-none prose-headings:text-[#0D1B3E] prose-p:text-[#0D1B3E] prose-strong:text-[#0D1B3E] prose-ul:text-[#0D1B3E] prose-ol:text-[#0D1B3E] prose-li:my-0.5 prose-p:my-1.5">
+    <div className="prose prose-sm max-w-none prose-headings:text-claimondo-navy prose-p:text-claimondo-navy prose-strong:text-claimondo-navy prose-ul:text-claimondo-navy prose-ol:text-claimondo-navy prose-li:my-0.5 prose-p:my-1.5">
       <ReactMarkdown>{children}</ReactMarkdown>
     </div>
   )
