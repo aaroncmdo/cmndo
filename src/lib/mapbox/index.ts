@@ -22,6 +22,11 @@ export {
   HERO_PIN_LAYER_ID,
   type HeroPin3dHandle,
 } from './hero-pin-3d'
+export {
+  attachGoogle3dTiles,
+  isGoogle3dTilesEnabled,
+  type Google3dTilesHandle,
+} from './google-3d-tiles'
 export { addKundeMarker, type KundeMarkerOptions } from './kunde-marker'
 export { upsertRouteLayer, removeRouteLayer } from './route-layer'
 export {

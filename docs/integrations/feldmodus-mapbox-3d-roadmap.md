@@ -84,14 +84,30 @@ Cross-Plattform: Web-First, später React Native (`@rnmapbox/maps` + `@react-thr
 
 Time-of-Day-Sync mit Termin-Slot + Wetter-Atmosphäre durch. Ohne Custom-Shader-Komplexität, voll auf Mapbox-Standard-Properties + Fog-Modifier.
 
-### Phase 4 — Photorealistic 3D Tiles (Optional, braucht Cost-Approval)
+### Phase 4 — Google Photorealistic 3D Tiles ✅ Code-Setup gepusht (PR pending)
 
-**Aufwand:** 2-3 Tage. **Effekt:** echte Mesh-Daten in Großstädten, fotorealistische Fassaden.
+**Status:** funktional implementiert, **STANDARDMÄSSIG OFF.** Aktivierung über zwei Env-Vars (siehe `.env.example`):
 
-- **Google Photorealistic 3D Tiles** als zusätzlicher Layer-Source via Mapbox 3D-Tiles-Layer-API (Mapbox v3 unterstützt externe 3D-Tiles).
-- Cost-Modell: ~$10/1000 Tile-Requests (Google Maps Platform Tier).
-- **Aaron-Decision nötig vor Aktivierung** — Cost-Burn pro SV-Termin schwer zu modellieren ohne Production-Daten.
-- Code-Stub kann angelegt werden, Activation hinter Feature-Flag.
+```
+NEXT_PUBLIC_GOOGLE_MAPS_3D_TILES_KEY=<Google-Maps-API-Key mit Photorealistic-3D-Tiles-Berechtigung>
+NEXT_PUBLIC_FELDMODUS_GOOGLE_TILES=true
+```
+
+**Architektur:**
+- `src/lib/mapbox/google-3d-tiles.ts` — `attachGoogle3dTiles(map)` Helper. Lazy-Import damit deck.gl + loaders.gl nicht ins initial Bundle gehen wenn Feature deaktiviert ist.
+- deck.gl `MapboxOverlay` + `Tile3DLayer` mit `Tiles3DLoader` aus `@loaders.gl/3d-tiles`
+- Source: `https://tile.googleapis.com/v1/3dtiles/root.json?key=…`
+
+**Cost-Profil:**
+- Google Maps Platform 3D Tiles: ~$10 pro 1000 Tile-Requests
+- Pro Map-View: 50–200 Tile-Requests (abhängig von Zoom + Schwenk)
+- → Konservative Schätzung pro SV-Tag: 500-2000 Requests = ~$5-20/SV-Tag bei 100% Aktivierung
+- Aaron-Cost-Modell vor Production-Aktivierung empfohlen
+
+**Was noch fehlt für Production:**
+- Cost-Modell finalisieren mit echten SV-Termin-Counts
+- Optional: per-User-Toggle in Profil (Default off, opt-in)
+- Optional: Geo-Fence (nur aktivieren wenn Stop in einer Großstadt liegt — 80% des Wow-Effekts ohne 100% Cost)
 
 ### Phase 5 — Custom-Shader (zurückgestellt)
 
