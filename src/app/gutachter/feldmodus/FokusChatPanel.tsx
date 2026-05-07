@@ -10,7 +10,7 @@
 // und Swipe-Gesten bewusst geschnitten — Tap-Toggle reicht für MVP.
 // Auto-Collapse bei sessionStatus='arrived' (Fallakten-View braucht Platz).
 
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   ChevronUpIcon,
@@ -63,6 +63,9 @@ export default function FokusChatPanel({
   empfaengerId,
 }: Props) {
   const supabase = useMemo(() => createClient(), [])
+  // useId-Suffix gegen Strict-Mode-Doppel-Mount-Crash (Memory
+  // feedback_realtime_channel_ids).
+  const channelSuffix = useId()
   const [expanded, setExpanded] = useState(false)
   const [messages, setMessages] = useState<Nachricht[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -85,7 +88,7 @@ export default function FokusChatPanel({
       })
 
     const channel = supabase
-      .channel(`fokus-chat-${fallId}`)
+      .channel(`fokus-chat-${fallId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -105,7 +108,7 @@ export default function FokusChatPanel({
       cancelled = true
       void supabase.removeChannel(channel)
     }
-  }, [supabase, fallId])
+  }, [supabase, fallId, channelSuffix])
 
   // Ungelesene zählen (inbound + nicht-gelesen + nicht eigene).
   useEffect(() => {

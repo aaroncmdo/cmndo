@@ -5,7 +5,7 @@
 // aktuellen Stop-Index lokal (initialisiert aus session.aktueller_termin_id),
 // reagiert auf Geofence-Events und leitet Fortschritts-Callbacks durch.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -162,12 +162,15 @@ export default function FeldmodusClient({
   // (z.B. durch Zeit-Fallback auf einem anderen Gerät, oder durch eine
   // andere Tab-Instanz) gesetzt wird, schaltet die UI ohne Reload in den
   // arrived-State und öffnet die Fallakte.
+  // useId-Suffix verhindert Strict-Mode-Doppel-Mount-Crash (Memory
+  // feedback_realtime_channel_ids).
+  const feldmodusTerminChannelSuffix = useId()
   useEffect(() => {
     const terminId = aktuellerStop?.termin_id
     if (!terminId) return
     const supabase = createClient()
     const channel = supabase
-      .channel(`feldmodus-termin-${terminId}`)
+      .channel(`feldmodus-termin-${terminId}-${feldmodusTerminChannelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -191,7 +194,7 @@ export default function FeldmodusClient({
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [aktuellerStop?.termin_id])
+  }, [aktuellerStop?.termin_id, feldmodusTerminChannelSuffix])
 
   // AAR-388: Beim Mount Recovery fahren + Sync-Listeners registrieren.
   // Hängengebliebene 'uploading'-Items aus Tab-Reload zurück auf 'pending'.
