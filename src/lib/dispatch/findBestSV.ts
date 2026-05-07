@@ -522,6 +522,17 @@ async function findNextFreeSlotForSv(
     .lte('start_zeit', inZwoelfWochen.toISOString())
     .order('start_zeit', { ascending: true })
 
+  // AAR-2026-05-07: Per-SV Wochentag-Sperre. Default ist [] (kein Block über
+  // Wochenende-Hardcode hinaus). SVs koennen z.B. [2,3,4] = Di/Mi/Do setzen.
+  const { data: svRow } = await db
+    .from('sachverstaendige')
+    .select('blockierte_wochentage')
+    .eq('id', svId)
+    .maybeSingle()
+  const blockierteWochentage = new Set<number>(
+    ((svRow?.blockierte_wochentage as number[] | null) ?? []) as number[],
+  )
+
   // AAR-719: Private Kalender-Busy-Windows vorab laden.
   let busyWindows: BusyWindow[] = []
   if (profileId) {
@@ -544,7 +555,13 @@ async function findNextFreeSlotForSv(
   while (kandidat < inZwoelfWochen && i < maxIter) {
     i++
     const wochentag = kandidat.getDay()
-    if (wochentag !== 0 && wochentag !== 6 && kandidat.getHours() >= 9 && kandidat.getHours() < 16) {
+    if (
+      wochentag !== 0 &&
+      wochentag !== 6 &&
+      !blockierteWochentage.has(wochentag) &&
+      kandidat.getHours() >= 9 &&
+      kandidat.getHours() < 16
+    ) {
       // Fenster um den Slot-Start: [t-puffer, t+dauer+puffer]
       const fensterStart = new Date(kandidat.getTime() - TERMIN_PUFFER_MIN * 60_000)
       const fensterEnd = new Date(kandidat.getTime() + (TERMIN_DAUER_MIN + TERMIN_PUFFER_MIN) * 60_000)

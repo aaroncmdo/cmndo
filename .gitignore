@@ -53,3 +53,7 @@ test-results/
 
 # AAR-600: Supabase CLI local scratch (linked-project state, caches)
 supabase/.temp/
+
+# 2026-05-07: Design-Review-Screenshot-Runs — lokale Artefakte fuer
+# Handoff-ZIP, nicht in Git versionieren (zu gross + flicker zwischen Runs).
+docs/portals-review/07.05.2026 Design Review/
