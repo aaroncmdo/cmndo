@@ -9,6 +9,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import HeuteClient from './HeuteClient'
 import type { TagesroutePflichtStat } from './TagesrouteSidebar'
+import { listPrivatStopsForDate } from './private-stops-actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -393,6 +394,10 @@ export default async function HeutePage() {
     }),
   )
 
+  // AAR-872: Privat-Stops (GCal/CalDAV-Termine, die der SV manuell als
+  // Tagesroute-Anker addet) initial laden.
+  const initialPrivatStops = await listPrivatStopsForDate(isoDate(todayStart))
+
   return (
     <HeuteClient
       termine={heuteTermine}
@@ -402,6 +407,7 @@ export default async function HeutePage() {
         lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
       }}
       hasActiveSession={hasActiveSession}
+      initialPrivatStops={initialPrivatStops}
     />
   )
 }

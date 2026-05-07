@@ -15,7 +15,7 @@ export interface KundeMarkerOptions {
    *   verlegung_pending → amber-darker (#d97706)
    *   default       → ondo (#4573A2)
    */
-  status?: 'bestaetigt' | 'reserviert' | 'verlegung_pending' | 'verlegt' | string
+  status?: 'bestaetigt' | 'reserviert' | 'verlegung_pending' | 'verlegt' | 'privat' | string
 }
 
 function colorForStatus(status?: string): string {
@@ -28,6 +28,8 @@ function colorForStatus(status?: string): string {
       return '#d97706' // amber-600 darker
     case 'verlegt':
       return '#94a3b8' // slate-400 dimmed
+    case 'privat':
+      return '#7c3aed' // AAR-872: violet-600 — Privat-Stop visuell distinct
     default:
       return '#4573A2' // claimondo-ondo
   }

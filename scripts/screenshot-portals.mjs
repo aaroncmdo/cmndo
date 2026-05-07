@@ -22,12 +22,20 @@ import { join } from 'node:path'
 
 const BASE_URL = process.env.SCREENSHOT_BASE_URL ?? 'http://localhost:3000'
 const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? 'Test1234!'
-const OUT_DIR = 'docs/portals-review/screenshots'
+const OUT_DIR = process.env.SCREENSHOT_OUT_DIR ?? 'docs/portals-review/screenshots'
 
-const VIEWPORTS = [
+// SCREENSHOT_VIEWPORTS=desktop,tablet,mobile (Default: desktop+mobile fuer
+// schnellen CI-Run, alle drei wenn Design-Handoff gewuenscht ist).
+const ALL_VIEWPORTS = [
   { name: 'desktop', width: 1440, height: 900, deviceScaleFactor: 1 },
+  { name: 'tablet', width: 768, height: 1024, deviceScaleFactor: 2 },
   { name: 'mobile', width: 390, height: 844, deviceScaleFactor: 2 },
 ]
+const viewportFilter = (process.env.SCREENSHOT_VIEWPORTS ?? 'desktop,mobile')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+const VIEWPORTS = ALL_VIEWPORTS.filter((v) => viewportFilter.includes(v.name))
 
 const PORTALS = {
   gutachter: {
