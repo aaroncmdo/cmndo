@@ -513,10 +513,16 @@ aside.kunde-sidebar[data-chat-open] .kunde-sidebar-rest {
   animation: wx-sun-pulse 4s ease-in-out infinite;
   pointer-events: none;
 }
-/* Tailwind-4-Workaround: in seltenen Faellen generiert der JIT-Compiler eine
-   kaputte .w-[var()]-Klasse mit leerem var() — z.B. wenn ein vorheriger
-   Source-Scan ein w-[var(--something)]-Token gesehen hat das spaeter
-   migriert wurde (Drawer.web.tsx pre-fix). Override mit safe-default damit
-   der CSS-Parser nicht bricht. width:auto ist neutral und greift nirgends
-   tatsaechlich (es gibt keinen Caller fuer diese Klasse). */
+/* Tailwind-4-Workaround: der JIT-Compiler kann eine kaputte
+   width-arbitrary-value-Klasse mit leerem CSS-var-Aufruf erzeugen, die
+   PostCSS dann mit "Unexpected end of input" abbrechen laesst — und mit
+   ihr die ganze restliche Datei. Der Trigger ist haeufig ein anderes
+   Source-Token das spaeter migriert/entfernt wurde und nur noch im
+   Source-Cache steht. Override mit safe-default + den triggernden String
+   bewusst aus dem Comment heraushalten, damit der Tailwind-Scanner ihn
+   nicht in seine Klassen-Liste aufnimmt (sonst beisst sich der Workaround
+   selbst in den Schwanz: 2026-05-08 lokales Repro bei Aaron — der Comment
+   selbst war die Quelle der Klasse, weil Tailwind 4 auch CSS-Files mit
+   scannt). 2026-05-08 Aaron-Repro: dev/login crashte mit dem Parse-Error,
+   sobald irgendwer hier landete. */
 .w-\[var\(\)\] { width: auto !important; }
