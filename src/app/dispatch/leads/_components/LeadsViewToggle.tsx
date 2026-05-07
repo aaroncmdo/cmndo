@@ -11,6 +11,8 @@ import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon } from 'lucide-re
 import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Chip } from '@/components/ui/Chip'
+import DensityToggle from '@/components/shared/DensityToggle'
+import { useDensityPreference, type Density } from '@/hooks/useDensityPreference'
 
 type Lead = {
   id: string
@@ -36,33 +38,41 @@ function flowLinkBadge(offen: boolean | null, abgeschlossen: boolean | null): { 
 
 export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
   const [view, setView] = useState<'liste' | 'kanban'>('liste')
+  const [density] = useDensityPreference('dispatch-leads')
 
   return (
     <div className="space-y-3">
-      {/* Toggle — Touch-friendly Segmented-Chips (Portal-Review C3) */}
-      <div className="flex items-center gap-2 w-fit">
-        <Chip
-          variant={view === 'liste' ? 'selected' : 'default'}
-          onClick={() => setView('liste')}
-        >
-          <ListIcon className="w-3.5 h-3.5" />
-          Liste
-        </Chip>
-        <Chip
-          variant={view === 'kanban' ? 'selected' : 'default'}
-          onClick={() => setView('kanban')}
-        >
-          <LayoutGridIcon className="w-3.5 h-3.5" />
-          Kanban
-        </Chip>
+      {/* Toggle-Reihe — View-Toggle links + DensityToggle rechts (nur in
+          Liste-View, im Kanban macht Density wenig Unterschied). */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2 w-fit">
+          <Chip
+            variant={view === 'liste' ? 'selected' : 'default'}
+            onClick={() => setView('liste')}
+          >
+            <ListIcon className="w-3.5 h-3.5" />
+            Liste
+          </Chip>
+          <Chip
+            variant={view === 'kanban' ? 'selected' : 'default'}
+            onClick={() => setView('kanban')}
+          >
+            <LayoutGridIcon className="w-3.5 h-3.5" />
+            Kanban
+          </Chip>
+        </div>
+        {view === 'liste' && <DensityToggle listKey="dispatch-leads" />}
       </div>
 
-      {view === 'liste' ? <ListView leads={leads} /> : <KanbanView leads={leads} />}
+      {view === 'liste' ? <ListView leads={leads} density={density} /> : <KanbanView leads={leads} />}
     </div>
   )
 }
 
-function ListView({ leads }: { leads: Lead[] }) {
+function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
+  const compact = density === 'compact'
+  const rowPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
+  const cellPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   return (
     <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
       {/* Mobile/Tablet-Card-Liste (<lg) — Portal-Review D3 */}
@@ -75,9 +85,9 @@ function ListView({ leads }: { leads: Lead[] }) {
             <Link
               key={lead.id}
               href={`/dispatch/leads/${lead.id}`}
-              className="flex items-start justify-between gap-3 px-4 py-3 hover:bg-[#f8f9fb] active:bg-claimondo-ondo/5 transition-colors"
+              className={`flex items-start justify-between gap-3 hover:bg-[#f8f9fb] active:bg-claimondo-ondo/5 transition-colors ${rowPadCls}`}
             >
-              <div className="flex-1 min-w-0 space-y-1.5">
+              <div className={`flex-1 min-w-0 ${compact ? 'space-y-0.5' : 'space-y-1.5'}`}>
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-claimondo-navy truncate">
                     {lead.vorname} {lead.nachname}
@@ -120,13 +130,13 @@ function ListView({ leads }: { leads: Lead[] }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-claimondo-border bg-[#f8f9fb]/50">
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Name</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Telefon</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Status</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">FlowLink</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Service</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Erstellt</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs"></th>
+              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Name</th>
+              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Telefon</th>
+              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Status</th>
+              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>FlowLink</th>
+              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Service</th>
+              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Erstellt</th>
+              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-claimondo-border">
@@ -134,7 +144,7 @@ function ListView({ leads }: { leads: Lead[] }) {
               const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
               return (
                 <tr key={lead.id} className="hover:bg-[#f8f9fb]/50 transition-colors">
-                  <td className="px-4 py-3">
+                  <td className={cellPadCls}>
                     <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-claimondo-ondo">
                       {lead.vorname} {lead.nachname}
                     </Link>
@@ -142,28 +152,28 @@ function ListView({ leads }: { leads: Lead[] }) {
                       <span className="ml-2 text-[10px] text-claimondo-ondo/70">{lead.schadens_fall_typ}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={cellPadCls}>
                     {lead.telefon ? (
                       <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
                     ) : (
                       <span className="text-claimondo-ondo/50">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={cellPadCls}>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
                       {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={cellPadCls}>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
+                  <td className={`${cellPadCls} text-xs text-claimondo-ondo`}>
                     {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
                   </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
+                  <td className={`${cellPadCls} text-xs text-claimondo-ondo/70`}>
                     {new Date(lead.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={cellPadCls}>
                     <Link href={`/dispatch/leads/${lead.id}`} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
                       <ExternalLinkIcon className="w-4 h-4" />
                     </Link>

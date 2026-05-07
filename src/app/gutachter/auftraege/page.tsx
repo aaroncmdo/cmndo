@@ -7,7 +7,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import Link from 'next/link'
 import { BriefcaseIcon } from 'lucide-react'
-import AuftragCard from './AuftragCard'
+import type { AuftragCardProps } from './AuftragCard'
+import AuftraegeGrid from './AuftraegeGrid'
 import TagesvorbereitungButton from './TagesvorbereitungButton'
 import { getUrsacheLabel } from '@/lib/statusLabels'
 import EmptyState from '@/components/shared/EmptyState'
@@ -199,16 +200,15 @@ export default async function AuftraegePage({
             ]}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-            {sichtbareAuftraege.map((auftrag) => {
-              const fall = fallMap[auftrag.fall_id as string]
-              if (!fall) return null
-              const kunde = fall.lead_id ? leadMap[fall.lead_id as string] : null
-              const termin = terminMap[fall.id as string]
-              return (
-                <AuftragCard
-                  key={auftrag.id}
-                  fall={{
+          <AuftraegeGrid
+            items={sichtbareAuftraege
+              .map((auftrag): AuftragCardProps | null => {
+                const fall = fallMap[auftrag.fall_id as string]
+                if (!fall) return null
+                const kunde = fall.lead_id ? leadMap[fall.lead_id as string] : null
+                const termin = terminMap[fall.id as string]
+                return {
+                  fall: {
                     id: fall.id as string,
                     fall_nummer: fall.fall_nummer as string | null,
                     status: auftrag.status as string,
@@ -220,27 +220,24 @@ export default async function AuftraegePage({
                     fahrzeug_modell: (fall.fahrzeug_modell as string | null) ?? null,
                     fahrzeug_baujahr: (fall.fahrzeug_baujahr as string | number | null) ?? null,
                     lackfarbe_code: (fall.lackfarbe_code as string | null) ?? null,
-                  }}
-                  kunde={kunde ? { vorname: kunde.vorname, nachname: kunde.nachname } : null}
-                  aktiverTermin={
-                    termin
-                      ? {
-                          id: termin.id,
-                          status: termin.status,
-                          start_zeit: termin.start_zeit,
-                          vorgeschlagenes_datum: termin.vorgeschlagenes_datum,
-                          gegenvorschlag_von:
-                            (termin.gegenvorschlag_von as 'sv' | 'kunde' | null) ?? null,
-                        }
-                      : null
-                  }
-                  ursacheLabel={getUrsacheLabel(fall.schadens_ursache as string | null)}
-                  statusLabel={AUFTRAG_STATUS_KURZ[auftrag.status as string] ?? (auftrag.status as string)}
-                  offeneDokumente={offeneDokuMap[fall.id as string] ?? 0}
-                />
-              )
-            })}
-          </div>
+                  },
+                  kunde: kunde ? { vorname: kunde.vorname, nachname: kunde.nachname } : null,
+                  aktiverTermin: termin
+                    ? {
+                        id: termin.id,
+                        status: termin.status,
+                        start_zeit: termin.start_zeit,
+                        vorgeschlagenes_datum: termin.vorgeschlagenes_datum,
+                        gegenvorschlag_von: (termin.gegenvorschlag_von as 'sv' | 'kunde' | null) ?? null,
+                      }
+                    : null,
+                  ursacheLabel: getUrsacheLabel(fall.schadens_ursache as string | null),
+                  statusLabel: AUFTRAG_STATUS_KURZ[auftrag.status as string] ?? (auftrag.status as string),
+                  offeneDokumente: offeneDokuMap[fall.id as string] ?? 0,
+                }
+              })
+              .filter((p): p is AuftragCardProps => p !== null)}
+          />
         )}
       </div>
     </div>

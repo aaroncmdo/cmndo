@@ -9,6 +9,8 @@ import { formatDatumMitWochentag, formatUhrzeit } from '@/lib/format'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import DensityToggle from '@/components/shared/DensityToggle'
+import { useDensityPreference } from '@/hooks/useDensityPreference'
 
 // KFZ-134: Gutachter Termine-Liste mit Akzeptieren/Ablehnen/Gegenvorschlag.
 
@@ -49,6 +51,9 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
   const [grund, setGrund] = useState('')
   const [neuesDatum, setNeuesDatum] = useState('')
   const [filter, setFilter] = useState<'offen' | 'alle'>('offen')
+  const [density] = useDensityPreference('gutachter-termine')
+  const compact = density === 'compact'
+  const cardPad = compact ? 'p-3' : 'p-5'
 
   const offene = termine.filter(t => ['reserviert', 'vorschlag', 'gegenvorschlag'].includes(t.status))
   const filtered = filter === 'offen' ? offene : termine
@@ -90,13 +95,16 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
           icon={CalendarIcon}
           size="lg"
           actions={
-            <div className="inline-flex bg-[#f8f9fb] rounded-xl p-0.5 text-xs font-medium">
-              <button onClick={() => setFilter('offen')} className={`px-3 py-1.5 rounded-lg ${filter === 'offen' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
-                Offen ({offene.length})
-              </button>
-              <button onClick={() => setFilter('alle')} className={`px-3 py-1.5 rounded-lg ${filter === 'alle' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
-                Alle ({termine.length})
-              </button>
+            <div className="flex items-center gap-2">
+              <div className="inline-flex bg-[#f8f9fb] rounded-xl p-0.5 text-xs font-medium">
+                <button onClick={() => setFilter('offen')} className={`px-3 py-1.5 rounded-lg ${filter === 'offen' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
+                  Offen ({offene.length})
+                </button>
+                <button onClick={() => setFilter('alle')} className={`px-3 py-1.5 rounded-lg ${filter === 'alle' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
+                  Alle ({termine.length})
+                </button>
+              </div>
+              <DensityToggle listKey="gutachter-termine" />
             </div>
           }
         />
@@ -115,7 +123,7 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
             const needsAction = ['reserviert', 'vorschlag'].includes(t.status) || isKundenGegenvorschlag
             const displayDatum = t.vorgeschlagenes_datum && t.status === 'gegenvorschlag' ? t.vorgeschlagenes_datum : t.start_zeit
             return (
-              <div key={t.id} className={`bg-white rounded-2xl border p-5 ${needsAction ? 'border-[var(--brand-secondary)] ring-1 ring-[var(--brand-secondary)]/20' : 'border-claimondo-border'}`}>
+              <div key={t.id} className={`bg-white rounded-2xl border ${cardPad} ${needsAction ? 'border-[var(--brand-secondary)] ring-1 ring-[var(--brand-secondary)]/20' : 'border-claimondo-border'}`}>
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1 flex-wrap">

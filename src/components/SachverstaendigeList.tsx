@@ -7,6 +7,8 @@ import { getSvStatus } from '@/lib/sv-status'
 import { KundeAvatar } from '@/components/shared/KundeAvatar'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Chip } from '@/components/ui/Chip'
+import DensityToggle from '@/components/shared/DensityToggle'
+import { useDensityPreference } from '@/hooks/useDensityPreference'
 
 // AAR-54: Tabellen-Ansicht für Sachverständige (statt Karte).
 // AAR-151: Aus src/app/admin/sachverstaendige/ verschoben in src/components/,
@@ -60,6 +62,9 @@ export default function SachverstaendigeList({
 }) {
   const [svFilter, setSvFilter] = useState<'aktive' | 'deaktivierte' | 'gesperrt' | 'alle'>('aktive')
   const [search, setSearch] = useState('')
+  const [density] = useDensityPreference('sv-liste')
+  const compact = density === 'compact'
+  const cellPad = compact ? 'px-3 py-1.5' : 'px-4 py-3'
 
   const filtered = useMemo(() => {
     return sachverstaendige.filter(sv => {
@@ -114,6 +119,7 @@ export default function SachverstaendigeList({
           >
             Karte öffnen →
           </Link>
+          <DensityToggle listKey="sv-liste" />
         </div>
       </div>
 
@@ -161,7 +167,7 @@ export default function SachverstaendigeList({
 
               return (
                 <tr key={sv.id} className="hover:bg-[#f0f4f8] transition-colors">
-                  <td className="px-4 py-3">
+                  <td className={cellPad}>
                     <div className="flex items-center gap-2">
                       <KundeAvatar name={sv.name} size={28} tone="ondo-subtle" />
                       <div>
@@ -170,25 +176,25 @@ export default function SachverstaendigeList({
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={cellPad}>
                     <StatusBadge colorCls={typ.cls}>{typ.label}</StatusBadge>
                   </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
+                  <td className={`${cellPad} text-xs text-claimondo-ondo`}>
                     <span className="flex items-center gap-1">
                       <MapPinIcon className="w-3 h-3 text-claimondo-ondo/70" />
                       {stadt}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-navy font-medium">{paket}</td>
-                  <td className="px-4 py-3 text-xs">
+                  <td className={`${cellPad} text-xs text-claimondo-navy font-medium`}>{paket}</td>
+                  <td className={`${cellPad} text-xs`}>
                     <span className={sv.offeneFaelle >= sv.maxFaelleMonat ? 'text-red-600 font-semibold' : 'text-claimondo-navy'}>
                       {sv.offeneFaelle}/{sv.maxFaelleMonat}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={cellPad}>
                     <StatusBadge colorCls={`${status.bg} ${status.text}`}>{status.label}</StatusBadge>
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className={`${cellPad} text-right`}>
                     <Link href={`${basePath}/sachverstaendige/${sv.id}`} className="text-claimondo-ondo hover:underline text-xs">→</Link>
                   </td>
                 </tr>
