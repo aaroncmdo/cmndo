@@ -9,7 +9,7 @@
 // Realtime-Subscription auf pflichtdokumente + faelle hält die Ansicht
 // ohne manuellen Reload aktuell.
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   ArrowLeftIcon,
@@ -53,6 +53,11 @@ export default function SvFallakteView({
   const notizenDirtyRef = useRef(false)
 
   const supabase = useMemo(() => createClient(), [])
+  // 2026-05-07: useId-Suffix verhindert „cannot add postgres_changes
+  // callbacks after subscribe()"-Crash bei Strict-Mode-Doppel-Mount.
+  // Channel-Namen müssen pro Consumer-Instanz eindeutig sein. Siehe
+  // Memory feedback_realtime_channel_ids.
+  const channelSuffix = useId()
 
   const reload = useCallback(async () => {
     setLoading(true)
@@ -83,7 +88,7 @@ export default function SvFallakteView({
   // ohne dass der SV manuell neu laden muss.
   useEffect(() => {
     const channel = supabase
-      .channel(`feldmodus-fallakte-${fallId}`)
+      .channel(`feldmodus-fallakte-${fallId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -112,7 +117,7 @@ export default function SvFallakteView({
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [supabase, fallId, reload])
+  }, [supabase, fallId, channelSuffix, reload])
 
   const pflichtOffen = slots.filter(
     (s) => s.istPflicht && s.status !== 'hochgeladen' && s.status !== 'geprueft',
