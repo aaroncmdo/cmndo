@@ -25,6 +25,9 @@ import {
   attachGoogle3dTiles,
   isGoogle3dTilesEnabled,
   type Google3dTilesHandle,
+  attachCesium3dTiles,
+  isCesium3dTilesEnabled,
+  type Cesium3dTilesHandle,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
@@ -112,6 +115,7 @@ export default function FeldmodusMap({
   const sv3dHandleRef = useRef<SvCar3dHandle | null>(null)
   const heroPinRef = useRef<HeroPin3dHandle | null>(null)
   const google3dTilesRef = useRef<Google3dTilesHandle | null>(null)
+  const cesium3dTilesRef = useRef<Cesium3dTilesHandle | null>(null)
   const stopMarkersRef = useRef<Marker[]>([])
   const tokenMissing = useRef(false)
   // 2026-05-07 Phase 3b: Wetter-Code (OpenWeatherMap weather_id) am
@@ -252,11 +256,17 @@ export default function FeldmodusMap({
         }
       }
 
-      // 2026-05-07 Phase 4: Google Photorealistic 3D Tiles — nur aktiv wenn
-      // beide Env-Vars gesetzt sind (Cost-Schutz, siehe lib/mapbox/google-
-      // 3d-tiles.ts). Lazy-Import damit deck.gl + loaders.gl nicht ins
-      // initial Bundle gehen wenn das Feature deaktiviert ist.
-      if (isGoogle3dTilesEnabled()) {
+      // 2026-05-07 Phase 4: 3D-Tiles — bevorzugt Cesium Ion (in EEA
+      // verfügbar), Google als Fallback (in EEA seit 2024 gesperrt).
+      // Lazy-Import damit deck.gl + loaders.gl nicht ins initial Bundle
+      // gehen wenn beide Features off sind.
+      if (isCesium3dTilesEnabled()) {
+        attachCesium3dTiles(map).then((handle) => {
+          if (handle) cesium3dTilesRef.current = handle
+        }).catch((err) => {
+          console.error('[FeldmodusMap] cesium-3d-tiles attach failed:', err)
+        })
+      } else if (isGoogle3dTilesEnabled()) {
         attachGoogle3dTiles(map).then((handle) => {
           if (handle) google3dTilesRef.current = handle
         }).catch((err) => {
@@ -321,6 +331,8 @@ export default function FeldmodusMap({
       heroPinRef.current = null
       google3dTilesRef.current?.remove()
       google3dTilesRef.current = null
+      cesium3dTilesRef.current?.remove()
+      cesium3dTilesRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current = []
       map.remove()
@@ -357,9 +369,11 @@ export default function FeldmodusMap({
     return () => ctrl.abort()
   }, [aktuellerStopIndex, stops])
 
-  // 2026-05-07 Phase 3: Light-Preset + Fog-Tinting folgen der Termin-Zeit.
-  // Bei Stop-Wechsel werden Beleuchtung UND atmosphärische Töne sanft
+  // 2026-05-07 Phase 3 + 5: Light-Preset + Fog-Tinting folgen der Termin-
+  // Zeit. Bei Stop-Wechsel werden Beleuchtung UND atmosphärische Töne sanft
   // umgestellt — Mapbox Standard interpoliert die Übergänge selbständig.
+  // Phase 5: Hero-Pin-Sun-Direction folgt dem gleichen Preset → Schatten
+  // wirken konsistent.
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -370,6 +384,7 @@ export default function FeldmodusMap({
       map.setConfigProperty('basemap', 'lightPreset', preset)
       const fog = applyWeatherToFog(fogForLightPreset(preset), weatherId)
       map.setFog(fog as Parameters<typeof map.setFog>[0])
+      heroPinRef.current?.updateLight(preset)
     } catch { /* style not ready yet */ }
   }, [aktuellerStopIndex, stops, weatherId])
 
