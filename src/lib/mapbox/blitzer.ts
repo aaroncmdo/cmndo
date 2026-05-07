@@ -1,29 +1,34 @@
 'use client'
 
-// 2026-05-07: Blitzer-Layer für den Feldmodus.
-// Datenquelle: OpenStreetMap via Overpass-API. Nodes mit
-// `highway=speed_camera`. Kostenlos, EU-flächendeckend.
+// 2026-05-08: Blitzer-Layer für den Feldmodus — jetzt via Atudo (Blitzer.de)
+// statt OSM. Liefert MOBILE Blitzer (type 1) zusätzlich zu stationären.
+// CORS: Access-Control-Allow-Origin: * — direkt aus dem Browser callbar.
 //
-// Lade-Strategie: Bounding-Box um die TBT-Route + 500m Puffer. Cache
-// pro BBox für 5 min damit Re-Renders nicht spammen.
+// Type-Codes (aus dem JayR-Skript-Original):
+//   0,1,2,3,4,5,6 = verschiedene Blitzer-Kategorien (mobile, fest,
+//   Rotlicht, Abschnitt, …). 1000 = Cluster-Pseudo-POI bei großem Zoom-
+//   Out — wird in der Marker-Anzeige ignoriert.
+//
+// Lade-Strategie: BBox um die TBT-Route + 500m Puffer. Cache pro BBox
+// 5 min damit Re-Renders/GPS-Jitter nicht spammen.
 
 import type { Map as MapboxMap } from 'mapbox-gl'
 
 export const BLITZER_SOURCE_ID = 'blitzer-src'
 export const BLITZER_LAYER_ID = 'blitzer-layer'
 
-const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
+const ATUDO_URL = 'https://cdn2.atudo.net/api/1.0/vl.php'
 const cache = new Map<string, { features: GeoJSON.Feature[]; ts: number }>()
 const CACHE_TTL_MS = 5 * 60 * 1000
 
 export type BlitzerFeature = GeoJSON.Feature<
   GeoJSON.Point,
-  { id: string; direction?: string }
+  { id: string; type: string; vmax?: string; street?: string }
 >
 
 /**
  * BBox = [minLng, minLat, maxLng, maxLat] (Mapbox-Style).
- * Liefert speed_camera-Nodes als GeoJSON-Features.
+ * Liefert mobile + stationäre Blitzer als GeoJSON-Features.
  */
 export async function fetchBlitzerInBbox(
   bbox: [number, number, number, number],
@@ -34,43 +39,53 @@ export async function fetchBlitzerInBbox(
     return cached.features as BlitzerFeature[]
   }
 
-  // Overpass erwartet south, west, north, east — wir konvertieren.
+  // Atudo erwartet box=lat_min,lng_min,lat_max,lng_max
   const [minLng, minLat, maxLng, maxLat] = bbox
-  const query = `
-    [out:json][timeout:10];
-    (
-      node["highway"="speed_camera"](${minLat},${minLng},${maxLat},${maxLng});
-      node["enforcement"="maxspeed"](${minLat},${minLng},${maxLat},${maxLng});
-    );
-    out body;
-  `
+  const url =
+    `${ATUDO_URL}?type=0,1,2,3,4,5,6&box=${minLat.toFixed(6)},${minLng.toFixed(6)},${maxLat.toFixed(6)},${maxLng.toFixed(6)}`
 
   try {
-    const res = await fetch(OVERPASS_URL, {
-      method: 'POST',
-      body: `data=${encodeURIComponent(query)}`,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    const res = await fetch(url, {
+      // Atudo prüft Referer leicht; cmndo.vercel.app wird akzeptiert
+      // (im Browser setzt der UA den Referer eh automatisch).
+      cache: 'no-store',
     })
     if (!res.ok) {
-      console.warn('[blitzer] Overpass HTTP', res.status)
+      console.warn('[blitzer-atudo] HTTP', res.status)
       return []
     }
     const data = (await res.json()) as {
-      elements?: Array<{ id: number; lat: number; lon: number; tags?: Record<string, string> }>
+      pois?: Array<{
+        id: string | number
+        lat: string | number
+        lng: string | number
+        type: string | number
+        vmax?: string | number
+        street?: string
+      }>
     }
-    const features: BlitzerFeature[] = (data.elements ?? []).map((e) => ({
-      type: 'Feature',
-      id: `blitzer-${e.id}`,
-      geometry: { type: 'Point', coordinates: [e.lon, e.lat] },
-      properties: {
-        id: String(e.id),
-        direction: e.tags?.direction,
-      },
-    }))
+    // Cluster-Pseudo-POIs (type=1000) bei zoomed-out Bbox aussortieren —
+    // einzelne Standorte sind type 0-6.
+    const features: BlitzerFeature[] = (data.pois ?? [])
+      .filter((p) => Number(p.type) < 100)
+      .map((p) => ({
+        type: 'Feature',
+        id: `blitzer-${p.id}`,
+        geometry: {
+          type: 'Point',
+          coordinates: [Number(p.lng), Number(p.lat)],
+        },
+        properties: {
+          id: String(p.id),
+          type: String(p.type),
+          vmax: p.vmax != null ? String(p.vmax) : undefined,
+          street: p.street,
+        },
+      }))
     cache.set(key, { features, ts: Date.now() })
     return features
   } catch (err) {
-    console.warn('[blitzer] fetch error:', err)
+    console.warn('[blitzer-atudo] fetch error:', err)
     return []
   }
 }
@@ -116,16 +131,21 @@ export function attachBlitzerLayer(map: MapboxMap, initial: BlitzerFeature[] = [
   }
 
   if (!map.getLayer(BLITZER_LAYER_ID)) {
-    // Zwei-Schicht: Pulse-Halo (großer transparenter Kreis) + zentraler Punkt.
+    // 2026-05-08: Type-1 (mobil) → lila Pulse, Rest (stationär) → rot.
+    // Macht Mobile-Blitzer auf den ersten Blick unterscheidbar.
     map.addLayer({
       id: `${BLITZER_LAYER_ID}-halo`,
       type: 'circle',
       source: BLITZER_SOURCE_ID,
       paint: {
-        'circle-radius': 16,
-        'circle-color': '#ef4444', // red-500
-        'circle-opacity': 0.25,
-        'circle-blur': 0.4,
+        'circle-radius': 18,
+        'circle-color': [
+          'case',
+          ['==', ['get', 'type'], '1'], '#a855f7', // purple-500 mobil
+          '#ef4444', // red-500 stationär
+        ],
+        'circle-opacity': 0.3,
+        'circle-blur': 0.5,
       },
     })
     map.addLayer({
@@ -134,7 +154,11 @@ export function attachBlitzerLayer(map: MapboxMap, initial: BlitzerFeature[] = [
       source: BLITZER_SOURCE_ID,
       paint: {
         'circle-radius': 6,
-        'circle-color': '#dc2626', // red-600
+        'circle-color': [
+          'case',
+          ['==', ['get', 'type'], '1'], '#9333ea', // purple-600 mobil
+          '#dc2626', // red-600 stationär
+        ],
         'circle-stroke-color': '#ffffff',
         'circle-stroke-width': 2,
       },
