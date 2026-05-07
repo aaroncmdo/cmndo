@@ -1,20 +1,21 @@
 'use client'
 
 // CMM-32 Polish: Standort-Permission-CTA fuer das SV-Portal.
-// Zeigt eine dezente Inline-Bar oben in der GutachterShell wenn der
-// Browser noch keinen Standort-Grant hat. Ein Klick triggert den
-// Permissions-Prompt; sobald der User „erlauben" klickt, schaltet
-// useGeoPosition automatisch auf 'granted' und startet watchPosition
-// ohne weiteren Eingriff.
 //
-// Bei 'denied' geht's nur ueber die Browser-Settings — wir zeigen
-// einen dauerhaften Hinweis statt eines Buttons, weil der zweite
-// getCurrentPosition()-Call dann sofort wieder fehlschlaegt.
+// 2026-05-07 (Design-Review-Iteration): Banner war auf allen 24 Routen
+// permanent oben sichtbar — auf Mobile bis zu 18 % der Viewport-Hoehe.
+// SV in /profil oder /abrechnung braucht aber kein GPS. Jetzt:
+//   - nur auf Routen wo Live-Location Mehrwert liefert (Heute, Feldmodus,
+//     Aufträge — die Standort-getriggerten Flows)
+//   - Mobile zeigt nur Pill-Icon + Erlauben-Button (kein 4-Zeilen-Text)
+//   - „Später" snoozt fuer 7 Tage via localStorage statt nur 1 Render
+//   - Glass-Style mit backdrop-blur passend zu Heute-Sidebar
 //
 // 'granted' und 'unsupported' rendern null — kein UI-Noise.
 
-import { useState, useTransition } from 'react'
-import { MapPinIcon, MapPinOffIcon } from 'lucide-react'
+import { useEffect, useState, useTransition } from 'react'
+import { usePathname } from 'next/navigation'
+import { MapPinIcon, MapPinOffIcon, XIcon } from 'lucide-react'
 import type { GeoPermission } from '@/hooks/useGeoPosition'
 
 type Props = {
@@ -22,54 +23,92 @@ type Props = {
   onRequest: () => Promise<void>
 }
 
+/**
+ * Routen auf denen der Standort-Banner relevant ist. Match via `startsWith` —
+ * `/gutachter/auftraege/123/...` greift auch.
+ */
+const ROUTES_WITH_BANNER = [
+  '/gutachter/heute',
+  '/gutachter/feldmodus',
+  '/gutachter/auftraege',
+] as const
+
+const SNOOZE_KEY = 'geo-prompt-snooze-until'
+const SNOOZE_DAYS = 7
+
+function getSnoozeUntil(): number {
+  if (typeof window === 'undefined') return 0
+  try {
+    return Number(window.localStorage.getItem(SNOOZE_KEY) ?? 0)
+  } catch {
+    return 0
+  }
+}
+
 export function GeoPermissionPrompt({ permission, onRequest }: Props) {
   const [pending, startTransition] = useTransition()
-  const [dismissed, setDismissed] = useState(false)
+  const [snoozedUntil, setSnoozedUntil] = useState<number>(0)
+  const pathname = usePathname() ?? ''
+
+  // Snooze nach Mount aus localStorage lesen — vermeidet SSR-Hydration-Mismatch.
+  useEffect(() => {
+    setSnoozedUntil(getSnoozeUntil())
+  }, [])
+
+  // Route-Filter: nur auf Standort-relevanten Pfaden anzeigen.
+  const onRelevantRoute = ROUTES_WITH_BANNER.some((r) => pathname.startsWith(r))
+  if (!onRelevantRoute) return null
 
   if (permission === 'granted' || permission === 'unsupported') return null
-  if (permission === 'prompt' && dismissed) return null
+  if (Date.now() < snoozedUntil) return null
 
   if (permission === 'denied') {
     return (
-      <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 flex items-start gap-2 text-xs">
-        <MapPinOffIcon className="w-4 h-4 text-rose-700 shrink-0 mt-0.5" />
-        <div className="flex-1">
-          <p className="font-medium text-rose-900">Standort blockiert</p>
-          <p className="text-rose-800 mt-0.5">
-            Auto-ETA und Vor-Ort-Erkennung sind aus. In den Browser-Einstellungen
-            unter „Standort" für Claimondo wieder erlauben — wir aktivieren das
-            Tracking dann automatisch beim nächsten Termin.
-          </p>
-        </div>
+      <div className="mb-3 rounded-xl border border-rose-200 bg-rose-50/80 backdrop-blur-md px-3 py-2 flex items-center gap-2 text-xs">
+        <MapPinOffIcon className="w-4 h-4 text-rose-700 shrink-0" />
+        <p className="flex-1 text-rose-900 truncate">
+          <span className="font-medium">Standort blockiert.</span>{' '}
+          <span className="hidden sm:inline">In Browser-Settings für Claimondo wieder erlauben.</span>
+          <span className="sm:hidden">Browser-Settings öffnen.</span>
+        </p>
       </div>
     )
   }
 
-  // 'prompt' — Klick triggert Browser-Permission-Dialog
+  function handleSnooze() {
+    const until = Date.now() + SNOOZE_DAYS * 86_400_000
+    try {
+      window.localStorage.setItem(SNOOZE_KEY, String(until))
+    } catch { /* private mode etc. */ }
+    setSnoozedUntil(until)
+  }
+
+  // 'prompt' — Glass-Pill, kompakt: Mobile nur Icon+Buttons, Desktop ein Satz.
   return (
-    <div className="rounded-xl border border-claimondo-border bg-white px-3 py-2 flex items-center gap-3 text-xs">
+    <div className="mb-3 rounded-xl border border-white/40 bg-white/65 backdrop-blur-md shadow-ios-sm px-3 py-2 flex items-center gap-2 text-xs">
       <MapPinIcon className="w-4 h-4 text-claimondo-navy shrink-0" />
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-claimondo-navy">Standort aktivieren</p>
-        <p className="text-claimondo-ondo">
-          Für Auto-ETA, Vor-Ort-Erkennung und „durchgeführt"-Trigger ohne manuelles
-          Tippen. Wir tracken nur während aktiver Termin-Anfahrt.
-        </p>
-      </div>
+      <p className="flex-1 min-w-0 text-claimondo-navy truncate">
+        <span className="hidden sm:inline">
+          Standort an für Auto-ETA &amp; Termin-Tracking
+        </span>
+        <span className="sm:hidden font-medium">Standort?</span>
+      </p>
       <button
         type="button"
         onClick={() => startTransition(() => void onRequest())}
         disabled={pending}
-        className="rounded-md bg-claimondo-navy text-white text-xs font-medium px-3 py-1.5 hover:bg-claimondo-navy/90 disabled:opacity-50 shrink-0"
+        className="rounded-md bg-claimondo-navy text-white text-xs font-medium px-3 py-1 hover:bg-claimondo-ondo disabled:opacity-50 shrink-0"
       >
-        {pending ? 'Bitte bestätigen…' : 'Erlauben'}
+        {pending ? '…' : 'Erlauben'}
       </button>
       <button
         type="button"
-        onClick={() => setDismissed(true)}
-        className="text-claimondo-ondo/60 hover:text-claimondo-ondo text-xs shrink-0"
+        onClick={handleSnooze}
+        className="text-claimondo-ondo/70 hover:text-claimondo-navy p-1 shrink-0"
+        title="7 Tage ausblenden"
+        aria-label="Standort-Hinweis 7 Tage ausblenden"
       >
-        Später
+        <XIcon className="w-3.5 h-3.5" />
       </button>
     </div>
   )
