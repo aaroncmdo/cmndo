@@ -3,8 +3,8 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import SVKalenderClient from './SVKalenderClient'
-import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
+import KalenderListeEmpty from './KalenderListeEmpty'
 
 // AAR-229 W5 / F-12: Kalender + Termine merge mit View-Toggle.
 export default async function SVKalenderPage({
@@ -168,7 +168,12 @@ export default async function SVKalenderPage({
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {terminListe.length === 0 ? (
-            <EmptyState title="Keine Termine vorhanden." />
+            // 2026-05-07 EmptyState-Iter-2: Kalender > Liste-View ist die
+            // echte Termine-Empty-State (legacy /gutachter/termine wird hier
+            // hin redirected). Wrapper-Component, weil diese Page eine
+            // Server-Component ist und LucideIcon nicht über die RSC-Boundary
+            // gereicht werden kann.
+            <KalenderListeEmpty />
           ) : terminListe.map(fall => {
             const t = new Date(fall.sv_termin!)
             const name = fall.lead_id && leadMap[fall.lead_id] ? leadMap[fall.lead_id] : '—'

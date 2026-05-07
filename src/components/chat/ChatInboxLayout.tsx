@@ -191,12 +191,18 @@ export default function ChatInboxLayout({
             <div className="flex-1 min-h-0 p-4 overflow-y-auto">{renderDetail(activeId)}</div>
           </>
         ) : (
+          // 2026-05-07 EmptyState-Iter-2: Wenn die Sidebar leer ist (threads
+          // count 0), zeigt der Detail-Pane jetzt den emptyHint prominent
+          // statt nur „Wähle einen Chat aus der Liste" — das wäre irreführend.
           <div className="flex-1 flex items-center justify-center text-center px-4">
-            <div>
-              <MessageCircleIcon className="w-12 h-12 mx-auto text-claimondo-ondo/40 mb-2" />
-              <p className="text-sm text-claimondo-ondo">
-                Wähle einen Chat aus der Liste
+            <div className="max-w-sm">
+              <MessageCircleIcon className="w-12 h-12 mx-auto text-claimondo-ondo/40 mb-3" />
+              <p className="text-sm text-claimondo-navy font-medium">
+                {threads.length === 0 ? 'Noch keine Chats' : 'Wähle einen Chat aus der Liste'}
               </p>
+              {threads.length === 0 && (
+                <p className="text-xs text-claimondo-ondo mt-2">{emptyHint}</p>
+              )}
             </div>
           </div>
         )}
