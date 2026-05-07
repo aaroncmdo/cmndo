@@ -490,8 +490,11 @@ export default function FeldmodusMap({
   }, [svPosition, aktuellerStop])
 
   return (
-    <div className="relative w-full h-full">
-      <div ref={containerRef} className="absolute inset-0" />
+    <div className="relative" style={{ width: '100%', height: '100%', minHeight: '100%' }}>
+      <div
+        ref={containerRef}
+        style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+      />
       {tokenMissing.current && (
         <div className="absolute inset-0 flex items-center justify-center bg-[var(--brand-primary)] text-center px-6">
           <div>
