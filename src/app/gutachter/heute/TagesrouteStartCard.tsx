@@ -18,6 +18,13 @@ export interface TagesrouteStartCardProps {
   geschaetzteFahrzeitMinuten?: number | null
   /** 2026-05-06: Live-Distanz aus Mapbox-Directions, optional. */
   distanzKm?: number | null
+  /**
+   * Heute→Feldmodus-Intro: parallel zur Session-Erstellung läuft die Map-
+   * Animation (Pitch 45→60, Zoom auf ersten Stop). Erst wenn beide fertig sind,
+   * wird in den Feldmodus navigiert. Optional — fehlt das Handle, navigiert die
+   * Card sofort wie zuvor.
+   */
+  onIntroAnimate?: () => Promise<void>
 }
 
 export default function TagesrouteStartCard({
@@ -26,6 +33,7 @@ export default function TagesrouteStartCard({
   disabledReason,
   geschaetzteFahrzeitMinuten = null,
   distanzKm = null,
+  onIntroAnimate,
 }: TagesrouteStartCardProps) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
@@ -35,12 +43,16 @@ export default function TagesrouteStartCard({
   async function handleStart() {
     setPending(true)
     setError(null)
+    // Animation parallel zur Server-Action — perceived latency bleibt minimal,
+    // weil die Mapbox-Kamera während des DB-Writes schon tiltet.
+    const animPromise = onIntroAnimate ? onIntroAnimate() : Promise.resolve()
     const res = await startOrResumeTagesSession(terminIds)
-    setPending(false)
     if (!res.success) {
+      setPending(false)
       setError(res.error ?? 'Fehler beim Start')
       return
     }
+    await animPromise
     router.push('/gutachter/feldmodus')
   }
 

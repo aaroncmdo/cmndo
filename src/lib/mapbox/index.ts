@@ -8,6 +8,14 @@ export {
   MAPBOX_STYLE_NAVIGATION_NIGHT,
 } from './styles'
 export { addSvAvatarMarker, addSvCarMarker, type SvMarkerOptions, type SvCarMarkerOptions } from './sv-marker'
+export {
+  tryAddSvCar3dModel,
+  SV_CAR_3D_DEFAULT_GLB,
+  SV_CAR_3D_LAYER_ID,
+  SV_CAR_3D_SOURCE_ID,
+  type SvCar3dHandle,
+  type SvCar3dPose,
+} from './sv-3d-car'
 export { addKundeMarker, type KundeMarkerOptions } from './kunde-marker'
 export { upsertRouteLayer, removeRouteLayer } from './route-layer'
 export {

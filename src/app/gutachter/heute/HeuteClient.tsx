@@ -12,13 +12,13 @@
 // Viewport gesetzt (lg = calc-string, < lg = 540px). TagesrouteMap
 // rendert das Element mit dieser inline-Höhe — kein Layout-Chain.
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import TagesrouteSidebar, { type TagesroutePflichtStat } from './TagesrouteSidebar'
 import TagesrouteStartCard from './TagesrouteStartCard'
 import TagesvorbereitungButton from '../auftraege/TagesvorbereitungButton'
 import type { HeuteTerminFull } from './page'
-import type { RouteStats, TagesrouteStop } from './TagesrouteMap'
+import type { RouteStats, TagesrouteMapHandle, TagesrouteStop } from './TagesrouteMap'
 
 const TagesrouteMap = dynamic(() => import('./TagesrouteMap'), { ssr: false })
 
@@ -44,6 +44,18 @@ export default function HeuteClient({
   )
   const [activeStopId, setActiveStopId] = useState<string | null>(null)
   const [routeStats, setRouteStats] = useState<RouteStats | null>(null)
+
+  // Heute→Feldmodus-Intro: Map exponiert ein Handle, StartCard ruft es vor
+  // dem router.push, damit der Pitch-Tween (45→60, Zoom 11→15, Bearing zum
+  // ersten Stop) als nahtlose Fortsetzung in den Feldmodus wirkt.
+  const mapHandleRef = useRef<TagesrouteMapHandle | null>(null)
+  const handleMapReady = useCallback((handle: TagesrouteMapHandle) => {
+    mapHandleRef.current = handle
+  }, [])
+  const triggerIntroAnimation = useCallback(
+    () => mapHandleRef.current?.animateIntro() ?? Promise.resolve(),
+    [],
+  )
 
   // Viewport-Detection für Map-Höhe + Layout-Switch
   const [isLargeScreen, setIsLargeScreen] = useState(false)
@@ -110,6 +122,7 @@ export default function HeuteClient({
         onStopClick={setActiveStopId}
         height={mapHeight}
         onRouteStatsChange={setRouteStats}
+        onReady={handleMapReady}
       />
 
       {/* Termine-Overlay — Mobile: gestackt unter Map (mt-4).
@@ -145,6 +158,7 @@ export default function HeuteClient({
             disabledReason={disabledReason}
             geschaetzteFahrzeitMinuten={routeStats?.dauerMin ?? null}
             distanzKm={routeStats?.distanzKm ?? null}
+            onIntroAnimate={triggerIntroAnimation}
           />
         </div>
       </div>
