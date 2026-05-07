@@ -109,7 +109,7 @@ export default async function SmokeLifecyclePage() {
       <div className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-claimondo-border bg-[#f8f9fb]">
+            <tr className="border-b border-claimondo-border bg-claimondo-bg">
               <th className="text-left px-4 py-2 font-medium text-claimondo-ondo">Szenario</th>
               <th className="text-left px-4 py-2 font-medium text-claimondo-ondo">Erwartung</th>
               <th className="text-left px-4 py-2 font-medium text-claimondo-ondo">Fall-Nummer</th>

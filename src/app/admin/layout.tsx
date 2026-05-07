@@ -55,7 +55,7 @@ export default async function AdminLayout({
     .in('status', ['offen', 'in-bearbeitung'])
 
   return (
-    <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">
+    <div className="h-screen bg-claimondo-bg relative overflow-hidden">
       {/* Spotlight search (Cmd+K) */}
       <Spotlight />
 
@@ -68,7 +68,7 @@ export default async function AdminLayout({
             NotificationBell. Tasks haben jetzt eigene Pill (AAR-723). */}
         {/* Mobile header — AAR-727 Glass-Dark mit subtilem Shadow */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
-          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
           <UpdatesNav variant="dark" />
         </header>
 

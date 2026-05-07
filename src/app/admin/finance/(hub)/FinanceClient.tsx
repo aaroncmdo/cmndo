@@ -80,7 +80,7 @@ export default function FinanceClient({
             label="Provision"
             value={eur(provisionMonat)}
             sub="10 % — dieser Monat"
-            accent="text-[#7BA3CC]"
+            accent="text-claimondo-light-blue"
           />
         </div>
 
@@ -91,7 +91,7 @@ export default function FinanceClient({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
           <Link
             href="/admin/finance/provisionen"
-            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-claimondo-ondo hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -106,14 +106,14 @@ export default function FinanceClient({
                   Status offen / bezahlt.
                 </p>
               </div>
-              <span className="text-[#4573A2] group-hover:translate-x-0.5 transition-transform shrink-0">
+              <span className="text-claimondo-ondo group-hover:translate-x-0.5 transition-transform shrink-0">
                 →
               </span>
             </div>
           </Link>
           <Link
             href="/admin/finance/kanzlei"
-            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
+            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-claimondo-ondo hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -128,7 +128,7 @@ export default function FinanceClient({
                   Partnerkanzlei versenden.
                 </p>
               </div>
-              <span className="text-[#4573A2] group-hover:translate-x-0.5 transition-transform shrink-0">
+              <span className="text-claimondo-ondo group-hover:translate-x-0.5 transition-transform shrink-0">
                 →
               </span>
             </div>
@@ -207,13 +207,13 @@ export default function FinanceClient({
                   </thead>
                   <tbody>
                     {tabellenDaten.map((row) => (
-                      <tr key={row.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors">
+                      <tr key={row.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
                         <td className="px-5 py-3">
                           <Link
                             href={`/faelle/${row.id}`}
                             target="_blank"
                             rel="noopener"
-                            className="text-[#7BA3CC] hover:text-[#7BA3CC] font-mono text-xs"
+                            className="text-claimondo-light-blue hover:text-claimondo-light-blue font-mono text-xs"
                           >
                             {row.fall_nummer ?? row.id.slice(0, 8)}
                           </Link>
@@ -248,11 +248,11 @@ export default function FinanceClient({
                     href={`/faelle/${row.id}`}
                     target="_blank"
                     rel="noopener"
-                    className="block px-5 py-4 hover:bg-[#f8f9fb]/40 transition-colors"
+                    className="block px-5 py-4 hover:bg-claimondo-bg/40 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-1">
                       <div>
-                        <span className="text-[#7BA3CC] font-mono text-xs">
+                        <span className="text-claimondo-light-blue font-mono text-xs">
                           {row.fall_nummer ?? row.id.slice(0, 8)}
                         </span>
                         <p className="text-claimondo-navy text-sm mt-0.5">{row.kunde}</p>

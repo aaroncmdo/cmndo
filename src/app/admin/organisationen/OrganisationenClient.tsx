@@ -20,7 +20,7 @@ type OrgRow = {
 const STATUS_BADGE: Record<string, { label: string; cls: string; Icon: typeof CheckCircleIcon }> = {
   aktiv: { label: 'Aktiv', cls: 'bg-emerald-50 text-emerald-700', Icon: CheckCircleIcon },
   pending: { label: 'Pending', cls: 'bg-yellow-50 text-yellow-700', Icon: ClockIcon },
-  vertrag_unterzeichnet: { label: 'Vertrag', cls: 'bg-[#f8f9fb] text-claimondo-ondo', Icon: ClockIcon },
+  vertrag_unterzeichnet: { label: 'Vertrag', cls: 'bg-claimondo-bg text-claimondo-ondo', Icon: ClockIcon },
   anzahlung_offen: { label: 'Anzahlung offen', cls: 'bg-amber-50 text-amber-700', Icon: AlertCircleIcon },
   blockiert: { label: 'Blockiert', cls: 'bg-red-50 text-red-700', Icon: AlertCircleIcon },
 }
@@ -37,11 +37,11 @@ export default function OrganisationenClient({ organisationen }: { organisatione
         description="Alle Büros und Akademien. Communities haben einen eigenen Bereich."
         icon={Building2Icon}
         actions={
-          <div className="inline-flex bg-[#f8f9fb] rounded-xl p-0.5 text-xs font-medium">
+          <div className="inline-flex bg-claimondo-bg rounded-xl p-0.5 text-xs font-medium">
             {(['alle', 'buero', 'akademie'] as const).map(f => (
               <button key={f} type="button" onClick={() => setFilter(f)}
                 className={`px-3 py-1.5 rounded-lg transition-colors capitalize ${
-                  filter === f ? 'bg-white text-[#1E3A5F] shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
+                  filter === f ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
                 }`}>
                 {f === 'alle' ? `Alle (${organisationen.length})` : f === 'buero' ? `Büros (${organisationen.filter(o => o.typ === 'buero').length})` : `Akademien (${organisationen.filter(o => o.typ === 'akademie').length})`}
               </button>
@@ -58,7 +58,7 @@ export default function OrganisationenClient({ organisationen }: { organisatione
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wide text-claimondo-ondo">
+            <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
               <tr>
                 <th className="text-left px-4 py-3">Organisation</th>
                 <th className="text-left px-4 py-3">Typ</th>
@@ -74,7 +74,7 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                 const badge = STATUS_BADGE[o.onboarding_status] ?? STATUS_BADGE.pending
                 const TypeIcon = o.typ === 'akademie' ? GraduationCapIcon : Building2Icon
                 return (
-                  <tr key={o.id} className="hover:bg-[#f8f9fb]/50">
+                  <tr key={o.id} className="hover:bg-claimondo-bg/50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <TypeIcon className="w-4 h-4 text-claimondo-ondo flex-shrink-0" />
@@ -82,7 +82,7 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <StatusBadge colorCls={o.typ === 'akademie' ? 'bg-purple-50 text-purple-700' : 'bg-[#f8f9fb] text-claimondo-ondo'}>
+                      <StatusBadge colorCls={o.typ === 'akademie' ? 'bg-purple-50 text-purple-700' : 'bg-claimondo-bg text-claimondo-ondo'}>
                         {o.typ === 'akademie' ? 'Akademie' : 'Büro'}
                       </StatusBadge>
                     </td>

@@ -207,7 +207,7 @@ export default function PolygonEditor({
 
   return (
     <div className="space-y-2">
-      <div ref={containerRef} className="w-full h-72 rounded-xl border border-claimondo-border overflow-hidden bg-[#f8f9fb]" />
+      <div ref={containerRef} className="w-full h-72 rounded-xl border border-claimondo-border overflow-hidden bg-claimondo-bg" />
       <div className="flex items-center justify-between text-[10px] text-claimondo-ondo">
         <span>
           {hasPolygon
@@ -217,7 +217,7 @@ export default function PolygonEditor({
         <div className="flex gap-1">
           {!hasPolygon && (
             <button type="button" onClick={handleDraw}
-              className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#4573A2]/10 hover:bg-[#4573A2]/20 text-[#4573A2]">
+              className="flex items-center gap-1 px-2 py-1 rounded-md bg-claimondo-ondo/10 hover:bg-claimondo-ondo/20 text-claimondo-ondo">
               <PenLineIcon className="w-3 h-3" /> Zeichnen
             </button>
           )}

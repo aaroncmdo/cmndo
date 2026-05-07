@@ -30,13 +30,13 @@ export function EventDetailModal({
             <p className="text-xs text-claimondo-ondo mb-0.5">
               {event.source} · {event.kategorie}
             </p>
-            <h3 className="text-base font-semibold text-[#0D1B3E]">{event.titel}</h3>
+            <h3 className="text-base font-semibold text-claimondo-navy">{event.titel}</h3>
             <p className="text-xs text-claimondo-ondo mt-0.5">{tsLabel}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md hover:bg-[#f8f9fb] text-claimondo-ondo"
+            className="p-1 rounded-md hover:bg-claimondo-bg text-claimondo-ondo"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4" />
@@ -49,21 +49,21 @@ export function EventDetailModal({
           )}
           {event.actor && (
             <div className="text-xs text-claimondo-ondo">
-              <span className="font-medium text-[#0D1B3E]">Ausgelöst von: </span>
+              <span className="font-medium text-claimondo-navy">Ausgelöst von: </span>
               {event.actor.name ?? event.actor.id ?? '—'}
               {event.actor.rolle && ` (${event.actor.rolle})`}
             </div>
           )}
           <div>
-            <p className="text-xs font-medium text-[#0D1B3E] mb-1">Typ</p>
-            <code className="text-xs text-claimondo-navy bg-[#f8f9fb] rounded px-1.5 py-0.5">
+            <p className="text-xs font-medium text-claimondo-navy mb-1">Typ</p>
+            <code className="text-xs text-claimondo-navy bg-claimondo-bg rounded px-1.5 py-0.5">
               {event.typ}
             </code>
           </div>
           {event.metadata && Object.keys(event.metadata).length > 0 && (
             <div>
-              <p className="text-xs font-medium text-[#0D1B3E] mb-1">Metadaten</p>
-              <pre className="text-[11px] text-claimondo-navy bg-[#f8f9fb] border border-claimondo-border rounded p-2 overflow-x-auto">
+              <p className="text-xs font-medium text-claimondo-navy mb-1">Metadaten</p>
+              <pre className="text-[11px] text-claimondo-navy bg-claimondo-bg border border-claimondo-border rounded p-2 overflow-x-auto">
                 {JSON.stringify(event.metadata, null, 2)}
               </pre>
             </div>
@@ -71,7 +71,7 @@ export function EventDetailModal({
           {event.route_url && (
             <Link
               href={event.route_url}
-              className="inline-flex items-center gap-1 text-xs font-medium text-[#4573A2] hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-medium text-claimondo-ondo hover:underline"
             >
               Zum Ziel
               <ExternalLinkIcon className="w-3.5 h-3.5" />

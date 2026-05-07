@@ -50,7 +50,7 @@ export default function DrawerShell({ children, title, width = 720 }: Props) {
           <button
             type="button"
             onClick={close}
-            className="p-1 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo/70"
+            className="p-1 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo/70"
             aria-label="Schließen"
           >
             <XIcon className="w-5 h-5" />
