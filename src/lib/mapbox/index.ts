@@ -49,6 +49,11 @@ export {
   HAZARD_LAYER_ID,
   type HazardFeature,
   type HazardLayerHandle,
+  fetchHereFlow,
+  attachFlowLayer,
+  FLOW_LAYER_ID,
+  type FlowFeature,
+  type FlowLayerHandle,
 } from './hazards'
 export {
   DEFAULT_FIELD_MAP_CONFIG,
