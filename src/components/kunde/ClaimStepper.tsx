@@ -39,7 +39,6 @@ import { setKanzleiWunsch, resetKanzleiWunsch, updateKanzleiAnsprechpartner, bes
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
-  MAIN_PHASE_LABEL,
   SUBPHASE_LABEL,
   type ClaimMainPhase,
   type ClaimLifecycle,
@@ -51,6 +50,16 @@ const MAIN_PHASES: { key: ClaimMainPhase; icon: typeof ClipboardListIcon }[] = [
   { key: 'regulierung', icon: ShieldCheckIcon },
   { key: 'abschluss', icon: FlagIcon },
 ]
+
+// 2026-05-07 Design-Review Item 5b: Kunde-freundliche Labels statt Versicherungs-
+// Fachjargon. Globale MAIN_PHASE_LABEL bleibt fuer Admin/Dispatch/KB-Portale,
+// hier ueberschreiben wir nur fuer die Kunde-Sicht.
+const KUNDE_PHASE_LABEL: Record<ClaimMainPhase, string> = {
+  erfassung: 'Schaden gemeldet',
+  begutachtung: 'Begutachtung',
+  regulierung: 'Mit Versicherung',
+  abschluss: 'Abgeschlossen',
+}
 
 const MAIN_PHASE_INDEX: Record<ClaimMainPhase, number> = {
   erfassung: 0,
@@ -515,7 +524,7 @@ export default function ClaimStepper({
                   >
                     {zeigeKanzleiWunschBanner && p.key === 'begutachtung'
                     ? 'Kanzlei'
-                    : MAIN_PHASE_LABEL[p.key]}
+                    : KUNDE_PHASE_LABEL[p.key]}
                   </p>
                   {isCurrent && (
                     <p className="text-[11px] text-claimondo-ondo truncate max-w-[140px] sm:max-w-none sm:whitespace-nowrap mt-0.5">
