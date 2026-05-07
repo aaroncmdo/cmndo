@@ -33,6 +33,7 @@ import {
   fetchBlitzerInBbox,
   bboxForRoute,
   type BlitzerLayerHandle,
+  type BlitzerFeature,
   attachHazardLayer,
   fetchHereHazards,
   type HazardLayerHandle,
@@ -43,6 +44,7 @@ import {
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
 import type { MapboxLightPreset } from '@/lib/mapbox/light-preset'
+import { haversineMetersLngLat, speakInstruction } from '@/lib/mapbox/turn-by-turn'
 
 type FogSpec = {
   color: string
@@ -128,6 +130,8 @@ export default function FeldmodusMap({
   const google3dTilesRef = useRef<Google3dTilesHandle | null>(null)
   const cesium3dTilesRef = useRef<Cesium3dTilesHandle | null>(null)
   const blitzerRef = useRef<BlitzerLayerHandle | null>(null)
+  const blitzerFeaturesRef = useRef<BlitzerFeature[]>([])
+  const warnedBlitzerIdsRef = useRef<Set<string>>(new Set())
   const hazardsRef = useRef<HazardLayerHandle | null>(null)
   const flowRef = useRef<FlowLayerHandle | null>(null)
   const stopMarkersRef = useRef<Marker[]>([])
@@ -418,6 +422,32 @@ export default function FeldmodusMap({
     } catch { /* style not ready yet */ }
   }, [aktuellerStopIndex, stops, weatherId])
 
+  // 2026-05-08 Blitzer-Voice: bei jedem position-Update Distance zu Blitzern
+  // prüfen. Type 1 (mobil) → eigener Sprech-Text damit der SV mobile Blitzer
+  // sofort akustisch unterscheiden kann von stationären.
+  useEffect(() => {
+    if (!svPosition) return
+    const features = blitzerFeaturesRef.current
+    if (features.length === 0) return
+    for (const f of features) {
+      const [lng, lat] = f.geometry.coordinates
+      const distM = haversineMetersLngLat([svPosition.lng, svPosition.lat], [lng, lat])
+      const id = (f.properties as { id: string; type?: string }).id
+      const isMobile = (f.properties as { type?: string }).type === '1'
+      const label = isMobile ? 'Achtung, mobiler Blitzer' : 'Achtung, Blitzer'
+      const key500 = `${id}-500`
+      const key200 = `${id}-200`
+      if (distM <= 200 && !warnedBlitzerIdsRef.current.has(key200)) {
+        speakInstruction(`${label} in 200 Metern`)
+        warnedBlitzerIdsRef.current.add(key200)
+        warnedBlitzerIdsRef.current.add(key500)
+      } else if (distM <= 500 && !warnedBlitzerIdsRef.current.has(key500)) {
+        speakInstruction(`${label} in 500 Metern`)
+        warnedBlitzerIdsRef.current.add(key500)
+      }
+    }
+  }, [svPosition])
+
   // SV-Marker aktualisieren wenn svPosition sich ändert.
   // 2026-05-07: 3D-Modell-Pfad bevorzugt — wenn `sv3dHandleRef` da ist,
   // wird die Pose ueber den ModelSource gesetzt (echter 3D-Render mit
@@ -540,6 +570,8 @@ export default function FeldmodusMap({
             fetchHereHazards(bbox),
             fetchHereFlow(bbox),
           ])
+          blitzerFeaturesRef.current = blitzerFeatures
+          warnedBlitzerIdsRef.current.clear()
           if (!blitzerRef.current && map.isStyleLoaded()) {
             blitzerRef.current = attachBlitzerLayer(map, blitzerFeatures)
           } else if (blitzerRef.current) {
