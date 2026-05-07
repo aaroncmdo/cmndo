@@ -90,9 +90,17 @@ export default function FeldmodusMap({
     // Fokus, Road-Labels an für Orientierung. Alles GPU-beschleunigt,
     // 0 zusätzliche Performance-Kosten. Siehe
     // docs/integrations/feldmodus-mapbox-3d-roadmap.md
+    //
+    // 2026-05-07 (Phase 3): Light-Preset folgt der TERMIN-ZEIT statt der
+    // Wall-Clock-Zeit. Wenn SV um 13 Uhr zum 18-Uhr-Termin fährt, sieht er
+    // bereits dusk-Licht — fühlt sich wie eine Vorschau auf die Anfahrt an
+    // und matcht den Stimmungs-Kontext. Bei fehlendem Stop fällt es auf
+    // jetzt zurück.
     const applyLightPreset = () => {
+      const targetStop = stops[Math.max(0, aktuellerStopIndex)] ?? null
+      const lightAt = targetStop?.start_zeit ? new Date(targetStop.start_zeit) : new Date()
       try {
-        map.setConfigProperty('basemap', 'lightPreset', getMapboxLightPreset())
+        map.setConfigProperty('basemap', 'lightPreset', getMapboxLightPreset(lightAt))
         map.setConfigProperty('basemap', 'show3dObjects', true)
         map.setConfigProperty('basemap', 'showPointOfInterestLabels', false)
         map.setConfigProperty('basemap', 'showRoadLabels', true)
@@ -100,15 +108,51 @@ export default function FeldmodusMap({
       } catch { /* fail silent */ }
     }
     const applyAtmosphere = () => {
+      // 2026-05-07 Phase 3: Fog-Tinting folgt dem Termin-Light-Preset.
+      // dawn → warmes Pfirsich, day → klares Blau, dusk → Magenta-Violett,
+      // night → tiefes Indigo + sichtbare Sterne.
+      const targetStop = stops[Math.max(0, aktuellerStopIndex)] ?? null
+      const lightAt = targetStop?.start_zeit ? new Date(targetStop.start_zeit) : new Date()
+      const preset = getMapboxLightPreset(lightAt)
+      const fog = (() => {
+        switch (preset) {
+          case 'dawn':
+            return {
+              color: 'rgb(255, 220, 200)',
+              'high-color': 'rgb(255, 195, 165)',
+              'horizon-blend': 0.08,
+              'space-color': 'rgb(60, 30, 70)',
+              'star-intensity': 0.05,
+            }
+          case 'dusk':
+            return {
+              color: 'rgb(245, 195, 195)',
+              'high-color': 'rgb(180, 140, 175)',
+              'horizon-blend': 0.08,
+              'space-color': 'rgb(40, 20, 70)',
+              'star-intensity': 0.1,
+            }
+          case 'night':
+            return {
+              color: 'rgb(60, 80, 120)',
+              'high-color': 'rgb(40, 60, 100)',
+              'horizon-blend': 0.04,
+              'space-color': 'rgb(5, 8, 25)',
+              'star-intensity': 0.55,
+            }
+          case 'day':
+          default:
+            return {
+              color: 'rgb(220, 230, 240)',
+              'high-color': 'rgb(200, 210, 230)',
+              'horizon-blend': 0.05,
+              'space-color': 'rgb(13, 27, 62)', // #0D1B3E claimondo-navy
+              'star-intensity': 0.05,
+            }
+        }
+      })()
       try {
-        // Fog mit claimondo-Navy-Space-Color für Horizon-Tiefe.
-        map.setFog({
-          color: 'rgb(220, 230, 240)',
-          'high-color': 'rgb(200, 210, 230)',
-          'horizon-blend': 0.05,
-          'space-color': 'rgb(13, 27, 62)', // #0D1B3E claimondo-navy
-          'star-intensity': 0.15,
-        })
+        map.setFog(fog as Parameters<typeof map.setFog>[0])
         // Terrain: globale Höhendaten für plastische Berge/Täler.
         // Die mapbox-dem-Source ist im Standard-Style bereits enthalten;
         // wir aktivieren sie nur als Terrain-Layer.
@@ -250,6 +294,33 @@ export default function FeldmodusMap({
     const target = stops[aktuellerStopIndex]
     if (!target || target.lat == null || target.lng == null) return
     handle.update([target.lng, target.lat])
+  }, [aktuellerStopIndex, stops])
+
+  // 2026-05-07 Phase 3: Light-Preset + Fog-Tinting folgen der Termin-Zeit.
+  // Bei Stop-Wechsel werden Beleuchtung UND atmosphärische Töne sanft
+  // umgestellt — Mapbox Standard interpoliert die Übergänge selbständig.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    const target = stops[aktuellerStopIndex]
+    if (!target?.start_zeit) return
+    const preset = getMapboxLightPreset(new Date(target.start_zeit))
+    try {
+      map.setConfigProperty('basemap', 'lightPreset', preset)
+      const fog = (() => {
+        switch (preset) {
+          case 'dawn':
+            return { color: 'rgb(255, 220, 200)', 'high-color': 'rgb(255, 195, 165)', 'horizon-blend': 0.08, 'space-color': 'rgb(60, 30, 70)', 'star-intensity': 0.05 }
+          case 'dusk':
+            return { color: 'rgb(245, 195, 195)', 'high-color': 'rgb(180, 140, 175)', 'horizon-blend': 0.08, 'space-color': 'rgb(40, 20, 70)', 'star-intensity': 0.1 }
+          case 'night':
+            return { color: 'rgb(60, 80, 120)', 'high-color': 'rgb(40, 60, 100)', 'horizon-blend': 0.04, 'space-color': 'rgb(5, 8, 25)', 'star-intensity': 0.55 }
+          default:
+            return { color: 'rgb(220, 230, 240)', 'high-color': 'rgb(200, 210, 230)', 'horizon-blend': 0.05, 'space-color': 'rgb(13, 27, 62)', 'star-intensity': 0.05 }
+        }
+      })()
+      map.setFog(fog as Parameters<typeof map.setFog>[0])
+    } catch { /* style not ready yet */ }
   }, [aktuellerStopIndex, stops])
 
   // SV-Marker aktualisieren wenn svPosition sich ändert.
