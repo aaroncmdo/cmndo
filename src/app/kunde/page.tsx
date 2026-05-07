@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
 import KundeWillkommensHero from '@/components/kunde/KundeWillkommensHero'
+import KundeAktivStatusHero from '@/components/kunde/KundeAktivStatusHero'
 // AAR-449: Neue FallKarte + Shared-Loader für Termin/Aktion/LastUpdate
 import FallKarte from '@/components/kunde/FallKarte'
 import { ladeFallKartenMeta, type FallKarteMetaInput } from '@/lib/kunde/fall-karte-loader'
@@ -173,6 +174,22 @@ export default async function KundeStartseite() {
 
       {/* AAR-432: Jetzt-zu-tun-Matrix */}
       <KundeJetztZuTunCard aktion={topAktion} />
+
+      {/* 5b: Aktiver-Fall-Hero — nur bei genau einem Fall, sonst direkt Grid. */}
+      {faelle.length === 1 && (
+        <div className="mt-4">
+          <KundeAktivStatusHero
+            fall={{
+              fall_nummer: faelle[0].fall_nummer as string | null,
+              sv_termin_iso: (faelle[0].sv_termin as string | null) ?? null,
+              gutachter_termin_bestaetigt_am: (faelle[0].gutachter_termin_bestaetigt_am as string | null) ?? null,
+              gutachten_eingegangen_am: (faelle[0].gutachten_eingegangen_am as string | null) ?? null,
+              regulierung_am: (faelle[0].regulierung_am as string | null) ?? null,
+              abgeschlossen_am: (faelle[0].abgeschlossen_am as string | null) ?? null,
+            }}
+          />
+        </div>
+      )}
 
       {faelle.length === 0 ? (
         <KundeWillkommensHero vorname={vorname} />
