@@ -7,6 +7,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { triggerSvLosgefahren } from '@/lib/termine/trigger-losgefahren'
 import { markArrival } from '@/lib/gps/mark-arrival'
 import {
@@ -178,6 +179,37 @@ export async function pauseFokusmodus(sessionId: string): Promise<Result> {
   if (!res) return { success: false, error: 'Pausieren fehlgeschlagen' }
   revalidatePath('/gutachter/feldmodus')
   revalidatePath('/gutachter/heute')
+  return { success: true }
+}
+
+/**
+ * 2026-05-07 (Aaron-Smoke): Exit-zurück-zur-Anfahrt aus dem arrived-Modus.
+ * Setzt session.status zurück auf idle UND macht den Auto-Arrive-Flag am
+ * Termin rückgängig (sv_angekommen_am=null, besichtigung_gestartet_am=null)
+ * damit der Fallback-Timer nicht direkt wieder triggert.
+ *
+ * Nutzungsfall: SV ist versehentlich im Vor-Ort-Modus gelandet (Termin-
+ * Uhrzeit-Fallback) aber er ist noch nicht da. Click → zurück zur Map.
+ */
+export async function exitArrivedToRoute(
+  sessionId: string,
+  terminId: string,
+): Promise<Result> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const admin = createAdminClient()
+  const { error: sessErr } = await admin
+    .from('sv_tages_session')
+    .update({ status: 'idle' })
+    .eq('id', sessionId)
+  if (sessErr) return { success: false, error: sessErr.message }
+  const { error: tErr } = await admin
+    .from('gutachter_termine')
+    .update({ sv_angekommen_am: null, besichtigung_gestartet_am: null })
+    .eq('id', terminId)
+  if (tErr) return { success: false, error: tErr.message }
+  revalidatePath('/gutachter/feldmodus')
   return { success: true }
 }
 
