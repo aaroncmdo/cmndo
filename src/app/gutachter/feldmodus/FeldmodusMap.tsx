@@ -15,6 +15,7 @@ import {
   addSvCarMarker,
   addKundeMarker,
   upsertRouteLayer,
+  fetchDrivingRoute,
   MAPBOX_STYLE_STANDARD,
   DEFAULT_FIELD_MAP_CONFIG,
   getMapboxLightPreset,
@@ -474,19 +475,21 @@ export default function FeldmodusMap({
     const stopLat = aktuellerStop.lat
     const svLng = svPosition.lng
     const svLat = svPosition.lat
-    if (!map.isStyleLoaded()) {
-      map.once('load', () => {
-        upsertRouteLayer(map, [
-          [svLng, svLat],
-          [stopLng, stopLat],
-        ])
-      })
-      return
+
+    // 2026-05-07: Echte Auto-Route über Mapbox Directions statt Luftlinie.
+    // fetchDrivingRoute hat in-memory-Cache (5 min) — bei GPS-Jitter wird
+    // dieselbe Route wiederverwendet ohne Re-Fetch.
+    const ctrl = new AbortController()
+    const drawRoute = (coords: Array<[number, number]>) => {
+      if (!map.isStyleLoaded()) {
+        map.once('load', () => upsertRouteLayer(map, coords))
+      } else {
+        upsertRouteLayer(map, coords)
+      }
     }
-    upsertRouteLayer(map, [
-      [svLng, svLat],
-      [stopLng, stopLat],
-    ])
+    void fetchDrivingRoute([svLng, svLat], [stopLng, stopLat], { signal: ctrl.signal })
+      .then((coords) => drawRoute(coords))
+    return () => ctrl.abort()
   }, [svPosition, aktuellerStop])
 
   return (

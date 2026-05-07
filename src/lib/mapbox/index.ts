@@ -34,6 +34,7 @@ export {
 } from './cesium-3d-tiles'
 export { addKundeMarker, type KundeMarkerOptions } from './kunde-marker'
 export { upsertRouteLayer, removeRouteLayer } from './route-layer'
+export { fetchDrivingRoute } from './directions'
 export {
   DEFAULT_FIELD_MAP_CONFIG,
   type FieldModusMapConfig,
