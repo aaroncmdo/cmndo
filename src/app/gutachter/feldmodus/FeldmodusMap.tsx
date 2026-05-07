@@ -33,6 +33,9 @@ import {
   fetchBlitzerInBbox,
   bboxForRoute,
   type BlitzerLayerHandle,
+  attachHazardLayer,
+  fetchHereHazards,
+  type HazardLayerHandle,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
@@ -122,6 +125,7 @@ export default function FeldmodusMap({
   const google3dTilesRef = useRef<Google3dTilesHandle | null>(null)
   const cesium3dTilesRef = useRef<Cesium3dTilesHandle | null>(null)
   const blitzerRef = useRef<BlitzerLayerHandle | null>(null)
+  const hazardsRef = useRef<HazardLayerHandle | null>(null)
   const stopMarkersRef = useRef<Marker[]>([])
   const tokenMissing = useRef(false)
   // 2026-05-07 Phase 3b: Wetter-Code (OpenWeatherMap weather_id) am
@@ -351,6 +355,8 @@ export default function FeldmodusMap({
       cesium3dTilesRef.current = null
       blitzerRef.current?.remove()
       blitzerRef.current = null
+      hazardsRef.current?.remove()
+      hazardsRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current = []
       map.remove()
@@ -520,13 +526,22 @@ export default function FeldmodusMap({
     void fetchDrivingRoute([svLng, svLat], [stopLng, stopLat], { signal: ctrl.signal })
       .then(async (coords) => {
         drawRoute(coords)
-        // Blitzer in der Route-Bbox laden + Layer mounten/aktualisieren.
+        // Blitzer (OSM) + Verkehrshindernisse (HERE) parallel laden.
         if (coords.length >= 2) {
-          const blitzerFeatures = await fetchBlitzerInBbox(bboxForRoute(coords, 0.5))
+          const bbox = bboxForRoute(coords, 0.5)
+          const [blitzerFeatures, hazardFeatures] = await Promise.all([
+            fetchBlitzerInBbox(bbox),
+            fetchHereHazards(bbox),
+          ])
           if (!blitzerRef.current && map.isStyleLoaded()) {
             blitzerRef.current = attachBlitzerLayer(map, blitzerFeatures)
           } else if (blitzerRef.current) {
             blitzerRef.current.update(blitzerFeatures)
+          }
+          if (!hazardsRef.current && map.isStyleLoaded()) {
+            hazardsRef.current = attachHazardLayer(map, hazardFeatures)
+          } else if (hazardsRef.current) {
+            hazardsRef.current.update(hazardFeatures)
           }
         }
       })
