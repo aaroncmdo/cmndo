@@ -92,7 +92,7 @@ function statusVisual(row: MaklerProvisionRow): {
   if (status === 'ausgezahlt') {
     return {
       label: 'Ausgezahlt',
-      className: 'bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border',
+      className: 'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border',
       icon: <WalletIcon width={12} height={12} />,
     }
   }
@@ -193,7 +193,7 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
           type="button"
           onClick={() => exportCsv(rowsForMonth, currentMonth)}
           disabled={rowsForMonth.length === 0}
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-[#4573A2] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <DownloadIcon width={14} height={14} />
           CSV-Export
@@ -238,7 +238,7 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
           type="button"
           onClick={() => gotoMonth(-1)}
           disabled={isPending}
-          className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:border-[#4573A2] disabled:opacity-50"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-50"
           aria-label="Vorheriger Monat"
         >
           <ChevronLeftIcon width={16} height={16} />
@@ -250,7 +250,7 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
           type="button"
           onClick={() => gotoMonth(1)}
           disabled={!canGoNext || isPending}
-          className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:border-[#4573A2] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Nächster Monat"
         >
           <ChevronRightIcon width={16} height={16} />
@@ -281,7 +281,7 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f8f9fb] text-xs uppercase tracking-wide text-claimondo-ondo">
+              <thead className="bg-claimondo-bg text-xs uppercase tracking-wide text-claimondo-ondo">
                 <tr>
                   <th className="text-left px-4 py-2.5 font-semibold">Datum</th>
                   <th className="text-left px-4 py-2.5 font-semibold">Fall</th>
@@ -303,7 +303,7 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
                   return (
                     <tr
                       key={row.id}
-                      className="border-t border-claimondo-border hover:bg-[#f8f9fb]/60"
+                      className="border-t border-claimondo-border hover:bg-claimondo-bg/60"
                     >
                       <td className="px-4 py-2.5 text-claimondo-navy whitespace-nowrap">
                         {fmtDate(row.trigger_at)}
@@ -379,10 +379,10 @@ function SummaryCard({
     navy: {
       bg: 'bg-claimondo-navy/5',
       fg: 'text-claimondo-navy',
-      border: 'border-[#0D1B3E]/10',
+      border: 'border-claimondo-navy/10',
     },
     blue: {
-      bg: 'bg-[#f8f9fb]',
+      bg: 'bg-claimondo-bg',
       fg: 'text-claimondo-ondo',
       border: 'border-claimondo-border',
     },

@@ -123,7 +123,7 @@ function SectionCard({
   return (
     <section className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
       <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border">
-        <span className="shrink-0 w-9 h-9 rounded-xl bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border flex items-center justify-center">
+        <span className="shrink-0 w-9 h-9 rounded-xl bg-claimondo-bg text-claimondo-ondo border border-claimondo-border flex items-center justify-center">
           {icon}
         </span>
         <div className="min-w-0 flex-1">
@@ -143,7 +143,7 @@ function SaveButton({ state }: { state: SaveState }) {
     <button
       type="submit"
       disabled={state.status === 'saving'}
-      className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50"
+      className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
     >
       {state.status === 'saving' ? (
         <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -211,8 +211,8 @@ function Input({
         required={required}
         pattern={pattern}
         autoComplete={autoComplete}
-        className={`mt-1 w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-shield focus:outline-none focus:ring-2 focus:ring-[#4573A2]/40 ${
-          readOnly ? 'bg-[#f8f9fb] text-claimondo-ondo cursor-not-allowed' : ''
+        className={`mt-1 w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-shield focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 ${
+          readOnly ? 'bg-claimondo-bg text-claimondo-ondo cursor-not-allowed' : ''
         }`}
       />
     </label>
@@ -456,7 +456,7 @@ function PasswortCard() {
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
           >
             {isPending ? (
               <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -499,7 +499,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
       title="Aktive Kunden-Consents"
       subtitle="Übersicht aller Fälle mit aktivem Zugriff. Kunden können den Zugriff jederzeit selbst widerrufen."
     >
-      <p className="text-xs text-claimondo-ondo bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 mb-3">
+      <p className="text-xs text-claimondo-ondo bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 mb-3">
         Sie können Consents auch von sich aus beenden — z.&nbsp;B. nach
         Abschluss eines Falls zur Datensparsamkeit.
       </p>
@@ -545,7 +545,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                       className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-full ${
                         c.consent_scope === 'vollzugriff'
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : 'bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border'
+                          : 'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border'
                       }`}
                     >
                       <ShieldCheckIcon width={10} height={10} />
@@ -684,13 +684,13 @@ function NotificationsCard({ prefs }: { prefs: NotificationPreferences }) {
           {NOTIF_LABELS.map((n) => (
             <label
               key={n.key}
-              className="flex items-start gap-3 p-3 rounded-lg border border-claimondo-border bg-[#f8f9fb] hover:bg-white cursor-pointer"
+              className="flex items-start gap-3 p-3 rounded-lg border border-claimondo-border bg-claimondo-bg hover:bg-white cursor-pointer"
             >
               <input
                 type="checkbox"
                 checked={local[n.key]}
                 onChange={() => toggle(n.key)}
-                className="mt-0.5 w-4 h-4 rounded border-claimondo-border text-claimondo-navy focus:ring-[#4573A2]/40"
+                className="mt-0.5 w-4 h-4 rounded border-claimondo-border text-claimondo-navy focus:ring-claimondo-ondo/40"
               />
               <div className="flex-1">
                 <p className="text-sm text-claimondo-navy">{n.label}</p>

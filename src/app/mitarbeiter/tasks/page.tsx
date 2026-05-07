@@ -39,7 +39,7 @@ export default async function MitarbeiterTasks({ searchParams }: {
         {tabs.map(t => (
           <Link key={t.key} href={`/mitarbeiter/tasks?status=${t.key}`}
             className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
-              status === t.key ? 'bg-claimondo-navy text-white' : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
+              status === t.key ? 'bg-claimondo-navy text-white' : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg'
             }`}>
             {t.label}
           </Link>
@@ -49,7 +49,7 @@ export default async function MitarbeiterTasks({ searchParams }: {
       <div className="bg-white rounded-ios-lg shadow-ios-md divide-y divide-claimondo-border">
         {(tasks ?? []).map(t => (
           <Link key={t.id} href={t.fall_id ? `/faelle/${t.fall_id}` : '#'}
-            className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
+            className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-claimondo-navy text-sm">{t.titel}</p>
@@ -59,7 +59,7 @@ export default async function MitarbeiterTasks({ searchParams }: {
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                   t.prioritaet === 'kritisch' ? 'bg-red-100 text-red-700' :
                   t.prioritaet === 'dringend' ? 'bg-amber-100 text-amber-700' :
-                  'bg-[#f8f9fb] text-claimondo-ondo'
+                  'bg-claimondo-bg text-claimondo-ondo'
                 }`}>{t.prioritaet}</span>
                 <span className="text-xs text-claimondo-ondo/70">
                   {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }) : '—'}

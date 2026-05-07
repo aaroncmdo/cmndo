@@ -26,7 +26,7 @@ export default async function MaklerOnboardingPage() {
   if (profile?.rolle !== 'makler') redirect(roleToPath(profile?.rolle as string | null | undefined))
 
   return (
-    <main className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-6 py-12">
+    <main className="min-h-screen bg-claimondo-bg flex items-center justify-center px-6 py-12">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-claimondo-border p-8">
         <PageHeader
           title="Ihr Makler-Profil ist noch nicht vollständig eingerichtet"

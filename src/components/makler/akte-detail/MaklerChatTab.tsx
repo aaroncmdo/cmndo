@@ -36,16 +36,16 @@ function avatarColor(rolle: string | null, isOwn: boolean): string {
     case 'kunde':
       return 'bg-emerald-600 text-white'
     case 'kundenbetreuer':
-      return 'bg-[#4573A2] text-white'
+      return 'bg-claimondo-ondo text-white'
     case 'sachverstaendiger':
     case 'gutachter':
       return 'bg-violet-600 text-white'
     case 'makler':
       return 'bg-amber-500 text-white'
     case 'system':
-      return 'bg-[#0D1B3E] text-white'
+      return 'bg-claimondo-navy text-white'
     default:
-      return 'bg-[#7BA3CC] text-white'
+      return 'bg-claimondo-light-blue text-white'
   }
 }
 
@@ -257,11 +257,11 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
   return (
     <div className="bg-white rounded-2xl border border-[#e4e7ef] overflow-hidden flex flex-col">
       {/* Info-Banner */}
-      <div className="flex items-start gap-3 px-4 py-3 bg-[#4573A2]/10 border-b border-[#e4e7ef]">
-        <span className="shrink-0 mt-0.5 text-[#0D1B3E]">
+      <div className="flex items-start gap-3 px-4 py-3 bg-claimondo-ondo/10 border-b border-[#e4e7ef]">
+        <span className="shrink-0 mt-0.5 text-claimondo-navy">
           <InfoIcon width={16} height={16} />
         </span>
-        <p className="text-xs text-[#0D1B3E] leading-relaxed">
+        <p className="text-xs text-claimondo-navy leading-relaxed">
           <span className="font-semibold">Gruppenchat:</span> Sie sehen
           Nachrichten zwischen Kunde, Kundenbetreuer und Gutachter. Ihre
           Nachrichten sind für alle sichtbar.
@@ -271,11 +271,11 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
       {/* Messages */}
       <div
         ref={scrollRef}
-        className="overflow-y-auto p-4 space-y-3 bg-[#f8f9fb] min-h-[400px] max-h-[60vh]"
+        className="overflow-y-auto p-4 space-y-3 bg-claimondo-bg min-h-[400px] max-h-[60vh]"
       >
         {bubbles.length === 0 ? (
           <div className="h-full flex items-center justify-center py-16">
-            <p className="text-sm text-[#4573A2]">
+            <p className="text-sm text-claimondo-ondo">
               Noch keine Nachrichten in diesem Fall.
             </p>
           </div>
@@ -287,7 +287,7 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
                 className="flex items-center gap-2 py-2"
               >
                 <div className="flex-1 h-px bg-[#e4e7ef]" />
-                <span className="text-[11px] text-[#4573A2] px-2">
+                <span className="text-[11px] text-claimondo-ondo px-2">
                   — {b.label} —
                 </span>
                 <div className="flex-1 h-px bg-[#e4e7ef]" />
@@ -328,13 +328,13 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
           rows={1}
           maxLength={2000}
           placeholder="Nachricht an die Gruppe schreiben …"
-          className="flex-1 resize-none rounded-lg border border-[#e4e7ef] bg-white px-3 py-2 text-sm text-[#0D1B3E] placeholder:text-[#7BA3CC] focus:outline-none focus:ring-2 focus:ring-[#4573A2]/40 min-h-[40px] max-h-32"
+          className="flex-1 resize-none rounded-lg border border-[#e4e7ef] bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
           disabled={sending}
         />
         <button
           type="submit"
           disabled={!input.trim() || sending}
-          className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 h-10 rounded-lg bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {sending ? (
             <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -360,9 +360,9 @@ function MessageRow({
   if (msg.is_system) {
     return (
       <div className="flex justify-center">
-        <div className="px-3 py-1.5 rounded-full bg-white border border-[#e4e7ef] text-[11px] text-[#4573A2] max-w-[75%] text-center">
+        <div className="px-3 py-1.5 rounded-full bg-white border border-[#e4e7ef] text-[11px] text-claimondo-ondo max-w-[75%] text-center">
           {msg.nachricht}
-          <span className="ml-2 text-[#7BA3CC]">
+          <span className="ml-2 text-claimondo-light-blue">
             {TIME.format(new Date(msg.created_at))}
           </span>
         </div>
@@ -392,17 +392,17 @@ function MessageRow({
       <div
         className={`flex flex-col max-w-[75%] ${isOwn ? 'items-end' : 'items-start'}`}
       >
-        <span className="text-[11px] text-[#4573A2] mb-0.5 px-1">{label}</span>
+        <span className="text-[11px] text-claimondo-ondo mb-0.5 px-1">{label}</span>
         <div
           className={`rounded-2xl px-3.5 py-2 text-sm leading-relaxed whitespace-pre-wrap break-words ${
             isOwn
-              ? 'bg-[#0D1B3E] text-white rounded-br-md'
-              : 'bg-white text-[#0D1B3E] border border-[#e4e7ef] rounded-bl-md'
+              ? 'bg-claimondo-navy text-white rounded-br-md'
+              : 'bg-white text-claimondo-navy border border-[#e4e7ef] rounded-bl-md'
           } ${pending ? 'opacity-60' : ''}`}
         >
           {msg.nachricht}
         </div>
-        <span className="text-[10px] text-[#7BA3CC] mt-0.5 px-1">
+        <span className="text-[10px] text-claimondo-light-blue mt-0.5 px-1">
           {TIME.format(new Date(msg.created_at))}
           {pending ? ' · wird gesendet …' : ''}
         </span>
