@@ -36,6 +36,9 @@ import {
   attachHazardLayer,
   fetchHereHazards,
   type HazardLayerHandle,
+  attachFlowLayer,
+  fetchHereFlow,
+  type FlowLayerHandle,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
@@ -126,6 +129,7 @@ export default function FeldmodusMap({
   const cesium3dTilesRef = useRef<Cesium3dTilesHandle | null>(null)
   const blitzerRef = useRef<BlitzerLayerHandle | null>(null)
   const hazardsRef = useRef<HazardLayerHandle | null>(null)
+  const flowRef = useRef<FlowLayerHandle | null>(null)
   const stopMarkersRef = useRef<Marker[]>([])
   const tokenMissing = useRef(false)
   // 2026-05-07 Phase 3b: Wetter-Code (OpenWeatherMap weather_id) am
@@ -357,6 +361,8 @@ export default function FeldmodusMap({
       blitzerRef.current = null
       hazardsRef.current?.remove()
       hazardsRef.current = null
+      flowRef.current?.remove()
+      flowRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current = []
       map.remove()
@@ -529,9 +535,10 @@ export default function FeldmodusMap({
         // Blitzer (OSM) + Verkehrshindernisse (HERE) parallel laden.
         if (coords.length >= 2) {
           const bbox = bboxForRoute(coords, 0.5)
-          const [blitzerFeatures, hazardFeatures] = await Promise.all([
+          const [blitzerFeatures, hazardFeatures, flowFeatures] = await Promise.all([
             fetchBlitzerInBbox(bbox),
             fetchHereHazards(bbox),
+            fetchHereFlow(bbox),
           ])
           if (!blitzerRef.current && map.isStyleLoaded()) {
             blitzerRef.current = attachBlitzerLayer(map, blitzerFeatures)
@@ -542,6 +549,11 @@ export default function FeldmodusMap({
             hazardsRef.current = attachHazardLayer(map, hazardFeatures)
           } else if (hazardsRef.current) {
             hazardsRef.current.update(hazardFeatures)
+          }
+          if (!flowRef.current && map.isStyleLoaded()) {
+            flowRef.current = attachFlowLayer(map, flowFeatures)
+          } else if (flowRef.current) {
+            flowRef.current.update(flowFeatures)
           }
         }
       })
