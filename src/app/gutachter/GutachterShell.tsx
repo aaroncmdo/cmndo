@@ -60,6 +60,11 @@ type NavSection = {
   items: NavItem[]
 }
 
+// 2026-05-07 Design-Review: Vorher 3 Sektionen (Tagesgeschäft / Finanzen /
+// Verwaltung) — der Reviewer fand die Trennung Finanzen-vs-Verwaltung unklar
+// (Vertrag und Abrechnung gehören thematisch zusammen). Jetzt 2 Sektionen
+// (Tagesgeschäft / Geschäft); Konfiguration (Profil/Einstellungen) lebt im
+// Sidebar-Footer-Block. Kommunikations-Sektion bleibt entfällt (AAR-727).
 const NAV_SECTIONS_BASE: NavSection[] = [
   {
     title: 'Tagesgeschäft',
@@ -75,19 +80,14 @@ const NAV_SECTIONS_BASE: NavSection[] = [
   // laufen über UpdatesNav. /gutachter/posteingang bleibt als Route erhalten
   // (Legacy-Bookmarks), taucht aber nicht mehr in der Sidebar auf.
   {
-    title: 'Finanzen',
+    title: 'Geschäft',
     items: [
       // AAR-244: Lead-Preise als Tab in Abrechnung integriert (kein eigener
       // Nav-Punkt mehr). Route /gutachter/leadpreise bleibt für Bookmarks.
-      { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
-    ],
-  },
-  {
-    title: 'Verwaltung',
-    items: [
       // CMM-17: 'Mein Gebiet' aus Nav entfernt — Aaron-Spec, kommt später als
       // eigenes Feature-Ticket zurück.
       { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
+      { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
       { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon, beta: true },
       { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
     ],
@@ -147,13 +147,17 @@ export default function GutachterShell({
   // direkt sichtbar, konsistent zu Tagesgeschäft/Kommunikation/Finanzen.
   // AAR-222: Sektions-basierte Nav. Team/Community werden conditional in
   // Verwaltung eingehängt.
+  // 2026-05-07: Conditional Items laufen jetzt in den Geschäft-Block (vorher
+  // Verwaltung). Verifizierung steht ganz oben weil Pre-Aktiv-Pfad, dann
+  // Vertrag/Abrechnung/Statistik/Reklamation, dann Team/Community.
   const NAV_SECTIONS: NavSection[] = NAV_SECTIONS_BASE.map(sec => {
-    if (sec.title !== 'Verwaltung') return sec
-    const conditional: NavItem[] = []
-    if (showVerifizierung) conditional.push({ href: '/gutachter/verifizierung', label: 'Verifizierung', icon: ShieldCheckIcon })
-    if (showTeam) conditional.push({ href: '/gutachter/team', label: 'Team', icon: UsersIcon })
-    if (showCommunity) conditional.push({ href: '/gutachter/community', label: 'Community', icon: TrophyIcon })
-    return { ...sec, items: [...sec.items, ...conditional] }
+    if (sec.title !== 'Geschäft') return sec
+    const before: NavItem[] = []
+    if (showVerifizierung) before.push({ href: '/gutachter/verifizierung', label: 'Verifizierung', icon: ShieldCheckIcon })
+    const after: NavItem[] = []
+    if (showTeam) after.push({ href: '/gutachter/team', label: 'Team', icon: UsersIcon })
+    if (showCommunity) after.push({ href: '/gutachter/community', label: 'Community', icon: TrophyIcon })
+    return { ...sec, items: [...before, ...sec.items, ...after] }
   })
 
   // AAR-220: Vollständiges Theme via CSS-Vars + EINMALIGE 2s-Transition.
