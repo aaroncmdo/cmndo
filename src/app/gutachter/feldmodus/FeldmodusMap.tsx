@@ -81,14 +81,47 @@ export default function FeldmodusMap({
 
     mapRef.current = map
 
-    // Uhrzeitabhängiger Light-Preset (dawn/day/dusk/night) + 3D-Modelle.
+    // 2026-05-07 (Phase 1 hyperrealistic-roadmap): Light-Preset + 3D-Modelle
+    // + Atmosphäre. Fog erzeugt Horizon-Tiefe; Terrain liefert globale
+    // Höhendaten für hügelige Anfahrten; POI-Labels aus für aufgeräumten
+    // Fokus, Road-Labels an für Orientierung. Alles GPU-beschleunigt,
+    // 0 zusätzliche Performance-Kosten. Siehe
+    // docs/integrations/feldmodus-mapbox-3d-roadmap.md
     const applyLightPreset = () => {
       try {
         map.setConfigProperty('basemap', 'lightPreset', getMapboxLightPreset())
         map.setConfigProperty('basemap', 'show3dObjects', true)
+        map.setConfigProperty('basemap', 'showPointOfInterestLabels', false)
+        map.setConfigProperty('basemap', 'showRoadLabels', true)
+        map.setConfigProperty('basemap', 'showTransitLabels', false)
+      } catch { /* fail silent */ }
+    }
+    const applyAtmosphere = () => {
+      try {
+        // Fog mit claimondo-Navy-Space-Color für Horizon-Tiefe.
+        map.setFog({
+          color: 'rgb(220, 230, 240)',
+          'high-color': 'rgb(200, 210, 230)',
+          'horizon-blend': 0.05,
+          'space-color': 'rgb(13, 27, 62)', // #0D1B3E claimondo-navy
+          'star-intensity': 0.15,
+        })
+        // Terrain: globale Höhendaten für plastische Berge/Täler.
+        // Die mapbox-dem-Source ist im Standard-Style bereits enthalten;
+        // wir aktivieren sie nur als Terrain-Layer.
+        if (!map.getSource('mapbox-dem')) {
+          map.addSource('mapbox-dem', {
+            type: 'raster-dem',
+            url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+            tileSize: 512,
+            maxzoom: 14,
+          })
+        }
+        map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.2 })
       } catch { /* fail silent */ }
     }
     map.on('style.load', applyLightPreset)
+    map.on('style.load', applyAtmosphere)
     const presetTick = setInterval(applyLightPreset, 5 * 60_000)
 
     map.on('load', () => {
