@@ -187,39 +187,14 @@ export default function AktuellerStopCard({
     stop.lng,
   ])
 
-  // Phase 3 — Fallback: Terminuhrzeit erreicht und GPS nicht überall
-  useEffect(() => {
-    if (besichtigungLaeuft) return
-    if (permissionState === 'granted' && kundeTracking.aktiviert) return
-    const startMs = new Date(stop.start_zeit).getTime()
-    const delay = Math.max(0, startMs - Date.now())
-    const timer = setTimeout(() => {
-      if (besichtigungFiredRef.current) return
-      besichtigungFiredRef.current = true
-      void markBesichtigungGestartet(sessionId, stop.termin_id, 'termin_uhrzeit')
-        .then((res) => {
-          if (res.success) {
-            onArrived(stop.lat ?? 0, stop.lng ?? 0, 'termin_uhrzeit')
-          } else {
-            besichtigungFiredRef.current = false
-          }
-        })
-        .catch(() => {
-          besichtigungFiredRef.current = false
-        })
-    }, delay)
-    return () => clearTimeout(timer)
-  }, [
-    besichtigungLaeuft,
-    permissionState,
-    kundeTracking.aktiviert,
-    sessionId,
-    stop.termin_id,
-    stop.start_zeit,
-    stop.lat,
-    stop.lng,
-    onArrived,
-  ])
+  // 2026-05-07 (Aaron-Smoke): Termin-Uhrzeit-Fallback DEAKTIVIERT.
+  // Vorher schickte der setTimeout den SV automatisch in den arrived-
+  // Modus sobald die Termin-Start-Zeit erreicht war — egal wo er
+  // gerade ist. Aaron: „Erst wenn ich da bin auf 50 m soll das aufgehen".
+  // arrived wird jetzt NUR über Geofence (50m, sofort) ausgelöst.
+  // Wenn GPS denied ist, bleibt der SV im Anfahrts-Modus und kann
+  // manuell „Besichtigung abschließen" drücken — aber NICHT direkt vom
+  // arrived-Modus ohne Geofence-Trigger.
 
   function onAbschliessen() {
     startTransition(async () => {

@@ -279,23 +279,31 @@ export default function FeldmodusMap({
           console.error('[FeldmodusMap] google-3d-tiles attach failed:', err)
         })
       }
-      // Initial-Camera: nahtlose Fortsetzung der Heute→Feldmodus-Intro-
-      // Animation. Pitch 60 + enger Zoom + Bearing Richtung erstem Stop —
-      // KEIN Wide-Bounds-Fit (würde den Pitch auf 0 reseten und das
-      // Driving-Gefühl zerstören). Gibt es keinen Stop mit Koordinaten,
-      // bleibt die Map auf dem fallbackCenter.
+      // 2026-05-07 (Aaron-Smoke): Initial-Camera zentriert auf SV, nicht
+      // auf den Stop. Vorher dreht die Camera „um den Dom", der SV-Pin
+      // war winzig irgendwo am Rand. Jetzt: SV-Position ist Mitte, Bearing
+      // zeigt Richtung Stop (so dass beim Vorwärtsfahren der Stop oben ist).
       const startStop =
         stops[Math.max(0, aktuellerStopIndex)] ??
         stops.find((s) => s.lat != null && s.lng != null) ??
         null
-      if (startStop && startStop.lat != null && startStop.lng != null) {
-        const stopLng = startStop.lng
-        const stopLat = startStop.lat
+      const carCenter: [number, number] | null =
+        sv.standort_lng != null && sv.standort_lat != null
+          ? [sv.standort_lng, sv.standort_lat]
+          : startStop && startStop.lat != null && startStop.lng != null
+            ? [startStop.lng, startStop.lat]
+            : null
+      if (carCenter) {
         let bearing = DEFAULT_FIELD_MAP_CONFIG.bearing
-        if (sv.standort_lng != null && sv.standort_lat != null) {
-          const φ1 = (sv.standort_lat * Math.PI) / 180
-          const φ2 = (stopLat * Math.PI) / 180
-          const Δλ = ((stopLng - sv.standort_lng) * Math.PI) / 180
+        if (
+          startStop &&
+          startStop.lat != null &&
+          startStop.lng != null &&
+          (carCenter[0] !== startStop.lng || carCenter[1] !== startStop.lat)
+        ) {
+          const φ1 = (carCenter[1] * Math.PI) / 180
+          const φ2 = (startStop.lat * Math.PI) / 180
+          const Δλ = ((startStop.lng - carCenter[0]) * Math.PI) / 180
           const y = Math.sin(Δλ) * Math.cos(φ2)
           const x =
             Math.cos(φ1) * Math.sin(φ2) -
@@ -303,9 +311,11 @@ export default function FeldmodusMap({
           bearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
         }
         map.jumpTo({
-          center: [stopLng, stopLat],
-          zoom: 15,
-          pitch: DEFAULT_FIELD_MAP_CONFIG.pitch,
+          center: carCenter,
+          // Navi-Modus-Look: enger Zoom (17) + steiler Pitch (65) damit der
+          // SV-Pin groß in der Mitte ist und die Strecke vor ihm sichtbar.
+          zoom: 17,
+          pitch: 65,
           bearing,
         })
       }
@@ -434,13 +444,25 @@ export default function FeldmodusMap({
     const map = mapRef.current
     if (!map) return
 
-    // TbT-Modus: Map folgt SV mit Heading-Rotation, nahem Zoom, hohem Pitch
+    // TbT-Modus: Map folgt SV mit Heading-Rotation (oder Bearing zum Stop
+    // wenn kein heading da), nahem Zoom, hohem Pitch. 2026-05-07: bei
+    // missing heading berechnen wir das Bearing vom SV → Stop, sonst
+    // zeigt die Camera nordwärts statt in Fahrtrichtung.
     if (followSv && svPosition) {
+      let bearing = svPosition.heading ?? 0
+      if (svPosition.heading == null && aktuellerStop?.lat != null && aktuellerStop?.lng != null) {
+        const φ1 = (svPosition.lat * Math.PI) / 180
+        const φ2 = (aktuellerStop.lat * Math.PI) / 180
+        const Δλ = ((aktuellerStop.lng - svPosition.lng) * Math.PI) / 180
+        const y = Math.sin(Δλ) * Math.cos(φ2)
+        const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ)
+        bearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
+      }
       map.easeTo({
         center: [svPosition.lng, svPosition.lat],
-        zoom: 16.5,
-        bearing: svPosition.heading ?? 0,
-        pitch: 60,
+        zoom: 17,
+        bearing,
+        pitch: 65,
         duration: 800,
         essential: true,
       })
