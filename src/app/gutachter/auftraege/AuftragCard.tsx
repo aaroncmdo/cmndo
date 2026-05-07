@@ -168,20 +168,44 @@ export default function AuftragCard(props: AuftragCardProps) {
         </span>
       </div>
 
-      {/* CMM-32: Fahrzeug-Render-Vorschau — kompakter Render im 130px-
-          Format. Auftragskarte braucht keinen 180px-Hero, das hat im
-          Visual-Review zu uebermaessigem Whitespace gefuehrt (besonders
-          im Logo-Fallback wo das Marken-Icon dominanter wirkt als die
-          eigentliche Auftrag-Information). */}
+      {/* 2026-05-07 (Aaron-Spec): Showroom-Hintergrund mit Marken-Logo /
+          Fahrzeug-Render im Zentrum. Quadratisches Display, Vignette +
+          Spotlight-Glow hinter dem Logo geben dem Panel räumliche Tiefe.
+          Imagin-Renders schweben dadurch wie auf einer Showroom-Drehbuehne;
+          im SimpleIcons-Fallback wirkt das Marken-Logo wie ein
+          beleuchtetes Wand-Display. */}
       {props.fall.fahrzeug_hersteller && (
-        <div className="relative z-10 flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/10 py-1 pointer-events-none">
-          <FahrzeugRenderImage
-            hersteller={props.fall.fahrzeug_hersteller}
-            modell={props.fall.fahrzeug_modell ?? null}
-            lackfarbe={(props.fall.lackfarbe_code as LackfarbeCode | null) ?? null}
-            baujahr={props.fall.fahrzeug_baujahr ?? null}
-            width={130}
-          />
+        <div className="relative z-10 pointer-events-none">
+          <div
+            className="relative aspect-square w-full max-w-[280px] mx-auto rounded-xl overflow-hidden border border-claimondo-navy/20 shadow-md"
+            style={{
+              backgroundImage: 'url(/auftrag/showroom-bg.webp)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            {/* Vignette: oberer Rand etwas dunkler, unterer Boden klar */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/15" />
+            {/* Spotlight-Halo zentriert hinter dem Logo */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(circle at 50% 45%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 55%)',
+              }}
+            />
+            {/* Marken-Logo / Fahrzeug-Render — dark=true → Logo in Weiß */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <FahrzeugRenderImage
+                hersteller={props.fall.fahrzeug_hersteller}
+                modell={props.fall.fahrzeug_modell ?? null}
+                lackfarbe={(props.fall.lackfarbe_code as LackfarbeCode | null) ?? null}
+                baujahr={props.fall.fahrzeug_baujahr ?? null}
+                width={170}
+                dark
+              />
+            </div>
+          </div>
         </div>
       )}
 
