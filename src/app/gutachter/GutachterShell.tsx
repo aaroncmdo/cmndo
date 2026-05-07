@@ -49,6 +49,10 @@ type NavItem = {
   icon: typeof MapPinIcon
   // badge: optional Render-Funktion die einen Counter zurückgibt
   badgeKey?: 'auftraege' | 'posteingang' | 'neueTermine'
+  // 2026-05-07 Design-Review: Beta-Pill am Nav-Item — signalisiert dass das
+  // Feature noch in Entwicklung ist. Statistiken hat aktuell nur einen
+  // Coming-Soon-Stub, soll aber als Roadmap-Hint sichtbar bleiben.
+  beta?: boolean
 }
 
 type NavSection = {
@@ -84,7 +88,7 @@ const NAV_SECTIONS_BASE: NavSection[] = [
       // CMM-17: 'Mein Gebiet' aus Nav entfernt — Aaron-Spec, kommt später als
       // eigenes Feature-Ticket zurück.
       { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
-      { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
+      { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon, beta: true },
       { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
     ],
   },
@@ -359,7 +363,7 @@ export default function GutachterShell({
                 {section.title}
               </p>
               <div className="space-y-0.5">
-                {section.items.map(({ href, label, icon: Icon, badgeKey }) => {
+                {section.items.map(({ href, label, icon: Icon, badgeKey, beta }) => {
                   const active = isActive(href)
                   const badge = badgeKey ? badgeCounts[badgeKey] : 0
                   return (
@@ -379,6 +383,14 @@ export default function GutachterShell({
                     >
                       <Icon className="w-5 h-5 shrink-0" />
                       <span className="flex-1 truncate">{label}</span>
+                      {beta && (
+                        <span
+                          className="inline-flex items-center justify-center px-1.5 h-4 rounded text-[9px] font-bold uppercase tracking-wider bg-white/15 text-white/80 border border-white/20"
+                          aria-label="Beta-Feature, in Entwicklung"
+                        >
+                          Beta
+                        </span>
+                      )}
                       {badge > 0 && (
                         <span
                           className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-red-500 text-white"
