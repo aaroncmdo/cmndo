@@ -24,7 +24,7 @@ import GlassPanel from '@/components/shared/GlassPanel'
 import { useFieldTracking } from './useFieldTracking'
 import { useTurnByTurn } from './useTurnByTurn'
 import { useWakeLock } from '@/hooks/useWakeLock'
-import { markArrived, pauseFokusmodus, startStop } from './actions'
+import { markArrived, pauseFokusmodus, startStop, exitArrivedToRoute } from './actions'
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
@@ -239,6 +239,20 @@ export default function FeldmodusClient({
   )
 
   // Sidebar-Inhalt einmal definiert, in Desktop-Sidebar + Mobile-Sheet wiederverwendet
+  // 2026-05-07: Exit aus arrived → idle. Auto-Arrive (Termin-Uhrzeit-
+  // Fallback) kann den SV ungewollt in den Vor-Ort-Modus schicken — dieser
+  // Handler bringt ihn zurück zur Anfahrt + reset arrivedFiredRef.
+  const handleBackToRoute = useCallback(async () => {
+    if (!aktuellerStop) return
+    const res = await exitArrivedToRoute(session.id, aktuellerStop.termin_id)
+    if (res.success) {
+      arrivedFiredRef.current = false
+      setSessionStatus('idle')
+    } else {
+      toast.error(res.error ?? 'Konnte nicht zur Anfahrt zurück')
+    }
+  }, [aktuellerStop, session.id])
+
   const sidebarContent =
     sessionStatus === 'arrived' && aktuellerStop ? (
       <SvFallakteView
@@ -246,6 +260,7 @@ export default function FeldmodusClient({
         sessionId={session.id}
         terminId={aktuellerStop.termin_id}
         onAdvanced={onAdvanced}
+        onBackToRoute={handleBackToRoute}
         onPauseBackToRoute={async () => {
           const res = await pauseFokusmodus(session.id)
           if (res.success) {
@@ -323,20 +338,21 @@ export default function FeldmodusClient({
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(720px,92vw)] h-[min(85vh,800px)] flex flex-col overflow-hidden"
           >
             <SvFallakteView
-            fallId={aktuellerStop.fall_id}
-            sessionId={session.id}
-            terminId={aktuellerStop.termin_id}
-            onAdvanced={onAdvanced}
-            onPauseBackToRoute={async () => {
-              const res = await pauseFokusmodus(session.id)
-              if (res.success) {
-                setSessionStatus('paused')
-                router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
-              } else {
-                toast.error(res.error ?? 'Pausieren fehlgeschlagen')
-              }
-            }}
-          />
+              fallId={aktuellerStop.fall_id}
+              sessionId={session.id}
+              terminId={aktuellerStop.termin_id}
+              onAdvanced={onAdvanced}
+              onBackToRoute={handleBackToRoute}
+              onPauseBackToRoute={async () => {
+                const res = await pauseFokusmodus(session.id)
+                if (res.success) {
+                  setSessionStatus('paused')
+                  router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+                } else {
+                  toast.error(res.error ?? 'Pausieren fehlgeschlagen')
+                }
+              }}
+            />
           </GlassPanel>
         </div>
       ) : (
