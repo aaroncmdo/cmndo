@@ -27,6 +27,11 @@ export {
   isGoogle3dTilesEnabled,
   type Google3dTilesHandle,
 } from './google-3d-tiles'
+export {
+  attachCesium3dTiles,
+  isCesium3dTilesEnabled,
+  type Cesium3dTilesHandle,
+} from './cesium-3d-tiles'
 export { addKundeMarker, type KundeMarkerOptions } from './kunde-marker'
 export { upsertRouteLayer, removeRouteLayer } from './route-layer'
 export {
