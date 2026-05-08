@@ -420,8 +420,8 @@ export async function runPhase1(anonContext, reportRef = { notes: [] }) {
       notes.push(`SOFT: Neuer Lead hat status=${neuerLead.status} statt 'neu'`)
       result = result === 'hard' ? 'hard' : 'soft'
     }
-    // leadId für Geo-Assert und nachfolgende Phasen auf neuen Lead setzen
-    leadId = neuerLead.id
+    // leadId BLEIBT der Fixture-Lead — Phase 2+ braucht den Fixture-Lead
+    // (hat unfallhergang/schaden_sichtbar aus Seed, neuer Lead nicht).
   }
 
   // Fixture-Lead: Existenz-Check (status kann durch Helpers variieren)

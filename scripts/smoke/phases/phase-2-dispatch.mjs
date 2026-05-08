@@ -56,8 +56,23 @@ export async function runPhase2(dispatchContext, phase1Result) {
     return { phase: 2, result: 'hard', notes, auftragId: null }
   }
 
-  // --- Pre-Condition: Thomas Schmidt in sachverstaendige vorhanden? --------
+  // --- Pre-Condition: gutachter_termine für Fixture-Lead löschen ----------
+  // Wenn ein vorheriger Smoke-Run bereits einen SV-Slot reserviert hat,
+  // steht initialPhase=4 (Stammdaten) statt 2 (Termin) — SvDispatchPanel
+  // wird dann nicht angezeigt. Wir löschen den alten Termin, damit
+  // q5_svTermin=false bleibt und die Seite auf Phase 2 startet.
   const db = getServiceDb()
+  const { error: terminDeleteError } = await db
+    .from('gutachter_termine')
+    .delete()
+    .eq('lead_id', leadId)
+  if (terminDeleteError) {
+    logWarn(2, `gutachter_termine-Reset fehlgeschlagen: ${terminDeleteError.message}`)
+  } else {
+    logPhase(2, `gutachter_termine für Lead ${leadId} zurückgesetzt (Termin-Phase auf 2)`)
+  }
+
+  // --- Pre-Condition: Thomas Schmidt in sachverstaendige vorhanden? --------
   // F-07-Fix: Query auf Profile-Join umgestellt — Vorname/Nachname liegen in profiles, nicht in sachverstaendige
   const { data: svByEmail } = await db
     .from('sachverstaendige')
@@ -148,12 +163,25 @@ export async function runPhase2(dispatchContext, phase1Result) {
       return { phase: 2, result: 'hard', notes, auftragId: null }
     }
 
-    // Warten bis Lead-Detail geladen ist
+    // Warten bis Lead-Detail geladen ist + Client-Komponenten hydratiert sind
     await page.waitForURL((url) => url.pathname.includes(leadId), { timeout: 15000 }).catch(() => {
       logWarn(2, 'URL enthält Lead-ID nicht — möglicherweise Redirect-Problem')
     })
+    // Warte auf die SV-Termin-Sektion ("SV-Termin reservieren" Heading) — zeigt
+    // an, dass Phase2TerminServiceTyp (Client-Component) fertig hydratiert ist.
+    await page.waitForSelector('text=SV-Termin reservieren', { timeout: 10000 }).catch(() => {
+      logWarn(2, 'SV-Termin-Sektion nicht sichtbar — Client-Component noch nicht hydratiert?')
+    })
 
     logPhase(2, `Lead-Detail geladen: ${page.url()}`)
+
+    // Debug: zeige was auf der Seite ist
+    const pageContent = await page.evaluate(() => ({
+      buttons: Array.from(document.querySelectorAll('button')).map(b => b.textContent?.trim()).filter(Boolean).slice(0, 20),
+      hardGateWarning: document.body.innerText.includes('Hard Gate erst abschließen'),
+    })).catch(() => ({}))
+    logPhase(2, `Seiten-Buttons: ${JSON.stringify(pageContent?.buttons?.slice(0, 10))}`)
+    logPhase(2, `Hard-Gate-Warnung sichtbar: ${pageContent?.hardGateWarning}`)
 
     // --- Schritt 2c: SV-Vorschlag starten ---------------------------------
     logPhase(2, 'Suche "Best-SV vorschlagen"-Button')
@@ -162,7 +190,7 @@ export async function runPhase2(dispatchContext, phase1Result) {
     // Korrekte Texte aus SvDispatchPanel.tsx:
     //   - "Gutachter suchen" (Erstaufruf)
     //   - "Erneut suchen" (nach Fehler)
-    // hardGateOk muss true sein (Lead braucht bestimmte qualifizierungs_phase)
+    // hardGateOk muss true sein (Lead braucht unfallhergang + schuldfrage + schaden_sichtbar/flags + polizei_vor_ort)
     const svButtonSelectors = [
       page.getByRole('button', { name: /Gutachter suchen/i }),
       page.getByRole('button', { name: /Erneut suchen/i }),
@@ -173,16 +201,16 @@ export async function runPhase2(dispatchContext, phase1Result) {
 
     let svVorschlagBtn = null
     for (const btn of svButtonSelectors) {
-      if (await btn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      if (await btn.isVisible({ timeout: 3000 }).catch(() => false)) {
         svVorschlagBtn = btn
         break
       }
     }
 
     if (!svVorschlagBtn) {
-      const msg = `"Gutachter suchen"-Button nicht gefunden — SvDispatchPanel zeigt den Button nur wenn hardGateOk=true (Qualifizierungs-Phase abgeschlossen)`
+      const msg = `"Gutachter suchen"-Button nicht gefunden — SvDispatchPanel zeigt den Button nur wenn hardGateOk=true`
       logHard(2, msg)
-      notes.push(`HARD: ${msg} — src/app/dispatch/leads/[id]/SvDispatchPanel.tsx:459-463 — hardGateOk prüft qualifizierungs_phase des Leads. Fixture-Lead hat qualifizierungs_phase=null → Hard Gate schlägt fehl. Lösung: Seed-Skript muss qualifizierungs_phase auf einen Wert setzen der hardGateOk=true liefert (Prüfe hard-gate.ts für gültige Werte), ODER Phase 1 Dispatch-Qualifizierung (Schritt 1-4 im Dispatch-Flow) muss vor SV-Suche durchgeführt werden.`)
+      notes.push(`HARD: ${msg} — src/app/dispatch/leads/[id]/SvDispatchPanel.tsx:456 — hardGateOk = q1_schuldfrage && q2_schaden && q3_polizei (qualification-engine.ts). Buttons auf Seite: ${JSON.stringify(pageContent?.buttons?.slice(0, 10))}`)
       await page.screenshot({ path: 'HARD-dispatch-sv-button-fehlt.png' }).catch(() => {})
       return { phase: 2, result: 'hard', notes, auftragId: null }
     }

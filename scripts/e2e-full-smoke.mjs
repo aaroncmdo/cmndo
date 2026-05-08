@@ -355,19 +355,6 @@ async function main() {
         if (leadId) {
           const { forceAuftragVorhanden, advanceLeadStatus, emitLeadCreatedMitteilung, saveFixtureIds } = helpers
 
-          // F-05: auftraege-Row sicherstellen
-          const fixtures = helpers.loadFixtureIds() ?? {}
-          const auftragResult = await forceAuftragVorhanden({
-            leadId,
-            terminId: fixtures.termin_id ?? null,
-            svProfileId: fixtures.sv_profile_id ?? null,
-            fallId: fixtures.fall_id ?? null,
-          })
-          if (auftragResult.ok && auftragResult.auftragId && !phase2Result.auftragId) {
-            phase2Result.auftragId = auftragResult.auftragId
-            console.log(`[Orchestrator] F-05-Workaround: auftragId=${auftragResult.auftragId}`)
-          }
-
           // F-06: lead.status auf flow-gesendet setzen
           await advanceLeadStatus(leadId, 'flow-gesendet')
 
@@ -376,17 +363,89 @@ async function main() {
 
           // Fixture-IDs erweitern mit Phase-2-Daten
           const db2 = helpers.getServiceDb()
+          const fixtures = helpers.loadFixtureIds() ?? {}
+
+          // Claim = SSoT: erst faelle by lead_id, dann claims by lead_id, sonst Workaround anlegen
           const { data: fallRow } = await db2.from('faelle').select('id').eq('lead_id', leadId).maybeSingle()
+          let resolvedFallId = fallRow?.id ?? null
+
+          if (!resolvedFallId) {
+            // Prüfe ob claim bereits existiert
+            let { data: claimRow } = await db2.from('claims').select('id').eq('lead_id', leadId).maybeSingle()
+
+            if (!claimRow) {
+              // Claim = SSoT: minimalen Claim aus Lead-Daten anlegen (Smoke-Workaround)
+              const { data: leadData } = await db2
+                .from('leads')
+                .select('unfalldatum, schadentyp')
+                .eq('id', leadId)
+                .maybeSingle()
+              const { data: newClaim, error: claimErr } = await db2
+                .from('claims')
+                .insert({
+                  lead_id: leadId,
+                  schadentag: leadData?.unfalldatum ?? new Date().toISOString().slice(0, 10),
+                  schadenart: 'haftpflicht',
+                  status: 'dispatch_done',
+                  created_via: 'lead_konvertierung',
+                })
+                .select('id')
+                .single()
+              if (claimErr) {
+                console.log(`[Orchestrator] Claim-Insert fehlgeschlagen: ${claimErr.message}`)
+              } else {
+                claimRow = newClaim
+                console.log(`[Orchestrator] Claim angelegt (SSoT-Workaround): ${claimRow.id}`)
+              }
+            }
+
+            if (claimRow?.id) {
+              // Fallakte mit claim_id anlegen
+              const { data: newFall, error: fallErr } = await db2
+                .from('faelle')
+                .insert({ lead_id: leadId, claim_id: claimRow.id, status: 'sv-termin' })
+                .select('id')
+                .single()
+              if (fallErr) {
+                console.log(`[Orchestrator] Fall-Insert fehlgeschlagen: ${fallErr.message}`)
+                // Fallback: faelle by claim_id suchen (Trigger hat ggf. bereits angelegt)
+                const { data: fallByClaimRow } = await db2.from('faelle').select('id').eq('claim_id', claimRow.id).maybeSingle()
+                resolvedFallId = fallByClaimRow?.id ?? null
+              } else {
+                resolvedFallId = newFall.id
+                // gutachter_termine.fall_id aktualisieren
+                const { data: termin } = await db2.from('gutachter_termine').select('id').eq('lead_id', leadId).order('created_at', { ascending: false }).limit(1).maybeSingle()
+                if (termin) {
+                  await db2.from('gutachter_termine').update({ fall_id: resolvedFallId }).eq('id', termin.id)
+                }
+              }
+              console.log(`[Orchestrator] Claim SSoT: claim_id=${claimRow.id} → fall_id=${resolvedFallId}`)
+            }
+          }
+
           const { data: svProfileRow } = await db2.from('profiles').select('id').eq('email', 'test-sv@claimondo.de').maybeSingle()
           const { data: svSacRow } = svProfileRow
             ? await db2.from('sachverstaendige').select('id').eq('profile_id', svProfileRow.id).maybeSingle()
             : { data: null }
 
+          // F-05: auftraege-Row NACH fall_id-Lookup sicherstellen
+          const terminRow = await db2.from('gutachter_termine').select('id').eq('lead_id', leadId).order('created_at', { ascending: false }).limit(1).maybeSingle()
+          const auftragResult = await forceAuftragVorhanden({
+            leadId,
+            terminId: terminRow?.data?.id ?? fixtures.termin_id ?? null,
+            svProfileId: svProfileRow?.id ?? fixtures.sv_profile_id ?? null,
+            fallId: resolvedFallId ?? fixtures.fall_id ?? null,
+          })
+          if (auftragResult.ok && auftragResult.auftragId && !phase2Result.auftragId) {
+            phase2Result.auftragId = auftragResult.auftragId
+            console.log(`[Orchestrator] F-05-Workaround: auftragId=${auftragResult.auftragId}`)
+          }
+
           saveFixtureIds({
-            fall_id: fallRow?.id ?? fixtures.fall_id ?? null,
+            fall_id: resolvedFallId ?? fixtures.fall_id ?? null,
             sv_profile_id: svProfileRow?.id ?? fixtures.sv_profile_id ?? null,
             sv_sachverstaendige_id: svSacRow?.id ?? fixtures.sv_sachverstaendige_id ?? null,
-            auftrag_id: phase2Result.auftragId ?? fixtures.auftrag_id ?? null,
+            auftrag_id: phase2Result.auftragId ?? auftragResult?.auftragId ?? fixtures.auftrag_id ?? null,
           })
         }
 
@@ -402,8 +461,9 @@ async function main() {
         phase4Result = phaseResult
 
         // Termin-ID in Fixture-IDs speichern für Phase 5-7
-        if (phase4Result?.terminId) {
-          helpers.saveFixtureIds({ termin_id: phase4Result.terminId })
+        // Phase 4 gibt terminId als auftragId zurück (Rückgabe-Konvention)
+        if (phase4Result?.auftragId) {
+          helpers.saveFixtureIds({ termin_id: phase4Result.auftragId })
         }
 
       } else if (phaseNr === 5) {
@@ -412,7 +472,7 @@ async function main() {
         const fixtureIds = helpers.loadFixtureIds() ?? {}
         phaseResult = await runPhase5(svCtx5, {
           auftragId: phase4Result?.auftragId ?? phase3Result?.auftragId ?? phase2Result?.auftragId ?? fixtureIds.auftrag_id ?? null,
-          terminId: phase4Result?.terminId ?? fixtureIds.termin_id ?? null,
+          terminId: phase4Result?.auftragId ?? fixtureIds.termin_id ?? null,
           notes: [],
         })
         phase5Result = phaseResult
