@@ -24,7 +24,7 @@
 // Caller (FeldmodusClient + FeldmodusMap-Callback). NaviHud rendert nur
 // das aktuell höchste Notice.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ZapIcon,
   AlertTriangleIcon,
@@ -37,6 +37,11 @@ import {
   GaugeIcon,
   RouteIcon,
 } from 'lucide-react'
+
+// 2026-05-08 (C10c): Auto-Accept-Dauer beim Reroute-Toast — 10s passiv,
+// dann switcht auf die Alternative. Gibt dem SV Zeit zu reagieren ohne
+// ihn aus dem Fahrfokus zu reißen.
+const REROUTE_AUTO_ACCEPT_MS = 10_000
 
 // ─── Notice-Types ────────────────────────────────────────────────────
 
@@ -123,15 +128,28 @@ const THEME_BLUE: Theme = {
   body: 'text-blue-50/90',
 }
 
+// 2026-05-08 (Aaron-Brief): Standard-Abbiegungen (Maneuver) sollen NICHT
+// blau sein — blau ist reserviert für Spurentscheidungen + Reroute. Die
+// gewöhnliche „Rechts in 200 m"-Anweisung kommt im weißen Glass-Look.
+const THEME_WHITE: Theme = {
+  bg: 'bg-white/65 backdrop-blur-2xl',
+  border: 'border-white/60',
+  iconColor: 'text-claimondo-navy',
+  iconBg: 'bg-white/85',
+  title: 'text-claimondo-navy',
+  body: 'text-claimondo-ondo',
+}
+
 function themeFor(notice: NaviNotice): Theme {
   switch (notice.type) {
     case 'blitzer':
       return THEME_RED
     case 'hazard':
       return THEME_AMBER
+    case 'maneuver':
+      return THEME_WHITE
     case 'reroute':
     case 'lane':
-    case 'maneuver':
     default:
       return THEME_BLUE
   }
@@ -263,46 +281,9 @@ function NoticeContent({ notice, theme }: { notice: NaviNotice; theme: Theme }) 
         </div>
       )
 
-    case 'reroute': {
-      const isHazard = notice.reason === 'hazard'
-      return (
-        <div>
-          <div className="flex items-center gap-4 px-5 py-4">
-            <div className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${theme.iconBg}`}>
-              {isHazard ? (
-                <AlertTriangleIcon className={`w-6 h-6 ${theme.iconColor}`} />
-              ) : (
-                <RouteIcon className={`w-6 h-6 ${theme.iconColor}`} />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className={`text-base font-bold ${theme.title} leading-tight`}>
-                {isHazard ? 'Hindernis voraus' : `Schnellere Route — ${Math.round(notice.etaSavedSec / 60)} min sparen`}
-              </p>
-              <p className={`text-xs ${theme.body} mt-0.5`}>
-                {isHazard ? notice.hazardLabel ?? 'Auf der aktuellen Strecke' : 'Wechseln auf die staufreie Alternative?'}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 px-5 pb-4">
-            <button
-              type="button"
-              onClick={notice.onAccept}
-              className="flex-1 h-11 rounded-xl bg-white text-blue-700 text-sm font-semibold hover:bg-white/90 transition-colors"
-            >
-              Übernehmen
-            </button>
-            <button
-              type="button"
-              onClick={notice.onDismiss}
-              className="flex-1 h-11 rounded-xl bg-white/15 text-white text-sm font-medium hover:bg-white/25 transition-colors"
-            >
-              Behalten
-            </button>
-          </div>
-        </div>
-      )
-    }
+    case 'reroute':
+      return <RerouteCard notice={notice} theme={theme} />
+
 
     case 'lane':
       return (
@@ -339,6 +320,104 @@ function NoticeContent({ notice, theme }: { notice: NaviNotice; theme: Theme }) 
         </div>
       )
   }
+}
+
+// ─── Reroute-Card mit Countdown-Bar + Auto-Accept ────────────────────
+
+function RerouteCard({
+  notice,
+  theme,
+}: {
+  notice: Extract<NaviNotice, { type: 'reroute' }>
+  theme: Theme
+}) {
+  const [remaining, setRemaining] = useState(REROUTE_AUTO_ACCEPT_MS)
+  const acceptedRef = useRef(false)
+
+  useEffect(() => {
+    acceptedRef.current = false
+    setRemaining(REROUTE_AUTO_ACCEPT_MS)
+    const startedAt = Date.now()
+    const id = window.setInterval(() => {
+      if (acceptedRef.current) return
+      const elapsed = Date.now() - startedAt
+      const left = Math.max(0, REROUTE_AUTO_ACCEPT_MS - elapsed)
+      setRemaining(left)
+      if (left <= 0 && !acceptedRef.current) {
+        acceptedRef.current = true
+        window.clearInterval(id)
+        notice.onAccept()
+      }
+    }, 100)
+    return () => window.clearInterval(id)
+  }, [notice])
+
+  const progressPct = (remaining / REROUTE_AUTO_ACCEPT_MS) * 100
+  const isHazard = notice.reason === 'hazard'
+  const remainingSec = Math.ceil(remaining / 1000)
+
+  const handleAccept = () => {
+    if (acceptedRef.current) return
+    acceptedRef.current = true
+    notice.onAccept()
+  }
+  const handleDismiss = () => {
+    if (acceptedRef.current) return
+    acceptedRef.current = true
+    notice.onDismiss()
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-4 px-5 py-4">
+        <div className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${theme.iconBg}`}>
+          {isHazard ? (
+            <AlertTriangleIcon className={`w-6 h-6 ${theme.iconColor}`} />
+          ) : (
+            <RouteIcon className={`w-6 h-6 ${theme.iconColor}`} />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`text-base font-bold ${theme.title} leading-tight`}>
+            {isHazard ? 'Hindernis voraus' : `Schnellere Route — ${Math.round(notice.etaSavedSec / 60)} min sparen`}
+          </p>
+          <p className={`text-xs ${theme.body} mt-0.5`}>
+            {isHazard ? (notice.hazardLabel ?? 'Auf der aktuellen Strecke') : 'Wechseln auf die staufreie Alternative?'}
+          </p>
+        </div>
+        {/* 2026-05-08 (Aaron-Brief): Countdown-Sekunden als sekundärer
+            Indikator. Wer schnell schaut sieht hier "in 7 s wird gewechselt"
+            ohne die ProgressBar abzuziehen. */}
+        <span className={`shrink-0 text-xs font-semibold ${theme.body} tabular-nums`}>
+          in {remainingSec} s
+        </span>
+      </div>
+      <div className="flex items-center gap-2 px-5 pb-4">
+        <button
+          type="button"
+          onClick={handleAccept}
+          className="flex-1 h-11 rounded-xl bg-white text-blue-700 text-sm font-semibold hover:bg-white/90 transition-colors"
+        >
+          Wechseln
+        </button>
+        <button
+          type="button"
+          onClick={handleDismiss}
+          className="flex-1 h-11 rounded-xl bg-white/15 text-white text-sm font-medium hover:bg-white/25 transition-colors"
+        >
+          Bleiben
+        </button>
+      </div>
+      {/* Progress-Bar — leert sich von 100 % nach 0 % über 10 s. Bei 0
+          wird onAccept ausgelöst. */}
+      <div className="h-1 bg-white/10">
+        <div
+          className="h-full bg-white transition-[width] ease-linear"
+          style={{ width: `${progressPct}%`, transitionDuration: '100ms' }}
+        />
+      </div>
+    </div>
+  )
 }
 
 // ─── Helpers für Caller ──────────────────────────────────────────────
