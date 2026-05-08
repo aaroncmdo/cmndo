@@ -21,6 +21,7 @@ import FokusHeader from './FokusHeader'
 import AktuellerStopCard from './AktuellerStopCard'
 import StopListItem from './StopListItem'
 import GlassPanel from '@/components/shared/GlassPanel'
+import NaviHud, { pickHighestPriorityNotice, formatNaviDistance, type NaviNotice } from './NaviHud'
 import { useFieldTracking } from './useFieldTracking'
 import { useTurnByTurn } from './useTurnByTurn'
 import { useWakeLock } from '@/hooks/useWakeLock'
@@ -150,6 +151,49 @@ export default function FeldmodusClient({
     position: position ? { lat: position.lat, lng: position.lng } : null,
     voiceEnabled: tbtVoiceOn,
   })
+
+  // 2026-05-08 (C10) NaviHud-Notice-Stack:
+  //   - mapNotice (Blitzer/Hazard/Reroute) wird von FeldmodusMap via
+  //     onMapNotice-Callback gemeldet
+  //   - laneNotice + maneuverNotice aus useTurnByTurn step.bannerInstructions
+  //   - kombiniert via pickHighestPriorityNotice (Blitzer > Hazard >
+  //     Reroute > Lane > Maneuver)
+  const [mapNotice, setMapNotice] = useState<NaviNotice | null>(null)
+  const naviNotice = useMemo<NaviNotice | null>(() => {
+    // Lane-Notice nur wenn der nächste Step Lane-Annotations hat UND
+    // wir nahe genug am Maneuver sind (< 300 m). Sonst kommt das zu
+    // früh und SV stresst sich überflüssig.
+    let laneNotice: NaviNotice | null = null
+    let maneuverNotice: NaviNotice | null = null
+    if (tbt.upcomingStep && tbt.distanceToNextManeuver != null) {
+      const step = tbt.upcomingStep
+      const distLabel = formatNaviDistance(tbt.distanceToNextManeuver)
+      const lanes = step.bannerInstructions[0]?.lanes
+      if (lanes && lanes.length > 1 && tbt.distanceToNextManeuver < 300) {
+        laneNotice = {
+          type: 'lane',
+          lanes,
+          maneuverInstruction: step.instruction,
+          distanceLabel: distLabel,
+        }
+      }
+      maneuverNotice = {
+        type: 'maneuver',
+        maneuverType: step.maneuverType,
+        modifier: step.maneuverModifier,
+        instruction: step.instruction,
+        distanceLabel: distLabel,
+        streetName: step.name,
+      }
+    }
+    return pickHighestPriorityNotice({
+      blitzer: mapNotice?.type === 'blitzer' ? mapNotice : null,
+      hazard: mapNotice?.type === 'hazard' ? mapNotice : null,
+      reroute: mapNotice?.type === 'reroute' ? mapNotice : null,
+      lane: laneNotice,
+      maneuver: maneuverNotice,
+    })
+  }, [mapNotice, tbt.upcomingStep, tbt.distanceToNextManeuver])
 
   // Auto-Losfahren: sobald der SV den Feldmodus für einen aktiven Stop öffnet,
   // markieren wir den Termin als "losgefahren" — generiert Tracking-Token,
@@ -317,6 +361,9 @@ export default function FeldmodusClient({
           followSv={!!position}
           // 2026-05-08 (C6): Hero-Pin Arrived-Choreographie
           arrived={sessionStatus === 'arrived'}
+          // 2026-05-08 (C10): Map-side Notices (Blitzer/Hazard/Reroute)
+          // an den Notice-Stack des Clients
+          onMapNotice={setMapNotice}
         />
       </div>
 
@@ -437,10 +484,15 @@ export default function FeldmodusClient({
         </div>
       </aside>
 
-      {/* Banner-Overlays — z-20 schweben über der Map.
-          Desktop: oben rechts neben den Floating-Cards links (lg:right-4),
-          links bleibt frei für FokusHeader/AktuellerStopCard.
-          Mobile: oben über der Karte. */}
+      {/* 2026-05-08 (C10) NaviHud — bottom-mittig, Glass-Design mit
+          Mode-Tönung. Konsolidiert Blitzer/Hazard/Reroute/Lane/Maneuver
+          in einen einzigen Slot. Vorher waren TbtBanner (top-rechts) und
+          RerouteToast (top-edge) zwei konkurrierende Banner — der SV
+          wusste nicht wo er hinschauen sollte. */}
+      {tbtActive && <NaviHud notice={naviNotice} />}
+
+      {/* Reduzierter Top-Banner: nur noch Gesamt-ETA + Voice-Toggle.
+          Maneuver/Stau-Detail wandert in den NaviHud unten. */}
       {tbtActive && tbt.upcomingStep && (
         <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-md z-20">
           <TbtBanner

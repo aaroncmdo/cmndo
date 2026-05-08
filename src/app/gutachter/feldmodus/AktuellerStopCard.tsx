@@ -265,15 +265,15 @@ export default function AktuellerStopCard({
   })()
 
   if (isCompact) {
-    // 2026-05-08 C1: Driving-Compact-Pille — eine kurze Glance-View für
-    // den Fahrkontext. SV sieht: wohin (Adresse), wer (Kennzeichen), wie
-    // weit (Distanz). Click expandiert.
+    // 2026-05-08 C9: Glass-Look kommt vom umschließenden GlassPanel
+    // (variant="prominent"). Die Card selbst ist transparent — kein
+    // bg-white das den Backdrop-Blur überlagert. Hover bleibt subtil.
     return (
       <button
         type="button"
         onClick={() => setManualMode('expanded')}
         aria-label="Stop-Details ausklappen"
-        className="w-full text-left rounded-xl bg-white text-claimondo-navy px-4 py-3 shadow-sm hover:bg-claimondo-bg/50 transition-colors flex items-center gap-3"
+        className="w-full text-left rounded-xl text-claimondo-navy px-4 py-3 hover:bg-white/30 transition-colors flex items-center gap-3"
       >
         <MapPinIcon className="w-5 h-5 text-[color:var(--brand-primary,var(--brand-secondary))] shrink-0" />
         <div className="flex-1 min-w-0">
@@ -298,7 +298,11 @@ export default function AktuellerStopCard({
   }
 
   return (
-    <div className="rounded-xl bg-white text-claimondo-navy p-4 shadow-sm space-y-3">
+    // 2026-05-08 C9: Card-Background transparent damit der Glass-Effekt
+    // vom umschließenden GlassPanel durchkommt. Vorher hatte bg-white
+    // den Backdrop-Blur überschattet → solid weißer Block statt frosted
+    // Glass.
+    <div className="rounded-xl text-claimondo-navy p-4 space-y-3">
       {/* Header — mit optionalem Collapse-Toggle */}
       <div>
         <div className="flex items-center gap-2 mb-1">
