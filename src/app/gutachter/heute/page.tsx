@@ -70,7 +70,8 @@ export default async function HeutePage() {
     id: string
     standort_lat: number | null
     standort_lng: number | null
-  }>(supabase, user.id, 'id, standort_lat, standort_lng')
+    isochrone_polygon: Array<{ lat: number; lng: number }> | null
+  }>(supabase, user.id, 'id, standort_lat, standort_lng, isochrone_polygon')
   if (!sv) redirect('/gutachter?error=Kein+SV-Profil')
 
   const todayStart = new Date()
@@ -419,6 +420,7 @@ export default async function HeutePage() {
         lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
         lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
       }}
+      isochronePolygon={sv.isochrone_polygon ?? null}
       hasActiveSession={hasActiveSession}
       initialPrivatStops={initialPrivatStops}
     />

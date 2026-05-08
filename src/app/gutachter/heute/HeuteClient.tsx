@@ -30,6 +30,10 @@ export interface HeuteClientProps {
   termine: HeuteTerminFull[]
   pflichtStats: TagesroutePflichtStat[]
   svStandort: { lat: number | null; lng: number | null }
+  /** 2026-05-08: Isochrone-Polygon des SV. Wenn Toggle „Mein Gebiet"
+   *  in Einstellungen aktiv (LocalStorage), rendert TagesrouteMap das
+   *  als leuchtende Grenz-Fläche um den Heimat-Standort. */
+  isochronePolygon: Array<{ lat: number; lng: number }> | null
   hasActiveSession: boolean
   /** AAR-872: bereits gespeicherte Privat-Stops fuer heute. */
   initialPrivatStops: PrivatStopRow[]
@@ -41,9 +45,26 @@ export default function HeuteClient({
   termine,
   pflichtStats,
   svStandort,
+  isochronePolygon,
   hasActiveSession,
   initialPrivatStops,
 }: HeuteClientProps) {
+  // 2026-05-08 Aaron-Toggle: LocalStorage `claimondo_show_gebiet_in_hub`
+  // entscheidet ob das Isochrone-Polygon gerendert wird. Initial-Read
+  // sync (kein Flicker), zusätzlich Listener auf custom-event vom
+  // Settings-Toggle damit sofortiges Update ohne Page-Reload.
+  const [showGebiet, setShowGebiet] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    return window.localStorage.getItem('claimondo_show_gebiet_in_hub') === '1'
+  })
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<boolean>).detail
+      if (typeof detail === 'boolean') setShowGebiet(detail)
+    }
+    window.addEventListener('claimondo:gebiet-toggle', handler)
+    return () => window.removeEventListener('claimondo:gebiet-toggle', handler)
+  }, [])
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(
     svStandort.lat != null && svStandort.lng != null
       ? { lat: svStandort.lat, lng: svStandort.lng }
@@ -171,6 +192,8 @@ export default function HeuteClient({
         height={mapHeight}
         onRouteStatsChange={setRouteStats}
         onReady={handleMapReady}
+        isochronePolygon={isochronePolygon}
+        showGebiet={showGebiet}
       />
 
       {/* Termine-Overlay — Mobile: gestackt unter Map (mt-4).
