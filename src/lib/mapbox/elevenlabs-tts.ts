@@ -9,10 +9,50 @@
 // „Achtung Blitzer in 200 Metern" entstehen einmal, dann CDN-Cache).
 // Client-Cache via Object-URL-Map: Blob-URL pro Text wird wiederverwendet
 // bis Page-Reload.
+//
+// 2026-05-08: Pre-Generation-Manifest. Wenn `public/tts/manifest.json`
+// existiert (= via `node scripts/pregenerate-tts.mjs` erzeugt), werden
+// die ~30 Standard-Phrasen direkt als statische MP3s vom CDN abgespielt
+// — null API-Call, sub-50ms-Playback. Dynamische Anweisungen
+// (Maneuver mit Straßennamen) gehen weiter durch den Server-Proxy.
 
 const audioCache = new Map<string, string>() // text → blob URL
 let active: HTMLAudioElement | null = null
 let elevenLabsAvailable: boolean | null = null
+
+// Pre-Generation-Manifest. Lazy-loaded — der erste speakViaElevenLabs-
+// Call holt das Manifest einmal und cached es im Modul. 404 ist ok
+// (kein Pre-Gen-Run gemacht), dann fallen alle Calls auf den API-Pfad.
+type StaticManifest = { entries: Record<string, string> }
+let staticManifestPromise: Promise<StaticManifest | null> | null = null
+async function loadStaticManifest(): Promise<StaticManifest | null> {
+  if (typeof window === 'undefined') return null
+  if (!staticManifestPromise) {
+    staticManifestPromise = fetch('/tts/manifest.json', { cache: 'force-cache' })
+      .then((res) => (res.ok ? (res.json() as Promise<StaticManifest>) : null))
+      .catch(() => null)
+  }
+  return staticManifestPromise
+}
+
+async function tryPlayStatic(text: string): Promise<boolean> {
+  const manifest = await loadStaticManifest()
+  if (!manifest) return false
+  const filename = manifest.entries[text]
+  if (!filename) return false
+  if (active) {
+    active.pause()
+    active.src = ''
+  }
+  const audio = new Audio(`/tts/${filename}`)
+  active = audio
+  try {
+    await audio.play()
+    return true
+  } catch {
+    return false
+  }
+}
 // In-flight-Promises pro Text damit parallele speakInstruction-Calls
 // (z.B. Blitzer 200m + 500m gleichzeitig) nur EINEN Network-Call machen.
 // Race-condition fix 2026-05-08 — vorher haben parallel pending Calls
@@ -57,6 +97,12 @@ export function isElevenLabsEnabled(): boolean {
  */
 export async function speakViaElevenLabs(text: string): Promise<boolean> {
   if (typeof window === 'undefined') return false
+
+  // 2026-05-08: Static-Manifest zuerst — wenn die Phrase pre-generiert
+  // ist, statisches MP3 abspielen ohne ElevenLabs-API-Touch. Sub-50ms
+  // Playback, null Quota-Verbrauch, funktioniert auch bei API-Outage.
+  if (await tryPlayStatic(text)) return true
+
   if (!(await probeAvailability())) return false
 
   // 2026-05-08: In-flight-Dedup. Wenn dieselbe Anweisung parallel

@@ -32,15 +32,17 @@ import { join } from 'node:path'
 const BASE_URL = process.env.FELDMODUS_BASE_URL ?? 'http://localhost:3000'
 const EMAIL = process.env.FELDMODUS_EMAIL ?? 'test-sv@claimondo.de'
 const PASSWORD = process.env.FELDMODUS_PASSWORD ?? 'Test1234!'
-const VIEWPORT_NAME = process.env.FELDMODUS_VIEWPORT ?? 'mobile'
+const VIEWPORT_NAME = process.env.FELDMODUS_VIEWPORT ?? 'desktop'
 
 // Test-Daten: Höninger Weg 100, 50969 Köln (Termin den Aaron geseedet hat)
 const STOP = { lat: 50.916214, lng: 6.941144, label: 'Höninger Weg 100' }
-// Start-GPS: ~3 km nördlich, mitten in Köln-Sülz
-const START_GPS = { lat: 50.9290, lng: 6.9320 }
-// „Mid-route" zwischen START und STOP (ungefähr) — hier dürfte ein Blitzer
-// in der Atudo-API auftauchen.
-const MID_GPS = { lat: 50.9226, lng: 6.9366 }
+// 2026-05-08: Aarons echter Standort = Mediapark (Köln-Neustadt-Nord).
+// Vorher war der Mock auf 50.929, 6.932 (~Köln-Sülz-Süd) was nichts mit
+// Aarons real-life Setup zu tun hatte und im Smoke verwirrend war.
+const START_GPS = { lat: 50.9522, lng: 6.9430, label: 'Mediapark Köln' }
+// Mid-Route zwischen Mediapark und Höninger Weg — knapp 4 km Richtung
+// Süden. Hier dürfte ein Blitzer in der Atudo-API auftauchen.
+const MID_GPS = { lat: 50.9335, lng: 6.9410 }
 // Innerhalb 50 m vom Stop — Geofence-Trigger.
 const ARRIVAL_GPS = {
   lat: STOP.lat + 0.0002,
@@ -115,14 +117,18 @@ async function login(page) {
   await logLine(`logged in as ${EMAIL}`)
 }
 
-async function ensureFeldmodus(page) {
-  // /gutachter → wenn aktiver Termin da ist landet das Layout via Heute auf Feldmodus
+async function gotoHeute(page) {
   await page.goto(`${BASE_URL}/gutachter/heute`, { waitUntil: 'domcontentloaded' })
-  await page.waitForTimeout(1_000)
-  // Versuche den „Feldmodus starten"-Button — kann unterschiedlich heißen
+  // Tagesroute-Map braucht ein paar Frames bis sie ihre Tiles fertig hat.
+  await page.waitForTimeout(2_500)
+  await logLine('heute reached')
+}
+
+async function startTagesmodus(page) {
   const triggers = [
     'text=Feldmodus starten',
     'text=Tagesroute starten',
+    'text=Tagesmodus starten',
     'text=Fokus-Modus',
     'a[href="/gutachter/feldmodus"]',
   ]
@@ -130,11 +136,12 @@ async function ensureFeldmodus(page) {
     const el = page.locator(sel).first()
     if (await el.count()) {
       await el.click().catch(() => {})
+      await logLine(`clicked: ${sel}`)
       break
     }
   }
   await page.waitForURL(/\/gutachter\/feldmodus/, { timeout: 10_000 }).catch(async () => {
-    // Fallback — direkt navigieren.
+    await logLine('Tagesmodus-Trigger nicht gefunden, navigiere direkt')
     await page.goto(`${BASE_URL}/gutachter/feldmodus`, { waitUntil: 'domcontentloaded' })
   })
   await logLine('feldmodus reached')
@@ -194,25 +201,36 @@ async function main() {
 
   try {
     await login(page)
-    await ensureFeldmodus(page)
-    await waitForMap(page, 'arrival')
-    await shoot(page, '01_arrival', 'Initial-Map vom Start-GPS, Bottom-Sheet expanded')
 
-    // 2026-05-08: Es gibt im Feldmodus keinen Losfahren-Button — startStop
-    // wird per Effect getriggered sobald Map+Position+aktivStop bereit
-    // sind. Die TbT-Phase ist also identisch zur 01_arrival. Stattdessen
-    // klappen wir das Mobile-Bottom-Sheet zu damit die Map sichtbar ist.
+    // Phase 00: /gutachter/heute Hub VOR dem Tagesmodus-Start.
+    // Zeigt die Tagesroute-Map, die Stop-Liste, den „Tagesmodus starten"-
+    // CTA und alle Hub-Widgets. Aaron-Anforderung 2026-05-08: er will
+    // auch diese Ansicht im Smoke-Lauf sehen — der Feldmodus ist nicht
+    // der einzige relevante Screen.
+    await gotoHeute(page)
+    await shoot(page, '00_heute_hub', 'Heute-Hub mit Tagesroute-Map vor dem Tagesmodus-Start')
+
+    // Phase 01: Tagesmodus starten → Feldmodus erreicht
+    await startTagesmodus(page)
+    await waitForMap(page, 'feldmodus-arrival')
+    await shoot(page, '01_feldmodus_start', 'Feldmodus initial geladen, Sheet expanded (Mobile) bzw. Cards (Desktop)')
+
+    // Phase 02: Mobile-Sheet einklappen damit Map sichtbar ist (Desktop:
+    // Sheet existiert nicht, Aufruf ist no-op).
     if (await tryCollapseSheet(page)) {
       await page.waitForTimeout(700)
       await shoot(page, '02_map_visible', 'Bottom-Sheet eingeklappt — Map + TbT + Stau-Linien sichtbar')
     } else {
-      await logLine('Sheet-Toggle nicht gefunden, überspringe Phase 02')
+      await logLine('Kein Sheet-Toggle (Desktop oder Layout-Variante)')
+      await shoot(page, '02_map_visible', 'Map vollständig sichtbar (kein Sheet zu kollabieren)')
     }
 
+    // Phase 03: GPS auf Mid-Route → Blitzer/Hazards/Flow im Frame
     await setGps(context, MID_GPS)
     await page.waitForTimeout(2_500)
     await shoot(page, '03_blitzer_zone', 'GPS auf Mid-Route — Blitzer/Hazards/Flow im Frame')
 
+    // Phase 04: GPS innerhalb Geofence → arrived state
     await setGps(context, ARRIVAL_GPS)
     await page.waitForTimeout(3_500) // Geofence (50m) braucht 1-2 Render-Cycles
     await shoot(page, '04_arrived', 'Geofence-Trigger — angekommen-State')
