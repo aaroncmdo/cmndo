@@ -21,6 +21,16 @@ import {
   removeRouteLayer,
   MAPBOX_STYLE_STANDARD_SATELLITE,
   getMapboxLightPreset,
+  attachBlitzerLayer,
+  fetchBlitzerInBbox,
+  bboxForRoute,
+  type BlitzerLayerHandle,
+  attachHazardLayer,
+  fetchHereHazards,
+  type HazardLayerHandle,
+  attachFlowLayer,
+  fetchHereFlow,
+  type FlowLayerHandle,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import { NavigationIcon } from 'lucide-react'
@@ -58,6 +68,10 @@ export type TagesrouteMapProps = {
   onRouteStatsChange?: (stats: RouteStats | null) => void
   /** Handle für Heute→Feldmodus-Intro-Animation. Wird einmal nach Mount gerufen. */
   onReady?: (handle: TagesrouteMapHandle) => void
+  /** 2026-05-08 Aaron-Brief: Isochrone-Polygon des SV. Wenn `showGebiet=true`,
+   *  rendern wir es als leuchtende Grenzfläche. */
+  isochronePolygon?: Array<{ lat: number; lng: number }> | null
+  showGebiet?: boolean
 }
 
 /** Initial-Bearing zwischen zwei LngLat-Punkten (Grad, 0=Nord, im Uhrzeigersinn). */
@@ -112,12 +126,21 @@ export default function TagesrouteMap({
   height,
   onRouteStatsChange,
   onReady,
+  isochronePolygon,
+  showGebiet = false,
 }: TagesrouteMapProps) {
   // EINE Ref. Mapbox attached sein Canvas direkt in diesem Element.
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
   const svMarkerRef = useRef<Marker | null>(null)
   const stopMarkersRef = useRef<Map<string, Marker>>(new Map())
+  // 2026-05-08 Aaron-Brief: Blitzer/Hazards/Stau auch im Heute-Hub
+  // anzeigen damit der SV vor dem Tagesmodus-Start sieht was unterwegs
+  // wartet. Layer werden parallel zur Tagesroute geladen, gleiche
+  // Atudo + HERE-APIs wie im Feldmodus.
+  const blitzerRef = useRef<BlitzerLayerHandle | null>(null)
+  const hazardsRef = useRef<HazardLayerHandle | null>(null)
+  const flowRef = useRef<FlowLayerHandle | null>(null)
   const [tokenMissing, setTokenMissing] = useState(false)
   const [routeStats, setRouteStats] = useState<{ distanzKm: number; dauerMin: number } | null>(null)
 
@@ -223,6 +246,12 @@ export default function TagesrouteMap({
       window.removeEventListener('resize', onWindowResize)
       svMarkerRef.current?.remove()
       svMarkerRef.current = null
+      blitzerRef.current?.remove()
+      blitzerRef.current = null
+      hazardsRef.current?.remove()
+      hazardsRef.current = null
+      flowRef.current?.remove()
+      flowRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current.clear()
       map.remove()
@@ -306,6 +335,33 @@ export default function TagesrouteMap({
               ]
 
         upsertRouteLayer(m, aktivCoords, 'main')
+
+        // 2026-05-08 (Aaron-Brief): Blitzer + Hazards + Stau-Linien auch
+        // im Heute-Hub damit der SV vor Tagesmodus-Start sieht was auf
+        // der Strecke wartet. Buffer 3 km, parallel-fetch, best-effort.
+        if (aktivCoords.length >= 2) {
+          const bbox = bboxForRoute(aktivCoords, 3)
+          void Promise.all([
+            fetchBlitzerInBbox(bbox),
+            fetchHereHazards(bbox),
+            fetchHereFlow(bbox),
+          ]).then(([blitzerFeatures, hazardFeatures, flowFeatures]) => {
+            const m2 = mapRef.current
+            if (!m2) return
+            const attach = () => {
+              if (!blitzerRef.current) blitzerRef.current = attachBlitzerLayer(m2, blitzerFeatures)
+              else blitzerRef.current.update(blitzerFeatures)
+              if (!hazardsRef.current) hazardsRef.current = attachHazardLayer(m2, hazardFeatures)
+              else hazardsRef.current.update(hazardFeatures)
+              if (!flowRef.current) flowRef.current = attachFlowLayer(m2, flowFeatures)
+              else flowRef.current.update(flowFeatures)
+            }
+            // Style noch nicht ready? Auf 'idle' warten — sonst wirft
+            // map.addSource innerhalb attachBlitzerLayer.
+            if (m2.isStyleLoaded()) attach()
+            else m2.once('idle', attach)
+          }).catch(() => { /* best-effort */ })
+        }
 
         // Stats kommen immer von der aktiven Route (das ist die echte Tagesroute)
         if (aktivRoute && aktivRoute.coords.length > 1) {
@@ -402,6 +458,99 @@ export default function TagesrouteMap({
       }
     })
   }, [activeStopId])
+
+  // 2026-05-08 Aaron-Brief: Isochrone-Polygon mit leuchtenden Grenzen
+  // im Heute-Hub. Aktiviert via Settings-Toggle (LocalStorage-driven).
+  // 4-Layer-Look:
+  //   1. Fill — bg-gradient-style transparente Innenfläche (subtle)
+  //   2. Outer-Glow — line-blur 8px, opacity 0.4
+  //   3. Mid-Glow — line-blur 3px, opacity 0.7
+  //   4. Inner-Stroke — solid line, opacity 1
+  // Cyan-Akzent (#22D3EE) auf Mapbox-Satellite-Style sichtbar genug.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    const apply = () => {
+      const m = mapRef.current
+      if (!m) return
+      const SOURCE = 'gebiet-isochrone-src'
+      const FILL = 'gebiet-isochrone-fill'
+      const GLOW_OUTER = 'gebiet-isochrone-glow-outer'
+      const GLOW_MID = 'gebiet-isochrone-glow-mid'
+      const STROKE = 'gebiet-isochrone-stroke'
+      const removeAll = () => {
+        for (const id of [FILL, GLOW_OUTER, GLOW_MID, STROKE]) {
+          if (m.getLayer(id)) try { m.removeLayer(id) } catch { /* noop */ }
+        }
+        if (m.getSource(SOURCE)) try { m.removeSource(SOURCE) } catch { /* noop */ }
+      }
+      if (!showGebiet || !isochronePolygon || isochronePolygon.length < 3) {
+        removeAll()
+        return
+      }
+      const ring: Array<[number, number]> = isochronePolygon.map((p) => [p.lng, p.lat])
+      // Polygon schließen
+      if (ring.length > 0 && (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1])) {
+        ring.push(ring[0])
+      }
+      const fc: GeoJSON.FeatureCollection = {
+        type: 'FeatureCollection',
+        features: [{ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [ring] } }],
+      }
+      const existing = m.getSource(SOURCE) as mapboxgl.GeoJSONSource | undefined
+      if (existing) {
+        existing.setData(fc)
+      } else {
+        m.addSource(SOURCE, { type: 'geojson', data: fc })
+        m.addLayer({
+          id: FILL,
+          type: 'fill',
+          source: SOURCE,
+          paint: {
+            'fill-color': '#22D3EE',
+            'fill-opacity': 0.08,
+          },
+        } as Parameters<typeof m.addLayer>[0])
+        m.addLayer({
+          id: GLOW_OUTER,
+          type: 'line',
+          source: SOURCE,
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-color': '#67E8F9',
+            'line-width': 14,
+            'line-opacity': 0.35,
+            'line-blur': 8,
+          },
+        } as Parameters<typeof m.addLayer>[0])
+        m.addLayer({
+          id: GLOW_MID,
+          type: 'line',
+          source: SOURCE,
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-color': '#22D3EE',
+            'line-width': 6,
+            'line-opacity': 0.7,
+            'line-blur': 3,
+          },
+        } as Parameters<typeof m.addLayer>[0])
+        m.addLayer({
+          id: STROKE,
+          type: 'line',
+          source: SOURCE,
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-color': '#A5F3FC',
+            'line-width': 2,
+            'line-opacity': 0.95,
+          },
+        } as Parameters<typeof m.addLayer>[0])
+      }
+    }
+    if (map.isStyleLoaded()) apply()
+    else map.once('idle', apply)
+  }, [showGebiet, isochronePolygon])
 
   if (tokenMissing) {
     return (

@@ -120,15 +120,18 @@ export async function speakViaElevenLabs(text: string): Promise<boolean> {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text }),
         })
-        if (!res.ok) {
-          console.warn('[elevenlabs-client] HTTP', res.status)
-          // 503 vom Proxy = ElevenLabs hat Plan-/Quota-Issue (z.B. 402 von
-          // ElevenLabs) → dauerhaft markieren damit kein weiterer Call
-          // gemacht wird. Web-Speech-Fallback übernimmt. Auch bei 502 hart
-          // disablen — wenn ein Voice-Call serverseitig fehlschlägt, sind
-          // weitere höchstwahrscheinlich auch hin.
-          if (res.status === 503 || res.status === 502 || res.status === 401) {
-            elevenLabsAvailable = false
+        // 2026-05-08: Server returned IMMER 200 — bei Plan-/Quota-Block
+        // mit { ok: false, blocked: true } Body. Wir checken den
+        // Content-Type: audio/mpeg = Erfolg, application/json = Block.
+        const contentType = res.headers.get('content-type') || ''
+        if (!res.ok || contentType.startsWith('application/json')) {
+          if (contentType.startsWith('application/json')) {
+            const body = (await res.json().catch(() => null)) as
+              | { ok?: boolean; blocked?: boolean }
+              | null
+            if (body?.blocked) {
+              elevenLabsAvailable = false
+            }
           }
           return false
         }

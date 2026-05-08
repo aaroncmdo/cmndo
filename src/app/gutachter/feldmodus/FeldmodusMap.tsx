@@ -189,6 +189,11 @@ export default function FeldmodusMap({
   // updaten kann (Audio fired einmal pro Threshold, Visual zeigt
   // dauerhaft solange Distance < 600 m).
   const [blitzerNotice, setBlitzerNotice] = useState<NaviNotice | null>(null)
+  // 2026-05-08 Aaron-Brief: Two-Finger-Rotation/Pitch. Wenn der User
+  // manuell rotiert/zoomt/dragged, follow-Effect pausiert damit die
+  // Camera nicht alle 800ms zurückspringt. Reset-Button (bottom-right)
+  // setzt das wieder zurück.
+  const [manualCameraOverride, setManualCameraOverride] = useState(false)
 
   const aktuellerStop = stops[aktuellerStopIndex] ?? null
 
@@ -220,9 +225,29 @@ export default function FeldmodusMap({
       pitch: DEFAULT_FIELD_MAP_CONFIG.pitch,
       bearing: DEFAULT_FIELD_MAP_CONFIG.bearing,
       attributionControl: false,
+      // 2026-05-08 Aaron-Brief: Two-Finger-Pinch-Zoom-Rotate explizit
+      // einschalten. Default ist true, aber wir setzen es bewusst damit
+      // klar ist: User kann mit zwei Fingern Bearing + Pitch ändern.
+      touchZoomRotate: true,
+      touchPitch: true,
+      pitchWithRotate: true,
+      dragRotate: true,
     })
 
     mapRef.current = map
+
+    // 2026-05-08 (Aaron-Brief): User-Interaction-Detection. Wenn der SV
+    // mit zwei Fingern dreht/pitched/zoomed, sollen wir den follow-Effect
+    // pausieren — sonst springt die Camera alle 800ms zurück. e.originalEvent
+    // ist nur bei Echt-User-Events gesetzt (programmatisches easeTo hat keins).
+    const onUserGesture = (e: unknown) => {
+      const ev = e as { originalEvent?: Event } | undefined
+      if (ev?.originalEvent) setManualCameraOverride(true)
+    }
+    map.on('dragstart', onUserGesture)
+    map.on('rotatestart', onUserGesture)
+    map.on('pitchstart', onUserGesture)
+    map.on('zoomstart', onUserGesture)
 
     // 2026-05-07 (Phase 1 hyperrealistic-roadmap): Light-Preset + 3D-Modelle
     // + Atmosphäre. Fog erzeugt Horizon-Tiefe; Terrain liefert globale
@@ -301,11 +326,12 @@ export default function FeldmodusMap({
         }
       }
       if (objUrl) {
-        // 2026-05-08: Default-Scale 3.5 weil das Porsche-OBJ im
-        // Original-Modellraum auf -0.85 bis 0.85 normalisiert ist
-        // (entspricht 1.7 m). Echte Autos sind 4.5 m → Scale 3 macht
-        // das Modell ca. 5 m lang. Bei anderen OBJs anpassen.
-        tryAddSvCarThreeJs(map, { lngLat: initialPose, heading: 0, scale: 3.5 }, { objUrl })
+        // 2026-05-08: Scale 8 — das Porsche-OBJ ist in -0.85..0.85-
+        // Range modeled, scale 8 macht es ca. 13 m visuell groß. Auf
+        // Mapbox-Standard-Buildings (~30 m hoch) das ist ein gut
+        // sichtbares Mini-Auto bei Zoom 17.8. Aaron-Smoke #33: scale
+        // 3.5 war zu klein, kaum erkennbar.
+        tryAddSvCarThreeJs(map, { lngLat: initialPose, heading: 0, scale: 8 }, { objUrl })
           .then((handle) => {
             if (handle) {
               svThreeHandleRef.current = handle
@@ -639,6 +665,11 @@ export default function FeldmodusMap({
     // Strecke. Vorher (zoom 17, kein padding) wirkte die Karte „aus dem
     // Hubschrauber" — Aaron-Feedback nach dem 08.05. Smoke-Test.
     if (followSv && svPosition) {
+      // 2026-05-08 Aaron-Brief: User-Override respektieren — wenn er
+      // gerade selbst die Camera dreht/pitcht, NICHT zurückspringen.
+      // Reset-Button (bottom-right) clears manualCameraOverride und
+      // triggert ein einmaliges easeTo zur Default-Pose.
+      if (manualCameraOverride) return
       let bearing = svPosition.heading ?? 0
       if (svPosition.heading == null && aktuellerStop?.lat != null && aktuellerStop?.lng != null) {
         const φ1 = (svPosition.lat * Math.PI) / 180
@@ -687,7 +718,7 @@ export default function FeldmodusMap({
         duration: 700,
       })
     }
-  }, [aktuellerStop, svPosition, followSv])
+  }, [aktuellerStop, svPosition, followSv, manualCameraOverride])
 
   // Route-Polyline: Luftlinie zwischen SV und aktuellem Stop
   useEffect(() => {
@@ -733,7 +764,11 @@ export default function FeldmodusMap({
         // führt. Opacity der Flow-Linie ist über hazards.ts definiert.
         const coords = primary.coords
         if (coords.length >= 2) {
-          const bbox = bboxForRoute(coords, 0.5)
+          // 2026-05-08 Aaron-Audit: 0.5 km Puffer war zu eng — auf
+          // einer 4 km Innenstadt-Route fanden wir 0 Blitzer obwohl
+          // Atudo 22 in Köln-Region listet. Buffer 3 km erfasst Blitzer
+          // entlang Hauptverbindungsstraßen ohne die Map zu überfluten.
+          const bbox = bboxForRoute(coords, 3)
           const [blitzerFeatures, hazardFeatures, flowFeatures] = await Promise.all([
             fetchBlitzerInBbox(bbox),
             fetchHereHazards(bbox),
@@ -884,6 +919,39 @@ export default function FeldmodusMap({
           im FeldmodusClient gerendert (single Notification-Slot bottom-
           mittig statt Top-Banner-Konkurrenz). proposedReroute fließt via
           onMapNotice an den Caller. */}
+
+      {/* 2026-05-08 (Aaron-Brief): Reset-Camera-Button — sichtbar nur
+          wenn der User die Camera manuell überschrieben hat (rotation/
+          pitch/zoom mit zwei Fingern). Klick → manualCameraOverride
+          ausschalten + sofortiges easeTo zur Default-Pose. Glass-Look
+          konsistent zu NaviHud + AktuellerStopCard. */}
+      {manualCameraOverride && (
+        <button
+          type="button"
+          onClick={() => {
+            setManualCameraOverride(false)
+            const m = mapRef.current
+            if (m && svPosition) {
+              m.easeTo({
+                center: [svPosition.lng, svPosition.lat],
+                zoom: 17.8,
+                pitch: 62,
+                bearing: svPosition.heading ?? 0,
+                padding: { top: 360, bottom: 60, left: 40, right: 40 },
+                duration: 600,
+                essential: true,
+              })
+            }
+          }}
+          className="absolute bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-full bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md px-4 py-2 text-xs font-semibold text-claimondo-navy hover:bg-white/85 transition-colors"
+          aria-label="Camera-Position zurücksetzen"
+        >
+          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="3,11 22,2 13,21 11,13" />
+          </svg>
+          Ansicht zurücksetzen
+        </button>
+      )}
       {tokenMissing.current && (
         <div className="absolute inset-0 flex items-center justify-center bg-[var(--brand-primary)] text-center px-6">
           <div>

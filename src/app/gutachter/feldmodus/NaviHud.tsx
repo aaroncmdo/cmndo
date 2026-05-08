@@ -226,7 +226,11 @@ export default function NaviHud({ notice }: NaviHudProps) {
     <div className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 z-30 w-[min(560px,92vw)] px-2">
       <div
         key={renderKey}
-        className={`pointer-events-auto rounded-2xl ${theme.bg} ${theme.border} border shadow-2xl shadow-black/40 overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-500`}
+        // 2026-05-08 (Aaron-Brief): NaviHud sollte sich wie die anderen
+        // Glass-Cards anfühlen — kein dramatischer drop-shadow, nur
+        // Backdrop-Blur + dezenter ios-Shadow wie GlassPanel. Vorher
+        // shadow-2xl shadow-black/40 wirkte wie ein aufgepfropfter Toast.
+        className={`pointer-events-auto rounded-2xl ${theme.bg} ${theme.border} border shadow-ios-md overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-500`}
       >
         <NoticeContent notice={notice} theme={theme} />
       </div>

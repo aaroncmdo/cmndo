@@ -83,10 +83,19 @@ const GLOW_LAYERS: Record<Variant, string> = {
 
 // 2026-05-08: Mapbox Standard Style hat einen `slot`-Mechanismus statt der
 // klassischen layer-Reihenfolge. `top` = über allen Buildings + Labels,
-// `middle` = über Roads aber unter Labels, `bottom` = unter Roads.
-// Für eine Navi-Linie wollen wir `top` damit auch 3D-Buildings (die im
-// Standard-Style einen eigenen Slot haben) die Linie nicht überdecken.
-const ROUTE_SLOT = 'top' as const
+// `middle` = über Roads aber unter Labels und Buildings, `bottom` = unter Roads.
+//
+// Aaron-Smoke 2026-05-08: mit slot='top' lief die Navi-Linie durch die
+// 3D-Gebäude DURCH (sie wurde immer im Vordergrund gerendert, auch wo
+// ein Building sie eigentlich verdecken sollte). Bei einer Strasse die
+// hinter einem Hochhaus liegt sah man trotzdem die blaue Linie quer
+// durch das Building.
+// Lösung: slot='middle' → Route liegt zwischen Roads und Buildings.
+// Roads sind sichtbar wo sie offen sind, Buildings verdecken die Route
+// realistic dort wo sie das räumlich tun. Labels (Strassennamen, POIs)
+// bleiben über der Route — gut so, sonst verdeckt der dicke Glow die
+// Beschriftung.
+const ROUTE_SLOT = 'middle' as const
 
 function toFeatureCollection(features: GeoJSON.Feature[]): GeoJSON.FeatureCollection {
   return { type: 'FeatureCollection', features }

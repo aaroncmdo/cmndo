@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
 import PageHeader from '@/components/shared/PageHeader'
+import KartenAnzeigeToggle from './KartenAnzeigeToggle'
 
 // AAR-720: Einstellungen-Hub. Sammel-Page für alle konfigurierbaren
 // Bereiche des SV-Portals — startet mit Kalender + Profil, wird nach
@@ -112,6 +113,15 @@ export default async function EinstellungenPage() {
             </Link>
           )
         })}
+      </div>
+
+      {/* 2026-05-08 Aaron-Brief: Toggle „Mein Gebiet auf Karte zeigen"
+          steuert den Heute-Hub-Polygon-Layer (LocalStorage-Persist). */}
+      <div className="space-y-2 pt-2">
+        <p className="text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo">
+          Karten-Anzeige
+        </p>
+        <KartenAnzeigeToggle />
       </div>
 
       <p className="text-[11px] text-claimondo-ondo/70 text-center">

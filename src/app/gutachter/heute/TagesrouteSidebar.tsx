@@ -163,8 +163,12 @@ export default function TagesrouteSidebar({
               className="inline-flex items-center gap-1 text-[11px] font-medium text-claimondo-navy bg-white hover:bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1.5"
               title="Privat-Termin als Tagesroute-Stop hinzufügen"
             >
+              {/* 2026-05-08 Aaron-UI-Audit: Label „Stop" kollidierte
+                  visuell mit der „Stop 1/1"-Counter-Notation oben.
+                  „Privat" als kurzer Action-Begriff — der Tooltip
+                  erklärt was es macht. */}
               <PlusCircleIcon className="w-3.5 h-3.5" />
-              Stop
+              Privat
             </button>
           )}
         </div>
