@@ -376,11 +376,51 @@ async function main() {
 
           // Fixture-IDs erweitern mit Phase-2-Daten
           const db2 = helpers.getServiceDb()
-          const { data: fallRow } = await db2.from('faelle').select('id').eq('lead_id', leadId).maybeSingle()
+          let { data: fallRow } = await db2.from('faelle').select('id').eq('lead_id', leadId).maybeSingle()
           const { data: svProfileRow } = await db2.from('profiles').select('id').eq('email', 'test-sv@claimondo.de').maybeSingle()
           const { data: svSacRow } = svProfileRow
             ? await db2.from('sachverstaendige').select('id').eq('profile_id', svProfileRow.id).maybeSingle()
             : { data: null }
+
+          // 2026-05-08: Claim-SSoT-Workaround. Wenn kein Fall existiert
+          // (Phase-2-UI hat ihn nicht erzeugt), legen wir Claim + Fall via
+          // Service-Role an. Das schaltet Phase 6-10 frei (alle die fall_id
+          // brauchen). claims.schadentag NOT NULL, status/created_via via
+          // Enum-Constraint eingeschränkt.
+          if (!fallRow?.id) {
+            const { data: lead } = await db2.from('leads').select('unfalldatum, schadentyp').eq('id', leadId).maybeSingle()
+            const schadentag = lead?.unfalldatum ?? new Date().toISOString().slice(0, 10)
+            const { data: claim, error: claimErr } = await db2.from('claims').insert({
+              lead_id: leadId,
+              schadentag,
+              schadenart: 'haftpflicht',
+              status: 'dispatch_done',
+              created_via: 'lead_konvertierung',
+            }).select('id').single()
+            if (claimErr) {
+              console.warn(`[orchestrator] Claim-Insert fehlgeschlagen: ${claimErr.message}`)
+            } else if (claim?.id) {
+              const { data: newFall, error: fallErr } = await db2.from('faelle').insert({
+                lead_id: leadId,
+                claim_id: claim.id,
+                status: 'sv-termin',
+              }).select('id').single()
+              if (fallErr) {
+                console.warn(`[orchestrator] Fall-Insert fehlgeschlagen: ${fallErr.message}`)
+              } else if (newFall?.id) {
+                fallRow = newFall
+                console.log(`[orchestrator] Claim+Fall via Workaround angelegt — fall_id=${newFall.id}`)
+                // gutachter_termine.fall_id nachziehen damit Phase 5-7
+                // den Termin korrekt mit dem Fall verknüpfen können.
+                const { data: termin } = await db2.from('gutachter_termine')
+                  .select('id').eq('lead_id', leadId)
+                  .order('created_at', { ascending: false }).limit(1).maybeSingle()
+                if (termin?.id) {
+                  await db2.from('gutachter_termine').update({ fall_id: newFall.id }).eq('id', termin.id)
+                }
+              }
+            }
+          }
 
           saveFixtureIds({
             fall_id: fallRow?.id ?? fixtures.fall_id ?? null,
