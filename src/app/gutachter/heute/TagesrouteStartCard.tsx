@@ -56,9 +56,11 @@ export default function TagesrouteStartCard({
     router.push('/gutachter/feldmodus')
   }
 
-  const label = hasActiveSession
-    ? 'Fokus-Modus fortsetzen'
-    : 'Tagesroute starten'
+  // 2026-05-08 Naming-Konsistenz: drei Begriffe ("Tagesroute starten",
+  // "Fokus-Modus", "Tagesvorbereitung") wurden im Audit als verwirrend
+  // identifiziert. „Tagesmodus" ist der gewählte Sammelbegriff für die
+  // gesamte SV-Tagesfahrt (Heute → Anfahrt → Vor Ort → Abschluss).
+  const label = hasActiveSession ? 'Tagesmodus fortsetzen' : 'Tagesmodus starten'
 
   // 2026-05-06: Mit Distanz-Anteil falls vorhanden — „3 Stops · 87 km · 4h 20min"
   const subLabelParts: string[] = [`${terminIds.length} Stop${terminIds.length === 1 ? '' : 's'}`]
