@@ -215,6 +215,12 @@ async function main() {
   // andere Domains reingrantet werden (sicherer).
   await context.grantPermissions(['geolocation'], { origin: BASE_URL })
 
+  // 2026-05-08: LocalStorage „Mein Gebiet auf Karte"-Toggle aktivieren
+  // damit der Hub das Isochrone-Polygon im Smoke rendert.
+  await context.addInitScript(() => {
+    try { window.localStorage.setItem('claimondo_show_gebiet_in_hub', '1') } catch { /* noop */ }
+  })
+
   try {
     await login(page)
 
