@@ -81,6 +81,23 @@ export async function tryAddSvCarThreeJs(
   }
   if (!model) return null
 
+  // 2026-05-08: HDR-Environment-Map für PBR-Reflexionen auf dem Lack.
+  // Wenn /public/hdr/studio_1k.hdr existiert (CC0 von Polyhaven),
+  // laden wir es als envMap. Ohne das File: Auto rendert ohne
+  // Reflexionen (matt). Mit: realistischer Carlack mit Sky-Reflektion.
+  let envMap: THREE.Texture | null = null
+  try {
+    const { RGBELoader } = await import('three/examples/jsm/loaders/RGBELoader.js')
+    const hdrLoader = new RGBELoader()
+    const hdr = await new Promise<THREE.DataTexture>((resolve, reject) => {
+      hdrLoader.load('/hdr/studio_1k.hdr', (t) => resolve(t), undefined, (err) => reject(err))
+    })
+    hdr.mapping = THREE.EquirectangularReflectionMapping
+    envMap = hdr
+  } catch {
+    // Kein HDR vorhanden — kein envMap, Auto rendert ohne Reflexionen.
+  }
+
   const loadedModel: THREE.Group = model
 
   // Default-PBR-Material falls das OBJ kein MTL referenziert (häufig bei
@@ -98,6 +115,8 @@ export async function tryAddSvCarThreeJs(
         metalness: 0.6,
         roughness: 0.35,
         side: THREE.DoubleSide,
+        envMap: envMap ?? undefined,
+        envMapIntensity: envMap ? 1.2 : 0,
       })
       mesh.castShadow = true
       mesh.receiveShadow = true

@@ -733,7 +733,11 @@ export default function FeldmodusMap({
         // führt. Opacity der Flow-Linie ist über hazards.ts definiert.
         const coords = primary.coords
         if (coords.length >= 2) {
-          const bbox = bboxForRoute(coords, 0.5)
+          // 2026-05-08 Aaron-Audit: 0.5 km Puffer war zu eng — auf
+          // einer 4 km Innenstadt-Route fanden wir 0 Blitzer obwohl
+          // Atudo 22 in Köln-Region listet. Buffer 3 km erfasst Blitzer
+          // entlang Hauptverbindungsstraßen ohne die Map zu überfluten.
+          const bbox = bboxForRoute(coords, 3)
           const [blitzerFeatures, hazardFeatures, flowFeatures] = await Promise.all([
             fetchBlitzerInBbox(bbox),
             fetchHereHazards(bbox),
