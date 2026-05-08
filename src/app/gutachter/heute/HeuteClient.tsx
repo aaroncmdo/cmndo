@@ -115,6 +115,42 @@ export default function HeuteClient({
     [privatStops],
   )
 
+  // 2026-05-08 Aaron-Brief: Pre-Render-Warmup für Feldmodus. Nach 3 s
+  // im Hub fetchen wir Mapbox-Standard-Style + die ersten Tiles um den
+  // SV-Standort. Dank Service-Worker-Cache (TILE_CACHE) sind die beim
+  // Klick auf „Tagesmodus starten" sofort verfügbar — Map rendert ohne
+  // Tile-Pop-In. Origin-Header und Auth nicht nötig (Mapbox-Style ist
+  // public mit access_token-Param).
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!origin) return
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+    if (!token) return
+    const tid = window.setTimeout(() => {
+      // Style + Sprite (~50 KB) — der Style-File listet alle Layer
+      void fetch(`https://api.mapbox.com/styles/v1/mapbox/standard?access_token=${token}`).catch(() => {})
+      // Tile-Indices um die Origin: zoom 13/14 abdecken die normale
+      // Hub→Feldmodus-Anfangsphase. ~6 Tiles pro Zoom-Stufe ausreichend.
+      const lng2tile = (lng: number, z: number) => Math.floor(((lng + 180) / 360) * Math.pow(2, z))
+      const lat2tile = (lat: number, z: number) => {
+        const r = (lat * Math.PI) / 180
+        return Math.floor(((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2) * Math.pow(2, z))
+      }
+      for (const z of [13, 14, 16]) {
+        const x0 = lng2tile(origin.lng, z)
+        const y0 = lat2tile(origin.lat, z)
+        for (const dx of [-1, 0, 1]) {
+          for (const dy of [-1, 0, 1]) {
+            void fetch(
+              `https://api.mapbox.com/v4/mapbox.satellite/${z}/${x0 + dx}/${y0 + dy}.webp?sku=101&access_token=${token}`,
+            ).catch(() => {})
+          }
+        }
+      }
+    }, 3_000)
+    return () => window.clearTimeout(tid)
+  }, [origin])
+
   // Viewport-Detection für Map-Höhe + Layout-Switch
   const [isLargeScreen, setIsLargeScreen] = useState(false)
   useEffect(() => {

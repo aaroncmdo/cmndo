@@ -82,20 +82,24 @@ export async function tryAddSvCarThreeJs(
   if (!model) return null
 
   // 2026-05-08: HDR-Environment-Map für PBR-Reflexionen auf dem Lack.
-  // Wenn /public/hdr/studio_1k.hdr existiert (CC0 von Polyhaven),
-  // laden wir es als envMap. Ohne das File: Auto rendert ohne
-  // Reflexionen (matt). Mit: realistischer Carlack mit Sky-Reflektion.
+  // Aktivierung NUR wenn `NEXT_PUBLIC_SV_CAR_HDR_URL` gesetzt ist —
+  // sonst null-Versuch, kein 404 in der Console (Aaron hatte das HDR-
+  // File noch nicht hochgeladen, aber wollte keine Errors).
   let envMap: THREE.Texture | null = null
-  try {
-    const { RGBELoader } = await import('three/examples/jsm/loaders/RGBELoader.js')
-    const hdrLoader = new RGBELoader()
-    const hdr = await new Promise<THREE.DataTexture>((resolve, reject) => {
-      hdrLoader.load('/hdr/studio_1k.hdr', (t) => resolve(t), undefined, (err) => reject(err))
-    })
-    hdr.mapping = THREE.EquirectangularReflectionMapping
-    envMap = hdr
-  } catch {
-    // Kein HDR vorhanden — kein envMap, Auto rendert ohne Reflexionen.
+  const hdrUrl = process.env.NEXT_PUBLIC_SV_CAR_HDR_URL
+  if (hdrUrl && hdrUrl.trim().length > 0) {
+    try {
+      const mod = await import('three/examples/jsm/loaders/RGBELoader.js')
+      const Loader = (mod as { HDRLoader?: typeof mod.RGBELoader; RGBELoader: typeof mod.RGBELoader }).HDRLoader ?? mod.RGBELoader
+      const hdrLoader = new Loader()
+      const hdr = await new Promise<THREE.DataTexture>((resolve, reject) => {
+        hdrLoader.load(hdrUrl, (t) => resolve(t), undefined, (err) => reject(err))
+      })
+      hdr.mapping = THREE.EquirectangularReflectionMapping
+      envMap = hdr
+    } catch {
+      // Lade-Fehler — kein envMap, Auto rendert ohne Reflexionen.
+    }
   }
 
   const loadedModel: THREE.Group = model
@@ -110,14 +114,20 @@ export async function tryAddSvCarThreeJs(
     if ((obj as THREE.Mesh).isMesh) {
       const mesh = obj as THREE.Mesh
       mesh.geometry.computeVertexNormals()
-      mesh.material = new THREE.MeshStandardMaterial({
+      // 2026-05-08: envMap nur als Prop setzen wenn vorhanden — sonst
+      // wirft Three.js „THREE.Material: parameter 'envMap' has value
+      // of undefined" warning pro Mesh-Child.
+      const matParams: THREE.MeshStandardMaterialParameters = {
         color: 0x1e3a5f, // Claimondo-Navy als Default-Lack
         metalness: 0.6,
         roughness: 0.35,
         side: THREE.DoubleSide,
-        envMap: envMap ?? undefined,
-        envMapIntensity: envMap ? 1.2 : 0,
-      })
+      }
+      if (envMap) {
+        matParams.envMap = envMap
+        matParams.envMapIntensity = 1.2
+      }
+      mesh.material = new THREE.MeshStandardMaterial(matParams)
       mesh.castShadow = true
       mesh.receiveShadow = true
     }

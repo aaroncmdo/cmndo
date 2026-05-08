@@ -82,13 +82,20 @@ export async function POST(request: Request) {
     if (!res.ok) {
       const detail = await res.text().catch(() => '')
       console.error('[elevenlabs-proxy] HTTP', res.status, detail.slice(0, 200))
-      // 402 = payment_required (Free-Plan kann Library-Voices nicht nutzen,
-      // siehe Aaron-Smoke 2026-05-08). Wir geben in dem Fall 503 zurück
-      // damit der Client das Feature dauerhaft als „nicht verfügbar"
-      // markiert und auf Web Speech zurückfällt — sonst spammt er bei
-      // jedem speakInstruction()-Call eine neue 502.
-      const status = res.status === 402 ? 503 : 502
-      return NextResponse.json({ error: 'TTS-API-Fehler', status: res.status }, { status })
+      // 2026-05-08: Statt 502/503 returnen wir 200 mit ok:false-Body —
+      // damit kein „Failed to load resource"-Log in der Browser-Console
+      // auftaucht. Aarons Free-Tier-Block ist bekannt, der Spam in
+      // Devtools wirkte aber wie ein echter Fehler beim UI-Audit.
+      // Client checkt den ok-Flag und switcht auf Web Speech.
+      return NextResponse.json(
+        { ok: false, blocked: true, status: res.status },
+        {
+          status: 200,
+          // Cache-Hint: Status-Antwort 5 Min cachen damit der Client
+          // nicht jeden Sekunde fragt.
+          headers: { 'Cache-Control': 'private, max-age=300' },
+        },
+      )
     }
     const arrayBuffer = await res.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)

@@ -9,7 +9,12 @@ realistische Lack-Reflexionen vom Sky/Studio-Light.
 2. Such z.B. „studio_small_03" oder „pretville_street" oder „kloofendal_43d_clear"
 3. Download in 1K-Auflösung (~500 KB-1 MB) — höher ist Overkill für Web
 4. Speichere als `public/hdr/studio_1k.hdr`
-5. Reload Feldmodus → Three.js OBJ-Auto bekommt envMap
+5. Setze `NEXT_PUBLIC_SV_CAR_HDR_URL=/hdr/studio_1k.hdr` in `.env.local`
+   (oder in Vercel-Project-Settings für Prod)
+6. Reload Feldmodus → Three.js OBJ-Auto bekommt envMap
+
+**Ohne ENV-Var wird das HDR-File NICHT geladen** — kein 404 in der
+Browser-Console wenn du noch kein File hochgeladen hast.
 
 ## Was passiert
 
