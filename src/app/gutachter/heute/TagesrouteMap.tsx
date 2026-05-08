@@ -21,6 +21,16 @@ import {
   removeRouteLayer,
   MAPBOX_STYLE_STANDARD_SATELLITE,
   getMapboxLightPreset,
+  attachBlitzerLayer,
+  fetchBlitzerInBbox,
+  bboxForRoute,
+  type BlitzerLayerHandle,
+  attachHazardLayer,
+  fetchHereHazards,
+  type HazardLayerHandle,
+  attachFlowLayer,
+  fetchHereFlow,
+  type FlowLayerHandle,
 } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import { NavigationIcon } from 'lucide-react'
@@ -118,6 +128,13 @@ export default function TagesrouteMap({
   const mapRef = useRef<MapboxMap | null>(null)
   const svMarkerRef = useRef<Marker | null>(null)
   const stopMarkersRef = useRef<Map<string, Marker>>(new Map())
+  // 2026-05-08 Aaron-Brief: Blitzer/Hazards/Stau auch im Heute-Hub
+  // anzeigen damit der SV vor dem Tagesmodus-Start sieht was unterwegs
+  // wartet. Layer werden parallel zur Tagesroute geladen, gleiche
+  // Atudo + HERE-APIs wie im Feldmodus.
+  const blitzerRef = useRef<BlitzerLayerHandle | null>(null)
+  const hazardsRef = useRef<HazardLayerHandle | null>(null)
+  const flowRef = useRef<FlowLayerHandle | null>(null)
   const [tokenMissing, setTokenMissing] = useState(false)
   const [routeStats, setRouteStats] = useState<{ distanzKm: number; dauerMin: number } | null>(null)
 
@@ -223,6 +240,12 @@ export default function TagesrouteMap({
       window.removeEventListener('resize', onWindowResize)
       svMarkerRef.current?.remove()
       svMarkerRef.current = null
+      blitzerRef.current?.remove()
+      blitzerRef.current = null
+      hazardsRef.current?.remove()
+      hazardsRef.current = null
+      flowRef.current?.remove()
+      flowRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current.clear()
       map.remove()
@@ -306,6 +329,33 @@ export default function TagesrouteMap({
               ]
 
         upsertRouteLayer(m, aktivCoords, 'main')
+
+        // 2026-05-08 (Aaron-Brief): Blitzer + Hazards + Stau-Linien auch
+        // im Heute-Hub damit der SV vor Tagesmodus-Start sieht was auf
+        // der Strecke wartet. Buffer 3 km, parallel-fetch, best-effort.
+        if (aktivCoords.length >= 2) {
+          const bbox = bboxForRoute(aktivCoords, 3)
+          void Promise.all([
+            fetchBlitzerInBbox(bbox),
+            fetchHereHazards(bbox),
+            fetchHereFlow(bbox),
+          ]).then(([blitzerFeatures, hazardFeatures, flowFeatures]) => {
+            const m2 = mapRef.current
+            if (!m2) return
+            const attach = () => {
+              if (!blitzerRef.current) blitzerRef.current = attachBlitzerLayer(m2, blitzerFeatures)
+              else blitzerRef.current.update(blitzerFeatures)
+              if (!hazardsRef.current) hazardsRef.current = attachHazardLayer(m2, hazardFeatures)
+              else hazardsRef.current.update(hazardFeatures)
+              if (!flowRef.current) flowRef.current = attachFlowLayer(m2, flowFeatures)
+              else flowRef.current.update(flowFeatures)
+            }
+            // Style noch nicht ready? Auf 'idle' warten — sonst wirft
+            // map.addSource innerhalb attachBlitzerLayer.
+            if (m2.isStyleLoaded()) attach()
+            else m2.once('idle', attach)
+          }).catch(() => { /* best-effort */ })
+        }
 
         // Stats kommen immer von der aktiven Route (das ist die echte Tagesroute)
         if (aktivRoute && aktivRoute.coords.length > 1) {

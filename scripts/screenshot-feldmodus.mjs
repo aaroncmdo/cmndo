@@ -134,8 +134,9 @@ async function login(page) {
 
 async function gotoHeute(page) {
   await page.goto(`${BASE_URL}/gutachter/heute`, { waitUntil: 'domcontentloaded' })
-  // Tagesroute-Map braucht ein paar Frames bis sie ihre Tiles fertig hat.
-  await page.waitForTimeout(2_500)
+  // Tagesroute-Map braucht ein paar Frames bis sie ihre Tiles fertig hat,
+  // plus async fetchMultiStopRoute + Atudo + HERE Hazards/Flow ~3-5s.
+  await page.waitForTimeout(6_000)
   await logLine('heute reached')
 }
 
@@ -196,7 +197,7 @@ async function main() {
   const page = await context.newPage()
   page.on('console', (msg) => {
     consoleEntries.push({ type: msg.type(), text: msg.text() })
-    if (msg.type() === 'error' || msg.type() === 'warning' || msg.text().includes('[sv-car-three') || msg.text().includes('[FeldmodusMap]')) {
+    if (msg.type() === 'error' || msg.type() === 'warning' || msg.text().includes('[sv-car-three') || msg.text().includes('[FeldmodusMap]') || msg.text().includes('[heute-map]')) {
       logLine(`[browser:${msg.type()}] ${msg.text()}`).catch(() => {})
     }
   })
