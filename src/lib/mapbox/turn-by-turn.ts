@@ -331,12 +331,21 @@ export function speakInstruction(text: string): void {
     }
   }
 
-  // ElevenLabs zuerst probieren — fire-and-forget. Bei Fehler oder
-  // disabled Feature fällt fastSpeechSynthesis() unten als Fallback ein.
-  void import('./elevenlabs-tts').then(({ speakViaElevenLabs, isElevenLabsEnabled }) => {
-    if (isElevenLabsEnabled()) {
-      void speakViaElevenLabs(trimmed).then((ok) => {
-        if (!ok) fastSpeechSynthesis(trimmed)
+  // Priority: 1. Google TTS (Neural2-D), 2. ElevenLabs, 3. Web Speech API
+  void import('./google-tts').then(({ speakViaGoogleTts, isGoogleTtsEnabled }) => {
+    if (isGoogleTtsEnabled()) {
+      void speakViaGoogleTts(trimmed).then((ok) => {
+        if (ok) return
+        // Fallback: ElevenLabs
+        void import('./elevenlabs-tts').then(({ speakViaElevenLabs, isElevenLabsEnabled }) => {
+          if (isElevenLabsEnabled()) {
+            void speakViaElevenLabs(trimmed).then((ok2) => {
+              if (!ok2) fastSpeechSynthesis(trimmed)
+            })
+          } else {
+            fastSpeechSynthesis(trimmed)
+          }
+        }).catch(() => fastSpeechSynthesis(trimmed))
       })
     } else {
       fastSpeechSynthesis(trimmed)
@@ -382,5 +391,6 @@ export function stopSpeaking(): void {
   try {
     window.speechSynthesis?.cancel()
   } catch { /* noop */ }
+  void import('./google-tts').then(({ stopGoogleTts }) => stopGoogleTts()).catch(() => { /* noop */ })
   void import('./elevenlabs-tts').then(({ stopElevenLabs }) => stopElevenLabs()).catch(() => { /* noop */ })
 }
