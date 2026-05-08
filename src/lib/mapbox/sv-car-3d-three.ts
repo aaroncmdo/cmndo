@@ -73,12 +73,7 @@ export async function tryAddSvCarThreeJs(
   try {
     const loader = new OBJLoader()
     model = await new Promise<THREE.Group>((resolve, reject) => {
-      loader.load(
-        options.objUrl,
-        (g) => resolve(g),
-        undefined,
-        (err) => reject(err),
-      )
+      loader.load(options.objUrl, (g) => resolve(g), undefined, (err) => reject(err))
     })
   } catch (err) {
     console.error('[sv-car-three] OBJ-Load failed:', err)
@@ -90,17 +85,20 @@ export async function tryAddSvCarThreeJs(
 
   // Default-PBR-Material falls das OBJ kein MTL referenziert (häufig bei
   // hand-decimated OBJs). Carlack-typisch.
+  // 2026-05-08: vertex-normals neu computen, weil viele OBJs (z.B. das
+  // Porsche_911_GT2.obj aus 2008) keine `vn`-Lines haben — sonst rendert
+  // MeshStandardMaterial den ganzen Body dunkel/flat. side=DoubleSide
+  // damit die Hülle auch von innen sichtbar bleibt wenn Camera nahe ist.
   loadedModel.traverse((obj: THREE.Object3D) => {
     if ((obj as THREE.Mesh).isMesh) {
       const mesh = obj as THREE.Mesh
-      const m = mesh.material as THREE.Material | undefined
-      if (!m || (m as THREE.MeshBasicMaterial).type === 'MeshBasicMaterial') {
-        mesh.material = new THREE.MeshStandardMaterial({
-          color: 0x1e3a5f, // Claimondo-Navy als Default-Lack
-          metalness: 0.6,
-          roughness: 0.35,
-        })
-      }
+      mesh.geometry.computeVertexNormals()
+      mesh.material = new THREE.MeshStandardMaterial({
+        color: 0x1e3a5f, // Claimondo-Navy als Default-Lack
+        metalness: 0.6,
+        roughness: 0.35,
+        side: THREE.DoubleSide,
+      })
       mesh.castShadow = true
       mesh.receiveShadow = true
     }

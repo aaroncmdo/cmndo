@@ -301,7 +301,11 @@ export default function FeldmodusMap({
         }
       }
       if (objUrl) {
-        tryAddSvCarThreeJs(map, { lngLat: initialPose, heading: 0, scale: 1 }, { objUrl })
+        // 2026-05-08: Default-Scale 3.5 weil das Porsche-OBJ im
+        // Original-Modellraum auf -0.85 bis 0.85 normalisiert ist
+        // (entspricht 1.7 m). Echte Autos sind 4.5 m → Scale 3 macht
+        // das Modell ca. 5 m lang. Bei anderen OBJs anpassen.
+        tryAddSvCarThreeJs(map, { lngLat: initialPose, heading: 0, scale: 3.5 }, { objUrl })
           .then((handle) => {
             if (handle) {
               svThreeHandleRef.current = handle
