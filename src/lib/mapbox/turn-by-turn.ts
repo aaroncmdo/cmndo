@@ -253,14 +253,46 @@ export function pointToPolylineDistanceMLngLat(
 
 let cachedVoice: SpeechSynthesisVoice | null = null
 
+/**
+ * 2026-05-08 Aaron-Smoke (übergangsweise free-Voice bis ElevenLabs Plan
+ * upgraded ist): wir picken aus den im Browser verfügbaren TTS-Stimmen
+ * die jeweils beste deutsche Variante. Reihenfolge nach Qualität:
+ *
+ *   1. iOS-Premium (Anna, Markus, Petra, Yannick)        — natürlich, neural
+ *   2. macOS-Enhanced (Anna (Enhanced), Petra (Premium)) — natürlich
+ *   3. Android-Google (Google Deutsch / Google de-DE)    — gut, neural
+ *   4. Microsoft-Online-Voices (Hedda, Stefan, Katja)    — gut, neural
+ *   5. Standard de-DE (Microsoft offline, Espeak etc.)   — Computer-typisch
+ *   6. de-* fallback (de-AT, de-CH)
+ *
+ * `localService=false` bei Apple und Microsoft Voices markiert die
+ * Online-/Cloud-Variante, die deutlich besser klingt als die Offline-
+ * Stimme mit gleichem Namen. Wir bevorzugen sie, lassen sie aber als
+ * letzten Schritt zu (offline funktioniert dann auch ohne Netz).
+ */
 function pickGermanVoice(): SpeechSynthesisVoice | null {
   if (cachedVoice) return cachedVoice
   if (typeof window === 'undefined' || !window.speechSynthesis) return null
   const voices = window.speechSynthesis.getVoices()
+  if (voices.length === 0) return null
+  const isDe = (v: SpeechSynthesisVoice) => v.lang === 'de-DE'
+  const isDeAny = (v: SpeechSynthesisVoice) => v.lang.startsWith('de')
+
+  // Tier 1: explizit hochwertige Namen — meistens iOS Premium/Enhanced.
+  const premiumNames = /(Anna|Petra|Markus|Yannick|Hedda|Stefan|Katja)/i
   cachedVoice =
-    voices.find((v) => v.lang === 'de-DE' && /(Anna|Markus|Petra)/i.test(v.name)) ??
-    voices.find((v) => v.lang === 'de-DE') ??
-    voices.find((v) => v.lang.startsWith('de')) ??
+    voices.find((v) => isDe(v) && premiumNames.test(v.name) && !v.localService) ??
+    voices.find((v) => isDe(v) && premiumNames.test(v.name)) ??
+    // Tier 2: Google Deutsch (Android Chrome / Desktop Chrome)
+    voices.find((v) => isDe(v) && /Google/i.test(v.name)) ??
+    // Tier 3: Microsoft Online Neural Voices (Edge)
+    voices.find((v) => isDe(v) && /Microsoft.*Online/i.test(v.name)) ??
+    // Tier 4: irgendeine de-DE
+    voices.find((v) => isDe(v) && !v.localService) ??
+    voices.find((v) => isDe(v)) ??
+    // Tier 5: de-AT / de-CH als letzter Fallback (besser als Englisch
+    // mit deutschem Text)
+    voices.find((v) => isDeAny(v)) ??
     null
   return cachedVoice
 }
@@ -315,13 +347,29 @@ export function speakInstruction(text: string): void {
 function fastSpeechSynthesis(text: string): void {
   if (!window.speechSynthesis) return
   try {
+    // 2026-05-08: Voice-Liste kann beim ersten Aufruf leer sein und wird
+    // asynchron befüllt. Wenn pickGermanVoice null returnt, einmal
+    // voiceschanged abwarten und retry — sonst spricht der Browser mit
+    // Default-Englisch.
+    const voice = pickGermanVoice()
+    if (!voice && window.speechSynthesis.getVoices().length === 0) {
+      const onChange = () => {
+        window.speechSynthesis.removeEventListener('voiceschanged', onChange)
+        cachedVoice = null
+        fastSpeechSynthesis(text)
+      }
+      window.speechSynthesis.addEventListener('voiceschanged', onChange, { once: true })
+      return
+    }
     window.speechSynthesis.cancel()
     const utter = new SpeechSynthesisUtterance(text)
-    const voice = pickGermanVoice()
     if (voice) utter.voice = voice
     utter.lang = 'de-DE'
-    utter.rate = 1.0
-    utter.pitch = 1.0
+    // 2026-05-08 Aaron-Feedback Free-Voice-Polish: leicht langsamer +
+    // minimal höher klingt natürlicher als Default 1.0/1.0 — vor allem
+    // auf Microsoft- und Espeak-Stimmen die sonst hektisch wirken.
+    utter.rate = 0.95
+    utter.pitch = 1.05
     utter.volume = 1.0
     window.speechSynthesis.speak(utter)
   } catch {

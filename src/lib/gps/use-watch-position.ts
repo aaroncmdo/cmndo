@@ -37,24 +37,53 @@ export function useWatchPosition(enabled: boolean) {
       }).catch(() => {})
     }
 
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      (pos) => {
-        setPosition({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-          heading: pos.coords.heading,
-          speed: pos.coords.speed,
-        })
-        setPermissionState('granted')
-        setError(null)
-      },
-      (err) => {
-        setError(err.message)
-        if (err.code === err.PERMISSION_DENIED) setPermissionState('denied')
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 },
-    )
+    // 2026-05-08 (Smoke + Browser-Compat): zwei-stufiger watchPosition-
+    // Setup. Erst high-accuracy (echte SVs auf Smartphones brauchen das
+    // für das Fahrzeug-GPS). Wenn das mit TIMEOUT (code 3) failt — passiert
+    // im Browser ohne Hardware-GPS oder wenn der Chip nicht antworten kann
+    // (Playwright headless, Desktop-Browser ohne GPS) — fallback auf
+    // low-accuracy Wifi/IP-Geolocation mit längerem Timeout. So sieht der
+    // useFieldTracking-Caller in beiden Fällen eine valid Position statt
+    // einer leeren „Timeout expired"-Meldung.
+    let highAccuracyFailed = false
+    const startWatch = (highAccuracy: boolean) => {
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          setPosition({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            accuracy: pos.coords.accuracy,
+            heading: pos.coords.heading,
+            speed: pos.coords.speed,
+          })
+          setPermissionState('granted')
+          setError(null)
+        },
+        (err) => {
+          if (err.code === err.PERMISSION_DENIED) {
+            setPermissionState('denied')
+            setError(err.message || 'GPS-Zugriff verweigert')
+            return
+          }
+          if (err.code === err.TIMEOUT && highAccuracy && !highAccuracyFailed) {
+            highAccuracyFailed = true
+            if (watchIdRef.current !== null) {
+              navigator.geolocation.clearWatch(watchIdRef.current)
+            }
+            startWatch(false)
+            return
+          }
+          // Sonstige Fehler durchreichen, mit Fallback-Message wenn der
+          // Browser einen leeren err.message liefert (passiert bei iOS-
+          // Safari TIMEOUT-Fall ohne Detail).
+          setError(err.message || (err.code === err.TIMEOUT ? 'GPS-Timeout — bitte nochmal versuchen' : 'GPS-Fehler'))
+        },
+        highAccuracy
+          ? { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+          : { enableHighAccuracy: false, timeout: 30000, maximumAge: 30000 },
+      )
+    }
+    startWatch(true)
 
     return () => {
       if (watchIdRef.current !== null) {
