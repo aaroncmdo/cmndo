@@ -20,6 +20,7 @@
 import { teardown, writeReport, getFindings } from './journey/_helpers.mjs'
 import { runPhase1 } from './journey/01-webform.mjs'
 import { runPhase2 } from './journey/02-dispatch-quali.mjs'
+import { runPhase3 } from './journey/03-button-audit.mjs'
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
 
@@ -47,10 +48,12 @@ async function main() {
 
   let phase1Result = null
   let phase2Result = null
+  let phase3Result = null
 
   try {
     phase1Result = await runPhase1()
     phase2Result = await runPhase2(phase1Result)
+    phase3Result = await runPhase3()
   } catch (err) {
     console.error('[Journey-Smoke] Unerwarteter Fehler:', err)
   } finally {
