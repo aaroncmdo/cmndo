@@ -209,6 +209,7 @@ export default function HeuteClient({
             disabledReason={disabledReason}
             geschaetzteFahrzeitMinuten={routeStats?.dauerMin ?? null}
             distanzKm={routeStats?.distanzKm ?? null}
+            origin={origin}
             onIntroAnimate={triggerIntroAnimation}
           />
         </GlassPanel>

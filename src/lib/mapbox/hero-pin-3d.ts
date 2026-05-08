@@ -28,6 +28,12 @@ export type HeroPin3dHandle = {
   /** Updated Sun-Position aus aktuellem Light-Preset (call bei Stop-/Time-
    *  Wechsel damit der Schattenwurf passt). */
   updateLight: (preset: MapboxLightPreset) => void
+  /**
+   * 2026-05-08 (C6) Arrived-Choreographie: bei `true` switcht der Pin
+   * auf success-grün, doppelte Pulse-Frequenz, intensiveren Glow. Bei
+   * `false` zurück zum Default-Cyan.
+   */
+  setArrived: (arrived: boolean) => void
   /** Entfernt den Layer. Idempotent. */
   remove: () => void
 }
@@ -39,8 +45,14 @@ const BEAM_HEIGHT_M = 24
 const BEAM_RADIUS_M = 1.5
 const GROUND_PULSE_MAX_RADIUS_M = 35
 
-const COLOR_GLOW = new THREE.Color('#7BA3CC') // claimondo-light-blue
+const COLOR_GLOW = new THREE.Color('#7BA3CC') // claimondo-light-blue (default)
 const COLOR_HALO = new THREE.Color('#4573A2') // claimondo-ondo
+// 2026-05-08 (C6): Arrived-Choreographie — emerald-Töne signalisieren
+// "Ziel erreicht". Doppelte Pulse-Frequenz erzeugt eine Erfolgs-
+// Animation, die den SV optisch belohnt + ihn auf den arrived-Modal
+// vorbereitet.
+const COLOR_GLOW_ARRIVED = new THREE.Color('#10B981') // emerald-500
+const COLOR_HALO_ARRIVED = new THREE.Color('#059669') // emerald-600
 
 /**
  * Liefert eine radial-gradient sprite-Texture für Soft-Glow-Halo.
@@ -110,6 +122,10 @@ export function attachHeroPin3d(
     rafId: 0 as number,
     startTime: Date.now(),
     preset: getMapboxLightPreset(new Date()),
+    // 2026-05-08 (C6): arrived-Flag steuert Color + Pulse-Frequenz.
+    arrived: false,
+    // Zeitpunkt des letzten arrived-Toggle für Color-Crossfade.
+    arrivedSince: 0,
   }
 
   let scene: THREE.Scene | null = null
@@ -220,19 +236,37 @@ export function attachHeroPin3d(
       const tick = () => {
         if (!innerMesh || !haloSprite || !groundRing || !groundRingMaterial || !beamMesh) return
         const t = (Date.now() - state.startTime) / 1000
-        // sin² ist sanfter als sin (start/end-Plateau).
-        const phase = Math.pow(Math.sin(t * Math.PI), 2)
-        innerMesh.scale.setScalar(1 + phase * 0.18)
-        haloSprite.scale.setScalar(OUTER_HALO_RADIUS_M * 2 * (1 + phase * 0.1))
-        const beamOpacity = 0.35 + phase * 0.25
+
+        // 2026-05-08 (C6): bei arrived doppelt so schnell pulsen +
+        // intensivere Skalen-Range. Wirkt wie eine "Ankommens-Atmung".
+        const pulseSpeed = state.arrived ? 2 : 1
+        const phase = Math.pow(Math.sin(t * Math.PI * pulseSpeed), 2)
+        const sphereGrowth = state.arrived ? 0.32 : 0.18
+        const haloGrowth = state.arrived ? 0.18 : 0.1
+        innerMesh.scale.setScalar(1 + phase * sphereGrowth)
+        haloSprite.scale.setScalar(OUTER_HALO_RADIUS_M * 2 * (1 + phase * haloGrowth))
+        const beamOpacity = (state.arrived ? 0.55 : 0.35) + phase * 0.25
         ;(beamMesh.material as THREE.MeshBasicMaterial).opacity = beamOpacity
 
-        // Ground-Ring: 2-Sekunden-Cycle, von Radius 2→GROUND_PULSE_MAX,
-        // Opacity 0.6→0. RingGeometry Radius geht via scale.
-        const ringPhase = (t % 2) / 2 // 0..1 sägezahn
+        // Color-Crossfade in/out arrived (300 ms ease).
+        if (state.arrivedSince > 0) {
+          const tCross = Math.min(1, (Date.now() - state.arrivedSince) / 300)
+          const target = state.arrived ? COLOR_GLOW_ARRIVED : COLOR_GLOW
+          const haloTarget = state.arrived ? COLOR_HALO_ARRIVED : COLOR_HALO
+          ;(innerMesh.material as THREE.MeshStandardMaterial).color.lerp(target, tCross)
+          ;(innerMesh.material as THREE.MeshStandardMaterial).emissive.lerp(target, tCross)
+          ;(beamMesh.material as THREE.MeshBasicMaterial).color.lerp(target, tCross)
+          groundRingMaterial.color.lerp(haloTarget, tCross)
+          if (tCross >= 1) state.arrivedSince = 0
+        }
+
+        // Ground-Ring: bei arrived 1-Sekunden-Cycle (schneller),
+        // sonst 2-Sekunden-Cycle.
+        const ringCycleSec = state.arrived ? 1 : 2
+        const ringPhase = (t % ringCycleSec) / ringCycleSec
         const ringScale = 1 + ringPhase * (GROUND_PULSE_MAX_RADIUS_M / 3)
         groundRing.scale.setScalar(ringScale)
-        groundRingMaterial.opacity = 0.6 * (1 - ringPhase)
+        groundRingMaterial.opacity = (state.arrived ? 0.85 : 0.6) * (1 - ringPhase)
 
         map.triggerRepaint()
         state.rafId = window.requestAnimationFrame(tick)
@@ -298,6 +332,12 @@ export function attachHeroPin3d(
         directionalLight.position.copy(sunDirectionFor(preset).multiplyScalar(50))
         directionalLight.intensity = sunIntensityFor(preset)
       }
+    },
+    setArrived(arrived: boolean) {
+      if (state.arrived === arrived) return
+      state.arrived = arrived
+      state.arrivedSince = Date.now()
+      try { map.triggerRepaint() } catch { /* noop */ }
     },
     remove() {
       try {

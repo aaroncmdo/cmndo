@@ -17,8 +17,49 @@
 import type { Map as MapboxMap } from 'mapbox-gl'
 import type { TrafficRoute } from './directions'
 import { routeToCongestionFeatures } from './directions'
+import type { MapboxLightPreset } from './light-preset'
 
 type Variant = 'main' | 'active-green'
+
+// 2026-05-08 (C5): Route-Farben adaptieren sich an das Light-Preset des
+// Mapbox-Standard-Styles. Auf hellem `day`-Style war die alte Google-Navi-
+// Blau-Linie (#1A73E8) gegen weiße Buildings nur subtil sichtbar — Aaron-
+// Smoke #5 zeigte Phase 04 mit fast unsichtbarer Route-Linie. Bei dunklen
+// Presets bleibt der leuchtende Look, bei hellen wechseln wir auf
+// dunkle Töne mit weißem Casing für maximalen Kontrast.
+type RouteTheme = {
+  /** Inner-Line-Color für 'low'/'unknown' congestion. */
+  baseLine: string
+  /** Glow-Halo-Color (außen, blurred). */
+  glow: string
+  /** Casing-Color zwischen Glow und Line. */
+  casing: string
+  /** Glow-Opacity — auf hellem Hintergrund weniger weil sonst Wash-out. */
+  glowOpacity: number
+}
+
+function themeForPreset(preset: MapboxLightPreset, isGreen: boolean): RouteTheme {
+  // Active-Green-Variante (Tagesroute-Highlight) bleibt themen-unabhängig
+  // weil sie den semantischen "aktive Route"-Akzent setzt — nicht zur
+  // Tageszeit gehört.
+  if (isGreen) {
+    return { baseLine: '#16A34A', glow: '#34D399', casing: '#FFFFFF', glowOpacity: 0.35 }
+  }
+  switch (preset) {
+    case 'day':
+      // Tagslicht: dunkle Navi-Linie auf weißen Tiles, dezenter Glow.
+      // Casing bleibt weiß — die "Highlight-Strasse"-Optik ist universell.
+      return { baseLine: '#0D47A1', glow: '#1976D2', casing: '#FFFFFF', glowOpacity: 0.22 }
+    case 'dawn':
+      // Morgendämmerung: medium-blue, etwas warm.
+      return { baseLine: '#1565C0', glow: '#42A5F5', casing: '#FFFFFF', glowOpacity: 0.28 }
+    case 'dusk':
+    case 'night':
+    default:
+      // Dusk/Night: leuchtende Google-Navi-Töne, intensiver Glow.
+      return { baseLine: '#1A73E8', glow: '#4285F4', casing: '#FFFFFF', glowOpacity: 0.4 }
+  }
+}
 
 const SOURCES: Record<Variant, string> = {
   'main': 'route-main',
@@ -65,13 +106,17 @@ function airlineFeatures(coords: Array<[number, number]>): GeoJSON.Feature[] {
  * Variante 1 (LEGACY): Plain-Coords-Polyline. Wird noch von der
  * Tagesroute auf /gutachter/heute genutzt (keine Traffic-Annotations
  * dort). Erzeugt eine Single-Feature-Collection mit congestion='unknown'.
+ *
+ * 2026-05-08 (C5): optionaler `lightPreset` für Theme-Adaption — wenn
+ * nicht gesetzt, fällt es auf 'night' (intensiver Glow) zurück.
  */
 export function upsertRouteLayer(
   map: MapboxMap,
   coords: Array<[number, number]>,
   variant: Variant = 'main',
+  lightPreset: MapboxLightPreset = 'night',
 ): void {
-  upsertRouteLayerCore(map, airlineFeatures(coords), variant)
+  upsertRouteLayerCore(map, airlineFeatures(coords), variant, lightPreset)
 }
 
 /**
@@ -83,15 +128,17 @@ export function upsertTrafficRouteLayer(
   map: MapboxMap,
   route: TrafficRoute,
   variant: Variant = 'main',
+  lightPreset: MapboxLightPreset = 'night',
 ): void {
   const features = routeToCongestionFeatures(route)
-  upsertRouteLayerCore(map, features.length ? features : airlineFeatures(route.coords), variant)
+  upsertRouteLayerCore(map, features.length ? features : airlineFeatures(route.coords), variant, lightPreset)
 }
 
 function upsertRouteLayerCore(
   map: MapboxMap,
   features: GeoJSON.Feature[],
   variant: Variant,
+  lightPreset: MapboxLightPreset,
 ): void {
   const sourceId = SOURCES[variant]
   const lineId = LINE_LAYERS[variant]
@@ -120,17 +167,18 @@ function upsertRouteLayerCore(
 
   // 2026-05-08: Google-Navi-Look mit congestion-Coloring auf der Top-Line.
   // Glow + Casing bleiben einfarbig (sonst flackert der Look in farbigen
-  // Stau-Bereichen). Default ist `low`/`unknown` = blau.
+  // Stau-Bereichen). Theme adaptiert sich an Light-Preset: dark line auf
+  // Tag, bright glow auf Nacht.
   const isGreen = variant === 'active-green'
+  const theme = themeForPreset(lightPreset, isGreen)
   const lineColorExpr = [
     'match',
     ['get', 'congestion'],
-    'severe', '#DC2626',  // red-600
+    'severe', '#DC2626',  // red-600 — kritisch, immer rot egal welches Theme
     'heavy', '#F97316',   // orange-500
     'moderate', '#F59E0B', // amber-500
-    isGreen ? '#16A34A' : '#1A73E8', // default low/unknown
+    theme.baseLine,        // default low/unknown — themen-abhängig
   ]
-  const glowColor = isGreen ? '#34D399' : '#4285F4' // emerald-400 / google-navi-blue-soft
 
   map.addLayer({
     id: glowId,
@@ -139,9 +187,9 @@ function upsertRouteLayerCore(
     slot: ROUTE_SLOT,
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: {
-      'line-color': glowColor,
+      'line-color': theme.glow,
       'line-width': 20,
-      'line-opacity': 0.35,
+      'line-opacity': theme.glowOpacity,
       'line-blur': 6,
     },
   } as Parameters<typeof map.addLayer>[0])
@@ -152,7 +200,7 @@ function upsertRouteLayerCore(
     slot: ROUTE_SLOT,
     layout: { 'line-join': 'round', 'line-cap': 'round' },
     paint: {
-      'line-color': '#FFFFFF',
+      'line-color': theme.casing,
       'line-width': 12,
       'line-opacity': 0.95,
     },

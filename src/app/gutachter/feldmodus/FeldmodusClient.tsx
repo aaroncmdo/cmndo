@@ -315,6 +315,8 @@ export default function FeldmodusClient({
           // aktiv war; bei kaltem Start ohne GPS sah das wie eine static
           // map aus.
           followSv={!!position}
+          // 2026-05-08 (C6): Hero-Pin Arrived-Choreographie
+          arrived={sessionStatus === 'arrived'}
         />
       </div>
 

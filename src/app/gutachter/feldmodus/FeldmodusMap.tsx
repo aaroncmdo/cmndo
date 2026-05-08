@@ -121,6 +121,12 @@ export interface FeldmodusMapProps {
   svPosition: { lat: number; lng: number; heading: number | null } | null
   /** Wenn true → Map folgt SV-Position mit bearing=heading + close zoom (TbT). */
   followSv?: boolean
+  /**
+   * 2026-05-08 (C6): Hero-Pin wechselt bei `arrived` auf grünen Glow +
+   * doppelte Pulse-Frequenz. Wird vom Caller gesetzt sobald die Session
+   * den Status 'arrived' erreicht.
+   */
+  arrived?: boolean
 }
 
 export default function FeldmodusMap({
@@ -129,6 +135,7 @@ export default function FeldmodusMap({
   aktuellerStopIndex,
   svPosition,
   followSv = false,
+  arrived = false,
 }: FeldmodusMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
@@ -340,13 +347,17 @@ export default function FeldmodusMap({
         }
         map.jumpTo({
           center: carCenter,
-          // 2026-05-08: Navi-Look enger gezogen — zoom 18.5, pitch 70.
-          // Mit bottom-heavy padding sitzt der Pin nicht in der Mitte,
-          // sondern im unteren Drittel; Strecke davor.
-          zoom: 18.5,
-          pitch: 70,
+          // 2026-05-08 (C7): Pitch 70 + Zoom 18.5 ließ die Camera in
+          // Innenstadt-Lagen durch Hochhäuser durchbrechen — Aaron-Smoke
+          // „darf nicht in die Gebäude rein". Pitch auf 62° entschärft
+          // das (Camera schaut mehr „über" als „durch"), zoom 17.8 gibt
+          // mehr Skyline-Übersicht. Top-padding noch heavier damit Pin
+          // im unteren Viertel sitzt und die Strecke voraus mehr Platz
+          // hat. Optisch immer noch GMaps-Navi-Look.
+          zoom: 17.8,
+          pitch: 62,
           bearing,
-          padding: { top: 320, bottom: 80, left: 40, right: 40 },
+          padding: { top: 360, bottom: 60, left: 40, right: 40 },
         })
       }
     })
@@ -437,8 +448,9 @@ export default function FeldmodusMap({
       const fog = applyWeatherToFog(fogForLightPreset(preset), weatherId)
       map.setFog(fog as Parameters<typeof map.setFog>[0])
       heroPinRef.current?.updateLight(preset)
+      heroPinRef.current?.setArrived(arrived)
     } catch { /* style not ready yet */ }
-  }, [aktuellerStopIndex, stops, weatherId])
+  }, [aktuellerStopIndex, stops, weatherId, arrived])
 
   // 2026-05-08 Blitzer-Voice: bei jedem position-Update Distance zu Blitzern
   // prüfen. Type 1 (mobil) → eigener Sprech-Text damit der SV mobile Blitzer
@@ -524,12 +536,14 @@ export default function FeldmodusMap({
       }
       map.easeTo({
         center: [svPosition.lng, svPosition.lat],
-        zoom: 18.5,
+        // 2026-05-08 (C7): Pitch 62 + Zoom 17.8 statt 70/18.5. Steiler
+        // wäre cinematischer, aber Camera dringt dann in Buildings ein
+        // (Aaron-Smoke „darf nicht in die Gebäude rein"). 62° + 17.8
+        // hält Camera über der Skyline.
+        zoom: 17.8,
         bearing,
-        pitch: 70,
-        // bottom-heavy padding → SV-Pin landet im unteren Drittel,
-        // Strecke davor sichtbar (GMaps-Navi-Look).
-        padding: { top: 320, bottom: 80, left: 40, right: 40 },
+        pitch: 62,
+        padding: { top: 360, bottom: 60, left: 40, right: 40 },
         duration: 800,
         essential: true,
       })
@@ -581,11 +595,17 @@ export default function FeldmodusMap({
     // Alternativen werden hier (noch) nicht visualisiert — kommen mit dem
     // Live-Reroute-Toast in PR B2.
     const ctrl = new AbortController()
+    // 2026-05-08 (C5): Route-Theme passt sich an Light-Preset des aktuellen
+    // Termin-Slots an. Tag → dunkle Linie auf hellen Tiles, Nacht →
+    // leuchtender Glow auf dunklen Tiles. Ohne Termin-Zeit → wall-clock.
+    const targetStop = stops[Math.max(0, aktuellerStopIndex)] ?? null
+    const lightAt = targetStop?.start_zeit ? new Date(targetStop.start_zeit) : new Date()
+    const lightPreset = getMapboxLightPreset(lightAt)
     const drawRoute = (route: TrafficRoute) => {
       if (!map.isStyleLoaded()) {
-        map.once('load', () => upsertTrafficRouteLayer(map, route))
+        map.once('load', () => upsertTrafficRouteLayer(map, route, 'main', lightPreset))
       } else {
-        upsertTrafficRouteLayer(map, route)
+        upsertTrafficRouteLayer(map, route, 'main', lightPreset)
       }
     }
     void fetchDrivingRoute([svLng, svLat], [stopLng, stopLat], { signal: ctrl.signal })
@@ -693,7 +713,9 @@ export default function FeldmodusMap({
         { bypassCache: true },
       )
       if (primary.coords.length >= 2) {
-        upsertTrafficRouteLayer(map, primary)
+        const targetStop = stops[Math.max(0, aktuellerStopIndex)] ?? null
+        const lightAt = targetStop?.start_zeit ? new Date(targetStop.start_zeit) : new Date()
+        upsertTrafficRouteLayer(map, primary, 'main', getMapboxLightPreset(lightAt))
         primaryRouteRef.current = primary
       }
       const fasterAlt = pickFasterAlternative(primary, alternatives)
@@ -713,7 +735,9 @@ export default function FeldmodusMap({
     if (!proposedReroute) return
     const map = mapRef.current
     if (map) {
-      upsertTrafficRouteLayer(map, proposedReroute.route)
+      const targetStop = stops[Math.max(0, aktuellerStopIndex)] ?? null
+      const lightAt = targetStop?.start_zeit ? new Date(targetStop.start_zeit) : new Date()
+      upsertTrafficRouteLayer(map, proposedReroute.route, 'main', getMapboxLightPreset(lightAt))
       primaryRouteRef.current = proposedReroute.route
     }
     setProposedReroute(null)

@@ -19,6 +19,14 @@ export interface TagesrouteStartCardProps {
   /** 2026-05-06: Live-Distanz aus Mapbox-Directions, optional. */
   distanzKm?: number | null
   /**
+   * 2026-05-08 (C8): aktueller Browser-GPS-Standort des SV. Wird beim
+   * Klick auf „Tagesmodus starten" als sachverstaendige.standort_lat/lng
+   * persistiert, damit der Feldmodus die Initial-Camera auf den echten
+   * Standort zentriert statt auf den (oft stale) Heimat-Standort.
+   * null = GPS noch nicht da → Server-Action ohne Origin-Update.
+   */
+  origin?: { lat: number; lng: number } | null
+  /**
    * Heute→Feldmodus-Intro: parallel zur Session-Erstellung läuft die Map-
    * Animation (Pitch 45→60, Zoom auf ersten Stop). Erst wenn beide fertig sind,
    * wird in den Feldmodus navigiert. Optional — fehlt das Handle, navigiert die
@@ -33,6 +41,7 @@ export default function TagesrouteStartCard({
   disabledReason,
   geschaetzteFahrzeitMinuten = null,
   distanzKm = null,
+  origin = null,
   onIntroAnimate,
 }: TagesrouteStartCardProps) {
   const router = useRouter()
@@ -46,7 +55,7 @@ export default function TagesrouteStartCard({
     // Animation parallel zur Server-Action — perceived latency bleibt minimal,
     // weil die Mapbox-Kamera während des DB-Writes schon tiltet.
     const animPromise = onIntroAnimate ? onIntroAnimate() : Promise.resolve()
-    const res = await startOrResumeTagesSession(terminIds)
+    const res = await startOrResumeTagesSession(terminIds, origin)
     if (!res.success) {
       setPending(false)
       setError(res.error ?? 'Fehler beim Start')
