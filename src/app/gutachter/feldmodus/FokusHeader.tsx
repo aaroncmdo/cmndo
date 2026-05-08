@@ -66,7 +66,7 @@ export default function FokusHeader({
     startTransition(async () => {
       const res = await pauseFokusmodus(sessionId)
       if (res.success) {
-        router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+        router.push('/gutachter/heute?info=Tagesmodus+pausiert')
       } else {
         toast.error(res.error ?? 'Pausieren fehlgeschlagen')
       }
@@ -90,7 +90,7 @@ export default function FokusHeader({
             ? 'bg-claimondo-navy/10 hover:bg-claimondo-navy/20 text-claimondo-navy'
             : 'bg-white/10 hover:bg-white/20 text-white'
         }`}
-        aria-label="Fokus-Modus pausieren"
+        aria-label="Tagesmodus pausieren"
       >
         <XIcon className="w-4 h-4" />
         <span className="hidden sm:inline">Pausieren</span>

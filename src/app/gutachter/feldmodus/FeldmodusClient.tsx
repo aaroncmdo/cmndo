@@ -265,7 +265,7 @@ export default function FeldmodusClient({
           const res = await pauseFokusmodus(session.id)
           if (res.success) {
             setSessionStatus('paused')
-            router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+            router.push('/gutachter/heute?info=Tagesmodus+pausiert')
           } else {
             toast.error(res.error ?? 'Pausieren fehlgeschlagen')
           }
@@ -347,7 +347,7 @@ export default function FeldmodusClient({
                 const res = await pauseFokusmodus(session.id)
                 if (res.success) {
                   setSessionStatus('paused')
-                  router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+                  router.push('/gutachter/heute?info=Tagesmodus+pausiert')
                 } else {
                   toast.error(res.error ?? 'Pausieren fehlgeschlagen')
                 }

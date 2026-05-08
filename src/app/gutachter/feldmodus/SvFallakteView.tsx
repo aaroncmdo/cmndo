@@ -164,7 +164,7 @@ export default function SvFallakteView({
           onClick={onPauseBackToRoute}
           className="p-1.5 rounded-lg hover:bg-white/10 text-white/80"
           aria-label="Pausieren — zurück zu Heute"
-          title="Fokus-Modus pausieren"
+          title="Tagesmodus pausieren"
         >
           <ArrowLeftIcon className="w-4 h-4" />
         </button>

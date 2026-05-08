@@ -222,7 +222,10 @@ export default function AktuellerStopCard({
     if (permissionState === 'denied') {
       return 'GPS verweigert — Ankunft wird zur Terminuhrzeit erkannt'
     }
-    return 'Auto-Ankunft aktiv (Geofence 100 m)'
+    // 2026-05-08: Anzeige matched echte Geofence-Größe — PR #604 hat
+    // den Radius von 100 m auf 50 m reduziert, der Hinweis-String ist
+    // nachgezogen.
+    return 'Auto-Ankunft aktiv (Geofence 50 m)'
   })()
 
   return (
