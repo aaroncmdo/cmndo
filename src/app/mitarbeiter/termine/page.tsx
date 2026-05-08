@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 const TYP_META: Record<string, { label: string; icon: typeof PhoneCallIcon; cls: string }> = {
   rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
+  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
   kb_beratung: { label: 'KB-Beratung', icon: CalendarIcon, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
 }
 
@@ -147,7 +147,7 @@ export default async function MitarbeiterTermine() {
           <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
             <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
               <h2 className="text-sm font-semibold text-claimondo-navy">
-                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
                   weekday: 'long',
                   day: '2-digit',
                   month: '2-digit',
@@ -170,7 +170,7 @@ export default async function MitarbeiterTermine() {
                 const href = lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : '#'
                 const overdue = new Date(t.start_zeit) < new Date()
                 return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
+                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
                     <div className="flex items-center gap-3">
                       <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${meta.cls}`}>
                         <Icon className="w-3 h-3" />
@@ -179,7 +179,7 @@ export default async function MitarbeiterTermine() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-claimondo-navy truncate">{subject}</p>
                         <p className={`text-xs ${overdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
-                          {new Date(t.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
+                          {new Date(t.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
                           {t.notizen && ` · ${t.notizen}`}
                           {overdue && ' (überfällig)'}
                         </p>

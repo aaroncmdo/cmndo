@@ -6,9 +6,6 @@ import { SearchIcon, HardHatIcon, MapPinIcon } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
 import { KundeAvatar } from '@/components/shared/KundeAvatar'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { Chip } from '@/components/ui/Chip'
-import DensityToggle from '@/components/shared/DensityToggle'
-import { useDensityPreference } from '@/hooks/useDensityPreference'
 
 // AAR-54: Tabellen-Ansicht für Sachverständige (statt Karte).
 // AAR-151: Aus src/app/admin/sachverstaendige/ verschoben in src/components/,
@@ -62,9 +59,6 @@ export default function SachverstaendigeList({
 }) {
   const [svFilter, setSvFilter] = useState<'aktive' | 'deaktivierte' | 'gesperrt' | 'alle'>('aktive')
   const [search, setSearch] = useState('')
-  const [density] = useDensityPreference('sv-liste')
-  const compact = density === 'compact'
-  const cellPad = compact ? 'px-3 py-1.5' : 'px-4 py-3'
 
   const filtered = useMemo(() => {
     return sachverstaendige.filter(sv => {
@@ -119,28 +113,27 @@ export default function SachverstaendigeList({
           >
             Karte öffnen →
           </Link>
-          <DensityToggle listKey="sv-liste" />
         </div>
       </div>
 
-      {/* Filter-Tabs — Touch-friendly Chips (Portal-Review C3) */}
-      <div className="px-4 py-2 border-b border-claimondo-border bg-white flex gap-2 flex-shrink-0 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+      {/* Filter-Tabs */}
+      <div className="px-4 py-2 border-b border-claimondo-border bg-white flex gap-1 flex-shrink-0">
         {tabs.map(t => (
-          <Chip
+          <button
             key={t.k}
-            variant={svFilter === t.k ? 'selected' : 'ghost'}
-            count={t.count}
             onClick={() => setSvFilter(t.k)}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              svFilter === t.k ? 'bg-[#f8f9fb] text-claimondo-navy' : 'text-claimondo-ondo hover:text-claimondo-navy'
+            }`}
           >
-            {t.label}
-          </Chip>
+            {t.label} <span className="text-claimondo-ondo/70 ml-1">{t.count}</span>
+          </button>
         ))}
       </div>
 
-      {/* Tabelle (Desktop ab lg) — Mobile/Tablet rendern Card-Liste, Portal-Review D3 */}
+      {/* Tabelle */}
       <div className="flex-1 overflow-auto">
-        {/* Desktop-Tabelle */}
-        <table className="w-full text-sm hidden lg:table">
+        <table className="w-full text-sm">
           <thead className="bg-[#f8f9fb] border-b border-claimondo-border sticky top-0">
             <tr className="text-left text-[10px] uppercase tracking-wider text-claimondo-ondo">
               <th className="px-4 py-2.5 font-medium">Name</th>
@@ -167,7 +160,7 @@ export default function SachverstaendigeList({
 
               return (
                 <tr key={sv.id} className="hover:bg-[#f0f4f8] transition-colors">
-                  <td className={cellPad}>
+                  <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <KundeAvatar name={sv.name} size={28} tone="ondo-subtle" />
                       <div>
@@ -176,25 +169,25 @@ export default function SachverstaendigeList({
                       </div>
                     </div>
                   </td>
-                  <td className={cellPad}>
+                  <td className="px-4 py-3">
                     <StatusBadge colorCls={typ.cls}>{typ.label}</StatusBadge>
                   </td>
-                  <td className={`${cellPad} text-xs text-claimondo-ondo`}>
+                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
                     <span className="flex items-center gap-1">
                       <MapPinIcon className="w-3 h-3 text-claimondo-ondo/70" />
                       {stadt}
                     </span>
                   </td>
-                  <td className={`${cellPad} text-xs text-claimondo-navy font-medium`}>{paket}</td>
-                  <td className={`${cellPad} text-xs`}>
+                  <td className="px-4 py-3 text-xs text-claimondo-navy font-medium">{paket}</td>
+                  <td className="px-4 py-3 text-xs">
                     <span className={sv.offeneFaelle >= sv.maxFaelleMonat ? 'text-red-600 font-semibold' : 'text-claimondo-navy'}>
                       {sv.offeneFaelle}/{sv.maxFaelleMonat}
                     </span>
                   </td>
-                  <td className={cellPad}>
+                  <td className="px-4 py-3">
                     <StatusBadge colorCls={`${status.bg} ${status.text}`}>{status.label}</StatusBadge>
                   </td>
-                  <td className={`${cellPad} text-right`}>
+                  <td className="px-4 py-3 text-right">
                     <Link href={`${basePath}/sachverstaendige/${sv.id}`} className="text-claimondo-ondo hover:underline text-xs">→</Link>
                   </td>
                 </tr>
@@ -202,49 +195,6 @@ export default function SachverstaendigeList({
             })}
           </tbody>
         </table>
-
-        {/* Mobile/Tablet-Card-Liste (<lg) — drei Felder primary (Name, Standort, Status), Tap = Detail */}
-        <div className="lg:hidden divide-y divide-claimondo-border bg-white">
-          {filtered.length === 0 ? (
-            <p className="px-4 py-8 text-center text-xs text-claimondo-ondo/70">Keine Sachverständige</p>
-          ) : filtered.map(sv => {
-            const status = getSvStatus({
-              portal_zugang_freigeschaltet: sv.portalZugangFreigeschaltet,
-              vertrag_unterschrieben: sv.vertragUnterschrieben,
-              gesperrt_seit: sv.gesperrtSeit,
-            })
-            const typ = TYP_BADGE[sv.gutachterTyp] ?? { label: sv.gutachterTyp, cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
-            const paket = PAKET_BADGE[sv.paket] ?? sv.paket
-            const stadt = sv.standortAdresse ? sv.standortAdresse.split(',').slice(-2, -1)[0]?.trim() || sv.standortAdresse : '—'
-            const auslastungTone = sv.offeneFaelle >= sv.maxFaelleMonat ? 'text-red-600 font-semibold' : 'text-claimondo-ondo'
-            return (
-              <Link
-                key={sv.id}
-                href={`${basePath}/sachverstaendige/${sv.id}`}
-                className="flex items-start gap-3 px-4 py-3 hover:bg-[#f8f9fb] active:bg-claimondo-ondo/5 transition-colors"
-              >
-                <KundeAvatar name={sv.name} size={36} tone="ondo-subtle" />
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-claimondo-navy truncate">{sv.name}</p>
-                    <StatusBadge colorCls={`${status.bg} ${status.text}`}>{status.label}</StatusBadge>
-                  </div>
-                  <div className="flex items-center gap-2 text-[11px] text-claimondo-ondo">
-                    <span className="inline-flex items-center gap-1">
-                      <MapPinIcon className="w-3 h-3 text-claimondo-ondo/70" />
-                      {stadt}
-                    </span>
-                    <span className="text-claimondo-ondo/40">·</span>
-                    <span className="font-medium text-claimondo-navy">{paket}</span>
-                    <span className="text-claimondo-ondo/40">·</span>
-                    <span className={auslastungTone}>{sv.offeneFaelle}/{sv.maxFaelleMonat}</span>
-                  </div>
-                  <StatusBadge colorCls={typ.cls}>{typ.label}</StatusBadge>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
       </div>
     </div>
   )

@@ -27,14 +27,14 @@ export default async function KanzleiLayout({
   // Content scrollt innen. Das Main hat keinen max-width-Cap mehr — sonst
   // entsteht rechts ein grauer Balken auf breiten Screens.
   return (
-    <div className="h-screen bg-claimondo-bg flex flex-col overflow-hidden">
+    <div className="h-screen bg-[#f8f9fb] flex flex-col overflow-hidden">
       <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-xl font-bold tracking-tight">
             <span className="text-white">Claim</span>
-            <span className="text-claimondo-light-blue">ondo</span>
+            <span className="text-[#7BA3CC]">ondo</span>
           </span>
-          <span className="text-[11px] uppercase tracking-wider text-claimondo-light-blue border border-claimondo-light-blue/30 rounded px-2 py-0.5">
+          <span className="text-[11px] uppercase tracking-wider text-[#7BA3CC] border border-[#7BA3CC]/30 rounded px-2 py-0.5">
             Kanzlei
           </span>
           {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
@@ -42,11 +42,11 @@ export default async function KanzleiLayout({
         </div>
         <div className="flex items-center gap-3">
           <UpdatesNav variant="dark" />
-          <span className="text-claimondo-light-blue text-sm">{displayName}</span>
+          <span className="text-[#7BA3CC] text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
-              className="text-claimondo-light-blue hover:text-white transition-colors"
+              className="text-[#7BA3CC] hover:text-white transition-colors"
               aria-label="Abmelden"
             >
               <LogOutIcon className="w-4 h-4" />

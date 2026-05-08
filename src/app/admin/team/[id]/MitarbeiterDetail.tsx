@@ -46,7 +46,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
           description={`${m.email as string} · ${m.rolle as string}`}
           size="lg"
           leadingSlot={
-            <div className="w-14 h-14 bg-claimondo-bg rounded-full flex items-center justify-center shrink-0">
+            <div className="w-14 h-14 bg-[#f8f9fb] rounded-full flex items-center justify-center shrink-0">
               <UserIcon className="w-7 h-7 text-claimondo-ondo" />
             </div>
           }
@@ -58,9 +58,9 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
         {stats.isDispatch ? (<>
           <KPI icon={<BarChart3Icon className="w-4 h-4 text-amber-400" />} label="Leads" value={stats.leadsTotal} />
           <KPI icon={<BriefcaseIcon className="w-4 h-4 text-green-400" />} label="Konvertiert" value={stats.leadsKonvertiert} />
-          <KPI icon={<BarChart3Icon className="w-4 h-4 text-claimondo-light-blue" />} label="Conv. Rate" value={stats.leadsTotal > 0 ? `${Math.round((stats.leadsKonvertiert / stats.leadsTotal) * 100)}%` : '—'} />
+          <KPI icon={<BarChart3Icon className="w-4 h-4 text-[#7BA3CC]" />} label="Conv. Rate" value={stats.leadsTotal > 0 ? `${Math.round((stats.leadsKonvertiert / stats.leadsTotal) * 100)}%` : '—'} />
         </>) : (<>
-          <KPI icon={<BriefcaseIcon className="w-4 h-4 text-claimondo-light-blue" />} label="Aktive Faelle" value={stats.aktiveFaelle} />
+          <KPI icon={<BriefcaseIcon className="w-4 h-4 text-[#7BA3CC]" />} label="Aktive Faelle" value={stats.aktiveFaelle} />
           <KPI icon={<BarChart3Icon className="w-4 h-4 text-green-400" />} label="Abgeschlossen" value={stats.abgeschlossen} />
           <KPI icon={<ClockIcon className="w-4 h-4 text-amber-400" />} label="Avg. Tage" value={stats.avgDays || '—'} />
         </>)}
@@ -112,7 +112,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label>
-              <select name="kategorie" defaultValue={(m.kategorie as string) ?? ''} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
+              <select name="kategorie" defaultValue={(m.kategorie as string) ?? ''} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
                 <option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option>
               </select>
             </div>
@@ -124,13 +124,13 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             <Field label="Eingestellt am" name="eingestellt_am" type="date" defaultValue={(m.eingestellt_am as string) ?? ''} />
             <div>
               <label className="text-sm text-claimondo-ondo mb-1 block">Aktiv</label>
-              <select name="aktiv" defaultValue={String(m.aktiv ?? true)} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
+              <select name="aktiv" defaultValue={String(m.aktiv ?? true)} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
                 <option value="true">Ja</option><option value="false">Nein</option>
               </select>
             </div>
           </div>
           {msg && <p className={`text-sm px-4 py-2 rounded-xl ${msg === 'Gespeichert' ? 'bg-green-50 text-green-300' : 'bg-red-50 text-red-300'}`}>{msg}</p>}
-          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-claimondo-ondo hover:bg-claimondo-shield  text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-[#4573A2] hover:bg-[#1E3A5F]  text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
             <SaveIcon className="w-4 h-4" />{saving ? 'Speichere...' : 'Speichern'}
           </button>
         </form>
@@ -142,8 +142,8 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             {m.twilio_whatsapp_nummer ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-mono text-claimondo-navy bg-claimondo-bg px-3 py-1.5 rounded-lg">{m.twilio_whatsapp_nummer as string}</span>
-                  <span className="text-[10px] text-claimondo-ondo/70">seit {m.twilio_nummer_provisioned_am ? new Date(m.twilio_nummer_provisioned_am as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}</span>
+                  <span className="text-sm font-mono text-claimondo-navy bg-[#f8f9fb] px-3 py-1.5 rounded-lg">{m.twilio_whatsapp_nummer as string}</span>
+                  <span className="text-[10px] text-claimondo-ondo/70">seit {m.twilio_nummer_provisioned_am ? new Date(m.twilio_nummer_provisioned_am as string).toLocaleDateString('de-DE') : '—'}</span>
                 </div>
                 <button
                   onClick={async () => {
@@ -170,7 +170,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
                     finally { setTwilioLoading(false) }
                   }}
                   disabled={twilioLoading}
-                  className="flex items-center gap-2 bg-claimondo-shield hover:bg-claimondo-ondo disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+                  className="flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
                 >
                   <PhoneIcon className="w-4 h-4" /> {twilioLoading ? 'Wird provisioniert...' : 'WhatsApp-Nummer zuweisen'}
                 </button>
@@ -200,7 +200,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
               value={twofaNeuePhone}
               onChange={(e) => setTwofaNeuePhone(e.target.value)}
               placeholder="Neue 2FA-Nummer (optional, z. B. +49 151 1234 5678)"
-              className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+              className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
             />
             <div className="flex gap-2 flex-wrap">
               <button
@@ -228,7 +228,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
                     setTwofaLoading(false)
                   }
                 }}
-                className="flex items-center gap-1.5 bg-claimondo-shield hover:bg-claimondo-ondo disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+                className="flex items-center gap-1.5 bg-[#1E3A5F] hover:bg-[#4573A2] disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
               >
                 <ShieldOffIcon className="w-4 h-4" />
                 {twofaLoading
@@ -263,7 +263,7 @@ function Field({ label, name, defaultValue, type = 'text' }: { label: string; na
   return (
     <div>
       <label className="text-sm text-claimondo-ondo mb-1 block">{label}</label>
-      <input name={name} type={type} defaultValue={defaultValue} step={type === 'number' ? 'any' : undefined} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
+      <input name={name} type={type} defaultValue={defaultValue} step={type === 'number' ? 'any' : undefined} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
     </div>
   )
 }

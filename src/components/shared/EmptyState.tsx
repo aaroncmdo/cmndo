@@ -1,13 +1,7 @@
-'use client'
-
 // AAR-414 / AAR-769 Phase 3: Zentrale Empty-State-Primitive. Vollständig
 // auf Primitives migriert (Card, Stack, Icon, Text, Button) — kein Tailwind
 // mehr im Render. Action mit `href` wird per <a>-Wrapper außerhalb des
 // Buttons unterstützt, weil <Button>-Primitive keinen Link-Modus hat.
-//
-// Muss 'use client' sein weil <Button> (auch 'use client') einen onPress-
-// Handler-Function erwartet — Server-Components duerfen keine Functions
-// als Props an Client-Components durchreichen (Next.js App-Router-Regel).
 
 import type { LucideIcon } from 'lucide-react'
 import { Button, Card, Icon, Stack, Text } from '@/components/primitives'
@@ -22,40 +16,18 @@ const ACTION_TO_TONE: Record<ActionVariant, ButtonTone> = {
   ghost: 'ghost',
 }
 
-export type EmptyStateAction = {
-  label: string
-  onClick?: () => void
-  href?: string
-  variant?: ActionVariant
-}
-
 export interface EmptyStateProps {
   icon?: LucideIcon
   title: string
   description?: string
-  /** Single Action (Backwards-Compat). Wenn `actions` gesetzt ist, wird `action` ignoriert. */
-  action?: EmptyStateAction
-  /** 2026-05-07 Design-Review: Mehrere CTAs (z.B. „Kalender prüfen" · „Profil ergänzen" · „Gebiet anpassen"). */
-  actions?: EmptyStateAction[]
+  action?: {
+    label: string
+    onClick?: () => void
+    href?: string
+    variant?: ActionVariant
+  }
   variant?: 'default' | 'compact'
   className?: string
-}
-
-function renderAction(a: EmptyStateAction) {
-  const tone = ACTION_TO_TONE[a.variant ?? 'primary']
-  const btn = (
-    <Button tone={tone} size="md" onPress={a.onClick ?? (() => {})}>
-      {a.label}
-    </Button>
-  )
-  if (a.href) {
-    return (
-      <a key={a.label} href={a.href} style={{ textDecoration: 'none', display: 'inline-block' }}>
-        {btn}
-      </a>
-    )
-  }
-  return <div key={a.label}>{btn}</div>
 }
 
 export default function EmptyState({
@@ -63,27 +35,31 @@ export default function EmptyState({
   title,
   description,
   action,
-  actions,
   variant = 'default',
   className = '',
 }: EmptyStateProps) {
   const padding = variant === 'compact' ? 6 : 12
   const iconSize = variant === 'compact' ? 32 : 40
 
-  const actionList = actions ?? (action ? [action] : [])
+  const actionTone = ACTION_TO_TONE[action?.variant ?? 'primary']
 
-  const actionsEl = actionList.length > 0 ? (
-    <div
-      style={{
-        marginTop: tokens.spacing[4],
-        display: 'flex',
-        gap: tokens.spacing[2],
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-      }}
-    >
-      {actionList.map(renderAction)}
-    </div>
+  const actionEl = action ? (
+    action.href ? (
+      <a
+        href={action.href}
+        style={{ textDecoration: 'none', display: 'inline-block', marginTop: tokens.spacing[4] }}
+      >
+        <Button tone={actionTone} size="md" onPress={() => {}}>
+          {action.label}
+        </Button>
+      </a>
+    ) : (
+      <div style={{ marginTop: tokens.spacing[4] }}>
+        <Button tone={actionTone} size="md" onPress={action.onClick ?? (() => {})}>
+          {action.label}
+        </Button>
+      </div>
+    )
   ) : null
 
   const inner = (
@@ -100,7 +76,7 @@ export default function EmptyState({
             {description}
           </Text>
         )}
-        {actionsEl}
+        {actionEl}
       </Stack>
     </Card>
   )

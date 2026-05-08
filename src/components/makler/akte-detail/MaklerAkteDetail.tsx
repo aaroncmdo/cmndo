@@ -160,7 +160,7 @@ export function MaklerAkteDetail({
           {kunde?.telefon ? (
             <a
               href={`tel:${kunde.telefon}`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white text-claimondo-navy text-sm font-semibold hover:bg-claimondo-light-blue/20"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white text-claimondo-navy text-sm font-semibold hover:bg-[#7BA3CC]/20"
             >
               <PhoneIcon width={16} height={16} />
               Kunde anrufen
@@ -315,7 +315,7 @@ function TabButton({
       onClick={onClick}
       className={`shrink-0 inline-flex items-center gap-2 px-3 py-2.5 text-sm border-b-2 -mb-px transition-colors ${
         active
-          ? 'border-claimondo-navy text-claimondo-navy font-semibold'
+          ? 'border-[#0D1B3E] text-claimondo-navy font-semibold'
           : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
       }`}
     >

@@ -33,7 +33,7 @@ export default async function MitarbeiterReklamationen() {
 
       <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-claimondo-bg text-xs uppercase text-claimondo-ondo">
+          <thead className="bg-[#f8f9fb] text-xs uppercase text-claimondo-ondo">
             <tr>
               <th className="text-left px-4 py-2">Fall</th>
               <th className="text-left px-4 py-2">Grund</th>
@@ -46,7 +46,7 @@ export default async function MitarbeiterReklamationen() {
             {(reklamationen ?? []).map(r => {
               const fall = fallMap.get(r.fall_id as string)
               return (
-                <tr key={r.id} className="hover:bg-claimondo-bg">
+                <tr key={r.id} className="hover:bg-[#f8f9fb]">
                   <td className="px-4 py-3">
                     <Link href={`/faelle/${r.fall_id}`} className="text-claimondo-ondo hover:underline font-medium">
                       {fall?.fall_nummer ?? (r.fall_id as string).slice(0, 8)}
@@ -57,14 +57,14 @@ export default async function MitarbeiterReklamationen() {
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       r.status === 'offen' ? 'bg-amber-100 text-amber-700' :
                       r.status === 'erledigt' ? 'bg-emerald-100 text-emerald-700' :
-                      'bg-claimondo-bg text-claimondo-ondo'
+                      'bg-[#f8f9fb] text-claimondo-ondo'
                     }`}>{r.status ?? '—'}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                    {r.eingereicht_am ? new Date(r.eingereicht_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
+                    {r.eingereicht_am ? new Date(r.eingereicht_am).toLocaleDateString('de-DE') : '—'}
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                    {r.frist_bis ? new Date(r.frist_bis).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
+                    {r.frist_bis ? new Date(r.frist_bis).toLocaleDateString('de-DE') : '—'}
                   </td>
                 </tr>
               )

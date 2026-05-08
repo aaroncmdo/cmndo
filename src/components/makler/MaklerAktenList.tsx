@@ -106,7 +106,7 @@ export function MaklerAktenList({ akten, counts, currentFilter }: Props) {
           {/* Desktop-Tabelle */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-claimondo-bg text-left text-xs text-claimondo-ondo uppercase tracking-wider">
+              <thead className="bg-[#f8f9fb] text-left text-xs text-claimondo-ondo uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3 font-medium">Akte</th>
                   <th className="px-4 py-3 font-medium">Kunde</th>
@@ -174,7 +174,7 @@ function AkteRow({
 
   return (
     <tr
-      className={clickable ? 'hover:bg-claimondo-bg cursor-pointer' : 'opacity-80'}
+      className={clickable ? 'hover:bg-[#f8f9fb] cursor-pointer' : 'opacity-80'}
       onClick={clickable ? handleClick : undefined}
     >
       <td className="px-4 py-3 font-mono text-xs text-claimondo-navy">
@@ -239,7 +239,7 @@ function AkteCard({
   if (akte.consent_scope === 'vollzugriff') {
     return (
       <li>
-        <Link href={`/makler/akten/${akte.id}`} className="block hover:bg-claimondo-bg">
+        <Link href={`/makler/akten/${akte.id}`} className="block hover:bg-[#f8f9fb]">
           {inner}
         </Link>
       </li>
@@ -251,7 +251,7 @@ function AkteCard({
         <button
           type="button"
           onClick={onMinimalClick}
-          className="w-full text-left hover:bg-claimondo-bg"
+          className="w-full text-left hover:bg-[#f8f9fb]"
         >
           {inner}
         </button>
@@ -266,8 +266,8 @@ function AkteCard({
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PHASE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  ersterfassung: { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy', label: 'Ersterfassung' },
-  onboarding: { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy', label: 'Onboarding' },
+  ersterfassung: { bg: 'bg-[#f8f9fb]', text: 'text-claimondo-navy', label: 'Ersterfassung' },
+  onboarding: { bg: 'bg-[#f8f9fb]', text: 'text-claimondo-navy', label: 'Onboarding' },
   'sv-gesucht': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV-Suche' },
   'sv-zugewiesen': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV zugewiesen' },
   'sv-termin': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV-Termin' },
@@ -323,7 +323,7 @@ function PhasePill({ akte }: { akte: MaklerAkteRow }) {
   const key = akte.aktuelle_phase ?? akte.status
   const entry =
     PHASE_COLORS[akte.status] ??
-    PHASE_COLORS[key] ?? { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy', label: key }
+    PHASE_COLORS[key] ?? { bg: 'bg-[#f8f9fb]', text: 'text-claimondo-navy', label: key }
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${entry.bg} ${entry.text}`}
@@ -421,7 +421,7 @@ function MiniDrawer({
         <button
           type="button"
           onClick={onClose}
-          className="w-full py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-shield"
+          className="w-full py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-[#1E3A5F]"
         >
           Schließen
         </button>
@@ -457,7 +457,7 @@ function EmptyState({ filter }: { filter: AktenFilter }) {
   const c = copy[filter]
   return (
     <div className="bg-white rounded-ios-md border border-claimondo-border p-10 text-center">
-      <div className="mx-auto w-12 h-12 rounded-full bg-claimondo-bg flex items-center justify-center text-claimondo-ondo mb-4">
+      <div className="mx-auto w-12 h-12 rounded-full bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo mb-4">
         <FolderOpenIcon width={22} height={22} />
       </div>
       <h2 className="text-base font-semibold text-claimondo-navy mb-2">{c.heading}</h2>

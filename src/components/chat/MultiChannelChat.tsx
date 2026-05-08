@@ -225,7 +225,9 @@ export default function MultiChannelChat({
 }
 
 function MessageBubble({ message, currentUserId }: { message: Nachricht; currentUserId: string | null }) {
+  const isOwnMsg = currentUserId && message.sender_id === currentUserId
   const isSystem = message.is_system
+  const alignRight = isOwnMsg
 
   if (isSystem) {
     return (
@@ -237,66 +239,22 @@ function MessageBubble({ message, currentUserId }: { message: Nachricht; current
     )
   }
 
-  // Eigene Nachricht: rechts, navy gefuellt (WhatsApp-Convention).
-  // Andere Nachrichten: links, mit Rolle-spezifischem Tint damit der KB im
-  // Multi-User-Verlauf sofort sieht ob das vom Kunden, einem anderen
-  // Mitarbeiter (KB/Admin/Dispatch) oder vom SV kommt.
-  const isOwnMsg = !!(currentUserId && message.sender_id === currentUserId)
-  const alignRight = isOwnMsg
-  const senderRolle = (message.sender_rolle ?? '').toLowerCase()
-  const istKunde = senderRolle === 'kunde'
-  const istSv = senderRolle === 'sachverstaendiger'
-  const istMitarbeiter = ['kundenbetreuer', 'admin', 'dispatch'].includes(senderRolle)
-
-  let bubbleCls: string
-  let linkCls: string
-  let timeCls: string
-  let labelCls = 'text-claimondo-ondo'
-  if (isOwnMsg) {
-    bubbleCls = 'bg-claimondo-navy text-white'
-    linkCls = 'text-white/80'
-    timeCls = 'text-white/60'
-  } else if (istKunde) {
-    bubbleCls = 'bg-white border border-claimondo-border text-claimondo-navy'
-    linkCls = 'text-claimondo-ondo'
-    timeCls = 'text-claimondo-ondo/70'
-  } else if (istSv) {
-    bubbleCls = 'bg-emerald-50 border border-emerald-200 text-claimondo-navy'
-    linkCls = 'text-emerald-700'
-    timeCls = 'text-emerald-700/70'
-    labelCls = 'text-emerald-700'
-  } else if (istMitarbeiter) {
-    // Andere Mitarbeiter (z.B. anderer KB im Multi-User, eskalierter Admin)
-    bubbleCls = 'bg-claimondo-ondo/12 border border-claimondo-ondo/25 text-claimondo-navy'
-    linkCls = 'text-claimondo-navy/80'
-    timeCls = 'text-claimondo-navy/50'
-    labelCls = 'text-claimondo-ondo'
-  } else {
-    bubbleCls = 'bg-white border border-claimondo-border text-claimondo-navy'
-    linkCls = 'text-claimondo-ondo'
-    timeCls = 'text-claimondo-ondo/70'
-  }
-
-  // Sender-Label zeigen wenn nicht eigenes Ich — gibt dem Leser den
-  // Rollen-Kontext (Kunde / SV / KB).
-  const showRolleLabel = !isOwnMsg && !!message.sender_rolle
-
   return (
     <div className={`flex ${alignRight ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${bubbleCls}`}>
-        {showRolleLabel && message.sender_rolle && (
-          <p className={`text-[10px] font-semibold mb-0.5 uppercase tracking-wider ${labelCls}`}>
-            {message.sender_rolle}
-          </p>
+      <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+        alignRight ? 'bg-[#4573A2] text-white' : 'bg-white border border-claimondo-border text-claimondo-navy'
+      }`}>
+        {!alignRight && message.sender_rolle && (
+          <p className="text-[10px] font-semibold text-claimondo-ondo mb-0.5 uppercase">{message.sender_rolle}</p>
         )}
         <p className="text-sm whitespace-pre-wrap">{message.nachricht}</p>
         {message.hat_anhang && message.anhang_url && (
-          <a href={message.anhang_url} target="_blank" rel="noopener noreferrer" className={`text-xs underline mt-1 block ${linkCls}`}>
+          <a href={message.anhang_url} target="_blank" rel="noopener noreferrer" className={`text-xs underline mt-1 block ${alignRight ? 'text-white/80' : 'text-[#4573A2]'}`}>
             Anhang oeffnen
           </a>
         )}
-        <p className={`text-[10px] mt-1 ${timeCls}`}>
-          {new Date(message.created_at).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
+        <p className={`text-[10px] mt-1 ${alignRight ? 'text-white/60' : 'text-claimondo-ondo/70'}`}>
+          {new Date(message.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>
     </div>

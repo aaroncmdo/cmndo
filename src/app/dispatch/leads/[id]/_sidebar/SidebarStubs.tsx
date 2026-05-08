@@ -10,7 +10,7 @@
 
 import { useState, useTransition } from 'react'
 import GespraechsleitfadenTimer from '../GespraechsleitfadenTimer'
-import RueckrufTerminPanel from '../RueckrufTerminPanel'
+import RueckrufSection from '../RueckrufSection'
 import TerminListeClient from '@/components/termine/TerminListeClient'
 import { useDispatchPhase, type Phase } from '../_lib/phase-context'
 import { Modal } from '@/components/primitives/Modal'
@@ -105,7 +105,7 @@ export function DisqualifizierenButton() {
             </p>
             <div className="space-y-1">
               {DISQ_GRUENDE.map((g) => (
-                <label key={g.key} className="flex items-start gap-2 text-xs cursor-pointer hover:bg-claimondo-bg rounded p-1.5">
+                <label key={g.key} className="flex items-start gap-2 text-xs cursor-pointer hover:bg-[#f8f9fb] rounded p-1.5">
                   <input
                     type="radio"
                     name="dq-grund"
@@ -133,7 +133,7 @@ export function DisqualifizierenButton() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-sm text-claimondo-ondo hover:bg-claimondo-bg"
+                className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-sm text-claimondo-ondo hover:bg-[#f8f9fb]"
               >
                 Abbrechen
               </button>
@@ -154,58 +154,24 @@ export function DisqualifizierenButton() {
 
 export function RueckrufButton() {
   const { lead } = useDispatchPhase()
-  const l = lead as unknown as {
-    anruf_versuche?: number | null
-    letzter_anruf_am?: string | null
-    letzter_anruf_status?: string | null
-  }
-  return (
-    <div className="bg-white rounded-2xl border border-claimondo-border p-4">
-      <RueckrufTerminPanel
-        leadId={lead.id}
-        initial={{
-          anrufVersuche: l.anruf_versuche ?? 0,
-          letzterAnrufAm: l.letzter_anruf_am ?? null,
-          letzterAnrufStatus: l.letzter_anruf_status ?? null,
-        }}
-      />
-    </div>
-  )
+  // AAR-637: Rückruf-Daten kommen jetzt aus admin_termine, nicht mehr vom
+  // Lead-Snapshot. RueckrufSection lädt den offenen Termin selbst.
+  return <RueckrufSection leadId={lead.id} />
 }
 
 // AAR-638: zeigt alle Termine zum Lead (Rückrufe aus admin_termine + ggf.
 // SV-Termine aus gutachter_termine, falls der Lead bereits zu einem Fall
 // konvertiert wurde und gutachter_termine.lead_id gesetzt ist).
-// Rückruf-Zeilen öffnen das RueckrufTerminPanel als Modal statt zu navigieren.
 export function TerminListeSidebar() {
   const { lead } = useDispatchPhase()
-  const [rueckrufLeadId, setRueckrufLeadId] = useState<string | null>(null)
-
   return (
-    <>
-      <TerminListeClient
-        leadId={lead.id}
-        variant="compact"
-        title="Termine zum Lead"
-        dispatchLinks
-        limit={8}
-        onRueckrufClick={(lId) => setRueckrufLeadId(lId)}
-      />
-      <Modal
-        open={!!rueckrufLeadId}
-        onClose={() => setRueckrufLeadId(null)}
-        maxWidth={520}
-        ariaLabel="Rückruftermin"
-        placement="bottom-sheet"
-      >
-        {rueckrufLeadId && (
-          <RueckrufTerminPanel
-            leadId={rueckrufLeadId}
-            onActionDone={() => setRueckrufLeadId(null)}
-          />
-        )}
-      </Modal>
-    </>
+    <TerminListeClient
+      leadId={lead.id}
+      variant="compact"
+      title="Termine zum Lead"
+      dispatchLinks
+      limit={8}
+    />
   )
 }
 

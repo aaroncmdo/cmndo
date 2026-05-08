@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HomeIcon, SearchIcon, CalendarIcon } from 'lucide-react'
+import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon } from 'lucide-react'
 
 // CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
 // und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
@@ -10,12 +10,12 @@ function buildNavItems(singleFallId: string | null) {
   const fallItem = singleFallId
     ? { href: `/kunde/faelle/${singleFallId}`, label: 'Mein Fall', icon: HomeIcon, exact: false }
     : { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true }
-  // "Nachrichten" raus (Chat lebt im KB-Card-Modal), "Profil" raus (klickt
-  // jetzt auf den eigenen Namen unten in der Sidebar).
   return [
     fallItem,
     { href: '/kunde/termine', label: 'Termine', icon: CalendarIcon, exact: false },
     { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon, exact: false },
+    { href: '/kunde/chat', label: 'Nachrichten', icon: MessageSquareIcon, exact: false },
+    { href: '/kunde/profil', label: 'Profil', icon: UserIcon, exact: false },
   ]
 }
 
@@ -33,7 +33,8 @@ export default function KundeNav({
   const MOBILE_ITEMS = [
     NAV_ITEMS[0]!,
     NAV_ITEMS.find((i) => i.href === '/kunde/termine')!,
-    NAV_ITEMS.find((i) => i.href === '/kunde/nachbesichtigung')!,
+    NAV_ITEMS.find((i) => i.href === '/kunde/chat')!,
+    NAV_ITEMS.find((i) => i.href === '/kunde/profil')!,
   ]
 
   function isActive(href: string, exact?: boolean) {
@@ -52,7 +53,7 @@ export default function KundeNav({
           return (
             <Link key={item.href} href={item.href}
               className={`flex flex-col items-center gap-0.5 min-w-[48px] min-h-[48px] px-3 py-2 transition-colors duration-500 ${
-                active ? 'text-white' : 'text-claimondo-light-blue hover:text-white'
+                active ? 'text-white' : 'text-[#7BA3CC] hover:text-white'
               }`}>
               <item.icon className="w-5 h-5" />
               <span className="text-[10px] font-medium">{item.label}</span>
@@ -66,13 +67,13 @@ export default function KundeNav({
   // Desktop: Sidebar Nav
   return (
     <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-      <p className="text-[10px] uppercase tracking-wider text-claimondo-light-blue px-3 pt-4 pb-2">Navigation</p>
+      <p className="text-[10px] uppercase tracking-wider text-[#7BA3CC] px-3 pt-4 pb-2">Navigation</p>
       {NAV_ITEMS.map(item => {
         const active = isActive(item.href, item.exact)
         return (
           <Link key={item.href} href={item.href}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
-              active ? 'bg-claimondo-ondo text-white font-semibold' : 'text-claimondo-light-blue hover:bg-claimondo-shield hover:text-white'
+              active ? 'bg-[#4573A2] text-white font-semibold' : 'text-[#7BA3CC] hover:bg-[#1E3A5F] hover:text-white'
             }`}>
             <item.icon style={{ width: 17, height: 17 }} />
             {item.label}

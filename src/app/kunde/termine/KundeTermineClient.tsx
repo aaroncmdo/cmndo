@@ -43,7 +43,7 @@ const STATUS_BADGE: Record<string, string> = {
   bestaetigt: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   gegenvorschlag: 'bg-amber-50 text-amber-700 border-amber-200',
   abgelehnt: 'bg-red-50 text-red-700 border-red-200',
-  abgeschlossen: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border',
+  abgeschlossen: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
 }
 
 // Dot-Farbe pro Status im Kalender
@@ -162,18 +162,18 @@ export default function KundeTermineClient({
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1.5 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo transition-colors"
               aria-label="Vorheriger Monat"
             >
               <ChevronLeftIcon className="w-4 h-4" />
             </button>
             <span className="text-sm font-semibold text-claimondo-navy capitalize">
-              {month.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', month: 'long', year: 'numeric' })}
+              {month.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
             </span>
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1.5 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo transition-colors"
               aria-label="Nächster Monat"
             >
               <ChevronRightIcon className="w-4 h-4" />
@@ -206,10 +206,10 @@ export default function KundeTermineClient({
                       ? 'bg-claimondo-navy text-white'
                       : isToday
                         ? 'bg-[#eef3f9] text-claimondo-navy font-bold'
-                        : 'hover:bg-claimondo-bg text-claimondo-navy'
+                        : 'hover:bg-[#f8f9fb] text-claimondo-navy'
                   } ${dayTermine.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
                   disabled={dayTermine.length === 0}
-                  aria-label={`${cell.date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}: ${dayTermine.length} Termin(e)`}
+                  aria-label={`${cell.date.toLocaleDateString('de-DE')}: ${dayTermine.length} Termin(e)`}
                 >
                   <span className="text-xs leading-none">{cell.date.getDate()}</span>
                   {dayTermine.length > 0 && (
@@ -238,7 +238,7 @@ export default function KundeTermineClient({
           {selectedKey && selectedTermine.length > 0 && (
             <div className="border-t border-claimondo-border px-4 py-3 space-y-2">
               <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
-                {new Date(selectedKey + 'T12:00:00').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+                {new Date(selectedKey + 'T12:00:00').toLocaleDateString('de-DE', {
                   weekday: 'long', day: '2-digit', month: 'long',
                 })}
               </p>
@@ -302,7 +302,7 @@ function TerminCard({
   const isVideo = t.kanal === 'video'
   const Icon = isKb ? VideoIcon : HardHatIcon
   const start = new Date(t.start_zeit)
-  const badgeCls = STATUS_BADGE[t.status] ?? 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'
+  const badgeCls = STATUS_BADGE[t.status] ?? 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border'
   const statusLabel = STATUS_LABEL[t.status] ?? t.status
 
   // AAR-698: Karte komplett klickbar → Termin-Detail-View.
@@ -329,9 +329,9 @@ function TerminCard({
             </span>
           </div>
           <p className="text-sm text-claimondo-navy mt-1">
-            {start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long' })}
+            {start.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
             {' · '}
-            {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
+            {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
           </p>
           {fall && (
             <p className="text-xs text-claimondo-ondo mt-0.5">

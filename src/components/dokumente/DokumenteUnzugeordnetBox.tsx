@@ -57,7 +57,7 @@ export default function DokumenteUnzugeordnetBox({
                     {doc.dokument_typ === 'kunde-nachreichung' ? 'Nachreichung' : 'Sonstiges'}
                   </StatusBadge>
                   <span className="text-[9px] text-claimondo-ondo">
-                    {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                    {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE')}
                   </span>
                 </div>
                 {doc.beschreibung && (

@@ -16,42 +16,23 @@ import type { CreateMitteilungInput, EmpfaengerRolle, KontextTyp, MitteilungKate
 //   - kunde             → /kunde/faelle/{id}
 //   - makler            → /makler/akten/{id}
 //   - admin/kb/kanzlei  → /faelle/{id} (geteilte Fallakte)
-//
-// 2026-05-07: kontext_typ='claim' neu — wir speichern claim_id als SSoT, lösen
-// per Lookup auf fall_id für die UI-Route auf. Async, weil DB-Hop nötig.
-async function autoRouteUrl(
+function autoRouteUrl(
   kontextTyp: KontextTyp | undefined,
   kontextId: string | undefined,
   rolle: EmpfaengerRolle,
-): Promise<string | null> {
+): string | null {
   if (!kontextTyp || !kontextId) return null
 
   // Portal-Base-Pfad über zentrale Quelle.
   const portalBase = roleToPath(rolle)
 
-  // Helper: rolle-spezifische Fall-Route bauen.
-  const fallRoute = (fallId: string): string => {
-    if (rolle === 'sachverstaendiger') return `/gutachter/fall/${fallId}`
-    if (rolle === 'kunde') return `/kunde/faelle/${fallId}`
-    if (rolle === 'makler') return `/makler/akten/${fallId}`
-    return `/faelle/${fallId}`
-  }
-
   switch (kontextTyp) {
     case 'fall':
-      return fallRoute(kontextId)
-    case 'claim': {
-      // claim → fall lookup. faelle.claim_id ist FK seit CMM-Phase-1.5.
-      const admin = createAdminClient()
-      const { data } = await admin
-        .from('faelle')
-        .select('id')
-        .eq('claim_id', kontextId)
-        .limit(1)
-        .maybeSingle()
-      const fallId = data?.id as string | undefined
-      return fallId ? fallRoute(fallId) : null
-    }
+      if (rolle === 'sachverstaendiger') return `/gutachter/fall/${kontextId}`
+      if (rolle === 'kunde') return `/kunde/faelle/${kontextId}`
+      if (rolle === 'makler') return `/makler/akten/${kontextId}`
+      // admin / kundenbetreuer / dispatch / kanzlei → geteilte Fallakte
+      return `/faelle/${kontextId}`
     case 'lead':
       if (rolle === 'dispatch') return `/dispatch/leads/${kontextId}`
       if (rolle === 'makler') return `/makler/leads/${kontextId}`
@@ -85,7 +66,7 @@ function autoIcon(kategorie: MitteilungKategorie, kontextTyp?: KontextTyp): stri
   if (kategorie === 'anruf') return '📞'
   if (kategorie === 'nachricht') return '💬'
   if (kategorie === 'task') return '📌'
-  if (kontextTyp === 'fall' || kontextTyp === 'claim') return '📁'
+  if (kontextTyp === 'fall') return '📁'
   if (kontextTyp === 'lead') return '📋'
   if (kontextTyp === 'termin') return '📅'
   if (kontextTyp === 'abrechnung') return '💶'
@@ -93,10 +74,12 @@ function autoIcon(kategorie: MitteilungKategorie, kontextTyp?: KontextTyp): stri
 }
 
 export async function createMitteilung(input: CreateMitteilungInput): Promise<{ id: string } | null> {
-  const admin = createAdminClient()
-  const routeUrl = input.route_url ?? (await autoRouteUrl(input.kontext_typ, input.kontext_id, input.empfaenger_rolle))
+  const db = createAdminClient()
+
+  const routeUrl = input.route_url ?? autoRouteUrl(input.kontext_typ, input.kontext_id, input.empfaenger_rolle)
   const icon = input.icon ?? autoIcon(input.kategorie, input.kontext_typ)
-  const { data, error } = await admin.from('mitteilungen').insert({
+
+  const { data, error } = await db.from('mitteilungen').insert({
     empfaenger_id: input.empfaenger_id,
     empfaenger_rolle: input.empfaenger_rolle,
     kategorie: input.kategorie,
@@ -105,23 +88,27 @@ export async function createMitteilung(input: CreateMitteilungInput): Promise<{ 
     kontext_typ: input.kontext_typ ?? null,
     kontext_id: input.kontext_id ?? null,
     route_url: routeUrl,
-    absender_id: input.absender_id ?? null,
-    absender_name: input.absender_name ?? null,
     icon,
     prioritaet: input.prioritaet ?? 'normal',
+    absender_id: input.absender_id ?? null,
+    absender_name: input.absender_name ?? null,
   }).select('id').single()
+
   if (error) {
-    console.error('[createMitteilung] insert error:', error.message)
+    console.error('[createMitteilung] Insert fehlgeschlagen:', error.message)
     return null
   }
   return data
 }
 
+// Convenience: Mitteilung an MEHRERE Empfänger (z.B. Admin + SV gleichzeitig).
 export async function createMitteilungMulti(
   empfaenger: Array<{ id: string; rolle: EmpfaengerRolle }>,
   base: Omit<CreateMitteilungInput, 'empfaenger_id' | 'empfaenger_rolle'>,
 ): Promise<void> {
   await Promise.allSettled(
-    empfaenger.map(e => createMitteilung({ ...base, empfaenger_id: e.id, empfaenger_rolle: e.rolle }))
+    empfaenger.map(e =>
+      createMitteilung({ ...base, empfaenger_id: e.id, empfaenger_rolle: e.rolle }),
+    ),
   )
 }

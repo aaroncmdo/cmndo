@@ -58,7 +58,6 @@ export default function RouteSidebar({
             svPosition={svPosition}
             svInGeofence={svInGeofence}
             permissionState={permissionState}
-            distanceMeters={distanceMeters}
             onAdvanced={onAdvanced}
             onArrived={onArrived}
           />

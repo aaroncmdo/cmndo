@@ -41,7 +41,7 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
       className={`rounded-2xl border p-4 sm:p-5 space-y-3 ${
         durchgefuehrt
           ? 'bg-emerald-50 border-emerald-200'
-          : 'bg-claimondo-bg border-claimondo-border'
+          : 'bg-[#f8f9fb] border-claimondo-border'
       }`}
     >
       <div className="flex items-center justify-between">
@@ -84,7 +84,7 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
             <div className="flex items-center gap-2 text-xs text-claimondo-navy bg-white rounded-lg px-3 py-2 border border-claimondo-border">
               <CalendarIcon className="w-3 h-3 text-claimondo-ondo" />
               Termin:{' '}
-              {new Date(fall.nachbesichtigung_termin_datum!).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
+              {new Date(fall.nachbesichtigung_termin_datum!).toLocaleString('de-DE', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',

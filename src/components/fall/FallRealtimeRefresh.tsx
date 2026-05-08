@@ -14,14 +14,11 @@ import { createClient } from '@/lib/supabase/client'
 
 type Props = {
   fallId: string
-  /** Optional: claim_id, damit Aenderungen am Claim (OCR-Felder, Phase, Status,
-   *  No-Show-Counter) ebenfalls einen Refresh ausloesen. */
-  claimId?: string | null
   /** Optional: Debounce zwischen mehreren schnellen Events (ms). Default 500. */
   debounceMs?: number
 }
 
-export default function FallRealtimeRefresh({ fallId, claimId, debounceMs = 500 }: Props) {
+export default function FallRealtimeRefresh({ fallId, debounceMs = 500 }: Props) {
   const router = useRouter()
   const channelId = useId()
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -70,37 +67,13 @@ export default function FallRealtimeRefresh({ fallId, claimId, debounceMs = 500 
         },
         scheduleRefresh,
       )
-
-    if (claimId) {
-      channel.on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'claims',
-          filter: `id=eq.${claimId}`,
-        },
-        scheduleRefresh,
-      )
-      channel.on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'kanzlei_faelle',
-          filter: `claim_id=eq.${claimId}`,
-        },
-        scheduleRefresh,
-      )
-    }
-
-    channel.subscribe()
+      .subscribe()
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
       supabase.removeChannel(channel)
     }
-  }, [fallId, claimId, channelId, router, debounceMs])
+  }, [fallId, channelId, router, debounceMs])
 
   return null
 }

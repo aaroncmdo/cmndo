@@ -60,7 +60,6 @@ export default function ProfilClient({
   pendingTermine,
   notificationPrefs,
   googleConnected,
-  googleAvatarUrl,
 }: {
   email: string
   profile: Profile
@@ -70,12 +69,9 @@ export default function ProfilClient({
   notificationPrefs: NotificationPreferencesFormValue
   // AAR-707: echter OAuth-Status aus profiles.google_refresh_token
   googleConnected: boolean
-  // CMM-29: Fallback-Avatar aus Google Places (nur wenn kein eigenes Bild hochgeladen)
-  googleAvatarUrl?: string | null
 }) {
   const router = useRouter()
   const [editing, setEditing] = useState(false)
-  const [showEmptyFields, setShowEmptyFields] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -208,29 +204,24 @@ export default function ProfilClient({
 
         <form onSubmit={handleSave} className="max-w-4xl">
           <div className="bg-white rounded-2xl p-6 border border-claimondo-border space-y-4">
-            {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis.
-                2026-05-07 Mobile-Polish: min-w-0 + truncate damit lange Namen
-                den Avatar nicht überlappen, „Sachverständiger" als Rolle-Pill
-                statt Subtitle-Text (verhindert Overflow auf 390er-Mobile). */}
-            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4 pb-4 border-b border-claimondo-border">
+            {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis */}
+            <div className="flex items-center gap-4 pb-4 border-b border-claimondo-border">
               <AvatarUpload
-                currentUrl={profile.avatar_url ?? googleAvatarUrl ?? null}
+                currentUrl={profile.avatar_url ?? null}
                 initials={initials || '??'}
                 size="md"
               />
-              <div className="flex-1 min-w-0 w-full">
-                <p className="text-claimondo-navy font-medium text-lg break-words">{fullName}</p>
-                <span className="inline-block mt-1 text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo bg-claimondo-bg border border-claimondo-border rounded-full px-2 py-0.5">
-                  Sachverständiger
-                </span>
+              <div>
+                <p className="text-claimondo-navy font-medium text-lg">{fullName}</p>
+                <p className="text-claimondo-ondo text-sm">Sachverständiger</p>
               </div>
             </div>
 
             {/* Fields */}
             <div className="space-y-0">
               {/* E-Mail read-only mit Hinweis */}
-              <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 border-b border-claimondo-border/50">
-                <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0">E-Mail</span>
+              <div className="flex gap-2 py-2.5 border-b border-claimondo-border/50">
+                <span className="text-claimondo-ondo text-sm w-36 shrink-0">E-Mail</span>
                 <div className="flex-1">
                   <span className="text-claimondo-navy text-sm">{email}</span>
                   <p className="text-claimondo-ondo/70 text-[10px] mt-0.5 flex items-center gap-1">
@@ -258,15 +249,15 @@ export default function ProfilClient({
                   <ControlledRow label="Vorname" value={form.vorname} onChange={v => updateField('vorname', v)} />
                   <ControlledRow label="Nachname" value={form.nachname} onChange={v => updateField('nachname', v)} />
                   <ControlledRow label="Telefon" type="tel" value={form.telefon} onChange={v => updateField('telefon', v)} />
-                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2 border-b border-claimondo-border/50">
-                    <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0 sm:pt-2">Anschrift</span>
+                  <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
+                    <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">Anschrift</span>
                     <div className="flex-1 space-y-2">
                       {mapsReady ? (
                         <GooglePlaceAutocomplete
                           defaultValue={standort.adresse}
                           placeholder="Büro-/Wohnadresse eingeben"
                           onSelect={onPlaceSelect}
-                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                       ) : (
                         <input
@@ -274,7 +265,7 @@ export default function ProfilClient({
                           value={standort.adresse}
                           onChange={e => setStandort(prev => ({ ...prev, adresse: e.target.value }))}
                           placeholder="Büro-/Wohnadresse eingeben"
-                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                       )}
                       {standort.lat != null && (
@@ -293,15 +284,15 @@ export default function ProfilClient({
                     onChange={v => updateField('anzeigename', v)}
                     placeholder="z.B. Max M. — Fallback: Vor- + Nachname"
                   />
-                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2 border-b border-claimondo-border/50">
-                    <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0 sm:pt-2">Profiltext</span>
+                  <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
+                    <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">Profiltext</span>
                     <textarea
                       value={form.profilbeschreibung}
                       onChange={e => updateField('profilbeschreibung', e.target.value)}
                       placeholder="z.B. Ihr persönlicher Sachverständiger mit 15 Jahren Erfahrung"
                       rows={2}
                       maxLength={200}
-                      className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
+                      className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
                     />
                   </div>
 
@@ -320,71 +311,25 @@ export default function ProfilClient({
                   <ControlledRow label="HRB" value={form.hrb} onChange={v => updateField('hrb', v)} placeholder="z.B. HRB 12345 (Berlin)" />
                 </>
               ) : (
-                (() => {
-                  // 2026-05-07 Design-Review: leere Felder per Default
-                  // verstecken — sonst sieht der Read-State wie ein
-                  // Daten-Verlust-Bug aus (7+ "—" untereinander). Toggle
-                  // unten expandiert sie als ergänzbare Liste.
-                  const isEmpty = (v: string | null | undefined) =>
-                    v == null || (typeof v === 'string' && v.trim() === '')
-                  const personalFields = [
-                    { label: 'Anrede', value: profile.anrede },
-                    { label: 'Titel', value: profile.titel },
-                    { label: 'Vorname', value: profile.vorname },
-                    { label: 'Nachname', value: profile.nachname },
-                    { label: 'Telefon', value: profile.telefon },
-                    { label: 'Anschrift', value: sv.standort_adresse },
-                    { label: 'Anzeigename', value: profile.anzeigename },
-                    { label: 'Profiltext', value: profile.profilbeschreibung },
-                  ]
-                  const firmaFields = [
-                    { label: 'Firmenname', value: sv.firmenname },
-                    { label: 'Rechtsform', value: sv.rechtsform },
-                    { label: 'Steuernummer', value: sv.steuernummer },
-                    { label: 'USt-IdNr', value: sv.ust_id },
-                    { label: 'HRB', value: sv.hrb },
-                  ]
-                  const filledPersonal = personalFields.filter((f) => !isEmpty(f.value))
-                  const emptyPersonal = personalFields.filter((f) => isEmpty(f.value))
-                  const filledFirma = firmaFields.filter((f) => !isEmpty(f.value))
-                  const emptyFirma = firmaFields.filter((f) => isEmpty(f.value))
-                  const totalEmpty = emptyPersonal.length + emptyFirma.length
-
-                  return (
-                    <>
-                      {filledPersonal.map((f) => (
-                        <FieldRow key={f.label} label={f.label} value={f.value as string} />
-                      ))}
-                      {showEmptyFields && emptyPersonal.map((f) => (
-                        <FieldRow key={f.label} label={f.label} value="—" />
-                      ))}
-                      {(filledFirma.length > 0 || (showEmptyFields && emptyFirma.length > 0)) && (
-                        <div className="pt-3 mt-3 border-t border-claimondo-border">
-                          <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wide mb-1 px-1">
-                            Firma / Steuerliches
-                          </p>
-                        </div>
-                      )}
-                      {filledFirma.map((f) => (
-                        <FieldRow key={f.label} label={f.label} value={f.value as string} />
-                      ))}
-                      {showEmptyFields && emptyFirma.map((f) => (
-                        <FieldRow key={f.label} label={f.label} value="—" />
-                      ))}
-                      {totalEmpty > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setShowEmptyFields((s) => !s)}
-                          className="mt-2 text-[11px] text-claimondo-ondo hover:text-claimondo-navy underline-offset-2 hover:underline self-start"
-                        >
-                          {showEmptyFields
-                            ? 'Leere Felder ausblenden'
-                            : `${totalEmpty} ${totalEmpty === 1 ? 'Feld' : 'Felder'} ergänzen ▾`}
-                        </button>
-                      )}
-                    </>
-                  )
-                })()
+                <>
+                  <FieldRow label="Anrede" value={profile.anrede ?? '—'} />
+                  <FieldRow label="Titel" value={profile.titel || '—'} />
+                  <FieldRow label="Vorname" value={profile.vorname ?? '—'} />
+                  <FieldRow label="Nachname" value={profile.nachname ?? '—'} />
+                  <FieldRow label="Telefon" value={profile.telefon ?? '—'} />
+                  <FieldRow label="Anschrift" value={sv.standort_adresse ?? '—'} />
+                  {/* AAR-369 */}
+                  <FieldRow label="Anzeigename" value={profile.anzeigename ?? '—'} />
+                  <FieldRow label="Profiltext" value={profile.profilbeschreibung ?? '—'} />
+                  <div className="pt-3 mt-3 border-t border-claimondo-border">
+                    <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
+                  </div>
+                  <FieldRow label="Firmenname" value={sv.firmenname ?? '—'} />
+                  <FieldRow label="Rechtsform" value={sv.rechtsform ?? '—'} />
+                  <FieldRow label="Steuernummer" value={sv.steuernummer ?? '—'} />
+                  <FieldRow label="USt-IdNr" value={sv.ust_id ?? '—'} />
+                  <FieldRow label="HRB" value={sv.hrb ?? '—'} />
+                </>
               )}
 
               <div className="pt-3 mt-3 border-t border-claimondo-border">
@@ -401,7 +346,7 @@ export default function ProfilClient({
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
-                  className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors"
+                  className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors"
                 >
                   Abbrechen
                 </button>
@@ -428,7 +373,7 @@ export default function ProfilClient({
             noch ein Status-Hinweis mit Deep-Link. */}
         <Link
           href="/gutachter/einstellungen/kalender"
-          className="bg-white rounded-2xl p-4 border border-claimondo-border mt-5 flex items-center gap-3 hover:border-claimondo-ondo transition-colors group"
+          className="bg-white rounded-2xl p-4 border border-claimondo-border mt-5 flex items-center gap-3 hover:border-[#4573A2] transition-colors group"
         >
           <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${googleConnected ? 'bg-green-500' : 'bg-zinc-400'}`} />
           <div className="flex-1 min-w-0">
@@ -439,7 +384,7 @@ export default function ProfilClient({
               Verwalten unter Einstellungen → Kalender
             </p>
           </div>
-          <span className="text-[11px] text-claimondo-ondo group-hover:text-claimondo-navy">Öffnen →</span>
+          <span className="text-[11px] text-[#4573A2] group-hover:text-[#0D1B3E]">Öffnen →</span>
         </Link>
 
         {/* KFZ-154: 3 Spezialisierungs-Listen */}
@@ -601,14 +546,14 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
   const end = new Date(termin.end_zeit)
 
   return (
-    <div className="bg-claimondo-bg/50 rounded-xl p-4 border border-claimondo-border">
+    <div className="bg-[#f8f9fb]/50 rounded-xl p-4 border border-claimondo-border">
       <div className="flex items-center justify-between mb-2">
         <p className="text-claimondo-navy text-sm font-medium">
-          {start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })}
+          {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
           {' '}
-          {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
+          {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
           –
-          {end.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
+          {end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
         </p>
         <span className="text-amber-400 text-[10px] font-medium bg-amber-50 px-2 py-0.5 rounded-full">Anfrage</span>
       </div>
@@ -637,20 +582,20 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
             value={ablehnungsgrund}
             onChange={e => setAblehnungsgrund(e.target.value)}
             placeholder="Grund (optional)"
-            className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
+            className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
           />
           <input
             type="datetime-local"
             value={gegenvorschlag}
             onChange={e => setGegenvorschlag(e.target.value)}
             required
-            className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
+            className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
           />
           <p className="text-claimondo-ondo text-xs">Gegenvorschlag ist Pflicht</p>
           <div className="flex gap-2">
             <button
               onClick={() => setShowReject(false)}
-              className="flex-1 py-2 rounded-lg text-xs text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors"
+              className="flex-1 py-2 rounded-lg text-xs text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors"
             >
               Zurück
             </button>
@@ -828,7 +773,7 @@ function SpezSection({
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-60 ${
                 active
                   ? 'bg-[var(--brand-secondary)] text-white'
-                  : 'bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy'
+                  : 'bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               {opt}
@@ -843,64 +788,27 @@ function SpezSection({
 
 function FieldRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 border-b border-claimondo-border/50 last:border-0">
-      <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0">{label}</span>
+    <div className="flex gap-2 py-2.5 border-b border-claimondo-border/50 last:border-0">
+      <span className="text-claimondo-ondo text-sm w-36 shrink-0">{label}</span>
       <span className="text-claimondo-navy text-sm">{value}</span>
     </div>
   )
 }
 
-// 2026-05-06 SV7 (Form-Audit): drei Verbesserungen pro Form-Row:
-//   1) Mobile-Stack: flex-col auf <sm, flex-row ab sm — Label nimmt nicht
-//      mehr 144px vom 390px-Mobile-Viewport, Input bekommt full-width.
-//   2) Implicit-Label: <label> wrapt Input — keine htmlFor/id-Plumbing,
-//      Klick aufs Label fokussiert das Feld.
-//   3) Auto-inferred autoComplete + inputMode aus type-Prop:
-//      type=tel   → inputMode=tel,    autoComplete=tel
-//      type=email → inputMode=email,  autoComplete=email
-//      type=number→ inputMode=decimal
-//      Mobile-Tastatur springt damit auf die richtige Variante (Ziffern-
-//      Pad bei Telefon, @-Tastatur bei Email).
-
-function inferInputMode(type: string): 'text' | 'tel' | 'email' | 'numeric' | 'decimal' | undefined {
-  if (type === 'tel') return 'tel'
-  if (type === 'email') return 'email'
-  if (type === 'number') return 'decimal'
-  return undefined
-}
-
-function inferAutoComplete(type: string, label: string): string | undefined {
-  if (type === 'tel') return 'tel'
-  if (type === 'email') return 'email'
-  const l = label.toLowerCase()
-  if (l.startsWith('vorname')) return 'given-name'
-  if (l.startsWith('nachname')) return 'family-name'
-  if (l.startsWith('firmenname')) return 'organization'
-  return undefined
-}
-
-const ROW_WRAPPER_CLS =
-  'flex flex-col sm:flex-row gap-1 sm:gap-2 py-2 border-b border-claimondo-border/50'
-const ROW_LABEL_CLS = 'text-claimondo-ondo text-sm sm:w-36 sm:shrink-0 sm:pt-2'
-const ROW_INPUT_CLS =
-  'flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]'
-
 function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
   label: string; name: string; defaultValue: string; type?: string; placeholder?: string
 }) {
   return (
-    <label className={ROW_WRAPPER_CLS}>
-      <span className={ROW_LABEL_CLS}>{label}</span>
+    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
+      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
       <input
         type={type}
         name={name}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        autoComplete={inferAutoComplete(type, label)}
-        inputMode={inferInputMode(type)}
-        className={ROW_INPUT_CLS}
+        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       />
-    </label>
+    </div>
   )
 }
 
@@ -911,18 +819,16 @@ function ControlledRow({ label, value, onChange, type = 'text', placeholder }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string
 }) {
   return (
-    <label className={ROW_WRAPPER_CLS}>
-      <span className={ROW_LABEL_CLS}>{label}</span>
+    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
+      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        autoComplete={inferAutoComplete(type, label)}
-        inputMode={inferInputMode(type)}
-        className={ROW_INPUT_CLS}
+        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       />
-    </label>
+    </div>
   )
 }
 
@@ -933,17 +839,17 @@ function SelectRow({ label, value, onChange, options }: {
   options: ReadonlyArray<{ value: string; label: string }>
 }) {
   return (
-    <label className={ROW_WRAPPER_CLS}>
-      <span className={ROW_LABEL_CLS}>{label}</span>
+    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
+      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className={ROW_INPUT_CLS}
+        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       >
         {options.map(o => (
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
-    </label>
+    </div>
   )
 }

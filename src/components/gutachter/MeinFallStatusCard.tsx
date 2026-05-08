@@ -22,12 +22,7 @@ import { getLexdriveDeepLink, getLexdriveLoginUrl } from '@/lib/kanzlei/lexdrive
 
 type Props = {
   phase: FallPhase
-  /** Geforderte Gesamtsumme — Kunden-Anspruch gegen die VS (faelle.gutachten_betrag).
-   *  Treibt den Kanzleifall-Lifecycle, ist aber NICHT das SV-Grundhonorar. */
-  geforderteGesamtsumme: number | null
-  /** Vom SV gefordertes Grundhonorar (auftraege.grundhonorar_netto/brutto).
-   *  Bewusst „gefordert" weil VS noch nicht ausgezahlt hat. */
-  geforderterGrundhonorarBetrag: number | null
+  geforderterBetrag: number | null
   gutachtenUrl: string | null
   gutachtenFreigegebenAm: string | null
   lexdriveCaseId: string | null
@@ -43,7 +38,7 @@ function fmtEuro(n: number | null): string {
 function fmtDatum(iso: string | null): string {
   if (!iso) return '—'
   try {
-    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+    return new Date(iso).toLocaleDateString('de-DE', {
       day: '2-digit', month: 'long', year: 'numeric',
     })
   } catch {
@@ -84,30 +79,16 @@ export default function MeinFallStatusCard(props: Props) {
         </div>
       </div>
 
-      {/* Forderungen: Gesamtsumme (gegen VS) + SV-Grundhonorar + Link aufs PDF.
-          Beide Betraege sind „gefordert" — VS hat noch nicht ausgezahlt. Das
-          treibt den Kanzleifall-Lifecycle. */}
-      {(props.geforderteGesamtsumme != null ||
-        props.geforderterGrundhonorarBetrag != null ||
-        props.gutachtenUrl) && (
-        <div className="rounded-xl bg-claimondo-bg border border-claimondo-border p-3 space-y-2">
-          {props.geforderteGesamtsumme != null && (
+      {/* Gutachten-Übersicht: geforderter Betrag + Link aufs PDF */}
+      {(props.geforderterBetrag != null || props.gutachtenUrl) && (
+        <div className="rounded-xl bg-[#f8f9fb] border border-claimondo-border p-3 space-y-2">
+          {props.geforderterBetrag != null && (
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-claimondo-ondo flex items-center gap-1.5">
-                <EuroIcon className="w-3.5 h-3.5" /> Geforderte Gesamtsumme
+                <EuroIcon className="w-3.5 h-3.5" /> Geforderter Betrag
               </span>
               <span className="text-sm font-semibold text-claimondo-navy">
-                {fmtEuro(props.geforderteGesamtsumme)}
-              </span>
-            </div>
-          )}
-          {props.geforderterGrundhonorarBetrag != null && (
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-claimondo-ondo flex items-center gap-1.5">
-                <EuroIcon className="w-3.5 h-3.5" /> Gefordertes Grundhonorar
-              </span>
-              <span className="text-sm font-semibold text-claimondo-navy">
-                {fmtEuro(props.geforderterGrundhonorarBetrag)}
+                {fmtEuro(props.geforderterBetrag)}
               </span>
             </div>
           )}

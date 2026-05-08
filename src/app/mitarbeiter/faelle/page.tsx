@@ -23,7 +23,7 @@ export default async function MitarbeiterFaelle() {
 
       <div className="bg-white rounded-xl border border-claimondo-border overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-claimondo-bg text-xs uppercase text-claimondo-ondo">
+          <thead className="bg-[#f8f9fb] text-xs uppercase text-claimondo-ondo">
             <tr>
               <th className="text-left px-4 py-2">Fall</th>
               <th className="text-left px-4 py-2">Fahrzeug</th>
@@ -33,7 +33,7 @@ export default async function MitarbeiterFaelle() {
           </thead>
           <tbody className="divide-y divide-claimondo-border">
             {(faelle ?? []).map(f => (
-              <tr key={f.id} className="hover:bg-claimondo-bg">
+              <tr key={f.id} className="hover:bg-[#f8f9fb]">
                 <td className="px-4 py-3">
                   <Link href={`/faelle/${f.id}`} className="text-claimondo-ondo hover:underline font-medium">
                     {f.fall_nummer ?? f.id.slice(0, 8)}
@@ -44,10 +44,10 @@ export default async function MitarbeiterFaelle() {
                   {[f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || '—'}
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.status}</span>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo">{f.status}</span>
                 </td>
                 <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
-                  {new Date(f.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                  {new Date(f.created_at).toLocaleDateString('de-DE')}
                 </td>
               </tr>
             ))}

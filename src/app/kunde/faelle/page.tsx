@@ -4,11 +4,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import { FolderOpenIcon } from 'lucide-react'
 import FallKarte from '@/components/kunde/FallKarte'
 import { ladeFallKartenMeta } from '@/lib/kunde/fall-karte-loader'
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
-import EmptyState from '@/components/shared/EmptyState'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,14 +35,20 @@ export default async function KundeFaelleListe() {
         >
           Meine Fälle
         </h1>
-        <EmptyState
-          icon={FolderOpenIcon}
-          title="Noch kein Schadensfall"
-          description="Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung."
-          actions={[
-            { label: 'Schaden melden', href: '/schaden-melden/schritt-1' },
-          ]}
-        />
+        <div
+          className="rounded-2xl border p-8 text-center"
+          style={{
+            background: 'var(--brand-surface, #ffffff)',
+            borderColor: 'var(--brand-border, #e5e7eb)',
+          }}
+        >
+          <p
+            className="text-sm"
+            style={{ color: 'var(--brand-text-secondary, #6b7280)' }}
+          >
+            Noch keine Fälle vorhanden.
+          </p>
+        </div>
       </div>
     )
   }
@@ -105,12 +109,6 @@ export default async function KundeFaelleListe() {
                 fahrzeug_hersteller: f.fahrzeug_hersteller as string | null,
                 fahrzeug_modell: f.fahrzeug_modell as string | null,
                 schadens_datum: f.schadens_datum as string | null,
-                sa_unterschrieben: f.sa_unterschrieben as boolean | null,
-                gutachten_eingegangen_am: f.gutachten_eingegangen_am as string | null,
-                regulierung_am: f.regulierung_am as string | null,
-                abgeschlossen_am: f.abgeschlossen_am as string | null,
-                vollmacht_signiert_am: f.vollmacht_signiert_am as string | null,
-                kanzlei_wunsch: f.kanzlei_wunsch as string | null,
               }}
               aktion={meta.aktion}
               nextTermin={meta.nextTermin}

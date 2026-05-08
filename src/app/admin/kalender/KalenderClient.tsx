@@ -30,11 +30,11 @@ type KalenderTermin = {
   gutachterName?: string; gutachterId?: string; fallId?: string; fallNummer?: string; link?: string; status?: string; overdue?: boolean
 }
 
-const FARBEN: Record<string, string> = { gutachter: '#4573A2', rueckruf: '#9CA3AF', kunde: '#5DAA80', intern: '#7B7B8A', task: '#f97316', kb_beratung: '#C9A84C' }
+const FARBEN: Record<string, string> = { gutachter: '#4573A2', rueckruf: '#E89B3C', kunde: '#5DAA80', intern: '#7B7B8A', task: '#f97316', kb_beratung: '#C9A84C' }
 const TYP_LABELS: Record<string, string> = { gutachter: 'Gutachter', rueckruf: 'Rueckruf', kunde: 'Kunde', intern: 'Intern', kb_beratung: 'KB-Beratung' }
 const TYP_ICONS: Record<string, typeof CalendarIcon> = { gutachter: CalendarIcon, rueckruf: PhoneIcon, kunde: UsersIcon, intern: CoffeeIcon, kb_beratung: PhoneIcon }
 const SV_TYP_BADGE: Record<string, { label: string; color: string }> = {
-  'kfz-gutachter': { label: 'KFZ', color: 'bg-claimondo-bg text-claimondo-ondo' },
+  'kfz-gutachter': { label: 'KFZ', color: 'bg-[#f8f9fb] text-claimondo-ondo' },
   'dat-gutachter': { label: 'DAT', color: 'bg-orange-100 text-orange-700' },
   'akademie': { label: 'Akademie', color: 'bg-green-100 text-green-700' },
   'gutachterbuero': { label: 'Buero', color: 'bg-purple-100 text-purple-700' },
@@ -221,11 +221,11 @@ export default function KalenderClient({
                   </button>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => navigate('prev')} className="p-2 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
+                  <button onClick={() => navigate('prev')} className="p-2 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors">
                     <ChevronLeftIcon className="w-4 h-4" />
                   </button>
-                  <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg rounded-lg transition-colors">Heute</button>
-                  <button onClick={() => navigate('next')} className="p-2 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
+                  <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs font-medium text-claimondo-navy hover:bg-[#f8f9fb] rounded-lg transition-colors">Heute</button>
+                  <button onClick={() => navigate('next')} className="p-2 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors">
                     <ChevronRightIcon className="w-4 h-4" />
                   </button>
                 </div>
@@ -265,7 +265,7 @@ export default function KalenderClient({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                 typFilter.gutachter
                   ? 'bg-white border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo'
-                  : 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo/70 cursor-not-allowed'
+                  : 'bg-[#f8f9fb] border-claimondo-border text-claimondo-ondo/70 cursor-not-allowed'
               }`}
               title={!typFilter.gutachter ? 'Gutachter-Termine sind ausgeblendet' : undefined}>
               <UsersIcon className="w-3.5 h-3.5" />
@@ -293,7 +293,7 @@ export default function KalenderClient({
                     const badge = SV_TYP_BADGE[g.typ]
                     return (
                       <button key={g.id} onClick={() => toggleGutachter(g.id)}
-                        className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-claimondo-bg transition-colors">
+                        className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-[#f8f9fb] transition-colors">
                         <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
                           selected ? 'bg-claimondo-ondo border-claimondo-ondo' : 'border-claimondo-border'
                         }`}>
@@ -333,9 +333,9 @@ export default function KalenderClient({
 
               return (
                 <div key={i} onClick={() => setModal({ mode: 'create', date: day })}
-                  className={`border-b border-r border-claimondo-border/50 p-1.5 cursor-pointer hover:bg-claimondo-bg/50 ${
+                  className={`border-b border-r border-claimondo-border/50 p-1.5 cursor-pointer hover:bg-[#f8f9fb]/50 ${
                     viewMode === 'week' ? 'min-h-48' : 'min-h-24'
-                  } ${!isCurrentMonth && viewMode === 'month' ? 'bg-claimondo-bg/50' : ''}`}>
+                  } ${!isCurrentMonth && viewMode === 'month' ? 'bg-[#f8f9fb]/50' : ''}`}>
                   <div className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
                     todayFlag ? 'bg-claimondo-navy text-white' : isCurrentMonth ? 'text-claimondo-navy' : 'text-claimondo-ondo/50'
                   }`}>
@@ -499,7 +499,7 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
               Erledigt
             </button>
             <button onClick={() => handleStatusChange('abgesagt')} disabled={loading}
-              className="flex-1 py-2 text-xs font-medium text-claimondo-ondo bg-claimondo-bg rounded-lg hover:bg-claimondo-border transition-colors disabled:opacity-50">
+              className="flex-1 py-2 text-xs font-medium text-claimondo-ondo bg-[#f8f9fb] rounded-lg hover:bg-claimondo-border transition-colors disabled:opacity-50">
               Absagen
             </button>
           </div>
@@ -520,7 +520,7 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
             )
           )}
           <div className="flex-1" />
-          <button onClick={onClose} className="px-4 py-2.5 text-sm font-medium text-claimondo-ondo bg-claimondo-bg rounded-lg hover:bg-claimondo-border transition-colors">
+          <button onClick={onClose} className="px-4 py-2.5 text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] rounded-lg hover:bg-claimondo-border transition-colors">
             Abbrechen
           </button>
           <button onClick={handleSave} disabled={loading || !titel.trim()}

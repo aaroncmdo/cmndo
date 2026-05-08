@@ -86,8 +86,6 @@ type Props = {
   width?: number
   className?: string
   alt?: string
-  /** Auf dunklem Hintergrund: Logo weiß, kein Grau-Placeholder */
-  dark?: boolean
 }
 
 type Stage = 'imagin' | 'simpleicons' | 'clearbit' | 'icon'
@@ -100,7 +98,6 @@ export default function FahrzeugRenderImage({
   width = 200,
   className = '',
   alt,
-  dark = false,
 }: Props) {
   const [stage, setStage] = useState<Stage>('imagin')
 
@@ -110,7 +107,7 @@ export default function FahrzeugRenderImage({
   if (!hersteller) {
     return (
       <div
-        className={`flex items-center justify-center ${dark ? 'text-white/60' : 'rounded-xl bg-claimondo-border/30 text-claimondo-ondo'} ${className}`}
+        className={`flex items-center justify-center rounded-xl bg-claimondo-border/30 text-claimondo-ondo ${className}`}
         style={{ width, height }}
       >
         <CarIcon className="w-8 h-8 opacity-50" />
@@ -121,9 +118,9 @@ export default function FahrzeugRenderImage({
   const key = lookupKey(hersteller)
   const imaginUrl = buildImaginProxyUrl({ hersteller, modell, lackfarbe, baujahr })
   const siSlug = key in SI_SLUG ? SI_SLUG[key] : null
-  // dark=true → weiß (für dunkle Hintergründe), sonst Claimondo-Navy im CI.
-  const siColor = dark ? 'FFFFFF' : '0D1B3E'
-  const siUrl = siSlug ? `https://cdn.simpleicons.org/${siSlug}/${siColor}` : null
+  // Claimondo-Navy als Logo-Farbe — SimpleIcons rendert sonst in der
+  // Brand-Color (z.B. Audi-Rot), das passt nicht ins CI.
+  const siUrl = siSlug ? `https://cdn.simpleicons.org/${siSlug}/0D1B3E` : null
   const clearbitDomain = CLEARBIT_DOMAIN[key] ?? null
   const clearbitUrl = clearbitDomain ? `https://logo.clearbit.com/${clearbitDomain}` : null
 
@@ -198,7 +195,7 @@ export default function FahrzeugRenderImage({
   // Stage 4 — CarIcon
   return (
     <div
-      className={`flex items-center justify-center ${dark ? 'text-white/60' : 'rounded-xl bg-claimondo-border/30 text-claimondo-ondo'} ${className}`}
+      className={`flex items-center justify-center rounded-xl bg-claimondo-border/30 text-claimondo-ondo ${className}`}
       style={{ width, height }}
     >
       <CarIcon className="w-8 h-8 opacity-50" />

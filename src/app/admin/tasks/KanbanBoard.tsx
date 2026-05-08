@@ -56,11 +56,11 @@ const TYP_LABEL: Record<string, string> = {
 }
 
 const TYP_COLOR: Record<string, string> = {
-  dispatch: 'bg-claimondo-bg text-claimondo-ondo',
+  dispatch: 'bg-[#f8f9fb] text-claimondo-ondo',
   filmcheck: 'bg-yellow-50 text-yellow-600',
   'kanzlei-anschlussschreiben': 'bg-green-50 text-green-600',
   'kanzlei-nachfrage': 'bg-emerald-50 text-emerald-600',
-  'versicherung-kontakt': 'bg-claimondo-ondo/10 text-claimondo-ondo',
+  'versicherung-kontakt': 'bg-[#4573A2]/10 text-[#4573A2]',
   'kunde-rueckfrage': 'bg-violet-50 text-violet-600',
   'sv-termin': 'bg-cyan-50 text-cyan-600',
   'zahlung-pruefen': 'bg-amber-50 text-amber-600',
@@ -77,7 +77,7 @@ const TASK_TYPES = [
 ] as const
 
 const COLUMN_HEADER_COLOR: Record<string, string> = {
-  offen: 'text-claimondo-light-blue',
+  offen: 'text-[#7BA3CC]',
   'in-bearbeitung': 'text-amber-500',
   erledigt: 'text-green-500',
   blockiert: 'text-red-500',
@@ -90,7 +90,7 @@ function isOverdue(faelligAm: string | null): boolean {
 
 function fmtDate(d: string | null) {
   if (!d) return null
-  return new Date(d).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })
+  return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
 }
 
 /**
@@ -283,7 +283,7 @@ export default function KanbanBoard({
                 </label>
                 <button
                   onClick={() => setDialogOpen(true)}
-                  className="px-4 py-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium rounded-xl transition-colors"
+                  className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
                 >
                   + Neuer Task
                 </button>
@@ -310,7 +310,7 @@ export default function KanbanBoard({
                     >
                       {col.label}
                     </span>
-                    <span className="text-claimondo-ondo/70 text-xs font-medium bg-claimondo-bg px-2 py-0.5 rounded-full">
+                    <span className="text-claimondo-ondo/70 text-xs font-medium bg-[#f8f9fb] px-2 py-0.5 rounded-full">
                       {colTasks.length}
                     </span>
                   </div>
@@ -321,7 +321,7 @@ export default function KanbanBoard({
                         ref={dp.innerRef}
                         {...dp.droppableProps}
                         className={`space-y-2 min-h-32 rounded-xl p-1 transition-colors ${
-                          snap.isDraggingOver ? 'bg-claimondo-ondo/5' : ''
+                          snap.isDraggingOver ? 'bg-[#4573A2]/5' : ''
                         }`}
                       >
                         {colTasks.length === 0 && (
@@ -403,7 +403,7 @@ function TaskCard({
       <div className="flex items-start justify-between gap-2 mb-2">
         <span
           className={`px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap ${
-            TYP_COLOR[task.typ] ?? 'bg-claimondo-bg text-claimondo-navy'
+            TYP_COLOR[task.typ] ?? 'bg-[#f8f9fb] text-claimondo-navy'
           }`}
         >
           {TYP_LABEL[task.typ] ?? task.typ}
@@ -439,7 +439,7 @@ function TaskCard({
       {isAutoResolved && (
         <div
           className="mb-2 inline-flex items-center gap-1 text-[10px] text-claimondo-ondo/70"
-          title={`Automatisch erledigt am ${task.auto_resolved_am ? new Date(task.auto_resolved_am).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }) : ''} weil ${task.auto_resolved_grund ?? ''}`}
+          title={`Automatisch erledigt am ${task.auto_resolved_am ? new Date(task.auto_resolved_am).toLocaleString('de-DE') : ''} weil ${task.auto_resolved_grund ?? ''}`}
         >
           <svg
             width="10"
@@ -465,7 +465,7 @@ function TaskCard({
         href={link.href}
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
-        className="flex items-center gap-1.5 mb-2 text-claimondo-ondo hover:text-claimondo-navy hover:underline"
+        className="flex items-center gap-1.5 mb-2 text-[#4573A2] hover:text-[#0D1B3E] hover:underline"
       >
         <svg
           width="12"
@@ -596,7 +596,7 @@ function NewTaskDialog({
               <select
                 name="typ"
                 required
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Bitte wählen...</option>
                 {TASK_TYPES.map((t) => (
@@ -612,7 +612,7 @@ function NewTaskDialog({
               <select
                 name="fall_id"
                 required
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Fall auswählen...</option>
                 {faelle.map((f) => (
@@ -630,7 +630,7 @@ function NewTaskDialog({
                 name="titel"
                 required
                 placeholder="Aufgabe beschreiben..."
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
 
@@ -642,7 +642,7 @@ function NewTaskDialog({
                 name="beschreibung"
                 rows={3}
                 placeholder="Details..."
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
               />
             </div>
 
@@ -651,7 +651,7 @@ function NewTaskDialog({
               <input
                 type="date"
                 name="faellig_am"
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
 
@@ -661,7 +661,7 @@ function NewTaskDialog({
               </label>
               <select
                 name="zugewiesen_an"
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Nicht zugewiesen</option>
                 {admins.map((a) => (
@@ -677,7 +677,7 @@ function NewTaskDialog({
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 rounded-xl text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-xl text-sm font-semibold bg-[#1E3A5F] hover:bg-[#4573A2] text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {submitting ? 'Wird erstellt...' : 'Task erstellen'}
             </button>

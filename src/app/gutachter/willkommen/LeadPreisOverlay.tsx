@@ -158,7 +158,7 @@ export default function LeadPreisOverlay({
           </section>
 
           {/* Erläuterung */}
-          <section className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
+          <section className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
             <p className="text-sm font-medium text-[var(--brand-primary)] mb-2">Wie funktioniert die Berechnung?</p>
             <ul className="text-xs text-claimondo-navy space-y-1.5 list-disc pl-4">
               <li>
@@ -179,7 +179,7 @@ export default function LeadPreisOverlay({
             </p>
             <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
               <table className="w-full text-xs">
-                <thead className="bg-claimondo-bg border-b border-claimondo-border sticky top-0">
+                <thead className="bg-[#f8f9fb] border-b border-claimondo-border sticky top-0">
                   <tr>
                     <th className="text-left px-4 py-2.5 text-claimondo-ondo font-medium">Schadenhöhe (Netto-RK bis)</th>
                     <th className="text-right px-4 py-2.5 text-claimondo-ondo font-medium">Paket-Preis (im Kontingent)</th>
@@ -188,7 +188,7 @@ export default function LeadPreisOverlay({
                 </thead>
                 <tbody>
                   {rows.map((row, i) => (
-                    <tr key={i} className="border-b border-claimondo-border last:border-b-0 hover:bg-claimondo-bg">
+                    <tr key={i} className="border-b border-claimondo-border last:border-b-0 hover:bg-[#f8f9fb]">
                       <td className="px-4 py-2 text-claimondo-navy font-medium tabular-nums">
                         {eur(Number(row.schadenhoehe_bis_netto))} EUR
                       </td>
@@ -202,7 +202,7 @@ export default function LeadPreisOverlay({
                   ))}
                 </tbody>
               </table>
-              <div className="px-4 py-2 bg-claimondo-bg border-t border-claimondo-border">
+              <div className="px-4 py-2 bg-[#f8f9fb] border-t border-claimondo-border">
                 <p className="text-[10px] text-claimondo-ondo/70">Alle Preise netto zzgl. 19% MwSt</p>
               </div>
             </div>

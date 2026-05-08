@@ -2,10 +2,6 @@
 // Aktive Aufträge bis QC-Freigabe leben in /gutachter/auftraege. Sobald der KB
 // das Gutachten freigibt (gutachten_final_freigegeben = true), wird ein
 // kanzlei_faelle-Eintrag angelegt — ab da erscheint der Fall hier.
-//
-// Phase 1.5b Cleanup (2026-05-05): Datenpfad direkt auftraege.claim_id →
-// kanzlei_faelle, ohne Umweg über faelle.claim_id-Lookup. Anzeige-Joins
-// (faelle, leads) folgen via FK-Chain in einer Supabase-Query.
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -52,19 +48,18 @@ export default async function GutachterFaellePage({
   const searchTerm = (q ?? '').trim()
   const admin = createAdminClient()
 
-  // Schritt 1: claim_ids aller abgeschlossenen Aufträge des SV.
-  // Phase 1.5b: auftraege.claim_id ist NOT NULL — kein faelle-Hop mehr.
+  // CMM-32f: Schritt 1 — alle abgeschlossenen Aufträge des SV finden.
   const { data: meineAuftraege } = await admin
     .from('auftraege')
-    .select('claim_id')
+    .select('fall_id')
     .eq('sv_id', sv.id)
     .eq('gutachten_final_freigegeben', true)
 
-  const meineClaimIds = Array.from(
-    new Set((meineAuftraege ?? []).map((a) => a.claim_id as string).filter(Boolean)),
+  const meineFallIds = Array.from(
+    new Set((meineAuftraege ?? []).map((a) => a.fall_id as string).filter(Boolean)),
   )
 
-  if (meineClaimIds.length === 0) {
+  if (meineFallIds.length === 0) {
     return (
       <div className="h-full flex flex-col">
         <div className="w-full space-y-6">
@@ -75,46 +70,22 @@ export default async function GutachterFaellePage({
     )
   }
 
-  // Schritt 2: kanzlei_faelle inkl. faelle-/lead-Anzeige-Daten via FK-Chain.
-  // Eine Query statt drei — kanzlei_faelle.fall_id → faelle.id, faelle.lead_id → leads.id.
+  // CMM-32f: Schritt 2 — kanzlei_faelle für genau diese Fälle.
   let kanzleiQuery = admin
     .from('kanzlei_faelle')
-    .select(
-      'id, fall_id, claim_id, status, vs_kontakt_am, ausgezahlt_am, erstellt_am, ' +
-        'faelle:faelle!fall_id(id, fall_nummer, schadens_ursache, schadens_datum, schadens_ort, lead_id, ' +
-        'leads:leads!lead_id(id, vorname, nachname))',
-    )
-    .in('claim_id', meineClaimIds)
+    .select('id, fall_id, status, vs_kontakt_am, ausgezahlt_am, erstellt_am')
+    .in('fall_id', meineFallIds)
     .order('erstellt_am', { ascending: false })
 
   if (activeFilter !== 'alle') {
     kanzleiQuery = kanzleiQuery.eq('status', activeFilter)
   }
 
-  const { data: kanzleiFaelleRaw } = await kanzleiQuery
+  const { data: kanzleiFaelle } = await kanzleiQuery
+  const kanzleiList = kanzleiFaelle ?? []
+  const fallIds = kanzleiList.map((k) => k.fall_id as string)
 
-  // Nested-FK-Normalisierung: Supabase liefert je nach Cardinality Array oder Objekt.
-  type KanzleiRow = {
-    id: string
-    fall_id: string
-    claim_id: string
-    status: string
-    vs_kontakt_am: string | null
-    ausgezahlt_am: string | null
-    erstellt_am: string
-    faelle:
-      | { id: string; fall_nummer: string | null; schadens_ursache: string | null; schadens_datum: string | null; schadens_ort: string | null; lead_id: string | null; leads: { id: string; vorname: string | null; nachname: string | null } | { id: string; vorname: string | null; nachname: string | null }[] | null }
-      | null
-  }
-  const kanzleiList: KanzleiRow[] = ((kanzleiFaelleRaw ?? []) as unknown as KanzleiRow[]).map((k) => {
-    const f = Array.isArray(k.faelle) ? (k.faelle[0] ?? null) : k.faelle
-    if (f && f.leads) {
-      f.leads = Array.isArray(f.leads) ? (f.leads[0] ?? null) : f.leads
-    }
-    return { ...k, faelle: f }
-  })
-
-  if (kanzleiList.length === 0) {
+  if (fallIds.length === 0) {
     return (
       <div className="h-full flex flex-col">
         <div className="w-full space-y-6">
@@ -126,18 +97,34 @@ export default async function GutachterFaellePage({
     )
   }
 
+  const [faelleRes, leadsRes] = await Promise.all([
+    admin
+      .from('faelle')
+      .select('id, fall_nummer, schadens_ursache, schadens_datum, schadens_ort, lead_id')
+      .in('id', fallIds),
+    Promise.resolve(null), // placeholder, leads kommen unten via leadIds
+  ])
+  void leadsRes
+
+  const fallMap = Object.fromEntries((faelleRes.data ?? []).map((f) => [f.id, f]))
+  const leadIds = (faelleRes.data ?? []).map((f) => f.lead_id).filter(Boolean) as string[]
+  const { data: leads } = leadIds.length
+    ? await admin.from('leads').select('id, vorname, nachname').in('id', leadIds)
+    : { data: [] as { id: string; vorname: string | null; nachname: string | null }[] }
+  const leadMap = Object.fromEntries((leads ?? []).map((l) => [l.id, l]))
+
   // Freitextsuche über Fall-Nr / Kunde / Ort
   const needle = searchTerm.toLowerCase()
   const filtered = needle
     ? kanzleiList.filter((k) => {
-        const f = k.faelle
+        const f = fallMap[k.fall_id as string]
         if (!f) return false
-        const lead = (f.leads as { vorname: string | null; nachname: string | null } | null) ?? null
+        const lead = f.lead_id ? leadMap[f.lead_id as string] : null
         const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim().toLowerCase() : ''
         return (
-          (f.fall_nummer ?? '').toLowerCase().includes(needle) ||
+          ((f.fall_nummer as string | null) ?? '').toLowerCase().includes(needle) ||
           name.includes(needle) ||
-          (f.schadens_ort ?? '').toLowerCase().includes(needle)
+          ((f.schadens_ort as string | null) ?? '').toLowerCase().includes(needle)
         )
       })
     : kanzleiList
@@ -171,29 +158,29 @@ export default async function GutachterFaellePage({
                 </thead>
                 <tbody>
                   {filtered.map((k) => {
-                    const f = k.faelle
+                    const f = fallMap[k.fall_id as string]
                     if (!f) return null
-                    const lead = (f.leads as { vorname: string | null; nachname: string | null } | null) ?? null
+                    const lead = f.lead_id ? leadMap[f.lead_id as string] : null
                     const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
                     return (
                       <tr
                         key={k.id}
-                        className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors"
+                        className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors"
                       >
                         <td className="px-4 py-3">
                           <Link
                             href={`/gutachter/fall/${f.id}`}
                             className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] font-mono text-xs"
                           >
-                            {f.fall_nummer ?? f.id.slice(0, 8)}
+                            {(f.fall_nummer as string | null) ?? (f.id as string).slice(0, 8)}
                           </Link>
                         </td>
                         <td className="px-4 py-3 text-claimondo-navy">{name}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <SchadensUrsacheBadge ursache={f.schadens_ursache} plain />
+                          <SchadensUrsacheBadge ursache={f.schadens_ursache as string | null} plain />
                         </td>
                         <td className="px-4 py-3 text-claimondo-ondo text-xs">
-                          {f.schadens_ort ?? '—'}
+                          {(f.schadens_ort as string | null) ?? '—'}
                         </td>
                         <td className="px-4 py-3">
                           <span
@@ -208,7 +195,7 @@ export default async function GutachterFaellePage({
                         </td>
                         <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">
                           {k.erstellt_am
-                            ? new Date(k.erstellt_am as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+                            ? new Date(k.erstellt_am as string).toLocaleDateString('de-DE', {
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric',

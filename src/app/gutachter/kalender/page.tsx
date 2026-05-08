@@ -3,8 +3,8 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import SVKalenderClient from './SVKalenderClient'
+import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
-import KalenderListeEmpty from './KalenderListeEmpty'
 
 // AAR-229 W5 / F-12: Kalender + Termine merge mit View-Toggle.
 export default async function SVKalenderPage({
@@ -29,18 +29,11 @@ export default async function SVKalenderPage({
   const { isGoogleConnected } = await import('@/lib/google/oauth-client')
   const gcalConnected = await isGoogleConnected(user.id)
 
-  // 2026-05-06 (Kelvin Gall-Fix): Externe Termine als Busy-Slots laden —
-  // Google + CalDAV (Apple). Vorher nur bei gcalConnected, dadurch sahen
-  // Apple-only-SVs ihre privaten Termine nicht im SV-Kalender.
-  // getSvBusySlots prueft selbst auf vorhandene Quellen.
-  const { data: hatCaldav } = await supabase
-    .from('sv_kalender_verbindungen')
-    .select('id')
-    .eq('sv_id', sv.id)
-    .eq('provider', 'caldav')
-    .maybeSingle()
+  // AAR-google-cal-drift: Externe Google-Termine der aktuellen + nächsten
+  // Woche als Busy-Slots laden, damit SV im Kalender-Tab seine private
+  // Belegung sieht. Fail-silent — leerer Array bei nicht-verbunden.
   let externalBusy: { start: string; end: string }[] = []
-  if (gcalConnected || hatCaldav) {
+  if (gcalConnected) {
     const now = new Date()
     const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
     const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
@@ -110,18 +103,6 @@ export default async function SVKalenderPage({
     .filter(f => f.sv_termin)
     .sort((a, b) => new Date(a.sv_termin!).getTime() - new Date(b.sv_termin!).getTime())
 
-  // 2026-05-06: Map start_zeit → fall_id für Time-Match-Clickability der
-  // externalBusy-Events. Damit wird ein „Gebucht"-Pill der via Google
-  // FreeBusy/CalDAV gelesen wurde, klickbar zum Claimondo-Auftrag, wenn
-  // er zeitlich zu einem internen gutachter_termine matched (±2 Minuten
-  // Toleranz, da Google-Events teils mit Sekunden-Drift zurückkommen).
-  const claimondoTermineByStart = (faelle ?? [])
-    .filter((f) => f.sv_termin)
-    .map((f) => ({
-      fallId: f.id as string,
-      startMs: new Date(f.sv_termin as string).getTime(),
-    }))
-
   return (
     <div className="h-full flex flex-col">
       {/* View-Toggle */}
@@ -129,7 +110,7 @@ export default async function SVKalenderPage({
         <PageHeader
           title="Kalender"
           actions={
-            <div className="flex gap-1 bg-claimondo-bg rounded-lg p-0.5">
+            <div className="flex gap-1 bg-[#f8f9fb] rounded-lg p-0.5">
               <Link
                 href="/gutachter/kalender?view=kalender"
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
@@ -163,27 +144,21 @@ export default async function SVKalenderPage({
           }))}
           externalBusy={externalBusy}
           verlegteSlots={verlegteSlots}
-          claimondoTermineByStart={claimondoTermineByStart}
         />
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {terminListe.length === 0 ? (
-            // 2026-05-07 EmptyState-Iter-2: Kalender > Liste-View ist die
-            // echte Termine-Empty-State (legacy /gutachter/termine wird hier
-            // hin redirected). Wrapper-Component, weil diese Page eine
-            // Server-Component ist und LucideIcon nicht über die RSC-Boundary
-            // gereicht werden kann.
-            <KalenderListeEmpty />
+            <EmptyState title="Keine Termine vorhanden." />
           ) : terminListe.map(fall => {
             const t = new Date(fall.sv_termin!)
             const name = fall.lead_id && leadMap[fall.lead_id] ? leadMap[fall.lead_id] : '—'
             return (
               <Link key={fall.id} href={`/gutachter/fall/${fall.id}`}
-                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-claimondo-bg transition-colors">
+                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-[#f8f9fb] transition-colors">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-claimondo-navy">
-                      {t.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })} — {t.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} Uhr
+                      {t.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} — {t.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
                     </p>
                     <p className="text-xs text-claimondo-ondo mt-0.5">{name} · {fall.schadens_ort ?? '—'}</p>
                   </div>

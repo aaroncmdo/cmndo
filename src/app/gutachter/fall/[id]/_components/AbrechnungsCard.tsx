@@ -56,13 +56,13 @@ export function AbrechnungsCard({
             ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
             : subphase.code === 'zahlung-eingegangen'
               ? 'bg-amber-50 text-amber-800 border border-amber-200'
-              : 'bg-claimondo-bg text-claimondo-navy border border-claimondo-border'
+              : 'bg-[#f8f9fb] text-claimondo-navy border border-claimondo-border'
         }`}
       >
         {ausgezahlt ? (
           <>
             <p className="font-semibold">
-              Überwiesen am {new Date(abrechnung!.abgerechnetAm!).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+              Überwiesen am {new Date(abrechnung!.abgerechnetAm!).toLocaleDateString('de-DE')}
             </p>
             <p className="mt-0.5">Bitte prüfe deinen Bankeingang.</p>
           </>

@@ -9,7 +9,7 @@
 // Renderer rein.
 
 import { useState, type ReactNode } from 'react'
-import { UserIcon, SearchIcon, MessageCircleIcon, ArrowLeftIcon } from 'lucide-react'
+import { UserIcon, SearchIcon, MessageCircleIcon } from 'lucide-react'
 import { DropletBadge } from '@/components/primitives'
 
 export type InboxThread = {
@@ -45,11 +45,11 @@ function fmtTime(iso: string): string {
   const d = new Date(iso)
   const today = new Date()
   if (d.toDateString() === today.toDateString()) {
-    return d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+    return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
   }
   const diff = Math.floor((today.getTime() - d.getTime()) / (1000 * 60 * 60 * 24))
-  if (diff < 7) return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short' })
-  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })
+  if (diff < 7) return d.toLocaleDateString('de-DE', { weekday: 'short' })
+  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
 }
 
 export default function ChatInboxLayout({
@@ -66,17 +66,6 @@ export default function ChatInboxLayout({
       ? initialThreadId
       : threads[0]?.id ?? null,
   )
-  // 2026-05-06 SV6: Mobile-Master/Detail. Auf Mobile + Tablet (< lg) wird
-  // entweder Liste ODER Detail angezeigt — nicht beides nebeneinander (war
-  // auf 390px unbenutzbar: Sidebar 320px ließ nur 70px für den Chat). Tap
-  // auf Thread → Detail-View; Back-Button → Liste. Auf Desktop bleibt's
-  // Side-by-Side. Breakpoint lg: konsistent mit GutachterShell + Kunde-
-  // Layout (Tablet bekommt Mobile-Behandlung).
-  const [mobileView, setMobileView] = useState<'list' | 'detail'>(
-    initialThreadId ? 'detail' : 'list',
-  )
-
-  const activeThread = activeId ? threads.find((t) => t.id === activeId) ?? null : null
 
   const filtered = threads.filter((t) => {
     if (!search) return true
@@ -85,15 +74,10 @@ export default function ChatInboxLayout({
 
   return (
     <div className="h-full flex min-h-0">
-      {/* Sidebar — Mobile: full-width wenn Liste sichtbar, sonst hidden;
-          Desktop: feste 320px Spalte. */}
-      <aside
-        className={`${
-          mobileView === 'list' ? 'flex' : 'hidden'
-        } lg:flex w-full lg:w-80 border-r border-claimondo-border flex-col bg-white shrink-0`}
-      >
+      {/* Sidebar */}
+      <aside className="w-80 border-r border-claimondo-border flex flex-col bg-white shrink-0">
         <div className="px-4 py-3 border-b border-claimondo-border sticky top-0 bg-white z-10">
-          <h2 className="text-lg font-semibold text-claimondo-navy">{title}</h2>
+          <h1 className="text-lg font-semibold text-claimondo-navy">{title}</h1>
           <div className="relative mt-2">
             <SearchIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-claimondo-ondo/70" />
             <input
@@ -120,10 +104,7 @@ export default function ChatInboxLayout({
               return (
                 <button
                   key={t.id}
-                  onClick={() => {
-                    setActiveId(t.id)
-                    setMobileView('detail')
-                  }}
+                  onClick={() => setActiveId(t.id)}
                   className={`w-full text-left px-3 py-3 border-b border-claimondo-border hover:bg-[#f8f9fb] transition-colors ${
                     active ? 'bg-claimondo-ondo/5' : ''
                   }`}
@@ -160,49 +141,17 @@ export default function ChatInboxLayout({
         </div>
       </aside>
 
-      {/* Detail-Panel — Mobile: full-width wenn Detail sichtbar, sonst hidden;
-          Desktop: flex-1. Mobile zeigt Back-Button + Thread-Titel als Header. */}
-      <main
-        className={`${
-          mobileView === 'detail' ? 'flex' : 'hidden'
-        } lg:flex flex-1 min-w-0 min-h-0 overflow-hidden bg-[#f8f9fb] flex-col`}
-      >
+      {/* Detail-Panel */}
+      <main className="flex-1 min-w-0 min-h-0 overflow-hidden bg-[#f8f9fb] flex flex-col">
         {activeId ? (
-          <>
-            {/* Mobile-Header mit Back-Button — Desktop versteckt */}
-            <div className="lg:hidden flex items-center gap-2 px-3 py-2 border-b border-claimondo-border bg-white shrink-0">
-              <button
-                type="button"
-                onClick={() => setMobileView('list')}
-                aria-label="Zurück zur Liste"
-                className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-[#f8f9fb] active:bg-claimondo-ondo/10 transition-colors"
-              >
-                <ArrowLeftIcon className="w-4 h-4 text-claimondo-navy" />
-              </button>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-claimondo-navy truncate">
-                  {activeThread?.title ?? '—'}
-                </p>
-                <p className="text-[11px] text-claimondo-ondo truncate">
-                  {activeThread?.subtitle ?? ''}
-                </p>
-              </div>
-            </div>
-            <div className="flex-1 min-h-0 p-4 overflow-y-auto">{renderDetail(activeId)}</div>
-          </>
+          <div className="flex-1 min-h-0 p-4 overflow-y-auto">{renderDetail(activeId)}</div>
         ) : (
-          // 2026-05-07 EmptyState-Iter-2: Wenn die Sidebar leer ist (threads
-          // count 0), zeigt der Detail-Pane jetzt den emptyHint prominent
-          // statt nur „Wähle einen Chat aus der Liste" — das wäre irreführend.
           <div className="flex-1 flex items-center justify-center text-center px-4">
-            <div className="max-w-sm">
-              <MessageCircleIcon className="w-12 h-12 mx-auto text-claimondo-ondo/40 mb-3" />
-              <p className="text-sm text-claimondo-navy font-medium">
-                {threads.length === 0 ? 'Noch keine Chats' : 'Wähle einen Chat aus der Liste'}
+            <div>
+              <MessageCircleIcon className="w-12 h-12 mx-auto text-claimondo-ondo/40 mb-2" />
+              <p className="text-sm text-claimondo-ondo">
+                Wähle einen Chat aus der Liste
               </p>
-              {threads.length === 0 && (
-                <p className="text-xs text-claimondo-ondo mt-2">{emptyHint}</p>
-              )}
             </div>
           </div>
         )}

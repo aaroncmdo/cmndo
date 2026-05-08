@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import RueckrufListItem from './RueckrufListItem'
+import Link from 'next/link'
+import RueckrufActions from './RueckrufActions'
+import PhoneButton from '@/components/shared/PhoneButton'
 import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-637: Rückrufe aus admin_termine (typ='rueckruf') lesen statt aus
@@ -26,13 +28,7 @@ type RueckrufRow = {
   } | null
 }
 
-export default async function DispatchRueckrufe({
-  searchParams,
-}: {
-  searchParams?: Promise<{ open?: string }>
-}) {
-  const sp = (await searchParams) ?? {}
-  const openParam = sp.open ?? null
+export default async function DispatchRueckrufe() {
   const supabase = await createClient()
 
   const { data: raw } = await supabase
@@ -77,16 +73,55 @@ export default async function DispatchRueckrufe({
         {termine.map((t) => {
           const lead = t.lead
           if (!lead) return null
+          const isOverdue = new Date(t.start_zeit) < new Date()
           return (
-            <RueckrufListItem
-              key={t.id}
-              terminId={t.id}
-              startZeit={t.start_zeit}
-              notizen={t.notizen}
-              isNew={!t.gesehen_am}
-              lead={lead}
-              defaultOpen={openParam === t.id}
-            />
+            <div key={t.id} className="flex items-center gap-4 px-5 py-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  {/* AAR-724: Roter Punkt für noch nicht gesehene Rückrufe. */}
+                  {!t.gesehen_am && (
+                    <span
+                      className="inline-block w-2 h-2 rounded-full bg-red-500 shrink-0"
+                      aria-label="Neu, noch nicht angesehen"
+                    />
+                  )}
+                  <Link
+                    href={`/dispatch/leads/${lead.id}`}
+                    className="text-sm font-medium text-claimondo-navy hover:text-claimondo-ondo"
+                  >
+                    {lead.vorname} {lead.nachname}
+                  </Link>
+                </div>
+                <div className="flex items-center gap-3 mt-1 text-xs text-claimondo-ondo">
+                  {lead.telefon && (
+                    <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
+                  )}
+                  <span className={isOverdue ? 'text-red-600 font-medium' : ''}>
+                    {new Date(t.start_zeit).toLocaleString('de-DE', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                    {isOverdue && ' (überfällig)'}
+                  </span>
+                  {t.notizen && (
+                    <span className="text-claimondo-ondo/70 truncate max-w-[200px]">{t.notizen}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 mt-1 text-[10px] text-claimondo-ondo/70">
+                  <span>Versuche: {lead.anruf_versuche ?? 0}</span>
+                  {lead.letzter_anruf_am && (
+                    <span>
+                      Letzter: {new Date(lead.letzter_anruf_am).toLocaleDateString('de-DE')} (
+                      {lead.letzter_anruf_status ?? '?'})
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <RueckrufActions leadId={lead.id} anrufVersuche={lead.anruf_versuche ?? 0} />
+            </div>
           )
         })}
         {termine.length === 0 && (

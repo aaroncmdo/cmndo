@@ -26,14 +26,14 @@ export default async function MaklerPendingPage() {
   if (profile?.rolle !== 'makler') redirect(roleToPath(profile?.rolle as string | null | undefined))
 
   return (
-    <main className="min-h-screen bg-claimondo-bg flex items-center justify-center px-6 py-12">
+    <main className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-6 py-12">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-claimondo-border p-8">
         <PageHeader
           title="Ihr Zugang wird aktuell geprüft"
           description="Wir melden uns innerhalb von 24 Stunden bei Ihnen und schalten Ihren Zugang frei."
           align="center"
           leadingSlot={
-            <div className="w-14 h-14 rounded-full bg-claimondo-bg border border-claimondo-border flex items-center justify-center text-claimondo-ondo">
+            <div className="w-14 h-14 rounded-full bg-[#f8f9fb] border border-claimondo-border flex items-center justify-center text-claimondo-ondo">
               <ClockIcon className="w-6 h-6" />
             </div>
           }

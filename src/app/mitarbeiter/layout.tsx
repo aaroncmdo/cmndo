@@ -6,7 +6,6 @@ import MitarbeiterNav from './_components/MitarbeiterNav'
 import TasksPill from '@/components/shared/TasksPill'
 import UpdatesNav from '@/components/shared/updates'
 import { roleToPath } from '@/lib/auth/role-redirect'
-import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 
 export default async function MitarbeiterLayout({
   children,
@@ -24,9 +23,8 @@ export default async function MitarbeiterLayout({
     .single()
 
   // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
-  // auf /login. Audit 2026-05-06: 'dispatch' raus — Dispatch hat eigenes
-  // Portal /dispatch und sollte nicht im KB-Portal landen.
-  if (!profile || !['kundenbetreuer', 'admin'].includes(profile.rolle)) {
+  // auf /login.
+  if (!profile || !['kundenbetreuer', 'dispatch', 'admin'].includes(profile.rolle)) {
     redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
   }
 
@@ -44,20 +42,20 @@ export default async function MitarbeiterLayout({
   } catch { /* */ }
 
   return (
-    <div className="min-h-screen bg-claimondo-bg">
+    <div className="min-h-screen bg-[#f8f9fb]">
       <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xl font-bold tracking-tight">
-            <span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span>
+            <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>
           </span>
           {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
           <TasksPill userId={user.id} href="/mitarbeiter/tasks" />
         </div>
         <div className="flex items-center gap-3">
           <UpdatesNav variant="dark" />
-          <span className="text-claimondo-light-blue text-sm">{displayName}</span>
+          <span className="text-[#7BA3CC] text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">
-            <button type="submit" className="text-claimondo-light-blue hover:text-white transition-colors">
+            <button type="submit" className="text-[#7BA3CC] hover:text-white transition-colors">
               <LogOutIcon className="w-4 h-4" />
             </button>
           </form>
@@ -67,9 +65,6 @@ export default async function MitarbeiterLayout({
         <MitarbeiterNav unreadNachrichten={unread} />
         <main className="flex-1 px-4 py-6 md:w-[96%] md:mx-auto md:px-0">{children}</main>
       </div>
-      {/* Globaler Posteingang + Pinned-Chats — gleicher FAB den Admin/SV nutzen,
-          damit KB Chats genauso anpinnen + parallel offen halten kann. */}
-      <GlobalPosteingangFab currentUserId={user.id} />
     </div>
   )
 }

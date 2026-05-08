@@ -44,7 +44,7 @@ export default function FaelleHubTabs({
             href={tab.href}
             className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
               active
-                ? 'border-claimondo-navy text-claimondo-navy'
+                ? 'border-[#0D1B3E] text-[#0D1B3E]'
                 : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy hover:border-claimondo-border'
             }`}
           >
@@ -53,7 +53,7 @@ export default function FaelleHubTabs({
               <span
                 className={`inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full text-[10px] font-semibold ${
                   active
-                    ? 'bg-claimondo-navy text-white'
+                    ? 'bg-[#0D1B3E] text-white'
                     : 'bg-red-100 text-red-700'
                 }`}
               >

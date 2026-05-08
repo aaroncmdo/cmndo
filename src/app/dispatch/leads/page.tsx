@@ -2,11 +2,11 @@
 // Server-Page lädt die Leads + rendert Phase-Filter-Chips. Die Darstellung
 // (Tabelle oder Kanban) wandert in die Client-Component LeadsViewToggle.
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 import NeuLeadDrawer from './_components/NeuLeadDrawer'
 import LeadsViewToggle from './_components/LeadsViewToggle'
 import { PHASE_OPTIONS } from './_components/leadPhaseConstants'
 import PageHeader from '@/components/shared/PageHeader'
-import { Chip, ChipRow } from '@/components/ui/Chip'
 
 export default async function DispatchLeads({
   searchParams,
@@ -34,38 +34,32 @@ export default async function DispatchLeads({
       <PageHeader
         title="Leads"
         actions={
-          <span className="text-sm text-claimondo-ondo">{leads?.length ?? 0} Ergebnisse</span>
+          <>
+            <span className="text-sm text-claimondo-ondo">{leads?.length ?? 0} Ergebnisse</span>
+            <NeuLeadDrawer />
+          </>
         }
       />
 
-      {/* Filter — Touch-friendly Chips (Portal-Review C3) */}
-      <ChipRow>
+      {/* Filter */}
+      <div className="flex flex-wrap gap-1.5">
         {PHASE_OPTIONS.map((opt) => (
-          <Chip
+          <Link
             key={opt.value}
             href={opt.value ? `/dispatch/leads?phase=${opt.value}` : '/dispatch/leads'}
-            variant={activePhase === opt.value ? 'selected' : 'default'}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
+              activePhase === opt.value
+                ? 'bg-claimondo-navy text-white'
+                : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
+            }`}
           >
             {opt.label}
-          </Chip>
+          </Link>
         ))}
-      </ChipRow>
+      </div>
 
       {/* Liste / Kanban Toggle + View */}
       <LeadsViewToggle leads={leads ?? []} />
-
-      {/* Floating Action Button — zentriert im Content-Bereich rechts der
-          Sidebar. --app-sidebar-width wird vom PortalNav auf <html> gesetzt
-          und ist auf Mobile 0px (Sidebar versteckt). */}
-      <div
-        className="fixed bottom-6 z-50"
-        style={{
-          left: 'calc(var(--app-sidebar-width, 0px) + (100vw - var(--app-sidebar-width, 0px)) / 2)',
-          transform: 'translateX(-50%)',
-        }}
-      >
-        <NeuLeadDrawer fab />
-      </div>
     </div>
   )
 }

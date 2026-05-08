@@ -154,7 +154,7 @@ export default async function AusstehendeZahlungenWidget() {
                 <li key={e.key}>
                   <Link
                     href={e.href}
-                    className="block px-5 py-3 hover:bg-claimondo-bg transition-colors"
+                    className="block px-5 py-3 hover:bg-[#f8f9fb] transition-colors"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
@@ -183,10 +183,10 @@ export default async function AusstehendeZahlungenWidget() {
         )}
       </div>
 
-      <div className="px-5 py-3 border-t border-claimondo-border bg-claimondo-bg">
+      <div className="px-5 py-3 border-t border-claimondo-border bg-[#f8f9fb]">
         <Link
           href="/admin/finance/abrechnungen"
-          className="flex items-center justify-center gap-1.5 text-xs font-medium text-claimondo-ondo hover:text-claimondo-shield transition-colors"
+          className="flex items-center justify-center gap-1.5 text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] transition-colors"
         >
           Alle anzeigen <ArrowRightIcon className="w-3 h-3" />
         </Link>

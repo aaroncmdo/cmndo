@@ -302,10 +302,10 @@ export default function BueroAnlegenWizard({ onSuccess }: {
   // Erfolgs-Page
   if (result) {
     return (
-      <div className="bg-white border border-claimondo-ondo/30 rounded-2xl p-8">
+      <div className="bg-white border border-[#4573A2]/30 rounded-2xl p-8">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-claimondo-ondo/10 flex items-center justify-center flex-shrink-0">
-            <CheckCircle2Icon className="w-6 h-6 text-claimondo-ondo" />
+          <div className="w-12 h-12 rounded-xl bg-[#4573A2]/10 flex items-center justify-center flex-shrink-0">
+            <CheckCircle2Icon className="w-6 h-6 text-[#4573A2]" />
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-claimondo-navy">{bueroName} angelegt</h2>
@@ -317,7 +317,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => router.push('/admin/sachverstaendige')}
-                className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
+                className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
               >
                 Zur SV-Liste
               </button>
@@ -338,12 +338,12 @@ export default function BueroAnlegenWizard({ onSuccess }: {
           return (
             <div key={s.key} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                i < step ? 'bg-claimondo-ondo' : i === step ? 'bg-claimondo-navy' : 'bg-claimondo-border'
+                i < step ? 'bg-[#4573A2]' : i === step ? 'bg-[#0D1B3E]' : 'bg-claimondo-border'
               }`}>
                 <Icon className={`w-4 h-4 ${i <= step ? 'text-white' : 'text-claimondo-ondo'}`} />
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`w-8 h-0.5 ${i < step ? 'bg-claimondo-ondo' : 'bg-claimondo-border'}`} />
+                <div className={`w-8 h-0.5 ${i < step ? 'bg-[#4573A2]' : 'bg-claimondo-border'}`} />
               )}
             </div>
           )
@@ -450,7 +450,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                 <div className="sm:col-span-2">
                   <label className={`text-xs mb-1.5 block ${fieldErrors.has('bueroAnschrift') ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
                     Anschrift Hauptbüro (= Rechnungsadresse) *
-                    {bueroAnschriftLat !== null && <span className="text-claimondo-ondo ml-2">✓ Geo gesetzt</span>}
+                    {bueroAnschriftLat !== null && <span className="text-[#4573A2] ml-2">✓ Geo gesetzt</span>}
                   </label>
                   <GooglePlaceAutocomplete
                     defaultValue={bueroAnschrift}
@@ -466,7 +466,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                     className={`w-full border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 ${
                       fieldErrors.has('bueroAnschrift')
                         ? 'bg-red-50 border-red-400 focus:ring-red-400'
-                        : 'bg-claimondo-bg border-claimondo-border focus:ring-[#1E3A5F]'
+                        : 'bg-[#f8f9fb] border-claimondo-border focus:ring-[#1E3A5F]'
                     }`}
                   />
                 </div>
@@ -508,7 +508,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
               <button
                 type="button"
                 onClick={addStandort}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-claimondo-shield/5 hover:bg-claimondo-shield/10 text-claimondo-shield text-xs font-medium"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1E3A5F]/5 hover:bg-[#1E3A5F]/10 text-[#1E3A5F] text-xs font-medium"
               >
                 <PlusIcon className="w-3.5 h-3.5" />
                 Standort
@@ -520,7 +520,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
               // Mitarbeiter-Felder im Hauptbuero sind read-only wenn Inhaber=Mitarbeiter
               const mitarbeiterReadonly = istHauptbuero && inhaberIstHauptbueroMitarbeiter
               return (
-              <div key={std.id} className={`border rounded-xl p-4 space-y-3 ${istHauptbuero ? 'border-claimondo-shield/30 bg-claimondo-shield/[0.02]' : 'border-claimondo-border'}`}>
+              <div key={std.id} className={`border rounded-xl p-4 space-y-3 ${istHauptbuero ? 'border-[#1E3A5F]/30 bg-[#1E3A5F]/[0.02]' : 'border-claimondo-border'}`}>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-claimondo-ondo">
                     {istHauptbuero ? 'Hauptbüro' : `Standort ${idx + 1}`}
@@ -545,19 +545,19 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                 {istHauptbuero ? (
                   <div>
                     <label className="text-xs text-claimondo-ondo mb-1.5 block">
-                      Anschrift <span className="text-claimondo-ondo ml-2">✓ aus Stammdaten</span>
+                      Anschrift <span className="text-[#4573A2] ml-2">✓ aus Stammdaten</span>
                     </label>
                     <input
                       type="text"
                       value={std.anschrift}
                       readOnly
-                      className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-ondo cursor-not-allowed"
+                      className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-ondo cursor-not-allowed"
                     />
                   </div>
                 ) : (
                   <div>
                     <label className={`text-xs mb-1.5 block ${fieldErrors.has(`std-${std.id}-anschrift`) ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
-                      Anschrift * {std.anschrift_lat !== null && <span className="text-claimondo-ondo ml-2">✓ Geo</span>}
+                      Anschrift * {std.anschrift_lat !== null && <span className="text-[#4573A2] ml-2">✓ Geo</span>}
                     </label>
                     <GooglePlaceAutocomplete
                       defaultValue={std.anschrift}
@@ -566,13 +566,13 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                       className={`w-full border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 ${
                         fieldErrors.has(`std-${std.id}-anschrift`)
                           ? 'bg-red-50 border-red-400 focus:ring-red-400'
-                          : 'bg-claimondo-bg border-claimondo-border focus:ring-[#1E3A5F]'
+                          : 'bg-[#f8f9fb] border-claimondo-border focus:ring-[#1E3A5F]'
                       }`}
                     />
                   </div>
                 )}
                 {mitarbeiterReadonly && (
-                  <div className="bg-claimondo-shield/5 border border-claimondo-shield/10 rounded-lg px-3 py-2 text-[11px] text-claimondo-ondo">
+                  <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-lg px-3 py-2 text-[11px] text-claimondo-ondo">
                     ℹ Mitarbeiter-Daten werden vom Inhaber-Account übernommen (kein zweiter Login nötig).
                   </div>
                 )}
@@ -630,7 +630,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                         onClick={() => updateStandort(std.id, 'paket', p)}
                         className={`px-3 py-2 rounded-lg border text-xs transition-colors ${
                           std.paket === p
-                            ? 'border-claimondo-shield bg-claimondo-shield/5 text-claimondo-shield font-semibold'
+                            ? 'border-[#1E3A5F] bg-[#1E3A5F]/5 text-[#1E3A5F] font-semibold'
                             : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
                         }`}
                       >
@@ -661,9 +661,9 @@ export default function BueroAnlegenWizard({ onSuccess }: {
               )
             })}
 
-            <div className="bg-claimondo-shield/5 border border-claimondo-shield/10 rounded-xl p-4">
+            <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-4">
               <p className="text-xs text-claimondo-ondo">Gesamt-Anzahlung (alle Standorte)</p>
-              <p className="text-2xl font-bold text-claimondo-shield mt-1">
+              <p className="text-2xl font-bold text-[#1E3A5F] mt-1">
                 {gesamtAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
               </p>
             </div>
@@ -673,7 +673,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
         {/* SCHRITT 2: Zusammenfassung */}
         {step === 2 && (
           <div className="space-y-4">
-            <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 text-sm">
+            <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 text-sm">
               <p className="text-xs text-claimondo-ondo uppercase mb-2">Büro</p>
               <p className="text-claimondo-navy"><strong>{bueroName}</strong>{bueroRechtsform && ` (${bueroRechtsform})`}</p>
               <p className="text-claimondo-ondo text-xs mt-1">{bueroAnschrift}</p>
@@ -693,14 +693,14 @@ export default function BueroAnlegenWizard({ onSuccess }: {
               </div>
               <div className="mt-3 pt-3 border-t border-claimondo-border">
                 <p className="text-xs text-claimondo-ondo uppercase">Gesamt-Anzahlung</p>
-                <p className="text-base font-bold text-claimondo-shield mt-1">
+                <p className="text-base font-bold text-[#1E3A5F] mt-1">
                   {gesamtAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
                 </p>
               </div>
             </div>
 
-            <div className="bg-claimondo-shield/5 border border-claimondo-shield/10 rounded-xl p-4 flex items-start gap-3">
-              <MailIcon className="w-5 h-5 text-claimondo-shield flex-shrink-0 mt-0.5" />
+            <div className="bg-[#1E3A5F]/5 border border-[#1E3A5F]/10 rounded-xl p-4 flex items-start gap-3">
+              <MailIcon className="w-5 h-5 text-[#1E3A5F] flex-shrink-0 mt-0.5" />
               <div className="text-xs text-claimondo-navy">
                 <strong>{1 + standorte.length} Welcome-Mails werden versendet:</strong>
                 <ul className="mt-2 ml-4 list-disc space-y-1">
@@ -727,7 +727,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
               type="button"
               onClick={() => setStep(step - 1)}
               disabled={saving}
-              className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
+              className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
             >
               Zurück
             </button>
@@ -736,7 +736,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
             type="button"
             onClick={handleNext}
             disabled={saving}
-            className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40"
+            className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
           >
             {saving ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Büro anlegen + Welcome-Mails senden'}
           </button>
@@ -770,8 +770,8 @@ function TagSection({
               onClick={() => onToggle(opt)}
               className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
                 active
-                  ? 'bg-claimondo-shield text-white'
-                  : 'bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy'
+                  ? 'bg-[#1E3A5F] text-white'
+                  : 'bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               {opt}
@@ -807,10 +807,10 @@ function Field({
         disabled={disabled}
         className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
           disabled
-            ? 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo cursor-not-allowed'
+            ? 'bg-[#f8f9fb] border-claimondo-border text-claimondo-ondo cursor-not-allowed'
             : error
             ? 'bg-red-50 border-red-400 text-claimondo-navy placeholder-gray-400 focus:ring-red-400'
-            : 'bg-claimondo-bg border-claimondo-border text-claimondo-navy placeholder-gray-400 focus:ring-[#1E3A5F]'
+            : 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy placeholder-gray-400 focus:ring-[#1E3A5F]'
         }`}
       />
     </div>
@@ -839,10 +839,10 @@ function SelectField({
         disabled={disabled}
         className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
           disabled
-            ? 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo cursor-not-allowed'
+            ? 'bg-[#f8f9fb] border-claimondo-border text-claimondo-ondo cursor-not-allowed'
             : error
             ? 'bg-red-50 border-red-400 text-claimondo-navy focus:ring-red-400'
-            : 'bg-claimondo-bg border-claimondo-border text-claimondo-navy focus:ring-[#1E3A5F]'
+            : 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy focus:ring-[#1E3A5F]'
         }`}
       >
         {!options.includes('') && (

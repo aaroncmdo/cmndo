@@ -87,7 +87,7 @@ export default function Phase6StatusTracking({
   const stepSent: Step = {
     label: 'Token-Link gesendet',
     sub: latestFlow
-      ? `Erstellt ${new Date(latestFlow.created_at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`
+      ? `Erstellt ${new Date(latestFlow.created_at).toLocaleString('de-DE')}`
       : 'Noch nicht gesendet',
     state: latestFlow ? 'done' : 'pending',
     icon: <ClockIcon className="w-4 h-4" />,
@@ -112,7 +112,7 @@ export default function Phase6StatusTracking({
   const stepOpened: Step = {
     label: 'Link geöffnet',
     sub: latestFlow?.geoeffnet_am
-      ? `Geöffnet ${new Date(latestFlow.geoeffnet_am).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`
+      ? `Geöffnet ${new Date(latestFlow.geoeffnet_am).toLocaleString('de-DE')}`
       : alarm
         ? 'Inaktiv seit >2h'
         : 'Kunde hat noch nicht geöffnet',
@@ -244,7 +244,7 @@ export default function Phase6StatusTracking({
                     : s.state === 'warning'
                       ? 'bg-red-500 text-white'
                       : s.state === 'disabled'
-                        ? 'bg-claimondo-bg text-claimondo-ondo/50'
+                        ? 'bg-[#f8f9fb] text-claimondo-ondo/50'
                         : 'bg-claimondo-border text-claimondo-ondo/70'
                 }`}
               >

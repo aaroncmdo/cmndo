@@ -100,7 +100,7 @@ function StatusBadge({ tone, children }: { tone: StatusBadgeTone; children: Reac
     green: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     amber: 'bg-amber-50 text-amber-700 border border-amber-200',
     red: 'bg-red-50 text-red-700 border border-red-200',
-    gray: 'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border',
+    gray: 'bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border',
   }
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${styles[tone]}`}>
@@ -198,7 +198,7 @@ function PflichtdokumenteCard({
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-            <ShieldCheckIcon className="w-4 h-4 text-claimondo-ondo" />
+            <ShieldCheckIcon className="w-4 h-4 text-[#4573A2]" />
             Pflichtdokumente
           </h2>
           <p className="text-[11px] text-claimondo-ondo mt-0.5">
@@ -221,10 +221,10 @@ function PflichtdokumenteCard({
         {pflichtdokumente.map((d) => (
           <div
             key={d.slotId}
-            className="flex items-start gap-3 border border-claimondo-border rounded-xl p-3 bg-claimondo-bg/40"
+            className="flex items-start gap-3 border border-claimondo-border rounded-xl p-3 bg-[#f8f9fb]/40"
           >
             <div className="w-9 h-9 rounded-lg bg-white border border-claimondo-border flex items-center justify-center flex-shrink-0">
-              <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
+              <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -253,7 +253,7 @@ function PflichtdokumenteCard({
               </div>
               {d.hochgeladenAm && (
                 <p className="text-[10px] text-claimondo-ondo mt-0.5">
-                  Hochgeladen: {new Date(d.hochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })}
+                  Hochgeladen: {new Date(d.hochgeladenAm).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
                 </p>
               )}
               {d.status === 'abgelehnt' && d.adminNotiz && (
@@ -264,7 +264,7 @@ function PflichtdokumenteCard({
                   href={d.signedUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[11px] text-claimondo-ondo hover:underline mt-1 inline-block"
+                  className="text-[11px] text-[#4573A2] hover:underline mt-1 inline-block"
                 >
                   Dokument öffnen ↗
                 </a>
@@ -293,7 +293,7 @@ function PflichtdokumenteCard({
                         setRejectingSlot(null)
                         setRejectNotiz('')
                       }}
-                      className="px-2.5 py-1 text-[11px] rounded-md border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
+                      className="px-2.5 py-1 text-[11px] rounded-md border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]"
                     >
                       Abbrechen
                     </button>
@@ -354,7 +354,7 @@ function PflichtdokumenteCard({
             type="button"
             onClick={handleAlleFreigeben}
             disabled={!kannAlleFreigeben || pending}
-            className="px-3 py-1.5 text-xs rounded-lg bg-claimondo-shield text-white hover:bg-claimondo-ondo disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 text-xs rounded-lg bg-[#1E3A5F] text-white hover:bg-[#4573A2] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Alle freigeben → verifizieren
           </button>
@@ -381,7 +381,7 @@ function SaVorlageCard({
 
   const hochgeladen = Boolean(saVorlageStoragePath)
   const hochgeladenDatum = saVorlageHochgeladenAm
-    ? new Date(saVorlageHochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })
+    ? new Date(saVorlageHochgeladenAm).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })
     : null
 
   function handleFreigeben() {
@@ -422,7 +422,7 @@ function SaVorlageCard({
     <section className="glass-light border border-claimondo-border rounded-ios-md p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
+          <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
           <h3 className="text-sm font-semibold text-claimondo-navy">Tier 1 — SA-Vorlage (Dispatch-Gate)</h3>
         </div>
         {badge}
@@ -440,7 +440,7 @@ function SaVorlageCard({
                 href={saVorlageSignedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-claimondo-ondo bg-claimondo-ondo/5 hover:bg-claimondo-ondo/10 border border-claimondo-ondo/20"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#4573A2] bg-[#4573A2]/5 hover:bg-[#4573A2]/10 border border-[#4573A2]/20"
               >
                 <FileTextIcon className="w-3.5 h-3.5" />
                 PDF ansehen
@@ -489,7 +489,7 @@ function SaVorlageCard({
                 onChange={e => setNotiz(e.target.value)}
                 placeholder="Ablehnungsgrund (min. 10 Zeichen) — wird dem SV im Banner angezeigt."
                 rows={3}
-                className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-claimondo-ondo"
+                className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-[#4573A2]"
               />
               <button
                 type="button"
@@ -535,10 +535,10 @@ function Tier2Card({
   }
 
   const fristDatum = verifizierungFristBis
-    ? new Date(verifizierungFristBis).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
+    ? new Date(verifizierungFristBis).toLocaleDateString('de-DE')
     : null
   const verifiziertDatum = verifiziertAm
-    ? new Date(verifiziertAm).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
+    ? new Date(verifiziertAm).toLocaleDateString('de-DE')
     : null
 
   function handleFreigeben() {
@@ -575,7 +575,7 @@ function Tier2Card({
     <section className="glass-light border border-claimondo-border rounded-ios-md p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <ShieldCheckIcon className="w-4 h-4 text-claimondo-ondo" />
+          <ShieldCheckIcon className="w-4 h-4 text-[#4573A2]" />
           <h3 className="text-sm font-semibold text-claimondo-navy">Tier 2 — Verifizierungs-Dokumente</h3>
         </div>
         {badge}
@@ -583,7 +583,7 @@ function Tier2Card({
 
       <div className="grid grid-cols-2 gap-3 mb-4 text-[11px]">
         {fristDatum && (
-          <div className="px-3 py-2 rounded-lg bg-claimondo-bg border border-claimondo-border">
+          <div className="px-3 py-2 rounded-lg bg-[#f8f9fb] border border-claimondo-border">
             <p className="text-claimondo-ondo">Frist bis</p>
             <p className="font-medium text-claimondo-navy">{fristDatum}</p>
           </div>
@@ -628,7 +628,7 @@ function Tier2Card({
                 type="button"
                 onClick={() => setNachforderung({ slotId: slot.slotId, begruendung: '', frist: defaultFrist })}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-claimondo-ondo hover:bg-claimondo-ondo/5 border border-claimondo-ondo/20 disabled:opacity-50 shrink-0 ml-2"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-[#4573A2] hover:bg-[#4573A2]/5 border border-[#4573A2]/20 disabled:opacity-50 shrink-0 ml-2"
               >
                 <PlusIcon className="w-3 h-3" />
                 Anfordern
@@ -640,8 +640,8 @@ function Tier2Card({
 
       {/* Nachfordern-Dialog */}
       {nachforderung && (
-        <div className="mb-4 p-3 rounded-lg bg-claimondo-ondo/5 border border-claimondo-ondo/20 space-y-2">
-          <p className="text-xs font-semibold text-claimondo-shield">
+        <div className="mb-4 p-3 rounded-lg bg-[#4573A2]/5 border border-[#4573A2]/20 space-y-2">
+          <p className="text-xs font-semibold text-[#1E3A5F]">
             Anfordern: {tier2Slots.find(s => s.slotId === nachforderung.slotId)?.label}
           </p>
           <textarea
@@ -649,7 +649,7 @@ function Tier2Card({
             onChange={e => setNachforderung({ ...nachforderung, begruendung: e.target.value })}
             placeholder="Begründung (min. 20 Zeichen) — wird dem SV in der Mitteilung angezeigt."
             rows={2}
-            className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-claimondo-ondo"
+            className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-[#4573A2]"
           />
           <div className="flex items-center gap-2">
             <label className="text-[11px] text-claimondo-ondo">Frist:</label>
@@ -663,7 +663,7 @@ function Tier2Card({
               type="button"
               onClick={handleNachfordern}
               disabled={pending}
-              className="ml-auto inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold bg-claimondo-shield text-white hover:bg-claimondo-ondo disabled:opacity-50"
+              className="ml-auto inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold bg-[#1E3A5F] text-white hover:bg-[#4573A2] disabled:opacity-50"
             >
               Anforderung senden
             </button>
@@ -715,7 +715,7 @@ function SlotQualiHinweis({ slot }: { slot: Tier2Slot }) {
   return (
     <div className="mt-1 text-[10px] text-claimondo-ondo space-y-0.5">
       {slot.steuertKundensichtbarkeit && (
-        <p className="text-[10px] text-claimondo-ondo">
+        <p className="text-[10px] text-[#4573A2]">
           Freigabe schaltet {qualiLabel} in Kundenkommunikation frei
         </p>
       )}
@@ -787,7 +787,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
           <div className="px-3 py-2 rounded-lg bg-white border border-red-200 text-xs">
             <p className="text-red-800">
               <span className="font-semibold">Gesperrt seit:</span>{' '}
-              {gesperrtSeit ? new Date(gesperrtSeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
+              {gesperrtSeit ? new Date(gesperrtSeit).toLocaleDateString('de-DE') : '—'}
             </p>
             {gesperrtGrund && <p className="text-red-700 mt-1 whitespace-pre-line"><span className="font-semibold">Grund:</span> {gesperrtGrund}</p>}
           </div>
@@ -820,7 +820,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
                 onChange={e => setGrund(e.target.value)}
                 placeholder="Sperr-Grund (min. 10 Zeichen) — interner Vermerk + Audit."
                 rows={3}
-                className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-claimondo-ondo"
+                className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-[#4573A2]"
               />
               <div className="flex items-center gap-2">
                 <button
@@ -890,7 +890,7 @@ function AdminSlotUpload({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={pending}
-        className="inline-flex items-center gap-1 px-2 py-1 text-[11px] rounded-md border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-40"
+        className="inline-flex items-center gap-1 px-2 py-1 text-[11px] rounded-md border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] disabled:opacity-40"
         title={hasFile ? 'Bestehendes Dokument ersetzen' : 'Dokument hochladen'}
       >
         {pending ? (

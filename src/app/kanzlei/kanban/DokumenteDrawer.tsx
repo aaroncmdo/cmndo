@@ -61,7 +61,7 @@ function formatBytes(n: number | null): string {
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
+  return new Date(iso).toLocaleString('de-DE', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -147,7 +147,7 @@ export default function DokumenteDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded hover:bg-claimondo-bg text-claimondo-ondo shrink-0"
+            className="p-1 rounded hover:bg-[#f8f9fb] text-claimondo-ondo shrink-0"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4" />
@@ -225,7 +225,7 @@ function DokumentRow({
     <div
       className={`rounded-lg border p-3 flex items-start gap-3 ${
         highlight
-          ? 'border-claimondo-ondo bg-claimondo-bg/40'
+          ? 'border-claimondo-ondo bg-[#f8f9fb]/40'
           : 'border-claimondo-border bg-white'
       }`}
     >

@@ -27,12 +27,12 @@ type AbrechnungRow = {
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
     offen: { label: 'Offen', cls: 'bg-yellow-100 text-yellow-800' },
-    versendet: { label: 'Versendet', cls: 'bg-claimondo-bg text-claimondo-navy' },
+    versendet: { label: 'Versendet', cls: 'bg-[#f8f9fb] text-claimondo-navy' },
     bezahlt: { label: 'Bezahlt', cls: 'bg-green-100 text-green-800' },
     ueberfaellig: { label: 'Ueberfaellig', cls: 'bg-red-100 text-red-800' },
-    storniert: { label: 'Storniert', cls: 'bg-claimondo-bg text-claimondo-ondo' },
+    storniert: { label: 'Storniert', cls: 'bg-[#f8f9fb] text-claimondo-ondo' },
   }
-  const { label, cls } = map[status] ?? { label: status, cls: 'bg-claimondo-bg text-claimondo-ondo' }
+  const { label, cls } = map[status] ?? { label: status, cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>
       {label}
@@ -142,7 +142,7 @@ export default async function KanzleiAbrechnungenPage() {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg border-b">
+            <thead className="bg-[#f8f9fb] border-b">
               <tr>
                 <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Rechnungsnummer</th>
                 <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Monat</th>
@@ -167,7 +167,7 @@ export default async function KanzleiAbrechnungenPage() {
                   new Date(row.abrechnungsjahr, row.abrechnungsmonat - 1, 1),
                 )
                 return (
-                  <tr key={row.id} className="hover:bg-claimondo-bg transition-colors">
+                  <tr key={row.id} className="hover:bg-[#f8f9fb] transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-claimondo-navy">{row.rechnungsnummer}</td>
                     <td className="px-4 py-3 text-claimondo-navy">{monatName} {row.abrechnungsjahr}</td>
                     <td className="px-4 py-3 text-claimondo-navy font-medium">{row.kanzlei_name}</td>
@@ -178,12 +178,12 @@ export default async function KanzleiAbrechnungenPage() {
                     <td className="px-4 py-3"><StatusBadge status={row.status} /></td>
                     <td className="px-4 py-3 text-claimondo-ondo text-xs">
                       {row.faelligkeitsdatum
-                        ? new Date(row.faelligkeitsdatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
+                        ? new Date(row.faelligkeitsdatum).toLocaleDateString('de-DE')
                         : '—'}
                     </td>
                     <td className="px-4 py-3 text-claimondo-ondo text-xs">
                       {row.bezahlt_am
-                        ? new Date(row.bezahlt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
+                        ? new Date(row.bezahlt_am).toLocaleDateString('de-DE')
                         : '—'}
                     </td>
                   </tr>

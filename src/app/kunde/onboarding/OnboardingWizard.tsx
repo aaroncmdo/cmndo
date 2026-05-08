@@ -330,7 +330,7 @@ export default function OnboardingWizard({
 
   function handleFinish() {
     startTransition(async () => {
-      await completeOnboarding(fall?.id)
+      await completeOnboarding()
       router.push('/kunde')
       router.refresh()
     })
@@ -346,9 +346,9 @@ export default function OnboardingWizard({
   const pflichtBlockedSlots = pflichtSlots.filter((s) => s.pflicht && s.status !== 'erfuellt')
 
   return (
-    <div className="min-h-screen bg-claimondo-bg flex flex-col">
+    <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
       {/* Progress */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-claimondo-bg">
+      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-[#f8f9fb]">
         <div className="h-full bg-claimondo-ondo transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
@@ -416,7 +416,7 @@ export default function OnboardingWizard({
                   <div className="mt-4 space-y-3">
                     <ClaimDataCard title="Schadensereignis">
                       {claim.schadentag && (
-                        <DataRow label="Datum" value={new Date(claim.schadentag).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: 'long', year: 'numeric' })} />
+                        <DataRow label="Datum" value={new Date(claim.schadentag).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })} />
                       )}
                       {claim.schadenzeit && <DataRow label="Uhrzeit" value={String(claim.schadenzeit).slice(0, 5)} />}
                       {claim.schadenort_adresse && (
@@ -496,10 +496,10 @@ export default function OnboardingWizard({
                       <p className="text-xs uppercase tracking-wider text-emerald-700 font-semibold">Termin verbindlich bestätigt</p>
                     </div>
                     <p className="text-lg font-bold text-claimondo-navy">
-                      {new Date(termin.datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                      {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                     </p>
                     <p className="text-sm font-medium text-claimondo-navy">
-                      {new Date(termin.datum).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} Uhr
+                      {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
                     </p>
                     {termin.ort && (
                       <p className="mt-3 text-sm text-claimondo-navy flex items-start gap-1.5">
@@ -602,13 +602,17 @@ export default function OnboardingWizard({
               // Pflicht-Slots existieren noch). Im gelben Fall schiebt der
               // Banner im Layout das Re-Engagement.
               //
-              // CMM-33 Fix: pflichtSlots nutzen statt pflichtDocs + docStatus.
-              // PflichtdokumenteSection-Uploads aktualisieren docStatus nicht —
-              // sie rufen router.refresh(), wodurch pflichtSlots als Prop neu
-              // vom Server kommt. d.status via ?? war nie erreichbar weil
-              // docStatus[d.id] immer defined ist (initialisiert als 'ausstehend').
-              const offenePflicht = pflichtSlots.filter(
-                (s) => s.pflicht && s.status !== 'erfuellt',
+              // CMM-22 Bugfix: gleiche Smart-Filter-Sicht wie der Banner
+              // (relevanteSlotIds), Pflicht aus der DB-Row, optimistische
+              // docStatus-Override für sofortiges Feedback nach einem Upload.
+              // Vorher zählte das Ende ungefiltert über pflichtDocs und
+              // ignorierte den Smart-Filter — dadurch tauchten Slots wie
+              // gewerbenachweis/freigabe_bank auf die der Banner gar nicht
+              // anzeigt (3 vs 4-Diskrepanz).
+              const offenePflicht = pflichtDocs.filter(
+                (d) => relevanteSlotIds.has(d.slot_id)
+                  && d.pflicht
+                  && (docStatus[d.id] ?? d.status) !== 'hochgeladen',
               ).length
               const allesErfuellt = offenePflicht === 0
               return (
@@ -714,7 +718,7 @@ function DokumentInfoOverlay({
             type="button"
             onClick={onClose}
             aria-label="Schließen"
-            className="w-8 h-8 rounded-full hover:bg-claimondo-bg flex items-center justify-center text-claimondo-ondo"
+            className="w-8 h-8 rounded-full hover:bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo"
           >
             <XIcon className="w-5 h-5" />
           </button>

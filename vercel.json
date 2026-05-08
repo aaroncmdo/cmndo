@@ -77,18 +77,6 @@
       "schedule": "0 10 * * *"
     },
     {
-      "path": "/api/cron/sa-reminder",
-      "schedule": "5 10 * * *"
-    },
-    {
-      "path": "/api/cron/re-termin-eskalation",
-      "schedule": "0 * * * *"
-    },
-    {
-      "path": "/api/cron/vs-korrespondenz-review",
-      "schedule": "0 9 * * 1"
-    },
-    {
       "path": "/api/cron/kb-termin-reminder",
       "schedule": "30 * * * *"
     },
@@ -187,10 +175,6 @@
     {
       "path": "/api/cron/verlegung-eskalation",
       "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/cron/google-bewertungen",
-      "schedule": "0 3 * * *"
     }
   ]
 }

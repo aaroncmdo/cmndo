@@ -388,7 +388,7 @@ export default function DokumenteTab({
                     <p className="text-sm text-claimondo-navy truncate">{d.label}</p>
                     <p className="text-[10px] text-claimondo-ondo truncate">
                       {d.original_filename ?? 'Unbenannt'} ·{' '}
-                      {new Date(d.hochgeladen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                      {new Date(d.hochgeladen_am).toLocaleDateString('de-DE')}
                     </p>
                   </div>
                 </div>
@@ -491,7 +491,7 @@ export default function DokumenteTab({
                           <span className="text-[9px] text-claimondo-ondo/70">{dok.quelle}</span>
                         )}
                         <span className="text-[9px] text-claimondo-ondo/70">
-                          {new Date(dok.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                          {new Date(dok.created_at).toLocaleDateString('de-DE')}
                         </span>
                       </div>
                     </div>

@@ -60,8 +60,8 @@ export function EventFilterBar({
               onClick={() => toggleSource(s.id)}
               className={`inline-flex items-center gap-1 text-xs font-medium rounded-full border px-2.5 py-1 transition-colors ${
                 active
-                  ? 'bg-claimondo-bg border-claimondo-ondo text-claimondo-navy'
-                  : 'bg-white border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg'
+                  ? 'bg-[#f8f9fb] border-claimondo-ondo text-claimondo-navy'
+                  : 'bg-white border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
               }`}
             >
               <span>{s.icon}</span>

@@ -61,7 +61,7 @@ export default async function LeadPreiseVerteilungWidget() {
       <div className="bg-white rounded-ios-lg shadow-ios-md p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <BarChart3Icon className="w-4 h-4 text-claimondo-ondo" />
+              <BarChart3Icon className="w-4 h-4 text-[#4573A2]" />
               <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
                 Lead-Preise Verteilung
               </h2>
@@ -94,7 +94,7 @@ export default async function LeadPreiseVerteilungWidget() {
                             {b.anzahl} · {fmtEur(b.summe)} · {pct.toFixed(0)}%
                           </span>
                         </div>
-                        <div className="h-2 bg-claimondo-bg rounded-full overflow-hidden">
+                        <div className="h-2 bg-[#f8f9fb] rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-[#4573A2] to-emerald-500 transition-all"
                             style={{ width: `${barWidth}%` }}

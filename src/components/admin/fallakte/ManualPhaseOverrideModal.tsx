@@ -102,7 +102,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-claimondo-navy flex items-center gap-2">
+          <DialogTitle className="text-[#0D1B3E] flex items-center gap-2">
             <AlertTriangleIcon className="w-5 h-5 text-amber-600" />
             Subphase manuell überschreiben
           </DialogTitle>
@@ -125,8 +125,8 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-claimondo-navy">Aktuelle Subphase</label>
-          <div className="w-full rounded-md border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm text-claimondo-navy">
+          <label className="text-xs font-medium text-[#0D1B3E]">Aktuelle Subphase</label>
+          <div className="w-full rounded-md border border-claimondo-border bg-[#f8f9fb] px-3 py-2 text-sm text-claimondo-navy">
             <span className="font-medium">{currentLabel}</span>
             {currentSubphase && (
               <span className="ml-2 font-mono text-xs text-claimondo-ondo">({currentSubphase})</span>
@@ -135,13 +135,13 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-claimondo-navy">
+          <label className="text-xs font-medium text-[#0D1B3E]">
             Neue Subphase <span className="text-red-600">*</span>
           </label>
           <select
             value={neueSubphase}
             onChange={(e) => setNeueSubphase(e.target.value)}
-            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
           >
             <option value="">– bitte wählen –</option>
             {groups.map((g) => (
@@ -157,7 +157,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-claimondo-navy">
+          <label className="text-xs font-medium text-[#0D1B3E]">
             Begründung <span className="text-red-600">*</span>
             <span className="text-claimondo-ondo font-normal ml-1">(min. 10 Zeichen)</span>
           </label>
@@ -166,7 +166,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
             onChange={(e) => setBegruendung(e.target.value)}
             rows={4}
             placeholder="Warum wird die Subphase manuell überschrieben? (z.B. Legacy-Migration, Visibility-Fine-Tuning, …)"
-            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
           />
           <p className="text-xs text-claimondo-ondo">
             {begruendung.trim().length} / min. 10 Zeichen —{' '}
@@ -196,7 +196,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
             type="button"
             onClick={() => handleOpenChange(false)}
             disabled={pending}
-            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
+            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-[#f8f9fb] disabled:opacity-50"
           >
             Abbrechen
           </button>

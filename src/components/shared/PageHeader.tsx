@@ -80,12 +80,8 @@ export default function PageHeader({
     )
   }
 
-  // 2026-05-07 Mobile-Polish: Auf Mobile wird die Actions-Zeile unter den
-  // Title gestapelt, damit lange Action-Labels (z.B. „Aktuelle Lead-Preis-
-  // Tabelle einsehen" auf /gutachter/abrechnung) den Title nicht zu
-  // „Abrechn…" trunkieren. Ab sm bleibt das Inline-Layout wie vorher.
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+    <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {leadingSlot}
         <div className="flex flex-col gap-1 min-w-0">
@@ -103,7 +99,7 @@ export default function PageHeader({
         </div>
       </div>
       {actions ? (
-        <div className="flex items-center gap-3 shrink-0 flex-wrap">{actions}</div>
+        <div className="flex items-center gap-3 shrink-0">{actions}</div>
       ) : null}
     </div>
   )

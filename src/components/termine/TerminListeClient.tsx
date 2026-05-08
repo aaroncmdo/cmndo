@@ -51,7 +51,6 @@ export default function TerminListeClient({
   variant = 'full',
   title = 'Termine',
   limit,
-  onRueckrufClick,
 }: {
   fallId?: string
   leadId?: string
@@ -59,8 +58,6 @@ export default function TerminListeClient({
   variant?: 'full' | 'compact'
   title?: string
   limit?: number
-  /** Wenn gesetzt: Rückruf-Zeilen öffnen diesen Handler statt zu navigieren. */
-  onRueckrufClick?: (leadId: string) => void
 }) {
   const [rows, setRows] = useState<Normalized[] | null>(null)
 
@@ -155,16 +152,16 @@ export default function TerminListeClient({
         <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">{title}</h3>
       )}
       {kommend.length > 0 && (
-        <Gruppe label="Kommend" rows={kommend} dispatchLinks={dispatchLinks} onRueckrufClick={onRueckrufClick} />
+        <Gruppe label="Kommend" rows={kommend} dispatchLinks={dispatchLinks} />
       )}
       {vergangen.length > 0 && (
-        <Gruppe label="Vergangen" rows={vergangen} dispatchLinks={dispatchLinks} muted onRueckrufClick={onRueckrufClick} />
+        <Gruppe label="Vergangen" rows={vergangen} dispatchLinks={dispatchLinks} muted />
       )}
     </div>
   )
 }
 
-function Gruppe({ label, rows, muted, dispatchLinks, onRueckrufClick }: { label: string; rows: Normalized[]; muted?: boolean; dispatchLinks?: boolean; onRueckrufClick?: (leadId: string) => void }) {
+function Gruppe({ label, rows, muted, dispatchLinks }: { label: string; rows: Normalized[]; muted?: boolean; dispatchLinks?: boolean }) {
   return (
     <section className={`bg-white rounded-xl border border-claimondo-border ${muted ? 'opacity-80' : ''}`}>
       <div className="px-3 py-2 border-b border-claimondo-border flex items-center justify-between">
@@ -172,22 +169,27 @@ function Gruppe({ label, rows, muted, dispatchLinks, onRueckrufClick }: { label:
         <span className="text-[10px] text-claimondo-ondo/70">{rows.length}</span>
       </div>
       <div className="divide-y divide-claimondo-border">
-        {rows.map(r => <Row key={`${r.quelle}-${r.id}`} r={r} dispatchLinks={dispatchLinks} onRueckrufClick={onRueckrufClick} />)}
+        {rows.map(r => <Row key={`${r.quelle}-${r.id}`} r={r} dispatchLinks={dispatchLinks} />)}
       </div>
     </section>
   )
 }
 
-function Row({ r, dispatchLinks, onRueckrufClick }: { r: Normalized; dispatchLinks?: boolean; onRueckrufClick?: (leadId: string) => void }) {
+function Row({ r, dispatchLinks }: { r: Normalized; dispatchLinks?: boolean }) {
   const meta = TYP_META[r.typ] ?? TYP_META.intern
   const Icon = meta.icon
   const start = new Date(r.start)
   const now = new Date()
   const isOverdue = r.status !== 'erledigt' && r.status !== 'abgesagt' && r.status !== 'abgelehnt' && start < now
-  const datum = start.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+  const href = r.fallId
+    ? `/faelle/${r.fallId}`
+    : r.leadId
+      ? (dispatchLinks ? `/dispatch/leads/${r.leadId}` : '#')
+      : '#'
+  const datum = start.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 
-  const inner = (
-    <>
+  return (
+    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-[#f8f9fb] transition-colors">
       <span className={`flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full border shrink-0 ${meta.cls}`}>
         <Icon className="w-3 h-3" />
         {meta.label}
@@ -203,31 +205,6 @@ function Row({ r, dispatchLinks, onRueckrufClick }: { r: Normalized; dispatchLin
       <span className={`text-[10px] font-medium whitespace-nowrap ${STATUS_CLS[r.status] ?? 'text-claimondo-ondo'}`}>
         {r.status}
       </span>
-    </>
-  )
-
-  // Rückruf-Zeile: Handler öffnet Panel statt Navigation
-  if (r.typ === 'rueckruf' && onRueckrufClick && r.leadId) {
-    return (
-      <button
-        type="button"
-        onClick={() => onRueckrufClick(r.leadId!)}
-        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-[#f8f9fb] transition-colors text-left"
-      >
-        {inner}
-      </button>
-    )
-  }
-
-  const href = r.fallId
-    ? `/faelle/${r.fallId}`
-    : r.leadId
-      ? (dispatchLinks ? `/dispatch/leads/${r.leadId}` : '#')
-      : '#'
-
-  return (
-    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-[#f8f9fb] transition-colors">
-      {inner}
     </Link>
   )
 }

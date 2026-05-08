@@ -98,11 +98,11 @@ export default async function KiUsagePage() {
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-white rounded-2xl border border-claimondo-border p-4">
           <div className="text-[11px] uppercase tracking-wider text-claimondo-ondo">Calls (7 Tage)</div>
-          <div className="text-2xl font-semibold text-claimondo-navy">{totalCalls.toLocaleString('de-DE')}</div>
+          <div className="text-2xl font-semibold text-[#0D1B3E]">{totalCalls.toLocaleString('de-DE')}</div>
         </div>
         <div className="bg-white rounded-2xl border border-claimondo-border p-4">
           <div className="text-[11px] uppercase tracking-wider text-claimondo-ondo">Cache-Hit-Rate</div>
-          <div className="text-2xl font-semibold text-claimondo-navy">
+          <div className="text-2xl font-semibold text-[#0D1B3E]">
             {totalCacheHitRate != null ? `${(totalCacheHitRate * 100).toFixed(1)}%` : '—'}
           </div>
           <div className="text-[11px] text-claimondo-ondo mt-1">
@@ -111,7 +111,7 @@ export default async function KiUsagePage() {
         </div>
         <div className="bg-white rounded-2xl border border-claimondo-border p-4">
           <div className="text-[11px] uppercase tracking-wider text-claimondo-ondo">Endpoints aktiv</div>
-          <div className="text-2xl font-semibold text-claimondo-navy">{aggregated.length}</div>
+          <div className="text-2xl font-semibold text-[#0D1B3E]">{aggregated.length}</div>
         </div>
       </section>
 
@@ -125,7 +125,7 @@ export default async function KiUsagePage() {
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg text-[11px] uppercase tracking-wider text-claimondo-ondo">
+            <thead className="bg-[#f8f9fb] text-[11px] uppercase tracking-wider text-claimondo-ondo">
               <tr>
                 <th className="text-left px-4 py-2">Endpoint</th>
                 <th className="text-right px-4 py-2">Calls</th>

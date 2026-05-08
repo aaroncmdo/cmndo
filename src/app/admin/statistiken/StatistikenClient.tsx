@@ -474,7 +474,7 @@ export default function StatistikenClient({
             <PageHeader title="Statistiken" />
             <div className="flex items-center gap-3 flex-wrap">
               {/* Zeitraum */}
-              <div className="flex bg-claimondo-bg rounded-lg p-0.5">
+              <div className="flex bg-[#f8f9fb] rounded-lg p-0.5">
                 {ZEITRAUM_OPTIONS.map(o => (
                   <button key={o.days} onClick={() => setZeitraum(o.days)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${zeitraum === o.days ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'}`}>
@@ -484,7 +484,7 @@ export default function StatistikenClient({
               </div>
               {/* Kundenberater / Leadabarbeiter Toggle */}
               {(rolle === 'kundenbetreuer' || rolle === 'dispatch') && (
-                <div className="flex bg-claimondo-bg rounded-lg p-0.5">
+                <div className="flex bg-[#f8f9fb] rounded-lg p-0.5">
                   <button onClick={() => setNurEigene(true)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${nurEigene ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'}`}>
                     Eigene
@@ -503,7 +503,7 @@ export default function StatistikenClient({
             {/* SV Filter */}
             {(rolle === 'admin' || rolle === 'sv_buero_inhaber' || rolle === 'akademie_verwalter') && svOptions.length > 1 && (
               <select value={filterSv} onChange={e => setFilterSv(e.target.value)}
-                className="px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-claimondo-ondo">
+                className="px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-[#4573A2]">
                 <option value="">Alle SVs</option>
                 {svOptions.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
               </select>
@@ -511,7 +511,7 @@ export default function StatistikenClient({
             {/* Versicherer Filter */}
             {versichererOptions.length > 0 && (
               <select value={filterVersicherer} onChange={e => setFilterVersicherer(e.target.value)}
-                className="px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-claimondo-ondo">
+                className="px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-[#4573A2]">
                 <option value="">Alle Versicherer</option>
                 {versichererOptions.map(v => <option key={v} value={v}>{v}</option>)}
               </select>
@@ -519,7 +519,7 @@ export default function StatistikenClient({
             {/* Region (PLZ) Filter */}
             <input type="text" value={filterPlz} onChange={e => setFilterPlz(e.target.value.replace(/\D/g, '').slice(0, 5))}
               placeholder="PLZ-Region" maxLength={5}
-              className="w-24 px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-claimondo-ondo" />
+              className="w-24 px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-[#4573A2]" />
             {(filterSv || filterVersicherer || filterPlz) && (
               <button onClick={() => { setFilterSv(''); setFilterVersicherer(''); setFilterPlz('') }}
                 className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo">Filter zurücksetzen</button>
@@ -558,7 +558,7 @@ export default function StatistikenClient({
                       </tr></thead>
                       <tbody>
                         {kuerzungData.map(d => (
-                          <tr key={d.grund} className="border-b border-claimondo-border hover:bg-claimondo-bg cursor-pointer"
+                          <tr key={d.grund} className="border-b border-claimondo-border hover:bg-[#f8f9fb] cursor-pointer"
                             onClick={() => openDrillDown(`Kürzungsgrund: ${d.label}`, d.fallIds, 'regulierungs_klassifizierung.kuerzung_betrag_netto')}>
                             <td className="py-2 px-2 text-claimondo-navy">{d.label}</td>
                             <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{d.count}</td>
@@ -602,7 +602,7 @@ export default function StatistikenClient({
                       </tr></thead>
                       <tbody>
                         {unfallData.map(d => (
-                          <tr key={d.typ} className="border-b border-claimondo-border hover:bg-claimondo-bg cursor-pointer"
+                          <tr key={d.typ} className="border-b border-claimondo-border hover:bg-[#f8f9fb] cursor-pointer"
                             onClick={() => openDrillDown(`Unfall: ${d.label}`, d.fallIds, 'faelle.unfall_konstellation')}>
                             <td className="py-2 px-2 text-claimondo-navy">{d.label}</td>
                             <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{d.count}</td>
@@ -702,9 +702,9 @@ export default function StatistikenClient({
 
               {/* Insight Box */}
               {gegnerFahrzeugData.length >= 2 && (
-                <div className="mt-4 bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-xl p-3">
+                <div className="mt-4 bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-3">
                   <p className="text-xs text-claimondo-navy">
-                    <span className="font-semibold text-claimondo-ondo">Insight:</span>{' '}
+                    <span className="font-semibold text-[#4573A2]">Insight:</span>{' '}
                     {gegnerFahrzeugData[0].count} Fälle ({Math.round((gegnerFahrzeugData[0].count / filtered.length) * 100)}%) haben {gegnerFahrzeugData[0].label} als Gegner.
                     {gegnerFahrzeugData.length > 1 && ` ${gegnerFahrzeugData[1].label}-Fälle haben durchschnittlich ${fmtEur(gegnerFahrzeugData[1].avgBetrag)} Schadenhöhe vs. ${fmtEur(gegnerFahrzeugData[0].avgBetrag)} bei ${gegnerFahrzeugData[0].label}.`}
                   </p>
@@ -721,14 +721,14 @@ export default function StatistikenClient({
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {potenzialeData.map(b => (
-                    <div key={b.metrik} className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
+                    <div key={b.metrik} className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="text-sm font-medium text-claimondo-navy pr-2">{b.beschreibung}</h4>
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${
                           b.statusColor === 'green' ? 'bg-green-100 text-green-700' :
                           b.statusColor === 'amber' ? 'bg-amber-100 text-amber-700' :
-                          b.statusColor === 'blue' ? 'bg-claimondo-ondo/10 text-claimondo-ondo' :
-                          'bg-claimondo-bg text-claimondo-ondo'
+                          b.statusColor === 'blue' ? 'bg-[#4573A2]/10 text-[#4573A2]' :
+                          'bg-[#f8f9fb] text-claimondo-ondo'
                         }`}>
                           {b.statusLabel}
                         </span>
@@ -759,7 +759,7 @@ export default function StatistikenClient({
                       {b.eigenerWert != null && (
                         <div className="h-2 bg-claimondo-border rounded-full overflow-hidden">
                           <div className={`h-full rounded-full transition-all ${
-                            b.statusColor === 'green' ? 'bg-green-500' : b.statusColor === 'amber' ? 'bg-amber-500' : 'bg-claimondo-ondo'
+                            b.statusColor === 'green' ? 'bg-green-500' : b.statusColor === 'amber' ? 'bg-amber-500' : 'bg-[#4573A2]'
                           }`} style={{ width: `${Math.min(Math.max((b.eigenerWert / Number(b.branchen_wert)) * 50, 5), 100)}%` }} />
                         </div>
                       )}

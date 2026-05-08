@@ -218,7 +218,7 @@ export default function KundeTrackingClient({
 
   if (!losgefahren) {
     const terminDatum = vorgeschlagenesDatum ?? ''
-    const terminDisplay = terminDatum ? new Date(terminDatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
+    const terminDisplay = terminDatum ? new Date(terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
 
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-10">
@@ -252,7 +252,7 @@ export default function KundeTrackingClient({
               <button
                 onClick={() => setShowGegenvorschlag(true)}
                 disabled={actionPending}
-                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-claimondo-bg text-amber-700 border border-amber-200 rounded-xl py-3 text-sm font-medium transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-[#f8f9fb] text-amber-700 border border-amber-200 rounded-xl py-3 text-sm font-medium transition-colors"
               >
                 <RefreshCwIcon className="w-4 h-4" /> Anderen Termin vorschlagen
               </button>
@@ -269,7 +269,7 @@ export default function KundeTrackingClient({
               return new Date(tz).toISOString().slice(0, 16)
             }
             const formatDe = (d: Date) =>
-              d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+              d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
             type Vorschlag = { key: string; label: string; sub: string; datum: Date }
             const vorschlaege: Vorschlag[] = []
             if (base && !Number.isNaN(base.getTime())) {
@@ -302,7 +302,7 @@ export default function KundeTrackingClient({
                         type="button"
                         onClick={() => submit(v.datum.toISOString(), gegenGrund)}
                         disabled={actionPending}
-                        className="w-full flex items-center justify-between gap-3 rounded-xl border border-claimondo-border hover:bg-claimondo-bg px-3 py-2.5 text-left disabled:opacity-50"
+                        className="w-full flex items-center justify-between gap-3 rounded-xl border border-claimondo-border hover:bg-[#f8f9fb] px-3 py-2.5 text-left disabled:opacity-50"
                       >
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-claimondo-navy">{v.label}</p>
@@ -327,7 +327,7 @@ export default function KundeTrackingClient({
                   className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-base resize-none focus:outline-none"
                   style={{ outlineColor: brandPrimary }} rows={2} />
                 <div className="flex gap-2">
-                  <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-xl text-sm bg-claimondo-bg text-claimondo-ondo">Abbrechen</button>
+                  <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
                   <button
                     onClick={async () => {
                       if (!gegenDatum) return

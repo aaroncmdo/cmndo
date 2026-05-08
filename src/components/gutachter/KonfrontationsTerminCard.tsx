@@ -25,7 +25,7 @@ interface Props {
 function formatSlot(s: { datum: string; uhrzeit: string }): string {
   const d = new Date(`${s.datum}T${s.uhrzeit}`)
   if (Number.isNaN(d.getTime())) return `${s.datum} ${s.uhrzeit}`
-  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+  return d.toLocaleDateString('de-DE', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -82,7 +82,7 @@ export function KonfrontationsTerminCard({
       className={`rounded-2xl border p-4 sm:p-5 space-y-3 ${
         bestaetigt
           ? 'bg-emerald-50 border-emerald-200'
-          : 'bg-claimondo-bg border-claimondo-ondo'
+          : 'bg-[#f8f9fb] border-claimondo-ondo'
       }`}
     >
       <div className="flex items-center gap-2">
@@ -97,7 +97,7 @@ export function KonfrontationsTerminCard({
       {bestaetigt ? (
         <p className="text-sm text-emerald-800">
           Termin bestätigt am{' '}
-          {new Date(terminVereinbartAm!).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+          {new Date(terminVereinbartAm!).toLocaleDateString('de-DE', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -137,7 +137,7 @@ export function KonfrontationsTerminCard({
                 type="button"
                 onClick={() => setAblehnenOffen(true)}
                 disabled={pending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-claimondo-border bg-white hover:bg-claimondo-bg text-claimondo-navy text-sm font-medium px-4 py-2.5 disabled:opacity-50"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-claimondo-border bg-white hover:bg-[#f8f9fb] text-claimondo-navy text-sm font-medium px-4 py-2.5 disabled:opacity-50"
               >
                 <XIcon className="w-4 h-4" />
                 Ablehnen
@@ -157,7 +157,7 @@ export function KonfrontationsTerminCard({
                 onChange={(e) => setGrund(e.target.value)}
                 rows={3}
                 placeholder="z.B. Urlaub im Vorschlags-Zeitraum, Terminkollision, …"
-                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
               />
               <div className="flex gap-2">
                 <button
@@ -167,7 +167,7 @@ export function KonfrontationsTerminCard({
                     setGrund('')
                   }}
                   disabled={pending}
-                  className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
+                  className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-[#f8f9fb] disabled:opacity-50"
                 >
                   Zurück
                 </button>

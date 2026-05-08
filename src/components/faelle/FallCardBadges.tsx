@@ -9,19 +9,15 @@ import { tokens } from '@/lib/design-tokens'
 export default function FallCardBadges({
   chatCount,
   updateCount,
-  kundeUploadCount = 0,
 }: {
   chatCount: number
   updateCount: number
-  /** A4 P0: ungesehene Kunde-Uploads — rote Badge mit Upload-Tone (amber). */
-  kundeUploadCount?: number
 }) {
-  if (chatCount === 0 && updateCount === 0 && kundeUploadCount === 0) return null
+  if (chatCount === 0 && updateCount === 0) return null
 
   return (
     <div className="flex items-center gap-1">
       {chatCount > 0 && <DropletBadge count={chatCount} tone="ondo" />}
-      {kundeUploadCount > 0 && <DropletBadge count={kundeUploadCount} tone="warning" />}
       {updateCount > 0 && <DropletBadge count={updateCount} tone="danger" />}
     </div>
   )

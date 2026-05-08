@@ -13,7 +13,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 
 // Datum/Uhrzeit-Formatter für Notifikations-Payloads (de-DE)
 function fmtDatum(iso: string): string {
-  return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+  return new Date(iso).toLocaleDateString('de-DE', {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
@@ -21,7 +21,7 @@ function fmtDatum(iso: string): string {
   })
 }
 function fmtUhrzeit(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
+  return new Date(iso).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
   })
@@ -343,17 +343,7 @@ export async function terminVerlegungVorschlagen(input: {
 type DecisionResult = { ok: true } | { ok: false; error: string }
 
 type KundeVorschlaegeResult =
-  | {
-      ok: true
-      vorschlaege: Array<{ start: string; end: string; datum: string }>
-      slotDauerMin: number
-      fallId: string
-      besichtigungsort: {
-        adresse: string
-        lat: number
-        lng: number
-      }
-    }
+  | { ok: true; vorschlaege: Array<{ start: string; end: string; datum: string }>; slotDauerMin: number }
   | { ok: false; error: string }
 
 /**
@@ -378,12 +368,7 @@ export async function getKundeTerminVorschlaegeAction(
     .eq('id', terminId)
     .maybeSingle()
   if (!termin) return { ok: false, error: 'Termin nicht gefunden.' }
-  // 'bestaetigt' = regulaerer Verlegen-Flow.
-  // 'reserviert' / 'gegenvorschlag' / 'verlegung_pending' = blockiert.
-  // Verstrichener Termin (start_zeit in der Vergangenheit) bleibt bestaetigt
-  // bis abgesagt — fuer die "Neuen Termin vereinbaren"-UX wollen wir die
-  // Vorschlaege weiter laden koennen.
-  if (!['bestaetigt'].includes(termin.status as string)) {
+  if (termin.status !== 'bestaetigt') {
     return { ok: false, error: 'Termin ist nicht mehr bestätigt.' }
   }
   if (!termin.fall_id) return { ok: false, error: 'Termin ohne Fall-Verknüpfung.' }
@@ -447,17 +432,7 @@ export async function getKundeTerminVorschlaegeAction(
 
   // Routen-Details rausfiltern — Kunde sieht nur Datum + Uhrzeit (SV-Privatsphäre)
   const vorschlaege = vorschlaegeRaw.map((v) => ({ start: v.start, end: v.end, datum: v.datum }))
-  return {
-    ok: true,
-    vorschlaege,
-    slotDauerMin,
-    fallId: termin.fall_id as string,
-    besichtigungsort: {
-      adresse: zielLabel,
-      lat: Number(zielLat),
-      lng: Number(zielLng),
-    },
-  }
+  return { ok: true, vorschlaege, slotDauerMin }
 }
 
 /**
@@ -483,11 +458,10 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
 
-  // Termin laden — sv_angekommen_am ist die Geo-Wahrheit fuer
-  // Verschuldens-Zuordnung (siehe Counter-Logik unten).
+  // Termin laden
   const { data: alt } = await admin
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, kb_id, kanal, typ, status, start_zeit, end_zeit, sv_angekommen_am')
+    .select('id, sv_id, fall_id, kb_id, kanal, typ, status, start_zeit, end_zeit')
     .eq('id', input.terminId)
     .maybeSingle()
   if (!alt) return { ok: false, error: 'Termin nicht gefunden.' }
@@ -521,25 +495,12 @@ export async function kundeTerminVerlegungVorschlagen(input: {
     alt.id as string,
   )
   if (!frei) {
-    // AAR-CMM PR B: Candidate-Location für ETA-Reachability der Alternativen
-    const { data: fallLoc } = await admin
-      .from('faelle')
-      .select('besichtigungsort_lat, besichtigungsort_lng')
-      .eq('id', alt.fall_id as string)
-      .maybeSingle()
-    const candLat = (fallLoc as { besichtigungsort_lat: number | null } | null)?.besichtigungsort_lat ?? null
-    const candLng = (fallLoc as { besichtigungsort_lng: number | null } | null)?.besichtigungsort_lng ?? null
-    const candidate = candLat != null && candLng != null
-      ? { lat: Number(candLat), lng: Number(candLng) }
-      : null
-
     const alternatives = await findAlternativenZuWunschslot(
       admin,
       alt.sv_id as string,
       input.neuesStartIso,
       slotDauerMin,
       alt.id as string,
-      candidate,
     )
     return { ok: false, error: 'Der gewünschte Termin ist beim Gutachter belegt.', alternatives }
   }
@@ -549,37 +510,7 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   // weiter verschieben, schlägt er seinerseits vor (SV-Flow → verlegung_pending
   // beim Kunden). So entsteht der Loop Kunde↔SV bei Bedarf.
 
-  // Reihenfolge: erst alten Termin schliessen, DANN neuen inserieren.
-  // Grund: EXCLUSION CONSTRAINT greift auf bestaetigt|reserviert|verlegt|verlegung_pending.
-  // Wenn wir erst inserieren (neuer = bestaetigt), ist der alte noch bestaetigt
-  // → bei zweitem Verschieben vom gleichen Slot feuert der CONSTRAINT (AAR-864 Bug).
-
-  // 1) Alter Termin schliessen.
-  // Wenn der Termin bereits verstrichen ist, gilt er als 'verpasst' —
-  // sonst 'verschoben'. Wer schuld ist (SV vs Kunde) ergibt sich aus
-  // sv_angekommen_am: war der SV nicht vor Ort, ist er der No-Show;
-  // war er vor Ort und nichts ist passiert, ist es Kunde-No-Show.
-  // Geo-Auto-Detection mit Permission, manueller Fallback ohne.
-  const altStartMs = new Date(alt.start_zeit as string).getTime()
-  const verstrichen = altStartMs + 60 * 60 * 1000 < Date.now()
-  const svWarVorOrt = !!(alt.sv_angekommen_am as string | null)
-  const verschuldenSv = verstrichen && !svWarVorOrt
-  const neuerAltStatus = verstrichen ? 'verpasst' : 'verschoben'
-
-  const { error: updErr } = await admin
-    .from('gutachter_termine')
-    .update({
-      status: neuerAltStatus,
-      verlegung_grund: input.grund?.trim() || null,
-      verlegung_initiator_kunde: true,
-    })
-    .eq('id', alt.id)
-    .eq('status', 'bestaetigt')
-  if (updErr) {
-    return { ok: false, error: `Alter Termin lässt sich nicht abschließen: ${updErr.message}` }
-  }
-
-  // 2) Neuen Slot anlegen — sofort 'bestaetigt', Initiator=Kunde
+  // 1) Neuen Slot anlegen — sofort 'bestaetigt', Initiator=Kunde
   const { data: neu, error: insErr } = await admin
     .from('gutachter_termine')
     .insert({
@@ -599,66 +530,26 @@ export async function kundeTerminVerlegungVorschlagen(input: {
     .single()
 
   if (insErr || !neu) {
-    // Rollback: alter Termin zurück auf bestaetigt
-    await admin
-      .from('gutachter_termine')
-      .update({ status: 'bestaetigt', verlegung_grund: null, verlegung_initiator_kunde: null })
-      .eq('id', alt.id)
     return {
       ok: false,
       error: `Neuer Slot anlegen fehlgeschlagen: ${insErr?.message ?? 'unbekannt'}`,
     }
   }
 
-  // Timeline-Eintrag fuer Audit
-  await admin.from('timeline').insert({
-    fall_id: alt.fall_id,
-    typ: verstrichen ? 'system' : 'termin',
-    titel: verstrichen
-      ? verschuldenSv
-        ? 'Termin verpasst — SV nicht erschienen, Kunde bucht neu'
-        : 'Termin verpasst — Kunde bucht neu'
-      : 'Termin verschoben (Kunde)',
-    beschreibung: input.grund?.trim() || null,
-  })
-
-  // Bei verpasstem Termin: passenden No-Show-Counter inkrementieren.
-  // Auto-Klassifikation via sv_angekommen_am (Geo-getriggert) statt
-  // pauschal Kunde-No-Show.
-  if (verstrichen && alt.fall_id) {
-    const { data: fallRow } = await admin
-      .from('faelle')
-      .select('claim_id')
-      .eq('id', alt.fall_id as string)
-      .maybeSingle()
-    const claimId = (fallRow?.claim_id as string | null) ?? null
-    if (claimId) {
-      const { data: claim } = await admin
-        .from('claims')
-        .select('kunde_no_show_count, sv_no_show_count')
-        .eq('id', claimId)
-        .maybeSingle()
-      const nowIso = new Date().toISOString()
-      if (verschuldenSv) {
-        const currentCount = (claim?.sv_no_show_count as number | null) ?? 0
-        await admin
-          .from('claims')
-          .update({
-            sv_no_show_count: currentCount + 1,
-            letzter_sv_no_show_am: nowIso,
-          })
-          .eq('id', claimId)
-      } else {
-        const currentCount = (claim?.kunde_no_show_count as number | null) ?? 0
-        await admin
-          .from('claims')
-          .update({
-            kunde_no_show_count: currentCount + 1,
-            letzter_no_show_am: nowIso,
-          })
-          .eq('id', claimId)
-      }
-    }
+  // 2) Alter Termin auf 'verschoben' (terminal — Kunde hat entschieden)
+  const { error: updErr } = await admin
+    .from('gutachter_termine')
+    .update({
+      status: 'verschoben',
+      verlegung_grund: input.grund?.trim() || null,
+      verlegung_initiator_kunde: true,
+    })
+    .eq('id', alt.id)
+    .eq('status', 'bestaetigt')
+  if (updErr) {
+    // Rollback neuer Termin
+    await admin.from('gutachter_termine').delete().eq('id', neu.id)
+    return { ok: false, error: `Alter Termin lässt sich nicht abschließen: ${updErr.message}` }
   }
 
   revalidateFallPaths(alt.fall_id as string | null)

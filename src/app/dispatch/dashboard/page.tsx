@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
+import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon } from 'lucide-react'
 import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConstants'
 import PageHeader from '@/components/shared/PageHeader'
 
@@ -13,7 +13,7 @@ export default async function DispatchDashboard() {
   todayStart.setHours(0, 0, 0, 0)
 
   // Parallel queries
-  const [newLeadsRes, openRueckrufeRes, flowLinksRes, myTasksRes, recentLeadsRes, kommendeRueckrufeRes] = await Promise.all([
+  const [newLeadsRes, openRueckrufeRes, flowLinksRes, myTasksRes, recentLeadsRes] = await Promise.all([
     // Neue Leads heute
     supabase
       .from('leads')
@@ -34,7 +34,7 @@ export default async function DispatchDashboard() {
     // Meine offenen Tasks
     supabase
       .from('tasks')
-      .select('id, titel, typ, prioritaet, faellig_am, fall_id, lead_id, created_at')
+      .select('id, titel, typ, prioritaet, faellig_am, fall_id, created_at')
       .eq('typ', 'dispatch')
       .eq('status', 'offen')
       .order('created_at', { ascending: false })
@@ -45,62 +45,16 @@ export default async function DispatchDashboard() {
       .select('id, vorname, nachname, telefon, qualifizierungs_phase, schadens_fall_typ, source_channel, created_at')
       .order('created_at', { ascending: false })
       .limit(15),
-    // Kommende Rückrufe (Timeline) — nächste 12, sortiert nach Datum
-    supabase
-      .from('admin_termine')
-      .select(
-        'id, start_zeit, notizen, lead_id, gesehen_am, lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon)',
-      )
-      .eq('typ', 'rueckruf')
-      .eq('status', 'offen')
-      .not('lead_id', 'is', null)
-      .order('start_zeit', { ascending: true })
-      .limit(12),
   ])
 
   const stats = [
-    { label: 'Neue Leads heute', value: newLeadsRes.count ?? 0, icon: UsersIcon, color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', href: '/dispatch/leads' },
+    { label: 'Neue Leads heute', value: newLeadsRes.count ?? 0, icon: UsersIcon, color: 'text-claimondo-ondo', bg: 'bg-[#f8f9fb]', href: '/dispatch/leads' },
     { label: 'Offene Rückrufe', value: openRueckrufeRes.count ?? 0, icon: PhoneIcon, color: 'text-amber-600', bg: 'bg-amber-50', href: '/dispatch/rueckrufe' },
     { label: 'FlowLinks versendet', value: flowLinksRes.count ?? 0, icon: LinkIcon, color: 'text-emerald-600', bg: 'bg-emerald-50', href: '/dispatch/leads' },
   ]
 
   const tasks = myTasksRes.data ?? []
   const recentLeads = recentLeadsRes.data ?? []
-
-  // Tasks mit fall_id aber ohne lead_id → Bulk-Resolve via faelle.lead_id,
-  // damit das Dashboard direkt in die Lead-Maske linkt (Aaron-Wunsch).
-  const fallOnlyTasks = tasks.filter((t) => !t.lead_id && t.fall_id)
-  const fallToLeadMap = new Map<string, string>()
-  if (fallOnlyTasks.length > 0) {
-    const fallIds = Array.from(new Set(fallOnlyTasks.map((t) => t.fall_id as string)))
-    const { data: faelleRows } = await supabase
-      .from('faelle')
-      .select('id, lead_id')
-      .in('id', fallIds)
-    for (const f of (faelleRows ?? []) as Array<{ id: string; lead_id: string | null }>) {
-      if (f.lead_id) fallToLeadMap.set(f.id, f.lead_id)
-    }
-  }
-  function leadIdForTask(t: { lead_id: string | null; fall_id: string | null }): string | null {
-    if (t.lead_id) return t.lead_id
-    if (t.fall_id && fallToLeadMap.has(t.fall_id)) return fallToLeadMap.get(t.fall_id)!
-    return null
-  }
-  type RueckrufRow = {
-    id: string
-    start_zeit: string
-    notizen: string | null
-    lead_id: string | null
-    gesehen_am: string | null
-    lead:
-      | { id: string; vorname: string | null; nachname: string | null; telefon: string | null }
-      | { id: string; vorname: string | null; nachname: string | null; telefon: string | null }[]
-      | null
-  }
-  const kommendeRueckrufe = ((kommendeRueckrufeRes.data ?? []) as unknown as RueckrufRow[]).map((r) => ({
-    ...r,
-    lead: Array.isArray(r.lead) ? r.lead[0] ?? null : r.lead,
-  }))
 
   function timeSince(d: string): string {
     const h = Math.floor((Date.now() - new Date(d).getTime()) / 3600000)
@@ -128,73 +82,6 @@ export default async function DispatchDashboard() {
         ))}
       </div>
 
-      {/* Rückrufe-Timeline: chronologische Liste, Click → Rückrufe-Liste mit Auto-Open-Popover */}
-      <div className="bg-white rounded-ios-lg shadow-ios-md">
-        <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-            <PhoneIcon className="w-4 h-4 text-amber-600" />
-            Rückrufe-Timeline
-            {kommendeRueckrufe.length > 0 && (
-              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                {kommendeRueckrufe.length}
-              </span>
-            )}
-          </h2>
-          <Link href="/dispatch/rueckrufe" className="text-xs text-claimondo-ondo hover:underline">
-            Alle anzeigen
-          </Link>
-        </div>
-        <ul className="divide-y divide-claimondo-border max-h-[320px] overflow-y-auto">
-          {kommendeRueckrufe.map((r) => {
-            const lead = r.lead
-            if (!lead) return null
-            const start = new Date(r.start_zeit)
-            const isOverdue = start.getTime() < Date.now()
-            const datum = start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })
-            const uhrzeit = start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
-            const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
-            return (
-              <li key={r.id}>
-                <Link
-                  href={`/dispatch/rueckrufe?open=${r.id}`}
-                  className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-bg transition-colors"
-                >
-                  {!r.gesehen_am && (
-                    <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-label="Neu" />
-                  )}
-                  <div className={`flex flex-col items-center justify-center w-14 shrink-0 rounded-lg py-1.5 ${
-                    isOverdue ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800'
-                  }`}>
-                    <span className="text-[10px] font-medium uppercase tracking-wider">{datum}</span>
-                    <span className="text-sm font-bold">{uhrzeit}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
-                    {lead.telefon && (
-                      <p className="text-xs text-claimondo-ondo truncate">{lead.telefon}</p>
-                    )}
-                    {r.notizen && (
-                      <p className="text-[11px] text-claimondo-ondo/70 truncate">{r.notizen}</p>
-                    )}
-                  </div>
-                  {isOverdue && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-red-700 bg-red-50 px-2 py-0.5 rounded-full shrink-0">
-                      <AlertCircleIcon className="w-3 h-3" />
-                      Überfällig
-                    </span>
-                  )}
-                </Link>
-              </li>
-            )
-          })}
-          {kommendeRueckrufe.length === 0 && (
-            <li className="px-5 py-8 text-sm text-claimondo-ondo/70 text-center">
-              Keine offenen Rückrufe
-            </li>
-          )}
-        </ul>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live-Feed: Neueste Leads */}
         <div className="bg-white rounded-ios-lg shadow-ios-md">
@@ -204,14 +91,14 @@ export default async function DispatchDashboard() {
           </div>
           <div className="divide-y divide-claimondo-border max-h-[400px] overflow-y-auto">
             {recentLeads.map((lead) => (
-              <Link key={lead.id} href={`/dispatch/leads/${lead.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-bg transition-colors">
+              <Link key={lead.id} href={`/dispatch/leads/${lead.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-[#f8f9fb] transition-colors">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-claimondo-navy truncate">
                     {lead.vorname} {lead.nachname}
                   </p>
                   <p className="text-xs text-claimondo-ondo">{lead.telefon} {lead.schadens_fall_typ ? `· ${lead.schadens_fall_typ}` : ''}</p>
                 </div>
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${PHASE_BADGES[lead.qualifizierungs_phase] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${PHASE_BADGES[lead.qualifizierungs_phase] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
                   {PHASE_LABELS[lead.qualifizierungs_phase] ?? lead.qualifizierungs_phase}
                 </span>
                 <span className="text-[10px] text-claimondo-ondo/70 whitespace-nowrap">{timeSince(lead.created_at)}</span>
@@ -235,39 +122,17 @@ export default async function DispatchDashboard() {
             </h2>
           </div>
           <div className="divide-y divide-claimondo-border max-h-[400px] overflow-y-auto">
-            {tasks.map((task) => {
-              const leadId = leadIdForTask(task)
-              const fallId = !leadId && task.fall_id ? task.fall_id : null
-              const href = leadId
-                ? `/dispatch/leads/${leadId}`
-                : fallId
-                  ? `/faelle/${fallId}`
-                  : null
-              const inner = (
-                <>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-claimondo-navy truncate">{task.titel}</p>
-                    <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : ''}</p>
-                  </div>
-                  {task.prioritaet === 'dringend' && (
-                    <span className="text-[10px] font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Dringend</span>
-                  )}
-                </>
-              )
-              return href ? (
-                <Link
-                  key={task.id}
-                  href={href}
-                  className="px-5 py-3 flex items-center gap-3 hover:bg-claimondo-bg transition-colors"
-                >
-                  {inner}
-                </Link>
-              ) : (
-                <div key={task.id} className="px-5 py-3 flex items-center gap-3">
-                  {inner}
+            {tasks.map((task) => (
+              <div key={task.id} className="px-5 py-3 flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-claimondo-navy truncate">{task.titel}</p>
+                  <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE') : ''}</p>
                 </div>
-              )
-            })}
+                {task.prioritaet === 'dringend' && (
+                  <span className="text-[10px] font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Dringend</span>
+                )}
+              </div>
+            ))}
             {tasks.length === 0 && (
               <p className="px-5 py-8 text-sm text-claimondo-ondo/70 text-center">Keine offenen Tasks</p>
             )}

@@ -18,7 +18,7 @@ type Auszahlung = {
 }
 
 const TYP_LABELS: Record<string, string> = { bonus: 'Bonus', provision: 'Provision', sachleistung: 'Sachleistung', freizeit: 'Freizeit' }
-const TYP_COLORS: Record<string, string> = { bonus: 'bg-green-50 text-green-300', provision: 'bg-claimondo-ondo/5 text-claimondo-light-blue', sachleistung: 'bg-violet-50 text-violet-300', freizeit: 'bg-amber-50 text-amber-300' }
+const TYP_COLORS: Record<string, string> = { bonus: 'bg-green-50 text-green-300', provision: 'bg-[#4573A2]/5 text-[#7BA3CC]', sachleistung: 'bg-violet-50 text-violet-300', freizeit: 'bg-amber-50 text-amber-300' }
 const KAT_LABELS: Record<string, string> = { dispatch: 'Dispatch', kundenbetreuer: 'Kundenbetreuer', alle: 'Alle' }
 
 export default function IncentivesClient({ incentives, auszahlungen }: {
@@ -60,16 +60,16 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
         description={`${aktive.length} aktiv · ${inaktive.length} inaktiv`}
         icon={GiftIcon}
         actions={
-          <button onClick={() => { setShowDialog(true); setError(null) }} className="flex items-center gap-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+          <button onClick={() => { setShowDialog(true); setError(null) }} className="flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
             <PlusIcon className="w-4 h-4" /> Neues Incentive
           </button>
         }
       />
 
       <div className="flex gap-2">
-        <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
-        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
-        <Link href="/admin/team/incentives" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg"><GiftIcon className="w-3.5 h-3.5 inline mr-1.5" />Incentives</Link>
+        <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
+        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
+        <Link href="/admin/team/incentives" className="px-3 py-1.5 bg-[#1E3A5F] text-white text-xs font-medium rounded-lg"><GiftIcon className="w-3.5 h-3.5 inline mr-1.5" />Incentives</Link>
       </div>
 
       {/* Aktive Incentives */}
@@ -82,8 +82,8 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
                 <div>
                   <h3 className="text-claimondo-navy font-semibold">{inc.titel}</h3>
                   <div className="flex gap-2 mt-1">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${TYP_COLORS[inc.typ] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{TYP_LABELS[inc.typ] ?? inc.typ}</span>
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-claimondo-bg text-claimondo-ondo">{KAT_LABELS[inc.kategorie] ?? inc.kategorie}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${TYP_COLORS[inc.typ] ?? 'bg-[#f8f9fb] text-claimondo-navy'}`}>{TYP_LABELS[inc.typ] ?? inc.typ}</span>
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[#f8f9fb] text-claimondo-ondo">{KAT_LABELS[inc.kategorie] ?? inc.kategorie}</span>
                   </div>
                 </div>
                 <button onClick={() => handleToggle(inc.id, inc.aktiv)} disabled={toggling === inc.id} className="text-green-400 hover:text-green-300 transition-colors">
@@ -105,7 +105,7 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
                       <div className="flex items-center gap-2">
                         <span className="text-claimondo-ondo">{a.monat}</span>
                         <span className="text-green-400">{fmt(a.betrag)}</span>
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${a.status === 'ausgezahlt' ? 'bg-green-50 text-green-300' : a.status === 'genehmigt' ? 'bg-claimondo-ondo/5 text-claimondo-light-blue' : 'bg-claimondo-bg text-claimondo-ondo'}`}>{a.status}</span>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${a.status === 'ausgezahlt' ? 'bg-green-50 text-green-300' : a.status === 'genehmigt' ? 'bg-[#4573A2]/5 text-[#7BA3CC]' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>{a.status}</span>
                       </div>
                     </div>
                   ))}
@@ -143,21 +143,21 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
       <Modal open={showDialog} onClose={() => setShowDialog(false)} maxWidth={480} ariaLabel="Neues Incentive">
         <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neues Incentive</h2>
         <form onSubmit={handleCreate} className="space-y-3">
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">Titel</label><input name="titel" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">Beschreibung</label><textarea name="beschreibung" rows={2} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Titel</label><input name="titel" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Beschreibung</label><textarea name="beschreibung" rows={2} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="alle">Alle</option></select></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Typ</label><select name="typ" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="bonus">Bonus</option><option value="provision">Provision</option><option value="sachleistung">Sachleistung</option><option value="freizeit">Freizeit</option></select></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="alle">Alle</option></select></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Typ</label><select name="typ" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="bonus">Bonus</option><option value="provision">Provision</option><option value="sachleistung">Sachleistung</option><option value="freizeit">Freizeit</option></select></div>
           </div>
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">Bedingung</label><input name="bedingung" required placeholder="z.B. Mehr als 50 Leads im Monat" className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Bedingung</label><input name="bedingung" required placeholder="z.B. Mehr als 50 Leads im Monat" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           <div className="grid grid-cols-3 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Wert (EUR)</label><input name="wert" type="number" step="0.01" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig ab</label><input name="gueltig_ab" type="date" className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig bis</label><input name="gueltig_bis" type="date" className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Wert (EUR)</label><input name="wert" type="number" step="0.01" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig ab</label><input name="gueltig_ab" type="date" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig bis</label><input name="gueltig_bis" type="date" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           </div>
           {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
+            <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
             <button type="submit" disabled={loading} className="flex-1 bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50">{loading ? 'Erstelle...' : 'Erstellen'}</button>
           </div>
         </form>

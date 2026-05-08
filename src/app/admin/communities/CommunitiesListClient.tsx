@@ -27,7 +27,7 @@ export default function CommunitiesListClient({ communities }: { communities: Co
         actions={
           <button
             onClick={() => setShowWizard(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
           >
             <PlusIcon className="w-4 h-4" /> Neue Community
           </button>
@@ -48,7 +48,7 @@ export default function CommunitiesListClient({ communities }: { communities: Co
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
+            <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wide text-claimondo-ondo">
               <tr>
                 <th className="text-left px-4 py-3">Name</th>
                 <th className="text-left px-4 py-3">Mitglieder</th>
@@ -60,7 +60,7 @@ export default function CommunitiesListClient({ communities }: { communities: Co
             </thead>
             <tbody className="divide-y divide-claimondo-border">
               {communities.map(c => (
-                <tr key={c.id} className="hover:bg-claimondo-bg/50">
+                <tr key={c.id} className="hover:bg-[#f8f9fb]/50">
                   <td className="px-4 py-3 font-medium text-claimondo-navy">{c.name}</td>
                   <td className="px-4 py-3 text-claimondo-navy">{c.member_count}</td>
                   <td className="px-4 py-3 text-claimondo-navy">{c.radius_km ? `${c.radius_km} km` : '—'}</td>
@@ -75,7 +75,7 @@ export default function CommunitiesListClient({ communities }: { communities: Co
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                    {new Date(c.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                    {new Date(c.created_at).toLocaleDateString('de-DE')}
                   </td>
                 </tr>
               ))}

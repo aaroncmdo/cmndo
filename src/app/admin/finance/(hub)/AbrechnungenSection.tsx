@@ -25,11 +25,11 @@ type Props = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  entwurf: 'bg-claimondo-bg text-claimondo-ondo',
-  versendet: 'bg-claimondo-bg text-claimondo-ondo',
+  entwurf: 'bg-[#f8f9fb] text-claimondo-ondo',
+  versendet: 'bg-[#f8f9fb] text-claimondo-ondo',
   bezahlt: 'bg-emerald-50 text-emerald-600',
   ueberfaellig: 'bg-red-50 text-red-600',
-  storniert: 'bg-claimondo-bg text-claimondo-ondo/70 line-through',
+  storniert: 'bg-[#f8f9fb] text-claimondo-ondo/70 line-through',
 }
 
 function eur(val: number) {
@@ -38,7 +38,7 @@ function eur(val: number) {
 
 function fmtDate(d: string | null) {
   if (!d) return '—'
-  return new Date(d).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
+  return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props) {
@@ -125,7 +125,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
           </div>
 
           {/* Manuell generieren */}
-          <div className="px-5 py-3 bg-claimondo-bg border-b border-claimondo-border flex flex-wrap items-center gap-2 text-xs">
+          <div className="px-5 py-3 bg-[#f8f9fb] border-b border-claimondo-border flex flex-wrap items-center gap-2 text-xs">
             <span className="text-claimondo-ondo">Neue Abrechnung:</span>
             <input
               type="month"
@@ -144,7 +144,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
             <button
               onClick={handleGenerieren}
               disabled={!genMonat || loading === 'gen'}
-              className="bg-claimondo-ondo text-white px-3 py-1 rounded-lg hover:bg-[#3a6590] disabled:opacity-50"
+              className="bg-[#4573A2] text-white px-3 py-1 rounded-lg hover:bg-[#3a6590] disabled:opacity-50"
             >
               {loading === 'gen' ? 'Generiere...' : 'Generieren'}
             </button>
@@ -172,8 +172,8 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                 </thead>
                 <tbody>
                   {filtered.map(abr => (
-                    <tr key={abr.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-claimondo-ondo">{abr.abrechnungs_nr}</td>
+                    <tr key={abr.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb] transition-colors">
+                      <td className="px-4 py-3 font-mono text-xs text-[#4573A2]">{abr.abrechnungs_nr}</td>
                       <td className="px-4 py-3 text-claimondo-navy text-xs">
                         <span className="block">{abr.empfaenger_name}</span>
                         <span className="text-[10px] text-claimondo-ondo/70">{abr.empfaenger_typ}</span>
@@ -185,7 +185,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                       <td className="px-4 py-3 text-center text-claimondo-ondo text-xs">{fmtDate(abr.versand_datum)}</td>
                       <td className="px-4 py-3 text-center text-claimondo-ondo text-xs">{fmtDate(abr.faellig_am)}</td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${STATUS_COLORS[abr.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${STATUS_COLORS[abr.status] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
                           {abr.status}
                         </span>
                       </td>
@@ -197,7 +197,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                               href={`${pdfBaseUrl}/${abr.pdf_path}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-[10px] px-2 py-0.5 rounded bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border"
+                              className="text-[10px] px-2 py-0.5 rounded bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border"
                             >
                               PDF
                             </a>
@@ -207,7 +207,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                             <button
                               onClick={() => handleVersenden(abr.id)}
                               disabled={loading === abr.id}
-                              className="text-[10px] px-2 py-0.5 rounded bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg disabled:opacity-50"
+                              className="text-[10px] px-2 py-0.5 rounded bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb] disabled:opacity-50"
                             >
                               {loading === abr.id ? '...' : 'Senden'}
                             </button>

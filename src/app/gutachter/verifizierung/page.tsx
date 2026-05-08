@@ -202,7 +202,7 @@ export default async function VerifizierungPage() {
         </div>
 
         {sv.sa_vorlage_status === null && (
-          <p className="text-sm text-claimondo-navy bg-claimondo-bg rounded-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-[#f8f9fb] rounded-lg px-3 py-2">
             Noch nicht hochgeladen. Der Upload erfolgt im Willkommen-Flow nach Abschluss der Anzahlung.
           </p>
         )}
@@ -240,12 +240,12 @@ export default async function VerifizierungPage() {
         </div>
 
         {sv.verifizierung_status === null && (
-          <p className="text-sm text-claimondo-navy bg-claimondo-bg rounded-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-[#f8f9fb] rounded-lg px-3 py-2">
             Die Frist startet automatisch nach Eingang Ihrer Anzahlung.
           </p>
         )}
         {sv.verifizierung_status === 'ausstehend' && sv.verifizierung_frist_bis && tageOffen !== null && (
-          <div className={`text-sm rounded-lg px-3 py-2 ${tageOffen <= 4 ? 'bg-amber-50 text-amber-700' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
+          <div className={`text-sm rounded-lg px-3 py-2 ${tageOffen <= 4 ? 'bg-amber-50 text-amber-700' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
             <p className="font-medium">
               Frist: {formatDatum(sv.verifizierung_frist_bis)} — noch {tageOffen} Tag{tageOffen === 1 ? '' : 'e'} offen
             </p>
@@ -284,8 +284,8 @@ export default async function VerifizierungPage() {
               return (
                 <div key={slot.slotId} className="py-3 flex items-start justify-between gap-3">
                   <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-claimondo-ondo/10 flex items-center justify-center shrink-0">
-                      <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
+                    <div className="w-8 h-8 rounded-lg bg-[#4573A2]/10 flex items-center justify-center shrink-0">
+                      <FileTextIcon className="w-4 h-4 text-[#4573A2]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-claimondo-navy">
@@ -325,7 +325,7 @@ export default async function VerifizierungPage() {
             })}
           </div>
 
-          <p className="text-[11px] text-claimondo-ondo bg-claimondo-bg rounded-lg px-3 py-2">
+          <p className="text-[11px] text-claimondo-ondo bg-[#f8f9fb] rounded-lg px-3 py-2">
             Pro Upload wird automatisch ein Prüf-Task beim Admin erstellt. Nach Freigabe ändert sich der Status auf „Freigegeben".
           </p>
         </section>
@@ -368,7 +368,7 @@ function StatusBadge({ status }: { status: string | null | undefined }) {
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo text-xs font-medium">
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-xs font-medium">
       Noch offen
     </span>
   )
@@ -396,7 +396,7 @@ function QualiSlotBadge({ status, hochgeladenAm }: { status: string | null; hoch
   }
   if (status === 'hochgeladen' || hochgeladenAm) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo text-[10px] font-medium shrink-0">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-[10px] font-medium shrink-0">
         <ClockIcon className="w-3 h-3" /> In Prüfung
       </span>
     )
@@ -409,7 +409,7 @@ function QualiSlotBadge({ status, hochgeladenAm }: { status: string | null; hoch
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo text-[10px] font-medium shrink-0">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-[10px] font-medium shrink-0">
       Noch nicht angefordert
     </span>
   )
@@ -417,7 +417,7 @@ function QualiSlotBadge({ status, hochgeladenAm }: { status: string | null; hoch
 
 function formatDatum(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+    return new Date(iso).toLocaleDateString('de-DE', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
