@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
+import { getAllLegalDocs } from '@/lib/legal/get-doc'
 // AAR-316 W2: Sprach-Banner für nicht-deutsche Kunden
 import { SprachBanner } from '@/components/i18n/SprachBanner'
 
@@ -130,39 +131,68 @@ export default async function FlowPage({
   // AAR-99: Reservierten SV+Termin laden fuer Schritt 2
   const { data: terminMitSv } = await svc
     .from('gutachter_termine')
-    .select('id, start_zeit, sv_id, sachverstaendige(profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url))')
+    .select('id, start_zeit, sv_id, sachverstaendige(profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url, firma))')
     .eq('lead_id', leadId)
     .in('status', ['reserviert', 'bestaetigt'])
     .order('start_zeit', { ascending: false })
     .limit(1)
     .maybeSingle()
 
-  // AAR-341: Besichtigungsort im FlowWizard Schritt 2 anzeigen —
-  // Adresse aus lead.unfallort (Dispatch-Phase 1) oder fahrzeug_standort_adresse
-  // (nicht fahrbereit / Werkstatt), strukturierter SV-Treffpunkt aus
-  // lead.besichtigungsort_adresse (AAR-581 N4, ersetzt Legacy-sv_treffpunkt).
+  // Besichtigungsort im FlowWizard Schritt 2: primär besichtigungsort_adresse
+  // (Dispatch setzt den konkreten Inspektions-Ort), Fallback fahrzeug_standort,
+  // letzter Ausweg unfallort. Treffpunkt-Notiz ist ein separates Freitext-Feld.
   let gutachter: {
     vorname: string
     avatarUrl: string | null
+    firma: string | null
     terminDatum: string | null
     besichtigungsAdresse: string | null
     svTreffpunkt: string | null
+    googleDurchschnitt: number | null
+    googleAnzahl: number | null
+    googleAktualisiertAm: string | null
   } | null = null
   if (terminMitSv?.sachverstaendige) {
-    const svJoin = terminMitSv.sachverstaendige as unknown as { profile_id: string; profiles: { vorname: string | null; avatar_url: string | null } | { vorname: string | null; avatar_url: string | null }[] | null } | { profile_id: string; profiles: unknown }[] | null
+    const svJoin = terminMitSv.sachverstaendige as unknown as
+      | { profile_id: string; profiles: { vorname: string | null; avatar_url: string | null; firma: string | null } | { vorname: string | null; avatar_url: string | null; firma: string | null }[] | null }
+      | { profile_id: string; profiles: unknown }[] | null
     const svRow = Array.isArray(svJoin) ? svJoin[0] : svJoin
-    const profile = svRow?.profiles as { vorname: string | null; avatar_url: string | null } | { vorname: string | null; avatar_url: string | null }[] | null
+    const profile = svRow?.profiles as { vorname: string | null; avatar_url: string | null; firma: string | null } | { vorname: string | null; avatar_url: string | null; firma: string | null }[] | null
     const profileRow = Array.isArray(profile) ? profile[0] : profile
+    const svProfileId = svRow?.profile_id as string | null | undefined
+
+    // Google-Bewertungs-Cache (CMM-31) für die SV-Profil-ID laden — non-critical
+    let googleDurchschnitt: number | null = null
+    let googleAnzahl: number | null = null
+    let googleAktualisiertAm: string | null = null
+    if (svProfileId) {
+      const { data: gb } = await svc
+        .from('google_bewertungen_cache')
+        .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am')
+        .eq('profile_id', svProfileId)
+        .maybeSingle()
+      if (gb) {
+        googleDurchschnitt = (gb.durchschnitt as number | null) ?? null
+        googleAnzahl = (gb.anzahl_bewertungen as number | null) ?? null
+        googleAktualisiertAm = (gb.zuletzt_aktualisiert_am as string | null) ?? null
+      }
+    }
+
     if (profileRow?.vorname) {
       gutachter = {
         vorname: profileRow.vorname,
         avatarUrl: profileRow.avatar_url ?? null,
+        firma: profileRow.firma ?? null,
         terminDatum: (terminMitSv.start_zeit as string | null) ?? null,
         besichtigungsAdresse:
-          (lead.unfallort as string | null) ??
+          (lead.besichtigungsort_adresse as string | null) ??
           (lead.fahrzeug_standort_adresse as string | null) ??
+          (lead.unfallort as string | null) ??
           null,
-        svTreffpunkt: (lead.besichtigungsort_adresse as string | null) ?? null,
+        svTreffpunkt: (lead.besichtigungsort_notiz as string | null) ?? null,
+        googleDurchschnitt,
+        googleAnzahl,
+        googleAktualisiertAm,
       }
     }
   }
@@ -210,6 +240,7 @@ export default async function FlowPage({
           // CMM-14: steuert die LexDrive-Visitenkarte am Ende
           service_typ: lead.service_typ ?? null,
         }}
+        legalDocs={getAllLegalDocs()}
       />
     </>
   )

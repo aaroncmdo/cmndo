@@ -110,22 +110,39 @@ export async function uploadPflichtdokumentKunde(fallId: string, pflichtdokument
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
   if (!ownership.ok) throw new Error('Nicht autorisiert')
 
+  // Claim-Pfad wenn claim_id vorhanden, sonst Fallback auf Legacy-Pfad
+  const { data: fall } = await admin
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .single()
+  const claimId = fall?.claim_id as string | null
   const ext = file.name.split('.').pop() ?? 'bin'
-  const path = `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
+  const path = claimId
+    ? `claim/${claimId}/kundendokumente/${Date.now()}.${ext}`
+    : `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
   const { error: uploadErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
   if (uploadErr) throw new Error(uploadErr.message)
 
   const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
-  const { data: pd } = await supabase.from('pflichtdokumente').select('titel').eq('id', pflichtdokumentId).single()
+  const { data: pd } = await supabase
+    .from('pflichtdokumente')
+    .select('titel, dokument_typ')
+    .eq('id', pflichtdokumentId)
+    .single()
 
+  const now = new Date().toISOString()
   await supabase.from('pflichtdokumente').update({
-    status: 'hochgeladen', datei_url: urlData.publicUrl, datei_name: file.name,
+    status: 'hochgeladen',
+    datei_url: urlData.publicUrl,
+    datei_name: file.name,
+    hochgeladen_am: now,
   }).eq('id', pflichtdokumentId)
 
   // AAR-553: fall_dokumente statt dokumente
   await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
-    dokument_typ: pd?.titel ?? 'kundendokument',
+    dokument_typ: pd?.dokument_typ ?? pd?.titel ?? 'kundendokument',
     storage_path: path,
     original_filename: file.name,
     groesse_bytes: file.size,

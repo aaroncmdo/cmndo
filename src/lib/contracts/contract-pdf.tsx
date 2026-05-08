@@ -68,7 +68,7 @@ function stripHtmlToParagraphs(html: string): string[] {
 
 function ContractDoc({ data }: { data: ContractPdfData }) {
   const paragraphs = stripHtmlToParagraphs(data.inhalt_html)
-  const datumStr = data.unterschrift_datum.toLocaleDateString('de-DE', {
+  const datumStr = data.unterschrift_datum.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     day: '2-digit', month: '2-digit', year: 'numeric',
   })
 

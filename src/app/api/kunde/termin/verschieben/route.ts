@@ -97,7 +97,7 @@ export async function POST(req: Request) {
         : `Kunde wünscht Verschiebung des Besichtigungstermins (${fall.fall_nummer ?? fall.id.slice(0, 8)})`
     const beschreibung = [
       wunsch ? `Wunsch-Zeitraum: ${wunsch}` : 'Kein Wunsch-Zeitraum angegeben.',
-      termin.start_zeit ? `Ursprünglicher Termin: ${new Date(termin.start_zeit).toLocaleString('de-DE')}` : null,
+      termin.start_zeit ? `Ursprünglicher Termin: ${new Date(termin.start_zeit).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}` : null,
     ]
       .filter(Boolean)
       .join('\n')

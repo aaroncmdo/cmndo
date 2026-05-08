@@ -17,7 +17,16 @@ import type { ZB1ExtractedData } from '@/lib/ocr/zb1-parser'
 
 type Slot = {
   // AAR-unfallfotos: 'unfallfotos' akzeptiert multiple Uploads (Mehr-Foto-Slot).
-  slot_id: 'fahrzeugschein' | 'polizeibericht' | 'unfallfotos' | 'sonstiges'
+  slot_id:
+    | 'fahrzeugschein'
+    | 'polizeibericht'
+    | 'unfallfotos'
+    | 'sonstiges'
+    | 'sachschaden_foto'
+    | 'sachschaden_rechnung'
+    | 'aerztliches_attest'
+    | 'diagnosebericht'
+    | 'zeugenaussage'
   label: string
   ocr: boolean
   hochgeladen: boolean
@@ -172,16 +181,9 @@ export async function uploadDokumentViaAnfrageToken(
       polizeibericht_hochgeladen_am: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }).eq('id', anfrage.lead_id)
-    // AAR-504: Auto-OCR im Hintergrund. Keine UI für den Kunden — nur intern
-    // für den Dispatcher. Fire-and-forget, errors werden geloggt.
-    try {
-      const { triggerAutoBkatOcr } = await import('@/lib/bkat/auto-trigger')
-      triggerAutoBkatOcr(db, anfrage.lead_id, publicUrl).catch((err) =>
-        console.error('[AAR-504] auto-bkat upload-dokumente:', err),
-      )
-    } catch (err) {
-      console.error('[AAR-504] auto-bkat module load:', err)
-    }
+    // AAR-504: Auto-OCR via after() — läuft garantiert nach Response-Send.
+    const { scheduleBkatAnalyseAfterUpload } = await import('@/lib/bkat/auto-trigger')
+    scheduleBkatAnalyseAfterUpload(db, anfrage.lead_id, publicUrl)
   } else if (slotId === 'unfallfotos') {
     // AAR-unfallfotos: Foto landet in fall_dokumente (typ=schadensfotos —
     // matcht den bestehenden Dokument-Katalog-Slot, siehe
@@ -200,9 +202,30 @@ export async function uploadDokumentViaAnfrageToken(
     } catch (err) {
       console.error('[AAR-unfallfotos] analyze-unfallfotos Modul-Load-Fehler:', err)
     }
+  } else if (slotId === 'sachschaden_foto') {
+    await insertFallDokument(db, fallId, 'sachschaden_foto', path, contentType, buf.length, slot.label)
+  } else if (slotId === 'sachschaden_rechnung') {
+    await insertFallDokument(db, fallId, 'sachschaden_rechnung', path, contentType, buf.length, slot.label)
+  } else if (slotId === 'aerztliches_attest') {
+    await insertFallDokument(db, fallId, 'aerztliches_attest', path, contentType, buf.length, slot.label)
+  } else if (slotId === 'diagnosebericht') {
+    await insertFallDokument(db, fallId, 'diagnosebericht', path, contentType, buf.length, slot.label)
+  } else if (slotId === 'zeugenaussage') {
+    await insertFallDokument(db, fallId, 'zeugenaussage', path, contentType, buf.length, slot.label)
   } else {
     // sonstiges → fall_dokumente ohne Slot-Mapping (KB ordnet manuell zu)
     await insertFallDokument(db, fallId, 'kunde-nachreichung', path, contentType, buf.length, slot.label)
+  }
+
+  // 4b. Pflichtdokument-Sync (non-critical) — Wenn für diesen Fall bereits
+  //     eine pflichtdokumente-Row existiert (z.B. nach SA-Abschluss via
+  //     Schritt 11 in convert-lead-to-claim), wird sie auf 'hochgeladen' gesetzt.
+  if (fallId && (slotId === 'fahrzeugschein' || slotId === 'polizeibericht')) {
+    try {
+      await syncPflichtdokument(db, fallId, slotId, publicUrl)
+    } catch (err) {
+      console.error('[pflichtdokument-sync] Fehler beim Syncing:', err)
+    }
   }
 
   // 5. Slot im JSONB-Array auf hochgeladen=true
@@ -254,6 +277,30 @@ export async function uploadDokumentViaAnfrageToken(
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 type AdminDb = ReturnType<typeof createAdminClient>
+
+async function syncPflichtdokument(
+  db: AdminDb,
+  fallId: string,
+  dokumentTyp: string,
+  dateiUrl: string,
+): Promise<void> {
+  const { data: pd } = await db
+    .from('pflichtdokumente')
+    .select('id')
+    .eq('fall_id', fallId)
+    .eq('dokument_typ', dokumentTyp)
+    .neq('status', 'hochgeladen')
+    .maybeSingle()
+  if (!pd) return
+  await db
+    .from('pflichtdokumente')
+    .update({
+      status: 'hochgeladen',
+      datei_url: dateiUrl,
+      hochgeladen_am: new Date().toISOString(),
+    })
+    .eq('id', pd.id)
+}
 
 async function insertFallDokument(
   db: AdminDb,

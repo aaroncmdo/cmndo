@@ -142,7 +142,7 @@ export async function GET(request: Request) {
 
       const magicUrl = `${APP_URL}/kanzlei/abrechnung/${abr.magic_link_token}`
       const bruttoStr = `${Number(abr.endbetrag_brutto).toFixed(2).replace('.', ',')} €`
-      const faelligAmStr = new Date(abr.faelligkeitsdatum as string).toLocaleDateString('de-DE')
+      const faelligAmStr = new Date(abr.faelligkeitsdatum as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
 
       const bodyData = {
         kanzleiName: kanzlei.name,

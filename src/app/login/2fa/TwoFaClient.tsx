@@ -51,18 +51,42 @@ export default function TwoFaClient({
     setCode('')
   }, [method])
 
+  // AAR-2fa-fix: Auto-Send mit Single-Attempt-Guard. Vorher konnte der
+  // useEffect bei React-Re-Renders unter bestimmten StrictMode-Bedingungen
+  // mehrfach feuern — ein attempted-Ref verhindert das jetzt deterministisch.
+  // Plus Method-Fallback: wenn SMS fehlschlägt + Email verfügbar → wechsle
+  // automatisch zu Email statt den User in einer Endlos-Fehlermeldung
+  // sitzen zu lassen.
+  const attemptedRef = useRef<Set<Method>>(new Set())
   useEffect(() => {
     if (codeSent) return
+    if (attemptedRef.current.has(method)) return
+    attemptedRef.current.add(method)
     const request = method === 'sms' ? requestTwoFaCode : requestEmailOtp
-    request().then(r => {
-      if (r.success) {
-        setCodeSent(true)
-        setResendCooldown(60)
-      } else {
-        setError(r.error ?? 'Code konnte nicht gesendet werden')
-      }
-    })
-  }, [codeSent, method])
+    request()
+      .then((r) => {
+        if (r.success) {
+          setCodeSent(true)
+          setResendCooldown(60)
+        } else {
+          // Wenn SMS scheitert + Email verfügbar → automatischer Fallback
+          if (method === 'sms' && emailVerfuegbar) {
+            setError(null)
+            setMethod('email')
+          } else {
+            setError(r.error ?? 'Code konnte nicht gesendet werden')
+          }
+        }
+      })
+      .catch((err) => {
+        if (method === 'sms' && emailVerfuegbar) {
+          setError(null)
+          setMethod('email')
+        } else {
+          setError(err instanceof Error ? err.message : 'Code konnte nicht gesendet werden')
+        }
+      })
+  }, [codeSent, method, emailVerfuegbar])
 
   useEffect(() => {
     if (resendCooldown <= 0) return
@@ -73,10 +97,16 @@ export default function TwoFaClient({
   function handleResend() {
     if (resendCooldown > 0) return
     setError(null)
+    // Auch beim manuellen Resend den attempted-Marker zurücksetzen damit
+    // ein expliziter Retry möglich ist (User-Input darf den Auto-Send-
+    // Guard übersteuern).
+    attemptedRef.current.delete(method)
     const request = method === 'sms' ? requestTwoFaCode : requestEmailOtp
     request().then(r => {
       if (r.success) setResendCooldown(60)
       else setError(r.error ?? 'Erneut senden fehlgeschlagen')
+    }).catch(err => {
+      setError(err instanceof Error ? err.message : 'Erneut senden fehlgeschlagen')
     })
   }
 

@@ -47,6 +47,8 @@ export async function createMitarbeiter(formData: FormData): Promise<{ email: st
     force_password_change: true, auth_provider: 'email',
     kategorie, kapazitaet_max: kapazitaet, aktiv: true,
     eingestellt_am: new Date().toISOString().split('T')[0],
+    twofa_aktiviert: false,
+    twofa_email_aktiviert: false,
   })
   if (profileError) throw new Error(`Profil erstellen fehlgeschlagen: ${profileError.message}`)
 

@@ -119,7 +119,7 @@ export default function DokumenteZuordnungsModal({
               <p className="mt-1 text-[10px] text-claimondo-ondo">
                 Aktuell: <span className="font-medium">{doc.dokument_typ}</span>
                 {' · '}
-                Hochgeladen: {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE')}
+                Hochgeladen: {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
               </p>
               {doc.beschreibung && (
                 <p className="mt-1 text-[11px] text-claimondo-ondo italic">„{doc.beschreibung}"</p>

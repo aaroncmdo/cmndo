@@ -64,7 +64,7 @@ export async function generateSAPdf(
   // Lead-Daten laden
   const { data: lead } = await admin.from('leads').select('vorname, nachname, email, telefon, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_standort_adresse').eq('id', leadId).single()
   const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : 'Kunde'
-  const datum = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const datum = new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
   const fahrzeug = lead ? [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ') : ''
 
   // Einfaches SA-Text-Dokument als HTML → in Storage als .html speichern
@@ -104,8 +104,14 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
 </div>
 </body></html>`
 
-  // Als HTML in Storage speichern
-  const path = `sa-dokumente/${fallId}/sicherungsabtretung_${Date.now()}.html`
+  // claim_id laden damit signiertes Dokument in den Claim-Bucket geht
+  const { data: fallRow } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (fallRow?.claim_id as string | null) ?? null
+
+  // Als HTML in Storage speichern — bevorzugt claim/{claimId}/signed/, Fallback sa-dokumente/
+  const path = claimId
+    ? `claim/${claimId}/signed/sicherungsabtretung_${Date.now()}.html`
+    : `sa-dokumente/${fallId}/sicherungsabtretung_${Date.now()}.html`
   const blob = new Blob([html], { type: 'text/html' })
   await admin.storage.from('fall-dokumente').upload(path, blob, { contentType: 'text/html' })
   const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
@@ -123,7 +129,7 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
     kategorie: 'unterschrift',
     quelle: 'flowlink',
     uploaded_by_kunde: true,
-    sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei'],
+    sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei', 'kunde'],
   })
 
   return { pdfUrl: publicUrl }
@@ -405,6 +411,23 @@ async function finalizeKundeSetup(
     console.warn('[finalizeKundeSetup] Lead-Relation für Fall', fallId, 'nicht gefunden — Pflichtdokumente-Katalog übersprungen')
   } else {
     await createPflichtdokumenteFromKatalog(admin, fallId, leadDocs)
+    // AAR-pflicht-sync: bereits vorhandene Lead-URLs auf pflichtdokumente
+    // anwenden — Kunde soll nicht „X fehlen" sehen für Dokumente die schon
+    // im Lead waren.
+    try {
+      const leadId = (leadForDocs as { lead_id: string | null } | null)?.lead_id
+      if (leadId) {
+        const { syncLeadDokumenteAnPflicht } = await import('@/lib/dokumente/sync-lead-zu-pflicht')
+        const { data: leadFull } = await admin
+          .from('leads')
+          .select('zb1_url, polizeibericht_url, unfallskizze_url, schadensfoto_urls')
+          .eq('id', leadId)
+          .maybeSingle()
+        if (leadFull) await syncLeadDokumenteAnPflicht(admin, fallId, leadFull)
+      }
+    } catch (err) {
+      console.warn('[AAR-pflicht-sync] finalizeKundeSetup:', err instanceof Error ? err.message : err)
+    }
   }
 
   // KFZ-129 / AAR-310: Chat-Teilnehmer werden seit AAR-102 aus faelle abgeleitet
@@ -428,7 +451,12 @@ async function sendWelcomeWithLogin(
 ): Promise<{ magicLink: string | null }> {
   let magicLink: string | null = null
   try {
-    const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/kunde/onboarding`
+    // PKCE-Fix: Supabase hängt ?code=XXX an die redirectTo-URL — das muss
+    // auf /api/auth/callback landen (exchangeCodeForSession), nicht direkt
+    // auf /kunde/onboarding (die Page kann keinen Code einlösen).
+    // next=/kunde/onboarding wird vom Callback nach erfolgreichem Login genutzt.
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+    const redirectTo = `${base}/api/auth/callback?next=/kunde/onboarding`
     const { data, error } = await adminDb.auth.admin.generateLink({
       type: 'magiclink',
       email,
@@ -727,6 +755,11 @@ export async function signSAandCreateFall(
   // 6d. KFZ-140 / AAR-322: Pflichtdokumente Katalog-driven erstellen
   try {
     await createPflichtdokumenteFromKatalog(admin, fall.id, lead as Record<string, unknown>)
+    // AAR-pflicht-sync: Lead-URLs sofort auf die frisch angelegten
+    // pflicht-Slots anwenden — der Lead hat zu diesem Zeitpunkt das volle
+    // Objekt, also können wir direkt durchreichen.
+    const { syncLeadDokumenteAnPflicht } = await import('@/lib/dokumente/sync-lead-zu-pflicht')
+    await syncLeadDokumenteAnPflicht(admin, fall.id, lead as Record<string, unknown>)
   } catch (err) { console.error('[KFZ-140] Pflichtdokumente im FlowLink-Pfad:', err) }
 
   // 6e. AAR-263 + AAR-182 + AAR-553: Dispatch-Uploads (ZB1 + Polizeibericht)
@@ -960,8 +993,8 @@ export async function signSAandCreateFall(
 
         if (svTelefon) {
           const terminDate = new Date(lead.gutachter_termin)
-          const datum = terminDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
-          const uhrzeit = terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+          const datum = terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+          const uhrzeit = terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
           const kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
           const adresse = lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz || 'Adresse folgt'
           const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
@@ -1028,7 +1061,7 @@ export async function signSAandCreateFall(
         | null
       const svName = (profile?.vorname ?? '').trim() || 'Ihrem Gutachter'
       const terminDate = new Date(lead.gutachter_termin)
-      const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+      const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
       const { sendCommunication } = await import('@/lib/communications/send')
       // AAR-193: vorname-Key entfernt (Redundanz wie in AAR-175 P0-C — das
       // Template nutzt nur die nummerierten Placeholder, der vorname-Key

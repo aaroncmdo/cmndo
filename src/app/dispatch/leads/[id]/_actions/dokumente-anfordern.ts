@@ -22,7 +22,16 @@ export type SlotEingabe = {
   // leads.schadensfoto_urls angehängt. Haiku-Vision wertet die Fotos aus und
   // befüllt leads.fahrzeugschaden_beschreibung (separate Spalte seit
   // AAR-665-Follow — sachschaden_beschreibung ist Drittschaden in Phase 1).
-  slot_id: 'fahrzeugschein' | 'polizeibericht' | 'unfallfotos' | 'sonstiges'
+  slot_id:
+    | 'fahrzeugschein'
+    | 'polizeibericht'
+    | 'unfallfotos'
+    | 'sonstiges'
+    | 'sachschaden_foto'
+    | 'sachschaden_rechnung'
+    | 'aerztliches_attest'
+    | 'diagnosebericht'
+    | 'zeugenaussage'
   ocr?: boolean
   label?: string  // optional — überschreibt Default-Label (nur für 'sonstiges' relevant)
 }
@@ -34,6 +43,11 @@ const DEFAULT_LABELS: Record<SlotEingabe['slot_id'], string> = {
   polizeibericht: 'Polizeiliche Unfallmitteilung',
   unfallfotos: 'Unfallfotos (alle Schaden-Ansichten)',
   sonstiges: 'Sonstiges Dokument',
+  sachschaden_foto: 'Fotos des Sachschadens',
+  sachschaden_rechnung: 'Rechnung / Kostenvoranschlag Sachschaden',
+  aerztliches_attest: 'Ärztliches Attest',
+  diagnosebericht: 'Diagnosebericht / Befundbericht',
+  zeugenaussage: 'Zeugenaussage / Zeugenkontakt',
 }
 
 async function requireDispatcher(supabase: Awaited<ReturnType<typeof createClient>>) {
@@ -176,12 +190,16 @@ export async function triggerDokumenteUploadRequest(
       }
     } else if (kanal === 'email') {
       const { sendEmail } = await import('@/lib/email/google/client')
-      const htmlListe = normalizedSlots.map((s) => `<li>${s.label}</li>`).join('')
+      const { render } = await import('@react-email/render')
+      const { DokumenteAnfrageEmail, subject: dokSubject } = await import('@/lib/email/google/templates/DokumenteAnfrage')
+      const vorname = lead.vorname ?? ''
+      const templateProps = { vorname, slots: normalizedSlots, uploadUrl }
+      const html = await render(DokumenteAnfrageEmail(templateProps))
       await sendEmail({
         to: lead.email!,
-        subject: 'Dokumente anfordern — Claimondo',
-        text: `Hallo ${lead.vorname ?? ''},\n\nbitte laden Sie folgende Dokumente hoch:\n${dokumenteListe}\n\n${uploadUrl}\n\n(Link ist 7 Tage gültig.)\n\nDanke!\nClaimondo`,
-        html: `<p>Hallo ${lead.vorname ?? ''},</p><p>bitte laden Sie folgende Dokumente über den untenstehenden Link hoch:</p><ul>${htmlListe}</ul><p><a href="${uploadUrl}" style="display:inline-block;background:#0D1B3E;color:#fff;padding:10px 20px;text-decoration:none;border-radius:8px;">Dokumente hochladen</a></p><p style="font-size:12px;color:#666;">Link ist 7 Tage gültig.</p><p>Danke!<br/>Claimondo</p>`,
+        subject: dokSubject(templateProps),
+        text: `Hallo ${vorname},\n\nbitte laden Sie folgende Dokumente hoch:\n${dokumenteListe}\n\n${uploadUrl}\n\n(Link ist 7 Tage gültig.)\n\nMit freundlichen Grüßen,\nIhr Claimondo-Team`,
+        html,
       })
     }
   } catch (err) {

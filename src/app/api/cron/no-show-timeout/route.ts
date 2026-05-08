@@ -10,10 +10,16 @@ export const dynamic = 'force-dynamic'
  * KFZ-150 Block H: No-Show Timeout Cron (täglich 10:00).
  * Fälle mit no_show_gemeldet_am > 5 Werktage → storno_kunde_no_show.
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const db = createAdminClient()
+  // CMM-40: re_termin_token_eingelaufen_am mitlesen — wenn der Kunde ueber
+  // den Re-Termin-Link einen neuen Slot vorgeschlagen hat, kein Storno.
   const { data: faelle } = await db.from('v_faelle_mit_aktuellem_termin')
-    .select('id, no_show_gemeldet_am, sv_termin')
+    .select('id, no_show_gemeldet_am, sv_termin, re_termin_token_eingelaufen_am')
     .not('no_show_gemeldet_am', 'is', null)
     .is('storniert_am', null)
 
@@ -31,6 +37,9 @@ export async function GET() {
     }
 
     if (new Date() < check) continue // Frist noch nicht um
+
+    // CMM-40: Kunde hat ueber Re-Termin-Link einen Slot vorgeschlagen → kein Storno
+    if (fall.re_termin_token_eingelaufen_am) continue
 
     // Prüfen ob zwischenzeitlich ein neuer Termin eingetragen wurde
     if (fall.sv_termin && new Date(fall.sv_termin) > gemeldet) continue // Neuer Termin existiert

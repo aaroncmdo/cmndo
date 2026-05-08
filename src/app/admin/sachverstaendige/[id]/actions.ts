@@ -28,6 +28,7 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
   // nach Anzahlung). Admin-Sperre läuft über deactivateGutachter/reactivateGutachter
   // in karte/actions.ts → schreibt gesperrt_seit statt ist_aktiv.
   const notizen = (formData.get('notizen') as string)?.trim() || null
+  const googlePlaceId = (formData.get('google_place_id') as string)?.trim() || null
 
   // AAR SV-Konsolidierung: Qualifikationen + Spezifikationen + Schadenarten
   // aus JSON-Strings parsen (Client serialisiert Arrays via JSON.stringify).
@@ -69,7 +70,7 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
   // Update profile
   const { error: profileErr } = await supabase
     .from('profiles')
-    .update({ vorname, nachname, telefon })
+    .update({ vorname, nachname, telefon, google_place_id: googlePlaceId })
     .eq('id', profileId)
 
   if (profileErr) throw new Error(`Profil-Update fehlgeschlagen: ${profileErr.message}`)

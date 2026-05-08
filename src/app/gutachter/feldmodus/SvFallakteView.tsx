@@ -9,7 +9,7 @@
 // Realtime-Subscription auf pflichtdokumente + faelle hält die Ansicht
 // ohne manuellen Reload aktuell.
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   ArrowLeftIcon,
@@ -17,6 +17,7 @@ import {
   PhoneIcon,
   RefreshCwIcon,
   SaveIcon,
+  XIcon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -34,6 +35,8 @@ export interface SvFallakteViewProps {
   terminId: string
   onAdvanced: (nextTerminId: string | null) => void
   onPauseBackToRoute: () => void
+  /** 2026-05-07: Zurück zur Anfahrt — exit aus arrived ohne Pause/Logout. */
+  onBackToRoute?: () => void
 }
 
 export default function SvFallakteView({
@@ -42,6 +45,7 @@ export default function SvFallakteView({
   terminId,
   onAdvanced,
   onPauseBackToRoute,
+  onBackToRoute,
 }: SvFallakteViewProps) {
   const [loading, setLoading] = useState(true)
   const [fall, setFall] = useState<FeldmodusFallakteFall | null>(null)
@@ -53,6 +57,11 @@ export default function SvFallakteView({
   const notizenDirtyRef = useRef(false)
 
   const supabase = useMemo(() => createClient(), [])
+  // 2026-05-07: useId-Suffix verhindert „cannot add postgres_changes
+  // callbacks after subscribe()"-Crash bei Strict-Mode-Doppel-Mount.
+  // Channel-Namen müssen pro Consumer-Instanz eindeutig sein. Siehe
+  // Memory feedback_realtime_channel_ids.
+  const channelSuffix = useId()
 
   const reload = useCallback(async () => {
     setLoading(true)
@@ -83,7 +92,7 @@ export default function SvFallakteView({
   // ohne dass der SV manuell neu laden muss.
   useEffect(() => {
     const channel = supabase
-      .channel(`feldmodus-fallakte-${fallId}`)
+      .channel(`feldmodus-fallakte-${fallId}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -112,7 +121,7 @@ export default function SvFallakteView({
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [supabase, fallId, reload])
+  }, [supabase, fallId, channelSuffix, reload])
 
   const pflichtOffen = slots.filter(
     (s) => s.istPflicht && s.status !== 'hochgeladen' && s.status !== 'geprueft',
@@ -134,13 +143,28 @@ export default function SvFallakteView({
 
   return (
     <div className="h-full flex flex-col bg-[var(--brand-primary)]/95 backdrop-blur-md text-white">
-      {/* Header */}
+      {/* Header — 2026-05-07 Aaron-Smoke: drei klare Buttons.
+            ×       (Schließen, Zurück zur Anfahrt) — wenn onBackToRoute prop
+            ←       Pausieren (zurück zu /heute, Session bleibt)
+            ↻       Neu laden */}
       <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
+        {onBackToRoute && (
+          <button
+            type="button"
+            onClick={onBackToRoute}
+            className="p-1.5 rounded-lg hover:bg-white/10 text-white/80"
+            aria-label="Zurück zur Anfahrt-Karte"
+            title="Zurück zur Anfahrt-Karte"
+          >
+            <XIcon className="w-4 h-4" />
+          </button>
+        )}
         <button
           type="button"
           onClick={onPauseBackToRoute}
           className="p-1.5 rounded-lg hover:bg-white/10 text-white/80"
-          aria-label="Zurück zur Route"
+          aria-label="Pausieren — zurück zu Heute"
+          title="Tagesmodus pausieren"
         >
           <ArrowLeftIcon className="w-4 h-4" />
         </button>

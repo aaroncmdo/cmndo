@@ -52,7 +52,9 @@ export async function createManualLead(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  if (!data.telefon) return { success: false, error: 'Telefon ist Pflicht' }
+  // AAR-quick-create: Telefon nicht mehr Pflicht — der Dispatcher legt
+  // einen leeren Lead-Stub an und füllt die Daten in der Lead-Maske aus.
+  // DB-Spalte `telefon` ist nullable, also kein Insert-Fail.
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -68,7 +70,7 @@ export async function createManualLead(
     anrede: data.anrede ?? null,
     vorname: data.vorname || null,
     nachname: data.nachname || null,
-    telefon: data.telefon,
+    telefon: data.telefon || null,
     email: data.email || null,
     fahrzeug_hersteller: data.fahrzeug_hersteller?.trim() || null,
     fahrzeug_modell: data.fahrzeug_modell?.trim() || null,

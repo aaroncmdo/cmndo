@@ -18,6 +18,9 @@ type MitteilungTyp =
   | 'paket_fast_voll'
   | 'guthaben_niedrig'
   | 'auftrag_storniert'  // AAR-91
+  | 'nachbesichtigung_beauftragt'  // CMM Phase 1.5d
+  | 'stellungnahme_beauftragt'     // CMM Phase 1.5d
+  | 're_termin_kundenwahl'         // CMM-41
 
 interface MitteilungExtras {
   kunde_name?: string
@@ -40,6 +43,7 @@ interface MitteilungExtras {
 const DRINGEND_TYPEN: MitteilungTyp[] = [
   'vorschaden_warnung',
   'qc_nachbesserung',
+  're_termin_kundenwahl', // CMM-41: SV soll schnell entscheiden
 ]
 
 /**
@@ -165,6 +169,24 @@ function buildMessage(
       return {
         titel: 'Guthaben niedrig',
         nachricht: `Aktuelles Guthaben nur noch ${e.guthaben?.toLocaleString('de-DE') ?? '?'} EUR. Bitte aufstocken.`,
+      }
+
+    case 'nachbesichtigung_beauftragt':
+      return {
+        titel: 'Nachbesichtigung beauftragt',
+        nachricht: `Nachbesichtigung wurde angefordert${fallRef}${e.grund ? `: ${e.grund}` : '.'} Bitte Termin vereinbaren.`,
+      }
+
+    case 'stellungnahme_beauftragt':
+      return {
+        titel: 'Stellungnahme angefordert',
+        nachricht: `Schriftliche Stellungnahme angefordert${fallRef}${e.grund ? `: ${e.grund}` : '.'} Bitte zeitnah einreichen.`,
+      }
+
+    case 're_termin_kundenwahl':
+      return {
+        titel: 'Kunde hat Re-Termin vorgeschlagen',
+        nachricht: `${e.kunde_name ?? 'Kunde'} hat einen neuen Termin vorgeschlagen${fallRef}: ${e.datum ?? ''} ${e.uhrzeit ?? ''}. Bitte annehmen oder ablehnen.`.trim(),
       }
 
     default:

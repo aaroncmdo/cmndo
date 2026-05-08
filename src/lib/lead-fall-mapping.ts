@@ -44,10 +44,11 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'gegner_anzahl_beteiligte',
   'gegner_fahrzeugtyp',
   // Fahrzeug
-  'kennzeichen',
+  'kennzeichen', 'kennzeichen_kreis', 'kennzeichen_buchstaben', 'kennzeichen_zahl', 'kennzeichen_suffix',
   'fahrzeug_hersteller',
   'fahrzeug_modell',
   'fahrzeug_farbe',
+  'lackfarbe_code',
   'erstzulassung',
   // AAR-181: Baujahr wird jetzt in Phase 4 als Pflichtfeld erfasst und muss
   // beim Fall-Erstellen übernommen werden
@@ -139,6 +140,7 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'besichtigungsort_lat',
   'besichtigungsort_lng',
   'besichtigungsort_place_id',
+  'besichtigungsort_notiz',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────

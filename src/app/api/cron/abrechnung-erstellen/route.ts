@@ -20,7 +20,11 @@ export const dynamic = 'force-dynamic'
  * abrechnung_positionen-Tabelle existiert weiterhin (aus kfz149 angelegt) und
  * dient als Audit-Trail mit FK auf abrechnungen(id).
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   // Ist heute der letzte Tag des Monats?
   const now = new Date()
   const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1)
@@ -224,7 +228,7 @@ export async function GET() {
         abrechnungsNr,
         monat: `${String(monat).padStart(2, '0')}/${jahr}`,
         betragBrutto: endbetragBrutto,
-        faelligAm: faellig.toLocaleDateString('de-DE'),
+        faelligAm: faellig.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
       }
       const html = await render(SvMonatsabrechnungVersandEmail(abrProps))
       await sendCommunication('sv_monatsabrechnung', {
@@ -315,7 +319,7 @@ export async function GET() {
         svName: verwalterName,
         abrechnungsNr,
         betragBrutto: totalBrutto,
-        faelligAm: faellig.toLocaleDateString('de-DE'),
+        faelligAm: faellig.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
         anzahlPositionen: acc.positions.length,
         anzahlSubSvs: subSvCount,
         orgTyp: acc.org_typ as 'buero' | 'akademie',

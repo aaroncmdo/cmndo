@@ -14,7 +14,7 @@ export default async function DispatchLayout({
   const { user, initials } = await requirePortalAccess(['dispatch', 'admin'])
 
   return (
-    <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">
+    <div className="h-screen bg-claimondo-bg relative overflow-hidden">
       <RealtimeLeadAlert />
       <DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />
 

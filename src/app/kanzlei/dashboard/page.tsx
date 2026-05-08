@@ -15,6 +15,15 @@ import { FolderOpenIcon, ArrowRightIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 
 const STATUS_PILL: Record<string, { bg: string; text: string; label: string }> = {
+  // Welle-7 Werte (AAR-854 Trigger)
+  onboarding:   { bg: '#eef4fb', text: '#1E3A5F', label: 'Neu' },
+  in_bearbeitung: { bg: '#fffbeb', text: '#b45309', label: 'In Bearbeitung' },
+  vs_kontakt:   { bg: '#fef2f2', text: '#b91c1c', label: 'VS-Kommunikation' },
+  reguliert:    { bg: '#ecfdf5', text: '#047857', label: 'Reguliert' },
+  abgelehnt:    { bg: '#fef2f2', text: '#b91c1c', label: 'Abgelehnt' },
+  kanzlei:      { bg: '#f5f3ff', text: '#6d28d9', label: 'An Kanzlei' },
+  storniert:    { bg: '#f1f3f7', text: '#4b5563', label: 'Storniert' },
+  // Welle-6 Werte (Backward-Compat)
   ersterfassung: { bg: '#eef4fb', text: '#1E3A5F', label: 'Ersterfassung' },
   'sv-gesucht': { bg: '#eef4fb', text: '#1E3A5F', label: 'SV gesucht' },
   'sv-zugewiesen': { bg: '#eef4fb', text: '#1E3A5F', label: 'SV zugewiesen' },
@@ -30,37 +39,31 @@ const STATUS_PILL: Record<string, { bg: string; text: string; label: string }> =
   'regulierung-laeuft': { bg: '#ecfdf5', text: '#047857', label: 'Regulierung läuft' },
   'zahlung-eingegangen': { bg: '#f0fdf4', text: '#15803d', label: 'Zahlung eingegangen' },
   abgeschlossen: { bg: '#ecfdf5', text: '#047857', label: 'Abgeschlossen' },
-  'vs-abgelehnt': { bg: '#fef2f2', text: '#b91c1c', label: 'VS abgelehnt' },
-  'vs-kuerzt': { bg: '#fef2f2', text: '#b91c1c', label: 'VS kürzt' },
-  storniert: { bg: '#f1f3f7', text: '#4b5563', label: 'Storniert' },
 }
 
+// Welle-7 aktuelle_phase-Werte (aus map_claim_phase_to_faelle_phase)
 const PHASE_LABEL: Record<string, string> = {
-  '1_ersterfassung': 'Ersterfassung & Termin',
-  '1': 'Ersterfassung & Termin',
-  '2_begutachtung': 'Begutachtung',
-  '2': 'Begutachtung',
-  '3_gutachten_qc': 'Gutachten & QC',
-  '3': 'Gutachten & QC',
-  '4_kanzlei': 'Kanzlei-Übergabe',
-  '4': 'Kanzlei-Übergabe',
-  '5_anschlussschreiben': 'Anschlussschreiben',
-  '5': 'Anschlussschreiben',
-  '6_vs_reaktion': 'VS-Reaktion',
-  '6': 'VS-Reaktion',
-  '7_ablehnung_klage': 'Ablehnung & Klage',
-  '7': 'Ablehnung & Klage',
-  '8_nachbesichtigung': 'Nachbesichtigung',
-  '8': 'Nachbesichtigung',
-  '9_regulierung': 'Regulierung & Zahlung',
-  '9': 'Regulierung & Zahlung',
-  '10_abschluss': 'Auszahlung & Abschluss',
-  '10': 'Auszahlung & Abschluss',
+  fallakte_wird_angelegt: 'Ersterfassung & Termin',
+  fallakte_angelegt:       'Ersterfassung & Termin',
+  termin_bestaetigt:       'Ersterfassung & Termin',
+  sv_unterwegs:            'Begutachtung',
+  sv_vor_ort:              'Begutachtung',
+  begutachtung_abgeschlossen: 'Begutachtung',
+  gutachten_wird_erstellt: 'Gutachten & QC',
+  gutachten_erstellt:      'Gutachten & QC',
+  qc_bestanden:            'Gutachten & QC',
+  kanzlei_fallakte_angelegt: 'Kanzlei-Übergabe',
+  warten_auf_vs:           'VS-Kommunikation',
+  vs_kontakt_laeuft:       'VS-Kommunikation',
+  vollzahlung_eingegangen: 'Reguliert',
+  ablehnung_kanzlei_prueft: 'Abgelehnt',
+  klage_eingereicht:       'Abgelehnt',
+  fall_akzeptiert_storniert: 'Storniert',
 }
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('de-DE', {
+  return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

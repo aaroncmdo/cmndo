@@ -4,7 +4,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resend, isResendAvailable } from '@/lib/email/resend-client'
 
-const LEXDRIVE_EMAIL = process.env.LEXDRIVE_KANZLEI_EMAIL ?? 'schaden@lexdrive.de'
+const LEXDRIVE_EMAIL = process.env.LEXDRIVE_KANZLEI_EMAIL ?? 'aaron.sprafke@claimondo.de'
 
 type Anhang = { filename: string; content: Buffer | string }
 
@@ -31,16 +31,18 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
 
   const db = createAdminClient()
 
-  // Fall + Lead laden
+  // Fall + Lead laden (inkl. claim_id für Unfallskizze)
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, lead_id, gegner_kennzeichen, gegner_name, gegner_versicherung, gegner_schadennummer, zeugen_kontakte')
+    .select('id, fall_nummer, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, gegner_schadennummer, zeugen_kontakte')
     .eq('id', fallId)
     .single()
 
   if (!fall) return { success: false, error: `Fall ${fallId} nicht gefunden` }
 
   let kunde: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null; kunde_strasse: string | null; kunde_plz: string | null; kunde_stadt: string | null } | null = null
+
+  // Kontaktdaten aus leads (Stammdaten liegen dort vollständig)
   if (fall.lead_id) {
     const { data: lead } = await db
       .from('leads')
@@ -48,6 +50,28 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
       .eq('id', fall.lead_id)
       .single()
     kunde = lead
+  }
+
+  // Email aus claims.kunde_email bevorzugen — direktes Feld, immer aktuell
+  // (Lead-Email kann veraltet sein wenn Kunde seine Email nach Konvertierung geändert hat)
+  if (fall.claim_id) {
+    const { data: claimEmail } = await db
+      .from('claims')
+      .select('kunde_email')
+      .eq('id', fall.claim_id as string)
+      .single()
+    if (claimEmail?.kunde_email) {
+      kunde = {
+        ...kunde,
+        vorname: kunde?.vorname ?? null,
+        nachname: kunde?.nachname ?? null,
+        telefon: kunde?.telefon ?? null,
+        kunde_strasse: kunde?.kunde_strasse ?? null,
+        kunde_plz: kunde?.kunde_plz ?? null,
+        kunde_stadt: kunde?.kunde_stadt ?? null,
+        email: claimEmail.kunde_email as string,
+      }
+    }
   }
 
   // Pflichtdokumente laden — Gutachten, Vollmacht, Sicherungsabtretung, Polizeibericht
@@ -62,6 +86,26 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   for (const d of attachmentsToFetch) {
     const att = await fetchPdfFromUrl(d.datei_url as string, (d.datei_name as string) ?? `${d.typ}.pdf`)
     if (att) attachments.push(att)
+  }
+
+  // Unfallskizze laden — aus claims (bestaetigt + URL oder inline SVG)
+  if (fall.claim_id) {
+    const { data: claimData } = await db
+      .from('claims')
+      .select('unfallskizze_svg, unfallskizze_url, unfallskizze_bestaetigt')
+      .eq('id', fall.claim_id as string)
+      .single()
+    if (claimData?.unfallskizze_bestaetigt) {
+      if (claimData.unfallskizze_url) {
+        const att = await fetchPdfFromUrl(claimData.unfallskizze_url as string, 'Unfallskizze.svg')
+        if (att) attachments.push(att)
+      } else if (claimData.unfallskizze_svg) {
+        attachments.push({
+          filename: 'Unfallskizze.svg',
+          content: Buffer.from(claimData.unfallskizze_svg as string, 'utf-8'),
+        })
+      }
+    }
   }
 
   // Email-Body

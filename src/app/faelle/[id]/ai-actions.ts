@@ -129,10 +129,10 @@ ${dokumente.slice(0, 15).map(d => `- ${d.datei_name ?? d.typ} (${d.kategorie ?? 
 ${pflichtdokumente.map(p => `- ${p.dokument_typ}: ${p.status}`).join('\n') || 'Keine'}
 
 ## Timeline (letzte 50)
-${timeline.map(t => `- **${new Date(t.created_at).toLocaleString('de-DE')}**: ${t.titel}${t.beschreibung ? ' — ' + String(t.beschreibung).slice(0, 150) : ''}`).join('\n')}
+${timeline.map(t => `- **${new Date(t.created_at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}**: ${t.titel}${t.beschreibung ? ' — ' + String(t.beschreibung).slice(0, 150) : ''}`).join('\n')}
 
 ## Nachrichten (letzte 30)
-${nachrichten.map(n => `- **${new Date(n.created_at).toLocaleString('de-DE')}** [${n.kanal}] ${n.sender_rolle}: ${String(n.nachricht ?? '').slice(0, 200)}`).join('\n')}
+${nachrichten.map(n => `- **${new Date(n.created_at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}** [${n.kanal}] ${n.sender_rolle}: ${String(n.nachricht ?? '').slice(0, 200)}`).join('\n')}
 
 ## Tasks (${tasks.length})
 ${tasks.map(t => `- [${t.status === 'erledigt' ? 'x' : ' '}] ${t.titel}${t.faellig_am ? ' (fällig: ' + t.faellig_am + ')' : ''}`).join('\n')}

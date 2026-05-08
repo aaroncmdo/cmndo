@@ -146,6 +146,8 @@ export async function verifyEmailOtp(code: string): Promise<{ success: boolean; 
 
   failCountMap.delete(key)
 
+  // AAR-2fa-loop-fix: 3-Tage-Persistenz — Login-Action löscht das Cookie
+  // beim nächsten Login. Siehe verify-code.ts für Details.
   const { cookies } = await import('next/headers')
   const cookieStore = await cookies()
   cookieStore.set('claimondo_2fa_verified', '1', {

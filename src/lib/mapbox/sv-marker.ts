@@ -106,3 +106,85 @@ export function addSvAvatarMarker(
     .addTo(map)
   return marker
 }
+
+// ─── Auto-Skin-Marker (Top-Down PKW) ───────────────────────────────────────
+
+export interface SvCarMarkerOptions {
+  /** Heading 0=Norden, 90=Osten — rotiert das Auto entsprechend. */
+  heading?: number | null
+  /** Karosseriefarbe (hex). Default Claimondo-Navy. */
+  bodyColor?: string
+}
+
+/**
+ * Top-Down-PKW-SVG als Mapbox-Marker. Inklusive Schatten + Scheinwerfer +
+ * Rückleuchten + Glas-Tönung. Größe: 40×64 px.
+ */
+function buildCarMarkerElement(opts: SvCarMarkerOptions): HTMLDivElement {
+  const wrapper = document.createElement('div')
+  wrapper.className = 'sv-car-marker'
+  // AAR-marker-instant: keine CSS-transition mehr — Aaron-Spec: „kreise und
+  // das auto sollen nicht mit latenz nachziehen, fest verankert an der
+  // position". Mapbox setLngLat() ist instant, aber transform-rotate hatte
+  // 300ms ease-out → sichtbares „Nachschwingen" bei jedem GPS-Update.
+  wrapper.style.cssText = [
+    'position: relative',
+    'width: 40px',
+    'height: 64px',
+    'pointer-events: none',
+    opts.heading != null ? `transform: rotate(${opts.heading}deg)` : '',
+  ]
+    .filter(Boolean)
+    .join(';')
+
+  const body = opts.bodyColor ?? '#0D1B3E'
+  wrapper.innerHTML = `
+    <svg viewBox="0 0 40 64" xmlns="http://www.w3.org/2000/svg" width="40" height="64">
+      <defs>
+        <filter id="car-shadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2.5"/>
+          <feOffset dx="0" dy="3" result="offsetblur"/>
+          <feFlood flood-color="rgba(0,0,0,0.45)"/>
+          <feComposite in2="offsetblur" operator="in"/>
+          <feMerge>
+            <feMergeNode/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <g filter="url(#car-shadow)">
+        <!-- Karosserie -->
+        <rect x="6" y="5" width="28" height="54" rx="9" fill="${body}" stroke="rgba(255,255,255,0.95)" stroke-width="1.5"/>
+        <!-- Frontscheibe -->
+        <path d="M9 14 L14 9 L26 9 L31 14 L31 24 L9 24 Z" fill="#7BA3CC" opacity="0.85"/>
+        <!-- Heckscheibe -->
+        <rect x="9" y="36" width="22" height="11" rx="2" fill="#7BA3CC" opacity="0.85"/>
+        <!-- Mittel-Trennung (Türen) -->
+        <line x1="20" y1="24" x2="20" y2="36" stroke="rgba(255,255,255,0.18)" stroke-width="0.6"/>
+        <line x1="9" y1="30" x2="31" y2="30" stroke="rgba(255,255,255,0.18)" stroke-width="0.6"/>
+        <!-- Scheinwerfer vorne -->
+        <rect x="9" y="6" width="6" height="2.5" rx="1" fill="#FFEEAA"/>
+        <rect x="25" y="6" width="6" height="2.5" rx="1" fill="#FFEEAA"/>
+        <!-- Rückleuchten -->
+        <rect x="9" y="55" width="6" height="2.5" rx="1" fill="#FF6B6B"/>
+        <rect x="25" y="55" width="6" height="2.5" rx="1" fill="#FF6B6B"/>
+      </g>
+    </svg>
+  `
+  return wrapper
+}
+
+/**
+ * Auto-Skin-Marker als SV-Position. Rotiert mit `heading`.
+ * Bevorzugte Variante für die Tagesroute-Karte.
+ */
+export function addSvCarMarker(
+  map: MapboxMap,
+  lngLat: [number, number],
+  options: SvCarMarkerOptions = {},
+): mapboxgl.Marker {
+  const el = buildCarMarkerElement(options)
+  return new mapboxgl.Marker({ element: el, anchor: 'center' })
+    .setLngLat(lngLat)
+    .addTo(map)
+}

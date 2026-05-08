@@ -1,8 +1,13 @@
-// AAR-504 Auto-Trigger: Fire-and-forget BKat-OCR nach Polizeibericht-Upload.
+// AAR-504 Auto-Trigger: BKat-OCR nach Polizeibericht-Upload.
 //
-// Wird aus den zwei Polizeibericht-Upload-Pfaden aufgerufen:
-//   1. /upload/dokumente/[token] (Web-Upload via Kunden-Portal)
-//   2. /api/webhooks/twilio/inbound (WhatsApp-Upload)
+// Aufruf-Pfade (alle nutzen `scheduleBkatAnalyseAfterUpload` damit der
+// Trigger via Next.js `after()` zuverlässig nach dem Response-Send läuft —
+// klassisches Promise.catch() ohne `after()` würde von Vercel ggf.
+// gekillt bevor die Mapbox/Claude-Calls durch sind):
+//   1. /upload/dokumente/[token]   — Web-Upload via Kunden-Token
+//   2. /api/webhooks/twilio/inbound — WhatsApp-Upload
+//   3. /kunde/onboarding (Wizard)  — post-Konvertierung über fall.lead_id
+//   4. /gutachter/termine/[id]     — SV-Vor-Ort-Upload
 //
 // Architektur-Entscheidung:
 // - Polizeibericht vorhanden → Auto-OCR läuft im Hintergrund, ohne Kunde-Dialog
@@ -16,7 +21,9 @@
 // aus dem Bild extrahiert (ist deterministisch, OCR ist konsistent).
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { after } from 'next/server'
 import { inferBkatFromPolizeibericht } from './inference'
+import { bkatToLegacySchadentyp } from './lookup'
 
 /**
  * Fire-and-forget BKat-Analyse nach einem Polizeibericht-Upload.
@@ -41,10 +48,15 @@ export async function triggerAutoBkatOcr(
     // Nur bkat_unfallart speichern. TBNRs sind transient im Result und
     // werden bei späterem Dispatcher-Review erneut extrahiert (gleiches
     // Bild, gleicher deterministischer Prompt).
+    // Auch den Legacy-schadentyp schreiben, damit der SchadentypPicker
+    // sofort den passenden Eintrag highlightet (statt erst nach Dispatcher-
+    // Übernahme).
+    const legacy = bkatToLegacySchadentyp(result.unfallart)
     await supabase
       .from('leads')
       .update({
         bkat_unfallart: result.unfallart,
+        ...(legacy ? { schadentyp: legacy } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq('id', leadId)
@@ -57,4 +69,32 @@ export async function triggerAutoBkatOcr(
   } catch (err) {
     console.error(`[AAR-504] Auto-OCR für Lead ${leadId} fehlgeschlagen:`, err)
   }
+}
+
+/**
+ * Robuster Aufruf-Wrapper: schedult triggerAutoBkatOcr via Next.js
+ * `after()` damit die OCR-Analyse nach Response-Send zuverlässig läuft.
+ * Aufruf in jedem Polizeibericht-Upload-Pfad direkt nach erfolgreichem
+ * Storage-Upload + leads-Update.
+ *
+ * Vor `after()`: Promise.catch() fire-and-forget hat auf Vercel das
+ * Risiko dass der Container vor Abschluss recycled wird → Mapbox/Claude-
+ * Calls brechen ab. Mit `after()` bleibt der Worker bis Promise resolved.
+ */
+export function scheduleBkatAnalyseAfterUpload(
+  supabase: SupabaseClient,
+  leadId: string,
+  bildUrl: string,
+): void {
+  if (!leadId || !bildUrl) return
+  after(async () => {
+    try {
+      await triggerAutoBkatOcr(supabase, leadId, bildUrl)
+    } catch (err) {
+      console.error(
+        `[AAR-504] scheduleBkatAnalyseAfterUpload Lead ${leadId}:`,
+        err instanceof Error ? err.message : err,
+      )
+    }
+  })
 }

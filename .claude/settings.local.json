@@ -34,6 +34,10 @@
       "c:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\app\\flow\\signatur"
     ]
   },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
   "spinnerTipsEnabled": true,
   "prefersReducedMotion": false
 }

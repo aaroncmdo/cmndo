@@ -11,8 +11,8 @@ import { MailIcon, UserIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { useFall } from '../FallContext'
 import QuickActions from './QuickActions'
-import SlaAlerts from './SlaAlerts'
 import FallRueckrufSection from './FallRueckrufSection'
+import EskalationCard from './EskalationCard'
 import TerminListeClient from '@/components/termine/TerminListeClient'
 // AAR-754 (Phase C): Shared FallKontakteCard statt handgerollter
 // Ansprechpartner-Block.
@@ -51,8 +51,12 @@ export default function FallSidebar({
       {/* Quick Actions (phase-abhängig) */}
       <QuickActions />
 
-      {/* SLA-Alerts (Countdown-Timer) */}
-      <SlaAlerts />
+      {/* Eskalation an Admin (Hartfall) */}
+      <EskalationCard
+        fallId={fall.id}
+        initialAdminId={(fall.eskaliert_an_admin_id as string | null) ?? null}
+        initialAdminName={null}
+      />
 
       {/* Rückruf (AAR-637) */}
       <FallRueckrufSection fallId={fall.id} />

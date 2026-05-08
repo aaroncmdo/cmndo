@@ -81,8 +81,8 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
     if (fallInfo?.sv_id) {
       const terminDate = fallInfo.sv_termin ? new Date(fallInfo.sv_termin) : null
       createGutachterMitteilung(fallInfo.sv_id, 'termin_bestaetigt', fallId, {
-        datum: terminDate?.toLocaleDateString('de-DE') ?? undefined,
-        uhrzeit: terminDate?.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) ?? undefined,
+        datum: terminDate?.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) ?? undefined,
+        uhrzeit: terminDate?.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) ?? undefined,
         fall_nummer: fallInfo.fall_nummer ?? undefined,
       }).catch(() => {})
     }
@@ -184,8 +184,8 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
       } catch { /* */ }
     }
 
-    // Phase 2c: Kanzlei-Email wenn schon uebergeben
-    const KANZLEI_RELEVANT = ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'regulierung-laeuft', 'nachbesichtigung-laeuft']
+    // Phase 2c: Kanzlei-Email wenn schon übergeben
+    const KANZLEI_RELEVANT = ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'regulierung-laeuft', 'kanzlei', 'vs_kontakt']
     if (fallInfo?.status && KANZLEI_RELEVANT.includes(fallInfo.status)) {
       const { data: kanzleiUsers } = await serviceClient.from('profiles').select('email').eq('rolle', 'kanzlei')
       for (const k of kanzleiUsers ?? []) {
@@ -461,9 +461,9 @@ export async function sendFlowLink(leadId: string) {
       console.warn('[sendFlowLink] SV-Name nicht auflösbar für Termin', { leadId, svId: termin.sv_id })
     }
     const terminDate = termin?.start_zeit ? new Date(termin.start_zeit) : null
-    const datum = terminDate ? terminDate.toLocaleDateString('de-DE') : ''
+    const datum = terminDate ? terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : ''
     const uhrzeit = terminDate
-      ? terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+      ? terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
       : ''
 
     if (!termin) {
@@ -541,10 +541,12 @@ async function convertLeadToFall(
   const nr = String((count ?? 0) + 1).padStart(3, '0')
   const fallNummer = `CLM-${dateStr}-${nr}`
 
-  // 3. Kundenbetreuer per Round-Robin zuweisen (AAR-427: mit Admin-Fallback)
+  // 3. Kundenbetreuer-Zuweisung mit Sticky-Lookup (gleicher Kunde/Ansprechpartner
+  // → gleicher KB, auch bei voller Kapazität). Fallback: Round-Robin → Admin.
   const kbAssignment = await assignKundenbetreuer(supabase, /* fallId noch nicht bekannt */ '', {
     writeToFall: false,
     logToTimeline: false,
+    stickyHints: { lead_id: leadId },
   })
   const kundenbetreuerId = kbAssignment.kundenbetreuer_id
   const kbFallbackFlag = kbAssignment.fallback_used === 'admin'
@@ -772,6 +774,15 @@ async function convertLeadToFall(
 
   // 6. Pflichtdokumente erstellen (AAR-322: Katalog-driven)
   await createPflichtdokumenteFromKatalog(supabase, fall.id, lead)
+  // AAR-pflicht-sync: Lead-URLs (zb1_url, polizeibericht_url, schadensfoto_urls,
+  // unfallskizze_url) auf die frisch angelegten pflicht-Slots anwenden,
+  // damit der Stand „bereits hochgeladen" sofort sichtbar ist.
+  try {
+    const { syncLeadDokumenteAnPflicht } = await import('@/lib/dokumente/sync-lead-zu-pflicht')
+    await syncLeadDokumenteAnPflicht(supabase, fall.id, lead as Record<string, unknown>)
+  } catch (err) {
+    console.warn('[AAR-pflicht-sync] dispatch-fall-actions:', err instanceof Error ? err.message : err)
+  }
 
   // AAR-90: Cardentity-Anreicherung wenn Lead FIN hat (kopiert vom Lead in Fall)
   if (lead.fin) {

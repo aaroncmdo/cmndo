@@ -107,8 +107,8 @@ export async function createKbVideoterminByKb(
           telefon: lead.telefon,
           vorname: lead.vorname ?? '',
           '1': lead.vorname ?? '',
-          '2': startZeit.toLocaleDateString('de-DE'),
-          '3': startZeit.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+          '2': startZeit.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
+          '3': startZeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
           '4': kanal,
           '5': videoLink ?? '',
         })
@@ -209,18 +209,18 @@ export async function createTermin(
     fall_id: fallId,
     typ: 'system',
     titel: `Termin vereinbart: ${data.betreff}`,
-    beschreibung: `${data.typ === 'video-call' ? 'Video-Call' : 'Telefonat'} am ${new Date(data.datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (${data.dauer_minuten} Min)${meetLink ? ` · ${meetLink}` : ''}`,
+    beschreibung: `${data.typ === 'video-call' ? 'Video-Call' : 'Telefonat'} am ${new Date(data.datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (${data.dauer_minuten} Min)${meetLink ? ` · ${meetLink}` : ''}`,
     erstellt_von: user.id,
   })
 
   const terminDate = new Date(data.datum)
   sendFallCommunication(fallId, 'kb_termin_bestaetigt', {
     termin_typ: data.typ,
-    termin_datum: terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-    termin_uhrzeit: terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+    termin_datum: terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }),
+    termin_uhrzeit: terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
     meet_link: meetLink ?? '',
-    '3': terminDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-    '4': terminDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+    '3': terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }),
+    '4': terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
   }).catch(() => {})
 
   revalidatePath(`/faelle/${fallId}`)

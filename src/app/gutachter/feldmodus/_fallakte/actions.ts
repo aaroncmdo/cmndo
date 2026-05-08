@@ -4,9 +4,16 @@
 // Lädt Fall + Pflichtdokumente-Slots für den SV, speichert Vor-Ort-Notizen.
 // Verifiziert immer, dass der eingeloggte Nutzer der zugeordnete SV des
 // Falls ist (RLS deckt das zwar auch ab — Defense-in-Depth).
+//
+// CMM-32f Update: SV-Zuordnung läuft jetzt über `auftraege.sv_id` (eine
+// Sub-Entity am Fall), nicht mehr direkt über `faelle.sv_id`. Der alte
+// Check (fall.sv_id === sv.id) liefert „Fall nicht gefunden" weil der
+// Fall nach Migration kein direktes sv_id mehr hat. Wir authorisieren
+// jetzt via Auftrag und laden den Fall mit Admin-Client (RLS umgehen).
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import { buildKatalogContext, evaluateKatalogRule } from '@/lib/dokumente/ruleEvaluator'
@@ -57,7 +64,21 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) return { success: false, error: 'Kein SV-Profil' }
 
-  const { data: fall, error: fallErr } = await supabase
+  // CMM-32f: Auth via Auftrag (sv_id auf auftraege, nicht mehr auf faelle).
+  // Fallback: legacy faelle.sv_id (für Pre-Migration-Fälle die noch keinen
+  // Auftrag haben). Beide Pfade ohne RLS via Admin-Client — die Auth ist
+  // explizit über die SV-Auftrag-Beziehung gegen den eingeloggten User.
+  const admin = createAdminClient()
+
+  const { data: auftrag } = await admin
+    .from('auftraege')
+    .select('id')
+    .eq('fall_id', fallId)
+    .eq('sv_id', sv.id)
+    .limit(1)
+    .maybeSingle()
+
+  const { data: fall, error: fallErr } = await admin
     .from('faelle')
     .select(
       'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, notizen, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, sv_id',
@@ -66,19 +87,21 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     .single()
 
   if (fallErr || !fall) return { success: false, error: 'Fall nicht gefunden' }
-  if (fall.sv_id !== sv.id) {
+
+  const istBerechtigt = !!auftrag || fall.sv_id === sv.id
+  if (!istBerechtigt) {
     return { success: false, error: 'Fall ist nicht diesem SV zugeordnet' }
   }
 
   const [{ data: lead }, { data: pflicht }, katalog] = await Promise.all([
     fall.lead_id
-      ? supabase
+      ? admin
           .from('leads')
           .select('vorname, nachname, telefon')
           .eq('id', fall.lead_id)
           .single()
       : Promise.resolve({ data: null }),
-    supabase
+    admin
       .from('pflichtdokumente')
       .select(
         'id, dokument_typ, status, pflicht, dokument_url, hochgeladen_am, sort_order',
@@ -94,8 +117,17 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     pflichtById.set(p.dokument_typ as string, p)
   }
 
+  // 2026-05-07 (Aaron-Smoke MAP3): Vorher landeten SV-Onboarding-Pflichten
+  // (Sicherungsabtretung, SA-Vorlage, Honorarvereinbarung, Berufshaft-
+  // pflicht, Gewerbeanmeldung, Bestellungsurkunde, BVSK …) im Feldmodus-
+  // Dokument-Tab. Die gehören NICHT zum Fall, sondern zum SV-Onboarding —
+  // Slot-Kategorie 'gutachter_verifizierung'. Filter raus.
+  // Plus: nur OFFENE Slots zeigen (ausstehend / nachgereicht_angefordert).
+  // Erledigte verstopfen die Liste — der SV will sehen was noch zu tun ist.
+  const FALL_RELEVANT_OFFEN_STATUS = new Set(['ausstehend', 'nachgereicht_angefordert'])
   const slots: FeldmodusSlot[] = katalog
     .filter((k) => k.uploadbar_von?.includes(SV_UPLOAD_ROLE))
+    .filter((k) => k.kategorie !== 'gutachter_verifizierung')
     .filter((k) => evaluateKatalogRule(k.freigeschaltet_wenn, ctx))
     .map((k) => {
       const existing = pflichtById.get(k.slot_id)
@@ -128,6 +160,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
           : null,
       }
     })
+    .filter((s) => FALL_RELEVANT_OFFEN_STATUS.has(s.status))
 
   const fallData: FeldmodusFallakteFall = {
     id: fall.id,
@@ -174,17 +207,26 @@ export async function saveFeldmodusNotizen(
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) return { success: false, error: 'Kein SV-Profil' }
 
-  // Sicherstellen, dass der Fall dem SV zugeordnet ist
-  const { data: fall } = await supabase
+  // CMM-32f: Auth via Auftrag (siehe loadFeldmodusFallakteData).
+  const admin = createAdminClient()
+  const { data: auftrag } = await admin
+    .from('auftraege')
+    .select('id')
+    .eq('fall_id', fallId)
+    .eq('sv_id', sv.id)
+    .limit(1)
+    .maybeSingle()
+  const { data: fall } = await admin
     .from('faelle')
     .select('sv_id')
     .eq('id', fallId)
     .single()
-  if (!fall || fall.sv_id !== sv.id) {
+  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+  if (!auftrag && fall.sv_id !== sv.id) {
     return { success: false, error: 'Fall ist nicht diesem SV zugeordnet' }
   }
 
-  const { error } = await supabase
+  const { error } = await admin
     .from('faelle')
     .update({ sv_notizen_vor_ort: notizen.trim() || null })
     .eq('id', fallId)

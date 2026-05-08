@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
+import KundeWillkommensHero from '@/components/kunde/KundeWillkommensHero'
 // AAR-449: Neue FallKarte + Shared-Loader für Termin/Aktion/LastUpdate
 import FallKarte from '@/components/kunde/FallKarte'
 import { ladeFallKartenMeta, type FallKarteMetaInput } from '@/lib/kunde/fall-karte-loader'
@@ -132,6 +133,7 @@ export default async function KundeStartseite() {
     schadens_plz: f.schadens_plz as string | null,
     schadens_ort: f.schadens_ort as string | null,
     nachbesichtigung_status: f.nachbesichtigung_status as string | null,
+    kanzlei_wunsch: f.kanzlei_wunsch as string | null,
   }))
   // AAR-705: Defensive — wenn der Karten-Loader (Termine/Timeline/Pflichtdok)
   // crasht, soll die Seite trotzdem die Fall-Karten ohne Meta zeigen statt
@@ -172,27 +174,16 @@ export default async function KundeStartseite() {
       {/* AAR-432: Jetzt-zu-tun-Matrix */}
       <KundeJetztZuTunCard aktion={topAktion} />
 
+      {/* 2026-05-07 5b-Hinweis: Single-Fall-Kunden werden auf der Zeile zuvor
+          via redirect() direkt zu /kunde/faelle/[id] umgeleitet — das ist die
+          Stelle wo der ClaimStepper seine 4-Phasen-Visualisierung rendert.
+          Hier auf dem Dashboard sehen wir nur Empty-State (faelle.length===0)
+          oder Multi-Fall-Grid (≥2). KundeAktivStatusHero ist als Component
+          fuer kuenftige Multi-Fall-Top-Strip-Iteration vorhanden, derzeit
+          nicht aktiv. */}
+
       {faelle.length === 0 ? (
-        <div
-          className="rounded-xl border p-8 text-center shadow-sm"
-          style={{
-            background: 'var(--brand-surface, #ffffff)',
-            borderColor: 'var(--brand-border, #e5e7eb)',
-          }}
-        >
-          <p
-            className="font-semibold"
-            style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
-          >
-            Noch kein Schadensfall
-          </p>
-          <p
-            className="mt-1 text-sm"
-            style={{ color: 'var(--brand-text-secondary, #6b7280)' }}
-          >
-            Sobald ein Fall für Sie angelegt wird, erscheint er hier.
-          </p>
-        </div>
+        <KundeWillkommensHero vorname={vorname} />
       ) : (
         <div className="space-y-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
           {faelle.map((fall) => {
@@ -208,6 +199,12 @@ export default async function KundeStartseite() {
                   fahrzeug_hersteller: fall.fahrzeug_hersteller as string | null,
                   fahrzeug_modell: fall.fahrzeug_modell as string | null,
                   schadens_datum: fall.schadens_datum as string | null,
+                  sa_unterschrieben: fall.sa_unterschrieben as boolean | null,
+                  gutachten_eingegangen_am: fall.gutachten_eingegangen_am as string | null,
+                  regulierung_am: fall.regulierung_am as string | null,
+                  abgeschlossen_am: fall.abgeschlossen_am as string | null,
+                  vollmacht_signiert_am: fall.vollmacht_signiert_am as string | null,
+                  kanzlei_wunsch: fall.kanzlei_wunsch as string | null,
                 }}
                 aktion={meta.aktion}
                 nextTermin={meta.nextTermin}

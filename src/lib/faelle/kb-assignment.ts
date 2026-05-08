@@ -9,6 +9,11 @@
 //   3. Tertiär  → weder KB noch Admin verfügbar: Timeline-Eintrag + Error-Log,
 //                  Fall bleibt unbezogen (kundenbetreuer_id = NULL)
 //
+// CMM/SoT-Konvention: claim ist die Single Source of Truth. Jeder Write der
+// kundenbetreuer_id muss auf BEIDEN Tabellen passieren (claims + faelle),
+// solange faelle.kundenbetreuer_id noch existiert. Helper updateKbOnFallAndClaim()
+// kapselt das. Vor diesem Sweep wurde nur faelle geschrieben → Drift in 6/13 Fällen.
+//
 // Wird aufgerufen aus admin/dispatch/actions.ts (signSAandCreateFall-Flow)
 // und kann später für Re-Assignments wiederverwendet werden.
 //
@@ -35,6 +40,42 @@ export type KbAssignmentResult = {
 }
 
 type ProfileLite = { id: string; email: string | null; kapazitaet_max: number | null }
+
+/**
+ * SoT-Sync-Helper: schreibt kundenbetreuer_id + Begleit-Felder auf faelle UND
+ * claims. Damit bleibt das denormalisierte Feld faelle.kundenbetreuer_id
+ * synchron zur SoT claims.kundenbetreuer_id (CMM-Migration mid-state).
+ *
+ * `fallback_flag` und `zugewiesen_am` werden nur auf faelle geschrieben —
+ * claims hat (Stand Mai 2026) keine separaten Spalten dafür.
+ */
+async function updateKbOnFallAndClaim(
+  supabase: AnySupabase,
+  fallId: string,
+  kbId: string,
+  fallbackFlag: boolean,
+): Promise<void> {
+  const now = new Date().toISOString()
+  const { data: fall } = await supabase
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+
+  await supabase
+    .from('faelle')
+    .update({
+      kundenbetreuer_id: kbId,
+      kundenbetreuer_fallback_flag: fallbackFlag,
+      kundenbetreuer_zugewiesen_am: now,
+    })
+    .eq('id', fallId)
+
+  const claimId = (fall?.claim_id as string | null) ?? null
+  if (claimId) {
+    await supabase.from('claims').update({ kundenbetreuer_id: kbId }).eq('id', claimId)
+  }
+}
 
 /**
  * Findet den KB mit den wenigsten offenen Fällen unter der Kapazitätsgrenze.
@@ -101,28 +142,145 @@ type AssignOptions = {
   logToTimeline?: boolean
 }
 
+/** Match-Hinweise für Sticky-KB-Lookup vor Round-Robin. */
+export type StickyKbHints = {
+  /** User-ID des Kunden falls bereits verknüpft (z.B. nach manuellem Match). */
+  kunde_id?: string | null
+  /** Lead-ID — über lead.email/telefon finden wir Anrufer + Halter. */
+  lead_id?: string | null
+  /** Direkte Kontakt-Werte (für Konversion ohne Lead-Row). */
+  kontakte?: Array<{ email?: string | null; telefon?: string | null }>
+}
+
+/**
+ * Sticky-KB: gibt den KB zurück, der diesen Kunden / Ansprechpartner
+ * bereits in einem anderen aktiven Fall betreut. Match-Quellen:
+ *   1. Direkte kunde_id-Verknüpfung (faelle.kundenbetreuer_id)
+ *   2. claim_parties mit gleicher email/telefon (KB des verlinkten Falls)
+ *   3. Anderer Lead mit gleicher email/telefon → daraus konvertierter Fall
+ *
+ * KB muss aktiv sein (`profiles.aktiv=true`), sonst NULL → Caller fällt
+ * auf Round-Robin zurück. Kapazität wird absichtlich ignoriert — Sticky
+ * schlägt Round-Robin auch bei voller Kapazität (Kontinuität > Workload).
+ */
+export async function findStickyKb(
+  supabase: AnySupabase,
+  hints: StickyKbHints,
+): Promise<{ kb_id: string; quelle: 'kunde_id' | 'claim_parties' | 'leads' } | null> {
+  // 1. Direkte kunde_id-Verknüpfung
+  if (hints.kunde_id) {
+    const { data: kbFall } = await supabase
+      .from('faelle')
+      .select('kundenbetreuer_id, profiles!faelle_kundenbetreuer_id_fkey(id, aktiv, rolle)')
+      .eq('kunde_id', hints.kunde_id)
+      .not('kundenbetreuer_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const kbId = (kbFall?.kundenbetreuer_id as string | null) ?? null
+    const profileJoin = (kbFall as { profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[] } | null)?.profiles
+    const profileRow = Array.isArray(profileJoin) ? profileJoin[0] : profileJoin
+    // Sticky-KB nur akzeptieren wenn Rolle KB oder Admin (nicht Dispatch)
+    if (
+      kbId &&
+      profileRow?.aktiv &&
+      ['kundenbetreuer', 'admin'].includes((profileRow.rolle as string) ?? '')
+    ) {
+      return { kb_id: kbId, quelle: 'kunde_id' }
+    }
+  }
+
+  // 2./3. Über Kontakt-Werte (E-Mail / Telefon) auf claim_parties + leads
+  const kontakte = hints.kontakte ?? []
+  if (hints.lead_id && kontakte.length === 0) {
+    const { data: lead } = await supabase
+      .from('leads')
+      .select('email, telefon, halter_email, halter_telefon')
+      .eq('id', hints.lead_id)
+      .maybeSingle()
+    if (lead) {
+      kontakte.push({ email: lead.email as string | null, telefon: lead.telefon as string | null })
+      if (lead.halter_email || lead.halter_telefon) {
+        kontakte.push({
+          email: lead.halter_email as string | null,
+          telefon: lead.halter_telefon as string | null,
+        })
+      }
+    }
+  }
+
+  for (const k of kontakte) {
+    const filters: string[] = []
+    if (k.email) filters.push(`email.ilike.${k.email}`)
+    if (k.telefon) filters.push(`telefon.eq.${k.telefon}`)
+    if (filters.length === 0) continue
+
+    // claim_parties → claim → faelle.kundenbetreuer_id
+    const { data: parties } = await supabase
+      .from('claim_parties')
+      .select('claim_id, email, telefon')
+      .or(filters.join(','))
+      .limit(5)
+    const claimIds = ((parties ?? []) as Array<{ claim_id: string }>).map((p) => p.claim_id)
+    if (claimIds.length > 0) {
+      const { data: kbFaelle } = await supabase
+        .from('faelle')
+        .select('kundenbetreuer_id, claim_id, profiles!faelle_kundenbetreuer_id_fkey(id, aktiv, rolle)')
+        .in('claim_id', claimIds)
+        .not('kundenbetreuer_id', 'is', null)
+        .order('created_at', { ascending: false })
+      for (const row of (kbFaelle ?? []) as Array<{
+        kundenbetreuer_id: string
+        profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[]
+      }>) {
+        const profileRow = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
+        if (
+          profileRow?.aktiv &&
+          ['kundenbetreuer', 'admin'].includes((profileRow.rolle as string) ?? '')
+        ) {
+          return { kb_id: row.kundenbetreuer_id, quelle: 'claim_parties' }
+        }
+      }
+    }
+  }
+
+  return null
+}
+
 /**
  * Hauptfunktion: weist einen Kundenbetreuer zu oder fällt auf den ersten
- * Admin zurück. Keine Exceptions — jeder Fall wird mit einem
- * KbAssignmentResult beantwortet.
+ * Admin zurück. Sticky-KB hat Vorrang vor Round-Robin (gleicher Kunde /
+ * Ansprechpartner → gleicher KB, auch bei voller Kapazität).
  */
 export async function assignKundenbetreuer(
   supabase: AnySupabase,
   fallId: string,
-  options: AssignOptions = {},
+  options: AssignOptions & { stickyHints?: StickyKbHints } = {},
 ): Promise<KbAssignmentResult> {
+  // 0. Sticky-KB prüfen (bevor Round-Robin)
+  if (options.stickyHints) {
+    const sticky = await findStickyKb(supabase, options.stickyHints)
+    if (sticky) {
+      if (options.writeToFall) {
+        await updateKbOnFallAndClaim(supabase, fallId, sticky.kb_id, false)
+      }
+      if (options.logToTimeline) {
+        await supabase.from('timeline').insert({
+          fall_id: fallId,
+          typ: 'system',
+          titel: 'KB durchgängig (Sticky)',
+          beschreibung: `Kunde/Ansprechpartner hatte bereits einen Fall — derselbe KB übernimmt (Quelle: ${sticky.quelle}).`,
+        })
+      }
+      return { success: true, kundenbetreuer_id: sticky.kb_id, fallback_used: 'none' }
+    }
+  }
+
   // 1. Primär: aktiver KB
   const kb = await findAvailableKB(supabase)
   if (kb) {
     if (options.writeToFall) {
-      await supabase
-        .from('faelle')
-        .update({
-          kundenbetreuer_id: kb.id,
-          kundenbetreuer_fallback_flag: false,
-          kundenbetreuer_zugewiesen_am: new Date().toISOString(),
-        })
-        .eq('id', fallId)
+      await updateKbOnFallAndClaim(supabase, fallId, kb.id, false)
     }
     return { success: true, kundenbetreuer_id: kb.id, fallback_used: 'none' }
   }
@@ -131,14 +289,7 @@ export async function assignKundenbetreuer(
   const admin = await findFirstActiveAdmin(supabase)
   if (admin) {
     if (options.writeToFall) {
-      await supabase
-        .from('faelle')
-        .update({
-          kundenbetreuer_id: admin.id,
-          kundenbetreuer_fallback_flag: true,
-          kundenbetreuer_zugewiesen_am: new Date().toISOString(),
-        })
-        .eq('id', fallId)
+      await updateKbOnFallAndClaim(supabase, fallId, admin.id, true)
     }
     if (options.logToTimeline) {
       await supabase.from('timeline').insert({

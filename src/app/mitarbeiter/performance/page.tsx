@@ -54,7 +54,7 @@ export default async function MitarbeiterPerformancePage() {
     })).sort((a, b) => b.value - a.value)
   }
 
-  const monatLabel = now.toLocaleString('de-DE', { month: 'long' }) + ' ' + now.getFullYear()
+  const monatLabel = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', month: 'long' }) + ' ' + now.getFullYear()
 
   // Heute-Timeline: Termine + Tasks fuer heute
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()

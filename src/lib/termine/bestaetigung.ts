@@ -35,7 +35,7 @@ export async function bestaetigeTermin(terminId: string) {
     fall_id: termin.fall_id,
     typ: 'termin',
     titel: 'Termin bestätigt',
-    beschreibung: `Termin am ${new Date(termin.start_zeit).toLocaleDateString('de-DE')} wurde bestätigt. Verbindlich ab: ${new Date(finalVerbindlichAb).toLocaleString('de-DE')}.`,
+    beschreibung: `Termin am ${new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} wurde bestätigt. Verbindlich ab: ${new Date(finalVerbindlichAb).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}.`,
   })
 
   if (tlErr) console.error('[bestaetigeTermin] Timeline-Insert:', tlErr.message)
@@ -49,8 +49,8 @@ export async function bestaetigeTermin(terminId: string) {
   // 4. WhatsApp T4 an Kunden + Email S-E6 an SV (non-critical)
   try {
     const { data: fall } = await db.from('faelle').select('lead_id, besichtigungsort_adresse').eq('id', termin.fall_id).single()
-    const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
-    const uhrzeit = new Date(termin.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+    const uhrzeit = new Date(termin.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 
     // WhatsApp T4 an Kunden
     if (fall?.lead_id) {

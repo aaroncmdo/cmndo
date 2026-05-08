@@ -73,11 +73,76 @@ export async function bookKbTermin(
   if (existErr) return { ok: false, error: 'Fehler bei Duplikat-Prüfung' }
   if (existing && existing.length > 0) return { ok: false, error: 'Sie haben bereits einen offenen Beratungstermin' }
 
-  // 6. Generate video link if needed
+  // 6. Video-Link: bei kanal='video' Google-Meet generieren wenn der KB
+  // mit Google verbunden ist. Schlägt OAuth fehl, fallen wir auf Jitsi
+  // zurück (UX > Hard-Fail) und schreiben einen Hinweis ins Timeline-Feld.
   let videoLink: string | null = null
+  let googleEventId: string | null = null
+  let googleCalendarId: string | null = null
+  let googleSyncedAt: string | null = null
+  let meetFallback = false
+
   if (kanal === 'video') {
-    const { randomBytes } = await import('crypto')
-    videoLink = `https://meet.jit.si/claimondo-${randomBytes(16).toString('hex')}`
+    try {
+      // Kunden- + KB-Daten für Attendee-Liste
+      const { data: kbProfile } = await db
+        .from('profiles')
+        .select('vorname, nachname, email')
+        .eq('id', kbId)
+        .single()
+      let kundeEmail: string | null = null
+      let kundeName = 'Kunde'
+      if (fall.kunde_id) {
+        const { data: kundeProf } = await db
+          .from('profiles')
+          .select('vorname, nachname, email')
+          .eq('id', fall.kunde_id)
+          .single()
+        if (kundeProf) {
+          kundeEmail = (kundeProf.email as string | null) ?? null
+          kundeName = [kundeProf.vorname, kundeProf.nachname].filter(Boolean).join(' ') || 'Kunde'
+        }
+      }
+      if (!kundeEmail && fall.lead_id) {
+        const { data: lead } = await db.from('leads').select('email, vorname, nachname').eq('id', fall.lead_id).single()
+        if (lead) {
+          kundeEmail = (lead.email as string | null) ?? null
+          kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || kundeName
+        }
+      }
+
+      const attendees: Array<{ email: string; displayName?: string }> = []
+      if (kbProfile?.email) {
+        attendees.push({
+          email: kbProfile.email as string,
+          displayName: [kbProfile.vorname, kbProfile.nachname].filter(Boolean).join(' ') || undefined,
+        })
+      }
+      if (kundeEmail) attendees.push({ email: kundeEmail, displayName: kundeName })
+
+      if (attendees.length === 0) throw new Error('Keine Teilnehmer-E-Mails verfügbar')
+
+      const { createMeetEvent } = await import('@/lib/google-calendar/events')
+      const meet = await createMeetEvent({
+        ownerUserId: kbId,
+        attendees,
+        title: `Beratungstermin · ${kundeName}`,
+        description: notiz ?? undefined,
+        startISO: startZeit.toISOString(),
+        dauerMinuten: KB_BERATUNG_DURATION_MIN,
+        withMeet: true,
+        idempotencyKey: `kb-${fallId}-${startZeit.getTime()}`,
+      })
+      videoLink = meet.meetLink
+      googleEventId = meet.eventId
+      googleCalendarId = meet.calendarId
+      googleSyncedAt = new Date().toISOString()
+    } catch (err) {
+      console.warn('[bookKbTermin] Google-Meet Fallback auf Jitsi:', err instanceof Error ? err.message : err)
+      meetFallback = true
+      const { randomBytes } = await import('crypto')
+      videoLink = `https://meet.jit.si/claimondo-${randomBytes(16).toString('hex')}`
+    }
   }
 
   // 7. Insert termin
@@ -89,6 +154,9 @@ export async function bookKbTermin(
       typ: 'kb_beratung',
       kanal,
       video_link: videoLink,
+      google_event_id: googleEventId,
+      google_calendar_id: googleCalendarId,
+      google_event_synced_at: googleSyncedAt,
       start_zeit: startZeit.toISOString(),
       end_zeit: endZeit.toISOString(),
       status: 'bestaetigt',
@@ -99,6 +167,15 @@ export async function bookKbTermin(
 
   if (insertErr || !newTermin) {
     return { ok: false, error: `Termin konnte nicht gespeichert werden: ${insertErr?.message ?? 'Unbekannter Fehler'}` }
+  }
+
+  if (meetFallback) {
+    await db.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'system',
+      titel: 'Google-Meet nicht generiert',
+      beschreibung: 'KB ist nicht mit Google verbunden — Fallback auf Jitsi-Link. KB sollte Google verbinden für Kalender-Sync.',
+    }).then(({ error }) => { if (error) console.warn('[bookKbTermin] timeline:', error.message) })
   }
 
   // 8. Timeline entry
@@ -190,7 +267,7 @@ export async function cancelKbTermin(terminId: string): Promise<CancelResult> {
     fall_id: termin.fall_id,
     typ: 'termin',
     titel: 'KB-Beratungstermin storniert (Kunde)',
-    beschreibung: `Termin am ${new Date(termin.start_zeit).toLocaleDateString('de-DE')} wurde vom Kunden storniert.`,
+    beschreibung: `Termin am ${new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} wurde vom Kunden storniert.`,
   })
   if (tlErr) console.error('[cancelKbTermin] Timeline-Insert:', tlErr.message)
 

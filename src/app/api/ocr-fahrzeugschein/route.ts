@@ -71,6 +71,10 @@ export async function POST(request: Request) {
     if (extracted.halter_stadt) updateData.halter_stadt = extracted.halter_stadt
     if (extracted.fahrzeug_hersteller) updateData.fahrzeug_hersteller = extracted.fahrzeug_hersteller
     if (extracted.fahrzeug_modell) updateData.fahrzeug_modell = extracted.fahrzeug_modell
+    if (extracted.fahrzeug_farbe) updateData.fahrzeug_farbe = extracted.fahrzeug_farbe
+    if (extracted.brn) updateData.brn = extracted.brn
+    if (extracted.hsn) updateData.hsn = extracted.hsn
+    if (extracted.tsn) updateData.tsn = extracted.tsn
 
     const { error: updateError } = await supabase
       .from('faelle')

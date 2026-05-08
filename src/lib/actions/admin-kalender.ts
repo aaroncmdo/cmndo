@@ -22,7 +22,7 @@ type KalenderTermin = {
 
 const FARBEN: Record<string, string> = {
   gutachter: '#4573A2',
-  rueckruf: '#E89B3C',
+  rueckruf: '#9CA3AF',
   kunde: '#5DAA80',
   intern: '#7B7B8A',
   kb_beratung: '#C9A84C',

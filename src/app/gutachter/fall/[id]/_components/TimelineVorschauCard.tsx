@@ -51,7 +51,7 @@ export function TimelineVorschauCard({
             {e.created_at && (
               <p className="text-[10px] text-claimondo-ondo/70 mt-0.5 flex items-center gap-1">
                 <ClockIcon className="w-3 h-3" />
-                {new Date(e.created_at).toLocaleString('de-DE', {
+                {new Date(e.created_at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
                   day: '2-digit',
                   month: '2-digit',
                   hour: '2-digit',

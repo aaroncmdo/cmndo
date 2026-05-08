@@ -23,7 +23,6 @@ export const metadata: Metadata = {
   title: "Claimondo",
   description: "Claimondo KFZ-Schadensmanagement",
   manifest: "/manifest.json",
-  themeColor: "#0D1B3E",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -36,6 +35,12 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Claimondo",
   },
+};
+
+// Next.js 15+: themeColor gehört in den separaten viewport-Export.
+// 2026-05-08: aus metadata raus migriert (Deprecation-Warning Sweep).
+export const viewport = {
+  themeColor: "#0D1B3E",
 };
 
 export default async function RootLayout({

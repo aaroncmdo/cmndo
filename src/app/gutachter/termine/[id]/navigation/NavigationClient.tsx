@@ -75,8 +75,8 @@ export default function NavigationClient({
     }).catch(() => setManualArriving(false))
   }
 
-  const uhrzeit = new Date(startZeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-  const datum = new Date(startZeit).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })
+  const uhrzeit = new Date(startZeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+  const datum = new Date(startZeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })
 
   if (arrived_) {
     return (

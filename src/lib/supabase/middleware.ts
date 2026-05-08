@@ -84,7 +84,9 @@ export async function updateSession(request: NextRequest) {
     const has2faCookie = request.cookies.get('claimondo_2fa_verified')?.value === '1'
     const hasRememberCookie = !!request.cookies.get('claimondo_remember')?.value
 
-    if (!isGoogleUser && !has2faCookie && !hasRememberCookie) {
+    // /gutachter-Portal hat kein 2FA — SVs werden direkt durchgelassen
+    const isGutachterPath = request.nextUrl.pathname.startsWith('/gutachter')
+    if (!isGoogleUser && !has2faCookie && !hasRememberCookie && !isGutachterPath) {
       response = NextResponse.redirect(new URL('/login/2fa', request.url))
     } else if (request.nextUrl.pathname.startsWith('/admin')) {
       // 2FA OK → Admin-Rollen-Check (KFZ-203: Dispatch-User darf nicht auf /admin/*)
@@ -126,6 +128,9 @@ function isPublicPath(pathname: string): boolean {
     '/passwort-zuruecksetzen',
     '/sv',
     '/kunde/termin',
+    // 2026-05-08: Token-basierter Termin-Bestätigungs-Pfad analog zu /sv und /upload —
+    // Magic-Link aus Email, kein Login nötig. Token-Validierung in der Action.
+    '/kunde-termin',
     // AAR-134: SV-Token-Ablehnung via Email-Link (kein Login nötig)
     '/ablehnen',
     // AAR-339: ZB1-Upload-Link (/upload/zb1/[token]) — Kunde hat noch keinen
@@ -135,6 +140,11 @@ function isPublicPath(pathname: string): boolean {
     '/nutzungsbedingungen',
     '/datenschutz',
     '/impressum',
+    // 2026-05-08: Webform-Lead-Strecke MUSS für anonyme Besucher offen
+    // sein — daraus entsteht der Lead, danach Self-Dispatch + Weiterleitung
+    // ins Portal. Ohne diesen Eintrag landet der Besucher auf /login und
+    // kann gar keinen Schaden melden.
+    '/schaden-melden',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }

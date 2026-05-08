@@ -156,133 +156,158 @@ export async function uploadSaVorlage(formData: FormData): Promise<{
 //   2. Datei in Storage (fall-dokumente/sv-pflicht/${svId}/${slot}/${ts}.${ext})
 //   3. pflichtdokumente-Row upsert (status='hochgeladen')
 //   4. Admin-Task + Mitteilung analog uploadSaVorlage
-export async function uploadSvPflichtdokument(formData: FormData): Promise<{
-  slot_id: string
-  storage_path: string
-  status: 'hochgeladen'
-}> {
-  const { userId, svId, svFirmenname, supabase } = await requireGutachter()
+// 2026-05-07 (Andreas-Kloss-Bug-Fix): Result-Object-Pattern. Vorher
+// throw — Next.js Production-Build maskiert Server-Action-Errors zu
+// generischem „Error", der SV sah „Upload fehlgeschlagen" ohne Detail.
+// Jetzt: detaillierte error-Messages kommen 1:1 beim Client an, plus
+// Server-side console.error für Vercel-Logs.
+export type UploadSvPflichtdokumentResult =
+  | { ok: true; slot_id: string; storage_path: string }
+  | { ok: false; error: string }
 
-  const slotId = (formData.get('slot_id') as string | null)?.trim() ?? ''
-  const file = formData.get('datei') as File | null
-  if (!slotId) throw new Error('Kein Slot angegeben')
-  if (slotId === 'sv_sa_vorlage') {
-    throw new Error('SA-Vorlage nutzt eigenen Endpoint (uploadSaVorlage)')
-  }
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
-
-  const slot = await getKatalogSlot(supabase, slotId)
-  if (!slot || !slot.aktiv) throw new Error(`Unbekannter oder deaktivierter Slot: ${slotId}`)
-  if (!slot.uploadbar_von.includes('sachverstaendiger')) {
-    throw new Error(`Slot "${slot.label}" ist nicht SV-uploadbar`)
-  }
-  if (slot.kategorie !== 'gutachter_verifizierung') {
-    throw new Error(`Slot "${slot.label}" ist kein Verifizierungs-Dokument`)
-  }
-
-  const maxBytes = slot.max_mb * 1024 * 1024
-  if (file.size > maxBytes) throw new Error(`Datei zu groß (max ${slot.max_mb} MB)`)
-  if (slot.akzeptierte_mime_types.length > 0 && file.type && !slot.akzeptierte_mime_types.includes(file.type)) {
-    // Browser liefert manchmal application/octet-stream — nicht hart blocken
-    if (file.type !== 'application/octet-stream') {
-      throw new Error(`MIME-Type nicht erlaubt (erwartet: ${slot.akzeptierte_mime_types.join(', ')})`)
-    }
-  }
-
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin'
-  const db = createAdminClient()
-
-  const { data: profile } = await db
-    .from('profiles')
-    .select('vorname, nachname')
-    .eq('id', userId)
-    .maybeSingle()
-  const svName =
-    [profile?.vorname, profile?.nachname].filter(Boolean).join(' ').trim()
-    || svFirmenname
-    || 'Unbekannter SV'
-
-  const path = `sv-pflicht/${svId}/${slotId}/${Date.now()}.${ext}`
-  const { error: uploadErr } = await db.storage
-    .from('fall-dokumente')
-    .upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: true })
-  if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
-
-  // Bestehende Row upsert — falls Admin schon angefordert hat (status='ausstehend')
-  // oder SV schon mal hochgeladen hat (Re-Upload-Fall).
-  const { data: existing } = await db
-    .from('pflichtdokumente')
-    .select('id')
-    .eq('sv_id', svId)
-    .eq('dokument_typ', slotId)
-    .maybeSingle()
-
-  if (existing) {
-    const { error: updErr } = await db
-      .from('pflichtdokumente')
-      .update({
-        status: 'hochgeladen',
-        dokument_url: path,
-        hochgeladen_am: new Date().toISOString(),
-      })
-      .eq('id', existing.id)
-    if (updErr) throw new Error(`DB-Update fehlgeschlagen: ${updErr.message}`)
-  } else {
-    const { error: insErr } = await db
-      .from('pflichtdokumente')
-      .insert({
-        sv_id: svId,
-        dokument_typ: slotId,
-        status: 'hochgeladen',
-        pflicht: true,
-        quelle: 'sachverstaendiger',
-        dokument_url: path,
-        hochgeladen_am: new Date().toISOString(),
-      })
-    if (insErr) throw new Error(`DB-Insert fehlgeschlagen: ${insErr.message}`)
-  }
-
-  // Admin-Task: Review-Pflicht nach Upload
-  await createLinkedTask({
-    titel: `${slot.label} von ${svName} zu prüfen`,
-    beschreibung: `${svName} hat „${slot.label}" hochgeladen. Bitte im Verifizierungs-Tab prüfen und freigeben.`,
-    prioritaet: 'normal',
-    typ: 'sv_dokument_review',
-    entity_type: 'gutachter',
-    entity_id: svId,
-    empfaenger_rolle: 'admin',
-    task_code: `sv_${slotId}_review`,
-    trigger_event: 'sv_pflichtdokument_hochgeladen',
-    auto_erstellt: true,
-  })
-
-  // Mitteilung an alle Admins (non-blocking)
+export async function uploadSvPflichtdokument(
+  formData: FormData,
+): Promise<UploadSvPflichtdokumentResult> {
+  let svId = ''
+  let slotId = ''
   try {
-    const { data: admins } = await db
-      .from('profiles')
-      .select('id')
-      .eq('rolle', 'admin')
-    if (admins && admins.length > 0) {
-      const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
-      await createMitteilungMulti(
-        admins.map((a) => ({ id: a.id, rolle: 'admin' as const })),
-        {
-          kategorie: 'task',
-          titel: `${slot.label} von ${svName}`,
-          inhalt: 'Bitte im SV-Verifizierungs-Tab prüfen und freigeben.',
-          route_url: `/admin/sachverstaendige/${svId}?tab=verifizierung`,
-          icon: 'bell',
-          prioritaet: 'normal',
-        },
-      )
+    const ctx = await requireGutachter()
+    svId = ctx.svId
+    const { userId, svFirmenname, supabase } = ctx
+
+    slotId = (formData.get('slot_id') as string | null)?.trim() ?? ''
+    const file = formData.get('datei') as File | null
+    if (!slotId) return { ok: false, error: 'Kein Slot angegeben' }
+    if (slotId === 'sv_sa_vorlage') {
+      return { ok: false, error: 'SA-Vorlage nutzt eigenen Endpoint (uploadSaVorlage)' }
     }
+    if (!file || file.size === 0) return { ok: false, error: 'Keine Datei ausgewählt' }
+
+    const slot = await getKatalogSlot(supabase, slotId)
+    if (!slot || !slot.aktiv) return { ok: false, error: `Unbekannter oder deaktivierter Slot: ${slotId}` }
+    if (!slot.uploadbar_von.includes('sachverstaendiger')) {
+      return { ok: false, error: `Slot „${slot.label}" ist nicht SV-uploadbar` }
+    }
+    if (slot.kategorie !== 'gutachter_verifizierung') {
+      return { ok: false, error: `Slot „${slot.label}" ist kein Verifizierungs-Dokument` }
+    }
+
+    const maxBytes = slot.max_mb * 1024 * 1024
+    if (file.size > maxBytes) {
+      return { ok: false, error: `Datei zu groß — max ${slot.max_mb} MB, deine Datei: ${(file.size / 1024 / 1024).toFixed(1)} MB` }
+    }
+    if (slot.akzeptierte_mime_types.length > 0 && file.type && !slot.akzeptierte_mime_types.includes(file.type)) {
+      if (file.type !== 'application/octet-stream') {
+        return { ok: false, error: `Datei-Typ „${file.type}" nicht erlaubt — erwartet: ${slot.akzeptierte_mime_types.join(', ')}` }
+      }
+    }
+
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'bin'
+    const db = createAdminClient()
+
+    const { data: profile } = await db
+      .from('profiles')
+      .select('vorname, nachname')
+      .eq('id', userId)
+      .maybeSingle()
+    const svName =
+      [profile?.vorname, profile?.nachname].filter(Boolean).join(' ').trim()
+      || svFirmenname
+      || 'Unbekannter SV'
+
+    const path = `sv-pflicht/${svId}/${slotId}/${Date.now()}.${ext}`
+    const { error: uploadErr } = await db.storage
+      .from('fall-dokumente')
+      .upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: true })
+    if (uploadErr) {
+      console.error('[uploadSvPflichtdokument] storage upload error', { svId, slotId, msg: uploadErr.message })
+      return { ok: false, error: `Storage-Upload fehlgeschlagen: ${uploadErr.message}` }
+    }
+
+    const { data: existing } = await db
+      .from('pflichtdokumente')
+      .select('id')
+      .eq('sv_id', svId)
+      .eq('dokument_typ', slotId)
+      .maybeSingle()
+
+    if (existing) {
+      const { error: updErr } = await db
+        .from('pflichtdokumente')
+        .update({
+          status: 'hochgeladen',
+          dokument_url: path,
+          hochgeladen_am: new Date().toISOString(),
+        })
+        .eq('id', existing.id)
+      if (updErr) {
+        console.error('[uploadSvPflichtdokument] db update error', { svId, slotId, msg: updErr.message })
+        return { ok: false, error: `DB-Update fehlgeschlagen: ${updErr.message}` }
+      }
+    } else {
+      const { error: insErr } = await db
+        .from('pflichtdokumente')
+        .insert({
+          sv_id: svId,
+          dokument_typ: slotId,
+          status: 'hochgeladen',
+          pflicht: true,
+          quelle: 'sachverstaendiger',
+          dokument_url: path,
+          hochgeladen_am: new Date().toISOString(),
+        })
+      if (insErr) {
+        console.error('[uploadSvPflichtdokument] db insert error', { svId, slotId, msg: insErr.message })
+        return { ok: false, error: `DB-Insert fehlgeschlagen: ${insErr.message}` }
+      }
+    }
+
+    // Admin-Task: Review-Pflicht nach Upload
+    await createLinkedTask({
+      titel: `${slot.label} von ${svName} zu prüfen`,
+      beschreibung: `${svName} hat „${slot.label}" hochgeladen. Bitte im Verifizierungs-Tab prüfen und freigeben.`,
+      prioritaet: 'normal',
+      typ: 'sv_dokument_review',
+      entity_type: 'gutachter',
+      entity_id: svId,
+      empfaenger_rolle: 'admin',
+      task_code: `sv_${slotId}_review`,
+      trigger_event: 'sv_pflichtdokument_hochgeladen',
+      auto_erstellt: true,
+    })
+
+    // Mitteilung an alle Admins (non-blocking)
+    try {
+      const { data: admins } = await db
+        .from('profiles')
+        .select('id')
+        .eq('rolle', 'admin')
+      if (admins && admins.length > 0) {
+        const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
+        await createMitteilungMulti(
+          admins.map((a) => ({ id: a.id, rolle: 'admin' as const })),
+          {
+            kategorie: 'task',
+            titel: `${slot.label} von ${svName}`,
+            inhalt: 'Bitte im SV-Verifizierungs-Tab prüfen und freigeben.',
+            route_url: `/admin/sachverstaendige/${svId}?tab=verifizierung`,
+            icon: 'bell',
+            prioritaet: 'normal',
+          },
+        )
+      }
+    } catch (err) {
+      console.error('[AAR-647] Admin-Mitteilung nach SV-Upload fehlgeschlagen:', err)
+    }
+
+    revalidatePath('/gutachter/verifizierung')
+    revalidatePath('/admin/aufgaben/alle')
+    revalidatePath(`/admin/sachverstaendige/${svId}`)
+
+    return { ok: true, slot_id: slotId, storage_path: path }
   } catch (err) {
-    console.error('[AAR-647] Admin-Mitteilung nach SV-Upload fehlgeschlagen:', err)
+    const msg = err instanceof Error ? err.message : 'Unbekannter Fehler'
+    console.error('[uploadSvPflichtdokument] uncaught', { svId, slotId, msg, err })
+    return { ok: false, error: msg }
   }
-
-  revalidatePath('/gutachter/verifizierung')
-  revalidatePath('/admin/aufgaben/alle')
-  revalidatePath(`/admin/sachverstaendige/${svId}`)
-
-  return { slot_id: slotId, storage_path: path, status: 'hochgeladen' }
 }

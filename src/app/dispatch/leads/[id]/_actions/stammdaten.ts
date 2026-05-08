@@ -11,10 +11,12 @@ import { revalidatePath } from 'next/cache'
 const STAMMDATEN_ALLOWED_FIELDS = new Set([
   // Kunde — Kontakt + Adresse + Notiz
   'vorname', 'nachname', 'telefon', 'email',
-  'kunde_plz', 'kunde_strasse', 'kunde_stadt',
+  'kunde_adresse', 'kunde_plz', 'kunde_strasse', 'kunde_stadt', 'kunde_lat', 'kunde_lng',
   'notiz',
   // Fahrzeug
-  'kennzeichen', 'fahrzeug_hersteller', 'fahrzeug_modell',
+  'kennzeichen', 'kennzeichen_kreis', 'kennzeichen_buchstaben', 'kennzeichen_zahl', 'kennzeichen_suffix',
+  'fahrzeug_hersteller', 'fahrzeug_modell',
+  'lackfarbe_code', 'fahrzeug_farbe',
   // AAR-181: Baujahr ist Pflichtfeld in Phase 4, muss in der Allowlist sein
   'fahrzeug_baujahr', 'erstzulassung',
   // AAR-347: OCR-Fallback — FIN/HSN/TSN manuell im Dispatch eintragbar,
@@ -26,7 +28,7 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'gegner_bekannt', 'gegner_kennzeichen', 'gegner_versicherung',
   // AAR-265: FK auf versicherungen-Stammdaten (Autocomplete in Phase 4)
   'gegner_versicherung_id',
-  'gegner_schadennummer', 'unfalldatum', 'unfall_uhrzeit',
+  'gegner_schadennummer', 'gegner_versicherungsnummer', 'unfalldatum', 'unfall_uhrzeit',
   // AAR-264: Wunschtermin in Phase 2 — wird auch fürs SV-Matching genutzt
   'wunschtermin',
   // AAR-270: Wochentag-Präferenz für SV-Slot-Filter (ISO 1=Mo..7=So)
@@ -47,6 +49,7 @@ const STAMMDATEN_ALLOWED_FIELDS = new Set([
   'besichtigungsort_lat',
   'besichtigungsort_lng',
   'besichtigungsort_place_id',
+  'besichtigungsort_notiz',
   // AAR-182 Audit-Fix #2: zb1_status damit „Nein — manuell eintragen" in
   // Zb1UploadCard persistiert werden kann (Wert 'abgelehnt').
   'zb1_status',

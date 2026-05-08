@@ -326,16 +326,9 @@ export async function POST(req: NextRequest) {
               updated_at: new Date().toISOString(),
             }).eq('id', matchedLeadId)
             await syncDokumentUploadAnfrage(db, matchedLeadId, 'polizeibericht', publicUrl)
-            // AAR-504: Auto-OCR nach WhatsApp-Upload — gleiche Logik wie
-            // Web-Upload. Fire-and-forget, nicht blocking.
-            try {
-              const { triggerAutoBkatOcr } = await import('@/lib/bkat/auto-trigger')
-              triggerAutoBkatOcr(db, matchedLeadId, publicUrl).catch((err) =>
-                console.error('[AAR-504] auto-bkat twilio-inbound:', err),
-              )
-            } catch (err) {
-              console.error('[AAR-504] auto-bkat module load:', err)
-            }
+            // AAR-504: Auto-OCR via after() — läuft garantiert nach Response-Send.
+            const { scheduleBkatAnalyseAfterUpload } = await import('@/lib/bkat/auto-trigger')
+            scheduleBkatAnalyseAfterUpload(db, matchedLeadId, publicUrl)
           }
         }
 
@@ -539,7 +532,7 @@ export async function POST(req: NextRequest) {
           kategorie,
           quelle: 'whatsapp',
           storage_path: path,
-          original_filename: `WhatsApp ${new Date(ts).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}.${ext}`,
+          original_filename: `WhatsApp ${new Date(ts).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}.${ext}`,
           groesse_bytes: buf.byteLength,
           mime_type: contentType,
           uploaded_by_kunde: true,

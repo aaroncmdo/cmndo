@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
           source_channel: 'aircall-inbound',
           status: 'neu',
           qualifizierungs_phase: 'neu',
-          notiz: `Auto-erstellt durch eingehenden Anruf am ${new Date().toLocaleString('de-DE')}`,
+          notiz: `Auto-erstellt durch eingehenden Anruf am ${new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`,
         })
         .select('id')
         .single()

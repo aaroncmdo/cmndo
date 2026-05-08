@@ -204,7 +204,7 @@ export async function dokumentAnfordern(
         emailText:
           `Hallo ${leadVorname ?? ''},\n\n${rolleLabel} benötigt von Ihnen:\n` +
           `${slot.label}\n\nBegründung: ${trimmed}\n\n` +
-          `Bitte laden Sie das Dokument bis spätestens ${new Date(fristIso).toLocaleDateString('de-DE')} ` +
+          `Bitte laden Sie das Dokument bis spätestens ${new Date(fristIso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} ` +
           `in Ihrem Portal hoch: ${portalUrl}`,
       },
     )

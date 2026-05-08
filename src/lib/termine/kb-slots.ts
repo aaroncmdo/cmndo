@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getSvBusySlots } from '@/lib/google-calendar/busy-slots'
 import {
   KB_BERATUNG_DURATION_MIN,
   KB_BERATUNG_VORLAUF_H,
@@ -80,6 +81,37 @@ export async function getAvailableKbSlots(
     }),
   )
 
+  // 2a-bis: Admin-Termine des KBs (Rueckrufe, Meetings) blockieren ebenfalls.
+  // Diese sind nicht in gutachter_termine sondern in admin_termine, mit
+  // zugewiesen_an=kbId. Status 'offen' = aktiv, 'erledigt'/'abgesagt' ignorieren.
+  const { data: adminTermine } = await db
+    .from('admin_termine')
+    .select('start_zeit, end_zeit')
+    .eq('zugewiesen_an', kbId)
+    .eq('status', 'offen')
+    .gte('start_zeit', windowStart)
+    .lte('start_zeit', windowEnd)
+  const adminBlockedRanges: Array<{ start: number; end: number }> = (
+    adminTermine ?? []
+  ).map((t) => ({
+    start: new Date(t.start_zeit as string).getTime(),
+    end: new Date((t.end_zeit as string) ?? (t.start_zeit as string)).getTime(),
+  }))
+
+  // 2b. Google-Calendar-Busy-Slots des KBs (externe Termine, Urlaub, etc.).
+  // Wenn der KB nicht mit Google verbunden ist, liefert der Helper [] —
+  // dann blockieren nur die in Claimondo gebuchten Slots.
+  let externalBusy: Array<{ start: number; end: number }> = []
+  try {
+    const busy = await getSvBusySlots(kbId, windowStart, windowEnd)
+    externalBusy = busy.map((b) => ({
+      start: new Date(b.start).getTime(),
+      end: new Date(b.end).getTime(),
+    }))
+  } catch (err) {
+    console.warn('[kb-slots] Google-FreeBusy-Lookup fehlgeschlagen:', err instanceof Error ? err.message : err)
+  }
+
   const slots: Array<{ datum: string; uhrzeit: string }> = []
 
   // 3. Iterate days
@@ -109,13 +141,24 @@ export async function getAvailableKbSlots(
         const utcKey = `${slotTime.getUTCFullYear()}-${String(slotTime.getUTCMonth() + 1).padStart(2, '0')}-${String(slotTime.getUTCDate()).padStart(2, '0')}T${String(slotTime.getUTCHours()).padStart(2, '0')}:${String(slotTime.getUTCMinutes()).padStart(2, '0')}`
 
         if (!bookedTimes.has(utcKey)) {
-          const datum = slotTime.toISOString().split('T')[0]
-          const uhrzeit = slotTime.toLocaleTimeString('de-DE', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-          })
-          slots.push({ datum, uhrzeit })
+          // Prüfe Überlappung mit Google-Calendar-Busy + admin_termine
+          const slotStart = slotTime.getTime()
+          const slotEnd = slotStart + KB_BERATUNG_DURATION_MIN * 60 * 1000
+          const busyOverlap = externalBusy.some(
+            (b) => slotStart < b.end && slotEnd > b.start,
+          )
+          const adminOverlap = adminBlockedRanges.some(
+            (b) => slotStart < b.end && slotEnd > b.start,
+          )
+          if (!busyOverlap && !adminOverlap) {
+            const datum = slotTime.toISOString().split('T')[0]
+            const uhrzeit = slotTime.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+            })
+            slots.push({ datum, uhrzeit })
+          }
         }
       }
       slotTime = new Date(slotTime.getTime() + KB_BERATUNG_DURATION_MIN * 60 * 1000)
