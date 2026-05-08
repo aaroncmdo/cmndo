@@ -51,6 +51,8 @@ import {
 import type { NaviNotice } from './NaviHud'
 import { formatNaviDistance } from './NaviHud'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
+import { sampleWeatherAlongRoute, clusterWeatherSamples } from '@/lib/mapbox/weather-route'
+import { attachWeatherFx, type WeatherFxHandle } from '@/lib/mapbox/weather-fx'
 import type { FeldmodusStop, FeldmodusSV } from './page'
 import type { MapboxLightPreset } from '@/lib/mapbox/light-preset'
 import { haversineMetersLngLat, speakInstruction } from '@/lib/mapbox/turn-by-turn'
@@ -158,6 +160,10 @@ export default function FeldmodusMap({
   const warnedBlitzerIdsRef = useRef<Set<string>>(new Set())
   const hazardsRef = useRef<HazardLayerHandle | null>(null)
   const flowRef = useRef<FlowLayerHandle | null>(null)
+  // 2026-05-08 (C12): Wetter-Animations-Layer (Three.js Particles für
+  // Schnee/Regen/Sturm an Wetter-Hotspots der Route). Wird beim primary-
+  // Route-Update mit-aktualisiert.
+  const weatherFxRef = useRef<WeatherFxHandle | null>(null)
   const stopMarkersRef = useRef<Marker[]>([])
   const tokenMissing = useRef(false)
   // 2026-05-07 Phase 3b: Wetter-Code (OpenWeatherMap weather_id) am
@@ -410,6 +416,8 @@ export default function FeldmodusMap({
       hazardsRef.current = null
       flowRef.current?.remove()
       flowRef.current = null
+      weatherFxRef.current?.remove()
+      weatherFxRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current = []
       map.remove()
@@ -709,6 +717,20 @@ export default function FeldmodusMap({
           } else if (flowRef.current) {
             flowRef.current.update(flowFeatures)
           }
+
+          // 2026-05-08 (C12): Wetter-Animations-Layer entlang der Route.
+          // Sample alle ~3 km, cluster gleiche Wetter-Codes, render
+          // Particles. Best-effort — bei Fail (kein OpenWeatherMap-Key,
+          // Netz-Fehler) bleibt die Route ohne Animation.
+          void sampleWeatherAlongRoute(coords)
+            .then((samples) => {
+              const regions = clusterWeatherSamples(samples)
+              if (!weatherFxRef.current && map.isStyleLoaded()) {
+                weatherFxRef.current = attachWeatherFx(map)
+              }
+              weatherFxRef.current?.update(regions)
+            })
+            .catch(() => { /* noop — Wetter-FX ist Cosmetic */ })
 
           // 2026-05-08 PR B2: Hazard-on-Route-Detection (sofort).
           // Wenn ein Hazard innerhalb 50 m der primary-polyline liegt
