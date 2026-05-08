@@ -382,6 +382,7 @@ export default function FeldmodusClient({
                 svPosition={position ? { lat: position.lat, lng: position.lng } : null}
                 svInGeofence={svInGeofence}
                 permissionState={permissionState}
+                distanceMeters={distanceMeters}
                 onAdvanced={onAdvanced}
                 onArrived={onArrived}
               />

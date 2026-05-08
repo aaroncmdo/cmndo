@@ -18,6 +18,8 @@ import {
   CarIcon,
   AlertTriangleIcon,
   FileTextIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from 'lucide-react'
 import { formatUhrzeit } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
@@ -32,9 +34,19 @@ export interface AktuellerStopCardProps {
   svPosition: { lat: number; lng: number } | null
   svInGeofence: boolean
   permissionState: 'pending' | 'granted' | 'denied'
+  /**
+   * 2026-05-08 (C1): Live-Distanz vom SV zum aktuellen Stop in Metern.
+   * Steuert ob die Card im Compact- oder Expanded-Layout rendert. null
+   * = unbekannt → expanded (sicherer Default vor erstem GPS-Tick).
+   */
+  distanceMeters: number | null
   onAdvanced: (nextTerminId: string | null) => void
   onArrived: (lat: number, lng: number, via: 'geofence' | 'manuell' | 'termin_uhrzeit') => void
 }
+
+// 2026-05-08 (C1) Smart-Collapse Schwellen — siehe Comment in
+// AktuellerStopCard für die Begründung der konkreten Werte.
+const COMPACT_DISTANCE_THRESHOLD_M = 500
 
 function buildGoogleMapsLink(stop: FeldmodusStop): string {
   const base = 'https://www.google.com/maps/dir/?api=1'
@@ -47,6 +59,12 @@ function buildGoogleMapsLink(stop: FeldmodusStop): string {
   return `${base}&destination=${encodeURIComponent(stop.adresse)}`
 }
 
+function formatDistanceShort(m: number | null): string | null {
+  if (m == null) return null
+  if (m < 1000) return `${Math.round(m / 10) * 10} m`
+  return `${(m / 1000).toFixed(1).replace('.', ',')} km`
+}
+
 export default function AktuellerStopCard({
   stop,
   sessionId,
@@ -54,10 +72,28 @@ export default function AktuellerStopCard({
   svPosition,
   svInGeofence,
   permissionState,
+  distanceMeters,
   onAdvanced,
   onArrived,
 }: AktuellerStopCardProps) {
   const [pending, startTransition] = useTransition()
+
+  // 2026-05-08 C1 (Smart-Collapse):
+  //   - Während der Anfahrt (distance > 500 m) zeigt die Card nur Header
+  //     + Adresse + Distanz/ETA-Pille — die Map dominiert. Niemand will
+  //     beim Fahren einen 12-zeiligen Briefing-Block lesen.
+  //   - Sobald < 500 m oder GPS unbekannt: voll expanded.
+  //   - User-Override via Chevron-Toggle persistiert nur den Manual-State
+  //     bis zum nächsten Distance-Übergang. Pragmatisch: wer expanded
+  //     hat will lesen, wer collapsed hat will Map.
+  // Briefing bekommt zusätzlich einen eigenen Disclosure-Toggle weil es
+  // auch im expanded-Mode oft zu lang ist (Cardentity-Briefings sind
+  // 200-400 Wörter).
+  const distanceShort = formatDistanceShort(distanceMeters)
+  const autoCompact = distanceMeters != null && distanceMeters > COMPACT_DISTANCE_THRESHOLD_M
+  const [manualMode, setManualMode] = useState<'compact' | 'expanded' | null>(null)
+  const isCompact = manualMode != null ? manualMode === 'compact' : autoCompact
+  const [briefingOpen, setBriefingOpen] = useState(false)
 
   // AAR-384 + Auto-Arrive: Termin-State live beobachten (Kunde-Tracking +
   // sv_angekommen_am + besichtigung_gestartet_am).
@@ -228,9 +264,42 @@ export default function AktuellerStopCard({
     return 'Auto-Ankunft aktiv (Geofence 50 m)'
   })()
 
+  if (isCompact) {
+    // 2026-05-08 C1: Driving-Compact-Pille — eine kurze Glance-View für
+    // den Fahrkontext. SV sieht: wohin (Adresse), wer (Kennzeichen), wie
+    // weit (Distanz). Click expandiert.
+    return (
+      <button
+        type="button"
+        onClick={() => setManualMode('expanded')}
+        aria-label="Stop-Details ausklappen"
+        className="w-full text-left rounded-xl bg-white text-claimondo-navy px-4 py-3 shadow-sm hover:bg-claimondo-bg/50 transition-colors flex items-center gap-3"
+      >
+        <MapPinIcon className="w-5 h-5 text-[color:var(--brand-primary,var(--brand-secondary))] shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            {stop.kennzeichen && (
+              <span className="font-mono text-xs font-semibold text-claimondo-navy">{stop.kennzeichen}</span>
+            )}
+            <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
+              {formatUhrzeit(stop.start_zeit)}
+            </span>
+          </div>
+          <p className="text-sm font-medium truncate">{stop.adresse}</p>
+        </div>
+        {distanceShort && (
+          <span className="text-xs font-semibold text-[color:var(--brand-primary,var(--brand-secondary))] shrink-0">
+            {distanceShort}
+          </span>
+        )}
+        <ChevronDownIcon className="w-4 h-4 text-claimondo-ondo shrink-0" />
+      </button>
+    )
+  }
+
   return (
     <div className="rounded-xl bg-white text-claimondo-navy p-4 shadow-sm space-y-3">
-      {/* Header */}
+      {/* Header — mit optionalem Collapse-Toggle */}
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--brand-primary,var(--brand-secondary))]">
@@ -244,6 +313,18 @@ export default function AktuellerStopCard({
               {stop.schadentyp}
             </span>
           )}
+          {/* Collapse-Toggle nur sinnvoll wenn überhaupt eine Distanz da ist
+              (sonst keine Info um auf Compact zu schalten). */}
+          {distanceShort && (
+            <button
+              type="button"
+              onClick={() => setManualMode('compact')}
+              aria-label="Stop-Details einklappen"
+              className="text-claimondo-ondo hover:text-claimondo-navy transition-colors"
+            >
+              <ChevronUpIcon className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
         <p className="text-sm font-semibold text-claimondo-navy">
           {stop.kennzeichen && (
@@ -254,10 +335,15 @@ export default function AktuellerStopCard({
         <p className="text-xs text-claimondo-ondo">{stop.kunde_name}</p>
       </div>
 
-      {/* Adresse */}
+      {/* Adresse + Distanz */}
       <div className="flex items-start gap-2 text-sm text-claimondo-navy">
         <MapPinIcon className="w-4 h-4 text-[color:var(--brand-primary,var(--brand-secondary))] mt-0.5" />
         <p className="flex-1">{stop.adresse}</p>
+        {distanceShort && (
+          <span className="text-xs font-semibold text-[color:var(--brand-primary,var(--brand-secondary))] shrink-0">
+            {distanceShort}
+          </span>
+        )}
       </div>
 
       {/* Kunde-Tracking-Status */}
@@ -338,15 +424,31 @@ export default function AktuellerStopCard({
         </p>
       )}
 
-      {/* SV-Briefing */}
+      {/* SV-Briefing — 2026-05-08 C1: Disclosure-Toggle.
+          Default collapsed weil der Briefing-Text 200-400 Wörter hat
+          (Cardentity-Output) und sonst 80 % der Card vollnimmt. SV
+          öffnet das gezielt vor dem Aussteigen. */}
       {stop.briefing_text && (
         <div className="border-t border-claimondo-border pt-3">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo mb-1">
-            Briefing
-          </p>
-          <p className="text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
-            {stop.briefing_text}
-          </p>
+          <button
+            type="button"
+            onClick={() => setBriefingOpen((v) => !v)}
+            aria-expanded={briefingOpen}
+            className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo hover:text-claimondo-navy transition-colors"
+          >
+            <span>Briefing</span>
+            {briefingOpen ? <ChevronUpIcon className="w-3.5 h-3.5" /> : <ChevronDownIcon className="w-3.5 h-3.5" />}
+            {!briefingOpen && (
+              <span className="ml-auto text-[10px] normal-case tracking-normal text-claimondo-ondo/70 font-normal">
+                Anzeigen
+              </span>
+            )}
+          </button>
+          {briefingOpen && (
+            <p className="mt-2 text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
+              {stop.briefing_text}
+            </p>
+          )}
         </div>
       )}
 
