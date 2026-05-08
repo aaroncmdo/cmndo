@@ -48,7 +48,8 @@ import {
   REROUTE_POLL_INTERVAL_MS,
   type ProposedReroute,
 } from '@/lib/mapbox'
-import RerouteToast from './RerouteToast'
+import type { NaviNotice } from './NaviHud'
+import { formatNaviDistance } from './NaviHud'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
 import type { MapboxLightPreset } from '@/lib/mapbox/light-preset'
@@ -127,6 +128,13 @@ export interface FeldmodusMapProps {
    * den Status 'arrived' erreicht.
    */
   arrived?: boolean
+  /**
+   * 2026-05-08 (C10): Map meldet ihre internen Notice-Trigger (Blitzer-
+   * Anflug, Hazard-on-Route, Reroute-Vorschlag) an den Caller, der sie
+   * mit tbt-Maneuver/Lane kombiniert und im NaviHud rendert.
+   * null = kein Notice der Map aktuell.
+   */
+  onMapNotice?: (notice: NaviNotice | null) => void
 }
 
 export default function FeldmodusMap({
@@ -136,6 +144,7 @@ export default function FeldmodusMap({
   svPosition,
   followSv = false,
   arrived = false,
+  onMapNotice,
 }: FeldmodusMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
@@ -163,6 +172,11 @@ export default function FeldmodusMap({
   const hazardsDataRef = useRef<HazardFeature[]>([])
   const [proposedReroute, setProposedReroute] = useState<ProposedReroute | null>(null)
   const proposedHazardSeenIdsRef = useRef<Set<string>>(new Set())
+  // 2026-05-08 (C10): Blitzer-Notice für NaviHud — separat vom Voice-
+  // Trigger damit das visuelle Banner unabhängig vom Audio-Cooldown
+  // updaten kann (Audio fired einmal pro Threshold, Visual zeigt
+  // dauerhaft solange Distance < 600 m).
+  const [blitzerNotice, setBlitzerNotice] = useState<NaviNotice | null>(null)
 
   const aktuellerStop = stops[aktuellerStopIndex] ?? null
 
@@ -452,18 +466,28 @@ export default function FeldmodusMap({
     } catch { /* style not ready yet */ }
   }, [aktuellerStopIndex, stops, weatherId, arrived])
 
-  // 2026-05-08 Blitzer-Voice: bei jedem position-Update Distance zu Blitzern
-  // prüfen. Type 1 (mobil) → eigener Sprech-Text damit der SV mobile Blitzer
-  // sofort akustisch unterscheiden kann von stationären.
+  // 2026-05-08 Blitzer-Voice + (C10) NaviHud-Notice. Bei jedem GPS-
+  // Update prüfen wir die Distance zu allen geladenen Blitzern. Sobald
+  // einer < 500 m bzw. < 200 m ist, sprechen wir die Anweisung aus UND
+  // melden eine `blitzer`-Notice an den Caller — der NaviHud zeigt den
+  // glassy roten Banner mit Distanz + ggf. Tempolimit.
+  // Auto-Clear: wenn der nächste Blitzer > 500 m entfernt ist (oder
+  // keine mehr in Range), notice=null.
   useEffect(() => {
     if (!svPosition) return
     const features = blitzerFeaturesRef.current
-    if (features.length === 0) return
+    if (features.length === 0) {
+      onMapNotice?.(null)
+      return
+    }
+    let nearest: { distM: number; isMobile: boolean; vmax: number | null } | null = null
     for (const f of features) {
       const [lng, lat] = f.geometry.coordinates
       const distM = haversineMetersLngLat([svPosition.lng, svPosition.lat], [lng, lat])
       const id = (f.properties as { id: string; type?: string }).id
       const isMobile = (f.properties as { type?: string }).type === '1'
+      const vmaxRaw = (f.properties as { vmax?: string }).vmax
+      const vmax = vmaxRaw != null ? Number.parseInt(vmaxRaw, 10) : null
       const label = isMobile ? 'Achtung, mobiler Blitzer' : 'Achtung, Blitzer'
       const key500 = `${id}-500`
       const key200 = `${id}-200`
@@ -475,8 +499,50 @@ export default function FeldmodusMap({
         speakInstruction(`${label} in 500 Metern`)
         warnedBlitzerIdsRef.current.add(key500)
       }
+      if (distM <= 600 && (!nearest || distM < nearest.distM)) {
+        nearest = { distM, isMobile, vmax: Number.isFinite(vmax) ? vmax : null }
+      }
+    }
+    if (nearest) {
+      setBlitzerNotice({
+        type: 'blitzer',
+        mobile: nearest.isMobile,
+        distanceLabel: formatNaviDistance(nearest.distM),
+        vmaxKmh: nearest.vmax,
+      })
+    } else {
+      setBlitzerNotice(null)
     }
   }, [svPosition])
+
+  // 2026-05-08 (C10) Notice-Combiner: meldet höchste-Prio-Notice an
+  // den Caller (FeldmodusClient → NaviHud). Prio: Blitzer > Reroute
+  // (Reroute deckt sowohl 'faster' als auch 'hazard'-Reason ab).
+  // Reroute-Notice wird hier dynamisch aus dem proposedReroute-State
+  // gebaut + Accept/Dismiss-Handler eingebunden.
+  useEffect(() => {
+    if (!onMapNotice) return
+    if (blitzerNotice) {
+      onMapNotice(blitzerNotice)
+      return
+    }
+    if (proposedReroute) {
+      onMapNotice({
+        type: 'reroute',
+        reason: proposedReroute.reason,
+        etaSavedSec: proposedReroute.etaSavedSec,
+        hazardLabel: proposedReroute.hazardLabel,
+        onAccept: () => handleAcceptReroute(),
+        onDismiss: () => handleDismissReroute(),
+      })
+      return
+    }
+    onMapNotice(null)
+    // handleAcceptReroute/handleDismissReroute ändern sich pro render —
+    // deps lassen wir absichtlich auf den State-Hauptachsen, sonst
+    // re-emittet jedes Render unnötig.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blitzerNotice, proposedReroute, onMapNotice])
 
   // SV-Marker aktualisieren wenn svPosition sich ändert.
   // 2026-05-07: 3D-Modell-Pfad bevorzugt — wenn `sv3dHandleRef` da ist,
@@ -752,13 +818,10 @@ export default function FeldmodusMap({
         ref={containerRef}
         style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
       />
-      {proposedReroute && (
-        <RerouteToast
-          proposed={proposedReroute}
-          onAccept={handleAcceptReroute}
-          onDismiss={handleDismissReroute}
-        />
-      )}
+      {/* 2026-05-08 (C10): RerouteToast entfernt — wird jetzt vom NaviHud
+          im FeldmodusClient gerendert (single Notification-Slot bottom-
+          mittig statt Top-Banner-Konkurrenz). proposedReroute fließt via
+          onMapNotice an den Caller. */}
       {tokenMissing.current && (
         <div className="absolute inset-0 flex items-center justify-center bg-[var(--brand-primary)] text-center px-6">
           <div>
