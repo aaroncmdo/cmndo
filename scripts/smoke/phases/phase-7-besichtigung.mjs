@@ -203,15 +203,29 @@ export async function runPhase7(svContext, reportRef = { notes: [] }, phase6Resu
         fullPage: false,
       }).catch(() => {})
 
-      // File-Input befüllen (hidden input — Playwright kann das direkt)
-      const fileInput = slot.locator('input[type="file"]').first()
-      try {
-        await fileInput.setInputFiles(fotoPath, { timeout: 5000 })
-        logPhase(7, `  Datei für "${slotLabel}" gesetzt`)
-      } catch (uploadErr) {
-        const msg = `  Upload-Input für Slot "${slotLabel}" fehlgeschlagen: ${uploadErr.message}`
+      // F-08 Fix: Filechooser-Pattern statt setInputFiles() auf hidden input.
+      // FeldmodusDokumentSlot.tsx:161 — "Datei"-Button ruft inputRef.current?.click().
+      // Playwright fängt den file-chooser-Event ab bevor der native Dialog erscheint.
+      const dateiButton = slot.getByRole('button', { name: /datei/i }).first()
+      const dateiButtonVisible = await dateiButton.isVisible().catch(() => false)
+      if (!dateiButtonVisible) {
+        const msg = `  "Datei"-Button für Slot "${slotLabel}" nicht sichtbar`
         logSoft(7, msg)
-        notes.push(`SOFT: ${msg} — FeldmodusDokumentSlot.tsx:174 — input.hidden in Shadow-DOM?`)
+        notes.push(`SOFT: ${msg} — FeldmodusDokumentSlot.tsx:158`)
+        result = result === 'hard' ? 'hard' : 'soft'
+        continue
+      }
+      try {
+        const [fileChooser] = await Promise.all([
+          page.waitForEvent('filechooser', { timeout: 5000 }),
+          dateiButton.click(),
+        ])
+        await fileChooser.setFiles(fotoPath)
+        logPhase(7, `  Datei für "${slotLabel}" gesetzt (filechooser)`)
+      } catch (uploadErr) {
+        const msg = `  Upload für Slot "${slotLabel}" fehlgeschlagen: ${uploadErr.message}`
+        logSoft(7, msg)
+        notes.push(`SOFT: ${msg} — FeldmodusDokumentSlot.tsx:158-170`)
         result = result === 'hard' ? 'hard' : 'soft'
         continue
       }

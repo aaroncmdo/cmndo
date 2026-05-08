@@ -78,20 +78,39 @@ export async function runPhase8(svContext, prevResult = { notes: [] }) {
     return { phase: 8, result: 'hard', notes, auftragId, fallId }
   }
 
-  try {
-    // --- Schritt 8a: Termin/Fall öffnen ------------------------------------
-    let zielUrl = null
-    if (fallId) {
-      zielUrl = `${BASE_URL}/gutachter/fall/${fallId}`
-    } else if (terminId) {
-      zielUrl = `${BASE_URL}/gutachter/termine/${terminId}`
-    } else if (auftragId) {
-      zielUrl = `${BASE_URL}/gutachter/auftraege`
+  // F-09 Fix: Precondition — Session auf 'arrived' setzen damit der
+  // BesichtigungAbschliessenButton in /gutachter/feldmodus sichtbar wird.
+  // Nur wenn terminId bekannt.
+  if (terminId) {
+    const sessionRows = await db.from('sv_tages_session').select('id, status').eq('sv_id', '7f79e570-776b-4525-82ce-c35654ed6ecc').maybeSingle()
+    const sessionId = sessionRows.data?.id ?? null
+    if (sessionId) {
+      const { error: sessErr } = await db.from('sv_tages_session').update({ status: 'arrived', aktueller_termin_id: terminId }).eq('id', sessionId)
+      const { error: tErr } = await db.from('gutachter_termine').update({ besichtigung_gestartet_am: new Date().toISOString(), sv_angekommen_am: new Date().toISOString() }).eq('id', terminId)
+      if (!sessErr && !tErr) {
+        logPhase(8, `F-09 Precondition: Session auf arrived gesetzt (sessionId=${sessionId})`)
+      } else {
+        logPhase(8, `F-09 Precondition Warn: sess=${sessErr?.message} termin=${tErr?.message}`)
+      }
     }
+  }
 
-    if (zielUrl) {
-      logPhase(8, `Navigiere zu ${zielUrl}`)
-      await gotoAndShoot(page, zielUrl, 'phase8-fall-detail')
+  try {
+    // --- Schritt 8a: /gutachter/feldmodus öffnen (enthält BesichtigungAbschliessenButton) ---
+    // F-09 Fix: Feldmodus ist die primäre Route für BesichtigungAbschliessenButton
+    let zielUrl = `${BASE_URL}/gutachter/feldmodus`
+    logPhase(8, `Navigiere zu ${zielUrl} (F-09: BesichtigungAbschliessenButton liegt im Feldmodus)`)
+    await gotoAndShoot(page, zielUrl, 'phase8-feldmodus')
+
+    // Fallback: Fall-Detail für Schaden-Felder
+    const fallDetailUrl = fallId
+      ? `${BASE_URL}/gutachter/fall/${fallId}`
+      : terminId
+        ? `${BASE_URL}/gutachter/termine/${terminId}`
+        : null
+    if (fallDetailUrl) {
+      logPhase(8, `Fallback: Navigiere zu ${fallDetailUrl} für Schaden-Felder`)
+      await gotoAndShoot(page, fallDetailUrl, 'phase8-fall-detail')
     }
 
     // --- Schritt 8b: D2-Felder ausfüllen (falls sichtbar) ------------------
@@ -168,16 +187,21 @@ export async function runPhase8(svContext, prevResult = { notes: [] }) {
       }
     }
 
-    // --- Schritt 8c: "Bericht generieren" / "Final freigeben" suchen -------
-    logPhase(8, 'Suche "Final freigeben" oder "Bericht freigeben" Button')
+    // --- Schritt 8c: "Besichtigung abschließen" im Feldmodus suchen ---------
+    // F-09 Fix: BesichtigungAbschliessenButton ist nur im Feldmodus-Modal sichtbar
+    // (Session muss arrived sein — Precondition oben via Service-Role gesetzt).
+    logPhase(8, 'Zurück zu /gutachter/feldmodus — suche "Besichtigung abschließen"')
+    await page.goto(`${BASE_URL}/gutachter/feldmodus`, { waitUntil: 'networkidle', timeout: 15000 }).catch(() => {})
+    await page.waitForTimeout(2000)
+    await page.screenshot({ path: `${process.env._SMOKE_OUT_DIR ?? '.'}/phase8-feldmodus-arrived.png` }).catch(() => {})
 
     const freigebeButtonSelectors = [
+      page.getByRole('button', { name: /Besichtigung abschlie[sß]en/i }),
       page.getByRole('button', { name: /Final freigeben/i }),
       page.getByRole('button', { name: /Bericht freigeben/i }),
       page.getByRole('button', { name: /Bericht generieren/i }),
       page.getByRole('button', { name: /Gutachten freigeben/i }),
-      page.getByRole('button', { name: /Abschließen/i }),
-      page.getByRole('button', { name: /Besichtigung abschließen/i }),
+      page.getByRole('button', { name: /Abschlie[sß]en/i }),
     ]
 
     let freigebeBtn = null
@@ -189,22 +213,22 @@ export async function runPhase8(svContext, prevResult = { notes: [] }) {
     }
 
     if (freigebeBtn) {
-      logPhase(8, '"Final freigeben"-Button gefunden — klicke')
+      logPhase(8, '"Besichtigung abschließen"-Button gefunden — klicke')
       await clickAndShoot(page, freigebeBtn, 'phase8-bericht-freigeben')
       await page.waitForTimeout(3000)
       logPhase(8, `Nach Freigabe URL: ${page.url()}`)
 
-      // Bestätigungs-Dialog
-      const confirmBtn = page.getByRole('button', { name: /Bestätigen|OK|Ja/i }).first()
+      // Bestätigungs-Dialog (pflichtOffen > 0 → zweiter Klick nötig)
+      const confirmBtn = page.getByRole('button', { name: /Trotzdem abschlie[sß]en|Bestätigen|OK|Ja/i }).first()
       if (await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
         await clickAndShoot(page, confirmBtn, 'phase8-freigabe-confirm')
         await page.waitForTimeout(2000)
       }
 
     } else {
-      const msg = '"Final freigeben"-Button nicht gefunden — Bericht-UI-Pfad unbekannt oder Preconditions nicht erfüllt'
+      const msg = '"Besichtigung abschließen"-Button nicht gefunden in /gutachter/feldmodus (F-09: Session muss arrived sein)'
       logSoft(8, msg)
-      notes.push(`SOFT: ${msg} — Prüfe: src/app/gutachter/feldmodus/BesichtigungAbschliessenButton.tsx und src/app/gutachter/termine/[id]/vor-ort/VorOrtClient.tsx`)
+      notes.push(`SOFT: ${msg} — BesichtigungAbschliessenButton.tsx nur sichtbar wenn sessionStatus=arrived`)
       result = 'soft'
     }
 
@@ -223,29 +247,32 @@ export async function runPhase8(svContext, prevResult = { notes: [] }) {
   }
 
   // --- Workaround: Service-Role-Mutate wenn UI-Pfad nicht vollständig war ---
-  logPhase(8, 'DB-Workaround: Setze auftraege.status=erfuellt + faelle.status=gutachten-eingegangen')
+  // F-09 Fix: 'erfuellt' ist kein gültiger auftraege.status (Constraint: termin|besichtigung|gutachten|abgeschlossen).
+  // Nach Besichtigung: status='abgeschlossen' (Auftrag erledigt, Gutachten folgt separat).
+  logPhase(8, 'DB-Workaround: Setze auftraege.status=abgeschlossen + faelle.status=gutachten-eingegangen')
   await new Promise((r) => setTimeout(r, 1500))
 
   // DB-Check: auftraege.status
+  const FERTIG_STATI = ['abgeschlossen', 'gutachten']
   let auftragErfuellt = false
   if (auftragId) {
     const { data: auftragRow } = await db.from('auftraege').select('status').eq('id', auftragId).maybeSingle()
-    auftragErfuellt = auftragRow?.status === 'erfuellt'
+    auftragErfuellt = FERTIG_STATI.includes(auftragRow?.status ?? '')
     if (!auftragErfuellt) {
-      // Workaround: direkt setzen
+      // Workaround: 'abgeschlossen' ist valider Constraint-Wert
       const { error } = await db.from('auftraege').update({
-        status: 'erfuellt',
-        erfuellt_am: new Date().toISOString(),
+        status: 'abgeschlossen',
+        abgeschlossen_am: new Date().toISOString(),
       }).eq('id', auftragId)
       if (error) {
-        notes.push(`SOFT: auftraege.status=erfuellt Workaround fehlgeschlagen: ${error.message}`)
+        notes.push(`SOFT: auftraege.status=abgeschlossen Workaround fehlgeschlagen: ${error.message}`)
       } else {
-        logPhase(8, 'Workaround: auftraege.status=erfuellt gesetzt')
-        notes.push('SOFT: auftraege.status=erfuellt via Service-Role Workaround gesetzt (UI-Freigabe nicht vollständig)')
+        logPhase(8, 'Workaround: auftraege.status=abgeschlossen gesetzt')
+        notes.push('SOFT: auftraege.status=abgeschlossen via Service-Role Workaround gesetzt (UI-Freigabe nicht vollständig)')
         result = result === 'hard' ? 'hard' : 'soft'
       }
     } else {
-      logPhase(8, 'auftraege.status ist bereits erfuellt — kein Workaround nötig')
+      logPhase(8, `auftraege.status ist bereits ${auftragRow?.status} — kein Workaround nötig`)
     }
   }
 
