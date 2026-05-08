@@ -114,7 +114,7 @@ export default function FeldmodusClient({
     [aktuellerStop, session.id, router],
   )
 
-  const { position: livePosition, distanceMeters, permissionState, error } = useFieldTracking({
+  const { position: livePosition, distanceMeters, permissionState, error, staleSinceMs } = useFieldTracking({
     enabled: trackingEnabled,
     svId: sv.id,
     terminId: aktuellerStop?.termin_id ?? null,
@@ -513,9 +513,23 @@ export default function FeldmodusClient({
           GPS-Zugriff verweigert — Auto-Ankunft und Live-Tracking deaktiviert.
         </div>
       )}
-      {error && permissionState !== 'denied' && (
+      {error && permissionState !== 'denied' && !staleSinceMs && (
         <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS-Warnung: {error}
+        </div>
+      )}
+      {/* 2026-05-08 (C13b): Stale-GPS-Banner — letzte Position älter als
+          30 s. Statt position auf null zu setzen behalten wir den letzten
+          guten Punkt + zeigen das hier deutlich an, damit der SV weiß
+          dass die Live-Pos vielleicht überholt ist (Funkloch / Tunnel /
+          Tiefgarage). Pre-existing GPS-Warnung wird in dem Fall
+          unterdrückt — Stale ist die spezifischere Info. */}
+      {staleSinceMs != null && permissionState !== 'denied' && (
+        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+          GPS unsicher — letzte Position vor{' '}
+          {staleSinceMs < 60_000
+            ? `${Math.round(staleSinceMs / 1000)} s`
+            : `${Math.round(staleSinceMs / 60_000)} min`}
         </div>
       )}
       {/* Wake-Lock-Hinweis: bottom-20 (above Inbox-FAB der bottom-4 right-4
