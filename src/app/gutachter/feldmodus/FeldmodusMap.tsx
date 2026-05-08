@@ -347,13 +347,17 @@ export default function FeldmodusMap({
         }
         map.jumpTo({
           center: carCenter,
-          // 2026-05-08: Navi-Look enger gezogen — zoom 18.5, pitch 70.
-          // Mit bottom-heavy padding sitzt der Pin nicht in der Mitte,
-          // sondern im unteren Drittel; Strecke davor.
-          zoom: 18.5,
-          pitch: 70,
+          // 2026-05-08 (C7): Pitch 70 + Zoom 18.5 ließ die Camera in
+          // Innenstadt-Lagen durch Hochhäuser durchbrechen — Aaron-Smoke
+          // „darf nicht in die Gebäude rein". Pitch auf 62° entschärft
+          // das (Camera schaut mehr „über" als „durch"), zoom 17.8 gibt
+          // mehr Skyline-Übersicht. Top-padding noch heavier damit Pin
+          // im unteren Viertel sitzt und die Strecke voraus mehr Platz
+          // hat. Optisch immer noch GMaps-Navi-Look.
+          zoom: 17.8,
+          pitch: 62,
           bearing,
-          padding: { top: 320, bottom: 80, left: 40, right: 40 },
+          padding: { top: 360, bottom: 60, left: 40, right: 40 },
         })
       }
     })
@@ -532,12 +536,14 @@ export default function FeldmodusMap({
       }
       map.easeTo({
         center: [svPosition.lng, svPosition.lat],
-        zoom: 18.5,
+        // 2026-05-08 (C7): Pitch 62 + Zoom 17.8 statt 70/18.5. Steiler
+        // wäre cinematischer, aber Camera dringt dann in Buildings ein
+        // (Aaron-Smoke „darf nicht in die Gebäude rein"). 62° + 17.8
+        // hält Camera über der Skyline.
+        zoom: 17.8,
         bearing,
-        pitch: 70,
-        // bottom-heavy padding → SV-Pin landet im unteren Drittel,
-        // Strecke davor sichtbar (GMaps-Navi-Look).
-        padding: { top: 320, bottom: 80, left: 40, right: 40 },
+        pitch: 62,
+        padding: { top: 360, bottom: 60, left: 40, right: 40 },
         duration: 800,
         essential: true,
       })
