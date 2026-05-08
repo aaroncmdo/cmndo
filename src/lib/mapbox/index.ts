@@ -18,6 +18,13 @@ export {
   type SvCar3dPose,
 } from './sv-3d-car'
 export {
+  tryAddSvCarThreeJs,
+  getSvCarObjUrl,
+  SV_CAR_THREE_LAYER_ID,
+  type SvCarThreeHandle,
+  type SvCarThreePose,
+} from './sv-car-3d-three'
+export {
   attachHeroPin3d,
   HERO_PIN_LAYER_ID,
   type HeroPin3dHandle,
