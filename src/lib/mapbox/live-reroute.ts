@@ -90,21 +90,39 @@ function isMeaningfullyDifferent(primary: TrafficRoute, alt: TrafficRoute): bool
   return false
 }
 
+/** Nur Hazards in den nächsten N Metern entlang der Route nerven uns —
+ * ein Hazard 4 km voraus produziert nur Lärm, weil er sich auflösen kann
+ * oder eine Re-Route zwischendurch ihn umgeht. 1.5 km matched grob die
+ * Reaktions-Distanz von Google Maps. */
+export const HAZARD_LOOKAHEAD_M = 1500
+
 /**
  * Findet das erste Hazard das auf der primary-polyline liegt (innerhalb
- * `radiusM`). Sortiert primary nach Distanz vom Anfang ist NICHT
- * gegeben — wir nehmen einfach den ersten Match weil ein einziger Hazard
- * reicht um Reroute-Toast zu triggern.
+ * `radiusM`) UND innerhalb der nächsten `lookaheadM` ab dem Start der
+ * Polyline. Wir nutzen die SV-Position als Start der Polyline — Mapbox-
+ * Directions liefert die Polyline immer ab dem origin.
  */
 export function findHazardOnRoute(
   hazards: HazardFeature[],
   primary: TrafficRoute,
   radiusM = HAZARD_ON_ROUTE_RADIUS_M,
+  lookaheadM = HAZARD_LOOKAHEAD_M,
 ): HazardFeature | null {
   if (primary.coords.length < 2) return null
+
+  // Polyline auf die ersten lookaheadM Meter trimmen.
+  const trimmed: Array<[number, number]> = [primary.coords[0]]
+  let acc = 0
+  for (let i = 1; i < primary.coords.length; i++) {
+    const seg = haversineMetersLngLat(primary.coords[i - 1], primary.coords[i])
+    acc += seg
+    trimmed.push(primary.coords[i])
+    if (acc >= lookaheadM) break
+  }
+
   for (const h of hazards) {
     const coords = h.geometry.coordinates as [number, number]
-    const d = pointToPolylineDistanceMLngLat(coords, primary.coords)
+    const d = pointToPolylineDistanceMLngLat(coords, trimmed)
     if (d <= radiusM) return h
   }
   return null

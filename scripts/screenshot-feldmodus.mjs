@@ -140,15 +140,15 @@ async function ensureFeldmodus(page) {
   await logLine('feldmodus reached')
 }
 
-async function tryClickLosfahren(page) {
-  const candidates = ['text=Losfahren', 'text=Navigation starten', 'text=Route starten']
-  for (const sel of candidates) {
-    const el = page.locator(sel).first()
-    if (await el.count()) {
-      await el.click().catch(() => {})
-      await logLine(`clicked: ${sel}`)
-      return true
-    }
+async function tryCollapseSheet(page) {
+  // 2026-05-08: Mobile-Bottom-Sheet zuklappen damit die Map sichtbar wird.
+  // Toggle-Button ist ein <button> mit aria-label „Stops einklappen".
+  const sel = 'button[aria-label="Stops einklappen"]'
+  const el = page.locator(sel).first()
+  if (await el.count()) {
+    await el.click().catch(() => {})
+    await logLine(`collapsed sheet: ${sel}`)
+    return true
   }
   return false
 }
@@ -163,7 +163,6 @@ async function main() {
     deviceScaleFactor: VP.deviceScaleFactor,
     isMobile: VIEWPORT_NAME === 'mobile',
     hasTouch: VIEWPORT_NAME !== 'desktop',
-    permissions: ['geolocation'],
     geolocation: { latitude: START_GPS.lat, longitude: START_GPS.lng, accuracy: 5 },
     userAgent:
       VIEWPORT_NAME === 'mobile'
@@ -187,17 +186,27 @@ async function main() {
     logLine(`[req-failed] ${req.url()} ${req.failure()?.errorText ?? ''}`).catch(() => {})
   })
 
+  // GPS-Permission MUSS vor dem ersten goto() für die Origin gegranted
+  // sein, sonst sieht useWatchPosition `permissionState=prompt` und
+  // timeoutet. Origin-spezifisch statt global, damit nicht versehentlich
+  // andere Domains reingrantet werden (sicherer).
+  await context.grantPermissions(['geolocation'], { origin: BASE_URL })
+
   try {
     await login(page)
     await ensureFeldmodus(page)
     await waitForMap(page, 'arrival')
-    await shoot(page, '01_arrival', 'Initial-Map vom Start-GPS aus, vor Losfahren')
+    await shoot(page, '01_arrival', 'Initial-Map vom Start-GPS, Bottom-Sheet expanded')
 
-    if (await tryClickLosfahren(page)) {
-      await page.waitForTimeout(2_000)
-      await shoot(page, '02_navi_tbt', 'Nach Losfahren — Camera-Follow + TbT-Modus')
+    // 2026-05-08: Es gibt im Feldmodus keinen Losfahren-Button — startStop
+    // wird per Effect getriggered sobald Map+Position+aktivStop bereit
+    // sind. Die TbT-Phase ist also identisch zur 01_arrival. Stattdessen
+    // klappen wir das Mobile-Bottom-Sheet zu damit die Map sichtbar ist.
+    if (await tryCollapseSheet(page)) {
+      await page.waitForTimeout(700)
+      await shoot(page, '02_map_visible', 'Bottom-Sheet eingeklappt — Map + TbT + Stau-Linien sichtbar')
     } else {
-      await logLine('Losfahren-Button nicht gefunden, überspringe TbT-Phase')
+      await logLine('Sheet-Toggle nicht gefunden, überspringe Phase 02')
     }
 
     await setGps(context, MID_GPS)

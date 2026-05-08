@@ -82,7 +82,13 @@ export async function POST(request: Request) {
     if (!res.ok) {
       const detail = await res.text().catch(() => '')
       console.error('[elevenlabs-proxy] HTTP', res.status, detail.slice(0, 200))
-      return NextResponse.json({ error: 'TTS-API-Fehler', status: res.status }, { status: 502 })
+      // 402 = payment_required (Free-Plan kann Library-Voices nicht nutzen,
+      // siehe Aaron-Smoke 2026-05-08). Wir geben in dem Fall 503 zurück
+      // damit der Client das Feature dauerhaft als „nicht verfügbar"
+      // markiert und auf Web Speech zurückfällt — sonst spammt er bei
+      // jedem speakInstruction()-Call eine neue 502.
+      const status = res.status === 402 ? 503 : 502
+      return NextResponse.json({ error: 'TTS-API-Fehler', status: res.status }, { status })
     }
     const arrayBuffer = await res.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
