@@ -180,15 +180,25 @@ export async function runPhase2(dispatchContext, phase1Result) {
     }
 
     if (!svVorschlagBtn) {
-      const msg = `"Gutachter suchen"-Button nicht gefunden — SvDispatchPanel zeigt den Button nur wenn hardGateOk=true (Qualifizierungs-Phase abgeschlossen)`
-      logHard(2, msg)
-      notes.push(`HARD: ${msg} — src/app/dispatch/leads/[id]/SvDispatchPanel.tsx:459-463 — hardGateOk prüft qualifizierungs_phase des Leads. Fixture-Lead hat qualifizierungs_phase=null → Hard Gate schlägt fehl. Lösung: Seed-Skript muss qualifizierungs_phase auf einen Wert setzen der hardGateOk=true liefert (Prüfe hard-gate.ts für gültige Werte), ODER Phase 1 Dispatch-Qualifizierung (Schritt 1-4 im Dispatch-Flow) muss vor SV-Suche durchgeführt werden.`)
-      await page.screenshot({ path: 'HARD-dispatch-sv-button-fehlt.png' }).catch(() => {})
-      return { phase: 2, result: 'hard', notes, auftragId: null }
+      // Fallback: SV-Suche kann automatisch beim Mount getriggert worden sein
+      // (topSuggestions !== null → Button wird ausgeblendet, stattdessen
+      // werden die SV-Cards direkt angezeigt). In diesem Fall direkt nach
+      // "Reservieren"-Buttons in den Cards suchen.
+      logPhase(2, '"Gutachter suchen"-Button nicht sichtbar — prüfe ob SV-Liste schon auto-geladen ist')
+      const reservierenBtn = page.getByRole('button', { name: /Reservieren|Auswählen|Vorschlag/i }).first()
+      const autoLoaded = await reservierenBtn.isVisible({ timeout: 3000 }).catch(() => false)
+      if (!autoLoaded) {
+        const msg = `Weder "Gutachter suchen"-Button noch SV-Liste sichtbar`
+        logHard(2, msg)
+        notes.push(`HARD: ${msg} — SvDispatchPanel.tsx: hardGateOk=false ODER topSuggestions=[]. Prüfe seed-fixtures: qualifizierungs_phase + Q1-Q3-Felder gesetzt? Sind SV-Profile mit aktivem 'sachverstaendige'-Eintrag in DB?`)
+        await page.screenshot({ path: 'HARD-dispatch-sv-button-fehlt.png' }).catch(() => {})
+        return { phase: 2, result: 'hard', notes, auftragId: null }
+      }
+      logPhase(2, 'SV-Liste war bereits auto-geladen — überspringe "Gutachter suchen"-Klick')
+    } else {
+      logPhase(2, 'Best-SV-Vorschlag-Button gefunden — klicke')
+      await clickAndShoot(page, svVorschlagBtn, 'sv-vorschlag-starten')
     }
-
-    logPhase(2, 'Best-SV-Vorschlag-Button gefunden — klicke')
-    await clickAndShoot(page, svVorschlagBtn, 'sv-vorschlag-starten')
 
     // Warten auf Ladeliste — SV-Suche braucht Geo-Berechnung + Mapbox-ETA-Calls
     // Längeres Warten: bis "Suche passende Gutachter..." verschwunden ist oder Timeout
