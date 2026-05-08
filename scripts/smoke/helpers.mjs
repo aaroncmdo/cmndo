@@ -709,6 +709,7 @@ export async function emitLeadCreatedMitteilung(leadId) {
   for (const profile of dispatchProfiles) {
     const { error: insErr } = await db.from('mitteilungen').insert({
       empfaenger_id: profile.id,
+      empfaenger_rolle: 'dispatch',  // NOT NULL Constraint
       kategorie: 'lead.created',
       kontext_id: leadId,
       kontext_typ: 'lead',
