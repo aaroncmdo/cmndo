@@ -198,6 +198,57 @@ export function haversineMetersLngLat(
   return 2 * EARTH_RADIUS_M * Math.asin(Math.sqrt(sa))
 }
 
+/**
+ * Minimale Distanz vom Punkt zu einer Polyline (in Metern).
+ *
+ * 2026-05-08 PR B2: Wird für Hazard-on-Route-Detection genutzt — wenn ein
+ * HERE-Hazard (Unfall, Sperrung) innerhalb 50 m der aktiven Polyline liegt,
+ * triggert das Reroute-Toast. Naive Local-Plane-Approximation: für die
+ * Distanzen die wir hier prüfen (≤ 200 m, Strecken-Längen ≤ 50 km) ist der
+ * Fehler durch Erdkrümmung unter 1 % — vernachlässigbar.
+ */
+export function pointToPolylineDistanceMLngLat(
+  point: [number, number],
+  polyline: Array<[number, number]>,
+): number {
+  if (polyline.length === 0) return Infinity
+  if (polyline.length === 1) return haversineMetersLngLat(point, polyline[0])
+
+  // Local equirectangular projection — zentriert auf den Punkt selbst.
+  const lat0Rad = (point[1] * Math.PI) / 180
+  const cosLat0 = Math.cos(lat0Rad)
+  const M_PER_DEG_LAT = 111_320 // ≈ Konstante in mittleren Breiten
+  const M_PER_DEG_LNG = 111_320 * cosLat0
+
+  const px = point[0] * M_PER_DEG_LNG
+  const py = point[1] * M_PER_DEG_LAT
+
+  let minSq = Infinity
+  for (let i = 0; i < polyline.length - 1; i++) {
+    const ax = polyline[i][0] * M_PER_DEG_LNG
+    const ay = polyline[i][1] * M_PER_DEG_LAT
+    const bx = polyline[i + 1][0] * M_PER_DEG_LNG
+    const by = polyline[i + 1][1] * M_PER_DEG_LAT
+
+    const dx = bx - ax
+    const dy = by - ay
+    const lenSq = dx * dx + dy * dy
+    let t = 0
+    if (lenSq > 0) {
+      t = ((px - ax) * dx + (py - ay) * dy) / lenSq
+      if (t < 0) t = 0
+      if (t > 1) t = 1
+    }
+    const cx = ax + t * dx
+    const cy = ay + t * dy
+    const ddx = px - cx
+    const ddy = py - cy
+    const distSq = ddx * ddx + ddy * ddy
+    if (distSq < minSq) minSq = distSq
+  }
+  return Math.sqrt(minSq)
+}
+
 // ─── Voice-Speech (Web-Speech-API) ───────────────────────────────────────
 
 let cachedVoice: SpeechSynthesisVoice | null = null

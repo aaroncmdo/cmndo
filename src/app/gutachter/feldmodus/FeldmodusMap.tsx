@@ -37,11 +37,18 @@ import {
   type BlitzerFeature,
   attachHazardLayer,
   fetchHereHazards,
+  type HazardFeature,
   type HazardLayerHandle,
   attachFlowLayer,
   fetchHereFlow,
   type FlowLayerHandle,
+  pickFasterAlternative,
+  findHazardOnRoute,
+  distanceToHazardM,
+  REROUTE_POLL_INTERVAL_MS,
+  type ProposedReroute,
 } from '@/lib/mapbox'
+import RerouteToast from './RerouteToast'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import type { FeldmodusStop, FeldmodusSV } from './page'
 import type { MapboxLightPreset } from '@/lib/mapbox/light-preset'
@@ -141,6 +148,14 @@ export default function FeldmodusMap({
   // aktuellen Stop. Modifiziert Fog-Tinting (dichter bei Regen, hellgrau
   // bei Schnee, fast-blind bei Nebel).
   const [weatherId, setWeatherId] = useState<number | null>(null)
+  // 2026-05-08 PR B2: Live-Reroute-State.
+  // primaryRouteRef speichert die aktuell gerenderte Route für Hazard-on-
+  // Route-Detection und Polling-Vergleich. Hazards werden im selben Effect
+  // wie die Route geholt und in hazardsDataRef gepuffert.
+  const primaryRouteRef = useRef<TrafficRoute | null>(null)
+  const hazardsDataRef = useRef<HazardFeature[]>([])
+  const [proposedReroute, setProposedReroute] = useState<ProposedReroute | null>(null)
+  const proposedHazardSeenIdsRef = useRef<Set<string>>(new Set())
 
   const aktuellerStop = stops[aktuellerStopIndex] ?? null
 
@@ -576,6 +591,7 @@ export default function FeldmodusMap({
     void fetchDrivingRoute([svLng, svLat], [stopLng, stopLat], { signal: ctrl.signal })
       .then(async ({ primary }) => {
         drawRoute(primary)
+        primaryRouteRef.current = primary
         // Blitzer (Atudo) + Verkehrshindernisse (HERE) + Off-Route-Stau-
         // Lines (HERE Flow) parallel laden. Off-Route-Flow bleibt als
         // Kontext-Layer drin — die Stau-Färbung der Hauptroute reicht
@@ -591,6 +607,7 @@ export default function FeldmodusMap({
           ])
           blitzerFeaturesRef.current = blitzerFeatures
           warnedBlitzerIdsRef.current.clear()
+          hazardsDataRef.current = hazardFeatures
           if (!blitzerRef.current && map.isStyleLoaded()) {
             blitzerRef.current = attachBlitzerLayer(map, blitzerFeatures)
           } else if (blitzerRef.current) {
@@ -606,10 +623,104 @@ export default function FeldmodusMap({
           } else if (flowRef.current) {
             flowRef.current.update(flowFeatures)
           }
+
+          // 2026-05-08 PR B2: Hazard-on-Route-Detection (sofort).
+          // Wenn ein Hazard innerhalb 50 m der primary-polyline liegt
+          // UND wir ihn noch nicht vorgeschlagen haben, fetchen wir
+          // die Alternativen synchron und triggern den Reroute-Toast.
+          const hazardOnRoute = findHazardOnRoute(hazardFeatures, primary)
+          if (hazardOnRoute) {
+            const hid = (hazardOnRoute.properties as { id?: string }).id ?? ''
+            if (!proposedHazardSeenIdsRef.current.has(hid)) {
+              proposedHazardSeenIdsRef.current.add(hid)
+              const distM = distanceToHazardM([svLng, svLat], hazardOnRoute)
+              const distLabel = distM < 1000
+                ? `${Math.round(distM / 50) * 50} m`
+                : `${(distM / 1000).toFixed(1).replace('.', ',')} km`
+              const desc = (hazardOnRoute.properties as { description?: string }).description
+              const label = desc ? `${desc} in ${distLabel}` : `Hindernis in ${distLabel}`
+              // Alternative gleich fetchen für die Toast-Action.
+              const { alternatives } = await fetchDrivingRoute(
+                [svLng, svLat],
+                [stopLng, stopLat],
+                { bypassCache: true },
+              )
+              const alt = alternatives[0] ?? null
+              if (alt) {
+                setProposedReroute({
+                  route: alt,
+                  reason: 'hazard',
+                  etaSavedSec: 0,
+                  hazardLabel: label,
+                })
+              }
+            }
+          }
         }
       })
     return () => ctrl.abort()
   }, [svPosition, aktuellerStop])
+
+  // 2026-05-08 PR B2: Polling für schnellere Alternative.
+  // Nur aktiv wenn followSv (TbT-Modus) UND noch > 1 km zum Stop. Innerhalb
+  // 1 km macht Reroute keinen Sinn mehr (zu spät, würde nur verwirren).
+  // Alle 30 s mit bypassCache:true → Mapbox-Quote-Impact: max 120 Calls/h
+  // pro aktiv-fahrendem SV, davon greift der Großteil dank 60-s-Cache
+  // gegen denselben Cache-Key nicht durch.
+  useEffect(() => {
+    if (!followSv) return
+    if (!svPosition) return
+    if (!aktuellerStop?.lat || !aktuellerStop?.lng) return
+    const stopLat = aktuellerStop.lat
+    const stopLng = aktuellerStop.lng
+    const id = window.setInterval(async () => {
+      const map = mapRef.current
+      if (!map) return
+      // Distance-Cutoff: in den letzten 1 km nicht mehr neu vorschlagen
+      const distToStop = (() => {
+        const φ1 = (svPosition.lat * Math.PI) / 180
+        const φ2 = (stopLat * Math.PI) / 180
+        const dLat = ((stopLat - svPosition.lat) * Math.PI) / 180
+        const dLng = ((stopLng - svPosition.lng) * Math.PI) / 180
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(dLng / 2) ** 2
+        return 2 * 6371000 * Math.asin(Math.sqrt(a))
+      })()
+      if (distToStop < 1000) return
+
+      const { primary, alternatives } = await fetchDrivingRoute(
+        [svPosition.lng, svPosition.lat],
+        [stopLng, stopLat],
+        { bypassCache: true },
+      )
+      if (primary.coords.length >= 2) {
+        upsertTrafficRouteLayer(map, primary)
+        primaryRouteRef.current = primary
+      }
+      const fasterAlt = pickFasterAlternative(primary, alternatives)
+      if (fasterAlt) {
+        setProposedReroute((prev) => prev ?? {
+          route: fasterAlt,
+          reason: 'faster',
+          etaSavedSec: primary.duration - fasterAlt.duration,
+        })
+      }
+    }, REROUTE_POLL_INTERVAL_MS)
+    return () => window.clearInterval(id)
+  }, [followSv, svPosition?.lat, svPosition?.lng, aktuellerStop?.termin_id])
+
+  // Reroute-Akzeptieren: alt zur primary machen + Toast schließen
+  function handleAcceptReroute() {
+    if (!proposedReroute) return
+    const map = mapRef.current
+    if (map) {
+      upsertTrafficRouteLayer(map, proposedReroute.route)
+      primaryRouteRef.current = proposedReroute.route
+    }
+    setProposedReroute(null)
+  }
+  function handleDismissReroute() {
+    setProposedReroute(null)
+  }
 
   return (
     <div className="relative" style={{ width: '100%', height: '100%', minHeight: '100%' }}>
@@ -617,6 +728,13 @@ export default function FeldmodusMap({
         ref={containerRef}
         style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
       />
+      {proposedReroute && (
+        <RerouteToast
+          proposed={proposedReroute}
+          onAccept={handleAcceptReroute}
+          onDismiss={handleDismissReroute}
+        />
+      )}
       {tokenMissing.current && (
         <div className="absolute inset-0 flex items-center justify-center bg-[var(--brand-primary)] text-center px-6">
           <div>

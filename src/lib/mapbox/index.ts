@@ -43,6 +43,17 @@ export {
   type DirectionsResult,
 } from './directions'
 export {
+  pickFasterAlternative,
+  findHazardOnRoute,
+  distanceToHazardM,
+  REROUTE_FASTER_THRESHOLD_SEC,
+  REROUTE_POLL_INTERVAL_MS,
+  REROUTE_AUTO_ACCEPT_MS,
+  HAZARD_ON_ROUTE_RADIUS_M,
+  type ProposedReroute,
+  type RerouteReason,
+} from './live-reroute'
+export {
   fetchBlitzerInBbox,
   bboxForRoute,
   attachBlitzerLayer,
