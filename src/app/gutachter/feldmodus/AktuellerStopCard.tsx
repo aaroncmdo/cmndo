@@ -90,7 +90,12 @@ export default function AktuellerStopCard({
   // auch im expanded-Mode oft zu lang ist (Cardentity-Briefings sind
   // 200-400 Wörter).
   const distanceShort = formatDistanceShort(distanceMeters)
-  const autoCompact = distanceMeters != null && distanceMeters > COMPACT_DISTANCE_THRESHOLD_M
+  // 2026-05-08 Aaron-UI-Audit: vorher war bei distanceMeters=null
+  // (initial-Mount, GPS noch nicht da) der Default `expanded` — die
+  // Card hat dann 30 % der Map-Hälfte besetzt obwohl der SV gerade
+  // erst rausgegangen ist und die Map sehen will. Jetzt Compact als
+  // sicherer Default: bei null oder > 500 m → compact. Click expandiert.
+  const autoCompact = distanceMeters == null || distanceMeters > COMPACT_DISTANCE_THRESHOLD_M
   const [manualMode, setManualMode] = useState<'compact' | 'expanded' | null>(null)
   const isCompact = manualMode != null ? manualMode === 'compact' : autoCompact
   const [briefingOpen, setBriefingOpen] = useState(false)
