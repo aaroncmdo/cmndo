@@ -12,12 +12,15 @@ export const ALLOWED_TRANSITIONS: Record<SessionStatus, SessionStatus[]> = {
   idle: ['en_route', 'paused'],
   // Aus en_route kann auch zurück zu idle gewechselt werden (Reset bei Fehlstart).
   en_route: ['arrived', 'paused', 'idle'],
-  // Aus arrived kann man zurück zu en_route (falsche Ankunft erkannt).
-  arrived: ['completing', 'en_route'],
-  // Aus completing entweder weiter zum nächsten Stop (en_route) oder fertig.
-  completing: ['en_route', 'finished'],
+  // Aus arrived: weiter zum Abschluss, zurück zu en_route (falsche Ankunft),
+  // oder pausieren (Aaron 2026-05-08: Fokus-Modus-Exit aus SvFallakteView).
+  arrived: ['completing', 'en_route', 'paused'],
+  // Aus completing entweder weiter zum nächsten Stop (en_route), fertig,
+  // oder pausieren (UI-Exit während Abschluss).
+  completing: ['en_route', 'finished', 'paused'],
   finished: [],
-  paused: ['idle', 'en_route'],
+  // Aus paused kann in den vorigen aktiven State zurückgekehrt werden.
+  paused: ['idle', 'en_route', 'arrived'],
 }
 
 export function canTransition(from: SessionStatus, to: SessionStatus): boolean {
