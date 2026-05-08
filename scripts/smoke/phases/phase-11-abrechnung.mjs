@@ -106,6 +106,7 @@ export async function runPhase11(adminContext, prevResult = { notes: [] }) {
     const now = new Date().toISOString().slice(0, 10)
     const insertPayload = {
       empfaenger_typ: 'sv',
+      empfaenger_id: svId,  // markBezahlt-Action braucht empfaenger_id (actions.ts:46)
       empfaenger_email: svProfileData?.email ?? 'test-sv@claimondo.de',
       empfaenger_name: `${svProfileData?.vorname ?? 'Test'} ${svProfileData?.nachname ?? 'SV'}`,
       status: 'versendet',
@@ -156,8 +157,17 @@ export async function runPhase11(adminContext, prevResult = { notes: [] }) {
     // --- Schritt 11a: /admin/abrechnungen öffnen ----------------------------
     logPhase(11, 'Navigiere zu /admin/abrechnungen')
     await gotoAndShoot(page, `${BASE_URL}/admin/abrechnungen`, 'phase11-abrechnungen-liste')
-
     await page.waitForTimeout(2000)
+
+    // Filter auf "Alle" setzen damit Smoke-Abrechnung (status='versendet')
+    // auch erscheint — default-Filter 'offen' zeigt nur nicht bezahlte/nicht stornierte.
+    // Bei Re-Run kann Abrechnung bereits auf 'bezahlt' sein → würde aus 'offen' rausfallen.
+    const alleFilterBtn = page.getByRole('button', { name: /^Alle/ }).first()
+    if (await alleFilterBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await alleFilterBtn.click()
+      await page.waitForTimeout(500)
+      logPhase(11, 'Filter auf "Alle" gesetzt')
+    }
 
     // Screenshot der Liste
     await page.screenshot({
@@ -165,71 +175,73 @@ export async function runPhase11(adminContext, prevResult = { notes: [] }) {
     }).catch(() => {})
 
     // --- Schritt 11b: Abrechnung in Liste finden ----------------------------
+    // AbrechnungenListClient.tsx: keine <a>-Tags in Tabellenzeilen!
+    // Jede Zeile hat einen "Details"-Button (onClick → Modal öffnen).
+    // Wir suchen nach der Zeile mit der Smoke-abrechnungs_nr oder nach svId.
     let abrechnungGeöffnet = false
 
+    // Versuche spezifische Zeile per abrechnungs_nr-Text zu finden
     if (abrechnungId) {
-      const linkMitId = page.locator(`a[href*="${abrechnungId}"], [data-abrechnung-id="${abrechnungId}"]`).first()
-      if (await linkMitId.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await clickAndShoot(page, linkMitId, 'phase11-abrechnung-oeffnen')
+      // abrechnungs_nr ist im td font-mono sichtbar (SMOKE-{timestamp})
+      const zeileDetails = page.locator('table tbody tr').filter({
+        has: page.locator(`td:has-text("SMOKE-")`),
+      }).locator('button', { hasText: 'Details' }).first()
+      if (await zeileDetails.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await clickAndShoot(page, zeileDetails, 'phase11-abrechnung-oeffnen')
         abrechnungGeöffnet = true
+        logPhase(11, 'Smoke-Abrechnung über "Details"-Button geöffnet')
       }
     }
 
     if (!abrechnungGeöffnet) {
-      // Erstes Element in der Liste klicken
-      const ersteZeile = page.locator('table tbody tr a, [data-testid^="abrechnung-row"]').first()
-      if (await ersteZeile.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await clickAndShoot(page, ersteZeile, 'phase11-abrechnung-erste')
+      // Erster "Details"-Button in der Liste
+      const ersterDetails = page.getByRole('button', { name: 'Details' }).first()
+      if (await ersterDetails.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await clickAndShoot(page, ersterDetails, 'phase11-abrechnung-erste')
         abrechnungGeöffnet = true
+        logPhase(11, 'Erste Abrechnung über "Details"-Button geöffnet')
       } else {
-        logSoft(11, 'Kein Abrechnungs-Link in Liste sichtbar')
-        notes.push('SOFT: Keine Abrechnung in /admin/abrechnungen Liste sichtbar — prüfe AbrechnungenListClient.tsx Filter und svId-Zuordnung')
+        logSoft(11, 'Kein "Details"-Button sichtbar — Liste leer oder Filter passt nicht')
+        notes.push('SOFT: Kein "Details"-Button in /admin/abrechnungen sichtbar — prüfe AbrechnungenListClient.tsx Filter (default="offen") und Workaround-Insert')
         result = 'soft'
       }
     }
 
     if (abrechnungGeöffnet) {
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(1000)
       await page.screenshot({
         path: `${process.env._SMOKE_OUT_DIR ?? '.'}/phase11-abrechnung-detail.png`,
       }).catch(() => {})
 
-      // --- Schritt 11c: "Markiere als bezahlt" klicken ---------------------
-      logPhase(11, 'Suche "Markiere als bezahlt"-Button')
+      // --- Schritt 11c: "Manuell als bezahlt markieren" klicken -----------
+      // AbrechnungenListClient.tsx:372-379: Button "Manuell als bezahlt markieren"
+      // → confirmMarkBezahlt=true → zeigt "Ja, als bezahlt"-Button
+      logPhase(11, 'Suche "Manuell als bezahlt markieren"-Button im Modal')
 
-      const bezahltSelectors = [
-        page.getByRole('button', { name: /Markiere als bezahlt/i }),
-        page.getByRole('button', { name: /Als bezahlt markieren/i }),
-        page.getByRole('button', { name: /Bezahlt/i }),
-        page.locator('[data-testid="mark-bezahlt-btn"]'),
-      ]
+      const manuellBtn = page.getByRole('button', { name: /Manuell als bezahlt markieren/i }).first()
+      const manuellSichtbar = await manuellBtn.isVisible({ timeout: 3000 }).catch(() => false)
 
-      let bezahltBtn = null
-      for (const btn of bezahltSelectors) {
-        if (await btn.isVisible({ timeout: 2000 }).catch(() => false)) {
-          bezahltBtn = btn
-          break
+      if (manuellSichtbar) {
+        logPhase(11, '"Manuell als bezahlt markieren" gefunden — klicke')
+        await clickAndShoot(page, manuellBtn, 'phase11-bezahlt-manuell-klick')
+        await page.waitForTimeout(500)
+
+        // Confirm-Flow: "Ja, als bezahlt"-Button erscheint
+        const jaBtn = page.getByRole('button', { name: /Ja, als bezahlt/i }).first()
+        if (await jaBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+          logPhase(11, '"Ja, als bezahlt"-Button gefunden — klicke')
+          await clickAndShoot(page, jaBtn, 'phase11-bezahlt-confirm')
+          await page.waitForTimeout(3000)
+        } else {
+          notes.push('SOFT: "Ja, als bezahlt"-Bestätigungs-Button nicht erschienen nach "Manuell als bezahlt markieren"')
+          result = 'soft'
         }
-      }
-
-      if (bezahltBtn) {
-        logPhase(11, '"Markiere als bezahlt"-Button gefunden — klicke')
-        await clickAndShoot(page, bezahltBtn, 'phase11-bezahlt-klick')
-        await page.waitForTimeout(3000)
-
-        // Confirm-Dialog / Beleg-Upload falls vorhanden
-        const confirmBtn = page.getByRole('button', { name: /Bestätigen|Ja|OK/i }).first()
-        if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await clickAndShoot(page, confirmBtn, 'phase11-bezahlt-confirm')
-          await page.waitForTimeout(2000)
-        }
-
         logPhase(11, `Nach Bezahlt-Markierung URL: ${page.url()}`)
 
       } else {
-        const msg = '"Markiere als bezahlt"-Button nicht gefunden'
+        const msg = '"Manuell als bezahlt markieren"-Button nicht gefunden im Modal'
         logSoft(11, msg)
-        notes.push(`SOFT: ${msg} — Abrechnung möglicherweise bereits bezahlt oder UI-Pfad nicht geöffnet. Prüfe: AbrechnungenListClient.tsx markBezahlt-Action`)
+        notes.push(`SOFT: ${msg} — Prüfe ob Abrechnung bereits bezahlt ist (dann kein Button). AbrechnungenListClient.tsx:358-410`)
         result = 'soft'
       }
     }
