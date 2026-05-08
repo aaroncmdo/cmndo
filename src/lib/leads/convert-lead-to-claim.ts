@@ -555,6 +555,39 @@ export async function convertLeadToClaim(
     console.error('[convertLeadToClaim] pflichtdokumente-Init fehlgeschlagen:', err)
   }
 
+  // ─── Schritt 12: auftraege-Erstgutachten anlegen (F-04 Fix 2026-05-08) ────
+  // CMM-32 hat die auftraege-Tabelle eingeführt + Backfill für Bestands-
+  // fälle. Bei NEUEN Fällen wurde aber bisher kein Auftrag angelegt — das
+  // SV-Portal /gutachter/auftraege blieb leer obwohl der SV per faelle.sv_id
+  // bereits zugeordnet war.
+  // Logik analog zum CMM-32b-Backfill: wenn der Fall einen sv_id hat,
+  // erzeuge sofort einen Erstgutachten-Auftrag mit Status 'beauftragt'.
+  // Idempotent: prüft ob schon ein Erstgutachten-Eintrag für diesen Fall
+  // existiert.
+  try {
+    const svIdAufFall = fallInsert.sv_id ?? null
+    if (svIdAufFall) {
+      const { data: vorhandenAuftrag } = await admin
+        .from('auftraege')
+        .select('id')
+        .eq('fall_id', fallId)
+        .eq('typ', 'erstgutachten')
+        .maybeSingle()
+      if (!vorhandenAuftrag) {
+        await admin.from('auftraege').insert({
+          fall_id: fallId,
+          claim_id: claimId,
+          sv_id: svIdAufFall,
+          typ: 'erstgutachten',
+          status: 'termin',
+          reihenfolge: 1,
+        } as never)
+      }
+    }
+  } catch (err) {
+    console.error('[convertLeadToClaim] auftraege-Erstgutachten-Insert fehlgeschlagen:', err)
+  }
+
   return {
     ok: true,
     claimId,
