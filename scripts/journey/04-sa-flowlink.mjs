@@ -297,12 +297,18 @@ export async function runPhase4(prevResult = {}) {
       let { data: termin } = await db.from('gutachter_termine')
         .select('id, sv_id').eq('lead_id', leadId).order('created_at', { ascending: false }).limit(1).maybeSingle()
 
-      // SV ermitteln (aus fixtures oder erstem aktiven sachverstaendige)
-      const fixtures2 = loadFixtureIds() ?? {}
-      let svId = fixtures2.sv_sachverstaendige_id ?? null
+      // SV ermitteln — IMMER test-sv@claimondo.de via profiles → sachverstaendige.
+      // Fixtures-Fallback war fragil weil bei Re-Runs ein Random-SV gewählt wurde,
+      // der nicht der test-sv war → Auftrag unsichtbar im SV-Portal.
+      let svId = null
+      const { data: testSvProfile } = await db.from('profiles').select('id').eq('email', 'test-sv@claimondo.de').maybeSingle()
+      if (testSvProfile?.id) {
+        const { data: testSv } = await db.from('sachverstaendige').select('id').eq('profile_id', testSvProfile.id).maybeSingle()
+        svId = testSv?.id ?? null
+      }
       if (!svId) {
-        const { data: anySv } = await db.from('sachverstaendige').select('id').limit(1).maybeSingle()
-        svId = anySv?.id ?? null
+        const fixtures2 = loadFixtureIds() ?? {}
+        svId = fixtures2.sv_sachverstaendige_id ?? null
       }
 
       if (termin && !termin.sv_id && svId) {
@@ -380,12 +386,18 @@ export async function runPhase4(prevResult = {}) {
   if (fall) {
     // SV: Auftrag MUSS jetzt sichtbar sein
     await checkpoint('sv', async (svPage) => {
-      await svPage.goto(`${BASE_URL}/gutachter/auftraege`, { waitUntil: 'domcontentloaded' })
+      // Hard navigate + reload — Auftrag wurde NACH dem letzten Checkpoint-Load
+      // erstellt, gecachte Seite würde ihn nicht zeigen.
+      await svPage.goto(`${BASE_URL}/gutachter/auftraege`, { waitUntil: 'domcontentloaded', timeout: 25_000 })
+      await svPage.waitForTimeout(2_000)
+      await svPage.reload({ waitUntil: 'domcontentloaded' })
       await svPage.waitForTimeout(3_000)
       await shoot(svPage, '04-cross-sv-auftraege-nach-sa')
-      // Auftrag-Cards rendern Fahrzeug-Kennzeichen oder Schadensort
-      const auftragCard = svPage.locator(`text=/${fall.id.slice(0, 8)}|Mueller|Lisa/i`).first()
-      await assertVisible(svPage, auftragCard, 'SV: Auftrag-Card sichtbar in /gutachter/auftraege', PHASE, { tag: 'cross-sv-auftrag-sichtbar' })
+      // Auftrag-Cards rendern Lead-Name (Lisa Mueller) als Header.
+      // Wir suchen nach einem Text-Element das den Namen enthält — `getByText`
+      // matcht partial in Inline-Elementen zuverlässiger als `.locator('text=...')`.
+      const auftragCard = svPage.getByText('Mueller', { exact: false }).first()
+      await assertVisible(svPage, auftragCard, 'SV: Auftrag-Card "Mueller" in /gutachter/auftraege', PHASE, { tag: 'cross-sv-auftrag-sichtbar' })
     })
 
     // Kunde: Fallakte sichtbar

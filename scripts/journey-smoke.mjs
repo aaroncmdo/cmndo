@@ -22,6 +22,8 @@ import { runPhase1 } from './journey/01-webform.mjs'
 import { runPhase2 } from './journey/02-dispatch-quali.mjs'
 import { runPhase3 } from './journey/03-button-audit.mjs'
 import { runPhase4 } from './journey/04-sa-flowlink.mjs'
+import { runPhase5 } from './journey/05-termin-bestaetigung.mjs'
+import { runPhase6 } from './journey/06-feldmodus.mjs'
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
 
@@ -37,7 +39,7 @@ async function pruefeDevServer() {
 async function main() {
   const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
   console.log('═══════════════════════════════════════════════════')
-  console.log(`  Claimondo Journey-Smoke (POC: Phase 1+2)`)
+  console.log(`  Claimondo Journey-Smoke (Phase 1–6 + Button-Audit)`)
   console.log(`  Zeitstempel: ${ts}`)
   console.log(`  Base-URL:    ${BASE_URL}`)
   console.log('═══════════════════════════════════════════════════\n')
@@ -51,11 +53,15 @@ async function main() {
   let phase2Result = null
   let phase3Result = null
   let phase4Result = null
+  let phase5Result = null
+  let phase6Result = null
 
   try {
     phase1Result = await runPhase1()
     phase2Result = await runPhase2(phase1Result)
     phase4Result = await runPhase4(phase2Result ?? phase1Result)
+    phase5Result = await runPhase5(phase4Result ?? phase2Result ?? phase1Result)
+    phase6Result = await runPhase6(phase5Result ?? phase4Result ?? phase2Result ?? phase1Result)
     phase3Result = await runPhase3() // Button-Audit am Ende: kein State-Bezug
   } catch (err) {
     console.error('[Journey-Smoke] Unerwarteter Fehler:', err)
