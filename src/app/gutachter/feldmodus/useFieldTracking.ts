@@ -35,6 +35,12 @@ export interface FieldTrackingState {
   distanceMeters: number | null
   permissionState: 'pending' | 'granted' | 'denied'
   error: string | null
+  /**
+   * 2026-05-08 (C13b): Wenn die letzte gute GPS-Position älter als 30 s
+   * ist, signalisieren wir das hier (Alter in ms). UI zeigt dann
+   * "GPS unsicher seit X min" statt "GPS-Lost". null = aktuell.
+   */
+  staleSinceMs: number | null
 }
 
 export function useFieldTracking({
@@ -45,7 +51,7 @@ export function useFieldTracking({
   targetLng,
   onGeofenceReached,
 }: UseFieldTrackingArgs): FieldTrackingState {
-  const { position, error, permissionState } = useWatchPosition(enabled)
+  const { position, error, permissionState, staleSinceMs } = useWatchPosition(enabled)
   const [distance, setDistance] = useState<number | null>(null)
   const lastSentAtRef = useRef<number>(0)
   const inGeofenceSinceRef = useRef<number | null>(null)
@@ -116,5 +122,6 @@ export function useFieldTracking({
     distanceMeters: distance,
     permissionState,
     error,
+    staleSinceMs,
   }
 }
