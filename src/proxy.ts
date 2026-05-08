@@ -17,6 +17,8 @@ export const config = {
   // ausgeliefert werden. /_next/static-Chunks sind ohnehin schon raus, also
   // kein Risiko dass authenticated Server-JS hier rauspurzelt.
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|glb|gltf|hdr|ktx2|woff|woff2|mp4|webm|js|json|txt|xml)$).*)',
+    // 2026-05-08 (C11b): .obj + .mtl ergänzt — Three.js OBJLoader für
+    // /3d/porsche.obj wurde sonst auf /login redirected.
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|glb|gltf|obj|mtl|hdr|ktx2|woff|woff2|mp4|webm|js|json|txt|xml)$).*)',
   ],
 }
