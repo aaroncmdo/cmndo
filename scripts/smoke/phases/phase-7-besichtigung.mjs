@@ -339,7 +339,7 @@ export async function runPhase7(svContext, reportRef = { notes: [] }, phase6Resu
     logPhase(7, `DB-Assert: pflichtdokumente.status='hochgeladen' für fall_id=${fallId}`)
     const { data: pflichtRows, error: pflichtError } = await db
       .from('pflichtdokumente')
-      .select('id, status, slot_id, fall_id')
+      .select('id, status, dokument_typ, fall_id')
       .eq('fall_id', fallId)
 
     if (pflichtError) {

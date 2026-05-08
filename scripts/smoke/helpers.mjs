@@ -465,22 +465,39 @@ export async function forceTerminAufHeute(terminId, svUserId = null) {
   const startZeit = new Date(jetzt.getTime() + 15 * 60_000).toISOString()
   const endZeit = new Date(jetzt.getTime() + 60 * 60_000).toISOString()
 
+  // 2026-05-08: Vor dem Update überlappende Termine desselben SVs stornieren,
+  // damit gutachter_termine_no_sv_overlap-EXCLUSION nicht greift. Wir holen
+  // die sv_id des Ziel-Termins und stornieren alle anderen aktiven Termine
+  // dieses SVs deren Zeit-Range mit unserem geplanten Slot kollidiert.
+  const { data: zielTermin } = await db
+    .from('gutachter_termine')
+    .select('sv_id').eq('id', terminId).maybeSingle()
+  if (zielTermin?.sv_id) {
+    await db
+      .from('gutachter_termine')
+      .update({ status: 'storniert' })
+      .eq('sv_id', zielTermin.sv_id)
+      .neq('id', terminId)
+      .gte('end_zeit', startZeit)
+      .lte('start_zeit', endZeit)
+      .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag'])
+  }
+
   const { error: terminError } = await db
     .from('gutachter_termine')
     .update({ start_zeit: startZeit, end_zeit: endZeit, status: 'bestaetigt' })
     .eq('id', terminId)
 
-  // 2026-05-08: Termin-Update kann an gutachter_termine_no_sv_overlap-EXCLUSION
-  // scheitern, wenn ein Re-Run einen Termin mit überlappender Zeit hat. Wir
-  // bestätigen ohne Zeit-Update als Fallback — die Session-Upsert unten ist
-  // der wichtige Teil für Phase 6, die echten Zeiten kann der Test akzeptieren.
   if (terminError) {
+    // Letzter Fallback: nur Status setzen
     const { error: confirmOnlyErr } = await db
       .from('gutachter_termine')
       .update({ status: 'bestaetigt' })
       .eq('id', terminId)
     if (confirmOnlyErr) {
       console.warn(`[helpers] forceTerminAufHeute Fallback fehlgeschlagen: ${confirmOnlyErr.message}`)
+    } else {
+      console.warn(`[helpers] forceTerminAufHeute: time-update fehlgeschlagen (${terminError.message}), nur status gesetzt`)
     }
   }
 
