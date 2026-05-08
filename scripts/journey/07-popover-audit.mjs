@@ -1,44 +1,39 @@
 /**
- * scripts/journey/07-popover-audit.mjs — Phase 7: Pop-Over-Audit pro Detail-Seite
+ * scripts/journey/07-popover-audit.mjs — Phase 7: Pop-Over-Audit (alle Seiten)
  *
  * Aaron-Brief: "auch die pop overs alles dann verstehst du die logik"
+ * = ALLE Seiten, ALLE Rollen, JEDEN Trigger der ein Overlay öffnet.
  *
- * Pro Rolle werden die zentralen Detail-Seiten geöffnet. Jeder Pop-Over-Trigger
- * (Sheet, Modal, Drawer) wird angeklickt und geprüft:
- *   1. Öffnet sich das Pop-Over?
- *   2. Zeigt es Inhalt (nicht leer)?
- *   3. Zeigt es KEINE Daten einer anderen Rolle (Hygiene)?
- *   4. Lässt es sich schließen (Escape / Schließen-Button)?
+ * Strategie:
+ *   1. Pro Rolle alle relevanten Routen öffnen
+ *   2. Auf jeder Seite alle klickbaren Elemente inventarisieren
+ *   3. Pro Element klicken + warten ob ein Overlay erscheint
+ *      (dialog, sheet, drawer, popover, radix-portal, vaul-drawer)
+ *   4. Overlay geöffnet → Inhalt + Hygiene prüfen → schließen
+ *   5. Kein Overlay → Element als NOOP/NAV klassifizieren (nicht SOFT)
  *
- * Getestete Seiten + Trigger:
+ * Klassifikation:
+ *   OPENS     — Overlay erscheint, hat Inhalt                → PASS
+ *   EMPTY     — Overlay erscheint, kein Inhalt               → SOFT
+ *   STUCK     — Klick hat Effekt, aber kein Overlay           → PASS (kein Bug)
+ *   NAV       — URL-Wechsel nach Klick                        → PASS (Info)
+ *   CLICK-ERR — Klick schlägt fehl                           → SOFT
+ *   HYGIENE   — Overlay zeigt interne/rollenfalsche Inhalte   → SOFT
  *
- * DISPATCH /dispatch/leads/[id]:
- *   - PhaseHeader-Pill → Bottom-Sheet (Phasenliste)
- *   - "Gutachter suchen" → SV-Suggestion-Liste inline
- *   - "Kalender vergleichen" → SvKalenderVergleichModal
- *   - "Disqualifizieren" → Disqualifizierungs-Modal (Radiogründe)
+ * Routen-Matrix (analog Button-Audit Phase 3):
+ *   admin:    /admin, /admin/faelle
+ *   dispatch: /dispatch/dashboard, /dispatch/leads, /dispatch/leads/[id]
+ *   sv:       /gutachter/heute, /gutachter/auftraege, /gutachter/posteingang,
+ *             /gutachter/profil, /gutachter/kalender
+ *   kunde:    /kunde, /kunde/faelle, /kunde/faelle/[id], /kunde/chat
  *
- * ADMIN /admin/faelle (Kanban Hub):
- *   - Kein dediziertes Pop-Over-Pattern — skip, Kanban-Cards sind inline
- *
- * GUTACHTER /gutachter/auftraege:
- *   - AuftragCard ohne eigene Modale, FallakteDrawer via Auftragsdetail
- *
- * KUNDE /kunde/faelle/[id]:
- *   - "Anderen Termin vorschlagen" → GegenvorschlagModal
- *     (Daten-Hygiene: kein SV-interner Kalender sichtbar)
- *
- * Klassifikation pro Trigger:
- *   OPENS  — Dialog/Sheet erscheint, Inhalt vorhanden
- *   EMPTY  — Dialog erscheint, aber leer (SOFT)
- *   STUCK  — Klick hat keinen Effekt (SOFT)
- *   CLOSE-FAIL — Schließen schlägt fehl (SOFT)
+ * Cap: max 20 Trigger pro Seite. Destruktive + headless-inkompatible
+ * Elemente werden wie in Phase 3 übersprungen.
  */
 
 import {
   record,
   shoot,
-  assertVisible,
   getAdminDb,
   loadFixtureIds,
   loginAs,
@@ -47,325 +42,258 @@ import {
 const PHASE = 7
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
 
-// ─── Hilfsfunktionen ─────────────────────────────────────────────────────────
+// ─── Filter-Pattern (wie _button-audit.mjs) ───────────────────────────────────
+const DANGEROUS   = /löschen|verwerfen|stornieren|ablehnen|bestätige.*lösch|sign.?out|abmelden/i
+const HEADLESS    = /aufnahme starten|aufnahme stoppen|kamera|mikrofon|datei wählen|foto aufnehmen/i
+const NOISE       = /^(zurück zur navigation|menü|settings|theme|sprache|search|suche|×|^x)$/i
+// Nur-Navigation: diese klicken wir nicht für Pop-Over-Audit
+const NAV_ONLY    = /^(Home|Dashboard|Aufträge|Fälle|Heute|Posteingang|Profil|Kalender|Chat|Abrechnung|Leads|Admin)$/i
 
-/**
- * Klickt einen Trigger und prüft ob ein Dialog/Sheet/Popover öffnet.
- * Gibt das klassifizierte Ergebnis zurück.
- */
-async function probePopover(page, trigger, label, closeFn) {
-  const beforeDialogs = await page.locator('[role="dialog"], [data-state="open"], [data-radix-dialog-content]').count().catch(() => 0)
+// Overlay-Selektoren — was zählt als "Pop-Over geöffnet"
+const OVERLAY_SEL = [
+  '[role="dialog"]',
+  '[data-state="open"]',
+  '[data-radix-dialog-content]',
+  '[data-vaul-drawer]',
+  '[data-radix-popper-content-wrapper]',
+  '[role="tooltip"]:not([aria-hidden])',
+  '[role="listbox"]',
+  '[role="menu"]',
+].join(', ')
 
-  let result = 'STUCK'
-  let detail = ''
+// Hygiene-Patterns: was darf in Kunden-/SV-Overlays NICHT stehen
+const HYGIENE_DISPATCH = /Dispatch-intern|Admin-Only|interne Notiz/i
+const HYGIENE_KUNDE    = /Dispatch|Admin-Ansicht|interne Notiz|SV-Matching/i
 
-  try {
-    await trigger.click({ timeout: 3_000 })
-    await page.waitForTimeout(800)
+// ─── Inventory ────────────────────────────────────────────────────────────────
 
-    const afterDialogs = await page.locator('[role="dialog"], [data-state="open"], [data-radix-dialog-content]').count().catch(() => 0)
-    const sheetVisible = await page.locator('[role="dialog"]').first().isVisible({ timeout: 1_500 }).catch(() => false)
-
-    if (afterDialogs > beforeDialogs || sheetVisible) {
-      // Inhalt-Check: mindestens ein sichtbares Text-Element innen
-      const content = await page.locator('[role="dialog"]').first().textContent({ timeout: 1_500 }).catch(() => '')
-      if (content && content.trim().length > 5) {
-        result = 'OPENS'
-        detail = content.trim().slice(0, 60)
-      } else {
-        result = 'EMPTY'
-        detail = 'Dialog offen, aber kein Inhalt erkennbar'
-      }
-    } else {
-      // Sheet / Radix-Drawer check (kein role="dialog")
-      const anyOverlay = await page.locator('[data-vaul-drawer], [data-state="open"]').first().isVisible({ timeout: 1_000 }).catch(() => false)
-      if (anyOverlay) {
-        result = 'OPENS'
-        detail = 'Overlay/Sheet geöffnet'
-      }
-    }
-  } catch (err) {
-    result = 'STUCK'
-    detail = err.message.slice(0, 60)
-  }
-
-  const sev = result === 'OPENS' ? 'PASS' : 'SOFT'
-  record(sev, PHASE, `PopOver "${label}" → ${result}${detail ? `: ${detail}` : ''}`, `pop-${result.toLowerCase()}`)
-  await shoot(page, `07-pop-${label.replace(/[^a-zA-Z0-9]/g, '-').slice(0, 30)}`)
-
-  // Pop-Over schließen
-  try {
-    if (closeFn) {
-      await closeFn()
-    } else {
-      await page.keyboard.press('Escape')
-      await page.waitForTimeout(300)
-      // Fallback: Schließen-Button
-      const closeBtn = page
-        .locator('button[aria-label*="schließen" i], button[aria-label*="close" i], button[data-testid*="close"]')
-        .first()
-      if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
-        await closeBtn.click()
-        await page.waitForTimeout(200)
-      }
-    }
-  } catch {
-    record('SOFT', PHASE, `PopOver "${label}" — Schließen fehlgeschlagen`, 'pop-close-fail')
-  }
-
-  await page.waitForTimeout(400)
-  return result
-}
-
-// ─── Dispatch: /dispatch/leads/[id] ──────────────────────────────────────────
-
-async function auditDispatchLeadDetail(leadId) {
-  if (!leadId) {
-    record('INFO', PHASE, 'Kein Lead-ID — Dispatch-Detail-Audit übersprungen', 'dispatch-skip')
-    return
-  }
-
-  const page = await loginAs('dispatch')
-  await page.goto(`${BASE_URL}/dispatch/leads/${leadId}`, { waitUntil: 'domcontentloaded', timeout: 25_000 })
-  await page.waitForTimeout(3_500)
-  await shoot(page, '07-dispatch-lead-detail')
-
-  // ── Trigger 1: PhaseHeader-Pill → Bottom-Sheet ──────────────────────────
-  const phasePill = page
-    .locator('button[aria-label*="Phase" i], button[aria-label*="phase" i]')
-    .or(page.locator('button').filter({ hasText: /Phase [0-9]|Phase wechseln/i }))
-    .first()
-
-  if (await phasePill.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await probePopover(page, phasePill, 'PhaseHeader-Pill')
-  } else {
-    record('INFO', PHASE, 'PhaseHeader-Pill nicht sichtbar (Lead evtl. in anderem Status)', 'dispatch-phase-pill')
-  }
-
-  // ── Trigger 2: "Gutachter suchen" → SV-Suggestions ────────────────────
-  const svSuchenBtn = page.getByRole('button', { name: /Gutachter suchen|Erneut suchen/i }).first()
-  if (await svSuchenBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    try {
-      await svSuchenBtn.click({ timeout: 3_000 })
-      await page.waitForTimeout(4_000) // API-Call + Render
-      await shoot(page, '07-dispatch-sv-suggestions')
-      const svCard = page.locator('text=/Sachverständige|SV-Name|Profil|Erreichbarkeit/i').first()
-      const svVisible = await svCard.isVisible({ timeout: 2_000 }).catch(() => false)
-      record(
-        svVisible ? 'PASS' : 'SOFT',
-        PHASE,
-        svVisible ? 'SV-Suggestions geladen' : 'SV-Suggestions leer oder nicht erschienen',
-        'dispatch-sv-suchen',
-      )
-    } catch (err) {
-      record('SOFT', PHASE, `"Gutachter suchen" Fehler: ${err.message.slice(0, 80)}`, 'dispatch-sv-suchen-err')
-    }
-  } else {
-    record('INFO', PHASE, '"Gutachter suchen"-Button nicht sichtbar (Termin evtl. schon vergeben)', 'dispatch-sv-skip')
-  }
-
-  // ── Trigger 3: "Kalender vergleichen" → SvKalenderVergleichModal ───────
-  const kalenderBtn = page.getByRole('button', { name: /Kalender vergleichen|Kalender öffnen/i }).first()
-  if (await kalenderBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await probePopover(page, kalenderBtn, 'SvKalenderVergleich')
-  } else {
-    record('INFO', PHASE, '"Kalender vergleichen"-Button nicht sichtbar', 'dispatch-kalender-skip')
-  }
-
-  // ── Trigger 4: "Disqualifizieren" → Modal ──────────────────────────────
-  // Achtung: destruktiv — wir öffnen nur, prüfen Inhalt, schließen ohne Submit.
-  const disqualBtn = page.getByRole('button', { name: /Disqualifizieren/i }).first()
-  if (await disqualBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await probePopover(page, disqualBtn, 'Disqualifizieren-Modal', async () => {
-      // Erst Abbrechen-Button suchen, dann Escape
-      const abbrBtn = page.getByRole('button', { name: /Abbrechen|Schließen|Zurück/i }).first()
-      if (await abbrBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
-        await abbrBtn.click()
-      } else {
-        await page.keyboard.press('Escape')
-      }
-      await page.waitForTimeout(300)
-    })
-  } else {
-    record('INFO', PHASE, '"Disqualifizieren"-Button nicht sichtbar', 'dispatch-disqual-skip')
-  }
-
-  // ── Hygiene: Kein anderer Lead/Kunden-Name sichtbar ────────────────────
-  // (Regression: Pagination oder Filter-Leak zeigt Daten anderer Leads)
-  const pageText = await page.textContent('body').catch(() => '')
-  const leakPatterns = [/Max\s+Mustermann/i, /Test.*GmbH.*Schadenmeldung/i]
-  for (const pat of leakPatterns) {
-    if (pat.test(pageText)) {
-      record('SOFT', PHASE, `Hygiene: Verdächtiger Fremd-Content in Dispatch-Detail: ${pat}`, 'dispatch-hygiene')
-    }
-  }
-  record('PASS', PHASE, 'Dispatch-Lead-Detail Pop-Over-Audit abgeschlossen', 'dispatch-done')
-}
-
-// ─── Gutachter: /gutachter/auftraege (kein Auftrag-Detail-Modal) ─────────────
-
-async function auditGutachterAuftraege() {
-  const page = await loginAs('sv')
-  await page.goto(`${BASE_URL}/gutachter/auftraege`, { waitUntil: 'domcontentloaded', timeout: 25_000 })
-  await page.waitForTimeout(2_500)
-  await shoot(page, '07-sv-auftraege')
-
-  // Suche nach Auftrag-Card-Link + Detail-Seite
-  const auftragLink = page.locator('a[href*="/gutachter/auftraege/"]').first()
-  const auftragLinkVisible = await auftragLink.isVisible({ timeout: 2_000 }).catch(() => false)
-  if (!auftragLinkVisible) {
-    record('INFO', PHASE, 'Keine Auftrag-Cards für SV vorhanden — Gutachter-Audit übersprungen', 'sv-skip')
-    return
-  }
-
-  const auftragHref = await auftragLink.getAttribute('href')
-  await page.goto(`${BASE_URL}${auftragHref}`, { waitUntil: 'domcontentloaded', timeout: 25_000 })
-  await page.waitForTimeout(2_500)
-  await shoot(page, '07-sv-auftrag-detail')
-
-  // Alle sichtbaren Trigger auf Detail-Seite inventarisieren
-  const triggers = await page.evaluate(() => {
-    const sel = 'button:not([disabled]), [role="button"]:not([aria-disabled="true"])'
-    return Array.from(document.querySelectorAll(sel))
+async function inventory(page) {
+  return await page.evaluate(() => {
+    const sel = [
+      'button:not([disabled])',
+      '[role="button"]:not([aria-disabled="true"])',
+      '[role="tab"]',
+      '[role="menuitem"]',
+      // aria-haspopup-Attribute deuten stark auf Pop-Over hin
+      '[aria-haspopup="true"], [aria-haspopup="dialog"], [aria-haspopup="menu"], [aria-haspopup="listbox"]',
+    ].join(',')
+    const all = [...new Set(Array.from(document.querySelectorAll(sel)))]
+    return all
       .filter((el) => {
-        const r = el.getBoundingClientRect()
+        const r  = el.getBoundingClientRect()
         const cs = window.getComputedStyle(el)
-        return r.width > 4 && r.height > 4 && cs.visibility !== 'hidden' && cs.display !== 'none'
+        return r.width > 4 && r.height > 4
+          && cs.visibility !== 'hidden'
+          && cs.display !== 'none'
+          && cs.opacity !== '0'
       })
-      .map((el, idx) => ({
-        idx,
-        text: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60),
-        aria: el.getAttribute('aria-label') || '',
-        testid: el.getAttribute('data-testid') || '',
-      }))
+      .map((el, idx) => {
+        const text    = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80)
+        const aria    = el.getAttribute('aria-label') || ''
+        const testid  = el.getAttribute('data-testid') || ''
+        const tag     = el.tagName.toLowerCase()
+        const href    = el instanceof HTMLAnchorElement ? el.getAttribute('href') : null
+        const haspop  = el.getAttribute('aria-haspopup') || ''
+        return { idx, text, aria, testid, tag, href, haspop }
+      })
   })
-
-  const SKIP = /abmelden|löschen|stornieren|ablehnen|sign.?out|kamera|mikrofon|datei|zurück|×|^x$/i
-  const modalTriggers = triggers.filter((t) => {
-    const label = t.testid || t.aria || t.text
-    return !SKIP.test(label) && label.length > 1
-  }).slice(0, 10)
-
-  record('INFO', PHASE, `Gutachter-Auftrag-Detail: ${triggers.length} Buttons (${modalTriggers.length} auditiert)`, 'sv-detail-inventory')
-
-  for (const t of modalTriggers) {
-    const label = t.testid || t.aria || t.text
-    const trigger = t.testid
-      ? page.locator(`[data-testid="${t.testid}"]`).first()
-      : t.aria
-        ? page.locator(`[aria-label="${t.aria}"]`).first()
-        : page.locator('button').filter({ hasText: t.text || ' ' }).first()
-
-    if (!(await trigger.isVisible({ timeout: 1_000 }).catch(() => false))) continue
-    await probePopover(page, trigger, `SV-${label}`)
-    // nach NAV zurücknavigieren
-    if (!page.url().includes(auftragHref ?? '')) {
-      await page.goto(`${BASE_URL}${auftragHref}`, { waitUntil: 'domcontentloaded' }).catch(() => {})
-      await page.waitForTimeout(1_000)
-    }
-  }
-
-  record('PASS', PHASE, 'Gutachter-Auftrag-Detail Pop-Over-Audit abgeschlossen', 'sv-done')
 }
 
-// ─── Kunde: /kunde/faelle/[id] ────────────────────────────────────────────────
+// ─── Overlay-Zähler ───────────────────────────────────────────────────────────
 
-async function auditKundeFallDetail(fallId) {
-  if (!fallId) {
-    record('INFO', PHASE, 'Kein Fall-ID — Kunde-Detail-Audit übersprungen', 'kunde-skip')
-    return
+async function countOverlays(page) {
+  return page.locator(OVERLAY_SEL).count().catch(() => 0)
+}
+
+// ─── Overlay schließen ────────────────────────────────────────────────────────
+
+async function closeOverlay(page) {
+  await page.keyboard.press('Escape').catch(() => {})
+  await page.waitForTimeout(250)
+  // Radix-Overlay prüfen
+  const stillOpen = await page.locator(OVERLAY_SEL).first().isVisible({ timeout: 600 }).catch(() => false)
+  if (stillOpen) {
+    // Schließen-Button suchen
+    const closeBtn = page.locator([
+      'button[aria-label*="schließen" i]',
+      'button[aria-label*="close" i]',
+      'button[data-testid*="close"]',
+      'button[aria-label*="zurück" i]',
+    ].join(', ')).first()
+    if (await closeBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+      await closeBtn.click().catch(() => {})
+      await page.waitForTimeout(250)
+    }
   }
+}
 
-  const page = await loginAs('kunde')
-  await page.goto(`${BASE_URL}/kunde/faelle/${fallId}`, { waitUntil: 'domcontentloaded', timeout: 25_000 })
-  await page.waitForTimeout(3_000)
-  await shoot(page, '07-kunde-fall-detail')
+// ─── Pro-Seite Pop-Over-Probe ──────────────────────────────────────────────────
 
-  // ── Trigger: "Anderen Termin vorschlagen" → GegenvorschlagModal ─────────
-  const gegenBtn = page.getByRole('button', { name: /anderen Termin|Gegenvorschlag|Termin vorschlagen/i }).first()
-  if (await gegenBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await probePopover(page, gegenBtn, 'GegenvorschlagModal', async () => {
-      // Abbrechen statt Speichern — kein destruktiver Effekt
-      const abbrBtn = page.getByRole('button', { name: /Abbrechen|Schließen|Zurück/i }).first()
-      if (await abbrBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
-        await abbrBtn.click()
-      } else {
-        await page.keyboard.press('Escape')
+async function auditPagePopovers(page, { role, route, fallId, leadId }) {
+  const items = await inventory(page)
+  const startUrl = page.url()
+
+  record('INFO', PHASE, `Pop-Over-Audit "${role}${route}": ${items.length} klickbare Elemente`, 'page-inventory')
+
+  let probed = 0
+  let opens = 0
+
+  for (const item of items) {
+    if (probed >= 20) {
+      record('INFO', PHASE, `Cap 20 erreicht auf ${role}${route}`, 'cap')
+      break
+    }
+
+    const label = item.testid || item.aria || item.text
+    if (!label || label.length < 2) continue
+    if (DANGEROUS.test(label)) continue
+    if (HEADLESS.test(label)) continue
+    if (NOISE.test(label.trim())) continue
+    if (NAV_ONLY.test(label.trim()) && !item.haspop) continue
+    // Reine externe Links überspringen
+    if (item.href && (item.href.startsWith('http') || item.href.startsWith('mailto:'))) continue
+
+    probed++
+
+    // Element neu lokalisieren
+    let target
+    try {
+      target = item.testid
+        ? page.locator(`[data-testid="${item.testid}"]`).first()
+        : item.aria
+          ? page.locator(`[aria-label="${item.aria}"]`).first()
+          : page.locator(item.tag).filter({ hasText: item.text || ' ' }).first()
+    } catch { continue }
+
+    if (!(await target.isVisible({ timeout: 800 }).catch(() => false))) continue
+
+    const beforeUrl      = page.url()
+    const beforeOverlays = await countOverlays(page)
+
+    let outcome = 'NOOP'
+    let detail  = ''
+
+    try {
+      await target.click({ timeout: 2_500 })
+      await page.waitForTimeout(600)
+
+      const afterUrl      = page.url()
+      const afterOverlays = await countOverlays(page)
+      const newOverlay    = afterOverlays > beforeOverlays
+
+      if (newOverlay) {
+        // Inhalt lesen
+        const content = await page.locator(OVERLAY_SEL).first().textContent({ timeout: 1_200 }).catch(() => '')
+        if (content && content.trim().length > 5) {
+          outcome = 'OPENS'
+          detail  = content.trim().slice(0, 80).replace(/\s+/g, ' ')
+          opens++
+
+          // Hygiene-Check
+          const hygieneText = content
+          if (role === 'kunde' && HYGIENE_KUNDE.test(hygieneText)) {
+            record('SOFT', PHASE, `Hygiene "${label}": interne Inhalte in Kunden-Overlay!`, 'hygiene-fail')
+          } else if (role === 'sv' && HYGIENE_DISPATCH.test(hygieneText)) {
+            record('SOFT', PHASE, `Hygiene "${label}": Dispatch-interne Inhalte in SV-Overlay!`, 'hygiene-fail')
+          }
+
+          await shoot(page, `07-${role}-${route.replace(/\//g, '-').replace(/[^a-zA-Z0-9-]/g, '')}-${label.slice(0, 20).replace(/\s+/g, '_')}`)
+        } else {
+          outcome = 'EMPTY'
+          detail  = 'Overlay offen, kein Inhalt'
+        }
+        await closeOverlay(page)
+      } else if (afterUrl !== beforeUrl) {
+        outcome = 'NAV'
+        detail  = `→ ${new URL(afterUrl).pathname}`
+        // Zurücknavigieren
+        await page.goto(startUrl, { waitUntil: 'domcontentloaded' }).catch(() => {})
+        await page.waitForTimeout(800)
       }
-      await page.waitForTimeout(300)
-    })
-
-    // Hygiene: Im Modal darf KEIN interner SV-Kalender / Dispatch-Tool sichtbar sein
-    const hygieneCheck = page.locator('text=/Dispatch|Admin-Ansicht|Interne Notiz/i').first()
-    const hygieneVisible = await hygieneCheck.isVisible({ timeout: 800 }).catch(() => false)
-    record(
-      hygieneVisible ? 'SOFT' : 'PASS',
-      PHASE,
-      hygieneVisible
-        ? 'Hygiene: Interne Inhalte im Kunden-Modal sichtbar!'
-        : 'Hygiene: Kunden-Modal zeigt keine internen Dispatch-Daten',
-      'kunde-hygiene',
-    )
-  } else {
-    record('INFO', PHASE, '"Anderen Termin vorschlagen"-Button nicht sichtbar (kein offener Termin)', 'kunde-gegenvorschlag-skip')
-  }
-
-  // ── Weitere sichtbare Trigger auditieren (max 6) ─────────────────────────
-  const SKIP_KUNDE = /abmelden|löschen|kamera|mikrofon|datei|×|^x$/i
-  const allBtns = await page.evaluate(() =>
-    Array.from(document.querySelectorAll('button:not([disabled])'))
-      .filter((el) => {
-        const r = el.getBoundingClientRect()
-        const cs = window.getComputedStyle(el)
-        return r.width > 4 && r.height > 4 && cs.visibility !== 'hidden' && cs.display !== 'none'
-      })
-      .map((el, idx) => ({
-        idx,
-        text: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60),
-        aria: el.getAttribute('aria-label') || '',
-      })),
-  )
-
-  const kundeTargets = allBtns
-    .filter((b) => {
-      const l = b.aria || b.text
-      return !SKIP_KUNDE.test(l) && l.length > 2 && !/anderen Termin|Gegenvorschlag/i.test(l)
-    })
-    .slice(0, 6)
-
-  for (const btn of kundeTargets) {
-    const label = btn.aria || btn.text
-    const trigger = btn.aria
-      ? page.locator(`[aria-label="${btn.aria}"]`).first()
-      : page.locator('button').filter({ hasText: btn.text || ' ' }).first()
-    if (!(await trigger.isVisible({ timeout: 800 }).catch(() => false))) continue
-    await probePopover(page, trigger, `Kunde-${label}`)
-    if (!page.url().includes(`/kunde/faelle/${fallId}`)) {
-      await page.goto(`${BASE_URL}/kunde/faelle/${fallId}`, { waitUntil: 'domcontentloaded' }).catch(() => {})
-      await page.waitForTimeout(1_000)
+    } catch (err) {
+      outcome = 'CLICK-ERR'
+      detail  = err.message.slice(0, 60)
     }
+
+    const sev = outcome === 'OPENS' ? 'PASS'
+              : outcome === 'NAV'   ? 'PASS'
+              : outcome === 'EMPTY' || outcome === 'CLICK-ERR' ? 'SOFT'
+              : 'INFO'   // NOOP = kein Bug
+
+    record(sev, PHASE, `"${role}${route}" → "${label}" → ${outcome}${detail ? `: ${detail}` : ''}`, `pop-${outcome.toLowerCase()}`)
   }
 
-  record('PASS', PHASE, 'Kunde-Fall-Detail Pop-Over-Audit abgeschlossen', 'kunde-done')
+  record(
+    'INFO',
+    PHASE,
+    `"${role}${route}" Zusammenfassung: ${probed} geprüft, ${opens} Overlays geöffnet`,
+    'page-summary',
+  )
 }
 
-// ─── Haupt-Export ─────────────────────────────────────────────────────────────
+// ─── Routen-Matrix ────────────────────────────────────────────────────────────
 
 export async function runPhase7(prevResult = {}) {
-  console.log('\n━━━ Phase 7: Pop-Over-Audit pro Detail-Seite ━━━\n')
+  console.log('\n━━━ Phase 7: Pop-Over-Audit (alle Seiten, alle Rollen) ━━━\n')
 
-  const fixtures = loadFixtureIds() ?? {}
-  const leadId = prevResult.leadId ?? fixtures.journey_lead_id ?? null
-  const fallId = prevResult.fallId ?? fixtures.journey_fall_id ?? null
+  const fixtures  = loadFixtureIds() ?? {}
+  const leadId    = prevResult.leadId  ?? fixtures.journey_lead_id  ?? null
+  const fallId    = prevResult.fallId  ?? fixtures.journey_fall_id  ?? null
 
-  if (!leadId && !fallId) {
-    record('SOFT', PHASE, 'Weder Lead-ID noch Fall-ID vorhanden — Pop-Over-Audit mit Minimal-Scope', 'precondition')
+  const ROUTES = {
+    admin: [
+      '/admin',
+      '/admin/faelle',
+    ],
+    dispatch: [
+      '/dispatch/dashboard',
+      '/dispatch/leads',
+      ...(leadId ? [`/dispatch/leads/${leadId}`] : []),
+    ],
+    sv: [
+      '/gutachter/heute',
+      '/gutachter/auftraege',
+      '/gutachter/posteingang',
+      '/gutachter/profil',
+      '/gutachter/kalender',
+    ],
+    kunde: [
+      '/kunde',
+      '/kunde/faelle',
+      ...(fallId ? [`/kunde/faelle/${fallId}`] : []),
+      '/kunde/chat',
+    ],
   }
 
-  await auditDispatchLeadDetail(leadId)
-  await auditGutachterAuftraege()
-  await auditKundeFallDetail(fallId)
+  for (const [role, routes] of Object.entries(ROUTES)) {
+    let page
+    try {
+      page = await loginAs(role)
+    } catch (err) {
+      record('SOFT', PHASE, `Login als ${role} fehlgeschlagen: ${err.message}`, `login-${role}`)
+      continue
+    }
 
-  record('PASS', PHASE, 'Phase 7 Pop-Over-Audit abgeschlossen', 'phase-done')
+    for (const route of routes) {
+      try {
+        await page.goto(`${BASE_URL}${route}`, { waitUntil: 'domcontentloaded', timeout: 25_000 })
+        await page.waitForTimeout(2_000)
+
+        // Redirect-Check
+        const finalPath = new URL(page.url()).pathname
+        if (finalPath !== route) {
+          record('INFO', PHASE, `${role}:${route} redirected → ${finalPath}`, `redirect`)
+          // Trotzdem auditieren (könnte z.B. /gutachter/heute → /gutachter/heute mit Session-Param sein)
+        }
+
+        await shoot(page, `07-${role}${route.replace(/\//g, '-')}`)
+        await auditPagePopovers(page, { role, route, leadId, fallId })
+      } catch (err) {
+        record('SOFT', PHASE, `${role}:${route} Fehler: ${err.message.slice(0, 100)}`, `route-error`)
+      }
+    }
+  }
+
+  record('PASS', PHASE, 'Phase 7 Pop-Over-Audit abgeschlossen — alle Seiten, alle Rollen', 'phase-done')
   return { ok: true, leadId, fallId }
 }
