@@ -128,6 +128,9 @@ function isPublicPath(pathname: string): boolean {
     '/passwort-zuruecksetzen',
     '/sv',
     '/kunde/termin',
+    // 2026-05-08: Token-basierter Termin-Bestätigungs-Pfad analog zu /sv und /upload —
+    // Magic-Link aus Email, kein Login nötig. Token-Validierung in der Action.
+    '/kunde-termin',
     // AAR-134: SV-Token-Ablehnung via Email-Link (kein Login nötig)
     '/ablehnen',
     // AAR-339: ZB1-Upload-Link (/upload/zb1/[token]) — Kunde hat noch keinen
@@ -137,6 +140,11 @@ function isPublicPath(pathname: string): boolean {
     '/nutzungsbedingungen',
     '/datenschutz',
     '/impressum',
+    // 2026-05-08: Webform-Lead-Strecke MUSS für anonyme Besucher offen
+    // sein — daraus entsteht der Lead, danach Self-Dispatch + Weiterleitung
+    // ins Portal. Ohne diesen Eintrag landet der Besucher auf /login und
+    // kann gar keinen Schaden melden.
+    '/schaden-melden',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
