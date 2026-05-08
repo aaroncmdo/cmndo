@@ -102,6 +102,21 @@ async function shoot(page, slot, note) {
   await logLine(`screenshot saved: ${slot} (${note})`)
 }
 
+/**
+ * 2026-05-08: Animations-Burst — schießt mehrere Screenshots in
+ * `intervalMs` Abstand. Damit sieht man fade-in / pulse-cycles /
+ * countdown-bars wie sie sich bewegen. Slot-Namen werden mit `_a`,
+ * `_b`, `_c` Suffix abgelegt.
+ */
+async function shootBurst(page, slot, note, frames = 3, intervalMs = 600) {
+  const labels = ['a', 'b', 'c', 'd', 'e']
+  for (let i = 0; i < frames; i++) {
+    const subSlot = `${slot}_${labels[i] ?? i}`
+    await shoot(page, subSlot, `${note} — frame ${i + 1}/${frames}`)
+    if (i < frames - 1) await page.waitForTimeout(intervalMs)
+  }
+}
+
 async function setGps(context, { lat, lng }) {
   await context.setGeolocation({ latitude: lat, longitude: lng, accuracy: 5 })
 }
@@ -181,7 +196,7 @@ async function main() {
   const page = await context.newPage()
   page.on('console', (msg) => {
     consoleEntries.push({ type: msg.type(), text: msg.text() })
-    if (msg.type() === 'error' || msg.type() === 'warning') {
+    if (msg.type() === 'error' || msg.type() === 'warning' || msg.text().includes('[sv-car-three') || msg.text().includes('[FeldmodusMap]')) {
       logLine(`[browser:${msg.type()}] ${msg.text()}`).catch(() => {})
     }
   })
@@ -213,7 +228,8 @@ async function main() {
     // Phase 01: Tagesmodus starten → Feldmodus erreicht
     await startTagesmodus(page)
     await waitForMap(page, 'feldmodus-arrival')
-    await shoot(page, '01_feldmodus_start', 'Feldmodus initial geladen, Sheet expanded (Mobile) bzw. Cards (Desktop)')
+    // Burst capture damit fade-in der NaviHud + Card-Slide-In sichtbar wird
+    await shootBurst(page, '01_feldmodus_start', 'Feldmodus initial — fade-in der Glass-Cards', 3, 500)
 
     // Phase 02: Mobile-Sheet einklappen damit Map sichtbar ist (Desktop:
     // Sheet existiert nicht, Aufruf ist no-op).
@@ -225,15 +241,19 @@ async function main() {
       await shoot(page, '02_map_visible', 'Map vollständig sichtbar (kein Sheet zu kollabieren)')
     }
 
-    // Phase 03: GPS auf Mid-Route → Blitzer/Hazards/Flow im Frame
+    // Phase 03: GPS auf Mid-Route → Reroute-Toast countdown captured
     await setGps(context, MID_GPS)
-    await page.waitForTimeout(2_500)
-    await shoot(page, '03_blitzer_zone', 'GPS auf Mid-Route — Blitzer/Hazards/Flow im Frame')
+    await page.waitForTimeout(1_500)
+    // Burst: 4 frames × 1.5s = 6s — sollte den 10s-Reroute-Countdown
+    // durchlaufen lassen, plus Maneuver-Updates capturen
+    await shootBurst(page, '03_blitzer_zone', 'Mid-Route — NaviHud Reroute-Countdown / Maneuver-Updates', 4, 1500)
 
     // Phase 04: GPS innerhalb Geofence → arrived state
     await setGps(context, ARRIVAL_GPS)
     await page.waitForTimeout(3_500) // Geofence (50m) braucht 1-2 Render-Cycles
     await shoot(page, '04_arrived', 'Geofence-Trigger — angekommen-State')
+    await page.waitForTimeout(1_500)
+    await shoot(page, '04b_arrived_settled', 'angekommen-State 1.5s später (Hero-Pin-Pulse-Cycle)')
   } catch (err) {
     await logLine(`[fatal] ${err?.stack ?? err}`)
     console.error('Lauf abgebrochen:', err?.message ?? err)

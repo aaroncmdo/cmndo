@@ -147,9 +147,13 @@ export async function tryAddSvCarThreeJs(
 
       const projection = new THREE.Matrix4().fromArray(matrixArr)
       const local = buildModelMatrix(state.target[0], state.target[1], 0)
-      // Heading + Scale auf das Model anwenden
+      // Heading + Scale auf das Model anwenden.
+      // 2026-05-08 Aaron-Brief: rotateY mit POSITIVEM heading drehte das
+      // Auto entgegen der Fahrtrichtung. Mapbox-bearing ist clockwise
+      // from N (= Standard-Compass), Three.js rotateY ist counter-
+      // clockwise looking down +Y. Negation matcht beide Konventionen.
       loadedModel.rotation.set(0, 0, 0)
-      loadedModel.rotateY(((state.heading ?? 0) * Math.PI) / 180)
+      loadedModel.rotateY(((-1 * (state.heading ?? 0)) * Math.PI) / 180)
       loadedModel.scale.setScalar(state.scale)
       camera.projectionMatrix = projection.multiply(local)
       renderer.resetState()

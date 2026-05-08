@@ -279,13 +279,18 @@ export default async function HeutePage() {
     for (const k of (katalogRows ?? []) as Array<{ slot_id: string; label: string }>) {
       labelMap.set(k.slot_id, k.label)
     }
+    // 2026-05-08 Aaron-UI-Audit Bug #4: einheitliche „offen für SV"-
+    // Definition mit pflichtStats unten. Status-States hochgeladen +
+    // in_pruefung sind aus SV-Sicht erledigt (er hat seinen Teil
+    // gemacht / Backend prüft).
+    const PFLICHT_DONE_STATES = new Set(['hochgeladen', 'in_pruefung', 'erfuellt', 'geprueft'])
     for (const p of (pflichtRows ?? []) as Array<{
       fall_id: string
       dokument_typ: string
       status: string
       pflicht: boolean
     }>) {
-      if (p.status === 'erfuellt' || p.status === 'geprueft') continue
+      if (PFLICHT_DONE_STATES.has(p.status)) continue
       if (!pflichtListMap.has(p.fall_id)) pflichtListMap.set(p.fall_id, [])
       pflichtListMap.get(p.fall_id)!.push({
         slot_id: p.dokument_typ,
@@ -381,12 +386,20 @@ export default async function HeutePage() {
   const fallIdsForPflicht = Array.from(
     new Set(heuteTermine.map((t) => t.fall_id).filter((x): x is string => !!x)),
   )
+  // 2026-05-08 Aaron-UI-Audit Bug #4: Top-Counter und Termin-Zeilen-Counter
+  // zählten unterschiedlich — Top filterte auf NOT (erfuellt|geprueft), die
+  // Termin-Zeile auf status === 'offen' (DB hat aber 'ausstehend' als
+  // Default — fast nichts gematched). Beide jetzt auf einheitlicher
+  // Definition: „offen für SV" = alles außer (hochgeladen, in_pruefung,
+  // erfuellt, geprueft). Das matched die Semantik „muss SV vor Ort
+  // einsammeln/anstoßen".
+  const PFLICHT_DONE_STATES = new Set(['hochgeladen', 'in_pruefung', 'erfuellt', 'geprueft'])
   const pflichtStats: TagesroutePflichtStat[] = await Promise.all(
     fallIdsForPflicht.map(async (fallId) => {
       try {
         const slots = await getPflichtdokumenteForFall(supabase, fallId, 'sv')
         const pflichtSlots = slots.filter((s) => s.pflicht)
-        const offen = pflichtSlots.filter((s) => s.status === 'offen').length
+        const offen = pflichtSlots.filter((s) => !PFLICHT_DONE_STATES.has(s.status ?? '')).length
         return { fallId, offen, gesamt: pflichtSlots.length }
       } catch {
         return { fallId, offen: 0, gesamt: 0 }
