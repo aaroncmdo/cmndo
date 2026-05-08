@@ -656,8 +656,9 @@ export async function emitLeadCreatedMitteilung(leadId) {
   const { data: bereitsVorhanden } = await db
     .from('mitteilungen')
     .select('id')
-    .eq('kategorie', 'lead.created')
+    .eq('empfaenger_rolle', 'dispatch')
     .eq('kontext_id', leadId)
+    .eq('kontext_typ', 'lead')
     .limit(1)
 
   if (bereitsVorhanden && bereitsVorhanden.length > 0) {
@@ -665,16 +666,20 @@ export async function emitLeadCreatedMitteilung(leadId) {
     return { ok: true, eingefuegt: 0, bereits_vorhanden: true }
   }
 
+  // F-02 Fix: mitteilungen-Schema — empfaenger_rolle ist NOT NULL, kategorie muss
+  // aus MitteilungKategorie = 'update'|'task'|'nachricht'|'anruf' sein (nicht 'lead.created').
   let eingefuegt = 0
   for (const profile of dispatchProfiles) {
     const { error: insErr } = await db.from('mitteilungen').insert({
       empfaenger_id: profile.id,
-      kategorie: 'lead.created',
+      empfaenger_rolle: 'dispatch',
+      kategorie: 'update',
       kontext_id: leadId,
       kontext_typ: 'lead',
       gelesen: false,
       titel: 'Neuer Lead eingegangen',
       inhalt: `Lead ${leadId} wurde über das Webformular erfasst.`,
+      prioritaet: 'normal',
     })
     if (insErr) {
       console.warn(`[helpers] emitLeadCreatedMitteilung: Insert für ${profile.id} fehlgeschlagen: ${insErr.message}`)
