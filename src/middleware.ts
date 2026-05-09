@@ -2,6 +2,26 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateSession } from './lib/supabase/middleware'
 
+// 2026-05-09: Domain-Split — claimondo.de = Marketing, app.claimondo.de = App.
+// Marketing-Pages auf app.* werden 301 auf claimondo.de redirected (kein
+// Duplicate-Content für Google). App-Pages auf claimondo.de werden 301 auf
+// app.* redirected (saubere UX, klare Trennung).
+const APP_PREFIXES = [
+  '/admin', '/dispatch', '/gutachter/', '/kunde', '/faelle', '/flow',
+  '/upload', '/sv', '/kunde-termin', '/ablehnen',
+  '/passwort-vergessen', '/passwort-zuruecksetzen', '/passwort-aendern',
+]
+
+const MARKETING_PREFIXES = [
+  '/vorteile', '/wie-es-funktioniert', '/faq', '/kfz-gutachter',
+  '/gutachter-finden', '/gutachter-partner', '/ueber-uns',
+  '/impressum', '/datenschutz', '/agb', '/nutzungsbedingungen',
+]
+
+function matchesAnyPrefix(pathname: string, prefixes: string[]): boolean {
+  return prefixes.some((p) => pathname === p || pathname.startsWith(p.endsWith('/') ? p : p + '/'))
+}
+
 // Subdomain-Routing: gutachter.claimondo.de → /gutachter-partner/*
 // Muss als Early-Return VOR updateSession laufen, damit der Rewrite
 // nicht durch den Auth-Guard als unprotected Route durchfällt.
@@ -9,14 +29,57 @@ import { updateSession } from './lib/supabase/middleware'
 // in eine Datei konsolidiert — Next.js 16 erlaubt nur einen Middleware-Einstieg.
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') ?? ''
+  const pathname = request.nextUrl.pathname
 
+  // Subdomain gutachter.claimondo.de — Partner-Recruiting
   if (hostname === 'gutachter.claimondo.de') {
     const url = request.nextUrl.clone()
-    const pathname = request.nextUrl.pathname
     if (!pathname.startsWith('/gutachter-partner')) {
       url.pathname = `/gutachter-partner${pathname === '/' ? '' : pathname}`
       return NextResponse.rewrite(url)
     }
+  }
+
+  // App-Subdomain (app.claimondo.de) für Bots zu noindex zwingen — Suchmaschinen
+  // sollen nur claimondo.de indexieren. Die App-Subdomain hat sowieso nur
+  // Auth-protected Routes hinter sich, aber /robots.txt braucht expliziten
+  // Disallow-Override.
+  if (hostname === 'app.claimondo.de' && pathname === '/robots.txt') {
+    return new NextResponse('User-agent: *\nDisallow: /\n', {
+      status: 200,
+      headers: { 'content-type': 'text/plain' },
+    })
+  }
+
+  // 301-Redirects zwischen Hauptdomain und App-Subdomain
+  const isAppRoute = matchesAnyPrefix(pathname, APP_PREFIXES)
+  const isMarketingRoute = pathname === '/' || matchesAnyPrefix(pathname, MARKETING_PREFIXES)
+
+  if (hostname === 'app.claimondo.de' && isMarketingRoute) {
+    // Marketing-Page auf App-Subdomain → 301 zu Hauptdomain
+    const url = new URL(request.url)
+    url.hostname = 'claimondo.de'
+    url.protocol = 'https:'
+    url.port = ''
+    return NextResponse.redirect(url, 301)
+  }
+
+  if ((hostname === 'claimondo.de' || hostname === 'www.claimondo.de') && isAppRoute) {
+    // App-Page auf Hauptdomain → 301 zur App-Subdomain
+    const url = new URL(request.url)
+    url.hostname = 'app.claimondo.de'
+    url.protocol = 'https:'
+    url.port = ''
+    return NextResponse.redirect(url, 301)
+  }
+
+  // www.claimondo.de → claimondo.de (kanonische Form, vermeidet Duplicate-Content)
+  if (hostname === 'www.claimondo.de') {
+    const url = new URL(request.url)
+    url.hostname = 'claimondo.de'
+    url.protocol = 'https:'
+    url.port = ''
+    return NextResponse.redirect(url, 301)
   }
 
   return await updateSession(request)
