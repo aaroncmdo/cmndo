@@ -9,7 +9,7 @@ import Link from 'next/link'
 import {
   Phone, ChevronRight, Check, ChevronDown, ArrowRight,
   Users, MapPin, FileText, Scale, Monitor, Zap, Shield,
-  MessageCircle, Star, Clock,
+  MessageCircle, Star, Clock, Search,
 } from 'lucide-react'
 
 const PHONE_DISPLAY = '0221 123 456 78'
@@ -148,9 +148,17 @@ function HeroSection() {
                   </span>
                 </Link>
               </div>
+              <Link
+                href="/gutachter-finden"
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#7BA3CC]/40 bg-[#7BA3CC]/10 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:border-[#7BA3CC] hover:bg-[#7BA3CC]/20"
+              >
+                <Search className="h-4 w-4 text-[#7BA3CC]" />
+                Gutachter in meiner Nähe finden
+                <ArrowRight className="h-3.5 w-3.5 text-[#7BA3CC]" />
+              </Link>
               <a
                 href="https://wa.me/49221XXXXXXX"
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-white/50 transition-colors hover:text-white/80"
+                className="mt-4 ml-3 inline-flex items-center gap-1.5 text-sm font-medium text-white/50 transition-colors hover:text-white/80"
               >
                 <MessageCircle className="h-3.5 w-3.5" />
                 WhatsApp schreiben

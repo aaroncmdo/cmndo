@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
   ClipboardList,
@@ -17,6 +18,45 @@ import {
   Car,
   TrendingUp,
 } from 'lucide-react'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript } from '@/lib/seo/jsonld'
+
+const PARTNER_URL = 'https://gutachter.claimondo.de'
+
+export const metadata: Metadata = {
+  title: 'Kfz-Sachverständiger werden — Aufträge ohne Akquise',
+  description:
+    'Werden Sie Partner-Gutachter bei Claimondo: vorqualifizierte Aufträge per App, transparente Honorare, Feldmodus mit GPS, automatische Abrechnung. Über 50 Partner bundesweit, 2.400+ abgeschlossene Aufträge.',
+  keywords: [
+    'Kfz-Sachverständiger Aufträge',
+    'Gutachter werden',
+    'Sachverständigen-Plattform',
+    'Kfz-Gutachten Auftrag',
+    'DAT-Experte',
+    'BVSK-Gutachter',
+    'Schadensgutachter Job',
+    'freier Sachverständiger',
+    'Gutachter App',
+  ],
+  alternates: {
+    canonical: `${PARTNER_URL}/`,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'de_DE',
+    siteName: 'Claimondo Gutachter-Partner',
+    url: PARTNER_URL,
+    title: 'Kfz-Sachverständiger werden — Aufträge ohne Akquise',
+    description:
+      'Vorqualifizierte Aufträge per App, transparente Honorare, automatische Abrechnung. 50+ Partner, 2.400+ Aufträge.',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Partner-Gutachter werden' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Kfz-Sachverständiger werden — Aufträge ohne Akquise',
+    description: 'Vorqualifizierte Aufträge per App, transparente Honorare, automatische Abrechnung.',
+    images: ['/og-default.png'],
+  },
+}
 
 // Gutachter-Partner-Landingpage — serviert unter gutachter.claimondo.de
 // via Middleware-Rewrite aus src/middleware.ts
@@ -135,6 +175,21 @@ const FALLBEISPIELE = [
 export default function GutachterPartnerPage() {
   return (
     <div className="min-h-screen bg-[#0D1B3E] text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript([
+          serviceSchema({
+            name: 'Partner-Programm für Kfz-Sachverständige',
+            description:
+              'Plattform für unabhängige Kfz-Sachverständige: vorqualifizierte Aufträge per App, GPS-Feldmodus, automatische Abrechnung, Dispatch-Support. Aktuell über 50 Partner bundesweit.',
+            url: PARTNER_URL,
+          }),
+          breadcrumbsSchema([
+            { name: 'Claimondo', url: 'https://claimondo.de/' },
+            { name: 'Gutachter werden', url: PARTNER_URL },
+          ]),
+        ])}
+      />
 
       {/* ── Topbar ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0D1B3E]/95 backdrop-blur">
