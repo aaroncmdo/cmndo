@@ -10,6 +10,9 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /* KFZ-177: ignoreBuildErrors entfernt — tsc ist jetzt sauber */
+  // VPS-Deployment: standalone-Output bündelt nur die nötigsten node_modules
+  // → kleines Deploy-Artefakt, kein node_modules-Upload nötig.
+  output: 'standalone',
   // Dokument-Uploads (SA-Vorlage, Pflichtdokumente) erlauben bis 16 MB.
   // Next.js-Default ist 1 MB — Uploads > 1 MB werfen sonst clientseitig
   // „An unexpected response was received from the server" bevor die Action
