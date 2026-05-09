@@ -8,8 +8,6 @@
 
 import { NextRequest } from 'next/server'
 
-export const runtime = 'edge'
-
 type OpenSearchResponse = [string, string[], string[], string[]]
 
 type SummaryResponse = {
