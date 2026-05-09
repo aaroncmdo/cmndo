@@ -53,6 +53,7 @@ type InitialState = Omit<
   | 'setDatResult'
   | 'markGegnerErfasst'
   | 'markZb1Erfasst'
+  | 'setFlowFlags'
   | 'setPromotionCode'
   | 'reset'
 >
