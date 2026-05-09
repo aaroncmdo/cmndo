@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export type SvLead = {
@@ -96,6 +97,82 @@ export async function erstelleGutachterFinderAnfrage(
 
   if (error) return { ok: false, error: error.message }
 
+  const anfrageId = data.id
+
+  // Dispatch-Task: alle dispatch/admin-User informieren dass ein SV angerufen werden muss
+  try {
+    const admin = createAdminClient()
+
+    // SV-Name ermitteln für den Task-Text
+    let svName = 'Unbekannt'
+    let svTelefon: string | null = null
+
+    if (payload.zugeordneter_sv_id) {
+      const { data: sv } = await admin
+        .from('sachverstaendige')
+        .select('firmenname, profiles(anzeigename, telefon)')
+        .eq('id', payload.zugeordneter_sv_id)
+        .single()
+      if (sv) {
+        const profil = Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles
+        svName = sv.firmenname ?? (profil as { anzeigename?: string } | null)?.anzeigename ?? 'SV'
+        svTelefon = (profil as { telefon?: string } | null)?.telefon ?? null
+      }
+    } else if (payload.zugeordneter_sv_lead_id) {
+      const { data: lead } = await admin
+        .from('sv_leads')
+        .select('name, telefon')
+        .eq('id', payload.zugeordneter_sv_lead_id)
+        .single()
+      if (lead) {
+        svName = lead.name
+        svTelefon = lead.telefon
+      }
+    }
+
+    const wunschterminText = payload.wunschtermin
+      ? new Date(payload.wunschtermin).toLocaleString('de-DE', {
+          weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+        })
+      : 'kein Termin'
+
+    const taskInhalt = [
+      `Kunde: ${payload.vorname} ${payload.nachname}`,
+      `Schaden: ${payload.schadentyp}`,
+      `Wunschtermin: ${wunschterminText}`,
+      svTelefon ? `SV-Tel.: ${svTelefon}` : null,
+      payload.sa_signatur_data_url ? '✓ SA unterzeichnet' : '⚠ SA noch nicht unterzeichnet',
+    ]
+      .filter(Boolean)
+      .join(' · ')
+
+    // Alle Dispatch-User laden und Task-Mitteilung senden
+    const { data: dispatchUser } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('rolle', 'dispatch')
+
+    const mitteilungen = (dispatchUser ?? []).map((u: { id: string }) => ({
+      empfaenger_id: u.id,
+      empfaenger_rolle: 'dispatch' as const,
+      kategorie: 'anruf' as const,
+      titel: `SV anrufen: ${svName} — Gutachter-Finder Buchung`,
+      inhalt: taskInhalt,
+      kontext_typ: null,
+      kontext_id: null,
+      route_url: `/dispatch/gutachter-finder/${anfrageId}`,
+      prioritaet: 'hoch' as const,
+      icon: '📞',
+    }))
+
+    if (mitteilungen.length > 0) {
+      await admin.from('mitteilungen').insert(mitteilungen)
+    }
+  } catch (taskErr) {
+    console.error('[GutachterFinder] Dispatch-Task fehlgeschlagen:', taskErr)
+  }
+
   revalidatePath('/admin/faelle')
-  return { ok: true, id: data.id }
+  revalidatePath('/dispatch/dashboard')
+  return { ok: true, id: anfrageId }
 }
