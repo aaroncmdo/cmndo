@@ -45,13 +45,17 @@ export async function middleware(request: NextRequest) {
   // App-Subdomain selbst wenn Google sie über Links findet.
   if (hostname === 'app.claimondo.de') {
     if (pathname === '/robots.txt') {
-      return new NextResponse('User-agent: *\nDisallow: /\n', {
-        status: 200,
-        headers: { 'content-type': 'text/plain' },
-      })
+      return new NextResponse(
+        'User-agent: *\nDisallow: /\nAllow: /login\nAllow: /passwort-vergessen\n',
+        { status: 200, headers: { 'content-type': 'text/plain' } },
+      )
     }
+    // /login + /passwort-vergessen bleiben crawlbar (kein noindex)
+    const isPublicAppPath = pathname === '/login' || pathname.startsWith('/passwort-')
     const response = await updateSession(request)
-    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    if (!isPublicAppPath) {
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    }
     return response
   }
 
