@@ -48,18 +48,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
-    // Kfz-Gutachter Pillar + Stadt-Landingpages (SEO-Hub)
+    // Kfz-Gutachter Pillar + Themen-Pages + Stadt-Landingpages
     {
       url: `${SITE_URL}/kfz-gutachter`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.95,
     },
+    {
+      url: `${SITE_URL}/kfz-gutachter/kosten`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/kfz-gutachter/ablauf`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/kfz-gutachter/wertminderung`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
     ...STAEDTE.map((s) => ({
       url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
-      priority: 0.9,
+      priority: 0.85,
     })),
     // Gutachter-Partner-Subdomain
     {
