@@ -88,6 +88,8 @@ type Props = {
   alt?: string
   /** Auf dunklem Hintergrund: Logo weiß, kein Grau-Placeholder */
   dark?: boolean
+  /** Imagin angle: 21 = front-driver-side ¾ (Default), 13 = Seite, 1 = Front. */
+  angle?: number
 }
 
 type Stage = 'imagin' | 'simpleicons' | 'clearbit' | 'icon'
@@ -101,6 +103,7 @@ export default function FahrzeugRenderImage({
   className = '',
   alt,
   dark = false,
+  angle,
 }: Props) {
   const [stage, setStage] = useState<Stage>('imagin')
 
@@ -119,7 +122,7 @@ export default function FahrzeugRenderImage({
   }
 
   const key = lookupKey(hersteller)
-  const imaginUrl = buildImaginProxyUrl({ hersteller, modell, lackfarbe, baujahr })
+  const imaginUrl = buildImaginProxyUrl({ hersteller, modell, lackfarbe, baujahr, angle })
   const siSlug = key in SI_SLUG ? SI_SLUG[key] : null
   // dark=true → weiß (für dunkle Hintergründe), sonst Claimondo-Navy im CI.
   const siColor = dark ? 'FFFFFF' : '0D1B3E'

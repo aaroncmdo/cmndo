@@ -199,14 +199,15 @@ export default function AuftragCard(props: AuftragCardProps) {
                   'radial-gradient(circle at 50% 45%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0) 55%)',
               }}
             />
-            {/* Marken-Logo / Fahrzeug-Render — dark=true → Logo in Weiß */}
-            <div className="absolute inset-0 flex items-center justify-center">
+            {/* Fahrzeug-Render: angle=21 → front-driver-side ¾ (45°). */}
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-center pb-2">
               <FahrzeugRenderImage
                 hersteller={props.fall.fahrzeug_hersteller}
                 modell={props.fall.fahrzeug_modell ?? null}
                 lackfarbe={(props.fall.lackfarbe_code as LackfarbeCode | null) ?? null}
                 baujahr={props.fall.fahrzeug_baujahr ?? null}
-                width={180}
+                width={300}
+                angle={21}
                 dark
               />
             </div>
