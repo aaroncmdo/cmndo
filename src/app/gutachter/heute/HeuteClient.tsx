@@ -30,6 +30,10 @@ export interface HeuteClientProps {
   termine: HeuteTerminFull[]
   pflichtStats: TagesroutePflichtStat[]
   svStandort: { lat: number | null; lng: number | null }
+  /** 2026-05-08: Isochrone-Polygon des SV. Wenn Toggle „Mein Gebiet"
+   *  in Einstellungen aktiv (LocalStorage), rendert TagesrouteMap das
+   *  als leuchtende Grenz-Fläche um den Heimat-Standort. */
+  isochronePolygon: Array<{ lat: number; lng: number }> | null
   hasActiveSession: boolean
   /** AAR-872: bereits gespeicherte Privat-Stops fuer heute. */
   initialPrivatStops: PrivatStopRow[]
@@ -41,9 +45,27 @@ export default function HeuteClient({
   termine,
   pflichtStats,
   svStandort,
+  isochronePolygon,
   hasActiveSession,
   initialPrivatStops,
 }: HeuteClientProps) {
+  // 2026-05-08 Aaron-Toggle: LocalStorage `claimondo_show_gebiet_in_hub`
+  // entscheidet ob das Isochrone-Polygon gerendert wird. Initial-Read
+  // sync (kein Flicker), zusätzlich Listener auf custom-event vom
+  // Settings-Toggle damit sofortiges Update ohne Page-Reload.
+  const [showGebiet, setShowGebiet] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true
+    // Default: sichtbar — nur ausblenden wenn explizit auf '0' gesetzt.
+    return window.localStorage.getItem('claimondo_show_gebiet_in_hub') !== '0'
+  })
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<boolean>).detail
+      if (typeof detail === 'boolean') setShowGebiet(detail)
+    }
+    window.addEventListener('claimondo:gebiet-toggle', handler)
+    return () => window.removeEventListener('claimondo:gebiet-toggle', handler)
+  }, [])
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(
     svStandort.lat != null && svStandort.lng != null
       ? { lat: svStandort.lat, lng: svStandort.lng }
@@ -93,6 +115,42 @@ export default function HeuteClient({
     () => new Set(privatStops.map((p) => p.external_event_id)),
     [privatStops],
   )
+
+  // 2026-05-08 Aaron-Brief: Pre-Render-Warmup für Feldmodus. Nach 3 s
+  // im Hub fetchen wir Mapbox-Standard-Style + die ersten Tiles um den
+  // SV-Standort. Dank Service-Worker-Cache (TILE_CACHE) sind die beim
+  // Klick auf „Tagesmodus starten" sofort verfügbar — Map rendert ohne
+  // Tile-Pop-In. Origin-Header und Auth nicht nötig (Mapbox-Style ist
+  // public mit access_token-Param).
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!origin) return
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+    if (!token) return
+    const tid = window.setTimeout(() => {
+      // Style + Sprite (~50 KB) — der Style-File listet alle Layer
+      void fetch(`https://api.mapbox.com/styles/v1/mapbox/standard?access_token=${token}`).catch(() => {})
+      // Tile-Indices um die Origin: zoom 13/14 abdecken die normale
+      // Hub→Feldmodus-Anfangsphase. ~6 Tiles pro Zoom-Stufe ausreichend.
+      const lng2tile = (lng: number, z: number) => Math.floor(((lng + 180) / 360) * Math.pow(2, z))
+      const lat2tile = (lat: number, z: number) => {
+        const r = (lat * Math.PI) / 180
+        return Math.floor(((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2) * Math.pow(2, z))
+      }
+      for (const z of [13, 14, 16]) {
+        const x0 = lng2tile(origin.lng, z)
+        const y0 = lat2tile(origin.lat, z)
+        for (const dx of [-1, 0, 1]) {
+          for (const dy of [-1, 0, 1]) {
+            void fetch(
+              `https://api.mapbox.com/v4/mapbox.satellite/${z}/${x0 + dx}/${y0 + dy}.webp?sku=101&access_token=${token}`,
+            ).catch(() => {})
+          }
+        }
+      }
+    }, 3_000)
+    return () => window.clearTimeout(tid)
+  }, [origin])
 
   // Viewport-Detection für Map-Höhe + Layout-Switch
   const [isLargeScreen, setIsLargeScreen] = useState(false)
@@ -171,6 +229,8 @@ export default function HeuteClient({
         height={mapHeight}
         onRouteStatsChange={setRouteStats}
         onReady={handleMapReady}
+        isochronePolygon={isochronePolygon}
+        showGebiet={showGebiet}
       />
 
       {/* Termine-Overlay — Mobile: gestackt unter Map (mt-4).
@@ -209,6 +269,7 @@ export default function HeuteClient({
             disabledReason={disabledReason}
             geschaetzteFahrzeitMinuten={routeStats?.dauerMin ?? null}
             distanzKm={routeStats?.distanzKm ?? null}
+            origin={origin}
             onIntroAnimate={triggerIntroAnimation}
           />
         </GlassPanel>

@@ -21,10 +21,11 @@ import FokusHeader from './FokusHeader'
 import AktuellerStopCard from './AktuellerStopCard'
 import StopListItem from './StopListItem'
 import GlassPanel from '@/components/shared/GlassPanel'
+import NaviHud, { pickHighestPriorityNotice, formatNaviDistance, type NaviNotice } from './NaviHud'
 import { useFieldTracking } from './useFieldTracking'
 import { useTurnByTurn } from './useTurnByTurn'
 import { useWakeLock } from '@/hooks/useWakeLock'
-import { markArrived, pauseFokusmodus, startStop } from './actions'
+import { markArrived, pauseFokusmodus, startStop, exitArrivedToRoute } from './actions'
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
@@ -113,7 +114,7 @@ export default function FeldmodusClient({
     [aktuellerStop, session.id, router],
   )
 
-  const { position: livePosition, distanceMeters, permissionState, error } = useFieldTracking({
+  const { position: livePosition, distanceMeters, permissionState, error, staleSinceMs } = useFieldTracking({
     enabled: trackingEnabled,
     svId: sv.id,
     terminId: aktuellerStop?.termin_id ?? null,
@@ -150,6 +151,49 @@ export default function FeldmodusClient({
     position: position ? { lat: position.lat, lng: position.lng } : null,
     voiceEnabled: tbtVoiceOn,
   })
+
+  // 2026-05-08 (C10) NaviHud-Notice-Stack:
+  //   - mapNotice (Blitzer/Hazard/Reroute) wird von FeldmodusMap via
+  //     onMapNotice-Callback gemeldet
+  //   - laneNotice + maneuverNotice aus useTurnByTurn step.bannerInstructions
+  //   - kombiniert via pickHighestPriorityNotice (Blitzer > Hazard >
+  //     Reroute > Lane > Maneuver)
+  const [mapNotice, setMapNotice] = useState<NaviNotice | null>(null)
+  const naviNotice = useMemo<NaviNotice | null>(() => {
+    // Lane-Notice nur wenn der nächste Step Lane-Annotations hat UND
+    // wir nahe genug am Maneuver sind (< 300 m). Sonst kommt das zu
+    // früh und SV stresst sich überflüssig.
+    let laneNotice: NaviNotice | null = null
+    let maneuverNotice: NaviNotice | null = null
+    if (tbt.upcomingStep && tbt.distanceToNextManeuver != null) {
+      const step = tbt.upcomingStep
+      const distLabel = formatNaviDistance(tbt.distanceToNextManeuver)
+      const lanes = step.bannerInstructions[0]?.lanes
+      if (lanes && lanes.length > 1 && tbt.distanceToNextManeuver < 300) {
+        laneNotice = {
+          type: 'lane',
+          lanes,
+          maneuverInstruction: step.instruction,
+          distanceLabel: distLabel,
+        }
+      }
+      maneuverNotice = {
+        type: 'maneuver',
+        maneuverType: step.maneuverType,
+        modifier: step.maneuverModifier,
+        instruction: step.instruction,
+        distanceLabel: distLabel,
+        streetName: step.name,
+      }
+    }
+    return pickHighestPriorityNotice({
+      blitzer: mapNotice?.type === 'blitzer' ? mapNotice : null,
+      hazard: mapNotice?.type === 'hazard' ? mapNotice : null,
+      reroute: mapNotice?.type === 'reroute' ? mapNotice : null,
+      lane: laneNotice,
+      maneuver: maneuverNotice,
+    })
+  }, [mapNotice, tbt.upcomingStep, tbt.distanceToNextManeuver])
 
   // Auto-Losfahren: sobald der SV den Feldmodus für einen aktiven Stop öffnet,
   // markieren wir den Termin als "losgefahren" — generiert Tracking-Token,
@@ -239,6 +283,20 @@ export default function FeldmodusClient({
   )
 
   // Sidebar-Inhalt einmal definiert, in Desktop-Sidebar + Mobile-Sheet wiederverwendet
+  // 2026-05-07: Exit aus arrived → idle. Auto-Arrive (Termin-Uhrzeit-
+  // Fallback) kann den SV ungewollt in den Vor-Ort-Modus schicken — dieser
+  // Handler bringt ihn zurück zur Anfahrt + reset arrivedFiredRef.
+  const handleBackToRoute = useCallback(async () => {
+    if (!aktuellerStop) return
+    const res = await exitArrivedToRoute(session.id, aktuellerStop.termin_id)
+    if (res.success) {
+      arrivedFiredRef.current = false
+      setSessionStatus('idle')
+    } else {
+      toast.error(res.error ?? 'Konnte nicht zur Anfahrt zurück')
+    }
+  }, [aktuellerStop, session.id])
+
   const sidebarContent =
     sessionStatus === 'arrived' && aktuellerStop ? (
       <SvFallakteView
@@ -246,11 +304,12 @@ export default function FeldmodusClient({
         sessionId={session.id}
         terminId={aktuellerStop.termin_id}
         onAdvanced={onAdvanced}
+        onBackToRoute={handleBackToRoute}
         onPauseBackToRoute={async () => {
           const res = await pauseFokusmodus(session.id)
           if (res.success) {
             setSessionStatus('paused')
-            router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+            router.push('/gutachter/heute?info=Tagesmodus+pausiert')
           } else {
             toast.error(res.error ?? 'Pausieren fehlgeschlagen')
           }
@@ -300,6 +359,11 @@ export default function FeldmodusClient({
           // aktiv war; bei kaltem Start ohne GPS sah das wie eine static
           // map aus.
           followSv={!!position}
+          // 2026-05-08 (C6): Hero-Pin Arrived-Choreographie
+          arrived={sessionStatus === 'arrived'}
+          // 2026-05-08 (C10): Map-side Notices (Blitzer/Hazard/Reroute)
+          // an den Notice-Stack des Clients
+          onMapNotice={setMapNotice}
         />
       </div>
 
@@ -323,20 +387,21 @@ export default function FeldmodusClient({
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(720px,92vw)] h-[min(85vh,800px)] flex flex-col overflow-hidden"
           >
             <SvFallakteView
-            fallId={aktuellerStop.fall_id}
-            sessionId={session.id}
-            terminId={aktuellerStop.termin_id}
-            onAdvanced={onAdvanced}
-            onPauseBackToRoute={async () => {
-              const res = await pauseFokusmodus(session.id)
-              if (res.success) {
-                setSessionStatus('paused')
-                router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
-              } else {
-                toast.error(res.error ?? 'Pausieren fehlgeschlagen')
-              }
-            }}
-          />
+              fallId={aktuellerStop.fall_id}
+              sessionId={session.id}
+              terminId={aktuellerStop.termin_id}
+              onAdvanced={onAdvanced}
+              onBackToRoute={handleBackToRoute}
+              onPauseBackToRoute={async () => {
+                const res = await pauseFokusmodus(session.id)
+                if (res.success) {
+                  setSessionStatus('paused')
+                  router.push('/gutachter/heute?info=Tagesmodus+pausiert')
+                } else {
+                  toast.error(res.error ?? 'Pausieren fehlgeschlagen')
+                }
+              }}
+            />
           </GlassPanel>
         </div>
       ) : (
@@ -366,6 +431,7 @@ export default function FeldmodusClient({
                 svPosition={position ? { lat: position.lat, lng: position.lng } : null}
                 svInGeofence={svInGeofence}
                 permissionState={permissionState}
+                distanceMeters={distanceMeters}
                 onAdvanced={onAdvanced}
                 onArrived={onArrived}
               />
@@ -418,10 +484,15 @@ export default function FeldmodusClient({
         </div>
       </aside>
 
-      {/* Banner-Overlays — z-20 schweben über der Map.
-          Desktop: oben rechts neben den Floating-Cards links (lg:right-4),
-          links bleibt frei für FokusHeader/AktuellerStopCard.
-          Mobile: oben über der Karte. */}
+      {/* 2026-05-08 (C10) NaviHud — bottom-mittig, Glass-Design mit
+          Mode-Tönung. Konsolidiert Blitzer/Hazard/Reroute/Lane/Maneuver
+          in einen einzigen Slot. Vorher waren TbtBanner (top-rechts) und
+          RerouteToast (top-edge) zwei konkurrierende Banner — der SV
+          wusste nicht wo er hinschauen sollte. */}
+      {tbtActive && <NaviHud notice={naviNotice} />}
+
+      {/* Reduzierter Top-Banner: nur noch Gesamt-ETA + Voice-Toggle.
+          Maneuver/Stau-Detail wandert in den NaviHud unten. */}
       {tbtActive && tbt.upcomingStep && (
         <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-md z-20">
           <TbtBanner
@@ -442,9 +513,23 @@ export default function FeldmodusClient({
           GPS-Zugriff verweigert — Auto-Ankunft und Live-Tracking deaktiviert.
         </div>
       )}
-      {error && permissionState !== 'denied' && (
+      {error && permissionState !== 'denied' && !staleSinceMs && (
         <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS-Warnung: {error}
+        </div>
+      )}
+      {/* 2026-05-08 (C13b): Stale-GPS-Banner — letzte Position älter als
+          30 s. Statt position auf null zu setzen behalten wir den letzten
+          guten Punkt + zeigen das hier deutlich an, damit der SV weiß
+          dass die Live-Pos vielleicht überholt ist (Funkloch / Tunnel /
+          Tiefgarage). Pre-existing GPS-Warnung wird in dem Fall
+          unterdrückt — Stale ist die spezifischere Info. */}
+      {staleSinceMs != null && permissionState !== 'denied' && (
+        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+          GPS unsicher — letzte Position vor{' '}
+          {staleSinceMs < 60_000
+            ? `${Math.round(staleSinceMs / 1000)} s`
+            : `${Math.round(staleSinceMs / 60_000)} min`}
         </div>
       )}
       {/* Wake-Lock-Hinweis: bottom-20 (above Inbox-FAB der bottom-4 right-4

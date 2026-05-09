@@ -7,11 +7,22 @@
 import { NavigationIcon } from 'lucide-react'
 import type { GeoTrackingState } from '@/hooks/useGeoTracking'
 
-export function SvUnterwegsInfo({ tracking }: { tracking: GeoTrackingState }) {
+type Props = {
+  tracking: GeoTrackingState
+  /** Fallback: Termin-Startzeit wenn GPS nicht verfügbar (ISO-String) */
+  terminStartIso?: string | null
+}
+
+export function SvUnterwegsInfo({ tracking, terminStartIso }: Props) {
   if (!tracking.isTracking) return null
 
   const ankunft = tracking.etaAnkunftzeit
     ? tracking.etaAnkunftzeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+    : null
+
+  // Fallback: Termin-Startzeit anzeigen wenn keine GPS-ETA verfügbar
+  const terminFallback = !ankunft && terminStartIso
+    ? new Date(terminStartIso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
     : null
 
   return (
@@ -22,7 +33,9 @@ export function SvUnterwegsInfo({ tracking }: { tracking: GeoTrackingState }) {
         <span className="text-sm text-claimondo-light-blue ml-2">
           {ankunft
             ? `· Ankunft ca. ${ankunft}${tracking.etaMinuten ? ` (${tracking.etaMinuten} Min.)` : ''}`
-            : '· Ankunft wird berechnet…'}
+            : terminFallback
+              ? `· Termin um ${terminFallback} Uhr`
+              : '· Ankunft wird berechnet…'}
         </span>
       </div>
     </div>

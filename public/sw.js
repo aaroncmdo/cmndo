@@ -1,11 +1,26 @@
 // KFZ-171: Claimondo Service Worker — Offline-Cache fuer statische Assets.
 // Push-Notifications vorbereitet (Listener registriert, wird spaeter aktiviert).
+//
+// 2026-05-08 (C13) Offline-Resilience: SVs fahren oft durch Funkloecher
+// (Eifel/Sauerland) oder Tiefgaragen ohne GPS und ohne Netz. Damit der
+// Feldmodus dort nicht komplett tot ist, cachen wir zusaetzlich:
+//   - /tts/* (TTS-MP3s + Manifest) — Voice-Ansagen weiter funktional
+//   - Mapbox-Tiles + Sprite + Style — letzte erfolgreich-geladene Tiles
+//     bleiben offline verfuegbar (stale-while-revalidate)
+// Cache-Versionen-Bump bei jedem SW-Asset-Update wichtig, sonst stuck.
 
-const CACHE_NAME = 'claimondo-v1'
+const CACHE_NAME = 'claimondo-v2'
+const TTS_CACHE = 'claimondo-tts-v1'
+const TILE_CACHE = 'claimondo-tiles-v1'
 const STATIC_ASSETS = [
   '/icons/icon.svg',
   '/icons/icon-maskable.svg',
   '/manifest.json',
+  '/tts/manifest.json',
+]
+const TILE_HOSTS = [
+  'api.mapbox.com',
+  'events.mapbox.com', // wird ignoriert
 ]
 
 // Install: statische Assets cachen
@@ -20,8 +35,12 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+      Promise.all(
+        keys
+          .filter((k) => k !== CACHE_NAME && k !== TTS_CACHE && k !== TILE_CACHE)
+          .map((k) => caches.delete(k)),
+      ),
+    ),
   )
   self.clients.claim()
 })
@@ -43,6 +62,42 @@ self.addEventListener('fetch', (event) => {
   if (STATIC_ASSETS.some((a) => url.pathname === a) || url.pathname.startsWith('/icons/')) {
     event.respondWith(
       caches.match(event.request).then((cached) => cached || fetch(event.request))
+    )
+    return
+  }
+
+  // 2026-05-08 (C13): TTS-Phrasen (statische MP3s aus dem Pre-Generation-
+  // Lauf). Stale-while-revalidate damit Voice auch offline weiter spielt
+  // sobald die Phrase einmal angesprochen wurde.
+  if (url.pathname.startsWith('/tts/')) {
+    event.respondWith(
+      caches.open(TTS_CACHE).then(async (cache) => {
+        const cached = await cache.match(event.request)
+        const networkPromise = fetch(event.request).then((res) => {
+          if (res.ok) cache.put(event.request, res.clone())
+          return res
+        }).catch(() => cached)
+        return cached || networkPromise
+      }),
+    )
+    return
+  }
+
+  // 2026-05-08 (C13): Mapbox-Tiles + Style + Sprite. Stale-while-
+  // revalidate damit der SV in einem Funkloch die letzten Tiles noch
+  // sieht. Quota-Begrenzung über Browser-Default (Cache-Storage hat
+  // typisch 50-200 MB pro Origin — reicht für Mapbox-Standard auf
+  // ~500 km²).
+  if (url.hostname === 'api.mapbox.com' && (url.pathname.includes('/tiles/') || url.pathname.includes('/sprite') || url.pathname.includes('/styles/') || url.pathname.includes('/v4/'))) {
+    event.respondWith(
+      caches.open(TILE_CACHE).then(async (cache) => {
+        const cached = await cache.match(event.request)
+        const networkPromise = fetch(event.request).then((res) => {
+          if (res.ok) cache.put(event.request, res.clone()).catch(() => {})
+          return res
+        }).catch(() => cached)
+        return cached || networkPromise
+      }),
     )
     return
   }

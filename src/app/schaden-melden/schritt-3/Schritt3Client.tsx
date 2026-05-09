@@ -30,6 +30,12 @@ type OcrExtracted = {
   fahrzeug_baujahr: number | null
   fahrzeug_hersteller: string | null
   fahrzeug_modell: string | null
+  // Halter-Felder (werden bei ist_fahrzeughalter=false aus OCR angezeigt)
+  halter_vorname: string | null
+  halter_nachname: string | null
+  halter_strasse: string | null
+  halter_plz: string | null
+  halter_stadt: string | null
 }
 
 type OcrResponse = {
@@ -40,13 +46,16 @@ type OcrResponse = {
   error?: string
 }
 
-export function Schritt3Client({ leadId }: { leadId: string }) {
+export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; istFahrzeughalter: boolean }) {
   const router = useRouter()
   const markZb1Erfasst = useFlowStore((s) => s.markZb1Erfasst)
   const setCurrentStep = useFlowStore((s) => s.setCurrentStep)
 
   const [uiMode, setUiMode] = useState<UiMode>('idle')
   const [confidence, setConfidence] = useState<number | null>(null)
+  const [ocrHalter, setOcrHalter] = useState<{
+    vorname: string; nachname: string; strasse: string; plz: string; stadt: string
+  }>({ vorname: '', nachname: '', strasse: '', plz: '', stadt: '' })
   const [pending, startTransition] = useTransition()
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const uploadInputRef = useRef<HTMLInputElement>(null)
@@ -102,6 +111,16 @@ export function Schritt3Client({ leadId }: { leadId: string }) {
           erstzulassung: json.extracted.erstzulassung ?? '',
           kennzeichen: json.extracted.kennzeichen ?? '',
         })
+        // Halter-Felder aus OCR vorausfüllen (bei ist_fahrzeughalter=false)
+        if (!istFahrzeughalter) {
+          setOcrHalter({
+            vorname: json.extracted.halter_vorname ?? '',
+            nachname: json.extracted.halter_nachname ?? '',
+            strasse: json.extracted.halter_strasse ?? '',
+            plz: json.extracted.halter_plz ?? '',
+            stadt: json.extracted.halter_stadt ?? '',
+          })
+        }
       }
 
       if (json.lowConfidence) {
@@ -120,7 +139,8 @@ export function Schritt3Client({ leadId }: { leadId: string }) {
 
   const onSubmit = handleSubmit((values) => {
     startTransition(async () => {
-      const result = await updateLeadZb1Manual(leadId, values, uiMode === 'manual')
+      const halterPayload = !istFahrzeughalter ? ocrHalter : undefined
+      const result = await updateLeadZb1Manual(leadId, values, uiMode === 'manual', halterPayload)
       if (!result.success) {
         toast.error(result.error)
         return
@@ -155,6 +175,11 @@ export function Schritt3Client({ leadId }: { leadId: string }) {
             <strong>A</strong> (Kennzeichen), <strong>B</strong> (Erstzulassung),{' '}
             <strong>E</strong> (FIN) und <strong>2.1/2.2</strong> (HSN/TSN) müssen
             gut lesbar sein.
+            {!istFahrzeughalter && (
+              <span className="mt-1 block text-claimondo-navy font-medium">
+                Wir lesen außerdem die Halterdaten (Felder C.1–C.4) aus — bitte auch diesen Bereich des Scheins abbilden.
+              </span>
+            )}
           </p>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -296,6 +321,82 @@ export function Schritt3Client({ leadId }: { leadId: string }) {
           />
         </div>
       </div>
+
+      {/* Halter-Daten — nur wenn Fahrer ≠ Fahrzeughalter */}
+      {!istFahrzeughalter && (
+        <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-claimondo-ondo" />
+            <p className="text-sm font-semibold text-claimondo-navy">
+              Halterdaten (aus Fahrzeugschein)
+            </p>
+          </div>
+          {(uiMode === 'preview' && (ocrHalter.vorname || ocrHalter.nachname)) ? (
+            <p className="text-xs text-green-700 bg-green-50 rounded px-3 py-2 border border-green-200">
+              Halterdaten erfolgreich aus Fahrzeugschein ausgelesen — bitte prüfen.
+            </p>
+          ) : (
+            <p className="text-xs text-claimondo-ondo">
+              Bitte Halterdaten manuell eingeben (aus Fahrzeugschein Feld C.1–C.4).
+            </p>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="halter_vorname">Vorname Halter</Label>
+              <input
+                id="halter_vorname"
+                type="text"
+                value={ocrHalter.vorname}
+                onChange={(e) => setOcrHalter((p) => ({ ...p, vorname: e.target.value }))}
+                className="mt-1 w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+              />
+            </div>
+            <div>
+              <Label htmlFor="halter_nachname">Nachname Halter</Label>
+              <input
+                id="halter_nachname"
+                type="text"
+                value={ocrHalter.nachname}
+                onChange={(e) => setOcrHalter((p) => ({ ...p, nachname: e.target.value }))}
+                className="mt-1 w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="halter_strasse">Straße + Hausnr.</Label>
+            <input
+              id="halter_strasse"
+              type="text"
+              value={ocrHalter.strasse}
+              onChange={(e) => setOcrHalter((p) => ({ ...p, strasse: e.target.value }))}
+              className="mt-1 w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="halter_plz">PLZ</Label>
+              <input
+                id="halter_plz"
+                type="text"
+                maxLength={5}
+                value={ocrHalter.plz}
+                onChange={(e) => setOcrHalter((p) => ({ ...p, plz: e.target.value }))}
+                className="mt-1 w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+              />
+            </div>
+            <div>
+              <Label htmlFor="halter_stadt">Ort</Label>
+              <input
+                id="halter_stadt"
+                type="text"
+                value={ocrHalter.stadt}
+                onChange={(e) => setOcrHalter((p) => ({ ...p, stadt: e.target.value }))}
+                className="mt-1 w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <button

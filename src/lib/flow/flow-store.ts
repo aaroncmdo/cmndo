@@ -23,6 +23,10 @@ export type FlowState = {
   gegnerDatenErfasst: boolean
   // Schritt 3
   zb1Erfasst: boolean
+  // Konditionelle Flow-Flags aus Schritt 1 (bestimmen Schritte und Validierungen)
+  istFahrzeughalter: boolean
+  hatVorschaeden: boolean
+  schuldfrage: 'gegner' | 'unklar' | 'eigenverantwortung' | null
   // Makler-Attribution
   promotionCode: string | null
 
@@ -34,6 +38,7 @@ export type FlowState = {
   setDatResult: (r: unknown) => void
   markGegnerErfasst: () => void
   markZb1Erfasst: () => void
+  setFlowFlags: (flags: { istFahrzeughalter: boolean; hatVorschaeden: boolean; schuldfrage: 'gegner' | 'unklar' | 'eigenverantwortung' }) => void
   setPromotionCode: (code: string) => void
   reset: () => void
 }
@@ -48,6 +53,7 @@ type InitialState = Omit<
   | 'setDatResult'
   | 'markGegnerErfasst'
   | 'markZb1Erfasst'
+  | 'setFlowFlags'
   | 'setPromotionCode'
   | 'reset'
 >
@@ -63,6 +69,9 @@ const INITIAL: InitialState = {
   datResult: null,
   gegnerDatenErfasst: false,
   zb1Erfasst: false,
+  istFahrzeughalter: true,
+  hatVorschaeden: false,
+  schuldfrage: null,
   promotionCode: null,
 }
 
@@ -83,6 +92,7 @@ export const useFlowStore = create<FlowState>()(
       setDatResult: (datResult) => set({ datResult }),
       markGegnerErfasst: () => set({ gegnerDatenErfasst: true }),
       markZb1Erfasst: () => set({ zb1Erfasst: true }),
+      setFlowFlags: (flags) => set(flags),
       setPromotionCode: (promotionCode) => set({ promotionCode }),
       reset: () => set(INITIAL),
     }),

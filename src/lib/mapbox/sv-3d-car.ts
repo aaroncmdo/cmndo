@@ -100,12 +100,31 @@ export async function tryAddSvCar3dModel(
       }
       // Layer erst anlegen, wenn die Source geladen ist — sonst
       // rendert Mapbox einen leeren Slot.
+      // 2026-05-08 (C11): Paint-Properties für PBR-Look. Ohne diese
+      // rendert Mapbox-model den GLB mit Default-Material das sehr
+      // matt wirkt. Roughness 0.35 gibt subtile Carlack-Reflexionen,
+      // emissive-strength 0.15 hält das Auto auch in dunklen Buildings
+      // sichtbar. Scale 1.6 weil Default-Grösse bei Zoom 17.8 zu klein
+      // wirkte. Cast/Receive-Shadows ergänzt für Tageszeit-Realismus.
       try {
         map.addLayer({
           id: SV_CAR_3D_LAYER_ID,
           type: 'model',
           source: SV_CAR_3D_SOURCE_ID,
-        })
+          slot: 'top',
+          paint: {
+            // PBR-Materialwerte: Roughness 0.25 gibt mehr Carlack-Glanz als 0.35.
+            // AO-Intensity 0.85 zeichnet Spalt-Schatten (Türen, Radkästen) plastisch.
+            // Emissive-Strength 0.12 hält Sichtbarkeit in Nacht-Szenen.
+            'model-roughness': 0.25,
+            'model-emissive-strength': 0.12,
+            'model-ambient-occlusion-intensity': 0.85,
+            'model-scale': [1.6, 1.6, 1.6],
+            'model-cast-shadows': true,
+            'model-receive-shadows': true,
+            'model-cutoff-fade-range': 0.2,
+          },
+        } as Parameters<typeof map.addLayer>[0])
       } catch {
         try { map.removeSource(SV_CAR_3D_SOURCE_ID) } catch { /* noop */ }
         resolve(null)

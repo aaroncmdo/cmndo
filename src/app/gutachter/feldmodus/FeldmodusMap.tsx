@@ -14,13 +14,17 @@ import {
   mapboxgl,
   addSvCarMarker,
   addKundeMarker,
-  upsertRouteLayer,
+  upsertTrafficRouteLayer,
   fetchDrivingRoute,
-  MAPBOX_STYLE_STANDARD,
+  type TrafficRoute,
+  MAPBOX_STYLE_STANDARD_SATELLITE,
   DEFAULT_FIELD_MAP_CONFIG,
   getMapboxLightPreset,
   tryAddSvCar3dModel,
   type SvCar3dHandle,
+  tryAddSvCarThreeJs,
+  getSvCarObjUrl,
+  type SvCarThreeHandle,
   attachHeroPin3d,
   type HeroPin3dHandle,
   attachGoogle3dTiles,
@@ -34,11 +38,27 @@ import {
   bboxForRoute,
   type BlitzerLayerHandle,
   type BlitzerFeature,
+  attachHazardLayer,
+  fetchHereHazards,
+  type HazardFeature,
+  type HazardLayerHandle,
+  attachFlowLayer,
+  fetchHereFlow,
+  type FlowLayerHandle,
+  pickFasterAlternative,
+  findHazardOnRoute,
+  distanceToHazardM,
+  REROUTE_POLL_INTERVAL_MS,
+  type ProposedReroute,
 } from '@/lib/mapbox'
-import { haversineMetersLngLat, speakInstruction } from '@/lib/mapbox/turn-by-turn'
+import type { NaviNotice } from './NaviHud'
+import { formatNaviDistance } from './NaviHud'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
+import { sampleWeatherAlongRoute, clusterWeatherSamples } from '@/lib/mapbox/weather-route'
+import { attachWeatherFx, type WeatherFxHandle } from '@/lib/mapbox/weather-fx'
 import type { FeldmodusStop, FeldmodusSV } from './page'
 import type { MapboxLightPreset } from '@/lib/mapbox/light-preset'
+import { haversineMetersLngLat, speakInstruction } from '@/lib/mapbox/turn-by-turn'
 
 type FogSpec = {
   color: string
@@ -107,6 +127,19 @@ export interface FeldmodusMapProps {
   svPosition: { lat: number; lng: number; heading: number | null } | null
   /** Wenn true → Map folgt SV-Position mit bearing=heading + close zoom (TbT). */
   followSv?: boolean
+  /**
+   * 2026-05-08 (C6): Hero-Pin wechselt bei `arrived` auf grünen Glow +
+   * doppelte Pulse-Frequenz. Wird vom Caller gesetzt sobald die Session
+   * den Status 'arrived' erreicht.
+   */
+  arrived?: boolean
+  /**
+   * 2026-05-08 (C10): Map meldet ihre internen Notice-Trigger (Blitzer-
+   * Anflug, Hazard-on-Route, Reroute-Vorschlag) an den Caller, der sie
+   * mit tbt-Maneuver/Lane kombiniert und im NaviHud rendert.
+   * null = kein Notice der Map aktuell.
+   */
+  onMapNotice?: (notice: NaviNotice | null) => void
 }
 
 export default function FeldmodusMap({
@@ -115,25 +148,52 @@ export default function FeldmodusMap({
   aktuellerStopIndex,
   svPosition,
   followSv = false,
+  arrived = false,
+  onMapNotice,
 }: FeldmodusMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
   const svMarkerRef = useRef<Marker | null>(null)
   const sv3dHandleRef = useRef<SvCar3dHandle | null>(null)
+  // 2026-05-08 (C11b): Three.js-OBJ-Variante des Auto-Renderers.
+  // Aktiv nur wenn NEXT_PUBLIC_SV_CAR_OBJ_URL gesetzt ist.
+  const svThreeHandleRef = useRef<SvCarThreeHandle | null>(null)
   const heroPinRef = useRef<HeroPin3dHandle | null>(null)
   const google3dTilesRef = useRef<Google3dTilesHandle | null>(null)
   const cesium3dTilesRef = useRef<Cesium3dTilesHandle | null>(null)
   const blitzerRef = useRef<BlitzerLayerHandle | null>(null)
-  // 2026-05-07: Blitzer-Features für Voice-Distanz-Check.
   const blitzerFeaturesRef = useRef<BlitzerFeature[]>([])
-  // Set der bereits gewarnten Blitzer-IDs damit nicht jeder Frame ne Stimme ausspuckt.
   const warnedBlitzerIdsRef = useRef<Set<string>>(new Set())
+  const hazardsRef = useRef<HazardLayerHandle | null>(null)
+  const flowRef = useRef<FlowLayerHandle | null>(null)
+  // 2026-05-08 (C12): Wetter-Animations-Layer (Three.js Particles für
+  // Schnee/Regen/Sturm an Wetter-Hotspots der Route). Wird beim primary-
+  // Route-Update mit-aktualisiert.
+  const weatherFxRef = useRef<WeatherFxHandle | null>(null)
   const stopMarkersRef = useRef<Marker[]>([])
   const tokenMissing = useRef(false)
   // 2026-05-07 Phase 3b: Wetter-Code (OpenWeatherMap weather_id) am
   // aktuellen Stop. Modifiziert Fog-Tinting (dichter bei Regen, hellgrau
   // bei Schnee, fast-blind bei Nebel).
   const [weatherId, setWeatherId] = useState<number | null>(null)
+  // 2026-05-08 PR B2: Live-Reroute-State.
+  // primaryRouteRef speichert die aktuell gerenderte Route für Hazard-on-
+  // Route-Detection und Polling-Vergleich. Hazards werden im selben Effect
+  // wie die Route geholt und in hazardsDataRef gepuffert.
+  const primaryRouteRef = useRef<TrafficRoute | null>(null)
+  const hazardsDataRef = useRef<HazardFeature[]>([])
+  const [proposedReroute, setProposedReroute] = useState<ProposedReroute | null>(null)
+  const proposedHazardSeenIdsRef = useRef<Set<string>>(new Set())
+  // 2026-05-08 (C10): Blitzer-Notice für NaviHud — separat vom Voice-
+  // Trigger damit das visuelle Banner unabhängig vom Audio-Cooldown
+  // updaten kann (Audio fired einmal pro Threshold, Visual zeigt
+  // dauerhaft solange Distance < 600 m).
+  const [blitzerNotice, setBlitzerNotice] = useState<NaviNotice | null>(null)
+  // 2026-05-08 Aaron-Brief: Two-Finger-Rotation/Pitch. Wenn der User
+  // manuell rotiert/zoomt/dragged, follow-Effect pausiert damit die
+  // Camera nicht alle 800ms zurückspringt. Reset-Button (bottom-right)
+  // setzt das wieder zurück.
+  const [manualCameraOverride, setManualCameraOverride] = useState(false)
 
   const aktuellerStop = stops[aktuellerStopIndex] ?? null
 
@@ -159,15 +219,35 @@ export default function FeldmodusMap({
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: MAPBOX_STYLE_STANDARD,
+      style: MAPBOX_STYLE_STANDARD_SATELLITE,
       center: fallbackCenter,
       zoom: DEFAULT_FIELD_MAP_CONFIG.initialZoom,
       pitch: DEFAULT_FIELD_MAP_CONFIG.pitch,
       bearing: DEFAULT_FIELD_MAP_CONFIG.bearing,
       attributionControl: false,
+      // 2026-05-08 Aaron-Brief: Two-Finger-Pinch-Zoom-Rotate explizit
+      // einschalten. Default ist true, aber wir setzen es bewusst damit
+      // klar ist: User kann mit zwei Fingern Bearing + Pitch ändern.
+      touchZoomRotate: true,
+      touchPitch: true,
+      pitchWithRotate: true,
+      dragRotate: true,
     })
 
     mapRef.current = map
+
+    // 2026-05-08 (Aaron-Brief): User-Interaction-Detection. Wenn der SV
+    // mit zwei Fingern dreht/pitched/zoomed, sollen wir den follow-Effect
+    // pausieren — sonst springt die Camera alle 800ms zurück. e.originalEvent
+    // ist nur bei Echt-User-Events gesetzt (programmatisches easeTo hat keins).
+    const onUserGesture = (e: unknown) => {
+      const ev = e as { originalEvent?: Event } | undefined
+      if (ev?.originalEvent) setManualCameraOverride(true)
+    }
+    map.on('dragstart', onUserGesture)
+    map.on('rotatestart', onUserGesture)
+    map.on('pitchstart', onUserGesture)
+    map.on('zoomstart', onUserGesture)
 
     // 2026-05-07 (Phase 1 hyperrealistic-roadmap): Light-Preset + 3D-Modelle
     // + Atmosphäre. Fog erzeugt Horizon-Tiefe; Terrain liefert globale
@@ -235,18 +315,44 @@ export default function FeldmodusMap({
         }
         return [10.4515, 51.1657]
       })()
-      tryAddSvCar3dModel(map, { lngLat: initialPose, heading: 0 })
-        .then((handle) => {
-          if (!handle) return
-          sv3dHandleRef.current = handle
-          // 3D ist da — falls bereits ein 2D-Fallback-Marker entstanden
-          // ist, entfernen.
+      // 2026-05-08 Aaron-Smoke: Mapbox-`model`-Layer rendert das vorhandene
+      // GLB als Box (Material/Normals defekt nach OBJ→glb-Konvertierung).
+      // Three.js-OBJ-Pfad lädt sehr langsam und ist in der Praxis nicht
+      // zuverlässig genug. Default ist jetzt: SVG-Top-Down-Marker (sv-marker.ts)
+      // als sauberer Mini-Car-Sprite. 3D-Pfad lässt sich opt-in aktivieren über
+      // NEXT_PUBLIC_SV_CAR_3D=1 — dann rotiert die alte Pipeline.
+      const enable3d = process.env.NEXT_PUBLIC_SV_CAR_3D === '1'
+      if (enable3d) {
+        const objUrl = getSvCarObjUrl()
+        const onCarReady = () => {
           if (svMarkerRef.current) {
             svMarkerRef.current.remove()
             svMarkerRef.current = null
           }
-        })
-        .catch(() => { /* fail silent — 2D-Fallback bleibt aktiv */ })
+        }
+        if (objUrl) {
+          tryAddSvCarThreeJs(map, { lngLat: initialPose, heading: 0, scale: 8 }, { objUrl })
+            .then((handle) => {
+              if (handle) {
+                svThreeHandleRef.current = handle
+                onCarReady()
+                return
+              }
+              return tryAddSvCar3dModel(map, { lngLat: initialPose, heading: 0 }).then((h) => {
+                if (h) { sv3dHandleRef.current = h; onCarReady() }
+              })
+            })
+            .catch(() => { /* SVG-Fallback bleibt aktiv */ })
+        } else {
+          tryAddSvCar3dModel(map, { lngLat: initialPose, heading: 0 })
+            .then((handle) => {
+              if (!handle) return
+              sv3dHandleRef.current = handle
+              onCarReady()
+            })
+            .catch(() => { /* SVG-Fallback bleibt aktiv */ })
+        }
+      }
 
       // Stop-Pins setzen (Nummer im Marker als Initials verwendet)
       stops.forEach((stop, idx) => {
@@ -285,23 +391,31 @@ export default function FeldmodusMap({
           console.error('[FeldmodusMap] google-3d-tiles attach failed:', err)
         })
       }
-      // Initial-Camera: nahtlose Fortsetzung der Heute→Feldmodus-Intro-
-      // Animation. Pitch 60 + enger Zoom + Bearing Richtung erstem Stop —
-      // KEIN Wide-Bounds-Fit (würde den Pitch auf 0 reseten und das
-      // Driving-Gefühl zerstören). Gibt es keinen Stop mit Koordinaten,
-      // bleibt die Map auf dem fallbackCenter.
+      // 2026-05-07 (Aaron-Smoke): Initial-Camera zentriert auf SV, nicht
+      // auf den Stop. Vorher dreht die Camera „um den Dom", der SV-Pin
+      // war winzig irgendwo am Rand. Jetzt: SV-Position ist Mitte, Bearing
+      // zeigt Richtung Stop (so dass beim Vorwärtsfahren der Stop oben ist).
       const startStop =
         stops[Math.max(0, aktuellerStopIndex)] ??
         stops.find((s) => s.lat != null && s.lng != null) ??
         null
-      if (startStop && startStop.lat != null && startStop.lng != null) {
-        const stopLng = startStop.lng
-        const stopLat = startStop.lat
+      const carCenter: [number, number] | null =
+        sv.standort_lng != null && sv.standort_lat != null
+          ? [sv.standort_lng, sv.standort_lat]
+          : startStop && startStop.lat != null && startStop.lng != null
+            ? [startStop.lng, startStop.lat]
+            : null
+      if (carCenter) {
         let bearing = DEFAULT_FIELD_MAP_CONFIG.bearing
-        if (sv.standort_lng != null && sv.standort_lat != null) {
-          const φ1 = (sv.standort_lat * Math.PI) / 180
-          const φ2 = (stopLat * Math.PI) / 180
-          const Δλ = ((stopLng - sv.standort_lng) * Math.PI) / 180
+        if (
+          startStop &&
+          startStop.lat != null &&
+          startStop.lng != null &&
+          (carCenter[0] !== startStop.lng || carCenter[1] !== startStop.lat)
+        ) {
+          const φ1 = (carCenter[1] * Math.PI) / 180
+          const φ2 = (startStop.lat * Math.PI) / 180
+          const Δλ = ((startStop.lng - carCenter[0]) * Math.PI) / 180
           const y = Math.sin(Δλ) * Math.cos(φ2)
           const x =
             Math.cos(φ1) * Math.sin(φ2) -
@@ -309,10 +423,18 @@ export default function FeldmodusMap({
           bearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
         }
         map.jumpTo({
-          center: [stopLng, stopLat],
-          zoom: 15,
-          pitch: DEFAULT_FIELD_MAP_CONFIG.pitch,
+          center: carCenter,
+          // 2026-05-08 (C7): Pitch 70 + Zoom 18.5 ließ die Camera in
+          // Innenstadt-Lagen durch Hochhäuser durchbrechen — Aaron-Smoke
+          // „darf nicht in die Gebäude rein". Pitch auf 62° entschärft
+          // das (Camera schaut mehr „über" als „durch"), zoom 17.8 gibt
+          // mehr Skyline-Übersicht. Top-padding noch heavier damit Pin
+          // im unteren Viertel sitzt und die Strecke voraus mehr Platz
+          // hat. Optisch immer noch GMaps-Navi-Look.
+          zoom: 17.8,
+          pitch: 62,
           bearing,
+          padding: { top: 360, bottom: 60, left: 40, right: 40 },
         })
       }
     })
@@ -339,6 +461,8 @@ export default function FeldmodusMap({
       svMarkerRef.current = null
       sv3dHandleRef.current?.remove()
       sv3dHandleRef.current = null
+      svThreeHandleRef.current?.remove()
+      svThreeHandleRef.current = null
       heroPinRef.current?.remove()
       heroPinRef.current = null
       google3dTilesRef.current?.remove()
@@ -347,6 +471,12 @@ export default function FeldmodusMap({
       cesium3dTilesRef.current = null
       blitzerRef.current?.remove()
       blitzerRef.current = null
+      hazardsRef.current?.remove()
+      hazardsRef.current = null
+      flowRef.current?.remove()
+      flowRef.current = null
+      weatherFxRef.current?.remove()
+      weatherFxRef.current = null
       stopMarkersRef.current.forEach((m) => m.remove())
       stopMarkersRef.current = []
       map.remove()
@@ -399,32 +529,87 @@ export default function FeldmodusMap({
       const fog = applyWeatherToFog(fogForLightPreset(preset), weatherId)
       map.setFog(fog as Parameters<typeof map.setFog>[0])
       heroPinRef.current?.updateLight(preset)
+      heroPinRef.current?.setArrived(arrived)
     } catch { /* style not ready yet */ }
-  }, [aktuellerStopIndex, stops, weatherId])
+  }, [aktuellerStopIndex, stops, weatherId, arrived])
 
-  // 2026-05-07 Blitzer-Voice: bei jedem position-Update Distance zu allen
-  // Blitzern in der Route-Bbox checken. Wenn < 500m und nicht schon gewarnt
-  // → speakInstruction. Stufen: 500m / 200m je Blitzer einmal.
+  // 2026-05-08 Blitzer-Voice + (C10) NaviHud-Notice. Bei jedem GPS-
+  // Update prüfen wir die Distance zu allen geladenen Blitzern. Sobald
+  // einer < 500 m bzw. < 200 m ist, sprechen wir die Anweisung aus UND
+  // melden eine `blitzer`-Notice an den Caller — der NaviHud zeigt den
+  // glassy roten Banner mit Distanz + ggf. Tempolimit.
+  // Auto-Clear: wenn der nächste Blitzer > 500 m entfernt ist (oder
+  // keine mehr in Range), notice=null.
   useEffect(() => {
     if (!svPosition) return
     const features = blitzerFeaturesRef.current
-    if (features.length === 0) return
+    if (features.length === 0) {
+      onMapNotice?.(null)
+      return
+    }
+    let nearest: { distM: number; isMobile: boolean; vmax: number | null } | null = null
     for (const f of features) {
       const [lng, lat] = f.geometry.coordinates
       const distM = haversineMetersLngLat([svPosition.lng, svPosition.lat], [lng, lat])
-      const id = (f.properties as { id: string }).id
+      const id = (f.properties as { id: string; type?: string }).id
+      const isMobile = (f.properties as { type?: string }).type === '1'
+      const vmaxRaw = (f.properties as { vmax?: string }).vmax
+      const vmax = vmaxRaw != null ? Number.parseInt(vmaxRaw, 10) : null
+      const label = isMobile ? 'Achtung, mobiler Blitzer' : 'Achtung, Blitzer'
       const key500 = `${id}-500`
       const key200 = `${id}-200`
       if (distM <= 200 && !warnedBlitzerIdsRef.current.has(key200)) {
-        speakInstruction('Achtung, Blitzer in 200 Metern')
+        speakInstruction(`${label} in 200 Metern`)
         warnedBlitzerIdsRef.current.add(key200)
-        warnedBlitzerIdsRef.current.add(key500) // 500er-Warnung wäre redundant
+        warnedBlitzerIdsRef.current.add(key500)
       } else if (distM <= 500 && !warnedBlitzerIdsRef.current.has(key500)) {
-        speakInstruction('Achtung, Blitzer in 500 Metern')
+        speakInstruction(`${label} in 500 Metern`)
         warnedBlitzerIdsRef.current.add(key500)
       }
+      if (distM <= 600 && (!nearest || distM < nearest.distM)) {
+        nearest = { distM, isMobile, vmax: Number.isFinite(vmax) ? vmax : null }
+      }
+    }
+    if (nearest) {
+      setBlitzerNotice({
+        type: 'blitzer',
+        mobile: nearest.isMobile,
+        distanceLabel: formatNaviDistance(nearest.distM),
+        vmaxKmh: nearest.vmax,
+      })
+    } else {
+      setBlitzerNotice(null)
     }
   }, [svPosition])
+
+  // 2026-05-08 (C10) Notice-Combiner: meldet höchste-Prio-Notice an
+  // den Caller (FeldmodusClient → NaviHud). Prio: Blitzer > Reroute
+  // (Reroute deckt sowohl 'faster' als auch 'hazard'-Reason ab).
+  // Reroute-Notice wird hier dynamisch aus dem proposedReroute-State
+  // gebaut + Accept/Dismiss-Handler eingebunden.
+  useEffect(() => {
+    if (!onMapNotice) return
+    if (blitzerNotice) {
+      onMapNotice(blitzerNotice)
+      return
+    }
+    if (proposedReroute) {
+      onMapNotice({
+        type: 'reroute',
+        reason: proposedReroute.reason,
+        etaSavedSec: proposedReroute.etaSavedSec,
+        hazardLabel: proposedReroute.hazardLabel,
+        onAccept: () => handleAcceptReroute(),
+        onDismiss: () => handleDismissReroute(),
+      })
+      return
+    }
+    onMapNotice(null)
+    // handleAcceptReroute/handleDismissReroute ändern sich pro render —
+    // deps lassen wir absichtlich auf den State-Hauptachsen, sonst
+    // re-emittet jedes Render unnötig.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blitzerNotice, proposedReroute, onMapNotice])
 
   // SV-Marker aktualisieren wenn svPosition sich ändert.
   // 2026-05-07: 3D-Modell-Pfad bevorzugt — wenn `sv3dHandleRef` da ist,
@@ -435,6 +620,13 @@ export default function FeldmodusMap({
     if (!map) return
     if (!svPosition) return
 
+    if (svThreeHandleRef.current) {
+      svThreeHandleRef.current.update({
+        lngLat: [svPosition.lng, svPosition.lat],
+        heading: svPosition.heading,
+      })
+      return
+    }
     if (sv3dHandleRef.current) {
       sv3dHandleRef.current.update({
         lngLat: [svPosition.lng, svPosition.lat],
@@ -464,13 +656,39 @@ export default function FeldmodusMap({
     const map = mapRef.current
     if (!map) return
 
-    // TbT-Modus: Map folgt SV mit Heading-Rotation, nahem Zoom, hohem Pitch
+    // TbT-Modus: Map folgt SV mit Heading-Rotation (oder Bearing zum Stop
+    // wenn kein heading da), nahem Zoom, hohem Pitch. 2026-05-07: bei
+    // missing heading berechnen wir das Bearing vom SV → Stop, sonst
+    // zeigt die Camera nordwärts statt in Fahrtrichtung.
+    // 2026-05-08: Zoom 18.5 + Pitch 70 + bottom-heavy padding für den
+    // Google-Maps-Navi-Look. Der SV-Pin sitzt im unteren Drittel, davor die
+    // Strecke. Vorher (zoom 17, kein padding) wirkte die Karte „aus dem
+    // Hubschrauber" — Aaron-Feedback nach dem 08.05. Smoke-Test.
     if (followSv && svPosition) {
+      // 2026-05-08 Aaron-Brief: User-Override respektieren — wenn er
+      // gerade selbst die Camera dreht/pitcht, NICHT zurückspringen.
+      // Reset-Button (bottom-right) clears manualCameraOverride und
+      // triggert ein einmaliges easeTo zur Default-Pose.
+      if (manualCameraOverride) return
+      let bearing = svPosition.heading ?? 0
+      if (svPosition.heading == null && aktuellerStop?.lat != null && aktuellerStop?.lng != null) {
+        const φ1 = (svPosition.lat * Math.PI) / 180
+        const φ2 = (aktuellerStop.lat * Math.PI) / 180
+        const Δλ = ((aktuellerStop.lng - svPosition.lng) * Math.PI) / 180
+        const y = Math.sin(Δλ) * Math.cos(φ2)
+        const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ)
+        bearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
+      }
       map.easeTo({
         center: [svPosition.lng, svPosition.lat],
-        zoom: 16.5,
-        bearing: svPosition.heading ?? 0,
-        pitch: 60,
+        // 2026-05-08 (C7): Pitch 62 + Zoom 17.8 statt 70/18.5. Steiler
+        // wäre cinematischer, aber Camera dringt dann in Buildings ein
+        // (Aaron-Smoke „darf nicht in die Gebäude rein"). 62° + 17.8
+        // hält Camera über der Skyline.
+        zoom: 17.8,
+        bearing,
+        pitch: 62,
+        padding: { top: 360, bottom: 60, left: 40, right: 40 },
         duration: 800,
         essential: true,
       })
@@ -500,7 +718,7 @@ export default function FeldmodusMap({
         duration: 700,
       })
     }
-  }, [aktuellerStop, svPosition, followSv])
+  }, [aktuellerStop, svPosition, followSv, manualCameraOverride])
 
   // Route-Polyline: Luftlinie zwischen SV und aktuellem Stop
   useEffect(() => {
@@ -513,37 +731,183 @@ export default function FeldmodusMap({
     const svLng = svPosition.lng
     const svLat = svPosition.lat
 
-    // 2026-05-07: Echte Auto-Route über Mapbox Directions statt Luftlinie.
-    // fetchDrivingRoute hat in-memory-Cache (5 min) — bei GPS-Jitter wird
-    // dieselbe Route wiederverwendet ohne Re-Fetch.
-    // Plus: Blitzer entlang der Route via OSM Overpass (BBox + 0.5 km Puffer).
+    // 2026-05-08 PR B: Echtzeit-Traffic-Route mit Stau-Färbung.
+    // fetchDrivingRoute liefert jetzt {primary, alternatives} mit per-
+    // Segment-congestion. upsertTrafficRouteLayer rendert die primary-
+    // Route GMaps-style farbig segmentiert (low=blau, moderate=amber,
+    // heavy=orange, severe=rot).
+    // Cache 60s — Traffic ändert sich schneller als statische Routen.
+    // Alternativen werden hier (noch) nicht visualisiert — kommen mit dem
+    // Live-Reroute-Toast in PR B2.
     const ctrl = new AbortController()
-    const drawRoute = (coords: Array<[number, number]>) => {
+    // 2026-05-08 (C5): Route-Theme passt sich an Light-Preset des aktuellen
+    // Termin-Slots an. Tag → dunkle Linie auf hellen Tiles, Nacht →
+    // leuchtender Glow auf dunklen Tiles. Ohne Termin-Zeit → wall-clock.
+    const targetStop = stops[Math.max(0, aktuellerStopIndex)] ?? null
+    const lightAt = targetStop?.start_zeit ? new Date(targetStop.start_zeit) : new Date()
+    const lightPreset = getMapboxLightPreset(lightAt)
+    const drawRoute = (route: TrafficRoute) => {
       if (!map.isStyleLoaded()) {
-        map.once('load', () => upsertRouteLayer(map, coords))
+        map.once('load', () => upsertTrafficRouteLayer(map, route, 'main', lightPreset))
       } else {
-        upsertRouteLayer(map, coords)
+        upsertTrafficRouteLayer(map, route, 'main', lightPreset)
       }
     }
     void fetchDrivingRoute([svLng, svLat], [stopLng, stopLat], { signal: ctrl.signal })
-      .then(async (coords) => {
-        drawRoute(coords)
-        // Blitzer in der Route-Bbox laden + Layer mounten/aktualisieren.
+      .then(async ({ primary }) => {
+        drawRoute(primary)
+        primaryRouteRef.current = primary
+        // Blitzer (Atudo) + Verkehrshindernisse (HERE) + Off-Route-Stau-
+        // Lines (HERE Flow) parallel laden. Off-Route-Flow bleibt als
+        // Kontext-Layer drin — die Stau-Färbung der Hauptroute reicht
+        // nicht aus um zu sehen wohin der Stau auf einer Alternative
+        // führt. Opacity der Flow-Linie ist über hazards.ts definiert.
+        const coords = primary.coords
         if (coords.length >= 2) {
-          const blitzerFeatures = await fetchBlitzerInBbox(bboxForRoute(coords, 0.5))
+          // 2026-05-08 Aaron-Audit: 0.5 km Puffer war zu eng — auf
+          // einer 4 km Innenstadt-Route fanden wir 0 Blitzer obwohl
+          // Atudo 22 in Köln-Region listet. Buffer 3 km erfasst Blitzer
+          // entlang Hauptverbindungsstraßen ohne die Map zu überfluten.
+          const bbox = bboxForRoute(coords, 3)
+          const [blitzerFeatures, hazardFeatures, flowFeatures] = await Promise.all([
+            fetchBlitzerInBbox(bbox),
+            fetchHereHazards(bbox),
+            fetchHereFlow(bbox),
+          ])
           blitzerFeaturesRef.current = blitzerFeatures
-          // Warn-Set bei neuer Route reset — der SV beginnt eine neue
-          // Anfahrt, frühere Warnungen sind nicht mehr relevant.
           warnedBlitzerIdsRef.current.clear()
+          hazardsDataRef.current = hazardFeatures
           if (!blitzerRef.current && map.isStyleLoaded()) {
             blitzerRef.current = attachBlitzerLayer(map, blitzerFeatures)
           } else if (blitzerRef.current) {
             blitzerRef.current.update(blitzerFeatures)
           }
+          if (!hazardsRef.current && map.isStyleLoaded()) {
+            hazardsRef.current = attachHazardLayer(map, hazardFeatures)
+          } else if (hazardsRef.current) {
+            hazardsRef.current.update(hazardFeatures)
+          }
+          if (!flowRef.current && map.isStyleLoaded()) {
+            flowRef.current = attachFlowLayer(map, flowFeatures)
+          } else if (flowRef.current) {
+            flowRef.current.update(flowFeatures)
+          }
+
+          // 2026-05-08 (C12): Wetter-Animations-Layer entlang der Route.
+          // Sample alle ~3 km, cluster gleiche Wetter-Codes, render
+          // Particles. Best-effort — bei Fail (kein OpenWeatherMap-Key,
+          // Netz-Fehler) bleibt die Route ohne Animation.
+          void sampleWeatherAlongRoute(coords)
+            .then((samples) => {
+              const regions = clusterWeatherSamples(samples)
+              if (!weatherFxRef.current && map.isStyleLoaded()) {
+                weatherFxRef.current = attachWeatherFx(map)
+              }
+              weatherFxRef.current?.update(regions)
+            })
+            .catch(() => { /* noop — Wetter-FX ist Cosmetic */ })
+
+          // 2026-05-08 PR B2: Hazard-on-Route-Detection (sofort).
+          // Wenn ein Hazard innerhalb 50 m der primary-polyline liegt
+          // UND wir ihn noch nicht vorgeschlagen haben, fetchen wir
+          // die Alternativen synchron und triggern den Reroute-Toast.
+          const hazardOnRoute = findHazardOnRoute(hazardFeatures, primary)
+          if (hazardOnRoute) {
+            const hid = (hazardOnRoute.properties as { id?: string }).id ?? ''
+            if (!proposedHazardSeenIdsRef.current.has(hid)) {
+              proposedHazardSeenIdsRef.current.add(hid)
+              const distM = distanceToHazardM([svLng, svLat], hazardOnRoute)
+              const distLabel = distM < 1000
+                ? `${Math.round(distM / 50) * 50} m`
+                : `${(distM / 1000).toFixed(1).replace('.', ',')} km`
+              const desc = (hazardOnRoute.properties as { description?: string }).description
+              const label = desc ? `${desc} in ${distLabel}` : `Hindernis in ${distLabel}`
+              // Alternative gleich fetchen für die Toast-Action.
+              const { alternatives } = await fetchDrivingRoute(
+                [svLng, svLat],
+                [stopLng, stopLat],
+                { bypassCache: true },
+              )
+              const alt = alternatives[0] ?? null
+              if (alt) {
+                setProposedReroute({
+                  route: alt,
+                  reason: 'hazard',
+                  etaSavedSec: 0,
+                  hazardLabel: label,
+                })
+              }
+            }
+          }
         }
       })
     return () => ctrl.abort()
   }, [svPosition, aktuellerStop])
+
+  // 2026-05-08 PR B2: Polling für schnellere Alternative.
+  // Nur aktiv wenn followSv (TbT-Modus) UND noch > 1 km zum Stop. Innerhalb
+  // 1 km macht Reroute keinen Sinn mehr (zu spät, würde nur verwirren).
+  // Alle 30 s mit bypassCache:true → Mapbox-Quote-Impact: max 120 Calls/h
+  // pro aktiv-fahrendem SV, davon greift der Großteil dank 60-s-Cache
+  // gegen denselben Cache-Key nicht durch.
+  useEffect(() => {
+    if (!followSv) return
+    if (!svPosition) return
+    if (!aktuellerStop?.lat || !aktuellerStop?.lng) return
+    const stopLat = aktuellerStop.lat
+    const stopLng = aktuellerStop.lng
+    const id = window.setInterval(async () => {
+      const map = mapRef.current
+      if (!map) return
+      // Distance-Cutoff: in den letzten 1 km nicht mehr neu vorschlagen
+      const distToStop = (() => {
+        const φ1 = (svPosition.lat * Math.PI) / 180
+        const φ2 = (stopLat * Math.PI) / 180
+        const dLat = ((stopLat - svPosition.lat) * Math.PI) / 180
+        const dLng = ((stopLng - svPosition.lng) * Math.PI) / 180
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(dLng / 2) ** 2
+        return 2 * 6371000 * Math.asin(Math.sqrt(a))
+      })()
+      if (distToStop < 1000) return
+
+      const { primary, alternatives } = await fetchDrivingRoute(
+        [svPosition.lng, svPosition.lat],
+        [stopLng, stopLat],
+        { bypassCache: true },
+      )
+      if (primary.coords.length >= 2) {
+        const targetStop = stops[Math.max(0, aktuellerStopIndex)] ?? null
+        const lightAt = targetStop?.start_zeit ? new Date(targetStop.start_zeit) : new Date()
+        upsertTrafficRouteLayer(map, primary, 'main', getMapboxLightPreset(lightAt))
+        primaryRouteRef.current = primary
+      }
+      const fasterAlt = pickFasterAlternative(primary, alternatives)
+      if (fasterAlt) {
+        setProposedReroute((prev) => prev ?? {
+          route: fasterAlt,
+          reason: 'faster',
+          etaSavedSec: primary.duration - fasterAlt.duration,
+        })
+      }
+    }, REROUTE_POLL_INTERVAL_MS)
+    return () => window.clearInterval(id)
+  }, [followSv, svPosition?.lat, svPosition?.lng, aktuellerStop?.termin_id])
+
+  // Reroute-Akzeptieren: alt zur primary machen + Toast schließen
+  function handleAcceptReroute() {
+    if (!proposedReroute) return
+    const map = mapRef.current
+    if (map) {
+      const targetStop = stops[Math.max(0, aktuellerStopIndex)] ?? null
+      const lightAt = targetStop?.start_zeit ? new Date(targetStop.start_zeit) : new Date()
+      upsertTrafficRouteLayer(map, proposedReroute.route, 'main', getMapboxLightPreset(lightAt))
+      primaryRouteRef.current = proposedReroute.route
+    }
+    setProposedReroute(null)
+  }
+  function handleDismissReroute() {
+    setProposedReroute(null)
+  }
 
   return (
     <div className="relative" style={{ width: '100%', height: '100%', minHeight: '100%' }}>
@@ -551,6 +915,43 @@ export default function FeldmodusMap({
         ref={containerRef}
         style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
       />
+      {/* 2026-05-08 (C10): RerouteToast entfernt — wird jetzt vom NaviHud
+          im FeldmodusClient gerendert (single Notification-Slot bottom-
+          mittig statt Top-Banner-Konkurrenz). proposedReroute fließt via
+          onMapNotice an den Caller. */}
+
+      {/* 2026-05-08 (Aaron-Brief): Reset-Camera-Button — sichtbar nur
+          wenn der User die Camera manuell überschrieben hat (rotation/
+          pitch/zoom mit zwei Fingern). Klick → manualCameraOverride
+          ausschalten + sofortiges easeTo zur Default-Pose. Glass-Look
+          konsistent zu NaviHud + AktuellerStopCard. */}
+      {manualCameraOverride && (
+        <button
+          type="button"
+          onClick={() => {
+            setManualCameraOverride(false)
+            const m = mapRef.current
+            if (m && svPosition) {
+              m.easeTo({
+                center: [svPosition.lng, svPosition.lat],
+                zoom: 17.8,
+                pitch: 62,
+                bearing: svPosition.heading ?? 0,
+                padding: { top: 360, bottom: 60, left: 40, right: 40 },
+                duration: 600,
+                essential: true,
+              })
+            }
+          }}
+          className="absolute bottom-24 right-4 z-30 inline-flex items-center gap-2 rounded-full bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md px-4 py-2 text-xs font-semibold text-claimondo-navy hover:bg-white/85 transition-colors"
+          aria-label="Camera-Position zurücksetzen"
+        >
+          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="3,11 22,2 13,21 11,13" />
+          </svg>
+          Ansicht zurücksetzen
+        </button>
+      )}
       {tokenMissing.current && (
         <div className="absolute inset-0 flex items-center justify-center bg-[var(--brand-primary)] text-center px-6">
           <div>

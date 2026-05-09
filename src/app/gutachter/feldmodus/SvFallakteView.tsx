@@ -17,6 +17,7 @@ import {
   PhoneIcon,
   RefreshCwIcon,
   SaveIcon,
+  XIcon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -34,6 +35,8 @@ export interface SvFallakteViewProps {
   terminId: string
   onAdvanced: (nextTerminId: string | null) => void
   onPauseBackToRoute: () => void
+  /** 2026-05-07: Zurück zur Anfahrt — exit aus arrived ohne Pause/Logout. */
+  onBackToRoute?: () => void
 }
 
 export default function SvFallakteView({
@@ -42,6 +45,7 @@ export default function SvFallakteView({
   terminId,
   onAdvanced,
   onPauseBackToRoute,
+  onBackToRoute,
 }: SvFallakteViewProps) {
   const [loading, setLoading] = useState(true)
   const [fall, setFall] = useState<FeldmodusFallakteFall | null>(null)
@@ -139,13 +143,28 @@ export default function SvFallakteView({
 
   return (
     <div className="h-full flex flex-col bg-[var(--brand-primary)]/95 backdrop-blur-md text-white">
-      {/* Header */}
+      {/* Header — 2026-05-07 Aaron-Smoke: drei klare Buttons.
+            ×       (Schließen, Zurück zur Anfahrt) — wenn onBackToRoute prop
+            ←       Pausieren (zurück zu /heute, Session bleibt)
+            ↻       Neu laden */}
       <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
+        {onBackToRoute && (
+          <button
+            type="button"
+            onClick={onBackToRoute}
+            className="p-1.5 rounded-lg hover:bg-white/10 text-white/80"
+            aria-label="Zurück zur Anfahrt-Karte"
+            title="Zurück zur Anfahrt-Karte"
+          >
+            <XIcon className="w-4 h-4" />
+          </button>
+        )}
         <button
           type="button"
           onClick={onPauseBackToRoute}
           className="p-1.5 rounded-lg hover:bg-white/10 text-white/80"
-          aria-label="Zurück zur Route"
+          aria-label="Pausieren — zurück zu Heute"
+          title="Tagesmodus pausieren"
         >
           <ArrowLeftIcon className="w-4 h-4" />
         </button>

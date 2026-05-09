@@ -198,37 +198,199 @@ export function haversineMetersLngLat(
   return 2 * EARTH_RADIUS_M * Math.asin(Math.sqrt(sa))
 }
 
+/**
+ * Minimale Distanz vom Punkt zu einer Polyline (in Metern).
+ *
+ * 2026-05-08 PR B2: Wird für Hazard-on-Route-Detection genutzt — wenn ein
+ * HERE-Hazard (Unfall, Sperrung) innerhalb 50 m der aktiven Polyline liegt,
+ * triggert das Reroute-Toast. Naive Local-Plane-Approximation: für die
+ * Distanzen die wir hier prüfen (≤ 200 m, Strecken-Längen ≤ 50 km) ist der
+ * Fehler durch Erdkrümmung unter 1 % — vernachlässigbar.
+ */
+export function pointToPolylineDistanceMLngLat(
+  point: [number, number],
+  polyline: Array<[number, number]>,
+): number {
+  if (polyline.length === 0) return Infinity
+  if (polyline.length === 1) return haversineMetersLngLat(point, polyline[0])
+
+  // Local equirectangular projection — zentriert auf den Punkt selbst.
+  const lat0Rad = (point[1] * Math.PI) / 180
+  const cosLat0 = Math.cos(lat0Rad)
+  const M_PER_DEG_LAT = 111_320 // ≈ Konstante in mittleren Breiten
+  const M_PER_DEG_LNG = 111_320 * cosLat0
+
+  const px = point[0] * M_PER_DEG_LNG
+  const py = point[1] * M_PER_DEG_LAT
+
+  let minSq = Infinity
+  for (let i = 0; i < polyline.length - 1; i++) {
+    const ax = polyline[i][0] * M_PER_DEG_LNG
+    const ay = polyline[i][1] * M_PER_DEG_LAT
+    const bx = polyline[i + 1][0] * M_PER_DEG_LNG
+    const by = polyline[i + 1][1] * M_PER_DEG_LAT
+
+    const dx = bx - ax
+    const dy = by - ay
+    const lenSq = dx * dx + dy * dy
+    let t = 0
+    if (lenSq > 0) {
+      t = ((px - ax) * dx + (py - ay) * dy) / lenSq
+      if (t < 0) t = 0
+      if (t > 1) t = 1
+    }
+    const cx = ax + t * dx
+    const cy = ay + t * dy
+    const ddx = px - cx
+    const ddy = py - cy
+    const distSq = ddx * ddx + ddy * ddy
+    if (distSq < minSq) minSq = distSq
+  }
+  return Math.sqrt(minSq)
+}
+
 // ─── Voice-Speech (Web-Speech-API) ───────────────────────────────────────
 
 let cachedVoice: SpeechSynthesisVoice | null = null
+// Wird auf true gesetzt sobald voiceschanged einmal gefeuert hat —
+// dann haben wir die vollständige Stimm-Liste und cachen sicher.
+let voicesLoaded = false
 
+// Module-Level-Listener: sobald der Browser neue Stimmen meldet
+// (passiert bei Chrome nach 1-2 Renders), Cache resetten damit
+// der nächste speakInstruction()-Aufruf mit der vollen Liste pickt.
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  window.speechSynthesis.addEventListener('voiceschanged', () => {
+    cachedVoice = null
+    voicesLoaded = true
+  })
+}
+
+/**
+ * Deutsche TTS-Stimme aus den verfügbaren Browser-Voices picken.
+ * Priorität (beste zuerst):
+ *
+ *   1. Google Deutsch (de-DE)          — neural, Tier-1 auf Chrome/Android
+ *   2. iOS/macOS Premium !localService  — Anna, Petra, Markus, Yannick
+ *   3. iOS/macOS Premium localService   — Offline-Variante der Premium-Stimmen
+ *   4. Microsoft Online Neural (Edge)   — Hedda Online, Katja Online
+ *   5. Beliebige de-DE !localService    — cloud-basierte Fallbacks
+ *   6. Beliebige de-DE                  — lokale System-Stimmen
+ *   7. de-AT / de-CH                    — besser als Englisch mit dt. Text
+ *
+ * Warum Google auf Tier 1: "Google Deutsch" ist die einzig verfügbare
+ * Neural-Stimme auf Chrome Desktop (Windows/Linux) und Chrome Android —
+ * dort gibt es keine Apple-Premium-Voices. Microsoft Hedda wird als
+ * Name-Match fälschlicherweise vor Google gezogen obwohl Google in der
+ * Praxis besser klingt. Daher: Google explizit zuerst, dann Premium-Namen.
+ *
+ * Cache: wird von voiceschanged-Listener invalidiert damit kein veralteter
+ * Wert (z.B. System-Fallback vor vollständigem Voice-Load) eingefroren bleibt.
+ */
 function pickGermanVoice(): SpeechSynthesisVoice | null {
   if (cachedVoice) return cachedVoice
   if (typeof window === 'undefined' || !window.speechSynthesis) return null
   const voices = window.speechSynthesis.getVoices()
+  if (voices.length === 0) return null
+  const isDe = (v: SpeechSynthesisVoice) => v.lang === 'de-DE'
+  const isDeAny = (v: SpeechSynthesisVoice) => v.lang.startsWith('de')
+  // Apple Premium-Namen (iOS + macOS) — OHNE Microsoft-Namen wie Hedda/Stefan/Katja
+  // da diese offline-Qualität haben und nach Google kommen sollen.
+  const applePremium = /^(Anna|Petra|Markus|Yannick)$/i
+
   cachedVoice =
-    voices.find((v) => v.lang === 'de-DE' && /(Anna|Markus|Petra)/i.test(v.name)) ??
-    voices.find((v) => v.lang === 'de-DE') ??
-    voices.find((v) => v.lang.startsWith('de')) ??
+    // Tier 1: Google Deutsch — neural, auf Chrome Desktop + Android verfügbar
+    voices.find((v) => isDe(v) && /Google/i.test(v.name)) ??
+    // Tier 2: Apple Premium Cloud (!localService = Online-Variante)
+    voices.find((v) => isDe(v) && applePremium.test(v.name) && !v.localService) ??
+    // Tier 3: Apple Premium lokal
+    voices.find((v) => isDe(v) && applePremium.test(v.name)) ??
+    // Tier 4: Microsoft Neural Online (Edge — Katja Online, Hedda Online etc.)
+    voices.find((v) => isDe(v) && /Microsoft.*Online/i.test(v.name)) ??
+    // Tier 5: beliebige Cloud-Stimme de-DE
+    voices.find((v) => isDe(v) && !v.localService) ??
+    // Tier 6: beliebige de-DE (System-Offline-Stimme)
+    voices.find((v) => isDe(v)) ??
+    // Tier 7: de-AT / de-CH als absoluter Fallback
+    voices.find((v) => isDeAny(v)) ??
     null
   return cachedVoice
 }
 
 /**
  * Liest einen Text laut vor. Cancelt vorherigen Speech.
- * Failt silent wenn die API nicht verfügbar ist.
+ * 2026-05-07: ElevenLabs als Premium-Voice (wenn NEXT_PUBLIC_ELEVENLABS_
+ * API_KEY gesetzt) → Fallback auf Web Speech API.
+ * Failt silent wenn beide nicht verfügbar.
+ *
+ * 2026-05-08 Repeat-Guard: Aaron-Smoke-Test ergab dass speakInstruction()
+ * bei manchen Render-Cycles dieselbe Anweisung mehrfach sprach (z.B. der
+ * Blitzer-Effect feuerte erneut bei jedem GPS-Tick mit unverändertem Set,
+ * weil set-mutations in einem Ref nicht automatisch die useEffect-Closure
+ * neu evaluieren). Hier eine letzte Verteidigungslinie: identische Texte
+ * innerhalb von 8 Sekunden nicht doppelt aussprechen — egal ob Caller-
+ * Dedup vergeigt war.
  */
+const recentlySpoken = new Map<string, number>()
+const REPEAT_COOLDOWN_MS = 8_000
+
 export function speakInstruction(text: string): void {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return
-  if (!text.trim()) return
+  if (typeof window === 'undefined') return
+  const trimmed = text.trim()
+  if (!trimmed) return
+
+  const now = Date.now()
+  const lastAt = recentlySpoken.get(trimmed)
+  if (lastAt != null && now - lastAt < REPEAT_COOLDOWN_MS) return
+  recentlySpoken.set(trimmed, now)
+  // Map nicht beliebig wachsen lassen — alte Einträge nach Cooldown-Ablauf
+  // wegputzen wenn der Map-Footprint > 64 Einträge ist.
+  if (recentlySpoken.size > 64) {
+    for (const [k, ts] of recentlySpoken) {
+      if (now - ts > REPEAT_COOLDOWN_MS) recentlySpoken.delete(k)
+    }
+  }
+
+  // TTS-Kette: Google Neural2 → ElevenLabs → Web Speech API.
+  // Jede Stufe wird nur versucht wenn die vorige false zurückgibt.
+  void import('./google-tts').then(({ speakViaGoogleTts }) =>
+    speakViaGoogleTts(trimmed)
+  ).then((ok) => {
+    if (ok) return
+    return import('./elevenlabs-tts').then(({ speakViaElevenLabs }) =>
+      speakViaElevenLabs(trimmed)
+    ).then((ok2) => {
+      if (!ok2) fastSpeechSynthesis(trimmed)
+    })
+  }).catch(() => fastSpeechSynthesis(trimmed))
+}
+
+function fastSpeechSynthesis(text: string): void {
+  if (!window.speechSynthesis) return
   try {
+    // 2026-05-08: Voice-Liste kann beim ersten Aufruf leer sein und wird
+    // asynchron befüllt. Wenn pickGermanVoice null returnt, einmal
+    // voiceschanged abwarten und retry — sonst spricht der Browser mit
+    // Default-Englisch.
+    const voice = pickGermanVoice()
+    if (!voice && window.speechSynthesis.getVoices().length === 0) {
+      const onChange = () => {
+        window.speechSynthesis.removeEventListener('voiceschanged', onChange)
+        cachedVoice = null
+        fastSpeechSynthesis(text)
+      }
+      window.speechSynthesis.addEventListener('voiceschanged', onChange, { once: true })
+      return
+    }
     window.speechSynthesis.cancel()
     const utter = new SpeechSynthesisUtterance(text)
-    const voice = pickGermanVoice()
     if (voice) utter.voice = voice
     utter.lang = 'de-DE'
-    utter.rate = 1.0
-    utter.pitch = 1.0
+    // 2026-05-08 Aaron-Feedback Free-Voice-Polish: leicht langsamer +
+    // minimal höher klingt natürlicher als Default 1.0/1.0 — vor allem
+    // auf Microsoft- und Espeak-Stimmen die sonst hektisch wirken.
+    utter.rate = 0.95
+    utter.pitch = 1.05
     utter.volume = 1.0
     window.speechSynthesis.speak(utter)
   } catch {
@@ -237,10 +399,10 @@ export function speakInstruction(text: string): void {
 }
 
 export function stopSpeaking(): void {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return
+  if (typeof window === 'undefined') return
   try {
-    window.speechSynthesis.cancel()
-  } catch {
-    /* noop */
-  }
+    window.speechSynthesis?.cancel()
+  } catch { /* noop */ }
+  void import('./google-tts').then(({ stopGoogleTts }) => stopGoogleTts()).catch(() => { /* noop */ })
+  void import('./elevenlabs-tts').then(({ stopElevenLabs }) => stopElevenLabs()).catch(() => { /* noop */ })
 }

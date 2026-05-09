@@ -5,11 +5,13 @@
 // promotion_code_id auf, erkennt Eigenverschulden → Disqualifikation.
 // Rückgabe immer { success: boolean; ... } — nie throw.
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { readPromoCookie, isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
 import { schritt1Schema, type Schritt1Input } from '@/lib/flow/schemas/schritt1'
+import { createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
+import { berechneFehlendeFelder } from '@/lib/flow/fehlende-felder'
 
 type CreateLeadResult =
   | { success: true; leadId: string; abortToSelbstverschulden: boolean }
@@ -38,9 +40,11 @@ export async function createLeadFromSchritt1(
     promotionCodeId = await resolvePromoCodeToId(promoCookie)
   }
 
-  const supabase = await createClient()
+  // Admin-Client für INSERT: /schaden-melden ist öffentlich (auch anonym), daher kein
+  // Auth-Kontext vorhanden — RLS würde anon-INSERT blockieren. Zod-Validation schützt.
+  const admin = createAdminClient()
 
-  const { data: lead, error } = await supabase
+  const { data: lead, error } = await admin
     .from('leads')
     .insert({
       unfalldatum: data.unfalldatum,
@@ -73,6 +77,18 @@ export async function createLeadFromSchritt1(
       disqualifiziert_am: isAbort ? new Date().toISOString() : null,
       promotion_code_id: promotionCodeId,
       voice_input_quelle: voiceInputQuelle,
+      // Konditionelle Pflichtfelder — bestimmen den weiteren Flow-Pfad
+      ist_fahrzeughalter: data.ist_fahrzeughalter,
+      halter_ungleich_fahrer_flag: !data.ist_fahrzeughalter,
+      fahrzeug_fahrbereit: data.fahrzeug_fahrbereit,
+      personenschaden_flag: data.personenschaden_flag,
+      hat_vorschaeden: data.hat_vorschaeden,
+      vorschaeden_beschreibung: data.hat_vorschaeden
+        ? (data.vorschaeden_beschreibung || null)
+        : null,
+      mietwagen_flag: data.mietwagen_flag ?? false,
+      nutzungsausfall: data.nutzungsausfall ?? false,
+      finanzierung_leasing: data.finanzierung_leasing ?? 'keine',
     })
     .select('id')
     .single()
@@ -81,6 +97,50 @@ export async function createLeadFromSchritt1(
     return {
       success: false,
       error: error?.message ?? 'Lead konnte nicht angelegt werden',
+    }
+  }
+
+  // Sofort nach Insert: fehlende_felder_jsonb berechnen und speichern.
+  const fehlendeFelder = berechneFehlendeFelder({
+    schuldfrage: data.schuldfrage,
+    schadentyp: data.schadentyp,
+    polizei_vor_ort: data.polizei_vor_ort,
+    ist_fahrzeughalter: data.ist_fahrzeughalter,
+    hat_vorschaeden: data.hat_vorschaeden,
+    finanzierung_leasing: data.finanzierung_leasing ?? 'keine',
+    personenschaden_flag: data.personenschaden_flag,
+    mietwagen_flag: data.mietwagen_flag ?? null,
+    vorname: data.vorname,
+    nachname: data.nachname,
+    email: data.email,
+    telefon: data.telefon,
+  })
+
+  if (fehlendeFelder.length > 0) {
+    await admin
+      .from('leads')
+      .update({ fehlende_felder_jsonb: fehlendeFelder })
+      .eq('id', lead.id)
+  }
+
+  // F-02: Dispatch-User über neuen Lead benachrichtigen (fire-and-forget).
+  if (!isAbort) {
+    const { data: dispatchers } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('rolle', 'dispatch')
+    if (dispatchers?.length) {
+      await createMitteilungMulti(
+        dispatchers.map((d) => ({ id: d.id as string, rolle: 'dispatch' as const })),
+        {
+          kategorie: 'update',
+          titel: 'Neuer Lead eingegangen',
+          inhalt: `${data.vorname} ${data.nachname} – ${data.schadentyp} (${data.unfallort ?? data.fahrzeug_standort_plz})`,
+          kontext_typ: 'lead',
+          kontext_id: lead.id,
+          prioritaet: 'normal',
+        },
+      )
     }
   }
 
