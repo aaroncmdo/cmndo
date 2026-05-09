@@ -4,7 +4,7 @@ import { Camera, Brain, UserCheck, FileText, ChevronRight, Clock, Shield, Star, 
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
+import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
   title: 'Wie es funktioniert — In 3 Schritten zum vollen Schadensersatz',
@@ -109,6 +109,27 @@ export default function WieEsFunktioniertPage() {
             description:
               '3-Schritt-Prozess: 1) Online Schaden melden mit Foto und KI-Vorbewertung, 2) Sachverständiger erstellt Gutachten vor Ort, 3) Anwalt setzt vollen Anspruch durch. Antwort unter 15 Min, Termin unter 48 h.',
             url: `${SITE_URL}/wie-es-funktioniert`,
+          }),
+          howToSchema({
+            name: 'Kfz-Schaden in 3 Schritten regulieren',
+            description:
+              'Vom Unfallfoto bis zur Auszahlung: So holen unverschuldet Geschädigte mit Claimondo den vollen Schadensersatz ohne Eigenanteil.',
+            totalTime: 'PT15M',
+            estimatedCost: { currency: 'EUR', value: '0' },
+            schritte: [
+              {
+                name: 'Schaden erfassen',
+                text: 'Beschreiben Sie kurz den Unfallhergang und laden Fotos hoch, oder diktieren Sie uns den Schaden per Sprache. Kein Papierkram, keine Formulare. Dauer: ca. 5 Minuten ohne Anmeldung.',
+              },
+              {
+                name: 'KI-Ersteinschätzung',
+                text: 'Unsere KI bewertet die hochgeladenen Fotos sofort: Schweregrad, mutmaßlicher Reparaturaufwand, voraussichtliche Wertminderung. Sie erhalten in unter 15 Minuten eine erste Indikation.',
+              },
+              {
+                name: 'Gutachter vor Ort + Anwalt durchsetzen',
+                text: 'Wir vermitteln einen unabhängigen DAT-Sachverständigen in Ihrer Region — Termin in unter 48 Stunden. Unsere Partnerkanzlei setzt anschließend den vollen Anspruch gegen die gegnerische Versicherung durch (§249 BGB).',
+              },
+            ],
           }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
