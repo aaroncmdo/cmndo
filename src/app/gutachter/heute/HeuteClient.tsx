@@ -54,8 +54,9 @@ export default function HeuteClient({
   // sync (kein Flicker), zusätzlich Listener auf custom-event vom
   // Settings-Toggle damit sofortiges Update ohne Page-Reload.
   const [showGebiet, setShowGebiet] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false
-    return window.localStorage.getItem('claimondo_show_gebiet_in_hub') === '1'
+    if (typeof window === 'undefined') return true
+    // Default: sichtbar — nur ausblenden wenn explizit auf '0' gesetzt.
+    return window.localStorage.getItem('claimondo_show_gebiet_in_hub') !== '0'
   })
   useEffect(() => {
     const handler = (e: Event) => {
