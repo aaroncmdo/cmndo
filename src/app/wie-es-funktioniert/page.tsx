@@ -139,24 +139,37 @@ export default function WieEsFunktioniertPage() {
       />
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Header */}
-      <section className="bg-gradient-to-b from-white to-[#f8f9fb] py-16 text-center">
+      {/* Header — Glass-Pass mit Spotlights */}
+      <section className="relative isolate overflow-hidden py-16 text-center sm:py-20">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background: [
+              'radial-gradient(circle at 20% 15%, rgba(123,163,204,0.22), transparent 50%)',
+              'radial-gradient(circle at 85% 35%, rgba(69,115,162,0.14), transparent 45%)',
+            ].join(', '),
+          }}
+        />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#4573A2]/20 bg-[#4573A2]/5 px-4 py-1.5 text-sm font-semibold text-[#4573A2]">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#4573A2] shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
             So einfach geht&apos;s
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-[#0D1B3E] sm:text-5xl">
+          <h1
+            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-[#0D1B3E] sm:text-5xl md:text-6xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
             Ihr Unfall. Unser Problem.
           </h1>
-          <p className="mt-4 text-lg text-[#4573A2]">
+          <p className="mt-5 text-balance text-base text-[#4573A2] sm:text-lg">
             In 3 Schritten zum vollen Schadensersatz — wir übernehmen alles.
           </p>
         </div>
       </section>
 
-      {/* Fakten-Strip */}
-      <div className="border-y border-[#e4e7ef] bg-white">
-        <div className="mx-auto grid max-w-5xl grid-cols-2 divide-x divide-[#e4e7ef] md:grid-cols-4">
+      {/* Fakten-Strip — Glass */}
+      <div className="border-y border-white/50 bg-white/60 backdrop-blur-md">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 divide-x divide-white/40 md:grid-cols-4">
           {FAKTEN.map((f) => {
             const Icon = f.icon
             return (
@@ -178,7 +191,8 @@ export default function WieEsFunktioniertPage() {
             return (
               <div
                 key={s.nr}
-                className={`flex flex-col gap-8 rounded-3xl border border-[#e4e7ef] bg-white p-8 shadow-sm md:flex-row md:items-start ${i % 2 === 1 ? 'md:flex-row-reverse' : ''}`}
+                className={`flex flex-col gap-8 rounded-3xl border border-white/60 bg-white/70 p-8 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-[0_8px_28px_rgba(13,27,62,0.10)] md:flex-row md:items-start ${i % 2 === 1 ? 'md:flex-row-reverse' : ''}`}
+                style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <div className="flex-shrink-0">
                   <div className={`flex h-20 w-20 items-center justify-center rounded-3xl border ${s.border} ${s.bg}`}>
@@ -189,7 +203,10 @@ export default function WieEsFunktioniertPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-4xl font-black text-[#e4e7ef]">{s.nr}</span>
                     <div>
-                      <h2 className="text-2xl font-extrabold text-[#0D1B3E]">{s.title}</h2>
+                      <h2
+                        className="text-2xl font-bold text-[#0D1B3E]"
+                        style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+                      >{s.title}</h2>
                       <div className="mt-0.5 text-sm font-semibold text-[#4573A2]">{s.subtitle}</div>
                     </div>
                   </div>
@@ -210,25 +227,38 @@ export default function WieEsFunktioniertPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-[#0D1B3E] py-20 text-center">
-        <div className="mx-auto max-w-2xl px-4">
-          <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+      <section className="relative isolate overflow-hidden bg-[#0D1B3E] py-20 text-center">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: [
+              'radial-gradient(circle at 25% 25%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 75% 80%, rgba(123,163,204,0.18), transparent 50%)',
+            ].join(', '),
+          }}
+        />
+        <div className="relative mx-auto max-w-2xl px-4">
+          <h2
+            className="text-3xl font-bold text-white sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
             Bereit? Schaden jetzt melden.
           </h2>
-          <p className="mt-3 text-lg text-white/60">
+          <p className="mt-3 text-lg text-white/65">
             Kostenlos, unverbindlich, in 5 Minuten erledigt.
           </p>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/schaden-melden"
-              className="inline-flex items-center gap-2 rounded-2xl bg-[#4573A2] px-8 py-4 text-base font-bold text-white shadow-xl transition-all hover:bg-[#7BA3CC]"
+              className="inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-[#7BA3CC] active:scale-[0.98]"
             >
               Schaden melden
               <ChevronRight className="h-5 w-5" />
             </Link>
             <a
               href="tel:+4922125906530"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-8 py-4 text-base font-semibold text-white/80 hover:border-white/40 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-4 w-4" />
               0221 25906530

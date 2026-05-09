@@ -187,35 +187,54 @@ export default function VorteilePage() {
       />
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Header */}
-      <section className="bg-gradient-to-b from-white to-[#f8f9fb] py-16 text-center">
+      {/* Header — Glass-Pass mit Spotlights wie Landing-Hero */}
+      <section className="relative isolate overflow-hidden py-16 text-center sm:py-20">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background: [
+              'radial-gradient(circle at 20% 15%, rgba(123,163,204,0.22), transparent 50%)',
+              'radial-gradient(circle at 85% 35%, rgba(69,115,162,0.14), transparent 45%)',
+            ].join(', '),
+          }}
+        />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#4573A2]/20 bg-[#4573A2]/5 px-4 py-1.5 text-sm font-semibold text-[#4573A2]">
+          <div
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#4573A2] shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm"
+          >
             Warum Claimondo?
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-[#0D1B3E] sm:text-5xl">
+          <h1
+            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-[#0D1B3E] sm:text-5xl md:text-6xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
             Ihr Recht. Vollständig durchgesetzt.
           </h1>
-          <p className="mt-4 text-lg text-[#4573A2]">
+          <p className="mt-5 text-balance text-base text-[#4573A2] sm:text-lg">
             Kein Kompromiss, kein Papierkram, keine Kosten für Sie.
           </p>
         </div>
       </section>
 
-      {/* Vorteile Grid */}
-      <section className="py-16">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
+      {/* Vorteile Grid — Glass-Cards */}
+      <section className="py-12 sm:py-16">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 sm:grid-cols-2 sm:gap-5 sm:px-6 lg:grid-cols-3">
           {VORTEILE.map((v) => {
             const Icon = v.icon
             return (
               <div
                 key={v.title}
-                className="rounded-3xl border border-[#e4e7ef] bg-white p-7 shadow-sm"
+                className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-[0_8px_28px_rgba(13,27,62,0.10)] sm:p-7"
+                style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#4573A2]/10">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#4573A2]/12">
                   <Icon className="h-6 w-6 text-[#4573A2]" />
                 </div>
-                <h2 className="text-xl font-extrabold text-[#0D1B3E]">{v.title}</h2>
+                <h2
+                  className="text-xl font-bold text-[#0D1B3E]"
+                  style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+                >{v.title}</h2>
                 <p className="mt-0.5 text-sm font-semibold text-[#7BA3CC]">{v.subtitle}</p>
                 <p className="mt-3 text-sm leading-relaxed text-[#1E3A5F]">{v.text}</p>
                 <ul className="mt-5 space-y-2">
@@ -306,16 +325,29 @@ export default function VorteilePage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="bg-[#0D1B3E] py-20 text-center">
-        <div className="mx-auto max-w-2xl px-4">
-          <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+      {/* CTA — dunkle Sektion mit subtilen Spotlights */}
+      <section className="relative isolate overflow-hidden bg-[#0D1B3E] py-20 text-center">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: [
+              'radial-gradient(circle at 20% 30%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 80% 70%, rgba(123,163,204,0.18), transparent 50%)',
+            ].join(', '),
+          }}
+        />
+        <div className="relative mx-auto max-w-2xl px-4">
+          <h2
+            className="text-3xl font-bold text-white sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
             Überzeugt? Jetzt Schaden melden.
           </h2>
-          <p className="mt-3 text-lg text-white/60">5 Minuten. Kostenlos. Unverbindlich.</p>
+          <p className="mt-3 text-lg text-white/65">5 Minuten. Kostenlos. Unverbindlich.</p>
           <Link
             href="/schaden-melden"
-            className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-[#4573A2] px-10 py-4 text-base font-bold text-white shadow-xl transition-all hover:bg-[#7BA3CC]"
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-8 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
           >
             Schaden melden — 0 € Kosten
             <ChevronRight className="h-5 w-5" />
