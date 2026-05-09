@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache'
 export type SvLead = {
   id: string
   name: string
+  vorname: string | null
   firma: string | null
   adresse: string
   plz: string | null
@@ -48,7 +49,7 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLead[] } | { ok
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('sv_leads')
-    .select('id,name,firma,adresse,plz,ort,lat,lng,telefon,email')
+    .select('id,name,vorname,firma,adresse,plz,ort,lat,lng,telefon,email')
     .eq('ist_aktiv', true)
   if (error) return { ok: false, error: error.message }
   return { ok: true, data: data as SvLead[] }
