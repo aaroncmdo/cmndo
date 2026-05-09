@@ -23,6 +23,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 import { berechneFehlendeFelder } from '@/lib/flow/fehlende-felder'
+import { pushMandatToKanzlei } from '@/lib/kanzlei/push-mandat'
 
 type Result =
   | { ok: true; fallId: string; userId: string; magicLinkSent: boolean; idempotent: boolean }
@@ -225,6 +226,35 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
       .update({ konvertierung_fehler: `convertLeadToClaim: ${conv.error}` })
       .eq('id', anfrageId)
     return { ok: false, error: `Konvertierung fehlgeschlagen: ${conv.error}` }
+  }
+
+  // ─── 5b. Service-Typ aus Z35-Wahl auf Fall setzen ────────────────────
+  // regulierungs_modus='vollstaendig' → service_typ='komplett' (Anwalt + Gutachter)
+  // regulierungs_modus='nur_gutachten' → service_typ='nur_gutachter'
+  // null/undefined → default 'komplett' (Anfragen vor PR #668 hatten noch
+  // keinen Modus, aber SA-Signatur impliziert Vollregulierung)
+  const serviceTyp =
+    anfrage.regulierungs_modus === 'nur_gutachten' ? 'nur_gutachter' : 'komplett'
+  await admin
+    .from('faelle')
+    .update({ service_typ: serviceTyp })
+    .eq('id', conv.fallId)
+
+  // ─── 5c. LexDrive Mandant-Push (fire-and-forget) ─────────────────────
+  // Bei service_typ='komplett' bekommt die Partner-Kanzlei den Mandanten
+  // gepusht. pushMandatToKanzlei prüft selbst service_typ + Feature-Flag
+  // KANZLEI_API_ENABLED und schreibt bei Fehler eine Timeline-Warnung.
+  // Fehler hier dürfen die Konvertierung NICHT blockieren.
+  if (serviceTyp === 'komplett') {
+    pushMandatToKanzlei(conv.fallId)
+      .then((res) => {
+        if (!res.success && !res.skipped) {
+          console.warn('[konvertiereAnfrageZuFall] LexDrive-Push fehlgeschlagen:', res.error)
+        }
+      })
+      .catch((err) => {
+        console.warn('[konvertiereAnfrageZuFall] LexDrive-Push Exception:', err)
+      })
   }
 
   // ─── 6. Magic-Link senden ────────────────────────────────────────────
