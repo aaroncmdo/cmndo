@@ -79,12 +79,43 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.85,
     })),
-    // Gutachter-Partner-Subdomain
+    // Gutachter-Partner-Recruiting (Marketing-Seite + Subdomain)
+    {
+      url: `${SITE_URL}/gutachter-partner`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
     {
       url: 'https://gutachter.claimondo.de/',
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
+    },
+    // Legal-Pages — fuer maschinenlesbare Vollstaendigkeit
+    {
+      url: `${SITE_URL}/impressum`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/datenschutz`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/agb`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/nutzungsbedingungen`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.3,
     },
   ]
 }
