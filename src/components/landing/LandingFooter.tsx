@@ -101,8 +101,8 @@ export async function LandingFooter() {
             © {year} Claimondo GmbH. {t('rights')}
           </p>
           <div className="flex gap-4 text-sm text-white/70">
-            <a href="tel:+4922112345678" className="hover:text-white">
-              0221 123 456 78
+            <a href="tel:+4922125906530" className="hover:text-white">
+              0221 25906530
             </a>
             <a href="mailto:hallo@claimondo.de" className="hover:text-white">
               hallo@claimondo.de

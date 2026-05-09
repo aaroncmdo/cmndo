@@ -12,11 +12,42 @@ import {
 } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { StickyCallBar } from '@/components/landing/StickyCallBar'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
-  title: 'Ihre Vorteile — Claimondo',
+  title: 'Vorteile von Claimondo — Bis zu 33 % mehr Schadensersatz',
   description:
-    'Warum Claimondo? 0 € für Sie, unabhängige Gutachter, volle Regulierung durch Anwalt. Alles aus einer Hand, deutschlandweit.',
+    'Warum Claimondo? 0 € Eigenanteil, unabhängiger DAT-Sachverständiger, voller Anspruch durchgesetzt. Studien zeigen: Direktabrechnung mit dem Versicherer kostet im Schnitt 33 % der Schadenssumme.',
+  keywords: [
+    'Vorteile Kfz-Schaden',
+    'Wertminderung sichern',
+    'UPE-Aufschläge',
+    'Mehrwertsteuer §249 BGB',
+    'unabhängiger Gutachter',
+    'volle Schadenregulierung',
+    'Anwalt Verkehrsunfall',
+    'HIS-Datei Schaden',
+  ],
+  alternates: {
+    canonical: '/vorteile',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'de_DE',
+    siteName: 'Claimondo',
+    url: `${SITE_URL}/vorteile`,
+    title: 'Vorteile — Bis zu 33 % mehr Schadensersatz',
+    description:
+      '0 € Eigenanteil, unabhängiger Gutachter, volle Auszahlung. Direktabrechnung mit dem Versicherer kostet im Schnitt 33 % der Schadenssumme.',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Vorteile' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Vorteile — Bis zu 33 % mehr Schadensersatz',
+    description: '0 € Eigenanteil, unabhängiger Gutachter, volle Auszahlung.',
+    images: ['/og-default.png'],
+  },
 }
 
 const VORTEILE = [
@@ -139,6 +170,21 @@ const VERGLEICH = [
 export default function VorteilePage() {
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript([
+          serviceSchema({
+            name: 'Vollständige Kfz-Schadensregulierung',
+            description:
+              'Von der Schadensaufnahme über Gutachten und Werkstatt bis zur Auszahlung — alles aus einer Hand, ohne Eigenanteil für unverschuldet Geschädigte (§249 BGB).',
+            url: `${SITE_URL}/vorteile`,
+          }),
+          breadcrumbsSchema([
+            { name: 'Startseite', url: '/' },
+            { name: 'Vorteile', url: '/vorteile' },
+          ]),
+        ])}
+      />
       <LandingTopbar authenticatedUser={null} />
 
       {/* Header */}
@@ -278,6 +324,7 @@ export default function VorteilePage() {
       </section>
 
       <LandingFooter />
+      <StickyCallBar quelle="Vorteile" />
     </div>
   )
 }
