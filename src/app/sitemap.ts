@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/seo/jsonld'
+import { STAEDTE } from './kfz-gutachter/staedte'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date()
@@ -41,6 +42,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
+    // Kfz-Gutachter Pillar + Stadt-Landingpages (SEO-Hub)
+    {
+      url: `${SITE_URL}/kfz-gutachter`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.95,
+    },
+    ...STAEDTE.map((s) => ({
+      url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    })),
     // Gutachter-Partner-Subdomain
     {
       url: 'https://gutachter.claimondo.de/',

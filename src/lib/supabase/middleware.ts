@@ -150,6 +150,7 @@ function isPublicPath(pathname: string): boolean {
     // GEO-Aufwand ist wirkungslos. Auf 307 → /login = SEO-Tod.
     '/gutachter-finden',
     '/gutachter-partner',
+    '/kfz-gutachter',
     '/vorteile',
     '/wie-es-funktioniert',
     '/faq',
