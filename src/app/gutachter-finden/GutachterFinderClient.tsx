@@ -5,6 +5,7 @@ import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import { erstelleGutachterFinderAnfrage } from '@/lib/actions/gutachter-finder-actions'
 import type { AktiverSV, SvLead } from '@/lib/actions/gutachter-finder-actions'
+import { konvertiereAnfrageZuFall } from '@/lib/actions/konvertiere-anfrage-zu-fall'
 import { MapPin, Loader2, Check, ChevronDown, Shield, Clock, Star, Zap, Calendar, ChevronRight, Camera, Sparkles } from 'lucide-react'
 
 // ——— Typen ———
@@ -210,6 +211,10 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
   } | null>(null)
   const [zb1Error, setZb1Error] = useState<string | null>(null)
 
+  // Konvertierungs-Status nach Booking — Magic-Link ist raus → Erfolgs-Screen
+  // zeigt "Email checken"-Hinweis statt "Wir melden uns".
+  const [konvertierungOk, setKonvertierungOk] = useState(false)
+
   // Z4 SA-Vollmacht: Signatur + AGB. Beide Pflicht damit Submit aktiv wird.
   const [agbAkzeptiert, setAgbAkzeptiert] = useState(false)
   const [signaturDataUrl, setSignaturDataUrl] = useState<string | null>(null)
@@ -404,12 +409,27 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       sa_signatur_data_url: signaturDataUrl ?? undefined,
     })
 
-    setSubmitting(false)
-
     if (result.ok) {
       setAnfrageId(result.id)
       setPhase('erfolg')
+
+      // Konvertierung läuft im Hintergrund — Erfolgs-Screen ist sofort sichtbar,
+      // Magic-Link-Status updated den Hinweis-Text wenn Mail rausging.
+      konvertiereAnfrageZuFall(result.id)
+        .then((conv) => {
+          if (conv.ok && conv.magicLinkSent) {
+            setKonvertierungOk(true)
+          }
+          if (!conv.ok) {
+            console.warn('[GutachterFinder] Konvertierung fehlgeschlagen:', conv.error)
+          }
+        })
+        .catch((err) => {
+          console.warn('[GutachterFinder] Konvertierung-Exception:', err)
+        })
     }
+
+    setSubmitting(false)
   }, [gewaehlterSV, gewaehlterSlot, formData, kundeLatLng, schadentyp, kennzeichen, kzUnbekannt, fahrzeugtyp, regulierung, signaturDataUrl])
 
   // ZB1-Foto verarbeiten: Datei → base64 → API → DB-Update + Imagin-URL.
@@ -1408,9 +1428,33 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
                 {gewaehlterSlot.label}
               </div>
             )}
-            <p className="text-xs" style={{ color: '#7BA3CC' }}>
-              Sie erhalten eine Bestätigung per E-Mail. Ihr Gutachter meldet sich vorab telefonisch.
-            </p>
+            {konvertierungOk ? (
+              <div
+                className="rounded-2xl border px-4 py-3 text-left"
+                style={{
+                  background: 'rgba(34,160,107,0.08)',
+                  borderColor: 'rgba(34,160,107,0.25)',
+                }}
+              >
+                <p
+                  className="flex items-center gap-2 text-sm font-semibold"
+                  style={{ color: '#0D1B3E', fontFamily: 'Montserrat, sans-serif' }}
+                >
+                  <Check className="h-4 w-4" style={{ color: '#22A06B' }} />
+                  E-Mail mit Login-Link verschickt
+                </p>
+                <p className="mt-1 text-xs leading-relaxed" style={{ color: '#1E3A5F' }}>
+                  Klicken Sie den Link in der Mail an <strong>{formData.email}</strong> — Sie
+                  landen direkt in Ihrem Portal mit dem angelegten Fall, dem Termin und allen
+                  Unterlagen.
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs" style={{ color: '#7BA3CC' }}>
+                Sie erhalten in Kürze eine Bestätigung per E-Mail. Ihr Gutachter meldet sich
+                vorab telefonisch.
+              </p>
+            )}
 
             {anfrageId && (
               <p className="mt-3 text-xs font-mono" style={{ color: 'rgba(13,27,62,0.3)' }}>
