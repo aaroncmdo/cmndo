@@ -188,8 +188,43 @@ export default function KfzGutachterPillarPage() {
         </div>
       </section>
 
-      {/* Stadt-Auswahl */}
+      {/* Themen-Pillars */}
       <section className="bg-white py-16">
+        <div className="mx-auto max-w-5xl px-5 sm:px-8">
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+              Vertiefen
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
+              Themen rund um Ihren Kfz-Schaden
+            </h2>
+          </div>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {[
+              { href: '/kfz-gutachter/kosten', titel: 'Kosten', lead: 'Was kostet ein Kfz-Gutachter? BVSK-Tabelle, Sicherungsabtretung, 750-€-Bagatellgrenze.' },
+              { href: '/kfz-gutachter/ablauf', titel: 'Ablauf', lead: 'Schritt für Schritt vom Unfall bis zur Auszahlung — durchschnittlich 6–8 Wochen.' },
+              { href: '/kfz-gutachter/wertminderung', titel: 'Wertminderung', lead: 'Sanden/Danner-Formel, Faustregel nach Alter, BGH-Linie. Typisch 500–2.500 €.' },
+            ].map((t) => (
+              <Link
+                key={t.href}
+                href={t.href}
+                className="group rounded-2xl border border-claimondo-border bg-claimondo-bg p-6 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-md"
+              >
+                <h3 className="text-xl font-extrabold text-claimondo-navy">{t.titel}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{t.lead}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-claimondo-ondo group-hover:text-claimondo-navy">
+                  Mehr erfahren
+                  <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stadt-Auswahl */}
+      <section className="bg-claimondo-bg py-16">
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
