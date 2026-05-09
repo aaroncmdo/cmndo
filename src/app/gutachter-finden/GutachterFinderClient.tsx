@@ -209,6 +209,14 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
     message: string
   } | null>(null)
   const [zb1Error, setZb1Error] = useState<string | null>(null)
+
+  // Z4 SA-Vollmacht: Signatur + AGB. Beide Pflicht damit Submit aktiv wird.
+  const [agbAkzeptiert, setAgbAkzeptiert] = useState(false)
+  const [signaturDataUrl, setSignaturDataUrl] = useState<string | null>(null)
+  const [hasSignatur, setHasSignatur] = useState(false)
+  const [legalAusgeklappt, setLegalAusgeklappt] = useState(false)
+  const signaturCanvasRef = useRef<HTMLCanvasElement>(null)
+  const isDrawingRef = useRef(false)
   const [gpsLaden, setGpsLaden] = useState(false)
   const [gpsFehler, setGpsFehler] = useState<string | null>(null)
   const [kundeLatLng, setKundeLatLng] = useState<{ lat: number; lng: number } | null>(null)
@@ -391,6 +399,9 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       zugeordneter_sv_id: gewaehlterSV.typ === 'sv' ? gewaehlterSV.id : undefined,
       zugeordneter_sv_lead_id: gewaehlterSV.typ === 'lead' ? gewaehlterSV.id : undefined,
       matching_typ: gewaehlterSV.typ === 'sv' ? 'sv_isochrone' : 'dat_lead_nearest',
+      // Z4: SA-Signatur aus dem Canvas. Server-Action setzt sa_unterzeichnet_am
+      // automatisch wenn data-url uebergeben wird.
+      sa_signatur_data_url: signaturDataUrl ?? undefined,
     })
 
     setSubmitting(false)
@@ -399,9 +410,77 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       setAnfrageId(result.id)
       setPhase('erfolg')
     }
-  }, [gewaehlterSV, gewaehlterSlot, formData, kundeLatLng, schadentyp, kennzeichen, kzUnbekannt, fahrzeugtyp, regulierung])
+  }, [gewaehlterSV, gewaehlterSlot, formData, kundeLatLng, schadentyp, kennzeichen, kzUnbekannt, fahrzeugtyp, regulierung, signaturDataUrl])
 
   // ZB1-Foto verarbeiten: Datei → base64 → API → DB-Update + Imagin-URL.
+  // Signatur-Canvas Helpers
+  function initSignaturCanvas() {
+    const canvas = signaturCanvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    // Retina-tauglich: device pixel ratio
+    const dpr = window.devicePixelRatio || 1
+    const rect = canvas.getBoundingClientRect()
+    canvas.width = rect.width * dpr
+    canvas.height = rect.height * dpr
+    ctx.scale(dpr, dpr)
+    ctx.strokeStyle = '#0D1B3E'
+    ctx.lineWidth = 2.5
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+  }
+
+  function startDrawing(e: React.PointerEvent<HTMLCanvasElement>) {
+    const canvas = signaturCanvasRef.current
+    if (!canvas) return
+    isDrawingRef.current = true
+    canvas.setPointerCapture(e.pointerId)
+    const rect = canvas.getBoundingClientRect()
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.beginPath()
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top)
+  }
+
+  function draw(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (!isDrawingRef.current) return
+    const canvas = signaturCanvasRef.current
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top)
+    ctx.stroke()
+    setHasSignatur(true)
+  }
+
+  function stopDrawing() {
+    if (!isDrawingRef.current) return
+    isDrawingRef.current = false
+    const canvas = signaturCanvasRef.current
+    if (!canvas) return
+    setSignaturDataUrl(canvas.toDataURL('image/png'))
+  }
+
+  function clearSignatur() {
+    const canvas = signaturCanvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    setHasSignatur(false)
+    setSignaturDataUrl(null)
+  }
+
+  // Canvas neu initialisieren wenn das Formular sichtbar wird
+  useEffect(() => {
+    if (phase === 'formular') {
+      const t = setTimeout(initSignaturCanvas, 100)
+      return () => clearTimeout(t)
+    }
+  }, [phase])
+
   function handleZb1Upload(file: File) {
     if (!anfrageId) return
     setZb1Loading(true)
@@ -435,10 +514,13 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
     reader.readAsDataURL(file)
   }
 
+  // Z4: SA-Vollmacht erfordert AGB + Signatur zusaetzlich zu Kontaktdaten.
   const formGueltig =
     formData.vorname.trim().length > 1 &&
     formData.nachname.trim().length > 1 &&
-    formData.email.includes('@')
+    formData.email.includes('@') &&
+    agbAkzeptiert &&
+    hasSignatur
 
   // ——— Render ———
   return (
@@ -1007,6 +1089,113 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
                     />
                   </div>
 
+                  {/* Z4: Signatur fuer SA-Vollmacht (Schadens-Abtretung). */}
+                  <div className="mt-5">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p
+                        className="text-xs font-semibold uppercase tracking-wider"
+                        style={{ color: '#4573A2' }}
+                      >
+                        Ihre Unterschrift
+                      </p>
+                      {hasSignatur && (
+                        <button
+                          type="button"
+                          onClick={clearSignatur}
+                          className="text-[11px] underline"
+                          style={{ color: '#7BA3CC' }}
+                        >
+                          neu zeichnen
+                        </button>
+                      )}
+                    </div>
+                    <div
+                      className="relative overflow-hidden rounded-2xl border-2 border-dashed"
+                      style={{
+                        borderColor: hasSignatur ? '#22A06B' : 'rgba(69,115,162,0.35)',
+                        background: '#fafbfc',
+                        height: 110,
+                      }}
+                    >
+                      <canvas
+                        ref={signaturCanvasRef}
+                        className="absolute inset-0 h-full w-full touch-none"
+                        onPointerDown={startDrawing}
+                        onPointerMove={draw}
+                        onPointerUp={stopDrawing}
+                        onPointerCancel={stopDrawing}
+                      />
+                      {!hasSignatur && (
+                        <div
+                          className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm italic"
+                          style={{ color: 'rgba(69,115,162,0.5)' }}
+                        >
+                          Hier mit dem Finger unterschreiben
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* AGB-Pflichtcheckbox + Rechtstext-Toggle */}
+                  <label
+                    className="mt-4 flex cursor-pointer items-start gap-2.5 text-[11px] leading-relaxed"
+                    style={{ color: '#4573A2' }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={agbAkzeptiert}
+                      onChange={(e) => setAgbAkzeptiert(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer"
+                      style={{ accentColor: '#22A06B' }}
+                    />
+                    <span>
+                      Ich beauftrage die Vermittlung eines KFZ-Sachverständigen und die
+                      Schadensregulierung. Alle Kosten trägt die gegnerische Versicherung. Ich
+                      stimme den{' '}
+                      <a href="/agb" target="_blank" className="underline" style={{ color: '#0D1B3E' }}>
+                        AGB
+                      </a>
+                      , der{' '}
+                      <a href="/datenschutz" target="_blank" className="underline" style={{ color: '#0D1B3E' }}>
+                        Datenschutzerklärung
+                      </a>{' '}
+                      und den{' '}
+                      <a href="/nutzungsbedingungen" target="_blank" className="underline" style={{ color: '#0D1B3E' }}>
+                        Nutzungsbedingungen
+                      </a>{' '}
+                      zu.{' '}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setLegalAusgeklappt((v) => !v)
+                        }}
+                        className="underline"
+                        style={{ color: '#0D1B3E' }}
+                      >
+                        {legalAusgeklappt ? 'Weniger' : 'Vollständiger Rechtstext'}
+                      </button>
+                    </span>
+                  </label>
+
+                  {legalAusgeklappt && (
+                    <div
+                      className="mt-2 rounded-xl border p-3 text-[10px] leading-relaxed"
+                      style={{
+                        background: 'rgba(248,249,251,0.9)',
+                        borderColor: 'rgba(13,27,62,0.1)',
+                        color: '#4573A2',
+                      }}
+                    >
+                      Hiermit beauftrage ich die Claimondo GmbH (i.Gr.), Hansaring 10, 50670 Köln,
+                      mit der Vermittlung eines zertifizierten KFZ-Sachverständigen zur Begutachtung
+                      des Unfallschadens an meinem Fahrzeug sowie mit der vollständigen
+                      Schadensregulierung durch eine kooperierende Partnerkanzlei. Die Kosten für den
+                      Sachverständigen und die anwaltliche Vertretung trägt gemäß §249 BGB die
+                      Haftpflichtversicherung des Unfallverursachers. Mir entstehen keine Kosten.
+                    </div>
+                  )}
+
                   <button
                     onClick={buchen}
                     disabled={submitting || !formGueltig}
@@ -1022,7 +1211,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
                         Buchung läuft …
                       </>
                     ) : (
-                      'Termin verbindlich buchen'
+                      'Gutachter jetzt losschicken →'
                     )}
                   </button>
 
