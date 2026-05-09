@@ -9,7 +9,10 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  /* KFZ-177: ignoreBuildErrors entfernt — tsc ist jetzt sauber */
+  // VPS-Build: TS-Checker + ESLint werden im CI (GitHub Actions) geprüft,
+  // auf dem RAM-limitierten VPS sparen wir den Check-Schritt.
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
   // VPS-Deployment: standalone-Output bündelt nur die nötigsten node_modules
   // → kleines Deploy-Artefakt, kein node_modules-Upload nötig.
   output: 'standalone',
