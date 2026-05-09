@@ -40,15 +40,19 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // App-Subdomain (app.claimondo.de) für Bots zu noindex zwingen — Suchmaschinen
-  // sollen nur claimondo.de indexieren. Die App-Subdomain hat sowieso nur
-  // Auth-protected Routes hinter sich, aber /robots.txt braucht expliziten
-  // Disallow-Override.
-  if (hostname === 'app.claimondo.de' && pathname === '/robots.txt') {
-    return new NextResponse('User-agent: *\nDisallow: /\n', {
-      status: 200,
-      headers: { 'content-type': 'text/plain' },
-    })
+  // App-Subdomain (app.claimondo.de): alle Responses mit X-Robots-Tag noindex versehen
+  // und /robots.txt explizit als Disallow: / ausliefern. Verhindert Indexierung der
+  // App-Subdomain selbst wenn Google sie über Links findet.
+  if (hostname === 'app.claimondo.de') {
+    if (pathname === '/robots.txt') {
+      return new NextResponse('User-agent: *\nDisallow: /\n', {
+        status: 200,
+        headers: { 'content-type': 'text/plain' },
+      })
+    }
+    const response = await updateSession(request)
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    return response
   }
 
   // 301-Redirects zwischen Hauptdomain und App-Subdomain
