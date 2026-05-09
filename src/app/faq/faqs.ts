@@ -119,4 +119,124 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       },
     ],
   },
+  {
+    gruppe: 'Ablauf & Zeitrahmen',
+    fragen: [
+      {
+        frage: 'Wie schnell bekomme ich einen Termin mit dem Gutachter?',
+        antwort:
+          'Bei Claimondo in der Regel unter 48 Stunden, bei Akutschäden auch am gleichen Tag möglich. Der Sachverständige kommt zu Ihnen — Werkstatt, Wohnort oder Arbeitsplatz, je nachdem was Ihnen passt. Sie müssen das Fahrzeug nicht selbst irgendwohin bringen. Bei großen Schäden (Totalschaden, Verbringung notwendig) kann der Termin länger dauern, aber wir koordinieren auch das.',
+      },
+      {
+        frage: 'Wie lange dauert das Gutachten selbst?',
+        antwort:
+          'Die Vor-Ort-Besichtigung dauert je nach Schadenumfang 30–90 Minuten. Der schriftliche Gutachten-Bericht liegt bei Standard-Schäden innerhalb von 48 Stunden vor, bei Tesla/E-Fahrzeugen oder Totalschäden mit Demontage 3–5 Werktage. Ohne Bericht kann der Anwalt nicht regulieren — Tempo ist hier kritisch und genau deshalb arbeiten wir mit DAT-Expert-zertifizierten SVs.',
+      },
+      {
+        frage: 'Wann bekomme ich mein Geld?',
+        antwort:
+          'Die Reparaturkosten zahlt die Versicherung in der Regel 4–8 Wochen nach Gutachten-Eingang. Wertminderung, Mietwagen und Nutzungsausfall folgen meist innerhalb derselben Frist. Bei Verzögerung oder Kürzung schreibt unser Anwalt — kürzt die Versicherung trotzdem, Klage. Bundesweiter Durchschnitt: 6–8 Wochen vom Unfall bis zur vollständigen Auszahlung.',
+      },
+      {
+        frage: 'Muss ich mein Auto vor der Begutachtung waschen oder reparieren?',
+        antwort:
+          'Nein — im Gegenteil. Lassen Sie das Fahrzeug genau im Zustand wie nach dem Unfall. Schmutz, Glassplitter, hängende Teile sind alles Beweise für den Schaden. Auch nicht selbst Demontage versuchen — manche Schäden zeigen sich erst beim Öffnen durch den Gutachter (z.B. Rahmenlängsträger, Steuergeräte).',
+      },
+    ],
+  },
+  {
+    gruppe: 'Sachverständige & Zertifizierung',
+    fragen: [
+      {
+        frage: 'Was ist DAT-Expert und warum ist das wichtig?',
+        antwort:
+          'DAT (Deutsche Automobil Treuhand) ist die führende deutsche Bewertungs-Datenbank für Fahrzeuge. DAT-Expert-Zertifizierte Sachverständige nutzen das DAT-Kalkulationssystem — Versicherungen akzeptieren diese Gutachten ohne Diskussion über die zugrundeliegenden Daten. Andere Programme (z.B. Audatex) sind ebenfalls anerkannt, DAT ist aber Marktführer und unsere Standard-Wahl.',
+      },
+      {
+        frage: 'Was unterscheidet einen Claimondo-Gutachter von einer DEKRA?',
+        antwort:
+          'DEKRA und TÜV sind klassische Prüforganisationen — sie machen v.a. HU/AU. Unfall-Gutachten machen sie auch, aber DEKRA wird oft von Versicherungen direkt beauftragt und ist dadurch nicht unabhängig. Unsere Partner sind freiberufliche, DAT-zertifizierte SVs, die nur für den Geschädigten arbeiten — keine Versicherungs-Mandate parallel.',
+      },
+      {
+        frage: 'Können Sie auch bei Tesla, Polestar oder anderen E-Autos helfen?',
+        antwort:
+          'Ja, aber Tesla- und E-Fahrzeug-Gutachten brauchen Spezial-Know-how. Wir routen solche Fälle gezielt an Sachverständige mit Tesla-/Polestar-Diagnose-Zugang. Wichtig: bei Tesla NICHT das Standard-DAT-Kalkulationsschema akzeptieren — die Verbundzeiten und Original-Teile-Preise müssen über Tesla Service Plus gerechnet werden, sonst entgehen Ihnen 20.000 € und mehr.',
+      },
+      {
+        frage: 'Mein Auto ist älter als 10 Jahre — bekomme ich noch ein Gutachten?',
+        antwort:
+          'Ja. Auch ältere Fahrzeuge haben Restwert, oft mehr als der Werkstatt-Eindruck vermuten lässt. Bei Oldtimern (über 30 Jahre) kommt zusätzlich der Sammlerwert ins Spiel — den berechnen Standard-Gutachter oft falsch. Wir vermitteln in solchen Fällen Spezial-SVs mit Oldtimer-Erfahrung. BGH-Linie: keine starre Altersgrenze für Wertminderung (VI ZR 357/03).',
+      },
+    ],
+  },
+  {
+    gruppe: 'Anwalt & Rechtsweg',
+    fragen: [
+      {
+        frage: 'Brauche ich wirklich einen Anwalt? Geht das nicht direkt mit der Versicherung?',
+        antwort:
+          'Sie können direkt mit der Versicherung reden — verlieren dabei aber im Schnitt 33% Ihres Anspruchs. Versicherungen kürzen Wertminderung, UPE-Aufschläge, Verbringungskosten und mehr. Ein Anwalt kennt diese Taktiken. Da die Anwaltskosten bei Fremdverschulden vollständig die Gegenseite trägt, ist die Rechnung einfach: 0 € Risiko, 33% mehr Auszahlung. Ein Anwalt lohnt sich praktisch immer.',
+      },
+      {
+        frage: 'Was kostet mich der Anwalt?',
+        antwort:
+          'Bei Fremdverschulden 0 €. Die Anwaltskosten sind Bestandteil des Schadens nach §249 BGB und werden vollständig von der gegnerischen Haftpflichtversicherung übernommen — RVG-Gebühren in voller Höhe. Auch bei Klage trägt die Gegenseite Gerichts- und Anwaltskosten bei Erfolg. Bei Mitschuld werden die Kosten anteilig aufgeteilt — wir informieren Sie vorab und ehrlich.',
+      },
+      {
+        frage: 'Was ist eine Sicherungsabtretung — und ist sie sicher?',
+        antwort:
+          'Bei der Sicherungsabtretung (§164 BGB) treten Sie Ihren Anspruch gegen die Versicherung in Höhe des Gutachterhonorars an den Sachverständigen ab. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Versicherung ab. Sie haben kein Insolvenzrisiko, kein Vorleistungsrisiko. Standardpraxis in der gesamten Branche, BGH-bestätigt.',
+      },
+      {
+        frage: 'Wie lange habe ich Zeit, Ansprüche geltend zu machen?',
+        antwort:
+          'Verjährung der Schadensersatz-Ansprüche aus Verkehrsunfällen: 3 Jahre (§195 BGB), Beginn ab Kenntnis des Schadens. Schmerzensgeld bei Spätfolgen kann später nachgefordert werden. Wichtig: nichts unterschreiben, was als "Abfindung" oder "Generalvergleich" deklariert ist — damit erlöschen ALLE Ansprüche, auch die unbekannten Spätfolgen. Im Zweifel: erst zu uns, dann unterschreiben.',
+      },
+    ],
+  },
+  {
+    gruppe: 'Datenschutz & Sicherheit',
+    fragen: [
+      {
+        frage: 'Was passiert mit meinen Daten?',
+        antwort:
+          'Alle Daten werden DSGVO-konform in Deutschland verarbeitet (Server in Frankfurt, Supabase EU). Weitergabe nur an: zuständigen Sachverständigen (für die Begutachtung), Partner-Anwaltskanzlei (für die Regulierung) und gegnerische Versicherung (für die Auszahlung). Keine Werbe-Datenweitergabe, keine Verkäufe an Dritte. Volle Auskunft + Löschung jederzeit per E-Mail an datenschutz@claimondo.de.',
+      },
+      {
+        frage: 'Sind Fotos und Dokumente sicher hochgeladen?',
+        antwort:
+          'Ja — verschlüsselte HTTPS-Verbindung, Speicherung in Supabase Storage mit Row-Level-Security. Nur der zuständige Sachverständige + Anwalt + Sie selbst sehen die Dokumente. Polizeiprotokolle, Personalausweis-Kopien und Zulassungsbescheinigung bleiben in dem geschützten Fall — nichts wird öffentlich oder an unbefugte Dritte weitergegeben.',
+      },
+      {
+        frage: 'Werde ich in der HIS-Datei (Hinweis- und Informationssystem der Versicherer) gespeichert?',
+        antwort:
+          'Bei einem unverschuldeten Unfall: nein — dort werden nur Geschädigte gespeichert, die selbst eine Versicherungsleistung beantragen. Sie machen aber Schadenersatz gegen den Verursacher geltend, das ist nicht HIS-relevant. Anders wenn Sie ohne Reparatur fiktiv abrechnen und später wieder Schaden haben — dann kann HIS Ihre Auszahlung blockieren. Reparieren Sie also lieber tatsächlich.',
+      },
+    ],
+  },
+  {
+    gruppe: 'Spezielle Schadenfälle',
+    fragen: [
+      {
+        frage: 'Mein Fahrzeug ist Totalschaden — was jetzt?',
+        antwort:
+          'Bei Totalschaden bekommen Sie den Wiederbeschaffungswert minus Restwert. Der Restwert wird auf dem regionalen Markt ermittelt (BGH VI ZR 119/04, NICHT Restwertbörse 200 km weit weg). Die 130%-Regel: Wenn Reparatur bis 30% über Wiederbeschaffungswert kostet, dürfen Sie trotzdem reparieren lassen — Voraussetzung: fachgerechte Reparatur + Fahrzeug 6 Monate weitergenutzt. Praktisches Beispiel: WBW 8.000 € → Reparatur bis 10.400 € möglich.',
+      },
+      {
+        frage: 'Was ist mit Mietwagen während der Reparatur?',
+        antwort:
+          'Anspruch auf gleichwertigen Mietwagen für die gesamte Reparaturdauer (BGH-Linie: Klassentiefer ist OK gegen Eigenanteil-Erstattung). Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (Gruppe A bis L, ca. 23 € bis 175 €/Tag). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation — Versicherer kürzen hier oft auf "vergleichbare Klasse" was nicht immer gerechtfertigt ist.',
+      },
+      {
+        frage: 'Ich habe einen Schaden mit einem Firmenfahrzeug. Geht das auch?',
+        antwort:
+          'Ja. Die Schadensregulierung läuft analog — Halter ist die Firma, Vollmacht der Geschäftsführung erforderlich. Wichtig: Vorsteuerabzugsberechtigte Firmen rechnen NETTO ab (kein MwSt-Anspruch nach §249 Abs. 2 BGB). Privatpersonen rechnen brutto. Nutzungsausfall ist auch für Firmenfahrzeuge möglich — die Sanden/Danner-Sätze gelten gleichermaßen.',
+      },
+      {
+        frage: 'Was wenn die Schuldfrage unklar ist?',
+        antwort:
+          'Bei unklarer Schuldfrage prüfen wir die Beweislage — Polizeibericht, Zeugen, Dashcam, Verkehrsskizze. Bei 50:50-Quotelung trägt jede Seite 50% des eigenen Schadens. Häufige Konstellation: Auffahrunfall ist meist 100:0 (Auffahrender haftet voll), Spurwechsel mit Gegenverkehr oft 70:30. Wir geben eine ehrliche Einschätzung — keine Versprechen, die wir nicht halten.',
+      },
+    ],
+  },
 ]
