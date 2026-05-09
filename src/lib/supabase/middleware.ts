@@ -153,6 +153,7 @@ function isPublicPath(pathname: string): boolean {
     '/vorteile',
     '/wie-es-funktioniert',
     '/faq',
+    '/ueber-uns',
     // robots.txt + sitemap.xml + opengraph-image — von Next.js auto-routes
     // generiert, dürfen nie hinter Auth liegen.
     '/robots.txt',

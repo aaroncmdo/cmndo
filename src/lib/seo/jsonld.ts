@@ -215,6 +215,66 @@ export function websiteSchema() {
   }
 }
 
+// HowTo-Schema — Google Rich-Result für Schritt-für-Schritt-Anleitungen.
+// Auf /wie-es-funktioniert. Princeton GEO: Statistics-Addition + HowTo
+// = sehr hohe Citation-Wahrscheinlichkeit in AI-Antworten.
+export function howToSchema(args: {
+  name: string
+  description: string
+  totalTime?: string  // ISO 8601 Duration z.B. "PT15M"
+  estimatedCost?: { currency: string; value: string }
+  schritte: Array<{ name: string; text: string; image?: string }>
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: args.name,
+    description: args.description,
+    ...(args.totalTime && { totalTime: args.totalTime }),
+    ...(args.estimatedCost && {
+      estimatedCost: {
+        '@type': 'MonetaryAmount',
+        currency: args.estimatedCost.currency,
+        value: args.estimatedCost.value,
+      },
+    }),
+    step: args.schritte.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+      ...(s.image && { image: s.image }),
+    })),
+  }
+}
+
+// Person-Schema — für About-Us-Page einzeln nutzbar.
+export function personSchema(args: {
+  name: string
+  jobTitle: string
+  description?: string
+  image?: string
+  sameAs?: string[]
+  worksFor?: { name: string; url: string }
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: args.name,
+    jobTitle: args.jobTitle,
+    ...(args.description && { description: args.description }),
+    ...(args.image && { image: args.image }),
+    ...(args.sameAs && { sameAs: args.sameAs }),
+    ...(args.worksFor && {
+      worksFor: {
+        '@type': 'Organization',
+        name: args.worksFor.name,
+        url: args.worksFor.url,
+      },
+    }),
+  }
+}
+
 // Render-Helper — gibt einen <script>-Tag-String mit dem JSON-LD aus
 export function jsonLdScript(data: object | object[]) {
   return {
