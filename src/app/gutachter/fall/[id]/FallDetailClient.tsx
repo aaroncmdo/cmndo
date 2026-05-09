@@ -361,7 +361,7 @@ export default function FallDetailClient(props: Props) {
 
       {/* Stepper + Termin-Banner als verschmolzener Header — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
-        <SvUnterwegsInfo tracking={geoTracking} />
+        <SvUnterwegsInfo tracking={geoTracking} terminStartIso={aktiverTermin?.start_zeit ?? null} />
         {/* CMM-32 Walkthrough: AuftragHeaderPanel verschmilzt Stepper +
             Termin-Banner zu einem Block. Termin-Sektion zeigt sich nur
             solange der Auftrag aktiv ist (vor Regulierungs-Phase). */}

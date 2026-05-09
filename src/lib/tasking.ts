@@ -49,6 +49,22 @@ export async function createAutoTask(params: AutoTaskParams): Promise<{ id: stri
     }
   }
 
+  // Dedup: wenn task_code gesetzt, keinen zweiten offenen Task desselben Typs erzeugen
+  if (params.task_code) {
+    const { data: existing } = await supabase
+      .from('tasks')
+      .select('id')
+      .eq('fall_id', params.fall_id)
+      .eq('task_code', params.task_code)
+      .in('status', ['offen', 'in-bearbeitung'])
+      .limit(1)
+      .maybeSingle()
+    if (existing) {
+      console.info(`[tasking] Dedup: Task ${params.task_code} für Fall ${params.fall_id} bereits offen — übersprungen`)
+      return existing
+    }
+  }
+
   const { data, error } = await supabase.from('tasks').insert({
     fall_id: params.fall_id,
     typ: params.task_typ,
