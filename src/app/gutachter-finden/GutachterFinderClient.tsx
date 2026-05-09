@@ -8,10 +8,12 @@ import type { AktiverSV, SvLead } from '@/lib/actions/gutachter-finder-actions'
 import { MapPin, Loader2, Check, ChevronDown, Shield, Clock, Star, Zap, Calendar, ChevronRight } from 'lucide-react'
 
 // ——— Typen ———
-// Prototyp-Flow (sv-live-mapbox_25.html): wann → schaden → … → gps → map → detail → formular → erfolg
-type Phase = 'wann' | 'schaden' | 'gps' | 'map' | 'detail' | 'formular' | 'erfolg'
+// Prototyp-Flow (sv-live-mapbox_25.html): wann → schaden → fahrzeug → gps → map → detail → formular → erfolg
+type Phase = 'wann' | 'schaden' | 'fahrzeug' | 'gps' | 'map' | 'detail' | 'formular' | 'erfolg'
 
 type Schadentyp = 'auffahrunfall' | 'parkschaden' | 'kreuzungsunfall' | 'wildschaden' | 'sonstiges'
+
+type Fahrzeugtyp = 'pkw' | 'motorrad' | 'transporter' | 'lkw' | 'wohnmobil'
 
 type Wann = 'sofort' | 'heute' | 'tage'
 
@@ -189,6 +191,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
   const [schadentyp, setSchadentyp] = useState<Schadentyp | null>(null)
   const [kennzeichen, setKennzeichen] = useState('')
   const [kzUnbekannt, setKzUnbekannt] = useState(false)
+  const [fahrzeugtyp, setFahrzeugtyp] = useState<Fahrzeugtyp | null>(null)
   const [gpsLaden, setGpsLaden] = useState(false)
   const [gpsFehler, setGpsFehler] = useState<string | null>(null)
   const [kundeLatLng, setKundeLatLng] = useState<{ lat: number; lng: number } | null>(null)
@@ -361,6 +364,8 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       schadentyp: schadentyp ?? formData.schadentyp ?? 'unbekannt',
       // Q2 Kennzeichen (Verursacher) — bei Fahrerflucht leer.
       kennzeichen: kzUnbekannt ? undefined : (kennzeichen.trim() || undefined),
+      // Q3 Fahrzeugtyp — als Beschreibung damit Dispatch SV-Spezialisierung sieht.
+      fahrzeug_beschreibung: fahrzeugtyp ?? undefined,
       schadenort_lat: kundeLatLng?.lat,
       schadenort_lng: kundeLatLng?.lng,
       wunschtermin,
@@ -375,7 +380,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       setAnfrageId(result.id)
       setPhase('erfolg')
     }
-  }, [gewaehlterSV, gewaehlterSlot, formData, kundeLatLng, schadentyp, kennzeichen, kzUnbekannt])
+  }, [gewaehlterSV, gewaehlterSlot, formData, kundeLatLng, schadentyp, kennzeichen, kzUnbekannt, fahrzeugtyp])
 
   const formGueltig =
     formData.vorname.trim().length > 1 &&
@@ -554,7 +559,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
             </button>
 
             <button
-              onClick={() => setPhase('gps')}
+              onClick={() => setPhase('fahrzeug')}
               disabled={!schadentyp || (!kzUnbekannt && kennzeichen.trim().length < 4)}
               className="mt-6 w-full rounded-2xl py-4 text-base font-bold text-white transition-all active:scale-95"
               style={{
@@ -569,6 +574,78 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
 
             <button
               onClick={() => setPhase('wann')}
+              className="mt-3 w-full text-center text-xs"
+              style={{ color: '#7BA3CC' }}
+            >
+              ← Zurück
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Q3 Fahrzeug — PKW/Motorrad/Transporter/LKW/Wohnmobil. Bestimmt SV-Spezialisierung. */}
+      {phase === 'fahrzeug' && (
+        <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0 overflow-y-auto">
+          <div
+            className="mx-4 my-4 w-full max-w-sm rounded-3xl border border-white/40 p-7"
+            style={{
+              background: 'rgba(255,255,255,0.82)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 60px rgba(13,27,62,0.18), 0 1px 0 rgba(255,255,255,0.9) inset',
+            }}
+          >
+            <h2
+              className="mb-2 text-xl font-bold"
+              style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
+            >
+              Welche Fahrzeugart?
+            </h2>
+            <p className="mb-5 text-sm" style={{ color: '#4573A2' }}>
+              Wir wählen einen Sachverständigen mit passender Spezialisierung.
+            </p>
+
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { wert: 'pkw', emoji: '🚗', label: 'PKW' },
+                { wert: 'motorrad', emoji: '🏍️', label: 'Motorrad' },
+                { wert: 'transporter', emoji: '🚐', label: 'Transporter' },
+                { wert: 'lkw', emoji: '🚛', label: 'LKW' },
+                { wert: 'wohnmobil', emoji: '🚌', label: 'Wohnmobil' },
+              ] as const).map(({ wert, emoji, label }) => {
+                const aktiv = fahrzeugtyp === wert
+                return (
+                  <button
+                    key={wert}
+                    onClick={() => setFahrzeugtyp(wert)}
+                    className="flex flex-col items-center gap-1.5 rounded-2xl border px-3 py-4 text-sm font-medium transition-all"
+                    style={{
+                      background: aktiv ? '#0D1B3E' : 'rgba(248,249,251,0.9)',
+                      borderColor: aktiv ? '#0D1B3E' : 'rgba(13,27,62,0.12)',
+                      color: aktiv ? '#fff' : '#0D1B3E',
+                    }}
+                  >
+                    <span className="text-2xl">{emoji}</span>
+                    <span style={{ fontFamily: 'Montserrat, sans-serif' }}>{label}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <button
+              onClick={() => setPhase('gps')}
+              disabled={!fahrzeugtyp}
+              className="mt-6 w-full rounded-2xl py-4 text-base font-bold text-white transition-all active:scale-95"
+              style={{
+                background: !fahrzeugtyp ? 'rgba(13,27,62,0.25)' : '#0D1B3E',
+                fontFamily: 'Montserrat, sans-serif',
+              }}
+            >
+              Weiter →
+            </button>
+
+            <button
+              onClick={() => setPhase('schaden')}
               className="mt-3 w-full text-center text-xs"
               style={{ color: '#7BA3CC' }}
             >
