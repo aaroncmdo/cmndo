@@ -99,6 +99,39 @@ const FEATURES = [
   'Direkter Draht zum Dispatch-Team',
 ]
 
+const FALLBEISPIELE = [
+  {
+    fahrzeug: 'Opel Karl',
+    tag: 'Verborgene Totalschäden',
+    situation: 'Von außen: nur Kratzer und eine leichte Delle sichtbar. Versicherungs-Gutachter: kosmetischer Schaden, kein strukturelles Problem.',
+    ergebnis: 'Nach Demontage durch unabhängigen Gutachter: Rahmenlängsträger verschoben — Totalschaden.',
+    verlust: '€7.000',
+    verlustText: 'wären ohne unabhängiges Gutachten einfach verloren gegangen.',
+    farbe: 'from-red-900/30 to-transparent',
+    borderFarbe: 'border-red-500/20',
+  },
+  {
+    fahrzeug: 'Tesla Model 3',
+    tag: 'E-Auto Sonderwissen',
+    situation: 'Standard-Gutachten mit DAT/Audatex: €22.000. Das Programm kannte die Verbundzeiten für US-Fahrzeuge nicht — Steuergeräte unter Schwellerblenden nicht erfasst.',
+    ergebnis: 'Mit Tesla-Originaldaten und Spezial-Gutachter: €48.000.',
+    verlust: '+€26.000',
+    verlustText: 'mehr für den Kunden — durch Fachwissen, das Standard-Software nicht liefert.',
+    farbe: 'from-amber-900/20 to-transparent',
+    borderFarbe: 'border-amber-500/20',
+  },
+  {
+    fahrzeug: 'NDR-Reportage-Fall',
+    tag: 'Automatisierte Kürzungen',
+    situation: 'ControlExpert-Prüfbericht ohne Fahrzeugbesichtigung: Schadensumme auf €2.000 gedrückt. Der Versicherer hatte gezahlt, der Fall galt als abgeschlossen.',
+    ergebnis: 'Unabhängiges Gutachten nach Demontage: €9.000 tatsächlicher Schaden.',
+    verlust: '€7.000',
+    verlustText: 'verloren — ohne Widerspruch. BGH VI ZR 65/18 hätte den vollen Betrag gesichert.',
+    farbe: 'from-[#4573A2]/20 to-transparent',
+    borderFarbe: 'border-[#4573A2]/30',
+  },
+]
+
 export default function GutachterPartnerPage() {
   return (
     <div className="min-h-screen bg-[#0D1B3E] text-white">
@@ -216,6 +249,55 @@ export default function GutachterPartnerPage() {
               )
             })}
           </div>
+        </div>
+      </section>
+
+      {/* ── Fallbeispiele ─────────────────────────────────── */}
+      <section className="border-y border-white/10 bg-[#060e1f] py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center">
+            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">Warum deine Arbeit zählt</div>
+            <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+              Echte Fälle. Echte Unterschiede.
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-white/50">
+              Das ist der Unterschied zwischen einem Versicherungs-Gutachter und dir.
+            </p>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {FALLBEISPIELE.map((f) => (
+              <div
+                key={f.fahrzeug}
+                className={`relative overflow-hidden rounded-3xl border ${f.borderFarbe} bg-gradient-to-br ${f.farbe} bg-white/5 p-6 backdrop-blur`}
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-white/70">
+                    {f.tag}
+                  </span>
+                  <span className="text-xs font-bold text-white/40">{f.fahrzeug}</span>
+                </div>
+
+                <p className="text-sm leading-relaxed text-white/55">{f.situation}</p>
+
+                <div className="my-4 border-t border-white/10" />
+
+                <p className="text-sm leading-relaxed text-white/80">
+                  <span className="font-semibold text-white">Ergebnis nach unabhängigem Gutachten:</span>{' '}
+                  {f.ergebnis}
+                </p>
+
+                <div className="mt-4 rounded-2xl bg-white/5 p-4">
+                  <div className="text-3xl font-black tracking-tight text-white">{f.verlust}</div>
+                  <div className="mt-1 text-xs text-white/50">{f.verlustText}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-10 text-center text-sm text-white/30">
+            Quellen: NDR-Reportage „Versicherungs-Gutachter vs. unabhängige Sachverständige" · BGH VI ZR 65/18 · BGH VI ZR 174/24
+          </p>
         </div>
       </section>
 

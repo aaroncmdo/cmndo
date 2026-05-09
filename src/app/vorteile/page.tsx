@@ -94,6 +94,39 @@ const VORTEILE = [
   },
 ]
 
+const KUERZUNGEN = [
+  {
+    position: 'Stundenverrechnungssätze',
+    trick: 'Verweis auf billigere Partnerwerkstatt',
+    recht: 'BGH VI ZR 248/05 — freie Werkstattwahl',
+  },
+  {
+    position: 'UPE-Aufschläge',
+    trick: 'Als „nicht erstattungsfähig" abgestempelt',
+    recht: 'BGH VI ZR 65/18 — erstattungsfähig',
+  },
+  {
+    position: 'Verbringungskosten',
+    trick: 'Komplett gestrichen',
+    recht: 'BGH — vollständig erstattungsfähig',
+  },
+  {
+    position: 'Beilackierungskosten',
+    trick: 'Ignoriert oder halbiert',
+    recht: 'BGH VI ZR 174/24 (2025) — gilt',
+  },
+  {
+    position: 'Sachverständigenhonorar',
+    trick: 'Als „überhöht" abgelehnt',
+    recht: 'BGH — Honorar liegt beim Auftraggeber',
+  },
+  {
+    position: 'Wertminderung',
+    trick: 'Komplett ignoriert oder auf Null gesetzt',
+    recht: 'BGH VI ZR 357/03 — keine starre Altersgrenze',
+  },
+]
+
 const VERGLEICH = [
   { punkt: 'Kosten für Sie', ohne: 'Gutachterkosten selbst zahlen', mit: '0 € — Gegner zahlt alles' },
   { punkt: 'Gutachter', ohne: 'Versicherungs-Gutachter (nicht neutral)', mit: 'Unabhängiger Sachverständiger' },
@@ -150,6 +183,51 @@ export default function VorteilePage() {
               </div>
             )
           })}
+        </div>
+      </section>
+
+      {/* Kürzungs-Aufklärung */}
+      <section className="bg-[#0D1B3E] py-20 text-white">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="text-center">
+            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">Was Sie nicht wissen sollen</div>
+            <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+              So kürzt die Versicherung Ihren Anspruch
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-white/60">
+              ControlExpert, K-Expert und DEKRA erstellen automatisierte Prüfberichte — <strong className="text-white">ohne Fahrzeugbesichtigung</strong>.
+              Positionen werden gestrichen, in der Hoffnung dass Sie nicht widersprechen.
+            </p>
+          </div>
+
+          <div className="mt-12 overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur">
+            <div className="grid grid-cols-3 border-b border-white/10 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white/40">
+              <div>Gekürzter Posten</div>
+              <div className="text-center">Versicherungs-Trick</div>
+              <div className="text-right">Ihr Recht (BGH)</div>
+            </div>
+            {KUERZUNGEN.map((k, i) => (
+              <div
+                key={k.position}
+                className={`grid grid-cols-3 items-center px-6 py-4 text-sm ${i < KUERZUNGEN.length - 1 ? 'border-b border-white/5' : ''}`}
+              >
+                <div className="font-semibold text-white">{k.position}</div>
+                <div className="text-center text-red-400">{k.trick}</div>
+                <div className="text-right text-emerald-400">{k.recht}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 rounded-3xl border border-amber-500/20 bg-amber-500/10 p-6 text-center">
+            <p className="text-lg font-semibold text-amber-200">
+              Im Schnitt verlieren Unfallbeteiligte{' '}
+              <span className="text-3xl font-black text-amber-400">33 %</span>{' '}
+              ihres Anspruchs — weil sie nicht widersprechen.
+            </p>
+            <p className="mt-2 text-sm text-amber-200/60">
+              Reales Beispiel: Gutachtenwert €11.900 → nach Versicherer-Kürzungen: €8.000 ausgezahlt. €3.900 verloren.
+            </p>
+          </div>
         </div>
       </section>
 
