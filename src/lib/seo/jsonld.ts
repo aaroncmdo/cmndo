@@ -9,10 +9,9 @@ export const PHONE_DISPLAY = '0221 25906530'
 export const CONTACT_EMAIL = 'kontakt@claimondo.de'
 
 // Hauptstadt + Region für GEO-Targeting
-// TODO Aaron: echte Adresse einsetzen — derzeit Platzhalter Köln-Mitte
 const HQ_LOCATION = {
-  streetAddress: 'Kaiser-Wilhelm-Ring 27-29',
-  postalCode: '50672',
+  streetAddress: 'Hansaring 10',
+  postalCode: '50670',
   addressLocality: 'Köln',
   addressRegion: 'NW',
   addressCountry: 'DE',
