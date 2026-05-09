@@ -12,7 +12,8 @@ const nextConfig: NextConfig = {
   // VPS-Build: TS-Checker + ESLint werden im CI (GitHub Actions) geprüft,
   // auf dem RAM-limitierten VPS sparen wir den Check-Schritt.
   typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true },
+  // eslint-Prop existiert in Next 16 TypeScript-Typen nicht mehr — cast nötig
+  ...(({ eslint: { ignoreDuringBuilds: true } }) as object),
   // VPS-Deployment: standalone-Output bündelt nur die nötigsten node_modules
   // → kleines Deploy-Artefakt, kein node_modules-Upload nötig.
   output: 'standalone',
