@@ -8,8 +8,13 @@ import type { AktiverSV, SvLead } from '@/lib/actions/gutachter-finder-actions'
 import { MapPin, Loader2, Check, ChevronDown, Shield, Clock, Star, Zap, Calendar, ChevronRight } from 'lucide-react'
 
 // ——— Typen ———
-// Prototyp-Flow (sv-live-mapbox_25.html): wann → schaden → fahrzeug → gps → map → detail → formular → erfolg
-type Phase = 'wann' | 'schaden' | 'fahrzeug' | 'gps' | 'map' | 'detail' | 'formular' | 'erfolg'
+// Prototyp-Flow (sv-live-mapbox_25.html):
+// wann → schaden → fahrzeug → gps → map → detail → ansprueche → formular → erfolg
+type Phase = 'wann' | 'schaden' | 'fahrzeug' | 'gps' | 'map' | 'detail' | 'ansprueche' | 'formular' | 'erfolg'
+
+// Regulierungs-Wahl aus z35 — bestimmt ob Anwalt eingebunden wird (Vollregulierung)
+// oder ob nur das Gutachten ausgeführt wird (Selbstregulierung).
+type Regulierung = 'vollstaendig' | 'nur_gutachten'
 
 type Schadentyp = 'auffahrunfall' | 'parkschaden' | 'kreuzungsunfall' | 'wildschaden' | 'sonstiges'
 
@@ -192,6 +197,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
   const [kennzeichen, setKennzeichen] = useState('')
   const [kzUnbekannt, setKzUnbekannt] = useState(false)
   const [fahrzeugtyp, setFahrzeugtyp] = useState<Fahrzeugtyp | null>(null)
+  const [regulierung, setRegulierung] = useState<Regulierung | null>(null)
   const [gpsLaden, setGpsLaden] = useState(false)
   const [gpsFehler, setGpsFehler] = useState<string | null>(null)
   const [kundeLatLng, setKundeLatLng] = useState<{ lat: number; lng: number } | null>(null)
@@ -366,6 +372,8 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       kennzeichen: kzUnbekannt ? undefined : (kennzeichen.trim() || undefined),
       // Q3 Fahrzeugtyp — als Beschreibung damit Dispatch SV-Spezialisierung sieht.
       fahrzeug_beschreibung: fahrzeugtyp ?? undefined,
+      // Z35 Ansprüche-Wahl — bestimmt ob Anwalt eingebunden wird.
+      regulierungs_modus: regulierung ?? undefined,
       schadenort_lat: kundeLatLng?.lat,
       schadenort_lng: kundeLatLng?.lng,
       wunschtermin,
@@ -380,7 +388,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       setAnfrageId(result.id)
       setPhase('erfolg')
     }
-  }, [gewaehlterSV, gewaehlterSlot, formData, kundeLatLng, schadentyp, kennzeichen, kzUnbekannt, fahrzeugtyp])
+  }, [gewaehlterSV, gewaehlterSlot, formData, kundeLatLng, schadentyp, kennzeichen, kzUnbekannt, fahrzeugtyp, regulierung])
 
   const formGueltig =
     formData.vorname.trim().length > 1 &&
@@ -857,7 +865,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
                   <button
                     onClick={() => {
                       if (!gewaehlterSlot) return
-                      setPhase('formular')
+                      setPhase('ansprueche')
                     }}
                     disabled={!gewaehlterSlot}
                     className="w-full rounded-2xl py-4 text-base font-bold text-white transition-all active:scale-95"
@@ -984,6 +992,152 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       )}
 
       {/* Erfolgs-Screen */}
+      {/* Z35 Ansprüche-Überzeugung — größter Conversion-Moment vor dem Formular.
+          Vollregulierung (Anwalt + alle Schadenspositionen) vs. Nur-Gutachten. */}
+      {phase === 'ansprueche' && (
+        <div className="absolute inset-0 flex items-end justify-center overflow-y-auto pb-12 sm:items-center sm:pb-0">
+          <div
+            className="mx-4 my-4 w-full max-w-md rounded-3xl border border-white/40 p-7"
+            style={{
+              background: 'rgba(255,255,255,0.92)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              boxShadow: '0 20px 60px rgba(13,27,62,0.18)',
+            }}
+          >
+            <div
+              className="mb-4 inline-block rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
+              style={{ background: 'rgba(243,192,83,0.18)', color: '#C28A2A' }}
+            >
+              Ihr Recht nach §249 BGB
+            </div>
+            <h2
+              className="mb-3 text-2xl font-bold leading-tight"
+              style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
+            >
+              Lassen Sie sich nichts entgehen
+            </h2>
+            <p className="mb-5 text-sm leading-relaxed" style={{ color: '#4573A2' }}>
+              Versicherungen kürzen bei <strong style={{ color: '#0D1B3E' }}>8 von 10 Fällen</strong>.
+              Wer ohne Anwalt reguliert, akzeptiert oft die erste Kürzung und verliert im Schnitt
+              über <strong style={{ color: '#0D1B3E' }}>3.000 €</strong>.
+            </p>
+
+            {/* Vollregulierung — empfohlen */}
+            <button
+              onClick={() => {
+                setRegulierung('vollstaendig')
+                setPhase('formular')
+              }}
+              className="mb-3 w-full rounded-2xl border-2 p-5 text-left transition-all active:scale-[0.99]"
+              style={{
+                background: '#0D1B3E',
+                borderColor: '#0D1B3E',
+                color: '#fff',
+                boxShadow: '0 8px 24px rgba(13,27,62,0.25)',
+              }}
+            >
+              <div
+                className="mb-2 inline-block rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                style={{ background: 'rgba(243,192,83,0.25)', color: '#F3C053' }}
+              >
+                Empfohlen
+              </div>
+              <p className="mb-3 text-base font-bold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                Vollständig regulieren lassen
+              </p>
+              <ul className="mb-3 flex flex-col gap-1.5 text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: '#7BA3CC' }} />
+                  <span>Unabhängiger Gutachter dokumentiert <strong style={{ color: '#fff' }}>alle</strong> Schadenspositionen</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: '#7BA3CC' }} />
+                  <span>Fachanwalt mit 2.000+ Fällen/Jahr fordert innerhalb 30 Tagen ein</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: '#7BA3CC' }} />
+                  <span>Wir übernehmen die komplette Kommunikation</span>
+                </li>
+              </ul>
+              <div
+                className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-semibold"
+                style={{ background: 'rgba(123,163,204,0.15)', color: '#7BA3CC' }}
+              >
+                <Check className="h-3 w-3" />
+                0 € für Sie — Versicherung zahlt Anwalt + Gutachter
+              </div>
+            </button>
+
+            {/* Beispielrechnung */}
+            <div
+              className="mb-4 rounded-2xl border p-4"
+              style={{ background: 'rgba(248,249,251,0.9)', borderColor: 'rgba(13,27,62,0.1)' }}
+            >
+              <p
+                className="mb-3 text-[9px] font-bold uppercase tracking-wider"
+                style={{ color: '#4573A2' }}
+              >
+                Beispiel · 4.800 € Schadenhöhe
+              </p>
+              <div className="flex flex-col gap-1.5 text-xs" style={{ color: '#0D1B3E' }}>
+                {[
+                  { label: 'Reparatur', wert: '4.800 €' },
+                  { label: 'Nutzungsausfall / Mietwagen', wert: 'ca. 530 €' },
+                  { label: 'Wertminderung', wert: 'ca. 650 €' },
+                  { label: 'Ersatzteil-Aufschläge (UPE)', wert: 'ca. 285 €' },
+                  { label: 'Unfallpauschale', wert: 'ca. 30 €' },
+                ].map(({ label, wert }) => (
+                  <div key={label} className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Check className="h-3 w-3" style={{ color: '#22A06B' }} />
+                      {label}
+                    </span>
+                    <span className="font-mono">{wert}</span>
+                  </div>
+                ))}
+              </div>
+              <div
+                className="mt-3 flex items-center justify-between border-t pt-3"
+                style={{ borderColor: 'rgba(13,27,62,0.08)' }}
+              >
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: '#22A06B' }}>
+                    Plus, was sonst gekürzt wird
+                  </p>
+                  <p className="text-[10px]" style={{ color: '#7BA3CC' }}>
+                    Ihr Anwalt fordert den vollen Betrag
+                  </p>
+                </div>
+                <p className="font-mono text-xl font-bold" style={{ color: '#22A06B' }}>
+                  +3.270 €
+                </p>
+              </div>
+            </div>
+
+            {/* Sekundär-Pfad: Nur Gutachten */}
+            <button
+              onClick={() => {
+                setRegulierung('nur_gutachten')
+                setPhase('formular')
+              }}
+              className="w-full rounded-xl py-2.5 text-xs"
+              style={{ color: '#7BA3CC' }}
+            >
+              Nur Gutachten — selbst regulieren →
+            </button>
+
+            <button
+              onClick={() => setPhase('detail')}
+              className="mt-1 w-full text-center text-[11px]"
+              style={{ color: '#9BAAB8' }}
+            >
+              ← Anderen Termin wählen
+            </button>
+          </div>
+        </div>
+      )}
+
       {phase === 'erfolg' && (
         <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0" style={{ zIndex: 20 }}>
           <div
