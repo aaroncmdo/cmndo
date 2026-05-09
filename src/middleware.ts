@@ -97,7 +97,10 @@ export const config = {
   // Matcher aus proxy.ts übernommen (vollständiger Exclusion-Katalog):
   // .glb → Mapbox 3D-Modell; .js/.json → sw.js + manifest.json;
   // .obj/.mtl → Three.js OBJLoader; Rest → Standard Next.js-Artefakte.
+  // robots.txt und sitemap.xml müssen durch die Middleware, damit
+  // app.claimondo.de eine eigene robots.txt (Disallow: /) zurückbekommt.
+  // txt/xml deshalb aus dem Exclusion-Pattern entfernt.
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|glb|gltf|obj|mtl|hdr|ktx2|woff|woff2|mp4|webm|js|json|txt|xml)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|glb|gltf|obj|mtl|hdr|ktx2|woff|woff2|mp4|webm|js|json)$).*)',
   ],
 }
