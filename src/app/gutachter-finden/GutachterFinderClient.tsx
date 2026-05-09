@@ -5,7 +5,7 @@ import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import { erstelleGutachterFinderAnfrage } from '@/lib/actions/gutachter-finder-actions'
 import type { AktiverSV, SvLead } from '@/lib/actions/gutachter-finder-actions'
-import { MapPin, Loader2, Check, ChevronDown, Shield, Clock, Star, Zap, Calendar, ChevronRight } from 'lucide-react'
+import { MapPin, Loader2, Check, ChevronDown, Shield, Clock, Star, Zap, Calendar, ChevronRight, Camera, Sparkles } from 'lucide-react'
 
 // ——— Typen ———
 // Prototyp-Flow (sv-live-mapbox_25.html):
@@ -198,6 +198,17 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
   const [kzUnbekannt, setKzUnbekannt] = useState(false)
   const [fahrzeugtyp, setFahrzeugtyp] = useState<Fahrzeugtyp | null>(null)
   const [regulierung, setRegulierung] = useState<Regulierung | null>(null)
+
+  // ZB1-OCR (Erfolgs-Screen): Foto-Upload nach Buchung. Vorname + Halter-Daten
+  // landen direkt in der Anfrage; Imagin-URL rendert das Fahrzeug visuell.
+  const [zb1Loading, setZb1Loading] = useState(false)
+  const [zb1Result, setZb1Result] = useState<{
+    extracted: Record<string, string | null>
+    imagin_url: string | null
+    fields_found: number
+    message: string
+  } | null>(null)
+  const [zb1Error, setZb1Error] = useState<string | null>(null)
   const [gpsLaden, setGpsLaden] = useState(false)
   const [gpsFehler, setGpsFehler] = useState<string | null>(null)
   const [kundeLatLng, setKundeLatLng] = useState<{ lat: number; lng: number } | null>(null)
@@ -389,6 +400,40 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       setPhase('erfolg')
     }
   }, [gewaehlterSV, gewaehlterSlot, formData, kundeLatLng, schadentyp, kennzeichen, kzUnbekannt, fahrzeugtyp, regulierung])
+
+  // ZB1-Foto verarbeiten: Datei → base64 → API → DB-Update + Imagin-URL.
+  function handleZb1Upload(file: File) {
+    if (!anfrageId) return
+    setZb1Loading(true)
+    setZb1Error(null)
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const base64 = typeof reader.result === 'string' ? reader.result : ''
+      try {
+        const res = await fetch('/api/ocr-fahrzeugschein-anfrage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ anfrage_id: anfrageId, image_base64: base64 }),
+        }).then((r) => r.json())
+        if (res?.success && res.extracted) {
+          setZb1Result({
+            extracted: res.extracted,
+            imagin_url: res.imagin_url ?? null,
+            fields_found: res.fields_found ?? 0,
+            message: res.message ?? '',
+          })
+        } else {
+          setZb1Error(res?.message ?? 'Fahrzeugschein konnte nicht ausgelesen werden.')
+        }
+      } catch (err) {
+        console.warn('[ZB1-OCR-Anfrage]', err)
+        setZb1Error('Netzwerkfehler — bitte später erneut versuchen.')
+      } finally {
+        setZb1Loading(false)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
 
   const formGueltig =
     formData.vorname.trim().length > 1 &&
@@ -1139,9 +1184,9 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       )}
 
       {phase === 'erfolg' && (
-        <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0" style={{ zIndex: 20 }}>
+        <div className="absolute inset-0 flex items-end justify-center overflow-y-auto pb-12 sm:items-center sm:pb-0" style={{ zIndex: 20 }}>
           <div
-            className="mx-4 w-full max-w-sm rounded-3xl border border-white/40 p-8 text-center"
+            className="mx-4 my-4 w-full max-w-sm rounded-3xl border border-white/40 p-7 text-center"
             style={{
               background: 'rgba(255,255,255,0.92)',
               backdropFilter: 'blur(24px)',
@@ -1183,6 +1228,135 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
                 Ref: {anfrageId.slice(0, 8).toUpperCase()}
               </p>
             )}
+
+            {/* ZB1-Schnellstart: Fahrzeugschein scannen → Imagin-Visualisierung +
+                FIN-Vorschadencheck im Hintergrund. Macht das spätere Onboarding 1-Klick. */}
+            <div
+              className="mt-6 rounded-2xl border-2 border-dashed p-4 text-left"
+              style={{
+                borderColor: zb1Result ? 'rgba(34,160,107,0.3)' : 'rgba(69,115,162,0.3)',
+                background: zb1Result ? 'rgba(34,160,107,0.04)' : 'rgba(69,115,162,0.04)',
+              }}
+            >
+              {!zb1Result && (
+                <>
+                  <div className="mb-2 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" style={{ color: '#4573A2' }} />
+                    <p
+                      className="text-sm font-bold"
+                      style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
+                    >
+                      Fahrzeug bestätigen — 1 Klick
+                    </p>
+                  </div>
+                  <p className="mb-3 text-xs leading-relaxed" style={{ color: '#4573A2' }}>
+                    Foto vom Fahrzeugschein machen — wir lesen FIN, Halter und Modell automatisch aus.
+                    Spart Ihnen das spätere Tippen und prüft direkt ob es Vorschäden gibt.
+                  </p>
+
+                  {zb1Error && (
+                    <p className="mb-2 text-xs" style={{ color: '#B45309' }}>
+                      {zb1Error}
+                    </p>
+                  )}
+
+                  <label
+                    className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white cursor-pointer active:scale-[0.98] transition-all"
+                    style={{
+                      background: zb1Loading ? 'rgba(13,27,62,0.5)' : '#0D1B3E',
+                      fontFamily: 'Montserrat, sans-serif',
+                    }}
+                  >
+                    {zb1Loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Wird ausgelesen …
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="h-4 w-4" />
+                        Fahrzeugschein scannen
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      disabled={zb1Loading}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0]
+                        if (f) handleZb1Upload(f)
+                        e.target.value = ''
+                      }}
+                    />
+                  </label>
+                </>
+              )}
+
+              {zb1Result && (
+                <>
+                  <div className="mb-3 flex items-center gap-2">
+                    <Check className="h-4 w-4" style={{ color: '#22A06B' }} />
+                    <p
+                      className="text-sm font-bold"
+                      style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
+                    >
+                      {zb1Result.fields_found} Felder erkannt
+                    </p>
+                  </div>
+
+                  {/* Imagin-Visual des Fahrzeugs */}
+                  {zb1Result.imagin_url && (
+                    <div
+                      className="mb-3 overflow-hidden rounded-xl"
+                      style={{ background: 'rgba(248,249,251,0.8)' }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={zb1Result.imagin_url}
+                        alt="Ihr Fahrzeug"
+                        className="h-32 w-full object-contain"
+                      />
+                    </div>
+                  )}
+
+                  <ul className="flex flex-col gap-1 text-xs" style={{ color: '#0D1B3E' }}>
+                    {zb1Result.extracted.fin_vin && (
+                      <li className="flex justify-between">
+                        <span style={{ color: '#4573A2' }}>FIN</span>
+                        <span className="font-mono font-medium">{zb1Result.extracted.fin_vin}</span>
+                      </li>
+                    )}
+                    {zb1Result.extracted.kennzeichen && (
+                      <li className="flex justify-between">
+                        <span style={{ color: '#4573A2' }}>Kennzeichen</span>
+                        <span className="font-medium">{zb1Result.extracted.kennzeichen}</span>
+                      </li>
+                    )}
+                    {(zb1Result.extracted.fahrzeug_hersteller || zb1Result.extracted.fahrzeug_modell) && (
+                      <li className="flex justify-between">
+                        <span style={{ color: '#4573A2' }}>Fahrzeug</span>
+                        <span className="font-medium">
+                          {[zb1Result.extracted.fahrzeug_hersteller, zb1Result.extracted.fahrzeug_modell]
+                            .filter(Boolean).join(' ')}
+                        </span>
+                      </li>
+                    )}
+                  </ul>
+
+                  {zb1Result.extracted.fin_vin && (
+                    <p
+                      className="mt-3 rounded-lg px-3 py-2 text-[11px] leading-relaxed"
+                      style={{ background: 'rgba(69,115,162,0.08)', color: '#1E3A5F' }}
+                    >
+                      Wir prüfen jetzt im Hintergrund ob Ihr Fahrzeug Vorschäden hat — falls ja, kein
+                      Thema, wir berücksichtigen das automatisch.
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
