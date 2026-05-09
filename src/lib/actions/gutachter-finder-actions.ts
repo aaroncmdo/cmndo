@@ -43,6 +43,8 @@ export type GutachterFinderPayload = {
   zugeordneter_sv_lead_id?: string
   matching_typ?: string
   sa_signatur_data_url?: string
+  // Z35-Wahl: vollstaendig (Anwalt + alle Positionen) vs. nur_gutachten (Selbst-Regulierung)
+  regulierungs_modus?: 'vollstaendig' | 'nur_gutachten'
 }
 
 export async function ladeSvLeads(): Promise<{ ok: true; data: SvLead[] } | { ok: false; error: string }> {
@@ -91,6 +93,7 @@ export async function erstelleGutachterFinderAnfrage(
       matching_typ: payload.matching_typ ?? null,
       sa_signatur_data_url: payload.sa_signatur_data_url ?? null,
       sa_unterzeichnet_am: payload.sa_signatur_data_url ? new Date().toISOString() : null,
+      regulierungs_modus: payload.regulierungs_modus ?? null,
       status: 'neu',
     })
     .select('id')
