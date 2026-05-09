@@ -88,7 +88,8 @@ type Props = {
   alt?: string
   /** Auf dunklem Hintergrund: Logo weiß, kein Grau-Placeholder */
   dark?: boolean
-  /** Imagin angle: 21 = front-driver-side ¾ (Default), 13 = Seite, 1 = Front. */
+  /** Imagin angle: 56 = front-driver-side ¾ (Default Aaron-Briefing 2026-05-09),
+   *  13 = Seite, 1 = Front. */
   angle?: number
 }
 

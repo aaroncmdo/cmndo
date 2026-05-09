@@ -77,7 +77,8 @@ export type ImaginParams = {
    *  Wenn übergeben, schickt der Imagin-Endpoint das modell-jahrgenaue
    *  Asset zurück (nicht den aktuellen Generations-Default). */
   baujahr?: number | string | null
-  /** Imagin angle: 21 = front-driver-side ¾, 13 = side, 1 = front. Default 21. */
+  /** Imagin angle: 56 = front-driver-side ¾ (Default Aaron-Briefing 2026-05-09),
+   *  21 = klassischer 3/4-Front, 13 = Seite, 1 = Front. */
   angle?: number
   zoomType?: 'fullscreen' | 'cabin'
 }
@@ -92,7 +93,7 @@ export function buildImaginUrl({
   modell,
   lackfarbe,
   baujahr,
-  angle = 21,
+  angle = 56,
   zoomType = 'fullscreen',
 }: ImaginParams): string | null {
   if (!hersteller?.trim()) return null
@@ -124,7 +125,8 @@ export function buildImaginProxyUrl({
   modell: string | null
   lackfarbe: LackfarbeCode | null
   baujahr?: number | string | null
-  /** Imagin angle: 21 = front-driver-side ¾ (Default), 13 = Seite, 1 = Front. */
+  /** Imagin angle: 56 = front-driver-side ¾ (Default Aaron-Briefing 2026-05-09),
+   *  13 = Seite, 1 = Front. */
   angle?: number
 }): string | null {
   if (!hersteller?.trim()) return null
