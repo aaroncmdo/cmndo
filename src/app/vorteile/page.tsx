@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
@@ -323,6 +324,7 @@ export default function VorteilePage() {
       </section>
 
       <LandingFooter />
+      <StickyCallBar quelle="Vorteile" />
     </div>
   )
 }

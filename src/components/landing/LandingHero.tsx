@@ -14,10 +14,9 @@ type Props = {
   authenticatedUser: AuthenticatedUser | null
 }
 
-// +49 221 123 456 78 — zentrale Claimondo-Hotline (gleiche Nummer wie im
-// Ticket-Spec; Quelle ist Platzhalter bis Service-Rufnummer gesetzt wird).
-const PHONE_DISPLAY = '0221 123 456 78'
-const PHONE_TEL = '+4922112345678'
+// Zentrale Claimondo-Hotline +49 221 25906530.
+const PHONE_DISPLAY = '0221 25906530'
+const PHONE_TEL = '+4922125906530'
 
 export async function LandingHero({ authenticatedUser }: Props) {
   const t = await getTranslations('landing.hero')

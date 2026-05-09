@@ -12,9 +12,9 @@ import {
   MessageCircle, Star, Clock, Search,
 } from 'lucide-react'
 
-const PHONE_DISPLAY = '0221 123 456 78'
-const PHONE_TEL = '+4922112345678'
-const PHONE_SHORT = '0221 123 456 78'
+const PHONE_DISPLAY = '0221 25906530'
+const PHONE_TEL = '+4922125906530'
+const PHONE_SHORT = '0221 25906530'
 
 // ── Fade-up scroll animation ──────────────────────────────────────────────────
 function FadeUp({

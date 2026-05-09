@@ -4,8 +4,12 @@
 
 export const SITE_URL = 'https://claimondo.de'
 export const SITE_NAME = 'Claimondo'
+export const PHONE_E164 = '+4922125906530'
+export const PHONE_DISPLAY = '0221 25906530'
+export const CONTACT_EMAIL = 'kontakt@claimondo.de'
 
 // Hauptstadt + Region für GEO-Targeting
+// TODO Aaron: echte Adresse einsetzen — derzeit Platzhalter Köln-Mitte
 const HQ_LOCATION = {
   streetAddress: 'Kaiser-Wilhelm-Ring 27-29',
   postalCode: '50672',
@@ -13,6 +17,23 @@ const HQ_LOCATION = {
   addressRegion: 'NW',
   addressCountry: 'DE',
 }
+
+// Founder-Profile für E-E-A-T (Person-Schema)
+// TODO Aaron: echte Bio-Texte + LinkedIn-URLs einsetzen — Texte sind Erstentwurf
+const FOUNDERS = [
+  {
+    name: 'Nicolas Kitta',
+    jobTitle: 'CEO & Mitgründer',
+    sameAs: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
+    image: `${SITE_URL}/brand/team-office.jpg`,
+  },
+  {
+    name: 'Aaron Sprafke',
+    jobTitle: 'COO & Mitgründer',
+    sameAs: 'https://www.linkedin.com/in/aaron-sprafke-355085237/',
+    image: `${SITE_URL}/brand/team-headset.png`,
+  },
+]
 
 // Bedeutende Städte die wir bedienen (areaServed)
 const SERVED_CITIES = [
@@ -36,13 +57,21 @@ export function organizationSchema() {
       '@type': 'PostalAddress',
       ...HQ_LOCATION,
     },
+    email: CONTACT_EMAIL,
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+49-221-12345678',
+      telephone: PHONE_E164,
       contactType: 'customer service',
       areaServed: 'DE',
       availableLanguage: ['de', 'en', 'tr', 'ar', 'pl', 'ru'],
     },
+    founder: FOUNDERS.map((f) => ({
+      '@type': 'Person',
+      name: f.name,
+      jobTitle: f.jobTitle,
+      sameAs: f.sameAs,
+      image: f.image,
+    })),
     sameAs: [
       'https://www.linkedin.com/company/claimondo',
     ],
@@ -56,9 +85,10 @@ export function localBusinessSchema() {
     '@type': 'LegalService',
     '@id': `${SITE_URL}/#localbusiness`,
     name: SITE_NAME,
-    image: `${SITE_URL}/icons/icon.svg`,
+    image: `${SITE_URL}/brand/logo-mark.svg`,
     url: SITE_URL,
-    telephone: '+49-221-12345678',
+    telephone: PHONE_E164,
+    email: CONTACT_EMAIL,
     priceRange: '€€',
     address: {
       '@type': 'PostalAddress',
@@ -93,13 +123,8 @@ export function localBusinessSchema() {
         closes: '18:00',
       },
     ],
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      reviewCount: '127',
-      bestRating: '5',
-      worstRating: '1',
-    },
+    // aggregateRating: erst hinzufügen wenn echte Trustpilot/Google-Reviews vorliegen.
+    // Schema.org-Spam-Strafe wenn ohne Belege ausgeliefert.
   }
 }
 

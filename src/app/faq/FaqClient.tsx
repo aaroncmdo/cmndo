@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { FAQ_GRUPPEN } from './faqs'
 
 function FaqItem({ frage, antwort }: { frage: string; antwort: string }) {
@@ -85,16 +86,17 @@ export default function FaqClient() {
               <ChevronRight className="h-5 w-5" />
             </Link>
             <a
-              href="tel:+4922112345678"
+              href="tel:+4922125906530"
               className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-8 py-4 text-base font-semibold text-white/80 hover:border-white/40 hover:text-white"
             >
-              0221 123 456 78 anrufen
+              0221 25906530 anrufen
             </a>
           </div>
         </div>
       </section>
 
       <LandingFooter />
+      <StickyCallBar quelle="FAQ" />
     </div>
   )
 }
