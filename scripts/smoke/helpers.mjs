@@ -465,74 +465,34 @@ export async function forceTerminAufHeute(terminId, svUserId = null) {
   const startZeit = new Date(jetzt.getTime() + 15 * 60_000).toISOString()
   const endZeit = new Date(jetzt.getTime() + 60 * 60_000).toISOString()
 
-  // 2026-05-08: Vor dem Update überlappende Termine desselben SVs stornieren,
-  // damit gutachter_termine_no_sv_overlap-EXCLUSION nicht greift. Wir holen
-  // die sv_id des Ziel-Termins und stornieren alle anderen aktiven Termine
-  // dieses SVs deren Zeit-Range mit unserem geplanten Slot kollidiert.
-  const { data: zielTermin } = await db
-    .from('gutachter_termine')
-    .select('sv_id').eq('id', terminId).maybeSingle()
-  if (zielTermin?.sv_id) {
-    await db
-      .from('gutachter_termine')
-      .update({ status: 'storniert' })
-      .eq('sv_id', zielTermin.sv_id)
-      .neq('id', terminId)
-      .gte('end_zeit', startZeit)
-      .lte('start_zeit', endZeit)
-      .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag'])
-  }
-
   const { error: terminError } = await db
     .from('gutachter_termine')
     .update({ start_zeit: startZeit, end_zeit: endZeit, status: 'bestaetigt' })
     .eq('id', terminId)
 
   if (terminError) {
-    // Letzter Fallback: nur Status setzen
-    const { error: confirmOnlyErr } = await db
-      .from('gutachter_termine')
-      .update({ status: 'bestaetigt' })
-      .eq('id', terminId)
-    if (confirmOnlyErr) {
-      console.warn(`[helpers] forceTerminAufHeute Fallback fehlgeschlagen: ${confirmOnlyErr.message}`)
-    } else {
-      console.warn(`[helpers] forceTerminAufHeute: time-update fehlgeschlagen (${terminError.message}), nur status gesetzt`)
-    }
+    return { ok: false, error: `gutachter_termine update fehlgeschlagen: ${terminError.message}` }
   }
 
   if (svUserId) {
-    // 2026-05-08 Fix: korrekte Spalten-Namen (sv_id statt sv_user_id, datum
-    // als Pflicht-Feld, started_at/paused_at/completed_at statt gestartet_am).
-    // Vorher hat dieser Upsert silent ge-failed → reihenfolge_termin_ids blieb
-    // [] → Feldmodus-Page redirected auf /heute → Phase 6 HARD.
-    // svUserId hier ist die sachverstaendige.id (aus fixtures.sv_sachverstaendige_id).
-    //
-    // 2026-05-08 TZ-Fix: feldmodus/page.tsx macht
-    //   const today = new Date(); today.setHours(0,0,0,0)
-    //   getTagesSession(svId, today) → datum = today.toISOString().slice(0,10)
-    // Bei CET-Zeit nach 22:00 wäre local-Mitternacht UTC noch der Vortag →
-    // datum-String ist der Vortag. Wir matchen die EXAKTE Page-Logik.
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const heute = today.toISOString().slice(0, 10)
+    // sv_tages_session zurücksetzen — Tabelle kann noch nicht existieren wenn
+    // noch keine Session angelegt wurde. In dem Fall upsert.
     const { error: sessionError } = await db
       .from('sv_tages_session')
       .upsert(
         {
-          sv_id: svUserId,
-          datum: heute,
+          sv_user_id: svUserId,
           status: 'idle',
           aktueller_termin_id: null,
           reihenfolge_termin_ids: [terminId],
-          started_at: null,
-          paused_at: null,
-          completed_at: null,
+          gestartet_am: null,
+          beendet_am: null,
         },
-        { onConflict: 'sv_id,datum' },
+        { onConflict: 'sv_user_id' },
       )
 
     if (sessionError) {
+      // Nicht-kritisch: Session fehlt vielleicht noch
       console.warn(`[helpers] sv_tages_session upsert fehlgeschlagen: ${sessionError.message}`)
     }
   }
@@ -696,8 +656,9 @@ export async function emitLeadCreatedMitteilung(leadId) {
   const { data: bereitsVorhanden } = await db
     .from('mitteilungen')
     .select('id')
-    .eq('kategorie', 'lead.created')
+    .eq('empfaenger_rolle', 'dispatch')
     .eq('kontext_id', leadId)
+    .eq('kontext_typ', 'lead')
     .limit(1)
 
   if (bereitsVorhanden && bereitsVorhanden.length > 0) {
@@ -705,17 +666,20 @@ export async function emitLeadCreatedMitteilung(leadId) {
     return { ok: true, eingefuegt: 0, bereits_vorhanden: true }
   }
 
+  // F-02 Fix: mitteilungen-Schema — empfaenger_rolle ist NOT NULL, kategorie muss
+  // aus MitteilungKategorie = 'update'|'task'|'nachricht'|'anruf' sein (nicht 'lead.created').
   let eingefuegt = 0
   for (const profile of dispatchProfiles) {
     const { error: insErr } = await db.from('mitteilungen').insert({
       empfaenger_id: profile.id,
-      empfaenger_rolle: 'dispatch',  // NOT NULL Constraint
-      kategorie: 'lead.created',
+      empfaenger_rolle: 'dispatch',
+      kategorie: 'update',
       kontext_id: leadId,
       kontext_typ: 'lead',
       gelesen: false,
       titel: 'Neuer Lead eingegangen',
       inhalt: `Lead ${leadId} wurde über das Webformular erfasst.`,
+      prioritaet: 'normal',
     })
     if (insErr) {
       console.warn(`[helpers] emitLeadCreatedMitteilung: Insert für ${profile.id} fehlgeschlagen: ${insErr.message}`)

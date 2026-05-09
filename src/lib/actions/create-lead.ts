@@ -5,11 +5,12 @@
 // promotion_code_id auf, erkennt Eigenverschulden → Disqualifikation.
 // Rückgabe immer { success: boolean; ... } — nie throw.
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { readPromoCookie, isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
 import { schritt1Schema, type Schritt1Input } from '@/lib/flow/schemas/schritt1'
+import { createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 import { berechneFehlendeFelder } from '@/lib/flow/fehlende-felder'
 
 type CreateLeadResult =
@@ -39,9 +40,11 @@ export async function createLeadFromSchritt1(
     promotionCodeId = await resolvePromoCodeToId(promoCookie)
   }
 
-  const supabase = await createClient()
+  // Admin-Client für INSERT: /schaden-melden ist öffentlich (auch anonym), daher kein
+  // Auth-Kontext vorhanden — RLS würde anon-INSERT blockieren. Zod-Validation schützt.
+  const admin = createAdminClient()
 
-  const { data: lead, error } = await supabase
+  const { data: lead, error } = await admin
     .from('leads')
     .insert({
       unfalldatum: data.unfalldatum,
@@ -98,7 +101,6 @@ export async function createLeadFromSchritt1(
   }
 
   // Sofort nach Insert: fehlende_felder_jsonb berechnen und speichern.
-  // Gibt Dispatch und nachgelagerten Schritten eine klare Checkliste.
   const fehlendeFelder = berechneFehlendeFelder({
     schuldfrage: data.schuldfrage,
     schadentyp: data.schadentyp,
@@ -115,10 +117,31 @@ export async function createLeadFromSchritt1(
   })
 
   if (fehlendeFelder.length > 0) {
-    await supabase
+    await admin
       .from('leads')
       .update({ fehlende_felder_jsonb: fehlendeFelder })
       .eq('id', lead.id)
+  }
+
+  // F-02: Dispatch-User über neuen Lead benachrichtigen (fire-and-forget).
+  if (!isAbort) {
+    const { data: dispatchers } = await admin
+      .from('profiles')
+      .select('id')
+      .eq('rolle', 'dispatch')
+    if (dispatchers?.length) {
+      await createMitteilungMulti(
+        dispatchers.map((d) => ({ id: d.id as string, rolle: 'dispatch' as const })),
+        {
+          kategorie: 'update',
+          titel: 'Neuer Lead eingegangen',
+          inhalt: `${data.vorname} ${data.nachname} – ${data.schadentyp} (${data.unfallort ?? data.fahrzeug_standort_plz})`,
+          kontext_typ: 'lead',
+          kontext_id: lead.id,
+          prioritaet: 'normal',
+        },
+      )
+    }
   }
 
   return {
