@@ -10,6 +10,15 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /* KFZ-177: ignoreBuildErrors entfernt — tsc ist jetzt sauber */
+  // Dokument-Uploads (SA-Vorlage, Pflichtdokumente) erlauben bis 16 MB.
+  // Next.js-Default ist 1 MB — Uploads > 1 MB werfen sonst clientseitig
+  // „An unexpected response was received from the server" bevor die Action
+  // überhaupt läuft.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '16mb',
+    },
+  },
   // Production-Source-Maps einschalten — damit User-Errors wie „an.map is not
   // a function" auf den echten File + Zeile zurückverfolgt werden können.
   // Erhöht die Bundle-Größe leicht, aber nur die .map-Files, die werden
