@@ -4,6 +4,7 @@ import { Camera, Brain, UserCheck, FileText, ChevronRight, Clock, Shield, Star, 
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
+import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
@@ -164,6 +165,21 @@ export default function WieEsFunktioniertPage() {
           <p className="mt-5 text-balance text-base text-[#4573A2] sm:text-lg">
             In 3 Schritten zum vollen Schadensersatz — wir übernehmen alles.
           </p>
+        </div>
+      </section>
+
+      {/* Direkt-Antwort: was passiert in welcher Reihenfolge */}
+      <section className="pb-2 pt-2 sm:pb-4 sm:pt-2">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <AnswerCapsule quelle="3-Schritt-Prozess · Antwort < 15 Min">
+            <strong>Claimondo regelt Ihren Schaden in drei Schritten:</strong> Sie melden
+            den Schaden online mit Fotos und Sprachnotiz (5 Min, keine Anmeldung). Unsere
+            KI liefert in unter 15 Minuten eine erste Einschätzung der Reparaturkosten und
+            Wiederbeschaffungswert. Ein DAT-zertifizierter Sachverständiger besichtigt das
+            Fahrzeug innerhalb von 48 Stunden vor Ort und erstellt das Gutachten in
+            weiteren 48 Stunden. Eine Partnerkanzlei setzt anschließend den vollen Anspruch
+            gegen die gegnerische Versicherung durch — Auszahlung ø nach 6–8 Wochen.
+          </AnswerCapsule>
         </div>
       </section>
 
