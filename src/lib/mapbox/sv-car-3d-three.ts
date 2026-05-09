@@ -81,10 +81,13 @@ export async function tryAddSvCarThreeJs(
   }
   if (!model) return null
 
-  // 2026-05-08: HDR-Environment-Map für PBR-Reflexionen auf dem Lack.
-  // Aktivierung NUR wenn `NEXT_PUBLIC_SV_CAR_HDR_URL` gesetzt ist —
-  // sonst null-Versuch, kein 404 in der Console (Aaron hatte das HDR-
-  // File noch nicht hochgeladen, aber wollte keine Errors).
+  // Environment-Map für PBR-Reflexionen auf dem Lack.
+  // Quelle (Priorität):
+  //   1. NEXT_PUBLIC_SV_CAR_HDR_URL → echtes HDR-Panorama (RGBE/EXR)
+  //   2. Kein URL → prozeduraler Sky-Gradient (Tageslicht-Blau/Grau)
+  // Beide Varianten setzen THREE.EquirectangularReflectionMapping und
+  // können ohne PMREMGenerator-Render-Pass direkt als envMap auf
+  // MeshStandardMaterial angewendet werden.
   let envMap: THREE.Texture | null = null
   const hdrUrl = process.env.NEXT_PUBLIC_SV_CAR_HDR_URL
   if (hdrUrl && hdrUrl.trim().length > 0) {
@@ -98,8 +101,31 @@ export async function tryAddSvCarThreeJs(
       hdr.mapping = THREE.EquirectangularReflectionMapping
       envMap = hdr
     } catch {
-      // Lade-Fehler — kein envMap, Auto rendert ohne Reflexionen.
+      // Lade-Fehler → fallthrough zu prozeduralem Fallback
     }
+  }
+
+  // Prozeduraler Sky-Fallback: 32×16 RGBA-Gradient (Tageshimmel → Erdton).
+  // Gibt dem Lack eine klare Reflexions-Linie zwischen Himmel und Boden —
+  // sichtbar auf dem Dach und den Seitenscheiben bei metalness=0.6.
+  if (!envMap) {
+    const W = 32, H = 16
+    const data = new Uint8Array(W * H * 4)
+    for (let y = 0; y < H; y++) {
+      const t = y / (H - 1) // 0 = Zenith, 1 = Nadir
+      // Zenith: Claimondo-Himmelblau (#a8c4e0), Nadir: Erd-Grau (#506050)
+      const r = Math.round(168 + (80  - 168) * t)
+      const g = Math.round(196 + (96  - 196) * t)
+      const b = Math.round(224 + (80  - 224) * t)
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 4
+        data[i] = r; data[i + 1] = g; data[i + 2] = b; data[i + 3] = 255
+      }
+    }
+    const skyTex = new THREE.DataTexture(data, W, H, THREE.RGBAFormat)
+    skyTex.mapping = THREE.EquirectangularReflectionMapping
+    skyTex.needsUpdate = true
+    envMap = skyTex
   }
 
   const loadedModel: THREE.Group = model

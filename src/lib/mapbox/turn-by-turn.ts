@@ -252,23 +252,40 @@ export function pointToPolylineDistanceMLngLat(
 // ─── Voice-Speech (Web-Speech-API) ───────────────────────────────────────
 
 let cachedVoice: SpeechSynthesisVoice | null = null
+// Wird auf true gesetzt sobald voiceschanged einmal gefeuert hat —
+// dann haben wir die vollständige Stimm-Liste und cachen sicher.
+let voicesLoaded = false
+
+// Module-Level-Listener: sobald der Browser neue Stimmen meldet
+// (passiert bei Chrome nach 1-2 Renders), Cache resetten damit
+// der nächste speakInstruction()-Aufruf mit der vollen Liste pickt.
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  window.speechSynthesis.addEventListener('voiceschanged', () => {
+    cachedVoice = null
+    voicesLoaded = true
+  })
+}
 
 /**
- * 2026-05-08 Aaron-Smoke (übergangsweise free-Voice bis ElevenLabs Plan
- * upgraded ist): wir picken aus den im Browser verfügbaren TTS-Stimmen
- * die jeweils beste deutsche Variante. Reihenfolge nach Qualität:
+ * Deutsche TTS-Stimme aus den verfügbaren Browser-Voices picken.
+ * Priorität (beste zuerst):
  *
- *   1. iOS-Premium (Anna, Markus, Petra, Yannick)        — natürlich, neural
- *   2. macOS-Enhanced (Anna (Enhanced), Petra (Premium)) — natürlich
- *   3. Android-Google (Google Deutsch / Google de-DE)    — gut, neural
- *   4. Microsoft-Online-Voices (Hedda, Stefan, Katja)    — gut, neural
- *   5. Standard de-DE (Microsoft offline, Espeak etc.)   — Computer-typisch
- *   6. de-* fallback (de-AT, de-CH)
+ *   1. Google Deutsch (de-DE)          — neural, Tier-1 auf Chrome/Android
+ *   2. iOS/macOS Premium !localService  — Anna, Petra, Markus, Yannick
+ *   3. iOS/macOS Premium localService   — Offline-Variante der Premium-Stimmen
+ *   4. Microsoft Online Neural (Edge)   — Hedda Online, Katja Online
+ *   5. Beliebige de-DE !localService    — cloud-basierte Fallbacks
+ *   6. Beliebige de-DE                  — lokale System-Stimmen
+ *   7. de-AT / de-CH                    — besser als Englisch mit dt. Text
  *
- * `localService=false` bei Apple und Microsoft Voices markiert die
- * Online-/Cloud-Variante, die deutlich besser klingt als die Offline-
- * Stimme mit gleichem Namen. Wir bevorzugen sie, lassen sie aber als
- * letzten Schritt zu (offline funktioniert dann auch ohne Netz).
+ * Warum Google auf Tier 1: "Google Deutsch" ist die einzig verfügbare
+ * Neural-Stimme auf Chrome Desktop (Windows/Linux) und Chrome Android —
+ * dort gibt es keine Apple-Premium-Voices. Microsoft Hedda wird als
+ * Name-Match fälschlicherweise vor Google gezogen obwohl Google in der
+ * Praxis besser klingt. Daher: Google explizit zuerst, dann Premium-Namen.
+ *
+ * Cache: wird von voiceschanged-Listener invalidiert damit kein veralteter
+ * Wert (z.B. System-Fallback vor vollständigem Voice-Load) eingefroren bleibt.
  */
 function pickGermanVoice(): SpeechSynthesisVoice | null {
   if (cachedVoice) return cachedVoice
@@ -277,21 +294,24 @@ function pickGermanVoice(): SpeechSynthesisVoice | null {
   if (voices.length === 0) return null
   const isDe = (v: SpeechSynthesisVoice) => v.lang === 'de-DE'
   const isDeAny = (v: SpeechSynthesisVoice) => v.lang.startsWith('de')
+  // Apple Premium-Namen (iOS + macOS) — OHNE Microsoft-Namen wie Hedda/Stefan/Katja
+  // da diese offline-Qualität haben und nach Google kommen sollen.
+  const applePremium = /^(Anna|Petra|Markus|Yannick)$/i
 
-  // Tier 1: explizit hochwertige Namen — meistens iOS Premium/Enhanced.
-  const premiumNames = /(Anna|Petra|Markus|Yannick|Hedda|Stefan|Katja)/i
   cachedVoice =
-    voices.find((v) => isDe(v) && premiumNames.test(v.name) && !v.localService) ??
-    voices.find((v) => isDe(v) && premiumNames.test(v.name)) ??
-    // Tier 2: Google Deutsch (Android Chrome / Desktop Chrome)
+    // Tier 1: Google Deutsch — neural, auf Chrome Desktop + Android verfügbar
     voices.find((v) => isDe(v) && /Google/i.test(v.name)) ??
-    // Tier 3: Microsoft Online Neural Voices (Edge)
+    // Tier 2: Apple Premium Cloud (!localService = Online-Variante)
+    voices.find((v) => isDe(v) && applePremium.test(v.name) && !v.localService) ??
+    // Tier 3: Apple Premium lokal
+    voices.find((v) => isDe(v) && applePremium.test(v.name)) ??
+    // Tier 4: Microsoft Neural Online (Edge — Katja Online, Hedda Online etc.)
     voices.find((v) => isDe(v) && /Microsoft.*Online/i.test(v.name)) ??
-    // Tier 4: irgendeine de-DE
+    // Tier 5: beliebige Cloud-Stimme de-DE
     voices.find((v) => isDe(v) && !v.localService) ??
+    // Tier 6: beliebige de-DE (System-Offline-Stimme)
     voices.find((v) => isDe(v)) ??
-    // Tier 5: de-AT / de-CH als letzter Fallback (besser als Englisch
-    // mit deutschem Text)
+    // Tier 7: de-AT / de-CH als absoluter Fallback
     voices.find((v) => isDeAny(v)) ??
     null
   return cachedVoice
@@ -331,16 +351,17 @@ export function speakInstruction(text: string): void {
     }
   }
 
-  // ElevenLabs zuerst probieren — fire-and-forget. Bei Fehler oder
-  // disabled Feature fällt fastSpeechSynthesis() unten als Fallback ein.
-  void import('./elevenlabs-tts').then(({ speakViaElevenLabs, isElevenLabsEnabled }) => {
-    if (isElevenLabsEnabled()) {
-      void speakViaElevenLabs(trimmed).then((ok) => {
-        if (!ok) fastSpeechSynthesis(trimmed)
-      })
-    } else {
-      fastSpeechSynthesis(trimmed)
-    }
+  // TTS-Kette: Google Neural2 → ElevenLabs → Web Speech API.
+  // Jede Stufe wird nur versucht wenn die vorige false zurückgibt.
+  void import('./google-tts').then(({ speakViaGoogleTts }) =>
+    speakViaGoogleTts(trimmed)
+  ).then((ok) => {
+    if (ok) return
+    return import('./elevenlabs-tts').then(({ speakViaElevenLabs }) =>
+      speakViaElevenLabs(trimmed)
+    ).then((ok2) => {
+      if (!ok2) fastSpeechSynthesis(trimmed)
+    })
   }).catch(() => fastSpeechSynthesis(trimmed))
 }
 
@@ -382,5 +403,6 @@ export function stopSpeaking(): void {
   try {
     window.speechSynthesis?.cancel()
   } catch { /* noop */ }
+  void import('./google-tts').then(({ stopGoogleTts }) => stopGoogleTts()).catch(() => { /* noop */ })
   void import('./elevenlabs-tts').then(({ stopElevenLabs }) => stopElevenLabs()).catch(() => { /* noop */ })
 }
