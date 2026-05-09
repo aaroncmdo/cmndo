@@ -19,7 +19,7 @@ export const BLITZER_LAYER_ID = 'blitzer-layer'
 
 const ATUDO_URL = 'https://cdn2.atudo.net/api/1.0/vl.php'
 const cache = new Map<string, { features: GeoJSON.Feature[]; ts: number }>()
-const CACHE_TTL_MS = 5 * 60 * 1000
+const CACHE_TTL_MS = 2 * 60 * 1000
 
 export type BlitzerFeature = GeoJSON.Feature<
   GeoJSON.Point,
@@ -88,6 +88,23 @@ export async function fetchBlitzerInBbox(
     console.warn('[blitzer-atudo] fetch error:', err)
     return []
   }
+}
+
+/**
+ * Berechnet eine BBox aus einem Isochrone-Polygon. Als Fallback wenn
+ * keine aktive Route vorhanden ist — deckt das gesamte SV-Einsatzgebiet ab.
+ */
+export function bboxForIsochrone(
+  polygon: Array<{ lat: number; lng: number }>,
+): [number, number, number, number] {
+  let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity
+  for (const { lat, lng } of polygon) {
+    if (lng < minLng) minLng = lng
+    if (lat < minLat) minLat = lat
+    if (lng > maxLng) maxLng = lng
+    if (lat > maxLat) maxLat = lat
+  }
+  return [minLng, minLat, maxLng, maxLat]
 }
 
 /**

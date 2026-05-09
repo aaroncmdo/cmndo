@@ -24,6 +24,12 @@ html[lang="ar"] {
   font-family: 'Noto Sans Arabic', var(--font-montserrat), system-ui, sans-serif;
 }
 
+/* Fließtext / Lesetext — Noto Sans für alle Paragraph- und Listen-Inhalte.
+   UI-Elemente (Buttons, Labels, Nav, Inputs) bleiben Montserrat. */
+p, li, blockquote, article, .prose {
+  font-family: var(--font-noto-sans), 'Noto Sans', system-ui, sans-serif;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
