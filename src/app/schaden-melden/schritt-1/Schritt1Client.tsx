@@ -21,6 +21,7 @@ import {
   SCHADENTYP_VALUES,
   SCHULDFRAGE_VALUES,
   FAHRZEUG_HERSTELLER_VALUES,
+  FINANZIERUNG_VALUES,
   schritt1Schema,
   type Schritt1Input,
 } from '@/lib/flow/schemas/schritt1'
@@ -104,6 +105,7 @@ export function Schritt1Client() {
   const searchParams = useSearchParams()
   const setLeadId = useFlowStore((s) => s.setLeadId)
   const setSchadenhergang = useFlowStore((s) => s.setSchadenhergang)
+  const setFlowFlags = useFlowStore((s) => s.setFlowFlags)
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState<string | null>(null)
   const [voiceBanner, setVoiceBanner] = useState<string | null>(null)
@@ -140,11 +142,22 @@ export function Schritt1Client() {
       email: '',
       telefon: '',
       dsgvo_consent: false as unknown as true,
+      // Konditionelle Pflichtfelder
+      ist_fahrzeughalter: true,
+      fahrzeug_fahrbereit: true,
+      personenschaden_flag: false,
+      hat_vorschaeden: false,
+      vorschaeden_beschreibung: '',
+      mietwagen_flag: false,
+      nutzungsausfall: false,
+      finanzierung_leasing: 'keine',
     },
   })
 
   const polizeiVorOrt = watch('polizei_vor_ort')
   const dsgvoConsent = watch('dsgvo_consent')
+  const hatVorschaeden = watch('hat_vorschaeden')
+  const schuldfrage = watch('schuldfrage')
 
   useEffect(() => {
     if (searchParams.get('prefilled') !== '1') return
@@ -176,6 +189,11 @@ export function Schritt1Client() {
         return
       }
       setLeadId(result.leadId)
+      setFlowFlags({
+        istFahrzeughalter: values.ist_fahrzeughalter,
+        hatVorschaeden: values.hat_vorschaeden,
+        schuldfrage: values.schuldfrage,
+      })
       router.push(
         result.abortToSelbstverschulden
           ? '/schaden-melden/selbstverschulden'
@@ -547,6 +565,281 @@ export function Schritt1Client() {
               <p className="mt-1 text-sm text-red-600">{errors.telefon.message}</p>
             ) : null}
           </div>
+        </div>
+      </fieldset>
+
+      {/* Konditionelle Pflichtfelder */}
+      <fieldset className="space-y-5">
+        <legend className="text-lg font-semibold text-claimondo-navy">
+          Weitere Angaben zu Ihrem Fall
+        </legend>
+
+        {/* Fahrzeughalter = Fahrer? */}
+        <div>
+          <p className="mb-2 text-sm font-medium text-claimondo-navy">
+            Sind Sie der eingetragene Fahrzeughalter?
+          </p>
+          <Controller
+            control={control}
+            name="ist_fahrzeughalter"
+            render={({ field }) => (
+              <div className="flex gap-3">
+                {[true, false].map((v) => (
+                  <label
+                    key={String(v)}
+                    className={[
+                      'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                      field.value === v
+                        ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
+                        : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
+                    ].join(' ')}
+                  >
+                    <input
+                      type="radio"
+                      checked={field.value === v}
+                      onChange={() => field.onChange(v)}
+                      className="h-4 w-4 accent-claimondo-ondo"
+                    />
+                    {v ? 'Ja, ich bin Halter' : 'Nein, anderer Halter'}
+                  </label>
+                ))}
+              </div>
+            )}
+          />
+          {watch('ist_fahrzeughalter') === false && (
+            <p className="mt-2 text-xs text-claimondo-ondo">
+              Wir lesen die Halterdaten beim nächsten Schritt per Kamera aus dem Fahrzeugschein aus.
+            </p>
+          )}
+        </div>
+
+        {/* Fahrzeug fahrbereit? */}
+        <div>
+          <p className="mb-2 text-sm font-medium text-claimondo-navy">
+            Ist das Fahrzeug noch fahrbereit?
+          </p>
+          <Controller
+            control={control}
+            name="fahrzeug_fahrbereit"
+            render={({ field }) => (
+              <div className="flex gap-3">
+                {[true, false].map((v) => (
+                  <label
+                    key={String(v)}
+                    className={[
+                      'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                      field.value === v
+                        ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
+                        : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
+                    ].join(' ')}
+                  >
+                    <input
+                      type="radio"
+                      checked={field.value === v}
+                      onChange={() => field.onChange(v)}
+                      className="h-4 w-4 accent-claimondo-ondo"
+                    />
+                    {v ? 'Ja, fahrbereit' : 'Nein, nicht fahrbereit'}
+                  </label>
+                ))}
+              </div>
+            )}
+          />
+        </div>
+
+        {/* Personenschaden? */}
+        <div>
+          <p className="mb-2 text-sm font-medium text-claimondo-navy">
+            Gibt es Personenschäden (Verletzte)?
+          </p>
+          <Controller
+            control={control}
+            name="personenschaden_flag"
+            render={({ field }) => (
+              <div className="flex gap-3">
+                {[false, true].map((v) => (
+                  <label
+                    key={String(v)}
+                    className={[
+                      'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                      field.value === v
+                        ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
+                        : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
+                    ].join(' ')}
+                  >
+                    <input
+                      type="radio"
+                      checked={field.value === v}
+                      onChange={() => field.onChange(v)}
+                      className="h-4 w-4 accent-claimondo-ondo"
+                    />
+                    {v ? 'Ja, Verletzte' : 'Nein'}
+                  </label>
+                ))}
+              </div>
+            )}
+          />
+        </div>
+
+        {/* Mietwagen + Nutzungsausfall (nur bei Gegner-Schuld) */}
+        {schuldfrage === 'gegner' && (
+          <>
+            <div>
+              <p className="mb-2 text-sm font-medium text-claimondo-navy">
+                Benötigen Sie einen Mietwagen?
+              </p>
+              <Controller
+                control={control}
+                name="mietwagen_flag"
+                render={({ field }) => (
+                  <div className="flex gap-3">
+                    {[false, true].map((v) => (
+                      <label
+                        key={String(v)}
+                        className={[
+                          'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                          field.value === v
+                            ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
+                            : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
+                        ].join(' ')}
+                      >
+                        <input
+                          type="radio"
+                          checked={field.value === v}
+                          onChange={() => field.onChange(v)}
+                          className="h-4 w-4 accent-claimondo-ondo"
+                        />
+                        {v ? 'Ja, Mietwagen' : 'Nein'}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              />
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-medium text-claimondo-navy">
+                Möchten Sie Nutzungsausfall geltend machen (statt Mietwagen)?
+              </p>
+              <Controller
+                control={control}
+                name="nutzungsausfall"
+                render={({ field }) => (
+                  <div className="flex gap-3">
+                    {[false, true].map((v) => (
+                      <label
+                        key={String(v)}
+                        className={[
+                          'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                          field.value === v
+                            ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
+                            : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
+                        ].join(' ')}
+                      >
+                        <input
+                          type="radio"
+                          checked={field.value === v}
+                          onChange={() => field.onChange(v)}
+                          className="h-4 w-4 accent-claimondo-ondo"
+                        />
+                        {v ? 'Ja, Nutzungsausfall' : 'Nein'}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Finanzierung / Leasing */}
+        <div>
+          <p className="mb-2 text-sm font-medium text-claimondo-navy">
+            Ist das Fahrzeug finanziert oder geleast?
+          </p>
+          <Controller
+            control={control}
+            name="finanzierung_leasing"
+            render={({ field }) => (
+              <div className="flex gap-3 flex-wrap">
+                {(FINANZIERUNG_VALUES as unknown as string[]).map((v) => {
+                  const labels: Record<string, string> = {
+                    keine: 'Nein',
+                    leasing: 'Leasing',
+                    finanzierung: 'Finanzierung',
+                  }
+                  return (
+                    <label
+                      key={v}
+                      className={[
+                        'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                        field.value === v
+                          ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
+                          : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
+                      ].join(' ')}
+                    >
+                      <input
+                        type="radio"
+                        checked={field.value === v}
+                        onChange={() => field.onChange(v)}
+                        className="h-4 w-4 accent-claimondo-ondo"
+                      />
+                      {labels[v]}
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+          />
+        </div>
+
+        {/* Vorschäden */}
+        <div>
+          <p className="mb-2 text-sm font-medium text-claimondo-navy">
+            Hat das Fahrzeug Vorschäden?
+          </p>
+          <Controller
+            control={control}
+            name="hat_vorschaeden"
+            render={({ field }) => (
+              <div className="flex gap-3">
+                {[false, true].map((v) => (
+                  <label
+                    key={String(v)}
+                    className={[
+                      'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                      field.value === v
+                        ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
+                        : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
+                    ].join(' ')}
+                  >
+                    <input
+                      type="radio"
+                      checked={field.value === v}
+                      onChange={() => field.onChange(v)}
+                      className="h-4 w-4 accent-claimondo-ondo"
+                    />
+                    {v ? 'Ja, Vorschäden vorhanden' : 'Keine Vorschäden'}
+                  </label>
+                ))}
+              </div>
+            )}
+          />
+          {hatVorschaeden && (
+            <div className="mt-3">
+              <Label htmlFor="vorschaeden_beschreibung">Vorschäden beschreiben</Label>
+              <Textarea
+                id="vorschaeden_beschreibung"
+                rows={3}
+                placeholder="Bitte kurz beschreiben: Wo am Fahrzeug, wann entstanden, repariert?"
+                {...register('vorschaeden_beschreibung')}
+              />
+              {errors.vorschaeden_beschreibung ? (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.vorschaeden_beschreibung.message}
+                </p>
+              ) : null}
+            </div>
+          )}
         </div>
       </fieldset>
 
