@@ -9,7 +9,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import {
-  organizationSchema, personSchema, breadcrumbsSchema,
+  personSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL,
 } from '@/lib/seo/jsonld'
 
@@ -147,7 +147,8 @@ export default function UeberUnsPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
-          organizationSchema(),
+          // organizationSchema kommt global aus layout.tsx — hier nur
+          // page-spezifische Schemas (AboutPage + Persons + Breadcrumbs).
           aboutPageSchema,
           ...FOUNDERS.map((f) =>
             personSchema({

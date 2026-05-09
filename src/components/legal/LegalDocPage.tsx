@@ -11,6 +11,7 @@
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { getLegalDoc, type LegalDocSlug } from '@/lib/legal/get-doc'
+import { jsonLdScript, SITE_URL, breadcrumbsSchema } from '@/lib/seo/jsonld'
 import LegalDocBody from './LegalDocBody'
 
 // Headings aus Markdown extrahieren (## und ###). Slug analog zu LegalDocBody.
@@ -42,8 +43,32 @@ export default function LegalDocPage({ slug }: { slug: LegalDocSlug }) {
   const headings = extractHeadings(doc.markdown)
   const showToc = headings.filter((h) => h.level === 2).length >= 3
 
+  // WebPage-Schema fuer Legal-Routes — bindet Page an die globale Organization
+  // (aus layout.tsx) damit Crawler den Kontext eindeutig zuordnen koennen.
+  const webPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${SITE_URL}/${slug}#webpage`,
+    url: `${SITE_URL}/${slug}`,
+    name: doc.titel,
+    inLanguage: 'de-DE',
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    about: { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+  }
+
   return (
     <div className="min-h-screen" style={{ background: '#f8f9fb' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript([
+          webPageSchema,
+          breadcrumbsSchema([
+            { name: 'Startseite', url: '/' },
+            { name: doc.titel, url: `/${slug}` },
+          ]),
+        ])}
+      />
       <LandingTopbar authenticatedUser={null} />
 
       {/* Glass-Header mit Spotlights — analog zu FAQ/Vorteile */}
