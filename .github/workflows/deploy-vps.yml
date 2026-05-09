@@ -62,10 +62,17 @@ jobs:
             rm -rf /var/www/claimondo-v2-old 2>/dev/null || true
             mv /var/www/claimondo-v2 /var/www/claimondo-v2-old 2>/dev/null || true
             mv /var/www/claimondo-v2-new /var/www/claimondo-v2
-            pm2 restart claimondo-v2 || pm2 start /var/www/claimondo-v2/server.js \
+            # Idempotenter Restart: alle Prozesse mit dem Namen löschen + neu starten.
+            # Behebt das Zombie-Problem (Run #25605528728): wenn id 1 (alter
+            # cluster-Prozess) im stopped-State steckt, scheitert pm2 restart
+            # an dem toten ID, der Fallback "pm2 start" failt weil der Name
+            # belegt ist von id 2. Delete-First-Pattern ist robust dagegen.
+            pm2 delete claimondo-v2 2>/dev/null || true
+            pm2 start /var/www/claimondo-v2/server.js \
               --name claimondo-v2 \
               --env production \
-              --max-memory-restart 1400M
+              --max-memory-restart 1400M \
+              --cwd /var/www/claimondo-v2
             pm2 save
             rm -f /tmp/deploy.tar.gz
             echo "Deploy $(date) abgeschlossen"
