@@ -162,9 +162,6 @@ type Props = {
       Nachbesichtigung/Konfrontation als Mitteilung wenn aktiv, MeinFallStatusCard).
       Wird direkt nach dem FallHeader vor dem 2-Spalten-Layout gerendert. */
   topServerBlocks?: React.ReactNode
-  /** CMM-32: Vor-Ort-Trigger („Bin angekommen" + Navigieren) wandert ans
-      Ende der Seite — Aaron-Spec, damit der Banner oben aufgeräumt bleibt. */
-  vorOrtCard?: React.ReactNode
   /** CMM-33: Pflicht-Slots für die zentrale Dokumente-Sektion unten rechts. */
   pflichtSlots?: PflichtSlotForView[]
   /** CMM-23: Auftrags-Phase für den Stepper in der linken Sidebar. */
@@ -459,13 +456,6 @@ export default function FallDetailClient(props: Props) {
           }
         />
       </div>
-
-      {/* CMM-32: Vor-Ort-Trigger ganz unten */}
-      {props.vorOrtCard && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6">
-          {props.vorOrtCard}
-        </div>
-      )}
 
     </div>
   )

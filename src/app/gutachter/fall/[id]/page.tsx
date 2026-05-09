@@ -15,7 +15,6 @@ import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 import BriefingCard from '@/components/fall/BriefingCard'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import GutachtenUploadBanner from '@/components/gutachter/GutachtenUploadBanner'
-import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
@@ -615,16 +614,6 @@ export default async function GutachterFallPage({
   return (
     <FallDetailClient
       topServerBlocks={topServerBlocks}
-      vorOrtCard={
-        zeigeVorOrt ? (
-          <VorOrtTriggerCard
-            fallId={id}
-            kundeName={kundenName}
-            kennzeichen={(fall.kennzeichen as string | null) ?? null}
-            adresse={besichtigungsAdresse}
-          />
-        ) : null
-      }
       pflichtSlots={pflichtSlots}
       svPhase={svPhase}
       gutachtenInQc={!!erstgutachtenAuftrag?.gutachten_url && !erstgutachtenAuftrag?.gutachten_final_freigegeben && !erstgutachtenReject}
