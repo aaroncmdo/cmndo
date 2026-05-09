@@ -1,3 +1,4 @@
+Initialising login role...
 export type Json =
   | string
   | number
@@ -5278,6 +5279,93 @@ export type Database = {
             columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gutachter_finder_anfragen: {
+        Row: {
+          bestaetigung_gesendet_am: string | null
+          email: string
+          erstellt_am: string
+          fahrzeug_beschreibung: string | null
+          fall_id: string | null
+          id: string
+          kennzeichen: string | null
+          matching_typ: string | null
+          nachname: string
+          sa_signatur_data_url: string | null
+          sa_unterzeichnet_am: string | null
+          schadenort: string | null
+          schadenort_lat: number | null
+          schadenort_lng: number | null
+          schadentyp: string
+          status: string
+          telefon: string | null
+          vorname: string
+          wunschtermin: string | null
+          zugeordneter_sv_id: string | null
+          zugeordneter_sv_lead_id: string | null
+        }
+        Insert: {
+          bestaetigung_gesendet_am?: string | null
+          email: string
+          erstellt_am?: string
+          fahrzeug_beschreibung?: string | null
+          fall_id?: string | null
+          id?: string
+          kennzeichen?: string | null
+          matching_typ?: string | null
+          nachname: string
+          sa_signatur_data_url?: string | null
+          sa_unterzeichnet_am?: string | null
+          schadenort?: string | null
+          schadenort_lat?: number | null
+          schadenort_lng?: number | null
+          schadentyp: string
+          status?: string
+          telefon?: string | null
+          vorname: string
+          wunschtermin?: string | null
+          zugeordneter_sv_id?: string | null
+          zugeordneter_sv_lead_id?: string | null
+        }
+        Update: {
+          bestaetigung_gesendet_am?: string | null
+          email?: string
+          erstellt_am?: string
+          fahrzeug_beschreibung?: string | null
+          fall_id?: string | null
+          id?: string
+          kennzeichen?: string | null
+          matching_typ?: string | null
+          nachname?: string
+          sa_signatur_data_url?: string | null
+          sa_unterzeichnet_am?: string | null
+          schadenort?: string | null
+          schadenort_lat?: number | null
+          schadenort_lng?: number | null
+          schadentyp?: string
+          status?: string
+          telefon?: string | null
+          vorname?: string
+          wunschtermin?: string | null
+          zugeordneter_sv_id?: string | null
+          zugeordneter_sv_lead_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gutachter_finder_anfragen_zugeordneter_sv_id_fkey"
+            columns: ["zugeordneter_sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachter_finder_anfragen_zugeordneter_sv_lead_id_fkey"
+            columns: ["zugeordneter_sv_lead_id"]
+            isOneToOne: false
+            referencedRelation: "sv_leads"
             referencedColumns: ["id"]
           },
         ]
@@ -10622,6 +10710,63 @@ export type Database = {
           },
         ]
       }
+      sv_leads: {
+        Row: {
+          adresse: string
+          aktualisiert_am: string
+          dat_id: string | null
+          dat_url: string | null
+          email: string | null
+          erstellt_am: string
+          firma: string | null
+          id: string
+          ist_aktiv: boolean
+          lat: number
+          lng: number
+          name: string
+          ort: string | null
+          plz: string | null
+          quelle: string
+          telefon: string | null
+        }
+        Insert: {
+          adresse: string
+          aktualisiert_am?: string
+          dat_id?: string | null
+          dat_url?: string | null
+          email?: string | null
+          erstellt_am?: string
+          firma?: string | null
+          id?: string
+          ist_aktiv?: boolean
+          lat: number
+          lng: number
+          name: string
+          ort?: string | null
+          plz?: string | null
+          quelle?: string
+          telefon?: string | null
+        }
+        Update: {
+          adresse?: string
+          aktualisiert_am?: string
+          dat_id?: string | null
+          dat_url?: string | null
+          email?: string | null
+          erstellt_am?: string
+          firma?: string | null
+          id?: string
+          ist_aktiv?: boolean
+          lat?: number
+          lng?: number
+          name?: string
+          ort?: string | null
+          plz?: string | null
+          quelle?: string
+          telefon?: string | null
+        }
+        Relationships: []
+      }
       sv_live_location: {
         Row: {
           accuracy: number | null
@@ -14410,3 +14555,6 @@ export const Constants = {
     },
   },
 } as const
+<claude-code-hint v="1" type="plugin" value="supabase@claude-plugins-official" />
+A new version of Supabase CLI is available: v2.98.2 (currently installed v2.98.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
