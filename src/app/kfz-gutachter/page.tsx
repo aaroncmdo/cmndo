@@ -88,14 +88,27 @@ export default function KfzGutachterPillarPage() {
 
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-claimondo-navy py-20 text-white">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 sm:px-8 md:grid-cols-2">
+      {/* Hero — Navy mit Spotlights für Tiefe */}
+      <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: [
+              'radial-gradient(circle at 15% 20%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 85% 75%, rgba(123,163,204,0.18), transparent 50%)',
+            ].join(', '),
+          }}
+        />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 sm:px-8 md:grid-cols-2">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-claimondo-light-blue">
               Unabhängige Kfz-Sachverständige
             </p>
-            <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
+            <h1
+              className="mt-4 text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl"
+              style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+            >
               Kfz-Gutachter finden —<br />
               <span className="text-claimondo-light-blue">unabhängig & kostenfrei.</span>
             </h1>
@@ -107,14 +120,14 @@ export default function KfzGutachterPillarPage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/gutachter-finden"
-                className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3.5 text-sm font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-bold text-claimondo-navy shadow-[0_8px_28px_rgba(255,255,255,0.18)] transition-all duration-200 hover:bg-claimondo-light-blue/90 active:scale-[0.98]"
               >
                 <MapPin className="h-4 w-4 text-claimondo-ondo" />
                 Auf der Karte ansehen
               </Link>
               <Link
                 href="/schaden-melden"
-                className="inline-flex items-center gap-2 rounded-2xl border-2 border-white/30 px-6 py-3.5 text-sm font-semibold text-white/90 hover:border-white/70"
+                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition-all hover:border-white/60 hover:bg-white/10"
               >
                 <ChevronRight className="h-4 w-4" />
                 Schaden melden
@@ -133,9 +146,9 @@ export default function KfzGutachterPillarPage() {
         </div>
       </section>
 
-      {/* Trust-Strip */}
-      <section className="border-y border-claimondo-border bg-white">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border px-5 sm:grid-cols-4">
+      {/* Trust-Strip — Glass */}
+      <section className="border-y border-white/50 bg-white/65 backdrop-blur-md">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-white/40 px-5 sm:grid-cols-4">
           {[
             { kpi: '89+', label: 'DAT-Partner' },
             { kpi: '<48h', label: 'Termin' },
@@ -209,7 +222,7 @@ export default function KfzGutachterPillarPage() {
               <Link
                 key={t.href}
                 href={t.href}
-                className="group rounded-2xl border border-claimondo-border bg-claimondo-bg p-6 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-md"
+                className="group rounded-2xl border border-white/60 bg-white/70 p-6 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-[0_8px_24px_rgba(13,27,62,0.10)]"
               >
                 <h3 className="text-xl font-extrabold text-claimondo-navy">{t.titel}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{t.lead}</p>
@@ -272,7 +285,7 @@ export default function KfzGutachterPillarPage() {
             {TOP_FAQ.map((f) => (
               <details
                 key={f.frage}
-                className="group rounded-2xl border border-claimondo-border bg-white p-5 shadow-sm"
+                className="group rounded-2xl border border-white/60 bg-white/70 p-5 backdrop-blur-md shadow-[0_4px_18px_rgba(13,27,62,0.06)] transition-all hover:bg-white/85"
               >
                 <summary className="cursor-pointer list-none text-base font-bold text-claimondo-navy">
                   <span className="flex items-center justify-between">
@@ -297,9 +310,22 @@ export default function KfzGutachterPillarPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-claimondo-navy py-20 text-white">
-        <div className="mx-auto max-w-3xl px-5 sm:px-8 text-center">
-          <h2 className="text-3xl font-extrabold sm:text-4xl">
+      <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: [
+              'radial-gradient(circle at 20% 25%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 80% 75%, rgba(123,163,204,0.18), transparent 50%)',
+            ].join(', '),
+          }}
+        />
+        <div className="relative mx-auto max-w-3xl px-5 text-center sm:px-8">
+          <h2
+            className="text-3xl font-bold sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
             Jetzt Gutachter in Ihrer Region finden
           </h2>
           <p className="mt-4 text-white/70">
@@ -308,14 +334,14 @@ export default function KfzGutachterPillarPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/gutachter-finden"
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-base font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-base font-bold text-claimondo-navy shadow-[0_8px_28px_rgba(255,255,255,0.18)] transition-all duration-200 hover:bg-claimondo-light-blue/90 active:scale-[0.98]"
             >
               <MapPin className="h-5 w-5 text-claimondo-ondo" />
               Karte ansehen
             </Link>
             <a
               href="tel:+4922125906530"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-5 w-5" />
               {PHONE_DISPLAY}
