@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
-import { Phone, ChevronRight, Shield, Zap, Users } from 'lucide-react'
+import { Phone, ChevronRight, Shield, Zap, Users, MapPin } from 'lucide-react'
 import { LandingCta } from '@/components/shared/LandingCta'
 import type { AuthenticatedUser } from './LandingTopbar'
 
@@ -86,9 +86,9 @@ export async function LandingHero({ authenticatedUser }: Props) {
           {t('subheadline')}
         </p>
 
-        {/* CTAs — primary navy + secondary ghost.
-            Wir nutzen die shared LandingCta, ergänzen aber den Telefon-Direktlink
-            als zusätzliche Tertiär-Option für mobile Conversion. */}
+        {/* CTAs — primärer Funnel: Gutachter-Finder Self-Dispatch (GPS → Karte →
+            Termin direkt buchen, Kunde landet automatisch im Portal). Sekundär
+            bleibt Schaden-Melden für die geführte Variante mit Beratung. */}
         <div className="mt-10 flex w-full max-w-md flex-col items-stretch gap-3 sm:max-w-none sm:flex-row sm:justify-center">
           {authenticatedUser ? (
             <Link
@@ -100,20 +100,20 @@ export async function LandingHero({ authenticatedUser }: Props) {
             </Link>
           ) : (
             <>
+              <Link
+                href="/gutachter-finden"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-navy px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_24px_rgba(13,27,62,0.22)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_12px_32px_rgba(13,27,62,0.30)] active:scale-[0.98]"
+              >
+                <MapPin className="h-5 w-5" aria-hidden="true" />
+                Gutachter sofort finden
+                <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" aria-hidden="true" />
+              </Link>
               <LandingCta
                 href="/schaden-melden"
-                variant="primary"
-                className="rounded-full px-7 py-3.5 shadow-[0_8px_24px_rgba(13,27,62,0.22)] hover:shadow-[0_12px_32px_rgba(13,27,62,0.30)] active:scale-[0.98]"
-              >
-                {t('cta_primary')}
-                <ChevronRight className="h-5 w-5 rtl:rotate-180" aria-hidden="true" />
-              </LandingCta>
-              <LandingCta
-                href="/beratung-anfragen"
                 variant="secondary"
                 className="rounded-full border-white/60 bg-white/70 px-7 py-3.5 backdrop-blur-md hover:bg-white"
               >
-                {t('cta_secondary')}
+                {t('cta_primary')}
               </LandingCta>
             </>
           )}
