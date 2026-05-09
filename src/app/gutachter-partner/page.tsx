@@ -191,24 +191,59 @@ export default function GutachterPartnerPage() {
         ])}
       />
 
-      {/* ── Topbar ─────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0D1B3E]/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-1.5">
-            <span className="text-xl font-bold tracking-tight text-white">Claim</span>
-            <span className="text-xl font-bold tracking-tight text-[#7BA3CC]">ondo</span>
-            <span className="ml-2 rounded-full bg-[#4573A2]/30 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[#7BA3CC]">
-              Gutachter
+      {/* ── Topbar — Glass auf Navy mit Schild-Logo ─────────── */}
+      <header
+        className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl"
+        style={{
+          background: 'rgba(13,27,62,0.72)',
+          WebkitBackdropFilter: 'saturate(180%) blur(24px)',
+          backdropFilter: 'saturate(180%) blur(24px)',
+        }}
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 -bottom-px h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(123,163,204,0.18) 50%, transparent 100%)',
+          }}
+        />
+        <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+          <Link href="/" aria-label="Claimondo Startseite" className="group flex items-center gap-2.5">
+            <span className="relative flex h-9 w-9 shrink-0 overflow-hidden rounded-[10px] shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-transform duration-200 group-hover:scale-[1.04]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/claimondo-shield.svg" alt="" width={36} height={36} className="h-9 w-9" />
+            </span>
+            <span className="hidden items-baseline gap-1.5 sm:flex">
+              <span
+                className="text-xl font-bold tracking-tight text-white"
+                style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+              >
+                claim<span className="text-[#7BA3CC]">ondo</span>
+              </span>
+              <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#7BA3CC]">
+                Gutachter
+              </span>
             </span>
           </Link>
-          <nav className="hidden items-center gap-6 text-sm font-medium text-white/70 md:flex">
-            <a href="#vorteile" className="transition-colors hover:text-white">Vorteile</a>
-            <a href="#so-funktioniert-es" className="transition-colors hover:text-white">So funktioniert&apos;s</a>
-            <a href="#app" className="transition-colors hover:text-white">Die App</a>
+          <nav className="hidden items-center gap-0.5 md:flex">
+            {[
+              { href: '#vorteile', label: 'Vorteile' },
+              { href: '#so-funktioniert-es', label: "So funktioniert's" },
+              { href: '#app', label: 'Die App' },
+            ].map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="rounded-full px-3.5 py-1.5 text-sm font-medium text-white/70 transition-all hover:bg-white/10 hover:text-white"
+              >
+                {link.label}
+              </a>
+            ))}
           </nav>
           <Link
             href="/gutachter/willkommen"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#4573A2] px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:bg-[#7BA3CC] hover:shadow-[#4573A2]/40"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#4573A2] px-5 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(69,115,162,0.5)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_6px_18px_rgba(123,163,204,0.55)] active:scale-[0.97]"
           >
             Jetzt bewerben
             <ChevronRight className="h-4 w-4" />
@@ -230,29 +265,32 @@ export default function GutachterPartnerPage() {
             Deutschlands führendes KFZ-Gutachter-Netzwerk
           </div>
 
-          <h1 className="mx-auto max-w-4xl text-5xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-6xl md:text-7xl">
+          <h1
+            className="mx-auto max-w-4xl text-balance text-5xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-6xl md:text-7xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
             Mehr Aufträge.{' '}
             <span className="bg-gradient-to-r from-[#7BA3CC] to-[#4573A2] bg-clip-text text-transparent">
               Weniger Verwaltung.
             </span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/60 sm:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-balance text-lg leading-relaxed text-white/65 sm:text-xl">
             Claimondo übernimmt Akquise, Koordination und Abrechnung.
             Du begutachtest — wir regeln den Rest.
           </p>
 
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/gutachter/willkommen"
-              className="inline-flex items-center gap-2 rounded-2xl bg-[#4573A2] px-8 py-4 text-base font-bold text-white shadow-xl shadow-[#4573A2]/30 transition-all hover:bg-[#7BA3CC] hover:shadow-[#7BA3CC]/30"
+              className="inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
             >
               Jetzt als Gutachter bewerben
               <ArrowRight className="h-5 w-5" />
             </Link>
             <a
               href="#so-funktioniert-es"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-8 py-4 text-base font-semibold text-white/80 transition-all hover:border-white/40 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               Mehr erfahren
             </a>
@@ -278,7 +316,10 @@ export default function GutachterPartnerPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center">
             <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">Warum Claimondo?</div>
-            <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+            <h2
+              className="text-balance text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl"
+              style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+            >
               Alles was du brauchst —{' '}
               <span className="text-[#7BA3CC]">nichts was du nicht willst</span>
             </h2>
@@ -515,7 +556,10 @@ export default function GutachterPartnerPage() {
       <section className="py-28">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
           <Users className="mx-auto mb-4 h-12 w-12 text-[#4573A2]" />
-          <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+          <h2
+            className="text-balance text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
             Bereit? Dann leg los.
           </h2>
           <p className="mt-4 text-lg text-white/55">
@@ -525,7 +569,7 @@ export default function GutachterPartnerPage() {
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/gutachter/willkommen"
-              className="inline-flex items-center gap-2 rounded-2xl bg-[#4573A2] px-10 py-5 text-lg font-bold text-white shadow-2xl shadow-[#4573A2]/40 transition-all hover:bg-[#7BA3CC] hover:shadow-[#7BA3CC]/40"
+              className="inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-9 py-4 text-lg font-bold text-white shadow-[0_12px_36px_rgba(69,115,162,0.55)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_16px_44px_rgba(123,163,204,0.60)] active:scale-[0.98]"
             >
               Kostenlos bewerben
               <ArrowRight className="h-5 w-5" />
