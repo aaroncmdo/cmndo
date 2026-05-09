@@ -47,16 +47,25 @@ export function organizationSchema() {
     '@type': 'Organization',
     '@id': `${SITE_URL}/#organization`,
     name: SITE_NAME,
+    legalName: 'Claimondo GmbH',
+    alternateName: ['claimondo', 'Claimondo Schadensregulierung'],
     url: SITE_URL,
-    logo: `${SITE_URL}/icons/icon.svg`,
+    logo: `${SITE_URL}/claimondo-icon.svg`,
+    image: `${SITE_URL}/claimondo-icon.svg`,
+    slogan: 'Vollständige Schadensregulierung — auf Augenhöhe.',
     description:
-      'Claimondo regelt Kfz-Unfallschäden komplett: unabhängiges Gutachten, Anwalt, Werkstatt und Auszahlung — kostenfrei für unverschuldet Geschädigte nach §249 BGB.',
+      'Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Über DAT-zertifizierte Sachverständige und die Partnerkanzlei LexDrive werden alle nach §249 BGB zustehenden Ansprüche durchgesetzt — kostenfrei für unverschuldet Geschädigte.',
     foundingDate: '2025',
+    foundingLocation: {
+      '@type': 'Place',
+      name: 'Köln, Deutschland',
+    },
     address: {
       '@type': 'PostalAddress',
       ...HQ_LOCATION,
     },
     email: CONTACT_EMAIL,
+    telephone: PHONE_E164,
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: PHONE_E164,
@@ -71,6 +80,30 @@ export function organizationSchema() {
       sameAs: f.sameAs,
       image: f.image,
     })),
+    // GEO-relevant: knowsAbout signalisiert ChatGPT/Perplexity/Claude die
+    // Themen-Domäne für Zitierungen.
+    knowsAbout: [
+      'Kfz-Schadensregulierung',
+      'Unfallgutachten',
+      '§249 BGB',
+      'Wertminderung',
+      'BVSK-Honorartabelle',
+      'Sicherungsabtretung §164 BGB',
+      'DAT-Expert-Sachverständige',
+      'Verkehrsrecht',
+      'Haftpflichtschaden',
+      'Nutzungsausfall',
+      'Mietwagen-Anspruch',
+      'BGH-Rechtsprechung Verkehrsunfall',
+    ],
+    // Vertrauenssignale: bekannte Partner als Schema-Verknüpfung
+    memberOf: [
+      {
+        '@type': 'Organization',
+        name: 'DAT Expert Partner Netzwerk',
+        url: 'https://www.dat.de/sachverstaendige/',
+      },
+    ],
     sameAs: [
       'https://www.linkedin.com/company/claimondo',
     ],
