@@ -4,7 +4,7 @@
 
 import {
   LayoutDashboardIcon, UsersIcon, PhoneIcon, LogOutIcon,
-  MapIcon, CarFrontIcon, TargetIcon, CalendarIcon,
+  MapIcon, CarFrontIcon, TargetIcon, CalendarIcon, SearchIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
@@ -15,6 +15,7 @@ const NAV_ARBEIT: PortalNavItem[] = [
   { href: '/dispatch/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/dispatch/leads', label: 'Leads', icon: UsersIcon },
   { href: '/dispatch/rueckrufe', label: 'Rückrufe', icon: PhoneIcon },
+  { href: '/dispatch/gutachter-finder', label: 'Gutachter-Finder', icon: SearchIcon },
   { href: '/dispatch/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/dispatch/karte', label: 'Karte', icon: MapIcon },
 ]

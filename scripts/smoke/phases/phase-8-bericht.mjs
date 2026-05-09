@@ -213,17 +213,22 @@ export async function runPhase8(svContext, prevResult = { notes: [] }) {
     }
 
     if (freigebeBtn) {
-      logPhase(8, '"Besichtigung abschließen"-Button gefunden — klicke')
-      await clickAndShoot(page, freigebeBtn, 'phase8-bericht-freigeben')
+      logPhase(8, '"Besichtigung abschließen"-Button gefunden — erster Klick')
+      await freigebeBtn.click({ force: true })
+      // BesichtigungAbschliessenButton.tsx:70 — onBlur setzt confirming=false zurück.
+      // Sofort nach dem ersten Klick prüfen ob der Button in den Confirm-State
+      // gewechselt hat ("Trotzdem abschließen") und direkt wieder klicken,
+      // bevor blur feuern kann.
+      await page.waitForTimeout(150)
+      const btnText = await freigebeBtn.textContent().catch(() => '')
+      if (btnText?.includes('Trotzdem')) {
+        logPhase(8, 'Confirm-State aktiv — zweiter Klick (force)')
+        await freigebeBtn.click({ force: true })
+        await page.waitForTimeout(500)
+      }
+      await page.screenshot({ path: `${process.env._SMOKE_OUT_DIR ?? '.'}/phase8-bericht-freigeben.png` }).catch(() => {})
       await page.waitForTimeout(3000)
       logPhase(8, `Nach Freigabe URL: ${page.url()}`)
-
-      // Bestätigungs-Dialog (pflichtOffen > 0 → zweiter Klick nötig)
-      const confirmBtn = page.getByRole('button', { name: /Trotzdem abschlie[sß]en|Bestätigen|OK|Ja/i }).first()
-      if (await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await clickAndShoot(page, confirmBtn, 'phase8-freigabe-confirm')
-        await page.waitForTimeout(2000)
-      }
 
     } else {
       const msg = '"Besichtigung abschließen"-Button nicht gefunden in /gutachter/feldmodus (F-09: Session muss arrived sein)'

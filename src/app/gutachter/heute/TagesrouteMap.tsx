@@ -24,6 +24,7 @@ import {
   attachBlitzerLayer,
   fetchBlitzerInBbox,
   bboxForRoute,
+  bboxForIsochrone,
   type BlitzerLayerHandle,
   attachHazardLayer,
   fetchHereHazards,
@@ -338,9 +339,17 @@ export default function TagesrouteMap({
 
         // 2026-05-08 (Aaron-Brief): Blitzer + Hazards + Stau-Linien auch
         // im Heute-Hub damit der SV vor Tagesmodus-Start sieht was auf
-        // der Strecke wartet. Buffer 3 km, parallel-fetch, best-effort.
-        if (aktivCoords.length >= 2) {
-          const bbox = bboxForRoute(aktivCoords, 3)
+        // der Strecke wartet. Route-BBox (3 km Puffer) hat Vorrang;
+        // Isochrone-Polygon als Fallback wenn keine Route — deckt
+        // das gesamte Einsatzgebiet ab. Cache-TTL = 2 min.
+        const blitzerBbox =
+          aktivCoords.length >= 2
+            ? bboxForRoute(aktivCoords, 3)
+            : isochronePolygon && isochronePolygon.length >= 3
+              ? bboxForIsochrone(isochronePolygon)
+              : null
+        if (blitzerBbox) {
+          const bbox = blitzerBbox
           void Promise.all([
             fetchBlitzerInBbox(bbox),
             fetchHereHazards(bbox),
@@ -395,7 +404,7 @@ export default function TagesrouteMap({
     })
 
     return () => { cancelled = true }
-  }, [svOrigin, aktivStops, validStops, onRouteStatsChange])
+  }, [svOrigin, aktivStops, validStops, onRouteStatsChange, isochronePolygon])
 
   // Intro-Handle für Heute→Feldmodus-Übergang: nach Mount einmalig
   // exponieren. Animiert auf Pitch 60 + Zoom 15 mit Bearing zum ersten

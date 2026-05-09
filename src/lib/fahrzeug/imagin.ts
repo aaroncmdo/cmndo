@@ -118,11 +118,14 @@ export function buildImaginProxyUrl({
   modell,
   lackfarbe,
   baujahr,
+  angle,
 }: {
   hersteller: string | null
   modell: string | null
   lackfarbe: LackfarbeCode | null
   baujahr?: number | string | null
+  /** Imagin angle: 21 = front-driver-side ¾ (Default), 13 = Seite, 1 = Front. */
+  angle?: number
 }): string | null {
   if (!hersteller?.trim()) return null
   const params = new URLSearchParams({ make: hersteller.trim() })
@@ -132,6 +135,7 @@ export function buildImaginProxyUrl({
     const yr = String(baujahr).match(/\d{4}/)?.[0]
     if (yr) params.set('year', yr)
   }
+  if (angle != null) params.set('angle', String(angle))
   return `/api/fahrzeug/imagin?${params.toString()}`
 }
 

@@ -203,29 +203,26 @@ export async function runPhase7(svContext, reportRef = { notes: [] }, phase6Resu
         fullPage: false,
       }).catch(() => {})
 
-      // F-08 Fix: Filechooser-Pattern statt setInputFiles() auf hidden input.
-      // FeldmodusDokumentSlot.tsx:161 — "Datei"-Button ruft inputRef.current?.click().
-      // Playwright fängt den file-chooser-Event ab bevor der native Dialog erscheint.
-      const dateiButton = slot.getByRole('button', { name: /datei/i }).first()
-      const dateiButtonVisible = await dateiButton.isVisible().catch(() => false)
-      if (!dateiButtonVisible) {
-        const msg = `  "Datei"-Button für Slot "${slotLabel}" nicht sichtbar`
+      // Fix: FeldmodusDokumentSlot.tsx:161 ruft inputRef.current?.click() auf ein
+      // hidden input — headless Playwright feuert keinen filechooser-Event.
+      // Stattdessen setInputFiles() direkt auf das versteckte input-Element
+      // setzen: das löst den onChange-Handler aus, ohne native Dialog.
+      const fileInput = slot.locator('input[type="file"]').first()
+      const fileInputExists = await fileInput.count().catch(() => 0) > 0
+      if (!fileInputExists) {
+        const msg = `  input[type="file"] für Slot "${slotLabel}" nicht gefunden`
         logSoft(7, msg)
-        notes.push(`SOFT: ${msg} — FeldmodusDokumentSlot.tsx:158`)
+        notes.push(`SOFT: ${msg} — FeldmodusDokumentSlot.tsx:174`)
         result = result === 'hard' ? 'hard' : 'soft'
         continue
       }
       try {
-        const [fileChooser] = await Promise.all([
-          page.waitForEvent('filechooser', { timeout: 5000 }),
-          dateiButton.click(),
-        ])
-        await fileChooser.setFiles(fotoPath)
-        logPhase(7, `  Datei für "${slotLabel}" gesetzt (filechooser)`)
+        await fileInput.setInputFiles(fotoPath)
+        logPhase(7, `  setInputFiles für "${slotLabel}" gesetzt`)
       } catch (uploadErr) {
-        const msg = `  Upload für Slot "${slotLabel}" fehlgeschlagen: ${uploadErr.message}`
+        const msg = `  setInputFiles für Slot "${slotLabel}" fehlgeschlagen: ${uploadErr.message}`
         logSoft(7, msg)
-        notes.push(`SOFT: ${msg} — FeldmodusDokumentSlot.tsx:158-170`)
+        notes.push(`SOFT: ${msg} — FeldmodusDokumentSlot.tsx:174-180`)
         result = result === 'hard' ? 'hard' : 'soft'
         continue
       }
@@ -342,7 +339,7 @@ export async function runPhase7(svContext, reportRef = { notes: [] }, phase6Resu
     logPhase(7, `DB-Assert: pflichtdokumente.status='hochgeladen' für fall_id=${fallId}`)
     const { data: pflichtRows, error: pflichtError } = await db
       .from('pflichtdokumente')
-      .select('id, status, slot_id, fall_id')
+      .select('id, status, dokument_typ, fall_id')
       .eq('fall_id', fallId)
 
     if (pflichtError) {

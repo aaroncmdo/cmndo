@@ -324,10 +324,10 @@ function UnfallDetail({ data }: { data: StammdatenAccordionData }) {
     ([str(fall.schadens_adresse), str(fall.schadens_plz), str(fall.schadens_ort)]
       .filter(Boolean)
       .join(', ') || null)
-  const datum = str(fall.schadens_datum)
-  const uhrzeit = str(fall.schadens_uhrzeit)
-  const hergang = str(fall.unfallhergang) ?? str(fall.schadens_beschreibung)
-  const polizei = bool(fall.polizei_aufgenommen)
+  const datum = str(fall.schadens_datum) ?? str(fall.unfalldatum)
+  const uhrzeit = str(fall.unfall_uhrzeit) ?? str(fall.schadens_uhrzeit)
+  const hergang = str(fall.unfallhergang) ?? str(fall.schadens_hergang) ?? str(fall.schadens_beschreibung)
+  const polizei = bool(fall.polizei_vor_ort) ?? bool(fall.polizei_aufgenommen)
   const dienststelle = str(fall.polizei_dienststelle)
   const aktenzeichen = str(fall.polizei_aktenzeichen)
 

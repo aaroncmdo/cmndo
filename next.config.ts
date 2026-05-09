@@ -9,12 +9,56 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  /* KFZ-177: ignoreBuildErrors entfernt — tsc ist jetzt sauber */
+  // VPS-Build: TS-Checker + ESLint werden im CI (GitHub Actions) geprüft,
+  // auf dem RAM-limitierten VPS sparen wir den Check-Schritt.
+  typescript: { ignoreBuildErrors: true },
+  // eslint-Prop existiert in Next 16 TypeScript-Typen nicht mehr — cast nötig
+  ...(({ eslint: { ignoreDuringBuilds: true } }) as object),
+  // VPS-Deployment: standalone-Output bündelt nur die nötigsten node_modules
+  // → kleines Deploy-Artefakt, kein node_modules-Upload nötig.
+  output: 'standalone',
+  // Dokument-Uploads (SA-Vorlage, Pflichtdokumente) erlauben bis 16 MB.
+  // Next.js-Default ist 1 MB — Uploads > 1 MB werfen sonst clientseitig
+  // „An unexpected response was received from the server" bevor die Action
+  // überhaupt läuft.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '16mb',
+    },
+  },
   // Production-Source-Maps einschalten — damit User-Errors wie „an.map is not
   // a function" auf den echten File + Zeile zurückverfolgt werden können.
   // Erhöht die Bundle-Größe leicht, aber nur die .map-Files, die werden
   // nicht zum Client geladen außer DevTools öffnet sie.
   productionBrowserSourceMaps: true,
+  // Security-Header für Public-Routes — Lighthouse-Best-Practice + DSGVO.
+  // CSP NICHT gesetzt: Mapbox-GL, Sentry, Google-Fonts, Vercel-Analytics
+  // brauchen explizite Quellen — separater Audit nötig wenn enforced.
+  async headers() {
+    const securityHeaders = [
+      // Klickjacking-Schutz (sticky bei alten Browsern, frame-ancestors in CSP wäre moderner)
+      { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+      // MIME-Sniffing aus
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      // Referrer policy: Cross-Site keine vollen URLs leaken
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      // HSTS — HTTPS-Force für 2 Jahre inkl. Subdomains
+      { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+      // Permissions-Policy: nur was wir nutzen erlauben (Geolocation für Map, Camera für Foto-Upload)
+      {
+        key: 'Permissions-Policy',
+        value: 'geolocation=(self), camera=(self), microphone=(self), payment=(), usb=(), magnetometer=()',
+      },
+      // X-DNS-Prefetch-Control für schnelleres DNS-Auflösen externer Ressourcen
+      { key: 'X-DNS-Prefetch-Control', value: 'on' },
+    ]
+    return [
+      {
+        source: '/:path*',
+        headers: securityHeaders,
+      },
+    ]
+  },
   async redirects() {
     return [
       // AAR-295: Alte SV-Auftrag-Detail-Route → einheitliche Fallakte.

@@ -17,7 +17,7 @@ import {
   upsertTrafficRouteLayer,
   fetchDrivingRoute,
   type TrafficRoute,
-  MAPBOX_STYLE_STANDARD,
+  MAPBOX_STYLE_STANDARD_SATELLITE,
   DEFAULT_FIELD_MAP_CONFIG,
   getMapboxLightPreset,
   tryAddSvCar3dModel,
@@ -219,7 +219,7 @@ export default function FeldmodusMap({
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: MAPBOX_STYLE_STANDARD,
+      style: MAPBOX_STYLE_STANDARD_SATELLITE,
       center: fallbackCenter,
       zoom: DEFAULT_FIELD_MAP_CONFIG.initialZoom,
       pitch: DEFAULT_FIELD_MAP_CONFIG.pitch,
@@ -315,43 +315,43 @@ export default function FeldmodusMap({
         }
         return [10.4515, 51.1657]
       })()
-      // 2026-05-08 (C11b): wenn NEXT_PUBLIC_SV_CAR_OBJ_URL gesetzt ist,
-      // bevorzugen wir den Three.js-OBJ-Pfad. Fällt bei Fehler (404,
-      // OOM bei zu großem OBJ) auf den Mapbox-glb-Pfad zurück.
-      const objUrl = getSvCarObjUrl()
-      const onCarReady = () => {
-        if (svMarkerRef.current) {
-          svMarkerRef.current.remove()
-          svMarkerRef.current = null
+      // 2026-05-08 Aaron-Smoke: Mapbox-`model`-Layer rendert das vorhandene
+      // GLB als Box (Material/Normals defekt nach OBJ→glb-Konvertierung).
+      // Three.js-OBJ-Pfad lädt sehr langsam und ist in der Praxis nicht
+      // zuverlässig genug. Default ist jetzt: SVG-Top-Down-Marker (sv-marker.ts)
+      // als sauberer Mini-Car-Sprite. 3D-Pfad lässt sich opt-in aktivieren über
+      // NEXT_PUBLIC_SV_CAR_3D=1 — dann rotiert die alte Pipeline.
+      const enable3d = process.env.NEXT_PUBLIC_SV_CAR_3D === '1'
+      if (enable3d) {
+        const objUrl = getSvCarObjUrl()
+        const onCarReady = () => {
+          if (svMarkerRef.current) {
+            svMarkerRef.current.remove()
+            svMarkerRef.current = null
+          }
         }
-      }
-      if (objUrl) {
-        // 2026-05-08: Scale 8 — das Porsche-OBJ ist in -0.85..0.85-
-        // Range modeled, scale 8 macht es ca. 13 m visuell groß. Auf
-        // Mapbox-Standard-Buildings (~30 m hoch) das ist ein gut
-        // sichtbares Mini-Auto bei Zoom 17.8. Aaron-Smoke #33: scale
-        // 3.5 war zu klein, kaum erkennbar.
-        tryAddSvCarThreeJs(map, { lngLat: initialPose, heading: 0, scale: 8 }, { objUrl })
-          .then((handle) => {
-            if (handle) {
-              svThreeHandleRef.current = handle
-              onCarReady()
-              return
-            }
-            // OBJ failed → glb-Fallback versuchen
-            return tryAddSvCar3dModel(map, { lngLat: initialPose, heading: 0 }).then((h) => {
-              if (h) { sv3dHandleRef.current = h; onCarReady() }
+        if (objUrl) {
+          tryAddSvCarThreeJs(map, { lngLat: initialPose, heading: 0, scale: 8 }, { objUrl })
+            .then((handle) => {
+              if (handle) {
+                svThreeHandleRef.current = handle
+                onCarReady()
+                return
+              }
+              return tryAddSvCar3dModel(map, { lngLat: initialPose, heading: 0 }).then((h) => {
+                if (h) { sv3dHandleRef.current = h; onCarReady() }
+              })
             })
-          })
-          .catch(() => { /* fail silent — 2D-Fallback bleibt aktiv */ })
-      } else {
-        tryAddSvCar3dModel(map, { lngLat: initialPose, heading: 0 })
-          .then((handle) => {
-            if (!handle) return
-            sv3dHandleRef.current = handle
-            onCarReady()
-          })
-          .catch(() => { /* fail silent — 2D-Fallback bleibt aktiv */ })
+            .catch(() => { /* SVG-Fallback bleibt aktiv */ })
+        } else {
+          tryAddSvCar3dModel(map, { lngLat: initialPose, heading: 0 })
+            .then((handle) => {
+              if (!handle) return
+              sv3dHandleRef.current = handle
+              onCarReady()
+            })
+            .catch(() => { /* SVG-Fallback bleibt aktiv */ })
+        }
       }
 
       // Stop-Pins setzen (Nummer im Marker als Initials verwendet)

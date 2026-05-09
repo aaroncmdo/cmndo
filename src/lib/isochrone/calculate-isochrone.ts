@@ -47,7 +47,7 @@ export async function calculateIsochrone(
   url.searchParams.set('contours_meters', String(meters))
   url.searchParams.set('polygons', 'true')
   url.searchParams.set('denoise', '1')
-  url.searchParams.set('generalize', '50')
+  url.searchParams.set('generalize', '0')
   url.searchParams.set('access_token', token)
 
   let response: Response

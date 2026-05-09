@@ -263,13 +263,8 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
       })
     }
 
-    // AAR-89: SV-03 Task triggern (Vor-Ort-Dokumentation)
-    if (svRec?.profile_id) {
-      try {
-        const { triggerSV03 } = await import('@/lib/gutachterTasking')
-        await triggerSV03(termin.fall_id, svRec.profile_id)
-      } catch (err) { console.error('[AAR-89] triggerSV03:', err) }
-    }
+    // SV-03 (Vor-Ort Dokumentation) deaktiviert — Task wird erst wieder
+    // aktiviert wenn die Vor-Ort-Erfassung in der App produktionsreif ist.
   } catch { /* non-critical */ }
 
   // AAR-501 N6: Event emittieren

@@ -162,9 +162,6 @@ type Props = {
       Nachbesichtigung/Konfrontation als Mitteilung wenn aktiv, MeinFallStatusCard).
       Wird direkt nach dem FallHeader vor dem 2-Spalten-Layout gerendert. */
   topServerBlocks?: React.ReactNode
-  /** CMM-32: Vor-Ort-Trigger („Bin angekommen" + Navigieren) wandert ans
-      Ende der Seite — Aaron-Spec, damit der Banner oben aufgeräumt bleibt. */
-  vorOrtCard?: React.ReactNode
   /** CMM-33: Pflicht-Slots für die zentrale Dokumente-Sektion unten rechts. */
   pflichtSlots?: PflichtSlotForView[]
   /** CMM-23: Auftrags-Phase für den Stepper in der linken Sidebar. */
@@ -364,7 +361,7 @@ export default function FallDetailClient(props: Props) {
 
       {/* Stepper + Termin-Banner als verschmolzener Header — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
-        <SvUnterwegsInfo tracking={geoTracking} />
+        <SvUnterwegsInfo tracking={geoTracking} terminStartIso={aktiverTermin?.start_zeit ?? null} />
         {/* CMM-32 Walkthrough: AuftragHeaderPanel verschmilzt Stepper +
             Termin-Banner zu einem Block. Termin-Sektion zeigt sich nur
             solange der Auftrag aktiv ist (vor Regulierungs-Phase). */}
@@ -459,13 +456,6 @@ export default function FallDetailClient(props: Props) {
           }
         />
       </div>
-
-      {/* CMM-32: Vor-Ort-Trigger ganz unten */}
-      {props.vorOrtCard && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6">
-          {props.vorOrtCard}
-        </div>
-      )}
 
     </div>
   )

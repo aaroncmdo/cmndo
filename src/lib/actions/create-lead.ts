@@ -11,6 +11,7 @@ import { readPromoCookie, isValidPromoCodeFormat } from '@/lib/flow/promo-attrib
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
 import { schritt1Schema, type Schritt1Input } from '@/lib/flow/schemas/schritt1'
 import { createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
+import { berechneFehlendeFelder } from '@/lib/flow/fehlende-felder'
 
 type CreateLeadResult =
   | { success: true; leadId: string; abortToSelbstverschulden: boolean }
@@ -76,6 +77,18 @@ export async function createLeadFromSchritt1(
       disqualifiziert_am: isAbort ? new Date().toISOString() : null,
       promotion_code_id: promotionCodeId,
       voice_input_quelle: voiceInputQuelle,
+      // Konditionelle Pflichtfelder — bestimmen den weiteren Flow-Pfad
+      ist_fahrzeughalter: data.ist_fahrzeughalter,
+      halter_ungleich_fahrer_flag: !data.ist_fahrzeughalter,
+      fahrzeug_fahrbereit: data.fahrzeug_fahrbereit,
+      personenschaden_flag: data.personenschaden_flag,
+      hat_vorschaeden: data.hat_vorschaeden,
+      vorschaeden_beschreibung: data.hat_vorschaeden
+        ? (data.vorschaeden_beschreibung || null)
+        : null,
+      mietwagen_flag: data.mietwagen_flag ?? false,
+      nutzungsausfall: data.nutzungsausfall ?? false,
+      finanzierung_leasing: data.finanzierung_leasing ?? 'keine',
     })
     .select('id')
     .single()
@@ -85,6 +98,29 @@ export async function createLeadFromSchritt1(
       success: false,
       error: error?.message ?? 'Lead konnte nicht angelegt werden',
     }
+  }
+
+  // Sofort nach Insert: fehlende_felder_jsonb berechnen und speichern.
+  const fehlendeFelder = berechneFehlendeFelder({
+    schuldfrage: data.schuldfrage,
+    schadentyp: data.schadentyp,
+    polizei_vor_ort: data.polizei_vor_ort,
+    ist_fahrzeughalter: data.ist_fahrzeughalter,
+    hat_vorschaeden: data.hat_vorschaeden,
+    finanzierung_leasing: data.finanzierung_leasing ?? 'keine',
+    personenschaden_flag: data.personenschaden_flag,
+    mietwagen_flag: data.mietwagen_flag ?? null,
+    vorname: data.vorname,
+    nachname: data.nachname,
+    email: data.email,
+    telefon: data.telefon,
+  })
+
+  if (fehlendeFelder.length > 0) {
+    await admin
+      .from('leads')
+      .update({ fehlende_felder_jsonb: fehlendeFelder })
+      .eq('id', lead.id)
   }
 
   // F-02: Dispatch-User über neuen Lead benachrichtigen (fire-and-forget).
