@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { GutachterFinderClient } from './GutachterFinderClient'
 import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import {
-  localBusinessSchema, serviceSchema, breadcrumbsSchema,
+  serviceSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL,
 } from '@/lib/seo/jsonld'
 
@@ -55,7 +55,7 @@ export default async function GutachterFindenPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
-          localBusinessSchema(),
+          // localBusinessSchema kommt global aus layout.tsx
           serviceSchema({
             name: 'Kfz-Gutachter-Vermittlung',
             description:

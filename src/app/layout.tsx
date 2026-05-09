@@ -10,7 +10,10 @@ import PwaInstallBanner from "@/components/PwaInstallBanner";
 import OfflineBanner from "@/components/offline/OfflineBanner";
 import ServiceWorkerBoot from "@/components/offline/ServiceWorkerBoot";
 import PersistStorageToast from "@/components/offline/PersistStorageToast";
-import { organizationSchema, websiteSchema, jsonLdScript, SITE_URL } from "@/lib/seo/jsonld";
+import {
+  organizationSchema, websiteSchema, localBusinessSchema,
+  jsonLdScript, SITE_URL,
+} from "@/lib/seo/jsonld";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -151,7 +154,11 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col glass-bg">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={jsonLdScript([organizationSchema(), websiteSchema()])}
+          dangerouslySetInnerHTML={jsonLdScript([
+            organizationSchema(),
+            localBusinessSchema(),
+            websiteSchema(),
+          ])}
         />
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-medium focus:text-[#1E3A5F] focus:ring-2 focus:ring-[#4573A2]">
           Zum Hauptinhalt springen

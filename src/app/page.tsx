@@ -7,7 +7,7 @@ import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { hashIp } from '@/lib/crypto/hash-ip'
 import { LandingPage } from '@/components/landing/LandingPage'
 import type { AuthenticatedUser } from '@/components/landing/LandingTopbar'
-import { localBusinessSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL } from '@/lib/seo/jsonld'
 
 // AAR-491 (M9): Promo-Click-Tracking direkt im Server-Component der
 // Landing-Seite. Fire-and-forget — darf Render nicht verzögern, Fehler
@@ -109,13 +109,7 @@ export default async function Home({ searchParams }: HomeProps = {}) {
     }
   }
 
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLdScript(localBusinessSchema())}
-      />
-      <LandingPage authenticatedUser={authenticatedUser} locale={locale} />
-    </>
-  )
+  // organizationSchema + localBusinessSchema + websiteSchema laufen global aus
+  // app/layout.tsx — hier kein eigenes Schema mehr nötig.
+  return <LandingPage authenticatedUser={authenticatedUser} locale={locale} />
 }
