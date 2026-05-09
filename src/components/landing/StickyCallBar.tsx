@@ -12,6 +12,9 @@ type Props = {
   quelle?: string
 }
 
+// 2026-05-09 Frontend-Audit: iOS-Glass-Pass — Sticky-Pill mit backdrop-blur,
+// rounded-full Buttons, weichen 28-32px Schatten, active:scale Tap-Feedback.
+// Modal mit Glass-Backdrop + rounded-Inputs.
 export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
@@ -34,37 +37,39 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
 
   return (
     <>
-      {/* Sticky Bar — mobile + desktop unten rechts */}
+      {/* Sticky Bar — Floating-Pill mit Glass-Backdrop */}
       <div className="fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-stretch gap-2 sm:left-auto sm:right-6 sm:translate-x-0">
         <a
           href={`tel:${PHONE_TEL}`}
-          className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-claimondo-ondo px-4 py-3.5 text-sm font-bold text-white shadow-2xl ring-1 ring-claimondo-shield/40 transition-all hover:-translate-y-0.5 hover:bg-claimondo-shield"
+          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-claimondo-navy px-5 py-3.5 text-sm font-bold text-white shadow-[0_8px_28px_rgba(13,27,62,0.30)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_12px_36px_rgba(13,27,62,0.38)] active:scale-[0.97]"
         >
           <Phone className="h-4 w-4" />
           <span>Sofort anrufen</span>
-          <span className="hidden sm:inline opacity-70 font-normal">{PHONE_DISPLAY}</span>
+          <span className="hidden font-normal opacity-75 sm:inline">{PHONE_DISPLAY}</span>
         </a>
         <button
           onClick={() => setOpen(true)}
-          className="rounded-2xl bg-white px-4 py-3.5 text-sm font-bold text-claimondo-navy shadow-2xl ring-1 ring-claimondo-border transition-all hover:-translate-y-0.5 hover:bg-claimondo-bg"
+          className="rounded-full border border-white/60 bg-white/85 px-5 py-3.5 text-sm font-bold text-claimondo-navy shadow-[0_8px_24px_rgba(13,27,62,0.12)] backdrop-blur-md transition-all duration-200 hover:bg-white hover:shadow-[0_12px_32px_rgba(13,27,62,0.18)] active:scale-[0.97]"
         >
           Rückruf
         </button>
       </div>
 
-      {/* Modal */}
+      {/* Modal — Glass-Backdrop + glassy Sheet */}
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-claimondo-navy/60 backdrop-blur-sm sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center backdrop-blur-md sm:items-center"
+          style={{ background: 'rgba(13,27,62,0.45)' }}
           onClick={() => !pending && setOpen(false)}
         >
           <div
-            className="relative w-full max-w-md rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl"
+            className="relative w-full max-w-md rounded-t-3xl border border-white/40 bg-white/95 p-6 shadow-[0_24px_64px_rgba(13,27,62,0.30)] sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
+            style={{ WebkitBackdropFilter: 'blur(24px)' }}
           >
             <button
               onClick={() => setOpen(false)}
-              className="absolute right-4 top-4 rounded-full p-1.5 text-claimondo-ondo hover:bg-claimondo-bg"
+              className="absolute right-4 top-4 rounded-full p-1.5 text-claimondo-ondo transition-colors hover:bg-claimondo-bg"
               aria-label="Schließen"
             >
               <X className="h-5 w-5" />
@@ -72,16 +77,24 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
 
             {done ? (
               <div className="py-8 text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                  <Check className="h-6 w-6 text-green-700" />
+                <div
+                  className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
+                  style={{ background: 'rgba(34,160,107,0.15)' }}
+                >
+                  <Check className="h-6 w-6" style={{ color: '#22A06B' }} />
                 </div>
-                <h3 className="text-xl font-bold text-claimondo-navy">Wir rufen zurück</h3>
+                <h3
+                  className="text-xl font-bold text-claimondo-navy"
+                  style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+                >
+                  Wir rufen zurück
+                </h3>
                 <p className="mt-2 text-sm text-claimondo-ondo">
                   Ein Berater meldet sich bei Ihnen — meistens in unter 15 Minuten während der Geschäftszeiten.
                 </p>
                 <button
                   onClick={() => setOpen(false)}
-                  className="mt-6 inline-flex rounded-full bg-claimondo-navy px-6 py-2.5 text-sm font-semibold text-white hover:bg-claimondo-shield"
+                  className="mt-6 inline-flex rounded-full bg-claimondo-navy px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-claimondo-shield"
                 >
                   Schließen
                 </button>
@@ -89,7 +102,12 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
             ) : (
               <form onSubmit={submit} className="space-y-4">
                 <div>
-                  <h3 className="text-xl font-bold text-claimondo-navy">Rückruf anfordern</h3>
+                  <h3
+                    className="text-xl font-bold text-claimondo-navy"
+                    style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+                  >
+                    Rückruf anfordern
+                  </h3>
                   <p className="mt-1 text-sm text-claimondo-ondo">
                     0 € Beratung — wir melden uns innerhalb der Geschäftszeiten unter 15 Minuten.
                   </p>
@@ -105,7 +123,7 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     autoComplete="name"
-                    className="mt-1 w-full rounded-xl border border-claimondo-border bg-claimondo-bg px-4 py-2.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                    className="mt-1 w-full rounded-2xl border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
                     placeholder="Max Mustermann"
                   />
                 </div>
@@ -120,7 +138,7 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
                     value={telefon}
                     onChange={(e) => setTelefon(e.target.value)}
                     autoComplete="tel"
-                    className="mt-1 w-full rounded-xl border border-claimondo-border bg-claimondo-bg px-4 py-2.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                    className="mt-1 w-full rounded-2xl border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
                     placeholder="0151 …"
                   />
                 </div>
@@ -132,7 +150,7 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
                   <select
                     value={zeitfenster}
                     onChange={(e) => setZeitfenster(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-claimondo-border bg-white px-4 py-2.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                    className="mt-1 w-full rounded-2xl border border-claimondo-border bg-white px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:outline-none"
                   >
                     <option>Schnellstmöglich</option>
                     <option>Heute Vormittag</option>
@@ -150,19 +168,19 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
                     value={nachricht}
                     onChange={(e) => setNachricht(e.target.value)}
                     rows={2}
-                    className="mt-1 w-full rounded-xl border border-claimondo-border bg-claimondo-bg px-4 py-2.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                    className="mt-1 w-full rounded-2xl border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
                     placeholder="Worum geht es?"
                   />
                 </div>
 
                 {error && (
-                  <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>
+                  <p className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>
                 )}
 
                 <button
                   type="submit"
                   disabled={pending}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-claimondo-navy py-3 text-sm font-bold text-white shadow-md hover:bg-claimondo-shield disabled:opacity-50"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-claimondo-navy py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(13,27,62,0.22)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_12px_32px_rgba(13,27,62,0.30)] active:scale-[0.98] disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" />
                   {pending ? 'Wird gesendet…' : 'Rückruf anfordern'}
