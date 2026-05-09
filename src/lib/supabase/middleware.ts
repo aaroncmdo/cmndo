@@ -145,6 +145,19 @@ function isPublicPath(pathname: string): boolean {
     // ins Portal. Ohne diesen Eintrag landet der Besucher auf /login und
     // kann gar keinen Schaden melden.
     '/schaden-melden',
+    // 2026-05-09: Marketing/SEO-Routes — MÜSSEN unauthenticated erreichbar
+    // sein, sonst kann Google sie nicht indexieren und der gesamte SEO-/
+    // GEO-Aufwand ist wirkungslos. Auf 307 → /login = SEO-Tod.
+    '/gutachter-finden',
+    '/gutachter-partner',
+    '/vorteile',
+    '/wie-es-funktioniert',
+    '/faq',
+    // robots.txt + sitemap.xml + opengraph-image — von Next.js auto-routes
+    // generiert, dürfen nie hinter Auth liegen.
+    '/robots.txt',
+    '/sitemap.xml',
+    '/opengraph-image',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
