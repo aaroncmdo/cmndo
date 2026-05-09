@@ -6,7 +6,7 @@ import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   CheckIcon, UploadCloudIcon, CalendarIcon, FileTextIcon, SparklesIcon, FolderOpenIcon,
-  AlertCircleIcon, ClockIcon, RefreshCwIcon, InfoIcon, XIcon,
+  AlertCircleIcon, ClockIcon, RefreshCwIcon, InfoIcon, XIcon, CameraIcon,
 } from 'lucide-react'
 import {
   completeOnboarding,
@@ -221,6 +221,49 @@ export default function OnboardingWizard({
     fieldsFound: number
   } | null>(null)
 
+  // Welcome-Step ZB1-Schnellstart — Kunde fotografiert Fahrzeugschein direkt nach
+  // dem Begrüßungsscreen, OCR füllt FIN/HSN/TSN/Kennzeichen/Halter in den Claim
+  // damit die Pflichtdaten nicht später manuell eingetippt werden müssen.
+  const [welcomeOcrResult, setWelcomeOcrResult] = useState<{
+    extracted: Record<string, string | null>
+    fieldsFound: number
+  } | null>(null)
+  const [welcomeOcrLoading, setWelcomeOcrLoading] = useState(false)
+  const [welcomeOcrError, setWelcomeOcrError] = useState<string | null>(null)
+
+  function handleWelcomeOcr(file: File) {
+    if (!fall?.id) return
+    setWelcomeOcrLoading(true)
+    setWelcomeOcrError(null)
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const base64 = typeof reader.result === 'string' ? reader.result : ''
+      try {
+        const res = await fetch('/api/ocr-fahrzeugschein', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fall_id: fall.id, image_base64: base64 }),
+        }).then((r) => r.json())
+        if (res?.success && res.extracted) {
+          setWelcomeOcrResult({
+            extracted: res.extracted,
+            fieldsFound: res.fields_found ?? 0,
+          })
+          // refresh damit Claim-Daten im nächsten Step (Fall) sichtbar sind
+          router.refresh()
+        } else {
+          setWelcomeOcrError(res?.message ?? 'Fahrzeugschein konnte nicht ausgelesen werden.')
+        }
+      } catch (err) {
+        console.warn('[Welcome ZB1-OCR]', err)
+        setWelcomeOcrError('Netzwerkfehler — bitte später erneut versuchen.')
+      } finally {
+        setWelcomeOcrLoading(false)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
   // CMM-21: lokaler File-Counter pro Slot — wird optimistisch nach jedem
   // erfolgreichen Upload hochgezählt damit der Kunde direktes Feedback hat,
   // ohne page-refresh zu brauchen.
@@ -373,15 +416,101 @@ export default function OnboardingWizard({
       <div className="flex-1 flex flex-col px-5 pt-16 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
           <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
-            {/* Welcome */}
+            {/* Welcome — mit optionalem Fahrzeugschein-OCR-Schnellstart */}
             {currentStep.id === 'welcome' && (
               <div>
                 <div className="mb-4"><SparklesIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">Willkommen bei Claimondo, {vorname}!</h1>
                 <p className="mt-3 text-sm text-claimondo-ondo leading-relaxed">
-                  Wir kuemmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
-                  Dieser kurze Einstieg zeigt Ihnen Ihre naechsten Schritte — dauert ca. 3 Minuten.
+                  Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
+                  Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.
                 </p>
+
+                {/* Schnellstart per ZB1-Scan: spart manuelle Eingabe von FIN, HSN/TSN, Halter */}
+                {fall?.id && (
+                  <div className="mt-5 rounded-2xl border border-claimondo-ondo/30 bg-claimondo-ondo/5 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-claimondo-ondo/15">
+                        <CameraIcon className="h-5 w-5 text-claimondo-ondo" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-claimondo-navy">
+                          Schnellstart: Fahrzeugschein scannen
+                        </p>
+                        <p className="mt-1 text-xs text-claimondo-ondo leading-relaxed">
+                          Foto von Ihrem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen,
+                          Hersteller und Halter automatisch aus. Spart Ihnen das spätere Tippen.
+                        </p>
+
+                        {welcomeOcrResult && (
+                          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                            <p className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
+                              <CheckIcon className="h-3.5 w-3.5" />
+                              {welcomeOcrResult.fieldsFound} Felder erkannt
+                            </p>
+                            <ul className="mt-2 space-y-0.5 text-xs text-claimondo-navy">
+                              {welcomeOcrResult.extracted.fin_vin && (
+                                <li>FIN: <span className="font-mono font-medium">{welcomeOcrResult.extracted.fin_vin}</span></li>
+                              )}
+                              {welcomeOcrResult.extracted.kennzeichen && (
+                                <li>Kennzeichen: <span className="font-medium">{welcomeOcrResult.extracted.kennzeichen}</span></li>
+                              )}
+                              {(welcomeOcrResult.extracted.fahrzeug_hersteller || welcomeOcrResult.extracted.fahrzeug_modell) && (
+                                <li>
+                                  Fahrzeug:{' '}
+                                  <span className="font-medium">
+                                    {[welcomeOcrResult.extracted.fahrzeug_hersteller, welcomeOcrResult.extracted.fahrzeug_modell]
+                                      .filter(Boolean).join(' ')}
+                                  </span>
+                                </li>
+                              )}
+                              {(welcomeOcrResult.extracted.halter_vorname || welcomeOcrResult.extracted.halter_nachname) && (
+                                <li>
+                                  Halter:{' '}
+                                  <span className="font-medium">
+                                    {[welcomeOcrResult.extracted.halter_vorname, welcomeOcrResult.extracted.halter_nachname]
+                                      .filter(Boolean).join(' ')}
+                                  </span>
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
+
+                        {welcomeOcrError && (
+                          <p className="mt-2 text-xs text-amber-700">{welcomeOcrError}</p>
+                        )}
+
+                        <label className="mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-xs font-semibold cursor-pointer active:scale-[0.98] transition-all">
+                          {welcomeOcrLoading ? (
+                            <>
+                              <RefreshCwIcon className="h-3.5 w-3.5 animate-spin" />
+                              Wird ausgelesen…
+                            </>
+                          ) : (
+                            <>
+                              <CameraIcon className="h-3.5 w-3.5" />
+                              {welcomeOcrResult ? 'Erneut scannen' : 'Foto machen'}
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            disabled={welcomeOcrLoading}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0]
+                              if (f) handleWelcomeOcr(f)
+                              e.target.value = ''
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={() => setStepIndex(1)}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
