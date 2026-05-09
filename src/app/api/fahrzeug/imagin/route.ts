@@ -12,8 +12,6 @@
 import { NextRequest } from 'next/server'
 import { buildImaginUrl, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 
-export const runtime = 'edge'
-
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams
   const hersteller = sp.get('make')
