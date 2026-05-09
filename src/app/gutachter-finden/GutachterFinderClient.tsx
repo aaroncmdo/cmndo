@@ -8,8 +8,10 @@ import type { AktiverSV, SvLead } from '@/lib/actions/gutachter-finder-actions'
 import { MapPin, Loader2, Check, ChevronDown, Shield, Clock, Star, Zap, Calendar, ChevronRight } from 'lucide-react'
 
 // ——— Typen ———
-// Prototyp-Flow (sv-live-mapbox_25.html): wann → … → gps → map → detail → formular → erfolg
-type Phase = 'wann' | 'gps' | 'map' | 'detail' | 'formular' | 'erfolg'
+// Prototyp-Flow (sv-live-mapbox_25.html): wann → schaden → … → gps → map → detail → formular → erfolg
+type Phase = 'wann' | 'schaden' | 'gps' | 'map' | 'detail' | 'formular' | 'erfolg'
+
+type Schadentyp = 'auffahrunfall' | 'parkschaden' | 'kreuzungsunfall' | 'wildschaden' | 'sonstiges'
 
 type Wann = 'sofort' | 'heute' | 'tage'
 
@@ -184,6 +186,9 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
 
   const [phase, setPhase] = useState<Phase>('wann')
   const [wann, setWann] = useState<Wann | null>(null)
+  const [schadentyp, setSchadentyp] = useState<Schadentyp | null>(null)
+  const [kennzeichen, setKennzeichen] = useState('')
+  const [kzUnbekannt, setKzUnbekannt] = useState(false)
   const [gpsLaden, setGpsLaden] = useState(false)
   const [gpsFehler, setGpsFehler] = useState<string | null>(null)
   const [kundeLatLng, setKundeLatLng] = useState<{ lat: number; lng: number } | null>(null)
@@ -352,7 +357,10 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       nachname: formData.nachname,
       email: formData.email,
       telefon: formData.telefon || undefined,
-      schadentyp: formData.schadentyp || 'unbekannt',
+      // Schadentyp jetzt aus Q2 statt aus Form-Select. formData.schadentyp ist Fallback.
+      schadentyp: schadentyp ?? formData.schadentyp ?? 'unbekannt',
+      // Q2 Kennzeichen (Verursacher) — bei Fahrerflucht leer.
+      kennzeichen: kzUnbekannt ? undefined : (kennzeichen.trim() || undefined),
       schadenort_lat: kundeLatLng?.lat,
       schadenort_lng: kundeLatLng?.lng,
       wunschtermin,
@@ -367,7 +375,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       setAnfrageId(result.id)
       setPhase('erfolg')
     }
-  }, [gewaehlterSV, gewaehlterSlot, formData, kundeLatLng])
+  }, [gewaehlterSV, gewaehlterSlot, formData, kundeLatLng, schadentyp, kennzeichen, kzUnbekannt])
 
   const formGueltig =
     formData.vorname.trim().length > 1 &&
@@ -422,7 +430,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
                   key={wert}
                   onClick={() => {
                     setWann(wert)
-                    setPhase('gps')
+                    setPhase('schaden')
                   }}
                   className="flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-left transition-all active:scale-[0.98]"
                   style={{
@@ -453,6 +461,119 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
             <p className="mt-4 text-center text-xs" style={{ color: '#7BA3CC' }}>
               Kostenlos für unverschuldet Geschädigte · §249 BGB
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Q2 Schaden — Schadentyp + Kennzeichen. KZ optional via Fahrerflucht-Toggle. */}
+      {phase === 'schaden' && (
+        <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0 overflow-y-auto">
+          <div
+            className="mx-4 my-4 w-full max-w-sm rounded-3xl border border-white/40 p-7"
+            style={{
+              background: 'rgba(255,255,255,0.82)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 60px rgba(13,27,62,0.18), 0 1px 0 rgba(255,255,255,0.9) inset',
+            }}
+          >
+            <h2
+              className="mb-2 text-xl font-bold"
+              style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
+            >
+              Was ist passiert?
+            </h2>
+            <p className="mb-5 text-sm" style={{ color: '#4573A2' }}>
+              Damit wir den richtigen Sachverständigen für Ihren Schaden zuordnen.
+            </p>
+
+            <div className="mb-5 flex flex-col gap-2">
+              {([
+                { wert: 'auffahrunfall', emoji: '🚗', label: 'Auffahrunfall' },
+                { wert: 'parkschaden', emoji: '🅿️', label: 'Parkschaden' },
+                { wert: 'kreuzungsunfall', emoji: '🔀', label: 'Kreuzungsunfall' },
+                { wert: 'wildschaden', emoji: '🦌', label: 'Wildschaden' },
+                { wert: 'sonstiges', emoji: '⚠️', label: 'Sonstiger Schaden' },
+              ] as const).map(({ wert, emoji, label }) => {
+                const aktiv = schadentyp === wert
+                return (
+                  <button
+                    key={wert}
+                    onClick={() => setSchadentyp(wert)}
+                    className="flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-medium transition-all"
+                    style={{
+                      background: aktiv ? '#0D1B3E' : 'rgba(248,249,251,0.9)',
+                      borderColor: aktiv ? '#0D1B3E' : 'rgba(13,27,62,0.12)',
+                      color: aktiv ? '#fff' : '#0D1B3E',
+                    }}
+                  >
+                    <span className="text-lg">{emoji}</span>
+                    <span className="flex-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>{label}</span>
+                    {aktiv && <Check className="h-4 w-4" />}
+                  </button>
+                )
+              })}
+            </div>
+
+            <p
+              className="mb-2 text-xs font-semibold uppercase tracking-wider"
+              style={{ color: '#4573A2' }}
+            >
+              Kennzeichen des Unfallverursachers
+            </p>
+            <input
+              type="text"
+              value={kennzeichen}
+              onChange={(e) => setKennzeichen(e.target.value.toUpperCase())}
+              placeholder="K AB 1234"
+              maxLength={10}
+              autoCapitalize="characters"
+              spellCheck={false}
+              disabled={kzUnbekannt}
+              className="w-full rounded-2xl border px-4 py-3 text-sm font-mono tracking-wider outline-none disabled:opacity-50"
+              style={{
+                background: 'rgba(248,249,251,0.9)',
+                borderColor: 'rgba(13,27,62,0.12)',
+                color: '#0D1B3E',
+              }}
+            />
+
+            <button
+              type="button"
+              onClick={() => {
+                setKzUnbekannt((v) => !v)
+                if (!kzUnbekannt) setKennzeichen('')
+              }}
+              className="mt-2 text-xs"
+              style={{
+                color: kzUnbekannt ? '#0D1B3E' : '#4573A2',
+                fontWeight: kzUnbekannt ? 700 : 400,
+              }}
+            >
+              {kzUnbekannt ? '✓ Kennzeichen unbekannt' : 'Kennzeichen unbekannt / Fahrerflucht?'}
+            </button>
+
+            <button
+              onClick={() => setPhase('gps')}
+              disabled={!schadentyp || (!kzUnbekannt && kennzeichen.trim().length < 4)}
+              className="mt-6 w-full rounded-2xl py-4 text-base font-bold text-white transition-all active:scale-95"
+              style={{
+                background: !schadentyp || (!kzUnbekannt && kennzeichen.trim().length < 4)
+                  ? 'rgba(13,27,62,0.25)'
+                  : '#0D1B3E',
+                fontFamily: 'Montserrat, sans-serif',
+              }}
+            >
+              Weiter →
+            </button>
+
+            <button
+              onClick={() => setPhase('wann')}
+              className="mt-3 w-full text-center text-xs"
+              style={{ color: '#7BA3CC' }}
+            >
+              ← Zurück
+            </button>
           </div>
         </div>
       )}
@@ -754,23 +875,6 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
                         color: '#0D1B3E',
                       }}
                     />
-                    <select
-                      value={formData.schadentyp}
-                      onChange={(e) => setFormData((p) => ({ ...p, schadentyp: e.target.value }))}
-                      className="rounded-2xl border px-4 py-3 text-sm outline-none"
-                      style={{
-                        background: 'rgba(248,249,251,0.9)',
-                        borderColor: 'rgba(13,27,62,0.12)',
-                        color: formData.schadentyp ? '#0D1B3E' : '#7BA3CC',
-                      }}
-                    >
-                      <option value="">Art des Schadens (optional)</option>
-                      <option value="auffahrunfall">Auffahrunfall</option>
-                      <option value="parkschaden">Parkschaden</option>
-                      <option value="kreuzungsunfall">Kreuzungsunfall</option>
-                      <option value="wildschaden">Wildschaden</option>
-                      <option value="sonstiges">Sonstiger Schaden</option>
-                    </select>
                   </div>
 
                   <button
