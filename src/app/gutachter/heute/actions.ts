@@ -12,6 +12,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { ensureTagesSession } from '@/lib/sv/tages-session'
+import { getGutachterForUser } from '@/lib/gutachter'
 
 export async function startOrResumeTagesSession(
   terminIds: string[],
@@ -21,12 +22,7 @@ export async function startOrResumeTagesSession(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'unauthorized' }
 
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id')
-    .eq('profile_id', user.id)
-    .single()
-
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv?.id) return { success: false, error: 'no_sv' }
 
   if (terminIds.length === 0) {

@@ -3,10 +3,41 @@ import Link from 'next/link'
 import { Camera, Brain, UserCheck, FileText, ChevronRight, Clock, Shield, Star, Phone } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { StickyCallBar } from '@/components/landing/StickyCallBar'
+import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
-  title: 'Wie es funktioniert — Claimondo',
-  description: 'In 3 einfachen Schritten zum vollen Schadensersatz. Schaden melden, KI-Einschätzung erhalten, Gutachter vor Ort — kostenlos für Sie.',
+  title: 'Wie es funktioniert — In 3 Schritten zum vollen Schadensersatz',
+  description:
+    'Foto, KI-Einschätzung, Gutachter vor Ort: In 3 Schritten zum vollen Anspruch. Erste Bewertung in unter 15 Minuten, Termin in unter 48 Stunden, kostenfrei für unverschuldet Geschädigte.',
+  keywords: [
+    'Kfz-Schaden melden',
+    'Unfallschaden online',
+    'KI-Schadensbewertung',
+    'Gutachter Termin online',
+    'Schaden Foto hochladen',
+    'Sachverständiger vor Ort',
+    'digitale Schadensregulierung',
+  ],
+  alternates: {
+    canonical: '/wie-es-funktioniert',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'de_DE',
+    siteName: 'Claimondo',
+    url: `${SITE_URL}/wie-es-funktioniert`,
+    title: 'Wie es funktioniert — In 3 Schritten zum vollen Schadensersatz',
+    description:
+      'Foto · KI-Einschätzung · Gutachter vor Ort. Antwort unter 15 Min, Termin unter 48 h.',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'So funktioniert Claimondo' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Wie es funktioniert — In 3 Schritten zum vollen Schadensersatz',
+    description: 'Foto · KI-Einschätzung · Gutachter vor Ort.',
+    images: ['/og-default.png'],
+  },
 }
 
 const SCHRITTE = [
@@ -70,6 +101,42 @@ const FAKTEN = [
 export default function WieEsFunktioniertPage() {
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript([
+          serviceSchema({
+            name: 'Digitale Kfz-Schadensregulierung',
+            description:
+              '3-Schritt-Prozess: 1) Online Schaden melden mit Foto und KI-Vorbewertung, 2) Sachverständiger erstellt Gutachten vor Ort, 3) Anwalt setzt vollen Anspruch durch. Antwort unter 15 Min, Termin unter 48 h.',
+            url: `${SITE_URL}/wie-es-funktioniert`,
+          }),
+          howToSchema({
+            name: 'Kfz-Schaden in 3 Schritten regulieren',
+            description:
+              'Vom Unfallfoto bis zur Auszahlung: So holen unverschuldet Geschädigte mit Claimondo den vollen Schadensersatz ohne Eigenanteil.',
+            totalTime: 'PT15M',
+            estimatedCost: { currency: 'EUR', value: '0' },
+            schritte: [
+              {
+                name: 'Schaden erfassen',
+                text: 'Beschreiben Sie kurz den Unfallhergang und laden Fotos hoch, oder diktieren Sie uns den Schaden per Sprache. Kein Papierkram, keine Formulare. Dauer: ca. 5 Minuten ohne Anmeldung.',
+              },
+              {
+                name: 'KI-Ersteinschätzung',
+                text: 'Unsere KI bewertet die hochgeladenen Fotos sofort: Schweregrad, mutmaßlicher Reparaturaufwand, voraussichtliche Wertminderung. Sie erhalten in unter 15 Minuten eine erste Indikation.',
+              },
+              {
+                name: 'Gutachter vor Ort + Anwalt durchsetzen',
+                text: 'Wir vermitteln einen unabhängigen DAT-Sachverständigen in Ihrer Region — Termin in unter 48 Stunden. Unsere Partnerkanzlei setzt anschließend den vollen Anspruch gegen die gegnerische Versicherung durch (§249 BGB).',
+              },
+            ],
+          }),
+          breadcrumbsSchema([
+            { name: 'Startseite', url: '/' },
+            { name: 'Wie es funktioniert', url: '/wie-es-funktioniert' },
+          ]),
+        ])}
+      />
       <LandingTopbar authenticatedUser={null} />
 
       {/* Header */}
@@ -160,17 +227,18 @@ export default function WieEsFunktioniertPage() {
               <ChevronRight className="h-5 w-5" />
             </Link>
             <a
-              href="tel:+4922112345678"
+              href="tel:+4922125906530"
               className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-8 py-4 text-base font-semibold text-white/80 hover:border-white/40 hover:text-white"
             >
               <Phone className="h-4 w-4" />
-              0221 123 456 78
+              0221 25906530
             </a>
           </div>
         </div>
       </section>
 
       <LandingFooter />
+      <StickyCallBar quelle="Wie es funktioniert" />
     </div>
   )
 }

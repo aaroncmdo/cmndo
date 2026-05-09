@@ -1,6 +1,8 @@
 import { LandingTopbar, type AuthenticatedUser } from './LandingTopbar'
 import { LandingFooter } from './LandingFooter'
 import { HauptseiteClient } from './HauptseiteClient'
+import { FounderSection } from './FounderSection'
+import { StickyCallBar } from './StickyCallBar'
 
 type Props = {
   authenticatedUser: AuthenticatedUser | null
@@ -13,8 +15,10 @@ export async function LandingPage({ authenticatedUser, locale }: Props) {
       <LandingTopbar authenticatedUser={authenticatedUser} locale={locale} />
       <main id="main-content" className="flex-1">
         <HauptseiteClient />
+        <FounderSection />
         <LandingFooter />
       </main>
+      <StickyCallBar quelle="Hauptseite" />
     </div>
   )
 }

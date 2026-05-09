@@ -35,7 +35,9 @@ export function LandingTopbar({ authenticatedUser, locale }: Props) {
         <nav className="hidden items-center gap-5 text-sm font-medium text-claimondo-ondo md:flex">
           <Link href="/wie-es-funktioniert" className="transition-colors hover:text-claimondo-navy">Wie es funktioniert</Link>
           <Link href="/vorteile" className="transition-colors hover:text-claimondo-navy">Vorteile</Link>
+          <Link href="/kfz-gutachter" className="transition-colors hover:text-claimondo-navy">Gutachter</Link>
           <Link href="/faq" className="transition-colors hover:text-claimondo-navy">FAQ</Link>
+          <Link href="/ueber-uns" className="transition-colors hover:text-claimondo-navy">Über uns</Link>
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">

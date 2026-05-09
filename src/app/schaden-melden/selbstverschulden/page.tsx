@@ -47,10 +47,10 @@ export default async function SelbstverschuldenPage() {
             <Phone className="h-4 w-4 text-claimondo-ondo" aria-hidden />
             <span>{t('hotline_hint')}</span>
             <a
-              href="tel:+4922112345678"
+              href="tel:+4922125906530"
               className="font-semibold text-claimondo-ondo hover:underline"
             >
-              0221 123 456 78
+              0221 25906530
             </a>
           </p>
         </div>
