@@ -5,10 +5,13 @@ import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
 import { erstelleGutachterFinderAnfrage } from '@/lib/actions/gutachter-finder-actions'
 import type { AktiverSV, SvLead } from '@/lib/actions/gutachter-finder-actions'
-import { MapPin, Loader2, Check, ChevronDown, Shield, Clock, Star } from 'lucide-react'
+import { MapPin, Loader2, Check, ChevronDown, Shield, Clock, Star, Zap, Calendar, ChevronRight } from 'lucide-react'
 
 // ——— Typen ———
-type Phase = 'gps' | 'map' | 'detail' | 'formular' | 'erfolg'
+// Prototyp-Flow (sv-live-mapbox_25.html): wann → … → gps → map → detail → formular → erfolg
+type Phase = 'wann' | 'gps' | 'map' | 'detail' | 'formular' | 'erfolg'
+
+type Wann = 'sofort' | 'heute' | 'tage'
 
 type TerminSlot = { datum: string; uhrzeit: string; label: string }
 
@@ -84,16 +87,41 @@ function naechsteSVs(
     .slice(0, 8)
 }
 
-function generiereSlots(): TerminSlot[] {
+function generiereSlots(wann: Wann): TerminSlot[] {
   const slots: TerminSlot[] = []
   const jetzt = new Date()
   const uhrzeiten = ['08:00', '10:00', '13:00', '15:00']
   const wochentage = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
   const monate = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
 
+  // Sofort-Pfad: ein Express-Slot mit ETA innerhalb 2h, kein Datum-Picker.
+  if (wann === 'sofort') {
+    const eta = new Date(jetzt.getTime() + 90 * 60 * 1000)
+    return [{
+      datum: jetzt.toISOString().split('T')[0],
+      uhrzeit: 'sofort',
+      label: `Heute · ETA ${eta.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`,
+    }]
+  }
+
+  // Heute-Pfad: 2 freie Slots am gleichen Tag, sonst Plan-B nächster Werktag.
+  if (wann === 'heute') {
+    const wt = jetzt.getDay()
+    if (wt !== 0 && wt !== 6) {
+      for (const uhrzeit of ['14:00', '16:00']) {
+        slots.push({
+          datum: jetzt.toISOString().split('T')[0],
+          uhrzeit,
+          label: `Heute · ${uhrzeit} Uhr`,
+        })
+      }
+      if (slots.length > 0) return slots
+    }
+  }
+
+  // Tage-Pfad (Default): 3 Werktage ab morgen.
   let tag = new Date(jetzt)
   tag.setDate(tag.getDate() + 1)
-
   while (slots.length < 3) {
     const wt = tag.getDay()
     if (wt !== 0 && wt !== 6) {
@@ -154,7 +182,8 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
   const kundeMarkerRef = useRef<Marker | null>(null)
   const svMarkersRef = useRef<Map<string, Marker>>(new Map())
 
-  const [phase, setPhase] = useState<Phase>('gps')
+  const [phase, setPhase] = useState<Phase>('wann')
+  const [wann, setWann] = useState<Wann | null>(null)
   const [gpsLaden, setGpsLaden] = useState(false)
   const [gpsFehler, setGpsFehler] = useState<string | null>(null)
   const [kundeLatLng, setKundeLatLng] = useState<{ lat: number; lng: number } | null>(null)
@@ -242,7 +271,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
 
         el.addEventListener('click', () => {
           setGewaehlterSV(sv)
-          setTermine(generiereSlots())
+          setTermine(generiereSlots(wann ?? 'tage'))
           setGewaehlterSlot(null)
           setSheetHoehe('mittel')
           setPhase('detail')
@@ -254,7 +283,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
         svMarkersRef.current.set(sv.id, marker)
       })
     },
-    [],
+    [wann],
   )
 
   // ——— GPS-Standort abrufen ———
@@ -313,7 +342,10 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
     if (!gewaehlterSV || !gewaehlterSlot) return
     setSubmitting(true)
 
-    const wunschtermin = `${gewaehlterSlot.datum}T${gewaehlterSlot.uhrzeit}:00`
+    // Sofort-Slot nutzt jetzt-Zeitpunkt + Express-Marker, geplante Slots wie bisher.
+    const wunschtermin = gewaehlterSlot.uhrzeit === 'sofort'
+      ? new Date().toISOString()
+      : `${gewaehlterSlot.datum}T${gewaehlterSlot.uhrzeit}:00`
 
     const result = await erstelleGutachterFinderAnfrage({
       vorname: formData.vorname,
@@ -349,6 +381,82 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       <div ref={mapContainerRef} className="absolute inset-0" />
 
       {/* GPS-Overlay */}
+      {/* Q1 Wann — Sofort / Heute / Tage. Bestimmt Slot-Generierung + späteren Tracking-Pfad. */}
+      {phase === 'wann' && (
+        <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0">
+          <div
+            className="mx-4 w-full max-w-sm rounded-3xl border border-white/40 p-7"
+            style={{
+              background: 'rgba(255,255,255,0.82)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 60px rgba(13,27,62,0.18), 0 1px 0 rgba(255,255,255,0.9) inset',
+            }}
+          >
+            <div className="mb-5 flex justify-center">
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-full"
+                style={{ background: 'rgba(69,115,162,0.12)' }}
+              >
+                <Clock className="h-6 w-6" style={{ color: '#4573A2' }} />
+              </div>
+            </div>
+
+            <h2
+              className="mb-2 text-center text-xl font-bold"
+              style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
+            >
+              Wann brauchen Sie den Gutachter?
+            </h2>
+            <p className="mb-6 text-center text-sm" style={{ color: '#4573A2' }}>
+              Wir passen den Ablauf an Ihre Situation an.
+            </p>
+
+            <div className="flex flex-col gap-2.5">
+              {([
+                { wert: 'sofort', icon: Zap, titel: 'Sofort', sub: 'Ich bin am Unfallort — Express-Begutachtung' },
+                { wert: 'heute', icon: Clock, titel: 'Heute', sub: 'Im Laufe des Tages — flexibler Termin' },
+                { wert: 'tage', icon: Calendar, titel: 'In den nächsten Tagen', sub: 'Termin in Ruhe vereinbaren' },
+              ] as const).map(({ wert, icon: Icon, titel, sub }) => (
+                <button
+                  key={wert}
+                  onClick={() => {
+                    setWann(wert)
+                    setPhase('gps')
+                  }}
+                  className="flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-left transition-all active:scale-[0.98]"
+                  style={{
+                    background: 'rgba(248,249,251,0.9)',
+                    borderColor: 'rgba(13,27,62,0.12)',
+                    color: '#0D1B3E',
+                  }}
+                >
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                    style={{ background: wert === 'sofort' ? 'rgba(243,192,83,0.18)' : 'rgba(69,115,162,0.1)' }}
+                  >
+                    <Icon className="h-5 w-5" style={{ color: wert === 'sofort' ? '#C28A2A' : '#4573A2' }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                      {titel}
+                    </p>
+                    <p className="text-xs" style={{ color: '#4573A2' }}>
+                      {sub}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0" style={{ color: '#7BA3CC' }} />
+                </button>
+              ))}
+            </div>
+
+            <p className="mt-4 text-center text-xs" style={{ color: '#7BA3CC' }}>
+              Kostenlos für unverschuldet Geschädigte · §249 BGB
+            </p>
+          </div>
+        </div>
+      )}
+
       {phase === 'gps' && (
         <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0">
           <div
