@@ -1,28 +1,337 @@
 {
   "landing": {
-    "hero": {},
-    "trust": {},
-    "steps": {},
-    "dat_teaser": {},
-    "seo": {},
-    "footer": {}
+    "hero": {
+      "trust_badge": "Deutschlandweit über 50 Partner-Gutachter",
+      "headline": "Unverschuldet im Blech? Claimondo regelt das.",
+      "subheadline": "Gutachten. Anwalt. Regulierung. Alles aus einer Hand. 0 € für Sie — der Gegner zahlt.",
+      "cta_primary": "Schaden melden",
+      "cta_secondary": "Beraten lassen",
+      "cta_authenticated": "Weiter zu meinem Portal",
+      "phone_label": "Oder rufen Sie uns an:",
+      "phone_aria": "Claimondo Hotline anrufen"
+    },
+    "trust": {
+      "heading": "Warum Claimondo?",
+      "independent": {
+        "title": "Unabhängige Gutachter",
+        "description": "Partner-Sachverständige, die nur Ihrem Fall verpflichtet sind."
+      },
+      "regulation": {
+        "title": "Echte Regulierung",
+        "description": "Kanzlei vertritt Sie bis zur vollen Auszahlung."
+      },
+      "all_in_one": {
+        "title": "Alles aus einer Hand",
+        "description": "Gutachten, Anwalt, Regulierung — ein Ansprechpartner."
+      }
+    },
+    "steps": {
+      "heading": "So einfach geht's",
+      "subheading": "In drei Schritten zum fertigen Gutachten.",
+      "step1": {
+        "title": "Schaden erfassen",
+        "description": "Fotos hochladen oder einfach einsprechen — Sie entscheiden."
+      },
+      "step2": {
+        "title": "KI-Ersteinschätzung",
+        "description": "Kostenlos, in Sekunden. Reparaturkosten + Wiederbeschaffungswert."
+      },
+      "step3": {
+        "title": "Gutachter vor Ort",
+        "description": "Termin in Ihrer Region, Gutachten in 48 Stunden."
+      },
+      "cta": "Jetzt Schaden melden",
+      "duration_hint": "Dauert ca. 3 Minuten"
+    },
+    "dat_teaser": {
+      "heading": "Nur eine Ersteinschätzung? Kostenlos in 2 Minuten.",
+      "description": "Fahrzeug-Daten und 2 Fotos — wir schätzen Reparaturkosten und Wiederbeschaffungswert. Ohne Account. Ohne Verpflichtung.",
+      "cta": "Jetzt einschätzen lassen",
+      "duration_hint": "Kein Account nötig"
+    },
+    "seo": {
+      "heading": "Wichtige Fragen nach einem Unfall",
+      "subheading": "Antworten aus unserer täglichen Arbeit.",
+      "polizei": {
+        "question": "Muss ich die Polizei rufen?",
+        "teaser": "Bei Fremdverschulden und über 1.500 € Schaden: ja. Wann genau — hier lesen."
+      },
+      "werkstatt": {
+        "question": "Welche Werkstatt darf ich wählen?",
+        "teaser": "Freie Werkstattwahl ist gesetzlich geschützt — auch gegen den Willen der Versicherung."
+      },
+      "rechtsschutz": {
+        "question": "Brauche ich eine Rechtsschutz?",
+        "teaser": "Bei Haftpflicht-Schäden nicht — der Gegner zahlt. Wir erklären wann es relevant wird."
+      },
+      "totalschaden": {
+        "question": "Was ist ein wirtschaftlicher Totalschaden?",
+        "teaser": "Ab wann wird es kritisch? Und was sind Ihre Optionen?"
+      },
+      "read_more": "Mehr lesen"
+    },
+    "footer": {
+      "tagline": "KFZ-Schadenmanagement. Einfach. Fair. Deutschlandweit.",
+      "product": {
+        "heading": "Produkt",
+        "melden": "Schaden melden",
+        "einschaetzung": "Ersteinschätzung",
+        "beratung": "Beratung anfragen"
+      },
+      "partner": {
+        "heading": "Partner",
+        "makler": "Makler werden",
+        "gutachter": "Gutachter werden",
+        "login": "Partner-Login"
+      },
+      "legal": {
+        "heading": "Rechtliches",
+        "datenschutz": "Datenschutz"
+      },
+      "rights": "Alle Rechte vorbehalten."
+    }
   },
   "flow": {
-    "step0": {},
-    "step1": {},
-    "step2a": {},
-    "step2b": {},
-    "step2c": {},
-    "step3": {},
-    "step4": {},
-    "abort": {}
+    "progress": {
+      "aria_label": "Fortschritt im Schaden-Melden-Flow",
+      "step1": "Hergang",
+      "step2": "Fotos",
+      "step3": "ZB1",
+      "step4": "Account"
+    },
+    "common": {
+      "weiter": "Weiter",
+      "zurueck": "Zurück",
+      "abbrechen": "Abbrechen",
+      "laden": "Lädt …",
+      "speichern": "Speichern"
+    },
+    "step0": {
+      "heading": "Was ist passiert?",
+      "sub": "Beantworten Sie ein paar kurze Fragen zum Schaden — danach erfassen wir die Fotos und den Fahrzeugschein.",
+      "cta_start": "Jetzt starten",
+      "dauer_hint": "Dauert ca. 3 Minuten"
+    },
+    "step1": {
+      "heading": "Hergang des Unfalls",
+      "sub": "Erzählen Sie uns, was passiert ist — per Stimme oder per Eingabe.",
+      "toggle_tippen": "Tippen",
+      "toggle_voice": "Sprechen",
+      "dsgvo_label": "Ich willige ein, dass Claimondo meine Angaben zur Schadensprüfung verarbeiten darf. Widerruf jederzeit möglich.",
+      "fields": {
+        "hergang_label": "Was ist passiert?",
+        "hergang_placeholder": "Zum Beispiel: Ich stand an der Ampel, der Gegner ist mir hinten aufgefahren.",
+        "unfall_datum_label": "Unfalldatum",
+        "unfall_zeit_label": "Uhrzeit (ungefähr)",
+        "unfall_ort_label": "Unfallort",
+        "unfall_ort_placeholder": "Stadt oder Straße eingeben",
+        "marke_label": "Marke Ihres Fahrzeugs",
+        "marke_placeholder": "Marke wählen …",
+        "modell_label": "Modell (optional)",
+        "modell_placeholder": "z. B. A4, Golf 7, 3er",
+        "schuldfrage_label": "Wer hat den Unfall verursacht?"
+      },
+      "errors": {
+        "hergang_required": "Bitte beschreiben Sie den Hergang.",
+        "hergang_too_short": "Die Beschreibung ist zu kurz — bitte ergänzen Sie ein paar Details.",
+        "unfall_datum_required": "Bitte Unfalldatum angeben.",
+        "unfall_datum_future": "Das Unfalldatum darf nicht in der Zukunft liegen.",
+        "unfall_ort_required": "Bitte Unfallort angeben.",
+        "marke_required": "Bitte Marke wählen.",
+        "schuldfrage_required": "Bitte wählen Sie, wer den Unfall verursacht hat.",
+        "dsgvo_required": "Ohne Einwilligung können wir den Fall leider nicht bearbeiten."
+      },
+      "hergang_options": {
+        "auffahrunfall": "Auffahrunfall",
+        "vorfahrt": "Vorfahrt missachtet",
+        "parken": "Beim Parken / Rangieren",
+        "spurwechsel": "Spurwechsel",
+        "wildunfall": "Wildunfall",
+        "sonstiges": "Sonstiges"
+      },
+      "schuldfrage_options": {
+        "gegner": {
+          "label": "Der andere Fahrer",
+          "description": "Ideal für Claimondo — wir übernehmen die komplette Regulierung."
+        },
+        "ich": {
+          "label": "Ich selbst",
+          "description": "Dann läuft die Abwicklung über Ihre Kaskoversicherung — wir sind hier nicht die richtige Anlaufstelle."
+        },
+        "teilschuld": {
+          "label": "Beide — Teilschuld",
+          "description": "Auch bei Teilschuld helfen wir weiter. Genauer klären wir das im Gutachten."
+        },
+        "unklar": {
+          "label": "Noch unklar",
+          "description": "Kein Problem — wir klären die Schuldfrage zusammen mit Ihrem Anwalt."
+        }
+      },
+      "marken": {
+        "audi": "Audi",
+        "bmw": "BMW",
+        "mercedes": "Mercedes-Benz",
+        "vw": "Volkswagen (VW)",
+        "porsche": "Porsche",
+        "opel": "Opel",
+        "ford": "Ford",
+        "skoda": "Škoda",
+        "seat": "Seat",
+        "hyundai": "Hyundai",
+        "kia": "Kia",
+        "toyota": "Toyota",
+        "nissan": "Nissan",
+        "mazda": "Mazda",
+        "honda": "Honda",
+        "peugeot": "Peugeot",
+        "renault": "Renault",
+        "citroen": "Citroën",
+        "fiat": "Fiat",
+        "alfaromeo": "Alfa Romeo",
+        "volvo": "Volvo",
+        "mini": "Mini",
+        "smart": "Smart",
+        "tesla": "Tesla",
+        "dacia": "Dacia",
+        "sonstiges": "Andere Marke"
+      },
+      "voice": {
+        "heading": "Hergang einsprechen",
+        "idle_hint": "Tippen Sie auf das Mikrofon und erzählen Sie einfach, was passiert ist.",
+        "idle_example": "Beispiel: „Ich stand auf der Kreuzung an der roten Ampel. Von hinten kam ein weißer BMW und ist mir ins Heck gefahren.\"",
+        "recording": "Aufnahme läuft … sprechen Sie einfach drauflos.",
+        "processing": "Text wird erstellt …",
+        "preview_hint": "Prüfen Sie den Text — Sie können ihn noch bearbeiten oder neu aufnehmen.",
+        "record_again": "Neu aufnehmen",
+        "switch_to_typing": "Lieber tippen",
+        "permission_denied": "Ohne Mikrofon-Freigabe funktioniert die Sprach-Eingabe leider nicht. Sie können jederzeit auf „Tippen\" wechseln."
+      }
+    },
+    "step2a": {
+      "heading": "Fotos vom Schaden",
+      "sub": "Klicken Sie auf einen Bereich im Fahrzeug, um die passenden Fotos hochzuladen. Mindestens 3 Fotos sind erforderlich.",
+      "dropzone_label": "Fotos hier ablegen oder klicken",
+      "dropzone_hint": "JPG, PNG oder WEBP · max. 10 MB",
+      "min_hint": "Noch {count} Foto(s) bis zum nächsten Schritt",
+      "ready_hint": "Alles bereit für die KI-Analyse",
+      "weiter": "Weiter zur Analyse",
+      "saving": "Wird gespeichert …",
+      "bereich": {
+        "vorne": "Vorne",
+        "hinten": "Hinten",
+        "links": "Links",
+        "rechts": "Rechts",
+        "dach": "Dach",
+        "innen": "Innen"
+      }
+    },
+    "step2b": {
+      "loading": {
+        "heading": "Wir analysieren Ihren Schaden …",
+        "phase_1": "Fotos werden geprüft …",
+        "phase_2": "KI schätzt Reparaturkosten …",
+        "phase_3": "Wiederbeschaffungswert wird ermittelt …",
+        "trust_note": "Wir lesen Ihre Fotos nur einmal aus — die Daten bleiben bei uns und werden nicht weitergegeben.",
+        "error_title": "Analyse fehlgeschlagen",
+        "error_retry": "Erneut versuchen",
+        "error_skip": "Ohne Vorschätzung weiter"
+      },
+      "ergebnis": {
+        "vision_title": "Erkannte Schäden",
+        "dat_title": "Vorläufige Wertermittlung",
+        "disclaimer": "Diese Einschätzung ist eine KI-basierte Vorschätzung und ersetzt kein Gutachten. Der verbindliche Wert wird vom Sachverständigen vor Ort ermittelt.",
+        "totalschaden_warning": "Hinweis: Die Reparaturkosten könnten den Wiederbeschaffungswert übersteigen — das wäre ein wirtschaftlicher Totalschaden. Ihr Gutachter klärt das vor Ort.",
+        "pdf_link": "Vorschätzung als PDF herunterladen",
+        "weiter": "Weiter zu den Unfalldaten"
+      }
+    },
+    "step2c": {
+      "heading": "Daten des Unfallgegners",
+      "sub": "Je mehr wir über den Gegner wissen, desto schneller läuft die Regulierung.",
+      "fahrerflucht_label": "Fahrerflucht — der Unfallgegner hat sich unerlaubt entfernt",
+      "auslandskennzeichen_label": "Auslandskennzeichen — das gegnerische Fahrzeug hatte ein ausländisches Kennzeichen",
+      "fahrerflucht_hint": "Polizei-Aktenzeichen wird zur Weiterverarbeitung dringend benötigt.",
+      "auslandskennzeichen_hint": "Ausländisches Kennzeichen — geben Sie es so gut wie möglich ein.",
+      "gegner_name": "Name des Unfallgegners",
+      "gegner_kennzeichen": "Kennzeichen",
+      "gegner_versicherung": "Versicherung des Gegners",
+      "gegner_versicherung_hint": "Aus der ZB1 / Versicherungs-Karte ablesbar. Falls unbekannt, freilassen.",
+      "gegner_schadennummer": "Schadennummer der gegnerischen Versicherung (optional)",
+      "zeugen_heading": "Zeugen",
+      "zeuge_hinzufuegen": "Zeuge hinzufügen",
+      "keine_zeugen": "Keine Zeugen erfasst. Maximal 5 möglich.",
+      "weiter": "Weiter zu ZB1",
+      "saving": "Wird gespeichert …"
+    },
+    "step3": {
+      "heading": "Fahrzeugschein",
+      "sub": "Wir brauchen die Fahrzeugdaten aus Ihrem ZB1.",
+      "scan_heading": "Fahrzeugschein scannen",
+      "scan_hint": "Wir brauchen nur die Vorderseite (ZB1). Felder A, B, E und 2.1/2.2 müssen gut lesbar sein.",
+      "scan_camera_cta": "Mit Kamera scannen",
+      "scan_upload_cta": "Datei hochladen",
+      "manual_cta": "Ich habe keinen Fahrzeugschein zur Hand — manuell eingeben",
+      "ocr_loading_title": "Wir lesen Ihren Fahrzeugschein aus …",
+      "ocr_loading_sub": "Das dauert normalerweise 5–10 Sekunden.",
+      "ocr_success": "Fahrzeugschein erfolgreich ausgelesen.",
+      "ocr_low_confidence": "Einige Felder wurden nicht sicher erkannt — bitte prüfen und ergänzen.",
+      "hsn_label": "HSN (Feld 2.1, 4 Ziffern)",
+      "tsn_label": "TSN (Feld 2.2, 3 Zeichen)",
+      "fin_label": "FIN / Fahrgestellnummer (Feld E, 17 Zeichen)",
+      "erstzulassung_label": "Erstzulassung (Feld B)",
+      "kennzeichen_label": "Kennzeichen (Feld A, optional)",
+      "retry_cta": "Anderes Bild hochladen",
+      "weiter": "Weiter zum Account",
+      "saving": "Wird gespeichert …"
+    },
+    "step4": {
+      "heading": "Account erstellen",
+      "sub": "Zum Schluss brauchen wir noch Ihren Zugang — dann können Sie den Fall jederzeit einsehen.",
+      "email_label": "E-Mail-Adresse",
+      "email_placeholder": "max.mustermann@example.com",
+      "email_exists_hint": "Diese E-Mail ist bereits bei Claimondo registriert — melden Sie sich mit Ihrem Passwort an, dann wird der Fall Ihrem Account zugeordnet.",
+      "password_label": "Passwort",
+      "password_hint": "Mindestens 8 Zeichen, ein Großbuchstabe, eine Zahl.",
+      "password_confirm_label": "Passwort wiederholen",
+      "agb_label": "Ich akzeptiere die Allgemeinen Geschäftsbedingungen.",
+      "datenschutz_label": "Ich habe die Datenschutzerklärung gelesen und stimme zu.",
+      "submit": "Account erstellen und Fall absenden",
+      "submit_loading": "Account wird erstellt …",
+      "makler_intro": "Ihr Fall wird von {maklerName} betreut — unser Partner-Makler hat Sie an Claimondo empfohlen.",
+      "makler_explanation": "Wählen Sie, welche Informationen {maklerName} zur Bearbeitung erhalten soll. Sie können die Freigabe jederzeit in Ihrem Profil widerrufen.",
+      "consent_minimal_title": "Nur Statusmeldungen",
+      "consent_minimal_desc": "{maklerName} erfährt nur, ob der Fall eröffnet, abgeschlossen oder abgebrochen wurde — keine Schadensdetails.",
+      "consent_full_title": "Volle Einsicht",
+      "consent_full_desc": "{maklerName} kann Schadensdetails, Fotos und den Gutachten-Status einsehen, um Sie besser zu beraten.",
+      "errors": {
+        "email_required": "Bitte geben Sie Ihre E-Mail an.",
+        "email_invalid": "Das ist keine gültige E-Mail-Adresse.",
+        "password_required": "Bitte wählen Sie ein Passwort.",
+        "password_weak": "Das Passwort ist zu schwach — mindestens 8 Zeichen, ein Großbuchstabe, eine Zahl.",
+        "password_mismatch": "Die beiden Passwörter stimmen nicht überein.",
+        "agb_required": "Ohne AGB-Zustimmung können wir den Fall nicht anlegen.",
+        "datenschutz_required": "Bitte stimmen Sie der Datenschutzerklärung zu."
+      }
+    },
+    "abort": {
+      "heading": "Bei Selbstverschulden sind wir nicht die richtige Anlaufstelle",
+      "explanation": "Wenn Sie den Unfall selbst verursacht haben, läuft die Schadenabwicklung über Ihre eigene Kaskoversicherung. Claimondo ist spezialisiert auf Haftpflicht-Schäden, bei denen der Gegner oder dessen Versicherung zahlt.",
+      "tip_1": "Melden Sie den Schaden Ihrer Kaskoversicherung so schnell wie möglich.",
+      "tip_2": "Dokumentieren Sie den Unfall mit Fotos und notieren Sie alle Details.",
+      "tip_3": "Holen Sie sich einen Kostenvoranschlag bei einer Werkstatt Ihres Vertrauens ein.",
+      "hotline_hint": "Unsicher ob es wirklich Selbstverschulden war? Rufen Sie uns an:",
+      "back_home": "Zurück zur Startseite"
+    }
   },
   "common": {
-    "weiter": "İleri",
-    "zurueck": "Geri",
-    "abbrechen": "İptal",
-    "laden": "Yükleniyor …",
-    "speichern": "Kaydet",
-    "schliessen": "Kapat"
+    "weiter": "Weiter",
+    "zurueck": "Zurück",
+    "abbrechen": "Abbrechen",
+    "laden": "Lädt …",
+    "speichern": "Speichern",
+    "schliessen": "Schließen",
+    "bestaetigen": "Bestätigen",
+    "loeschen": "Löschen",
+    "bearbeiten": "Bearbeiten"
   }
 }
