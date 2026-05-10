@@ -131,7 +131,13 @@ export function PortalNav({
         <aside
           role="navigation"
           aria-label={ariaLabel ?? 'Portal-Navigation'}
-          className={`hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 bg-[#0D1B3E] ${className}`}
+          className={`hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 backdrop-blur-xl border-r border-white/5 ${className}`}
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(13,27,62,0.92) 0%, rgba(30,58,95,0.88) 100%)',
+            WebkitBackdropFilter: 'saturate(180%) blur(24px)',
+            backdropFilter: 'saturate(180%) blur(24px)',
+          }}
         >
           {headerSlot && <div className="px-5 py-5">{headerSlot}</div>}
 
@@ -195,7 +201,12 @@ export function PortalNav({
     <aside
       role="navigation"
       aria-label={ariaLabel ?? 'Portal-Navigation'}
-      className={`w-56 shrink-0 border-r border-claimondo-border bg-white overflow-y-auto ${className}`}
+      className={`w-56 shrink-0 border-r border-white/40 backdrop-blur-xl overflow-y-auto ${className}`}
+      style={{
+        background: 'rgba(255,255,255,0.75)',
+        WebkitBackdropFilter: 'saturate(180%) blur(20px)',
+        backdropFilter: 'saturate(180%) blur(20px)',
+      }}
     >
       <div className="flex flex-col gap-0.5 p-3">
         {sections.map((section, i) => (
