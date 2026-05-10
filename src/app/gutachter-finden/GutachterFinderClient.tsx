@@ -257,36 +257,26 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
     schadentyp: '',
   })
 
-  // ——— Karte initialisieren ———
-  // 2026-05-10 Performance: Init verschoben bis User in GPS-Phase ist.
-  // Spart die schwere Mapbox-WebGL-Init + Tile-Requests in Phase 1-3
-  // (Wann/Schaden/Fahrzeug) wo die Map noch gar nicht sichtbar ist.
+  // ——— Karte: sofort initialisieren (Blur-Hintergrund) ———
+  // Map läuft immer im Hintergrund — während Form-Phasen gebluurt,
+  // nach GPS-Freigabe klar sichtbar (CSS-Transition auf dem Wrapper).
   useEffect(() => {
-    // Map erst ab GPS-Phase initialisieren — vorher braucht's sie nicht
-    if (
-      phase === 'routing' ||
-      phase === 'vor_ort_fotos' ||
-      phase === 'vor_ort_kontakt' ||
-      phase === 'vor_ort_erfolg' ||
-      phase === 'wann' ||
-      phase === 'schaden' ||
-      phase === 'fahrzeug'
-    ) return
     if (mapRef.current || !mapContainerRef.current) return
     if (!ensureMapboxInitialized()) return
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/light-v11',
-      center: [6.9603, 50.9333],
-      zoom: 10,
+      center: [10.4515, 51.1657], // Deutschland-Mitte als Blur-Hintergrund
+      zoom: 5.5,
       pitch: 0,
       bearing: 0,
       attributionControl: false,
+      interactive: false, // während Blur-Phasen nicht interagierbar
     })
 
     map.on('load', () => {
-      // Subtile 3D-Gebäude
+      // Subtile 3D-Gebäude (nur ab Zoom 14 sichtbar)
       const layers = map.getStyle().layers
       const labelLayer = layers.find(
         (l) => l.type === 'symbol' && (l.layout as Record<string, unknown>)?.['text-field'],
@@ -315,6 +305,22 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
     return () => {
       map.remove()
       mapRef.current = null
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Map-Interaktivität + Zoom nach GPS-Freigabe
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    if (phase === 'map' || phase === 'detail' || phase === 'ansprueche' || phase === 'formular' || phase === 'erfolg') {
+      map.scrollZoom.enable()
+      map.dragPan.enable()
+      map.touchZoomRotate.enable()
+    } else {
+      map.scrollZoom.disable()
+      map.dragPan.disable()
+      map.touchZoomRotate.disable()
     }
   }, [phase])
 
@@ -613,10 +619,32 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
     hasSignatur
 
   // ——— Render ———
+  const isFormPhase = !['map', 'detail', 'ansprueche', 'formular', 'erfolg'].includes(phase)
+
   return (
     <div className="relative w-full overflow-hidden" style={{ height: 'calc(100dvh - 64px)' }}>
-      {/* Karte — immer im Hintergrund */}
-      <div ref={mapContainerRef} className="absolute inset-0" />
+      {/* Karte — Blur löst sich auf wenn Phase 'map' erreicht wird */}
+      <div
+        className="absolute inset-0"
+        style={{
+          filter: isFormPhase ? 'blur(28px) brightness(0.72) saturate(0.55)' : 'none',
+          transform: isFormPhase ? 'scale(1.06)' : 'scale(1)',
+          transition: 'filter 0.9s cubic-bezier(0.4,0,0.2,1), transform 0.9s cubic-bezier(0.4,0,0.2,1)',
+        }}
+      >
+        <div ref={mapContainerRef} className="absolute inset-0" />
+      </div>
+
+      {/* Navy-Gradient-Overlay verschwindet mit dem Blur */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(160deg, rgba(13,27,62,0.52) 0%, rgba(13,27,62,0.28) 55%, rgba(69,115,162,0.15) 100%)',
+          opacity: isFormPhase ? 1 : 0,
+          transition: 'opacity 0.9s cubic-bezier(0.4,0,0.2,1)',
+        }}
+      />
 
       {/* GPS-Overlay */}
       {/* Aaron 10.05.: Routing — Bist du am Unfallort? */}
