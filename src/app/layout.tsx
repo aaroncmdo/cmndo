@@ -151,6 +151,16 @@ export default async function RootLayout({
       dir={dir}
       className={`${montserrat.variable} ${notoSans.variable} h-full antialiased`}
     >
+      <head>
+        {/* Performance: Preconnect zu externen Origins die bereits im LCP-
+            Fenster geladen werden. Spart 100-300ms TTFB beim ersten Asset-
+            Request. dns-prefetch als Fallback fuer aeltere Browser. */}
+        <link rel="preconnect" href="https://api.mapbox.com" crossOrigin="" />
+        <link rel="preconnect" href="https://events.mapbox.com" crossOrigin="" />
+        <link rel="preconnect" href="https://cdn.imagin.studio" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://api.mapbox.com" />
+        <link rel="dns-prefetch" href="https://cdn.imagin.studio" />
+      </head>
       <body className="min-h-full flex flex-col glass-bg">
         <script
           type="application/ld+json"
