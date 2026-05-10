@@ -26,13 +26,17 @@ export async function updateSession(request: NextRequest) {
   // werden sobald supabase einen Token rotiert.
   const remember = request.cookies.get(REMEMBER_COOKIE_NAME)?.value !== '0'
 
+  // AAR-login-loop: gleiche Domain-Logik wie in server.ts — alle Auth-Cookies
+  // auf .claimondo.de setzen damit claimondo.de ↔ app.claimondo.de teilen.
+  const cookieDomain = process.env.NODE_ENV === 'production' ? '.claimondo.de' : undefined
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookieOptions: remember
-        ? { maxAge: ONE_YEAR_SECONDS, path: '/', sameSite: 'lax' }
-        : { maxAge: undefined, path: '/', sameSite: 'lax' },
+        ? { maxAge: ONE_YEAR_SECONDS, path: '/', sameSite: 'lax', domain: cookieDomain }
+        : { maxAge: undefined, path: '/', sameSite: 'lax', domain: cookieDomain },
       cookies: {
         getAll() {
           return request.cookies.getAll()
@@ -45,8 +49,8 @@ export async function updateSession(request: NextRequest) {
             const opts = c.options ?? {}
             // Wenn remember=false, hartes Session-Cookie erzwingen.
             const finalOpts = remember
-              ? opts
-              : { ...opts, maxAge: undefined, expires: undefined }
+              ? { ...opts, domain: cookieDomain }
+              : { ...opts, maxAge: undefined, expires: undefined, domain: cookieDomain }
             return {
               name: c.name,
               value: c.value,
