@@ -57,6 +57,49 @@ export async function svAblehneTermin(
     console.warn('[svAblehneTermin] Dispatcher-Email fehlgeschlagen:', err)
   }
 
+  // WA an Kunden: Termin wurde abgelehnt, neuer Termin wird abgestimmt
+  if (termin.lead_id || termin.fall_id) {
+    import('@/lib/whatsapp/send').then(({ sendNachricht }) => {
+      const sendKundeWa = async () => {
+        let leadId = termin.lead_id
+        let kundeVorname = ''
+        let kundeTelefon: string | null = null
+        let kundeEntityId = ''
+
+        if (termin.fall_id) {
+          const { data: fall } = await adminDb.from('faelle').select('lead_id, kunde_id').eq('id', termin.fall_id).maybeSingle()
+          if (fall?.lead_id) leadId = fall.lead_id
+        }
+
+        if (leadId) {
+          kundeEntityId = leadId
+          const { data: lead } = await adminDb.from('leads').select('vorname, telefon').eq('id', leadId).maybeSingle()
+          if (lead) { kundeVorname = lead.vorname ?? ''; kundeTelefon = lead.telefon }
+        }
+
+        if (!kundeTelefon || !kundeEntityId) return
+
+        const appUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claimondo.de'
+        const portalLink = termin.fall_id ? `${appUrl}/kunde/faelle/${termin.fall_id}` : `${appUrl}/kunde`
+
+        await sendNachricht({
+          entity: 'lead',
+          entityId: kundeEntityId,
+          phone: kundeTelefon,
+          text: [
+            `Hallo ${kundeVorname || 'Kunde'}, der gebuchte Termin musste leider abgesagt werden.`,
+            `Unser Team wird sich schnellstmöglich mit dir in Verbindung setzen, um einen neuen Termin zu vereinbaren.`,
+            `Dein Portal: ${portalLink}`,
+          ].join('\n\n'),
+          fallId: termin.fall_id ?? null,
+          templateKey: 'termin_abgelehnt_kunde',
+          empfaengerRolle: 'kunde',
+        })
+      }
+      sendKundeWa().catch(err => console.error('[svAblehneTermin] WA an Kunden fehlgeschlagen:', err))
+    }).catch(() => {})
+  }
+
   // Timeline — typ='termin', scope auf fall_id ODER lead_id
   await adminDb.from('timeline').insert({
     fall_id: termin.fall_id ?? null,
@@ -141,6 +184,60 @@ export async function svGegenvorschlagTermin(
     await sendDispatcherGegenvorschlag(terminId, slots, begruendung?.trim() || null)
   } catch (err) {
     console.warn('[svGegenvorschlagTermin] Dispatcher-Email fehlgeschlagen:', err)
+  }
+
+  // WA an Kunden: neue Terminoptionen verfügbar
+  if (termin.lead_id || termin.fall_id) {
+    import('@/lib/whatsapp/send').then(({ sendNachricht }) => {
+      const sendKundeWa = async () => {
+        let leadId = termin.lead_id
+        let kundeVorname = ''
+        let kundeTelefon: string | null = null
+        let kundeEntityId = ''
+
+        if (termin.fall_id) {
+          const { data: fall } = await adminDb.from('faelle').select('lead_id').eq('id', termin.fall_id).maybeSingle()
+          if (fall?.lead_id) leadId = fall.lead_id
+        }
+
+        if (leadId) {
+          kundeEntityId = leadId
+          const { data: lead } = await adminDb.from('leads').select('vorname, telefon').eq('id', leadId).maybeSingle()
+          if (lead) { kundeVorname = lead.vorname ?? ''; kundeTelefon = lead.telefon }
+        }
+
+        if (!kundeTelefon || !kundeEntityId) return
+
+        const appUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claimondo.de'
+        const portalLink = termin.fall_id ? `${appUrl}/kunde/faelle/${termin.fall_id}` : `${appUrl}/kunde`
+
+        const erstesSlot = slots[0]
+        const erstDatum = erstesSlot
+          ? new Date(erstesSlot.start).toLocaleDateString('de-DE', {
+              timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit',
+              hour: '2-digit', minute: '2-digit',
+            })
+          : ''
+
+        await sendNachricht({
+          entity: 'lead',
+          entityId: kundeEntityId,
+          phone: kundeTelefon,
+          text: [
+            `Hallo ${kundeVorname || 'Kunde'}, dein Gutachter hat ${slots.length} neue Terminvorschläge für dich:`,
+            erstDatum ? `Erster Vorschlag: ${erstDatum} Uhr` : null,
+            slots.length > 1 ? `+ ${slots.length - 1} weitere Option${slots.length > 2 ? 'en' : ''}` : null,
+            '',
+            `Bitte bestätige deinen Wunschtermin in deinem Portal:`,
+            portalLink,
+          ].filter((l) => l !== null).join('\n'),
+          fallId: termin.fall_id ?? null,
+          templateKey: 'gegenvorschlag_kunde',
+          empfaengerRolle: 'kunde',
+        })
+      }
+      sendKundeWa().catch(err => console.error('[svGegenvorschlagTermin] WA an Kunden fehlgeschlagen:', err))
+    }).catch(() => {})
   }
 
   await adminDb.from('timeline').insert({
