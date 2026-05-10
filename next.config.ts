@@ -88,6 +88,22 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  // Feldmodus-3D-Packages (three, deck.gl, loaders.gl) werden erst installiert
+  // wenn das Feature produktionsreif ist. Bis dahin als Server-External
+  // markieren damit Turbopack keinen Build-Fehler wirft.
+  serverExternalPackages: ['three', '@deck.gl/mapbox', '@deck.gl/geo-layers', '@loaders.gl/3d-tiles'],
+  webpack(config) {
+    // Client-Bundle: 3D-Packages als leere Module auflösen bis installiert.
+    config.resolve = config.resolve ?? {}
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      three: false,
+      '@deck.gl/mapbox': false,
+      '@deck.gl/geo-layers': false,
+      '@loaders.gl/3d-tiles': false,
+    }
+    return config
+  },
 };
 
 const withIntl = withNextIntl(nextConfig);
