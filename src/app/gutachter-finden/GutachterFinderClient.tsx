@@ -11,7 +11,12 @@ import { MapPin, Loader2, Check, ChevronDown, Shield, Clock, Star, Zap, Calendar
 // ——— Typen ———
 // Prototyp-Flow (sv-live-mapbox_25.html):
 // wann → schaden → fahrzeug → gps → map → detail → ansprueche → formular → erfolg
-type Phase = 'wann' | 'schaden' | 'fahrzeug' | 'gps' | 'map' | 'detail' | 'ansprueche' | 'formular' | 'erfolg'
+type Phase =
+  | 'routing' // Aaron 10.05.: NEU am Funnel-Anfang — am Unfallort? ja → vor_ort_*, nein → wann
+  | 'vor_ort_fotos' // Foto-Wizard mit GPS-Stempel
+  | 'vor_ort_kontakt' // Kontakt-Daten + Sofort-Submit, kein Termin
+  | 'vor_ort_erfolg' // "Wir rufen dich in 5 Min an"
+  | 'wann' | 'schaden' | 'fahrzeug' | 'gps' | 'map' | 'detail' | 'ansprueche' | 'formular' | 'erfolg'
 
 // Regulierungs-Wahl aus z35 — bestimmt ob Anwalt eingebunden wird (Vollregulierung)
 // oder ob nur das Gutachten ausgeführt wird (Selbstregulierung).
@@ -192,7 +197,14 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
   const kundeMarkerRef = useRef<Marker | null>(null)
   const svMarkersRef = useRef<Map<string, Marker>>(new Map())
 
-  const [phase, setPhase] = useState<Phase>('wann')
+  const [phase, setPhase] = useState<Phase>('routing')
+
+  // Aaron 10.05.: Vor-Ort-State
+  const [vorOrtFotos, setVorOrtFotos] = useState<string[]>([])
+  const [vorOrtKontakt, setVorOrtKontakt] = useState({ vorname: '', nachname: '', telefon: '', email: '' })
+  const [vorOrtSubmitting, setVorOrtSubmitting] = useState(false)
+  const [vorOrtAnfrageId, setVorOrtAnfrageId] = useState<string | null>(null)
+  const [vorOrtUploading, setVorOrtUploading] = useState(false)
   const [wann, setWann] = useState<Wann | null>(null)
   const [schadentyp, setSchadentyp] = useState<Schadentyp | null>(null)
   const [kennzeichen, setKennzeichen] = useState('')
@@ -247,7 +259,15 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
   // (Wann/Schaden/Fahrzeug) wo die Map noch gar nicht sichtbar ist.
   useEffect(() => {
     // Map erst ab GPS-Phase initialisieren — vorher braucht's sie nicht
-    if (phase === 'wann' || phase === 'schaden' || phase === 'fahrzeug') return
+    if (
+      phase === 'routing' ||
+      phase === 'vor_ort_fotos' ||
+      phase === 'vor_ort_kontakt' ||
+      phase === 'vor_ort_erfolg' ||
+      phase === 'wann' ||
+      phase === 'schaden' ||
+      phase === 'fahrzeug'
+    ) return
     if (mapRef.current || !mapContainerRef.current) return
     if (!ensureMapboxInitialized()) return
 
@@ -506,6 +526,47 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
     }
   }, [phase])
 
+  // Aaron 10.05.: Vor-Ort-Foto-Wizard. Konvertiert zu Base64, klein als
+  // Data-URL ins jsonb. Storage-Migration kommt wenn Volumen da ist.
+  async function fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '')
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
+
+  async function handleVorOrtFoto(file: File) {
+    setVorOrtUploading(true)
+    try {
+      const dataUrl = await fileToDataUrl(file)
+      setVorOrtFotos((prev) => [...prev, dataUrl])
+    } finally {
+      setVorOrtUploading(false)
+    }
+  }
+
+  async function vorOrtSubmit() {
+    setVorOrtSubmitting(true)
+    const result = await erstelleGutachterFinderAnfrage({
+      vorname: vorOrtKontakt.vorname,
+      nachname: vorOrtKontakt.nachname,
+      email: vorOrtKontakt.email,
+      telefon: vorOrtKontakt.telefon || undefined,
+      schadentyp: 'unbekannt', // wird vor Ort nicht geklickt — Dispatch klärt am Telefon
+      schadenort_lat: kundeLatLng?.lat,
+      schadenort_lng: kundeLatLng?.lng,
+      am_unfallort_flag: true,
+      aufnahme_fotos: vorOrtFotos,
+    })
+    setVorOrtSubmitting(false)
+    if (result.ok) {
+      setVorOrtAnfrageId(result.id)
+      setPhase('vor_ort_erfolg')
+    }
+  }
+
   function handleZb1Upload(file: File) {
     if (!anfrageId) return
     setZb1Loading(true)
@@ -554,6 +615,306 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       <div ref={mapContainerRef} className="absolute inset-0" />
 
       {/* GPS-Overlay */}
+      {/* Aaron 10.05.: Routing — Bist du am Unfallort? */}
+      {phase === 'routing' && (
+        <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0">
+          <div
+            className="mx-4 w-full max-w-sm rounded-3xl border border-white/40 p-7"
+            style={{
+              background: 'rgba(255,255,255,0.82)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 60px rgba(13,27,62,0.18), 0 1px 0 rgba(255,255,255,0.9) inset',
+            }}
+          >
+            <h2
+              className="mb-2 text-center text-xl font-bold"
+              style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
+            >
+              Sind Sie gerade am Unfallort?
+            </h2>
+            <p className="mb-6 text-center text-sm" style={{ color: '#4573A2' }}>
+              Wir passen den Ablauf an Ihre Situation an.
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <button
+                onClick={() => {
+                  // GPS direkt anfragen weil Vor-Ort-Pfad GPS-Stempel braucht
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) =>
+                        setKundeLatLng({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                      () => {
+                        /* User-decline ist ok */
+                      },
+                      { timeout: 5000 },
+                    )
+                  }
+                  setPhase('vor_ort_fotos')
+                }}
+                className="rounded-2xl px-4 py-3.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(13,27,62,0.22)] transition-all active:scale-[0.98]"
+                style={{ background: '#0D1B3E', fontFamily: 'Montserrat, sans-serif' }}
+              >
+                🚨 Ja, am Unfallort — Sofort-Aufnahme
+              </button>
+              <button
+                onClick={() => setPhase('wann')}
+                className="rounded-2xl border bg-white/70 px-4 py-3.5 text-sm font-semibold text-claimondo-navy backdrop-blur-md transition-all hover:bg-white/90 active:scale-[0.98]"
+                style={{ borderColor: 'rgba(13,27,62,0.12)', fontFamily: 'Montserrat, sans-serif' }}
+              >
+                Nein — Termin später buchen
+              </button>
+            </div>
+            <p className="mt-4 text-center text-xs" style={{ color: '#7BA3CC' }}>
+              Kostenlos für unverschuldet Geschädigte · §249 BGB
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Vor-Ort-Foto-Wizard */}
+      {phase === 'vor_ort_fotos' && (
+        <div className="absolute inset-0 flex items-end justify-center overflow-y-auto pb-12 sm:items-center sm:pb-0">
+          <div
+            className="mx-4 my-4 w-full max-w-md rounded-3xl border border-white/40 p-6"
+            style={{
+              background: 'rgba(255,255,255,0.92)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 60px rgba(13,27,62,0.18)',
+            }}
+          >
+            <p className="mb-1 text-center text-xs font-bold uppercase tracking-[0.18em] text-[#4573A2]">
+              Schritt 1 von 2 · Fotos
+            </p>
+            <h2
+              className="mb-3 text-center text-xl font-bold"
+              style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
+            >
+              Fotos vom Unfall
+            </h2>
+            <p className="mb-5 text-center text-sm" style={{ color: '#4573A2' }}>
+              Mindestens ein Foto — am besten vier (Übersicht, Schaden nah, Kennzeichen, Umfeld).
+              GPS und Zeit werden automatisch gespeichert.
+            </p>
+
+            {vorOrtFotos.length > 0 && (
+              <div className="mb-4 grid grid-cols-3 gap-2">
+                {vorOrtFotos.map((src, idx) => (
+                  <div key={idx} className="relative aspect-square overflow-hidden rounded-xl border border-white/60">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                    <button
+                      onClick={() => setVorOrtFotos((prev) => prev.filter((_, i) => i !== idx))}
+                      className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-xs text-white"
+                      aria-label="Foto entfernen"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <label
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-claimondo-ondo/40 bg-white/60 py-6 text-sm font-semibold text-claimondo-navy transition-all hover:bg-white/80 active:scale-[0.99]"
+              style={{ fontFamily: 'Montserrat, sans-serif' }}
+            >
+              {vorOrtUploading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Foto wird hinzugefügt …
+                </>
+              ) : (
+                <>
+                  <span className="text-2xl">📷</span>
+                  {vorOrtFotos.length === 0 ? 'Erstes Foto aufnehmen' : 'Weiteres Foto'}
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                disabled={vorOrtUploading}
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  if (f) handleVorOrtFoto(f)
+                  e.target.value = ''
+                }}
+              />
+            </label>
+
+            <button
+              onClick={() => setPhase('vor_ort_kontakt')}
+              disabled={vorOrtFotos.length === 0}
+              className="mt-5 w-full rounded-2xl py-4 text-base font-bold text-white transition-all active:scale-95 disabled:opacity-40"
+              style={{
+                background: '#0D1B3E',
+                fontFamily: 'Montserrat, sans-serif',
+              }}
+            >
+              {vorOrtFotos.length === 0
+                ? 'Mindestens ein Foto'
+                : `Weiter (${vorOrtFotos.length} Foto${vorOrtFotos.length === 1 ? '' : 's'}) →`}
+            </button>
+            <button
+              onClick={() => setPhase('routing')}
+              className="mt-3 w-full text-center text-xs"
+              style={{ color: '#7BA3CC' }}
+            >
+              ← Zurück
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Vor-Ort-Kontakt + Sofort-Submit */}
+      {phase === 'vor_ort_kontakt' && (
+        <div className="absolute inset-0 flex items-end justify-center overflow-y-auto pb-12 sm:items-center sm:pb-0">
+          <div
+            className="mx-4 my-4 w-full max-w-md rounded-3xl border border-white/40 p-6"
+            style={{
+              background: 'rgba(255,255,255,0.92)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 60px rgba(13,27,62,0.18)',
+            }}
+          >
+            <p className="mb-1 text-center text-xs font-bold uppercase tracking-[0.18em] text-[#4573A2]">
+              Schritt 2 von 2 · Kontakt
+            </p>
+            <h2
+              className="mb-3 text-center text-xl font-bold"
+              style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
+            >
+              Wie erreichen wir Sie?
+            </h2>
+            <p className="mb-5 text-center text-sm" style={{ color: '#4573A2' }}>
+              Wir rufen Sie in den nächsten 5 Minuten zurück und schicken einen Gutachter.
+            </p>
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-3">
+                <input
+                  placeholder="Vorname"
+                  value={vorOrtKontakt.vorname}
+                  onChange={(e) => setVorOrtKontakt((p) => ({ ...p, vorname: e.target.value }))}
+                  className="flex-1 rounded-2xl border px-4 py-3 text-sm outline-none"
+                  style={{ background: 'rgba(248,249,251,0.9)', borderColor: 'rgba(13,27,62,0.12)' }}
+                />
+                <input
+                  placeholder="Nachname"
+                  value={vorOrtKontakt.nachname}
+                  onChange={(e) => setVorOrtKontakt((p) => ({ ...p, nachname: e.target.value }))}
+                  className="flex-1 rounded-2xl border px-4 py-3 text-sm outline-none"
+                  style={{ background: 'rgba(248,249,251,0.9)', borderColor: 'rgba(13,27,62,0.12)' }}
+                />
+              </div>
+              <input
+                type="tel"
+                placeholder="Telefonnummer"
+                value={vorOrtKontakt.telefon}
+                onChange={(e) => setVorOrtKontakt((p) => ({ ...p, telefon: e.target.value }))}
+                className="rounded-2xl border px-4 py-3 text-sm outline-none"
+                style={{ background: 'rgba(248,249,251,0.9)', borderColor: 'rgba(13,27,62,0.12)' }}
+              />
+              <input
+                type="email"
+                placeholder="E-Mail-Adresse"
+                value={vorOrtKontakt.email}
+                onChange={(e) => setVorOrtKontakt((p) => ({ ...p, email: e.target.value }))}
+                className="rounded-2xl border px-4 py-3 text-sm outline-none"
+                style={{ background: 'rgba(248,249,251,0.9)', borderColor: 'rgba(13,27,62,0.12)' }}
+              />
+            </div>
+            <button
+              onClick={vorOrtSubmit}
+              disabled={
+                vorOrtSubmitting ||
+                !vorOrtKontakt.vorname ||
+                !vorOrtKontakt.nachname ||
+                !vorOrtKontakt.telefon ||
+                !vorOrtKontakt.email.includes('@')
+              }
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-bold text-white transition-all active:scale-95 disabled:opacity-40"
+              style={{ background: '#0D1B3E', fontFamily: 'Montserrat, sans-serif' }}
+            >
+              {vorOrtSubmitting ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Wird gesendet …
+                </>
+              ) : (
+                'Soforthilfe anfordern →'
+              )}
+            </button>
+            <button
+              onClick={() => setPhase('vor_ort_fotos')}
+              className="mt-3 w-full text-center text-xs"
+              style={{ color: '#7BA3CC' }}
+            >
+              ← Fotos ändern
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Vor-Ort-Erfolg */}
+      {phase === 'vor_ort_erfolg' && (
+        <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0">
+          <div
+            className="mx-4 w-full max-w-sm rounded-3xl border border-white/40 p-7 text-center"
+            style={{
+              background: 'rgba(255,255,255,0.92)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              boxShadow: '0 20px 60px rgba(13,27,62,0.18)',
+            }}
+          >
+            <div
+              className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full"
+              style={{ background: 'rgba(34,160,107,0.12)' }}
+            >
+              <Check className="h-8 w-8" style={{ color: '#22A06B' }} />
+            </div>
+            <h2
+              className="mb-2 text-2xl font-bold"
+              style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
+            >
+              Soforthilfe ist unterwegs
+            </h2>
+            <p className="mb-4 text-sm" style={{ color: '#4573A2' }}>
+              Wir rufen Sie in den nächsten 5 Minuten unter{' '}
+              <strong style={{ color: '#0D1B3E' }}>{vorOrtKontakt.telefon}</strong> zurück.
+            </p>
+            <div
+              className="rounded-2xl border-2 border-dashed p-4 text-left"
+              style={{ borderColor: 'rgba(34,160,107,0.3)', background: 'rgba(34,160,107,0.04)' }}
+            >
+              <p className="text-xs" style={{ color: '#1E3A5F' }}>
+                <strong>{vorOrtFotos.length}</strong> Foto{vorOrtFotos.length === 1 ? '' : 's'} gespeichert
+                {kundeLatLng && (
+                  <>
+                    {' '}· GPS{' '}
+                    <span className="font-mono">
+                      {kundeLatLng.lat.toFixed(4)}, {kundeLatLng.lng.toFixed(4)}
+                    </span>
+                  </>
+                )}
+              </p>
+              <p className="mt-1 text-xs" style={{ color: '#1E3A5F' }}>
+                Zeitstempel: {new Date().toLocaleString('de-DE')}
+              </p>
+            </div>
+            {vorOrtAnfrageId && (
+              <p className="mt-4 font-mono text-xs" style={{ color: 'rgba(13,27,62,0.3)' }}>
+                Ref: {vorOrtAnfrageId.slice(0, 8).toUpperCase()}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Q1 Wann — Sofort / Heute / Tage. Bestimmt Slot-Generierung + späteren Tracking-Pfad. */}
       {phase === 'wann' && (
         <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0">

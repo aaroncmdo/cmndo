@@ -45,6 +45,10 @@ export type GutachterFinderPayload = {
   sa_signatur_data_url?: string
   // Z35-Wahl: vollstaendig (Anwalt + alle Positionen) vs. nur_gutachten (Selbst-Regulierung)
   regulierungs_modus?: 'vollstaendig' | 'nur_gutachten'
+  // Aaron 10.05.: Vor-Ort-Routing am Funnel-Anfang. JA-Pfad fuehrt in Foto-Wizard
+  // statt klassischer Termin-Buchung.
+  am_unfallort_flag?: boolean
+  aufnahme_fotos?: string[] // Base64-Data-URLs aus dem Foto-Wizard
 }
 
 export async function ladeSvLeads(): Promise<{ ok: true; data: SvLead[] } | { ok: false; error: string }> {
@@ -94,6 +98,13 @@ export async function erstelleGutachterFinderAnfrage(
       sa_signatur_data_url: payload.sa_signatur_data_url ?? null,
       sa_unterzeichnet_am: payload.sa_signatur_data_url ? new Date().toISOString() : null,
       regulierungs_modus: payload.regulierungs_modus ?? null,
+      am_unfallort_flag: payload.am_unfallort_flag ?? false,
+      aufnahme_fotos: payload.aufnahme_fotos && payload.aufnahme_fotos.length > 0
+        ? payload.aufnahme_fotos
+        : null,
+      aufgenommen_am: payload.aufnahme_fotos && payload.aufnahme_fotos.length > 0
+        ? new Date().toISOString()
+        : null,
       status: 'neu',
     })
     .select('id')
