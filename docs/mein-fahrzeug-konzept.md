@@ -4,6 +4,14 @@
 **Status:** Konzept-Dokument, noch nicht in Implementation
 **Vision:** Eine separate, fahrzeug-zentrische Datenbank die als **Plattform-Layer** zwischen allen Marktteilnehmern rund ums Auto fungiert. Claimondo zieht Daten daraus + contributed eigene. Andere Player (Versicherer, Werkstätten, OEMs, Sachverständige) ebenfalls.
 
+## Drei Kern-Prinzipien (Aaron 10.05.)
+
+1. **Halter-2FA als Gate** — jeder Lese-Zugriff durch einen externen Player erfordert eine aktive Halter-Bestätigung (Push, OTP, FaceID, NFC-Tap). Kein „Set-and-Forget"-Consent. Halter sieht in Echtzeit *wer gerade was lesen will* und entscheidet pro Anfrage.
+2. **Reciprocal Contribution** — Wer liest, schreibt auch zurück. Pflicht-Pakt: jeder Player gibt mindestens die Daten ins System die für andere Player wertvoll sind, sobald er selbst gelesen hat. Verhindert Free-Rider und macht die Plattform mit jedem Player wertvoller.
+3. **Asset-Scope-Strict** — Datenfluss strikt rund um *ein konkretes Fahrzeug* (VIN). Keine Cross-Vehicle-Aggregation, keine Broad-Marketing-Datenströme. Alles ist gebunden an einen einzelnen Asset-Kontext.
+
+Diese drei Prinzipien sind die Kern-Differenzierung gegenüber bestehenden Branchen-Datenbanken (HIS-Datei, OEM-Telematik, CarDentity) — die sind alle **Player-zentrisch**, „Mein Fahrzeug" ist **Asset-zentrisch + Halter-controlled**.
+
 ---
 
 ## 1. Warum separat?
@@ -99,8 +107,57 @@ Das Ergebnis: jeder Marktteilnehmer macht teure Recherche-Arbeit (CarDentity, HI
 
 - Halter loggt sich ein (Magic-Link / Apple-ID / Google) und sieht alle Daten zu allen seinen Fahrzeugen
 - Pro Datenpunkt sieht er: wer hat geschrieben, wann, mit welcher Berechtigung
-- Consent-UI: Halter aktiviert/deaktiviert Read-Access pro Marktteilnehmer pro Datenkategorie
 - Bei Verkauf: 1-Klick-Übergabe zum neuen Halter (oder Anonymisierung der historischen Daten)
+
+### 2FA-Live-Approval-Flow (statt Set-and-Forget-Consent)
+
+Jeder externe Player-Read-Request löst beim Halter eine **aktive Bestätigungs-Anfrage** aus:
+
+```
+Player (z.B. Werkstatt) → API: GET /vehicle/{vin}/damages
+                            ↓
+                     Plattform prüft: Halter-Session aktiv?
+                            ↓
+                  Push an Halter-Phone:
+                  ┌────────────────────────────────────┐
+                  │ Werkstatt Müller fragt an:         │
+                  │ Schadenshistorie deines BMW 320d   │
+                  │                                    │
+                  │ Zweck: „Reparatur vorbereiten"     │
+                  │ Lesen für: 24 Stunden              │
+                  │                                    │
+                  │  [ Freigeben ]   [ Ablehnen ]      │
+                  └────────────────────────────────────┘
+                            ↓ FaceID / OTP
+                     Player bekommt Time-limited-Token
+                            ↓
+                     Audit-Log: wer/was/wann
+```
+
+**Default-Setting:** keine Standing-Consents. Jeder Read braucht aktive Bestätigung.
+**Power-User-Mode:** Halter kann „Vertraute Player" definieren die für 30 Tage automatisch lesen dürfen — aber jeden Read sieht er trotzdem im Audit-Feed.
+
+### Reciprocal-Contribution — Wer liest, schreibt zurück
+
+Jeder Player der Daten zieht hat eine **Schreib-Pflicht** zur Plattform:
+
+| Player | Was er typisch liest | Was er beitragen muss |
+|---|---|---|
+| Werkstatt | Service-Heft, Reparatur-Historie | Reparatur-Bericht nach Auftrag |
+| Versicherer | Schadenshistorie, Vorschäden | Versicherungs-Abrechnung pro Schaden |
+| Sachverständiger | Vorschäden, OEM-Specs | Gutachten-PDF |
+| OEM | Halter-Anschrift für Recalls | Recall-Status, Software-Updates |
+| Claimondo | Vorschaden-Historie, Halter-Daten | Schadensregulierungs-Bericht, Reparatur-Quittungen |
+
+**Mechanismus:** Bei API-Onboarding signiert Player ein Reciprocity-Agreement. Wenn er nach 30 Tagen Read-Access kein Write zurückgegeben hat → Read-Quote sinkt. Free-Rider werden auto-throttled.
+
+### Asset-Scope-Strict
+
+Alle Datenflüsse sind **VIN-gebunden**. Player kann nicht „alle BMW 320d in NRW" lesen, sondern nur einzelne VINs zu denen Halter aktiv eingewilligt hat. Das ist:
+
+- DSGVO-tragfähig (Zweckbindung Art. 5 lit. b)
+- Wettbewerbsrechtlich neutral (kein Markt-Monopol durch Aggregation)
+- Halter-fair (er sieht jeden einzelnen Lookup als „mein Auto wurde abgefragt")
 
 **Rechtliche Grundlage** (DSGVO):
 - Halter-Account = Datenverarbeiter-Verantwortlicher seiner eigenen Daten
