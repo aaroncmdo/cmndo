@@ -80,5 +80,58 @@ export async function calculateIsochrone(
   }
 
   // GeoJSON liefert [lng, lat] — zurück in IsoPoint-Shape für Caller-Kompatibilität
-  return ring.map(([pLng, pLat]) => ({ lat: pLat, lng: pLng }))
+  const raw = ring.map(([pLng, pLat]) => ({ lat: pLat, lng: pLng }))
+
+  // AAR-isochrone-resolution: Mapbox liefert typischerweise 50-200 Punkte.
+  // ~1500 Punkte = deutlich präzisere Point-in-Polygon-Tests in findBestSV,
+  // der Gutachter-Finder-Map und allen Isochrone-Overlays. Lineare Interpolation
+  // entlang der Polygon-Kanten — kein Vertex-Shift, nur Dichte erhöhen.
+  return densifyPolygon(raw, 1500)
+}
+
+/**
+ * Erhöht die Punkt-Dichte eines geschlossenen Polygons auf target_n Punkte
+ * via linearer Interpolation entlang der Kanten. Gibt das Polygon ohne den
+ * doppelten Schlusspunkt zurück (erster = letzter Punkt aus GeoJSON).
+ */
+function densifyPolygon(points: IsoPoint[], targetN: number): IsoPoint[] {
+  // Schlusspunkt entfernen wenn identisch mit erstem (GeoJSON-Konvention)
+  const pts = points.length > 1 &&
+    points[0].lat === points[points.length - 1].lat &&
+    points[0].lng === points[points.length - 1].lng
+    ? points.slice(0, -1)
+    : [...points]
+
+  if (pts.length < 2) return pts
+
+  // Gesamtumfang berechnen (Haversine wäre exakter, aber Euler-Distanz reicht
+  // für relative Gewichtung pro Kante auf dieser Skala)
+  const edges: number[] = []
+  let totalLen = 0
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i]
+    const b = pts[(i + 1) % pts.length]
+    const d = Math.sqrt((b.lng - a.lng) ** 2 + (b.lat - a.lat) ** 2)
+    edges.push(d)
+    totalLen += d
+  }
+
+  if (totalLen === 0) return pts
+
+  const result: IsoPoint[] = []
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i]
+    const b = pts[(i + 1) % pts.length]
+    // Wie viele Punkte entfallen auf diese Kante (proportional zur Länge)?
+    const segPts = Math.max(1, Math.round((edges[i] / totalLen) * targetN))
+    for (let j = 0; j < segPts; j++) {
+      const t = j / segPts
+      result.push({
+        lat: a.lat + t * (b.lat - a.lat),
+        lng: a.lng + t * (b.lng - a.lng),
+      })
+    }
+  }
+
+  return result
 }
