@@ -333,5 +333,34 @@
     "bestaetigen": "Confirm",
     "loeschen": "Delete",
     "bearbeiten": "Edit"
+  },
+  "ueber_uns": {
+    "metadata": {
+      "title": "Über Claimondo — Digitale Kfz-Schadensregulierung aus Köln",
+      "description": "2025 in Köln gegründete Plattform für Kfz-Schadensregulierung. Gründer: Nicolas Kitta (CEO) + Aaron Sprafke (COO). 89+ DAT-Partner, kostenfrei nach §249 BGB."
+    },
+    "hero": {
+      "eyebrow": "Über Claimondo",
+      "headline": "Vollständige Schadensregulierung —",
+      "headline_accent": "auf Augenhöhe.",
+      "subline": "Wir sind die Plattform die Geschädigten gibt was ihnen zusteht — nicht das was die Versicherung gerade noch durchwinkt."
+    },
+    "definition": {
+      "eyebrow": "Wer wir sind",
+      "p1_intro": "ist eine",
+      "p1_year": "2025",
+      "p1_continued": "in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Sitz der Gesellschaft ist die",
+      "p1_street": "Hansaring 10",
+      "p1_in": "in",
+      "p1_postal": "50670",
+      "p1_city": "Köln",
+      "p1_founded_by": "Gegründet wurde Claimondo von",
+      "p1_ceo": "Nicolas Kitta",
+      "p1_ceo_role": "(CEO) und",
+      "p1_coo": "Aaron Sprafke",
+      "p1_coo_role": "(COO).",
+      "p2": "Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch DAT-zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei LexDrive und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei.",
+      "p3": "Das Partner-Netzwerk umfasst aktuell 89+ DAT-Expert-Sachverständige in Nordrhein-Westfalen mit bundesweiter Skalierung auf rund 460 Sachverständige geplant. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+    }
   }
 }
