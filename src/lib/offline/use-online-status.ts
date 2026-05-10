@@ -26,7 +26,7 @@ export function useOnlineStatus(): boolean {
       const res = await fetch('/api/health', {
         method: 'HEAD',
         cache: 'no-store',
-        signal: AbortSignal.timeout(3000),
+        signal: AbortSignal.timeout(8000),
       })
       if (res.ok) {
         // Sofort online markieren + Debounce abbrechen
