@@ -13,6 +13,7 @@ import {
   personSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // 2026-05-09 Brand-Identity Pass für GEO:
 // 1) Erste 200 Wörter sind die maschinenlesbare Entitäts-Definition. ChatGPT,
@@ -35,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('title'),
     description: t('description'),
-    alternates: { canonical: '/ueber-uns' },
+    alternates: { canonical: `${SITE_URL}/ueber-uns`, ...buildLanguageAlternates('/ueber-uns') },
     openGraph: {
       type: 'profile',
       locale: 'de_DE',

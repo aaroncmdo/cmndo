@@ -14,6 +14,7 @@ import {
   organizationSchema, websiteSchema, localBusinessSchema,
   jsonLdScript, SITE_URL,
 } from "@/lib/seo/jsonld";
+import { buildLanguageAlternates } from "@/lib/seo/alternates";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -64,10 +65,8 @@ export const metadata: Metadata = {
     telephone: true,
   },
   alternates: {
-    canonical: "/",
-    languages: {
-      "de-DE": "/",
-    },
+    canonical: SITE_URL,
+    ...buildLanguageAlternates('/'),
   },
   openGraph: {
     type: "website",
