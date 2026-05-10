@@ -68,6 +68,7 @@ export default function Phase6StatusTracking({
     // AAR-275: wa_gesendet verrät ob letzter Versand WA war (Twilio-Delivery
     // möglich) oder Email/SMS (kein WA-Callback).
     wa_gesendet?: boolean | null
+    whatsapp_verfuegbar?: boolean | null
   }
   const latestFlow = flowLinks[0]
 
@@ -288,16 +289,24 @@ export default function Phase6StatusTracking({
                 type="button"
                 onClick={() => resend('whatsapp')}
                 disabled={resendPending || !l.telefon}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25D366] text-white text-xs font-semibold hover:bg-[#1fa855] disabled:opacity-40 disabled:cursor-not-allowed"
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+                  l.whatsapp_verfuegbar === true
+                    ? 'bg-[#25D366] text-white hover:bg-[#1fa855] ring-2 ring-emerald-300'
+                    : 'bg-[#25D366] text-white hover:bg-[#1fa855]'
+                }`}
               >
                 <SendIcon className="w-3.5 h-3.5" />
-                WhatsApp
+                {l.whatsapp_verfuegbar === true ? '📱 WA' : 'WhatsApp'}
               </button>
               <button
                 type="button"
                 onClick={() => resend('sms')}
                 disabled={resendPending || !l.telefon}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+                  l.whatsapp_verfuegbar === true
+                    ? 'bg-claimondo-bg text-claimondo-ondo/60 border border-claimondo-border hover:bg-claimondo-border'
+                    : 'bg-amber-500 text-white hover:bg-amber-600'
+                }`}
               >
                 <PhoneIcon className="w-3.5 h-3.5" />
                 SMS
