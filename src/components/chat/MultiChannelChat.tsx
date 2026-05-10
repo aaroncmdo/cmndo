@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-102: Shared Multi-Channel Chat Komponente mit 5 Kanal-Tabs.
 // Nutzt Supabase Realtime fuer Live-Messages.
@@ -176,7 +176,7 @@ export default function MultiChannelChat({
               key={c.id}
               onClick={() => setActiveKanal(c.id)}
               className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${
-                active ? 'border-[#4573A2] text-[#0D1B3E]' : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
+                active ? 'border-claimondo-ondo text-claimondo-navy' : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               <Icon className="w-4 h-4" style={{ color: c.color }} />
@@ -192,7 +192,7 @@ export default function MultiChannelChat({
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f8f9fb]">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-claimondo-bg">
         {messages.length === 0 ? (
           <p className="text-center text-claimondo-ondo/70 text-sm py-10">Noch keine Nachrichten in diesem Kanal.</p>
         ) : (
@@ -208,13 +208,13 @@ export default function MultiChannelChat({
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
           placeholder={`Nachricht ueber ${visibleChannels.find(c => c.id === activeKanal)?.label}...`}
-          className="flex-1 px-4 py-2.5 bg-[#f8f9fb] border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+          className="flex-1 px-4 py-2.5 bg-claimondo-bg border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
           disabled={sending}
         />
         <button
           onClick={handleSend}
           disabled={!input.trim() || sending}
-          className="px-4 py-2.5 bg-[#4573A2] text-white rounded-xl text-sm font-medium hover:bg-[#0D1B3E] disabled:opacity-40 inline-flex items-center gap-1.5"
+          className="px-4 py-2.5 bg-claimondo-ondo text-white rounded-xl text-sm font-medium hover:bg-claimondo-navy disabled:opacity-40 inline-flex items-center gap-1.5"
         >
           <SendIcon className="w-4 h-4" />
           {sending ? 'Sende...' : 'Senden'}

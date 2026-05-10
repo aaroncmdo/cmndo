@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-840: Endzustand-Modal
 //
@@ -135,19 +135,19 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
     <Modal open={open} onClose={onClose} ariaLabel={t.label} maxWidth={520}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#0D1B3E]/10 flex items-center justify-center shrink-0">
-            <Icon className="w-5 h-5 text-[#0D1B3E]" />
+          <div className="w-10 h-10 rounded-full bg-claimondo-navy/10 flex items-center justify-center shrink-0">
+            <Icon className="w-5 h-5 text-claimondo-navy" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-[#0D1B3E]">{t.label}</h2>
-            <p className="text-xs text-[#7BA3CC] mt-0.5">{t.sublabel}</p>
+            <h2 className="text-base font-semibold text-claimondo-navy">{t.label}</h2>
+            <p className="text-xs text-claimondo-light-blue mt-0.5">{t.sublabel}</p>
           </div>
         </div>
 
         {/* Mode-spezifische Felder */}
         {mode === 'reguliert' && (
           <div>
-            <label className="block text-xs font-medium text-[#0D1B3E] mb-1">
+            <label className="block text-xs font-medium text-claimondo-navy mb-1">
               Regulierungsbetrag (EUR) <span className="text-rose-600">*</span>
             </label>
             <input
@@ -156,20 +156,20 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
               value={regulierungsBetrag}
               onChange={(e) => setRegulierungsBetrag(e.target.value)}
               placeholder="z.B. 4500.00"
-              className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+              className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             />
           </div>
         )}
 
         {mode === 'abgelehnt' && (
           <div>
-            <label className="block text-xs font-medium text-[#0D1B3E] mb-1">
+            <label className="block text-xs font-medium text-claimondo-navy mb-1">
               Ablehnungsgrund <span className="text-rose-600">*</span>
             </label>
             <select
               value={vsAblehnungsGrund}
               onChange={(e) => setVsAblehnungsGrund(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+              className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             >
               {ABLEHNUNGS_GRUENDE.map((g) => (
                 <option key={g.value} value={g.value}>{g.label}</option>
@@ -180,7 +180,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
 
         {/* Begründung — immer Pflicht */}
         <div>
-          <label className="block text-xs font-medium text-[#0D1B3E] mb-1">
+          <label className="block text-xs font-medium text-claimondo-navy mb-1">
             Begründung (Audit) <span className="text-rose-600">*</span>
           </label>
           <textarea
@@ -193,7 +193,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
               : mode === 'storniert'  ? 'z.B. „Kunde wünscht Abbruch der Bearbeitung"'
               :                          'z.B. „Telefonat mit Frau Müller von Allianz, Az 123/456"'
             }
-            className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+            className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
           />
         </div>
 
@@ -222,9 +222,9 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
             type="checkbox"
             checked={notifyCustomer}
             onChange={(e) => setNotifyCustomer(e.target.checked)}
-            className="w-4 h-4 rounded border-[#7BA3CC]"
+            className="w-4 h-4 rounded border-claimondo-light-blue"
           />
-          <span className="text-sm text-[#0D1B3E]">Kunde informieren (WhatsApp + Email)</span>
+          <span className="text-sm text-claimondo-navy">Kunde informieren (WhatsApp + Email)</span>
         </label>
 
         {/* Actions */}
@@ -233,14 +233,14 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="px-4 py-2 rounded-lg border border-[#E2E8F3] text-sm text-[#7BA3CC] hover:bg-[#f8f9fb] disabled:opacity-50"
+            className="px-4 py-2 rounded-lg border border-[#E2E8F3] text-sm text-claimondo-light-blue hover:bg-claimondo-bg disabled:opacity-50"
           >
             Abbrechen
           </button>
           <button
             type="submit"
             disabled={isPending}
-            className="px-4 py-2 rounded-lg bg-[#0D1B3E] text-white text-sm font-medium hover:bg-[#1a2d5a] disabled:opacity-50"
+            className="px-4 py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-[#1a2d5a] disabled:opacity-50"
           >
             {isPending ? 'Wird gespeichert…' : t.label}
           </button>

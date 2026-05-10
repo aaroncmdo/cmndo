@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-778: Migriert auf shared PortalNav (dark variant).
 // Vorher: 187-Zeilen Self-Contained-Sidebar mit dupliziertem isActive + Item-Rendering.
@@ -64,14 +64,17 @@ export default function AdminNav({
       }}
       headerSlot={
         <>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/claimondo-shield.svg" alt="" width={28} height={28} className="h-7 w-7 shrink-0" />
             <span className="text-xl font-bold tracking-tight">
               <span className="text-white">Claim</span>
-              <span className="text-[#7BA3CC]">ondo</span>
+              <span className="text-claimondo-light-blue">ondo</span>
             </span>
             <TasksPill userId={userId} href="/admin/meine-tasks" initialCount={meineTasksCount ?? 0} />
           </div>
-          <p className="text-xs mt-0.5 text-[#7BA3CC]">{email}</p>
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-light-blue/70 mt-1 px-0.5">Admin-Portal</p>
+          <p className="text-xs mt-0.5 text-claimondo-light-blue truncate">{email}</p>
         </>
       }
       footerSlot={
@@ -88,7 +91,7 @@ export default function AdminNav({
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-[#7BA3CC] hover:bg-white/5 hover:text-white"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
             >
               <LogOutIcon style={{ width: 17, height: 17 }} />
               Abmelden

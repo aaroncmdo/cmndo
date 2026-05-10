@@ -1,4 +1,4 @@
-// AAR-162 / W2: Fallakte Server-Page.
+﻿// AAR-162 / W2: Fallakte Server-Page.
 // Lädt alle Fall-Daten und delegiert an FallakteShell.
 // AAR-172: Der 210-KB-Monolith FallakteClient.old.tsx wurde gelöscht, nachdem
 // die neue Shell-Architektur alle W2-W5-Tickets abdeckt.
@@ -901,7 +901,7 @@ export default async function FallaktePage({
               <a
                 key={f.id}
                 href={`/faelle/${f.id}`}
-                className="text-[#4573A2] hover:underline font-medium text-sm"
+                className="text-claimondo-ondo hover:underline font-medium text-sm"
               >
                 {f.fall_nummer ?? f.id.slice(0, 8)}
                 {f.kennzeichen && ` (${f.kennzeichen})`}

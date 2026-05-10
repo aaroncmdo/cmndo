@@ -280,6 +280,51 @@ p, li, blockquote, article, .prose {
    Die Utilities sind bewusst als eigene Klassen und nicht als Tailwind-
    Custom-Utility modelliert — sie bündeln bg + border + backdrop-filter,
    was in Tailwind nur über Multi-Step arbeit gehen würde. */
+/* glass-card: Premium iOS-Glass — der Login-Page-Standard.
+   rgba(.82) + 24px-Blur + border(.65) + iOS-Shadow mit Navy-Tint.
+   Für Card-Container auf hellem Hintergrund (Portale, Auth-Pages). */
+.glass-card {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 20px 60px rgba(13, 27, 62, 0.10), 0 4px 16px rgba(13, 27, 62, 0.06), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+}
+
+/* glass-card-sm: Kompakte Variante für kleinere Cards / Chips. */
+.glass-card-sm {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 28px rgba(13, 27, 62, 0.08), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  backdrop-filter: saturate(160%) blur(16px);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+}
+
+/* glass-navy: Dunkle Premium-Variante für Navy-Hintergrund-Sections. */
+.glass-navy {
+  background: rgba(13, 27, 62, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30), 0 4px 16px rgba(0, 0, 0, 0.15);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+}
+
+/* ambient-bg: Heller App-Hintergrund mit atmosphärischen Spotlight-Gradienten. */
+.ambient-bg {
+  background: #f2f3f7;
+  position: relative;
+}
+.ambient-bg::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(65% 55% at 85% 0%, rgba(123, 163, 204, 0.12), transparent 65%),
+    radial-gradient(55% 65% at 0% 100%, rgba(69, 115, 162, 0.08), transparent 70%);
+  z-index: 0;
+}
+
 .glass-light {
   background-color: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.4);

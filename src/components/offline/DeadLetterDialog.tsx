@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-388: Dead-Letter-Queue-UI.
 // AAR-781: Migriert auf Modal-Primitive.
@@ -61,14 +61,14 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
     <Modal open={open} onClose={onClose} maxWidth={512} noPadding hideCloseButton ariaLabel="Fehlgeschlagene Uploads">
       <div className="flex flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 64px)' }}>
         <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border">
-          <div className="flex items-center gap-2 text-[#0D1B3E]">
+          <div className="flex items-center gap-2 text-claimondo-navy">
             <AlertTriangleIcon className="w-5 h-5 text-red-600" />
             <h2 className="text-sm font-semibold">Dauerhaft fehlgeschlagene Uploads</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-[#f8f9fb] text-claimondo-ondo"
+            className="p-1.5 rounded-md hover:bg-claimondo-bg text-claimondo-ondo"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4" />
@@ -84,7 +84,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
                 <li key={item.id} className="rounded-lg border border-red-100 bg-red-50/50 px-3 py-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-[#0D1B3E] truncate">{item.file_name}</p>
+                      <p className="text-xs font-medium text-claimondo-navy truncate">{item.file_name}</p>
                       <p className="text-[11px] text-claimondo-ondo mt-0.5">
                         Fall: {item.fall_id.slice(0, 8)}… · {item.dokument_typ} · {item.retry_count} Versuche
                       </p>
@@ -97,7 +97,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
                         type="button"
                         disabled={busy === item.id}
                         onClick={() => handleRetry(item)}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-[11px] disabled:opacity-50"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-claimondo-ondo hover:bg-claimondo-shield text-white text-[11px] disabled:opacity-50"
                       >
                         <RefreshCwIcon className="w-3 h-3" /> Erneut
                       </button>
@@ -117,7 +117,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
           )}
         </div>
 
-        <div className="px-5 py-3 border-t border-claimondo-border bg-[#f8f9fb] text-[11px] text-claimondo-ondo">
+        <div className="px-5 py-3 border-t border-claimondo-border bg-claimondo-bg text-[11px] text-claimondo-ondo">
           Uploads, die nach 10 Versuchen weiter fehlschlagen, landen hier. Nach „Erneut versuchen" starten wir den Sync sofort.
         </div>
       </div>

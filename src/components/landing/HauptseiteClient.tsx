@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // Claimondo Hauptseite — vollständige 12-Sektionen Landing-Page.
 // Design: Montserrat (Headings/UI) · Noto Sans (Fließtext via globals.css)
@@ -150,11 +150,11 @@ function HeroSection() {
               </div>
               <Link
                 href="/gutachter-finden"
-                className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#7BA3CC]/40 bg-[#7BA3CC]/10 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:border-[#7BA3CC] hover:bg-[#7BA3CC]/20"
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-claimondo-light-blue/40 bg-claimondo-light-blue/10 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:border-claimondo-light-blue hover:bg-claimondo-light-blue/20"
               >
-                <Search className="h-4 w-4 text-[#7BA3CC]" />
+                <Search className="h-4 w-4 text-claimondo-light-blue" />
                 Gutachter in meiner Nähe finden
-                <ArrowRight className="h-3.5 w-3.5 text-[#7BA3CC]" />
+                <ArrowRight className="h-3.5 w-3.5 text-claimondo-light-blue" />
               </Link>
               <a
                 href="https://wa.me/49221XXXXXXX"

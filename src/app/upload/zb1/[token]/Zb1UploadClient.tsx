@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-296 W1: Mobile-first Upload-UI für ZB1.
 // 4 Schritte: Hinweise → Vorschau → Upload+OCR läuft → Erfolg/Fehler.
@@ -127,13 +127,13 @@ export default function Zb1UploadClient({
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] py-6 px-4">
+    <div className="min-h-screen bg-claimondo-bg py-6 px-4">
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
           <span className="text-2xl font-bold tracking-tight">
-            <span className="text-[#0D1B3E]">Claim</span>
-            <span className="text-[#7BA3CC]">ondo</span>
+            <span className="text-claimondo-navy">Claim</span>
+            <span className="text-claimondo-light-blue">ondo</span>
           </span>
           <p className="text-xs text-claimondo-ondo mt-1">Fahrzeugschein-Upload</p>
         </div>
@@ -148,7 +148,7 @@ export default function Zb1UploadClient({
                 Bitte fotografieren Sie Ihren <strong>Fahrzeugschein (Zulassungsbescheinigung Teil I, Vorderseite)</strong>.
                 Wir lesen die Daten automatisch aus.
               </p>
-              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-3 space-y-1.5">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-3 space-y-1.5">
                 <p className="text-xs font-semibold text-claimondo-navy">Tipps für gute Lesbarkeit:</p>
                 <ul className="text-xs text-claimondo-navy space-y-1">
                   <li>✓ Alle 4 Ecken des Dokuments sichtbar</li>
@@ -161,7 +161,7 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F]"
+                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
                 >
                   <CameraIcon className="w-6 h-6" />
                   Jetzt fotografieren
@@ -169,7 +169,7 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={() => galleryInputRef.current?.click()}
-                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-xl bg-white border border-[#4573A2] text-[#4573A2] text-sm font-semibold hover:bg-[#f8f9fb]"
+                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-xl bg-white border border-claimondo-ondo text-claimondo-ondo text-sm font-semibold hover:bg-claimondo-bg"
                 >
                   <ImageIcon className="w-6 h-6" />
                   Aus Galerie wählen
@@ -198,7 +198,7 @@ export default function Zb1UploadClient({
             <>
               <h2 className="text-base font-semibold text-claimondo-navy">Foto prüfen</h2>
               <p className="text-xs text-claimondo-ondo">Sind alle 4 Ecken gut zu sehen?</p>
-              <div className="rounded-xl overflow-hidden border border-claimondo-border bg-[#f8f9fb]">
+              <div className="rounded-xl overflow-hidden border border-claimondo-border bg-claimondo-bg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={previewUrl} alt="Fahrzeugschein-Vorschau" className="w-full h-auto" />
               </div>
@@ -206,14 +206,14 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={reset}
-                  className="px-3 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy text-sm font-semibold hover:bg-[#f8f9fb]"
+                  className="px-3 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy text-sm font-semibold hover:bg-claimondo-bg"
                 >
                   Nochmal
                 </button>
                 <button
                   type="button"
                   onClick={handleUpload}
-                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F]"
+                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
                 >
                   <CheckCircle2Icon className="w-4 h-4" />
                   Verwenden
@@ -224,7 +224,7 @@ export default function Zb1UploadClient({
 
           {step === 'uploading' && (
             <div className="py-8 text-center space-y-4">
-              <div className="w-12 h-12 mx-auto border-4 border-[#4573A2] border-t-transparent rounded-full animate-spin" />
+              <div className="w-12 h-12 mx-auto border-4 border-claimondo-ondo border-t-transparent rounded-full animate-spin" />
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-claimondo-navy">Wird hochgeladen ...</p>
                 <p className="text-xs text-claimondo-ondo">Daten werden ausgelesen — bitte warten</p>
@@ -270,7 +270,7 @@ export default function Zb1UploadClient({
               <button
                 type="button"
                 onClick={reset}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F]"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
               >
                 <RefreshCwIcon className="w-4 h-4" />
                 Erneut versuchen

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-776: Shared Tab-Bar für die Fallakte (alle drei Portale).
 // Vorher hatte jede Fallakte (Admin, SV, Kunde) eine eigene Tab-Bar
@@ -45,7 +45,7 @@ export function FallakteTabs<TKey extends string>({
                   className={`relative flex items-center gap-2 px-3.5 py-2 text-sm rounded-lg transition-all whitespace-nowrap ${
                     active
                       ? 'bg-claimondo-ondo/10 text-claimondo-navy font-semibold ring-1 ring-claimondo-ondo/20'
-                      : 'text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] font-medium'
+                      : 'text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg font-medium'
                   }`}
                 >
                   <Icon

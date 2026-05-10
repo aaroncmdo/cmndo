@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // CMM-33: Zentrale Pflichtdokumente-Section für alle Rollen + Onboarding.
 //
@@ -166,7 +166,7 @@ function SlotCard({
   const isErfuellt = slot.status === 'erfuellt'
   const containerClass = isErfuellt
     ? 'rounded-xl border border-emerald-200 bg-emerald-50/40 p-3'
-    : 'rounded-xl border border-claimondo-border bg-[#f8f9fb] p-3'
+    : 'rounded-xl border border-claimondo-border bg-claimondo-bg p-3'
 
   return (
     <li className={containerClass}>

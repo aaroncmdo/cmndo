@@ -27,9 +27,8 @@ export async function LandingHero({ authenticatedUser }: Props) {
 
   return (
     <section
-      className="relative isolate overflow-hidden"
+      className="relative isolate overflow-hidden bg-claimondo-bg"
       aria-labelledby="hero-heading"
-      style={{ background: '#f8f9fb' }}
     >
       {/* Atmosphärische Hintergrund-Spotlights — 3 radiale Gradients,
           asymmetrisch verteilt, geben dem Glass-Look Tiefe. */}
@@ -143,10 +142,9 @@ export async function LandingHero({ authenticatedUser }: Props) {
               }}
             >
               <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10"
-                style={{ background: 'rgba(69,115,162,0.12)' }}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10 sm:h-10 sm:w-10"
               >
-                <Icon className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: '#4573A2' }} />
+                <Icon className="h-4 w-4 text-claimondo-ondo sm:h-5 sm:w-5" />
               </div>
               <div className="flex flex-1 items-baseline gap-2 sm:mt-2 sm:flex-col sm:items-start sm:gap-0">
                 <span

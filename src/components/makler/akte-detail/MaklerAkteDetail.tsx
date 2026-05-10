@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-487 (M5): Makler-Akte-Detail — Client-Komponente mit Header, Quick-
 // Stats, 5-Tab-Navigation (3 aktive Panels + 2 Placeholder für M6/M7).
@@ -324,7 +324,7 @@ function TabButton({
       {count !== undefined && count > 0 ? (
         <span
           className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-medium ${
-            active ? 'bg-claimondo-navy text-white' : 'bg-[#e4e7ef] text-claimondo-navy'
+            active ? 'bg-claimondo-navy text-white' : 'bg-claimondo-border text-claimondo-navy'
           }`}
         >
           {count}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
@@ -350,12 +350,12 @@ export default function GutachterShell({
                 )}
               </Link>
             ) : (
-              <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></Link>
+              <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></Link>
             )}
             {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
             <TasksPill userId={userId} href="/gutachter/tasks" />
           </div>
-          <p className="text-[#7BA3CC] text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
+          <p className="text-claimondo-light-blue text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
         </div>
 
         {/* AAR-222: Gruppierte Nav mit Section-Headers + Badge-Counter
@@ -422,7 +422,7 @@ export default function GutachterShell({
           <button
             type="button"
             onClick={() => setShowSupport(true)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium bg-white text-[#0D1B3E] hover:bg-[#f8f9fb] transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors"
             aria-label="Hilfe und Support öffnen"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -444,9 +444,9 @@ export default function GutachterShell({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-semibold truncate">{displayName}</p>
-              <p className="text-[#7BA3CC] text-xs">Sachverständiger</p>
+              <p className="text-claimondo-light-blue text-xs">Sachverständiger</p>
             </div>
-            <UserIcon className="w-4 h-4 text-[#7BA3CC] group-hover:text-white shrink-0" />
+            <UserIcon className="w-4 h-4 text-claimondo-light-blue group-hover:text-white shrink-0" />
           </Link>
           {/* AAR-720: Einstellungen-Knopf unter Profil — Hub für Kalender,
               später weitere Konfigurations-Bereiche (Benachrichtigungen,
@@ -454,12 +454,12 @@ export default function GutachterShell({
           <Link
             href="/gutachter/einstellungen"
             onClick={() => setSidebarOpen(false)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-white hover:bg-white/5 transition-colors"
           >
             <SettingsIcon className="w-4 h-4" /> Einstellungen
           </Link>
           <button onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-red-400 hover:bg-white/5 transition-colors">
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-red-400 hover:bg-white/5 transition-colors">
             <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>
@@ -501,7 +501,7 @@ export default function GutachterShell({
               />
             </Link>
           ) : (
-            <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+            <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
           )}
           {/* AAR-252: Glocke im Mobile-Header — war vorher nur im Wetter-
               Banner, das aber bei SVs ohne standort_lat nicht rendert. */}
@@ -523,7 +523,7 @@ export default function GutachterShell({
           <main
             id="main-content"
             role="main"
-            className="h-full overflow-y-auto bg-[#f8f9fb] rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4"
+            className="h-full overflow-y-auto bg-claimondo-bg rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4"
           >
             {/* CMM-32 Polish: Standort-CTA — sichtbar wenn Browser-Permission
                 noch 'prompt' oder 'denied' ist; sonst rendert null.

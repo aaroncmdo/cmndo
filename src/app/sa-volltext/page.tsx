@@ -1,8 +1,8 @@
-import PageHeader from '@/components/shared/PageHeader'
+﻿import PageHeader from '@/components/shared/PageHeader'
 
 export default function SAVolltextPage() {
   return (
-    <div className="min-h-screen bg-[#f8f9fb] py-10 px-5">
+    <div className="min-h-screen bg-claimondo-bg py-10 px-5">
       <div className="max-w-2xl mx-auto bg-white border border-claimondo-border rounded-2xl shadow-sm p-8">
         <div className="mb-6">
           <PageHeader title="Sicherungsabtretung und Unterschriftsvollmacht" size="lg" />

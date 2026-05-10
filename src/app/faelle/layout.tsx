@@ -1,4 +1,4 @@
-// AAR-628: Rolle-abhängige Shell für die Fallakte-Route.
+﻿// AAR-628: Rolle-abhängige Shell für die Fallakte-Route.
 //
 // Die Fallakte wird von vier internen Rollen genutzt:
 //   - admin           → volle Admin-Shell (AdminNav + NotificationBell + Spotlight)
@@ -58,23 +58,23 @@ export default async function FaelleLayout({
   if (rolle === 'kanzlei') {
     // AAR-676: h-screen + overflow-hidden, nur Main scrollt. max-w-Cap weg.
     return (
-      <div className="h-screen bg-[#f8f9fb] flex flex-col overflow-hidden">
-        <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between shrink-0">
+      <div className="h-screen bg-claimondo-bg flex flex-col overflow-hidden">
+        <header className="bg-claimondo-navy px-4 py-3 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-xl font-bold tracking-tight">
               <span className="text-white">Claim</span>
-              <span className="text-[#7BA3CC]">ondo</span>
+              <span className="text-claimondo-light-blue">ondo</span>
             </span>
-            <span className="text-[11px] uppercase tracking-wider text-[#7BA3CC] border border-[#7BA3CC]/30 rounded px-2 py-0.5">
+            <span className="text-[11px] uppercase tracking-wider text-claimondo-light-blue border border-claimondo-light-blue/30 rounded px-2 py-0.5">
               Kanzlei
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[#7BA3CC] text-sm">{displayName}</span>
+            <span className="text-claimondo-light-blue text-sm">{displayName}</span>
             <form action="/api/auth/logout" method="POST">
               <button
                 type="submit"
-                className="text-[#7BA3CC] hover:text-white transition-colors"
+                className="text-claimondo-light-blue hover:text-white transition-colors"
                 aria-label="Abmelden"
               >
                 <LogOutIcon className="w-4 h-4" />
@@ -105,15 +105,15 @@ export default async function FaelleLayout({
     } catch { /* non-critical */ }
 
     return (
-      <div className="min-h-screen bg-[#f8f9fb]">
-        <header className="bg-[#0D1B3E] px-4 py-3 flex items-center justify-between">
+      <div className="min-h-screen bg-claimondo-bg">
+        <header className="bg-claimondo-navy px-4 py-3 flex items-center justify-between">
           <span className="text-xl font-bold tracking-tight">
-            <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>
+            <span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span>
           </span>
           <div className="flex items-center gap-3">
-            <span className="text-[#7BA3CC] text-sm">{displayName}</span>
+            <span className="text-claimondo-light-blue text-sm">{displayName}</span>
             <form action="/api/auth/logout" method="POST">
-              <button type="submit" className="text-[#7BA3CC] hover:text-white transition-colors">
+              <button type="submit" className="text-claimondo-light-blue hover:text-white transition-colors">
                 <LogOutIcon className="w-4 h-4" />
               </button>
             </form>
@@ -136,7 +136,7 @@ export default async function FaelleLayout({
     .in('status', ['offen', 'in-bearbeitung'])
 
   return (
-    <div className="h-screen bg-[#f8f9fb] relative overflow-hidden">
+    <div className="h-screen bg-claimondo-bg relative overflow-hidden">
       <Spotlight />
       <AdminNav
         email={user.email ?? ''}
@@ -145,9 +145,9 @@ export default async function FaelleLayout({
         meineTasksCount={meineTasksCount ?? 0}
       />
       <div className="md:ml-56 h-screen flex flex-col relative z-10">
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0D1B3E] shrink-0">
+        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-claimondo-navy shrink-0">
           <span className="text-lg font-bold tracking-tight">
-            <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>
+            <span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span>
           </span>
           <UpdatesNav variant="dark" />
         </header>

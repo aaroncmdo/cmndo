@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-773: Shared Inbox-Layout für ALLE Portale.
 // Vorher hatten Gutachter-Posteingang, KB-Nachrichten und Admin-Inbox jeweils
@@ -124,7 +124,7 @@ export default function ChatInboxLayout({
                     setActiveId(t.id)
                     setMobileView('detail')
                   }}
-                  className={`w-full text-left px-3 py-3 border-b border-claimondo-border hover:bg-[#f8f9fb] transition-colors ${
+                  className={`w-full text-left px-3 py-3 border-b border-claimondo-border hover:bg-claimondo-bg transition-colors ${
                     active ? 'bg-claimondo-ondo/5' : ''
                   }`}
                 >
@@ -165,7 +165,7 @@ export default function ChatInboxLayout({
       <main
         className={`${
           mobileView === 'detail' ? 'flex' : 'hidden'
-        } lg:flex flex-1 min-w-0 min-h-0 overflow-hidden bg-[#f8f9fb] flex-col`}
+        } lg:flex flex-1 min-w-0 min-h-0 overflow-hidden bg-claimondo-bg flex-col`}
       >
         {activeId ? (
           <>
@@ -175,7 +175,7 @@ export default function ChatInboxLayout({
                 type="button"
                 onClick={() => setMobileView('list')}
                 aria-label="Zurück zur Liste"
-                className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-[#f8f9fb] active:bg-claimondo-ondo/10 transition-colors"
+                className="inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-claimondo-bg active:bg-claimondo-ondo/10 transition-colors"
               >
                 <ArrowLeftIcon className="w-4 h-4 text-claimondo-navy" />
               </button>

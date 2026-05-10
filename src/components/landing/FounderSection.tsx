@@ -36,7 +36,14 @@ const FOUNDERS = [
 
 export function FounderSection() {
   return (
-    <section className="relative overflow-hidden bg-white py-20" aria-labelledby="founders-heading">
+    <section
+      className="relative overflow-hidden bg-claimondo-bg py-20"
+      aria-labelledby="founders-heading"
+      style={{
+        backgroundImage:
+          'radial-gradient(65% 55% at 15% 100%, rgba(123,163,204,.15), transparent 65%)',
+      }}
+    >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
@@ -71,7 +78,7 @@ export function FounderSection() {
           {FOUNDERS.map((f) => (
             <article
               key={f.name}
-              className="rounded-3xl border border-claimondo-border bg-claimondo-bg p-6 shadow-sm"
+              className="glass-card rounded-3xl p-6 shadow-[0_4px_20px_rgba(13,27,62,0.07)]"
               itemScope
               itemType="https://schema.org/Person"
             >
@@ -100,7 +107,7 @@ export function FounderSection() {
                 {f.bio}
               </p>
 
-              <blockquote className="mt-5 flex gap-3 rounded-xl border-l-4 border-claimondo-ondo bg-white p-4">
+              <blockquote className="glass-card-sm mt-5 flex gap-3 rounded-xl border-l-4 border-claimondo-ondo p-4">
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
                 <p className="text-sm italic text-claimondo-shield">{f.quote}</p>
               </blockquote>

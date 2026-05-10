@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-486 (M4): Makler-Akten-Liste — Filter-Chips, Tabelle/Karten, Consent-
 // aware Click-Through. Filter wird als URL-Param gespiegelt (?filter=...) —
@@ -117,7 +117,7 @@ export function MaklerAktenList({ akten, counts, currentFilter }: Props) {
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e4e7ef]">
+              <tbody className="divide-y divide-claimondo-border">
                 {akten.map((a) => (
                   <AkteRow
                     key={a.id}
@@ -130,7 +130,7 @@ export function MaklerAktenList({ akten, counts, currentFilter }: Props) {
           </div>
 
           {/* Mobile-Karten */}
-          <ul className="md:hidden divide-y divide-[#e4e7ef]">
+          <ul className="md:hidden divide-y divide-claimondo-border">
             {akten.map((a) => (
               <AkteCard
                 key={a.id}

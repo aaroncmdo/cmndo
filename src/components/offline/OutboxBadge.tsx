@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { getPendingCount, getOutboxItems, type OutboxItem } from '@/lib/offline/outbox'
@@ -88,7 +88,7 @@ export default function OutboxBadge() {
             <button
               onClick={handleRetry}
               disabled={syncing}
-              className="w-full text-xs font-medium text-[#4573A2] hover:text-[#1E3A5F] disabled:text-claimondo-ondo/70 flex items-center justify-center gap-1.5 py-1"
+              className="w-full text-xs font-medium text-claimondo-ondo hover:text-claimondo-shield disabled:text-claimondo-ondo/70 flex items-center justify-center gap-1.5 py-1"
             >
               <RefreshCwIcon className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} />
               {syncing ? 'Synchronisiere...' : 'Jetzt synchronisieren'}

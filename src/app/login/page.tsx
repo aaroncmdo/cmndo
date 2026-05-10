@@ -52,29 +52,20 @@ export default function LoginPage({
             className="text-3xl font-bold tracking-[-0.03em]"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            <span style={{ color: '#0D1B3E' }}>Claim</span><span style={{ color: '#4573A2' }}>ondo</span>
+            <span className="text-claimondo-navy">Claim</span><span className="text-claimondo-ondo">ondo</span>
           </h1>
-          <p className="mt-1.5 text-sm font-medium" style={{ color: '#4573A2' }}>
+          <p className="mt-1.5 text-sm font-medium text-claimondo-ondo">
             Mit deinem Konto anmelden
           </p>
         </div>
 
         {/* Glass Card */}
-        <div
-          className="rounded-3xl p-8"
-          style={{
-            background: 'rgba(255,255,255,0.82)',
-            border: '1px solid rgba(255,255,255,0.65)',
-            boxShadow: '0 20px 60px rgba(13,27,62,0.10), 0 4px 16px rgba(13,27,62,0.06), 0 1px 0 rgba(255,255,255,0.9) inset',
-            backdropFilter: 'saturate(180%) blur(24px)',
-            WebkitBackdropFilter: 'saturate(180%) blur(24px)',
-          }}
-        >
+        <div className="glass-card rounded-3xl p-8">
           <LoginClient loginAction={login} />
           <ErrorMessage searchParams={searchParams} />
         </div>
 
-        <p className="mt-6 text-center text-xs" style={{ color: '#7BA3CC' }}>
+        <p className="mt-6 text-center text-xs text-claimondo-light-blue">
           &copy; 2026 Claimondo GmbH
         </p>
       </div>

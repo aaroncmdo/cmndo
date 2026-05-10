@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronRight, MapPin, Phone } from 'lucide-react'
@@ -68,7 +68,7 @@ const TOP_FAQ = [
 
 export default function KfzGutachterPillarPage() {
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen bg-claimondo-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-Phase0 (0.6) / CMM-25: Geteiltes Modal für SV-Termin-Aktionen.
 // Modes (CMM-25 hat 'erstvorschlag' entfernt — Termin wird vom Dispatcher
@@ -108,8 +108,8 @@ export default function TerminVorschlagModal({
       <div>
         <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border sticky top-0 bg-white/40 backdrop-blur-sm">
           <div className="flex items-center gap-2">
-            <CalendarIcon className="w-5 h-5 text-[#4573A2]" />
-            <h2 className="text-base font-semibold text-[#0D1B3E]">{title}</h2>
+            <CalendarIcon className="w-5 h-5 text-claimondo-ondo" />
+            <h2 className="text-base font-semibold text-claimondo-navy">{title}</h2>
           </div>
           <button
             type="button"
@@ -129,7 +129,7 @@ export default function TerminVorschlagModal({
               value={datetime}
               onChange={e => setDatetime(e.target.value)}
               required
-              className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+              className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             />
           </div>
 
@@ -141,7 +141,7 @@ export default function TerminVorschlagModal({
               rows={2}
               maxLength={200}
               placeholder="z.B. anderer Zeitpunkt passt besser ins Einsatzgebiet"
-              className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2] resize-none"
+              className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo resize-none"
             />
           </div>
 
@@ -150,14 +150,14 @@ export default function TerminVorschlagModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:bg-[#f8f9fb] transition-colors"
+              className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:bg-claimondo-bg transition-colors"
             >
               Abbrechen
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
               {isPending && <Loader2Icon className="w-4 h-4 animate-spin" />}
               Gegenvorschlag senden

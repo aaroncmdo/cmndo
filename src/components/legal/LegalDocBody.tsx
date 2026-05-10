@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // Markdown-Renderer fuer Legal-Dokumente. Wird sowohl in der Full-Page-
 // Variante (LegalDocPage) als auch im Popover (LegalDocPopover) verwendet.
@@ -73,7 +73,7 @@ export default function LegalDocBody({ markdown }: { markdown: string }) {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#4573A2] underline decoration-[#7BA3CC] decoration-1 underline-offset-2 transition-colors hover:text-[#1E3A5F] hover:decoration-[#4573A2]"
+              className="text-claimondo-ondo underline decoration-[#7BA3CC] decoration-1 underline-offset-2 transition-colors hover:text-claimondo-shield hover:decoration-claimondo-ondo"
             >
               {children}
             </a>

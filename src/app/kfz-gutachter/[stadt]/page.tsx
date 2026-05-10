@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -94,7 +94,7 @@ export default async function KfzGutachterStadtPage({
   const faqs = buildStadtFaq(s.name, s.h1Anker, s.lokal.landgericht)
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen bg-claimondo-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([

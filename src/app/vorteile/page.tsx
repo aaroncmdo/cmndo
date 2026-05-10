@@ -170,7 +170,7 @@ const VERGLEICH = [
 
 export default function VorteilePage() {
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen bg-claimondo-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
@@ -202,17 +202,17 @@ export default function VorteilePage() {
         />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div
-            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#4573A2] shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm"
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm"
           >
             Warum Claimondo?
           </div>
           <h1
-            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-[#0D1B3E] sm:text-5xl md:text-6xl"
+            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             Ihr Recht. Vollständig durchgesetzt.
           </h1>
-          <p className="mt-5 text-balance text-base text-[#4573A2] sm:text-lg">
+          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
             Kein Kompromiss, kein Papierkram, keine Kosten für Sie.
           </p>
         </div>
@@ -243,18 +243,18 @@ export default function VorteilePage() {
                 className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-[0_8px_28px_rgba(13,27,62,0.10)] sm:p-7"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#4573A2]/12">
-                  <Icon className="h-6 w-6 text-[#4573A2]" />
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-claimondo-ondo/12">
+                  <Icon className="h-6 w-6 text-claimondo-ondo" />
                 </div>
                 <h2
-                  className="text-xl font-bold text-[#0D1B3E]"
+                  className="text-xl font-bold text-claimondo-navy"
                   style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
                 >{v.title}</h2>
-                <p className="mt-0.5 text-sm font-semibold text-[#7BA3CC]">{v.subtitle}</p>
-                <p className="mt-3 text-sm leading-relaxed text-[#1E3A5F]">{v.text}</p>
+                <p className="mt-0.5 text-sm font-semibold text-claimondo-light-blue">{v.subtitle}</p>
+                <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{v.text}</p>
                 <ul className="mt-5 space-y-2">
                   {v.punkte.map((p) => (
-                    <li key={p} className="flex items-start gap-2 text-sm text-[#4573A2]">
+                    <li key={p} className="flex items-start gap-2 text-sm text-claimondo-ondo">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" />
                       {p}
                     </li>
@@ -267,10 +267,10 @@ export default function VorteilePage() {
       </section>
 
       {/* Kürzungs-Aufklärung */}
-      <section className="bg-[#0D1B3E] py-20 text-white">
+      <section className="bg-claimondo-navy py-20 text-white">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="text-center">
-            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">Was Sie nicht wissen sollen</div>
+            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-claimondo-light-blue">Was Sie nicht wissen sollen</div>
             <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
               So kürzt die Versicherung Ihren Anspruch
             </h2>
@@ -282,14 +282,10 @@ export default function VorteilePage() {
 
           {/* Direkt-Antwort: warum Versicherungen kürzen + welche BGH-Urteile dagegen stehen */}
           <div
-            className="mx-auto mt-10 max-w-3xl rounded-2xl border-l-4 p-5 text-[15px] leading-relaxed"
-            style={{
-              borderColor: '#7BA3CC',
-              background: 'rgba(123,163,204,0.10)',
-              color: 'rgba(255,255,255,0.92)',
-            }}
+            className="mx-auto mt-10 max-w-3xl rounded-2xl border-l-4 border-claimondo-light-blue p-5 text-[15px] leading-relaxed text-white/90"
+            style={{ background: 'rgba(123,163,204,0.10)' }}
           >
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#7BA3CC' }}>
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-claimondo-light-blue">
               Direkt-Antwort · BGH VI ZR 65/18 · VI ZR 174/24 · VI ZR 119/04
             </p>
             <p>
@@ -337,11 +333,11 @@ export default function VorteilePage() {
       {/* Vergleichstabelle */}
       <section className="py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <h2 className="mb-8 text-center text-3xl font-extrabold text-[#0D1B3E]">
+          <h2 className="mb-8 text-center text-3xl font-extrabold text-claimondo-navy">
             Mit oder ohne Claimondo?
           </h2>
-          <div className="overflow-hidden rounded-3xl border border-[#e4e7ef] bg-white shadow-sm">
-            <div className="grid grid-cols-3 border-b border-[#e4e7ef] bg-[#f8f9fb] px-6 py-3 text-xs font-bold uppercase tracking-wider text-[#4573A2]">
+          <div className="overflow-hidden rounded-3xl border border-claimondo-border bg-white shadow-sm">
+            <div className="grid grid-cols-3 border-b border-claimondo-border bg-claimondo-bg px-6 py-3 text-xs font-bold uppercase tracking-wider text-claimondo-ondo">
               <div>Was wird verglichen</div>
               <div className="text-center text-red-500">Ohne Claimondo</div>
               <div className="text-center text-emerald-600">Mit Claimondo</div>
@@ -349,9 +345,9 @@ export default function VorteilePage() {
             {VERGLEICH.map((v, i) => (
               <div
                 key={v.punkt}
-                className={`grid grid-cols-3 px-6 py-4 text-sm ${i < VERGLEICH.length - 1 ? 'border-b border-[#e4e7ef]' : ''}`}
+                className={`grid grid-cols-3 px-6 py-4 text-sm ${i < VERGLEICH.length - 1 ? 'border-b border-claimondo-border' : ''}`}
               >
-                <div className="font-semibold text-[#0D1B3E]">{v.punkt}</div>
+                <div className="font-semibold text-claimondo-navy">{v.punkt}</div>
                 <div className="text-center text-red-500">{v.ohne}</div>
                 <div className="flex items-center justify-center gap-1 font-semibold text-emerald-700">
                   <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
@@ -364,7 +360,7 @@ export default function VorteilePage() {
       </section>
 
       {/* CTA — dunkle Sektion mit subtilen Spotlights */}
-      <section className="relative isolate overflow-hidden bg-[#0D1B3E] py-20 text-center">
+      <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-center">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -385,7 +381,7 @@ export default function VorteilePage() {
           <p className="mt-3 text-lg text-white/65">5 Minuten. Kostenlos. Unverbindlich.</p>
           <Link
             href="/schaden-melden"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-8 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-8 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
           >
             Schaden melden — 0 € Kosten
             <ChevronRight className="h-5 w-5" />

@@ -1,4 +1,4 @@
-// AAR-326 (Child 6 von AAR-320): Box für unzugeordnete Kunden-Uploads.
+﻿// AAR-326 (Child 6 von AAR-320): Box für unzugeordnete Kunden-Uploads.
 //
 // Kunden können über den AAR-324-Freier-Upload Dokumente als
 // `kunde-nachreichung` oder `sonstiges` hochladen — ohne konkretes Slot
@@ -73,7 +73,7 @@ export default function DokumenteUnzugeordnetBox({
                   href={doc.previewUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-claimondo-ondo/70 hover:text-[#4573A2] p-1"
+                  className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-1"
                   title="Dokument öffnen"
                 >
                   <ExternalLinkIcon className="w-3.5 h-3.5" />
@@ -85,7 +85,7 @@ export default function DokumenteUnzugeordnetBox({
                   setActiveDoc(doc)
                   setOpen(true)
                 }}
-                className="text-[10px] font-medium text-white bg-[#4573A2] hover:bg-[#1E3A5F] px-2.5 py-1 rounded-md"
+                className="text-[10px] font-medium text-white bg-claimondo-ondo hover:bg-claimondo-shield px-2.5 py-1 rounded-md"
               >
                 Zuordnen
               </button>

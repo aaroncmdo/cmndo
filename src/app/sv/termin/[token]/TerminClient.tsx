@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -61,10 +61,10 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
       <PageWrapper>
         <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 border border-claimondo-border">
           <div className="text-center mb-4">
-            <div className="w-14 h-14 rounded-full bg-[#4573A2]/10 flex items-center justify-center mx-auto mb-3">
+            <div className="w-14 h-14 rounded-full bg-claimondo-ondo/10 flex items-center justify-center mx-auto mb-3">
               <span className="text-2xl">{icon}</span>
             </div>
-            <h1 className="text-lg font-semibold text-[#0D1B3E]" style={{ fontFamily: 'Montserrat, sans-serif' }}>{title}</h1>
+            <h1 className="text-lg font-semibold text-claimondo-navy" style={{ fontFamily: 'Montserrat, sans-serif' }}>{title}</h1>
             <p className="text-sm text-claimondo-ondo mt-1">{message}</p>
           </div>
 
@@ -84,7 +84,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
           <div className={`w-14 h-14 rounded-full ${doneSuccess ? 'bg-green-500/10' : 'bg-red-500/10'} flex items-center justify-center mx-auto mb-3`}>
             <span className="text-2xl">{doneSuccess ? '✓' : '✗'}</span>
           </div>
-          <h1 className="text-lg font-semibold text-[#0D1B3E] mb-1">{doneSuccess ? 'Erledigt' : 'Fehler'}</h1>
+          <h1 className="text-lg font-semibold text-claimondo-navy mb-1">{doneSuccess ? 'Erledigt' : 'Fehler'}</h1>
           <p className="text-sm text-claimondo-ondo">{doneMessage}</p>
           <FallakteLink fallId={termin.fall_id} />
         </div>
@@ -130,7 +130,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
   return (
     <PageWrapper>
       <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/10 border border-claimondo-border">
-        <h1 className="text-lg font-semibold text-[#0D1B3E] mb-4" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+        <h1 className="text-lg font-semibold text-claimondo-navy mb-4" style={{ fontFamily: 'Montserrat, sans-serif' }}>
           Dein nächster Termin
         </h1>
 
@@ -149,9 +149,9 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
 
         {/* SV-eigener Gegenvorschlag Status */}
         {isSvGegenvorschlag && termin.vorgeschlagenes_datum && (
-          <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-2xl p-4 mb-4">
-            <p className="text-sm font-medium text-[#0D1B3E]">Du hast einen Gegenvorschlag gemacht</p>
-            <p className="text-sm text-[#1E3A5F]">
+          <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-2xl p-4 mb-4">
+            <p className="text-sm font-medium text-claimondo-navy">Du hast einen Gegenvorschlag gemacht</p>
+            <p className="text-sm text-claimondo-shield">
               Vorgeschlagenes Datum: {new Date(termin.vorgeschlagenes_datum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </p>
             <p className="text-xs text-claimondo-ondo mt-1">Wir warten auf Rückmeldung vom Kunden.</p>
@@ -160,8 +160,8 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
 
         {/* Hinweistext */}
         {!isSvGegenvorschlag && (
-          <div className="bg-[#4573A2]/5 border border-[#7BA3CC]/30 rounded-2xl px-4 py-3 mb-4">
-            <p className="text-xs text-[#1E3A5F]">
+          <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-2xl px-4 py-3 mb-4">
+            <p className="text-xs text-claimondo-shield">
               {isKundenGegenvorschlag
                 ? 'Der Kunde hat einen alternativen Termin vorgeschlagen. Du kannst annehmen, erneut gegenvorschlagen oder ablehnen.'
                 : 'Der Termin ist standardmäßig bestätigt. Hier nur eingreifen wenn du ablehnen oder verschieben möchtest.'}
@@ -174,12 +174,12 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
           <div className="space-y-3 mb-4">
             {isKundenGegenvorschlag && (
               <button onClick={handleAnnehmen} disabled={loading}
-                className="w-full py-3.5 rounded-2xl bg-[#1E3A5F] text-white font-medium text-sm hover:bg-[#4573A2] transition-colors disabled:opacity-40 active:scale-[0.98]">
+                className="w-full py-3.5 rounded-2xl bg-claimondo-shield text-white font-medium text-sm hover:bg-claimondo-ondo transition-colors disabled:opacity-40 active:scale-[0.98]">
                 {loading ? 'Wird verarbeitet...' : 'Vorschlag annehmen'}
               </button>
             )}
             <button onClick={() => setView('gegenvorschlag')} disabled={loading}
-              className="w-full py-3.5 rounded-2xl bg-white text-[#1E3A5F] font-medium text-sm border border-[#4573A2] hover:bg-[#f8f9fb] transition-colors disabled:opacity-40">
+              className="w-full py-3.5 rounded-2xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-ondo hover:bg-claimondo-bg transition-colors disabled:opacity-40">
               {isKundenGegenvorschlag ? 'Erneut gegenvorschlagen' : 'Neuen Termin vorschlagen'}
             </button>
             <button onClick={() => setView('ablehnen')} disabled={loading}
@@ -194,7 +194,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
           <div className="space-y-3 mb-4">
             <p className="text-sm text-claimondo-ondo">Möchtest du den Termin wirklich ablehnen?</p>
             <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full rounded-2xl border border-claimondo-border bg-[#f8f9fb] px-4 py-3 text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 resize-none focus:outline-none focus:ring-2 focus:ring-[#4573A2]" rows={3} />
+              className="w-full rounded-2xl border border-claimondo-border bg-claimondo-bg px-4 py-3 text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 resize-none focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" rows={3} />
             <button onClick={handleAblehnen} disabled={loading}
               className="w-full py-3.5 rounded-2xl bg-red-600 text-white font-medium text-sm hover:bg-red-700 transition-colors disabled:opacity-40 active:scale-[0.98]">
               {loading ? 'Wird verarbeitet...' : 'Termin endgültig ablehnen'}
@@ -209,11 +209,11 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
             <p className="text-sm text-claimondo-ondo">Schlage einen alternativen Termin vor:</p>
             <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="w-full rounded-2xl border border-claimondo-border bg-[#f8f9fb] px-4 py-3 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
+              className="w-full rounded-2xl border border-claimondo-border bg-claimondo-bg px-4 py-3 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" />
             <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
-              className="w-full rounded-2xl border border-claimondo-border bg-[#f8f9fb] px-4 py-3 text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 resize-none focus:outline-none focus:ring-2 focus:ring-[#4573A2]" rows={2} />
+              className="w-full rounded-2xl border border-claimondo-border bg-claimondo-bg px-4 py-3 text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 resize-none focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" rows={2} />
             <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
-              className="w-full py-3.5 rounded-2xl bg-[#1E3A5F] text-white font-medium text-sm hover:bg-[#4573A2] transition-colors disabled:opacity-40 active:scale-[0.98]">
+              className="w-full py-3.5 rounded-2xl bg-claimondo-shield text-white font-medium text-sm hover:bg-claimondo-ondo transition-colors disabled:opacity-40 active:scale-[0.98]">
               {loading ? 'Wird verarbeitet...' : 'Gegenvorschlag senden'}
             </button>
             <button onClick={() => setView('overview')} disabled={loading} className="w-full py-3 text-sm text-claimondo-ondo hover:text-claimondo-navy">Zurück</button>
@@ -230,14 +230,14 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
 
 function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-claimondo-bg flex flex-col items-center justify-center p-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-[#0D1B3E] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-claimondo-navy flex items-center justify-center">
               <span className="text-white font-bold text-sm">C</span>
             </div>
-            <span className="text-lg font-semibold text-[#0D1B3E]" style={{ fontFamily: 'Montserrat, sans-serif' }}>Claimondo</span>
+            <span className="text-lg font-semibold text-claimondo-navy" style={{ fontFamily: 'Montserrat, sans-serif' }}>Claimondo</span>
           </div>
         </div>
         {children}
@@ -249,14 +249,14 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
 
 function TerminInfoCard({ termin, datum, uhrzeit, mapsUrl }: { termin: TerminData; datum: string; uhrzeit: string; mapsUrl: string }) {
   return (
-    <div className="bg-[#f8f9fb] rounded-2xl p-4 mb-4 space-y-2">
+    <div className="bg-claimondo-bg rounded-2xl p-4 mb-4 space-y-2">
       <InfoRow label="Kunde" value={termin.kunde_name} />
       <InfoRow label="Datum" value={datum} />
       <InfoRow label="Uhrzeit" value={`${uhrzeit} Uhr`} />
       <div className="flex justify-between text-sm">
         <span className="text-claimondo-ondo">Adresse</span>
         <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
-          className="text-[#4573A2] font-medium text-right hover:underline max-w-[60%] truncate">
+          className="text-claimondo-ondo font-medium text-right hover:underline max-w-[60%] truncate">
           {termin.adresse}
         </a>
       </div>
@@ -282,7 +282,7 @@ function FallakteLink({ fallId }: { fallId: string | null }) {
   return (
     <div className="mt-4 pt-4 border-t border-claimondo-border">
       <Link href={`/gutachter/fall/${fallId}`}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-[#4573A2] font-medium text-sm border border-[#7BA3CC]/30 hover:bg-[#4573A2]/5 transition-colors">
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-claimondo-ondo font-medium text-sm border border-claimondo-light-blue/30 hover:bg-claimondo-ondo/5 transition-colors">
         → Zur vollständigen Fallakte
       </Link>
     </div>

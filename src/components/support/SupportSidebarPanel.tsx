@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // Hilfe & Support als Inline-Panel innerhalb der Sidebar.
 // Ersetzt den Sidebar-Inhalt mit einem Slide-in-Panel (gleiche Breite, kein
@@ -29,15 +29,15 @@ function PanelHeader({
           type="button"
           onClick={onClose}
           aria-label="Zurück zur Navigation"
-          className="p-1.5 -ml-1 rounded-lg text-[#4573A2] hover:text-[#0D1B3E] hover:bg-[#f8f9fb] transition-colors shrink-0"
+          className="p-1.5 -ml-1 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors shrink-0"
         >
           <ArrowLeftIcon className="w-4 h-4" />
         </button>
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm font-semibold text-[#0D1B3E] leading-tight">
+          <h2 className="text-sm font-semibold text-claimondo-navy leading-tight">
             Hilfe &amp; Support
           </h2>
-          <p className="text-[11px] text-[#4573A2] leading-tight truncate">
+          <p className="text-[11px] text-claimondo-ondo leading-tight truncate">
             {mode === 'durchdenken'
               ? 'Feature durchdenken'
               : 'KI-Assistenz · legt Linear-Tickets an'}
@@ -55,7 +55,7 @@ function PanelHeader({
             className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-colors ${
               mode === 'durchdenken'
                 ? 'bg-violet-50 text-violet-700 border-violet-200'
-                : 'bg-[#f8f9fb] text-[#4573A2] border-[#e8eaf0] hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200'
+                : 'bg-claimondo-bg text-claimondo-ondo border-[#e8eaf0] hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200'
             }`}
             aria-pressed={mode === 'durchdenken'}
           >

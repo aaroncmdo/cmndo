@@ -1,4 +1,4 @@
-// AAR-327 (Child 7 von AAR-320): Liste der Dokumente, die die aktuelle Rolle
+﻿// AAR-327 (Child 7 von AAR-320): Liste der Dokumente, die die aktuelle Rolle
 // (oder der aktuelle User) beim Kunden angefordert hat. Zeigt Status +
 // Frist-Overdue. Der Parent lädt die Rows und filtert die Rolle/User-Match
 // server-seitig, damit jede Rolle nur ihre eigenen Anforderungen sieht.
@@ -55,7 +55,7 @@ function statusBadge(status: string, frist: string | null): {
     case 'abgelehnt':
       return {
         icon: XCircleIcon,
-        bg: 'bg-[#f8f9fb] border-claimondo-border',
+        bg: 'bg-claimondo-bg border-claimondo-border',
         text: 'text-claimondo-ondo',
         labelTxt: 'Abgelehnt',
       }
@@ -98,7 +98,7 @@ export default function AnforderungenListe({
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-1 text-[10px] font-medium text-[#4573A2] hover:text-[#1E3A5F]"
+          className="inline-flex items-center gap-1 text-[10px] font-medium text-claimondo-ondo hover:text-claimondo-shield"
         >
           <PlusIcon className="w-3 h-3" /> Neue Anforderung
         </button>

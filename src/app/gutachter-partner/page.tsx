@@ -163,7 +163,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
 
 export default function GutachterPartnerPage() {
   return (
-    <div className="min-h-screen bg-[#0D1B3E] text-white">
+    <div className="min-h-screen bg-claimondo-navy text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
@@ -185,7 +185,7 @@ export default function GutachterPartnerPage() {
       <header
         className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl"
         style={{
-          background: 'rgba(13,27,62,0.72)',
+          background: 'rgba(13,27,62,0.80)',
           WebkitBackdropFilter: 'saturate(180%) blur(24px)',
           backdropFilter: 'saturate(180%) blur(24px)',
         }}
@@ -201,9 +201,9 @@ export default function GutachterPartnerPage() {
                 className="text-xl font-bold tracking-tight text-white"
                 style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
               >
-                claim<span className="text-[#7BA3CC]">ondo</span>
+                claim<span className="text-claimondo-light-blue">ondo</span>
               </span>
-              <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#7BA3CC]">
+              <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-claimondo-light-blue">
                 Partner
               </span>
             </span>
@@ -226,7 +226,7 @@ export default function GutachterPartnerPage() {
           </nav>
           <a
             href="#waitlist"
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#4573A2] px-5 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(69,115,162,0.5)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_6px_18px_rgba(123,163,204,0.55)] active:scale-[0.97]"
+            className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-ondo px-5 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(69,115,162,0.5)] transition-all duration-200 hover:bg-claimondo-light-blue hover:shadow-[0_6px_18px_rgba(123,163,204,0.55)] active:scale-[0.97]"
           >
             Auf die Warteliste
             <ChevronRight className="h-4 w-4" />
@@ -237,12 +237,12 @@ export default function GutachterPartnerPage() {
       {/* ── Hero ───────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-[#4573A2]/20 blur-[120px]" />
-          <div className="absolute -bottom-32 right-1/4 h-96 w-96 rounded-full bg-[#1E3A5F]/40 blur-[120px]" />
+          <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-claimondo-ondo/20 blur-[120px]" />
+          <div className="absolute -bottom-32 right-1/4 h-96 w-96 rounded-full bg-claimondo-navy/40 blur-[120px]" />
         </div>
 
         <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-20 sm:px-6 sm:pt-28">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#4573A2]/40 bg-[#4573A2]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-[#7BA3CC]">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-claimondo-ondo/40 bg-claimondo-ondo/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-claimondo-light-blue">
             DAT-Expert · BVSK · §164 BGB-Sicherungsabtretung
           </div>
 
@@ -251,7 +251,7 @@ export default function GutachterPartnerPage() {
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             Mehr Aufträge.{' '}
-            <span className="bg-gradient-to-r from-[#7BA3CC] to-[#4573A2] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-claimondo-light-blue to-claimondo-ondo bg-clip-text text-transparent">
               100 % BVSK.
             </span>{' '}
             Null Bürokratie.
@@ -283,7 +283,7 @@ export default function GutachterPartnerPage() {
           <div className="mt-10 flex flex-col items-start gap-3 sm:flex-row">
             <a
               href="#waitlist"
-              className="inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
             >
               Auf die Warteliste — Gebiet sehen
               <ArrowRight className="h-5 w-5" />
@@ -299,9 +299,9 @@ export default function GutachterPartnerPage() {
       </section>
 
       {/* ── Drei Säulen ───────────────────────────────────── */}
-      <section id="warum" className="border-y border-white/10 bg-[#0a1428]/60 py-24">
+      <section id="warum" className="border-y border-white/10 bg-claimondo-navy/95 py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">
+          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-claimondo-light-blue">
             Warum Claimondo
           </div>
           <h2
@@ -317,10 +317,10 @@ export default function GutachterPartnerPage() {
               return (
                 <div
                   key={s.title}
-                  className="group rounded-3xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur transition-all hover:border-[#4573A2]/50 hover:bg-white/[0.08]"
+                  className="group rounded-3xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur transition-all hover:border-claimondo-ondo/50 hover:bg-white/[0.08]"
                 >
-                  <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#4573A2]/20">
-                    <Icon className="h-6 w-6 text-[#7BA3CC]" />
+                  <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-claimondo-ondo/20">
+                    <Icon className="h-6 w-6 text-claimondo-light-blue" />
                   </div>
                   <h3 className="text-xl font-bold text-white">{s.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-white/60">{s.text}</p>
@@ -334,7 +334,7 @@ export default function GutachterPartnerPage() {
       {/* ── Ablauf ──────────────────────────────────────────── */}
       <section id="ablauf" className="py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">
+          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-claimondo-light-blue">
             Ablauf — vier Schritte
           </div>
           <h2
@@ -350,12 +350,12 @@ export default function GutachterPartnerPage() {
               return (
                 <div key={s.nr} className="relative">
                   {i < SCHRITTE.length - 1 && (
-                    <div className="absolute left-[calc(50%+2rem)] top-6 hidden h-px w-full bg-gradient-to-r from-[#4573A2]/40 to-transparent lg:block" />
+                    <div className="absolute left-[calc(50%+2rem)] top-6 hidden h-px w-full bg-gradient-to-r from-claimondo-ondo/40 to-transparent lg:block" />
                   )}
                   <div className="relative">
-                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#4573A2]/40 bg-[#4573A2]/15">
-                      <Icon className="h-6 w-6 text-[#7BA3CC]" />
-                      <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#4573A2] text-[10px] font-black text-white">
+                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-claimondo-ondo/40 bg-claimondo-ondo/15">
+                      <Icon className="h-6 w-6 text-claimondo-light-blue" />
+                      <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-claimondo-ondo text-[10px] font-black text-white">
                         {s.nr}
                       </div>
                     </div>
@@ -370,9 +370,9 @@ export default function GutachterPartnerPage() {
       </section>
 
       {/* ── Honorar-Erklärung ─────────────────────────────── */}
-      <section id="honorar" className="border-y border-white/10 bg-[#060e1f] py-24">
+      <section id="honorar" className="border-y border-white/10 bg-claimondo-navy py-24">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">
+          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-claimondo-light-blue">
             Honorar &amp; Auszahlung
           </div>
           <h2
@@ -384,11 +384,11 @@ export default function GutachterPartnerPage() {
 
           <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="rounded-3xl border border-white/10 bg-white/5 p-7 backdrop-blur">
-              <Briefcase className="h-7 w-7 text-[#7BA3CC]" />
+              <Briefcase className="h-7 w-7 text-claimondo-light-blue" />
               <h3 className="mt-4 text-lg font-bold text-white">So läuft die Abrechnung</h3>
               <ol className="mt-4 space-y-3 text-sm text-white/65">
                 <li className="flex gap-3">
-                  <span className="font-bold text-[#7BA3CC]">1</span>
+                  <span className="font-bold text-claimondo-light-blue">1</span>
                   <span>
                     Geschädigter unterzeichnet die Sicherungsabtretung an dich.
                     Damit ist dein Honorar rechtlich abgesichert (§164 BGB,
@@ -396,14 +396,14 @@ export default function GutachterPartnerPage() {
                   </span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="font-bold text-[#7BA3CC]">2</span>
+                  <span className="font-bold text-claimondo-light-blue">2</span>
                   <span>
                     Du erstellst dein Gutachten. Honorar nach BVSK-Tabelle 100% —
                     keine Plattform-Provision, keine Pauschalen-Kürzung.
                   </span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="font-bold text-[#7BA3CC]">3</span>
+                  <span className="font-bold text-claimondo-light-blue">3</span>
                   <span>
                     LexDrive (Partnerkanzlei Köln) reicht das Honorar bei der
                     gegnerischen Versicherung ein und setzt es durch — auch
@@ -411,7 +411,7 @@ export default function GutachterPartnerPage() {
                   </span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="font-bold text-[#7BA3CC]">4</span>
+                  <span className="font-bold text-claimondo-light-blue">4</span>
                   <span>
                     Versicherung zahlt direkt auf dein Konto. Übliche Frist:
                     4–8 Wochen. Streitfälle laufen über LexDrive — kein Risiko
@@ -422,7 +422,7 @@ export default function GutachterPartnerPage() {
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-white/5 p-7 backdrop-blur">
-              <TrendingUp className="h-7 w-7 text-[#7BA3CC]" />
+              <TrendingUp className="h-7 w-7 text-claimondo-light-blue" />
               <h3 className="mt-4 text-lg font-bold text-white">Was Claimondo verdient</h3>
               <p className="mt-4 text-sm leading-relaxed text-white/65">
                 Wir verdienen <span className="font-semibold text-white">nicht an deinem Honorar</span>.
@@ -431,8 +431,8 @@ export default function GutachterPartnerPage() {
                 Das ist genau das Modell mit dem etablierte Anwalts-SV-
                 Kooperationen seit Jahrzehnten arbeiten.
               </p>
-              <div className="mt-5 rounded-2xl bg-[#4573A2]/15 p-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-[#7BA3CC]">
+              <div className="mt-5 rounded-2xl bg-claimondo-ondo/15 p-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-claimondo-light-blue">
                   Folge für dich
                 </p>
                 <p className="mt-1 text-sm text-white">
@@ -449,7 +449,7 @@ export default function GutachterPartnerPage() {
       <section id="waitlist" className="py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mb-10 max-w-3xl">
-            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">
+            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-claimondo-light-blue">
               Warteliste — Region zuerst freischalten
             </div>
             <h2
@@ -470,9 +470,9 @@ export default function GutachterPartnerPage() {
       </section>
 
       {/* ── FAQ ───────────────────────────────────────────── */}
-      <section id="faq" className="border-y border-white/10 bg-[#0a1428]/60 py-24">
+      <section id="faq" className="border-y border-white/10 bg-claimondo-navy/95 py-24">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">
+          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-claimondo-light-blue">
             Fragen &amp; Antworten
           </div>
           <h2
@@ -490,7 +490,7 @@ export default function GutachterPartnerPage() {
               >
                 <summary className="flex cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left">
                   <span className="text-base font-semibold text-white">{f.frage}</span>
-                  <ChevronRight className="h-5 w-5 flex-shrink-0 text-[#7BA3CC] transition-transform group-open:rotate-90" />
+                  <ChevronRight className="h-5 w-5 flex-shrink-0 text-claimondo-light-blue transition-transform group-open:rotate-90" />
                 </summary>
                 <div className="border-t border-white/10 px-6 py-5 text-sm leading-relaxed text-white/65">
                   {f.antwort}
@@ -516,7 +516,7 @@ export default function GutachterPartnerPage() {
           <div className="mt-8 flex justify-center">
             <a
               href="#waitlist"
-              className="inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-9 py-4 text-lg font-bold text-white shadow-[0_12px_36px_rgba(69,115,162,0.55)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_16px_44px_rgba(123,163,204,0.60)] active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-9 py-4 text-lg font-bold text-white shadow-[0_12px_36px_rgba(69,115,162,0.55)] transition-all duration-200 hover:bg-claimondo-light-blue hover:shadow-[0_16px_44px_rgba(123,163,204,0.60)] active:scale-[0.98]"
             >
               Jetzt eintragen
               <ArrowRight className="h-5 w-5" />
@@ -542,7 +542,7 @@ export default function GutachterPartnerPage() {
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center gap-1">
               <span className="text-lg font-bold text-white">Claim</span>
-              <span className="text-lg font-bold text-[#7BA3CC]">ondo</span>
+              <span className="text-lg font-bold text-claimondo-light-blue">ondo</span>
               <span className="ml-2 text-sm text-white/30">Partner-Plattform</span>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/40">

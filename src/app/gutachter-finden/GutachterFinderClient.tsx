@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useTranslations } from 'next-intl'
@@ -651,7 +651,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
       {phase === 'routing' && (
         <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0">
           <div
-            className="mx-4 w-full max-w-sm rounded-3xl border border-white/40 p-7"
+            className="glass-card mx-4 w-full max-w-sm rounded-3xl p-7"
             style={{
               background: 'rgba(255,255,255,0.82)',
               backdropFilter: 'blur(20px)',
@@ -716,7 +716,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               boxShadow: '0 20px 60px rgba(13,27,62,0.18)',
             }}
           >
-            <p className="mb-1 text-center text-xs font-bold uppercase tracking-[0.18em] text-[#4573A2]">
+            <p className="mb-1 text-center text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
               {t('vor_ort_fotos.step_label')}
             </p>
             <h2
@@ -812,7 +812,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               boxShadow: '0 20px 60px rgba(13,27,62,0.18)',
             }}
           >
-            <p className="mb-1 text-center text-xs font-bold uppercase tracking-[0.18em] text-[#4573A2]">
+            <p className="mb-1 text-center text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
               {t('vor_ort_kontakt.step_label')}
             </p>
             <h2
@@ -949,7 +949,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
       {phase === 'wann' && (
         <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0">
           <div
-            className="mx-4 w-full max-w-sm rounded-3xl border border-white/40 p-7"
+            className="glass-card mx-4 w-full max-w-sm rounded-3xl p-7"
             style={{
               background: 'rgba(255,255,255,0.82)',
               backdropFilter: 'blur(20px)',
@@ -1025,7 +1025,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
       {phase === 'schaden' && (
         <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0 overflow-y-auto">
           <div
-            className="mx-4 my-4 w-full max-w-sm rounded-3xl border border-white/40 p-7"
+            className="glass-card mx-4 my-4 w-full max-w-sm rounded-3xl p-7"
             style={{
               background: 'rgba(255,255,255,0.82)',
               backdropFilter: 'blur(20px)',
@@ -1138,7 +1138,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
       {phase === 'fahrzeug' && (
         <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0 overflow-y-auto">
           <div
-            className="mx-4 my-4 w-full max-w-sm rounded-3xl border border-white/40 p-7"
+            className="glass-card mx-4 my-4 w-full max-w-sm rounded-3xl p-7"
             style={{
               background: 'rgba(255,255,255,0.82)',
               backdropFilter: 'blur(20px)',
@@ -1209,7 +1209,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
       {phase === 'gps' && (
         <div className="absolute inset-0 flex items-end justify-center pb-12 sm:items-center sm:pb-0">
           <div
-            className="mx-4 w-full max-w-sm rounded-3xl border border-white/40 p-7"
+            className="glass-card mx-4 w-full max-w-sm rounded-3xl p-7"
             style={{
               background: 'rgba(255,255,255,0.82)',
               backdropFilter: 'blur(20px)',

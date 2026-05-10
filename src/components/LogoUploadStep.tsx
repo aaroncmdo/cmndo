@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
@@ -87,11 +87,11 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
   return (
     <div className="space-y-5">
       {/* BUG-95: Header in Claimondo-CI ohne Grün */}
-      <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-4 flex items-start gap-3">
-        <CheckCircle2Icon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-[#0D1B3E]">
+      <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-xl p-4 flex items-start gap-3">
+        <CheckCircle2Icon className="w-5 h-5 text-claimondo-ondo flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-claimondo-navy">
           <p className="font-semibold">Herzlichen Dank für Ihre Anzahlung!</p>
-          <p className="text-xs text-[#1E3A5F] mt-1">
+          <p className="text-xs text-claimondo-shield mt-1">
             Letzter Schritt: Lade jetzt dein Logo hoch für dein eigenes Branding.
             Die Farben werden automatisch aus deinem Logo extrahiert und auf dein
             gesamtes Portal angewendet.
@@ -105,8 +105,8 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           {...getRootProps()}
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors ${
             isDragActive
-              ? 'border-[#4573A2] bg-[#4573A2]/5'
-              : 'border-claimondo-border bg-[#f8f9fb] hover:border-[#4573A2] hover:bg-[#f8f9fb]'
+              ? 'border-claimondo-ondo bg-claimondo-ondo/5'
+              : 'border-claimondo-border bg-claimondo-bg hover:border-claimondo-ondo hover:bg-claimondo-bg'
           } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
         >
           <input {...getInputProps()} />
@@ -116,7 +116,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           </p>
           <p className="text-[11px] text-claimondo-ondo mt-1">PNG, JPG, SVG oder WebP — max 2 MB</p>
           {uploading && (
-            <p className="text-xs text-[#4573A2] mt-3">Logo wird verarbeitet ...</p>
+            <p className="text-xs text-claimondo-ondo mt-3">Logo wird verarbeitet ...</p>
           )}
         </div>
       ) : (
@@ -131,7 +131,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
               </div>
               <div>
                 <p className="text-sm font-medium text-claimondo-navy flex items-center gap-1.5">
-                  <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
+                  <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
                   Logo hochgeladen
                 </p>
                 <p className="text-[11px] text-claimondo-ondo mt-0.5">Farben automatisch extrahiert und angewendet</p>
@@ -162,7 +162,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           type="button"
           onClick={onDone}
           disabled={uploading}
-          className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
+          className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
         >
           Später machen
         </button>
@@ -171,7 +171,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           loadingText="Wird hochgeladen ..."
           onClick={onDone}
           disabled={!logoUrl}
-          className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {logoUrl ? 'Weiter' : 'Bitte zuerst Logo hochladen'}
         </LoadingButton>

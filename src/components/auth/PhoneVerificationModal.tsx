@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // KFZ-184 Phase B: Phone Verification Modal (Onboarding + Profil).
 // AAR-781: Migriert auf Modal-Primitive.
@@ -56,7 +56,7 @@ export default function PhoneVerificationModal({
       <div>
         <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
           <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-            <SmartphoneIcon className="w-4 h-4 text-[#4573A2]" /> Telefon verifizieren
+            <SmartphoneIcon className="w-4 h-4 text-claimondo-ondo" /> Telefon verifizieren
           </h3>
           <button onClick={onClose} className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-1">
             <XIcon className="w-4 h-4" />
@@ -75,11 +75,11 @@ export default function PhoneVerificationModal({
               <input
                 type="tel" value={telefon} onChange={e => setTelefon(e.target.value)}
                 placeholder="+49 163 1234567"
-                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
               />
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button onClick={handleSendCode} disabled={pending}
-                className="w-full py-2.5 rounded-xl bg-[#1E3A5F] text-white text-sm font-semibold disabled:opacity-50">
+                className="w-full py-2.5 rounded-xl bg-claimondo-shield text-white text-sm font-semibold disabled:opacity-50">
                 {pending ? 'Wird gesendet...' : 'Code senden'}
               </button>
             </div>
@@ -90,11 +90,11 @@ export default function PhoneVerificationModal({
                 type="text" inputMode="numeric" maxLength={6} value={code}
                 onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000" autoFocus
-                className="w-full text-center text-xl font-mono tracking-[0.4em] bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+                className="w-full text-center text-xl font-mono tracking-[0.4em] bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
               />
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button onClick={handleVerify} disabled={pending || code.length !== 6}
-                className="w-full py-2.5 rounded-xl bg-[#1E3A5F] text-white text-sm font-semibold disabled:opacity-50">
+                className="w-full py-2.5 rounded-xl bg-claimondo-shield text-white text-sm font-semibold disabled:opacity-50">
                 {pending ? 'Wird geprüft...' : 'Verifizieren'}
               </button>
               <button onClick={() => { setStep('phone'); setCode(''); setError(null) }}

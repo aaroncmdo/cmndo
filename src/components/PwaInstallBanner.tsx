@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { DownloadIcon, XIcon } from 'lucide-react'
@@ -48,14 +48,14 @@ export default function PwaInstallBanner() {
   if (!show) return null
 
   return (
-    <div className="fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50 bg-[#0D1B3E] text-white rounded-2xl p-4 shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom">
+    <div className="fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50 bg-claimondo-navy text-white rounded-2xl p-4 shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom">
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold">Claimondo installieren</p>
         <p className="text-[11px] text-claimondo-ondo/50 mt-0.5">Schnellzugriff ohne Browser. Offline-fähig.</p>
       </div>
       <button
         onClick={handleInstall}
-        className="flex items-center gap-1.5 bg-[#4573A2] hover:bg-[#7BA3CC] text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors flex-shrink-0"
+        className="flex items-center gap-1.5 bg-claimondo-ondo hover:bg-claimondo-light-blue text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors flex-shrink-0"
       >
         <DownloadIcon className="w-3.5 h-3.5" /> Installieren
       </button>

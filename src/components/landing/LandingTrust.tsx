@@ -15,7 +15,16 @@ export async function LandingTrust() {
   const t = await getTranslations('landing.trust')
 
   return (
-    <section className="bg-white py-16" aria-labelledby="trust-heading">
+    // Ambient-Gradient-Hintergrund gibt der Trust-Section optische Tiefe
+    // ohne den Übergang zur Hero-Section zu hart zu machen.
+    <section
+      className="relative overflow-hidden bg-claimondo-bg py-16"
+      aria-labelledby="trust-heading"
+      style={{
+        backgroundImage:
+          'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.18), transparent 65%)',
+      }}
+    >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <h2
           id="trust-heading"
@@ -27,7 +36,12 @@ export async function LandingTrust() {
           {FEATURES.map((f) => {
             const Icon = f.icon
             return (
-              <div key={f.key} className="text-center">
+              /* Glass-Card-SM für jeden Feature-Block — konsistent mit
+                 dem iOS-Design-System der restlichen Landing-Sections. */
+              <div
+                key={f.key}
+                className="glass-card-sm rounded-2xl p-6 text-center shadow-[0_4px_20px_rgba(13,27,62,0.07)]"
+              >
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-claimondo-ondo/10">
                   <Icon className="h-7 w-7 text-claimondo-ondo" aria-hidden="true" />
                 </div>

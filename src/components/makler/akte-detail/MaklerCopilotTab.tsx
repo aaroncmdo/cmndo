@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-489 (M7): Makler-Copilot Tab — Claude-Sonnet-4.6 mit vollem Fall-
 // Kontext. Streaming via /api/makler/copilot. Greeting + 4 Suggestion-
@@ -157,9 +157,9 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e4e7ef] overflow-hidden flex flex-col">
+    <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-[#e4e7ef] bg-gradient-to-br from-[#0D1B3E] to-[#1E3A5F] text-white">
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border bg-gradient-to-br from-[#0D1B3E] to-[#1E3A5F] text-white">
         <span className="shrink-0 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
           <SparklesIcon width={20} height={20} />
         </span>
@@ -205,7 +205,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
                   type="button"
                   onClick={() => void ask(s.query)}
                   disabled={streaming}
-                  className="text-left px-3 py-2.5 rounded-xl border border-[#e4e7ef] bg-white hover:border-claimondo-ondo hover:bg-claimondo-ondo/5 text-sm text-claimondo-navy inline-flex items-center gap-2 disabled:opacity-50"
+                  className="text-left px-3 py-2.5 rounded-xl border border-claimondo-border bg-white hover:border-claimondo-ondo hover:bg-claimondo-ondo/5 text-sm text-claimondo-navy inline-flex items-center gap-2 disabled:opacity-50"
                 >
                   <span className="text-claimondo-ondo">{s.icon}</span>
                   <span className="flex-1">{s.label}</span>
@@ -235,7 +235,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
       {/* Input */}
       <form
         onSubmit={handleSubmit}
-        className="flex items-end gap-2 p-3 border-t border-[#e4e7ef] bg-white"
+        className="flex items-end gap-2 p-3 border-t border-claimondo-border bg-white"
       >
         <textarea
           value={input}
@@ -249,7 +249,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
           rows={1}
           maxLength={2000}
           placeholder="Fragen Sie den Copilot …"
-          className="flex-1 resize-none rounded-lg border border-[#e4e7ef] bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
+          className="flex-1 resize-none rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
           disabled={streaming}
         />
         <button
@@ -278,7 +278,7 @@ function AssistantBubble({ children }: { children: React.ReactNode }) {
       >
         <SparklesIcon width={16} height={16} />
       </div>
-      <div className="flex-1 max-w-[85%] bg-white border border-[#e4e7ef] rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
+      <div className="flex-1 max-w-[85%] bg-white border border-claimondo-border rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
         {children}
       </div>
     </div>
@@ -317,7 +317,7 @@ function MessageRow({
       >
         <SparklesIcon width={16} height={16} />
       </div>
-      <div className="flex-1 max-w-[85%] bg-white border border-[#e4e7ef] rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
+      <div className="flex-1 max-w-[85%] bg-white border border-claimondo-border rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
         {empty && isLastAssistant ? (
           <span className="inline-flex items-center gap-2 text-claimondo-ondo">
             <Loader2Icon width={14} height={14} className="animate-spin" />

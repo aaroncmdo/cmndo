@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-140 / W6: Phase 4 Stammdaten mit Inline-Edit + Auto-Save on-blur.
 // Alle Felder sind einzeln editierbar und werden beim Verlassen des Inputs
@@ -771,7 +771,7 @@ export default function Phase4Stammdaten() {
       {/* AAR-665-Follow: Schadenbeschreibungs-Card (WAS am Auto kaputt).
           Optional, kein Hard-Gate. Mit „Kunde hat Unfallfotos"-Checkmark
           für Bulk-Anforderung via DokumenteAnfordernCard. */}
-      <div className="rounded-xl bg-white border border-[#e4e7ef] p-4 space-y-3">
+      <div className="rounded-xl bg-white border border-claimondo-border p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <p className="text-xs font-semibold text-claimondo-navy flex items-center gap-1.5">
             <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-638/641/643: Client-Variant der Termin-Liste. Lädt die Termine nach
 // Mount via Browser-Client (Supabase). Pattern parallel zu FallRueckrufSection
@@ -29,8 +29,8 @@ type Normalized = {
 const TYP_META: Record<TerminTyp, { label: string; icon: typeof PhoneCallIcon; cls: string }> = {
   rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
-  gutachter: { label: 'Gutachter', icon: HardHatIcon, cls: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' },
+  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
+  gutachter: { label: 'Gutachter', icon: HardHatIcon, cls: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' },
   kb_beratung: { label: 'KB-Beratung', icon: VideoIcon, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
 }
 
@@ -212,7 +212,7 @@ function Row({ r, dispatchLinks, onRueckrufClick }: { r: Normalized; dispatchLin
       <button
         type="button"
         onClick={() => onRueckrufClick(r.leadId!)}
-        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-[#f8f9fb] transition-colors text-left"
+        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-claimondo-bg transition-colors text-left"
       >
         {inner}
       </button>
@@ -226,7 +226,7 @@ function Row({ r, dispatchLinks, onRueckrufClick }: { r: Normalized; dispatchLin
       : '#'
 
   return (
-    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-[#f8f9fb] transition-colors">
+    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-claimondo-bg transition-colors">
       {inner}
     </Link>
   )

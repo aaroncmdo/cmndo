@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-307: Rollen-gated Button für das Task-Anlegen-Modal.
 // Rendert nur wenn der aktuelle Nutzer eine erlaubte Rolle hat (KB/SV/Admin).
@@ -27,8 +27,8 @@ export function TaskAnlegenButton({
 
   const className =
     variant === 'primary'
-      ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-xs font-medium text-claimondo-navy hover:bg-[#f8f9fb]'
-      : 'inline-flex items-center gap-1 text-xs font-medium text-[#4573A2] hover:text-[#0D1B3E]'
+      ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg'
+      : 'inline-flex items-center gap-1 text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy'
 
   return (
     <>
