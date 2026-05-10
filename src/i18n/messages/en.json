@@ -362,5 +362,152 @@
       "p2": "Claimondo coordinates the entire claim settlement process: independent expert report by DAT-certified appraisers, legal enforcement through partner law firm LexDrive, and full payment of all entitlements under §249 BGB (German Civil Code on damage compensation) — repair costs, diminished value (Wertminderung), loss of use (Nutzungsausfall), rental car, and pain and suffering. The service is free of charge for injured parties who are not at fault.",
       "p3": "The partner network currently comprises 89+ DAT-Expert appraisers in North Rhine-Westphalia, with nationwide expansion to approximately 460 appraisers planned. Appointments are typically available within 48 hours. The legal basis for the right to an independent appraiser is §249 BGB as well as established BGH case law (including VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     }
+  },
+  "gutachter_finder": {
+    "legal": "Free for no-fault injured parties · §249 BGB",
+    "routing": {
+      "heading": "Are you currently at the accident scene?",
+      "sub": "We'll tailor the process to your situation.",
+      "cta_vor_ort": "Yes, at the scene — immediate intake",
+      "cta_termin": "No — book an appointment later"
+    },
+    "vor_ort_fotos": {
+      "step_label": "Step 1 of 2 · Photos",
+      "heading": "Photos of the accident",
+      "sub": "At least one photo — ideally four (overview, damage close-up, license plate, surroundings). GPS and timestamp are saved automatically.",
+      "cta_min": "At least one photo",
+      "cta_weiter": "Continue ({count} {count, plural, one {photo} other {photos}}) →",
+      "btn_erstes": "Take first photo",
+      "btn_weiteres": "Add another photo",
+      "uploading": "Adding photo …",
+      "zurueck": "← Back"
+    },
+    "vor_ort_kontakt": {
+      "step_label": "Step 2 of 2 · Contact",
+      "heading": "How can we reach you?",
+      "sub": "We'll call you back within the next 5 minutes and dispatch an expert.",
+      "placeholder_vorname": "First name",
+      "placeholder_nachname": "Last name",
+      "placeholder_telefon": "Phone number",
+      "placeholder_email": "Email address",
+      "cta": "Request immediate assistance →",
+      "sending": "Sending …",
+      "zurueck": "← Change photos"
+    },
+    "vor_ort_erfolg": {
+      "heading": "Immediate assistance is on the way",
+      "sub": "We'll call you back at {telefon} within the next 5 minutes.",
+      "fotos_gespeichert": "{count} {count, plural, one {photo} other {photos}} saved",
+      "gps_label": "GPS"
+    },
+    "wann": {
+      "heading": "When do you need the expert?",
+      "sub": "We'll tailor the process to your situation.",
+      "sofort_titel": "Immediately",
+      "sofort_sub": "I'm at the accident scene — Express Assessment",
+      "heute_titel": "Today",
+      "heute_sub": "During the day — flexible appointment",
+      "tage_titel": "In the next few days",
+      "tage_sub": "Schedule an appointment at your convenience"
+    },
+    "schaden": {
+      "heading": "What happened?",
+      "sub": "So we can assign the right expert for your claim.",
+      "kz_label": "License plate of the at-fault party",
+      "kz_placeholder": "K AB 1234",
+      "kz_unbekannt": "License plate unknown / hit and run?",
+      "kz_unbekannt_set": "✓ License plate unknown",
+      "weiter": "Continue →",
+      "zurueck": "← Back",
+      "auffahrunfall": "Rear-end collision",
+      "parkschaden": "Parking damage",
+      "kreuzungsunfall": "Intersection accident",
+      "wildschaden": "Wildlife damage",
+      "sonstiges": "Other damage"
+    },
+    "fahrzeug": {
+      "heading": "What type of vehicle?",
+      "sub": "We select an expert with the right specialization.",
+      "weiter": "Continue →",
+      "zurueck": "← Back",
+      "pkw": "Car",
+      "motorrad": "Motorcycle",
+      "transporter": "Van",
+      "lkw": "Truck",
+      "wohnmobil": "Motorhome"
+    },
+    "gps": {
+      "heading": "Experts near you",
+      "sub": "We'll show you the next available DAT-certified expert in your area right away.",
+      "cta": "Share location",
+      "loading": "Detecting location …",
+      "hint": "Only used for expert search · Data is not stored",
+      "fehler_denied": "Location access denied — please allow it in your browser settings.",
+      "fehler_generic": "Location could not be determined."
+    },
+    "karte": {
+      "banner": "{count} {count, plural, one {appraiser} other {appraisers}} near you",
+      "banner_keine": "No appraisers found near you"
+    },
+    "detail": {
+      "entfernt": "{km} km away",
+      "dat_badge": "DAT Expert Partner",
+      "freie_termine": "Available appointments",
+      "termin_reservieren": "Reserve appointment →",
+      "legal": "Free for injured parties with no fault · €0 out of pocket",
+      "slot_aendern": "change"
+    },
+    "ansprueche": {
+      "badge": "Your right under §249 BGB",
+      "heading": "Don't leave money on the table",
+      "sub": "Insurers reduce payouts in <highlight_8von10>8 out of 10</highlight_8von10> cases. Those who settle without a lawyer often accept the first reduction — losing an average of over <highlight_3000>€3,000</highlight_3000>.",
+      "sub_8von10": "8 out of 10",
+      "sub_3000": "€3,000",
+      "voll_badge": "Recommended",
+      "voll_heading": "Have your claim fully settled",
+      "voll_li1": "Independent appraiser documents all damage items",
+      "voll_li2": "Specialist lawyer with 2,000+ cases/year files within 30 days",
+      "voll_li3": "We handle all communication on your behalf",
+      "voll_kostenlos": "€0 for you — insurance pays lawyer + appraiser",
+      "beispiel_label": "Example · €4,800 claim amount",
+      "beispiel_plus": "Plus what would otherwise be reduced",
+      "beispiel_anwalt": "Your lawyer demands the full amount",
+      "nur_gutachten": "Expert report only — settle yourself →",
+      "zurueck": "← Choose a different appointment"
+    },
+    "formular": {
+      "heading": "Your contact details",
+      "placeholder_vorname": "First name",
+      "placeholder_nachname": "Last name",
+      "placeholder_telefon": "Phone number",
+      "placeholder_email": "Email address",
+      "signatur_label": "Your signature",
+      "signatur_hint": "Sign here with your finger",
+      "signatur_neu": "redraw",
+      "agb_text": "I authorise the arrangement of a KFZ-Sachverständiger and claim settlement. All costs are borne by the opposing insurance. I agree to the <link_agb>T&Cs</link_agb>, the <link_datenschutz>Privacy Policy</link_datenschutz>, and the <link_nutzung>Terms of Use</link_nutzung>.",
+      "agb_link": "T&Cs",
+      "datenschutz_link": "Privacy Policy",
+      "nutzung_link": "Terms of Use",
+      "legal_toggle_mehr": "Full legal text",
+      "legal_toggle_weniger": "Less",
+      "legal_volltext": "I hereby engage Claimondo GmbH (i.Gr.), Hansaring 10, 50670 Köln, to arrange a certified KFZ-Sachverständiger for the assessment of the accident damage to my vehicle, and to handle the full claim settlement through a cooperating partner law firm. The costs for the expert and legal representation are borne by the at-fault party's liability insurer pursuant to §249 BGB. I incur no costs.",
+      "cta_senden": "Send expert now →",
+      "cta_senden_termin": "Confirm appointment →",
+      "sending": "Booking in progress …",
+      "hint_meldung": "Your expert will be in touch within 30 minutes"
+    },
+    "erfolg": {
+      "heading": "Appointment confirmed!",
+      "sub": "{sv_vorname} will come to you at the chosen appointment.",
+      "magic_link_heading": "Email with login link sent",
+      "magic_link_sub": "Click the link in the email sent to {email} — you will land directly in your portal with the created case, the appointment, and all documents.",
+      "email_hint": "You will receive a confirmation by email shortly. Your expert will contact you by phone in advance.",
+      "zb1_heading": "Confirm vehicle — 1 click",
+      "zb1_sub": "Take a photo of your vehicle registration document — we automatically read out the FIN, registered keeper, and model. Saves you typing later and immediately checks for any pre-existing damage.",
+      "zb1_cta": "Scan registration document",
+      "zb1_scanning": "Reading data …",
+      "zb1_felder": "{count} fields detected",
+      "zb1_fin_hint": "We are now checking in the background whether your vehicle has any pre-existing damage — if so, no problem, we factor that in automatically."
+    }
   }
 }

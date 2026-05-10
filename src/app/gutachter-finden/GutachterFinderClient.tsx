@@ -1,6 +1,7 @@
 'use client'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
@@ -246,6 +247,8 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
   const [anfrageId, setAnfrageId] = useState<string | null>(null)
   const [sheetHoehe, setSheetHoehe] = useState<'klein' | 'mittel' | 'gross'>('klein')
 
+  const t = useTranslations('gutachter_finder')
+
   const [formData, setFormData] = useState<FormData>({
     vorname: '',
     nachname: '',
@@ -393,8 +396,8 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
         setGpsLaden(false)
         setGpsFehler(
           err.code === 1
-            ? 'Standortzugriff verweigert — bitte in den Browser-Einstellungen erlauben.'
-            : 'Standort konnte nicht ermittelt werden.',
+            ? t('gps.fehler_denied')
+            : t('gps.fehler_generic'),
         )
       },
       { timeout: 12000, enableHighAccuracy: true },
@@ -632,10 +635,10 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mb-2 text-center text-xl font-bold"
               style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
             >
-              Sind Sie gerade am Unfallort?
+              {t('routing.heading')}
             </h2>
             <p className="mb-6 text-center text-sm" style={{ color: '#4573A2' }}>
-              Wir passen den Ablauf an Ihre Situation an.
+              {t('routing.sub')}
             </p>
             <div className="flex flex-col gap-2.5">
               <button
@@ -656,18 +659,18 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                 className="rounded-2xl px-4 py-3.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(13,27,62,0.22)] transition-all active:scale-[0.98]"
                 style={{ background: '#0D1B3E', fontFamily: 'Montserrat, sans-serif' }}
               >
-                🚨 Ja, am Unfallort — Sofort-Aufnahme
+                🚨 {t('routing.cta_vor_ort')}
               </button>
               <button
                 onClick={() => setPhase('wann')}
                 className="rounded-2xl border bg-white/70 px-4 py-3.5 text-sm font-semibold text-claimondo-navy backdrop-blur-md transition-all hover:bg-white/90 active:scale-[0.98]"
                 style={{ borderColor: 'rgba(13,27,62,0.12)', fontFamily: 'Montserrat, sans-serif' }}
               >
-                Nein — Termin später buchen
+                {t('routing.cta_termin')}
               </button>
             </div>
             <p className="mt-4 text-center text-xs" style={{ color: '#7BA3CC' }}>
-              Kostenlos für unverschuldet Geschädigte · §249 BGB
+              {t('legal')}
             </p>
           </div>
         </div>
@@ -686,17 +689,16 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
             }}
           >
             <p className="mb-1 text-center text-xs font-bold uppercase tracking-[0.18em] text-[#4573A2]">
-              Schritt 1 von 2 · Fotos
+              {t('vor_ort_fotos.step_label')}
             </p>
             <h2
               className="mb-3 text-center text-xl font-bold"
               style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
             >
-              Fotos vom Unfall
+              {t('vor_ort_fotos.heading')}
             </h2>
             <p className="mb-5 text-center text-sm" style={{ color: '#4573A2' }}>
-              Mindestens ein Foto — am besten vier (Übersicht, Schaden nah, Kennzeichen, Umfeld).
-              GPS und Zeit werden automatisch gespeichert.
+              {t('vor_ort_fotos.sub')}
             </p>
 
             {vorOrtFotos.length > 0 && (
@@ -729,7 +731,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               ) : (
                 <>
                   <span className="text-2xl">📷</span>
-                  {vorOrtFotos.length === 0 ? 'Erstes Foto aufnehmen' : 'Weiteres Foto'}
+                  {vorOrtFotos.length === 0 ? t('vor_ort_fotos.btn_erstes') : t('vor_ort_fotos.btn_weiteres')}
                 </>
               )}
               <input
@@ -756,15 +758,15 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               }}
             >
               {vorOrtFotos.length === 0
-                ? 'Mindestens ein Foto'
-                : `Weiter (${vorOrtFotos.length} Foto${vorOrtFotos.length === 1 ? '' : 's'}) →`}
+                ? t('vor_ort_fotos.cta_min')
+                : t('vor_ort_fotos.cta_weiter', { count: vorOrtFotos.length })}
             </button>
             <button
               onClick={() => setPhase('routing')}
               className="mt-3 w-full text-center text-xs"
               style={{ color: '#7BA3CC' }}
             >
-              ← Zurück
+              {t('vor_ort_fotos.zurueck')}
             </button>
           </div>
         </div>
@@ -783,28 +785,28 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
             }}
           >
             <p className="mb-1 text-center text-xs font-bold uppercase tracking-[0.18em] text-[#4573A2]">
-              Schritt 2 von 2 · Kontakt
+              {t('vor_ort_kontakt.step_label')}
             </p>
             <h2
               className="mb-3 text-center text-xl font-bold"
               style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
             >
-              Wie erreichen wir Sie?
+              {t('vor_ort_kontakt.heading')}
             </h2>
             <p className="mb-5 text-center text-sm" style={{ color: '#4573A2' }}>
-              Wir rufen Sie in den nächsten 5 Minuten zurück und schicken einen Gutachter.
+              {t('vor_ort_kontakt.sub')}
             </p>
             <div className="flex flex-col gap-3">
               <div className="flex gap-3">
                 <input
-                  placeholder="Vorname"
+                  placeholder={t('vor_ort_kontakt.placeholder_vorname')}
                   value={vorOrtKontakt.vorname}
                   onChange={(e) => setVorOrtKontakt((p) => ({ ...p, vorname: e.target.value }))}
                   className="flex-1 rounded-2xl border px-4 py-3 text-sm outline-none"
                   style={{ background: 'rgba(248,249,251,0.9)', borderColor: 'rgba(13,27,62,0.12)' }}
                 />
                 <input
-                  placeholder="Nachname"
+                  placeholder={t('vor_ort_kontakt.placeholder_nachname')}
                   value={vorOrtKontakt.nachname}
                   onChange={(e) => setVorOrtKontakt((p) => ({ ...p, nachname: e.target.value }))}
                   className="flex-1 rounded-2xl border px-4 py-3 text-sm outline-none"
@@ -813,7 +815,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               </div>
               <input
                 type="tel"
-                placeholder="Telefonnummer"
+                placeholder={t('vor_ort_kontakt.placeholder_telefon')}
                 value={vorOrtKontakt.telefon}
                 onChange={(e) => setVorOrtKontakt((p) => ({ ...p, telefon: e.target.value }))}
                 className="rounded-2xl border px-4 py-3 text-sm outline-none"
@@ -821,7 +823,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               />
               <input
                 type="email"
-                placeholder="E-Mail-Adresse"
+                placeholder={t('vor_ort_kontakt.placeholder_email')}
                 value={vorOrtKontakt.email}
                 onChange={(e) => setVorOrtKontakt((p) => ({ ...p, email: e.target.value }))}
                 className="rounded-2xl border px-4 py-3 text-sm outline-none"
@@ -846,7 +848,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                   Wird gesendet …
                 </>
               ) : (
-                'Soforthilfe anfordern →'
+                t('vor_ort_kontakt.cta')
               )}
             </button>
             <button
@@ -854,7 +856,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mt-3 w-full text-center text-xs"
               style={{ color: '#7BA3CC' }}
             >
-              ← Fotos ändern
+              {t('vor_ort_kontakt.zurueck')}
             </button>
           </div>
         </div>
@@ -882,11 +884,10 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mb-2 text-2xl font-bold"
               style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
             >
-              Soforthilfe ist unterwegs
+              {t('vor_ort_erfolg.heading')}
             </h2>
             <p className="mb-4 text-sm" style={{ color: '#4573A2' }}>
-              Wir rufen Sie in den nächsten 5 Minuten unter{' '}
-              <strong style={{ color: '#0D1B3E' }}>{vorOrtKontakt.telefon}</strong> zurück.
+              {t('vor_ort_erfolg.sub', { telefon: vorOrtKontakt.telefon })}
             </p>
             <div
               className="rounded-2xl border-2 border-dashed p-4 text-left"
@@ -941,18 +942,18 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mb-2 text-center text-xl font-bold"
               style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
             >
-              Wann brauchen Sie den Gutachter?
+              {t('wann.heading')}
             </h2>
             <p className="mb-6 text-center text-sm" style={{ color: '#4573A2' }}>
-              Wir passen den Ablauf an Ihre Situation an.
+              {t('wann.sub')}
             </p>
 
             <div className="flex flex-col gap-2.5">
               {([
-                { wert: 'sofort', icon: Zap, titel: 'Sofort', sub: 'Ich bin am Unfallort — Express-Begutachtung' },
-                { wert: 'heute', icon: Clock, titel: 'Heute', sub: 'Im Laufe des Tages — flexibler Termin' },
-                { wert: 'tage', icon: Calendar, titel: 'In den nächsten Tagen', sub: 'Termin in Ruhe vereinbaren' },
-              ] as const).map(({ wert, icon: Icon, titel, sub }) => (
+                { wert: 'sofort', icon: Zap, titelKey: 'wann.sofort_titel', subKey: 'wann.sofort_sub' },
+                { wert: 'heute', icon: Clock, titelKey: 'wann.heute_titel', subKey: 'wann.heute_sub' },
+                { wert: 'tage', icon: Calendar, titelKey: 'wann.tage_titel', subKey: 'wann.tage_sub' },
+              ] as const).map(({ wert, icon: Icon, titelKey, subKey }) => (
                 <button
                   key={wert}
                   onClick={() => {
@@ -974,10 +975,10 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                      {titel}
+                      {t(titelKey)}
                     </p>
                     <p className="text-xs" style={{ color: '#4573A2' }}>
-                      {sub}
+                      {t(subKey)}
                     </p>
                   </div>
                   <ChevronRight className="h-4 w-4 shrink-0" style={{ color: '#7BA3CC' }} />
@@ -986,7 +987,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
             </div>
 
             <p className="mt-4 text-center text-xs" style={{ color: '#7BA3CC' }}>
-              Kostenlos für unverschuldet Geschädigte · §249 BGB
+              {t('legal')}
             </p>
           </div>
         </div>
@@ -1008,20 +1009,20 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mb-2 text-xl font-bold"
               style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
             >
-              Was ist passiert?
+              {t('schaden.heading')}
             </h2>
             <p className="mb-5 text-sm" style={{ color: '#4573A2' }}>
-              Damit wir den richtigen Sachverständigen für Ihren Schaden zuordnen.
+              {t('schaden.sub')}
             </p>
 
             <div className="mb-5 flex flex-col gap-2">
               {([
-                { wert: 'auffahrunfall', emoji: '🚗', label: 'Auffahrunfall' },
-                { wert: 'parkschaden', emoji: '🅿️', label: 'Parkschaden' },
-                { wert: 'kreuzungsunfall', emoji: '🔀', label: 'Kreuzungsunfall' },
-                { wert: 'wildschaden', emoji: '🦌', label: 'Wildschaden' },
-                { wert: 'sonstiges', emoji: '⚠️', label: 'Sonstiger Schaden' },
-              ] as const).map(({ wert, emoji, label }) => {
+                { wert: 'auffahrunfall', emoji: '🚗', labelKey: 'schaden.auffahrunfall' },
+                { wert: 'parkschaden', emoji: '🅿️', labelKey: 'schaden.parkschaden' },
+                { wert: 'kreuzungsunfall', emoji: '🔀', labelKey: 'schaden.kreuzungsunfall' },
+                { wert: 'wildschaden', emoji: '🦌', labelKey: 'schaden.wildschaden' },
+                { wert: 'sonstiges', emoji: '⚠️', labelKey: 'schaden.sonstiges' },
+              ] as const).map(({ wert, emoji, labelKey }) => {
                 const aktiv = schadentyp === wert
                 return (
                   <button
@@ -1035,7 +1036,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                     }}
                   >
                     <span className="text-lg">{emoji}</span>
-                    <span className="flex-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>{label}</span>
+                    <span className="flex-1" style={{ fontFamily: 'Montserrat, sans-serif' }}>{t(labelKey)}</span>
                     {aktiv && <Check className="h-4 w-4" />}
                   </button>
                 )
@@ -1046,13 +1047,13 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mb-2 text-xs font-semibold uppercase tracking-wider"
               style={{ color: '#4573A2' }}
             >
-              Kennzeichen des Unfallverursachers
+              {t('schaden.kz_label')}
             </p>
             <input
               type="text"
               value={kennzeichen}
               onChange={(e) => setKennzeichen(e.target.value.toUpperCase())}
-              placeholder="K AB 1234"
+              placeholder={t('schaden.kz_placeholder')}
               maxLength={10}
               autoCapitalize="characters"
               spellCheck={false}
@@ -1077,7 +1078,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                 fontWeight: kzUnbekannt ? 700 : 400,
               }}
             >
-              {kzUnbekannt ? '✓ Kennzeichen unbekannt' : 'Kennzeichen unbekannt / Fahrerflucht?'}
+              {kzUnbekannt ? t('schaden.kz_unbekannt_set') : t('schaden.kz_unbekannt')}
             </button>
 
             <button
@@ -1121,20 +1122,20 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mb-2 text-xl font-bold"
               style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
             >
-              Welche Fahrzeugart?
+              {t('fahrzeug.heading')}
             </h2>
             <p className="mb-5 text-sm" style={{ color: '#4573A2' }}>
-              Wir wählen einen Sachverständigen mit passender Spezialisierung.
+              {t('fahrzeug.sub')}
             </p>
 
             <div className="grid grid-cols-2 gap-2">
               {([
-                { wert: 'pkw', emoji: '🚗', label: 'PKW' },
-                { wert: 'motorrad', emoji: '🏍️', label: 'Motorrad' },
-                { wert: 'transporter', emoji: '🚐', label: 'Transporter' },
-                { wert: 'lkw', emoji: '🚛', label: 'LKW' },
-                { wert: 'wohnmobil', emoji: '🚌', label: 'Wohnmobil' },
-              ] as const).map(({ wert, emoji, label }) => {
+                { wert: 'pkw', emoji: '🚗' },
+                { wert: 'motorrad', emoji: '🏍️' },
+                { wert: 'transporter', emoji: '🚐' },
+                { wert: 'lkw', emoji: '🚛' },
+                { wert: 'wohnmobil', emoji: '🚌' },
+              ] as const).map(({ wert, emoji }) => {
                 const aktiv = fahrzeugtyp === wert
                 return (
                   <button
@@ -1148,7 +1149,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                     }}
                   >
                     <span className="text-2xl">{emoji}</span>
-                    <span style={{ fontFamily: 'Montserrat, sans-serif' }}>{label}</span>
+                    <span style={{ fontFamily: 'Montserrat, sans-serif' }}>{t(`fahrzeug.${wert}`)}</span>
                   </button>
                 )
               })}
@@ -1163,7 +1164,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                 fontFamily: 'Montserrat, sans-serif',
               }}
             >
-              Weiter →
+              {t('fahrzeug.weiter')}
             </button>
 
             <button
@@ -1171,7 +1172,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mt-3 w-full text-center text-xs"
               style={{ color: '#7BA3CC' }}
             >
-              ← Zurück
+              {t('fahrzeug.zurueck')}
             </button>
           </div>
         </div>
@@ -1212,10 +1213,10 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mb-2 text-center text-xl font-bold"
               style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
             >
-              Gutachter in Ihrer Nähe
+              {t('gps.heading')}
             </h2>
             <p className="mb-6 text-center text-sm" style={{ color: '#4573A2' }}>
-              Wir zeigen Ihnen sofort den nächsten freien DAT-zertifizierten Sachverständigen.
+              {t('gps.sub')}
             </p>
 
             {gpsFehler && (
@@ -1236,18 +1237,18 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               {gpsLaden ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  Standort wird ermittelt …
+                  {t('gps.loading')}
                 </>
               ) : (
                 <>
                   <MapPin className="h-5 w-5" />
-                  Standort freigeben
+                  {t('gps.cta')}
                 </>
               )}
             </button>
 
             <p className="mt-3 text-center text-xs" style={{ color: '#7BA3CC' }}>
-              Nur für die Gutachter-Suche · Daten werden nicht gespeichert
+              {t('gps.hint')}
             </p>
           </div>
         </div>
@@ -1269,8 +1270,8 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
           >
             <MapPin className="h-4 w-4" style={{ color: '#4573A2' }} />
             {naechsteSVList.length > 0
-              ? `${naechsteSVList.length} Sachverständige in Ihrer Nähe`
-              : 'Keine Sachverständige in Ihrer Nähe gefunden'}
+              ? t('karte.banner', { count: naechsteSVList.length })
+              : t('karte.banner_keine')}
           </div>
         </div>
       )}
@@ -1321,14 +1322,14 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                   <div className="mt-1 flex items-center gap-3 text-sm" style={{ color: '#4573A2' }}>
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {gewaehlterSV.distanzKm.toFixed(1)} km entfernt
+                      {t('detail.entfernt', { km: gewaehlterSV.distanzKm.toFixed(1) })}
                     </span>
                     <span
                       className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
                       style={{ background: 'rgba(69,115,162,0.1)', color: '#1E3A5F' }}
                     >
                       <Shield className="h-3 w-3" />
-                      DAT Expert Partner
+                      {t('detail.dat_badge')}
                     </span>
                   </div>
                 </div>
@@ -1350,7 +1351,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               {phase === 'detail' && (
                 <>
                   <p className="mb-3 text-sm font-semibold" style={{ color: '#0D1B3E', fontFamily: 'Montserrat, sans-serif' }}>
-                    Freie Termine
+                    {t('detail.freie_termine')}
                   </p>
                   <div className="mb-5 flex flex-col gap-2">
                     {termine.map((slot) => {
@@ -1388,11 +1389,11 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                       fontFamily: 'Montserrat, sans-serif',
                     }}
                   >
-                    Termin reservieren →
+                    {t('detail.termin_reservieren')}
                   </button>
 
                   <p className="mt-3 text-center text-xs" style={{ color: '#7BA3CC' }}>
-                    Kostenlos für unverschuldet Geschädigte · 0 € Eigenanteil
+                    {t('detail.legal')}
                   </p>
                 </>
               )}
@@ -1413,7 +1414,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                         className="ml-auto text-xs underline"
                         style={{ color: '#4573A2' }}
                       >
-                        ändern
+                        {t('detail.slot_aendern')}
                       </button>
                     </div>
                   )}
@@ -1422,13 +1423,13 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                     className="mb-4 text-sm font-semibold"
                     style={{ color: '#0D1B3E', fontFamily: 'Montserrat, sans-serif' }}
                   >
-                    Ihre Kontaktdaten
+                    {t('formular.heading')}
                   </p>
 
                   <div className="flex flex-col gap-3">
                     <div className="flex gap-3">
                       <input
-                        placeholder="Vorname"
+                        placeholder={t('formular.placeholder_vorname')}
                         value={formData.vorname}
                         onChange={(e) => setFormData((p) => ({ ...p, vorname: e.target.value }))}
                         className="flex-1 rounded-2xl border px-4 py-3 text-sm outline-none"
@@ -1439,7 +1440,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                         }}
                       />
                       <input
-                        placeholder="Nachname"
+                        placeholder={t('formular.placeholder_nachname')}
                         value={formData.nachname}
                         onChange={(e) => setFormData((p) => ({ ...p, nachname: e.target.value }))}
                         className="flex-1 rounded-2xl border px-4 py-3 text-sm outline-none"
@@ -1451,7 +1452,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                       />
                     </div>
                     <input
-                      placeholder="Telefonnummer"
+                      placeholder={t('formular.placeholder_telefon')}
                       type="tel"
                       value={formData.telefon}
                       onChange={(e) => setFormData((p) => ({ ...p, telefon: e.target.value }))}
@@ -1463,7 +1464,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                       }}
                     />
                     <input
-                      placeholder="E-Mail-Adresse"
+                      placeholder={t('formular.placeholder_email')}
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
@@ -1483,7 +1484,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                         className="text-xs font-semibold uppercase tracking-wider"
                         style={{ color: '#4573A2' }}
                       >
-                        Ihre Unterschrift
+                        {t('formular.signatur_label')}
                       </p>
                       {hasSignatur && (
                         <button
@@ -1492,7 +1493,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                           className="text-[11px] underline"
                           style={{ color: '#7BA3CC' }}
                         >
-                          neu zeichnen
+                          {t('formular.signatur_neu')}
                         </button>
                       )}
                     </div>
@@ -1517,7 +1518,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                           className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm italic"
                           style={{ color: 'rgba(69,115,162,0.5)' }}
                         >
-                          Hier mit dem Finger unterschreiben
+                          {t('formular.signatur_hint')}
                         </div>
                       )}
                     </div>
@@ -1536,21 +1537,17 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                       style={{ accentColor: '#22A06B' }}
                     />
                     <span>
-                      Ich beauftrage die Vermittlung eines KFZ-Sachverständigen und die
-                      Schadensregulierung. Alle Kosten trägt die gegnerische Versicherung. Ich
-                      stimme den{' '}
-                      <a href="/agb" target="_blank" className="underline" style={{ color: '#0D1B3E' }}>
-                        AGB
-                      </a>
-                      , der{' '}
-                      <a href="/datenschutz" target="_blank" className="underline" style={{ color: '#0D1B3E' }}>
-                        Datenschutzerklärung
-                      </a>{' '}
-                      und den{' '}
-                      <a href="/nutzungsbedingungen" target="_blank" className="underline" style={{ color: '#0D1B3E' }}>
-                        Nutzungsbedingungen
-                      </a>{' '}
-                      zu.{' '}
+                      {t.rich('formular.agb_text', {
+                        link_agb: (chunks) => (
+                          <a href="/agb" target="_blank" className="underline" style={{ color: '#0D1B3E' }}>{chunks}</a>
+                        ),
+                        link_datenschutz: (chunks) => (
+                          <a href="/datenschutz" target="_blank" className="underline" style={{ color: '#0D1B3E' }}>{chunks}</a>
+                        ),
+                        link_nutzung: (chunks) => (
+                          <a href="/nutzungsbedingungen" target="_blank" className="underline" style={{ color: '#0D1B3E' }}>{chunks}</a>
+                        ),
+                      })}{' '}
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1560,7 +1557,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                         className="underline"
                         style={{ color: '#0D1B3E' }}
                       >
-                        {legalAusgeklappt ? 'Weniger' : 'Vollständiger Rechtstext'}
+                        {legalAusgeklappt ? t('formular.legal_toggle_weniger') : t('formular.legal_toggle_mehr')}
                       </button>
                     </span>
                   </label>
@@ -1574,12 +1571,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                         color: '#4573A2',
                       }}
                     >
-                      Hiermit beauftrage ich die Claimondo GmbH (i.Gr.), Hansaring 10, 50670 Köln,
-                      mit der Vermittlung eines zertifizierten KFZ-Sachverständigen zur Begutachtung
-                      des Unfallschadens an meinem Fahrzeug sowie mit der vollständigen
-                      Schadensregulierung durch eine kooperierende Partnerkanzlei. Die Kosten für den
-                      Sachverständigen und die anwaltliche Vertretung trägt gemäß §249 BGB die
-                      Haftpflichtversicherung des Unfallverursachers. Mir entstehen keine Kosten.
+                      {t('formular.legal_volltext')}
                     </div>
                   )}
 
@@ -1595,15 +1587,15 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                     {submitting ? (
                       <>
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        Buchung läuft …
+                        {t('formular.sending')}
                       </>
                     ) : (
-                      'Gutachter jetzt losschicken →'
+                      t('formular.cta_senden')
                     )}
                   </button>
 
                   <p className="mt-3 text-center text-xs" style={{ color: '#7BA3CC' }}>
-                    Ihr Gutachter meldet sich innerhalb von 30 Minuten
+                    {t('formular.hint_meldung')}
                   </p>
                 </>
               )}
@@ -1630,18 +1622,19 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mb-4 inline-block rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
               style={{ background: 'rgba(243,192,83,0.18)', color: '#C28A2A' }}
             >
-              Ihr Recht nach §249 BGB
+              {t('ansprueche.badge')}
             </div>
             <h2
               className="mb-3 text-2xl font-bold leading-tight"
               style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
             >
-              Lassen Sie sich nichts entgehen
+              {t('ansprueche.heading')}
             </h2>
             <p className="mb-5 text-sm leading-relaxed" style={{ color: '#4573A2' }}>
-              Versicherungen kürzen bei <strong style={{ color: '#0D1B3E' }}>8 von 10 Fällen</strong>.
-              Wer ohne Anwalt reguliert, akzeptiert oft die erste Kürzung und verliert im Schnitt
-              über <strong style={{ color: '#0D1B3E' }}>3.000 €</strong>.
+              {t.rich('ansprueche.sub', {
+                highlight_8von10: (chunks) => <strong style={{ color: '#0D1B3E' }}>{chunks}</strong>,
+                highlight_3000: (chunks) => <strong style={{ color: '#0D1B3E' }}>{chunks}</strong>,
+              })}
             </p>
 
             {/* Vollregulierung — empfohlen */}
@@ -1662,23 +1655,23 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                 className="mb-2 inline-block rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
                 style={{ background: 'rgba(243,192,83,0.25)', color: '#F3C053' }}
               >
-                Empfohlen
+              {t('ansprueche.voll_badge')}
               </div>
               <p className="mb-3 text-base font-bold" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                Vollständig regulieren lassen
+              {t('ansprueche.voll_heading')}
               </p>
               <ul className="mb-3 flex flex-col gap-1.5 text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.85)' }}>
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: '#7BA3CC' }} />
-                  <span>Unabhängiger Gutachter dokumentiert <strong style={{ color: '#fff' }}>alle</strong> Schadenspositionen</span>
+                  <span>{t('ansprueche.voll_li1')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: '#7BA3CC' }} />
-                  <span>Fachanwalt mit 2.000+ Fällen/Jahr fordert innerhalb 30 Tagen ein</span>
+                  <span>{t('ansprueche.voll_li2')}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: '#7BA3CC' }} />
-                  <span>Wir übernehmen die komplette Kommunikation</span>
+                  <span>{t('ansprueche.voll_li3')}</span>
                 </li>
               </ul>
               <div
@@ -1686,7 +1679,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                 style={{ background: 'rgba(123,163,204,0.15)', color: '#7BA3CC' }}
               >
                 <Check className="h-3 w-3" />
-                0 € für Sie — Versicherung zahlt Anwalt + Gutachter
+                {t('ansprueche.voll_kostenlos')}
               </div>
             </button>
 
@@ -1699,7 +1692,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                 className="mb-3 text-[9px] font-bold uppercase tracking-wider"
                 style={{ color: '#4573A2' }}
               >
-                Beispiel · 4.800 € Schadenhöhe
+              {t('ansprueche.beispiel_label')}
               </p>
               <div className="flex flex-col gap-1.5 text-xs" style={{ color: '#0D1B3E' }}>
                 {[
@@ -1724,10 +1717,10 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               >
                 <div>
                   <p className="text-xs font-semibold" style={{ color: '#22A06B' }}>
-                    Plus, was sonst gekürzt wird
+                    {t('ansprueche.beispiel_plus')}
                   </p>
                   <p className="text-[10px]" style={{ color: '#7BA3CC' }}>
-                    Ihr Anwalt fordert den vollen Betrag
+                    {t('ansprueche.beispiel_anwalt')}
                   </p>
                 </div>
                 <p className="font-mono text-xl font-bold" style={{ color: '#22A06B' }}>
@@ -1745,7 +1738,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="w-full rounded-xl py-2.5 text-xs"
               style={{ color: '#7BA3CC' }}
             >
-              Nur Gutachten — selbst regulieren →
+              {t('ansprueche.nur_gutachten')}
             </button>
 
             <button
@@ -1753,7 +1746,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mt-1 w-full text-center text-[11px]"
               style={{ color: '#9BAAB8' }}
             >
-              ← Anderen Termin wählen
+              {t('ansprueche.zurueck')}
             </button>
           </div>
         </div>
@@ -1781,10 +1774,10 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
               className="mb-2 text-2xl font-bold"
               style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
             >
-              Termin bestätigt!
+              {t('erfolg.heading')}
             </h2>
             <p className="mb-2 text-sm" style={{ color: '#4573A2' }}>
-              {gewaehlterSV?.vorname} kommt zum gewählten Termin zu Ihnen.
+              {t('erfolg.sub', { sv_vorname: gewaehlterSV?.vorname ?? '' })}
             </p>
             {gewaehlterSlot && (
               <div
@@ -1808,18 +1801,15 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                   style={{ color: '#0D1B3E', fontFamily: 'Montserrat, sans-serif' }}
                 >
                   <Check className="h-4 w-4" style={{ color: '#22A06B' }} />
-                  E-Mail mit Login-Link verschickt
+                  {t('erfolg.magic_link_heading')}
                 </p>
                 <p className="mt-1 text-xs leading-relaxed" style={{ color: '#1E3A5F' }}>
-                  Klicken Sie den Link in der Mail an <strong>{formData.email}</strong> — Sie
-                  landen direkt in Ihrem Portal mit dem angelegten Fall, dem Termin und allen
-                  Unterlagen.
+                  {t('erfolg.magic_link_sub', { email: formData.email })}
                 </p>
               </div>
             ) : (
               <p className="text-xs" style={{ color: '#7BA3CC' }}>
-                Sie erhalten in Kürze eine Bestätigung per E-Mail. Ihr Gutachter meldet sich
-                vorab telefonisch.
+                {t('erfolg.email_hint')}
               </p>
             )}
 
@@ -1846,12 +1836,11 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                       className="text-sm font-bold"
                       style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
                     >
-                      Fahrzeug bestätigen — 1 Klick
+                      {t('erfolg.zb1_heading')}
                     </p>
                   </div>
                   <p className="mb-3 text-xs leading-relaxed" style={{ color: '#4573A2' }}>
-                    Foto vom Fahrzeugschein machen — wir lesen FIN, Halter und Modell automatisch aus.
-                    Spart Ihnen das spätere Tippen und prüft direkt ob es Vorschäden gibt.
+                    {t('erfolg.zb1_sub')}
                   </p>
 
                   {zb1Error && (
@@ -1870,12 +1859,12 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                     {zb1Loading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Wird ausgelesen …
+                        {t('erfolg.zb1_scanning')}
                       </>
                     ) : (
                       <>
                         <Camera className="h-4 w-4" />
-                        Fahrzeugschein scannen
+                        {t('erfolg.zb1_cta')}
                       </>
                     )}
                     <input
@@ -1902,7 +1891,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                       className="text-sm font-bold"
                       style={{ fontFamily: 'Montserrat, sans-serif', color: '#0D1B3E' }}
                     >
-                      {zb1Result.fields_found} Felder erkannt
+                      {t('erfolg.zb1_felder', { count: zb1Result.fields_found })}
                     </p>
                   </div>
 
@@ -1950,8 +1939,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderCli
                       className="mt-3 rounded-lg px-3 py-2 text-[11px] leading-relaxed"
                       style={{ background: 'rgba(69,115,162,0.08)', color: '#1E3A5F' }}
                     >
-                      Wir prüfen jetzt im Hintergrund ob Ihr Fahrzeug Vorschäden hat — falls ja, kein
-                      Thema, wir berücksichtigen das automatisch.
+                      {t('erfolg.zb1_fin_hint')}
                     </p>
                   )}
                 </>

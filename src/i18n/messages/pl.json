@@ -362,5 +362,152 @@
       "p2": "Claimondo koordynuje cały proces likwidacji szkody: niezależną ekspertyzę przeprowadzoną przez certyfikowanych rzeczoznawców DAT-Expert, dochodzenie roszczeń przez kancelarię partnerską LexDrive oraz pełną wypłatę świadczeń przysługujących na podstawie §249 BGB — naprawa, utrata wartości, utrata możliwości użytkowania, wynajem auta, zadośćuczynienie za ból i cierpienie. Dla poszkodowanych bez winy usługa jest bezpłatna.",
       "p3": "Sieć partnerów obejmuje obecnie 89+ rzeczoznawców DAT-Expert w Nadrenii Północnej-Westfalii, z planowaną ogólnopolską skalą do około 460 rzeczoznawców. Terminy są zazwyczaj dostępne w ciągu 48 godzin. Podstawę prawną roszczenia do niezależnego rzeczoznawcy stanowi §249 BGB oraz utrwalone orzecznictwo BGH (m.in. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     }
+  },
+  "gutachter_finder": {
+    "legal": "Bezpłatnie dla poszkodowanych bez winy · §249 BGB",
+    "routing": {
+      "heading": "Czy jesteś teraz na miejscu wypadku?",
+      "sub": "Dostosujemy przebieg do Twojej sytuacji.",
+      "cta_vor_ort": "Tak, na miejscu — natychmiastowa rejestracja",
+      "cta_termin": "Nie — umów termin później"
+    },
+    "vor_ort_fotos": {
+      "step_label": "Krok 1 z 2 · Zdjęcia",
+      "heading": "Zdjęcia z wypadku",
+      "sub": "Co najmniej jedno zdjęcie — najlepiej cztery (ogólne, szkoda z bliska, tablica rejestracyjna, otoczenie). GPS i czas są zapisywane automatycznie.",
+      "cta_min": "Co najmniej jedno zdjęcie",
+      "cta_weiter": "Dalej ({count} {count, plural, one {zdjęcie} few {zdjęcia} other {zdjęć}}) →",
+      "btn_erstes": "Zrób pierwsze zdjęcie",
+      "btn_weiteres": "Dodaj kolejne zdjęcie",
+      "uploading": "Dodawanie zdjęcia …",
+      "zurueck": "← Wstecz"
+    },
+    "vor_ort_kontakt": {
+      "step_label": "Krok 2 z 2 · Kontakt",
+      "heading": "Jak możemy się z Tobą skontaktować?",
+      "sub": "Oddzwonimy do Ciebie w ciągu 5 minut i wyślemy rzeczoznawcę.",
+      "placeholder_vorname": "Imię",
+      "placeholder_nachname": "Nazwisko",
+      "placeholder_telefon": "Numer telefonu",
+      "placeholder_email": "Adres e-mail",
+      "cta": "Poproś o natychmiastową pomoc →",
+      "sending": "Wysyłanie …",
+      "zurueck": "← Zmień zdjęcia"
+    },
+    "vor_ort_erfolg": {
+      "heading": "Natychmiastowa pomoc jest w drodze",
+      "sub": "Oddzwonimy do Ciebie w ciągu 5 minut pod numer {telefon}.",
+      "fotos_gespeichert": "{count} {count, plural, one {zdjęcie} few {zdjęcia} other {zdjęć}} zapisano",
+      "gps_label": "GPS"
+    },
+    "wann": {
+      "heading": "Kiedy potrzebujesz rzeczoznawcy?",
+      "sub": "Dostosujemy przebieg do Twojej sytuacji.",
+      "sofort_titel": "Natychmiast",
+      "sofort_sub": "Jestem na miejscu wypadku — ekspresowa ekspertyza",
+      "heute_titel": "Dzisiaj",
+      "heute_sub": "W ciągu dnia — elastyczny termin",
+      "tage_titel": "W ciągu najbliższych dni",
+      "tage_sub": "Umówić termin spokojnie"
+    },
+    "schaden": {
+      "heading": "Co się stało?",
+      "sub": "Abyśmy mogli przydzielić odpowiedniego rzeczoznawcę do Twojej szkody.",
+      "kz_label": "Numer rejestracyjny sprawcy",
+      "kz_placeholder": "K AB 1234",
+      "kz_unbekannt": "Numer rejestracyjny nieznany / ucieczka z miejsca wypadku?",
+      "kz_unbekannt_set": "✓ Numer rejestracyjny nieznany",
+      "weiter": "Dalej →",
+      "zurueck": "← Wstecz",
+      "auffahrunfall": "Kolizja tylna",
+      "parkschaden": "Szkoda parkingowa",
+      "kreuzungsunfall": "Kolizja na skrzyżowaniu",
+      "wildschaden": "Szkoda po zderzeniu ze zwierzęciem",
+      "sonstiges": "Inna szkoda"
+    },
+    "fahrzeug": {
+      "heading": "Jaki rodzaj pojazdu?",
+      "sub": "Wybieramy rzeczoznawcę z odpowiednią specjalizacją.",
+      "weiter": "Dalej →",
+      "zurueck": "← Wstecz",
+      "pkw": "Samochód osobowy",
+      "motorrad": "Motocykl",
+      "transporter": "Dostawczak",
+      "lkw": "Ciężarówka",
+      "wohnmobil": "Kamper"
+    },
+    "gps": {
+      "heading": "Rzeczoznawca w Twojej okolicy",
+      "sub": "Natychmiast pokażemy Ci najbliższego dostępnego rzeczoznawcę z certyfikatem DAT.",
+      "cta": "Udostępnij lokalizację",
+      "loading": "Trwa ustalanie lokalizacji …",
+      "hint": "Tylko do wyszukiwania rzeczoznawców · Dane nie są zapisywane",
+      "fehler_denied": "Dostęp do lokalizacji odmówiony — zezwól w ustawieniach przeglądarki.",
+      "fehler_generic": "Nie udało się ustalić lokalizacji."
+    },
+    "karte": {
+      "banner": "{count} {count, plural, one {rzeczoznawca} few {rzeczoznawców} other {rzeczoznawców}} w Twojej okolicy",
+      "banner_keine": "Nie znaleziono rzeczoznawców w Twojej okolicy"
+    },
+    "detail": {
+      "entfernt": " {km} km stąd",
+      "dat_badge": "DAT Expert Partner",
+      "freie_termine": "Wolne terminy",
+      "termin_reservieren": "Zarezerwuj termin →",
+      "legal": "Bezpłatnie dla poszkodowanych bez winy · 0 € własnego wkładu",
+      "slot_aendern": "zmień"
+    },
+    "ansprueche": {
+      "badge": "Twoje prawo zgodnie z §249 BGB",
+      "heading": "Nie pozwól na uszczuplenie swoich praw",
+      "sub": "Ubezpieczalnie obcinają wypłaty w <highlight_8von10>8 na 10</highlight_8von10> przypadków. Kto reguluje bez adwokata, często akceptuje pierwsze cięcie i traci średnio ponad <highlight_3000>3.000 €</highlight_3000>.",
+      "sub_8von10": "8 na 10",
+      "sub_3000": "3.000 €",
+      "voll_badge": "Polecane",
+      "voll_heading": "Zlecić pełną likwidację szkody",
+      "voll_li1": "Niezależny rzeczoznawca dokumentuje wszystkie pozycje szkody",
+      "voll_li2": "Adwokat specjalista z 2.000+ sprawami/rok dochodzi roszczeń w ciągu 30 dni",
+      "voll_li3": "Przejmujemy całą komunikację",
+      "voll_kostenlos": "0 € dla Ciebie — ubezpieczenie płaci za adwokata i rzeczoznawcę",
+      "beispiel_label": "Przykład · 4.800 € wysokość szkody",
+      "beispiel_plus": "Plus to, co inaczej zostałoby obcięte",
+      "beispiel_anwalt": "Twój adwokat dochodzi pełnej kwoty",
+      "nur_gutachten": "Tylko ekspertyza — samodzielna likwidacja →",
+      "zurueck": "← Wybierz inny termin"
+    },
+    "formular": {
+      "heading": "Twoje dane kontaktowe",
+      "placeholder_vorname": "Imię",
+      "placeholder_nachname": "Nazwisko",
+      "placeholder_telefon": "Numer telefonu",
+      "placeholder_email": "Adres e-mail",
+      "signatur_label": "Twój podpis",
+      "signatur_hint": "Podpisz tutaj palcem",
+      "signatur_neu": "narysuj ponownie",
+      "agb_text": "Zlecam pośrednictwo w wyborze rzeczoznawcy samochodowego oraz likwidację szkody. Wszystkie koszty ponosi ubezpieczenie sprawcy. Akceptuję <link_agb>OWU</link_agb>, <link_datenschutz>Polityka prywatności</link_datenschutz> oraz <link_nutzung>Warunki użytkowania</link_nutzung>.",
+      "agb_link": "OWU",
+      "datenschutz_link": "Polityka prywatności",
+      "nutzung_link": "Warunki użytkowania",
+      "legal_toggle_mehr": "Pełna treść prawna",
+      "legal_toggle_weniger": "Mniej",
+      "legal_volltext": "Niniejszym zlecam Claimondo GmbH (i.Gr.), Hansaring 10, 50670 Köln, pośrednictwo w wyborze certyfikowanego rzeczoznawcy samochodowego w celu oceny szkody pokolizyjnej mojego pojazdu, a także pełną likwidację szkody przez współpracującą kancelarię partnerską. Koszty rzeczoznawcy oraz obsługi prawnej ponosi — zgodnie z §249 BGB — ubezpieczyciel OC sprawcy wypadku. Nie ponoszę żadnych kosztów.",
+      "cta_senden": "Wyślij rzeczoznawcę teraz →",
+      "cta_senden_termin": "Potwierdź termin →",
+      "sending": "Rezerwacja w toku…",
+      "hint_meldung": "Twój rzeczoznawca odezwie się w ciągu 30 minut"
+    },
+    "erfolg": {
+      "heading": "Termin potwierdzony!",
+      "sub": "{sv_vorname} przyjedzie do Ciebie w wybranym terminie.",
+      "magic_link_heading": "Link do logowania wysłany e-mailem",
+      "magic_link_sub": "Kliknij link w wiadomości na adres {email} — trafisz bezpośrednio do swojego portalu z założoną sprawą, terminem i wszystkimi dokumentami.",
+      "email_hint": "Wkrótce otrzymasz potwierdzenie e-mailem. Twój rzeczoznawca skontaktuje się wcześniej telefonicznie.",
+      "zb1_heading": "Potwierdź pojazd — 1 kliknięcie",
+      "zb1_sub": "Zrób zdjęcie dowodu rejestracyjnego — automatycznie odczytamy VIN, właściciela i model. Oszczędzi Ci to późniejszego wpisywania danych i od razu sprawdzimy, czy pojazd ma wcześniejsze szkody.",
+      "zb1_cta": "Skanuj dowód rejestracyjny",
+      "zb1_scanning": "Odczytywanie danych…",
+      "zb1_felder": "Rozpoznano {count} pól",
+      "zb1_fin_hint": "Sprawdzamy teraz w tle, czy Twój pojazd ma wcześniejsze szkody — jeśli tak, żaden problem, uwzględnimy to automatycznie."
+    }
   }
 }
