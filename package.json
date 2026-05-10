@@ -17,7 +17,9 @@
     "screenshots": "node scripts/screenshot-portals.mjs",
     "screenshots:gutachter": "node scripts/screenshot-portals.mjs gutachter",
     "screenshots:dispatch": "node scripts/screenshot-portals.mjs dispatch",
-    "screenshots:kunde": "node scripts/screenshot-portals.mjs kunde"
+    "screenshots:kunde": "node scripts/screenshot-portals.mjs kunde",
+    "i18n:translate": "node --env-file=.env.local scripts/i18n/translate.mjs",
+    "i18n:translate:force": "node --env-file=.env.local scripts/i18n/translate.mjs --force"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
