@@ -15,7 +15,7 @@ import { STAEDTE } from './staedte'
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter finden — Unabhängig, schnell, kostenfrei',
   description:
-    'Unabhängige Kfz-Sachverständige für Unfallschäden in ganz Deutschland. 89+ DAT-Expert-Partner, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte (§249 BGB). Stadt wählen oder Karte ansehen.',
+    'Unabhängige DAT-Kfz-Sachverständige für Unfallschäden bundesweit. 89+ Partner, Termin < 48 h, 0 € für unverschuldet Geschädigte (§249 BGB).',
   keywords: [
     'Kfz-Gutachter',
     'Unfallgutachter',

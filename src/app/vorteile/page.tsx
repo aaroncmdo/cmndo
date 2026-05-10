@@ -19,7 +19,7 @@ import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/
 export const metadata: Metadata = {
   title: 'Vorteile von Claimondo — Bis zu 33 % mehr Schadensersatz',
   description:
-    'Warum Claimondo? 0 € Eigenanteil, unabhängiger DAT-Sachverständiger, voller Anspruch durchgesetzt. Studien zeigen: Direktabrechnung mit dem Versicherer kostet im Schnitt 33 % der Schadenssumme.',
+    '0 € Eigenanteil, unabhängiger DAT-Sachverständiger, voller Anspruch nach §249 BGB durchgesetzt. Direktabrechnung kostet im Schnitt 33 %.',
   keywords: [
     'Vorteile Kfz-Schaden',
     'Wertminderung sichern',
