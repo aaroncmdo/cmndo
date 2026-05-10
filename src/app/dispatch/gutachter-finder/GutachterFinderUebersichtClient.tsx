@@ -6,6 +6,7 @@ import type { GutachterFinderAnfrage } from './actions'
 import { aktualisiereAnfrageStatus } from './actions'
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
+  entwurf: { label: 'Offen — anrufen', color: 'bg-orange-100 text-orange-800' },
   neu: { label: 'Neu', color: 'bg-amber-100 text-amber-800' },
   in_bearbeitung: { label: 'In Bearbeitung', color: 'bg-blue-100 text-blue-700' },
   sv_kontaktiert: { label: 'SV kontaktiert', color: 'bg-claimondo-ondo/10 text-claimondo-ondo' },
@@ -37,7 +38,7 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
 
   const svName = anfrage.sv_name ?? anfrage.sv_lead_name ?? null
   const svTelefon = anfrage.sv_telefon ?? anfrage.sv_lead_telefon ?? null
-  const istOffen = lokalerStatus === 'neu' || lokalerStatus === 'in_bearbeitung'
+  const istOffen = lokalerStatus === 'entwurf' || lokalerStatus === 'neu' || lokalerStatus === 'in_bearbeitung'
 
   function wechsleStatus(neuerStatus: string) {
     setLokalerStatus(neuerStatus)
@@ -112,6 +113,14 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
         </div>
       </div>
 
+      {/* Entwurf-Banner — Wizard nicht abgeschlossen, nur Telefon vorhanden */}
+      {lokalerStatus === 'entwurf' && (
+        <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-orange-50 border border-orange-200 flex items-center gap-2">
+          <PhoneIcon className="w-4 h-4 text-orange-600 shrink-0" />
+          <span className="text-xs font-semibold text-orange-800">Wizard abgebrochen — bitte anrufen und Daten aufnehmen</span>
+        </div>
+      )}
+
       {/* Anruf-Banner für Lead-Fallback — SV muss manuell kontaktiert werden */}
       {anfrage.matching_typ === 'lead_fallback' && lokalerStatus !== 'sv_kontaktiert' && lokalerStatus !== 'termin_bestaetigt' && lokalerStatus !== 'abgeschlossen' && (
         <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-amber-50 border border-amber-200 flex items-center gap-2">
@@ -184,7 +193,7 @@ export default function GutachterFinderUebersichtClient({
 
   const sichtbare =
     filter === 'offen'
-      ? anfragen.filter((a) => a.status === 'neu' || a.status === 'in_bearbeitung' || a.status === 'sv_kontaktiert')
+      ? anfragen.filter((a) => a.status === 'entwurf' || a.status === 'neu' || a.status === 'in_bearbeitung' || a.status === 'sv_kontaktiert')
       : filter === 'anruf'
       ? anrufNoetig
       : anfragen
