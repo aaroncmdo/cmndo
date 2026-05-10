@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { BadgeCheckIcon, ShieldOffIcon } from 'lucide-react'
@@ -32,7 +32,7 @@ export default function VerifizierungsToggle({ svId, verifiziert, verifiziertAm 
   }
 
   const datum = verifiziertAm
-    ? new Date(verifiziertAm).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
+    ? new Date(verifiziertAm).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: '2-digit' })
     : null
 
   if (verifiziert) {
@@ -57,7 +57,7 @@ export default function VerifizierungsToggle({ svId, verifiziert, verifiziertAm 
         onClick={toggle}
         disabled={pending}
         title="Als verifiziert markieren — gibt Whitelabeling auf Kunden-Seite frei"
-        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border transition-colors disabled:opacity-50"
       >
         <ShieldOffIcon className="w-3 h-3" />
         {pending ? 'Speichern…' : 'Nicht verifiziert'}

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { CreditCardIcon, AlertTriangleIcon, CheckCircle2Icon } from 'lucide-react'
 
 // KFZ-155: Stripe-Connect Auszahlungen Status fuer den Finance-Tab.
@@ -11,7 +11,7 @@ import { CreditCardIcon, AlertTriangleIcon, CheckCircle2Icon } from 'lucide-reac
 
 function fmtTime(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleString('de-DE', {
+  return d.toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
     day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
   })
 }
@@ -86,13 +86,13 @@ export default async function StripeConnectStatusWidget() {
         <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
           <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CreditCardIcon className="w-4 h-4 text-[#4573A2]" />
+              <CreditCardIcon className="w-4 h-4 text-claimondo-ondo" />
               <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
                 Stripe-Connect Health
               </h2>
             </div>
             <span className={`flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full ${
-              healthOk ? 'bg-emerald-50 text-emerald-700' : s.failed7d > 0 ? 'bg-red-50 text-red-700' : 'bg-[#f8f9fb] text-claimondo-ondo'
+              healthOk ? 'bg-emerald-50 text-emerald-700' : s.failed7d > 0 ? 'bg-red-50 text-red-700' : 'bg-claimondo-bg text-claimondo-ondo'
             }`}>
               {healthOk ? (
                 <><CheckCircle2Icon className="w-3 h-3" /> healthy</>
@@ -107,7 +107,7 @@ export default async function StripeConnectStatusWidget() {
           <div className="p-5">
             {/* 3 Counter */}
             <div className="grid grid-cols-3 gap-4 mb-5">
-              <div className="text-center p-3 bg-[#f8f9fb] rounded-xl">
+              <div className="text-center p-3 bg-claimondo-bg rounded-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Events (7 Tage)</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{s.total7d}</p>
               </div>

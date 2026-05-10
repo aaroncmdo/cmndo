@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-162 / W2: Übersicht-Tab — Status + Stammdaten-Sections.
 // AAR-169: Videotermin-Buchen-Button für KB (Video solo, nicht mit LexDrive).
@@ -78,7 +78,7 @@ export default function UebersichtTab() {
   const strukturGeneratedBy = strukturRaw?.generated_by ?? null
   const statusLabel = FALL_STATUS_LABELS[status] ?? status
   const statusCls =
-    FALL_STATUS_COLORS[status] ?? 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border'
+    FALL_STATUS_COLORS[status] ?? 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'
 
   // AAR-169: KB-Videotermin-Buchen
   const [showBuchen, setShowBuchen] = useState(false)
@@ -155,7 +155,7 @@ export default function UebersichtTab() {
           <button
             type="button"
             onClick={() => setShowBuchen((v) => !v)}
-            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-[#4573A2] text-white hover:bg-[#0D1B3E]"
+            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white hover:bg-claimondo-navy"
           >
             <VideoIcon className="w-3.5 h-3.5" /> Videotermin buchen
           </button>
@@ -166,7 +166,7 @@ export default function UebersichtTab() {
       {showBuchen && (
         <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
           <div className="flex items-center gap-2">
-            <VideoIcon className="w-4 h-4 text-[#4573A2]" />
+            <VideoIcon className="w-4 h-4 text-claimondo-ondo" />
             <h3 className="text-sm font-semibold text-claimondo-navy">Videotermin mit Kunde buchen</h3>
           </div>
           <p className="text-[11px] text-claimondo-ondo">
@@ -181,7 +181,7 @@ export default function UebersichtTab() {
                 type="date"
                 value={buchenDatum}
                 onChange={(e) => setBuchenDatum(e.target.value)}
-                className="w-full text-sm border-b border-claimondo-border focus:border-[#4573A2] outline-none py-1"
+                className="w-full text-sm border-b border-claimondo-border focus:border-claimondo-ondo outline-none py-1"
               />
             </div>
             <div>
@@ -192,7 +192,7 @@ export default function UebersichtTab() {
                 type="time"
                 value={buchenUhrzeit}
                 onChange={(e) => setBuchenUhrzeit(e.target.value)}
-                className="w-full text-sm border-b border-claimondo-border focus:border-[#4573A2] outline-none py-1"
+                className="w-full text-sm border-b border-claimondo-border focus:border-claimondo-ondo outline-none py-1"
               />
             </div>
             <div className="sm:col-span-2">
@@ -207,8 +207,8 @@ export default function UebersichtTab() {
                     onClick={() => setBuchenKanal(k)}
                     className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
                       buchenKanal === k
-                        ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                        : 'bg-white text-claimondo-ondo border-claimondo-border hover:bg-[#f8f9fb]'
+                        ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
+                        : 'bg-white text-claimondo-ondo border-claimondo-border hover:bg-claimondo-bg'
                     }`}
                   >
                     {k === 'video' ? 'Video' : 'Telefon'}
@@ -225,7 +225,7 @@ export default function UebersichtTab() {
                 value={buchenNotiz}
                 onChange={(e) => setBuchenNotiz(e.target.value)}
                 placeholder="Optional — worum geht's im Termin?"
-                className="w-full text-sm border-b border-claimondo-border focus:border-[#4573A2] outline-none py-1"
+                className="w-full text-sm border-b border-claimondo-border focus:border-claimondo-ondo outline-none py-1"
               />
             </div>
           </div>
@@ -233,7 +233,7 @@ export default function UebersichtTab() {
             <button
               type="button"
               onClick={() => setShowBuchen(false)}
-              className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]"
+              className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
             >
               Abbrechen
             </button>
@@ -241,7 +241,7 @@ export default function UebersichtTab() {
               type="button"
               onClick={buchen}
               disabled={pending}
-              className="px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] disabled:opacity-50"
+              className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
             >
               {pending ? 'Buche ...' : 'Buchen'}
             </button>

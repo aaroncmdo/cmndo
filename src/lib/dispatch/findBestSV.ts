@@ -26,6 +26,9 @@ export type SvMatchInput = {
   // im ±wunschterminFensterMin-Fenster bereits einen anderen Termin hat.
   wunschterminIso?: string | null
   wunschterminFensterMin?: number
+  // Sticky-SV: bevorzuge diesen SV (kunde hatte ihn schon mal) — er bekommt
+  // einen massiven Score-Bonus + "Sticky"-Reason-Badge, sonst normale Logik.
+  stickySvId?: string | null
 }
 
 export type SvMatchCandidate = {
@@ -34,6 +37,8 @@ export type SvMatchCandidate = {
   name: string
   paket: string
   distanzKm: number
+  /** Echte Mapbox-Driving-ETA Büro → Fall in Minuten. null bei API-Fehler. */
+  etaFromBueroMin: number | null
   offeneFaelle: number
   kontingentFrei: number
   ablehnungen30d: number
@@ -254,11 +259,29 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
       }
     }
 
+    // AAR-CMM: Score nutzt jetzt echte Mapbox-ETA Büro→Fall (Minuten) statt
+    // Haversine-km. ETA-Gewicht 0.5 weil Minuten in DE-Stadtverkehr ~doppelt
+    // so groß sein können wie km — wir wollen ETA nicht überproportional
+    // bestrafen. Bei Mapbox-Ausfall fällt der Score auf -distanzKm zurück.
+    const etaFromBueroMin = bueroEtaMap.get(sv.id as string) ?? null
+    const distanzPenalty = etaFromBueroMin != null ? etaFromBueroMin * 0.5 : distanzKm
+
     // Score: höher = besser
-    // +100 pro Paket-Stufe, -2 pro offenem Fall, -2 pro Ablehnung, -1 pro km, +40 wenn am Wunschtermin frei
-    const score = paketPrio * 100 - kontingentGenutzt * 2 - ablehnungen * 2 - distanzKm + wunschterminBonus
+    // +100 pro Paket-Stufe, -2 pro offenem Fall, -2 pro Ablehnung,
+    // -0.5 pro ETA-Minute (oder -1/km Fallback), +40 wenn am Wunschtermin frei
+    // Sticky-SV: +1000 (schlaegt alle anderen Faktoren — Kontinuitaet > Optimierung)
+    const stickyBonus = input.stickySvId && sv.id === input.stickySvId ? 1000 : 0
+    const score =
+      paketPrio * 100 -
+      kontingentGenutzt * 2 -
+      ablehnungen * 2 -
+      distanzPenalty +
+      wunschterminBonus +
+      stickyBonus
     reasons.push(`Paket: ${paket}`)
     reasons.push(`${kontingentFrei}/${kontingentGesamt} frei`)
+    if (etaFromBueroMin != null) reasons.push(`${etaFromBueroMin} min Fahrt vom Büro`)
+    if (stickyBonus > 0) reasons.unshift('Bekannter SV (Sticky)')
 
     const profile = Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles
     candidates.push({
@@ -267,6 +290,7 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
       name: profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() : '—',
       paket,
       distanzKm: Math.round(distanzKm * 10) / 10,
+      etaFromBueroMin,
       offeneFaelle: kontingentGenutzt,
       kontingentFrei,
       ablehnungen30d: ablehnungen,

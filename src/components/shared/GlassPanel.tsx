@@ -1,10 +1,10 @@
-// 2026-05-07 Design-Review Item 1.4: Iconic „Heute-Sidebar"-Glass-Look als
+﻿// 2026-05-07 Design-Review Item 1.4: Iconic „Heute-Sidebar"-Glass-Look als
 // shared Component. Vorher: ~16 Stellen mit inline `bg-white/55 backdrop-blur-md
 // border border-white/40 rounded-xl shadow-ios-md`. Drift-Risiko bei jeder
 // Aenderung. Jetzt: <GlassPanel> mit drei Varianten + Doc-Comment.
 //
 // WICHTIG: GlassPanel ist fuer **schwebende Floating-Elemente** ueber Image/
-// Map-Backgrounds. Auf normaler grey-bg-Page (`bg-[#f8f9fb]`) wirkt Glass
+// Map-Backgrounds. Auf normaler grey-bg-Page (`bg-claimondo-bg`) wirkt Glass
 // schmutzig — dort weiterhin solid Card-Primitive nutzen.
 
 import type { ReactNode } from 'react'

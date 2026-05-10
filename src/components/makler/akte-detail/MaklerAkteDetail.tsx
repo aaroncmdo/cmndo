@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-487 (M5): Makler-Akte-Detail — Client-Komponente mit Header, Quick-
 // Stats, 5-Tab-Navigation (3 aktive Panels + 2 Placeholder für M6/M7).
@@ -160,7 +160,7 @@ export function MaklerAkteDetail({
           {kunde?.telefon ? (
             <a
               href={`tel:${kunde.telefon}`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white text-claimondo-navy text-sm font-semibold hover:bg-[#7BA3CC]/20"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white text-claimondo-navy text-sm font-semibold hover:bg-claimondo-light-blue/20"
             >
               <PhoneIcon width={16} height={16} />
               Kunde anrufen
@@ -315,7 +315,7 @@ function TabButton({
       onClick={onClick}
       className={`shrink-0 inline-flex items-center gap-2 px-3 py-2.5 text-sm border-b-2 -mb-px transition-colors ${
         active
-          ? 'border-[#0D1B3E] text-claimondo-navy font-semibold'
+          ? 'border-claimondo-navy text-claimondo-navy font-semibold'
           : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
       }`}
     >
@@ -324,7 +324,7 @@ function TabButton({
       {count !== undefined && count > 0 ? (
         <span
           className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-medium ${
-            active ? 'bg-claimondo-navy text-white' : 'bg-[#e4e7ef] text-claimondo-navy'
+            active ? 'bg-claimondo-navy text-white' : 'bg-claimondo-border text-claimondo-navy'
           }`}
         >
           {count}

@@ -2555,11 +2555,13 @@ export type Database = {
           besichtigungsort_adresse: string | null
           besichtigungsort_lat: number | null
           besichtigungsort_lng: number | null
+          besichtigungsort_notiz: string | null
           besichtigungsort_place_id: string | null
           betreuungspaket: Database["public"]["Enums"]["betreuungspaket"] | null
           bevorzugter_kanal: string | null
           bic: string | null
           bkat_unfallart: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn: string | null
           cardentity_abfrage_am: string | null
           cardentity_enriched_at: string | null
           cardentity_report: Json | null
@@ -2587,7 +2589,11 @@ export type Database = {
           eskalation_tag_28_ergebnis: string | null
           eskalation_tag_28_ergebnis_am: string | null
           eskalation_tag_28_ergebnis_von: string | null
+          eskaliert_am: string | null
+          eskaliert_an_admin_id: string | null
+          eskaliert_grund: string | null
           fahrerflucht: boolean | null
+          fahrzeug_aufbau: string | null
           fahrzeug_ausstattung: Json | null
           fahrzeug_baujahr: number | null
           fahrzeug_fahrbereit: boolean | null
@@ -2625,6 +2631,7 @@ export type Database = {
           geschlossen_grund: string | null
           gewerbe_flag: boolean | null
           google_review_gesendet: boolean | null
+          google_review_prompt_gezeigt_am: string | null
           gutachten_betrag: number | null
           gutachten_eingegangen_am: string | null
           gutachten_hochgeladen_am: string | null
@@ -2662,6 +2669,10 @@ export type Database = {
           kanzlei_provision_status: string | null
           kanzlei_uebergeben_am: string | null
           kennzeichen: string | null
+          kennzeichen_buchstaben: string | null
+          kennzeichen_kreis: string | null
+          kennzeichen_suffix: string | null
+          kennzeichen_zahl: string | null
           ki_geschaetzte_kosten_max: number | null
           ki_geschaetzte_kosten_min: number | null
           ki_kalkulation: Json | null
@@ -2677,6 +2688,7 @@ export type Database = {
           kunde_id: string | null
           kunde_lat: number | null
           kunde_lng: number | null
+          kunde_match_via: string | null
           kunde_nachname: string | null
           kunde_plz: string | null
           kunde_stadt: string | null
@@ -2740,6 +2752,9 @@ export type Database = {
           polizei_vor_ort: boolean | null
           polizeibericht_status: string | null
           prioritaet: string | null
+          re_termin_eskalation_an_kb_am: string | null
+          re_termin_token: string | null
+          re_termin_token_eingelaufen_am: string | null
           regulierung_am: string | null
           regulierung_angekuendigt_am: string | null
           regulierung_betrag: number | null
@@ -2887,6 +2902,7 @@ export type Database = {
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
+          besichtigungsort_notiz?: string | null
           besichtigungsort_place_id?: string | null
           betreuungspaket?:
             | Database["public"]["Enums"]["betreuungspaket"]
@@ -2894,6 +2910,7 @@ export type Database = {
           bevorzugter_kanal?: string | null
           bic?: string | null
           bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn?: string | null
           cardentity_abfrage_am?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
@@ -2921,7 +2938,11 @@ export type Database = {
           eskalation_tag_28_ergebnis?: string | null
           eskalation_tag_28_ergebnis_am?: string | null
           eskalation_tag_28_ergebnis_von?: string | null
+          eskaliert_am?: string | null
+          eskaliert_an_admin_id?: string | null
+          eskaliert_grund?: string | null
           fahrerflucht?: boolean | null
+          fahrzeug_aufbau?: string | null
           fahrzeug_ausstattung?: Json | null
           fahrzeug_baujahr?: number | null
           fahrzeug_fahrbereit?: boolean | null
@@ -2959,6 +2980,7 @@ export type Database = {
           geschlossen_grund?: string | null
           gewerbe_flag?: boolean | null
           google_review_gesendet?: boolean | null
+          google_review_prompt_gezeigt_am?: string | null
           gutachten_betrag?: number | null
           gutachten_eingegangen_am?: string | null
           gutachten_hochgeladen_am?: string | null
@@ -2996,6 +3018,10 @@ export type Database = {
           kanzlei_provision_status?: string | null
           kanzlei_uebergeben_am?: string | null
           kennzeichen?: string | null
+          kennzeichen_buchstaben?: string | null
+          kennzeichen_kreis?: string | null
+          kennzeichen_suffix?: string | null
+          kennzeichen_zahl?: string | null
           ki_geschaetzte_kosten_max?: number | null
           ki_geschaetzte_kosten_min?: number | null
           ki_kalkulation?: Json | null
@@ -3011,6 +3037,7 @@ export type Database = {
           kunde_id?: string | null
           kunde_lat?: number | null
           kunde_lng?: number | null
+          kunde_match_via?: string | null
           kunde_nachname?: string | null
           kunde_plz?: string | null
           kunde_stadt?: string | null
@@ -3074,6 +3101,9 @@ export type Database = {
           polizei_vor_ort?: boolean | null
           polizeibericht_status?: string | null
           prioritaet?: string | null
+          re_termin_eskalation_an_kb_am?: string | null
+          re_termin_token?: string | null
+          re_termin_token_eingelaufen_am?: string | null
           regulierung_am?: string | null
           regulierung_angekuendigt_am?: string | null
           regulierung_betrag?: number | null
@@ -3221,6 +3251,7 @@ export type Database = {
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
+          besichtigungsort_notiz?: string | null
           besichtigungsort_place_id?: string | null
           betreuungspaket?:
             | Database["public"]["Enums"]["betreuungspaket"]
@@ -3228,6 +3259,7 @@ export type Database = {
           bevorzugter_kanal?: string | null
           bic?: string | null
           bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn?: string | null
           cardentity_abfrage_am?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
@@ -3255,7 +3287,11 @@ export type Database = {
           eskalation_tag_28_ergebnis?: string | null
           eskalation_tag_28_ergebnis_am?: string | null
           eskalation_tag_28_ergebnis_von?: string | null
+          eskaliert_am?: string | null
+          eskaliert_an_admin_id?: string | null
+          eskaliert_grund?: string | null
           fahrerflucht?: boolean | null
+          fahrzeug_aufbau?: string | null
           fahrzeug_ausstattung?: Json | null
           fahrzeug_baujahr?: number | null
           fahrzeug_fahrbereit?: boolean | null
@@ -3293,6 +3329,7 @@ export type Database = {
           geschlossen_grund?: string | null
           gewerbe_flag?: boolean | null
           google_review_gesendet?: boolean | null
+          google_review_prompt_gezeigt_am?: string | null
           gutachten_betrag?: number | null
           gutachten_eingegangen_am?: string | null
           gutachten_hochgeladen_am?: string | null
@@ -3330,6 +3367,10 @@ export type Database = {
           kanzlei_provision_status?: string | null
           kanzlei_uebergeben_am?: string | null
           kennzeichen?: string | null
+          kennzeichen_buchstaben?: string | null
+          kennzeichen_kreis?: string | null
+          kennzeichen_suffix?: string | null
+          kennzeichen_zahl?: string | null
           ki_geschaetzte_kosten_max?: number | null
           ki_geschaetzte_kosten_min?: number | null
           ki_kalkulation?: Json | null
@@ -3345,6 +3386,7 @@ export type Database = {
           kunde_id?: string | null
           kunde_lat?: number | null
           kunde_lng?: number | null
+          kunde_match_via?: string | null
           kunde_nachname?: string | null
           kunde_plz?: string | null
           kunde_stadt?: string | null
@@ -3408,6 +3450,9 @@ export type Database = {
           polizei_vor_ort?: boolean | null
           polizeibericht_status?: string | null
           prioritaet?: string | null
+          re_termin_eskalation_an_kb_am?: string | null
+          re_termin_token?: string | null
+          re_termin_token_eingelaufen_am?: string | null
           regulierung_am?: string | null
           regulierung_angekuendigt_am?: string | null
           regulierung_betrag?: number | null
@@ -3582,6 +3627,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "faelle_eskaliert_an_admin_id_fkey"
+            columns: ["eskaliert_an_admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "faelle_gegner_versicherung_id_fkey"
             columns: ["gegner_versicherung_id"]
             isOneToOne: false
@@ -3669,6 +3721,7 @@ export type Database = {
           idempotency_key: string | null
           ist_pflicht: boolean
           kategorie: string | null
+          kb_gesehen_am: string | null
           lead_id: string | null
           mime_type: string | null
           ocr_extracted_data: Json | null
@@ -3701,6 +3754,7 @@ export type Database = {
           idempotency_key?: string | null
           ist_pflicht?: boolean
           kategorie?: string | null
+          kb_gesehen_am?: string | null
           lead_id?: string | null
           mime_type?: string | null
           ocr_extracted_data?: Json | null
@@ -3733,6 +3787,7 @@ export type Database = {
           idempotency_key?: string | null
           ist_pflicht?: boolean
           kategorie?: string | null
+          kb_gesehen_am?: string | null
           lead_id?: string | null
           mime_type?: string | null
           ocr_extracted_data?: Json | null
@@ -4897,6 +4952,93 @@ export type Database = {
           },
         ]
       }
+      gutachter_finder_anfragen: {
+        Row: {
+          bestaetigung_gesendet_am: string | null
+          email: string
+          erstellt_am: string
+          fahrzeug_beschreibung: string | null
+          fall_id: string | null
+          id: string
+          kennzeichen: string | null
+          matching_typ: string | null
+          nachname: string
+          sa_signatur_data_url: string | null
+          sa_unterzeichnet_am: string | null
+          schadenort: string | null
+          schadenort_lat: number | null
+          schadenort_lng: number | null
+          schadentyp: string
+          status: string
+          telefon: string | null
+          vorname: string
+          wunschtermin: string | null
+          zugeordneter_sv_id: string | null
+          zugeordneter_sv_lead_id: string | null
+        }
+        Insert: {
+          bestaetigung_gesendet_am?: string | null
+          email: string
+          erstellt_am?: string
+          fahrzeug_beschreibung?: string | null
+          fall_id?: string | null
+          id?: string
+          kennzeichen?: string | null
+          matching_typ?: string | null
+          nachname: string
+          sa_signatur_data_url?: string | null
+          sa_unterzeichnet_am?: string | null
+          schadenort?: string | null
+          schadenort_lat?: number | null
+          schadenort_lng?: number | null
+          schadentyp: string
+          status?: string
+          telefon?: string | null
+          vorname: string
+          wunschtermin?: string | null
+          zugeordneter_sv_id?: string | null
+          zugeordneter_sv_lead_id?: string | null
+        }
+        Update: {
+          bestaetigung_gesendet_am?: string | null
+          email?: string
+          erstellt_am?: string
+          fahrzeug_beschreibung?: string | null
+          fall_id?: string | null
+          id?: string
+          kennzeichen?: string | null
+          matching_typ?: string | null
+          nachname?: string
+          sa_signatur_data_url?: string | null
+          sa_unterzeichnet_am?: string | null
+          schadenort?: string | null
+          schadenort_lat?: number | null
+          schadenort_lng?: number | null
+          schadentyp?: string
+          status?: string
+          telefon?: string | null
+          vorname?: string
+          wunschtermin?: string | null
+          zugeordneter_sv_id?: string | null
+          zugeordneter_sv_lead_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gutachter_finder_anfragen_zugeordneter_sv_id_fkey"
+            columns: ["zugeordneter_sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachter_finder_anfragen_zugeordneter_sv_lead_id_fkey"
+            columns: ["zugeordneter_sv_lead_id"]
+            isOneToOne: false
+            referencedRelation: "sv_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gutachter_mitteilungen: {
         Row: {
           created_at: string | null
@@ -5049,6 +5191,9 @@ export type Database = {
           auftrag_id: string | null
           besichtigung_gestartet_am: string | null
           bezahlt: boolean
+          caldav_event_uid: string | null
+          caldav_object_url: string | null
+          caldav_synced_at: string | null
           cancelled_at: string | null
           created_at: string | null
           durchgefuehrt_am: string | null
@@ -5129,6 +5274,9 @@ export type Database = {
           auftrag_id?: string | null
           besichtigung_gestartet_am?: string | null
           bezahlt?: boolean
+          caldav_event_uid?: string | null
+          caldav_object_url?: string | null
+          caldav_synced_at?: string | null
           cancelled_at?: string | null
           created_at?: string | null
           durchgefuehrt_am?: string | null
@@ -5209,6 +5357,9 @@ export type Database = {
           auftrag_id?: string | null
           besichtigung_gestartet_am?: string | null
           bezahlt?: boolean
+          caldav_event_uid?: string | null
+          caldav_object_url?: string | null
+          caldav_synced_at?: string | null
           cancelled_at?: string | null
           created_at?: string | null
           durchgefuehrt_am?: string | null
@@ -6361,14 +6512,17 @@ export type Database = {
           aircall_contact_id: string | null
           anrede: string | null
           anruf_versuche: number | null
+          ansprechpartner_beziehung: string | null
           aufklaerung_teilschuld_bestaetigt: boolean | null
           auslandskennzeichen: boolean | null
           besichtigungsort_adresse: string | null
           besichtigungsort_lat: number | null
           besichtigungsort_lng: number | null
+          besichtigungsort_notiz: string | null
           besichtigungsort_place_id: string | null
           bevorzugter_kanal: string | null
           bkat_unfallart: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn: string | null
           cardentity_enriched_at: string | null
           cardentity_report: Json | null
           claude_vision_analyse: Json | null
@@ -6385,6 +6539,7 @@ export type Database = {
           email: string | null
           erstzulassung: string | null
           fahrerflucht: boolean | null
+          fahrzeug_aufbau: string | null
           fahrzeug_ausstattung: Json | null
           fahrzeug_baujahr: number | null
           fahrzeug_fahrbereit: boolean | null
@@ -6439,6 +6594,10 @@ export type Database = {
           ist_fahrzeughalter: boolean | null
           kanzlei_triggered: boolean | null
           kennzeichen: string | null
+          kennzeichen_buchstaben: string | null
+          kennzeichen_kreis: string | null
+          kennzeichen_suffix: string | null
+          kennzeichen_zahl: string | null
           kilometerstand: number | null
           kontaktversuche: number | null
           konvertiert_am: string | null
@@ -6446,6 +6605,7 @@ export type Database = {
           konvertiert_zu_claim_id: string | null
           konvertiert_zu_fall_id: string | null
           kunde_adresse: string | null
+          kunde_id: string | null
           kunde_lat: number | null
           kunde_lng: number | null
           kunde_plz: string | null
@@ -6554,14 +6714,17 @@ export type Database = {
           aircall_contact_id?: string | null
           anrede?: string | null
           anruf_versuche?: number | null
+          ansprechpartner_beziehung?: string | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
+          besichtigungsort_notiz?: string | null
           besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
           bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
           claude_vision_analyse?: Json | null
@@ -6578,6 +6741,7 @@ export type Database = {
           email?: string | null
           erstzulassung?: string | null
           fahrerflucht?: boolean | null
+          fahrzeug_aufbau?: string | null
           fahrzeug_ausstattung?: Json | null
           fahrzeug_baujahr?: number | null
           fahrzeug_fahrbereit?: boolean | null
@@ -6632,6 +6796,10 @@ export type Database = {
           ist_fahrzeughalter?: boolean | null
           kanzlei_triggered?: boolean | null
           kennzeichen?: string | null
+          kennzeichen_buchstaben?: string | null
+          kennzeichen_kreis?: string | null
+          kennzeichen_suffix?: string | null
+          kennzeichen_zahl?: string | null
           kilometerstand?: number | null
           kontaktversuche?: number | null
           konvertiert_am?: string | null
@@ -6639,6 +6807,7 @@ export type Database = {
           konvertiert_zu_claim_id?: string | null
           konvertiert_zu_fall_id?: string | null
           kunde_adresse?: string | null
+          kunde_id?: string | null
           kunde_lat?: number | null
           kunde_lng?: number | null
           kunde_plz?: string | null
@@ -6747,14 +6916,17 @@ export type Database = {
           aircall_contact_id?: string | null
           anrede?: string | null
           anruf_versuche?: number | null
+          ansprechpartner_beziehung?: string | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
           auslandskennzeichen?: boolean | null
           besichtigungsort_adresse?: string | null
           besichtigungsort_lat?: number | null
           besichtigungsort_lng?: number | null
+          besichtigungsort_notiz?: string | null
           besichtigungsort_place_id?: string | null
           bevorzugter_kanal?: string | null
           bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
+          brn?: string | null
           cardentity_enriched_at?: string | null
           cardentity_report?: Json | null
           claude_vision_analyse?: Json | null
@@ -6771,6 +6943,7 @@ export type Database = {
           email?: string | null
           erstzulassung?: string | null
           fahrerflucht?: boolean | null
+          fahrzeug_aufbau?: string | null
           fahrzeug_ausstattung?: Json | null
           fahrzeug_baujahr?: number | null
           fahrzeug_fahrbereit?: boolean | null
@@ -6825,6 +6998,10 @@ export type Database = {
           ist_fahrzeughalter?: boolean | null
           kanzlei_triggered?: boolean | null
           kennzeichen?: string | null
+          kennzeichen_buchstaben?: string | null
+          kennzeichen_kreis?: string | null
+          kennzeichen_suffix?: string | null
+          kennzeichen_zahl?: string | null
           kilometerstand?: number | null
           kontaktversuche?: number | null
           konvertiert_am?: string | null
@@ -6832,6 +7009,7 @@ export type Database = {
           konvertiert_zu_claim_id?: string | null
           konvertiert_zu_fall_id?: string | null
           kunde_adresse?: string | null
+          kunde_id?: string | null
           kunde_lat?: number | null
           kunde_lng?: number | null
           kunde_plz?: string | null
@@ -7019,6 +7197,13 @@ export type Database = {
             columns: ["konvertiert_zu_fall_id"]
             isOneToOne: false
             referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_kunde_id_fkey"
+            columns: ["kunde_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -8463,6 +8648,7 @@ export type Database = {
           google_access_token: string | null
           google_connected_at: string | null
           google_email: string | null
+          google_place_id: string | null
           google_refresh_token: string | null
           google_token_expires_at: string | null
           id: string
@@ -8517,6 +8703,7 @@ export type Database = {
           google_access_token?: string | null
           google_connected_at?: string | null
           google_email?: string | null
+          google_place_id?: string | null
           google_refresh_token?: string | null
           google_token_expires_at?: string | null
           id: string
@@ -8571,6 +8758,7 @@ export type Database = {
           google_access_token?: string | null
           google_connected_at?: string | null
           google_email?: string | null
+          google_place_id?: string | null
           google_refresh_token?: string | null
           google_token_expires_at?: string | null
           id?: string
@@ -10604,6 +10792,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "sv_payment_reminders_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sv_private_stops: {
+        Row: {
+          address: string
+          created_at: string
+          datum: string
+          end_zeit: string
+          external_event_id: string
+          id: string
+          lat: number
+          lng: number
+          place_id: string | null
+          source: string
+          start_zeit: string
+          sv_id: string
+          titel: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          datum: string
+          end_zeit: string
+          external_event_id: string
+          id?: string
+          lat: number
+          lng: number
+          place_id?: string | null
+          source: string
+          start_zeit: string
+          sv_id: string
+          titel?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          datum?: string
+          end_zeit?: string
+          external_event_id?: string
+          id?: string
+          lat?: number
+          lng?: number
+          place_id?: string | null
+          source?: string
+          start_zeit?: string
+          sv_id?: string
+          titel?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sv_private_stops_sv_id_fkey"
             columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "sachverstaendige"

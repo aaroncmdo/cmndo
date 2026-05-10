@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claimondo — SV-Live</title>
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0d1530;--accent:#f3c053;--green:#639922;
+  --yellow:#EF9F27;--blue:#378ADD;--success:#10b981;
+  --bg:#f8f9fb;--border:#e4e7ef;--muted:#6b7280;
+  --sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:var(--sans)}
+
+/* HEADER */
+.hdr{height:52px;background:var(--primary);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:relative;z-index:100;flex-shrink:0}
+.hdr-logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+.hdr-logo-i{width:26px;height:26px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);border-radius:6px;display:grid;place-items:center}
+.hdr-logo-t{font-size:16px;font-weight:700;letter-spacing:-.02em}
+.hdr-logo-t .w{color:#fff}.hdr-logo-t .b{color:#7296bd}
+.hdr-nav{display:flex;gap:20px}
+.hdr-nav a{font-size:13px;font-weight:500;color:rgba(255,255,255,.55);text-decoration:none;cursor:pointer}
+.hdr-nav a:hover{color:#fff}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.hdr-tel{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.8)}
+.hdr-cta{background:var(--accent);color:var(--primary);font-size:12px;font-weight:700;border:none;border-radius:8px;padding:7px 14px;cursor:pointer}
+
+/* LAYOUT */
+.app{display:flex;flex-direction:column;height:100vh}
+.main{flex:1;display:flex;position:relative;overflow:hidden}
+
+/* MAP */
+#map{position:absolute;inset:0}
+.mapboxgl-ctrl-attrib{display:none!important}
+.mapboxgl-ctrl-logo{display:none!important}
+.mapboxgl-ctrl-group{display:none!important}
+
+/* PANEL */
+#panel{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff;overflow-y:auto;overflow-x:hidden;transition:width .55s cubic-bezier(.4,0,.2,1);z-index:20;box-shadow:4px 0 24px rgba(13,21,48,.1)}
+#panel.open{width:46%}
+#pc{padding:28px 36px;min-height:100%;display:flex;flex-direction:column}
+
+/* STEPBAR */
+#stepbar{height:38px;background:#fff;border-bottom:1px solid var(--border);display:none;align-items:center;justify-content:center;gap:5px;font-size:12px;position:sticky;top:0;z-index:5;flex-shrink:0}
+#stepbar.show{display:flex}
+.s{color:var(--muted);font-weight:500}.s.done{color:var(--success)}.s.act{font-weight:700;color:var(--primary)}
+.sdot{color:var(--border);margin:0 3px}
+
+/* BANNER */
+.banner{position:absolute;top:0;left:0;right:0;z-index:15;background:linear-gradient(90deg,rgba(13,21,48,.92),rgba(26,39,68,.92));backdrop-filter:blur(8px);padding:9px 20px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.banner .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0}
+.banner .t{font-size:12px;font-weight:500;color:rgba(255,255,255,.9);flex:1}
+.banner .e{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent)}
+
+/* TRUST */
+.trust{position:absolute;bottom:0;left:0;right:0;z-index:15;background:rgba(13,21,48,.88);backdrop-filter:blur(8px);padding:10px 24px;display:flex;align-items:center;justify-content:center}
+.ti{display:flex;align-items:center;gap:6px;padding:0 16px;color:rgba(255,255,255,.78);font-size:11px;font-weight:500;border-right:1px solid rgba(255,255,255,.1)}
+.ti:last-child{border:none}.ti:first-child{font-weight:700;font-size:12px}
+
+/* HERO */
+.hero{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(ellipse at 50% 55%,rgba(13,21,48,.52) 0%,rgba(13,21,48,.18) 55%,transparent 80%)}
+.hero-pill{background:#eef7e5;color:var(--green);font-size:11px;font-weight:700;text-transform:uppercase;border-radius:20px;padding:5px 14px;letter-spacing:.04em;margin-bottom:12px;animation:fu .4s ease}
+.hero-live{display:inline-flex;align-items:center;gap:7px;background:rgba(13,21,48,.75);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;margin-bottom:16px;animation:fu .4s .1s ease both}
+.hero-live .d{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.hero-live span{font-size:12px;font-weight:600;color:rgba(255,255,255,.9)}
+.hero-live b{font-family:var(--mono);font-weight:700;color:var(--accent)}
+.hero h1{font-size:36px;font-weight:900;color:#fff;line-height:1.1;letter-spacing:-.03em;text-shadow:0 2px 24px rgba(0,0,0,.5);margin-bottom:10px;max-width:480px;animation:fu .4s .2s ease both}
+.hero p{font-size:14px;color:rgba(255,255,255,.82);line-height:1.6;margin-bottom:16px;max-width:400px;animation:fu .4s .25s ease both}
+.hero-stars{display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.75);margin-bottom:20px;animation:fu .4s .3s ease both}
+.hero-stars svg{fill:var(--accent);width:13px;height:13px}
+.btn-gold{background:var(--accent);color:var(--primary);border:none;border-radius:12px;padding:15px 28px;font-family:var(--sans);font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 20px rgba(243,192,83,.45);width:100%;max-width:380px;transition:all .15s;letter-spacing:-.01em;animation:fu .4s .35s ease both}
+.btn-gold:hover{background:#e5b445;transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:12px;padding:14px 28px;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;width:100%;margin-top:8px}
+#pc .btn-gold,#pc .btn-outline{max-width:100%}
+.hero-sec{font-size:13px;color:rgba(255,255,255,.6);margin-top:12px;cursor:pointer;animation:fu .4s .4s ease both}
+.hero-sm{font-size:11px;color:rgba(255,255,255,.35);margin-top:6px;animation:fu .4s .4s ease both}
+
+/* BACK */
+.back{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:16px;border:none;background:none;font-family:var(--sans);padding:0}
+.back:hover{color:var(--primary)}
+
+/* PROGRESS */
+.qp{display:flex;gap:4px;margin-bottom:16px}.qp div{flex:1;height:3px;border-radius:2px;background:var(--border)}.qp .done{background:var(--accent)}.qp .cur{background:rgba(243,192,83,.4)}
+.ql{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.03em;margin-bottom:4px}
+.qt{font-size:20px;font-weight:800;color:var(--primary);letter-spacing:-.02em;line-height:1.2;margin-bottom:18px}
+
+/* OPTIONS */
+.ob{display:flex;align-items:center;gap:10px;padding:13px 15px;border:1.5px solid var(--border);border-radius:11px;margin-bottom:7px;cursor:pointer;background:#fff;width:100%;transition:all .15s;text-align:left}
+.ob:hover{border-color:var(--accent);background:#fffbf0}
+.ob-l{font-size:15px;font-weight:600;color:var(--primary)}
+.ob-s{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* PROFILE */
+.pbadge{display:inline-block;background:var(--primary);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;border-radius:6px;padding:3px 10px;letter-spacing:.05em;margin-bottom:10px}
+.prow{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.av{width:50px;height:50px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid rgba(13,21,48,.08)}
+.av img{width:100%;height:100%;object-fit:cover}
+.av-sm{width:40px;height:40px}
+.pn{font-size:17px;font-weight:800;color:var(--primary);letter-spacing:-.02em}
+.ps{font-size:12px;color:var(--muted);margin-top:2px}
+.eta-box{background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:12px 16px;display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
+.eta-n{font-family:var(--mono);font-size:30px;font-weight:800;color:var(--primary);line-height:1}
+.eta-l{font-size:13px;font-weight:600;color:var(--primary)}
+.eta-l2{font-size:11px;color:var(--muted)}
+.stars{display:flex;align-items:center;gap:2px;margin-top:3px}
+.stars svg{width:12px;height:12px;fill:var(--accent)}
+.stars b{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--primary);margin-left:3px}
+.stars span{font-size:11px;color:var(--muted);margin-left:2px}
+.brow{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.b{font-size:11px;font-weight:700;border-radius:6px;padding:4px 10px}
+.b-s{font-size:10px;padding:2px 7px;background:transparent!important;border:1.5px solid var(--border);color:var(--muted)!important;opacity:.7}
+.kost{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--success);font-weight:600;margin-bottom:14px}
+
+/* FORM */
+.fr{display:flex;gap:10px;margin-bottom:10px}
+.fg{flex:1}.fg.full{width:100%;margin-bottom:10px}
+.fl{font-size:11px;font-weight:600;color:var(--primary);margin-bottom:3px;display:block}
+.fi{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 13px;font-size:14px;font-family:var(--sans);color:var(--primary);background:#fff;outline:none}
+.fi:focus{border-color:var(--accent)}
+.fi::placeholder{color:#9ca3af}
+.sig-field{border:1.5px dashed var(--border);border-radius:9px;height:72px;background:#fafbfc;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:12px;margin-bottom:6px}
+.lock{display:flex;align-items:center;gap:4px;font-size:10px;color:#9ca3af;margin-bottom:14px}
+
+/* SUMMARY */
+.scard{background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.scard .nm{font-size:13px;font-weight:700;color:var(--primary)}
+.scard .mt{font-size:11px;color:var(--muted);margin-top:1px}
+.scard .ct{display:inline-block;background:#eef7e5;color:var(--green);font-size:10px;font-weight:700;border-radius:5px;padding:2px 7px;margin-top:3px}
+
+/* STEPS */
+.stitle{font-size:12px;font-weight:600;color:var(--primary);margin-bottom:10px}
+.sr{display:flex;gap:8px;margin-bottom:10px;align-items:flex-start}
+.sn{width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.srt{font-size:13px;font-weight:700;color:var(--primary)}
+.srd{font-size:11px;color:var(--muted);line-height:1.4;margin-top:1px}
+
+/* CONFIRM */
+.cchk{width:48px;height:48px;border-radius:50%;background:#eef7e5;border:2px solid var(--success);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.ctitle{font-size:20px;font-weight:800;color:var(--primary);text-align:center;letter-spacing:-.02em;margin-bottom:14px}
+
+/* PORTAL */
+.pbtn{width:100%;padding:14px;background:var(--accent);color:var(--primary);border:none;border-radius:11px;font-family:var(--sans);font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(243,192,83,.4);margin-bottom:5px}
+.phint{text-align:center;font-size:10px;color:#9ca3af}
+.pinfo{border-top:1.5px solid var(--border);margin-top:10px;padding-top:8px;font-size:10px;color:#9ca3af;text-align:center;line-height:1.5}
+
+/* SV LIST */
+.svcard{border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer;background:#fff;transition:all .15s}
+.svcard:hover{border-color:var(--accent);background:#fffbf0}
+.svcard.top{border:2px solid var(--primary)}
+.svtop{background:var(--primary);color:var(--accent);font-size:9px;font-weight:700;text-transform:uppercase;border-radius:5px;padding:2px 8px;display:inline-block;margin-bottom:6px}
+
+/* LOADING */
+.ldp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:360px;background:#fff;border-radius:18px;padding:28px 24px;box-shadow:0 8px 40px rgba(13,21,48,.18);text-align:center;z-index:30}
+.spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+.ldt{font-size:16px;font-weight:800;color:var(--primary);margin-bottom:16px}
+.ls{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:5px;text-align:left;font-size:12px}
+.ls.done{background:#f0f7f0;border:1px solid #b8ddb8;color:var(--green);font-weight:600}
+.ls.act{background:var(--bg);border:1.5px solid var(--primary);font-weight:700;color:var(--primary)}
+.ls.pen{background:#fafafa;border:1px solid var(--border);opacity:.4;color:#9ca3af}
+
+/* REG */
+.rc{border:2px solid var(--primary);border-radius:13px;padding:18px;margin-bottom:10px;background:#fff}
+.rc-b{border:1.5px solid var(--border);border-radius:13px;padding:14px 18px;background:var(--bg)}
+.rchk{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0f1f3;font-size:12px;gap:8px}
+.rchk:last-child{border-bottom:none}
+.rchk-l{display:flex;align-items:center;gap:7px;color:var(--primary)}
+.rchk-l svg{flex-shrink:0;width:15px;height:15px}
+.rchk-r{font-family:var(--mono);font-weight:500;color:var(--muted);white-space:nowrap}
+.cdiff{background:#eef7e5;border:1.5px solid #b8ddb8;border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.rwarn{display:flex;align-items:center;gap:6px;font-size:11px;color:#a05000;background:#fff8f0;border:1px solid #e8c87a;border-radius:7px;padding:7px 9px;margin-top:8px}
+
+/* Z6 */
+.z6w{display:flex;align-items:center;justify-content:center;height:100%;background:var(--bg);padding:24px}
+.z6c{width:400px;background:#fff;border-radius:18px;padding:32px 28px;box-shadow:0 8px 40px rgba(13,21,48,.14);border:1px solid rgba(13,21,48,.06)}
+.z6t{font-size:20px;font-weight:800;color:var(--primary);text-align:center;margin-bottom:5px}
+.z6s{font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px}
+.sbtn{width:100%;padding:13px;border-radius:11px;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:8px}
+.sg{background:#fff;border:1.5px solid var(--border);color:var(--primary)}
+.sa{background:#000;border:none;color:#fff}
+.z6d{text-align:center;font-size:11px;color:#9ca3af;margin:14px 0;display:flex;align-items:center;gap:8px}
+.z6d::before,.z6d::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* BERATER */
+.berater-card{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+
+/* SEP */
+.sep{border-top:1.5px solid var(--border);margin:14px 0}
+
+/* TIMELINE */
+.tl{display:flex;flex-direction:column}
+.ts{display:flex;gap:10px;position:relative;padding-bottom:12px}
+.ts:not(:last-child)::after{content:'';position:absolute;left:9px;top:20px;bottom:0;width:2px}
+.ts.done::after{background:var(--success)}.ts.act::after,.ts.pen::after{background:var(--border)}
+.td{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.td.done{background:var(--success)}.td.act{background:var(--primary)}.td.pen{background:#fff;border:2px solid var(--border)}
+.tsp{width:9px;height:9px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:var(--accent);animation:spin .8s linear infinite}
+.tlab{font-size:12px;color:var(--primary)}.tlab.act{font-weight:700}.tlab.pen{color:#9ca3af}
+.tmeta{font-size:10px;font-family:var(--mono);font-weight:700;margin-top:1px}
+.tmeta.done{color:var(--muted)}.tmeta.act{color:var(--accent)}
+
+/* KENNZEICHEN */
+.kz-wrap{display:flex;align-items:stretch;border:2px solid var(--primary);border-radius:10px;overflow:hidden;background:#fefdf5;height:46px;max-width:300px}
+.kz-eu{width:30px;background:var(--primary);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.kz-eu .kz-stars{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;width:16px}
+.kz-eu .kz-star{width:3px;height:3px;border-radius:50%;background:var(--accent)}
+.kz-eu .kz-d{color:#fff;font-size:8px;font-weight:700;margin-top:1px}
+.kz-input{border:none;background:transparent;font-family:var(--mono);font-size:16px;font-weight:700;text-transform:uppercase;text-align:center;color:var(--primary);outline:none}
+.kz-sep{display:flex;align-items:center;gap:2px;padding:0 2px}
+.kz-plak{width:13px;height:13px;border-radius:50%;border:1.5px solid #d0d5e0;display:flex;align-items:center;justify-content:center;font-size:4px;color:#9ca3af;font-weight:700}
+
+/* ANIMATION */
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(99,153,34,.5)}70%{box-shadow:0 0 0 8px rgba(99,153,34,0)}100%{box-shadow:0 0 0 0 rgba(99,153,34,0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes carDrive{0%{transform:translateX(-3px)}50%{transform:translateX(3px)}100%{transform:translateX(-3px)}}
+#pc>*{animation:fu .25s ease both}
+
+/* Custom Mapbox popup */
+.mapboxgl-popup-content{border-radius:12px!important;padding:0!important;box-shadow:0 4px 20px rgba(13,21,48,.18)!important;min-width:240px}
+.mapboxgl-popup-close-button{font-size:18px;padding:8px 10px;color:var(--muted)}
+.sv-pop{padding:14px}
+.sv-pop-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sv-pop-av{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid rgba(13,21,48,.08)}
+.sv-pop-name{font-size:14px;font-weight:700;color:var(--primary)}
+.sv-pop-area{font-size:11px;color:var(--muted)}
+.sv-pop-eta{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--primary);margin-top:3px}
+.sv-pop-stars{color:var(--accent);font-size:12px;letter-spacing:1px}
+.sv-pop-badges{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}
+.sv-pop-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px}
+.sv-pop-avail{font-size:12px;font-weight:700;margin:4px 0 8px}
+.sv-pop-btn{width:100%;padding:9px;background:var(--accent);color:var(--primary);border:none;border-radius:8px;font-family:'Inter';font-size:12px;font-weight:700;cursor:pointer;letter-spacing:-.01em}
+
+/* Marker elements */
+.customer-marker{position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+.cu-dot{width:16px;height:16px;border-radius:50%;background:#4285F4;border:3px solid #fff;box-shadow:0 2px 8px rgba(66,133,244,.5);position:relative;z-index:2}
+.cu-ring{position:absolute;width:36px;height:36px;border-radius:50%;background:rgba(66,133,244,.15);top:50%;left:50%;transform:translate(-50%,-50%);animation:cuspulse 2.5s ease-out infinite}
+.cu-ring2{animation-delay:1.25s;background:rgba(66,133,244,.08)}
+@keyframes cuspulse{0%{transform:translate(-50%,-50%) scale(.5);opacity:1}100%{transform:translate(-50%,-50%) scale(2);opacity:0}}
+
+.sv-marker{position:relative;cursor:pointer}
+.sv-car{display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 3px 5px rgba(0,0,0,.4))}
+.sv-car svg{transition:transform .15s}
+.sv-car:hover svg{transform:scale(1.2)}
+.sv-eta-label{font-family:'JetBrains Mono';font-size:10px;font-weight:700;background:var(--primary);color:var(--accent);border-radius:4px;padding:2px 5px;white-space:nowrap;margin-top:2px;opacity:0;transition:opacity .2s}
+.sv-marker:hover .sv-eta-label{opacity:1}
+
+.dom-marker{background:rgba(13,21,48,.88);backdrop-filter:blur(6px);border:1.5px solid rgba(243,192,83,.6);border-radius:8px;padding:5px 9px;display:flex;align-items:center;gap:5px;box-shadow:0 3px 14px rgba(13,21,48,.4);cursor:default}
+.dom-marker span{font-size:10px;font-weight:700;color:#fff;white-space:nowrap;letter-spacing:.02em}
+
+.drive-marker{filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+@keyframes carpulse{0%{transform:translate(-50%,-50%) scale(.4);opacity:.8}100%{transform:translate(-50%,-50%) scale(2.2);opacity:0}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <a class="hdr-logo" href="#">
+      <div class="hdr-logo-i"><svg width="13" height="13" viewBox="0 0 15 15"><path d="M7.5 1L2 3.8V7.5c0 3 2.4 5.5 5.5 6 3.1-.5 5.5-3 5.5-6V3.8L7.5 1z" fill="none" stroke="white" stroke-width="1.5" stroke-linejoin="round"/><polyline points="5 7.5 6.8 9.3 10 5.5" stroke="white" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <span class="hdr-logo-t"><span class="w">claim</span><span class="b">ondo</span></span>
+    </a>
+    <nav class="hdr-nav"><a>Soforthilfe</a><a>Leistungen</a><a>Ansprüche</a><a>Ratgeber</a><a>Über uns</a></nav>
+    <div class="hdr-r"><span class="hdr-tel">0221 259 065 30</span><button class="hdr-cta">Jetzt anrufen</button></div>
+  </div>
+  <div class="main">
+    <div id="map"></div>
+    <div id="panel">
+      <div id="stepbar"></div>
+      <div id="pc"></div>
+    </div>
+    <div id="map-ui">
+      <div class="banner" id="banner" style="display:none"><div class="dot"></div><span class="t" id="btxt"></span><span class="e" id="beta"></span></div>
+      <div class="trust" id="trust">
+        <div class="ti"><svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 1L3 3.5V7c0 3 2.2 5.2 5 5.5 2.8-.3 5-2.5 5-5.5V3.5L8 1z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>DAT Expert Partner</div>
+        <div class="ti"><svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="6" r="3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 9v6" stroke="currentColor" stroke-width="1.3"/></svg>460+ Gutachter</div>
+        <div class="ti"><svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 4v4l3 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>24/7 Soforthilfe</div>
+        <div class="ti"><svg width="13" height="13" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><text x="8" y="11.5" text-anchor="middle" font-size="9" fill="currentColor" font-weight="700">€</text></svg>100% kostenlos</div>
+      </div>
+      <div class="hero" id="hero">
+        <div class="hero-live"><div class="d"></div><span>7 Gutachter in Köln verfügbar ·</span><b>Nächster ~12 Min</b></div>
+        <h1>KFZ-Gutachter in Köln — in Minuten vor Ort.</h1>
+        <p>Zertifizierte Sachverständige, live disponiert. Sofort oder per Termin. 0 € bei unverschuldetem Unfall.</p>
+        <div class="hero-stars"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.2"/><text x="8" y="11" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.7)" font-weight="700">G</text></svg><svg viewBox="0 0 13 13"><polygon points="6.5,1 8,5 12,5 9,7.5 10,11.5 6.5,9 3,11.5 4,7.5 1,5 5,5"/></svg><svg viewBox="0 0 13 13"><polygon points="6.5,1 8,5 12,5 9,7.5 10,11.5 6.5,9 3,11.5 4,7.5 1,5 5,5"/></svg><svg viewBox="0 0 13 13"><polygon points="6.5,1 8,5 12,5 9,7.5 10,11.5 6.5,9 3,11.5 4,7.5 1,5 5,5"/></svg><svg viewBox="0 0 13 13"><polygon points="6.5,1 8,5 12,5 9,7.5 10,11.5 6.5,9 3,11.5 4,7.5 1,5 5,5"/></svg><svg viewBox="0 0 13 13"><polygon points="6.5,1 8,5 12,5 9,7.5 10,11.5 6.5,9 3,11.5 4,7.5 1,5 5,5"/></svg>5,0 · Hervorragend</div>
+        <button class="btn-gold" onclick="startFlow()">Jetzt Gutachter finden →</button>
+        <div class="hero-sec">Oder: 0221 259 065 30 anrufen</div>
+        <div class="hero-sm">Bereits über 2.000 Fälle erfolgreich abgewickelt.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+mapboxgl.accessToken='REDACTED_MAPBOX_PK_TOKEN';
+
+// ─── DATA ───
+const SV=[
+  {id:1,n:'Andreas K.',ar:'Ehrenfeld',lng:6.9157,lat:50.9434,r:'4.9',rv:'127',bd:['ÖBuV','DAT Expert'],sp:['PKW','Transporter'],st:'today',eta:12,ph:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=112&q=80&auto=format&fit=crop'},
+  {id:2,n:'Markus L.',ar:'Deutz',lng:6.9753,lat:50.9337,r:'4.7',rv:'89',bd:['BVSK','DAT Expert'],sp:['PKW','Motorrad'],st:'today',eta:18,ph:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=112&q=80&auto=format&fit=crop'},
+  {id:3,n:'Stefan W.',ar:'Lindenthal',lng:6.905,lat:50.9334,r:'4.8',rv:'64',bd:['ÖBuV'],sp:['PKW','LKW'],st:'tomorrow',eta:null,ph:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=112&q=80&auto=format&fit=crop'},
+  {id:4,n:'Claudia M.',ar:'Nippes',lng:6.951,lat:50.9627,r:'4.6',rv:'42',bd:['DAT Expert'],sp:['PKW'],st:'today',eta:25,ph:'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=112&q=80&auto=format&fit=crop'},
+  {id:5,n:'Thomas B.',ar:'Mülheim',lng:6.9825,lat:50.958,r:'4.8',rv:'73',bd:['ÖBuV','BVSK'],sp:['PKW','Transporter'],st:'today',eta:22,ph:'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=112&q=80&auto=format&fit=crop'},
+];
+const CU={lng:6.9440,lat:50.9280};
+let TOP=SV[0]; // Initial default, will be recalculated by updateSVPins()
+const DOM={lng:6.9603,lat:50.9413};
+
+// Calculate distance between two points (Haversine)
+function distKm(lat1,lng1,lat2,lng2){
+  const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// Find closest available SV to customer
+function findClosestSV(){
+  const available=SV.filter(s=>s.st==='today');
+  if(!available.length)return SV[0];
+  available.sort((a,b)=>distKm(CU.lat,CU.lng,a.lat,a.lng)-distKm(CU.lat,CU.lng,b.lat,b.lng));
+  // Update ETAs based on distance (rough: 2min/km city driving)
+  SV.forEach(s=>{
+    if(s.st==='today'){
+      const d=distKm(CU.lat,CU.lng,s.lat,s.lng);
+      s.eta=Math.max(5,Math.round(d*2.5));
+    }
+  });
+  return available[0];
+}
+
+// Update pin visuals: closest = colored, rest = greyed out
+function updateSVPins(){
+  TOP=findClosestSV();
+  svMarkers.forEach(mk=>{
+    const el=mk.m.getElement();
+    const inner=el.querySelector('.sv-inner');
+    if(!inner)return;
+    const isClosest=mk.sv.id===TOP.id;
+    const isAvailToday=mk.sv.st==='today';
+    // Show/hide pulse ring
+    const pulse=el.querySelector('.sv-pulse-ring');
+    if(pulse)pulse.style.display=isClosest?'block':'none';
+    if(isClosest){
+      inner.style.filter='none';
+      inner.style.opacity='1';
+      inner.style.transform='scale(1.15)';
+      el.style.zIndex='10';
+    } else {
+      inner.style.filter='grayscale(100%)';
+      inner.style.opacity=isAvailToday?'0.45':'0.3';
+      inner.style.transform='scale(0.85)';
+      el.style.zIndex='1';
+    }
+  });
+}
+
+// Clear and redraw route to closest SV
+function clearRoute(){
+  if(map.getLayer('route-bg'))map.removeLayer('route-bg');
+  if(map.getLayer('route'))map.removeLayer('route');
+  if(map.getSource('route'))map.removeSource('route');
+  routeDrawn=false;
+}
+
+// Real Köln street routes
+const ROUTES=[
+  [[6.928,50.936],[6.932,50.939],[6.938,50.942],[6.944,50.944],[6.951,50.944],[6.957,50.942],[6.962,50.939],[6.964,50.935],[6.962,50.931],[6.957,50.928],[6.951,50.926],[6.944,50.926],[6.938,50.928],[6.932,50.931],[6.928,50.936]],
+  [[6.904,50.948],[6.912,50.946],[6.920,50.944],[6.929,50.942],[6.937,50.940],[6.943,50.938],[6.950,50.936],[6.957,50.934],[6.963,50.932],[6.957,50.934],[6.950,50.936],[6.943,50.938],[6.937,50.940],[6.929,50.942],[6.920,50.944],[6.912,50.946],[6.904,50.948]],
+  [[6.975,50.954],[6.970,50.950],[6.965,50.946],[6.960,50.942],[6.955,50.938],[6.950,50.935],[6.955,50.938],[6.960,50.942],[6.965,50.946],[6.970,50.950],[6.975,50.954]],
+];
+
+// ─── MAP ───
+const map=new mapboxgl.Map({
+  container:'map',
+  style:'mapbox://styles/mapbox/streets-v12',
+  center:[DOM.lng,50.9380],
+  zoom:13.2,
+  pitch:52,
+  bearing:-18,
+  antialias:true
+});
+
+let svMarkers=[],driveMarkers=[],cusMarker,routeDrawn=false;
+
+map.on('load',()=>{
+  // 3D Buildings - more visible
+  map.addLayer({
+    'id':'3d-buildings',
+    'source':'composite',
+    'source-layer':'building',
+    'filter':['==','extrude','true'],
+    'type':'fill-extrusion',
+    'minzoom':13,
+    'paint':{
+      'fill-extrusion-color':['interpolate',['linear'],['get','height'],[0,'#d8d0c4'],[30,'#c8bfb2'],[80,'#b8ae9f'],[150,'#a89d8e']],
+      'fill-extrusion-height':['interpolate',['linear'],['zoom'],[13,0],[13.5,['get','height']]],
+      'fill-extrusion-base':['interpolate',['linear'],['zoom'],[13,0],[13.5,['get','min_height']]],
+      'fill-extrusion-opacity':0.85,
+    }
+  });
+
+  // Customer pin with double pulse rings
+  const cuEl=document.createElement('div');
+  cuEl.innerHTML='<div class="customer-marker"><div class="cu-ring"></div><div class="cu-ring cu-ring2"></div><div class="cu-dot"></div></div>';
+  cusMarker=new mapboxgl.Marker({element:cuEl,anchor:'center'}).setLngLat([CU.lng,CU.lat]).setPopup(new mapboxgl.Popup({offset:20}).setHTML('<div style="padding:8px;font-family:Inter;font-size:13px;font-weight:600;color:#0d1530">📍 Ihr Standort</div>')).addTo(map);
+
+  // Dom landmark marker
+  const domEl=document.createElement('div');
+  domEl.innerHTML='<div class="dom-marker"><svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 0L6 4H4L3 6H2L1 8V18H3V10H5V18H7V6L8 2L9 6V18H11V10H13V18H15V8L14 6H13L12 4H10L8 0Z" fill="#f3c053" stroke="#fff" stroke-width="0.5"/><rect x="6.5" y="12" width="3" height="6" rx="1.5" fill="rgba(255,255,255,0.4)"/></svg><span>Kölner Dom</span></div>';
+  new mapboxgl.Marker({element:domEl,anchor:'bottom'}).setLngLat([DOM.lng,DOM.lat]).addTo(map);
+
+  // SV photo pin markers
+  SV.forEach(sv=>{
+    const color=sv.st==='today'?'#639922':sv.st==='tomorrow'?'#EF9F27':'#378ADD';
+    const initials=sv.n.split(' ').map(w=>w[0]).join('').slice(0,2);
+    const size=36;
+
+    const el=document.createElement('div');
+    el.style.cssText=`cursor:pointer`;
+
+    // Photo circle with colored border — wrapped in .sv-inner for safe CSS transform
+    el.innerHTML=`<div class="sv-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .4s ease,filter .4s ease,opacity .4s ease;transform-origin:center bottom">
+      <div style="position:relative">
+        <div class="sv-pulse-ring" style="position:absolute;width:${size+14}px;height:${size+14}px;border-radius:50%;border:2px solid ${color};opacity:0;animation:carpulse 2.2s infinite;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;display:none"></div>
+        <div style="width:${size}px;height:${size}px;border-radius:50%;border:3px solid ${color};overflow:hidden;background:#e4e7ef;box-shadow:0 3px 12px rgba(0,0,0,.3);position:relative;z-index:2">
+          <img src="${sv.ph}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div style="display:none;width:100%;height:100%;background:${color};align-items:center;justify-content:center;font-family:Inter;font-size:16px;font-weight:800;color:#fff">${initials}</div>
+        </div>
+        <div class="sv-status-dot" style="width:10px;height:10px;border-radius:50%;background:${color};border:2px solid #fff;position:absolute;bottom:1px;right:1px;z-index:3;box-shadow:0 1px 4px rgba(0,0,0,.3)"></div>
+      </div>
+      <div style="background:rgba(13,21,48,0.82);backdrop-filter:blur(4px);color:#fff;font-family:Inter;font-size:9px;font-weight:700;border-radius:5px;padding:2px 6px;margin-top:3px;white-space:nowrap;letter-spacing:.02em;box-shadow:0 1px 6px rgba(0,0,0,.25)">${sv.n.split(' ')[0]} ${initials[1]||''}.</div>
+    </div>`;
+
+    const badgeColors={'ÖBuV':['#fef3cd','#856404'],'DAT Expert':['#e8f0fe','#1a56db'],'BVSK':['#eef7e5','#639922']};
+    const badgesHtml=sv.bd.map(b=>{const c=badgeColors[b]||['#eee','#333'];return `<span class="sv-pop-badge" style="background:${c[0]};color:${c[1]}">${b}</span>`;}).join('');
+    const availColor=sv.st==='today'?'#639922':'#EF9F27';
+    const availText=sv.eta?`Heute · Ankunft in ~${sv.eta} Min`:sv.st==='tomorrow'?'Morgen verfügbar':'Nächste 48h';
+
+    const popup=new mapboxgl.Popup({offset:[0,-(size/2+8)],closeButton:true,maxWidth:'260px'})
+      .setHTML(`<div class="sv-pop">
+        <div class="sv-pop-row">
+          <img class="sv-pop-av" src="${sv.ph}" onerror="this.style.background='#1a365d'">
+          <div>
+            <div class="sv-pop-name">${sv.n}</div>
+            <div class="sv-pop-area">KFZ-Sachverständiger · Köln-${sv.ar}</div>
+            <div style="color:#f3c053;font-size:11px;margin-top:2px">★★★★★ <b style="font-family:'JetBrains Mono';color:#0d1530">${sv.r}</b> <span style="color:#6b7280;font-family:Inter;font-weight:400">(${sv.rv})</span></div>
+          </div>
+        </div>
+        <div class="sv-pop-badges">${badgesHtml}</div>
+        <div class="sv-pop-avail" style="color:${availColor};font-size:12px;font-weight:700;margin-bottom:8px">${availText}</div>
+        ${sv.eta?`<div style="background:#f8f9fb;border-radius:8px;padding:8px 10px;display:flex;align-items:baseline;gap:6px;margin-bottom:8px"><span style="font-family:'JetBrains Mono';font-size:22px;font-weight:800;color:#0d1530">~${sv.eta}</span><span style="font-size:11px;color:#6b7280">Min Anfahrtszeit</span></div>`:''}
+        <button class="sv-pop-btn" onclick="selectSV(${sv.id})">Diesen Gutachter wählen →</button>
+      </div>`);
+
+    const m=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([sv.lng,sv.lat]).setPopup(popup).addTo(map);
+    svMarkers.push({m,sv});
+  });
+
+  // Close all popups when clicking on map
+  map.on('click',function(e){
+    if(!e.originalEvent.target.closest('.sv-marker')&&!e.originalEvent.target.closest('.mapboxgl-popup')){
+      svMarkers.forEach(function(mk){mk.m.getPopup()&&mk.m.getPopup().isOpen()&&mk.m.togglePopup();});
+    }
+  });
+
+  // Disable map rotation for consistent pin positions
+  map.dragRotate.disable();
+  map.touchZoomRotate.disableRotation();
+  // Initialize closest SV and pin visuals
+  updateSVPins();
+  // (removed driving cars to prevent map bugs)
+});
+
+
+// ─── STATE ───
+const D={s:'z0',h:[],a:{}};
+
+function selectSV(id){
+  D.a.selectedSV=id;
+  document.querySelectorAll('.mapboxgl-popup').forEach(p=>p.remove());
+  if(!document.getElementById('panel').classList.contains('open')){
+    startFlow();
+  } else {
+    nav('z35');
+  }
+}
+
+// ─── NAVIGATION ───
+function startFlow(){
+  document.getElementById('hero').style.display='none';
+  document.getElementById('trust').style.display='none';
+  document.getElementById('banner').style.display='flex';
+  document.getElementById('btxt').textContent='7 Gutachter in Köln verfügbar';
+  document.getElementById('beta').textContent='Nächster ~12 Min';
+  document.getElementById('panel').classList.add('open');
+  setTimeout(()=>nav('q1'),300);
+}
+
+const STEPS=[
+  {l:'Angaben',s:['q1','q2','q3','q4']},
+  {l:'Gutachter',s:['z3a','z3b','z3bs']},
+  {l:'Regulierung',s:['z35','z35b','z35c']},
+  {l:'Bestätigen',s:['z4']},
+  {l:'Abschluss',s:['z5a','z5b']},
+];
+
+function nav(s){
+  D.h.push(D.s);D.s=s;
+  const pc=document.getElementById('pc');
+  const sb=document.getElementById('stepbar');
+  const allS=['q1','q2','q3','q4','berater','z3a','z3b','z3bs','z35','z35b','z35c','z4','z5a','z5b'];
+  if(allS.includes(s)){
+    sb.className='show';
+    let h='';let done=true;
+    STEPS.forEach((st,i)=>{
+      if(i>0)h+='<span class="sdot">·</span>';
+      if(st.s.includes(s)){done=false;h+=`<span class="s act">${st.l}</span>`;}
+      else if(done)h+=`<span class="s done">✓ ${st.l}</span>`;
+      else h+=`<span class="s">${st.l}</span>`;
+    });
+    sb.innerHTML=h;
+  }else sb.className='';
+
+  switch(s){
+    case'q1':pc.innerHTML=rQ1();mapDim(0.15);break;
+    case'q2':pc.innerHTML=rQ2();mapDim(0.15);break;
+    case'berater':pc.innerHTML=rBerater();mapDim(0.15);break;
+    case'q3':pc.innerHTML=rQ3();mapDim(0.15);break;
+    case'q4':pc.innerHTML=rQ4();mapDim(0.15);break;
+    case'loading':doLoad();return;
+    case'z3a':pc.innerHTML=rZ3A();mapZoomRoute(TOP);break;
+    case'z3b':pc.innerHTML=rZ3B();mapZoomAll();break;
+    case'z3bs':pc.innerHTML=rZ3BS();break;
+    case'z35':pc.innerHTML=rZ35();mapDim(0.4);break;
+    case'z35b':pc.innerHTML=rZ35b();mapDim(0.4);break;
+    case'z35c':pc.innerHTML=rZ35c();mapDim(0.4);break;
+    case'z4':pc.innerHTML=rZ4();mapDim(0.6);hidePins();break;
+    case'z5a':pc.innerHTML=rZ5A();mapDim(0);mapZoomRoute(TOP);showBannerTrack();break;
+    case'z5b':pc.innerHTML=rZ5B();mapDim(0.25);break;
+    case'z6':doZ6();return;
+  }
+  pc.scrollTop=0;
+}
+
+function goBack(){
+  let p=D.h.pop();
+  if(!p)return;
+  if(p==='z0'||p==='loading'){
+    if(p==='z0'){
+      document.getElementById('hero').style.display='flex';
+      document.getElementById('trust').style.display='flex';
+      document.getElementById('banner').style.display='none';
+      document.getElementById('panel').classList.remove('open');
+      document.getElementById('stepbar').className='';
+      D.s='z0';D.h=[];mapDim(0);return;
+    }
+    p='q4';
+  }
+  nav(p);
+}
+
+function mapDim(v){
+  map.setPaintProperty('background','background-opacity',v>0?1:0);
+  const overlay=document.getElementById('map');
+  overlay.style.transition='filter .4s';
+  overlay.style.filter=v>0.3?`brightness(${1-v*0.4})`:'none';
+}
+function mapZoomRoute(sv){
+  map.flyTo({center:[(CU.lng+sv.lng)/2,(CU.lat+sv.lat)/2],zoom:13.5,pitch:50,bearing:-15,duration:1200});
+  svMarkers.forEach(m=>{
+    const inner=m.m.getElement().querySelector('.sv-inner');
+    if(!inner)return;
+    if(m.sv.id===sv.id){
+      inner.style.filter='none';inner.style.opacity='1';inner.style.transform='scale(1.15)';m.m.getElement().style.zIndex='10';
+    } else {
+      inner.style.filter='grayscale(100%)';inner.style.opacity='0.25';inner.style.transform='scale(0.8)';m.m.getElement().style.zIndex='1';
+    }
+  });
+  if(!routeDrawn){
+    routeDrawn=true;
+    if(map.getSource('route'))return;
+    // Fetch real driving route from Mapbox Directions API
+    fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${sv.lng},${sv.lat};${CU.lng},${CU.lat}?geometries=geojson&overview=full&access_token=${mapboxgl.accessToken}`)
+      .then(r=>r.json())
+      .then(data=>{
+        if(data.routes&&data.routes.length>0){
+          const route=data.routes[0].geometry;
+          map.addSource('route',{type:'geojson',data:{type:'Feature',geometry:route}});
+          map.addLayer({id:'route-bg',type:'line',source:'route',paint:{'line-color':'#0d1530','line-width':6,'line-opacity':0.15},layout:{'line-cap':'round','line-join':'round'}});
+          map.addLayer({id:'route',type:'line',source:'route',paint:{'line-color':'#0d1530','line-width':3,'line-opacity':0.8},layout:{'line-cap':'round','line-join':'round'}});
+          // Fit map to route bounds
+          const coords=route.coordinates;
+          const bounds=coords.reduce((b,c)=>b.extend(c),new mapboxgl.LngLatBounds(coords[0],coords[0]));
+          map.fitBounds(bounds,{padding:{top:80,bottom:80,left:60,right:60},pitch:50,bearing:-15,duration:1400});
+        } else {
+          // Fallback: straight line if API fails
+          map.addSource('route',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[[sv.lng,sv.lat],[CU.lng,CU.lat]]}}});
+          map.addLayer({id:'route',type:'line',source:'route',paint:{'line-color':'#0d1530','line-width':3,'line-dasharray':[2,3],'line-opacity':0.7}});
+        }
+      })
+      .catch(()=>{
+        // Fallback on network error
+        map.addSource('route',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[[sv.lng,sv.lat],[CU.lng,CU.lat]]}}});
+        map.addLayer({id:'route',type:'line',source:'route',paint:{'line-color':'#0d1530','line-width':3,'line-dasharray':[2,3],'line-opacity':0.7}});
+      });
+  }
+}
+function mapZoomAll(){
+  map.flyTo({center:[6.9578,50.9375],zoom:12.5,pitch:45,bearing:-10,duration:1000});
+  clearRoute();
+  // Show all pins but keep grey state for non-closest
+  updateSVPins();
+}
+function hidePins(){svMarkers.forEach(m=>{const inner=m.m.getElement().querySelector('.sv-inner');if(inner){inner.style.opacity='0';inner.style.filter='none';}});}
+function showBannerTrack(){
+  document.getElementById('btxt').textContent='Ihr Gutachter ist unterwegs';
+  document.getElementById('beta').textContent=`Ankunft in ~${TOP?TOP.eta:8} Min`;
+}
+
+function doLoad(){
+  document.getElementById('panel').classList.remove('open');
+  const existing=document.querySelector('.ldp');
+  if(existing)existing.remove();
+  const d=document.createElement('div');
+  d.className='ldp';
+  d.innerHTML=`<div class="spin"></div><div class="ldt">Gutachter werden gesucht...</div>
+    <div class="ls done"><div style="width:16px;height:16px;border-radius:50%;background:#10b981;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="8" height="8" viewBox="0 0 9 9"><polyline points="1,5 3.5,7.5 8,2" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div><span>Standort ausgewertet</span></div>
+    <div class="ls act"><div style="width:16px;height:16px;border-radius:50%;border:2px solid #e4e7ef;border-top-color:#0d1530;animation:spin .8s linear infinite;flex-shrink:0"></div><span>Verfügbarkeit wird geprüft...</span></div>
+    <div class="ls pen"><div style="width:16px;height:16px;border-radius:50%;border:1.5px solid #e4e7ef;flex-shrink:0"></div><span>Besten Gutachter berechnen</span></div>`;
+  document.querySelector('.main').appendChild(d);
+  setTimeout(()=>{
+    d.remove();
+    document.getElementById('panel').classList.add('open');
+    nav(D.a.wann==='sofort'?'z3a':'z3b');
+  },2400);
+}
+
+function doZ6(){
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('banner').style.display='none';
+  document.getElementById('map').style.display='none';
+  const p=document.getElementById('panel');
+  p.style.width='100%';p.style.display='block';
+  document.getElementById('stepbar').className='';
+  document.getElementById('pc').innerHTML=rZ6();
+}
+
+// ─── HELPERS ───
+function stars(s,c){return `<div class="stars">${'<svg viewBox="0 0 13 13"><polygon points="6.5,1 8,5 12,5 9,7.5 10,11.5 6.5,9 3,11.5 4,7.5 1,5 5,5"/></svg>'.repeat(5)}<b>${s}</b><span>(${c})</span></div>`;}
+function badges(bd,sp){
+  let h='<div class="brow">';
+  bd.forEach(b=>{const bg=b==='ÖBuV'?'#fef3cd':b==='BVSK'?'#eef7e5':'#e8f0fe';const c=b==='ÖBuV'?'#856404':b==='BVSK'?'#639922':'#1a56db';h+=`<span class="b" style="background:${bg};color:${c}">${b}</span>`;});
+  sp.forEach(s=>{h+=`<span class="b b-s">${s}</span>`;});
+  return h+'</div>';
+}
+function prog(step,tot=4){
+  let h='<div class="qp">';
+  for(let i=0;i<tot;i++)h+=`<div class="${i<step?'done':i===step?'cur':''}"></div>`;
+  return h+`</div><div class="ql">Frage ${step+1} von ${tot}</div>`;
+}
+function back(){return `<button class="back" onclick="goBack()">← Zurück</button>`;}
+function checkSVG(){return `<svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#eef7e5"/><polyline points="4.5,8.5 7,11 11.5,5" stroke="#639922" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
+
+// ─── SCREENS ───
+function rQ1(){return `${back()}${prog(0)}<h2 class="qt">Wann brauchen Sie einen Gutachter?</h2>
+  <div class="ob" onclick="D.a.wann='sofort';nav('q2')"><div><div class="ob-l">Sofort — ich bin am Unfallort</div></div></div>
+  <div class="ob" onclick="D.a.wann='heute';nav('q2')"><div><div class="ob-l">Heute</div></div></div>
+  <div class="ob" onclick="D.a.wann='tage';nav('q2')"><div><div class="ob-l">In den nächsten Tagen</div></div></div>
+  <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border)"><div class="lock"><svg width="11" height="11" viewBox="0 0 12 12"><rect x="2" y="5" width="8" height="6" rx="1" fill="none" stroke="#9ca3af" stroke-width="1.2"/><path d="M4 5V3.5a2 2 0 014 0V5" fill="none" stroke="#9ca3af" stroke-width="1.2"/></svg>Angaben werden verschlüsselt übertragen.</div></div>`;}
+
+function rQ2(){return `${back()}${prog(1)}<h2 class="qt">Was ist passiert?</h2>
+  <div class="ob" id="q2-hp" onclick="expandQ2()"><div>
+    <div class="ob-l">Mir wurde reingefahren</div>
+    <div class="ob-s" style="color:var(--green)">Kosten übernimmt die gegnerische Versicherung</div>
+    <div id="q2-details" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px">
+      <div style="margin-bottom:10px">
+        <label class="fl">Kennzeichen des Unfallgegners</label>
+        <div class="kz-wrap" style="max-width:280px">
+          <div class="kz-eu"><div class="kz-stars">${'<div class="kz-star"></div>'.repeat(12)}</div><div class="kz-d">D</div></div>
+          <input id="q2kz" class="kz-input" style="width:100%;padding:0 12px;text-align:left;letter-spacing:1.5px" maxlength="10" placeholder="K AB 1234" oninput="formatKZ(this);q2Check()" onclick="event.stopPropagation()" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        </div>
+        <div id="q2-nolink" style="font-size:11px;color:var(--blue);cursor:pointer;margin-top:5px" onclick="event.stopPropagation();D.a.noKZ=!D.a.noKZ;this.textContent=D.a.noKZ?'✓ Kennzeichen unbekannt':'Kennzeichen unbekannt / Fahrerflucht?';this.style.fontWeight=D.a.noKZ?'700':'400';q2Check()">Kennzeichen unbekannt / Fahrerflucht?</div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label class="fl">War die Polizei vor Ort?</label>
+        <div style="display:flex;gap:8px;margin-top:3px">
+          <div class="ob" id="q2pj" style="flex:1;margin-bottom:0;justify-content:center;padding:10px" onclick="event.stopPropagation();D.a.polizei='ja';document.getElementById('q2pj').style.borderColor='var(--accent)';document.getElementById('q2pj').style.background='#fffbf0';document.getElementById('q2pn').style.borderColor='';document.getElementById('q2pn').style.background='';document.getElementById('q2-az').style.display='block';q2Check()"><div class="ob-l" style="font-size:13px">Ja</div></div>
+          <div class="ob" id="q2pn" style="flex:1;margin-bottom:0;justify-content:center;padding:10px" onclick="event.stopPropagation();D.a.polizei='nein';document.getElementById('q2pn').style.borderColor='var(--accent)';document.getElementById('q2pn').style.background='#fffbf0';document.getElementById('q2pj').style.borderColor='';document.getElementById('q2pj').style.background='';document.getElementById('q2-az').style.display='none';q2Check()"><div class="ob-l" style="font-size:13px">Nein</div></div>
+        </div>
+      </div>
+      <div id="q2-az" style="display:none;margin-bottom:10px">
+        <label class="fl">Aktenzeichen (falls bekannt)</label>
+        <input class="fi" placeholder="Optional — z.B. 2026/123456" onclick="event.stopPropagation()" style="font-size:13px">
+      </div>
+      <div id="q2-action"></div>
+    </div>
+  </div></div>
+  <div class="ob" onclick="nav('berater')"><div><div class="ob-l">Nicht sicher</div><div class="ob-s">Unser Schadenberater hilft Ihnen weiter</div></div></div>`;}
+
+function expandQ2(){
+  const det=document.getElementById('q2-details');
+  if(det.style.display==='none'){
+    det.style.display='block';
+    document.getElementById('q2-hp').style.borderColor='var(--accent)';
+    document.getElementById('q2-hp').style.background='#fffbf0';
+    document.getElementById('q2-hp').onclick=null;
+    // Auto-focus KZ field
+    setTimeout(()=>{const f=document.getElementById('q2kz');if(f)f.focus();},150);
+  }
+}
+
+// Format license plate: uppercase, allow spaces as natural separators, strip invalid chars
+function formatKZ(el){
+  let pos=el.selectionStart;
+  let old=el.value;
+  // Only allow letters, digits, spaces and hyphens
+  let val=old.replace(/[^A-ZÄÖÜa-zäöü0-9 \-]/g,'').toUpperCase();
+  // Collapse multiple spaces
+  val=val.replace(/  +/g,' ');
+  if(val!==old){
+    let diff=old.length-val.length;
+    el.value=val;
+    el.setSelectionRange(Math.max(0,pos-diff),Math.max(0,pos-diff));
+  }
+}
+
+function q2Check(){
+  const kz=document.getElementById('q2kz');
+  const raw=kz?kz.value.replace(/[\s\-]/g,''):'';
+  // Valid KZ: at least 1 letter city + 1 letter + 1 digit (e.g. "KA1")
+  const hasKZ=raw.length>=3&&/^[A-ZÄÖÜ]{1,3}[A-ZÄÖÜ]{1,2}[0-9]{1,4}$/.test(raw)&&!D.a.noKZ;
+  const noKZ=!!D.a.noKZ;
+  const noPol=D.a.polizei==='nein';
+  const hasPol=D.a.polizei==='ja';
+  const el=document.getElementById('q2-action');
+  if(!el)return;
+  if(noKZ&&noPol){
+    el.innerHTML='<div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px;text-align:center;margin-top:4px"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:4px">Bitte rufen Sie uns an</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">Ohne Kennzeichen und Polizeibericht klären wir den Fall telefonisch.</div><a href="tel:022125906530" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:var(--accent);color:var(--primary);border-radius:9px;font-weight:800;font-size:13px;text-decoration:none;font-family:var(--sans)">0221 259 065 30</a></div>';
+  } else if(hasKZ||hasPol){
+    el.innerHTML='<button class="btn-gold" style="font-size:14px;padding:12px;margin-top:4px" onclick="event.stopPropagation();D.a.typ=\'hp\';nav(\'q3\')">Weiter \u2192</button>';
+  } else {
+    el.innerHTML='';
+  }
+}
+
+function rBerater(){return `${back()}<h2 class="qt">Kein Problem — wir klären das gemeinsam.</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5">Unser Schadenberater prüft mit Ihnen, ob ein Gutachter sinnvoll ist und wer die Kosten trägt.</p>
+  <div class="berater-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+      <div><div style="font-size:15px;font-weight:700;color:var(--primary)">Claimondo Schadenberatung</div><div style="font-size:12px;color:var(--muted)">Mo-Fr 8-20 Uhr · Sa 9-16 Uhr</div></div>
+    </div>
+    <a href="tel:022125906530" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:var(--accent);color:var(--primary);border:none;border-radius:10px;font-family:var(--sans);font-size:15px;font-weight:800;cursor:pointer;text-decoration:none;margin-bottom:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>Jetzt anrufen: 0221 259 065 30</a>
+    <div style="text-align:center;font-size:11px;color:var(--muted)">Kostenlos und unverbindlich</div>
+  </div>
+  <div class="ob" onclick="D.a.typ='unsicher';nav('q3')" style="justify-content:center"><div class="ob-l">Trotzdem fortfahren →</div></div>`;}
+
+function rQ3(){return `${back()}${prog(2)}<h2 class="qt">Welchen Fahrzeugtyp?</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">
+    <div class="ob" onclick="D.a.fz='pkw';nav('q4')" style="justify-content:center"><div class="ob-l">PKW</div></div>
+    <div class="ob" onclick="D.a.fz='mot';nav('q4')" style="justify-content:center"><div class="ob-l">Motorrad</div></div>
+    <div class="ob" onclick="D.a.fz='tra';nav('q4')" style="justify-content:center"><div class="ob-l">Transporter</div></div>
+    <div class="ob" onclick="D.a.fz='lkw';nav('q4')" style="justify-content:center"><div class="ob-l">LKW</div></div>
+  </div>
+  <div class="ob" onclick="D.a.fz='wm';nav('q4')" style="justify-content:center"><div class="ob-l">Wohnmobil</div></div>`;}
+
+function rQ4(){return `${back()}${prog(3)}<h2 class="qt">Wo soll die Besichtigung stattfinden?</h2>
+  <div class="ob" id="opt-gps" onclick="selectOrtOption('gps')"><div><div class="ob-l">An meinem aktuellen Standort</div><div class="ob-s">GPS wird verwendet</div></div></div>
+  <div class="ob" id="opt-adr" onclick="selectOrtOption('adr')"><div>
+    <div class="ob-l">An einer anderen Adresse</div>
+    <div id="adr-input" style="display:none;margin-top:10px">
+      <input id="adr-field" class="fi" placeholder="Straße und Hausnummer eingeben..." style="margin-bottom:4px" autocomplete="off" oninput="geocodeSearch(this.value,'adr')">
+      <div id="adr-suggestions" style="display:none;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:8px;max-height:200px;overflow-y:auto"></div>
+    </div>
+  </div></div>
+  <div class="ob" id="opt-ws" onclick="selectOrtOption('ws')"><div>
+    <div class="ob-l">In einer Werkstatt</div>
+    <div id="ws-input" style="display:none;margin-top:10px">
+      <input id="ws-field" class="fi" placeholder="Werkstattname oder Adresse..." style="margin-bottom:4px" autocomplete="off" oninput="geocodeSearch(this.value,'ws')">
+      <div id="ws-suggestions" style="display:none;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:8px;max-height:200px;overflow-y:auto"></div>
+    </div>
+  </div></div>
+  <div class="ob" id="opt-x" onclick="selectOrtOption('?')"><div><div class="ob-l">Weiß ich noch nicht</div><div class="ob-s">Wir klären das telefonisch mit Ihnen</div></div></div>
+  <div id="q4-confirm" style="display:none;margin-top:8px"><button class="btn-gold" onclick="nav('loading')">Gutachter suchen →</button></div>
+  <div id="q4-call" style="display:none;margin-top:12px">
+    <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+      <div style="font-size:14px;font-weight:700;color:var(--primary);margin-bottom:6px">Wir klären das gemeinsam</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Unser Team berät Sie, wo die Besichtigung am besten stattfinden kann.</div>
+      <a href="tel:022125906530" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:var(--accent);color:var(--primary);border:none;border-radius:10px;font-family:var(--sans);font-size:15px;font-weight:800;cursor:pointer;text-decoration:none;margin-bottom:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>Jetzt anrufen: 0221 259 065 30</a>
+      <div style="font-size:11px;color:var(--muted)">Mo-Fr 8-20 Uhr · Sa 9-16 Uhr</div>
+    </div>
+  </div>`;}
+
+function selectOrtOption(type){
+  ['gps','adr','ws','?'].forEach(t=>{
+    const el=document.getElementById('opt-'+t.replace('?','x'));
+    if(el){el.style.borderColor='';el.style.background='';}
+  });
+  document.getElementById('adr-input').style.display='none';
+  document.getElementById('ws-input').style.display='none';
+  document.getElementById('q4-confirm').style.display='none';
+  document.getElementById('q4-call').style.display='none';
+
+  D.a.ort=type;
+  const sel=document.getElementById('opt-'+(type==='?'?'x':type));
+  if(sel){sel.style.borderColor='var(--accent)';sel.style.background='#fffbf0';}
+
+  if(type==='gps'){
+    // Request browser geolocation
+    if(navigator.geolocation){
+      const sel=document.getElementById('opt-gps');
+      sel.innerHTML='<div><div class="ob-l">Standort wird ermittelt...</div><div class="ob-s" style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite"></div>Bitte Standortfreigabe im Browser bestätigen</div></div>';
+      navigator.geolocation.getCurrentPosition(
+        function(pos){
+          CU.lat=pos.coords.latitude;
+          CU.lng=pos.coords.longitude;
+          if(cusMarker)cusMarker.setLngLat([CU.lng,CU.lat]);
+          map.flyTo({center:[CU.lng,CU.lat],zoom:14,duration:800});
+          // Recalculate closest SV
+          clearRoute();
+          updateSVPins();
+          nav('loading');
+        },
+        function(err){
+          // GPS denied - show address input instead
+          sel.innerHTML='<div><div class="ob-l">Standort nicht verfügbar</div><div class="ob-s" style="color:#a05000">Bitte wählen Sie eine andere Option</div></div>';
+          sel.style.borderColor='#e8c87a';
+          sel.style.background='#fff8f0';
+        },
+        {enableHighAccuracy:true,timeout:8000}
+      );
+    } else {
+      nav('loading');
+    }
+  } else if(type==='?'){
+    document.getElementById('q4-call').style.display='block';
+  } else if(type==='adr'){
+    document.getElementById('adr-input').style.display='block';
+    document.getElementById('q4-confirm').style.display='block';
+    setTimeout(()=>document.getElementById('adr-field').focus(),100);
+  } else if(type==='ws'){
+    document.getElementById('ws-input').style.display='block';
+    document.getElementById('q4-confirm').style.display='block';
+    setTimeout(()=>document.getElementById('ws-field').focus(),100);
+  }
+}
+
+// Mapbox Geocoding API for address search
+let geocodeTimeout=null;
+function geocodeSearch(val,type){
+  const container=document.getElementById(type+'-suggestions');
+  if(!val||val.length<3){container.style.display='none';return;}
+  clearTimeout(geocodeTimeout);
+  geocodeTimeout=setTimeout(()=>{
+    fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(val)}.json?access_token=${mapboxgl.accessToken}&country=de&bbox=6.7,50.8,7.2,51.1&limit=5&language=de${type==='ws'?'&types=poi':'&types=address'}`)
+      .then(r=>r.json())
+      .then(data=>{
+        if(!data.features||!data.features.length){container.style.display='none';return;}
+        container.style.display='block';
+        container.innerHTML=data.features.map((f,i)=>`<div onclick="selectGeoAddress('${f.place_name.replace(/'/g,"\\'")}',${f.center[0]},${f.center[1]},'${type}')" style="padding:10px 12px;font-size:13px;color:var(--primary);cursor:pointer;border-bottom:${i<data.features.length-1?'1px solid var(--border)':'none'};display:flex;align-items:center;gap:8px;background:#fff" onmouseover="this.style.background='#fffbf0'" onmouseout="this.style.background='#fff'">
+          <svg width="12" height="16" viewBox="0 0 12 16" style="flex-shrink:0"><path d="M6 0C2.7 0 0 2.7 0 6c0 4.5 6 10 6 10s6-5.5 6-10c0-3.3-2.7-6-6-6zm0 8.2c-1.2 0-2.2-1-2.2-2.2S4.8 3.8 6 3.8 8.2 4.8 8.2 6 7.2 8.2 6 8.2z" fill="#6b7280"/></svg>
+          <div><div style="font-weight:600">${f.text}</div><div style="font-size:11px;color:var(--muted)">${f.place_name}</div></div>
+        </div>`).join('');
+      })
+      .catch(()=>{container.style.display='none';});
+  },300);
+}
+
+function selectGeoAddress(addr,lng,lat,type){
+  document.getElementById(type+'-field').value=addr;
+  document.getElementById(type+'-suggestions').style.display='none';
+  D.a.selectedAddress=addr;
+  // Move customer marker to selected address
+  CU.lng=lng;CU.lat=lat;
+  if(cusMarker)cusMarker.setLngLat([lng,lat]);
+  map.flyTo({center:[lng,lat],zoom:14,duration:800});
+  // Recalculate closest SV and update pins
+  clearRoute();
+  updateSVPins();
+}
+
+function rZ3A(){const s=TOP;return `${back()}<div class="pbadge">EMPFOHLEN</div>
+  <div class="prow"><div class="av"><img src="${s.ph}" onerror="this.style.background='#1a365d'"></div><div><div class="pn">${s.n}</div><div class="ps">KFZ-Sachverständiger · Köln-${s.ar}</div>${stars(s.r,s.rv)}</div></div>
+  <div class="eta-box"><span class="eta-n">~${s.eta}</span><div><div class="eta-l">Minuten</div><div class="eta-l2">geschätzte Anfahrtszeit</div></div></div>
+  ${badges(s.bd,s.sp)}
+  <div class="kost"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="#10b981" stroke-width="1.5"/><text x="7" y="11" text-anchor="middle" font-size="9" fill="#10b981" font-weight="700">€</text></svg>Kostenlos — Versicherung übernimmt alle Kosten</div>
+  <button class="btn-gold" onclick="nav('z35')">Jetzt beauftragen →</button>
+  <button class="btn-outline" onclick="nav('z3b')">Andere Gutachter anzeigen →</button>
+  <div style="text-align:center;margin-top:6px;font-size:11px;color:#9ca3af;cursor:pointer" onclick="nav('q1')">← Antworten ändern</div>`;}
+
+function rZ3B(){
+  const sorted=[...SV].filter(s=>s.st==='today').sort((a,b)=>distKm(CU.lat,CU.lng,a.lat,a.lng)-distKm(CU.lat,CU.lng,b.lat,b.lng));
+  return `${back()}<h2 class="qt">Gutachter in Ihrer Nähe</h2><p style="font-size:12px;color:var(--muted);margin-bottom:14px">Sortiert nach Entfernung zu Ihrem Standort</p>
+  ${sorted.map((s,i)=>`<div class="svcard${s.id===TOP.id?' top':''}" onclick="D.a.selectedSV=${s.id};nav('z3bs')">
+    ${s.id===TOP.id?'<div class="svtop">NÄCHSTER</div>':''}
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div class="av av-sm"><img src="${s.ph}"></div><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--primary)">${s.n} · ${s.ar}</div>${stars(s.r,s.rv)}</div></div>
+    <div class="brow" style="margin-bottom:4px">${s.bd.map(b=>`<span class="b" style="font-size:10px;background:${b==='ÖBuV'?'#fef3cd':b==='BVSK'?'#eef7e5':'#e8f0fe'};color:${b==='ÖBuV'?'#856404':b==='BVSK'?'#639922':'#1a56db'}">${b}</span>`).join('')}</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:${s.id===TOP.id?'var(--green)':'var(--muted)'}"><div style="width:8px;height:8px;border-radius:50%;background:${s.id===TOP.id?'var(--green)':'var(--muted)'}"></div>${s.id===TOP.id?'Heute':'Heute'} · Ankunft in ~${s.eta} Min</div>
+  </div>`).join('')}`;
+}
+function rZ3BS(){const sv=SV.find(s=>s.id===(D.a.selectedSV||1))||TOP;return `${back()}<div style="font-size:12px;color:var(--blue);cursor:pointer;margin-bottom:12px" onclick="nav('z3b')">← Anderen Gutachter wählen</div>
+  <div class="prow" style="padding-bottom:12px;border-bottom:1.5px solid var(--border);margin-bottom:14px"><div class="av"><img src="${sv.ph}"></div><div><div class="pn">${sv.n}</div>${stars(sv.r,sv.rv)}${badges(sv.bd,sv.sp)}</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+    ${[{d:'Heute',sl:['14:00','16:00']},{d:'Morgen',sl:['09:00','11:00','14:00']},{d:'Übermorgen',sl:['10:00','15:00']}].map(d=>`<div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;padding-bottom:4px;border-bottom:1.5px solid var(--border)">${d.d}</div>
+      ${d.sl.map((t,i)=>`<div style="border:${i===0&&d.d==='Morgen'?'2px solid var(--accent)':'1.5px solid var(--border)'};background:${i===0&&d.d==='Morgen'?'#fffbf0':'#fff'};border-radius:7px;padding:7px;text-align:center;font-size:12px;font-family:var(--mono);font-weight:600;cursor:pointer;margin-bottom:3px" onclick="nav('z35')">${t}</div>`).join('')}
+    </div>`).join('')}
+  </div>
+  <div class="kost" style="margin-bottom:12px"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="#10b981" stroke-width="1.5"/><text x="7" y="11" text-anchor="middle" font-size="9" fill="#10b981" font-weight="700">€</text></svg>Kostenlos — Versicherung übernimmt alle Kosten</div>
+  <button class="btn-gold" onclick="nav('z35')">Termin reservieren →</button>`;}
+
+function rZ35(){return `${back()}<h2 class="qt" style="font-size:19px;line-height:1.2">Lassen Sie sich keinen Cent wegnehmen.</h2>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6">Versicherungen kürzen bei <b style="color:var(--primary)">8 von 10 Fällen</b> — bei Nutzungsausfall, Wertminderung oder Gutachterkosten. Wer ohne Anwalt reguliert, akzeptiert oft die erste Kürzung und verliert im Schnitt über 3.000 €.</p>
+  <div class="rc" onclick="nav('z35b')" style="cursor:pointer">
+    <div class="pbadge" style="background:var(--primary);color:var(--accent)">IHR RECHT NACH § 249 BGB</div>
+    <div style="font-size:16px;font-weight:800;color:var(--primary);margin-bottom:6px">Vollständig regulieren lassen</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px"><span style="color:var(--green);flex-shrink:0">✓</span><span>Unabhängiger Gutachter dokumentiert <b style="color:var(--primary)">alle</b> Schadenspositionen</span></div>
+      <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px"><span style="color:var(--green);flex-shrink:0">✓</span><span>Fachanwalt mit 2.000+ Fällen/Jahr fordert innerhalb von 30 Tagen ein</span></div>
+      <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px"><span style="color:var(--green);flex-shrink:0">✓</span><span>Keine Warteschlange, kein Abspeisen — wir übernehmen die komplette Kommunikation</span></div>
+    </div>
+    <div class="kost" style="margin-bottom:0"><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="#10b981" stroke-width="1.5"/><text x="7" y="11" text-anchor="middle" font-size="9" fill="#10b981" font-weight="700">€</text></svg>0 € für Sie — Anwalt und Gutachter zahlt die gegnerische Versicherung</div>
+  </div>
+  <div class="rc-b" onclick="nav('z35c')" style="cursor:pointer">
+    <div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:4px">Nur Gutachten — selbst regulieren</div>
+    <div style="font-size:11px;color:#b0b5be;line-height:1.4">⚠ Ohne Anwalt verhandeln Sie direkt mit der Versicherung. Kürzungen werden häufig ohne Widerspruch akzeptiert.</div>
+  </div>`;}
+
+function rZ35b(){return `${back()}<h2 class="qt" style="font-size:18px">Das steht Ihnen zu</h2>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5">Alle Positionen, die Ihr Fachanwalt bei der gegnerischen Versicherung einfordert — ohne Abzüge.</p>
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <div style="flex:1;display:flex;gap:6px;align-items:flex-start"><div class="sn" style="width:18px;height:18px;font-size:8px;flex-shrink:0">1</div><div style="font-size:11px;line-height:1.3"><b style="color:var(--primary)">Gutachter prüft</b><br><span style="color:var(--muted)">Alle Ansprüche vor Ort</span></div></div>
+    <div style="flex:1;display:flex;gap:6px;align-items:flex-start"><div class="sn" style="width:18px;height:18px;font-size:8px;flex-shrink:0">2</div><div style="font-size:11px;line-height:1.3"><b style="color:var(--primary)">Kanzlei fordert</b><br><span style="color:var(--muted)">Bei der Versicherung ein</span></div></div>
+    <div style="flex:1;display:flex;gap:6px;align-items:flex-start"><div class="sn" style="width:18px;height:18px;font-size:8px;flex-shrink:0">3</div><div style="font-size:11px;line-height:1.3"><b style="color:var(--primary)">Auszahlung</b><br><span style="color:var(--muted)">Direkt an Sie</span></div></div>
+  </div>
+  <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:12px;margin-bottom:12px">
+    <div style="font-size:9px;font-weight:700;color:var(--accent);background:rgba(243,192,83,.1);border-radius:5px;padding:3px 7px;display:inline-block;margin-bottom:8px;letter-spacing:.03em">BEISPIEL BEI 4.800 € SCHADENHÖHE</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+      <div style="padding:5px 8px 5px 0;border-bottom:1px solid #f0f1f3;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--primary)">${checkSVG()} Reparatur<span style="margin-left:auto;font-family:var(--mono);font-weight:600;font-size:11px">4.800 €</span></div>
+      <div style="padding:5px 0 5px 8px;border-bottom:1px solid #f0f1f3;border-left:1px solid #f0f1f3;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--primary)">${checkSVG()} <span>Nutzungsausfall<br><span style="font-size:9px;color:var(--muted);font-weight:400">/ Mietwagen · 23–175 €/Tag</span></span><span style="margin-left:auto;font-family:var(--mono);font-weight:500;color:var(--muted);font-size:10px;white-space:nowrap">ca. 530 €</span></div>
+      <div style="padding:5px 8px 5px 0;border-bottom:1px solid #f0f1f3;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--primary)">${checkSVG()} Wertminderung<span style="margin-left:auto;font-family:var(--mono);font-weight:500;color:var(--muted);font-size:10px">ca. 650 €</span></div>
+      <div style="padding:5px 0 5px 8px;border-bottom:1px solid #f0f1f3;border-left:1px solid #f0f1f3;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--primary)">${checkSVG()} Ersatzteile<span style="margin-left:auto;font-family:var(--mono);font-weight:500;color:var(--muted);font-size:10px">ca. 285 €</span></div>
+      <div style="padding:5px 8px 5px 0;border-bottom:1px solid #f0f1f3;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--primary)">${checkSVG()} Unfallpauschale<span style="margin-left:auto;font-family:var(--mono);font-weight:500;color:var(--muted);font-size:10px">ca. 30 €</span></div>
+      <div style="padding:5px 0 5px 8px;border-bottom:1px solid #f0f1f3;border-left:1px solid #f0f1f3;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--primary)">${checkSVG()} Sachschäden<span style="margin-left:auto;font-size:9px;color:var(--muted)">individuell</span></div>
+      <div style="padding:5px 8px 5px 0;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--primary)">${checkSVG()} Schmerzensgeld<span style="margin-left:auto;font-size:9px;color:var(--muted)">individuell</span></div>
+      <div style="padding:5px 0 5px 8px;border-left:1px solid #f0f1f3;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--primary)">${checkSVG()} Verdienstausfall<span style="margin-left:auto;font-size:9px;color:var(--muted)">individuell</span></div>
+    </div>
+    <div class="cdiff" style="margin-top:10px">
+      <div><div style="font-size:11px;color:var(--green);font-weight:600">Positionen, die Versicherungen oft kürzen</div><div style="font-size:9px;color:var(--muted)">Ihr Fachanwalt fordert den vollen Betrag</div></div>
+      <div style="font-family:var(--mono);font-size:20px;font-weight:800;color:var(--green)">+3.270 €</div>
+    </div>
+  </div>
+  <div class="kost" style="justify-content:center;margin-bottom:10px;font-size:11px"><svg width="13" height="13" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="#10b981" stroke-width="1.5"/><text x="7" y="11" text-anchor="middle" font-size="9" fill="#10b981" font-weight="700">€</text></svg>0 € für Sie — Ihr Recht auf Anwalt und Gutachter zahlt die Versicherung</div>
+  <button class="btn-gold" onclick="nav('z4')">Ansprüche vollständig sichern →</button>`;}
+
+function rZ35c(){
+  const xSvg='<svg width="11" height="11" viewBox="0 0 12 12" style="flex-shrink:0"><path d="M2 2l8 8M10 2l-8 8" stroke="#dc2626" stroke-width="2" stroke-linecap="round"/></svg>';
+  return `${back()}<h2 class="qt" style="font-size:18px;line-height:1.2">Sind Sie sicher?</h2>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5">Ohne Anwalt übernehmen <b style="color:var(--primary)">Sie persönlich</b> die gesamte Schadensregulierung:</p>
+
+  <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:11px;padding:14px;margin-bottom:14px">
+    <div style="font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.03em;margin-bottom:10px">Das müssen Sie dann selbst erledigen</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#7f1d1d;line-height:1.4">${xSvg}<span>In der <b>Warteschlange</b> der Versicherung sitzen und Ihren Fall erklären</span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#7f1d1d;line-height:1.4">${xSvg}<span>Kürzungen bei Nutzungsausfall, Wertminderung und Gutachterkosten selbst <b>widersprechen</b></span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#7f1d1d;line-height:1.4">${xSvg}<span><b>Fristen und Verjährung</b> eigenständig im Blick behalten</span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#7f1d1d;line-height:1.4">${xSvg}<span>Das erste Angebot der Versicherung bewerten — <b>ohne juristische Erfahrung</b></span></div>
+    </div>
+  </div>
+
+  <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:14px;margin-bottom:14px">
+    <div style="font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.03em;margin-bottom:10px">Was Versicherungen typischerweise kürzen</div>
+    <div style="display:flex;flex-direction:column;gap:0">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f1f3;font-size:11px">
+        <span style="color:var(--primary)">Nutzungsausfall / Mietwagen</span>
+        <span style="font-family:var(--mono);color:#dc2626;font-weight:600">– 530 €</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f1f3;font-size:11px">
+        <span style="color:var(--primary)">Wertminderung</span>
+        <span style="font-family:var(--mono);color:#dc2626;font-weight:600">– 650 €</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f1f3;font-size:11px">
+        <span style="color:var(--primary)">UPE-Aufschläge / Ersatzteile</span>
+        <span style="font-family:var(--mono);color:#dc2626;font-weight:600">– 285 €</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:11px">
+        <span style="color:var(--primary)">Gutachterkosten (Kürzung)</span>
+        <span style="font-family:var(--mono);color:#dc2626;font-weight:600">– 200 €</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:2px solid #fecaca">
+      <span style="font-size:12px;font-weight:700;color:#dc2626">Möglicher Verlust</span>
+      <span style="font-family:var(--mono);font-size:18px;font-weight:800;color:#dc2626">– 1.665 €</span>
+    </div>
+  </div>
+
+  <button class="btn-gold" onclick="nav('z35b')" style="margin-bottom:8px">Doch vollständig regulieren — 0 € für mich →</button>
+  <div style="text-align:center;margin-top:4px;font-size:11px;color:#9ca3af;cursor:pointer" onclick="nav('z4')">Trotzdem nur Gutachten →</div>`;
+}
+
+function rZ4(){const s=TOP;const addr=D.a.selectedAddress||'Ihr aktueller Standort';
+  // Animate waiting status after render
+  setTimeout(()=>{
+    const dots=document.getElementById('z4-dots');
+    if(!dots)return;
+    let c=0;
+    setInterval(()=>{c=(c+1)%4;dots.textContent='.'.repeat(c||1);},500);
+  },200);
+  return `${back()}
+  <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:12px;margin-bottom:10px">
+    <div style="display:flex;gap:10px;margin-bottom:10px">
+      <div style="position:relative;flex-shrink:0">
+        <div class="av av-sm" style="width:50px;height:50px"><img src="${s.ph}"></div>
+        <div style="position:absolute;bottom:0;right:0;width:14px;height:14px;border-radius:50%;background:var(--accent);border:2.5px solid #fff;display:flex;align-items:center;justify-content:center"><div style="width:6px;height:6px;border-radius:50%;background:var(--primary);animation:pulse 1.5s infinite"></div></div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--primary)">${s.n}</div>
+            <div style="font-size:10px;color:var(--muted)">KFZ-Sachverständiger · Köln-${s.ar}</div>
+          </div>
+          <div style="font-family:var(--mono);font-size:14px;font-weight:800;color:var(--green)">0 €</div>
+        </div>
+        <div style="color:#f3c053;font-size:10px;margin-top:2px">★★★★★ <b style="font-family:var(--mono);color:var(--primary)">${s.r}</b> <span style="color:var(--muted)">(${s.rv})</span></div>
+        <div style="display:flex;gap:3px;margin-top:3px;flex-wrap:wrap">${s.bd.map(b=>`<span style="font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;background:${b==='ÖBuV'?'#fef3cd':b==='BVSK'?'#eef7e5':'#e8f0fe'};color:${b==='ÖBuV'?'#856404':b==='BVSK'?'#639922':'#1a56db'}">${b}</span>`).join('')}${s.sp.map(p=>`<span style="font-size:8px;font-weight:600;padding:2px 5px;border-radius:3px;background:#f3f4f6;color:var(--muted)">${p}</span>`).join('')}</div>
+      </div>
+    </div>
+
+    <div style="background:var(--primary);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+      <div style="width:32px;height:32px;border-radius:50%;border:2.5px solid rgba(243,192,83,.4);border-top-color:var(--accent);animation:spin .8s linear infinite;flex-shrink:0"></div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#fff">Wartet auf Ihre Freigabe<span id="z4-dots" style="color:var(--accent)">...</span></div>
+        <div style="font-size:10px;color:rgba(255,255,255,.6)">Bereit loszufahren · ca. ~${s.eta} Min Anfahrt · ${addr}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:10px">
+    <div style="flex:1;text-align:center;padding:6px 4px;border-radius:7px;border:1px solid var(--border);background:#fff"><div style="font-size:11px;font-weight:800;color:var(--green)">①</div><div style="font-size:9px;font-weight:600;color:var(--primary)">Gutachter</div><div style="font-size:8px;color:var(--muted)">fährt los</div></div>
+    <div style="flex:1;text-align:center;padding:6px 4px;border-radius:7px;border:1px solid var(--border);background:#fff"><div style="font-size:11px;font-weight:800;color:var(--green)">②</div><div style="font-size:9px;font-weight:600;color:var(--primary)">Fachanwalt</div><div style="font-size:8px;color:var(--muted)">übernimmt</div></div>
+    <div style="flex:1;text-align:center;padding:6px 4px;border-radius:7px;border:1px solid var(--border);background:#fff"><div style="font-size:11px;font-weight:800;color:var(--green)">③</div><div style="font-size:9px;font-weight:600;color:var(--primary)">Sie werden</div><div style="font-size:8px;color:var(--muted)">informiert</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:5px">
+    <div class="fg" style="margin-bottom:0"><label class="fl" style="font-size:10px">Vor- und Nachname</label><input class="fi" id="name-inp" placeholder="Max Mustermann" style="padding:8px 10px;font-size:12px" oninput="var s=document.getElementById('sig-txt');s.textContent=this.value||'Ihre Unterschrift';s.style.opacity=this.value?'1':'.3'"></div>
+    <div class="fg" style="margin-bottom:0"><label class="fl" style="font-size:10px">Telefonnummer</label><input class="fi" placeholder="+49 221 ..." style="padding:8px 10px;font-size:12px"></div>
+  </div>
+  <div class="fg" style="margin-bottom:6px"><label class="fl" style="font-size:10px">E-Mail-Adresse</label><input class="fi" placeholder="max@beispiel.de" style="padding:8px 10px;font-size:12px"></div>
+
+  <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+    <div style="flex:1">
+      <label class="fl" style="font-size:10px;margin-bottom:2px">Ihre Unterschrift</label>
+      <div style="border:1.5px solid var(--border);border-radius:8px;height:48px;background:#fafbfc;display:flex;align-items:center;justify-content:center;padding:0 16px"><span id="sig-txt" style="font-family:'Dancing Script',cursive;font-size:22px;color:var(--primary);opacity:.3;transition:opacity .3s">Ihre Unterschrift</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;color:#9ca3af;font-size:9px;padding-top:22px;flex-shrink:0"><svg width="10" height="10" viewBox="0 0 12 12"><rect x="2" y="5" width="8" height="6" rx="1" fill="none" stroke="#9ca3af" stroke-width="1.2"/><path d="M4 5V3.5a2 2 0 014 0V5" fill="none" stroke="#9ca3af" stroke-width="1.2"/></svg>SSL</div>
+  </div>
+
+  <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
+    <input type="checkbox" id="z4-agb" style="margin-top:2px;width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer" onchange="document.getElementById('z4-submit').style.opacity=this.checked?'1':'.5';document.getElementById('z4-submit').style.pointerEvents=this.checked?'auto':'none'">
+    <label for="z4-agb" style="font-size:9px;color:var(--muted);line-height:1.4;cursor:pointer">
+      Ich beauftrage die Vermittlung eines KFZ-Sachverständigen und die Schadensregulierung. Alle Kosten trägt die gegnerische Versicherung. Ich stimme den <span style="color:var(--blue);text-decoration:underline;cursor:pointer">AGB</span>, der <span style="color:var(--blue);text-decoration:underline;cursor:pointer">Datenschutzerklärung</span> und den <span style="color:var(--blue);text-decoration:underline;cursor:pointer">Nutzungsbedingungen</span> zu.
+      <span id="z4-legal-toggle" style="color:var(--blue);cursor:pointer;text-decoration:underline;display:inline" onclick="event.preventDefault();var t=document.getElementById('z4-legal-full');var b=this;if(t.style.display==='none'){t.style.display='block';b.textContent='Weniger';}else{t.style.display='none';b.textContent='Vollständiger Rechtstext';}">Vollständiger Rechtstext</span>
+      <div id="z4-legal-full" style="display:none;margin-top:6px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:9px;color:var(--muted);line-height:1.5">
+        Hiermit beauftrage ich die Claimondo GmbH (i.Gr.), Hansaring 10, 50670 Köln, mit der Vermittlung eines zertifizierten KFZ-Sachverständigen zur Begutachtung des Unfallschadens an meinem Fahrzeug sowie mit der vollständigen Schadensregulierung durch eine kooperierende Partnerkanzlei. Die Kosten für den Sachverständigen und die anwaltliche Vertretung trägt gemäß § 249 BGB die Haftpflichtversicherung des Unfallverursachers. Mir entstehen keine Kosten.
+      </div>
+    </label>
+  </div>
+
+  <button id="z4-submit" class="btn-gold" style="padding:13px 28px;font-size:15px;position:sticky;bottom:12px;z-index:5;box-shadow:0 -4px 20px rgba(255,255,255,.9),0 4px 20px rgba(243,192,83,.45);opacity:.5;pointer-events:none" onclick="nav(D.a.wann==='sofort'?'z5a':'z5b')">Gutachter jetzt losschicken →</button>`;}
+
+function rZ5A(){const s=TOP;
+  // Start progressive reveal after render
+  setTimeout(()=>{
+    const msg=document.getElementById('z5a-msg');
+    const eta=document.getElementById('z5a-eta');
+    if(!msg||!eta)return;
+    setTimeout(()=>{msg.textContent='Er macht sich jeden Moment auf den Weg...';},2000);
+    setTimeout(()=>{msg.textContent='Wir berechnen die Ankunftszeit...';},4000);
+    setTimeout(()=>{
+      msg.innerHTML='<span style="color:var(--green);font-weight:700">Ihr Gutachter ist unterwegs!</span>';
+      eta.style.display='block';
+      eta.style.animation='fu .4s ease';
+      // Show todo section
+      const todo=document.getElementById('z5a-todo');
+      if(todo){todo.style.display='block';todo.style.animation='fu .4s .2s ease both';}
+    },5500);
+  },200);
+  return `
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <div class="cchk" style="width:36px;height:36px;margin:0;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 22 22"><polyline points="4,12 9,17 18,6" stroke="#10b981" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div><div style="font-size:16px;font-weight:800;color:var(--primary)">Auftrag bestätigt!</div><div style="font-size:11px;color:var(--muted)">Ihr Gutachter wurde benachrichtigt</div></div>
+  </div>
+
+  <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:12px;margin-bottom:10px;text-align:center">
+    <div style="margin-bottom:6px">
+      <svg width="36" height="22" viewBox="0 0 50 28" style="animation:carDrive 1s ease-in-out infinite">
+        <rect x="2" y="8" width="46" height="16" rx="4" fill="var(--primary)" stroke="white" stroke-width="1.5"/>
+        <rect x="8" y="2" width="34" height="12" rx="3" fill="var(--primary)" stroke="white" stroke-width="1.2"/>
+        <rect x="12" y="3.5" width="10" height="8" rx="1.5" fill="rgba(255,255,255,0.3)"/>
+        <rect x="28" y="3.5" width="10" height="8" rx="1.5" fill="rgba(255,255,255,0.3)"/>
+        <circle cx="12" cy="25" r="4" fill="#333" stroke="white" stroke-width="1.2"><animateTransform attributeName="transform" type="rotate" from="0 12 25" to="360 12 25" dur="0.5s" repeatCount="indefinite"/></circle>
+        <circle cx="38" cy="25" r="4" fill="#333" stroke="white" stroke-width="1.2"><animateTransform attributeName="transform" type="rotate" from="0 38 25" to="360 38 25" dur="0.5s" repeatCount="indefinite"/></circle>
+      </svg>
+    </div>
+    <div id="z5a-msg" style="font-size:12px;color:var(--muted);line-height:1.4;transition:all .3s">Wir haben Ihrem Gutachter Bescheid gegeben...</div>
+  </div>
+
+  <div id="z5a-eta" style="display:none;margin-bottom:10px">
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <div style="flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px">Ca. Ankunftszeit</div>
+        <div style="font-family:var(--mono);font-size:24px;font-weight:800;color:var(--primary)">~${s.eta} <span style="font-size:11px;font-weight:500;color:var(--muted)">Min</span></div>
+      </div>
+      <div style="flex:1.2;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:8px;display:flex;gap:8px;align-items:center">
+        <div class="av av-sm" style="width:40px;height:40px;flex-shrink:0"><img src="${s.ph}"></div>
+        <div style="min-width:0">
+          <div style="font-size:12px;font-weight:700;color:var(--primary)">${s.n}</div>
+          <div style="color:#f3c053;font-size:10px;margin-top:1px">★★★★★ <b style="font-family:var(--mono);color:var(--primary)">${s.r}</b> <span style="color:var(--muted)">(${s.rv})</span></div>
+          <div style="display:flex;gap:3px;margin-top:3px;flex-wrap:wrap">${s.bd.map(b=>`<span style="font-size:7px;font-weight:700;padding:1px 4px;border-radius:3px;background:${b==='ÖBuV'?'#fef3cd':b==='BVSK'?'#eef7e5':'#e8f0fe'};color:${b==='ÖBuV'?'#856404':b==='BVSK'?'#639922':'#1a56db'}">${b}</span>`).join('')}</div>
+          <div style="font-size:8px;color:var(--muted);margin-top:2px">${s.sp.join(' · ')}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:0;margin-bottom:4px">
+      <div style="display:flex;align-items:center;gap:0;flex:1"><div style="width:16px;height:16px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="7" height="7" viewBox="0 0 9 9"><polyline points="1,5 3.5,7.5 8,2" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div><div style="flex:1;height:2px;background:var(--success)"></div></div>
+      <div style="display:flex;align-items:center;gap:0;flex:1"><div style="width:16px;height:16px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="8" height="5" viewBox="0 0 20 12"><rect x="1" y="3" width="18" height="8" rx="2" fill="#fff"/><circle cx="5" cy="11" r="2" fill="var(--accent)"/><circle cx="15" cy="11" r="2" fill="var(--accent)"/></svg></div><div style="flex:1;height:2px;background:var(--border)"></div></div>
+      <div style="display:flex;align-items:center;gap:0;flex:1"><div style="width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--border);flex-shrink:0"></div><div style="flex:1;height:2px;background:var(--border)"></div></div>
+      <div style="width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--border);flex-shrink:0"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-bottom:10px">
+      <span style="color:var(--success);font-weight:600">Bestätigt</span><span style="font-weight:700;color:var(--primary)">Unterwegs</span><span>Vor Ort</span><span>Besichtigung</span>
+    </div>
+  </div>
+
+  <div id="z5a-todo" style="display:none">
+    <div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:6px">Bereiten Sie den Termin vor</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+      <div style="background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:10px;cursor:pointer;transition:border-color .2s" onclick="this.style.borderColor='var(--success)';this.querySelector('.todo-i').innerHTML='✓';this.querySelector('.todo-i').style.background='var(--success)';this.querySelector('.todo-i').style.color='#fff'">
+        <div class="todo-i" style="width:22px;height:22px;border-radius:6px;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:12px;margin-bottom:5px">📸</div>
+        <div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:2px">Schadenfotos</div>
+        <div style="font-size:9px;color:var(--muted);line-height:1.3">4 Seiten + Details vom Schaden fotografieren</div>
+      </div>
+      <div style="background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:10px;cursor:pointer;transition:border-color .2s" onclick="this.style.borderColor='var(--success)';this.querySelector('.todo-i').innerHTML='✓';this.querySelector('.todo-i').style.background='var(--success)';this.querySelector('.todo-i').style.color='#fff'">
+        <div class="todo-i" style="width:22px;height:22px;border-radius:6px;background:#fef3cd;display:flex;align-items:center;justify-content:center;font-size:12px;margin-bottom:5px">📋</div>
+        <div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:2px">Unfallbericht</div>
+        <div style="font-size:9px;color:var(--muted);line-height:1.3">Kurzen Hergang im Portal ausfüllen</div>
+      </div>
+      <div style="background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:10px;cursor:pointer;transition:border-color .2s" onclick="this.style.borderColor='var(--success)';this.querySelector('.todo-i').innerHTML='✓';this.querySelector('.todo-i').style.background='var(--success)';this.querySelector('.todo-i').style.color='#fff'">
+        <div class="todo-i" style="width:22px;height:22px;border-radius:6px;background:#eef7e5;display:flex;align-items:center;justify-content:center;font-size:12px;margin-bottom:5px">📄</div>
+        <div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:2px">Dokumente</div>
+        <div style="font-size:9px;color:var(--muted);line-height:1.3">Fahrzeugschein, Führerschein, Polizeiprotokoll</div>
+      </div>
+      <div style="background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:10px;cursor:pointer;transition:border-color .2s" onclick="this.style.borderColor='var(--accent)';this.querySelector('.todo-i').style.background='var(--accent)'">
+        <div class="todo-i" style="width:22px;height:22px;border-radius:6px;background:#f0e6ff;display:flex;align-items:center;justify-content:center;font-size:12px;margin-bottom:5px">💬</div>
+        <div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:2px">Chat mit Gutachter</div>
+        <div style="font-size:9px;color:var(--muted);line-height:1.3">Fragen stellen oder Infos vorab senden</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="pbtn" onclick="nav('z6')" style="position:sticky;bottom:12px;z-index:5;box-shadow:0 -4px 16px rgba(255,255,255,.9),0 4px 16px rgba(243,192,83,.4)">Zum Kundenportal →</button>
+  <div style="text-align:center;margin-top:6px;font-size:9px;color:#b0b5be">Live-Status · Schadenberater · Fachanwalt · Alle Dokumente</div>
+  <div style="text-align:center;margin-top:4px;font-size:9px;color:#9ca3af">Termin verschieben · Stornieren</div>`;}
+
+function rZ5B(){return `
+  <div style="text-align:center"><div class="cchk"><svg width="20" height="20" viewBox="0 0 22 22"><polyline points="4,12 9,17 18,6" stroke="#10b981" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ctitle">Termin bestätigt!</div></div>
+  <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--primary)" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14"/><path d="M7 2v4M13 2v4"/></svg><div><div style="font-size:16px;font-weight:800;color:var(--primary)">Morgen, 14:30 Uhr</div><div style="font-size:11px;color:var(--muted)">Montag, 05. Mai 2026</div></div></div>
+  <div class="scard"><div class="av av-sm"><img src="${SV[4].ph}"></div><div><div class="nm">Thomas B. · Mülheim</div><div style="display:flex;gap:4px;margin-top:3px"><span class="b" style="font-size:10px;background:#fef3cd;color:#856404">ÖBuV</span><span class="b" style="font-size:10px;background:#eef7e5;color:#639922">BVSK</span></div></div></div>
+  <div class="sep"></div>
+  <div class="stitle">Was jetzt zu tun ist:</div>
+  <div class="sr"><div class="sn">1</div><div><div class="srt">Schaden fotografieren</div><div class="srd">Fahrzeug von 4 Seiten + Detailaufnahmen</div></div></div>
+  <div class="sr"><div class="sn">2</div><div><div class="srt">Unterlagen bereithalten</div><div class="srd">Fahrzeugschein (ZB1) + Polizeibericht</div></div></div>
+  <div class="sr"><div class="sn">3</div><div><div class="srt">Im Portal hochladen</div><div class="srd">Damit sich Ihr Gutachter vorbereiten kann</div></div></div>
+  <div class="sep"></div>
+  <button class="pbtn" onclick="nav('z6')">Zum Portal — Unterlagen hochladen →</button>
+  <div class="phint">Erstmalig: Konto einrichten (Google, Apple oder E-Mail)</div>
+  <div class="pinfo">Im Portal: Schadenberater · Fachanwalt · Live-Tracking am Termintag</div>
+  <div style="text-align:center;margin-top:8px;font-size:10px;color:#9ca3af">Termin verschieben · Stornieren</div>`;}
+
+function rZ6(){return `<div class="z6w"><div class="z6c">
+  <div style="text-align:center;margin-bottom:20px"><span style="font-size:20px;font-weight:700"><span style="color:var(--primary)">claim</span><span style="color:#7296bd">ondo</span></span></div>
+  <div class="z6t">Willkommen bei Claimondo</div>
+  <div class="z6s">Richten Sie Ihren Zugang ein — einmalig, in 10 Sekunden.</div>
+  <button class="sbtn sg"><div style="width:16px;height:16px;border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#4285F4">G</div>Mit Google fortfahren</button>
+  <button class="sbtn sa"><div style="width:14px;height:14px;background:#fff;border-radius:2px"></div>Mit Apple fortfahren</button>
+  <div class="z6d">oder</div>
+  <div style="margin-bottom:10px"><label class="fl">E-Mail-Adresse</label><input class="fi" value="max@beispiel.de" style="background:var(--bg);color:var(--muted)" readonly></div>
+  <div style="margin-bottom:10px"><label class="fl">Passwort</label><input class="fi" type="password" placeholder="Min. 8 Zeichen"></div>
+  <button class="btn-gold" style="max-width:100%;margin-top:6px">Konto erstellen →</button>
+  <div style="text-align:center;font-size:10px;color:#9ca3af;line-height:1.5;margin-top:10px">Mit Ihrer Registrierung stimmen Sie unseren <span style="color:var(--blue);cursor:pointer">AGB</span> und der <span style="color:var(--blue);cursor:pointer">Datenschutzrichtlinie</span> zu.</div>
+</div></div>`;}
+</script>
+</body>
+</html>

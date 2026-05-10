@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-725: Globale Updates-Nav. Ersetzt MitteilungszentralePanel /
 // NotificationBell in allen 6 Portalen außer Kunde.
@@ -150,12 +150,12 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
     buttonClass = 'bg-red-500 hover:bg-red-600 text-white'
   } else if (unreadTotal > 0) {
     buttonClass = variant === 'dark'
-      ? 'bg-[#1E3A5F] hover:bg-[#2A4570] text-white'
-      : 'bg-[#0D1B3E] hover:bg-[#1E3A5F] text-white'
+      ? 'bg-claimondo-shield hover:bg-[#2A4570] text-white'
+      : 'bg-claimondo-navy hover:bg-claimondo-shield text-white'
   } else {
     buttonClass = variant === 'dark'
       ? 'bg-white/10 hover:bg-white/20 text-white/80'
-      : 'bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy'
+      : 'bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy'
   }
 
   const flashClass = flashing
@@ -204,7 +204,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
             className="absolute right-0 mt-2 w-[360px] max-w-[92vw] glass-light rounded-ios-lg shadow-ios-lg z-40 overflow-hidden"
           >
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/40">
-            <h2 className="text-sm font-semibold text-[#0D1B3E]">Updates</h2>
+            <h2 className="text-sm font-semibold text-claimondo-navy">Updates</h2>
             <button
               onClick={() => setOpen(false)}
               className="p-1 -mr-1 text-claimondo-ondo hover:text-claimondo-navy"
@@ -227,7 +227,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
                     active
                       ? isKritisch
                         ? 'text-red-600 border-b-2 border-red-500 bg-red-50/30'
-                        : 'text-[#0D1B3E] border-b-2 border-[#4573A2] bg-[#4573A2]/5'
+                        : 'text-claimondo-navy border-b-2 border-claimondo-ondo bg-claimondo-ondo/5'
                       : 'text-claimondo-ondo hover:text-claimondo-navy'
                   }`}
                 >
@@ -236,7 +236,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
                     <span>{t.label}</span>
                     {c > 0 && (
                       <span className={`inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold ${
-                        isKritisch ? 'bg-red-500 text-white' : 'bg-[#4573A2] text-white'
+                        isKritisch ? 'bg-red-500 text-white' : 'bg-claimondo-ondo text-white'
                       }`}>
                         {c > 99 ? '99+' : c}
                       </span>
@@ -258,7 +258,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
                 <div
                   key={m.id}
                   className={`border-b border-claimondo-border px-4 py-3 transition-colors ${
-                    m.gelesen ? 'bg-white' : 'bg-[#4573A2]/5'
+                    m.gelesen ? 'bg-white' : 'bg-claimondo-ondo/5'
                   }`}
                 >
                   <div className="flex items-start gap-2.5">

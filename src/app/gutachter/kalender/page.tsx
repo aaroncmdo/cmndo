@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -103,14 +103,27 @@ export default async function SVKalenderPage({
     .filter(f => f.sv_termin)
     .sort((a, b) => new Date(a.sv_termin!).getTime() - new Date(b.sv_termin!).getTime())
 
+  // 2026-05-06: Map start_zeit → fall_id für Time-Match-Clickability der
+  // externalBusy-Events. Damit wird ein „Gebucht"-Pill der via Google
+  // FreeBusy/CalDAV gelesen wurde, klickbar zum Claimondo-Auftrag, wenn
+  // er zeitlich zu einem internen gutachter_termine matched (±2 Minuten
+  // Toleranz, da Google-Events teils mit Sekunden-Drift zurückkommen).
+  const claimondoTermineByStart = (faelle ?? [])
+    .filter((f) => f.sv_termin)
+    .map((f) => ({
+      fallId: f.id as string,
+      startMs: new Date(f.sv_termin as string).getTime(),
+    }))
+
   return (
     <div className="h-full flex flex-col">
+      <KalenderRealtimeRefresh svId={sv.id} />
       {/* View-Toggle */}
       <div className="px-4 py-2 bg-white border-b border-claimondo-border shrink-0">
         <PageHeader
           title="Kalender"
           actions={
-            <div className="flex gap-1 bg-[#f8f9fb] rounded-lg p-0.5">
+            <div className="flex gap-1 bg-claimondo-bg rounded-lg p-0.5">
               <Link
                 href="/gutachter/kalender?view=kalender"
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
@@ -148,13 +161,18 @@ export default async function SVKalenderPage({
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {terminListe.length === 0 ? (
-            <EmptyState title="Keine Termine vorhanden." />
+            // 2026-05-07 EmptyState-Iter-2: Kalender > Liste-View ist die
+            // echte Termine-Empty-State (legacy /gutachter/termine wird hier
+            // hin redirected). Wrapper-Component, weil diese Page eine
+            // Server-Component ist und LucideIcon nicht über die RSC-Boundary
+            // gereicht werden kann.
+            <KalenderListeEmpty />
           ) : terminListe.map(fall => {
             const t = new Date(fall.sv_termin!)
             const name = fall.lead_id && leadMap[fall.lead_id] ? leadMap[fall.lead_id] : '—'
             return (
               <Link key={fall.id} href={`/gutachter/fall/${fall.id}`}
-                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-[#f8f9fb] transition-colors">
+                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-claimondo-bg transition-colors">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-claimondo-navy">

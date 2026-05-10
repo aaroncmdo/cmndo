@@ -8,12 +8,21 @@ import { zb1Schema, type Zb1FormValues } from '@/lib/flow/schemas/schritt3'
 // (b) User hat manuell ohne Scan eingetippt.
 // Beide Pfade schreiben dieselben Felder in `leads`.
 
+type HalterDaten = {
+  vorname: string
+  nachname: string
+  strasse: string
+  plz: string
+  stadt: string
+}
+
 type Result = { success: true } | { success: false; error: string }
 
 export async function updateLeadZb1Manual(
   leadId: string,
   input: Zb1FormValues,
   manual: boolean,
+  halter?: HalterDaten,
 ): Promise<Result> {
   if (!leadId) return { success: false, error: 'Lead-ID fehlt' }
 
@@ -25,6 +34,18 @@ export async function updateLeadZb1Manual(
   const d = parsed.data
 
   const supabase = await createClient()
+
+  const halterUpdate =
+    halter && (halter.vorname || halter.nachname)
+      ? {
+          halter_vorname: halter.vorname || null,
+          halter_nachname: halter.nachname || null,
+          halter_strasse: halter.strasse || null,
+          halter_plz: halter.plz || null,
+          halter_stadt: halter.stadt || null,
+        }
+      : {}
+
   const { error } = await supabase
     .from('leads')
     .update({
@@ -38,6 +59,7 @@ export async function updateLeadZb1Manual(
         submitted_at: new Date().toISOString(),
         source: manual ? 'manuell' : 'ocr-confirmed',
       },
+      ...halterUpdate,
     })
     .eq('id', leadId)
 

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -9,6 +9,7 @@ import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
+import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 
 type SvSearchParams = { tab?: string }
 
@@ -30,7 +31,7 @@ export default async function SvDetailPage({
   // AAR-659: urlaub_von/bis mitladen — für Header-Badge.
   const { data: sv, error: svErr } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon)')
+    .select('id, profile_id, paket, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon, google_place_id)')
     .eq('id', id)
     .single()
   if (svErr) console.error('[admin/sv-detail] SV-Query:', svErr.message)
@@ -48,8 +49,18 @@ export default async function SvDetailPage({
 
   const profileRaw = sv.profiles as unknown
   const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
-    vorname: string | null; nachname: string | null; email: string | null; telefon: string | null
+    vorname: string | null; nachname: string | null; email: string | null; telefon: string | null; google_place_id: string | null
   } | null
+
+  // Google-Bewertung aus Cache laden (profile_id = sv.profile_id)
+  const { data: bewertungRow } = sv.profile_id
+    ? await supabase
+        .from('google_bewertungen_cache')
+        .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am')
+        .eq('profile_id', sv.profile_id)
+        .maybeSingle()
+    : { data: null }
+  const bewertung = bewertungRow ?? null
 
   // Fälle + Tasks parallel laden
   const [faelleRes, tasksRes] = await Promise.all([
@@ -252,8 +263,8 @@ export default async function SvDetailPage({
             description={
               <span className="flex items-center gap-3 flex-wrap">
                 {profile?.email && <span>{profile.email}</span>}
-                {sv.gutachter_typ && <span className="bg-[#4573A2]/5 text-[#4573A2] px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.gutachter_typ}</span>}
-                {sv.paket && <span className="bg-[#f8f9fb] px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.paket}</span>}
+                {sv.gutachter_typ && <span className="bg-claimondo-ondo/5 text-claimondo-ondo px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.gutachter_typ}</span>}
+                {sv.paket && <span className="bg-claimondo-bg px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.paket}</span>}
                 {/* AAR-659: partner_seit + werbebudget waren im SELECT aber nie gerendert — Dead-Load. */}
                 {sv.partner_seit && (
                   <span className="text-claimondo-ondo/70">
@@ -274,7 +285,7 @@ export default async function SvDetailPage({
                   const anstehend = heute < von
                   if (!aktiv && !anstehend) return null
                   return (
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${aktiv ? 'bg-amber-50 text-amber-700' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${aktiv ? 'bg-amber-50 text-amber-700' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
                       Urlaub {von}–{bis}
                     </span>
                   )
@@ -285,8 +296,8 @@ export default async function SvDetailPage({
               <>
                 <div className="text-right">
                   <span className="text-sm font-bold text-claimondo-navy tabular-nums">{genutzt}/{maxFaelle}</span>
-                  <div className="w-20 h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden mt-0.5">
-                    <div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-[#4573A2]'}`}
+                  <div className="w-20 h-1.5 bg-claimondo-bg rounded-full overflow-hidden mt-0.5">
+                    <div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-claimondo-ondo'}`}
                       style={{ width: `${Math.min(100, pct)}%` }} />
                   </div>
                 </div>
@@ -325,7 +336,7 @@ export default async function SvDetailPage({
             href={`/admin/sachverstaendige/${id}`}
             className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
               activeTab === 'stammdaten'
-                ? 'border-[#4573A2] text-[#1E3A5F]'
+                ? 'border-claimondo-ondo text-claimondo-shield'
                 : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
             }`}
           >
@@ -335,7 +346,7 @@ export default async function SvDetailPage({
             href={`/admin/sachverstaendige/${id}?tab=verifizierung`}
             className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
               activeTab === 'verifizierung'
-                ? 'border-[#4573A2] text-[#1E3A5F]'
+                ? 'border-claimondo-ondo text-claimondo-shield'
                 : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
             }`}
           >
@@ -346,7 +357,7 @@ export default async function SvDetailPage({
 
       {/* ── Tab-Content ──────────────────────────────────────────── */}
       {activeTab === 'verifizierung' ? (
-        <div className="flex-1 overflow-y-auto p-4 bg-[#f8f9fb]/30">
+        <div className="flex-1 overflow-y-auto p-4 bg-claimondo-bg/30">
           <div className="max-w-4xl mx-auto">
             {verifizierungsData.loadError && (
               <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
@@ -419,7 +430,7 @@ export default async function SvDetailPage({
                   <p className="text-[10px] text-claimondo-ondo">Max. Kapazität</p>
                 </div>
                 <div>
-                  <p className={`text-2xl font-bold tabular-nums ${pct > 80 ? 'text-red-500' : pct > 50 ? 'text-amber-500' : 'text-[#4573A2]'}`}>{pct}%</p>
+                  <p className={`text-2xl font-bold tabular-nums ${pct > 80 ? 'text-red-500' : pct > 50 ? 'text-amber-500' : 'text-claimondo-ondo'}`}>{pct}%</p>
                   <p className="text-[10px] text-claimondo-ondo">Auslastung</p>
                 </div>
               </div>
@@ -451,12 +462,13 @@ export default async function SvDetailPage({
                 bvskMitgliedsnummer: sv.bvsk_mitgliedsnummer ?? '',
                 ihkZertifikatNummer: sv.ihk_zertifikat_nummer ?? '',
                 oebuvBestellungsnummer: sv.oebuv_bestellungsnummer ?? '',
+                googlePlaceId: profile?.google_place_id ?? null,
               }}
             />
           </div>
 
           {/* RIGHT: Offene Fälle + Tasks Panel */}
-          <div className="w-[340px] flex-shrink-0 border-l border-claimondo-border overflow-y-auto p-4 space-y-4 bg-[#f8f9fb]/30">
+          <div className="w-[340px] flex-shrink-0 border-l border-claimondo-border overflow-y-auto p-4 space-y-4 bg-claimondo-bg/30">
             {/* Offene Fälle */}
             <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
               <div className="px-3 py-2 border-b border-claimondo-border">
@@ -472,13 +484,13 @@ export default async function SvDetailPage({
                     const kunde = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
                     return (
                       <Link key={fall.id} href={`/faelle/${fall.id}`}
-                        className="block px-3 py-2.5 border-b border-claimondo-border hover:bg-[#f8f9fb] transition-colors">
+                        className="block px-3 py-2.5 border-b border-claimondo-border hover:bg-claimondo-bg transition-colors">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-claimondo-navy truncate">{kunde}</span>
                           <FallStatusBadge status={fall.status} size="xs" />
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-[#4573A2] font-mono">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>
+                          <span className="text-[10px] text-claimondo-ondo font-mono">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>
                           {fall.sv_termin && <span className="text-[10px] text-claimondo-ondo/70">{new Date(fall.sv_termin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</span>}
                         </div>
                       </Link>
@@ -503,7 +515,7 @@ export default async function SvDetailPage({
                     const overdue = t.faellig_am && new Date(t.faellig_am) < now
                     return (
                       <Link key={t.id} href={t.fall_id ? `/faelle/${t.fall_id}` : '#'}
-                        className={`block px-3 py-2.5 border-b border-claimondo-border hover:bg-[#f8f9fb] transition-colors ${overdue ? 'bg-red-50/30' : ''}`}>
+                        className={`block px-3 py-2.5 border-b border-claimondo-border hover:bg-claimondo-bg transition-colors ${overdue ? 'bg-red-50/30' : ''}`}>
                         <p className="text-xs text-claimondo-navy font-medium truncate">{t.titel}</p>
                         <div className="flex items-center gap-2 mt-0.5 text-[10px]">
                           <span className="text-claimondo-ondo/70 font-mono">{fallNr}</span>

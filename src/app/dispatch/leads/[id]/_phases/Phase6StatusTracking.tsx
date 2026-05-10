@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-142 / W8: Phase 6 Status-Tracking nach FlowLink-Versand.
 // AAR-178 P3-C + P3-E: Erneut-senden Button + Vollmacht immer als 5. Schritt
@@ -68,6 +68,7 @@ export default function Phase6StatusTracking({
     // AAR-275: wa_gesendet verrät ob letzter Versand WA war (Twilio-Delivery
     // möglich) oder Email/SMS (kein WA-Callback).
     wa_gesendet?: boolean | null
+    whatsapp_verfuegbar?: boolean | null
   }
   const latestFlow = flowLinks[0]
 
@@ -87,7 +88,7 @@ export default function Phase6StatusTracking({
   const stepSent: Step = {
     label: 'Token-Link gesendet',
     sub: latestFlow
-      ? `Erstellt ${new Date(latestFlow.created_at).toLocaleString('de-DE')}`
+      ? `Erstellt ${new Date(latestFlow.created_at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`
       : 'Noch nicht gesendet',
     state: latestFlow ? 'done' : 'pending',
     icon: <ClockIcon className="w-4 h-4" />,
@@ -112,7 +113,7 @@ export default function Phase6StatusTracking({
   const stepOpened: Step = {
     label: 'Link geöffnet',
     sub: latestFlow?.geoeffnet_am
-      ? `Geöffnet ${new Date(latestFlow.geoeffnet_am).toLocaleString('de-DE')}`
+      ? `Geöffnet ${new Date(latestFlow.geoeffnet_am).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`
       : alarm
         ? 'Inaktiv seit >2h'
         : 'Kunde hat noch nicht geöffnet',
@@ -244,7 +245,7 @@ export default function Phase6StatusTracking({
                     : s.state === 'warning'
                       ? 'bg-red-500 text-white'
                       : s.state === 'disabled'
-                        ? 'bg-[#f8f9fb] text-claimondo-ondo/50'
+                        ? 'bg-claimondo-bg text-claimondo-ondo/50'
                         : 'bg-claimondo-border text-claimondo-ondo/70'
                 }`}
               >
@@ -288,16 +289,24 @@ export default function Phase6StatusTracking({
                 type="button"
                 onClick={() => resend('whatsapp')}
                 disabled={resendPending || !l.telefon}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-[#25D366] text-white text-xs font-semibold hover:bg-[#1fa855] disabled:opacity-40 disabled:cursor-not-allowed"
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+                  l.whatsapp_verfuegbar === true
+                    ? 'bg-[#25D366] text-white hover:bg-[#1fa855] ring-2 ring-emerald-300'
+                    : 'bg-[#25D366] text-white hover:bg-[#1fa855]'
+                }`}
               >
                 <SendIcon className="w-3.5 h-3.5" />
-                WhatsApp
+                {l.whatsapp_verfuegbar === true ? '📱 WA' : 'WhatsApp'}
               </button>
               <button
                 type="button"
                 onClick={() => resend('sms')}
                 disabled={resendPending || !l.telefon}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+                  l.whatsapp_verfuegbar === true
+                    ? 'bg-claimondo-bg text-claimondo-ondo/60 border border-claimondo-border hover:bg-claimondo-border'
+                    : 'bg-amber-500 text-white hover:bg-amber-600'
+                }`}
               >
                 <PhoneIcon className="w-3.5 h-3.5" />
                 SMS

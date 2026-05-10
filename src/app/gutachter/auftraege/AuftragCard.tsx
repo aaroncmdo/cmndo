@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-408 / CMM-25: Eine Card pro SV-Auftrag. CMM-25 hat den Erstvorschlag-
 // Pfad entfernt — Dispatcher blockt den Slot, SA-Unterschrift bestätigt
@@ -80,7 +80,7 @@ function deriveTerminMeta(t: AuftragCardProps['aktiverTermin']): TerminMeta {
 function fmtDateShort(iso: string | null | undefined): string {
   if (!iso) return '—'
   try {
-    return new Date(iso).toLocaleString('de-DE', {
+    return new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
       weekday: 'short',
       day: '2-digit',
       month: '2-digit',
@@ -136,8 +136,19 @@ export default function AuftragCard(props: AuftragCardProps) {
               {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
             </span>
           </p>
+          <div className="flex items-center gap-2 flex-wrap text-[11px] text-claimondo-ondo">
+            {props.fall.kennzeichen && (
+              <span className="inline-flex items-center rounded-md border border-claimondo-navy/70 bg-white px-1.5 py-0 font-mono text-[10px] tracking-wide text-claimondo-navy">
+                {props.fall.kennzeichen}
+              </span>
+            )}
+            {fahrzeug && <span className="truncate">{fahrzeug}</span>}
+            <span className="font-mono text-[var(--brand-secondary)]">
+              {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
+            </span>
+          </div>
         </div>
-        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo whitespace-nowrap">
+        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo whitespace-nowrap">
           {props.statusLabel}
         </span>
       </div>

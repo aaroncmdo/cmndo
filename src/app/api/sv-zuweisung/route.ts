@@ -8,6 +8,7 @@ import { triggerSV01, deductLeadpreis } from '@/lib/gutachterTasking'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
+import { sendNachricht } from '@/lib/whatsapp/send'
 
 // ─── Point-in-Polygon (Ray Casting) ─────────────────────────────────────────
 

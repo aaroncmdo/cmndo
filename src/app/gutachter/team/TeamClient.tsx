@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { Building2Icon, GraduationCapIcon, MailIcon, ShieldOffIcon, ShieldCheckIcon, ArrowRightIcon, InboxIcon, UsersIcon, BarChart3Icon, WalletIcon, ActivityIcon } from 'lucide-react'
@@ -134,7 +134,7 @@ export default function TeamClient({
             </div>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wide text-claimondo-ondo">
+              <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
                 <tr>
                   <th className="text-left px-4 py-3">Fall</th>
                   <th className="text-left px-4 py-3">Standort</th>
@@ -168,7 +168,7 @@ export default function TeamClient({
                           value={assignTargets[l.id] ?? ''}
                           onChange={e => setAssignTargets(prev => ({ ...prev, [l.id]: e.target.value }))}
                           disabled={pending}
-                          className="text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand-secondary)]"
+                          className="text-xs bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand-secondary)]"
                         >
                           <option value="">Wählen...</option>
                           {eligibleTargets.map(s => (
@@ -206,7 +206,7 @@ export default function TeamClient({
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wide text-claimondo-ondo">
+            <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
               <tr>
                 <th className="text-left px-4 py-3">Name</th>
                 <th className="text-left px-4 py-3">Email</th>
@@ -222,11 +222,11 @@ export default function TeamClient({
                 const name = [s.vorname, s.nachname].filter(Boolean).join(' ') || '—'
                 const isGesperrt = !!s.gesperrt_seit
                 const status = isGesperrt ? { label: 'Gesperrt', cls: 'bg-red-50 text-red-700' }
-                  : !s.ist_aktiv ? { label: 'Inaktiv', cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
+                  : !s.ist_aktiv ? { label: 'Inaktiv', cls: 'bg-claimondo-bg text-claimondo-ondo' }
                   : !s.portal_zugang_freigeschaltet ? { label: 'Wartet auf Onboarding', cls: 'bg-yellow-50 text-yellow-700' }
                   : { label: 'Aktiv', cls: 'bg-emerald-50 text-emerald-700' }
                 return (
-                  <tr key={s.id} className={`hover:bg-[#f8f9fb]/50 ${isGesperrt ? 'opacity-60' : ''}`}>
+                  <tr key={s.id} className={`hover:bg-claimondo-bg/50 ${isGesperrt ? 'opacity-60' : ''}`}>
                     <td className="px-4 py-3 text-claimondo-navy">{name}</td>
                     <td className="px-4 py-3 text-claimondo-ondo text-xs">{s.email ?? '—'}</td>
                     <td className="px-4 py-3 text-claimondo-navy capitalize">{s.paket}</td>

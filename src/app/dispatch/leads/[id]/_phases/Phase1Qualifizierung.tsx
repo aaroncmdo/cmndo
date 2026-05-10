@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-138 / W4: Phase 1 Qualifizierung. Ersetzt Schritt0HardGate.tsx.
 // Basiert auf der alten Hard-Gate-Form, erweitert um:
@@ -29,7 +29,7 @@ import {
   UserPlusIcon,
   PackageIcon,
 } from 'lucide-react'
-import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 // AAR-175 P1-B: ExitSkript inline rendern sobald die MA Eigenverantwortung
 // auswählt — vorher nur roter Einzeiler ohne konkrete Ausstiegsschritte,
 // jetzt das volle 4-Punkte-Skript mit Copy-Button (Notion-Spec §2.Q1).
@@ -84,6 +84,11 @@ type LeadFields = {
   fahrerflucht?: boolean | null
   // AAR-316: Sprache des Kunden (ISO-Code)
   sprache?: string | null
+  // Besichtigungsort — wird hier aus Phase 2 gezogen (sichtbar wenn nicht fahrbereit)
+  besichtigungsort_adresse?: string | null
+  besichtigungsort_lat?: number | null
+  besichtigungsort_lng?: number | null
+  besichtigungsort_place_id?: string | null
 }
 
 // AAR-316: Dropdown-Optionen — nur die 7 CHECK-Constraint-erlaubten Werte.
@@ -126,7 +131,7 @@ function KundendatenEditBlock({
   }
   return (
     <details className="group border border-claimondo-border rounded-lg" open>
-      <summary className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-claimondo-ondo cursor-pointer list-none select-none hover:bg-[#f8f9fb] rounded-lg">
+      <summary className="flex items-center gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-claimondo-ondo cursor-pointer list-none select-none hover:bg-claimondo-bg rounded-lg">
         Kundendaten bearbeiten
       </summary>
       <div className="px-3 pb-3 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -197,6 +202,49 @@ export default function Phase1Qualifizierung() {
       l.polizei_vor_ort === true ? (l.polizeibericht_pflicht ?? null) : null,
   })
   const [toast, setToast] = useState('')
+  const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState(
+    l.besichtigungsort_adresse ?? ''
+  )
+  const [besichtigungsortNotiz, setBesichtigungsortNotiz] = useState(
+    (l as { besichtigungsort_notiz?: string | null }).besichtigungsort_notiz ?? ''
+  )
+
+  function saveBesichtigungsort(place: PlaceResult) {
+    setBesichtigungsortAdresse(place.adresse)
+    patchLead({
+      besichtigungsort_adresse: place.adresse,
+      besichtigungsort_lat: place.lat,
+      besichtigungsort_lng: place.lng,
+      besichtigungsort_place_id: place.place_id || null,
+    } as Partial<typeof lead>)
+    startTransition(async () => {
+      await saveStammdaten(lead.id, {
+        besichtigungsort_adresse: place.adresse,
+        besichtigungsort_lat: place.lat,
+        besichtigungsort_lng: place.lng,
+        besichtigungsort_place_id: place.place_id || null,
+      })
+    })
+  }
+
+  function clearBesichtigungsort() {
+    if (!besichtigungsortAdresse) return
+    setBesichtigungsortAdresse('')
+    patchLead({
+      besichtigungsort_adresse: null,
+      besichtigungsort_lat: null,
+      besichtigungsort_lng: null,
+      besichtigungsort_place_id: null,
+    } as Partial<typeof lead>)
+    startTransition(async () => {
+      await saveStammdaten(lead.id, {
+        besichtigungsort_adresse: null,
+        besichtigungsort_lat: null,
+        besichtigungsort_lng: null,
+        besichtigungsort_place_id: null,
+      })
+    })
+  }
 
   const q1Complete =
     !!draft.unfallhergang?.trim() &&
@@ -390,7 +438,7 @@ export default function Phase1Qualifizierung() {
                 className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors ${
                   selected
                     ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                    : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
+                    : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-claimondo-bg'
                 } disabled:opacity-60`}
                 title={s.label}
               >
@@ -429,7 +477,7 @@ export default function Phase1Qualifizierung() {
                   }
                 })
               }
-              className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border hover:bg-[#f8f9fb]"
+              className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-claimondo-bg text-claimondo-ondo border border-claimondo-border hover:bg-claimondo-bg"
               title={`„${b.prompt.trim()}" ans Textfeld anhängen`}
             >
               + {b.label}
@@ -456,7 +504,7 @@ export default function Phase1Qualifizierung() {
               type="button"
               onClick={() => setDraft(d => ({ ...d, schuldfrage: o.v }))}
               className={`flex-1 px-2 py-1.5 rounded-lg text-[10px] font-medium transition-colors ${
-                draft.schuldfrage === o.v ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border'
+                draft.schuldfrage === o.v ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border'
               }`}
             >
               {o.label}
@@ -499,13 +547,13 @@ export default function Phase1Qualifizierung() {
           <h3 className="text-xs font-semibold text-claimondo-navy">Wie sieht es mit Ihrem Auto aus — hat es was abgekriegt?</h3>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: true }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === true ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>Ja — sichtbarer Schaden</button>
-          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: false }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === false ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>Nein / unklar</button>
+          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: true }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === true ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo'}`}>Ja — sichtbarer Schaden</button>
+          <button type="button" onClick={() => setDraft(d => ({ ...d, schaden_sichtbar: false }))} className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.schaden_sichtbar === false ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo'}`}>Nein / unklar</button>
         </div>
 
         {/* Bei Ja: Fahrbereit-Toggle (Spec §3 Q2 Unterfeld) */}
         {draft.schaden_sichtbar === true && (
-          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-lg p-3 space-y-2">
             <div className="flex items-center gap-2">
               <CarFrontIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
               <span className="text-[11px] font-semibold text-claimondo-navy">Fahrzeug noch fahrbereit?</span>
@@ -515,13 +563,49 @@ export default function Phase1Qualifizierung() {
               <button type="button" onClick={() => setDraft(d => ({ ...d, fahrzeug_fahrbereit: false }))} className={`flex-1 px-3 py-1 rounded-lg text-[11px] font-medium ${draft.fahrzeug_fahrbereit === false ? 'bg-claimondo-ondo text-white' : 'bg-white border border-claimondo-border text-claimondo-ondo'}`}>Nein</button>
             </div>
             {draft.fahrzeug_fahrbereit === false && (
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
-                <p className="text-[11px] text-orange-800 font-medium">Mietwagen jetzt ansprechen — Anspruch gilt ab Unfalltag!</p>
-                <label className="flex items-center gap-1.5 text-[11px] text-orange-900 cursor-pointer mt-1.5">
-                  <input type="checkbox" checked={draft.mietwagen_flag ?? false} onChange={e => setDraft(d => ({ ...d, mietwagen_flag: e.target.checked }))} className="w-3.5 h-3.5" />
-                  Kunde will Mietwagen
-                </label>
-              </div>
+              <>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-2">
+                  <p className="text-[11px] text-orange-800 font-medium">Mietwagen jetzt ansprechen — Anspruch gilt ab Unfalltag!</p>
+                  <label className="flex items-center gap-1.5 text-[11px] text-orange-900 cursor-pointer mt-1.5">
+                    <input type="checkbox" checked={draft.mietwagen_flag ?? false} onChange={e => setDraft(d => ({ ...d, mietwagen_flag: e.target.checked }))} className="w-3.5 h-3.5" />
+                    Kunde will Mietwagen
+                  </label>
+                </div>
+                {/* Besichtigungsadresse: Fahrzeug steht irgendwo — SV muss hinfahren */}
+                <div className="bg-claimondo-bg border border-claimondo-border rounded-lg p-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <MapPinIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                    <span className="text-[11px] font-semibold text-claimondo-navy">Wo steht das Fahrzeug?</span>
+                    {besichtigungsortAdresse && (
+                      <CheckCircleIcon className="w-3.5 h-3.5 text-green-500 ml-auto shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-[10px] text-claimondo-ondo">
+                    Adresse wo der Gutachter das Fahrzeug besichtigen soll (Werkstatt, Stellplatz …).
+                    Leer lassen = SV fährt zum Unfallort.
+                  </p>
+                  <GooglePlaceAutocomplete
+                    defaultValue={besichtigungsortAdresse}
+                    placeholder="Werkstatt / Stellplatz-Adresse"
+                    onSelect={saveBesichtigungsort}
+                    onBlur={(current) => { if (!current.trim()) clearBesichtigungsort() }}
+                    className="w-full px-2 py-1.5 border border-claimondo-border rounded-lg text-xs"
+                  />
+                  <textarea
+                    value={besichtigungsortNotiz}
+                    onChange={e => setBesichtigungsortNotiz(e.target.value)}
+                    onBlur={() => {
+                      const notiz = besichtigungsortNotiz.trim() || null
+                      startTransition(async () => {
+                        await saveStammdaten(lead.id, { besichtigungsort_notiz: notiz })
+                      })
+                    }}
+                    rows={2}
+                    placeholder="Treffpunkt-Notiz (z.B. Hintereingang, Schlüssel bei Werkstatt …)"
+                    className="w-full px-2 py-1.5 border border-claimondo-border rounded-lg text-xs resize-none mt-1"
+                  />
+                </div>
+              </>
             )}
             <label className={`flex items-center gap-1.5 text-[11px] cursor-pointer rounded-lg p-1.5 ${
               isAuffahrunfall ? 'bg-rose-50 border border-rose-200 text-rose-900' : 'text-claimondo-navy'
@@ -536,7 +620,7 @@ export default function Phase1Qualifizierung() {
 
         {/* Bei Nein: Nachfrage-Block (wie bisher) */}
         {draft.schaden_sichtbar === false && (
-          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-lg p-3 space-y-2">
             <p className="text-[11px] font-semibold text-claimondo-navy">Nachfrage (wörtlich stellen):</p>
             <p className="text-xs text-claimondo-navy italic">
               „Wie geht es Ihnen — haben Sie sich verletzt oder spüren Sie körperliche Beschwerden?"
@@ -604,7 +688,7 @@ export default function Phase1Qualifizierung() {
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
               draft.sachschaden_flag === true
                 ? 'bg-claimondo-navy text-white'
-                : 'bg-[#f8f9fb] text-claimondo-ondo'
+                : 'bg-claimondo-bg text-claimondo-ondo'
             }`}
           >
             Ja — Sachschaden vorhanden
@@ -621,7 +705,7 @@ export default function Phase1Qualifizierung() {
             className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
               draft.sachschaden_flag === false
                 ? 'bg-claimondo-navy text-white'
-                : 'bg-[#f8f9fb] text-claimondo-ondo'
+                : 'bg-claimondo-bg text-claimondo-ondo'
             }`}
           >
             Nein
@@ -670,7 +754,7 @@ export default function Phase1Qualifizierung() {
         {draft.unfallort && (draft.unfallort_lat == null || draft.unfallort_lng == null) && (
           <p className="text-[10px] text-amber-700 flex items-start gap-1">
             <InfoIcon className="w-3 h-3 mt-0.5 shrink-0" />
-            Koordinaten fehlen — SV-Dispatch nutzt Kunden-Adresse als Fallback. Bitte einen Autocomplete-Vorschlag wählen.
+            Koordinaten fehlen — SV-Dispatch nutzt Besichtigungsort als primären Standort. Bitte einen Autocomplete-Vorschlag wählen.
           </p>
         )}
 
@@ -721,7 +805,7 @@ export default function Phase1Qualifizierung() {
           <button
             type="button"
             onClick={() => setDraft(d => ({ ...d, polizei_vor_ort: true }))}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === true ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === true ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo'}`}
           >
             Ja — Polizei war da
           </button>
@@ -736,14 +820,14 @@ export default function Phase1Qualifizierung() {
                 polizei_aktenzeichen: '',
               }))
             }
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === false ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}
+            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${draft.polizei_vor_ort === false ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo'}`}
           >
             Nein
           </button>
         </div>
 
         {draft.polizei_vor_ort === true && (
-          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-3 space-y-2">
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-lg p-3 space-y-2">
             <p className="text-[11px] font-semibold text-claimondo-navy">Polizeibericht bereits vorhanden?</p>
             <div className="flex gap-2">
               <button

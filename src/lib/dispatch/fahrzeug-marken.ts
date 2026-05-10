@@ -1,4 +1,4 @@
-// AAR-82 B-06: Top-20 KFZ-Marken Dropdown + Kennzeichen-Format
+﻿// AAR-82 B-06: Top-20 KFZ-Marken Dropdown + Kennzeichen-Format
 
 export const TOP_KFZ_MARKEN = [
   'Audi', 'BMW', 'Citroen', 'Dacia', 'Fiat',
@@ -28,8 +28,8 @@ export function computeFlowLinkStufe(lead: {
 }
 
 export const FLOWLINK_STUFE_LABEL: Record<FlowLinkStufe, { label: string; cls: string }> = {
-  nicht_gesendet: { label: 'Nicht gesendet', cls: 'bg-[#f8f9fb] text-claimondo-ondo' },
-  gesendet: { label: 'Gesendet', cls: 'bg-[#f8f9fb] text-claimondo-ondo' },
+  nicht_gesendet: { label: 'Nicht gesendet', cls: 'bg-claimondo-bg text-claimondo-ondo' },
+  gesendet: { label: 'Gesendet', cls: 'bg-claimondo-bg text-claimondo-ondo' },
   geoeffnet: { label: 'Geöffnet', cls: 'bg-amber-100 text-amber-700' },
   in_bearbeitung: { label: 'In Bearbeitung', cls: 'bg-violet-100 text-violet-700' },
   abgeschlossen: { label: 'Abgeschlossen', cls: 'bg-green-100 text-green-700' },

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-316 W2+W3: Sprach-Banner-Komponente. Zeigt sich nur wenn sprache !== 'de'
 // und bietet einen Google-Translate-Link auf die aktuelle Seite.
@@ -22,7 +22,7 @@ export function SprachBanner({ sprache }: { sprache: SpracheCode | null | undefi
   return (
     <div
       dir={texts.rtl ? 'rtl' : 'ltr'}
-      className="sticky top-0 z-40 bg-[#4573A2] text-white px-3 py-2 text-xs sm:text-sm flex items-center justify-between gap-2 flex-wrap"
+      className="sticky top-0 z-40 bg-claimondo-ondo text-white px-3 py-2 text-xs sm:text-sm flex items-center justify-between gap-2 flex-wrap"
     >
       <div className="flex items-center gap-2 min-w-0">
         <Languages className="w-4 h-4 shrink-0" />

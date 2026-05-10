@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-2fa-loop-fix: Bridge-Component für User die auf /login/2fa landen
 // ohne aktive 2FA. Setzt das Skip-Cookie via Server-Action und navigiert
@@ -31,7 +31,7 @@ export default function TwoFaSkipRedirect({ targetPath }: { targetPath: string }
   }, [targetPath])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8f9fb] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-claimondo-bg px-4">
       <div className="text-center space-y-3">
         {error ? (
           <>

@@ -1,4 +1,4 @@
-// CMM-23: Schlanke Status-Card für die SV-Fall-View nach Gutachten-
+﻿// CMM-23: Schlanke Status-Card für die SV-Fall-View nach Gutachten-
 // Freigabe. Eine Card pro Fall-Phase, rendert exakt das was der SV in
 // dieser Phase wissen muss — Aaron-Spec: "jede Karte in jedem
 // Prozessschritt = eine Funktion".
@@ -81,7 +81,7 @@ export default function MeinFallStatusCard(props: Props) {
 
       {/* Gutachten-Übersicht: geforderter Betrag + Link aufs PDF */}
       {(props.geforderterBetrag != null || props.gutachtenUrl) && (
-        <div className="rounded-xl bg-[#f8f9fb] border border-claimondo-border p-3 space-y-2">
+        <div className="rounded-xl bg-claimondo-bg border border-claimondo-border p-3 space-y-2">
           {props.geforderterBetrag != null && (
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-claimondo-ondo flex items-center gap-1.5">

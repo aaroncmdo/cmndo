@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 
 export const metadata: Metadata = {
@@ -17,9 +17,9 @@ export default function ImpressumPage() {
         <PageHeader title="Impressum" size="lg" />
       </div>
 
-      <section className="space-y-6 text-[#1E3A5F]/90 leading-relaxed">
+      <section className="space-y-6 text-claimondo-shield/90 leading-relaxed">
         <div>
-          <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Angaben gemäß &sect; 5 TMG</h2>
+          <h2 className="text-lg font-semibold text-claimondo-shield mb-2">Angaben gemäß &sect; 5 TMG</h2>
           <p>
             Claimondo GmbH i.G.<br />
             Hansaring 10<br />
@@ -28,30 +28,30 @@ export default function ImpressumPage() {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Vertreten durch</h2>
+          <h2 className="text-lg font-semibold text-claimondo-shield mb-2">Vertreten durch</h2>
           <p>Geschäftsführer: Aaron Sprafke, Nicolas Kitta</p>
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Kontakt</h2>
+          <h2 className="text-lg font-semibold text-claimondo-shield mb-2">Kontakt</h2>
           <p>
-            E-Mail: <a href="mailto:aaron.sprafke@claimondo.de" className="text-[#4573A2] underline">aaron.sprafke@claimondo.de</a><br />
-            Telefon: <a href="tel:+4922116398980" className="text-[#4573A2] underline">+49 221 163 989 80</a>
+            E-Mail: <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a><br />
+            Telefon: <a href="tel:+4922116398980" className="text-claimondo-ondo underline">+49 221 163 989 80</a>
           </p>
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Handelsregister</h2>
+          <h2 className="text-lg font-semibold text-claimondo-shield mb-2">Handelsregister</h2>
           <p>Eintragung in Vorbereitung</p>
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Umsatzsteuer-Identifikationsnummer</h2>
+          <h2 className="text-lg font-semibold text-claimondo-shield mb-2">Umsatzsteuer-Identifikationsnummer</h2>
           <p>In Beantragung</p>
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-[#1E3A5F] mb-2">Verantwortlich für den Inhalt nach &sect; 55 Abs. 2 RStV</h2>
+          <h2 className="text-lg font-semibold text-claimondo-shield mb-2">Verantwortlich für den Inhalt nach &sect; 55 Abs. 2 RStV</h2>
           <p>
             Aaron Sprafke<br />
             Hansaring 10<br />

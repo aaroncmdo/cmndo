@@ -107,8 +107,18 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         .eq('id', fall.sv_id as string)
         .single()
       if (sv?.profile_id) {
-        const { data: p } = await admin.from('profiles').select('vorname, nachname, telefon').eq('id', sv.profile_id).single()
-        if (p) { svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || null; svTelefon = p.telefon }
+        const { data: p } = await admin
+          .from('profiles')
+          .select('vorname, nachname, telefon, google_place_id, avatar_url, profilbeschreibung')
+          .eq('id', sv.profile_id)
+          .single()
+        if (p) {
+          svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || null
+          svTelefon = p.telefon
+          svGooglePlaceId = (p.google_place_id as string | null) ?? null
+          svAvatarUrl = (p.avatar_url as string | null) ?? null
+          svBeschreibung = (p.profilbeschreibung as string | null) ?? null
+        }
       }
       svVerifiziert = sv?.verifizierung_status === 'geprueft'
     }
@@ -135,8 +145,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // Dokumente laden — abgelehnte Iterationen (KB-Reject-Loop) werden
     // dem Kunden nicht gezeigt; er sieht nur die aktive Version.
     const { data: dokumenteRaw } = await admin.from('fall_dokumente')
-      .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am')
-      .eq('fall_id', id)
+      .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am, sichtbar_fuer')
+      .in('fall_id', claimFallIds)
       .is('geloescht_am', null)
       .is('abgelehnt_am', null)
       .order('hochgeladen_am')
@@ -401,6 +411,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const kennzeichen = (fall.kennzeichen as string) ?? ''
     const fahrzeug = [(fall.fahrzeug_hersteller as string), (fall.fahrzeug_modell as string)].filter(Boolean).join(' ')
     const adresse = (fall.besichtigungsort_adresse as string) || (fall.unfallort as string) || [(fall.schadens_adresse as string), (fall.schadens_plz as string), (fall.schadens_ort as string)].filter(Boolean).join(', ') || ''
+
+    // Gutachten-Freigabe und URL für ClaimSummary-Anspruch-Tab
+    const erstgutachtenFuerSummary = auftraege.find((a) => a.typ === 'erstgutachten')
+    const gutachtenFreigegebenFuerSummary = !!erstgutachtenFuerSummary?.gutachten_final_freigegeben
+    const gutachtenUrlFuerSummary = gutachtenFreigegebenFuerSummary && gutachtenUrlAusBucket ? gutachtenUrlAusBucket : null
 
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">

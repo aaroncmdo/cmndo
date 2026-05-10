@@ -219,7 +219,7 @@ export default function FeldmodusMap({
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: MAPBOX_STYLE_STANDARD,
+      style: MAPBOX_STYLE_STANDARD_SATELLITE,
       center: fallbackCenter,
       zoom: DEFAULT_FIELD_MAP_CONFIG.initialZoom,
       pitch: DEFAULT_FIELD_MAP_CONFIG.pitch,

@@ -51,6 +51,7 @@ type LeadSnapshot = {
   unfallskizze_svg?: string | null
   unfallskizze_bestaetigt?: boolean | null
   unfallskizze_generiert_am?: string | null
+  whatsapp_verfuegbar?: boolean | null
 }
 
 type AktiverTermin = {
@@ -452,17 +453,31 @@ export default function Phase5Zusammenfassung() {
             disabled={pending || !qualification.canSendFlowLink || !waNummer}
             onClick={() => send('whatsapp')}
             title={!waNummer ? 'Bitte WhatsApp-Nummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:bg-[#1fa855] disabled:opacity-40 disabled:cursor-not-allowed"
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-white text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+              l.whatsapp_verfuegbar === true
+                ? 'bg-[#25D366] hover:bg-[#1fa855] ring-2 ring-emerald-300 shadow-md'
+                : 'bg-[#25D366] hover:bg-[#1fa855]'
+            }`}
           >
             <MessageSquareIcon className="w-4 h-4" />
-            {pending && sendStatus.kanal === 'whatsapp' ? 'Sende ...' : 'WhatsApp'}
+            {pending && sendStatus.kanal === 'whatsapp' ? 'Sende ...' : (
+              l.whatsapp_verfuegbar === true ? '📱 WhatsApp' : 'WhatsApp'
+            )}
           </button>
           <button
             type="button"
             disabled={pending || !qualification.canSendFlowLink || !waNummer}
             onClick={() => send('sms')}
-            title={!waNummer ? 'Bitte Telefonnummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed"
+            title={
+              l.whatsapp_verfuegbar === true
+                ? 'Kein SMS-Fallback nötig — Kunde ist auf WhatsApp erreichbar'
+                : !waNummer ? 'Bitte Telefonnummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined
+            }
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+              l.whatsapp_verfuegbar === true
+                ? 'bg-claimondo-bg text-claimondo-ondo/60 border border-claimondo-border hover:bg-claimondo-border'
+                : 'bg-amber-500 text-white hover:bg-amber-600'
+            }`}
           >
             <PhoneIcon className="w-4 h-4" />
             {pending && sendStatus.kanal === 'sms' ? 'Sende ...' : 'SMS'}

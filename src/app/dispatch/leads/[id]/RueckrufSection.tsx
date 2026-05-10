@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-637: Rückruf-Daten liegen jetzt auf admin_termine (typ='rueckruf',
 // lead_id=...). Die Komponente lädt den offenen Rückruf-Termin selbst via
@@ -123,7 +123,7 @@ export default function RueckrufSection({ leadId }: { leadId: string }) {
             type="datetime-local"
             value={datum}
             onChange={e => setDatum(e.target.value)}
-            className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
           />
         </div>
         <div>
@@ -133,7 +133,7 @@ export default function RueckrufSection({ leadId }: { leadId: string }) {
             value={notiz}
             onChange={e => setNotiz(e.target.value)}
             placeholder="z.B. Kunde ab 14 Uhr erreichbar"
-            className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-gray-400"
+            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-gray-400"
           />
         </div>
       </div>

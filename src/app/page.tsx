@@ -7,6 +7,8 @@ import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { hashIp } from '@/lib/crypto/hash-ip'
 import { LandingPage } from '@/components/landing/LandingPage'
 import type { AuthenticatedUser } from '@/components/landing/LandingTopbar'
+import { SITE_URL } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // AAR-491 (M9): Promo-Click-Tracking direkt im Server-Component der
 // Landing-Seite. Fire-and-forget — darf Render nicht verzögern, Fehler
@@ -48,22 +50,29 @@ async function trackPromoClick(code: string): Promise<void> {
 //     bewusst ansteuern und teilen können.
 
 export const metadata: Metadata = {
-  title: 'Claimondo — Ihr KFZ-Schaden, digital geregelt',
+  title: 'Kfz-Schaden digital geregelt — Gutachter, Anwalt & Auszahlung',
   description:
-    'Claimondo übernimmt Ihren Unfallschaden komplett: Gutachten, Werkstatt, Anwalt und Auszahlung — transparent und unabhängig von der gegnerischen Versicherung.',
+    'Nach dem Unfall: Claimondo übernimmt Gutachten, Anwalt, Werkstatt und Auszahlung. 0 € für unverschuldet Geschädigte (§249 BGB). Bundesweit verfügbar — Antwort unter 15 Minuten.',
+  alternates: {
+    canonical: SITE_URL,
+    ...buildLanguageAlternates('/'),
+  },
   openGraph: {
-    title: 'Claimondo — Ihr KFZ-Schaden, digital geregelt',
-    description:
-      'Unabhängige Schadensregulierung nach Kfz-Unfällen. Gutachten, Werkstatt, Anwalt und Auszahlung aus einer Hand.',
     type: 'website',
     locale: 'de_DE',
     siteName: 'Claimondo',
+    url: SITE_URL,
+    title: 'Kfz-Schaden digital geregelt — Gutachter, Anwalt & Auszahlung',
+    description:
+      'Nach dem Unfall: Gutachten, Anwalt, Werkstatt & Auszahlung aus einer Hand. 0 € für unverschuldet Geschädigte. Antwort unter 15 Min.',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Claimondo — Ihr KFZ-Schaden, digital geregelt',
+    title: 'Kfz-Schaden digital geregelt — Gutachter, Anwalt & Auszahlung',
     description:
-      'Unabhängige Schadensregulierung nach Kfz-Unfällen. Gutachten, Werkstatt, Anwalt und Auszahlung aus einer Hand.',
+      'Nach dem Unfall: Gutachten, Anwalt, Werkstatt & Auszahlung aus einer Hand. 0 € für unverschuldet Geschädigte.',
+    images: ['/og-default.png'],
   },
 }
 
@@ -102,7 +111,7 @@ export default async function Home({ searchParams }: HomeProps = {}) {
     }
   }
 
-  return (
-    <LandingPage authenticatedUser={authenticatedUser} locale={locale} />
-  )
+  // organizationSchema + localBusinessSchema + websiteSchema laufen global aus
+  // app/layout.tsx — hier kein eigenes Schema mehr nötig.
+  return <LandingPage authenticatedUser={authenticatedUser} locale={locale} />
 }

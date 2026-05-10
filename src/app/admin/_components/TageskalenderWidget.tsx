@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ClockIcon, CalendarIcon, UserIcon } from 'lucide-react'
 
@@ -27,14 +27,14 @@ export default async function TageskalenderWidget() {
   const events = [
     ...(svTermine ?? []).map(f => ({
       id: `sv-${f.id}`,
-      zeit: new Date(f.sv_termin!).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      zeit: new Date(f.sv_termin!).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
       titel: `SV-Termin: ${f.fall_nummer ?? f.kennzeichen ?? 'Fall'}`,
       typ: 'gutachter' as const,
       link: `/faelle/${f.id}`,
     })),
     ...(termine ?? []).map(t => ({
       id: `t-${t.id}`,
-      zeit: new Date(t.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      zeit: new Date(t.datum).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
       titel: t.betreff ?? t.typ,
       typ: t.typ as 'telefonat' | 'video-call' | 'intern',
       link: t.fall_id ? `/faelle/${t.fall_id}` : '/admin/kalender',
@@ -47,10 +47,10 @@ export default async function TageskalenderWidget() {
     <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
       <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-[#4573A2]" />
+          <CalendarIcon className="w-4 h-4 text-claimondo-ondo" />
           <h2 className="text-sm font-semibold text-claimondo-navy">Dein Tag</h2>
         </div>
-        <Link href="/admin/kalender" className="text-[10px] text-[#4573A2] hover:underline">Kalender</Link>
+        <Link href="/admin/kalender" className="text-[10px] text-claimondo-ondo hover:underline">Kalender</Link>
       </div>
 
       {events.length === 0 ? (
@@ -66,8 +66,8 @@ export default async function TageskalenderWidget() {
             const isNow = Math.abs(eventMin - nowMinutes) < 30
 
             return (
-              <Link key={e.id} href={e.link} className={`flex items-center gap-3 px-5 py-3 hover:bg-[#f8f9fb] transition-colors ${isPast && !isNow ? 'opacity-50' : ''}`}>
-                <div className={`w-10 text-center font-mono text-sm font-semibold ${isNow ? 'text-[#4573A2]' : 'text-claimondo-ondo'}`}>
+              <Link key={e.id} href={e.link} className={`flex items-center gap-3 px-5 py-3 hover:bg-claimondo-bg transition-colors ${isPast && !isNow ? 'opacity-50' : ''}`}>
+                <div className={`w-10 text-center font-mono text-sm font-semibold ${isNow ? 'text-claimondo-ondo' : 'text-claimondo-ondo'}`}>
                   {e.zeit}
                 </div>
                 {isNow && <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />}
@@ -75,10 +75,10 @@ export default async function TageskalenderWidget() {
                   <p className={`text-sm truncate ${isNow ? 'font-semibold text-claimondo-navy' : 'text-claimondo-navy'}`}>{e.titel}</p>
                 </div>
                 <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${
-                  e.typ === 'gutachter' ? 'bg-[#f8f9fb] text-claimondo-ondo' :
+                  e.typ === 'gutachter' ? 'bg-claimondo-bg text-claimondo-ondo' :
                   e.typ === 'telefonat' ? 'bg-amber-50 text-amber-600' :
                   e.typ === 'video-call' ? 'bg-green-50 text-green-600' :
-                  'bg-[#f8f9fb] text-claimondo-ondo'
+                  'bg-claimondo-bg text-claimondo-ondo'
                 }`}>
                   {e.typ === 'gutachter' ? 'SV' : e.typ === 'video-call' ? 'Video' : e.typ === 'telefonat' ? 'Tel.' : e.typ}
                 </span>

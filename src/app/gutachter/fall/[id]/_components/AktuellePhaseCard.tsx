@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-289: Router-Komponente für linke Spalte. Rendert je nach Subphase einen
 // kompakten Hint + CTA „Aktion in der Akte". Echte Aktionen (Termin annehmen,
@@ -49,7 +49,7 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     title: 'Heute am Termintag — Vor-Ort-Aktionen',
     text: 'Mache Fotos, prüfe FIN + Kilometerstand, hole fehlende Dokumente vom Kunden. Vor-Ort-Panel unten.',
     cta: 'Vor-Ort-Panel unten',
-    cssAccent: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy',
+    cssAccent: 'bg-claimondo-bg border-claimondo-border text-claimondo-navy',
   },
   'gutachten-erstellen': {
     icon: UploadIcon,
@@ -62,19 +62,19 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     icon: ScaleIcon,
     title: 'Akte bei Kanzlei',
     text: 'Das Gutachten wurde an LexDrive übergeben. Aktuell keine SV-Aktion nötig — die Kanzlei prüft + schreibt die Versicherung an.',
-    cssAccent: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy',
+    cssAccent: 'bg-claimondo-bg border-claimondo-border text-claimondo-navy',
   },
   anspruchsschreiben: {
     icon: ScaleIcon,
     title: 'Anspruchsschreiben versandt',
     text: 'Die Kanzlei hat das Anspruchsschreiben an die Versicherung gesendet. Wir warten auf Reaktion.',
-    cssAccent: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy',
+    cssAccent: 'bg-claimondo-bg border-claimondo-border text-claimondo-navy',
   },
   regulierung: {
     icon: ClockIcon,
     title: 'Regulierung läuft',
     text: 'Die Versicherung prüft den Anspruch. Sobald reguliert wird, siehst du es hier — Auszahlung deines Honorars folgt automatisch.',
-    cssAccent: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy',
+    cssAccent: 'bg-claimondo-bg border-claimondo-border text-claimondo-navy',
   },
   'zahlung-eingegangen': {
     icon: EuroIcon,
@@ -92,7 +92,7 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     icon: CircleCheckBigIcon,
     title: 'Fall abgeschlossen',
     text: 'Alle Schritte erledigt. Akte bleibt im Archiv verfügbar.',
-    cssAccent: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-navy',
+    cssAccent: 'bg-claimondo-bg border-claimondo-border text-claimondo-navy',
   },
   storniert: {
     icon: XCircleIcon,

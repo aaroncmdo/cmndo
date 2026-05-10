@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-115: SV-Zuweisung + Termin-Reservierung im Lead-Detail (Dispatch-Portal)
 // Dispatcher waehlt vor FlowLink-Versand einen SV aus den Isochrone-Vorschlaegen
@@ -39,7 +39,7 @@ type SvWithSlots = SvSuggestion & { slots: SlotCandidate[] }
 
 const MATCH_BADGE: Record<SlotMatchType, { label: string; cls: string } | null> = {
   wunschtermin: { label: '✨ Wunschtermin', cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-  gleicher_tag: { label: '📅 Gleicher Tag', cls: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
+  gleicher_tag: { label: '📅 Gleicher Tag', cls: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
   nahe: { label: 'Nahe', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   nach: null,
 }
@@ -96,6 +96,8 @@ export default function SvDispatchPanel({
   // AAR-195: Vorgeschlagene Slots für den manuell aus Extra-Liste gewählten SV
   const [freeSlots, setFreeSlots] = useState<SlotCandidate[]>([])
   const [slotsLoading, setSlotsLoading] = useState(false)
+  // SV-Kalender-Vergleichsmodal (Tabs pro SV mit Termin-Liste + Routen)
+  const [kalenderOpen, setKalenderOpen] = useState(false)
   // AAR-521: Debug-Modal für "Warum keine SVs?"
   const [debugOpen, setDebugOpen] = useState(false)
   const [debugData, setDebugData] = useState<DebugSvMatchingResponse | null>(null)
@@ -135,6 +137,7 @@ export default function SvDispatchPanel({
     getNextFreeSlotsForSv(selectedSv.svId, 3, dauerMin, {
       wunschterminIso: wunschterminIso ?? null,
       wunschterminWochentage: wunschterminWochentage ?? null,
+      leadId,
     })
       .then((r) => {
         if (!cancelled) setFreeSlots(r.success ? r.slots ?? [] : [])
@@ -335,7 +338,7 @@ export default function SvDispatchPanel({
           type="button"
           disabled={pending}
           onClick={handleCancel}
-          className="w-full text-xs font-medium px-3 py-2 rounded-lg border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] disabled:opacity-50"
+          className="w-full text-xs font-medium px-3 py-2 rounded-lg border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50"
         >
           Stornieren + neuen SV wählen
         </button>
@@ -372,9 +375,9 @@ export default function SvDispatchPanel({
             <p className={`font-medium ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>
               {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
               {' · '}
-              {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+              {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
               {' – '}
-              {ende.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+              {ende.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
         </div>
@@ -558,12 +561,12 @@ export default function SvDispatchPanel({
                           className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
                             isSel
                               ? 'bg-claimondo-navy text-white border-claimondo-navy'
-                              : 'bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-[#f8f9fb]'
+                              : 'bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-claimondo-bg'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-sm font-medium">{s.name}</span>
-                            <StatusBadge colorCls={isSel ? 'bg-white/20 text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}>
+                            <StatusBadge colorCls={isSel ? 'bg-white/20 text-white' : 'bg-claimondo-bg text-claimondo-ondo'}>
                               {s.paket}
                             </StatusBadge>
                           </div>
@@ -657,7 +660,7 @@ export default function SvDispatchPanel({
                           key={s.svId}
                           type="button"
                           onClick={() => setSelectedSv(s)}
-                          className="w-full text-left px-3 py-2 rounded-lg border bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-[#f8f9fb] transition-colors"
+                          className="w-full text-left px-3 py-2 rounded-lg border bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-claimondo-bg transition-colors"
                         >
                           <span className="text-sm font-medium">{s.name}</span>
                           <span className="ml-2 text-[10px] text-claimondo-ondo">
@@ -735,7 +738,7 @@ export default function SvDispatchPanel({
               )}
               {debugData && (
                 <>
-                  <div className="text-xs text-claimondo-ondo bg-[#f8f9fb] rounded-lg p-2">
+                  <div className="text-xs text-claimondo-ondo bg-claimondo-bg rounded-lg p-2">
                     <div>Fall-Koordinaten: {debugData.fallLat.toFixed(5)}, {debugData.fallLng.toFixed(5)}</div>
                     <div>
                       {debugData.passend} von {debugData.gesamt} aktiven SVs passen.
@@ -840,7 +843,7 @@ function SvCard({
       {sv.verfuegbarAmWunschtermin === true && wunschterminIso && (
         <p className="text-[10px] text-emerald-700 flex items-center gap-1">
           <CheckIcon className="w-3 h-3" />
-          Am Wunschtermin {new Date(wunschterminIso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} verfügbar
+          Am Wunschtermin {new Date(wunschterminIso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} verfügbar
         </p>
       )}
 
@@ -875,13 +878,13 @@ function SlotKachel({
 }) {
   const start = new Date(slot.start)
   const end = new Date(slot.end)
-  const tag = start.toLocaleDateString('de-DE', {
+  const tag = start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
   })
-  const von = start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-  const bis = end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const von = start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+  const bis = end.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
   const badge = MATCH_BADGE[slot.matchType]
   return (
     <button

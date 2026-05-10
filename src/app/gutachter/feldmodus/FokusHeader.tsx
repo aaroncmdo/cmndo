@@ -18,6 +18,13 @@ export interface FokusHeaderProps {
   aktuellerIndex: number
   totalStops: number
   distanceMeters: number | null
+  /**
+   * 2026-05-07 Polish: Glass-Wrapper auf Desktop bekam doppelten Background
+   * (transparent außen + solid navy innen). `variant='light'` macht den
+   * inneren Header transparent → das Glass-Pill um ihn schlägt sauber durch.
+   * Default `dark` für Mobile-Bottom-Sheet (RouteSidebar-Container).
+   */
+  variant?: 'dark' | 'light'
 }
 
 function formatDistance(m: number | null): string | null {
@@ -49,7 +56,9 @@ export default function FokusHeader({
   aktuellerIndex,
   totalStops,
   distanceMeters,
+  variant = 'dark',
 }: FokusHeaderProps) {
+  const isLight = variant === 'light'
   const router = useRouter()
   const [pending, startTransition] = useTransition()
 
@@ -57,7 +66,7 @@ export default function FokusHeader({
     startTransition(async () => {
       const res = await pauseFokusmodus(sessionId)
       if (res.success) {
-        router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+        router.push('/gutachter/heute?info=Tagesmodus+pausiert')
       } else {
         toast.error(res.error ?? 'Pausieren fehlgeschlagen')
       }
@@ -67,20 +76,28 @@ export default function FokusHeader({
   const distLabel = formatDistance(distanceMeters)
 
   return (
-    <div className="flex items-center gap-3 px-3 py-2 bg-[var(--brand-primary)] border-b border-white/10">
+    <div
+      className={`flex items-center gap-3 px-3 py-2 ${
+        isLight ? '' : 'bg-[var(--brand-primary)] border-b border-white/10'
+      }`}
+    >
       <button
         type="button"
         onClick={onExit}
         disabled={pending}
-        className="inline-flex items-center gap-1 rounded-md bg-white/10 hover:bg-white/20 px-2 py-1.5 text-xs text-white disabled:opacity-50"
-        aria-label="Fokus-Modus pausieren"
+        className={`inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs disabled:opacity-50 ${
+          isLight
+            ? 'bg-claimondo-navy/10 hover:bg-claimondo-navy/20 text-claimondo-navy'
+            : 'bg-white/10 hover:bg-white/20 text-white'
+        }`}
+        aria-label="Tagesmodus pausieren"
       >
         <XIcon className="w-4 h-4" />
         <span className="hidden sm:inline">Pausieren</span>
       </button>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 text-white">
+        <div className={`flex items-center gap-2 ${isLight ? 'text-claimondo-navy' : 'text-white'}`}>
           <span className="text-sm font-semibold">
             Stop {Math.min(aktuellerIndex + 1, totalStops)}/{totalStops}
           </span>
@@ -93,7 +110,13 @@ export default function FokusHeader({
         </div>
       </div>
 
-      <span className="text-[10px] uppercase tracking-wider rounded-full bg-[color:var(--brand-primary,var(--brand-secondary))]/20 text-[color:var(--brand-primary,var(--brand-accent))] px-2 py-1">
+      <span
+        className={`text-[10px] uppercase tracking-wider rounded-full px-2 py-1 ${
+          isLight
+            ? 'bg-claimondo-navy/10 text-claimondo-navy'
+            : 'bg-[color:var(--brand-primary,var(--brand-secondary))]/20 text-[color:var(--brand-primary,var(--brand-accent))]'
+        }`}
+      >
         {statusLabel(sessionStatus)}
       </span>
     </div>

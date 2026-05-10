@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-559 (C10): Upload-Formular für technische Stellungnahme.
 // Zeigt VS-Kürzungspositionen als Kontext, dann PDF-Upload + optionale Notiz.
@@ -102,7 +102,7 @@ export default function StellungnahmeClient({
           <button
             type="button"
             onClick={() => router.back()}
-            className="p-2 rounded-lg text-claimondo-ondo hover:bg-[#f8f9fb] transition-colors shrink-0"
+            className="p-2 rounded-lg text-claimondo-ondo hover:bg-claimondo-bg transition-colors shrink-0"
             aria-label="Zurück"
           >
             <ArrowLeftIcon className="w-5 h-5" />
@@ -187,12 +187,12 @@ export default function StellungnahmeClient({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={isPending}
-            className="w-full rounded-2xl border-2 border-dashed border-claimondo-border bg-white hover:border-[#4573A2] px-4 py-6 text-center transition-colors disabled:opacity-50"
+            className="w-full rounded-2xl border-2 border-dashed border-claimondo-border bg-white hover:border-claimondo-ondo px-4 py-6 text-center transition-colors disabled:opacity-50"
           >
             {file ? (
               <div className="flex items-center justify-center gap-2">
-                <FileTextIcon className="w-5 h-5 text-[#4573A2]" />
-                <span className="text-sm font-medium text-[#0D1B3E] truncate max-w-[220px]">
+                <FileTextIcon className="w-5 h-5 text-claimondo-ondo" />
+                <span className="text-sm font-medium text-claimondo-navy truncate max-w-[220px]">
                   {file.name}
                 </span>
                 <span className="text-[11px] text-claimondo-ondo">
@@ -203,7 +203,7 @@ export default function StellungnahmeClient({
               <>
                 <UploadCloudIcon className="w-7 h-7 text-claimondo-ondo/70 mx-auto mb-2" />
                 <p className="text-sm text-claimondo-ondo">PDF, JPEG oder PNG — max. 20 MB</p>
-                <p className="text-xs text-[#4573A2] mt-1 font-medium">Datei auswählen</p>
+                <p className="text-xs text-claimondo-ondo mt-1 font-medium">Datei auswählen</p>
               </>
             )}
           </button>
@@ -231,7 +231,7 @@ export default function StellungnahmeClient({
             maxLength={500}
             placeholder="z. B. Erläuterung zu UPE-Aufschlägen oder Reparaturkosten"
             disabled={isPending}
-            className="w-full rounded-xl border border-claimondo-border bg-white px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent resize-none disabled:bg-[#f8f9fb]"
+            className="w-full rounded-xl border border-claimondo-border bg-white px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent resize-none disabled:bg-claimondo-bg"
           />
           <p className="text-[10px] text-claimondo-ondo/70 text-right">{notiz.length}/500</p>
         </div>
@@ -263,7 +263,7 @@ export default function StellungnahmeClient({
         <button
           type="submit"
           disabled={!file || !bestaetigt || isPending}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-[#0D1B3E] hover:bg-[#12265a] text-white text-sm font-semibold disabled:opacity-40 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-claimondo-navy hover:bg-[#12265a] text-white text-sm font-semibold disabled:opacity-40 transition-colors"
         >
           {isPending ? (
             <>

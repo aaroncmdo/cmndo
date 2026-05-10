@@ -28,7 +28,13 @@ type RueckrufRow = {
   } | null
 }
 
-export default async function DispatchRueckrufe() {
+export default async function DispatchRueckrufe({
+  searchParams,
+}: {
+  searchParams?: Promise<{ open?: string }>
+}) {
+  const sp = (await searchParams) ?? {}
+  const openParam = sp.open ?? null
   const supabase = await createClient()
 
   const { data: raw } = await supabase
@@ -73,7 +79,6 @@ export default async function DispatchRueckrufe() {
         {termine.map((t) => {
           const lead = t.lead
           if (!lead) return null
-          const isOverdue = new Date(t.start_zeit) < new Date()
           return (
             <div key={t.id} className="flex items-center gap-4 px-5 py-4">
               <div className="flex-1 min-w-0">

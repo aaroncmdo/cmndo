@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
@@ -32,6 +32,8 @@ type Fall = {
   sv_name: string | null
   ungelesene_nachrichten?: number
   ungelesene_updates?: number
+  /** A4 P0: rote Badge wenn Kunde Dokumente hochgeladen hat die der KB nicht gesehen hat */
+  ungesehene_kunde_uploads?: number
   aktuelle_phase?: string | null
   abgeschlossen_am?: string | null
   // AAR-770: Jüngste offene Mitteilung für Hover-Preview
@@ -53,16 +55,31 @@ const COLUMNS = [
   { key: 'abgeschlossen', label: 'Fertig', color: 'text-emerald-700', bg: 'bg-emerald-600' },
 ]
 
-function mapStatus(status: string): string {
+function mapStatus(status: string, aktuellePhase?: string | null): string {
   if (COLUMNS.some(c => c.key === status)) return status
+  // Welle-6 Aliase
   if (status === 'qc-pruefung') return 'filmcheck'
   if (status === 'regulierung') return 'regulierung-laeuft'
   if (status === 'begutachtung-laeuft') return 'besichtigung'
-  if (status === 'nachbesichtigung-laeuft') return 'regulierung-laeuft'
-  if (status === 'vs-abgelehnt') return 'regulierung-laeuft'
-  if (status === 'regulierung-laeuft') return 'regulierung'
-  if (status === 'vs-abgelehnt') return 'regulierung'
   if (status === 'zahlung-eingegangen') return 'abgeschlossen'
+  // Welle-7 claims.status-Werte (via AAR-854 Trigger)
+  if (status === 'onboarding') {
+    // Feinmapping via aktuelle_phase wenn vorhanden
+    if (aktuellePhase?.includes('sv_unterwegs') || aktuellePhase === 'sv_vor_ort' || aktuellePhase === 'begutachtung_abgeschlossen') return 'besichtigung'
+    if (aktuellePhase?.includes('gutachten') || aktuellePhase === 'qc_bestanden') return 'gutachten-eingegangen'
+    if (aktuellePhase === 'termin_bestaetigt') return 'sv-termin'
+    return 'ersterfassung'
+  }
+  if (status === 'in_bearbeitung') {
+    if (aktuellePhase?.includes('sv_unterwegs') || aktuellePhase === 'sv_vor_ort' || aktuellePhase === 'begutachtung_abgeschlossen') return 'besichtigung'
+    if (aktuellePhase?.includes('gutachten') || aktuellePhase === 'qc_bestanden') return 'gutachten-eingegangen'
+    if (aktuellePhase === 'termin_bestaetigt') return 'sv-termin'
+    return 'sv-zugewiesen'
+  }
+  if (status === 'vs_kontakt') return 'regulierung-laeuft'
+  if (status === 'reguliert') return 'abgeschlossen'
+  if (status === 'abgelehnt') return 'abgeschlossen'
+  if (status === 'kanzlei') return 'kanzlei-uebergeben'
   return 'ersterfassung'
 }
 
@@ -102,7 +119,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
   const byColumn = useMemo(() => {
     const map: Record<string, Fall[]> = {}
     for (const col of COLUMNS) {
-      map[col.key] = filtered.filter(f => mapStatus(f.status) === col.key)
+      map[col.key] = filtered.filter(f => mapStatus(f.status, f.aktuelle_phase) === col.key)
         .sort((a, b) => (b.ungelesene_nachrichten ?? 0) - (a.ungelesene_nachrichten ?? 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     }
     return map
@@ -137,7 +154,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
           <span className="text-claimondo-ondo/70 text-xs">{filtered.length}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex gap-0.5 bg-[#f8f9fb] rounded-lg p-0.5">
+          <div className="flex gap-0.5 bg-claimondo-bg rounded-lg p-0.5">
             {(['aktive', 'deaktivierte', 'alle'] as const).map(f => (
               <button key={f} onClick={() => setAktivFilter(f)}
                 className={`text-[10px] font-medium px-2 py-1 rounded-md transition-colors ${aktivFilter === f ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'}`}>
@@ -168,7 +185,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
                   {/* Column header: 28px */}
                   <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
                     <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
-                    <span className="text-claimondo-ondo text-[10px] font-medium bg-[#f8f9fb] px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
+                    <span className="text-claimondo-ondo text-[10px] font-medium bg-claimondo-bg px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
                   </div>
                   <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
 
@@ -298,7 +315,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
             </button>
             {menuOpen && (
               <div className="absolute right-1 top-6 bg-white border border-claimondo-border rounded-lg shadow-lg py-1 w-36 z-30">
-                <Link href={`/faelle/${fall.id}`} className="block px-3 py-1.5 text-xs text-claimondo-navy hover:bg-[#f8f9fb]">Öffnen</Link>
+                <Link href={`/faelle/${fall.id}`} className="block px-3 py-1.5 text-xs text-claimondo-navy hover:bg-claimondo-bg">Öffnen</Link>
                 <button onClick={() => { setMenuOpen(false); setModal('deactivate'); setGrund(''); setError('') }} className="w-full text-left px-3 py-1.5 text-xs text-amber-600 hover:bg-amber-50">Deaktivieren</button>
                 <button onClick={() => { setMenuOpen(false); setModal('delete'); setError('') }} className="w-full text-left px-3 py-1.5 text-xs text-red-500 hover:bg-red-50">Löschen</button>
               </div>
@@ -335,7 +352,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
             )}
           </div>
           <div className="flex flex-wrap gap-1 mt-1">
-            {fall.kennzeichen && <span className="bg-[#f8f9fb] text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
+            {fall.kennzeichen && <span className="bg-claimondo-bg text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
             {fall.schadens_fall_typ && <span className="bg-claimondo-ondo/5 text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadens_fall_typ] ?? fall.schadens_fall_typ}</span>}
           </div>
           {(fall.betreuer_name || fall.sv_name) && (
@@ -409,7 +426,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
         <p className="text-xs text-claimondo-ondo/70 mb-4">Alle Daten werden unwiderruflich entfernt.</p>
         {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
         <div className="flex gap-2">
-          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border">Abbrechen</button>
+          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border">Abbrechen</button>
           <button disabled={processing} onClick={async () => {
             setProcessing(true)
             const result = await deleteFall(fall.id)
@@ -430,7 +447,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
         </select>
         {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
         <div className="flex gap-2">
-          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border">Abbrechen</button>
+          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border">Abbrechen</button>
           <button disabled={processing || !grund} onClick={async () => {
             setProcessing(true)
             try { await deactivateFall(fall.id, grund, ''); onRefresh() } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }

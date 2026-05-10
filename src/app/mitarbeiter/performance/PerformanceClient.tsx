@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { BarChart3Icon, BriefcaseIcon, TrophyIcon, GiftIcon, ClockIcon, PhoneIcon, VideoIcon, AlertTriangleIcon, CalendarIcon } from 'lucide-react'
@@ -57,10 +57,10 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
           <div className="space-y-2">
             {timeline.map((item, i) => {
               const d = new Date(item.zeit)
-              const zeit = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+              const zeit = d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
               const style = TL_COLORS[item.typ] ?? TL_COLORS.task
               const content = (
-                <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-[#f8f9fb]/50 transition-colors">
+                <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-claimondo-bg/50 transition-colors">
                   <span className="text-claimondo-ondo text-sm font-semibold tabular-nums w-12 shrink-0">{zeit}</span>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${style.bg} ${style.text} shrink-0`}>
                     {style.icon}

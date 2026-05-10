@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // CMM-37 (Vorab Option A): Button auf der Aufträge-Liste der den
 // Tagesvorbereitungs-CSV-Export auslöst. Default-Range = heute, mit
@@ -51,7 +51,7 @@ export default function TagesvorbereitungButton() {
         type="button"
         onClick={trigger}
         disabled={pending}
-        className={`h-9 inline-flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium border border-claimondo-border bg-white text-claimondo-navy hover:bg-[#f8f9fb] transition-colors ${
+        className={`h-9 inline-flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium border border-claimondo-border bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors ${
           pending ? 'opacity-60 pointer-events-none' : ''
         }`}
       >

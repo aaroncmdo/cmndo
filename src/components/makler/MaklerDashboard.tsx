@@ -1,4 +1,4 @@
-// AAR-484 (M2): Makler-Dashboard-Komponente. Server-Component-kompatibel
+﻿// AAR-484 (M2): Makler-Dashboard-Komponente. Server-Component-kompatibel
 // (keine Client-State-Abhängigkeit), rendert Greeting, Stat-Grid, Activity-
 // Feed, Schnellaktionen und Tipp-des-Monats.
 
@@ -97,7 +97,7 @@ export function MaklerDashboard({ makler, data }: Props) {
                 eintreffen, erscheinen sie hier.
               </p>
             ) : (
-              <ul className="divide-y divide-[#e4e7ef]">
+              <ul className="divide-y divide-claimondo-border">
                 {activity.map((a) => (
                   <li key={`${a.kind}-${a.id}`} className="py-3 flex items-start gap-3">
                     <ActivityBadge kind={a.kind} />
@@ -260,7 +260,7 @@ function QuickAction({
       className="block bg-white rounded-ios-md border border-claimondo-border p-4 hover:border-claimondo-ondo transition-colors"
     >
       <div className="flex items-start gap-3">
-        <span className="shrink-0 w-10 h-10 rounded-lg bg-[#f8f9fb] flex items-center justify-center text-claimondo-navy">
+        <span className="shrink-0 w-10 h-10 rounded-lg bg-claimondo-bg flex items-center justify-center text-claimondo-navy">
           {icon}
         </span>
         <div className="flex-1 min-w-0">

@@ -1,4 +1,4 @@
-// Mitarbeiter-Kundentermine. Zeigt SV-Besichtigungen der Fälle die ich
+﻿// Mitarbeiter-Kundentermine. Zeigt SV-Besichtigungen der Fälle die ich
 // als KB/LB betreue (faelle.kundenbetreuer_id = user.id). Unterschied zu
 // /mitarbeiter/termine: dort sind MEINE Termine (Rückrufe etc., bei denen
 // ich anwesend bin). Hier sind Kunden-Termine meiner Fälle (SV-Besich-
@@ -156,7 +156,7 @@ export default async function MitarbeiterKundentermine() {
                 const svName = sv?.profile_id ? svNameMap[sv.profile_id] ?? 'SV' : 'SV'
                 const href = fall ? `/faelle/${fall.id}` : '#'
                 return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
+                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border bg-claimondo-ondo/10 text-claimondo-ondo border-claimondo-ondo/20">
                         <CalendarIcon className="w-3 h-3" />
@@ -168,7 +168,7 @@ export default async function MitarbeiterKundentermine() {
                         </p>
                         <p className="text-xs text-claimondo-ondo flex items-center gap-1 flex-wrap">
                           <span>
-                            {new Date(t.start_zeit).toLocaleTimeString('de-DE', {
+                            {new Date(t.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
                               hour: '2-digit',
                               minute: '2-digit',
                             })}

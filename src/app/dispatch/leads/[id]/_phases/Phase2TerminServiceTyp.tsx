@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-139 / W5: Phase 2 — SV-Termin + Service-Typ (Pfad A/B).
 // AAR-176 P2-C: Besichtigungsadresse wird direkt im onSelect gespeichert
@@ -12,7 +12,7 @@ import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../_lib/phase-context'
 import { setServiceTyp, saveStammdaten } from '../actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
-import { MapPinIcon, CheckCircle2Icon, ScaleIcon, CalendarIcon } from 'lucide-react'
+import { CheckCircle2Icon, CheckCircleIcon, ScaleIcon, CalendarIcon, MapPinIcon } from 'lucide-react'
 
 export default function Phase2TerminServiceTyp() {
   const router = useRouter()
@@ -49,6 +49,9 @@ export default function Phase2TerminServiceTyp() {
   const [wochentage, setWochentage] = useState<number[]>(l.wunschtermin_wochentage ?? [])
   const wunschterminDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [toast, setToast] = useState('')
+  const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState(
+    l.besichtigungsort_adresse ?? '',
+  )
 
   // AAR-264: Debounced auto-save (500ms) für Wunschtermin
   useEffect(() => {
@@ -89,28 +92,31 @@ export default function Phase2TerminServiceTyp() {
 
   function saveBesichtigungsort(place: PlaceResult) {
     setBesichtigungsortAdresse(place.adresse)
-    // AAR-realtime: Provider sofort patchen
     patchLead({
       besichtigungsort_adresse: place.adresse,
       besichtigungsort_lat: place.lat,
       besichtigungsort_lng: place.lng,
-      besichtigungsort_place_id: place.place_id || null,
+      besichtigungsort_place_id: place.place_id,
     } as Partial<typeof lead>)
     startTransition(async () => {
-      const r = await saveStammdaten(lead.id, {
+      await saveStammdaten(lead.id, {
         besichtigungsort_adresse: place.adresse,
         besichtigungsort_lat: place.lat,
         besichtigungsort_lng: place.lng,
-        besichtigungsort_place_id: place.place_id || null,
+        besichtigungsort_place_id: place.place_id,
       })
-      setToast(r.success ? 'Besichtigungsort gespeichert' : r.error ?? 'Fehler')
-      setTimeout(() => setToast(''), 2000)
+      router.refresh()
     })
   }
-
   function clearBesichtigungsort() {
     if (!besichtigungsortAdresse) return
     setBesichtigungsortAdresse('')
+    patchLead({
+      besichtigungsort_adresse: null,
+      besichtigungsort_lat: null,
+      besichtigungsort_lng: null,
+      besichtigungsort_place_id: null,
+    } as Partial<typeof lead>)
     startTransition(async () => {
       await saveStammdaten(lead.id, {
         besichtigungsort_adresse: null,
@@ -118,6 +124,7 @@ export default function Phase2TerminServiceTyp() {
         besichtigungsort_lng: null,
         besichtigungsort_place_id: null,
       })
+      router.refresh()
     })
   }
 
@@ -181,7 +188,7 @@ export default function Phase2TerminServiceTyp() {
       {/* AAR-264: Wunschtermin GANZ OBEN — „Wann" ist wichtiger als „Wo" für
           das Gespräch. Auto-Save 500ms Debounce. Der Wunschtermin fließt
           ins SV-Matching ein (verfuegbarAmWunschtermin + Score-Bonus). */}
-      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 space-y-3">
+      <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 space-y-3">
         {/* AAR-270: Wochentag-Picker — vor dem datetime-local-Input.
             Mehrfachauswahl, Default=Egal. Filtert die SV-Slot-Vorschläge. */}
         <div className="space-y-1.5">
@@ -358,7 +365,7 @@ export default function Phase2TerminServiceTyp() {
           type="button"
           disabled={pending}
           onClick={() => setPhase(1)}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
         >
           ← Zurück zu Phase 1
         </button>
@@ -369,7 +376,7 @@ export default function Phase2TerminServiceTyp() {
             onClick={() => setPhase(3)}
             className="flex-1 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            Weiter zu Phase 3 →
+            Weiter zu Phase 4 →
           </button>
         )}
       </div>

@@ -76,6 +76,18 @@ export async function createLeadFromSchritt1(
       disqualifiziert_am: isAbort ? new Date().toISOString() : null,
       promotion_code_id: promotionCodeId,
       voice_input_quelle: voiceInputQuelle,
+      // Konditionelle Pflichtfelder — bestimmen den weiteren Flow-Pfad
+      ist_fahrzeughalter: data.ist_fahrzeughalter,
+      halter_ungleich_fahrer_flag: !data.ist_fahrzeughalter,
+      fahrzeug_fahrbereit: data.fahrzeug_fahrbereit,
+      personenschaden_flag: data.personenschaden_flag,
+      hat_vorschaeden: data.hat_vorschaeden,
+      vorschaeden_beschreibung: data.hat_vorschaeden
+        ? (data.vorschaeden_beschreibung || null)
+        : null,
+      mietwagen_flag: data.mietwagen_flag ?? false,
+      nutzungsausfall: data.nutzungsausfall ?? false,
+      finanzierung_leasing: data.finanzierung_leasing ?? 'keine',
     })
     .select('id')
     .single()

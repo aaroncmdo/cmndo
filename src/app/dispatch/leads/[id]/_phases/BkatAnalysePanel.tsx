@@ -9,7 +9,7 @@
 // dann ins fall_dokumente.ocr_result). Andernfalls koennte Kanzlei die TBNR
 // als Polizei-bestaetigt missverstehen.
 
-import { useState, useTransition } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { SparklesIcon, AlertTriangleIcon, CheckCircleIcon, ScaleIcon } from 'lucide-react'
 import {
   analyzeBkatForLead,
@@ -47,45 +47,56 @@ const SCHULD_LABEL: Record<string, { label: string; cls: string }> = {
 export default function BkatAnalysePanel({
   leadId,
   polizeiVorOrt,
+  initialUnfallart,
   onSchadentypGesetzt,
 }: {
   leadId: string
   polizeiVorOrt: boolean | null
+  initialUnfallart?: string | null
   onSchadentypGesetzt?: () => void
 }) {
-  const [, startTransition] = useTransition()
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<Result | null>(null)
-  const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [autoSaved, setAutoSaved] = useState(false)
+  const autoStartedRef = useRef(false)
+
+  // Auto-Trigger beim Mount: wenn noch kein bkat_unfallart auf dem Lead
+  // gespeichert ist, läuft die Analyse direkt los — der Mitarbeiter muss
+  // nicht mehr „Analysieren" klicken. Verhindert Doppelausführung über Ref.
+  useEffect(() => {
+    if (autoStartedRef.current) return
+    if (initialUnfallart) return
+    autoStartedRef.current = true
+    void analyze()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function analyze() {
     setLoading(true)
     setResult(null)
+    setAutoSaved(false)
     try {
       const r = await analyzeBkatForLead(leadId)
       setResult(r)
+      // Auto-Übernehmen wenn Unfallart mit ausreichender Konfidenz erkannt
+      if (r.success && r.data?.unfallart) {
+        const unfallart = r.data.unfallart
+        const legacy = bkatToLegacySchadentyp(unfallart as Parameters<typeof bkatToLegacySchadentyp>[0])
+        const saved = await saveBkatUnfallart(leadId, unfallart as Parameters<typeof saveBkatUnfallart>[1], legacy)
+        if (saved.success) {
+          setAutoSaved(true)
+          setToast(`Schadentyp „${UNFALLART_LABEL[unfallart] ?? unfallart}" automatisch übernommen`)
+          setTimeout(() => setToast(null), 4000)
+          onSchadentypGesetzt?.()
+        } else {
+          setToast(saved.error ?? 'Auto-Speichern fehlgeschlagen')
+          setTimeout(() => setToast(null), 5000)
+        }
+      }
     } finally {
       setLoading(false)
     }
-  }
-
-  async function uebernehmen(unfallart: string) {
-    if (!unfallart) return
-    setSaving(true)
-    startTransition(async () => {
-      const legacy = bkatToLegacySchadentyp(unfallart as Parameters<typeof bkatToLegacySchadentyp>[0])
-      const r = await saveBkatUnfallart(leadId, unfallart as Parameters<typeof saveBkatUnfallart>[1], legacy)
-      setSaving(false)
-      if (r.success) {
-        setToast(`Unfallart „${UNFALLART_LABEL[unfallart] ?? unfallart}" übernommen`)
-        setTimeout(() => setToast(null), 3000)
-        onSchadentypGesetzt?.()
-      } else {
-        setToast(r.error ?? 'Speichern fehlgeschlagen')
-        setTimeout(() => setToast(null), 5000)
-      }
-    })
   }
 
   const data = result?.data
@@ -95,6 +106,9 @@ export default function BkatAnalysePanel({
       : data?.source === 'llm'
         ? 'Unfallhergang (KI)'
         : 'keine Daten'
+
+  // Top-TBNR für Inline-Anzeige neben dem Schadentyp
+  const topTbnr = data?.vorschlaege?.[0]
 
   return (
     <div className="rounded-xl border border-claimondo-ondo/30 bg-claimondo-ondo/5 p-4 space-y-3">
@@ -118,9 +132,16 @@ export default function BkatAnalysePanel({
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50"
           >
             <SparklesIcon className="w-3.5 h-3.5" />
-            {loading ? 'Analysiere …' : 'Unfallart analysieren'}
+            {loading ? 'Analysiere …' : 'Erneut analysieren'}
           </button>
-        </>
+        </div>
+      )}
+
+      {!result && !initialUnfallart && loading && (
+        <div className="flex items-center gap-2 text-xs text-claimondo-ondo">
+          <SparklesIcon className="w-3.5 h-3.5 animate-pulse" />
+          Analysiere Unfallhergang …
+        </div>
       )}
 
       {result && !result.success && (
@@ -135,7 +156,7 @@ export default function BkatAnalysePanel({
           <AlertTriangleIcon className="w-4 h-4 mt-0.5 shrink-0" />
           <span>
             Keine eindeutige Klassifikation möglich — Unfallhergang zu kurz
-            oder KI ist unsicher. Bitte manuell wählen.
+            oder KI ist unsicher. Bitte den Schadentyp unten manuell wählen.
           </span>
         </div>
       )}
@@ -171,8 +192,13 @@ export default function BkatAnalysePanel({
                   Übernehmen
                 </button>
               </div>
+              {autoSaved && (
+                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5 font-medium">
+                  <CheckCircleIcon className="w-3 h-3" />
+                  Automatisch übernommen
+                </span>
+              )}
             </div>
-          )}
 
           <div>
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo mb-1">

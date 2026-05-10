@@ -1,8 +1,7 @@
-// AAR-179 P3-H + P3-I: Leads-Übersicht mit Liste/Kanban-Toggle.
+﻿// AAR-179 P3-H + P3-I: Leads-Übersicht mit Liste/Kanban-Toggle.
 // Server-Page lädt die Leads + rendert Phase-Filter-Chips. Die Darstellung
 // (Tabelle oder Kanban) wandert in die Client-Component LeadsViewToggle.
 import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
 import NeuLeadDrawer from './_components/NeuLeadDrawer'
 import LeadsViewToggle from './_components/LeadsViewToggle'
 import { PHASE_OPTIONS } from './_components/leadPhaseConstants'
@@ -18,7 +17,7 @@ export default async function DispatchLeads({
 
   let query = supabase
     .from('leads')
-    .select('id, vorname, nachname, telefon, email, qualifizierungs_phase, schadens_fall_typ, service_typ, source_channel, flow_link_geoeffnet, flow_link_abgeschlossen, created_at, updated_at')
+    .select('id, vorname, nachname, telefon, email, qualifizierungs_phase, schadens_fall_typ, service_typ, source_channel, flow_link_geoeffnet, flow_link_abgeschlossen, whatsapp_verfuegbar, created_at, updated_at')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -41,25 +40,38 @@ export default async function DispatchLeads({
         }
       />
 
-      {/* Filter */}
-      <div className="flex flex-wrap gap-1.5">
+      {/* Filter — Touch-friendly Chips (Portal-Review C3) */}
+      <ChipRow>
         {PHASE_OPTIONS.map((opt) => (
-          <Link
+          <Chip
             key={opt.value}
             href={opt.value ? `/dispatch/leads?phase=${opt.value}` : '/dispatch/leads'}
             className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
               activePhase === opt.value
                 ? 'bg-claimondo-navy text-white'
-                : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
+                : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg'
             }`}
           >
             {opt.label}
-          </Link>
+          </Chip>
         ))}
-      </div>
+      </ChipRow>
 
       {/* Liste / Kanban Toggle + View */}
       <LeadsViewToggle leads={leads ?? []} />
+
+      {/* Floating Action Button — zentriert im Content-Bereich rechts der
+          Sidebar. --app-sidebar-width wird vom PortalNav auf <html> gesetzt
+          und ist auf Mobile 0px (Sidebar versteckt). */}
+      <div
+        className="fixed bottom-6 z-50"
+        style={{
+          left: 'calc(var(--app-sidebar-width, 0px) + (100vw - var(--app-sidebar-width, 0px)) / 2)',
+          transform: 'translateX(-50%)',
+        }}
+      >
+        <NeuLeadDrawer fab />
+      </div>
     </div>
   )
 }

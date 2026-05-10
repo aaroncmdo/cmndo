@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import WillkommenClient from './WillkommenClient'
+import WillkommenWaiting from './WillkommenWaiting'
 import { resolveMaxFaelleMonat, resolveUmkreisKm } from '@/lib/sachverstaendige/kontingent'
 
 /**
@@ -52,7 +53,10 @@ export default async function GutachterWillkommenPage({
   const allSvs = svRows ?? []
 
   if (!allSvs.length) {
-    redirect('/login?error=Dein%20Account%20ist%20noch%20nicht%20eingerichtet.%20Bitte%20kontaktiere%20aaron.sprafke%40claimondo.de')
+    // Supabase-Propagierungs-Lag: Record wurde gerade vom Admin angelegt
+    // und ist noch nicht auf dem Query-Pfad sichtbar. Statt Login-Error
+    // kurz warten und Seite neu laden — nach 4 s ist die Row da.
+    return <WillkommenWaiting />
   }
 
   // KFZ-152 Phase 2+3: Rolle ableiten + primaeren SV-Eintrag waehlen.

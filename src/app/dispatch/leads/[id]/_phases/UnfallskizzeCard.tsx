@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-317 MVP: Unfallskizze-Card in Phase 5. MA kann die Skizze generieren,
 // prüfen und freigeben. Re-Generate via „Neu generieren"-Button. Kunden-
@@ -12,6 +12,7 @@ import {
   approveUnfallskizze,
   clearUnfallskizze,
 } from '../_actions/unfallskizze'
+import { UnfallskizzeEditor } from './UnfallskizzeEditor'
 
 export function UnfallskizzeCard({
   leadId,
@@ -30,6 +31,8 @@ export function UnfallskizzeCard({
   const [bestaetigt, setBestaetigt] = useState(initialBestaetigt)
   const [generiertAm, setGeneriertAm] = useState<string | null>(initialGeneriertAm)
   const [error, setError] = useState<string | null>(null)
+  // AAR-skizze-editor: Toggle für Drag-and-Drop-Modus
+  const [editing, setEditing] = useState(false)
   const [pending, startTransition] = useTransition()
 
   const hatHergang = !!unfallhergang?.trim()
@@ -107,7 +110,20 @@ export function UnfallskizzeCard({
         </button>
       )}
 
-      {svg && (
+      {svg && editing && (
+        <UnfallskizzeEditor
+          leadId={leadId}
+          initialSvg={svg}
+          onSaved={(newSvg) => {
+            setSvg(newSvg)
+            setBestaetigt(false)
+            setEditing(false)
+          }}
+          onCancel={() => setEditing(false)}
+        />
+      )}
+
+      {svg && !editing && (
         <div className="space-y-2">
           <div
             className="rounded-xl border border-claimondo-border bg-white overflow-hidden"
@@ -131,9 +147,18 @@ export function UnfallskizzeCard({
               </button>
               <button
                 type="button"
+                onClick={() => setEditing(true)}
+                disabled={pending}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+              >
+                <MoveIcon className="w-3.5 h-3.5" />
+                Bearbeiten
+              </button>
+              <button
+                type="button"
                 onClick={generate}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
               >
                 <RefreshCwIcon className="w-3.5 h-3.5" />
                 Neu generieren
@@ -142,7 +167,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={clear}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
               >
                 <XIcon className="w-3.5 h-3.5" />
                 Verwerfen

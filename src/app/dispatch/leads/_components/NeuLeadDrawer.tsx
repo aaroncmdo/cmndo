@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-110: Lead manuell anlegen Drawer
 // AAR-695: service_typ raus (wird im Lead-Flow gesetzt, ist Endpoint-Sender
@@ -36,22 +36,30 @@ const INITIAL: CreateManualLeadInput = {
 
 export default function NeuLeadDrawer() {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
-  const [data, setData] = useState<CreateManualLeadInput>(INITIAL)
 
-  function handleSubmit() {
-    setError(null)
+  function handleClick() {
     startTransition(async () => {
-      const result = await createManualLead(data)
-      if (!result.success || !result.leadId) {
-        setError(result.error ?? 'Fehler')
-        return
+      const result = await createManualLead({
+        anrede: null,
+        vorname: '',
+        nachname: '',
+        telefon: '',
+        email: '',
+        kunde_adresse: '',
+        kunde_strasse: '',
+        kunde_plz: '',
+        kunde_stadt: '',
+        kunde_lat: null,
+        kunde_lng: null,
+        source_channel: 'manuell',
+        notizen: '',
+      })
+      if (result.success && result.leadId) {
+        router.push(`/dispatch/leads/${result.leadId}`)
+      } else {
+        alert(result.error ?? 'Lead konnte nicht angelegt werden')
       }
-      setData(INITIAL)
-      setOpen(false)
-      router.push(`/dispatch/leads/${result.leadId}`)
     })
   }
 
@@ -222,7 +230,7 @@ export default function NeuLeadDrawer() {
           {error && <p className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</p>}
 
           <div className="flex gap-2 pt-2">
-            <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-[#f8f9fb] rounded-xl">
+            <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-claimondo-bg rounded-xl">
               Abbrechen
             </button>
             <button

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-162 / W2: Generische Inline-Edit-Komponente für Fall-Stammdaten.
 // Adaptiert aus src/app/dispatch/leads/[id]/_phases/Phase4Stammdaten.tsx
@@ -63,7 +63,7 @@ export default function InlineEditField({
         ? 'border-green-300'
         : status === 'error'
           ? 'border-red-300'
-          : 'border-claimondo-border hover:border-claimondo-border focus:border-[#4573A2]'
+          : 'border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo'
 
   const common = {
     value: draft,

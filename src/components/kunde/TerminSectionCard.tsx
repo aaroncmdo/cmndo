@@ -1,4 +1,4 @@
-// AAR-448: Vollwertige Termin-Detail-Card für das Kunden-Portal.
+﻿// AAR-448: Vollwertige Termin-Detail-Card für das Kunden-Portal.
 // Zeigt SV-Begutachtung ODER KB-Videotermin mit allen Metadaten und
 // Quick-Actions (Anrufen, Navigieren, Verschieben, Absagen, ICS-Export).
 
@@ -35,7 +35,7 @@ export type TerminSectionProps = {
 function fmtDatum(iso: string | null): string {
   if (!iso) return ''
   try {
-    return new Date(iso).toLocaleDateString('de-DE', {
+    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
       weekday: 'long',
       day: '2-digit',
       month: 'long',
@@ -50,10 +50,10 @@ function fmtZeitRange(startIso: string | null, endIso: string | null): string {
   if (!startIso) return ''
   try {
     const s = new Date(startIso)
-    const sTxt = s.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    const sTxt = s.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
     if (!endIso) return `${sTxt} Uhr`
     const e = new Date(endIso)
-    const eTxt = e.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    const eTxt = e.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
     return `${sTxt} — ${eTxt} Uhr`
   } catch {
     return ''
@@ -91,23 +91,23 @@ function getStatusConfig(termin: TerminSectionProps['termin']): StatusConfig {
   const endMs = termin.end_zeit ? new Date(termin.end_zeit).getTime() : startMs + 60 * 60 * 1000
 
   if (termin.sv_angekommen_am) return { label: 'Läuft gerade', cls: 'bg-emerald-50 text-emerald-700' }
-  if (termin.sv_unterwegs_seit) return { label: 'Auf dem Weg', cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
+  if (termin.sv_unterwegs_seit) return { label: 'Auf dem Weg', cls: 'bg-claimondo-bg text-claimondo-ondo' }
   if (termin.status === 'reserviert' || termin.status === 'gegenvorschlag')
     return { label: 'Vorgeschlagen', cls: 'bg-amber-50 text-amber-700' }
   if (termin.status === 'bestaetigt') {
     if (!Number.isNaN(startMs) && now >= startMs && now <= endMs)
       return { label: 'Läuft gerade', cls: 'bg-emerald-50 text-emerald-700' }
     if (!Number.isNaN(startMs) && startMs > now && startMs - now < 2 * 3_600_000)
-      return { label: 'In Kürze', cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
+      return { label: 'In Kürze', cls: 'bg-claimondo-bg text-claimondo-ondo' }
     if (!Number.isNaN(startMs) && endMs < now)
-      return { label: 'Vergangen', cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
+      return { label: 'Vergangen', cls: 'bg-claimondo-bg text-claimondo-ondo' }
     return { label: 'Bestätigt', cls: 'bg-emerald-50 text-emerald-700' }
   }
   if (termin.status === 'abgesagt' || termin.status === 'storniert')
     return { label: 'Abgesagt', cls: 'bg-red-50 text-red-600' }
   if (termin.status === 'verschoben')
     return { label: 'Verschoben', cls: 'bg-amber-50 text-amber-700' }
-  return { label: termin.status, cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
+  return { label: termin.status, cls: 'bg-claimondo-bg text-claimondo-ondo' }
 }
 
 export default function TerminSectionCard({ termin, gegenueber }: TerminSectionProps) {

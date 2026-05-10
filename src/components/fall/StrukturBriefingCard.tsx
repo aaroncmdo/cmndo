@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-772: Struktur-Briefing — INTERNE Card für Admin/KB.
 // Zeigt das strukturierte Briefing (Kurzversion + Hinweise + Warnungen +
@@ -31,7 +31,7 @@ export default function StrukturBriefingCard({
       <div className="flex items-center gap-2">
         <LayoutGridIcon className="w-4 h-4 text-[color:var(--brand-primary,#4573A2)]" />
         <h3 className="text-sm font-semibold text-claimondo-navy">Struktur-Briefing</h3>
-        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-[9px] font-medium normal-case tracking-normal">
+        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo text-[9px] font-medium normal-case tracking-normal">
           intern
         </span>
       </div>

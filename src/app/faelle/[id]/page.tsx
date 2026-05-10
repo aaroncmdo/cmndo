@@ -1,4 +1,4 @@
-// AAR-162 / W2: Fallakte Server-Page.
+﻿// AAR-162 / W2: Fallakte Server-Page.
 // Lädt alle Fall-Daten und delegiert an FallakteShell.
 // AAR-172: Der 210-KB-Monolith FallakteClient.old.tsx wurde gelöscht, nachdem
 // die neue Shell-Architektur alle W2-W5-Tickets abdeckt.
@@ -674,6 +674,22 @@ export default async function FallaktePage({
         </div>
       )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
+      {userRolle === 'admin' && gutachtenOcr && claimId && (
+        <div className="mb-4">
+          {/* CMM-32 Walkthrough: GutachtenOcrCard ist jetzt 'use client' mit
+              Edit-Mode + Re-Run. Sie braucht claim_id/fall_id/auftrag_id
+              fuer die Server-Actions. erstgutachtenAuftragId wurde oben
+              geladen. */}
+          <GutachtenOcrCard
+            data={{
+              ...(gutachtenOcr as unknown as Record<string, unknown>),
+              claim_id: claimId,
+              fall_id: id,
+              auftrag_id: erstgutachtenAuftragId,
+            } as unknown as Parameters<typeof GutachtenOcrCard>[0]['data']}
+          />
+        </div>
+      )}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
       {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
           Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}
@@ -692,7 +708,7 @@ export default async function FallaktePage({
               <a
                 key={f.id}
                 href={`/faelle/${f.id}`}
-                className="text-[#4573A2] hover:underline font-medium text-sm"
+                className="text-claimondo-ondo hover:underline font-medium text-sm"
               >
                 {f.fall_nummer ?? f.id.slice(0, 8)}
                 {f.kennzeichen && ` (${f.kennzeichen})`}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-409: Filter- + Such-Leiste für das SV-Fälle-Archiv. Schreibt alle
 // Filter-Änderungen in die URL (router.replace, debounce für Text-Input),
@@ -96,7 +96,7 @@ export default function FaelleFilterBar({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Fall-Nr, Kunde oder Ort"
-            className="w-full pl-9 pr-8 py-2 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] focus:bg-white"
+            className="w-full pl-9 pr-8 py-2 rounded-xl border border-claimondo-border bg-claimondo-bg text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] focus:bg-white"
           />
           {query && (
             <button

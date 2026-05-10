@@ -1,4 +1,8 @@
-'use client'
+﻿'use client'
+
+// AAR-805: Admin-Wrapper über Shared-Spotlight. Zeigt Faelle/Leads/SVs.
+// Logik (Cmd+K, Debounce, Pfeil-Navigation, Modal-Chrome) liegt jetzt in
+// components/shared/Spotlight.
 
 // AAR-805: Admin-Wrapper über Shared-Spotlight. Zeigt Faelle/Leads/SVs.
 // Logik (Cmd+K, Debounce, Pfeil-Navigation, Modal-Chrome) liegt jetzt in
@@ -28,8 +32,8 @@ export default function Spotlight() {
         key: 'fall',
         label: 'Fälle',
         icon: FileTextIcon,
-        iconColor: 'text-[#4573A2]',
-        hoverBg: 'hover:bg-[#4573A2]/5',
+        iconColor: 'text-claimondo-ondo',
+        hoverBg: 'hover:bg-claimondo-ondo/5',
         results: d.faelle ?? [],
       },
       {

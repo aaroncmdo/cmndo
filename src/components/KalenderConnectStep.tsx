@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-242: Kalender-Connect-Step im Willkommen-Wizard.
 // AAR-717: Apple Calendar (CalDAV) aktiviert — eigener Connect-Modal-Flow
@@ -69,7 +69,7 @@ export default function KalenderConnectStep({
         </div>
         <button
           onClick={onDone}
-          className="w-full py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+          className="w-full py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
         >
           Weiter
         </button>
@@ -79,11 +79,11 @@ export default function KalenderConnectStep({
 
   return (
     <div className="space-y-5">
-      <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-xl p-4 flex items-start gap-3">
-        <CalendarIcon className="w-5 h-5 text-[#4573A2] flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-[#0D1B3E]">
+      <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-xl p-4 flex items-start gap-3">
+        <CalendarIcon className="w-5 h-5 text-claimondo-ondo flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-claimondo-navy">
           <p className="font-semibold">Kalender verbinden</p>
-          <p className="text-xs text-[#1E3A5F] mt-1">
+          <p className="text-xs text-claimondo-shield mt-1">
             Verbinde deinen Kalender, damit wir dir nur Termine in freien Zeitslots vorschlagen.
             Ohne Kalender bekommst du Termine manuell per E-Mail/WhatsApp.
           </p>
@@ -133,7 +133,7 @@ export default function KalenderConnectStep({
         loadingText="Wird gespeichert ..."
         onClick={() => { if (selected === 'keiner') chooseOptOut() }}
         disabled={selected !== 'keiner'}
-        className="w-full py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold transition-colors disabled:opacity-40"
+        className="w-full py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40"
       >
         Weiter ohne Kalender
       </LoadingButton>
@@ -177,10 +177,10 @@ function ProviderCard({
       onClick={onSelect}
       className={`w-full text-left rounded-xl border-2 p-4 transition-colors ${
         !enabled
-          ? 'border-claimondo-border bg-[#f8f9fb] text-claimondo-ondo/70 cursor-not-allowed'
+          ? 'border-claimondo-border bg-claimondo-bg text-claimondo-ondo/70 cursor-not-allowed'
           : selected
-          ? 'border-[#4573A2] bg-[#4573A2]/5'
-          : 'border-claimondo-border hover:border-[#4573A2]/50 bg-white'
+          ? 'border-claimondo-ondo bg-claimondo-ondo/5'
+          : 'border-claimondo-border hover:border-claimondo-ondo/50 bg-white'
       }`}
     >
       <p className={`text-sm font-semibold ${enabled ? 'text-claimondo-navy' : 'text-claimondo-ondo/70'}`}>{label}</p>

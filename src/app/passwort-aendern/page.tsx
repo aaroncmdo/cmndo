@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -60,10 +60,21 @@ export default function PasswortAendernPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f8f9fb] px-5">
-      <div className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center bg-[#f2f3f7] px-5 relative overflow-hidden">
+      {/* Ambient-Gradient Spotlights */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: [
+            'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.2), transparent 65%)',
+            'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.12), transparent 70%)',
+          ].join(', '),
+        }}
+      />
+      <div className="w-full max-w-sm relative z-10">
         <div className="mb-8 text-center">
-          <span className="text-3xl font-bold tracking-tight"><span className="text-[#0D1B3E]">Claim</span><span className="text-[#4573A2]">ondo</span></span>
+          <span className="text-3xl font-bold tracking-tight"><span className="text-claimondo-navy">Claim</span><span className="text-claimondo-ondo">ondo</span></span>
           <p className="mt-1 text-sm text-claimondo-ondo">Bitte ändern Sie Ihr Passwort</p>
         </div>
 
@@ -91,7 +102,7 @@ export default function PasswortAendernPage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
               />
             </div>
 
@@ -107,7 +118,7 @@ export default function PasswortAendernPage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
               />
             </div>
 

@@ -1,8 +1,7 @@
-'use client'
+﻿'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { SendIcon, FileTextIcon, CalendarIcon } from 'lucide-react'
-import { markNachrichtenGelesen } from '@/lib/markNachrichtenGelesen'
+import { useState } from 'react'
+import { CalendarIcon } from 'lucide-react'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { waehleGegenvorschlagSlot } from './actions'
 import Link from 'next/link'
@@ -20,9 +19,7 @@ import { MietwagenStatusCard } from '@/components/shared/mietwagen'
 // AAR-761 Phase 2: Kunde-Upload-Card fuer Belege
 import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 
-type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean | null; anhang_url: string | null; created_at: string }
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
-type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url: string | null }
 type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null; sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null }
 
 const ROLLE_LABEL: Record<string, string> = { kunde: 'Sie', admin: 'Claimondo', kundenbetreuer: 'Ihr Betreuer', gutachter: 'Gutachter', sachverstaendiger: 'Gutachter', system: 'System' }
@@ -30,22 +27,15 @@ const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-claimondo-ondo', admin:
 
 function fmt(val: string | null): string {
   if (!val) return ''
-  return new Date(val).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return new Date(val).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 function fmtDateTime(val: string | null): string {
   if (!val) return ''
-  return new Date(val).toLocaleString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return new Date(val).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
-// ─── Tabs ───────────────────────────────────────────────────────────────────
-
-const TABS = [
-  { key: 'uebersicht', label: 'Übersicht' },
-  { key: 'dokumente', label: 'Dokumente' },
-  { key: 'chat', label: 'Chat' },
-] as const
-
-type TabKey = (typeof TABS)[number]['key']
+// Tab-System entfernt — Übersicht + Dokumente werden direkt
+// untereinander gerendert.
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
@@ -58,13 +48,14 @@ export default function FallDetailSections({
   svVerifiziert?: boolean
   kbName?: string | null
   dokumente: Dokument[]
-  nachrichten: Nachricht[]
-  userId: string
-  chatTeilnehmer?: ChatTeilnehmer[]
+  /** @deprecated — Chat ist entfernt, Nachrichten gehen ueber Sidebar */
+  nachrichten?: unknown[]
+  /** @deprecated — userId nur noch fuer Chat genutzt, der ist raus */
+  userId?: string
+  /** @deprecated — Chat-Teilnehmer nicht mehr noetig */
+  chatTeilnehmer?: unknown[]
   aktiverTermin?: AktiverTermin | null
 }) {
-  const [activeTab, setActiveTab] = useState<TabKey>('uebersicht')
-
   return (
     <div>
       {/* Tab-Leiste */}
@@ -77,7 +68,7 @@ export default function FallDetailSections({
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.key
                 ? 'bg-claimondo-ondo text-white'
-                : 'text-claimondo-ondo hover:bg-[#f8f9fb]'
+                : 'text-claimondo-ondo hover:bg-claimondo-bg'
             }`}>
             {tab.label}
           </button>
@@ -313,7 +304,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           if (isSystem) {
             return (
               <div key={msg.id} className="flex justify-center">
-                <div className="bg-[#f8f9fb] border border-claimondo-light-blue/30 rounded-xl px-4 py-2 max-w-[85%]">
+                <div className="bg-claimondo-bg border border-claimondo-light-blue/30 rounded-xl px-4 py-2 max-w-[85%]">
                   <p className="text-xs text-claimondo-navy text-center whitespace-pre-wrap">{msg.nachricht}</p>
                   <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">
                     {new Date(msg.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
@@ -324,7 +315,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           }
 
           const senderName = getSenderName(msg)
-          const bubbleColor = isOwn ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-navy'
+          const bubbleColor = isOwn ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-navy'
           const lightText = isOwn ? 'text-white/60' : 'text-claimondo-ondo/70'
 
           return (
@@ -360,7 +351,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           <input type="text" value={text} onChange={e => setText(e.target.value)}
             placeholder="Nachricht schreiben..."
             // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
-            className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-xl px-4 py-3 text-base text-claimondo-navy placeholder-gray-400 focus:outline-none focus:border-claimondo-ondo" />
+            className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-xl px-4 py-3 text-base text-claimondo-navy placeholder-gray-400 focus:outline-none focus:border-claimondo-ondo" />
           <button type="submit" disabled={sending || !text.trim()}
             className="px-4 py-3 bg-claimondo-ondo hover:bg-claimondo-shield text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
             {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}
@@ -382,7 +373,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
   const [kundeGrund, setKundeGrund] = useState('')
   const [done, setDone] = useState<string | null>(null)
 
-  const datumStr = new Date(vorgeschlagenesDatum).toLocaleString('de-DE', {
+  const datumStr = new Date(vorgeschlagenesDatum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
     weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 
@@ -430,11 +421,11 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
             {loading ? 'Wird verarbeitet...' : 'Vorschlag annehmen'}
           </button>
           <button onClick={() => setShowModal(true)} disabled={loading}
-            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-shield hover:bg-[#f8f9fb] transition-colors disabled:opacity-40">
+            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-shield hover:bg-claimondo-bg transition-colors disabled:opacity-40">
             Anderen Termin vorschlagen
           </button>
           <Link href={`/kunde/faelle/${fallId}/kalender`}
-            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-light-blue/30 hover:bg-[#f8f9fb] transition-colors flex items-center justify-center gap-2">
+            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-light-blue/30 hover:bg-claimondo-bg transition-colors flex items-center justify-center gap-2">
             <CalendarIcon className="w-4 h-4" /> Kalender des Gutachters öffnen
           </Link>
         </div>
@@ -455,7 +446,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
 
         <div className="flex gap-2">
           <button onClick={() => setShowModal(false)}
-            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors">
+            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors">
             Abbrechen
           </button>
           <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
@@ -493,7 +484,7 @@ function SlotAuswahlBanner({
     if (result.success) {
       const datumStr = (() => {
         try {
-          return new Date(`${slot.datum}T${slot.uhrzeit}`).toLocaleString('de-DE', {
+          return new Date(`${slot.datum}T${slot.uhrzeit}`).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
             weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
           })
         } catch {
@@ -526,7 +517,7 @@ function SlotAuswahlBanner({
         {slots.map((slot, idx) => {
           const datumStr = (() => {
             try {
-              return new Date(`${slot.datum}T${slot.uhrzeit}`).toLocaleString('de-DE', {
+              return new Date(`${slot.datum}T${slot.uhrzeit}`).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
                 weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
               })
             } catch {

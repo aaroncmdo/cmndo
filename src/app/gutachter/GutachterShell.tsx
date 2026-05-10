@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
@@ -55,6 +55,11 @@ type NavSection = {
   items: NavItem[]
 }
 
+// 2026-05-07 Design-Review: Vorher 3 Sektionen (Tagesgeschäft / Finanzen /
+// Verwaltung) — der Reviewer fand die Trennung Finanzen-vs-Verwaltung unklar
+// (Vertrag und Abrechnung gehören thematisch zusammen). Jetzt 2 Sektionen
+// (Tagesgeschäft / Geschäft); Konfiguration (Profil/Einstellungen) lebt im
+// Sidebar-Footer-Block. Kommunikations-Sektion bleibt entfällt (AAR-727).
 const NAV_SECTIONS_BASE: NavSection[] = [
   {
     title: 'Tagesgeschäft',
@@ -83,7 +88,8 @@ const NAV_SECTIONS_BASE: NavSection[] = [
       // CMM-17: 'Mein Gebiet' aus Nav entfernt — Aaron-Spec, kommt später als
       // eigenes Feature-Ticket zurück.
       { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
-      { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon },
+      { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
+      { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon, beta: true },
       { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
     ],
   },
@@ -135,13 +141,17 @@ export default function GutachterShell({
   // direkt sichtbar, konsistent zu Tagesgeschäft/Kommunikation/Finanzen.
   // AAR-222: Sektions-basierte Nav. Team/Community werden conditional in
   // Verwaltung eingehängt.
+  // 2026-05-07: Conditional Items laufen jetzt in den Geschäft-Block (vorher
+  // Verwaltung). Verifizierung steht ganz oben weil Pre-Aktiv-Pfad, dann
+  // Vertrag/Abrechnung/Statistik/Reklamation, dann Team/Community.
   const NAV_SECTIONS: NavSection[] = NAV_SECTIONS_BASE.map(sec => {
-    if (sec.title !== 'Verwaltung') return sec
-    const conditional: NavItem[] = []
-    if (showVerifizierung) conditional.push({ href: '/gutachter/verifizierung', label: 'Verifizierung', icon: ShieldCheckIcon })
-    if (showTeam) conditional.push({ href: '/gutachter/team', label: 'Team', icon: UsersIcon })
-    if (showCommunity) conditional.push({ href: '/gutachter/community', label: 'Community', icon: TrophyIcon })
-    return { ...sec, items: [...sec.items, ...conditional] }
+    if (sec.title !== 'Geschäft') return sec
+    const before: NavItem[] = []
+    if (showVerifizierung) before.push({ href: '/gutachter/verifizierung', label: 'Verifizierung', icon: ShieldCheckIcon })
+    const after: NavItem[] = []
+    if (showTeam) after.push({ href: '/gutachter/team', label: 'Team', icon: UsersIcon })
+    if (showCommunity) after.push({ href: '/gutachter/community', label: 'Community', icon: TrophyIcon })
+    return { ...sec, items: [...before, ...sec.items, ...after] }
   })
 
   // AAR-220: Vollständiges Theme via CSS-Vars + EINMALIGE 2s-Transition.
@@ -334,12 +344,12 @@ export default function GutachterShell({
                 )}
               </Link>
             ) : (
-              <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></Link>
+              <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></Link>
             )}
             {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
             <TasksPill userId={userId} href="/gutachter/tasks" />
           </div>
-          <p className="text-[#7BA3CC] text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
+          <p className="text-claimondo-light-blue text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
         </div>
 
         {/* AAR-222: Gruppierte Nav mit Section-Headers + Badge-Counter
@@ -351,7 +361,7 @@ export default function GutachterShell({
                 {section.title}
               </p>
               <div className="space-y-0.5">
-                {section.items.map(({ href, label, icon: Icon, badgeKey }) => {
+                {section.items.map(({ href, label, icon: Icon, badgeKey, beta }) => {
                   const active = isActive(href)
                   const badge = badgeKey ? badgeCounts[badgeKey] : 0
                   return (
@@ -371,6 +381,14 @@ export default function GutachterShell({
                     >
                       <Icon className="w-5 h-5 shrink-0" />
                       <span className="flex-1 truncate">{label}</span>
+                      {beta && (
+                        <span
+                          className="inline-flex items-center justify-center px-1.5 h-4 rounded text-[9px] font-bold uppercase tracking-wider bg-white/15 text-white/80 border border-white/20"
+                          aria-label="Beta-Feature, in Entwicklung"
+                        >
+                          Beta
+                        </span>
+                      )}
                       {badge > 0 && (
                         <span
                           className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-red-500 text-white"
@@ -387,8 +405,25 @@ export default function GutachterShell({
           ))}
         </nav>
 
+        {/* Hilfe & Support — Inline-Panel ersetzt Sidebar-Inhalt (gleiche Breite, kein Drawer) */}
+        <SupportSidebarPanel
+          open={showSupport}
+          onClose={() => setShowSupport(false)}
+          userName={displayName}
+        />
+
         <div className="mt-auto px-3 py-3 border-t border-white/10 space-y-2">
-          <SupportButton userName={displayName} />
+          <button
+            type="button"
+            onClick={() => setShowSupport(true)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors"
+            aria-label="Hilfe und Support öffnen"
+          >
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            Hilfe &amp; Support
+          </button>
           <Link href="/gutachter/profil" onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors group">
             <div
@@ -403,9 +438,9 @@ export default function GutachterShell({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-semibold truncate">{displayName}</p>
-              <p className="text-[#7BA3CC] text-xs">Sachverständiger</p>
+              <p className="text-claimondo-light-blue text-xs">Sachverständiger</p>
             </div>
-            <UserIcon className="w-4 h-4 text-[#7BA3CC] group-hover:text-white shrink-0" />
+            <UserIcon className="w-4 h-4 text-claimondo-light-blue group-hover:text-white shrink-0" />
           </Link>
           {/* AAR-720: Einstellungen-Knopf unter Profil — Hub für Kalender,
               später weitere Konfigurations-Bereiche (Benachrichtigungen,
@@ -413,12 +448,22 @@ export default function GutachterShell({
           <Link
             href="/gutachter/einstellungen"
             onClick={() => setSidebarOpen(false)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-white hover:bg-white/5 transition-colors"
+          >
+            <SettingsIcon className="w-4 h-4" /> Einstellungen
+          </Link>
+          {/* AAR-720: Einstellungen-Knopf unter Profil — Hub für Kalender,
+              später weitere Konfigurations-Bereiche (Benachrichtigungen,
+              2FA, etc.). */}
+          <Link
+            href="/gutachter/einstellungen"
+            onClick={() => setSidebarOpen(false)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-white hover:bg-white/5 transition-colors"
           >
             <SettingsIcon className="w-4 h-4" /> Einstellungen
           </Link>
           <button onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-red-400 hover:bg-white/5 transition-colors">
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-red-400 hover:bg-white/5 transition-colors">
             <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>
@@ -460,7 +505,7 @@ export default function GutachterShell({
               />
             </Link>
           ) : (
-            <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+            <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
           )}
           {/* AAR-252: Glocke im Mobile-Header — war vorher nur im Wetter-
               Banner, das aber bei SVs ohne standort_lat nicht rendert. */}
@@ -489,7 +534,7 @@ export default function GutachterShell({
           <main
             id="main-content"
             role="main"
-            className="h-full overflow-y-auto rounded-l-2xl rounded-r-none bg-[#f8f9fb] shadow-sm p-2 sm:p-3 lg:p-4"
+            className="h-full overflow-y-auto rounded-l-2xl rounded-r-none bg-claimondo-bg shadow-sm p-2 sm:p-3 lg:p-4"
           >
             {children}
           </main>

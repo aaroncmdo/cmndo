@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-544 (C7): Render-Component für den unified Event-Stream.
 // Gruppiert Events nach Datum, zeigt Source-Icons + Severity-Farben und
@@ -47,7 +47,7 @@ const ICON_BY_NAME: Record<string, typeof FileTextIcon> = {
 }
 
 const SEVERITY_COLOR: Record<FallEventSeverity, string> = {
-  info: 'text-claimondo-ondo bg-[#f8f9fb]',
+  info: 'text-claimondo-ondo bg-claimondo-bg',
   success: 'text-emerald-700 bg-emerald-50',
   warning: 'text-amber-700 bg-amber-50',
   error: 'text-red-700 bg-red-50',
@@ -61,7 +61,7 @@ function pickIcon(e: FallEvent): typeof FileTextIcon {
 function fmtDateHeader(iso: string): string {
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('de-DE', {
+  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     weekday: 'long',
     day: '2-digit',
     month: 'long',
@@ -72,7 +72,7 @@ function fmtDateHeader(iso: string): string {
 function fmtTime(iso: string): string {
   const d = new Date(iso)
   if (isNaN(d.getTime())) return ''
-  return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 }
 
 function dateKey(iso: string): string {
@@ -158,7 +158,7 @@ export function EventTimeline({ events }: { events: FallEvent[] }) {
                   return (
                     <li
                       key={ev.id}
-                      className="flex items-start gap-3 px-4 py-2.5 hover:bg-[#f8f9fb]/70 border-b border-claimondo-border last:border-b-0 cursor-pointer"
+                      className="flex items-start gap-3 px-4 py-2.5 hover:bg-claimondo-bg/70 border-b border-claimondo-border last:border-b-0 cursor-pointer"
                       onClick={() => setSelected(ev)}
                     >
                       <span

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-485 (M3): Makler-Leads-Tabelle mit Filter-Chips und Consent-gesteuerter
 // Click-Through-Logik. Design-Tokens: Claimondo Navy/Ondo-Blue/Shield.
@@ -109,7 +109,7 @@ export function MaklerLeadsTable({ leads }: Props) {
           {/* Desktop-Tabelle */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f8f9fb] text-left text-xs text-claimondo-ondo uppercase tracking-wider">
+              <thead className="bg-claimondo-bg text-left text-xs text-claimondo-ondo uppercase tracking-wider">
                 <tr>
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Fahrzeug</th>
@@ -120,7 +120,7 @@ export function MaklerLeadsTable({ leads }: Props) {
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e4e7ef]">
+              <tbody className="divide-y divide-claimondo-border">
                 {filtered.map((lead) => (
                   <LeadRow
                     key={lead.id}
@@ -133,7 +133,7 @@ export function MaklerLeadsTable({ leads }: Props) {
           </div>
 
           {/* Mobile-Karten */}
-          <ul className="md:hidden divide-y divide-[#e4e7ef]">
+          <ul className="md:hidden divide-y divide-claimondo-border">
             {filtered.map((lead) => (
               <LeadCard
                 key={lead.id}
@@ -167,7 +167,7 @@ function LeadRow({
   const clickable = lead.consent_label === 'vollzugriff' || lead.consent_label === 'minimal'
 
   const rowClass = clickable
-    ? 'hover:bg-[#f8f9fb] cursor-pointer'
+    ? 'hover:bg-claimondo-bg cursor-pointer'
     : 'opacity-80'
 
   function handleClick() {
@@ -231,7 +231,7 @@ function LeadCard({
       <li>
         <Link
           href={`/makler/akten/${lead.fall_id}`}
-          className="block hover:bg-[#f8f9fb]"
+          className="block hover:bg-claimondo-bg"
         >
           {inner}
         </Link>
@@ -245,7 +245,7 @@ function LeadCard({
         <button
           type="button"
           onClick={onMinimalClick}
-          className="w-full text-left hover:bg-[#f8f9fb]"
+          className="w-full text-left hover:bg-claimondo-bg"
         >
           {inner}
         </button>
@@ -269,7 +269,7 @@ function StatusPill({
 }) {
   if (disqualifiziert) {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#f8f9fb] text-claimondo-ondo">
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-claimondo-bg text-claimondo-ondo">
         disqualifiziert
       </span>
     )
@@ -279,7 +279,7 @@ function StatusPill({
     qualifiziert: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
     konvertiert: { bg: 'bg-emerald-600/10', text: 'text-emerald-700' },
   }
-  const entry = cfg[status] ?? { bg: 'bg-[#f8f9fb]', text: 'text-claimondo-navy' }
+  const entry = cfg[status] ?? { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy' }
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${entry.bg} ${entry.text}`}
@@ -307,7 +307,7 @@ function ConsentBadge({ label }: { label: ConsentLabel }) {
       label: 'Widerrufen',
     },
     kein_account: {
-      bg: 'bg-[#f8f9fb]',
+      bg: 'bg-claimondo-bg',
       text: 'text-claimondo-ondo',
       label: 'Kein Account',
     },
@@ -392,7 +392,7 @@ function MiniDrawer({
         <button
           type="button"
           onClick={onClose}
-          className="w-full py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-[#1E3A5F]"
+          className="w-full py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-shield"
         >
           Schließen
         </button>
@@ -417,7 +417,7 @@ function Row({ dt, dd }: { dt: string; dd: string }) {
 function EmptyState() {
   return (
     <div className="bg-white rounded-ios-md border border-claimondo-border p-10 text-center">
-      <div className="mx-auto w-12 h-12 rounded-full bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo mb-4">
+      <div className="mx-auto w-12 h-12 rounded-full bg-claimondo-bg flex items-center justify-center text-claimondo-ondo mb-4">
         <UserPlusIcon width={22} height={22} />
       </div>
       <h2 className="text-base font-semibold text-claimondo-navy mb-2">
@@ -429,7 +429,7 @@ function EmptyState() {
       </p>
       <Link
         href="/makler/promo"
-        className="inline-block px-4 py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-[#1E3A5F]"
+        className="inline-block px-4 py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-shield"
       >
         Promo-Code teilen
       </Link>

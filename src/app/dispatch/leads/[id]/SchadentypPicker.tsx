@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-81 + AAR-83 + AAR-114: Schadentyp-Picker (Notion-Spec 14.04.2026 §3)
 // 5 Typen mit icon/beschreibung_ma/kundenbeispiel/dispatch_hinweis/farbe
@@ -69,11 +69,11 @@ const OPTIONS: TypDef[] = [
 ]
 
 const FARBE_CLS: Record<TypDef['farbe'], { wrap: string; label: string; border: string }> = {
-  blue: { wrap: 'bg-[#f8f9fb] text-claimondo-navy', label: 'text-claimondo-navy', border: 'border-claimondo-border' },
+  blue: { wrap: 'bg-claimondo-bg text-claimondo-navy', label: 'text-claimondo-navy', border: 'border-claimondo-border' },
   green: { wrap: 'bg-green-50 text-green-800', label: 'text-green-900', border: 'border-green-200' },
   amber: { wrap: 'bg-amber-50 text-amber-800', label: 'text-amber-900', border: 'border-amber-200' },
   red: { wrap: 'bg-red-50 text-red-800', label: 'text-red-900', border: 'border-red-200' },
-  gray: { wrap: 'bg-[#f8f9fb] text-claimondo-navy', label: 'text-claimondo-navy', border: 'border-claimondo-border' },
+  gray: { wrap: 'bg-claimondo-bg text-claimondo-navy', label: 'text-claimondo-navy', border: 'border-claimondo-border' },
 }
 
 export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, gegnerKennzeichen, initialKamera, onSaved }: {
@@ -193,7 +193,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
             type="button"
             onClick={handleClear}
             disabled={pending}
-            className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-claimondo-border text-[10px] font-medium text-claimondo-ondo hover:bg-[#f8f9fb] hover:text-red-700 hover:border-red-200 disabled:opacity-40"
+            className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-claimondo-border text-[10px] font-medium text-claimondo-ondo hover:bg-claimondo-bg hover:text-red-700 hover:border-red-200 disabled:opacity-40"
           >
             <XIcon className="w-3 h-3" />
             Clear
@@ -209,7 +209,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
             onClick={() => handleTypClick(o.value)}
             disabled={pending}
             className={`px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors flex flex-col items-start gap-1 disabled:opacity-60 ${
-              typ === o.value ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb] text-claimondo-navy hover:bg-claimondo-border'
+              typ === o.value ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-navy hover:bg-claimondo-border'
             }`}
           >
             <span className="text-lg leading-none">{o.icon}</span>

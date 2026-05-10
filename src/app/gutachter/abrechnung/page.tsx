@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
@@ -213,7 +213,7 @@ export default async function AbrechnungPage() {
               </p>
               <p className="text-claimondo-ondo text-sm tabular-nums">{auslastungProzent}%</p>
             </div>
-            <div className="w-full h-2 bg-[#f8f9fb] rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-claimondo-bg rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${progressColor}`}
                 style={{ width: `${auslastungProzent}%` }}
@@ -264,13 +264,13 @@ export default async function AbrechnungPage() {
                           ? abr.leadpreis.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
                           : '—'
                         const datum = fall.gutachten_eingegangen_am
-                          ? new Date(fall.gutachten_eingegangen_am).toLocaleDateString('de-DE', {
+                          ? new Date(fall.gutachten_eingegangen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                               day: '2-digit',
                               month: '2-digit',
                               year: 'numeric',
                             })
                           : fall.created_at
-                            ? new Date(fall.created_at).toLocaleDateString('de-DE', {
+                            ? new Date(fall.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric',
@@ -280,7 +280,7 @@ export default async function AbrechnungPage() {
                         return (
                           <tr
                             key={fall.id}
-                            className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors"
+                            className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors"
                           >
                             <td className="px-4 py-3">
                               <span className="text-[var(--brand-accent)] font-mono text-xs">
@@ -326,13 +326,13 @@ export default async function AbrechnungPage() {
                     ? abr.leadpreis.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
                     : '—'
                   const datum = fall.gutachten_eingegangen_am
-                    ? new Date(fall.gutachten_eingegangen_am).toLocaleDateString('de-DE', {
+                    ? new Date(fall.gutachten_eingegangen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
                       })
                     : fall.created_at
-                      ? new Date(fall.created_at).toLocaleDateString('de-DE', {
+                      ? new Date(fall.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
@@ -405,15 +405,15 @@ export default async function AbrechnungPage() {
                       status === 'freigegeben' ? 'Freigegeben' : status
                     const statusColor =
                       status === 'beauftragt' ? 'bg-amber-50 text-amber-700' :
-                      status === 'hochgeladen' ? 'bg-[#f8f9fb] text-claimondo-ondo' :
+                      status === 'hochgeladen' ? 'bg-claimondo-bg text-claimondo-ondo' :
                       status === 'freigegeben' ? 'bg-emerald-50 text-emerald-700' :
-                      'bg-[#f8f9fb] text-claimondo-navy'
+                      'bg-claimondo-bg text-claimondo-navy'
                     const fmt = (iso: string | null) =>
                       iso
-                        ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                        ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
                         : '—'
                     return (
-                      <tr key={s.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors">
+                      <tr key={s.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
                         <td className="px-4 py-3">
                           <Link
                             href={`/gutachter/faelle/${s.id}`}
@@ -450,12 +450,12 @@ export default async function AbrechnungPage() {
                   status === 'freigegeben' ? 'Freigegeben' : status
                 const statusColor =
                   status === 'beauftragt' ? 'bg-amber-50 text-amber-700' :
-                  status === 'hochgeladen' ? 'bg-[#f8f9fb] text-claimondo-ondo' :
+                  status === 'hochgeladen' ? 'bg-claimondo-bg text-claimondo-ondo' :
                   status === 'freigegeben' ? 'bg-emerald-50 text-emerald-700' :
-                  'bg-[#f8f9fb] text-claimondo-navy'
+                  'bg-claimondo-bg text-claimondo-navy'
                 const fmt = (iso: string | null) =>
                   iso
-                    ? new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
                     : '—'
                 return (
                   <div key={s.id} className="bg-white rounded-2xl p-4 border border-claimondo-border">
@@ -534,7 +534,7 @@ export default async function AbrechnungPage() {
             </div>
             <button
               disabled
-              className="flex items-center gap-2 bg-[#f8f9fb] text-claimondo-ondo text-sm font-medium py-2.5 px-4 rounded-xl cursor-not-allowed opacity-50"
+              className="flex items-center gap-2 bg-claimondo-bg text-claimondo-ondo text-sm font-medium py-2.5 px-4 rounded-xl cursor-not-allowed opacity-50"
             >
               <DownloadIcon className="w-4 h-4" />
               PDF Download

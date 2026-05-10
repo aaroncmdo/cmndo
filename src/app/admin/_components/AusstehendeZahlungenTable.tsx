@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { loadAusstehende, StatusBadge } from './AusstehendeZahlungenWidget'
 
 // KFZ-155: Volle Tabelle mit allen ausstehenden Zahlungen — wird im
@@ -43,7 +43,7 @@ export default async function AusstehendeZahlungenTable() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-claimondo-border bg-[#f8f9fb]">
+              <tr className="border-b border-claimondo-border bg-claimondo-bg">
                 <th className="text-left px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Empfaenger</th>
                 <th className="text-left px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Email</th>
                 <th className="text-right px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Betrag</th>
@@ -53,9 +53,9 @@ export default async function AusstehendeZahlungenTable() {
             </thead>
             <tbody>
               {rows.map(r => (
-                <tr key={r.key} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb] transition-colors">
+                <tr key={r.key} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg transition-colors">
                   <td className="px-5 py-3">
-                    <Link href={r.href} className="text-claimondo-navy font-medium hover:text-[#4573A2]">
+                    <Link href={r.href} className="text-claimondo-navy font-medium hover:text-claimondo-ondo">
                       {r.name}
                     </Link>
                   </td>
@@ -71,7 +71,7 @@ export default async function AusstehendeZahlungenTable() {
               ))}
             </tbody>
             <tfoot>
-              <tr className="bg-[#f8f9fb] border-t border-claimondo-border">
+              <tr className="bg-claimondo-bg border-t border-claimondo-border">
                 <td colSpan={2} className="px-5 py-2.5 text-xs text-claimondo-ondo font-semibold">
                   {totalCount} offene Forderungen
                 </td>

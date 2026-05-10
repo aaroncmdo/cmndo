@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-560 (C11): Manueller Status-Override-Modal (Admin-only).
 // Zeigt eine Liste aller 21 faelle.status-Werte, verlangt Pflicht-Begründung
@@ -51,13 +51,8 @@ const STATUS_LABEL: Record<FallStatusValue, string> = {
   anschlussschreiben: 'Anschlussschreiben',
   regulierung: 'Regulierung',
   'regulierung-laeuft': 'Regulierung läuft',
-  'vs-kuerzt': 'VS kürzt',
-  'vs-abgelehnt': 'VS abgelehnt',
-  'nachbesichtigung-laeuft': 'Nachbesichtigung läuft',
-  klage: 'Klage',
   'zahlung-eingegangen': 'Zahlung eingegangen',
   abgeschlossen: 'Abgeschlossen',
-  storniert: 'Storniert',
 }
 
 export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentStatus }: Props) {
@@ -105,7 +100,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-[#0D1B3E] flex items-center gap-2">
+          <DialogTitle className="text-claimondo-navy flex items-center gap-2">
             <AlertTriangleIcon className="w-5 h-5 text-amber-600" />
             Status manuell überschreiben
           </DialogTitle>
@@ -127,20 +122,20 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#0D1B3E]">Aktueller Status</label>
-          <div className="w-full rounded-md border border-claimondo-border bg-[#f8f9fb] px-3 py-2 text-sm font-mono text-claimondo-navy">
+          <label className="text-xs font-medium text-claimondo-navy">Aktueller Status</label>
+          <div className="w-full rounded-md border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm font-mono text-claimondo-navy">
             {currentStatus}
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#0D1B3E]">
+          <label className="text-xs font-medium text-claimondo-navy">
             Neuer Status <span className="text-red-600">*</span>
           </label>
           <select
             value={neuerStatus}
             onChange={(e) => setNeuerStatus(e.target.value as FallStatusValue | '')}
-            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
           >
             <option value="">– bitte wählen –</option>
             {ALLOWED_STATUS_VALUES.map((s) => (
@@ -152,7 +147,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#0D1B3E]">
+          <label className="text-xs font-medium text-claimondo-navy">
             Begründung <span className="text-red-600">*</span>
             <span className="text-claimondo-ondo font-normal ml-1">(min. 10 Zeichen)</span>
           </label>
@@ -161,7 +156,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
             onChange={(e) => setBegruendung(e.target.value)}
             rows={4}
             placeholder="Warum wird der Status manuell überschrieben? (z.B. Legacy-Migration, außergerichtliche Einigung, …)"
-            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
+            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
           />
           <p className="text-xs text-claimondo-ondo">
             {begruendung.trim().length} / min. 10 Zeichen —{' '}
@@ -191,7 +186,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
             type="button"
             onClick={() => handleOpenChange(false)}
             disabled={pending}
-            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-[#f8f9fb] disabled:opacity-50"
+            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
           >
             Abbrechen
           </button>

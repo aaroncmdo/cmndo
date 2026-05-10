@@ -12,6 +12,7 @@ export function Schritt3Guard() {
   const router = useRouter()
   const leadId = useFlowStore((s) => s.leadId)
   const gegnerDatenErfasst = useFlowStore((s) => s.gegnerDatenErfasst)
+  const istFahrzeughalter = useFlowStore((s) => s.istFahrzeughalter)
 
   useEffect(() => {
     if (!leadId) {
@@ -27,5 +28,5 @@ export function Schritt3Guard() {
     return <p className="text-sm text-claimondo-ondo">Leite weiter …</p>
   }
 
-  return <Schritt3Client leadId={leadId} />
+  return <Schritt3Client leadId={leadId} istFahrzeughalter={istFahrzeughalter} />
 }

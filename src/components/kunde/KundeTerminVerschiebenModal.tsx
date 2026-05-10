@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-864: Kunden-Modal zum proaktiven Termin-Verschieben.
 //
@@ -204,7 +204,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
                   className={`w-full text-left rounded-xl border p-3 transition-colors ${
                     sel
                       ? 'border-claimondo-navy bg-claimondo-navy/[0.06]'
-                      : 'border-claimondo-border bg-white hover:bg-[#f8f9fb]'
+                      : 'border-claimondo-border bg-white hover:bg-claimondo-bg'
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -329,7 +329,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
         <button
           onClick={() => { reset(); onClose() }}
           disabled={submitting}
-          className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors disabled:opacity-50"
+          className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors disabled:opacity-50"
         >
           Abbrechen
         </button>

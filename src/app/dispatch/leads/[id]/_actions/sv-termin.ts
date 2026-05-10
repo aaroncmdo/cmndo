@@ -21,7 +21,7 @@ export async function listSvSuggestionsForLead(leadId: string): Promise<{
 
   const { data: lead } = await supabase
     .from('leads')
-    .select('besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, wunschtermin')
+    .select('besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, wunschtermin, kunde_id, email, telefon, halter_email, halter_telefon')
     .eq('id', leadId)
     .single()
 
@@ -51,9 +51,15 @@ export async function listSvSuggestionsForLead(leadId: string): Promise<{
 
   // AAR-264: Wunschtermin durchreichen — findBestSV macht Kalender-Check + Score-Bonus
   const wunschterminIso = (lead as { wunschtermin: string | null }).wunschtermin
+
+  // Sticky-SV: hatte der Kunde bereits einen Fall? Dann der gleiche SV.
+  // Quellen: lead.kunde_id (durch Match-Modal) ODER E-Mail/Telefon-Match
+  // auf claim_parties.
+  const stickySvId = await findStickySvForLead(supabase, lead as Record<string, unknown>)
+
   const { findBestSV } = await import('@/lib/dispatch/findBestSV')
   const candidates = await findBestSV(
-    { fallLat: Number(lat), fallLng: Number(lng), wunschterminIso },
+    { fallLat: Number(lat), fallLng: Number(lng), wunschterminIso, stickySvId },
     8,
   )
 
@@ -88,6 +94,34 @@ export async function reserveSvTerminForLead(
 
   if (konflikt && konflikt.length > 0) {
     return { success: false, error: 'SV hat bereits einen Termin im gewählten Zeitfenster' }
+  }
+
+  // AAR-CMM: Reachability-Hard-Check — SV muss zum Slot anfahren UND nach
+  // dem Slot zum nächsten Termin kommen können. Nutzt Mapbox-ETA gegen
+  // Vorgänger-/Nachfolge-Termin.
+  const { data: leadLoc } = await supabase
+    .from('leads')
+    .select('besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng')
+    .eq('id', leadId)
+    .single()
+  const candidateLat =
+    (leadLoc as { besichtigungsort_lat: number | null; fahrzeug_standort_lat: number | null } | null)
+      ?.besichtigungsort_lat ?? (leadLoc as { fahrzeug_standort_lat: number | null } | null)?.fahrzeug_standort_lat ?? null
+  const candidateLng =
+    (leadLoc as { besichtigungsort_lng: number | null; fahrzeug_standort_lng: number | null } | null)
+      ?.besichtigungsort_lng ?? (leadLoc as { fahrzeug_standort_lng: number | null } | null)?.fahrzeug_standort_lng ?? null
+
+  if (candidateLat != null && candidateLng != null) {
+    const reach = await checkSvReachability(supabase, {
+      svId,
+      candidateLat: Number(candidateLat),
+      candidateLng: Number(candidateLng),
+      candidateStartIso: startDate.toISOString(),
+      candidateEndIso: endDate.toISOString(),
+    })
+    if (!reach.reachable) {
+      return { success: false, error: reach.grund ?? 'SV kann den Termin nicht erreichen' }
+    }
   }
 
   // AAR-134: 'abgelehnt' auch stornieren — verhindert Doppel-Termine nach SV-Ablehnung.
@@ -131,8 +165,8 @@ export async function reserveSvTerminForLead(
       kunde_name: l ? `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() : '—',
       schadentyp: l?.schadentyp ?? undefined,
       adresse: l?.kunde_plz ?? undefined,
-      datum: startDate.toLocaleDateString('de-DE'),
-      uhrzeit: startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      datum: startDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
+      uhrzeit: startDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
     })
   } catch (err) {
     console.warn('[reserveSvTerminForLead] Mitteilung fehlgeschlagen:', err)
@@ -181,7 +215,7 @@ export async function acceptGegenvorschlag(
 
   const { data: termin } = await supabase
     .from('gutachter_termine')
-    .select('id, status, sv_vorgeschlagene_slots, lead_id, fall_id')
+    .select('id, sv_id, status, sv_vorgeschlagene_slots, lead_id, fall_id')
     .eq('id', terminId)
     .single()
 
@@ -199,6 +233,44 @@ export async function acceptGegenvorschlag(
     return { success: false, error: 'Slot ist leer' }
   }
 
+  // AAR-CMM Reachability-Hard-Check: SV-Gegenvorschlag muss erreichbar sein.
+  // Wenn der SV inzwischen einen Vor-/Nachfolge-Termin bekommen hat, blocken
+  // wir die Annahme.
+  if (termin.sv_id) {
+    let candLat: number | null = null
+    let candLng: number | null = null
+    if (termin.fall_id) {
+      const { data: f } = await supabase
+        .from('faelle')
+        .select('besichtigungsort_lat, besichtigungsort_lng')
+        .eq('id', termin.fall_id)
+        .single()
+      candLat = (f as { besichtigungsort_lat: number | null } | null)?.besichtigungsort_lat ?? null
+      candLng = (f as { besichtigungsort_lng: number | null } | null)?.besichtigungsort_lng ?? null
+    } else if (termin.lead_id) {
+      const { data: l } = await supabase
+        .from('leads')
+        .select('besichtigungsort_lat, besichtigungsort_lng')
+        .eq('id', termin.lead_id)
+        .single()
+      candLat = (l as { besichtigungsort_lat: number | null } | null)?.besichtigungsort_lat ?? null
+      candLng = (l as { besichtigungsort_lng: number | null } | null)?.besichtigungsort_lng ?? null
+    }
+    if (candLat != null && candLng != null) {
+      const reach = await checkSvReachability(supabase, {
+        svId: termin.sv_id,
+        candidateLat: Number(candLat),
+        candidateLng: Number(candLng),
+        candidateStartIso: slot.start,
+        candidateEndIso: slot.end,
+        ignoreTerminIds: [terminId],
+      })
+      if (!reach.reachable) {
+        return { success: false, error: reach.grund ?? 'SV-Gegenvorschlag ist nicht mehr erreichbar' }
+      }
+    }
+  }
+
   const { error } = await supabase
     .from('gutachter_termine')
     .update({
@@ -211,12 +283,38 @@ export async function acceptGegenvorschlag(
 
   if (error) return { success: false, error: error.message }
 
+  // 2026-05-06: SV-Termin in den Google- + CalDAV-Kalender des SVs
+  // schreiben. Non-critical, parallel — Sync-Fehler darf den Termin-Update
+  // nicht brechen. Beide no-op'en wenn der jeweilige Provider nicht
+  // verbunden ist.
+  if (termin.fall_id) {
+    const fallId = termin.fall_id as string
+    await Promise.all([
+      (async () => {
+        try {
+          const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
+          await syncSvTerminToGoogle(terminId, fallId)
+        } catch (err) {
+          console.error('[sv-termin-sync] Google Dispatch-Gegenvorschlag:', err)
+        }
+      })(),
+      (async () => {
+        try {
+          const { syncSvTerminToCalDav } = await import('@/lib/kalender/caldav/sv-termin-sync')
+          await syncSvTerminToCalDav(terminId, fallId)
+        } catch (err) {
+          console.error('[sv-termin-sync] CalDAV Dispatch-Gegenvorschlag:', err)
+        }
+      })(),
+    ])
+  }
+
   await supabase.from('timeline').insert({
     fall_id: termin.fall_id ?? null,
     lead_id: !termin.fall_id ? termin.lead_id : null,
     typ: 'termin',
     titel: 'Dispatcher hat SV-Gegenvorschlag akzeptiert',
-    beschreibung: `Slot ${slotIndex + 1} angenommen: ${new Date(slot.start).toLocaleString('de-DE')}`,
+    beschreibung: `Slot ${slotIndex + 1} angenommen: ${new Date(slot.start).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`,
     erstellt_von: user.id,
   }).then(() => {}, () => {})
 
@@ -233,7 +331,7 @@ export async function acceptGegenvorschlag(
         .single()
       if (leadData?.telefon) {
         const slotStart = new Date(slot.start)
-        const datumUhrzeit = `${slotStart.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${slotStart.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+        const datumUhrzeit = `${slotStart.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${slotStart.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
 
         // SV-Name aus Termin nachladen (wenn Typ-Relations unterstützt)
         let svName = 'Ihrem Gutachter'
@@ -289,6 +387,8 @@ export type NextFreeSlotsOpts = {
   wunschterminIso?: string | null
   wunschterminWochentage?: number[] | null
   prioritizeAroundWunschtermin?: boolean
+  /** AAR-CMM PR B: Wenn übergeben, werden ETA-unerreichbare Slots ausgefiltert. */
+  leadId?: string | null
 }
 
 export async function getNextFreeSlotsForSv(
@@ -312,6 +412,33 @@ export async function getNextFreeSlotsForSv(
     .gte('start_zeit', now.toISOString())
     .lte('start_zeit', inZwoelfWochen.toISOString())
     .order('start_zeit', { ascending: true })
+
+  // AAR-CMM PR B: ETA-Reachability-Vorberechnung. Wenn leadId übergeben,
+  // laden wir Lead-Besichtigungsort und berechnen ETAs zu allen Termin-
+  // Locations dieses SV in einer einzigen Mapbox-Matrix-Call.
+  let slotEtaCtx: Awaited<ReturnType<typeof precomputeSvSlotEtas>> | null = null
+  if (opts?.leadId) {
+    const { data: lead } = await supabase
+      .from('leads')
+      .select('besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng')
+      .eq('id', opts.leadId)
+      .single()
+    const lat =
+      (lead as { besichtigungsort_lat: number | null } | null)?.besichtigungsort_lat ??
+      (lead as { fahrzeug_standort_lat: number | null } | null)?.fahrzeug_standort_lat ?? null
+    const lng =
+      (lead as { besichtigungsort_lng: number | null } | null)?.besichtigungsort_lng ??
+      (lead as { fahrzeug_standort_lng: number | null } | null)?.fahrzeug_standort_lng ?? null
+    if (lat != null && lng != null) {
+      slotEtaCtx = await precomputeSvSlotEtas(
+        supabase,
+        svId,
+        { lat: Number(lat), lng: Number(lng) },
+        now.toISOString(),
+        inZwoelfWochen.toISOString(),
+      )
+    }
+  }
 
   const wunschterminIso = opts?.wunschterminIso ?? null
   const wunschtermin = wunschterminIso ? new Date(wunschterminIso) : null
@@ -350,6 +477,19 @@ export async function getNextFreeSlotsForSv(
         (b) => new Date(b.start_zeit) < slotEnd && new Date(b.end_zeit) > kandidat,
       )
       if (!konflikt) {
+        // AAR-CMM PR B: ETA-Reachability — Slot nur vorschlagen wenn SV
+        // ihn vom Vortermin erreichen UND zum Folgetermin weiterfahren kann.
+        if (slotEtaCtx) {
+          const reach = isSlotReachable(kandidat, slotEnd, slotEtaCtx)
+          if (!reach.reachable) {
+            kandidat.setTime(kandidat.getTime() + 60 * 60_000)
+            if (kandidat.getHours() >= 17) {
+              kandidat.setDate(kandidat.getDate() + 1)
+              kandidat.setHours(9, 0, 0, 0)
+            }
+            continue
+          }
+        }
         alleKandidaten.push({
           start: kandidat.toISOString(),
           end: slotEnd.toISOString(),
@@ -445,6 +585,7 @@ export async function getSvSuggestionsWithSlots(
         wunschterminIso,
         wunschterminWochentage,
         prioritizeAroundWunschtermin: true,
+        leadId,
       })
       return { cand, slots: r.success ? r.slots ?? [] : [] }
     }),

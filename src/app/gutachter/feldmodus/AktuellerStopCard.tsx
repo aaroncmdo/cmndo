@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-382 / Auto-Arrive: Expanded Card für den aktiven Stop im Fokus-Modus.
 // Keine manuellen "Losfahren"/"Ich bin angekommen"-Buttons mehr — Ankunft wird
@@ -16,6 +16,10 @@ import {
   CheckCircle2Icon,
   MapPinIcon,
   CarIcon,
+  AlertTriangleIcon,
+  FileTextIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from 'lucide-react'
 import { formatUhrzeit } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
@@ -34,6 +38,10 @@ export interface AktuellerStopCardProps {
   onArrived: (lat: number, lng: number, via: 'geofence' | 'manuell' | 'termin_uhrzeit') => void
 }
 
+// 2026-05-08 (C1) Smart-Collapse Schwellen — siehe Comment in
+// AktuellerStopCard für die Begründung der konkreten Werte.
+const COMPACT_DISTANCE_THRESHOLD_M = 500
+
 function buildGoogleMapsLink(stop: FeldmodusStop): string {
   const base = 'https://www.google.com/maps/dir/?api=1'
   if (stop.place_id) {
@@ -43,6 +51,12 @@ function buildGoogleMapsLink(stop: FeldmodusStop): string {
     return `${base}&destination=${stop.lat},${stop.lng}`
   }
   return `${base}&destination=${encodeURIComponent(stop.adresse)}`
+}
+
+function formatDistanceShort(m: number | null): string | null {
+  if (m == null) return null
+  if (m < 1000) return `${Math.round(m / 10) * 10} m`
+  return `${(m / 1000).toFixed(1).replace('.', ',')} km`
 }
 
 export default function AktuellerStopCard({
@@ -60,6 +74,10 @@ export default function AktuellerStopCard({
   // AAR-384 + Auto-Arrive: Termin-State live beobachten (Kunde-Tracking +
   // sv_angekommen_am + besichtigung_gestartet_am).
   const supabase = useMemo(() => createClient(), [])
+  // 2026-05-07: useId-Suffix verhindert „cannot add postgres_changes
+  // callbacks after subscribe()"-Crash bei Strict-Mode-Doppel-Mount oder
+  // Layout-bedingt parallelem Render. Memory feedback_realtime_channel_ids.
+  const channelSuffix = useId()
   const [kundeTracking, setKundeTracking] = useState<{
     aktiviert: boolean
     etaMinutes: number | null
@@ -121,7 +139,7 @@ export default function AktuellerStopCard({
       cancelled = true
       void supabase.removeChannel(channel)
     }
-  }, [supabase, stop.termin_id])
+  }, [supabase, stop.termin_id, channelSuffix])
 
   const besichtigungLaeuft = Boolean(besichtigungGestartetAm) || sessionStatus === 'arrived'
   const svIstDa = Boolean(svAngekommenAm)
@@ -260,6 +278,18 @@ export default function AktuellerStopCard({
               {stop.schadentyp}
             </span>
           )}
+          {/* Collapse-Toggle nur sinnvoll wenn überhaupt eine Distanz da ist
+              (sonst keine Info um auf Compact zu schalten). */}
+          {distanceShort && (
+            <button
+              type="button"
+              onClick={() => setManualMode('compact')}
+              aria-label="Stop-Details einklappen"
+              className="text-claimondo-ondo hover:text-claimondo-navy transition-colors"
+            >
+              <ChevronUpIcon className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
         <p className="text-sm font-semibold text-claimondo-navy">
           {stop.kennzeichen && (
@@ -274,6 +304,11 @@ export default function AktuellerStopCard({
       <div className="flex items-start gap-2 text-sm text-claimondo-navy">
         <MapPinIcon className="w-4 h-4 text-[color:var(--brand-primary,var(--brand-secondary))] mt-0.5" />
         <p className="flex-1">{stop.adresse}</p>
+        {distanceShort && (
+          <span className="text-xs font-semibold text-[color:var(--brand-primary,var(--brand-secondary))] shrink-0">
+            {distanceShort}
+          </span>
+        )}
       </div>
 
       {/* Kunde-Tracking-Status */}
@@ -326,9 +361,9 @@ export default function AktuellerStopCard({
             type="button"
             onClick={onAbschliessen}
             disabled={pending}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold py-2.5 hover:bg-[var(--brand-primary)] disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-primary)] text-white text-base font-semibold min-h-14 px-4 hover:bg-[var(--brand-primary)] disabled:opacity-50"
           >
-            <CheckCircle2Icon className="w-4 h-4" />
+            <CheckCircle2Icon className="w-5 h-5" />
             {pending ? 'Schließe ab …' : 'Besichtigung abschließen'}
           </button>
         )}
@@ -337,7 +372,7 @@ export default function AktuellerStopCard({
           href={mapsLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 hover:bg-[#f8f9fb]"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 hover:bg-claimondo-bg"
         >
           <NavigationIcon className="w-4 h-4" />
           In Google Maps öffnen

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-841 Frontend Phase C/4: KB-Sidebar-Override-Dropdown
 //
@@ -33,9 +33,9 @@ const QUICK_ACTIONS: {
   icon: typeof ScaleIcon
   tone: string
 }[] = [
-  { wunsch: 'partnerkanzlei',     label: 'Partnerkanzlei einbinden',  icon: ScaleIcon,        tone: 'text-[#0D1B3E]' },
-  { wunsch: 'keine_kanzlei',      label: 'Keine Kanzlei',             icon: XIcon,            tone: 'text-[#7BA3CC]' },
-  { wunsch: 'noch_unentschieden', label: 'Auf "noch unentschieden" zurücksetzen', icon: HelpCircleIcon, tone: 'text-[#7BA3CC]' },
+  { wunsch: 'partnerkanzlei',     label: 'Partnerkanzlei einbinden',  icon: ScaleIcon,        tone: 'text-claimondo-navy' },
+  { wunsch: 'keine_kanzlei',      label: 'Keine Kanzlei',             icon: XIcon,            tone: 'text-claimondo-light-blue' },
+  { wunsch: 'noch_unentschieden', label: 'Auf "noch unentschieden" zurücksetzen', icon: HelpCircleIcon, tone: 'text-claimondo-light-blue' },
 ]
 
 export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole, paketVersandPending = false }: Props) {
@@ -107,7 +107,7 @@ export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole, pake
           type="button"
           onClick={() => !isPending && setOpen(!open)}
           disabled={isPending}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#E2E8F3] bg-white text-xs font-medium text-[#0D1B3E] hover:bg-[#f8f9fb] disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#E2E8F3] bg-white text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
           title="Kanzlei-Wunsch ändern"
         >
           Kanzlei: {currentLabel}
@@ -135,7 +135,7 @@ export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole, pake
                 key={a.wunsch}
                 type="button"
                 onClick={() => handleQuickAction(a.wunsch)}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#0D1B3E] hover:bg-[#f8f9fb] text-left"
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-claimondo-navy hover:bg-claimondo-bg text-left"
               >
                 <a.icon className={`w-4 h-4 ${a.tone}`} />
                 {a.label}
@@ -145,9 +145,9 @@ export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole, pake
             <button
               type="button"
               onClick={() => { setOpen(false); setEigeneOpen(true) }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#0D1B3E] hover:bg-[#f8f9fb] text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-claimondo-navy hover:bg-claimondo-bg text-left"
             >
-              <BuildingIcon className="w-4 h-4 text-[#4573A2]" />
+              <BuildingIcon className="w-4 h-4 text-claimondo-ondo" />
               Eigene Kanzlei einbinden…
             </button>
           </div>

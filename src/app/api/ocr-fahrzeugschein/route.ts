@@ -76,13 +76,47 @@ export async function POST(request: Request) {
     if (extracted.hsn) updateData.hsn = extracted.hsn
     if (extracted.tsn) updateData.tsn = extracted.tsn
 
-    const { error: updateError } = await supabase
+    const { data: fallRow, error: updateError } = await supabase
       .from('faelle')
       .update(updateData)
       .eq('id', fall_id)
+      .select('claim_id')
+      .single()
 
     if (updateError) {
       console.error('[OCR-ZB1] DB update error:', updateError)
+    }
+
+    // Parallel auf claims schreiben — FIN/HSN/TSN/Kennzeichen/Halter sind nicht
+    // im faelle↔claims Sync-Trigger (CMM Phase 1.5a). Direkt in claims schreiben
+    // damit die SSoT für SV/Kanzlei/Reports konsistent ist.
+    if (fallRow?.claim_id) {
+      const claimUpdate: Record<string, unknown> = {}
+      if (extracted.fin_vin) claimUpdate.fin_vin = extracted.fin_vin
+      if (extracted.kennzeichen) claimUpdate.kennzeichen = extracted.kennzeichen
+      if (extracted.erstzulassung) claimUpdate.erstzulassung = extracted.erstzulassung
+      if (extracted.fahrzeug_baujahr != null) claimUpdate.fahrzeug_baujahr = extracted.fahrzeug_baujahr
+      if (extracted.halter_vorname) claimUpdate.halter_vorname = extracted.halter_vorname
+      if (extracted.halter_nachname) claimUpdate.halter_nachname = extracted.halter_nachname
+      if (extracted.halter_strasse) claimUpdate.halter_strasse = extracted.halter_strasse
+      if (extracted.halter_plz) claimUpdate.halter_plz = extracted.halter_plz
+      if (extracted.halter_stadt) claimUpdate.halter_stadt = extracted.halter_stadt
+      if (extracted.fahrzeug_hersteller) claimUpdate.fahrzeug_hersteller = extracted.fahrzeug_hersteller
+      if (extracted.fahrzeug_modell) claimUpdate.fahrzeug_modell = extracted.fahrzeug_modell
+      if (extracted.fahrzeug_farbe) claimUpdate.fahrzeug_farbe = extracted.fahrzeug_farbe
+      if (extracted.brn) claimUpdate.brn = extracted.brn
+      if (extracted.hsn) claimUpdate.hsn = extracted.hsn
+      if (extracted.tsn) claimUpdate.tsn = extracted.tsn
+
+      if (Object.keys(claimUpdate).length > 0) {
+        const { error: claimError } = await supabase
+          .from('claims')
+          .update(claimUpdate)
+          .eq('id', fallRow.claim_id)
+        if (claimError) {
+          console.error('[OCR-ZB1] claims update error:', claimError)
+        }
+      }
     }
 
     // ─── Step 5: Timeline entry ─────────────────────────────────────────────

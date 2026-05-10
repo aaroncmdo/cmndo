@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-386: In-App-Kamera-Modal für den Feldmodus-Upload.
 // Nutzt `navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })`
@@ -229,7 +229,7 @@ export default function KameraModal({
           <button
             type="button"
             onClick={handleCapture}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-white text-black text-sm font-semibold hover:bg-[#f8f9fb]"
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-white text-black text-sm font-semibold hover:bg-claimondo-bg"
           >
             <CameraIcon className="w-5 h-5" />
             Foto aufnehmen

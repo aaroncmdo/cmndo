@@ -3,6 +3,8 @@ import { z } from 'zod'
 // AAR-468 C2: Zod-Schema für Schritt 1 (Tippen-Modus). Enum-Werte werden
 // als const-Arrays exportiert, damit der Client sie für Chip-Buttons und
 // Radio-Listen wiederverwenden kann.
+// Erweiterung: Konditionelle Pflichtfelder die den gesamten Flow-Pfad
+// bestimmen (ist_fahrzeughalter, fahrzeug_fahrbereit, hat_vorschaeden etc.).
 
 export const SCHADENTYP_VALUES = [
   'auffahrunfall',
@@ -10,6 +12,9 @@ export const SCHADENTYP_VALUES = [
   'kreuzung',
   'sonstiges',
 ] as const
+
+export const FINANZIERUNG_VALUES = ['keine', 'leasing', 'finanzierung'] as const
+export type FinanzierungTyp = (typeof FINANZIERUNG_VALUES)[number]
 
 export const SCHULDFRAGE_VALUES = ['gegner', 'unklar', 'eigenverantwortung'] as const
 
@@ -90,6 +95,15 @@ export const schritt1Schema = z
       .trim()
       .regex(/^\+?[0-9 /()\-]{6,20}$/, 'Ungültiges Telefon-Format'),
     dsgvo_consent: z.literal(true, { error: 'DSGVO-Einwilligung ist erforderlich' }),
+    // ——— Konditionelle Pflichtfelder: bestimmen den weiteren Flow-Pfad ———
+    ist_fahrzeughalter: z.boolean(),
+    fahrzeug_fahrbereit: z.boolean(),
+    personenschaden_flag: z.boolean(),
+    hat_vorschaeden: z.boolean(),
+    vorschaeden_beschreibung: z.string().trim().max(1000).optional().or(z.literal('')),
+    mietwagen_flag: z.boolean().optional(),
+    nutzungsausfall: z.boolean().optional(),
+    finanzierung_leasing: z.enum(FINANZIERUNG_VALUES).optional(),
   })
   .refine(
     (data) =>
@@ -98,6 +112,13 @@ export const schritt1Schema = z
     {
       message: 'Aktenzeichen bitte angeben wenn Polizei vor Ort war',
       path: ['polizei_aktenzeichen'],
+    },
+  )
+  .refine(
+    (data) => !data.hat_vorschaeden || (data.vorschaeden_beschreibung?.trim().length ?? 0) >= 10,
+    {
+      message: 'Bitte Vorschäden kurz beschreiben (mindestens 10 Zeichen)',
+      path: ['vorschaeden_beschreibung'],
     },
   )
 

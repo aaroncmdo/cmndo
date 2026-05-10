@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-315: SV-Post-Termin-Block. Erscheint ab Subphase „gutachten-erstellen"
 // (also nach der Vor-Ort-Besichtigung). SV trägt ein was er mit dem Kunden
@@ -77,7 +77,7 @@ export function AbrechnungsartCard({
   }
 
   const datum = savedAt
-    ? new Date(savedAt).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    ? new Date(savedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
     : null
 
   return (
@@ -102,7 +102,7 @@ export function AbrechnungsartCard({
             className={`text-left px-3 py-2 rounded-ios-sm border text-xs transition-colors ${
               art === o.value
                 ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
+                : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-claimondo-bg'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <p className="font-medium">{o.label}</p>

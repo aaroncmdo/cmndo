@@ -37,6 +37,7 @@ export default function EmptyState({
   title,
   description,
   action,
+  actions,
   variant = 'default',
   className = '',
 }: EmptyStateProps) {

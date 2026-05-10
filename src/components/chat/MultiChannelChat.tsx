@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-102: Shared Multi-Channel Chat Komponente mit 5 Kanal-Tabs.
 // Nutzt Supabase Realtime fuer Live-Messages.
@@ -176,7 +176,7 @@ export default function MultiChannelChat({
               key={c.id}
               onClick={() => setActiveKanal(c.id)}
               className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${
-                active ? 'border-[#4573A2] text-[#0D1B3E]' : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
+                active ? 'border-claimondo-ondo text-claimondo-navy' : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               <Icon className="w-4 h-4" style={{ color: c.color }} />
@@ -192,7 +192,7 @@ export default function MultiChannelChat({
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f8f9fb]">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-claimondo-bg">
         {messages.length === 0 ? (
           <p className="text-center text-claimondo-ondo/70 text-sm py-10">Noch keine Nachrichten in diesem Kanal.</p>
         ) : (
@@ -208,13 +208,13 @@ export default function MultiChannelChat({
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
           placeholder={`Nachricht ueber ${visibleChannels.find(c => c.id === activeKanal)?.label}...`}
-          className="flex-1 px-4 py-2.5 bg-[#f8f9fb] border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
+          className="flex-1 px-4 py-2.5 bg-claimondo-bg border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
           disabled={sending}
         />
         <button
           onClick={handleSend}
           disabled={!input.trim() || sending}
-          className="px-4 py-2.5 bg-[#4573A2] text-white rounded-xl text-sm font-medium hover:bg-[#0D1B3E] disabled:opacity-40 inline-flex items-center gap-1.5"
+          className="px-4 py-2.5 bg-claimondo-ondo text-white rounded-xl text-sm font-medium hover:bg-claimondo-navy disabled:opacity-40 inline-flex items-center gap-1.5"
         >
           <SendIcon className="w-4 h-4" />
           {sending ? 'Sende...' : 'Senden'}
@@ -225,9 +225,7 @@ export default function MultiChannelChat({
 }
 
 function MessageBubble({ message, currentUserId }: { message: Nachricht; currentUserId: string | null }) {
-  const isOwnMsg = currentUserId && message.sender_id === currentUserId
   const isSystem = message.is_system
-  const alignRight = isOwnMsg
 
   if (isSystem) {
     return (
@@ -239,17 +237,61 @@ function MessageBubble({ message, currentUserId }: { message: Nachricht; current
     )
   }
 
+  // Eigene Nachricht: rechts, navy gefuellt (WhatsApp-Convention).
+  // Andere Nachrichten: links, mit Rolle-spezifischem Tint damit der KB im
+  // Multi-User-Verlauf sofort sieht ob das vom Kunden, einem anderen
+  // Mitarbeiter (KB/Admin/Dispatch) oder vom SV kommt.
+  const isOwnMsg = !!(currentUserId && message.sender_id === currentUserId)
+  const alignRight = isOwnMsg
+  const senderRolle = (message.sender_rolle ?? '').toLowerCase()
+  const istKunde = senderRolle === 'kunde'
+  const istSv = senderRolle === 'sachverstaendiger'
+  const istMitarbeiter = ['kundenbetreuer', 'admin', 'dispatch'].includes(senderRolle)
+
+  let bubbleCls: string
+  let linkCls: string
+  let timeCls: string
+  let labelCls = 'text-claimondo-ondo'
+  if (isOwnMsg) {
+    bubbleCls = 'bg-claimondo-navy text-white'
+    linkCls = 'text-white/80'
+    timeCls = 'text-white/60'
+  } else if (istKunde) {
+    bubbleCls = 'bg-white border border-claimondo-border text-claimondo-navy'
+    linkCls = 'text-claimondo-ondo'
+    timeCls = 'text-claimondo-ondo/70'
+  } else if (istSv) {
+    bubbleCls = 'bg-emerald-50 border border-emerald-200 text-claimondo-navy'
+    linkCls = 'text-emerald-700'
+    timeCls = 'text-emerald-700/70'
+    labelCls = 'text-emerald-700'
+  } else if (istMitarbeiter) {
+    // Andere Mitarbeiter (z.B. anderer KB im Multi-User, eskalierter Admin)
+    bubbleCls = 'bg-claimondo-ondo/12 border border-claimondo-ondo/25 text-claimondo-navy'
+    linkCls = 'text-claimondo-navy/80'
+    timeCls = 'text-claimondo-navy/50'
+    labelCls = 'text-claimondo-ondo'
+  } else {
+    bubbleCls = 'bg-white border border-claimondo-border text-claimondo-navy'
+    linkCls = 'text-claimondo-ondo'
+    timeCls = 'text-claimondo-ondo/70'
+  }
+
+  // Sender-Label zeigen wenn nicht eigenes Ich — gibt dem Leser den
+  // Rollen-Kontext (Kunde / SV / KB).
+  const showRolleLabel = !isOwnMsg && !!message.sender_rolle
+
   return (
     <div className={`flex ${alignRight ? 'justify-end' : 'justify-start'}`}>
       <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-        alignRight ? 'bg-[#4573A2] text-white' : 'bg-white border border-claimondo-border text-claimondo-navy'
+        alignRight ? 'bg-claimondo-ondo text-white' : 'bg-white border border-claimondo-border text-claimondo-navy'
       }`}>
         {!alignRight && message.sender_rolle && (
           <p className="text-[10px] font-semibold text-claimondo-ondo mb-0.5 uppercase">{message.sender_rolle}</p>
         )}
         <p className="text-sm whitespace-pre-wrap">{message.nachricht}</p>
         {message.hat_anhang && message.anhang_url && (
-          <a href={message.anhang_url} target="_blank" rel="noopener noreferrer" className={`text-xs underline mt-1 block ${alignRight ? 'text-white/80' : 'text-[#4573A2]'}`}>
+          <a href={message.anhang_url} target="_blank" rel="noopener noreferrer" className={`text-xs underline mt-1 block ${linkCls}`}>
             Anhang oeffnen
           </a>
         )}

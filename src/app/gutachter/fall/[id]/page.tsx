@@ -173,7 +173,7 @@ export default async function GutachterFallPage({
     kundenbetreuer = kbProfile
   }
 
-  // Attach leadpreis to fall object for display
+  // Attach leadpreis to fall object for display.
   const fallWithAbrechnung = {
     ...fall,
     _leadpreis: abrechnung?.leadpreis ? Number(abrechnung.leadpreis) : null,
@@ -561,7 +561,11 @@ export default async function GutachterFallPage({
       nachrichten={nachrichten ?? []}
       kundenbetreuer={kundenbetreuer}
       chatTeilnehmer={chatTeilnehmer}
-      aktiverTermin={aktiverTermin}
+      aktiverTermin={
+        aktiverTermin
+          ? { ...aktiverTermin, verstrichen: aktiverTerminVerstrichen }
+          : null
+      }
       fallDokumente={fallDokumente}
       kuerzungen={kuerzungen}
       abrechnungAusgezahltAm={(abrechnung as { abgerechnet_am?: string | null } | null)?.abgerechnet_am ?? null}

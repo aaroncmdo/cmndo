@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-698: Termin-Detail-View — Mobile-first, vier Sektionen:
 //   1. Header mit Datum/Status-Badge
@@ -82,7 +82,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string; icon: typeof Ch
   },
   abgesagt: {
     label: 'Abgesagt',
-    cls: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
+    cls: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border',
     icon: AlertCircleIcon,
   },
   abgeschlossen: {
@@ -115,7 +115,7 @@ export default function KundeTerminDetailClient({
 
   const status = STATUS_LABEL[termin.status] ?? {
     label: termin.status,
-    cls: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
+    cls: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border',
     icon: ClockIcon,
   }
   const StatusIcon = status.icon
@@ -312,7 +312,7 @@ export default function KundeTerminDetailClient({
             </p>
           </div>
           {mapsEmbedSrc && (
-            <div className="aspect-video w-full bg-[#f8f9fb]">
+            <div className="aspect-video w-full bg-claimondo-bg">
               <iframe
                 src={mapsEmbedSrc}
                 width="100%"

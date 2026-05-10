@@ -8,7 +8,7 @@ export default async function TerminPage({ params }: { params: Promise<{ token: 
 
   if (error || !termin) {
     return (
-      <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-xl shadow-black/10">
           <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl text-red-500">✗</span>

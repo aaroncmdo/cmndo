@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -140,7 +140,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
           return (
             <div key={s.key} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                i < step ? 'bg-emerald-500' : i === step ? 'bg-[#4573A2]' : 'bg-claimondo-border'
+                i < step ? 'bg-emerald-500' : i === step ? 'bg-claimondo-ondo' : 'bg-claimondo-border'
               }`}>
                 <Icon className="w-4 h-4 text-white" />
               </div>
@@ -165,7 +165,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
                 onChange={e => setBeschreibung(e.target.value)}
                 rows={2}
                 placeholder="Worum geht es in dieser Community?"
-                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2] resize-y"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo resize-y"
               />
             </div>
             <div>
@@ -184,22 +184,22 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
                   setZentrumLng(place.lng)
                   setZentrumPlaceId(place.place_id)
                 }}
-                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
               />
             </div>
 
             {/* KFZ-152 Phase 3 Follow-up: Circle-vs-Polygon Toggle */}
             <div>
-              <div className="inline-flex bg-[#f8f9fb] rounded-xl p-0.5 text-xs font-medium mb-2">
+              <div className="inline-flex bg-claimondo-bg rounded-xl p-0.5 text-xs font-medium mb-2">
                 <button type="button" onClick={() => setGebietMode('circle')}
                   className={`px-3 py-1.5 rounded-lg transition-colors ${
-                    gebietMode === 'circle' ? 'bg-white text-[#1E3A5F] shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
+                    gebietMode === 'circle' ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
                   }`}>
                   Kreis (Zentrum + Radius)
                 </button>
                 <button type="button" onClick={() => setGebietMode('polygon')}
                   className={`px-3 py-1.5 rounded-lg transition-colors ${
-                    gebietMode === 'polygon' ? 'bg-white text-[#1E3A5F] shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
+                    gebietMode === 'polygon' ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
                   }`}>
                   Polygon (frei zeichnen)
                 </button>
@@ -245,7 +245,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
           <div className="flex items-center justify-between">
             <p className="text-xs text-claimondo-ondo">Mindestens 1 Mitglied. Jeder bekommt eigenen Login + eigene Anzahlung.</p>
             <button type="button" onClick={addMember}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#4573A2]/5 hover:bg-[#4573A2]/10 text-[#4573A2] text-xs font-medium">
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-claimondo-ondo/5 hover:bg-claimondo-ondo/10 text-claimondo-ondo text-xs font-medium">
               <PlusIcon className="w-3.5 h-3.5" /> Mitglied
             </button>
           </div>
@@ -275,7 +275,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
                   {(['standard', 'pro', 'premium'] as const).map(p => (
                     <button key={p} type="button" onClick={() => updateMember(m.id, 'paket', p)}
                       className={`px-3 py-2 rounded-lg border text-xs transition-colors ${
-                        m.paket === p ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#4573A2] font-semibold' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
+                        m.paket === p ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-ondo font-semibold' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
                       }`}>
                       <div className="capitalize">{p}</div>
                       <div className="text-[10px] mt-0.5 opacity-70">{PAKET_KONFIG[p].kontingent} F · {PAKET_KONFIG[p].preis_anzahlung_eur}€</div>
@@ -290,7 +290,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
 
       {step === 2 && (
         <div className="space-y-4">
-          <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 text-sm">
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 text-sm">
             <p className="text-xs text-claimondo-ondo uppercase mb-2">Community</p>
             <p className="text-claimondo-navy"><strong>{name}</strong></p>
             {beschreibung && <p className="text-xs text-claimondo-ondo mt-1">{beschreibung}</p>}
@@ -320,13 +320,13 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
       <div className="flex items-center gap-3 mt-6">
         {step > 0 ? (
           <button type="button" onClick={() => setStep(step - 1)} disabled={pending}
-            className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40">
+            className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40">
             Zurück
           </button>
         ) : (
           onCancel && (
             <button type="button" onClick={onCancel} disabled={pending}
-              className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40">
+              className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40">
               Abbrechen
             </button>
           )
@@ -334,7 +334,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
         <button type="button"
           onClick={() => { if (step < STEPS.length - 1) setStep(step + 1); else handleSubmit() }}
           disabled={pending || !canNext()}
-          className="flex-1 py-2.5 rounded-xl bg-[#4573A2] hover:bg-[#1E3A5F] text-white text-sm font-semibold transition-colors disabled:opacity-40">
+          className="flex-1 py-2.5 rounded-xl bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-semibold transition-colors disabled:opacity-40">
           {pending ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Community anlegen + Welcome-Mails senden'}
         </button>
       </div>
@@ -351,7 +351,7 @@ function Field({
     <div>
       <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
+        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" />
     </div>
   )
 }
@@ -361,7 +361,7 @@ function NumField({ label, value, onChange }: { label: string; value: number; on
     <div>
       <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <input type="number" value={value} onChange={e => onChange(Number(e.target.value) || 0)}
-        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]" />
+        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" />
     </div>
   )
 }
@@ -376,7 +376,7 @@ function SelectField({
     <div>
       <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <select value={value} onChange={e => onChange(e.target.value)}
-        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]">
+        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo">
         {!options.includes('') && <option value="" disabled>{placeholder ?? 'Bitte wählen...'}</option>}
         {options.map(opt => (
           <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -13,7 +13,7 @@ import PageHeader from '@/components/shared/PageHeader'
 const PRIO_COLORS: Record<string, string> = {
   kritisch: 'bg-red-50 text-red-300 border-red-800',
   dringend: 'bg-amber-50 text-amber-300 border-amber-800',
-  normal: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border',
+  normal: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border',
 }
 
 const PRIO_LABELS: Record<string, string> = {
@@ -71,7 +71,7 @@ export default async function GutachterTasksPage() {
           title="Meine Tasks"
           icon={ClipboardListIcon}
           actions={
-            <span className="bg-[#f8f9fb] text-claimondo-navy text-xs font-medium px-2.5 py-1 rounded-full">
+            <span className="bg-claimondo-bg text-claimondo-navy text-xs font-medium px-2.5 py-1 rounded-full">
               {offeneTasks.length} offen
             </span>
           }

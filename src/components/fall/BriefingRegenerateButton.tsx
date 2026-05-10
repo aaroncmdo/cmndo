@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-377: Regenerate-Button für das SV-Briefing. Wird in der BriefingCard
 // gerendert — nur wenn der Aufrufer `canRegenerate=true` setzt (UI-Gate,
@@ -38,7 +38,7 @@ export default function BriefingRegenerateButton({
       type="button"
       onClick={onClick}
       disabled={pending}
-      className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb] disabled:opacity-50"
+      className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg disabled:opacity-50"
     >
       <RefreshCwIcon
         className={`w-3 h-3 ${pending ? 'animate-spin' : ''}`}

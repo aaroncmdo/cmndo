@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -83,12 +83,23 @@ export default function PasswortZuruecksetzenPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-[#f8f9fb]">
+    <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-[#f2f3f7]">
+      {/* Ambient-Gradient Spotlights */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: [
+            'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.2), transparent 65%)',
+            'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.12), transparent 70%)',
+          ].join(', '),
+        }}
+      />
       <div className="w-full max-w-sm relative z-10">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold tracking-tight">
-            <span className="text-[#0D1B3E]">Claim</span>
-            <span className="text-[#4573A2]">ondo</span>
+            <span className="text-claimondo-navy">Claim</span>
+            <span className="text-claimondo-ondo">ondo</span>
           </h1>
           <p className="mt-2 text-sm text-claimondo-ondo">Neues Passwort setzen</p>
         </div>
@@ -110,7 +121,7 @@ export default function PasswortZuruecksetzenPage() {
               </p>
               <Link
                 href="/passwort-vergessen"
-                className="inline-block w-full py-3 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-sm transition-colors"
+                className="inline-block w-full py-3 rounded-full bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-sm transition-colors text-center"
               >
                 Neuen Reset-Link anfordern
               </Link>
@@ -132,8 +143,8 @@ export default function PasswortZuruecksetzenPage() {
           {phase === 'ready' && (
             <>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-[#4573A2]/10 flex items-center justify-center">
-                  <KeyIcon className="w-5 h-5 text-[#4573A2]" />
+                <div className="w-10 h-10 rounded-xl bg-claimondo-ondo/10 flex items-center justify-center">
+                  <KeyIcon className="w-5 h-5 text-claimondo-ondo" />
                 </div>
                 <div>
                   <p className="text-claimondo-navy font-medium text-sm">Neues Passwort setzen</p>
@@ -154,7 +165,7 @@ export default function PasswortZuruecksetzenPage() {
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
                   />
                 </div>
 
@@ -170,7 +181,7 @@ export default function PasswortZuruecksetzenPage() {
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
                   />
                 </div>
 
@@ -184,7 +195,7 @@ export default function PasswortZuruecksetzenPage() {
                   type="submit"
                   isLoading={submitting}
                   loadingText="Wird gespeichert..."
-                  className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm active:scale-[0.98] transition-all mt-1"
+                  className="w-full py-3.5 rounded-full bg-claimondo-shield hover:bg-claimondo-ondo text-white disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm active:scale-[0.98] transition-all mt-1"
                 >
                   Passwort speichern
                 </LoadingButton>

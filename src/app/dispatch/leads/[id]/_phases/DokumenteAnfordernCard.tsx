@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-352: Kombinierte Dokumenten-Anfrage-Karte — ersetzt Zb1UploadCard und
 // PolizeiberichtUploadCard. Der Dispatcher wählt per Checkbox welche Dokumente
@@ -10,10 +10,11 @@
 // Action gespiegelt, damit der Twilio-Inbound-Webhook weiter funktioniert,
 // wenn der Kunde mit Foto per WA antwortet statt den Link zu nutzen.
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { triggerDokumenteUploadRequest, saveStammdaten } from '../actions'
 import type { SlotEingabe } from '../_actions/dokumente-anfordern'
+import { berechneErwartung } from '@/lib/dokumente/erwartung'
 import {
   FileTextIcon,
   ShieldAlertIcon,
@@ -27,27 +28,29 @@ import {
   XCircleIcon,
   XIcon,
   CameraIcon,
+  StethoscopeIcon,
+  ReceiptIcon,
+  UsersIcon,
 } from 'lucide-react'
 
 type Props = {
   leadId: string
-  zb1Status: string | null
+  // AAR-erwartung: Lead-Datensatz wird durchgereicht — die Card berechnet
+  // ihre Slot-Visibility selbst aus berechneErwartung(lead) statt aus
+  // mehreren bool-Props. Eine Quelle der Wahrheit für „welche Slots
+  // erwartet werden".
+  lead: Record<string, unknown>
   zb1HochgeladenAm: string | null
-  polizeiberichtStatus: string | null
   polizeiberichtHochgeladenAm: string | null
-  zeigePolizeibericht: boolean
   telefon: string | null
   email: string | null
   // AAR-unfallfotos: Wenn bereits Fotos im Lead liegen, Checkbox nicht auto-
   // vorwählen; Dispatcher kann sie trotzdem manuell setzen (Nachreichung).
   unfallfotosVorhanden: boolean
   // AAR-unfallfotos: Extern gesetzter „Kunde hat Unfallfotos"-Trigger aus der
-  // Schadenbeschreibung-Card in Phase 4. Wenn true → unfallfotos-Checkbox
-  // wird vorgewählt und die Schadenbeschreibungs-Card scrollt zum Button.
+  // Schadenbeschreibung-Card in Phase 4.
   unfallfotosAnfragenDefault?: boolean
   // AAR-unfallfotos-callback: Thumbnails + Analyse-Status für den Dispatcher.
-  // Kommt direkt aus den Lead-Spalten — Parent reicht sie durch, damit der
-  // Polling-Refresh den Haiku-Status sichtbar macht.
   schadensfotoUrls?: string[] | null
   sachschadenBeschreibung?: string | null
 }
@@ -56,19 +59,17 @@ type SonstigesEintrag = { id: number; label: string }
 
 const STATUS_UI: Record<string, { label: string; bg: string; text: string; icon: typeof CheckCircle2Icon }> = {
   gesendet: { label: 'Anfrage gesendet — warte auf Foto', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: ClockIcon },
-  geoeffnet: { label: 'Kunde hat Anfrage geöffnet', bg: 'bg-[#f8f9fb] border-claimondo-border', text: 'text-claimondo-ondo', icon: ClockIcon },
+  geoeffnet: { label: 'Kunde hat Anfrage geöffnet', bg: 'bg-claimondo-bg border-claimondo-border', text: 'text-claimondo-ondo', icon: ClockIcon },
   hochgeladen: { label: 'Foto eingegangen', bg: 'bg-green-50 border-green-200', text: 'text-green-700', icon: CheckCircle2Icon },
   fehlgeschlagen: { label: 'Upload fehlgeschlagen — manuell nacharbeiten', bg: 'bg-red-50 border-red-200', text: 'text-red-700', icon: AlertCircleIcon },
-  abgelehnt: { label: 'Manuelle Erfassung gewählt', bg: 'bg-[#f8f9fb] border-claimondo-border', text: 'text-claimondo-ondo', icon: XCircleIcon },
+  abgelehnt: { label: 'Manuelle Erfassung gewählt', bg: 'bg-claimondo-bg border-claimondo-border', text: 'text-claimondo-ondo', icon: XCircleIcon },
 }
 
 export default function DokumenteAnfordernCard({
   leadId,
-  zb1Status,
+  lead,
   zb1HochgeladenAm,
-  polizeiberichtStatus,
   polizeiberichtHochgeladenAm,
-  zeigePolizeibericht,
   telefon,
   email,
   unfallfotosVorhanden,
@@ -76,6 +77,33 @@ export default function DokumenteAnfordernCard({
   schadensfotoUrls,
   sachschadenBeschreibung,
 }: Props) {
+  const zb1Status = (lead.zb1_status as string | null) ?? null
+  const polizeiberichtStatus = (lead.polizeibericht_status as string | null) ?? null
+
+  // AAR-erwartung: Eine Quelle der Wahrheit. Welche Slots der Dispatcher
+  // sieht, ergibt sich aus berechneErwartung(lead) — kein verteiltes
+  // Conditional pro Slot. Override-Toggle weiter unten zeigt zusätzlich
+  // alle möglichen Slots, falls das Lead-Form unvollständig war.
+  const erwartet = useMemo(
+    () => berechneErwartung(lead as Parameters<typeof berechneErwartung>[0]),
+    [lead],
+  )
+  const erwarteteIds = useMemo(() => new Set(erwartet.map((s) => s.slot_id)), [erwartet])
+
+  const zeigePolizeibericht = erwarteteIds.has('polizeibericht')
+  const sichtbarSachschadenFoto_initial = erwarteteIds.has('sachschaden_foto')
+  const sichtbarSachschadenRechnung_initial = erwarteteIds.has('sachschaden_rechnung')
+  const sichtbarAttest_initial = erwarteteIds.has('aerztliches_attest')
+  const sichtbarDiagnose_initial = erwarteteIds.has('diagnosebericht')
+  const sichtbarZeugen_initial = erwarteteIds.has('zeugenaussage')
+  // Echter „Anfrage offen"-State aus dokument_upload_anfragen.
+  // Wird beim Mount + bei jedem Polling-Tick neu geladen, damit die UI
+  // sich nicht durch bloßes Setzen der Checkbox falsch zeigt.
+  const [serverAnfrageOffen, setServerAnfrageOffen] = useState(false)
+  // Lokaler Override für die Sekunden direkt nach „Anfrage senden" — damit
+  // der „warte auf Fotos"-Hinweis sofort erscheint, ohne auf Server-Refresh
+  // zu warten.
+  const [eigeneAnfrageEbenGesendet, setEigeneAnfrageEbenGesendet] = useState(false)
   const router = useRouter()
 
   // Slot-Auswahl — Fahrzeugschein vorausgewählt wenn noch nicht hochgeladen
@@ -92,8 +120,21 @@ export default function DokumenteAnfordernCard({
   const [selectUnfallfotos, setSelectUnfallfotos] = useState(
     !!unfallfotosAnfragenDefault && !unfallfotosVorhanden,
   )
+  const [selectSachschadenFoto, setSelectSachschadenFoto] = useState(false)
+  const [selectSachschadenRechnung, setSelectSachschadenRechnung] = useState(false)
+  const [selectAttest, setSelectAttest] = useState(false)
+  const [selectDiagnosebericht, setSelectDiagnosebericht] = useState(false)
+  const [selectZeugenaussage, setSelectZeugenaussage] = useState(false)
   const [sonstige, setSonstige] = useState<SonstigesEintrag[]>([])
   const [nextId, setNextId] = useState(1)
+  // Override-Toggle: zeigt conditional Slots (Sachschaden/Personenschaden/
+  // Zeugen) auch dann wenn die Lead-Flags nicht gesetzt sind. Dispatcher
+  // kann manuell aktivieren wenn er im Call merkt dass es z.B. einen Zeugen
+  // gibt obwohl das im Lead-Form nicht ausgefüllt war.
+  const [zeigeAlleSlots, setZeigeAlleSlots] = useState(false)
+  const sichtbarSachschaden = sichtbarSachschadenFoto_initial || sichtbarSachschadenRechnung_initial || zeigeAlleSlots
+  const sichtbarPersonenschaden = sichtbarAttest_initial || sichtbarDiagnose_initial || zeigeAlleSlots
+  const sichtbarZeugen = sichtbarZeugen_initial || zeigeAlleSlots
 
   // Parent-Trigger „Kunde hat Unfallfotos" nachträglich aktivieren
   useEffect(() => {
@@ -111,7 +152,40 @@ export default function DokumenteAnfordernCard({
   // hoch und Haiku braucht ein paar Sekunden, beides soll automatisch
   // aktualisiert angezeigt werden.
   const fotosCount = Array.isArray(schadensfotoUrls) ? schadensfotoUrls.length : 0
-  const unfallfotosPollingAktiv = selectUnfallfotos || fotosCount > 0
+  const unfallfotosPollingAktiv =
+    serverAnfrageOffen || eigeneAnfrageEbenGesendet || fotosCount > 0
+
+  // Lädt aus dokument_upload_anfragen ob eine offene unfallfotos-Anfrage
+  // existiert. Re-loadet beim Mount + jeden Polling-Tick (10s).
+  useEffect(() => {
+    let cancelled = false
+    async function check() {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('dokument_upload_anfragen')
+        .select('slots, status')
+        .eq('lead_id', leadId)
+        .eq('status', 'gesendet')
+        .order('erstellt_am', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (cancelled) return
+      if (!data) {
+        setServerAnfrageOffen(false)
+        return
+      }
+      const slots = (data.slots as Array<{ slot_id: string; hochgeladen?: boolean }> | null) ?? []
+      const offen = slots.some((s) => s.slot_id === 'unfallfotos' && !s.hochgeladen)
+      setServerAnfrageOffen(offen)
+    }
+    void check()
+    const iv = setInterval(check, 10_000)
+    return () => {
+      cancelled = true
+      clearInterval(iv)
+    }
+  }, [leadId])
   useEffect(() => {
     const läuft =
       (zb1Status === 'gesendet' || zb1Status === 'geoeffnet') ||
@@ -123,15 +197,21 @@ export default function DokumenteAnfordernCard({
   }, [zb1Status, polizeiberichtStatus, unfallfotosPollingAktiv, router])
 
   // Analyse-Status des Unfallfoto-Slots:
-  // - fotosCount === 0  → „warte auf Fotos" (falls angefragt) / nichts
+  // - fotosCount === 0 + Anfrage gesendet → „warte auf Fotos"
+  // - fotosCount === 0 + keine Anfrage    → kein Status (nur Checkbox-Vorauswahl)
   // - fotosCount > 0 + keine Beschreibung → „Analyse läuft"
-  // - fotosCount > 0 + Beschreibung → „Analyse erfolgreich"
+  // - fotosCount > 0 + Beschreibung       → „Analyse erfolgreich"
   // - fotosCount > 0 + Beschreibung startet mit „Schaden auf Foto nicht" → „Analyse unklar"
+  // BUGFIX (Aaron): vorher reichte selectUnfallfotos (UI-Checkbox) aus, was
+  // beim bloßen Vor-Auswählen der Checkbox bereits „Anfrage gesendet" zeigte.
+  // Jetzt wird nur ein echter Server-Status oder ein gerade abgesendeter
+  // lokaler State akzeptiert.
+  const istAnfrageOffen = serverAnfrageOffen || eigeneAnfrageEbenGesendet
   const haikuBeschreibung = sachschadenBeschreibung?.trim() ?? ''
   const haikuUnklar = haikuBeschreibung.toLowerCase().startsWith('schaden auf foto nicht')
   const unfallfotosAnalyseStatus: 'warte' | 'laeuft' | 'erfolg' | 'unklar' | null =
     fotosCount === 0
-      ? selectUnfallfotos
+      ? istAnfrageOffen
         ? 'warte'
         : null
       : haikuBeschreibung.length === 0
@@ -184,6 +264,21 @@ export default function DokumenteAnfordernCard({
     if (selectUnfallfotos) {
       slots.push({ slot_id: 'unfallfotos' })
     }
+    if (selectSachschadenFoto) {
+      slots.push({ slot_id: 'sachschaden_foto' })
+    }
+    if (selectSachschadenRechnung) {
+      slots.push({ slot_id: 'sachschaden_rechnung' })
+    }
+    if (selectAttest) {
+      slots.push({ slot_id: 'aerztliches_attest' })
+    }
+    if (selectDiagnosebericht) {
+      slots.push({ slot_id: 'diagnosebericht' })
+    }
+    if (selectZeugenaussage) {
+      slots.push({ slot_id: 'zeugenaussage' })
+    }
     for (const s of sonstige) {
       const trimmed = s.label.trim()
       if (trimmed.length > 0) {
@@ -196,6 +291,7 @@ export default function DokumenteAnfordernCard({
     }
 
     setFeedback(null)
+    const enthaeltUnfallfotos = slots.some((s) => s.slot_id === 'unfallfotos')
     startTransition(async () => {
       const r = await triggerDokumenteUploadRequest(leadId, slots, kanal)
       if (r.success) {
@@ -204,6 +300,9 @@ export default function DokumenteAnfordernCard({
           text: `Anfrage per ${kanal === 'whatsapp' ? 'WhatsApp' : kanal === 'sms' ? 'SMS' : 'Email'} versendet — ${slots.length} ${slots.length === 1 ? 'Dokument' : 'Dokumente'} angefragt`,
         })
         setSonstige([])
+        // Sofortiger Override damit „warte auf Fotos" zwischen Versand und
+        // Server-Refresh sichtbar wird, falls unfallfotos im Slot-Set war.
+        if (enthaeltUnfallfotos) setEigeneAnfrageEbenGesendet(true)
         router.refresh()
       } else {
         setFeedback({ ok: false, text: r.error ?? 'Versand fehlgeschlagen' })
@@ -215,6 +314,11 @@ export default function DokumenteAnfordernCard({
     selectFahrzeugschein ||
     selectPolizeibericht ||
     selectUnfallfotos ||
+    selectSachschadenFoto ||
+    selectSachschadenRechnung ||
+    selectAttest ||
+    selectDiagnosebericht ||
+    selectZeugenaussage ||
     sonstige.some((s) => s.label.trim().length > 0)
 
   return (
@@ -277,7 +381,7 @@ export default function DokumenteAnfordernCard({
         </label>
 
         {/* Fahrzeugschein */}
-        <div className={`rounded-lg border p-3 ${selectFahrzeugschein ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
+        <div className={`rounded-lg border p-3 ${selectFahrzeugschein ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -322,7 +426,7 @@ export default function DokumenteAnfordernCard({
 
         {/* Polizeibericht — nur wenn polizei_vor_ort=true UND polizeibericht_pflicht=true */}
         {zeigePolizeibericht && (
-          <div className={`rounded-lg border p-3 ${selectPolizeibericht ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
+          <div className={`rounded-lg border p-3 ${selectPolizeibericht ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
             <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -356,7 +460,7 @@ export default function DokumenteAnfordernCard({
         {/* AAR-unfallfotos: Unfallfotos-Slot. Multi-File — Kunde kann mehrere
             Fotos via denselben Link hochladen. Nach Upload läuft Haiku-Vision
             und füllt leads.fahrzeugschaden_beschreibung automatisch. */}
-        <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
+        <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -393,8 +497,8 @@ export default function DokumenteAnfordernCard({
             </div>
           )}
           {unfallfotosAnalyseStatus === 'laeuft' && (
-            <div className="mt-2 flex items-center gap-2 text-[11px] text-claimondo-ondo bg-[#f8f9fb] border border-claimondo-border rounded px-2 py-1.5">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#f8f9fb]0 animate-pulse shrink-0" />
+            <div className="mt-2 flex items-center gap-2 text-[11px] text-claimondo-ondo bg-claimondo-bg border border-claimondo-border rounded px-2 py-1.5">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-claimondo-bg0 animate-pulse shrink-0" />
               <span>Foto{fotosCount === 1 ? '' : 's'} eingegangen — Claude analysiert den Schaden …</span>
             </div>
           )}
@@ -441,6 +545,135 @@ export default function DokumenteAnfordernCard({
           )}
         </div>
 
+        {/* Sachschaden-Slots — wenn hat_sachschaden=true ODER manuell aufgeklappt */}
+        {sichtbarSachschaden && (
+          <>
+            <div className={`rounded-lg border p-3 ${selectSachschadenFoto ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectSachschadenFoto}
+                  onChange={(e) => setSelectSachschadenFoto(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                    <span className="text-xs font-semibold text-claimondo-navy">Fotos des Sachschadens</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-medium">Sachschaden</span>
+                  </div>
+                  <p className="text-[10px] text-claimondo-ondo mt-0.5">
+                    Fotos des beschädigten Gegenstands (z. B. Handy, Brille, Kleidung).
+                  </p>
+                </div>
+              </label>
+            </div>
+            <div className={`rounded-lg border p-3 ${selectSachschadenRechnung ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectSachschadenRechnung}
+                  onChange={(e) => setSelectSachschadenRechnung(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <ReceiptIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                    <span className="text-xs font-semibold text-claimondo-navy">Rechnung / Kostenvoranschlag Sachschaden</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-medium">Sachschaden</span>
+                  </div>
+                  <p className="text-[10px] text-claimondo-ondo mt-0.5">
+                    Reparaturrechnung oder Kostenvoranschlag für den beschädigten Gegenstand.
+                  </p>
+                </div>
+              </label>
+            </div>
+          </>
+        )}
+
+        {/* Personenschaden-Slots — wenn hat_personenschaden=true ODER manuell aufgeklappt */}
+        {sichtbarPersonenschaden && (
+          <>
+            <div className={`rounded-lg border p-3 ${selectAttest ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectAttest}
+                  onChange={(e) => setSelectAttest(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <StethoscopeIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                    <span className="text-xs font-semibold text-claimondo-navy">Ärztliches Attest</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-medium">Personenschaden</span>
+                  </div>
+                  <p className="text-[10px] text-claimondo-ondo mt-0.5">
+                    Ärztliche Bescheinigung über Verletzungen infolge des Unfalls.
+                  </p>
+                </div>
+              </label>
+            </div>
+            <div className={`rounded-lg border p-3 ${selectDiagnosebericht ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectDiagnosebericht}
+                  onChange={(e) => setSelectDiagnosebericht(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <FileTextIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                    <span className="text-xs font-semibold text-claimondo-navy">Diagnosebericht / Befundbericht</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-medium">Personenschaden</span>
+                  </div>
+                  <p className="text-[10px] text-claimondo-ondo mt-0.5">
+                    Ärztlicher Befundbericht oder Entlassungsbericht aus der Klinik.
+                  </p>
+                </div>
+              </label>
+            </div>
+          </>
+        )}
+
+        {/* Zeugenaussage — wenn zeugen=true ODER manuell aufgeklappt */}
+        {sichtbarZeugen && (
+          <div className={`rounded-lg border p-3 ${selectZeugenaussage ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectZeugenaussage}
+                onChange={(e) => setSelectZeugenaussage(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5">
+                  <UsersIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
+                  <span className="text-xs font-semibold text-claimondo-navy">Zeugenaussage / Zeugenkontakt</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-claimondo-shield/10 text-claimondo-navy font-medium">Zeugen</span>
+                </div>
+                <p className="text-[10px] text-claimondo-ondo mt-0.5">
+                  Schriftliche Zeugenaussage oder Kontaktdaten des Zeugen als Scan / Foto.
+                </p>
+              </div>
+            </label>
+          </div>
+        )}
+
+        {/* Manueller Override: alle conditional Slots zeigen — falls die
+            Lead-Flags (sachschaden_flag, personenschaden_flag, zeugen) nicht
+            gesetzt sind, der Dispatcher sie aber im Telefonat braucht. */}
+        {!zeigeAlleSlots && (!sichtbarSachschadenFoto_initial || !sichtbarAttest_initial || !sichtbarZeugen_initial) && (
+          <button
+            type="button"
+            onClick={() => setZeigeAlleSlots(true)}
+            className="text-[11px] text-claimondo-ondo hover:text-claimondo-navy underline self-start"
+          >
+            + Weitere Anforderungen einblenden (Sachschaden / Personenschaden / Zeugenaussage)
+          </button>
+        )}
+
         {/* Freie „Sonstige"-Slots */}
         {sonstige.map((s) => (
           <div key={s.id} className="rounded-lg border border-claimondo-border p-3 flex items-center gap-2">
@@ -466,7 +699,7 @@ export default function DokumenteAnfordernCard({
         <button
           type="button"
           onClick={addSonstiges}
-          className="w-full text-[11px] text-claimondo-ondo border border-dashed border-claimondo-ondo/50 rounded-lg py-1.5 hover:bg-[#f8f9fb] flex items-center justify-center gap-1"
+          className="w-full text-[11px] text-claimondo-ondo border border-dashed border-claimondo-ondo/50 rounded-lg py-1.5 hover:bg-claimondo-bg flex items-center justify-center gap-1"
         >
           <PlusIcon className="w-3.5 h-3.5" />
           Weiteres Dokument hinzufügen
@@ -485,7 +718,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('whatsapp')}
               disabled={!telefon}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                kanal === 'whatsapp' ? 'bg-[#25D366] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb]'
+                kanal === 'whatsapp' ? 'bg-[#25D366] text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
               } disabled:opacity-40`}
             >
               <MessageSquareIcon className="w-4 h-4" />
@@ -496,7 +729,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('sms')}
               disabled={!telefon}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                kanal === 'sms' ? 'bg-amber-500 text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb]'
+                kanal === 'sms' ? 'bg-amber-500 text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
               } disabled:opacity-40`}
             >
               <PhoneIcon className="w-4 h-4" />
@@ -507,7 +740,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('email')}
               disabled={!email}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                kanal === 'email' ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb]'
+                kanal === 'email' ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
               } disabled:opacity-40`}
             >
               <MailIcon className="w-4 h-4" />

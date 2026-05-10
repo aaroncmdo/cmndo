@@ -6,7 +6,10 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import HeuteClient from './HeuteClient'
+import type { TagesroutePflichtStat } from './TagesrouteSidebar'
+import { listPrivatStopsForDate } from './private-stops-actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +26,12 @@ export type HeuteTerminFull = {
   status: string
   // Kunden-Infos
   kunde_name: string
+  kunde_anrede: 'herr' | 'frau' | 'divers' | null
   kunde_telefon: string | null
+  // 2026-05-06: Profilbild für Termin-Card-Polish
+  kunde_avatar_url: string | null
+  // 2026-05-06: Stop-Wetter für Termin-Card (Open-Weather-Map)
+  stop_weather: { temp: number; emoji: string; description: string } | null
   // Fall-Infos (evtl. leer bei pre_flowlink=true)
   fall_nummer: string
   kennzeichen: string | null
@@ -65,7 +73,8 @@ export default async function HeutePage() {
     id: string
     standort_lat: number | null
     standort_lng: number | null
-  }>(supabase, user.id, 'id, standort_lat, standort_lng')
+    isochrone_polygon: Array<{ lat: number; lng: number }> | null
+  }>(supabase, user.id, 'id, standort_lat, standort_lng, isochrone_polygon')
   if (!sv) redirect('/gutachter?error=Kein+SV-Profil')
 
   const todayStart = new Date()
@@ -114,7 +123,7 @@ export default async function HeutePage() {
     const { data: faelle } = await supabase
       .from('faelle')
       .select(
-        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text',
+        'id, fall_nummer, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum',
       )
       .in('id', fallIds)
     const faelleRows = (faelle ?? []) as unknown as Record<string, unknown>[]
@@ -133,12 +142,164 @@ export default async function HeutePage() {
   const leadIds = Array.from(new Set([...leadIdsFromFaelle, ...leadIdsFromTermine]))
   const leadMap = new Map<string, Record<string, unknown>>()
   if (leadIds.length) {
-    const { data: leads } = await supabase
+    // 2026-05-06: admin-client damit RLS uns nicht aussperrt — die
+    // Termine sind bereits per sv_id gefiltert, leads dazu zu laden ist
+    // legitim (kein Cross-Tenant-Risiko).
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    const { data: leads } = await admin
       .from('leads')
-      .select('id, vorname, nachname, telefon, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort')
+      .select('id, vorname, nachname, anrede, telefon, kunde_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_fall_typ, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng')
       .in('id', leadIds)
     for (const l of (leads ?? []) as unknown as Record<string, unknown>[]) {
       leadMap.set(l.id as string, l)
+    }
+  }
+
+  // 2026-05-06: claim_parties als Fallback-Quelle für Kunde-Daten —
+  // bei Claim-getriebenen Aufträgen (CMM-Phase 2+) liegen vorname/
+  // nachname/anrede/telefon nicht im lead sondern in
+  // claim_parties.rolle='geschaedigter'. Für jeden Fall den
+  // geschaedigter-Snapshot laden.
+  const claimIds = Array.from(
+    new Set(
+      [...fallMap.values()]
+        .map((f) => f.claim_id as string | null)
+        .filter((x): x is string => !!x),
+    ),
+  )
+  const partyMap = new Map<string, { vorname: string | null; nachname: string | null; anrede: string | null; telefon: string | null; user_id: string | null }>()
+  if (claimIds.length) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    const { data: parties } = await admin
+      .from('claim_parties')
+      .select('claim_id, rolle, vorname, nachname, anrede, telefon, mobil, user_id, reihenfolge')
+      .in('claim_id', claimIds)
+      .eq('rolle', 'geschaedigter')
+      .order('reihenfolge', { ascending: true })
+    for (const p of (parties ?? []) as Array<Record<string, unknown>>) {
+      const cId = p.claim_id as string
+      if (partyMap.has(cId)) continue // erste/primäre geschaedigter-Row gewinnt
+      partyMap.set(cId, {
+        vorname: (p.vorname as string | null) ?? null,
+        nachname: (p.nachname as string | null) ?? null,
+        anrede: (p.anrede as string | null) ?? null,
+        telefon: ((p.telefon as string | null) ?? (p.mobil as string | null)) ?? null,
+        user_id: (p.user_id as string | null) ?? null,
+      })
+    }
+  }
+
+  // 2026-05-06: Kunden-Avatare laden (lead.kunde_id → profiles.avatar_url).
+  // Wichtig: admin-client benutzen, da RLS dem SV nicht erlaubt fremde
+  // profiles-Rows zu lesen — wir nehmen nur die avatar_url (nicht-sensitiv,
+  // public im avatare-Bucket eh).
+  const kundeIds = Array.from(
+    new Set(
+      [
+        ...[...leadMap.values()].map((l) => l.kunde_id as string | null),
+        ...[...partyMap.values()].map((p) => p.user_id),
+      ].filter((x): x is string => !!x),
+    ),
+  )
+  const avatarMap = new Map<string, string | null>()
+  if (kundeIds.length) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    const { data: profiles } = await admin
+      .from('profiles')
+      .select('id, avatar_url')
+      .in('id', kundeIds)
+    for (const p of (profiles ?? []) as Array<{ id: string; avatar_url: string | null }>) {
+      avatarMap.set(p.id, p.avatar_url ?? null)
+    }
+  }
+
+  // 2026-05-06: Wetter pro besichtigungsort. Parallel-Fetch über alle
+  // Termine mit gültigen Koordinaten. Cache lebt im Lib-Modul (5 min TTL),
+  // doppelte Coords kollidieren auf den Cache-Key.
+  const { getWeatherSnapshot, weatherEmoji } = await import('@/lib/weather/get-weather')
+  const weatherEntries = await Promise.all(
+    (termine ?? []).map(async (t) => {
+      const fall = t.fall_id ? fallMap.get(t.fall_id as string) : null
+      const lead = t.lead_id ? leadMap.get(t.lead_id as string) : null
+      const lat =
+        (fall?.besichtigungsort_lat as number | null) ??
+        (lead?.besichtigungsort_lat as number | null) ??
+        null
+      const lng =
+        (fall?.besichtigungsort_lng as number | null) ??
+        (lead?.besichtigungsort_lng as number | null) ??
+        null
+      if (lat == null || lng == null) return [t.id as string, null] as const
+      const snap = await getWeatherSnapshot(Number(lat), Number(lng))
+      if (!snap) return [t.id as string, null] as const
+      return [
+        t.id as string,
+        {
+          temp: snap.temp,
+          emoji: weatherEmoji(snap.weather_id),
+          description: snap.description,
+        },
+      ] as const
+    }),
+  )
+  const weatherMap = new Map<string, { temp: number; emoji: string; description: string } | null>(
+    weatherEntries,
+  )
+
+  // Aufträge pro Fall (CMM-32f) — für Auftrag-Typ-Anzeige
+  const auftragMap = new Map<string, { typ: string; status: string }>()
+  if (fallIds.length) {
+    const { data: auftraege } = await supabase
+      .from('auftraege')
+      .select('fall_id, typ, status, reihenfolge')
+      .in('fall_id', fallIds)
+      .eq('sv_id', sv.id)
+      .order('reihenfolge', { ascending: false })
+    for (const a of (auftraege ?? []) as Array<{ fall_id: string; typ: string; status: string }>) {
+      if (!auftragMap.has(a.fall_id)) auftragMap.set(a.fall_id, { typ: a.typ, status: a.status })
+    }
+  }
+
+  // Pflichtdokumente pro Fall (offen + Pflicht) mit Katalog-Labels —
+  // damit der SV vor Ort sieht was er einsammeln muss.
+  const pflichtListMap = new Map<string, Array<{ slot_id: string; label: string }>>()
+  if (fallIds.length) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    const [{ data: pflichtRows }, { data: katalogRows }] = await Promise.all([
+      admin
+        .from('pflichtdokumente')
+        .select('fall_id, dokument_typ, status, pflicht')
+        .in('fall_id', fallIds)
+        .eq('pflicht', true),
+      admin
+        .from('dokument_katalog')
+        .select('slot_id, label'),
+    ])
+    const labelMap = new Map<string, string>()
+    for (const k of (katalogRows ?? []) as Array<{ slot_id: string; label: string }>) {
+      labelMap.set(k.slot_id, k.label)
+    }
+    // 2026-05-08 Aaron-UI-Audit Bug #4: einheitliche „offen für SV"-
+    // Definition mit pflichtStats unten. Status-States hochgeladen +
+    // in_pruefung sind aus SV-Sicht erledigt (er hat seinen Teil
+    // gemacht / Backend prüft).
+    const PFLICHT_DONE_STATES = new Set(['hochgeladen', 'in_pruefung', 'erfuellt', 'geprueft'])
+    for (const p of (pflichtRows ?? []) as Array<{
+      fall_id: string
+      dokument_typ: string
+      status: string
+      pflicht: boolean
+    }>) {
+      if (PFLICHT_DONE_STATES.has(p.status)) continue
+      if (!pflichtListMap.has(p.fall_id)) pflichtListMap.set(p.fall_id, [])
+      pflichtListMap.get(p.fall_id)!.push({
+        slot_id: p.dokument_typ,
+        label: labelMap.get(p.dokument_typ) ?? p.dokument_typ,
+      })
     }
   }
 
@@ -164,10 +325,34 @@ export default async function HeutePage() {
       start_zeit: t.start_zeit as string,
       end_zeit: (t.end_zeit as string) ?? null,
       status: t.status as string,
-      kunde_name: lead
-        ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
-        : '—',
-      kunde_telefon: (lead?.telefon as string | null) ?? null,
+      // 2026-05-06: Kunde-Daten Fallback-Chain: claim_parties >
+      // lead — bei Claim-getriebenen Aufträgen ist die Party-Snapshot
+      // die Source-of-Truth.
+      kunde_name: (() => {
+        const party = fall?.claim_id ? partyMap.get(fall.claim_id as string) : null
+        const partyName = party
+          ? [party.vorname, party.nachname].filter(Boolean).join(' ')
+          : ''
+        if (partyName) return partyName
+        return lead
+          ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
+          : '—'
+      })(),
+      kunde_anrede: (() => {
+        const party = fall?.claim_id ? partyMap.get(fall.claim_id as string) : null
+        const a = (party?.anrede as string | null) ?? (lead?.anrede as string | null) ?? null
+        return (a as 'herr' | 'frau' | 'divers' | null) ?? null
+      })(),
+      kunde_telefon: (() => {
+        const party = fall?.claim_id ? partyMap.get(fall.claim_id as string) : null
+        return party?.telefon ?? (lead?.telefon as string | null) ?? null
+      })(),
+      kunde_avatar_url: (() => {
+        const party = fall?.claim_id ? partyMap.get(fall.claim_id as string) : null
+        const userId = party?.user_id ?? (lead?.kunde_id as string | null) ?? null
+        return userId ? avatarMap.get(userId) ?? null : null
+      })(),
+      stop_weather: weatherMap.get(t.id as string) ?? null,
       fall_nummer:
         (fall?.fall_nummer as string) ??
         (preFlowlink ? 'Provisorisch' : ((t.fall_id as string) ?? '').slice(0, 8)),
@@ -193,14 +378,48 @@ export default async function HeutePage() {
     }
   })
 
+  // Pflichtdokumente-Counts pro Fall parallel laden — damit die Sidebar
+  // pro Termin „X von Y offen" anzeigen kann. Pre-FlowLink-Termine ohne
+  // fall_id werden übersprungen.
+  const fallIdsForPflicht = Array.from(
+    new Set(heuteTermine.map((t) => t.fall_id).filter((x): x is string => !!x)),
+  )
+  // 2026-05-08 Aaron-UI-Audit Bug #4: Top-Counter und Termin-Zeilen-Counter
+  // zählten unterschiedlich — Top filterte auf NOT (erfuellt|geprueft), die
+  // Termin-Zeile auf status === 'offen' (DB hat aber 'ausstehend' als
+  // Default — fast nichts gematched). Beide jetzt auf einheitlicher
+  // Definition: „offen für SV" = alles außer (hochgeladen, in_pruefung,
+  // erfuellt, geprueft). Das matched die Semantik „muss SV vor Ort
+  // einsammeln/anstoßen".
+  const PFLICHT_DONE_STATES = new Set(['hochgeladen', 'in_pruefung', 'erfuellt', 'geprueft'])
+  const pflichtStats: TagesroutePflichtStat[] = await Promise.all(
+    fallIdsForPflicht.map(async (fallId) => {
+      try {
+        const slots = await getPflichtdokumenteForFall(supabase, fallId, 'sv')
+        const pflichtSlots = slots.filter((s) => s.pflicht)
+        const offen = pflichtSlots.filter((s) => !PFLICHT_DONE_STATES.has(s.status ?? '')).length
+        return { fallId, offen, gesamt: pflichtSlots.length }
+      } catch {
+        return { fallId, offen: 0, gesamt: 0 }
+      }
+    }),
+  )
+
+  // AAR-872: Privat-Stops (GCal/CalDAV-Termine, die der SV manuell als
+  // Tagesroute-Anker addet) initial laden.
+  const initialPrivatStops = await listPrivatStopsForDate(isoDate(todayStart))
+
   return (
     <HeuteClient
       termine={heuteTermine}
+      pflichtStats={pflichtStats}
       svStandort={{
         lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
         lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
       }}
+      isochronePolygon={sv.isochrone_polygon ?? null}
       hasActiveSession={hasActiveSession}
+      initialPrivatStops={initialPrivatStops}
     />
   )
 }

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -30,12 +30,12 @@ type TerminRow = {
 }
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  reserviert: { label: 'Reserviert', cls: 'bg-[#f8f9fb] text-claimondo-ondo' },
+  reserviert: { label: 'Reserviert', cls: 'bg-claimondo-bg text-claimondo-ondo' },
   vorschlag: { label: 'Vorschlag', cls: 'bg-amber-50 text-amber-700' },
   gegenvorschlag: { label: 'Gegenvorschlag', cls: 'bg-orange-50 text-orange-700' },
   bestaetigt: { label: 'Bestätigt', cls: 'bg-emerald-50 text-emerald-700' },
   abgelehnt: { label: 'Abgelehnt', cls: 'bg-red-50 text-red-700' },
-  storniert: { label: 'Storniert', cls: 'bg-[#f8f9fb] text-claimondo-ondo' },
+  storniert: { label: 'Storniert', cls: 'bg-claimondo-bg text-claimondo-ondo' },
 }
 
 // AAR-411: delegiert an die zentrale Formatter-Bibliothek.
@@ -90,7 +90,7 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
           icon={CalendarIcon}
           size="lg"
           actions={
-            <div className="inline-flex bg-[#f8f9fb] rounded-xl p-0.5 text-xs font-medium">
+            <div className="inline-flex bg-claimondo-bg rounded-xl p-0.5 text-xs font-medium">
               <button onClick={() => setFilter('offen')} className={`px-3 py-1.5 rounded-lg ${filter === 'offen' ? 'bg-white text-[var(--brand-primary)] shadow' : 'text-claimondo-ondo'}`}>
                 Offen ({offene.length})
               </button>
@@ -110,7 +110,7 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
       ) : (
         <div className="space-y-3">
           {filtered.map(t => {
-            const badge = STATUS_BADGE[t.status] ?? { label: t.status, cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
+            const badge = STATUS_BADGE[t.status] ?? { label: t.status, cls: 'bg-claimondo-bg text-claimondo-ondo' }
             const isKundenGegenvorschlag = t.status === 'gegenvorschlag' && t.gegenvorschlag_von === 'kunde'
             const needsAction = ['reserviert', 'vorschlag'].includes(t.status) || isKundenGegenvorschlag
             const displayDatum = t.vorgeschlagenes_datum && t.status === 'gegenvorschlag' ? t.vorgeschlagenes_datum : t.start_zeit
@@ -177,7 +177,7 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
         <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
           className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
         <div className="flex gap-2">
-          <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
+          <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-claimondo-bg text-claimondo-ondo">Abbrechen</button>
           <button onClick={handleAblehnen} disabled={pending} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-red-600 text-white disabled:opacity-50">Ablehnen</button>
         </div>
       </Modal>
@@ -193,7 +193,7 @@ export default function TermineClient({ termine }: { termine: TerminRow[] }) {
         <textarea value={grund} onChange={e => setGrund(e.target.value)} placeholder="Begründung (optional)"
           className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-3 resize-none focus:outline-none focus:border-[var(--brand-secondary)]" rows={2} />
         <div className="flex gap-2">
-          <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo">Abbrechen</button>
+          <button onClick={() => setModal(null)} className="flex-1 py-2 rounded-xl text-sm bg-claimondo-bg text-claimondo-ondo">Abbrechen</button>
           <button onClick={handleGegenvorschlag} disabled={pending || !neuesDatum} className="flex-1 py-2 rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50">Vorschlagen</button>
         </div>
       </Modal>

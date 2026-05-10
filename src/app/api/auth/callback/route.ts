@@ -10,6 +10,9 @@ import { roleToPath } from '@/lib/auth/role-redirect'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  // next wird von Magic-Link-Flows (Kunden-Welcome, Passwort-Reset etc.)
+  // mitgeschickt damit der Callback nach Session-Exchange direkt dorthin navigiert.
+  const next = searchParams.get('next')
 
   if (code) {
     const supabase = await createClient()
@@ -18,13 +21,6 @@ export async function GET(request: Request) {
     if (!error) {
       const user = (await supabase.auth.getUser())?.data?.user ?? null
       if (user) {
-        // Update auth_provider to google and disable force_password_change
-        await supabase
-          .from('profiles')
-          .update({ auth_provider: 'google', force_password_change: false })
-          .eq('id', user.id)
-
-        // Get role for redirect
         const { data: profile } = await supabase
           .from('profiles')
           .select('rolle')

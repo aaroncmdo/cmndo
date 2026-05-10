@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-541 (C4): Admin/KB-Sicht auf den MultiChannelChat.
 // Rendert den Shared-Component mit rollenabhängigem Kanal-Whitelist,
@@ -62,7 +62,7 @@ export default function KommunikationTab({
       </div>
 
       <aside className="bg-white border border-claimondo-border rounded-xl p-4 h-fit">
-        <h3 className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-3">
+        <h3 className="text-xs font-semibold text-claimondo-navy uppercase tracking-wider mb-3">
           Teilnehmer ({teilnehmer.length})
         </h3>
         {teilnehmer.length === 0 ? (
@@ -82,12 +82,12 @@ export default function KommunikationTab({
                       className="w-8 h-8 rounded-full object-cover border border-claimondo-border"
                     />
                   ) : (
-                    <span className="w-8 h-8 rounded-full bg-[#EBF1F8] text-[#0D1B3E] flex items-center justify-center text-xs font-semibold">
+                    <span className="w-8 h-8 rounded-full bg-[#EBF1F8] text-claimondo-navy flex items-center justify-center text-xs font-semibold">
                       {initials}
                     </span>
                   )}
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-[#0D1B3E] truncate">{name}</p>
+                    <p className="text-xs font-medium text-claimondo-navy truncate">{name}</p>
                     <p className="text-[10px] text-claimondo-ondo">{ROLLE_LABEL[t.rolle]}</p>
                   </div>
                 </li>

@@ -1,4 +1,4 @@
-// AAR-326 (Child 6 von AAR-320): Drag&drop-sortierbare Pflichtdokumenten-
+﻿// AAR-326 (Child 6 von AAR-320): Drag&drop-sortierbare Pflichtdokumenten-
 // Liste für den KB.
 //
 // Zeigt pflichtdokumente gruppiert nach Kategorie. Jede Zeile ist per
@@ -141,8 +141,8 @@ export default function DokumenteListeSortierbar({
                             {...prov.draggableProps}
                             className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs ${
                               snap.isDragging
-                                ? 'bg-[#4573A2]/5 border-[#4573A2] shadow-sm'
-                                : 'bg-[#f8f9fb] border-claimondo-border'
+                                ? 'bg-claimondo-ondo/5 border-claimondo-ondo shadow-sm'
+                                : 'bg-claimondo-bg border-claimondo-border'
                             }`}
                           >
                             <span

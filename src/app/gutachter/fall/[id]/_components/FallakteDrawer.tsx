@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-289: Full-Screen-Drawer „Komplette Akte". Wird über den [📎 Akte]-Button
 // im FallHeader geöffnet. Backdrop-Click + Escape-Key schließen. Tab-Bar
@@ -122,7 +122,7 @@ export function FallakteDrawer({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] transition-colors text-sm font-medium"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg transition-colors text-sm font-medium"
         aria-label="Komplette Akte öffnen"
       >
         <PaperclipIcon className="w-4 h-4" />
@@ -139,7 +139,7 @@ export function FallakteDrawer({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="p-2 hover:bg-[#f8f9fb] rounded-lg"
+                className="p-2 hover:bg-claimondo-bg rounded-lg"
                 aria-label="Schließen"
               >
                 <XIcon className="w-5 h-5" />
@@ -263,7 +263,7 @@ function TeamListe({
                   nummer={m.telefon}
                   variant="inline"
                   label="Anrufen"
-                  className="!px-3 !py-1.5 !rounded-lg !border !border-claimondo-border !bg-white !text-claimondo-navy !text-xs !font-medium hover:!bg-[#f8f9fb]"
+                  className="!px-3 !py-1.5 !rounded-lg !border !border-claimondo-border !bg-white !text-claimondo-navy !text-xs !font-medium hover:!bg-claimondo-bg"
                 />
               )}
             </div>
@@ -295,14 +295,14 @@ function DateienListe({ dokumente }: { dokumente: DocLite[] }) {
         return (
           <li
             key={d.id ?? i}
-            className="flex items-center gap-3 p-3 rounded-lg border border-claimondo-border bg-white hover:bg-[#f8f9fb]"
+            className="flex items-center gap-3 p-3 rounded-lg border border-claimondo-border bg-white hover:bg-claimondo-bg"
           >
             <FileTextIcon className="w-5 h-5 text-claimondo-ondo/70 shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
               <p className="text-[11px] text-claimondo-ondo">
                 {typ}
-                {datum ? ` · ${new Date(datum).toLocaleDateString('de-DE')}` : ''}
+                {datum ? ` · ${new Date(datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}` : ''}
               </p>
             </div>
             {url && (
@@ -382,7 +382,7 @@ function ChatListe({
             return (
               <li
                 key={n.id ?? i}
-                className="p-3 rounded-lg bg-[#f8f9fb] border border-claimondo-border"
+                className="p-3 rounded-lg bg-claimondo-bg border border-claimondo-border"
               >
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-medium text-claimondo-navy">

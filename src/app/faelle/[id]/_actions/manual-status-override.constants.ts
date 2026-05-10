@@ -34,10 +34,6 @@ export const ALLOWED_STATUS_VALUES = [
   'anschlussschreiben',
   'regulierung',
   'regulierung-laeuft',
-  'vs-kuerzt',
-  'vs-abgelehnt',
-  'nachbesichtigung-laeuft',
-  'klage',
   'zahlung-eingegangen',
   'abgeschlossen',
 ] as const

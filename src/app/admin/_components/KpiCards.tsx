@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { UsersIcon, EuroIcon, FolderIcon, TrendingUpIcon, ClipboardCheckIcon } from 'lucide-react'
 
@@ -111,8 +111,8 @@ export default async function KpiCards() {
       label: 'Aktive SVs',
       value: fmtNumber(kpis.aktiveSvs),
       icon: UsersIcon,
-      bg: 'bg-[#4573A2]/10',
-      iconColor: 'text-[#4573A2]',
+      bg: 'bg-claimondo-ondo/10',
+      iconColor: 'text-claimondo-ondo',
       hint: 'Portal-Zugang freigeschaltet',
       href: '/admin/sachverstaendige',
     },
@@ -147,7 +147,7 @@ export default async function KpiCards() {
       label: 'Gutachten → QC',
       value: fmtNumber(kpis.pendingQc),
       icon: ClipboardCheckIcon,
-      bg: kpis.pendingQc > 0 ? 'bg-red-50' : 'bg-[#f8f9fb]',
+      bg: kpis.pendingQc > 0 ? 'bg-red-50' : 'bg-claimondo-bg',
       iconColor: kpis.pendingQc > 0 ? 'text-red-600' : 'text-claimondo-ondo/70',
       hint: 'warten auf Filmcheck',
       href: '/admin/faelle/statistiken',
@@ -162,7 +162,7 @@ export default async function KpiCards() {
           <Link
             key={c.label}
             href={c.href}
-            className="bg-white rounded-ios-lg shadow-ios-sm p-4 hover:shadow-ios-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4573A2] focus-visible:ring-offset-1"
+            className="bg-white rounded-ios-lg shadow-ios-sm p-4 hover:shadow-ios-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-ondo focus-visible:ring-offset-1"
           >
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo font-semibold">{c.label}</p>

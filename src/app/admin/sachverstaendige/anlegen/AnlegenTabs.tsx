@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { UserIcon, Building2Icon, GraduationCapIcon, UsersIcon } from 'lucide-react'
@@ -56,7 +56,7 @@ export default function AnlegenTabs({ onSuccess }: {
               disabled={t.disabled}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap border ${
                 t.disabled
-                  ? 'bg-[#f8f9fb] text-claimondo-ondo/50 border-claimondo-border cursor-not-allowed'
+                  ? 'bg-claimondo-bg text-claimondo-ondo/50 border-claimondo-border cursor-not-allowed'
                   : isActive
                   ? colors.active
                   : colors.idle
@@ -87,7 +87,7 @@ export default function AnlegenTabs({ onSuccess }: {
           </p>
           <Link
             href="/admin/partner/communities"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-semibold"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
           >
             <UsersIcon className="w-4 h-4" /> Zu /admin/communities
           </Link>

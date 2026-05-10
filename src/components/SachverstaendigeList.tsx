@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
@@ -37,7 +37,7 @@ type SV = {
 }
 
 const TYP_BADGE: Record<string, { label: string; cls: string }> = {
-  'kfz-gutachter': { label: 'KFZ-SV', cls: 'bg-[#f8f9fb] text-claimondo-ondo' },
+  'kfz-gutachter': { label: 'KFZ-SV', cls: 'bg-claimondo-bg text-claimondo-ondo' },
   'dat-gutachter': { label: 'DAT', cls: 'bg-orange-50 text-orange-700' },
   akademie: { label: 'Akademie', cls: 'bg-green-50 text-green-700' },
   gutachterbuero: { label: 'Büro', cls: 'bg-purple-50 text-purple-700' },
@@ -59,6 +59,9 @@ export default function SachverstaendigeList({
 }) {
   const [svFilter, setSvFilter] = useState<'aktive' | 'deaktivierte' | 'gesperrt' | 'alle'>('aktive')
   const [search, setSearch] = useState('')
+  const [density] = useDensityPreference('sv-liste')
+  const compact = density === 'compact'
+  const cellPad = compact ? 'px-3 py-1.5' : 'px-4 py-3'
 
   const filtered = useMemo(() => {
     return sachverstaendige.filter(sv => {
@@ -87,11 +90,11 @@ export default function SachverstaendigeList({
   ]
 
   return (
-    <div className="h-full flex flex-col bg-[#f8f9fb]">
+    <div className="h-full flex flex-col bg-claimondo-bg">
       {/* Header */}
       <div className="px-4 py-3 border-b border-claimondo-border bg-white flex items-center justify-between gap-3 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <HardHatIcon className="w-4 h-4 text-[#4573A2]" />
+          <HardHatIcon className="w-4 h-4 text-claimondo-ondo" />
           <h1 className="text-sm font-semibold text-claimondo-navy">Sachverständige</h1>
           <span className="text-xs text-claimondo-ondo/70">({filtered.length})</span>
         </div>
@@ -102,28 +105,31 @@ export default function SachverstaendigeList({
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Suche..."
-              className="pl-7 pr-2 py-1.5 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg w-48 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+              className="pl-7 pr-2 py-1.5 text-xs bg-claimondo-bg border border-claimondo-border rounded-lg w-48 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
           </div>
           {/* AAR-151: „Karte öffnen" zeigt für Admin auf den Hub (dort IST die Karte),
               für Dispatch auf die Isochrone-Ansicht (die Karte mit Lead-Auswahl). */}
           <Link
             href={basePath === '/admin' ? '/admin/sachverstaendige' : '/dispatch/isochrone'}
-            className="text-xs text-[#4573A2] hover:underline"
+            className="text-xs text-claimondo-ondo hover:underline"
           >
             Karte öffnen →
           </Link>
+          <DensityToggle listKey="sv-liste" />
         </div>
       </div>
 
       {/* Filter-Tabs */}
       <div className="px-4 py-2 border-b border-claimondo-border bg-white flex gap-1 flex-shrink-0">
         {tabs.map(t => (
-          <button
+          <Chip
             key={t.k}
+            variant={svFilter === t.k ? 'selected' : 'ghost'}
+            count={t.count}
             onClick={() => setSvFilter(t.k)}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              svFilter === t.k ? 'bg-[#f8f9fb] text-claimondo-navy' : 'text-claimondo-ondo hover:text-claimondo-navy'
+              svFilter === t.k ? 'bg-claimondo-bg text-claimondo-navy' : 'text-claimondo-ondo hover:text-claimondo-navy'
             }`}
           >
             {t.label} <span className="text-claimondo-ondo/70 ml-1">{t.count}</span>
@@ -131,10 +137,10 @@ export default function SachverstaendigeList({
         ))}
       </div>
 
-      {/* Tabelle */}
+      {/* Tabelle (Desktop ab lg) — Mobile/Tablet rendern Card-Liste, Portal-Review D3 */}
       <div className="flex-1 overflow-auto">
         <table className="w-full text-sm">
-          <thead className="bg-[#f8f9fb] border-b border-claimondo-border sticky top-0">
+          <thead className="bg-claimondo-bg border-b border-claimondo-border sticky top-0">
             <tr className="text-left text-[10px] uppercase tracking-wider text-claimondo-ondo">
               <th className="px-4 py-2.5 font-medium">Name</th>
               <th className="px-4 py-2.5 font-medium">Typ</th>
@@ -154,13 +160,13 @@ export default function SachverstaendigeList({
                 vertrag_unterschrieben: sv.vertragUnterschrieben,
                 gesperrt_seit: sv.gesperrtSeit,
               })
-              const typ = TYP_BADGE[sv.gutachterTyp] ?? { label: sv.gutachterTyp, cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
+              const typ = TYP_BADGE[sv.gutachterTyp] ?? { label: sv.gutachterTyp, cls: 'bg-claimondo-bg text-claimondo-ondo' }
               const paket = PAKET_BADGE[sv.paket] ?? sv.paket
               const stadt = sv.standortAdresse ? sv.standortAdresse.split(',').slice(-2, -1)[0]?.trim() || sv.standortAdresse : '—'
 
               return (
                 <tr key={sv.id} className="hover:bg-[#f0f4f8] transition-colors">
-                  <td className="px-4 py-3">
+                  <td className={cellPad}>
                     <div className="flex items-center gap-2">
                       <KundeAvatar name={sv.name} size={28} tone="ondo-subtle" />
                       <div>
@@ -195,6 +201,49 @@ export default function SachverstaendigeList({
             })}
           </tbody>
         </table>
+
+        {/* Mobile/Tablet-Card-Liste (<lg) — drei Felder primary (Name, Standort, Status), Tap = Detail */}
+        <div className="lg:hidden divide-y divide-claimondo-border bg-white">
+          {filtered.length === 0 ? (
+            <p className="px-4 py-8 text-center text-xs text-claimondo-ondo/70">Keine Sachverständige</p>
+          ) : filtered.map(sv => {
+            const status = getSvStatus({
+              portal_zugang_freigeschaltet: sv.portalZugangFreigeschaltet,
+              vertrag_unterschrieben: sv.vertragUnterschrieben,
+              gesperrt_seit: sv.gesperrtSeit,
+            })
+            const typ = TYP_BADGE[sv.gutachterTyp] ?? { label: sv.gutachterTyp, cls: 'bg-claimondo-bg text-claimondo-ondo' }
+            const paket = PAKET_BADGE[sv.paket] ?? sv.paket
+            const stadt = sv.standortAdresse ? sv.standortAdresse.split(',').slice(-2, -1)[0]?.trim() || sv.standortAdresse : '—'
+            const auslastungTone = sv.offeneFaelle >= sv.maxFaelleMonat ? 'text-red-600 font-semibold' : 'text-claimondo-ondo'
+            return (
+              <Link
+                key={sv.id}
+                href={`${basePath}/sachverstaendige/${sv.id}`}
+                className="flex items-start gap-3 px-4 py-3 hover:bg-claimondo-bg active:bg-claimondo-ondo/5 transition-colors"
+              >
+                <KundeAvatar name={sv.name} size={36} tone="ondo-subtle" />
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-claimondo-navy truncate">{sv.name}</p>
+                    <StatusBadge colorCls={`${status.bg} ${status.text}`}>{status.label}</StatusBadge>
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] text-claimondo-ondo">
+                    <span className="inline-flex items-center gap-1">
+                      <MapPinIcon className="w-3 h-3 text-claimondo-ondo/70" />
+                      {stadt}
+                    </span>
+                    <span className="text-claimondo-ondo/40">·</span>
+                    <span className="font-medium text-claimondo-navy">{paket}</span>
+                    <span className="text-claimondo-ondo/40">·</span>
+                    <span className={auslastungTone}>{sv.offeneFaelle}/{sv.maxFaelleMonat}</span>
+                  </div>
+                  <StatusBadge colorCls={typ.cls}>{typ.label}</StatusBadge>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

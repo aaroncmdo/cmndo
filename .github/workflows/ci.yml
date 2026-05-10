@@ -28,8 +28,6 @@ jobs:
 
       - run: npm ci
 
-      # Next.js-Build-Cache — webpack + SWC wiederverwenden wenn
-      # Source-Hash gleich. Spart ~50% Build-Zeit bei incremental Changes.
       - name: Cache Next.js build
         uses: actions/cache@v4
         with:
@@ -47,7 +45,7 @@ jobs:
 
       - name: Lint
         run: npm run lint
-        continue-on-error: true  # 30 React 19 lint errors (setState in effect, etc) — wird in separatem Cleanup gefixt
+        continue-on-error: true
 
       - name: Build
         run: npm run build
@@ -58,6 +56,7 @@ jobs:
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
           NEXT_PUBLIC_GOOGLE_MAPS_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_KEY }}
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
   e2e:
@@ -73,24 +72,9 @@ jobs:
 
       - run: npm ci
 
-      # AAR-616: Dynamische Vercel-Preview-URL je PR.
-      # Vorher: statischer `PLAYWRIGHT_BASE_URL`-Secret → zeigte auf fixe
-      # Staging/Prod-URL, E2E validierte nie den PR-Code.
-      # Jetzt: warten bis Vercel den Preview-Deploy fertig hat, URL als
-      # Step-Output weiterreichen an den Playwright-Run. Für Push auf
-      # main/staging (Production/Staging-Deploys) Fallback auf das
-      # PLAYWRIGHT_BASE_URL-Secret wenn noch vorhanden.
-      - name: Wait for Vercel Preview (PR)
-        if: github.event_name == 'pull_request'
-        id: vercel-preview
-        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          max_timeout: 600
-          check_interval: 15
+      # Kein Vercel-Preview-Wait mehr — E2E läuft gegen app.claimondo.de (Production-VPS).
+      # PRs werden nach Merge auf main getestet, nicht gegen Preview-Deploys.
 
-      # Playwright Browser-Binaries cachen — Chromium-Install
-      # dauert sonst 30-60s pro Run.
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v4
@@ -99,8 +83,6 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install Playwright Chromium
-        # Bei Cache-Hit nur System-Dependencies (apt) neu installieren, keine
-        # Browser-Binaries. Sonst voller Install.
         run: |
           if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
             npx playwright install-deps chromium
@@ -111,8 +93,7 @@ jobs:
       - name: Run E2E Tests
         run: npx playwright test
         env:
-          # AAR-616: Preview-URL > Fallback-Secret > Default in playwright.config.ts
-          PLAYWRIGHT_BASE_URL: ${{ steps.vercel-preview.outputs.url || secrets.PLAYWRIGHT_BASE_URL }}
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

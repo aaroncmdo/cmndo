@@ -1,17 +1,17 @@
-// AAR-322: Zentraler Pflichtdokumente-Erzeuger — ersetzt die zwei vorher
-// duplizierten Implementierungen (createDefaultPflichtdokumente in
-// flow/[token]/actions.ts + createPflichtdokumente in admin/dispatch/actions.ts).
+// Lead-Bucket → Claim-Bucket Transfer.
 //
-// Quelle der Wahrheit ist der dokument_katalog mit JSON-Rule-DSL.
-// AAR-353: Leasing-/Finanzierungsverträge ersetzt durch Katalog-Slot
-// freigabe_bank (triggert auf finanzierung_leasing ∈ {leasing,finanzierung}).
-// Supplementär bleiben nur Slots die (noch) nicht im Katalog sind:
-// gewerbenachweis, gf_vollmacht, halter_vollmacht, halter_ausweis +
-// Fahrerflucht-Polizeibericht.
+// Liest die Erwartung deterministisch aus berechneErwartung() (Lead-Flags
+// → Slot-Liste) und legt für jeden erwarteten Slot eine pflichtdokumente-
+// Zeile an, die noch nicht existiert. Eine Quelle der Wahrheit für „welche
+// Dokumente erwartet werden" — keine doppelte Logik mehr in Katalog-DSL +
+// Supplementär-Block.
+//
+// Idempotent: bestehende Slots werden nicht überschrieben oder dupliziert.
+// Aufrufbar nach Lead→Fall-Konvertierung und nach Lead-Flag-Updates (z.B.
+// wenn der KB nachträglich personenschaden_flag setzt).
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { getAlleSlots } from './katalog'
-import { buildKatalogContext, evaluateKatalogRule } from './ruleEvaluator'
+import { berechneErwartung } from './erwartung'
 
 type PflichtdokumenteInsert = {
   fall_id: string
@@ -21,15 +21,6 @@ type PflichtdokumenteInsert = {
   quelle: string
 }
 
-/**
- * Legt für einen frisch erstellten Fall die passenden pflichtdokumente-Zeilen an.
- * Idempotent: macht nichts wenn bereits pflichtdokumente für den Fall existieren.
- *
- * @param supabase Admin- oder Service-Client (RLS bypassed oder mit passenden Rechten).
- * @param fallId UUID des Falls.
- * @param lead Lead-Spalten relevant für Rule-Evaluation (zb1_status, personenschaden_flag, ...).
- * @param fall Optional: Fall-Spalten für Rules die auf den Fall schauen (technische_stellungnahme_status, zeugen_vorhanden).
- */
 export async function createPflichtdokumenteFromKatalog(
   supabase: SupabaseClient,
   fallId: string,
@@ -49,8 +40,6 @@ export async function createPflichtdokumenteFromKatalog(
     (existingRows ?? []).map((r) => r.dokument_typ as string),
   )
 
-  const ctx = buildKatalogContext({ lead, fall })
-  const alleSlots = await getAlleSlots(supabase)
   const docs: PflichtdokumenteInsert[] = []
   const seen = new Set<string>()
 
@@ -66,7 +55,7 @@ export async function createPflichtdokumenteFromKatalog(
     docs.push({
       fall_id: fallId,
       dokument_typ: slot.slot_id,
-      pflicht: istPflicht,
+      pflicht: slot.pflicht,
       status: 'ausstehend',
       quelle: 'system',
     })
@@ -114,9 +103,8 @@ export async function createPflichtdokumenteFromKatalog(
   if (docs.length === 0) return
   await supabase.from('pflichtdokumente').insert(docs)
 
-  // AAR-623: Konditionale WA-Tasks fuer freigabe_bank + zeugenbericht
-  // triggern — nur fuer Slots die gerade frisch als pflicht angelegt
-  // wurden. Idempotent (prueft Task-Dedup + Upload-Status intern).
+  // AAR-623: Konditionale WA-Tasks für freigabe_bank + zeugenbericht
+  // triggern — nur für Slots die gerade frisch angelegt wurden.
   try {
     const { triggerKonditionaleDokumentTasks } = await import('./konditional-tasks')
     const insertedSlots = docs.map((d) => d.dokument_typ)

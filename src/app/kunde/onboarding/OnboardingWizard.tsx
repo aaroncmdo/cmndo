@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-100: 5-Step Onboarding Wizard
 // AAR-125: Deep-Link via ?step=dokumente springt direkt in Step 3 (Dokumente)
@@ -6,15 +6,17 @@ import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   CheckIcon, UploadCloudIcon, CalendarIcon, FileTextIcon, SparklesIcon, FolderOpenIcon,
-  AlertCircleIcon, ClockIcon, RefreshCwIcon, InfoIcon, XIcon,
+  AlertCircleIcon, ClockIcon, RefreshCwIcon, InfoIcon, XIcon, CameraIcon,
 } from 'lucide-react'
 import {
   completeOnboarding,
   uploadPflichtdokument,
   uploadKundenDokument,
   markiereAlleSpaeterNachreichen,
+  setzeVorschadenAbrechnung,
   type PflichtdokumentStand,
   type FreierSlot,
+  type VorschadenAbrechnungsStatus,
 } from './actions'
 import type { ClaimFull } from '@/lib/claims/types'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
@@ -124,6 +126,14 @@ const DOC_INFO: Record<string, { warum: string; wo: string }> = {
   vorschaden_bericht: {
     warum: 'Der SV-Bericht zu früheren Schäden grenzt Alt- von Neuschaden ab — schützt vor Kürzungen durch die Versicherung.',
     wo: 'Falls Sie damals ein Gutachten hatten, liegt der Bericht bei Ihren Unterlagen — oder anfordern beim damaligen Sachverständigen.',
+  },
+  altschaden_fotos: {
+    warum: 'Fotos eines früheren Schadens helfen dem Gutachter, den aktuellen Schaden sauber abzugrenzen. Ohne Vergleichsfotos kann die Versicherung den Vorschaden vom aktuellen abziehen.',
+    wo: 'Auf Ihrem Phone (Galerie / Cloud-Backup vom alten Datum), in alten WhatsApp-Chats oder bei der Werkstatt die damals repariert hat.',
+  },
+  altes_gutachten: {
+    warum: 'Ein früheres Gutachten zum Vorschaden ist die beste Abgrenzung zum aktuellen Schaden. Der neue Sachverständige spart Zeit und Sie stärken Ihre rechtliche Position erheblich.',
+    wo: 'In Ihren Unterlagen vom letzten Schadensfall — oft als PDF per E-Mail vom damaligen Gutachter erhalten oder beim damaligen Anwalt anfordern.',
   },
   mietwagenrechnung: {
     warum: 'Die Mietwagenkosten werden von der gegnerischen Versicherung erstattet, wenn der Zeitraum und die Klasse nachgewiesen sind.',
@@ -330,7 +340,7 @@ export default function OnboardingWizard({
 
   function handleFinish() {
     startTransition(async () => {
-      await completeOnboarding()
+      await completeOnboarding(fall?.id)
       router.push('/kunde')
       router.refresh()
     })
@@ -346,9 +356,9 @@ export default function OnboardingWizard({
   const pflichtBlockedSlots = pflichtSlots.filter((s) => s.pflicht && s.status !== 'erfuellt')
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
+    <div className="min-h-screen bg-claimondo-bg flex flex-col">
       {/* Progress */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-[#f8f9fb]">
+      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-claimondo-bg">
         <div className="h-full bg-claimondo-ondo transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
@@ -382,6 +392,92 @@ export default function OnboardingWizard({
                   Wir kuemmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
                   Dieser kurze Einstieg zeigt Ihnen Ihre naechsten Schritte — dauert ca. 3 Minuten.
                 </p>
+
+                {/* Schnellstart per ZB1-Scan: spart manuelle Eingabe von FIN, HSN/TSN, Halter */}
+                {fall?.id && (
+                  <div className="mt-5 rounded-2xl border border-claimondo-ondo/30 bg-claimondo-ondo/5 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-claimondo-ondo/15">
+                        <CameraIcon className="h-5 w-5 text-claimondo-ondo" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-claimondo-navy">
+                          Schnellstart: Fahrzeugschein scannen
+                        </p>
+                        <p className="mt-1 text-xs text-claimondo-ondo leading-relaxed">
+                          Foto von Ihrem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen,
+                          Hersteller und Halter automatisch aus. Spart Ihnen das spätere Tippen.
+                        </p>
+
+                        {welcomeOcrResult && (
+                          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                            <p className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
+                              <CheckIcon className="h-3.5 w-3.5" />
+                              {welcomeOcrResult.fieldsFound} Felder erkannt
+                            </p>
+                            <ul className="mt-2 space-y-0.5 text-xs text-claimondo-navy">
+                              {welcomeOcrResult.extracted.fin_vin && (
+                                <li>FIN: <span className="font-mono font-medium">{welcomeOcrResult.extracted.fin_vin}</span></li>
+                              )}
+                              {welcomeOcrResult.extracted.kennzeichen && (
+                                <li>Kennzeichen: <span className="font-medium">{welcomeOcrResult.extracted.kennzeichen}</span></li>
+                              )}
+                              {(welcomeOcrResult.extracted.fahrzeug_hersteller || welcomeOcrResult.extracted.fahrzeug_modell) && (
+                                <li>
+                                  Fahrzeug:{' '}
+                                  <span className="font-medium">
+                                    {[welcomeOcrResult.extracted.fahrzeug_hersteller, welcomeOcrResult.extracted.fahrzeug_modell]
+                                      .filter(Boolean).join(' ')}
+                                  </span>
+                                </li>
+                              )}
+                              {(welcomeOcrResult.extracted.halter_vorname || welcomeOcrResult.extracted.halter_nachname) && (
+                                <li>
+                                  Halter:{' '}
+                                  <span className="font-medium">
+                                    {[welcomeOcrResult.extracted.halter_vorname, welcomeOcrResult.extracted.halter_nachname]
+                                      .filter(Boolean).join(' ')}
+                                  </span>
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
+
+                        {welcomeOcrError && (
+                          <p className="mt-2 text-xs text-amber-700">{welcomeOcrError}</p>
+                        )}
+
+                        <label className="mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-xs font-semibold cursor-pointer active:scale-[0.98] transition-all">
+                          {welcomeOcrLoading ? (
+                            <>
+                              <RefreshCwIcon className="h-3.5 w-3.5 animate-spin" />
+                              Wird ausgelesen…
+                            </>
+                          ) : (
+                            <>
+                              <CameraIcon className="h-3.5 w-3.5" />
+                              {welcomeOcrResult ? 'Erneut scannen' : 'Foto machen'}
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            disabled={welcomeOcrLoading}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0]
+                              if (f) handleWelcomeOcr(f)
+                              e.target.value = ''
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={() => setStepIndex(1)}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
@@ -718,7 +814,7 @@ function DokumentInfoOverlay({
             type="button"
             onClick={onClose}
             aria-label="Schließen"
-            className="w-8 h-8 rounded-full hover:bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo"
+            className="w-8 h-8 rounded-full hover:bg-claimondo-bg flex items-center justify-center text-claimondo-ondo"
           >
             <XIcon className="w-5 h-5" />
           </button>

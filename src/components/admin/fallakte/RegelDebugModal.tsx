@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-542 (C5): Admin-Debug-Modal pro Pflicht-Matrix-Slot.
 // AAR-781: Migriert auf Modal-Primitive (ESC-Handling durch Modal übernommen).
@@ -26,10 +26,10 @@ export default function RegelDebugModal({
   if (!entry) return null
 
   const status = !entry.freigeschaltet
-    ? { label: 'Nicht freigeschaltet', color: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' }
+    ? { label: 'Nicht freigeschaltet', color: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' }
     : entry.pflicht
-      ? { label: 'Pflicht', color: 'bg-[#4573A2]/10 text-[#0D1B3E] border-[#4573A2]/30' }
-      : { label: 'Optional', color: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' }
+      ? { label: 'Pflicht', color: 'bg-claimondo-ondo/10 text-claimondo-navy border-claimondo-ondo/30' }
+      : { label: 'Optional', color: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' }
 
   return (
     <Modal open onClose={onClose} maxWidth={512} noPadding hideCloseButton ariaLabel="Regel-Debug">
@@ -39,7 +39,7 @@ export default function RegelDebugModal({
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1">
               Slot · {entry.kategorie}
             </p>
-            <h3 className="text-base font-semibold text-[#0D1B3E] truncate">{entry.label}</h3>
+            <h3 className="text-base font-semibold text-claimondo-navy truncate">{entry.label}</h3>
             <p className="text-[11px] text-claimondo-ondo mt-0.5 truncate">
               slot_id: <code className="font-mono">{entry.slot_id}</code>
             </p>
@@ -77,7 +77,7 @@ export default function RegelDebugModal({
             <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
               freigeschaltet_wenn
             </p>
-            <pre className="bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
+            <pre className="bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
               {pretty(entry.freigeschaltet_wenn)}
             </pre>
           </div>
@@ -85,7 +85,7 @@ export default function RegelDebugModal({
             <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
               pflicht_wenn
             </p>
-            <pre className="bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
+            <pre className="bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
               {pretty(entry.pflicht_wenn)}
             </pre>
           </div>
@@ -117,7 +117,7 @@ export default function RegelDebugModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 rounded-md text-xs font-medium bg-[#4573A2] text-white hover:bg-[#0D1B3E]"
+            className="px-3 py-1.5 rounded-md text-xs font-medium bg-claimondo-ondo text-white hover:bg-claimondo-navy"
           >
             Schließen
           </button>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -32,6 +32,34 @@ type GutachterTermin = {
 
 type DailyW = { date: string; tempMax: number; tempMin: number; code: number }
 function wEmoji(c: number) { return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️' }
+
+// 2026-05-06: HH:mm in Europe/Berlin formatieren — stabil zwischen
+// Vercel-SSR (UTC) und Browser. date-fns format() nutzt die jeweilige
+// Local-TZ, was bei SSR zu 2h-Versatz im Sommer führte (UTC-Wall ≠
+// Berlin-Wall). Intl.DateTimeFormat mit explicit timeZone löst das.
+function formatBerlinTime(input: Date | string): string {
+  const d = typeof input === 'string' ? new Date(input) : input
+  return new Intl.DateTimeFormat('de-DE', {
+    timeZone: 'Europe/Berlin',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(d)
+}
+
+// 2026-05-06: Time-Match — externalBusy-Event auf internen Claimondo-
+// Termin mappen damit der „Gebucht"-Pill klickbar zum Auftrag wird.
+// Toleranz 2 Min (Google FreeBusy gibt teils Sekunden-Drift zurück).
+const TIME_MATCH_TOLERANCE_MS = 2 * 60 * 1000
+function findMatchingFallId(
+  externalStart: string,
+  candidates: Array<{ fallId: string; startMs: number }> | undefined,
+): string | null {
+  if (!candidates || candidates.length === 0) return null
+  const externalMs = new Date(externalStart).getTime()
+  const hit = candidates.find((c) => Math.abs(c.startMs - externalMs) < TIME_MATCH_TOLERANCE_MS)
+  return hit?.fallId ?? null
+}
 
 export default function SVKalenderClient({
   faelle,
@@ -140,7 +168,15 @@ export default function SVKalenderClient({
   const ohneTermin = faelle.filter(f => !f.sv_termin)
 
   function getEntriesForDay(day: Date) {
-    return terminFaelle.filter(f => isSameDay(new Date(f.sv_termin!), day))
+    // 2026-05-06: ASC nach Uhrzeit sortieren — sonst stehen 16:00 oben
+    // und 08:00 unten (zufällig in DB-Reihenfolge). User-Erwartung:
+    // 8 oben, 16 unten.
+    return terminFaelle
+      .filter((f) => isSameDay(new Date(f.sv_termin!), day))
+      .sort(
+        (a, b) =>
+          new Date(a.sv_termin!).getTime() - new Date(b.sv_termin!).getTime(),
+      )
   }
 
   async function handleSetTermin() {
@@ -182,9 +218,9 @@ export default function SVKalenderClient({
             </a>
           )}
           <div className="flex items-center gap-2">
-            <button onClick={() => setCurrentDate(subWeeks(currentDate, 1))} className="px-3 py-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] rounded-lg transition-colors">← Zurück</button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs text-claimondo-navy hover:text-claimondo-navy hover:bg-[#f8f9fb] rounded-lg transition-colors font-medium">Heute</button>
-            <button onClick={() => setCurrentDate(addWeeks(currentDate, 1))} className="px-3 py-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] rounded-lg transition-colors">Weiter →</button>
+            <button onClick={() => setCurrentDate(subWeeks(currentDate, 1))} className="px-3 py-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg rounded-lg transition-colors">← Zurück</button>
+            <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs text-claimondo-navy hover:text-claimondo-navy hover:bg-claimondo-bg rounded-lg transition-colors font-medium">Heute</button>
+            <button onClick={() => setCurrentDate(addWeeks(currentDate, 1))} className="px-3 py-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg rounded-lg transition-colors">Weiter →</button>
           </div>
         </div>
       </div>
@@ -200,7 +236,7 @@ export default function SVKalenderClient({
               const dayKey = format(day, 'yyyy-MM-dd')
               const dayW = dailyWeather[dayKey]
               return (
-                <div key={i} className={`border-r border-claimondo-border/50 last:border-r-0 min-h-48 ${today ? 'bg-[#f8f9fb]/30' : ''}`}>
+                <div key={i} className={`border-r border-claimondo-border/50 last:border-r-0 min-h-48 ${today ? 'bg-claimondo-bg/30' : ''}`}>
                   {/* Day header */}
                   <div className="px-2 py-2 border-b border-claimondo-border/50 text-center">
                     <span className="text-claimondo-ondo text-[10px] uppercase">{format(day, 'EEE', { locale: de })}</span>
@@ -234,7 +270,7 @@ export default function SVKalenderClient({
                         return (
                           <div
                             key={`busy-${idx}`}
-                            className="px-2 py-1 rounded-lg text-[10px] leading-tight bg-[#f8f9fb] text-claimondo-ondo border border-claimondo-border"
+                            className="px-2 py-1 rounded-lg text-[10px] leading-tight bg-claimondo-bg text-claimondo-ondo border border-claimondo-border"
                             title="Externer Google-Termin — blockiert"
                           >
                             <div className="font-medium">
@@ -270,7 +306,7 @@ export default function SVKalenderClient({
                         )
                       })}
                     {entries.map(fall => {
-                      const time = fall.sv_termin ? format(new Date(fall.sv_termin), 'HH:mm') : ''
+                      const time = fall.sv_termin ? formatBerlinTime(fall.sv_termin) : ''
                       const overdue = fall.sv_termin && isBefore(new Date(fall.sv_termin), startOfDay(new Date()))
                       const isReserviert = fall.gutachter_termin_status === 'reserviert'
                       // AAR-864: pending Verlegung — gestrichelt amber
@@ -333,7 +369,7 @@ export default function SVKalenderClient({
             </h2>
             <div className="space-y-2">
               {ohneTermin.map(fall => (
-                <div key={fall.id} className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-xl bg-[#f8f9fb]/40">
+                <div key={fall.id} className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-xl bg-claimondo-bg/40">
                   <div className="min-w-0">
                     <Link href={`/gutachter/fall/${fall.id}`} className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] text-xs font-mono">
                       {fall.fall_nummer ?? fall.id.slice(0, 8)}
@@ -370,7 +406,7 @@ export default function SVKalenderClient({
                       type="date"
                       value={terminDate}
                       onChange={e => setTerminDate(e.target.value)}
-                      className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                      className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                     />
                   </div>
                   <div>
@@ -379,7 +415,7 @@ export default function SVKalenderClient({
                       type="time"
                       value={terminTime}
                       onChange={e => setTerminTime(e.target.value)}
-                      className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                      className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                     />
                   </div>
                 </div>
@@ -387,7 +423,7 @@ export default function SVKalenderClient({
                 {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
 
                 <div className="flex gap-2">
-                  <button onClick={() => setDialogFall(null)} className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors">
+                  <button onClick={() => setDialogFall(null)} className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
                     Abbrechen
                   </button>
                   <button
@@ -413,11 +449,11 @@ export default function SVKalenderClient({
                   onChange={e => setAblehnenGrund(e.target.value)}
                   placeholder="Ablehnungsgrund (z.B. Terminkonflikt, Krankheit ...)"
                   rows={3}
-                  className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-red-300 mb-4 resize-none"
+                  className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-red-300 mb-4 resize-none"
                 />
                 {svAktionError && <p className="text-red-400 text-xs mb-3">{svAktionError}</p>}
                 <div className="flex gap-2">
-                  <button onClick={() => setSvAktionModal(null)} className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:bg-[#f8f9fb] transition-colors">
+                  <button onClick={() => setSvAktionModal(null)} className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:bg-claimondo-bg transition-colors">
                     Abbrechen
                   </button>
                   <button
@@ -443,13 +479,13 @@ export default function SVKalenderClient({
                         type="date"
                         value={slot.datum}
                         onChange={e => setGegSlots(prev => prev.map((s, i) => i === idx ? { ...s, datum: e.target.value } : s))}
-                        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+                        className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                       />
                       <input
                         type="time"
                         value={slot.uhrzeit}
                         onChange={e => setGegSlots(prev => prev.map((s, i) => i === idx ? { ...s, uhrzeit: e.target.value } : s))}
-                        className="w-24 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+                        className="w-24 bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                       />
                       {gegSlots.length > 1 && (
                         <button onClick={() => setGegSlots(prev => prev.filter((_, i) => i !== idx))} className="text-claimondo-ondo/70 hover:text-red-500 text-xs px-1">✕</button>
@@ -467,7 +503,7 @@ export default function SVKalenderClient({
                 </div>
                 {svAktionError && <p className="text-red-400 text-xs mb-3">{svAktionError}</p>}
                 <div className="flex gap-2">
-                  <button onClick={() => setSvAktionModal(null)} className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:bg-[#f8f9fb] transition-colors">
+                  <button onClick={() => setSvAktionModal(null)} className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:bg-claimondo-bg transition-colors">
                     Abbrechen
                   </button>
                   <button

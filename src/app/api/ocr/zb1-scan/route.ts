@@ -74,9 +74,27 @@ export async function POST(req: NextRequest) {
     const found = core.filter(Boolean).length
     const confidence = found / core.length
 
-    // 4) Bei genug Daten: direkt in leads schreiben
+    // 4) Bei genug Daten: direkt in leads schreiben (inkl. Halter-Felder für ist_fahrzeughalter=false)
     const zb1Token = crypto.randomUUID()
     if (confidence >= 0.8) {
+      // Prüfen ob Halter-Daten gebraucht werden (ist_fahrzeughalter=false am Lead)
+      const { data: leadRow } = await supabase
+        .from('leads')
+        .select('ist_fahrzeughalter')
+        .eq('id', leadId)
+        .single()
+
+      const halterUpdate =
+        leadRow?.ist_fahrzeughalter === false
+          ? {
+              halter_vorname: extracted.halter_vorname ?? null,
+              halter_nachname: extracted.halter_nachname ?? null,
+              halter_strasse: extracted.halter_strasse ?? null,
+              halter_plz: extracted.halter_plz ?? null,
+              halter_stadt: extracted.halter_stadt ?? null,
+            }
+          : {}
+
       const { error: updateError } = await supabase
         .from('leads')
         .update({

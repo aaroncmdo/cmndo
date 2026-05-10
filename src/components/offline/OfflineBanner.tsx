@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { useOnlineStatus } from '@/lib/offline/use-online-status'
@@ -97,7 +97,7 @@ export default function OfflineBanner() {
 
   if (reconnect.phase === 'syncing') {
     return (
-      <div className="fixed top-0 inset-x-0 z-[60] bg-[#4573A2] text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-lg">
+      <div className="fixed top-0 inset-x-0 z-[60] bg-claimondo-ondo text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-lg">
         <CloudUploadIcon className="w-4 h-4 animate-pulse" />
         Verbindung wiederhergestellt — {reconnect.pending}{' '}
         {reconnect.pending === 1 ? 'Upload wird' : 'Uploads werden'} synchronisiert...

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -85,7 +85,7 @@ export default function KalenderEinstellungenClient({
       <section className="bg-white border border-claimondo-border rounded-2xl p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-[#0D1B3E]">Google Calendar</h2>
+            <h2 className="text-base font-semibold text-claimondo-navy">Google Calendar</h2>
             <p className="text-xs text-claimondo-ondo">
               OAuth — Claimondo liest Verfügbarkeit direkt aus deinem Google-Konto.
             </p>
@@ -96,7 +96,7 @@ export default function KalenderEinstellungenClient({
               verbunden
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo text-xs font-medium">
               nicht verbunden
             </span>
           )}
@@ -107,7 +107,7 @@ export default function KalenderEinstellungenClient({
         <button
           type="button"
           onClick={handleConnectGoogle}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#4573A2] hover:text-[#0D1B3E]"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy"
         >
           {googleConnected ? (
             <>
@@ -127,7 +127,7 @@ export default function KalenderEinstellungenClient({
       <section className="bg-white border border-claimondo-border rounded-2xl p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-semibold text-[#0D1B3E]">Apple iCloud / CalDAV</h2>
+            <h2 className="text-base font-semibold text-claimondo-navy">Apple iCloud / CalDAV</h2>
             <p className="text-xs text-claimondo-ondo">
               App-spezifisches Passwort aus deiner Apple-ID — Claimondo liest Verfügbarkeit.
             </p>
@@ -145,7 +145,7 @@ export default function KalenderEinstellungenClient({
               </span>
             )
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-xs font-medium">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo text-xs font-medium">
               nicht verbunden
             </span>
           )}
@@ -178,7 +178,7 @@ export default function KalenderEinstellungenClient({
           <button
             type="button"
             onClick={() => setCaldavModalOpen(true)}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#4573A2] hover:text-[#0D1B3E]"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy"
           >
             {caldav ? (
               <>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-638/641/643: Client-Variant der Termin-Liste. Lädt die Termine nach
 // Mount via Browser-Client (Supabase). Pattern parallel zu FallRueckrufSection
@@ -29,8 +29,8 @@ type Normalized = {
 const TYP_META: Record<TerminTyp, { label: string; icon: typeof PhoneCallIcon; cls: string }> = {
   rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
-  gutachter: { label: 'Gutachter', icon: HardHatIcon, cls: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' },
+  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
+  gutachter: { label: 'Gutachter', icon: HardHatIcon, cls: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' },
   kb_beratung: { label: 'KB-Beratung', icon: VideoIcon, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
 }
 
@@ -51,6 +51,7 @@ export default function TerminListeClient({
   variant = 'full',
   title = 'Termine',
   limit,
+  onRueckrufClick,
 }: {
   fallId?: string
   leadId?: string
@@ -58,6 +59,8 @@ export default function TerminListeClient({
   variant?: 'full' | 'compact'
   title?: string
   limit?: number
+  /** Wenn gesetzt: Rückruf-Zeilen öffnen diesen Handler statt zu navigieren. */
+  onRueckrufClick?: (leadId: string) => void
 }) {
   const [rows, setRows] = useState<Normalized[] | null>(null)
 
@@ -152,16 +155,16 @@ export default function TerminListeClient({
         <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">{title}</h3>
       )}
       {kommend.length > 0 && (
-        <Gruppe label="Kommend" rows={kommend} dispatchLinks={dispatchLinks} />
+        <Gruppe label="Kommend" rows={kommend} dispatchLinks={dispatchLinks} onRueckrufClick={onRueckrufClick} />
       )}
       {vergangen.length > 0 && (
-        <Gruppe label="Vergangen" rows={vergangen} dispatchLinks={dispatchLinks} muted />
+        <Gruppe label="Vergangen" rows={vergangen} dispatchLinks={dispatchLinks} muted onRueckrufClick={onRueckrufClick} />
       )}
     </div>
   )
 }
 
-function Gruppe({ label, rows, muted, dispatchLinks }: { label: string; rows: Normalized[]; muted?: boolean; dispatchLinks?: boolean }) {
+function Gruppe({ label, rows, muted, dispatchLinks, onRueckrufClick }: { label: string; rows: Normalized[]; muted?: boolean; dispatchLinks?: boolean; onRueckrufClick?: (leadId: string) => void }) {
   return (
     <section className={`bg-white rounded-xl border border-claimondo-border ${muted ? 'opacity-80' : ''}`}>
       <div className="px-3 py-2 border-b border-claimondo-border flex items-center justify-between">
@@ -175,21 +178,16 @@ function Gruppe({ label, rows, muted, dispatchLinks }: { label: string; rows: No
   )
 }
 
-function Row({ r, dispatchLinks }: { r: Normalized; dispatchLinks?: boolean }) {
+function Row({ r, dispatchLinks, onRueckrufClick }: { r: Normalized; dispatchLinks?: boolean; onRueckrufClick?: (leadId: string) => void }) {
   const meta = TYP_META[r.typ] ?? TYP_META.intern
   const Icon = meta.icon
   const start = new Date(r.start)
   const now = new Date()
   const isOverdue = r.status !== 'erledigt' && r.status !== 'abgesagt' && r.status !== 'abgelehnt' && start < now
-  const href = r.fallId
-    ? `/faelle/${r.fallId}`
-    : r.leadId
-      ? (dispatchLinks ? `/dispatch/leads/${r.leadId}` : '#')
-      : '#'
-  const datum = start.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+  const datum = start.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 
   return (
-    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-[#f8f9fb] transition-colors">
+    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-claimondo-bg transition-colors">
       <span className={`flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full border shrink-0 ${meta.cls}`}>
         <Icon className="w-3 h-3" />
         {meta.label}
@@ -205,6 +203,31 @@ function Row({ r, dispatchLinks }: { r: Normalized; dispatchLinks?: boolean }) {
       <span className={`text-[10px] font-medium whitespace-nowrap ${STATUS_CLS[r.status] ?? 'text-claimondo-ondo'}`}>
         {r.status}
       </span>
+    </>
+  )
+
+  // Rückruf-Zeile: Handler öffnet Panel statt Navigation
+  if (r.typ === 'rueckruf' && onRueckrufClick && r.leadId) {
+    return (
+      <button
+        type="button"
+        onClick={() => onRueckrufClick(r.leadId!)}
+        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-claimondo-bg transition-colors text-left"
+      >
+        {inner}
+      </button>
+    )
+  }
+
+  const href = r.fallId
+    ? `/faelle/${r.fallId}`
+    : r.leadId
+      ? (dispatchLinks ? `/dispatch/leads/${r.leadId}` : '#')
+      : '#'
+
+  return (
+    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-claimondo-bg transition-colors">
+      {inner}
     </Link>
   )
 }

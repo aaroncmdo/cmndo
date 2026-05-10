@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-137 / W3: DispatchShell — 2-Column Layout.
 // Links: Phase-Stepper + aktive Phase. Rechts: fixe Sidebar (Timer, Disqual,
@@ -25,6 +25,7 @@ import {
   GespraechshilfePanel,
   EinwandKarten,
 } from './_sidebar/SidebarStubs'
+import KundenMatchCard from './_sidebar/KundenMatchCard'
 import { computeFlowLinkStufe, FLOWLINK_STUFE_LABEL } from '@/lib/dispatch/fahrzeug-marken'
 import { PHASE_LABELS as PHASE_LABELS_CONST, PHASE_BADGES } from '../_components/leadPhaseConstants'
 import PageHeader from '@/components/shared/PageHeader'
@@ -77,7 +78,7 @@ export default function DispatchShell({
 
   const phase = lead.qualifizierungs_phase ?? 'neu'
   const phaseLabel = PHASE_LABELS_CONST[phase] ?? phase
-  const phaseColor = PHASE_BADGES[phase] ?? 'bg-[#f8f9fb] text-claimondo-ondo'
+  const phaseColor = PHASE_BADGES[phase] ?? 'bg-claimondo-bg text-claimondo-ondo'
 
   return (
     <DispatchPhaseProvider
@@ -147,8 +148,14 @@ export default function DispatchShell({
         </main>
 
         {/* Sidebar */}
-        <aside className="lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-claimondo-border bg-[#f8f9fb] overflow-y-auto p-4 space-y-3">
+        <aside className="lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-claimondo-border bg-claimondo-bg overflow-y-auto p-4 space-y-3">
           <TimerWidget />
+          <KundenMatchCard
+            leadId={lead.id as string}
+            initialMatchedKundeId={
+              ((lead as Record<string, unknown>).kunde_id as string | null) ?? null
+            }
+          />
           <DisqualifizierenButton />
           <RueckrufButton />
           <TerminListeSidebar />
