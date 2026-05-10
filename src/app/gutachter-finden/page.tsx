@@ -35,13 +35,13 @@ export const metadata: Metadata = {
     title: 'Kfz-Gutachter finden — sofort & in Ihrer Nähe',
     description:
       'Karte aller verfügbaren Sachverständigen in Deutschland. Termin in unter 48h. Kostenfrei für unverschuldet Geschädigte.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Gutachter finden' }],
+    // opengraph-image.tsx in diesem Verzeichnis liefert das dynamische OG-Bild.
+    // Next.js hängt den /gutachter-finden/opengraph-image Route automatisch ein.
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Kfz-Gutachter finden — sofort & in Ihrer Nähe',
     description: 'Karte aller verfügbaren Sachverständigen in Deutschland. Termin in unter 48h.',
-    images: ['/og-default.png'],
   },
 }
 
