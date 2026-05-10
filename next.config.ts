@@ -90,17 +90,15 @@ const nextConfig: NextConfig = {
   },
   // Feldmodus-3D-Packages (three, deck.gl, loaders.gl) werden erst installiert
   // wenn das Feature produktionsreif ist. Bis dahin werden alle Imports auf
-  // einen Proxy-Stub umgeleitet (Turbopack resolveAlias).
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        three: './src/lib/mapbox/__stubs__/three-stub.ts',
-        'three/examples/jsm/loaders/OBJLoader.js': './src/lib/mapbox/__stubs__/three-stub.ts',
-        'three/examples/jsm/loaders/RGBELoader.js': './src/lib/mapbox/__stubs__/three-stub.ts',
-        '@deck.gl/mapbox': './src/lib/mapbox/__stubs__/three-stub.ts',
-        '@deck.gl/geo-layers': './src/lib/mapbox/__stubs__/three-stub.ts',
-        '@loaders.gl/3d-tiles': './src/lib/mapbox/__stubs__/three-stub.ts',
-      },
+  // einen Proxy-Stub umgeleitet (Turbopack resolveAlias — Top-Level in Next 16).
+  turbopack: {
+    resolveAlias: {
+      three: './src/lib/mapbox/__stubs__/three-stub',
+      'three/examples/jsm/loaders/OBJLoader.js': './src/lib/mapbox/__stubs__/three-stub',
+      'three/examples/jsm/loaders/RGBELoader.js': './src/lib/mapbox/__stubs__/three-stub',
+      '@deck.gl/mapbox': './src/lib/mapbox/__stubs__/three-stub',
+      '@deck.gl/geo-layers': './src/lib/mapbox/__stubs__/three-stub',
+      '@loaders.gl/3d-tiles': './src/lib/mapbox/__stubs__/three-stub',
     },
   },
 };
