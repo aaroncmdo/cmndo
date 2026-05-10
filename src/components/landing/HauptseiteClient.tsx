@@ -232,39 +232,57 @@ function HeroSection() {
 }
 
 // ── Section 2 — Zahlen ────────────────────────────────────────────────────────
+// 2026-05-10: Glass-Cards statt solid-color-Border-Bug. Vorher waren bg-claimondo-*
+// als "accent" gemeint, wurden aber als Background-Util angewendet — Cards waren
+// vollflächig ondo/navy/light-blue eingefärbt. Jetzt Glass-Pattern wie der Hero.
 const ZAHLEN = [
-  { zahl: '2.000+', label: 'Erfolgreich durchgesetzte Fälle', accent: 'bg-claimondo-ondo' },
-  { zahl: '8 Mio. €+', label: 'Schadenssumme erwirkt', accent: 'bg-claimondo-navy' },
-  { zahl: '32 Tage', label: 'Ø Abwicklungsdauer', accent: 'bg-claimondo-light-blue' },
-  { zahl: '<15 Min', label: 'WhatsApp-Antwortzeit', accent: 'bg-claimondo-ondo' },
+  { zahl: '2.000+', label: 'Erfolgreich durchgesetzte Fälle' },
+  { zahl: '8 Mio. €+', label: 'Schadenssumme erwirkt' },
+  { zahl: '32 Tage', label: 'Ø Abwicklungsdauer' },
+  { zahl: '< 15 Min', label: 'WhatsApp-Antwortzeit' },
 ]
 
 function ZahlenSection() {
   return (
     <div className="relative z-10 mx-auto -mt-10 max-w-6xl px-5 sm:px-8">
       <FadeUp>
-        <div className="rounded-[22px] border border-claimondo-border bg-white p-8 shadow-[0_20px_48px_-8px_rgba(13,27,62,.18)]">
-          <div className="flex flex-col justify-between gap-6 border-b border-claimondo-border pb-7 sm:flex-row sm:items-start">
+        <div
+          className="rounded-3xl border border-white/60 bg-white/75 p-8 shadow-[0_20px_48px_-8px_rgba(13,27,62,.12)] backdrop-blur-xl"
+          style={{ WebkitBackdropFilter: 'saturate(180%) blur(20px)' }}
+        >
+          <div className="flex flex-col justify-between gap-6 border-b border-claimondo-navy/10 pb-7 sm:flex-row sm:items-start">
             <div>
-              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-claimondo-ondo">
+              <p
+                className="text-[11px] font-bold uppercase tracking-[0.18em] text-claimondo-ondo"
+                style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+              >
                 Claimondo in Zahlen
               </p>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em] text-claimondo-navy sm:text-3xl">
+              <h2
+                className="mt-2 text-balance text-2xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-3xl"
+                style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+              >
                 Wir reden nicht — wir liefern.
               </h2>
             </div>
-            <p className="max-w-xs text-right text-sm leading-relaxed text-gray-500">
+            <p className="max-w-xs text-sm leading-relaxed text-claimondo-shield sm:text-right">
               Erfahrungen aus über 2.000 erfolgreich abgewickelten Fällen mit unserer Partnerkanzlei.
             </p>
           </div>
-          <div className="mt-7 grid grid-cols-2 gap-5 lg:grid-cols-4">
-            {ZAHLEN.map(({ zahl, label, accent }, i) => (
+          <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            {ZAHLEN.map(({ zahl, label }, i) => (
               <FadeUp key={zahl} delay={i * 80}>
-                <div className={`border-l-[3px] ${accent} pl-5`}>
-                  <div className="font-mono text-4xl font-extrabold leading-none tracking-[-0.04em] text-claimondo-navy sm:text-5xl">
+                <div
+                  className="rounded-2xl border border-white/60 bg-white/65 px-5 py-5 shadow-[0_4px_18px_rgba(13,27,62,0.06)] backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-[0_8px_28px_rgba(13,27,62,0.10)]"
+                  style={{ WebkitBackdropFilter: 'blur(14px)' }}
+                >
+                  <div
+                    className="text-3xl font-bold leading-none tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
+                    style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+                  >
                     {zahl}
                   </div>
-                  <p className="mt-2 text-sm leading-snug text-gray-500">{label}</p>
+                  <p className="mt-2 text-sm leading-snug text-claimondo-ondo">{label}</p>
                 </div>
               </FadeUp>
             ))}
