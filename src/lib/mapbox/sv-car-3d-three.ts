@@ -1,3 +1,4 @@
+// @ts-nocheck — three.js nicht installiert (Feldmodus-3D-Backlog)
 'use client'
 
 // 2026-05-08 (C11b): Three.js-basierte SV-Auto-3D-Render-Pipeline.
