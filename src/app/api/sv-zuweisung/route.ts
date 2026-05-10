@@ -8,6 +8,7 @@ import { triggerSV01, deductLeadpreis } from '@/lib/gutachterTasking'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
+import { sendNachricht } from '@/lib/whatsapp/send'
 
 // ─── Point-in-Polygon (Ray Casting) ─────────────────────────────────────────
 
@@ -327,6 +328,50 @@ export async function POST(request: Request) {
       sendFallCommunication(fallId, 'sv_losgefahren').catch((err) => {
         console.error('[sv-zuweisung] sv_losgefahren-Benachrichtigung:', err instanceof Error ? err.message : err)
       })
+
+      // WhatsApp an SV — Neuer Auftrag
+      if (svProfileData?.profile_id) {
+        const { data: svProfile2 } = await supabase
+          .from('profiles')
+          .select('vorname, telefon')
+          .eq('id', svProfileData.profile_id)
+          .maybeSingle()
+
+        if (svProfile2?.telefon) {
+          const appUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claimondo.de'
+          const svPortalLink = fallFull.id ? `${appUrl}/gutachter/fall/${fallFull.id}` : `${appUrl}/gutachter`
+          const wunschterminText = fallFull.wunschtermin
+            ? new Date(fallFull.wunschtermin).toLocaleDateString('de-DE', {
+                timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric',
+              })
+            : 'wird noch abgestimmt'
+
+          const svText = [
+            `Hallo ${svProfile2.vorname ?? 'Gutachter'}, du hast einen neuen Auftrag erhalten:`,
+            '',
+            `Fall: ${fallFull.fall_nummer ?? fallId.slice(0, 8)}`,
+            kundeName ? `Kunde: ${kundeName}` : null,
+            fallFull.kennzeichen ? `Fahrzeug: ${fallFull.kennzeichen}` : null,
+            adresse ? `Besichtigungsort: ${adresse}` : null,
+            `Wunschtermin: ${wunschterminText}`,
+            '',
+            `Bitte kontaktiere den Kunden und vereinbare einen Termin.`,
+            `Portal: ${svPortalLink}`,
+          ].filter((l) => l !== null).join('\n')
+
+          sendNachricht({
+            entity: 'profile',
+            entityId: svProfileData.profile_id,
+            phone: svProfile2.telefon,
+            text: svText,
+            fallId: fallFull.id,
+            templateKey: 'sv_neuer_auftrag',
+            empfaengerRolle: 'sachverstaendiger',
+          }).catch((err) => {
+            console.error('[sv-zuweisung] WA an SV fehlgeschlagen:', err instanceof Error ? err.message : err)
+          })
+        }
+      }
 
       // Lead-Preis vom SV-Guthaben abziehen
       // AAR-719: Silent-Catch hier war kritisch — ohne Leadpreis-Abzug würde
