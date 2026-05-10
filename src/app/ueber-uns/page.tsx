@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import {
   Quote, Mail, Phone, ChevronRight, Link as LinkedinIcon,
   Shield, Scale, Zap, Eye, MapPin, Sparkles,
@@ -26,21 +27,25 @@ import {
 // 6) Trust-Beweise: DAT-Partnerschaft, Hansaring-Sitz, BVSK-Honorartabelle,
 //    LexDrive-Kanzleinetzwerk — jeder Claim mit Quelle.
 
-export const metadata: Metadata = {
-  title: 'Über Claimondo — Digitale Kfz-Schadensregulierung aus Köln',
-  description:
-    '2025 in Köln gegründete Plattform für Kfz-Schadensregulierung. Gründer: Nicolas Kitta (CEO) + Aaron Sprafke (COO). 89+ DAT-Partner, kostenfrei nach §249 BGB.',
-  alternates: { canonical: '/ueber-uns' },
-  openGraph: {
-    type: 'profile',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/ueber-uns`,
-    title: 'Über Claimondo — Digitale Kfz-Schadensregulierung aus Köln',
-    description:
-      'Nicolas Kitta (CEO) und Aaron Sprafke (COO) — die Gründer hinter Claimondo. Gegründet 2025 in Köln, Hansaring 10.',
-    images: [{ url: '/brand/team-founders.png', width: 1200, height: 600, alt: 'Claimondo Founders' }],
-  },
+// 2026-05-10 i18n Phase 1B Beispiel: Metadata wird via generateMetadata async
+// geladen damit getTranslations darin funktionieren kann. Pattern fuer alle
+// weiteren Marketing-Pages.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('ueber_uns.metadata')
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: { canonical: '/ueber-uns' },
+    openGraph: {
+      type: 'profile',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/ueber-uns`,
+      title: t('title'),
+      description: t('description'),
+      images: [{ url: '/brand/team-founders.png', width: 1200, height: 600, alt: 'Claimondo Founders' }],
+    },
+  }
 }
 
 const FOUNDERS = [
@@ -127,7 +132,8 @@ const ZAHLEN = [
   { kpi: '§249 BGB', label: 'Rechtliche Grundlage Ihres Anspruchs' },
 ]
 
-export default function UeberUnsPage() {
+export default async function UeberUnsPage() {
+  const t = await getTranslations('ueber_uns')
   const aboutPageSchema = {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
@@ -184,17 +190,17 @@ export default function UeberUnsPage() {
         <div className="mx-auto max-w-3xl px-5 text-center sm:px-6">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
             <Sparkles className="h-3.5 w-3.5" />
-            Über Claimondo
+            {t('hero.eyebrow')}
           </div>
           <h1
             className="text-balance text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Vollständige Schadensregulierung —{' '}
-            <span style={{ color: '#4573A2' }}>auf Augenhöhe.</span>
+            {t('hero.headline')}{' '}
+            <span style={{ color: '#4573A2' }}>{t('hero.headline_accent')}</span>
           </h1>
           <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
-            Wir sind die Plattform die Geschädigten gibt was ihnen zusteht — nicht das was die Versicherung gerade noch durchwinkt.
+            {t('hero.subline')}
           </p>
         </div>
       </section>
