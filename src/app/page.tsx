@@ -8,6 +8,7 @@ import { hashIp } from '@/lib/crypto/hash-ip'
 import { LandingPage } from '@/components/landing/LandingPage'
 import type { AuthenticatedUser } from '@/components/landing/LandingTopbar'
 import { SITE_URL } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // AAR-491 (M9): Promo-Click-Tracking direkt im Server-Component der
 // Landing-Seite. Fire-and-forget — darf Render nicht verzögern, Fehler
@@ -53,7 +54,8 @@ export const metadata: Metadata = {
   description:
     'Nach dem Unfall: Claimondo übernimmt Gutachten, Anwalt, Werkstatt und Auszahlung. 0 € für unverschuldet Geschädigte (§249 BGB). Bundesweit verfügbar — Antwort unter 15 Minuten.',
   alternates: {
-    canonical: '/',
+    canonical: SITE_URL,
+    ...buildLanguageAlternates('/'),
   },
   openGraph: {
     type: 'website',

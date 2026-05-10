@@ -5,6 +5,7 @@ import {
   serviceSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter finden in Ihrer Nähe — sofort & zertifiziert',
@@ -24,7 +25,8 @@ export const metadata: Metadata = {
     'Karte Sachverständige',
   ],
   alternates: {
-    canonical: '/gutachter-finden',
+    canonical: `${SITE_URL}/gutachter-finden`,
+    ...buildLanguageAlternates('/gutachter-finden'),
   },
   openGraph: {
     type: 'website',
