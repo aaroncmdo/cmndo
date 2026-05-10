@@ -33,9 +33,15 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // Subdomain gutachter.claimondo.de — Partner-Recruiting
+  // /api/* explizit ausgenommen — sonst wird /api/health auf
+  // /gutachter-partner/api/health umgeschrieben (404) und der
+  // useOnlineStatus-Hook löst fälschlicherweise den Offline-Banner aus.
   if (hostname === 'gutachter.claimondo.de') {
     const url = request.nextUrl.clone()
-    if (!pathname.startsWith('/gutachter-partner')) {
+    if (
+      !pathname.startsWith('/gutachter-partner') &&
+      !pathname.startsWith('/api/')
+    ) {
       url.pathname = `/gutachter-partner${pathname === '/' ? '' : pathname}`
       return NextResponse.rewrite(url)
     }
