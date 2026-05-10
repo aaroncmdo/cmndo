@@ -11,7 +11,12 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 
-async function ensureAdmin() {
+async function ensureAdmin(request?: Request) {
+  // CRON_SECRET-Header erlaubt VPS-Aufrufe ohne Browser-Session
+  if (request) {
+    const auth = request.headers.get('authorization')
+    if (auth === `Bearer ${process.env.CRON_SECRET}`) return { ok: true as const }
+  }
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { error: 'Nicht angemeldet' as const, status: 401 }
@@ -26,8 +31,8 @@ async function ensureAdmin() {
   return { ok: true as const }
 }
 
-export async function GET() {
-  const auth = await ensureAdmin()
+export async function GET(request: Request) {
+  const auth = await ensureAdmin(request)
   if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
   const db = createAdminClient()
@@ -58,7 +63,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = await ensureAdmin()
+  const auth = await ensureAdmin(request)
   if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
   const body = await request.json().catch(() => ({})) as { dryRun?: boolean; limit?: number }
