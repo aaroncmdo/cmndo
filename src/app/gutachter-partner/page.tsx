@@ -20,9 +20,7 @@ import {
   faqPageSchema,
   jsonLdScript,
 } from '@/lib/seo/jsonld'
-import dynamic from 'next/dynamic'
-
-const WaitlistApply = dynamic(() => import('./WaitlistApply'), { ssr: false })
+import WaitlistApplyLoader from './WaitlistApplyLoader'
 
 const PARTNER_URL = 'https://gutachter.claimondo.de'
 
@@ -467,7 +465,7 @@ export default function GutachterPartnerPage() {
             </p>
           </div>
 
-          <WaitlistApply />
+          <WaitlistApplyLoader />
         </div>
       </section>
 

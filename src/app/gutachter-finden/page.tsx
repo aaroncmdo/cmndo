@@ -1,11 +1,5 @@
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
-import type { GutachterFinderClientProps } from './GutachterFinderClient'
-
-const GutachterFinderClient = dynamic<GutachterFinderClientProps>(
-  () => import('./GutachterFinderClient').then(m => ({ default: m.GutachterFinderClient })),
-  { ssr: false },
-)
+import { GutachterFinderLoader } from './GutachterFinderLoader'
 import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import {
   serviceSchema, breadcrumbsSchema,
@@ -82,7 +76,7 @@ export default async function GutachterFindenPage() {
       <h1 className="sr-only">
         Kfz-Gutachter in Ihrer Nähe finden — sofort buchen, kostenfrei nach §249 BGB
       </h1>
-      <GutachterFinderClient aktiveSVs={aktiveSVs} svLeads={svLeads} />
+      <GutachterFinderLoader aktiveSVs={aktiveSVs} svLeads={svLeads} />
     </>
   )
 }
