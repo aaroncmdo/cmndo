@@ -16,6 +16,7 @@ const MARKETING_PREFIXES = [
   '/vorteile', '/wie-es-funktioniert', '/faq', '/kfz-gutachter',
   '/gutachter-finden', '/gutachter-partner', '/ueber-uns',
   '/impressum', '/datenschutz', '/agb', '/nutzungsbedingungen',
+  '/schadensreport-2026',
 ]
 
 function matchesAnyPrefix(pathname: string, prefixes: string[]): boolean {
