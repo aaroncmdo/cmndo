@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { PhoneIcon, CheckCircleIcon, ClockIcon, PenSquareIcon, UserIcon, MapPinIcon, CalendarIcon, FileSignatureIcon } from 'lucide-react'
+import { PhoneIcon, CheckCircleIcon, ClockIcon, PenSquareIcon, UserIcon, MapPinIcon, CalendarIcon, FileSignatureIcon, AlertCircleIcon } from 'lucide-react'
 import type { GutachterFinderAnfrage } from './actions'
 import { aktualisiereAnfrageStatus } from './actions'
 
@@ -112,11 +112,19 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
         </div>
       </div>
 
+      {/* Anruf-Banner für Lead-Fallback — SV muss manuell kontaktiert werden */}
+      {anfrage.matching_typ === 'lead_fallback' && lokalerStatus !== 'sv_kontaktiert' && lokalerStatus !== 'termin_bestaetigt' && lokalerStatus !== 'abgeschlossen' && (
+        <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-amber-50 border border-amber-200 flex items-center gap-2">
+          <AlertCircleIcon className="w-4 h-4 text-amber-600 shrink-0" />
+          <span className="text-xs font-semibold text-amber-800">DAT-SV — bitte manuell anrufen!</span>
+        </div>
+      )}
+
       {/* SV-Block — zeigt wen wir anrufen müssen */}
       {svName && (
         <div className="mx-4 mb-3 px-3 py-2.5 rounded-ios-sm bg-claimondo-bg border border-claimondo-border">
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-semibold mb-1">
-            Zugeordneter {anfrage.matching_typ === 'sv_lead' ? 'DAT-Expert' : 'Sachverständiger'}
+            {anfrage.matching_typ === 'lead_fallback' ? 'DAT-Expert (extern — anrufen!)' : 'Zugeordneter Sachverständiger'}
           </p>
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-semibold text-claimondo-navy">{svName}</p>
@@ -168,27 +176,42 @@ export default function GutachterFinderUebersichtClient({
 }: {
   anfragen: GutachterFinderAnfrage[]
 }) {
-  const [filter, setFilter] = useState<'offen' | 'alle'>('offen')
+  const [filter, setFilter] = useState<'offen' | 'anruf' | 'alle'>('offen')
 
-  const sichtbare = filter === 'offen'
-    ? anfragen.filter((a) => a.status === 'neu' || a.status === 'in_bearbeitung' || a.status === 'sv_kontaktiert')
-    : anfragen
+  const anrufNoetig = anfragen.filter(
+    (a) => a.matching_typ === 'lead_fallback' && a.status !== 'sv_kontaktiert' && a.status !== 'termin_bestaetigt' && a.status !== 'abgeschlossen' && a.status !== 'storniert',
+  )
+
+  const sichtbare =
+    filter === 'offen'
+      ? anfragen.filter((a) => a.status === 'neu' || a.status === 'in_bearbeitung' || a.status === 'sv_kontaktiert')
+      : filter === 'anruf'
+      ? anrufNoetig
+      : anfragen
 
   return (
     <div className="space-y-4">
       {/* Filter-Tabs */}
-      <div className="flex gap-2">
-        {(['offen', 'alle'] as const).map((tab) => (
+      <div className="flex flex-wrap gap-2">
+        {([
+          { key: 'offen', label: 'Offen' },
+          { key: 'anruf', label: `Anruf nötig${anrufNoetig.length > 0 ? ` (${anrufNoetig.length})` : ''}` },
+          { key: 'alle', label: 'Alle' },
+        ] as const).map((tab) => (
           <button
-            key={tab}
-            onClick={() => setFilter(tab)}
+            key={tab.key}
+            onClick={() => setFilter(tab.key)}
             className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-colors ${
-              filter === tab
-                ? 'bg-claimondo-navy text-white'
+              filter === tab.key
+                ? tab.key === 'anruf'
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-claimondo-navy text-white'
+                : tab.key === 'anruf' && anrufNoetig.length > 0
+                ? 'bg-amber-50 text-amber-700 border border-amber-300 hover:bg-amber-100'
                 : 'bg-white text-claimondo-navy border border-claimondo-border hover:bg-claimondo-bg'
             }`}
           >
-            {tab === 'offen' ? 'Offen' : 'Alle'}
+            {tab.label}
           </button>
         ))}
       </div>
