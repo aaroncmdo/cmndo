@@ -48,6 +48,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
+    // Schadensreport — Datenpublikation, hoher GEO-Hebel
+    {
+      url: `${SITE_URL}/schadensreport-2026`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
     // Kfz-Gutachter Pillar + Themen-Pages + Stadt-Landingpages
     {
       url: `${SITE_URL}/kfz-gutachter`,
