@@ -9,7 +9,7 @@ import { updateSession } from './lib/supabase/middleware'
 const APP_PREFIXES = [
   '/admin', '/dispatch', '/gutachter/', '/kunde', '/faelle', '/flow',
   '/upload', '/sv', '/kunde-termin', '/ablehnen',
-  '/passwort-vergessen', '/passwort-zuruecksetzen', '/passwort-aendern',
+  '/login', '/passwort-vergessen', '/passwort-zuruecksetzen', '/passwort-aendern',
 ]
 
 const MARKETING_PREFIXES = [
