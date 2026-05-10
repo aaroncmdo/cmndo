@@ -42,14 +42,14 @@ export type HeuteTerminFull = {
   // AAR-724: Noch nicht vom SV angesehen → roter Punkt auf der Card.
   gesehen_am: string | null
   // Feldmodus-Sprint: erweiterte Kunden-/Termin-Felder für TagesrouteSidebar
-  kunde_anrede?: string | null
+  kunde_anrede?: 'herr' | 'frau' | 'divers' | null
   kunde_avatar_url?: string | null
   stop_weather?: { description: string; emoji: string; temp: number } | null
   auftrag_typ?: string | null
   hat_vorschaeden?: boolean
   vorschaden_anzahl?: number | null
   vorschaden_letzter_datum?: string | null
-  einzusammelnde_dokumente: string[]
+  einzusammelnde_dokumente: Array<{ slot_id: string; label: string }>
 }
 
 function isoDate(d: Date): string {

@@ -33,6 +33,11 @@ interface Props {
 
 const STATUS_LABEL: Record<FallStatusValue, string> = {
   onboarding: 'Onboarding',
+  in_bearbeitung: 'In Bearbeitung',
+  vs_kontakt: 'VS-Kontakt',
+  reguliert: 'Reguliert',
+  abgelehnt: 'Abgelehnt',
+  kanzlei: 'Kanzlei',
   ersterfassung: 'Ersterfassung',
   'sv-gesucht': 'SV gesucht',
   'sv-zugewiesen': 'SV zugewiesen',

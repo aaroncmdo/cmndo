@@ -35,7 +35,7 @@ function imAnfahrtsFenster(auftrag: NonNullable<AktiverAuftrag>): boolean {
   return now >= fensterStart && now <= fensterEnde
 }
 
-export type GeoPermission = PermissionState
+export type GeoPermission = PermissionState | 'unsupported'
 
 export function useGeoPosition(svId: string | null) {
   const watchIdRef = useRef<number | null>(null)
