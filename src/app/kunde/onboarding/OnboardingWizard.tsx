@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-100: 5-Step Onboarding Wizard
 // AAR-125: Deep-Link via ?step=dokumente springt direkt in Step 3 (Dokumente)
@@ -358,7 +358,7 @@ export default function OnboardingWizard({
   return (
     <div className="min-h-screen bg-claimondo-bg flex flex-col">
       {/* Progress */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-[#f8f9fb]">
+      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-claimondo-bg">
         <div className="h-full bg-claimondo-ondo transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
@@ -814,7 +814,7 @@ function DokumentInfoOverlay({
             type="button"
             onClick={onClose}
             aria-label="Schließen"
-            className="w-8 h-8 rounded-full hover:bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo"
+            className="w-8 h-8 rounded-full hover:bg-claimondo-bg flex items-center justify-center text-claimondo-ondo"
           >
             <XIcon className="w-5 h-5" />
           </button>

@@ -29,8 +29,8 @@ type Normalized = {
 const TYP_META: Record<TerminTyp, { label: string; icon: typeof PhoneCallIcon; cls: string }> = {
   rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
-  gutachter: { label: 'Gutachter', icon: HardHatIcon, cls: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' },
+  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
+  gutachter: { label: 'Gutachter', icon: HardHatIcon, cls: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' },
   kb_beratung: { label: 'KB-Beratung', icon: VideoIcon, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
 }
 
@@ -187,7 +187,7 @@ function Row({ r, dispatchLinks, onRueckrufClick }: { r: Normalized; dispatchLin
   const datum = start.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 
   return (
-    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-[#f8f9fb] transition-colors">
+    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-claimondo-bg transition-colors">
       <span className={`flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full border shrink-0 ${meta.cls}`}>
         <Icon className="w-3 h-3" />
         {meta.label}

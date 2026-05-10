@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-294 / AAR-398: Conditional NachbesichtigungCard. DB-Felder verifiziert:
 // nachbesichtigung_status, _angefordert_am, _termin_datum, _ergebnis.
@@ -41,7 +41,7 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
       className={`rounded-2xl border p-4 sm:p-5 space-y-3 ${
         durchgefuehrt
           ? 'bg-emerald-50 border-emerald-200'
-          : 'bg-[#f8f9fb] border-claimondo-border'
+          : 'bg-claimondo-bg border-claimondo-border'
       }`}
     >
       <div className="flex items-center justify-between">

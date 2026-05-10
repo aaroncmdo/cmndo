@@ -89,13 +89,13 @@ export default function VorOrtPanel({ fallId, kundeName, kennzeichen, adresse, o
         </div>
 
         {/* Progress */}
-        <div className="px-4 py-2 bg-[#f8f9fb] border-b border-claimondo-border shrink-0">
+        <div className="px-4 py-2 bg-claimondo-bg border-b border-claimondo-border shrink-0">
           <div className="flex items-center justify-between text-xs mb-1">
             <span className="text-claimondo-ondo">{erledigt} von {total} erledigt</span>
-            <span className="text-[#4573A2] font-semibold">{Math.round((erledigt / total) * 100)}%</span>
+            <span className="text-claimondo-ondo font-semibold">{Math.round((erledigt / total) * 100)}%</span>
           </div>
           <div className="h-1.5 bg-claimondo-border rounded-full">
-            <div className="h-full bg-[#4573A2] rounded-full transition-all" style={{ width: `${(erledigt / total) * 100}%` }} />
+            <div className="h-full bg-claimondo-ondo rounded-full transition-all" style={{ width: `${(erledigt / total) * 100}%` }} />
           </div>
         </div>
 
@@ -116,7 +116,7 @@ export default function VorOrtPanel({ fallId, kundeName, kennzeichen, adresse, o
             <div className="grid grid-cols-2 gap-2">
               {FOTO_PERSPEKTIVEN.map(p => (
                 <label key={p} className={`flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-dashed cursor-pointer transition-colors ${
-                  fotos[p] ? 'border-green-300 bg-green-50 text-green-600' : 'border-claimondo-border bg-[#f8f9fb] text-claimondo-ondo hover:border-[#4573A2]/30'
+                  fotos[p] ? 'border-green-300 bg-green-50 text-green-600' : 'border-claimondo-border bg-claimondo-bg text-claimondo-ondo hover:border-claimondo-ondo/30'
                 }`}>
                   {fotos[p] ? <CheckIcon className="w-4 h-4" /> : <CameraIcon className="w-4 h-4" />}
                   <span className="text-xs font-medium">{p}</span>

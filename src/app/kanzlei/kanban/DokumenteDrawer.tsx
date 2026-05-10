@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-kanzlei-portal PR 3: Drawer von rechts mit Liste aller Dokumente
 // des Falls. Lädt aus fall_dokumente — RLS in Migration 20260421151144
@@ -147,7 +147,7 @@ export default function DokumenteDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded hover:bg-[#f8f9fb] text-claimondo-ondo shrink-0"
+            className="p-1 rounded hover:bg-claimondo-bg text-claimondo-ondo shrink-0"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4" />
@@ -225,7 +225,7 @@ function DokumentRow({
     <div
       className={`rounded-lg border p-3 flex items-start gap-3 ${
         highlight
-          ? 'border-claimondo-ondo bg-[#f8f9fb]/40'
+          ? 'border-claimondo-ondo bg-claimondo-bg/40'
           : 'border-claimondo-border bg-white'
       }`}
     >

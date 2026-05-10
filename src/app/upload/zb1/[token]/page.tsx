@@ -20,7 +20,7 @@ export default async function Zb1UploadPage({
           ? { title: 'Foto bereits empfangen', text: 'Wir haben Ihren Fahrzeugschein bereits erhalten. Falls Sie ein neues Foto schicken möchten, kontaktieren Sie bitte Ihren Ansprechpartner.' }
           : { title: 'Link nicht gültig', text: 'Dieser Upload-Link ist ungültig. Bitte prüfen Sie die URL oder kontaktieren Sie Ihren Ansprechpartner.' }
     return (
-      <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-6">
         <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border max-w-md w-full p-8 text-center space-y-3">
           <div className="text-3xl">⚠</div>
           <h1 className="text-lg font-semibold text-claimondo-navy">{cfg.title}</h1>

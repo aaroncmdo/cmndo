@@ -1,4 +1,4 @@
-// AAR-179 P3-H + P3-I: Leads-Übersicht mit Liste/Kanban-Toggle.
+﻿// AAR-179 P3-H + P3-I: Leads-Übersicht mit Liste/Kanban-Toggle.
 // Server-Page lädt die Leads + rendert Phase-Filter-Chips. Die Darstellung
 // (Tabelle oder Kanban) wandert in die Client-Component LeadsViewToggle.
 import { createClient } from '@/lib/supabase/server'
@@ -49,7 +49,7 @@ export default async function DispatchLeads({
             className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
               activePhase === opt.value
                 ? 'bg-claimondo-navy text-white'
-                : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
+                : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg'
             }`}
           >
             {opt.label}

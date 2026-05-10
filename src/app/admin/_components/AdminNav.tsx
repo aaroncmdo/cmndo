@@ -71,11 +71,11 @@ export default function AdminNav({
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold tracking-tight">
               <span className="text-white">Claim</span>
-              <span className="text-[#7BA3CC]">ondo</span>
+              <span className="text-claimondo-light-blue">ondo</span>
             </span>
             <TasksPill userId={userId} href="/admin/meine-tasks" initialCount={meineTasksCount ?? 0} />
           </div>
-          <p className="text-xs mt-0.5 text-[#7BA3CC]">{email}</p>
+          <p className="text-xs mt-0.5 text-claimondo-light-blue">{email}</p>
         </>
       }
       footerSlot={

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-114: 8-Minuten-Gespraechsleitfaden-Timer (Notion-Spec 14.04.2026 §1)
 // Phasen: 0-2min empathisch reden lassen, 2-4min Q1/Q2/Q3, 4-5min Nutzen,
@@ -23,7 +23,7 @@ type Phase = {
 }
 
 const PHASEN: Phase[] = [
-  { von: 0, bis: 120, kurz: '0:00 – 2:00', label: 'Kunde erzählen lassen. Empathie. Claimondo kurz vorstellen.', bg: 'bg-[#f8f9fb]', border: 'border-claimondo-border', text: 'text-claimondo-navy' },
+  { von: 0, bis: 120, kurz: '0:00 – 2:00', label: 'Kunde erzählen lassen. Empathie. Claimondo kurz vorstellen.', bg: 'bg-claimondo-bg', border: 'border-claimondo-border', text: 'text-claimondo-navy' },
   // AAR-176 P2-E: Q3 ist seit AAR-138 Polizei-vor-Ort, nicht mehr Haftpflicht.
   { von: 120, bis: 240, kurz: '2:00 – 4:00', label: 'Q1 Hergang + Aufklärung, Q2 Schaden, Q3 Polizei.', bg: 'bg-violet-50', border: 'border-violet-200', text: 'text-violet-800' },
   { von: 240, bis: 300, kurz: '4:00 – 5:00', label: 'Nutzenversprechen + SV-Termin vormerken.', bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-800' },
@@ -97,7 +97,7 @@ export default function GespraechsleitfadenTimer({
     return (
       <div className="bg-white border border-claimondo-border rounded-xl p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#f8f9fb] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-claimondo-bg flex items-center justify-center">
             <PhoneCallIcon className="w-5 h-5 text-claimondo-ondo/70" />
           </div>
           <div>
@@ -115,7 +115,7 @@ export default function GespraechsleitfadenTimer({
 
   if (beendetAm) {
     return (
-      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-3 flex items-center gap-3">
+      <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-3 flex items-center gap-3">
         <PhoneOffIcon className="w-4 h-4 text-claimondo-ondo shrink-0" />
         <div className="flex-1 space-y-0.5">
           <p className="text-xs text-claimondo-navy">
@@ -148,12 +148,12 @@ export default function GespraechsleitfadenTimer({
           )}
         </div>
         <button type="button" disabled={pending} onClick={beende}
-          className="px-3 py-1.5 rounded-lg bg-[#f8f9fb] text-claimondo-navy text-xs font-medium hover:bg-claimondo-border disabled:opacity-50">
+          className="px-3 py-1.5 rounded-lg bg-claimondo-bg text-claimondo-navy text-xs font-medium hover:bg-claimondo-border disabled:opacity-50">
           Gespräch beenden
         </button>
       </div>
 
-      <div className="w-full h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-claimondo-bg rounded-full overflow-hidden">
         <div
           className={`h-full transition-all duration-1000 ${istUeberzogen ? 'bg-red-500' : 'bg-claimondo-ondo'}`}
           style={{ width: `${progressPct}%` }}
@@ -211,7 +211,7 @@ export default function GespraechsleitfadenTimer({
                 type="button"
                 onClick={() => setShowSummary(false)}
                 disabled={pending}
-                className="flex-1 px-3 py-2 rounded-lg bg-[#f8f9fb] text-claimondo-navy text-xs font-medium hover:bg-claimondo-border disabled:opacity-50"
+                className="flex-1 px-3 py-2 rounded-lg bg-claimondo-bg text-claimondo-navy text-xs font-medium hover:bg-claimondo-border disabled:opacity-50"
               >
                 Weiter sprechen
               </button>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-142 / W8: Phase 6 Status-Tracking nach FlowLink-Versand.
 // AAR-178 P3-C + P3-E: Erneut-senden Button + Vollmacht immer als 5. Schritt
@@ -245,7 +245,7 @@ export default function Phase6StatusTracking({
                     : s.state === 'warning'
                       ? 'bg-red-500 text-white'
                       : s.state === 'disabled'
-                        ? 'bg-[#f8f9fb] text-claimondo-ondo/50'
+                        ? 'bg-claimondo-bg text-claimondo-ondo/50'
                         : 'bg-claimondo-border text-claimondo-ondo/70'
                 }`}
               >

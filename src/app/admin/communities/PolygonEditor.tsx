@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { Trash2Icon, PenLineIcon } from 'lucide-react'
@@ -207,7 +207,7 @@ export default function PolygonEditor({
 
   return (
     <div className="space-y-2">
-      <div ref={containerRef} className="w-full h-72 rounded-xl border border-claimondo-border overflow-hidden bg-[#f8f9fb]" />
+      <div ref={containerRef} className="w-full h-72 rounded-xl border border-claimondo-border overflow-hidden bg-claimondo-bg" />
       <div className="flex items-center justify-between text-[10px] text-claimondo-ondo">
         <span>
           {hasPolygon

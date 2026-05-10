@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-293: SV-Abrechnungs-Card für Phase 6.x. Zeigt Honorar (faelle.gutachten_betrag),
 // Leadpreis + Netto-Auszahlung. Kunden-Auszahlungsbetrag ist NICHT für SV bestimmt.
@@ -56,7 +56,7 @@ export function AbrechnungsCard({
             ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
             : subphase.code === 'zahlung-eingegangen'
               ? 'bg-amber-50 text-amber-800 border border-amber-200'
-              : 'bg-[#f8f9fb] text-claimondo-navy border border-claimondo-border'
+              : 'bg-claimondo-bg text-claimondo-navy border border-claimondo-border'
         }`}
       >
         {ausgezahlt ? (

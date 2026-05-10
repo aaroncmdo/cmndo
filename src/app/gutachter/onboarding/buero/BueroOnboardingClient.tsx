@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -189,12 +189,12 @@ export default function BueroOnboardingClient({
             return (
               <div key={s.key} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  i < step ? 'bg-green-600' : i === step ? 'bg-[var(--brand-primary)]' : 'bg-[#f8f9fb]'
+                  i < step ? 'bg-green-600' : i === step ? 'bg-[var(--brand-primary)]' : 'bg-claimondo-bg'
                 }`}>
                   <Icon className="w-4 h-4 text-white" />
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-[#f8f9fb]'}`} />
+                  <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-claimondo-bg'}`} />
                 )}
               </div>
             )
@@ -262,7 +262,7 @@ export default function BueroOnboardingClient({
                           defaultValue={std.anschrift}
                           placeholder="Adresse via Auswahl waehlen..."
                           onSelect={place => setStandortPlace(std.id, place)}
-                          className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                         {std.anschrift && (std.lat === null || std.lng === null) && (
                           <p className="text-[10px] text-amber-600 mt-1">
@@ -315,7 +315,7 @@ export default function BueroOnboardingClient({
           {/* SCHRITT 1: Vertrag */}
           {step === 1 && (
             <div className="space-y-4">
-              <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 max-h-64 overflow-y-auto text-xs text-claimondo-ondo leading-relaxed">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 max-h-64 overflow-y-auto text-xs text-claimondo-ondo leading-relaxed">
                 <h4 className="font-semibold text-claimondo-navy mb-2">Kooperationsvertrag-Muster (Auszug)</h4>
                 <p>
                   Der Bueroinhaber unterzeichnet stellvertretend fuer alle aktuellen und zukuenftigen Standorte
@@ -400,7 +400,7 @@ export default function BueroOnboardingClient({
                 type="button"
                 onClick={() => setStep(step - 1)}
                 disabled={saving}
-                className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
+                className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
               >
                 Zurueck
               </button>
@@ -461,7 +461,7 @@ function Field({
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] disabled:opacity-50"
+        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] disabled:opacity-50"
       />
     </div>
   )

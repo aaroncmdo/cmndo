@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { TrendingUpIcon, BarChart3Icon } from 'lucide-react'
 
 // KFZ-155: Row 4 — kompakte Charts/Stats fuer das Dashboard.
@@ -76,7 +76,7 @@ export default async function DashboardStats() {
       <div className="bg-white rounded-ios-lg shadow-ios-md p-5 flex flex-col">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <BarChart3Icon className="w-4 h-4 text-[#4573A2]" />
+            <BarChart3Icon className="w-4 h-4 text-claimondo-ondo" />
             <h3 className="text-sm font-semibold text-claimondo-navy">Lead-Konversion (30 Tage)</h3>
           </div>
         </div>
@@ -94,7 +94,7 @@ export default async function DashboardStats() {
             <p className="text-3xl font-bold text-emerald-600 tabular-nums">{s.konversionPct}%</p>
           </div>
         </div>
-        <div className="mt-3 h-2 bg-[#f8f9fb] rounded-full overflow-hidden">
+        <div className="mt-3 h-2 bg-claimondo-bg rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-[#4573A2] to-emerald-500 transition-all"
             style={{ width: `${Math.min(100, s.konversionPct)}%` }}

@@ -109,7 +109,7 @@ export function CardentityTypBButton({
         type="button"
         onClick={trigger}
         disabled={pending}
-        className={`inline-flex items-center gap-1.5 ${padding} rounded-lg border border-claimondo-border bg-white text-xs font-medium text-claimondo-navy hover:bg-[#f8f9fb] disabled:opacity-60 disabled:cursor-not-allowed`}
+        className={`inline-flex items-center gap-1.5 ${padding} rounded-lg border border-claimondo-border bg-white text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-60 disabled:cursor-not-allowed`}
         title="Cardentity Typ-B kostet 15€ pro Abfrage. Sinnvoll bei konkretem Vorschadenverdacht."
       >
         {pending ? (

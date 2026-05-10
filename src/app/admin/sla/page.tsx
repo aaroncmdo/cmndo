@@ -1,4 +1,4 @@
-// AAR-85: SLA-Monitoring Admin-Widget — zeigt pending + breached SLAs
+﻿// AAR-85: SLA-Monitoring Admin-Widget — zeigt pending + breached SLAs
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { AlertTriangleIcon, ClockIcon, CheckCircleIcon } from 'lucide-react'
@@ -49,7 +49,7 @@ export default async function SlaMonitoringPage() {
           </div>
           <p className="text-3xl font-bold text-amber-900 mt-2">{atRisk.length}</p>
         </div>
-        <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
+        <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
           <div className="flex items-center gap-2 text-claimondo-ondo">
             <CheckCircleIcon className="w-5 h-5" />
             <span className="text-xs font-semibold uppercase">Offen</span>
@@ -61,7 +61,7 @@ export default async function SlaMonitoringPage() {
       {/* Tabelle */}
       <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-[#f8f9fb]">
+          <thead className="bg-claimondo-bg">
             <tr className="text-xs uppercase text-claimondo-ondo">
               <th className="text-left px-4 py-3">Fall</th>
               <th className="text-left px-4 py-3">SLA-Typ</th>
@@ -101,7 +101,7 @@ export default async function SlaMonitoringPage() {
                     ) : restMin < 30 ? (
                       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Risiko</span>
                     ) : (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo">Offen</span>
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">Offen</span>
                     )}
                   </td>
                   <td className="px-4 py-3">

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 
 export const metadata: Metadata = {
@@ -17,22 +17,22 @@ export default function DatenschutzPage() {
         <PageHeader title="Datenschutzerklärung" size="lg" />
       </div>
 
-      <div className="space-y-8 text-[#1E3A5F]/90 leading-relaxed">
+      <div className="space-y-8 text-claimondo-shield/90 leading-relaxed">
         {/* 1. Verantwortlicher */}
         <section>
-          <h2 className="text-xl font-semibold text-[#1E3A5F] mb-3">1. Verantwortlicher</h2>
+          <h2 className="text-xl font-semibold text-claimondo-shield mb-3">1. Verantwortlicher</h2>
           <p>
             Claimondo GmbH i.G.<br />
             Hansaring 10<br />
             50670 Köln<br />
-            E-Mail: <a href="mailto:aaron.sprafke@claimondo.de" className="text-[#4573A2] underline">aaron.sprafke@claimondo.de</a>
+            E-Mail: <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a>
           </p>
           <p className="mt-2">Geschäftsführer: Aaron Sprafke, Nicolas Kitta</p>
         </section>
 
         {/* 2. Welche Daten werden erhoben */}
         <section>
-          <h2 className="text-xl font-semibold text-[#1E3A5F] mb-3">2. Welche Daten werden erhoben</h2>
+          <h2 className="text-xl font-semibold text-claimondo-shield mb-3">2. Welche Daten werden erhoben</h2>
           <p>Im Rahmen der Nutzung unserer Plattform erheben und verarbeiten wir folgende personenbezogene Daten:</p>
           <ul className="list-disc ml-6 mt-2 space-y-1">
             <li><strong>Authentifizierungsdaten:</strong> E-Mail-Adresse, Passwort (gehasht), Login-Zeitpunkte</li>
@@ -46,7 +46,7 @@ export default function DatenschutzPage() {
 
         {/* 3. Zweck der Verarbeitung */}
         <section>
-          <h2 className="text-xl font-semibold text-[#1E3A5F] mb-3">3. Zweck der Verarbeitung</h2>
+          <h2 className="text-xl font-semibold text-claimondo-shield mb-3">3. Zweck der Verarbeitung</h2>
           <p>Die Verarbeitung Ihrer Daten erfolgt zu folgenden Zwecken:</p>
           <ul className="list-disc ml-6 mt-2 space-y-1">
             <li>Bereitstellung und Betrieb der Plattform für KFZ-Schadensmanagement</li>
@@ -59,7 +59,7 @@ export default function DatenschutzPage() {
 
         {/* 4. Rechtsgrundlage */}
         <section>
-          <h2 className="text-xl font-semibold text-[#1E3A5F] mb-3">4. Rechtsgrundlage</h2>
+          <h2 className="text-xl font-semibold text-claimondo-shield mb-3">4. Rechtsgrundlage</h2>
           <p>Die Verarbeitung Ihrer personenbezogenen Daten erfolgt auf Grundlage von:</p>
           <ul className="list-disc ml-6 mt-2 space-y-1">
             <li><strong>Art. 6 Abs. 1 lit. b DSGVO</strong> &mdash; Erfüllung eines Vertrages oder vorvertraglicher Maßnahmen (Nutzung der Plattform, Fallbearbeitung)</li>
@@ -70,12 +70,12 @@ export default function DatenschutzPage() {
 
         {/* 5. Auftragsverarbeiter */}
         <section>
-          <h2 className="text-xl font-semibold text-[#1E3A5F] mb-3">5. Auftragsverarbeiter</h2>
+          <h2 className="text-xl font-semibold text-claimondo-shield mb-3">5. Auftragsverarbeiter</h2>
           <p>Wir setzen folgende Dienstleister als Auftragsverarbeiter ein:</p>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="border-b border-[#1E3A5F]/20">
+                <tr className="border-b border-claimondo-shield/20">
                   <th className="text-left py-2 pr-4 font-semibold">Anbieter</th>
                   <th className="text-left py-2 pr-4 font-semibold">Sitz</th>
                   <th className="text-left py-2 font-semibold">Zweck</th>
@@ -124,7 +124,7 @@ export default function DatenschutzPage() {
 
         {/* 6. Speicherdauer */}
         <section>
-          <h2 className="text-xl font-semibold text-[#1E3A5F] mb-3">6. Speicherdauer</h2>
+          <h2 className="text-xl font-semibold text-claimondo-shield mb-3">6. Speicherdauer</h2>
           <p>
             Wir speichern Ihre personenbezogenen Daten nur so lange, wie es für die Erfüllung
             der Verarbeitungszwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen.
@@ -136,7 +136,7 @@ export default function DatenschutzPage() {
 
         {/* 7. Rechte des Betroffenen */}
         <section>
-          <h2 className="text-xl font-semibold text-[#1E3A5F] mb-3">7. Ihre Rechte</h2>
+          <h2 className="text-xl font-semibold text-claimondo-shield mb-3">7. Ihre Rechte</h2>
           <p>Sie haben gemäß DSGVO folgende Rechte:</p>
           <ul className="list-disc ml-6 mt-2 space-y-1">
             <li><strong>Auskunftsrecht</strong> (Art. 15 DSGVO) &mdash; Auskunft über Ihre gespeicherten Daten</li>
@@ -148,13 +148,13 @@ export default function DatenschutzPage() {
           </ul>
           <p className="mt-2">
             Zur Ausübung Ihrer Rechte wenden Sie sich bitte an:{' '}
-            <a href="mailto:aaron.sprafke@claimondo.de" className="text-[#4573A2] underline">aaron.sprafke@claimondo.de</a>
+            <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a>
           </p>
         </section>
 
         {/* 8. Beschwerderecht */}
         <section>
-          <h2 className="text-xl font-semibold text-[#1E3A5F] mb-3">8. Beschwerderecht</h2>
+          <h2 className="text-xl font-semibold text-claimondo-shield mb-3">8. Beschwerderecht</h2>
           <p>
             Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.
             Die für uns zuständige Aufsichtsbehörde ist:

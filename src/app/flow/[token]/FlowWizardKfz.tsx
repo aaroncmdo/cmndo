@@ -276,7 +276,7 @@ export default function FlowWizardKfz({
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
+    <div className="min-h-screen bg-claimondo-bg flex flex-col">
       {/* CMM-14: Verstecktes Login-Form für den Auto-Login nach Account-
           Anlage. Submit zu Route-Handler /api/auth/login-after-flow — der
           macht signInWithPassword + Set-Cookie + 303-Redirect. Browser
@@ -291,8 +291,8 @@ export default function FlowWizardKfz({
         <input type="hidden" name="password" defaultValue="" />
       </form>
       {/* Progress bar */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-[#f8f9fb]">
-        <div className="h-full bg-[#4573A2] transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
+      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-claimondo-bg">
+        <div className="h-full bg-claimondo-ondo transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
       </div>
 
       {/* Step indicator */}
@@ -302,7 +302,7 @@ export default function FlowWizardKfz({
             <div key={s.id} className="flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 i < stepIndex ? 'bg-emerald-500 text-white' :
-                i === stepIndex ? 'bg-[#4573A2] text-white' :
+                i === stepIndex ? 'bg-claimondo-ondo text-white' :
                 'bg-claimondo-border text-claimondo-ondo/70'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
@@ -397,7 +397,7 @@ export default function FlowWizardKfz({
                 <StepHeader
                   question="Ihr persönlicher Gutachter"
                   sub="Dieser Sachverständige wird Ihren Schaden begutachten."
-                  icon={<UserIcon className="w-8 h-8 text-[#4573A2]" />}
+                  icon={<UserIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
                 {gutachter ? (
@@ -414,13 +414,13 @@ export default function FlowWizardKfz({
                         {gutachter.vorname.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">Ihr Sachverständiger</p>
-                    <h2 className="text-2xl font-bold text-[#0D1B3E] mb-2">{gutachter.vorname}</h2>
+                    <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">Ihr Sachverständiger</p>
+                    <h2 className="text-2xl font-bold text-claimondo-navy mb-2">{gutachter.vorname}</h2>
                     <p className="text-sm text-claimondo-ondo">Wird sich bei Ihnen melden</p>
                     {gutachter.terminDatum && (
-                      <div className="mt-4 pt-4 border-t border-[#4573A2]/20">
+                      <div className="mt-4 pt-4 border-t border-claimondo-ondo/20">
                         <p className="text-xs text-claimondo-ondo mb-1">Termin reserviert</p>
-                        <p className="text-sm font-semibold text-[#0D1B3E]">
+                        <p className="text-sm font-semibold text-claimondo-navy">
                           {new Date(gutachter.terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                         </p>
                         <p className="text-sm text-claimondo-ondo">
@@ -428,9 +428,9 @@ export default function FlowWizardKfz({
                         </p>
                         {/* Besichtigungsort prominent — NICHT der Unfallort */}
                         {gutachter.besichtigungsAdresse && (
-                          <div className="mt-3 pt-3 border-t border-[#4573A2]/10">
+                          <div className="mt-3 pt-3 border-t border-claimondo-ondo/10">
                             <p className="text-xs text-claimondo-ondo mb-0.5">Besichtigungsort</p>
-                            <p className="text-sm text-[#0D1B3E]">{gutachter.besichtigungsAdresse}</p>
+                            <p className="text-sm text-claimondo-navy">{gutachter.besichtigungsAdresse}</p>
                             {gutachter.svTreffpunkt && (
                               <p className="text-xs text-claimondo-ondo mt-0.5">
                                 Treffpunkt: {gutachter.svTreffpunkt}
@@ -449,7 +449,7 @@ export default function FlowWizardKfz({
 
                 <button
                   onClick={() => setStepIndex(stepIndexById('sa'))}
-                  className="w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >
                   Weiter
                 </button>
@@ -471,7 +471,7 @@ export default function FlowWizardKfz({
                   icon={<PenToolIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
-                <div className="bg-[#4573A2]/5 border border-[#4573A2]/20 rounded-2xl px-4 py-4 mb-5 text-sm text-claimondo-navy leading-relaxed">
+                <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-2xl px-4 py-4 mb-5 text-sm text-claimondo-navy leading-relaxed">
                   <p className="font-medium text-claimondo-navy mb-2">Zusammenfassung:</p>
                   <p>Ich beauftrage die Claimondo GmbH mit der Koordination meines KFZ-Schadens.
                   Mir entstehen <strong>keine Kosten</strong>. Die Gutachterkosten werden im Rahmen
@@ -583,7 +583,7 @@ export default function FlowWizardKfz({
                 <StepHeader
                   question="Geschafft!"
                   sub="Ihr Fall wurde erfolgreich erstellt."
-                  icon={<UserPlusIcon className="w-8 h-8 text-[#4573A2]" />}
+                  icon={<UserPlusIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
                 <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
@@ -597,11 +597,11 @@ export default function FlowWizardKfz({
                     anzeigen. LexDrive meldet sich proaktiv beim Kunden via
                     Edge-Function — hier nur die Visitenkarte. */}
                 {lead.service_typ === 'komplett' && (
-                  <div className="mb-5 rounded-2xl border border-[#4573A2]/20 bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 p-5">
-                    <p className="text-xs uppercase tracking-wider text-[#4573A2] mb-1">
+                  <div className="mb-5 rounded-2xl border border-claimondo-ondo/20 bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 p-5">
+                    <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">
                       Ihr juristischer Ansprechpartner
                     </p>
-                    <p className="text-base font-semibold text-[#0D1B3E] mb-1">
+                    <p className="text-base font-semibold text-claimondo-navy mb-1">
                       LexDrive
                     </p>
                     <p className="text-xs text-claimondo-ondo">
@@ -613,7 +613,7 @@ export default function FlowWizardKfz({
 
                 {(creatingAccount || (accountCreated && !error)) && (
                   <div className="rounded-2xl border border-claimondo-border bg-white p-6 text-center">
-                    <div className="inline-block w-6 h-6 border-2 border-[#4573A2] border-t-transparent rounded-full animate-spin mb-3" />
+                    <div className="inline-block w-6 h-6 border-2 border-claimondo-ondo border-t-transparent rounded-full animate-spin mb-3" />
                     <p className="text-sm text-claimondo-ondo">
                       {creatingAccount
                         ? 'Wir richten Ihr Portal ein …'
@@ -634,14 +634,14 @@ export default function FlowWizardKfz({
                     /kunde als letzter Fallback. */}
                 {accountCreated && error && (
                   <div className="space-y-4 mt-4">
-                    <div className="rounded-2xl bg-[#f8f9fb] border border-claimondo-border p-4 text-sm text-claimondo-ondo">
+                    <div className="rounded-2xl bg-claimondo-bg border border-claimondo-border p-4 text-sm text-claimondo-ondo">
                       Wir haben Ihnen die Zugangsdaten an{' '}
                       <span className="font-medium text-claimondo-navy">{accountEmail}</span>{' '}
                       gesendet.
                     </div>
                     <a
                       href={magicLink ?? '/kunde/onboarding'}
-                      className="block w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base text-center active:scale-[0.98] transition-all"
+                      className="block w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base text-center active:scale-[0.98] transition-all"
                     >
                       Zu meinem Portal
                     </a>
@@ -713,7 +713,7 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-sm text-claimondo-navy focus:outline-none focus:border-[#4573A2] focus:bg-white transition-colors"
+        className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo focus:bg-white transition-colors"
       />
     </div>
   )
@@ -721,7 +721,7 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-[#f8f9fb] border border-claimondo-border">
+    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-claimondo-bg border border-claimondo-border">
       <span className="text-xs text-claimondo-ondo">{label}</span>
       <span className="text-sm text-claimondo-navy break-words">{value}</span>
     </div>

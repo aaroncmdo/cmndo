@@ -117,7 +117,7 @@ export function TaskAnlegenModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-[#f8f9fb]"
+            className="p-1.5 rounded-md hover:bg-claimondo-bg"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4 text-claimondo-ondo" />
@@ -135,7 +135,7 @@ export function TaskAnlegenModal({
               onChange={(e) => setTitel(e.target.value)}
               maxLength={200}
               placeholder="Was muss gemacht werden?"
-              className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2]"
+              className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-claimondo-ondo"
             />
           </div>
 
@@ -148,7 +148,7 @@ export function TaskAnlegenModal({
               onChange={(e) => setBeschreibung(e.target.value)}
               rows={3}
               placeholder="Kontext, Details, Links …"
-              className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2]"
+              className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-claimondo-ondo"
             />
           </div>
 
@@ -160,7 +160,7 @@ export function TaskAnlegenModal({
               <select
                 value={empfaengerRolle}
                 onChange={(e) => setEmpfaengerRolle(e.target.value as EmpfaengerRolle)}
-                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
+                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-claimondo-ondo bg-white"
               >
                 {ROLLEN.map((r) => (
                   <option key={r.value} value={r.value}>
@@ -181,7 +181,7 @@ export function TaskAnlegenModal({
                 onChange={(e) =>
                   setPrioritaet(e.target.value as 'niedrig' | 'normal' | 'hoch')
                 }
-                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
+                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-claimondo-ondo bg-white"
               >
                 <option value="niedrig">Niedrig</option>
                 <option value="normal">Normal</option>
@@ -196,7 +196,7 @@ export function TaskAnlegenModal({
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2]"
+                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-claimondo-ondo"
               />
             </div>
             <div>
@@ -206,7 +206,7 @@ export function TaskAnlegenModal({
               <select
                 value={entityType}
                 onChange={(e) => setEntityType(e.target.value as EntityType | '')}
-                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
+                className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-claimondo-ondo bg-white"
               >
                 <option value="">— Keiner —</option>
                 {ENTITY_TYPES.map((t) => (
@@ -237,7 +237,7 @@ export function TaskAnlegenModal({
                 <select
                   value={entityId}
                   onChange={(e) => setEntityId(e.target.value)}
-                  className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-[#4573A2] bg-white"
+                  className="w-full text-sm rounded-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-claimondo-ondo bg-white"
                 >
                   <option value="">— Wählen —</option>
                   {entityOptions.map((o) => (
@@ -261,7 +261,7 @@ export function TaskAnlegenModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]"
+            className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
           >
             Abbrechen
           </button>

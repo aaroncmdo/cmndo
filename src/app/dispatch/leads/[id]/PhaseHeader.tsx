@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-137 / W3: Phase-Stepper. 6 Steps horizontal.
 // Grün = erledigt, Blau = aktiv, Grau = noch nicht erreicht.
@@ -129,8 +129,8 @@ export default function PhaseHeader({
                     : isDone
                       ? 'bg-green-50 text-green-700 hover:bg-green-100 cursor-pointer'
                       : canNavigate
-                        ? 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-claimondo-border cursor-pointer'
-                        : 'bg-[#f8f9fb] text-claimondo-ondo/50 cursor-not-allowed'
+                        ? 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border cursor-pointer'
+                        : 'bg-claimondo-bg text-claimondo-ondo/50 cursor-not-allowed'
                 }`}
               >
                 <span

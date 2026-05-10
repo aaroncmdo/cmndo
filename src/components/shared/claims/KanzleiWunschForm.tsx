@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-841: Shared Form-Component für Kanzlei-Wunsch-Frage.
 //
@@ -119,8 +119,8 @@ export function KanzleiWunschForm({
     <form onSubmit={handleSubmit} className={containerCls}>
       {variant === 'card' && (
         <div>
-          <h3 className="text-sm font-semibold text-[#0D1B3E]">Möchtest du eine Kanzlei einbinden?</h3>
-          <p className="text-xs text-[#7BA3CC] mt-0.5">Eine Kanzlei vertritt deine Ansprüche gegenüber der Versicherung.</p>
+          <h3 className="text-sm font-semibold text-claimondo-navy">Möchtest du eine Kanzlei einbinden?</h3>
+          <p className="text-xs text-claimondo-light-blue mt-0.5">Eine Kanzlei vertritt deine Ansprüche gegenüber der Versicherung.</p>
         </div>
       )}
 
@@ -133,8 +133,8 @@ export function KanzleiWunschForm({
               key={opt.value}
               className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                 checked
-                  ? 'border-[#4573A2] bg-[#4573A2]/5'
-                  : 'border-[#E2E8F3] hover:bg-[#f8f9fb]'
+                  ? 'border-claimondo-ondo bg-claimondo-ondo/5'
+                  : 'border-[#E2E8F3] hover:bg-claimondo-bg'
               }`}
             >
               <input
@@ -145,10 +145,10 @@ export function KanzleiWunschForm({
                 onChange={() => setWunsch(opt.value)}
                 className="mt-1"
               />
-              <Icon className={`w-4 h-4 mt-1 shrink-0 ${checked ? 'text-[#4573A2]' : 'text-[#7BA3CC]'}`} />
+              <Icon className={`w-4 h-4 mt-1 shrink-0 ${checked ? 'text-claimondo-ondo' : 'text-claimondo-light-blue'}`} />
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium ${checked ? 'text-[#0D1B3E]' : 'text-[#0D1B3E]'}`}>{opt.label}</p>
-                <p className="text-xs text-[#7BA3CC]">{opt.sub}</p>
+                <p className={`text-sm font-medium ${checked ? 'text-claimondo-navy' : 'text-claimondo-navy'}`}>{opt.label}</p>
+                <p className="text-xs text-claimondo-light-blue">{opt.sub}</p>
               </div>
             </label>
           )
@@ -156,8 +156,8 @@ export function KanzleiWunschForm({
       </div>
 
       {wunsch === 'eigene_kanzlei' && (
-        <div className="bg-[#f8f9fb] rounded-lg p-3 space-y-2 border border-[#E2E8F3]">
-          <p className="text-xs font-medium text-[#0D1B3E]">Kontaktdaten der Kanzlei</p>
+        <div className="bg-claimondo-bg rounded-lg p-3 space-y-2 border border-[#E2E8F3]">
+          <p className="text-xs font-medium text-claimondo-navy">Kontaktdaten der Kanzlei</p>
           <input
             type="text"
             value={eigeneName}
@@ -186,14 +186,14 @@ export function KanzleiWunschForm({
             placeholder="Ansprechpartner (optional)"
             className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm bg-white"
           />
-          <p className="text-[11px] text-[#7BA3CC]">Email oder Telefon ist Pflicht.</p>
+          <p className="text-[11px] text-claimondo-light-blue">Email oder Telefon ist Pflicht.</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={isPending}
-        className="w-full px-4 py-2.5 rounded-lg bg-[#0D1B3E] text-white text-sm font-medium hover:bg-[#1a2d5a] disabled:opacity-50 transition-colors"
+        className="w-full px-4 py-2.5 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-[#1a2d5a] disabled:opacity-50 transition-colors"
       >
         {isPending ? 'Wird gespeichert…' : submitLabel}
       </button>

@@ -1,4 +1,4 @@
-// AAR-68: Mitarbeiter Reklamationen — gefiltert auf KB-Faelle
+﻿// AAR-68: Mitarbeiter Reklamationen — gefiltert auf KB-Faelle
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -33,7 +33,7 @@ export default async function MitarbeiterReklamationen() {
 
       <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-[#f8f9fb] text-xs uppercase text-claimondo-ondo">
+          <thead className="bg-claimondo-bg text-xs uppercase text-claimondo-ondo">
             <tr>
               <th className="text-left px-4 py-2">Fall</th>
               <th className="text-left px-4 py-2">Grund</th>
@@ -46,7 +46,7 @@ export default async function MitarbeiterReklamationen() {
             {(reklamationen ?? []).map(r => {
               const fall = fallMap.get(r.fall_id as string)
               return (
-                <tr key={r.id} className="hover:bg-[#f8f9fb]">
+                <tr key={r.id} className="hover:bg-claimondo-bg">
                   <td className="px-4 py-3">
                     <Link href={`/faelle/${r.fall_id}`} className="text-claimondo-ondo hover:underline font-medium">
                       {fall?.fall_nummer ?? (r.fall_id as string).slice(0, 8)}
@@ -57,7 +57,7 @@ export default async function MitarbeiterReklamationen() {
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       r.status === 'offen' ? 'bg-amber-100 text-amber-700' :
                       r.status === 'erledigt' ? 'bg-emerald-100 text-emerald-700' :
-                      'bg-[#f8f9fb] text-claimondo-ondo'
+                      'bg-claimondo-bg text-claimondo-ondo'
                     }`}>{r.status ?? '—'}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo">

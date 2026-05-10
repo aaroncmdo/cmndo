@@ -143,9 +143,9 @@ export default function FallDokumentDropzone({
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-            isDragActive ? 'border-[#4573A2] bg-[#4573A2]/5' :
-            uploading ? 'border-claimondo-border bg-[#f8f9fb]' :
-            'border-claimondo-border hover:border-[#4573A2] hover:bg-[#f8f9fb]/50'
+            isDragActive ? 'border-claimondo-ondo bg-claimondo-ondo/5' :
+            uploading ? 'border-claimondo-border bg-claimondo-bg' :
+            'border-claimondo-border hover:border-claimondo-ondo hover:bg-claimondo-bg/50'
           }`}
         >
           <input {...getInputProps()} />

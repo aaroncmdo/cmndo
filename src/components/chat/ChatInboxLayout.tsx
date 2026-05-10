@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-773: Shared Inbox-Layout für ALLE Portale.
 // Vorher hatten Gutachter-Posteingang, KB-Nachrichten und Admin-Inbox jeweils
@@ -105,7 +105,7 @@ export default function ChatInboxLayout({
                 <button
                   key={t.id}
                   onClick={() => setActiveId(t.id)}
-                  className={`w-full text-left px-3 py-3 border-b border-claimondo-border hover:bg-[#f8f9fb] transition-colors ${
+                  className={`w-full text-left px-3 py-3 border-b border-claimondo-border hover:bg-claimondo-bg transition-colors ${
                     active ? 'bg-claimondo-ondo/5' : ''
                   }`}
                 >
@@ -142,7 +142,7 @@ export default function ChatInboxLayout({
       </aside>
 
       {/* Detail-Panel */}
-      <main className="flex-1 min-w-0 min-h-0 overflow-hidden bg-[#f8f9fb] flex flex-col">
+      <main className="flex-1 min-w-0 min-h-0 overflow-hidden bg-claimondo-bg flex flex-col">
         {activeId ? (
           <div className="flex-1 min-h-0 p-4 overflow-y-auto">{renderDetail(activeId)}</div>
         ) : (

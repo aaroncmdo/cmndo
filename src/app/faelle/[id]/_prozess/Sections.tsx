@@ -91,7 +91,7 @@ function fmtEuro(v: unknown): string | null {
 }
 
 const KUERZUNGSTYP_LABEL: Record<string, { label: string; color: string }> = {
-  technisch: { label: 'Technisch', color: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
+  technisch: { label: 'Technisch', color: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
   argumentativ: { label: 'Argumentativ', color: 'bg-purple-50 text-purple-800 border-purple-200' },
   gemischt: { label: 'Gemischt', color: 'bg-amber-50 text-amber-800 border-amber-200' },
 }
@@ -536,7 +536,7 @@ export function NachbesichtigungSection() {
       )}
 
       {ergebnis && (
-        <div className="rounded-md bg-[#f8f9fb] border border-claimondo-border p-3 text-[11px] text-claimondo-navy">
+        <div className="rounded-md bg-claimondo-bg border border-claimondo-border p-3 text-[11px] text-claimondo-navy">
           <strong className="block mb-1">Ergebnis:</strong>
           {ergebnis}
         </div>
@@ -670,7 +670,7 @@ export function AuszahlungSection() {
             </div>
           </div>
           <div className="flex items-start gap-2 rounded-md border border-[#EBF1F8] bg-white p-2">
-            <EyeIcon className="w-3.5 h-3.5 text-[#4573A2] mt-0.5 shrink-0" />
+            <EyeIcon className="w-3.5 h-3.5 text-claimondo-ondo mt-0.5 shrink-0" />
             <p className="text-[11px] text-claimondo-ondo">
               Sichtbarkeit: Kunde sieht nur Kunden-Betrag (<code>faelle_kunde_view</code>),
               SV nur das Honorar (<code>faelle_sv_view</code>). Admin/KB sehen den vollen Split.
@@ -681,7 +681,7 @@ export function AuszahlungSection() {
           </p>
         </div>
       ) : (
-        <div className="rounded-md border border-claimondo-border bg-[#f8f9fb] p-3 text-[11px] text-claimondo-navy">
+        <div className="rounded-md border border-claimondo-border bg-claimondo-bg p-3 text-[11px] text-claimondo-navy">
           Split-Anzeige nur für Admin + Kundenbetreuer sichtbar.
         </div>
       )}

@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin'
+﻿import { createAdminClient } from '@/lib/supabase/admin'
 import { createKanzleiCheckoutSession } from '@/lib/stripe/kanzlei-checkout'
 import KanzleiCheckoutClient from './KanzleiCheckoutClient'
 
@@ -46,7 +46,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
   // Token nicht gefunden
   if (!abrechnung) {
     return (
-      <main className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
+      <main className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
           <div className="text-4xl mb-4">🔒</div>
           <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link ungueltig</h1>
@@ -61,7 +61,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
   const expires = abrechnung.magic_link_expires_at ? new Date(abrechnung.magic_link_expires_at as string) : null
   if (expires && now > expires && abrechnung.status !== 'bezahlt') {
     return (
-      <main className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
+      <main className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
           <div className="text-4xl mb-4">⏳</div>
           <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link abgelaufen</h1>
@@ -92,7 +92,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
   // Bereits bezahlt
   if (abrechnung.status === 'bezahlt') {
     return (
-      <main className="min-h-screen bg-[#f8f9fb] p-4 md:p-8">
+      <main className="min-h-screen bg-claimondo-bg p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-2xl shadow p-8">
             <div className="flex items-center gap-3 mb-6">
@@ -114,7 +114,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
 
   // Normale Rechnungsansicht
   return (
-    <main className="min-h-screen bg-[#f8f9fb] p-4 md:p-8">
+    <main className="min-h-screen bg-claimondo-bg p-4 md:p-8">
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-claimondo-navy rounded-2xl p-6 text-white">
@@ -155,7 +155,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-[#f8f9fb]">
+              <thead className="bg-claimondo-bg">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium text-claimondo-ondo">Nr.</th>
                   <th className="text-left px-4 py-3 font-medium text-claimondo-ondo">Fall-Nr.</th>
@@ -166,7 +166,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
               </thead>
               <tbody className="divide-y divide-claimondo-border">
                 {(positionen ?? []).map((pos) => (
-                  <tr key={pos.id} className="hover:bg-[#f8f9fb]">
+                  <tr key={pos.id} className="hover:bg-claimondo-bg">
                     <td className="px-4 py-3 text-claimondo-ondo">{pos.position_nr}</td>
                     <td className="px-4 py-3 font-mono text-xs text-claimondo-navy">{pos.fall_nr ?? '—'}</td>
                     <td className="px-4 py-3 text-claimondo-navy">{pos.kunde_name}</td>
@@ -185,7 +185,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
           </div>
 
           {/* Summen */}
-          <div className="p-6 border-t bg-[#f8f9fb] space-y-2">
+          <div className="p-6 border-t bg-claimondo-bg space-y-2">
             <div className="flex justify-between text-sm text-claimondo-ondo">
               <span>Zwischensumme netto ({abrechnung.anzahl_vollmachten} Vollmachten)</span>
               <span>{Number(abrechnung.endbetrag_netto).toFixed(2).replace('.', ',')} €</span>

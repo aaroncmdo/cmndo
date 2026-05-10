@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -20,8 +20,8 @@ type TaskRow = {
 const PRIO_BADGE: Record<string, string> = {
   dringend: 'bg-red-50 text-red-700',
   hoch: 'bg-amber-50 text-amber-700',
-  normal: 'bg-[#f8f9fb] text-claimondo-ondo',
-  niedrig: 'bg-[#f8f9fb] text-claimondo-ondo/70',
+  normal: 'bg-claimondo-bg text-claimondo-ondo',
+  niedrig: 'bg-claimondo-bg text-claimondo-ondo/70',
 }
 
 const STATUS_ICON: Record<string, { Icon: typeof CheckCircleIcon; cls: string }> = {
@@ -56,13 +56,13 @@ export default function MyTasksClient({
         icon={ClipboardListIcon}
       />
 
-      <div className="inline-flex bg-[#f8f9fb] rounded-xl p-0.5 text-xs font-medium">
+      <div className="inline-flex bg-claimondo-bg rounded-xl p-0.5 text-xs font-medium">
         <button onClick={() => setTab('assigned')}
-          className={`px-4 py-1.5 rounded-lg transition-colors ${tab === 'assigned' ? 'bg-white text-[#1E3A5F] shadow' : 'text-claimondo-ondo'}`}>
+          className={`px-4 py-1.5 rounded-lg transition-colors ${tab === 'assigned' ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo'}`}>
           Mir zugewiesen ({assigned.length})
         </button>
         <button onClick={() => setTab('created')}
-          className={`px-4 py-1.5 rounded-lg transition-colors ${tab === 'created' ? 'bg-white text-[#1E3A5F] shadow' : 'text-claimondo-ondo'}`}>
+          className={`px-4 py-1.5 rounded-lg transition-colors ${tab === 'created' ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo'}`}>
           Von mir erstellt ({created.length})
         </button>
       </div>
@@ -72,7 +72,7 @@ export default function MyTasksClient({
           <div className="p-12 text-center text-sm text-claimondo-ondo/70">Keine Tasks in dieser Ansicht.</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-[#f8f9fb] text-[10px] uppercase tracking-wide text-claimondo-ondo">
+            <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
               <tr>
                 <th className="w-10 px-4 py-3"></th>
                 <th className="text-left px-4 py-3">Task</th>
@@ -87,7 +87,7 @@ export default function MyTasksClient({
                 const cfg = STATUS_ICON[t.status] ?? STATUS_ICON.offen
                 const isOverdue = t.faellig_am && new Date(t.faellig_am) < new Date() && t.status !== 'erledigt'
                 return (
-                  <tr key={t.id} className={`hover:bg-[#f8f9fb]/50 ${isOverdue ? 'bg-red-50/20' : ''}`}>
+                  <tr key={t.id} className={`hover:bg-claimondo-bg/50 ${isOverdue ? 'bg-red-50/20' : ''}`}>
                     <td className="px-4 py-3">
                       <button onClick={() => handleStatusChange(t.id, t.status === 'erledigt' ? 'offen' : 'erledigt')} disabled={pending}>
                         <cfg.Icon className={`w-4 h-4 ${cfg.cls}`} />
@@ -116,7 +116,7 @@ export default function MyTasksClient({
                     </td>
                     <td className="px-4 py-3">
                       <select value={t.status} onChange={e => handleStatusChange(t.id, e.target.value)} disabled={pending}
-                        className="text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg px-2 py-1 focus:outline-none">
+                        className="text-xs bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1 focus:outline-none">
                         <option value="offen">Offen</option>
                         <option value="in-bearbeitung">In Bearbeitung</option>
                         <option value="erledigt">Erledigt</option>

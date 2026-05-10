@@ -105,8 +105,8 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           {...getRootProps()}
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors ${
             isDragActive
-              ? 'border-[#4573A2] bg-[#4573A2]/5'
-              : 'border-claimondo-border bg-[#f8f9fb] hover:border-[#4573A2] hover:bg-[#f8f9fb]'
+              ? 'border-claimondo-ondo bg-claimondo-ondo/5'
+              : 'border-claimondo-border bg-claimondo-bg hover:border-claimondo-ondo hover:bg-claimondo-bg'
           } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
         >
           <input {...getInputProps()} />
@@ -131,7 +131,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
               </div>
               <div>
                 <p className="text-sm font-medium text-claimondo-navy flex items-center gap-1.5">
-                  <CheckCircle2Icon className="w-4 h-4 text-[#4573A2]" />
+                  <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
                   Logo hochgeladen
                 </p>
                 <p className="text-[11px] text-claimondo-ondo mt-0.5">Farben automatisch extrahiert und angewendet</p>
@@ -162,7 +162,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           type="button"
           onClick={onDone}
           disabled={uploading}
-          className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
+          className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
         >
           Später machen
         </button>

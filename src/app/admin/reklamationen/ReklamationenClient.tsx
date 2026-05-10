@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -61,7 +61,7 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
           {['eingereicht', 'pruefung', 'berechtigt', 'abgelehnt', 'alle'].map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`px-3 py-1.5 text-xs font-medium leading-tight text-center rounded-full border transition-colors ${
-                filter === f ? 'bg-[#4573A2] text-white border-[#4573A2]' : 'border-claimondo-border text-claimondo-ondo'
+                filter === f ? 'bg-claimondo-ondo text-white border-claimondo-ondo' : 'border-claimondo-border text-claimondo-ondo'
               }`}>{f === 'alle' ? 'Alle' : STATUS_BADGE[f]?.label ?? f}</button>
           ))}
         </div>
@@ -89,7 +89,7 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
                       <div className="space-y-2">
                         <textarea value={adminGrund} onChange={e => setAdminGrund(e.target.value)}
                           placeholder="Admin-Begründung (bei Ablehnung Pflicht)"
-                          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-xs resize-none focus:outline-none focus:border-[#4573A2]" rows={2} />
+                          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-xs resize-none focus:outline-none focus:border-claimondo-ondo" rows={2} />
                         <div className="flex gap-2">
                           <button onClick={() => handleEntscheidung(r.id, 'berechtigt')} disabled={loading}
                             className="px-3 py-1.5 text-xs font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 disabled:opacity-50">Berechtigt</button>

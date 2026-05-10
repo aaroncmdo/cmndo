@@ -1,4 +1,4 @@
-// AAR-558 (C9): Auszahlungs-Card für das Kunde-Portal.
+﻿// AAR-558 (C9): Auszahlungs-Card für das Kunde-Portal.
 // Zeigt AUSSCHLIESSLICH den Netto-Kunden-Anteil (auszahlung_kunde_betrag).
 // NIE regulierung_betrag (Brutto inkl. SV-Honorar) und NIE
 // auszahlung_gutachter_betrag. Datenquelle: faelle_kunde_view (C8), die
@@ -49,20 +49,20 @@ export default function AuszahlungCard({ betrag, eingegangenAm, zahlungsweg }: P
 
       <div>
         <p className="text-xs text-claimondo-ondo">Netto-Betrag (Ihr Anteil)</p>
-        <p className="text-2xl font-bold text-[#0D1B3E]">{formatEuro(n)}</p>
+        <p className="text-2xl font-bold text-claimondo-navy">{formatEuro(n)}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-xs pt-1">
         {eingegangen && eingegangenAm && (
           <div>
             <p className="text-claimondo-ondo">Eingang</p>
-            <p className="text-[#0D1B3E] font-medium">{formatDate(eingegangenAm)}</p>
+            <p className="text-claimondo-navy font-medium">{formatDate(eingegangenAm)}</p>
           </div>
         )}
         {zahlungsweg && (
           <div>
             <p className="text-claimondo-ondo">Zahlungsweg</p>
-            <p className="text-[#0D1B3E] font-medium">
+            <p className="text-claimondo-navy font-medium">
               {ZAHLUNGSWEG_LABEL[zahlungsweg] ?? zahlungsweg}
             </p>
           </div>

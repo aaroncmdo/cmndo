@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -123,7 +123,7 @@ export default async function SVKalenderPage({
         <PageHeader
           title="Kalender"
           actions={
-            <div className="flex gap-1 bg-[#f8f9fb] rounded-lg p-0.5">
+            <div className="flex gap-1 bg-claimondo-bg rounded-lg p-0.5">
               <Link
                 href="/gutachter/kalender?view=kalender"
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
@@ -172,7 +172,7 @@ export default async function SVKalenderPage({
             const name = fall.lead_id && leadMap[fall.lead_id] ? leadMap[fall.lead_id] : '—'
             return (
               <Link key={fall.id} href={`/gutachter/fall/${fall.id}`}
-                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-[#f8f9fb] transition-colors">
+                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-claimondo-bg transition-colors">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-claimondo-navy">

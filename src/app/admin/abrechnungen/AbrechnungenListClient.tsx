@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useMemo, useState, useTransition } from 'react'
 import {
@@ -56,11 +56,11 @@ function isFaellig(row: Row): boolean {
 }
 
 function statusBadge(row: Row): { label: string; bg: string; text: string; dot: string } {
-  if (row.storniert_am) return { label: 'Storniert', bg: 'bg-[#f8f9fb]', text: 'text-claimondo-ondo', dot: 'bg-claimondo-ondo/70' }
+  if (row.storniert_am) return { label: 'Storniert', bg: 'bg-claimondo-bg', text: 'text-claimondo-ondo', dot: 'bg-claimondo-ondo/70' }
   if (row.bezahlt_am) return { label: 'Bezahlt', bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' }
   if (row.status === 'fehlgeschlagen' || row.einzug_fehler) return { label: 'Fehlgeschlagen', bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' }
   if (isFaellig(row)) return { label: 'Faellig', bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' }
-  if (row.status === 'versendet') return { label: 'Versendet', bg: 'bg-[#f8f9fb]', text: 'text-claimondo-ondo', dot: 'bg-[#f8f9fb]0' }
+  if (row.status === 'versendet') return { label: 'Versendet', bg: 'bg-claimondo-bg', text: 'text-claimondo-ondo', dot: 'bg-claimondo-bg0' }
   return { label: 'Offen', bg: 'bg-yellow-50', text: 'text-yellow-700', dot: 'bg-yellow-500' }
 }
 
@@ -222,7 +222,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
           <div className="p-12 text-center text-sm text-claimondo-ondo">Keine Eintraege im Filter <strong>{FILTER_TABS.find(t => t.key === filter)?.label}</strong>.</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-[#f8f9fb] text-[10px] uppercase text-claimondo-ondo tracking-wide">
+            <thead className="bg-claimondo-bg text-[10px] uppercase text-claimondo-ondo tracking-wide">
               <tr>
                 <th className="text-left px-4 py-3">Rechnung</th>
                 <th className="text-left px-4 py-3">Empfaenger</th>
@@ -237,7 +237,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
               {filtered.map(r => {
                 const badge = statusBadge(r)
                 return (
-                  <tr key={r.id} className="hover:bg-[#f8f9fb]/50 transition-colors">
+                  <tr key={r.id} className="hover:bg-claimondo-bg/50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="font-mono text-xs text-claimondo-navy">{r.abrechnungs_nr}</div>
                       <div className="text-[10px] text-claimondo-ondo/70">erstellt {fmtDate(r.created_at)}</div>
@@ -302,7 +302,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
               {(() => {
                 const b = statusBadge(selected)
                 return (
-                  <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
+                  <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
                     <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70 mb-2">Status</p>
                     <StatusBadge colorCls={`${b.bg} ${b.text}`} size="sm">
                       <span className={`w-2 h-2 rounded-full ${b.dot}`} />
@@ -348,7 +348,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
 
               {/* Notiz */}
               {selected.notiz && (
-                <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4">
+                <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
                   <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70 mb-1">Notiz</p>
                   <p className="text-xs text-claimondo-navy whitespace-pre-wrap">{selected.notiz}</p>
                 </div>
@@ -394,7 +394,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         <button
                           onClick={() => { setConfirmMarkBezahlt(false); setBezahltNotiz('') }}
                           disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-[#f8f9fb]"
+                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-claimondo-bg"
                         >
                           Abbrechen
                         </button>
@@ -429,7 +429,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                       />
                       <div className="flex gap-2">
                         <button onClick={() => { setConfirmStorno(false); setStornoGrund('') }} disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-[#f8f9fb]">Abbrechen</button>
+                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-claimondo-bg">Abbrechen</button>
                         <button onClick={() => handleStorno(selected)} disabled={pending || !stornoGrund.trim()}
                           className="flex-1 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium disabled:opacity-40">
                           {pending ? '...' : 'Stornieren'}
@@ -443,7 +443,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
               {/* KFZ-150: Storno-Details + Re-Issue Button */}
               {selected.storniert_am && selected.status === 'storniert' && (
                 <div className="pt-4 border-t border-claimondo-border space-y-3">
-                  <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-3 space-y-1">
+                  <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-3 space-y-1">
                     <p className="text-xs text-claimondo-ondo"><strong>Storniert am:</strong> {fmtDate(selected.storniert_am)}</p>
                     {selected.storniert_grund && <p className="text-xs text-claimondo-ondo"><strong>Grund:</strong> {selected.storniert_grund}</p>}
                     {selected.ersetzt_durch_abrechnung_id && <p className="text-xs text-emerald-600"><strong>Korrekturabrechnung erstellt</strong></p>}
@@ -488,7 +488,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                       )}
                       <div className="flex gap-2">
                         <button onClick={() => { setShowReIssueForm(false); setReIssueKorrekturen([]) }} disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-[#f8f9fb]">Abbrechen</button>
+                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-claimondo-bg">Abbrechen</button>
                         <button onClick={() => handleReIssue(selected)} disabled={pending}
                           className="flex-1 py-1.5 rounded-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-xs font-medium disabled:opacity-40">
                           {pending ? 'Erstelle...' : 'Re-Issue erstellen'}

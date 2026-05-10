@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -91,7 +91,7 @@ export default function AnlegenFallClient() {
                       schadensursache: '', spezifikation: '', schadens_art: '', notiz: '',
                     })
                   }}
-                  className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb]"
+                  className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
                 >
                   Weiteren Fall anlegen
                 </button>
@@ -172,7 +172,7 @@ export default function AnlegenFallClient() {
             onChange={e => update('notiz', e.target.value)}
             rows={3}
             placeholder="Was hat der Kunde am Telefon gesagt?"
-            className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-y"
+            className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-y"
           />
         </div>
 
@@ -187,7 +187,7 @@ export default function AnlegenFallClient() {
             type="button"
             onClick={() => router.push('/admin/faelle')}
             disabled={pending}
-            className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
+            className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
           >
             Abbrechen
           </button>
@@ -225,7 +225,7 @@ function Field({
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
-        className={`w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] ${mono ? 'font-mono' : ''}`}
+        className={`w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] ${mono ? 'font-mono' : ''}`}
       />
     </div>
   )
@@ -246,7 +246,7 @@ function SelectField({
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       >
         <option value="">{placeholder ?? '—'}</option>
         {options.map(opt => (

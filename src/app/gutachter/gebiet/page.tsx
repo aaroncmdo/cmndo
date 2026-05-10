@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
@@ -288,7 +288,7 @@ export default function GebietPage() {
                 ['vorschau', 'Vorschau', EyeIcon],
               ] as const).map(([k, l, I]) => (
                 <button key={k} onClick={() => setLayers(p => ({ ...p, [k]: !p[k] }))}
-                  className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium ${layers[k] ? 'bg-[var(--brand-secondary)]/5 text-[var(--brand-secondary)]' : 'bg-[#f8f9fb] text-claimondo-ondo/70'}`}>
+                  className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium ${layers[k] ? 'bg-[var(--brand-secondary)]/5 text-[var(--brand-secondary)]' : 'bg-claimondo-bg text-claimondo-ondo/70'}`}>
                   <I className="w-3 h-3" /> {l}
                 </button>
               ))}
@@ -305,7 +305,7 @@ export default function GebietPage() {
           {/* AAR-346: Sichtbares Error-Overlay wenn Maps-Script/-Key scheitert.
               Vorher war der Bereich komplett leer ohne Feedback an den Nutzer. */}
           {mapError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#f8f9fb] z-20">
+            <div className="absolute inset-0 flex items-center justify-center bg-claimondo-bg z-20">
               <div className="max-w-md mx-4 rounded-xl border border-red-200 bg-white p-5 shadow-sm">
                 <p className="text-sm font-semibold text-red-700 mb-1">Karte konnte nicht geladen werden</p>
                 <p className="text-xs text-claimondo-ondo leading-relaxed">{mapError}</p>
@@ -385,19 +385,19 @@ export default function GebietPage() {
               <p className="text-[10px] text-claimondo-ondo">{currentPaket.faelle} Fälle/Mo · {currentPaket.radius_km}km · {currentPaket.preis}€/Mo</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-[#f8f9fb] rounded-lg p-2 text-center">
+              <div className="bg-claimondo-bg rounded-lg p-2 text-center">
                 <p className="text-sm font-bold text-claimondo-navy">{currentPaket.radius_km} km</p>
                 <p className="text-[9px] text-claimondo-ondo">Einsatzradius</p>
               </div>
-              <div className="bg-[#f8f9fb] rounded-lg p-2 text-center">
+              <div className="bg-claimondo-bg rounded-lg p-2 text-center">
                 <p className="text-sm font-bold text-claimondo-navy">{areaKm2.toFixed(0)} km²</p>
                 <p className="text-[9px] text-claimondo-ondo">Gebietsfläche</p>
               </div>
-              <div className="bg-[#f8f9fb] rounded-lg p-2 text-center">
+              <div className="bg-claimondo-bg rounded-lg p-2 text-center">
                 <p className="text-sm font-bold text-claimondo-navy">{touchingNeighbors.length}</p>
                 <p className="text-[9px] text-claimondo-ondo">Nachbar-SV</p>
               </div>
-              <div className="bg-[#f8f9fb] rounded-lg p-2 text-center">
+              <div className="bg-claimondo-bg rounded-lg p-2 text-center">
                 <p className="text-sm font-bold text-amber-600">~{overlapPct}%</p>
                 <p className="text-[9px] text-claimondo-ondo">Überlappung</p>
               </div>
@@ -445,7 +445,7 @@ export default function GebietPage() {
           {/* Individuelles Angebot */}
           <div className="border-t border-claimondo-border pt-3">
             <button onClick={() => setShowAnfrageModal(true)}
-              className="w-full flex items-center justify-center gap-2 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-xs font-medium py-3 rounded-xl transition-colors">
+              className="w-full flex items-center justify-center gap-2 bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy text-xs font-medium py-3 rounded-xl transition-colors">
               <SendIcon className="w-3.5 h-3.5" /> Individuelles Angebot anfragen
             </button>
           </div>
@@ -538,7 +538,7 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
               <label className="text-sm text-claimondo-navy mb-1.5 block">Nachricht (optional)</label>
               <textarea value={nachricht} onChange={e => setNachricht(e.target.value)}
                 rows={3} placeholder="Besondere Wünsche, zusätzliche Standorte..."
-                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none" />
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none" />
             </div>
 
             <button onClick={handleSubmit} disabled={sending}

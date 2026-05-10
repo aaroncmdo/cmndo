@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-544 (C7): Filter-Bar für den unified Event-Stream im Timeline-Tab.
 // Quellen-Checkboxen, Zeitraum-Select, Such-Input.
@@ -60,8 +60,8 @@ export function EventFilterBar({
               onClick={() => toggleSource(s.id)}
               className={`inline-flex items-center gap-1 text-xs font-medium rounded-full border px-2.5 py-1 transition-colors ${
                 active
-                  ? 'bg-[#f8f9fb] border-claimondo-ondo text-claimondo-navy'
-                  : 'bg-white border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
+                  ? 'bg-claimondo-bg border-claimondo-ondo text-claimondo-navy'
+                  : 'bg-white border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg'
               }`}
             >
               <span>{s.icon}</span>

@@ -1,4 +1,4 @@
-// AAR-61: Mitarbeiter-Portal Layout mit Sidebar
+﻿// AAR-61: Mitarbeiter-Portal Layout mit Sidebar
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
@@ -42,18 +42,18 @@ export default async function MitarbeiterLayout({
   } catch { /* */ }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen bg-claimondo-bg">
       <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xl font-bold tracking-tight">
-            <span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span>
+            <span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span>
           </span>
           {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
           <TasksPill userId={user.id} href="/mitarbeiter/tasks" />
         </div>
         <div className="flex items-center gap-3">
           <UpdatesNav variant="dark" />
-          <span className="text-[#7BA3CC] text-sm">{displayName}</span>
+          <span className="text-claimondo-light-blue text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">
             <button type="submit" className="text-claimondo-light-blue hover:text-white transition-colors">
               <LogOutIcon className="w-4 h-4" />

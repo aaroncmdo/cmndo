@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import EmptyState from '@/components/shared/EmptyState'
 
 // AAR-649: Rolle-basierter Fallback-Link. Admin/Dispatch/KB/SV/Makler
@@ -31,7 +31,7 @@ export default async function NotFound() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-5">
+    <div className="min-h-screen bg-claimondo-bg flex items-center justify-center px-5">
       <div className="max-w-md w-full">
         <div className="text-center text-claimondo-ondo/50 text-7xl font-bold mb-4">404</div>
         <EmptyState

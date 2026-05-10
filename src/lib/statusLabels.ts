@@ -48,10 +48,10 @@ export const FALL_STATUS_LABELS: Record<string, string> = {
 // Neutrale UI-Farben: Claimondo-Tokens (#f8f9fb, #0D1B3E, #4573A2).
 // Semantische Farben (success/warning/danger): emerald/amber/orange/red erlaubt.
 const STATUS_SLOT_CLASSES = {
-  neutral: 'bg-[#f8f9fb] text-claimondo-ondo',
-  active:  'bg-[#4573A2]/10 text-[#4573A2]',
+  neutral: 'bg-claimondo-bg text-claimondo-ondo',
+  active:  'bg-claimondo-ondo/10 text-claimondo-ondo',
   pending: 'bg-amber-50 text-amber-700',
-  done:    'bg-[#f8f9fb] text-claimondo-navy',
+  done:    'bg-claimondo-bg text-claimondo-navy',
   success: 'bg-emerald-50 text-emerald-700',
   warning: 'bg-orange-50 text-orange-700',
   danger:  'bg-red-50 text-red-700',
@@ -125,8 +125,8 @@ export const SCHADENS_URSACHE_COLORS: Record<string, string> = {
   sturmschaden: 'bg-cyan-50 text-cyan-700',
   vandalismus: 'bg-pink-50 text-pink-700',
   verschleiss: 'bg-amber-50 text-amber-700',
-  sonstiges: 'bg-[#f8f9fb] text-claimondo-navy',
-  kfz: 'bg-[#4573A2]/5 text-[#7BA3CC]',
+  sonstiges: 'bg-claimondo-bg text-claimondo-navy',
+  kfz: 'bg-claimondo-ondo/5 text-claimondo-light-blue',
 }
 
 export function getUrsacheLabel(code: string | null | undefined): string {
@@ -211,7 +211,7 @@ export const MANDATSTYP_LABELS: Record<string, string> = {
 }
 
 export const MANDATSTYP_COLORS: Record<string, string> = {
-  claimondo: 'bg-claimondo-navy text-[#7BA3CC]',
+  claimondo: 'bg-claimondo-navy text-claimondo-light-blue',
   'kanzlei-claimondo': 'bg-purple-950 text-purple-300',
 }
 

@@ -159,7 +159,7 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
       </div>
 
       {showMaklerBox && (
-        <div className="rounded-xl border border-claimondo-border bg-[#f8f9fb] p-4">
+        <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-4">
           <div className="flex items-start gap-3">
             <Info className="mt-0.5 h-5 w-5 shrink-0 text-claimondo-ondo" />
             <div className="flex-1">

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-538 (C1): Trigger-Felder-Liste für den PhaseHeader.
 // Zeigt welche Felder wann gesetzt wurden + von welcher Quelle.
@@ -18,11 +18,11 @@ const SOURCE_LABEL: Record<TriggerSource, string> = {
 }
 
 const SOURCE_COLOR: Record<TriggerSource, string> = {
-  manual: 'bg-[#f8f9fb] text-claimondo-navy',
+  manual: 'bg-claimondo-bg text-claimondo-navy',
   webhook: 'bg-purple-100 text-purple-800',
   cron: 'bg-amber-100 text-amber-800',
-  ocr: 'bg-[#f8f9fb] text-claimondo-navy',
-  manual_admin: 'bg-[#EBF1F8] text-[#0D1B3E]',
+  ocr: 'bg-claimondo-bg text-claimondo-navy',
+  manual_admin: 'bg-[#EBF1F8] text-claimondo-navy',
   manual_kb: 'bg-green-100 text-green-800',
   manual_sv: 'bg-indigo-100 text-indigo-800',
   manual_kunde: 'bg-pink-100 text-pink-800',
@@ -54,7 +54,7 @@ export function PhaseTriggerList({ fields }: { fields: TriggerField[] }) {
           </span>
           <span className="font-mono text-claimondo-navy">{f.name}</span>
           <span className="text-claimondo-ondo">=</span>
-          <span className="text-[#0D1B3E] font-medium">{fmtValue(f.value)}</span>
+          <span className="text-claimondo-navy font-medium">{fmtValue(f.value)}</span>
           {f.set_at && <span className="text-claimondo-ondo/70">· {fmtDate(f.set_at)}</span>}
         </li>
       ))}

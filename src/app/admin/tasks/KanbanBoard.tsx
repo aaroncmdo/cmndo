@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-154: Task-Kanban Rewrite.
 // - Status-Dropdown entfernt, Statuswechsel ausschliesslich per Drag & Drop
@@ -56,7 +56,7 @@ const TYP_LABEL: Record<string, string> = {
 }
 
 const TYP_COLOR: Record<string, string> = {
-  dispatch: 'bg-[#f8f9fb] text-claimondo-ondo',
+  dispatch: 'bg-claimondo-bg text-claimondo-ondo',
   filmcheck: 'bg-yellow-50 text-yellow-600',
   'kanzlei-anschlussschreiben': 'bg-green-50 text-green-600',
   'kanzlei-nachfrage': 'bg-emerald-50 text-emerald-600',
@@ -283,7 +283,7 @@ export default function KanbanBoard({
                 </label>
                 <button
                   onClick={() => setDialogOpen(true)}
-                  className="px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
+                  className="px-4 py-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium rounded-xl transition-colors"
                 >
                   + Neuer Task
                 </button>
@@ -310,7 +310,7 @@ export default function KanbanBoard({
                     >
                       {col.label}
                     </span>
-                    <span className="text-claimondo-ondo/70 text-xs font-medium bg-[#f8f9fb] px-2 py-0.5 rounded-full">
+                    <span className="text-claimondo-ondo/70 text-xs font-medium bg-claimondo-bg px-2 py-0.5 rounded-full">
                       {colTasks.length}
                     </span>
                   </div>
@@ -403,7 +403,7 @@ function TaskCard({
       <div className="flex items-start justify-between gap-2 mb-2">
         <span
           className={`px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap ${
-            TYP_COLOR[task.typ] ?? 'bg-[#f8f9fb] text-claimondo-navy'
+            TYP_COLOR[task.typ] ?? 'bg-claimondo-bg text-claimondo-navy'
           }`}
         >
           {TYP_LABEL[task.typ] ?? task.typ}
@@ -596,7 +596,7 @@ function NewTaskDialog({
               <select
                 name="typ"
                 required
-                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Bitte wählen...</option>
                 {TASK_TYPES.map((t) => (
@@ -612,7 +612,7 @@ function NewTaskDialog({
               <select
                 name="fall_id"
                 required
-                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Fall auswählen...</option>
                 {faelle.map((f) => (
@@ -630,7 +630,7 @@ function NewTaskDialog({
                 name="titel"
                 required
                 placeholder="Aufgabe beschreiben..."
-                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
 
@@ -642,7 +642,7 @@ function NewTaskDialog({
                 name="beschreibung"
                 rows={3}
                 placeholder="Details..."
-                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
               />
             </div>
 
@@ -651,7 +651,7 @@ function NewTaskDialog({
               <input
                 type="date"
                 name="faellig_am"
-                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
 
@@ -661,7 +661,7 @@ function NewTaskDialog({
               </label>
               <select
                 name="zugewiesen_an"
-                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               >
                 <option value="">Nicht zugewiesen</option>
                 {admins.map((a) => (

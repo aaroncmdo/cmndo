@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-289: Schlanke Shell für die SV-Fallakte mit Phasen-Stepper, Akte-Drawer
 // und 2-Spalten-Layout (Desktop) bzw. stacked (Mobile).
@@ -330,14 +330,14 @@ export default function FallDetailClient(props: Props) {
   })
 
   return (
-    <div className="min-h-full bg-[#f8f9fb] -mx-2 sm:-mx-3 lg:-mx-4 -mb-2 sm:-mb-3 lg:-mb-4 -mt-2 sm:-mt-3 lg:-mt-4 [&_.rounded-2xl]:shadow-sm">
+    <div className="min-h-full bg-claimondo-bg -mx-2 sm:-mx-3 lg:-mx-4 -mb-2 sm:-mb-3 lg:-mb-4 -mt-2 sm:-mt-3 lg:-mt-4 [&_.rounded-2xl]:shadow-sm">
       <FallRealtimeRefresh fallId={fall.id as string} />
       <FallWindowDropzone fallId={fall.id as string} />
       {/* AAR-864 Polish: Akten-Header sticky direkt am Wrapper-Oberrand.
           Negativer top kompensiert das main-Padding (p-2/3/4) damit der
           Sticky-Anker direkt an der oberen rounded-2xl-Kante des Wrappers
           klebt, nicht am Padding-Inside. */}
-      <div className="sticky -top-2 sm:-top-3 lg:-top-4 z-30 bg-[#f8f9fb] shadow-sm">
+      <div className="sticky -top-2 sm:-top-3 lg:-top-4 z-30 bg-claimondo-bg shadow-sm">
         <FallHeader
           fallNummer={fallNummer}
           fallId={fall.id as string}

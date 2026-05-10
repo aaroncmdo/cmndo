@@ -32,8 +32,8 @@ export default function Spotlight() {
         key: 'fall',
         label: 'Fälle',
         icon: FileTextIcon,
-        iconColor: 'text-[#4573A2]',
-        hoverBg: 'hover:bg-[#4573A2]/5',
+        iconColor: 'text-claimondo-ondo',
+        hoverBg: 'hover:bg-claimondo-ondo/5',
         results: d.faelle ?? [],
       },
       {

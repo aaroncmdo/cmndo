@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -106,7 +106,7 @@ export default function KalenderClient({
                 className={`flex flex-col items-center py-2 px-1 rounded-lg text-xs transition-colors ${
                   isSelected
                     ? 'bg-claimondo-ondo text-white'
-                    : 'bg-[#f8f9fb] text-claimondo-navy hover:bg-claimondo-ondo/10'
+                    : 'bg-claimondo-bg text-claimondo-navy hover:bg-claimondo-ondo/10'
                 }`}>
                 <span className="font-medium">{dayName}</span>
                 <span className="text-lg font-bold leading-tight">{dayNum}</span>
@@ -139,7 +139,7 @@ export default function KalenderClient({
                         ? 'bg-red-50 text-red-300 cursor-not-allowed'
                         : isSelected
                           ? 'bg-claimondo-ondo text-white ring-2 ring-claimondo-ondo ring-offset-1'
-                          : 'bg-[#f8f9fb] text-claimondo-navy hover:bg-claimondo-ondo/10'
+                          : 'bg-claimondo-bg text-claimondo-navy hover:bg-claimondo-ondo/10'
                     }`}>
                     {slot.belegt ? (
                       <span className="line-through">{timeStr}</span>
@@ -171,7 +171,7 @@ export default function KalenderClient({
       {/* Legende */}
       <div className="flex items-center gap-4 text-xs text-claimondo-ondo/70">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-[#f8f9fb] border border-claimondo-border" />
+          <div className="w-3 h-3 rounded bg-claimondo-bg border border-claimondo-border" />
           <span>Frei</span>
         </div>
         <div className="flex items-center gap-1.5">

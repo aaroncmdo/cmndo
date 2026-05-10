@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // CMM-36: Zeigt dem SV seinen Live-Tracking-Status unterhalb des Steppers.
 // Erscheint nur wenn Tracking aktiv (isTracking=true). Zeigt Name, ETA und
@@ -23,11 +23,11 @@ export function SvUnterwegsInfo({
 
   return (
     <div className="rounded-2xl bg-claimondo-navy text-white px-4 py-3 flex items-center gap-3">
-      <NavigationIcon className="w-4 h-4 shrink-0 text-[#7BA3CC]" />
+      <NavigationIcon className="w-4 h-4 shrink-0 text-claimondo-light-blue" />
       <div className="flex-1 min-w-0">
         <span className="text-sm font-semibold">{name} ist unterwegs</span>
         {ankunft && (
-          <span className="text-sm text-[#7BA3CC] ml-2">
+          <span className="text-sm text-claimondo-light-blue ml-2">
             · Ankunft ca. {ankunft}
             {tracking.etaMinuten && ` (${tracking.etaMinuten} Min.)`}
           </span>

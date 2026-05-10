@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -179,7 +179,7 @@ export default function VertragPage() {
 
           <div>
             <p className="text-xs text-claimondo-ondo mb-2">Unterschrift (mit Finger oder Maus zeichnen):</p>
-            <canvas ref={canvasRef} className="w-full h-[120px] border-2 border-dashed border-claimondo-border rounded-xl bg-[#f8f9fb] cursor-crosshair" />
+            <canvas ref={canvasRef} className="w-full h-[120px] border-2 border-dashed border-claimondo-border rounded-xl bg-claimondo-bg cursor-crosshair" />
             {signed && <p className="text-[10px] text-green-600 mt-1">Unterschrift erfasst</p>}
           </div>
 

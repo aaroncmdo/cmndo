@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { CalendarIcon } from 'lucide-react'
@@ -68,7 +68,7 @@ export default function FallDetailSections({
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.key
                 ? 'bg-claimondo-ondo text-white'
-                : 'text-claimondo-ondo hover:bg-[#f8f9fb]'
+                : 'text-claimondo-ondo hover:bg-claimondo-bg'
             }`}>
             {tab.label}
           </button>
@@ -304,7 +304,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           if (isSystem) {
             return (
               <div key={msg.id} className="flex justify-center">
-                <div className="bg-[#f8f9fb] border border-claimondo-light-blue/30 rounded-xl px-4 py-2 max-w-[85%]">
+                <div className="bg-claimondo-bg border border-claimondo-light-blue/30 rounded-xl px-4 py-2 max-w-[85%]">
                   <p className="text-xs text-claimondo-navy text-center whitespace-pre-wrap">{msg.nachricht}</p>
                   <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">
                     {new Date(msg.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
@@ -315,7 +315,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           }
 
           const senderName = getSenderName(msg)
-          const bubbleColor = isOwn ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-navy'
+          const bubbleColor = isOwn ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-navy'
           const lightText = isOwn ? 'text-white/60' : 'text-claimondo-ondo/70'
 
           return (
@@ -351,7 +351,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           <input type="text" value={text} onChange={e => setText(e.target.value)}
             placeholder="Nachricht schreiben..."
             // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
-            className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-xl px-4 py-3 text-base text-claimondo-navy placeholder-gray-400 focus:outline-none focus:border-claimondo-ondo" />
+            className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-xl px-4 py-3 text-base text-claimondo-navy placeholder-gray-400 focus:outline-none focus:border-claimondo-ondo" />
           <button type="submit" disabled={sending || !text.trim()}
             className="px-4 py-3 bg-claimondo-ondo hover:bg-claimondo-shield text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
             {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}
@@ -421,11 +421,11 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
             {loading ? 'Wird verarbeitet...' : 'Vorschlag annehmen'}
           </button>
           <button onClick={() => setShowModal(true)} disabled={loading}
-            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-shield hover:bg-[#f8f9fb] transition-colors disabled:opacity-40">
+            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-shield hover:bg-claimondo-bg transition-colors disabled:opacity-40">
             Anderen Termin vorschlagen
           </button>
           <Link href={`/kunde/faelle/${fallId}/kalender`}
-            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-light-blue/30 hover:bg-[#f8f9fb] transition-colors flex items-center justify-center gap-2">
+            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-light-blue/30 hover:bg-claimondo-bg transition-colors flex items-center justify-center gap-2">
             <CalendarIcon className="w-4 h-4" /> Kalender des Gutachters öffnen
           </Link>
         </div>
@@ -446,7 +446,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
 
         <div className="flex gap-2">
           <button onClick={() => setShowModal(false)}
-            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors">
+            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors">
             Abbrechen
           </button>
           <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}

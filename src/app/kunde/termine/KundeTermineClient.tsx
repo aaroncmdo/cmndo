@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-639: Kalender-View + Liste-Toggle für Kunden-Termine.
 // Liste: Kommend/Verlauf-Sektionen (wie bisher).
@@ -43,7 +43,7 @@ const STATUS_BADGE: Record<string, string> = {
   bestaetigt: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   gegenvorschlag: 'bg-amber-50 text-amber-700 border-amber-200',
   abgelehnt: 'bg-red-50 text-red-700 border-red-200',
-  abgeschlossen: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
+  abgeschlossen: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border',
 }
 
 // Dot-Farbe pro Status im Kalender
@@ -162,7 +162,7 @@ export default function KundeTermineClient({
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1.5 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo transition-colors"
+              className="p-1.5 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo transition-colors"
               aria-label="Vorheriger Monat"
             >
               <ChevronLeftIcon className="w-4 h-4" />
@@ -173,7 +173,7 @@ export default function KundeTermineClient({
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1.5 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo transition-colors"
+              className="p-1.5 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo transition-colors"
               aria-label="Nächster Monat"
             >
               <ChevronRightIcon className="w-4 h-4" />
@@ -206,7 +206,7 @@ export default function KundeTermineClient({
                       ? 'bg-claimondo-navy text-white'
                       : isToday
                         ? 'bg-[#eef3f9] text-claimondo-navy font-bold'
-                        : 'hover:bg-[#f8f9fb] text-claimondo-navy'
+                        : 'hover:bg-claimondo-bg text-claimondo-navy'
                   } ${dayTermine.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
                   disabled={dayTermine.length === 0}
                   aria-label={`${cell.date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}: ${dayTermine.length} Termin(e)`}
@@ -302,7 +302,7 @@ function TerminCard({
   const isVideo = t.kanal === 'video'
   const Icon = isKb ? VideoIcon : HardHatIcon
   const start = new Date(t.start_zeit)
-  const badgeCls = STATUS_BADGE[t.status] ?? 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border'
+  const badgeCls = STATUS_BADGE[t.status] ?? 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'
   const statusLabel = STATUS_LABEL[t.status] ?? t.status
 
   // AAR-698: Karte komplett klickbar → Termin-Detail-View.

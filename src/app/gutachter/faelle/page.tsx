@@ -1,4 +1,4 @@
-// CMM-32f: SV-Fälle-Liste zeigt nur noch Regulierungs-Phase (kanzlei_faelle).
+﻿// CMM-32f: SV-Fälle-Liste zeigt nur noch Regulierungs-Phase (kanzlei_faelle).
 // Aktive Aufträge bis QC-Freigabe leben in /gutachter/auftraege. Sobald der KB
 // das Gutachten freigibt (gutachten_final_freigegeben = true), wird ein
 // kanzlei_faelle-Eintrag angelegt — ab da erscheint der Fall hier.
@@ -165,7 +165,7 @@ export default async function GutachterFaellePage({
                     return (
                       <tr
                         key={k.id}
-                        className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors"
+                        className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors"
                       >
                         <td className="px-4 py-3">
                           <Link

@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { AlertCircleIcon, ArrowRightIcon, EuroIcon } from 'lucide-react'
 import { StatusBadge as SharedStatusBadge } from '@/components/shared/StatusBadge'
@@ -154,7 +154,7 @@ export default async function AusstehendeZahlungenWidget() {
                 <li key={e.key}>
                   <Link
                     href={e.href}
-                    className="block px-5 py-3 hover:bg-[#f8f9fb] transition-colors"
+                    className="block px-5 py-3 hover:bg-claimondo-bg transition-colors"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
@@ -183,7 +183,7 @@ export default async function AusstehendeZahlungenWidget() {
         )}
       </div>
 
-      <div className="px-5 py-3 border-t border-claimondo-border bg-[#f8f9fb]">
+      <div className="px-5 py-3 border-t border-claimondo-border bg-claimondo-bg">
         <Link
           href="/admin/finance/abrechnungen"
           className="flex items-center justify-center gap-1.5 text-xs font-medium text-claimondo-ondo hover:text-claimondo-shield transition-colors"

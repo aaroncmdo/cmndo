@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import AdminNav from './_components/AdminNav'
@@ -77,7 +77,7 @@ export default async function AdminLayout({
             NotificationBell. Tasks haben jetzt eigene Pill (AAR-723). */}
         {/* Mobile header — AAR-727 Glass-Dark mit subtilem Shadow */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
-          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
           <UpdatesNav variant="dark" />
         </header>
 

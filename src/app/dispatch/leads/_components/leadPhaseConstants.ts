@@ -1,4 +1,4 @@
-// AAR-179 Follow-up: Shared Phase-Konstanten, damit page.tsx und
+﻿// AAR-179 Follow-up: Shared Phase-Konstanten, damit page.tsx und
 // LeadsViewToggle dieselbe Quelle der Wahrheit nutzen (vorher Duplikation).
 
 export const PHASE_OPTIONS = [
@@ -15,8 +15,8 @@ export const PHASE_OPTIONS = [
 ] as const
 
 export const PHASE_BADGES: Record<string, string> = {
-  'neu': 'bg-[#f8f9fb] text-claimondo-ondo',
-  'nicht-erreicht': 'bg-[#f8f9fb] text-claimondo-ondo',
+  'neu': 'bg-claimondo-bg text-claimondo-ondo',
+  'nicht-erreicht': 'bg-claimondo-bg text-claimondo-ondo',
   'rueckruf': 'bg-amber-100 text-amber-700',
   'in-qualifizierung': 'bg-violet-100 text-violet-700',
   'flow-versendet': 'bg-emerald-100 text-emerald-700',

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-115: SV-Zuweisung + Termin-Reservierung im Lead-Detail (Dispatch-Portal)
 // Dispatcher waehlt vor FlowLink-Versand einen SV aus den Isochrone-Vorschlaegen
@@ -39,7 +39,7 @@ type SvWithSlots = SvSuggestion & { slots: SlotCandidate[] }
 
 const MATCH_BADGE: Record<SlotMatchType, { label: string; cls: string } | null> = {
   wunschtermin: { label: '✨ Wunschtermin', cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-  gleicher_tag: { label: '📅 Gleicher Tag', cls: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
+  gleicher_tag: { label: '📅 Gleicher Tag', cls: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
   nahe: { label: 'Nahe', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   nach: null,
 }
@@ -338,7 +338,7 @@ export default function SvDispatchPanel({
           type="button"
           disabled={pending}
           onClick={handleCancel}
-          className="w-full text-xs font-medium px-3 py-2 rounded-lg border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] disabled:opacity-50"
+          className="w-full text-xs font-medium px-3 py-2 rounded-lg border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50"
         >
           Stornieren + neuen SV wählen
         </button>
@@ -561,12 +561,12 @@ export default function SvDispatchPanel({
                           className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
                             isSel
                               ? 'bg-claimondo-navy text-white border-claimondo-navy'
-                              : 'bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-[#f8f9fb]'
+                              : 'bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-claimondo-bg'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-sm font-medium">{s.name}</span>
-                            <StatusBadge colorCls={isSel ? 'bg-white/20 text-white' : 'bg-[#f8f9fb] text-claimondo-ondo'}>
+                            <StatusBadge colorCls={isSel ? 'bg-white/20 text-white' : 'bg-claimondo-bg text-claimondo-ondo'}>
                               {s.paket}
                             </StatusBadge>
                           </div>
@@ -660,7 +660,7 @@ export default function SvDispatchPanel({
                           key={s.svId}
                           type="button"
                           onClick={() => setSelectedSv(s)}
-                          className="w-full text-left px-3 py-2 rounded-lg border bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-[#f8f9fb] transition-colors"
+                          className="w-full text-left px-3 py-2 rounded-lg border bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-claimondo-bg transition-colors"
                         >
                           <span className="text-sm font-medium">{s.name}</span>
                           <span className="ml-2 text-[10px] text-claimondo-ondo">
@@ -738,7 +738,7 @@ export default function SvDispatchPanel({
               )}
               {debugData && (
                 <>
-                  <div className="text-xs text-claimondo-ondo bg-[#f8f9fb] rounded-lg p-2">
+                  <div className="text-xs text-claimondo-ondo bg-claimondo-bg rounded-lg p-2">
                     <div>Fall-Koordinaten: {debugData.fallLat.toFixed(5)}, {debugData.fallLng.toFixed(5)}</div>
                     <div>
                       {debugData.passend} von {debugData.gesamt} aktiven SVs passen.

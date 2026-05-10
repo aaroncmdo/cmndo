@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-382 / Auto-Arrive: Expanded Card für den aktiven Stop im Fokus-Modus.
 // Keine manuellen "Losfahren"/"Ich bin angekommen"-Buttons mehr — Ankunft wird
@@ -372,7 +372,7 @@ export default function AktuellerStopCard({
           href={mapsLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 hover:bg-[#f8f9fb]"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 hover:bg-claimondo-bg"
         >
           <NavigationIcon className="w-4 h-4" />
           In Google Maps öffnen

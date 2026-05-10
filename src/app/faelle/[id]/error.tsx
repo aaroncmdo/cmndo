@@ -34,7 +34,7 @@ export default function FallakteError({ error, reset }: { error: Error & { diges
           Bitte versuchen Sie es erneut. Falls das Problem bestehen bleibt, kontaktieren Sie den Support mit folgender Info.
         </p>
         {(error.message || error.digest || error.stack) && (
-          <div className="text-left mb-3 rounded-lg bg-[#f8f9fb] border border-claimondo-border px-3 py-2.5 space-y-2 max-h-80 overflow-y-auto">
+          <div className="text-left mb-3 rounded-lg bg-claimondo-bg border border-claimondo-border px-3 py-2.5 space-y-2 max-h-80 overflow-y-auto">
             {error.message && (
               <p className="text-[11px] font-mono text-claimondo-navy break-all">{error.message}</p>
             )}
@@ -57,7 +57,7 @@ export default function FallakteError({ error, reset }: { error: Error & { diges
                 /* noop */
               }
             }}
-            className="px-4 py-2 bg-white border border-claimondo-border text-claimondo-navy font-medium text-xs rounded-lg hover:bg-[#f8f9fb] transition-colors"
+            className="px-4 py-2 bg-white border border-claimondo-border text-claimondo-navy font-medium text-xs rounded-lg hover:bg-claimondo-bg transition-colors"
           >
             {copied ? 'Kopiert ✓' : 'Fehlerbericht kopieren'}
           </button>
@@ -71,7 +71,7 @@ export default function FallakteError({ error, reset }: { error: Error & { diges
           </button>
           <button
             onClick={() => window.location.reload()}
-            className="px-5 py-2.5 bg-white border border-claimondo-border text-claimondo-navy font-medium text-sm rounded-xl hover:bg-[#f8f9fb] transition-colors"
+            className="px-5 py-2.5 bg-white border border-claimondo-border text-claimondo-navy font-medium text-sm rounded-xl hover:bg-claimondo-bg transition-colors"
           >
             Seite neu laden
           </button>

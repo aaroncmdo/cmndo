@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-110: Lead manuell anlegen Drawer
 // AAR-695: service_typ raus (wird im Lead-Flow gesetzt, ist Endpoint-Sender
@@ -230,7 +230,7 @@ export default function NeuLeadDrawer() {
           {error && <p className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</p>}
 
           <div className="flex gap-2 pt-2">
-            <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-[#f8f9fb] rounded-xl">
+            <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-claimondo-bg rounded-xl">
               Abbrechen
             </button>
             <button

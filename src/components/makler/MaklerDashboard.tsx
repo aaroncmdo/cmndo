@@ -260,7 +260,7 @@ function QuickAction({
       className="block bg-white rounded-ios-md border border-claimondo-border p-4 hover:border-claimondo-ondo transition-colors"
     >
       <div className="flex items-start gap-3">
-        <span className="shrink-0 w-10 h-10 rounded-lg bg-[#f8f9fb] flex items-center justify-center text-claimondo-navy">
+        <span className="shrink-0 w-10 h-10 rounded-lg bg-claimondo-bg flex items-center justify-center text-claimondo-navy">
           {icon}
         </span>
         <div className="flex-1 min-w-0">

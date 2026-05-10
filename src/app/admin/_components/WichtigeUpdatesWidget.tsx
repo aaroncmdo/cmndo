@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import {
   UserPlusIcon,
@@ -240,14 +240,14 @@ export default async function WichtigeUpdatesWidget() {
     <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden flex flex-col h-full max-h-[500px]">
       <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ActivityIcon className="w-4 h-4 text-[#4573A2]" />
+          <ActivityIcon className="w-4 h-4 text-claimondo-ondo" />
           <h2 className="text-sm font-semibold text-claimondo-navy">Wichtige Updates</h2>
         </div>
         <span className="text-[10px] text-claimondo-ondo">letzte 48h</span>
       </div>
 
       {/* Welcome-Mail-Versand-Statistik */}
-      <div className="px-5 py-2 border-b border-claimondo-border bg-[#f8f9fb] flex items-center gap-3 text-[11px]">
+      <div className="px-5 py-2 border-b border-claimondo-border bg-claimondo-bg flex items-center gap-3 text-[11px]">
         <span className="text-claimondo-ondo">Email-Versand 48h:</span>
         <span className="flex items-center gap-1 text-emerald-600 font-medium">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -270,7 +270,7 @@ export default async function WichtigeUpdatesWidget() {
               const meta = EVENT_META[e.type]
               const Icon = meta.icon
               const content = (
-                <div className="flex items-start gap-3 px-5 py-3 hover:bg-[#f8f9fb] transition-colors">
+                <div className="flex items-start gap-3 px-5 py-3 hover:bg-claimondo-bg transition-colors">
                   <div className={`w-7 h-7 rounded-full ${meta.bg} flex items-center justify-center flex-shrink-0`}>
                     <Icon className={`w-3.5 h-3.5 ${meta.iconColor}`} />
                   </div>

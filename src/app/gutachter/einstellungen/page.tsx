@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { CalendarIcon, UserIcon, ChevronRightIcon, SettingsIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -89,26 +89,26 @@ export default async function EinstellungenPage() {
               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
               : item.statusTone === 'amber'
                 ? 'bg-amber-50 text-amber-700 border-amber-200'
-                : 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border'
+                : 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-start gap-4 bg-white border border-claimondo-border rounded-2xl p-4 hover:border-[#4573A2] transition-colors group"
+              className="flex items-start gap-4 bg-white border border-claimondo-border rounded-2xl p-4 hover:border-claimondo-ondo transition-colors group"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#4573A2]/10 flex items-center justify-center flex-shrink-0">
-                <Icon className="w-5 h-5 text-[#4573A2]" />
+              <div className="w-10 h-10 rounded-xl bg-claimondo-ondo/10 flex items-center justify-center flex-shrink-0">
+                <Icon className="w-5 h-5 text-claimondo-ondo" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-[#0D1B3E]">{item.label}</p>
+                  <p className="text-sm font-semibold text-claimondo-navy">{item.label}</p>
                   <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${toneClass}`}>
                     {item.status}
                   </span>
                 </div>
                 <p className="text-xs text-claimondo-ondo mt-1">{item.description}</p>
               </div>
-              <ChevronRightIcon className="w-4 h-4 text-claimondo-ondo/70 group-hover:text-[#4573A2] flex-shrink-0 mt-2" />
+              <ChevronRightIcon className="w-4 h-4 text-claimondo-ondo/70 group-hover:text-claimondo-ondo flex-shrink-0 mt-2" />
             </Link>
           )
         })}

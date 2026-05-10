@@ -35,7 +35,7 @@ export default function ColorFineTuning({ theme, onChange }: Props) {
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="w-full px-4 py-3 bg-[#f8f9fb] hover:bg-claimondo-border flex items-center justify-between text-left"
+        className="w-full px-4 py-3 bg-claimondo-bg hover:bg-claimondo-border flex items-center justify-between text-left"
       >
         <div>
           <span className="text-sm font-medium text-claimondo-navy">Feintuning</span>

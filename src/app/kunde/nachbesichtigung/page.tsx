@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import NachbesichtigungClient from './NachbesichtigungClient'
 
@@ -16,7 +16,7 @@ export default async function NachbesichtigungPage() {
 
   if (!faelle?.length) {
     return (
-      <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-8 max-w-md text-center">
           <p className="text-claimondo-ondo">Aktuell keine offene Nachbesichtigung.</p>
         </div>

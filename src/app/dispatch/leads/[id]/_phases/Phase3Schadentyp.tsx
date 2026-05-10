@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-139 / W5: Phase 3 — Schadentyp. Dünner Wrapper um SchadentypPicker.
 // AAR-268: Weiter-Button + router.refresh() nach Save damit Qualification-
@@ -46,7 +46,7 @@ export default function Phase3Schadentyp() {
         <button
           type="button"
           onClick={() => setPhase(2)}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] text-sm font-semibold flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg text-sm font-semibold flex items-center justify-center gap-2"
         >
           ← Zurück zu Phase 2
         </button>

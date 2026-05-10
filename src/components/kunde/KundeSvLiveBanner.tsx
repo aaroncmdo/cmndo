@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // CMM-36: Kunden-seitiger Live-Banner für SV-Anfahrt + Vor-Ort-Status.
 // Stilistisch identisch zum SvUnterwegsInfo des SV-Portals (navy/Navigation),
@@ -115,11 +115,11 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
 
   return (
     <div className="rounded-2xl bg-claimondo-navy text-white px-4 py-3 flex items-center gap-3">
-      <NavigationIcon className="w-4 h-4 shrink-0 text-[#7BA3CC]" />
+      <NavigationIcon className="w-4 h-4 shrink-0 text-claimondo-light-blue" />
       <div className="flex-1 min-w-0">
         <span className="text-sm font-semibold">{vorname} ist unterwegs</span>
         {ankunftLabel && (
-          <span className="text-sm text-[#7BA3CC] ml-2">
+          <span className="text-sm text-claimondo-light-blue ml-2">
             · Ankunft ca. {ankunftLabel}
             {eta != null && ` (${eta} Min.)`}
           </span>

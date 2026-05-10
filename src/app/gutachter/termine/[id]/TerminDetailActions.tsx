@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -69,7 +69,7 @@ export default function TerminDetailActions({
   if (svAngekommen) {
     return (
       <div className="space-y-3">
-        <div className="bg-[#f8f9fb] border border-claimondo-border rounded-2xl p-4 flex items-center gap-3">
+        <div className="bg-claimondo-bg border border-claimondo-border rounded-2xl p-4 flex items-center gap-3">
           <MapPinIcon className="w-5 h-5 text-claimondo-ondo flex-shrink-0" />
           <p className="text-sm font-medium text-claimondo-navy">SV ist vor Ort angekommen</p>
         </div>
@@ -98,7 +98,7 @@ export default function TerminDetailActions({
         </Link>
         <Link
           href={`/gutachter/termine/${terminId}/vor-ort`}
-          className="block w-full text-center bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy rounded-2xl py-3 text-sm font-medium transition-colors"
+          className="block w-full text-center bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy rounded-2xl py-3 text-sm font-medium transition-colors"
         >
           Direkt zum Vor-Ort-Modus
         </Link>
@@ -134,7 +134,7 @@ export default function TerminDetailActions({
 
       {/* AAR-134: Ablehnen / Gegenvorschlag — collapsible */}
       {canAblehnen && (
-        <details className="bg-[#f8f9fb] border border-claimondo-border rounded-2xl">
+        <details className="bg-claimondo-bg border border-claimondo-border rounded-2xl">
           <summary className="px-4 py-3 cursor-pointer text-sm font-medium text-claimondo-navy">
             Kann ich diesen Termin nicht wahrnehmen?
           </summary>
@@ -222,7 +222,7 @@ function AblehnenModal({
               key={g}
               type="button"
               onClick={() => setGrund(g === 'Sonstiges' ? '' : g + ' — ')}
-              className="text-[10px] px-2 py-1 rounded bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy"
+              className="text-[10px] px-2 py-1 rounded bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy"
             >
               {g}
             </button>
@@ -240,7 +240,7 @@ function AblehnenModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo"
+            className="flex-1 py-2 rounded-xl text-sm bg-claimondo-bg text-claimondo-ondo"
           >
             Abbrechen
           </button>
@@ -389,7 +389,7 @@ function GegenvorschlagModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2 rounded-xl text-sm bg-[#f8f9fb] text-claimondo-ondo"
+            className="flex-1 py-2 rounded-xl text-sm bg-claimondo-bg text-claimondo-ondo"
           >
             Abbrechen
           </button>

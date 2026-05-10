@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-179 P3-H + P3-I: Leads-Übersicht mit Toggle zwischen Liste (Tabelle)
 // und Kanban (Karten gruppiert nach qualifizierungs_phase). Der Dispatcher
@@ -51,7 +51,7 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
   return (
     <div className="space-y-3">
       {/* Toggle */}
-      <div className="flex items-center gap-1 bg-[#f8f9fb] rounded-lg p-0.5 w-fit">
+      <div className="flex items-center gap-1 bg-claimondo-bg rounded-lg p-0.5 w-fit">
         <button
           type="button"
           onClick={() => setView('liste')}
@@ -88,7 +88,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-claimondo-border bg-[#f8f9fb]/50">
+            <tr className="border-b border-claimondo-border bg-claimondo-bg/50">
               <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Name</th>
               <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Telefon</th>
               <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Status</th>
@@ -103,7 +103,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
               const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
               const wa = waPill(lead.whatsapp_verfuegbar, lead.telefon)
               return (
-                <tr key={lead.id} className="hover:bg-[#f8f9fb]/50 transition-colors">
+                <tr key={lead.id} className="hover:bg-claimondo-bg/50 transition-colors">
                   <td className="px-4 py-3">
                     <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-claimondo-ondo">
                       {lead.vorname} {lead.nachname}
@@ -120,7 +120,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                       {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
                     </span>
                   </td>
@@ -179,7 +179,7 @@ function KanbanView({ leads }: { leads: Lead[] }) {
       {phasenOrder.map((phase) => {
         const bucket = gruppen[phase] ?? []
         return (
-          <div key={phase} className="min-w-[260px] w-[260px] bg-[#f8f9fb] rounded-xl p-2 space-y-2 flex-shrink-0">
+          <div key={phase} className="min-w-[260px] w-[260px] bg-claimondo-bg rounded-xl p-2 space-y-2 flex-shrink-0">
             <div className="flex items-center justify-between px-1">
               <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${PHASE_BADGES[phase] ?? 'bg-claimondo-border text-claimondo-ondo'}`}>
                 {PHASE_LABELS[phase] ?? phase}

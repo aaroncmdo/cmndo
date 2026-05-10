@@ -55,7 +55,7 @@ function statusBadge(status: string, frist: string | null): {
     case 'abgelehnt':
       return {
         icon: XCircleIcon,
-        bg: 'bg-[#f8f9fb] border-claimondo-border',
+        bg: 'bg-claimondo-bg border-claimondo-border',
         text: 'text-claimondo-ondo',
         labelTxt: 'Abgelehnt',
       }

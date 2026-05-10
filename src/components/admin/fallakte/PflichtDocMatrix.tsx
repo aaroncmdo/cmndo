@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-542 (C5): Pflicht-Doc-Matrix — gruppierte Anzeige aller Katalog-Slots
 // mit ihrem aktuellen Pflicht/Optional/Disabled-Status pro Fall.
@@ -84,7 +84,7 @@ export default function PflichtDocMatrix({
     <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          <ListChecksIcon className="w-3.5 h-3.5 text-[#4573A2]" />
+          <ListChecksIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
           <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
             Pflicht-Matrix
           </h3>
@@ -143,7 +143,7 @@ export default function PflichtDocMatrix({
                       key={e.slot_id}
                       className={`flex items-center justify-between gap-2 rounded-md px-2 py-1.5 ${
                         !e.freigeschaltet ? 'opacity-60' : ''
-                      } ${isClickable ? 'cursor-pointer hover:bg-[#f8f9fb]' : ''}`}
+                      } ${isClickable ? 'cursor-pointer hover:bg-claimondo-bg' : ''}`}
                       onClick={() => {
                         if (isClickable) setSelected(e)
                       }}

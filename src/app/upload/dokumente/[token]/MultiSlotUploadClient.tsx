@@ -167,7 +167,7 @@ export default function MultiSlotUploadClient({
                 jedes Dokument wird sofort gespeichert.
               </p>
               <div className="pt-2">
-                <div className="h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden">
+                <div className="h-1.5 bg-claimondo-bg rounded-full overflow-hidden">
                   <div
                     className="h-full bg-claimondo-ondo transition-all"
                     style={{
@@ -338,7 +338,7 @@ function SlotCard({
             <button
               type="button"
               onClick={() => galleryInputRef.current?.click()}
-              className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-white border border-[#4573A2] text-[#4573A2] text-xs font-semibold hover:bg-[#f8f9fb]"
+              className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-white border border-claimondo-ondo text-claimondo-ondo text-xs font-semibold hover:bg-claimondo-bg"
             >
               <ImageIcon className="w-5 h-5" />
               Galerie
@@ -365,7 +365,7 @@ function SlotCard({
 
       {state.action === 'vorschau' && state.previewUrl && (
         <>
-          <div className="rounded-lg overflow-hidden border border-claimondo-border bg-[#f8f9fb]">
+          <div className="rounded-lg overflow-hidden border border-claimondo-border bg-claimondo-bg">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={state.previewUrl} alt={`${slot.label}-Vorschau`} className="w-full h-auto" />
           </div>
@@ -373,7 +373,7 @@ function SlotCard({
             <button
               type="button"
               onClick={onReset}
-              className="px-2 py-2.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-semibold hover:bg-[#f8f9fb]"
+              className="px-2 py-2.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-semibold hover:bg-claimondo-bg"
             >
               Nochmal
             </button>
@@ -391,7 +391,7 @@ function SlotCard({
 
       {state.action === 'uploading' && (
         <div className="py-4 text-center space-y-2">
-          <div className="w-8 h-8 mx-auto border-4 border-[#4573A2] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 mx-auto border-4 border-claimondo-ondo border-t-transparent rounded-full animate-spin" />
           <p className="text-xs font-semibold text-claimondo-navy">Wird hochgeladen ...</p>
           {slot.slot_id === 'fahrzeugschein' && slot.ocr && (
             <p className="text-[10px] text-claimondo-ondo">Daten werden ausgelesen — bitte warten</p>
@@ -425,7 +425,7 @@ function SlotCard({
             <button
               type="button"
               onClick={onReset}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] text-xs font-semibold hover:bg-[#f8f9fb]"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-claimondo-ondo text-claimondo-ondo text-xs font-semibold hover:bg-claimondo-bg"
             >
               <CameraIcon className="w-3 h-3" />
               Weiteres Foto hochladen

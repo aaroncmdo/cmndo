@@ -165,7 +165,7 @@ export default function PasswortZuruecksetzenPage() {
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
                   />
                 </div>
 
@@ -181,7 +181,7 @@ export default function PasswortZuruecksetzenPage() {
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
                   />
                 </div>
 

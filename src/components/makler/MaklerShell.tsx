@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-483 (M1): Makler-Portal-Shell. Strukturell gespiegelt am DispatchNav
 // (fixed Sidebar desktop + mobile Bottom-Nav). Design-Tokens Claimondo
@@ -78,7 +78,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
             {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
             <TasksPill userId={userId} href="/makler" />
           </div>
-          <p className="text-[10px] mt-1 uppercase tracking-wider text-claimondo-shield bg-[#1E3A5F] inline-block px-2 py-0.5 rounded">
+          <p className="text-[10px] mt-1 uppercase tracking-wider text-claimondo-shield bg-claimondo-shield inline-block px-2 py-0.5 rounded">
             Makler
           </p>
           <p className="text-xs mt-1 text-claimondo-shield truncate">{makler.firma}</p>
@@ -93,7 +93,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
                   active
-                    ? 'bg-[#1E3A5F] text-white font-semibold'
+                    ? 'bg-claimondo-shield text-white font-semibold'
                     : 'text-claimondo-shield hover:bg-white/5 hover:text-white'
                 }`}
               >
@@ -138,7 +138,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
             <span className="text-white">Claim</span>
             <span className="text-claimondo-shield">ondo</span>
           </span>
-          <span className="text-[10px] uppercase tracking-wider text-claimondo-shield bg-[#1E3A5F] px-2 py-0.5 rounded">
+          <span className="text-[10px] uppercase tracking-wider text-claimondo-shield bg-claimondo-shield px-2 py-0.5 rounded">
             Makler
           </span>
         </header>
@@ -164,7 +164,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-2 py-1 rounded-xl transition-all ${
-                active ? 'text-white bg-[#1E3A5F]' : 'text-claimondo-shield'
+                active ? 'text-white bg-claimondo-shield' : 'text-claimondo-shield'
               }`}
             >
               <item.icon style={{ width: 20, height: 20 }} />

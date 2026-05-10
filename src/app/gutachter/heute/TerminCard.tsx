@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-381: Termin-Card auf dem vertikalen Tageskalender-Rail.
 // Positioniert per absolute-top anhand Startzeit, Höhe proportional zur Dauer.
@@ -32,14 +32,14 @@ function statusBadge(status: string): { label: string; className: string } {
     case 'abgeschlossen':
       return {
         label: 'Abgeschlossen',
-        className: 'bg-[#f8f9fb] text-claimondo-ondo',
+        className: 'bg-claimondo-bg text-claimondo-ondo',
       }
     case 'abgelehnt':
       return { label: 'Abgelehnt', className: 'bg-red-50 text-red-600' }
     case 'no_show':
       return { label: 'No-Show', className: 'bg-amber-50 text-amber-700' }
     case 'reserviert':
-      return { label: 'Reserviert', className: 'bg-[#f8f9fb] text-claimondo-ondo' }
+      return { label: 'Reserviert', className: 'bg-claimondo-bg text-claimondo-ondo' }
     // AAR-864: Verlegungs-Slots
     case 'verlegung_pending':
       return { label: 'Verlegung pending', className: 'bg-amber-50 text-amber-700' }
@@ -74,7 +74,7 @@ export default function TerminCard({
     <div
       className={`absolute left-16 right-2 rounded-xl px-3 py-2 shadow-sm transition-opacity ${
         vergangen
-          ? 'bg-[#f8f9fb] border border-claimondo-border opacity-60'
+          ? 'bg-claimondo-bg border border-claimondo-border opacity-60'
           : termin.status === 'verlegung_pending'
             ? 'bg-amber-50 border-2 border-dashed border-amber-400'
             : termin.status === 'verlegt'

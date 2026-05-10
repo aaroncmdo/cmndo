@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
@@ -258,7 +258,7 @@ export default function ProfilClient({
                           defaultValue={standort.adresse}
                           placeholder="Büro-/Wohnadresse eingeben"
                           onSelect={onPlaceSelect}
-                          className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                       ) : (
                         <input
@@ -266,7 +266,7 @@ export default function ProfilClient({
                           value={standort.adresse}
                           onChange={e => setStandort(prev => ({ ...prev, adresse: e.target.value }))}
                           placeholder="Büro-/Wohnadresse eingeben"
-                          className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                       )}
                       {standort.lat != null && (
@@ -293,7 +293,7 @@ export default function ProfilClient({
                       placeholder="z.B. Ihr persönlicher Sachverständiger mit 15 Jahren Erfahrung"
                       rows={2}
                       maxLength={200}
-                      className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
+                      className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
                     />
                   </div>
 
@@ -347,7 +347,7 @@ export default function ProfilClient({
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
-                  className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors"
+                  className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors"
                 >
                   Abbrechen
                 </button>
@@ -374,7 +374,7 @@ export default function ProfilClient({
             noch ein Status-Hinweis mit Deep-Link. */}
         <Link
           href="/gutachter/einstellungen/kalender"
-          className="bg-white rounded-2xl p-4 border border-claimondo-border mt-5 flex items-center gap-3 hover:border-[#4573A2] transition-colors group"
+          className="bg-white rounded-2xl p-4 border border-claimondo-border mt-5 flex items-center gap-3 hover:border-claimondo-ondo transition-colors group"
         >
           <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${googleConnected ? 'bg-green-500' : 'bg-zinc-400'}`} />
           <div className="flex-1 min-w-0">
@@ -385,7 +385,7 @@ export default function ProfilClient({
               Verwalten unter Einstellungen → Kalender
             </p>
           </div>
-          <span className="text-[11px] text-[#4573A2] group-hover:text-[#0D1B3E]">Öffnen →</span>
+          <span className="text-[11px] text-claimondo-ondo group-hover:text-claimondo-navy">Öffnen →</span>
         </Link>
 
         {/* KFZ-154: 3 Spezialisierungs-Listen */}
@@ -547,7 +547,7 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
   const end = new Date(termin.end_zeit)
 
   return (
-    <div className="bg-[#f8f9fb]/50 rounded-xl p-4 border border-claimondo-border">
+    <div className="bg-claimondo-bg/50 rounded-xl p-4 border border-claimondo-border">
       <div className="flex items-center justify-between mb-2">
         <p className="text-claimondo-navy text-sm font-medium">
           {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
@@ -583,20 +583,20 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
             value={ablehnungsgrund}
             onChange={e => setAblehnungsgrund(e.target.value)}
             placeholder="Grund (optional)"
-            className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
+            className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
           />
           <input
             type="datetime-local"
             value={gegenvorschlag}
             onChange={e => setGegenvorschlag(e.target.value)}
             required
-            className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
+            className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-1 focus:ring-[var(--brand-primary)]"
           />
           <p className="text-claimondo-ondo text-xs">Gegenvorschlag ist Pflicht</p>
           <div className="flex gap-2">
             <button
               onClick={() => setShowReject(false)}
-              className="flex-1 py-2 rounded-lg text-xs text-claimondo-ondo hover:text-claimondo-navy hover:bg-[#f8f9fb] transition-colors"
+              className="flex-1 py-2 rounded-lg text-xs text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors"
             >
               Zurück
             </button>
@@ -774,7 +774,7 @@ function SpezSection({
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-60 ${
                 active
                   ? 'bg-[var(--brand-secondary)] text-white'
-                  : 'bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy'
+                  : 'bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               {opt}
@@ -842,7 +842,7 @@ function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
         name={name}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+        className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       />
     </label>
   )
@@ -862,7 +862,7 @@ function ControlledRow({ label, value, onChange, type = 'text', placeholder }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+        className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       />
     </label>
   )
@@ -880,7 +880,7 @@ function SelectRow({ label, value, onChange, options }: {
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="flex-1 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+        className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       >
         {options.map(o => (
           <option key={o.value} value={o.value}>{o.label}</option>

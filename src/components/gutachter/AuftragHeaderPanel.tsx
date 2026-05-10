@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // CMM-32 Walkthrough: SV-Header-Banner — kombiniert Stepper, Termin-Daten,
 // Navigation, SV-Briefing und „vor Ort einzusammeln"-Liste in einem
@@ -463,7 +463,7 @@ export default function AuftragHeaderPanel({
         <div className="flex gap-2">
           <button
             onClick={() => setModal(null)}
-            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors"
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors"
           >
             Abbrechen
           </button>
@@ -512,7 +512,7 @@ export default function AuftragHeaderPanel({
         <div className="flex gap-2">
           <button
             onClick={() => setModal(null)}
-            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors"
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors"
           >
             Abbrechen
           </button>

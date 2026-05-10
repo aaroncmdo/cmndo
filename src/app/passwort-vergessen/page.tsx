@@ -74,7 +74,7 @@ export default function PasswortVergessenPage() {
                     placeholder="name@beispiel.de"
                     required
                     autoComplete="email"
-                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
                   />
                 </div>
 
@@ -107,7 +107,7 @@ export default function PasswortVergessenPage() {
 
           <Link
             href="/login"
-            className="mt-6 flex items-center justify-center gap-1.5 text-xs text-claimondo-ondo hover:text-[#1E3A5F] transition-colors"
+            className="mt-6 flex items-center justify-center gap-1.5 text-xs text-claimondo-ondo hover:text-claimondo-shield transition-colors"
           >
             <ArrowLeftIcon className="w-3 h-3" />
             Zurück zum Login

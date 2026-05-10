@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-139 / W5: Phase 2 — SV-Termin + Service-Typ (Pfad A/B).
 // AAR-176 P2-C: Besichtigungsadresse wird direkt im onSelect gespeichert
@@ -188,7 +188,7 @@ export default function Phase2TerminServiceTyp() {
       {/* AAR-264: Wunschtermin GANZ OBEN — „Wann" ist wichtiger als „Wo" für
           das Gespräch. Auto-Save 500ms Debounce. Der Wunschtermin fließt
           ins SV-Matching ein (verfuegbarAmWunschtermin + Score-Bonus). */}
-      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 space-y-3">
+      <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 space-y-3">
         {/* AAR-270: Wochentag-Picker — vor dem datetime-local-Input.
             Mehrfachauswahl, Default=Egal. Filtert die SV-Slot-Vorschläge. */}
         <div className="space-y-1.5">
@@ -365,7 +365,7 @@ export default function Phase2TerminServiceTyp() {
           type="button"
           disabled={pending}
           onClick={() => setPhase(1)}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
         >
           ← Zurück zu Phase 1
         </button>

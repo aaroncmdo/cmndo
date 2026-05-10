@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // Aaron 2026-04-30: Vertragseditor-Client. Pro Slot eine Card mit:
 //  - Aktuelles PDF (signed-URL Embed)
@@ -192,7 +192,7 @@ function SlotCard({
 
   return (
     <section className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
-      <header className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border bg-[#f8f9fb]">
+      <header className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border bg-claimondo-bg">
         <div className="flex items-center gap-2">
           <FileTextIcon className="w-4 h-4 text-claimondo-navy" />
           <h2 className="text-sm font-semibold text-claimondo-navy">
@@ -247,7 +247,7 @@ function SlotCard({
                   className={`px-2 py-0.5 text-[11px] rounded-md border transition-colors ${
                     target === t
                       ? 'bg-claimondo-navy text-white border-claimondo-navy'
-                      : 'bg-white text-claimondo-ondo border-claimondo-border hover:bg-[#f8f9fb]'
+                      : 'bg-white text-claimondo-ondo border-claimondo-border hover:bg-claimondo-bg'
                   }`}
                 >
                   {t}
@@ -259,7 +259,7 @@ function SlotCard({
             </div>
 
             <div
-              className="relative w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg overflow-hidden cursor-crosshair"
+              className="relative w-full bg-claimondo-bg border border-claimondo-border rounded-lg overflow-hidden cursor-crosshair"
               style={{ aspectRatio: `${pdfSize.width} / ${pdfSize.height}` }}
               onClick={onPdfClick}
             >
@@ -340,7 +340,7 @@ function SlotCard({
                 type="button"
                 onClick={speichern}
                 disabled={pending || !localPath}
-                className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-claimondo-navy text-white hover:bg-[#4573A2] disabled:opacity-40"
+                className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-claimondo-navy text-white hover:bg-claimondo-ondo disabled:opacity-40"
               >
                 {pending ? (
                   <Loader2Icon className="w-3.5 h-3.5 animate-spin" />

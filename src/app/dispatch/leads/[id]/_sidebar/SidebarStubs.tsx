@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-142 / W8: Sidebar Widgets (final).
 // Enthält alle 5 fixen Sidebar-Komponenten:
@@ -105,7 +105,7 @@ export function DisqualifizierenButton() {
             </p>
             <div className="space-y-1">
               {DISQ_GRUENDE.map((g) => (
-                <label key={g.key} className="flex items-start gap-2 text-xs cursor-pointer hover:bg-[#f8f9fb] rounded p-1.5">
+                <label key={g.key} className="flex items-start gap-2 text-xs cursor-pointer hover:bg-claimondo-bg rounded p-1.5">
                   <input
                     type="radio"
                     name="dq-grund"
@@ -133,7 +133,7 @@ export function DisqualifizierenButton() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-sm text-claimondo-ondo hover:bg-[#f8f9fb]"
+                className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-sm text-claimondo-ondo hover:bg-claimondo-bg"
               >
                 Abbrechen
               </button>

@@ -82,7 +82,7 @@ export default function AvatarUpload({ currentUrl, initials, size = 'md', onChan
   return (
     <div className="flex items-center gap-3">
       <div
-        className={`${boxClass} rounded-full bg-[#f8f9fb] flex items-center justify-center text-claimondo-ondo font-semibold overflow-hidden relative`}
+        className={`${boxClass} rounded-full bg-claimondo-bg flex items-center justify-center text-claimondo-ondo font-semibold overflow-hidden relative`}
       >
         {previewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

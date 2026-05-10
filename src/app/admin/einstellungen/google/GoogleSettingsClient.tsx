@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-96: Google OAuth Settings UI
 import { useState, useTransition } from 'react'
@@ -62,7 +62,7 @@ export default function GoogleSettingsClient({
           {!confirmDisconnect ? (
             <button
               onClick={() => setConfirmDisconnect(true)}
-              className="px-4 py-2 text-sm font-medium bg-white border border-claimondo-border text-claimondo-navy rounded-lg hover:bg-[#f8f9fb]"
+              className="px-4 py-2 text-sm font-medium bg-white border border-claimondo-border text-claimondo-navy rounded-lg hover:bg-claimondo-bg"
             >
               Verbindung trennen
             </button>
@@ -92,7 +92,7 @@ export default function GoogleSettingsClient({
         </a>
       )}
 
-      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-4 text-xs text-claimondo-navy space-y-1">
+      <div className="bg-claimondo-bg border border-claimondo-border rounded-lg p-4 text-xs text-claimondo-navy space-y-1">
         <p className="font-semibold">Datenschutz:</p>
         <p>• Wir speichern nur den Refresh-Token (verschluesselt) — keine Email-Inhalte, kein Kalender-Lese-Zugriff.</p>
         <p>• Scopes: nur calendar.events (Termine erstellen) + userinfo.email (deine Google-Adresse).</p>

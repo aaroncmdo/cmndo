@@ -344,12 +344,12 @@ export default function GutachterShell({
                 )}
               </Link>
             ) : (
-              <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></Link>
+              <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></Link>
             )}
             {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
             <TasksPill userId={userId} href="/gutachter/tasks" />
           </div>
-          <p className="text-[#7BA3CC] text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
+          <p className="text-claimondo-light-blue text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
         </div>
 
         {/* AAR-222: Gruppierte Nav mit Section-Headers + Badge-Counter
@@ -458,7 +458,7 @@ export default function GutachterShell({
           <Link
             href="/gutachter/einstellungen"
             onClick={() => setSidebarOpen(false)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-white hover:bg-white/5 transition-colors"
           >
             <SettingsIcon className="w-4 h-4" /> Einstellungen
           </Link>
@@ -534,7 +534,7 @@ export default function GutachterShell({
           <main
             id="main-content"
             role="main"
-            className="h-full overflow-y-auto rounded-l-2xl rounded-r-none bg-[#f8f9fb] shadow-sm p-2 sm:p-3 lg:p-4"
+            className="h-full overflow-y-auto rounded-l-2xl rounded-r-none bg-claimondo-bg shadow-sm p-2 sm:p-3 lg:p-4"
           >
             {children}
           </main>

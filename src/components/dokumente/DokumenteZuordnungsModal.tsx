@@ -97,7 +97,7 @@ export default function DokumenteZuordnungsModal({
         {doc && (
           <div className="space-y-4 pt-1">
             {/* Datei-Info */}
-            <div className="rounded-lg border border-claimondo-border bg-[#f8f9fb] px-3 py-2.5">
+            <div className="rounded-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <FileTextIcon className="w-4 h-4 text-claimondo-ondo/70 shrink-0" />
@@ -140,7 +140,7 @@ export default function DokumenteZuordnungsModal({
                 <select
                   value={slotId}
                   onChange={(e) => setSlotId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2] bg-white"
+                  className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo bg-white"
                   disabled={pending}
                 >
                   {slots.map((s) => (
@@ -166,7 +166,7 @@ export default function DokumenteZuordnungsModal({
                 rows={2}
                 disabled={pending}
                 placeholder='z.B. „Aus E-Mail vom Kunden nachgereicht"'
-                className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+                className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
               />
             </div>
 
@@ -184,7 +184,7 @@ export default function DokumenteZuordnungsModal({
             type="button"
             onClick={() => onOpenChange(false)}
             disabled={pending}
-            className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-[#f8f9fb] disabled:opacity-50"
+            className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-claimondo-bg disabled:opacity-50"
           >
             Abbrechen
           </button>

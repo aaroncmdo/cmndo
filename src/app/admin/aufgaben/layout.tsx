@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-531 (A2b): Aufgaben-Hub Layout — Tab-Nav für Meine Tasks + Alle Tasks.
 
@@ -25,7 +25,7 @@ export default function AufgabenLayout({ children }: { children: React.ReactNode
                 href={tab.href}
                 className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                   active
-                    ? 'border-[#0D1B3E] text-[#0D1B3E]'
+                    ? 'border-claimondo-navy text-claimondo-navy'
                     : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy hover:border-claimondo-border'
                 }`}
               >

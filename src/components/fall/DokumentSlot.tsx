@@ -50,7 +50,7 @@ const STATUS_BADGE: Record<DokumentSlotStatus, { label: string; className: strin
     label: 'Nachzureichen',
     className: 'bg-orange-50 text-orange-700 border-orange-200',
   },
-  optional: { label: 'Optional', className: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' },
+  optional: { label: 'Optional', className: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' },
 }
 
 const ACCEPTED = 'image/jpeg,image/png,image/webp,application/pdf'
@@ -121,7 +121,7 @@ export default function DokumentSlot({
   return (
     <div
       className={`rounded-xl border ${
-        dragOver ? 'border-[#4573A2] bg-[#4573A2]/5' : 'border-claimondo-border bg-white'
+        dragOver ? 'border-claimondo-ondo bg-claimondo-ondo/5' : 'border-claimondo-border bg-white'
       } p-4 transition-colors`}
       onDragOver={e => {
         e.preventDefault()
@@ -146,8 +146,8 @@ export default function DokumentSlot({
       </div>
 
       {hasFile && (
-        <div className="flex items-center gap-2 mb-3 text-xs text-claimondo-navy bg-[#f8f9fb] rounded-lg px-3 py-2">
-          <FileIcon className="w-3.5 h-3.5 text-[#4573A2] flex-shrink-0" />
+        <div className="flex items-center gap-2 mb-3 text-xs text-claimondo-navy bg-claimondo-bg rounded-lg px-3 py-2">
+          <FileIcon className="w-3.5 h-3.5 text-claimondo-ondo flex-shrink-0" />
           <span className="truncate flex-1">{localFile!.name}</span>
           {localStatus === 'hochgeladen' || localStatus === 'geprueft' ? (
             <CheckCircle2Icon className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />

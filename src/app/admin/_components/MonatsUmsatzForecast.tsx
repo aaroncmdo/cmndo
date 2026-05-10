@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { TrendingUpIcon, CalendarIcon } from 'lucide-react'
 
 // KFZ-155: Monats-Umsatz "laufend + geplant" fuer den Finance-Tab.
@@ -126,7 +126,7 @@ export default async function MonatsUmsatzForecast() {
                 )}
               </span>
             </div>
-            <div className="h-3 bg-[#f8f9fb] rounded-full overflow-hidden flex">
+            <div className="h-3 bg-claimondo-bg rounded-full overflow-hidden flex">
               <div
                 className="bg-emerald-500"
                 style={{ width: `${f.gesamtForecast > 0 ? Math.min(100, (f.gesamtLaufend / f.gesamtForecast) * 100) : 0}%` }}

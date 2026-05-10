@@ -1,4 +1,4 @@
-// AAR-637: Mitarbeiter-Terminübersicht. Zeigt alle meine admin_termine
+﻿// AAR-637: Mitarbeiter-Terminübersicht. Zeigt alle meine admin_termine
 // (zugewiesen_an = user.id) gruppiert nach Tag. Kalender-Charakter weil
 // KB/LB sowohl Rückrufe als auch Kundentermine haben.
 
@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 const TYP_META: Record<string, { label: string; icon: typeof PhoneCallIcon; cls: string }> = {
   rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
+  intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
   kb_beratung: { label: 'KB-Beratung', icon: CalendarIcon, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
 }
 
@@ -170,7 +170,7 @@ export default async function MitarbeiterTermine() {
                 const href = lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : '#'
                 const overdue = new Date(t.start_zeit) < new Date()
                 return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
+                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
                     <div className="flex items-center gap-3">
                       <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${meta.cls}`}>
                         <Icon className="w-3 h-3" />

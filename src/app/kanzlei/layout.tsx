@@ -1,4 +1,4 @@
-// AAR-kanzlei-portal Layout — Navy-Header + Sidebar, spiegelt das
+﻿// AAR-kanzlei-portal Layout — Navy-Header + Sidebar, spiegelt das
 // Mitarbeiter-Layout damit der Look konsistent ist. Design-Tokens laut
 // Design & Daten Philosophie (Notion 11.04.2026):
 //   Navy #0D1B3E — Header
@@ -27,7 +27,7 @@ export default async function KanzleiLayout({
   // Content scrollt innen. Das Main hat keinen max-width-Cap mehr — sonst
   // entsteht rechts ein grauer Balken auf breiten Screens.
   return (
-    <div className="h-screen bg-[#f8f9fb] flex flex-col overflow-hidden">
+    <div className="h-screen bg-claimondo-bg flex flex-col overflow-hidden">
       <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
@@ -46,7 +46,7 @@ export default async function KanzleiLayout({
         </div>
         <div className="flex items-center gap-3">
           <UpdatesNav variant="dark" />
-          <span className="text-[#7BA3CC] text-sm">{displayName}</span>
+          <span className="text-claimondo-light-blue text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"

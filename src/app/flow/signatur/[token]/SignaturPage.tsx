@@ -176,7 +176,7 @@ function SignatureStep({
   return (
     <div className="min-h-screen bg-claimondo-bg flex flex-col">
       {/* Progress bar */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1 bg-[#f8f9fb]">
+      <div className="fixed top-0 inset-x-0 z-10 h-1 bg-claimondo-bg">
         <div
           className="h-full bg-claimondo-ondo transition-all duration-500"
           style={{ width: step === 1 ? '50%' : '100%' }}

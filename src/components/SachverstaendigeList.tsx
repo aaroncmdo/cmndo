@@ -37,7 +37,7 @@ type SV = {
 }
 
 const TYP_BADGE: Record<string, { label: string; cls: string }> = {
-  'kfz-gutachter': { label: 'KFZ-SV', cls: 'bg-[#f8f9fb] text-claimondo-ondo' },
+  'kfz-gutachter': { label: 'KFZ-SV', cls: 'bg-claimondo-bg text-claimondo-ondo' },
   'dat-gutachter': { label: 'DAT', cls: 'bg-orange-50 text-orange-700' },
   akademie: { label: 'Akademie', cls: 'bg-green-50 text-green-700' },
   gutachterbuero: { label: 'Büro', cls: 'bg-purple-50 text-purple-700' },
@@ -94,7 +94,7 @@ export default function SachverstaendigeList({
       {/* Header */}
       <div className="px-4 py-3 border-b border-claimondo-border bg-white flex items-center justify-between gap-3 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <HardHatIcon className="w-4 h-4 text-[#4573A2]" />
+          <HardHatIcon className="w-4 h-4 text-claimondo-ondo" />
           <h1 className="text-sm font-semibold text-claimondo-navy">Sachverständige</h1>
           <span className="text-xs text-claimondo-ondo/70">({filtered.length})</span>
         </div>
@@ -105,7 +105,7 @@ export default function SachverstaendigeList({
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Suche..."
-              className="pl-7 pr-2 py-1.5 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg w-48 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+              className="pl-7 pr-2 py-1.5 text-xs bg-claimondo-bg border border-claimondo-border rounded-lg w-48 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
           </div>
           {/* AAR-151: „Karte öffnen" zeigt für Admin auf den Hub (dort IST die Karte),
@@ -129,7 +129,7 @@ export default function SachverstaendigeList({
             count={t.count}
             onClick={() => setSvFilter(t.k)}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              svFilter === t.k ? 'bg-[#f8f9fb] text-claimondo-navy' : 'text-claimondo-ondo hover:text-claimondo-navy'
+              svFilter === t.k ? 'bg-claimondo-bg text-claimondo-navy' : 'text-claimondo-ondo hover:text-claimondo-navy'
             }`}
           >
             {t.label} <span className="text-claimondo-ondo/70 ml-1">{t.count}</span>
@@ -140,7 +140,7 @@ export default function SachverstaendigeList({
       {/* Tabelle (Desktop ab lg) — Mobile/Tablet rendern Card-Liste, Portal-Review D3 */}
       <div className="flex-1 overflow-auto">
         <table className="w-full text-sm">
-          <thead className="bg-[#f8f9fb] border-b border-claimondo-border sticky top-0">
+          <thead className="bg-claimondo-bg border-b border-claimondo-border sticky top-0">
             <tr className="text-left text-[10px] uppercase tracking-wider text-claimondo-ondo">
               <th className="px-4 py-2.5 font-medium">Name</th>
               <th className="px-4 py-2.5 font-medium">Typ</th>
@@ -160,7 +160,7 @@ export default function SachverstaendigeList({
                 vertrag_unterschrieben: sv.vertragUnterschrieben,
                 gesperrt_seit: sv.gesperrtSeit,
               })
-              const typ = TYP_BADGE[sv.gutachterTyp] ?? { label: sv.gutachterTyp, cls: 'bg-[#f8f9fb] text-claimondo-ondo' }
+              const typ = TYP_BADGE[sv.gutachterTyp] ?? { label: sv.gutachterTyp, cls: 'bg-claimondo-bg text-claimondo-ondo' }
               const paket = PAKET_BADGE[sv.paket] ?? sv.paket
               const stadt = sv.standortAdresse ? sv.standortAdresse.split(',').slice(-2, -1)[0]?.trim() || sv.standortAdresse : '—'
 

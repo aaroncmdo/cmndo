@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ShieldCheckIcon, CheckCircleIcon, ClockIcon, XCircleIcon, AlertTriangleIcon, FileTextIcon, IdCardIcon } from 'lucide-react'
 import QualiSlotUpload from './QualiSlotUpload'
@@ -202,7 +202,7 @@ export default async function VerifizierungPage() {
         </div>
 
         {sv.sa_vorlage_status === null && (
-          <p className="text-sm text-claimondo-navy bg-[#f8f9fb] rounded-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-claimondo-bg rounded-lg px-3 py-2">
             Noch nicht hochgeladen. Der Upload erfolgt im Willkommen-Flow nach Abschluss der Anzahlung.
           </p>
         )}
@@ -240,12 +240,12 @@ export default async function VerifizierungPage() {
         </div>
 
         {sv.verifizierung_status === null && (
-          <p className="text-sm text-claimondo-navy bg-[#f8f9fb] rounded-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-claimondo-bg rounded-lg px-3 py-2">
             Die Frist startet automatisch nach Eingang Ihrer Anzahlung.
           </p>
         )}
         {sv.verifizierung_status === 'ausstehend' && sv.verifizierung_frist_bis && tageOffen !== null && (
-          <div className={`text-sm rounded-lg px-3 py-2 ${tageOffen <= 4 ? 'bg-amber-50 text-amber-700' : 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
+          <div className={`text-sm rounded-lg px-3 py-2 ${tageOffen <= 4 ? 'bg-amber-50 text-amber-700' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
             <p className="font-medium">
               Frist: {formatDatum(sv.verifizierung_frist_bis)} — noch {tageOffen} Tag{tageOffen === 1 ? '' : 'e'} offen
             </p>
@@ -325,7 +325,7 @@ export default async function VerifizierungPage() {
             })}
           </div>
 
-          <p className="text-[11px] text-claimondo-ondo bg-[#f8f9fb] rounded-lg px-3 py-2">
+          <p className="text-[11px] text-claimondo-ondo bg-claimondo-bg rounded-lg px-3 py-2">
             Pro Upload wird automatisch ein Prüf-Task beim Admin erstellt. Nach Freigabe ändert sich der Status auf „Freigegeben".
           </p>
         </section>
@@ -368,7 +368,7 @@ function StatusBadge({ status }: { status: string | null | undefined }) {
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-xs font-medium">
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo text-xs font-medium">
       Noch offen
     </span>
   )
@@ -396,7 +396,7 @@ function QualiSlotBadge({ status, hochgeladenAm }: { status: string | null; hoch
   }
   if (status === 'hochgeladen' || hochgeladenAm) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-[10px] font-medium shrink-0">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo text-[10px] font-medium shrink-0">
         <ClockIcon className="w-3 h-3" /> In Prüfung
       </span>
     )
@@ -409,7 +409,7 @@ function QualiSlotBadge({ status, hochgeladenAm }: { status: string | null; hoch
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo text-[10px] font-medium shrink-0">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo text-[10px] font-medium shrink-0">
       Noch nicht angefordert
     </span>
   )

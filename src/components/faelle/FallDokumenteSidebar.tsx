@@ -186,7 +186,7 @@ export default function FallDokumenteSidebar({
           <div className="border-t border-claimondo-border my-2" />
           <div className="space-y-1">
             {optionale.map(d => (
-              <div key={d.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs bg-[#f8f9fb]/50">
+              <div key={d.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs bg-claimondo-bg/50">
                 {d.mime_type?.startsWith('image/') ? (
                   <ImageIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 flex-shrink-0" />
                 ) : (
@@ -205,7 +205,7 @@ export default function FallDokumenteSidebar({
       <button
         type="button"
         onClick={() => setUploadingTyp('sonstiges')}
-        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-dashed border-claimondo-border text-claimondo-ondo/70 hover:text-[#4573A2] hover:border-[#4573A2] text-[10px] transition-colors"
+        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-dashed border-claimondo-border text-claimondo-ondo/70 hover:text-claimondo-ondo hover:border-claimondo-ondo text-[10px] transition-colors"
       >
         <UploadIcon className="w-3 h-3" /> Weiteres Dokument
       </button>

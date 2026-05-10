@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-408 / CMM-25: Eine Card pro SV-Auftrag. CMM-25 hat den Erstvorschlag-
 // Pfad entfernt — Dispatcher blockt den Slot, SA-Unterschrift bestätigt
@@ -148,7 +148,7 @@ export default function AuftragCard(props: AuftragCardProps) {
             </span>
           </div>
         </div>
-        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo whitespace-nowrap">
+        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo whitespace-nowrap">
           {props.statusLabel}
         </span>
       </div>

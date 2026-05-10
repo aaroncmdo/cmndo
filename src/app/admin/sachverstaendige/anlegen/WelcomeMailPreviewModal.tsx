@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { MailIcon, LoaderIcon } from 'lucide-react'
@@ -74,7 +74,7 @@ export default function WelcomeMailPreviewModal({ open, input, onConfirm, onCanc
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-auto bg-[#f8f9fb] min-h-[300px] -mx-6 px-0 my-4">
+        <div className="flex-1 overflow-auto bg-claimondo-bg min-h-[300px] -mx-6 px-0 my-4">
           {loading && (
             <div className="h-full flex items-center justify-center text-xs text-claimondo-ondo p-8">
               <LoaderIcon className="w-4 h-4 mr-2 animate-spin" />
@@ -107,7 +107,7 @@ export default function WelcomeMailPreviewModal({ open, input, onConfirm, onCanc
             type="button"
             onClick={onCancel}
             disabled={saving}
-            className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb] disabled:opacity-40"
+            className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
           >
             Abbrechen
           </button>
