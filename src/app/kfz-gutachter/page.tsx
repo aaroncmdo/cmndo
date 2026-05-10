@@ -213,11 +213,12 @@ export default function KfzGutachterPillarPage() {
             </h2>
           </div>
 
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {[
               { href: '/kfz-gutachter/kosten', titel: 'Kosten', lead: 'Was kostet ein Kfz-Gutachter? BVSK-Tabelle, Sicherungsabtretung, 750-€-Bagatellgrenze.' },
               { href: '/kfz-gutachter/ablauf', titel: 'Ablauf', lead: 'Schritt für Schritt vom Unfall bis zur Auszahlung — durchschnittlich 6–8 Wochen.' },
               { href: '/kfz-gutachter/wertminderung', titel: 'Wertminderung', lead: 'Sanden/Danner-Formel, Faustregel nach Alter, BGH-Linie. Typisch 500–2.500 €.' },
+              { href: '/schadensreport-2026', titel: 'Schadensreport 2026', lead: 'Welche Positionen kürzen Versicherungen am häufigsten? BGH-Urteile, BVSK-Honorare, NRW-Daten.' },
             ].map((t) => (
               <Link
                 key={t.href}

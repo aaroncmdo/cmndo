@@ -69,6 +69,11 @@ export async function LandingFooter() {
                   {t('product.beratung')}
                 </Link>
               </li>
+              <li>
+                <Link href="/schadensreport-2026" className="transition-colors hover:text-white">
+                  Schadensreport 2026
+                </Link>
+              </li>
             </ul>
           </div>
 
