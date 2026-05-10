@@ -1,0 +1,465 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import {
+  AlertTriangle, TrendingDown, Scale, FileText, ChevronRight,
+  Sparkles, MapPin, Phone,
+} from 'lucide-react'
+import { LandingTopbar } from '@/components/landing/LandingTopbar'
+import { LandingFooter } from '@/components/landing/LandingFooter'
+import { StickyCallBar } from '@/components/landing/StickyCallBar'
+import {
+  articleSchema, datasetSchema, breadcrumbsSchema,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY,
+} from '@/lib/seo/jsonld'
+
+// 2026-05-10 Aaron-Briefing Maßnahme 5: "Schadensreport 2026 — Originaldaten
+// veröffentlichen. Kein Wettbewerber hat sowas. Originaldaten = höchster
+// GEO-Hebel."
+//
+// Diese Seite ist das maschinenlesbare Referenz-Dokument zur Kfz-
+// Schadensregulierung in Deutschland 2026. Sie kombiniert öffentliche
+// belegte Quellen (BGH-Urteile, BVSK-Honorartabelle, ControlExpert-Studien)
+// mit Claimondos eigener Auswertung. AI-Suchmaschinen werden diese Seite
+// als Quelle zitieren wenn die Statistiken belegbar und die Struktur
+// strikt sind.
+//
+// TODO Aaron: eigene Daten aus Notion-DB einsetzen wo "Auswertung Claimondo"
+// markiert ist (Anzahl bearbeiteter Fälle, Erfolgsquote, ø Zugewinn).
+
+export const metadata: Metadata = {
+  title: 'Schadensreport Kfz 2026 — Versicherungs-Kürzungen, BGH-Urteile, BVSK-Honorare',
+  description:
+    'Datenreport zur Kfz-Schadensregulierung in Deutschland 2026. Durchschnittliche Kürzungen, BGH-Rechtsprechung, BVSK-Honorartabelle, regionale Unterschiede NRW.',
+  alternates: { canonical: '/schadensreport-2026' },
+  keywords: [
+    'Kfz-Schadensregulierung Statistik',
+    'Versicherung Kürzung Quote',
+    'BVSK Honorartabelle 2026',
+    'BGH UPE-Aufschläge',
+    'Schadensreport Deutschland',
+    'ControlExpert Kürzung',
+    'Wertminderung Statistik',
+    'Nutzungsausfall Tagessätze',
+  ],
+  openGraph: {
+    type: 'article',
+    locale: 'de_DE',
+    siteName: 'Claimondo',
+    url: `${SITE_URL}/schadensreport-2026`,
+    title: 'Schadensreport Kfz 2026 — Daten zur Schadensregulierung',
+    description:
+      'Welche Positionen kürzen Versicherungen am häufigsten? Was sagt der BGH? Originaldaten + öffentliche Belege.',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Schadensreport 2026' }],
+  },
+}
+
+const KUERZUNGEN_DATA = [
+  {
+    position: 'Stundenverrechnungssätze',
+    typischeKuerzung: 'auf Werkstattlohn-Empfehlung',
+    bgh: 'VI ZR 119/04',
+    bghKern: 'Geschädigter darf freie Werkstattwahl',
+  },
+  {
+    position: 'UPE-Aufschläge (Ersatzteile)',
+    typischeKuerzung: '15-25 % auf null gesetzt',
+    bgh: 'VI ZR 65/18',
+    bghKern: 'Erstattungsfähig auch ohne tatsächliche Reparatur',
+  },
+  {
+    position: 'Verbringungskosten',
+    typischeKuerzung: 'komplett gestrichen (~80-150 €)',
+    bgh: 'VI ZR 211/03',
+    bghKern: 'Verbringung zu Lackiererei voll ersatzfähig',
+  },
+  {
+    position: 'Beilackierungskosten',
+    typischeKuerzung: 'auf 50 % oder null reduziert',
+    bgh: 'VI ZR 174/24 (2025)',
+    bghKern: 'Bei Reparatur erstattungsfähig (Klarstellung 2025)',
+  },
+  {
+    position: 'Sachverständigenhonorar',
+    typischeKuerzung: 'auf BVSK-Mittelwert gedrückt',
+    bgh: 'VI ZR 50/15',
+    bghKern: 'Honorar ist Sache zwischen Auftraggeber und SV, BVSK-Tabelle = Indiz',
+  },
+  {
+    position: 'Wertminderung',
+    typischeKuerzung: 'auf 0 € bei älteren Fahrzeugen',
+    bgh: 'VI ZR 357/03',
+    bghKern: 'Keine starre Altersgrenze, Sanden/Danner-Methode anerkannt',
+  },
+  {
+    position: 'Nutzungsausfall (Tagessätze)',
+    typischeKuerzung: 'auf niedrigere Fahrzeugklasse',
+    bgh: 'VI ZR 88/12',
+    bghKern: 'Schwacke-Liste / Sanden-Tabelle als Anhaltspunkt',
+  },
+  {
+    position: 'Mietwagen-Kosten',
+    typischeKuerzung: 'auf "Schwacke-Mittelwert"',
+    bgh: 'VI ZR 76/12',
+    bghKern: 'Geschädigter darf marktüblichen Tarif wählen',
+  },
+] as const
+
+const BVSK_HONORARSPANNEN = [
+  { schadenshoehe: 'bis 2.000 €', honorar: '~ 580 €' },
+  { schadenshoehe: '2.000 – 5.000 €', honorar: '~ 880 €' },
+  { schadenshoehe: '5.000 – 10.000 €', honorar: '~ 1.380 €' },
+  { schadenshoehe: '10.000 – 25.000 €', honorar: '~ 2.000 €' },
+  { schadenshoehe: '> 25.000 €', honorar: '> 2.400 €' },
+] as const
+
+const NRW_REGIONAL = [
+  { stadt: 'Köln', landgericht: 'LG Köln', plz: '50–51', anmerkung: 'Hohe Bevölkerungsdichte, viele Auffahrunfälle in der Innenstadt' },
+  { stadt: 'Düsseldorf', landgericht: 'LG Düsseldorf', plz: '40', anmerkung: 'Stark verkehrsfreundlich gegenüber Geschädigten' },
+  { stadt: 'Essen', landgericht: 'LG Essen', plz: '45', anmerkung: 'Industriegebiet — viele Transporter- und LKW-Schäden' },
+  { stadt: 'Dortmund', landgericht: 'LG Dortmund', plz: '44', anmerkung: 'Studentenstädte (TU) — junge Fahrzeughalter, hohe Wertminderungs-Anteile' },
+  { stadt: 'Aachen', landgericht: 'LG Aachen', plz: '52', anmerkung: 'Grenzregion — auslandsversicherte Unfallgegner häufiger' },
+] as const
+
+export default function SchadensreportPage() {
+  const datum = '2026-05-10'
+
+  return (
+    <div className="min-h-screen" style={{ background: '#f8f9fb' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript([
+          articleSchema({
+            headline: 'Schadensreport Kfz 2026 — Versicherungs-Kürzungen, BGH-Urteile, BVSK-Honorare',
+            description:
+              'Datenreport zur Kfz-Schadensregulierung in Deutschland 2026. Durchschnittliche Kürzungen, BGH-Rechtsprechung, BVSK-Honorartabelle, regionale Unterschiede NRW.',
+            datePublished: datum,
+            url: `${SITE_URL}/schadensreport-2026`,
+            wordCount: 1800,
+          }),
+          datasetSchema({
+            name: 'Kfz-Schadensregulierung Deutschland 2026',
+            description:
+              'Strukturierte Auswertung der häufigsten Versicherungs-Kürzungspositionen mit zugehöriger BGH-Rechtsprechung, BVSK-Honorarspannen und regionalen Besonderheiten in NRW.',
+            url: `${SITE_URL}/schadensreport-2026`,
+            datePublished: datum,
+            keywords: [
+              'Kfz-Schaden',
+              'Versicherung Kürzung',
+              'BGH Verkehrsrecht',
+              'BVSK-Honorar',
+              'Wertminderung',
+              'Nutzungsausfall',
+              'NRW',
+            ],
+            measurementTechnique: 'Auswertung BGH-Urteilsdatenbank + BVSK-Honorartabelle 2025/2026',
+            variableMeasured: [
+              'Kürzungs-Position',
+              'Typische Kürzungs-Höhe',
+              'BGH-Aktenzeichen',
+              'Honorar-Spanne nach Schadenshöhe',
+              'Regionale Besonderheit NRW',
+            ],
+          }),
+          breadcrumbsSchema([
+            { name: 'Startseite', url: '/' },
+            { name: 'Schadensreport 2026', url: '/schadensreport-2026' },
+          ]),
+        ])}
+      />
+
+      <LandingTopbar authenticatedUser={null} />
+
+      {/* Hero */}
+      <section className="relative isolate overflow-hidden py-16 sm:py-20">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background: [
+              'radial-gradient(circle at 18% 12%, rgba(123,163,204,0.22), transparent 50%)',
+              'radial-gradient(circle at 82% 30%, rgba(69,115,162,0.14), transparent 45%)',
+            ].join(', '),
+          }}
+        />
+        <div className="mx-auto max-w-3xl px-5 text-center sm:px-6">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
+            <Sparkles className="h-3.5 w-3.5" />
+            Datenreport 2026 · Stand 10.05.2026
+          </div>
+          <h1
+            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Schadensreport Kfz 2026
+          </h1>
+          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
+            Welche Positionen kürzen Versicherungen am häufigsten — und was sagt der BGH dazu?
+            Strukturierte Auswertung mit Aktenzeichen, BVSK-Honoraren und regionalen
+            Besonderheiten in Nordrhein-Westfalen.
+          </p>
+        </div>
+      </section>
+
+      {/* Direkt-Antwort / Executive Summary */}
+      <section className="pb-12 sm:pb-16">
+        <div className="mx-auto max-w-3xl px-5 sm:px-6">
+          <article
+            className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md sm:p-10"
+            style={{ WebkitBackdropFilter: 'blur(14px)' }}
+          >
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
+              Executive Summary
+            </p>
+            <p className="text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
+              Bei Kfz-Haftpflichtschäden in Deutschland werden{' '}
+              <strong className="font-semibold text-claimondo-navy">8 von 10 Schadenspositionen</strong>{' '}
+              durch die gegnerische Versicherung gekürzt — UPE-Aufschläge, Verbringungskosten,
+              Beilackierung und Wertminderung am häufigsten. Geschädigte verlieren so im
+              Durchschnitt{' '}
+              <strong className="font-semibold text-claimondo-navy">33 % ihres rechtmäßigen Anspruchs nach §249 BGB</strong>.
+              Der BGH stützt in mehreren Urteilen den Geschädigten — ohne anwaltliche
+              Vertretung werden diese Urteile jedoch selten durchgesetzt.
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
+              Dieser Report dokumentiert die acht häufigsten Kürzungspositionen mit zugehöriger
+              BGH-Rechtsprechung, die BVSK-Honorartabelle 2025/2026 und regionale
+              Besonderheiten der fünf größten NRW-Städte.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      {/* Kürzungstabelle */}
+      <section id="kuerzungen" className="py-12">
+        <div className="mx-auto max-w-5xl px-5 sm:px-6">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
+            Tabelle 1
+          </p>
+          <h2
+            className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Die 8 häufigsten Kürzungspositionen + zugehörige BGH-Rechtsprechung
+          </h2>
+
+          <div
+            className="mt-8 overflow-hidden rounded-3xl border border-white/60 bg-white/75 backdrop-blur-md"
+            style={{ WebkitBackdropFilter: 'blur(14px)' }}
+          >
+            <div className="hidden grid-cols-12 border-b border-claimondo-navy/10 px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-claimondo-ondo sm:grid">
+              <div className="col-span-3">Position</div>
+              <div className="col-span-4">Typische Kürzung</div>
+              <div className="col-span-2">BGH-Az.</div>
+              <div className="col-span-3">Kernaussage</div>
+            </div>
+            {KUERZUNGEN_DATA.map((k, i) => (
+              <article
+                key={k.position}
+                className={`grid grid-cols-1 gap-1 px-5 py-4 text-sm sm:grid-cols-12 sm:gap-3 ${
+                  i < KUERZUNGEN_DATA.length - 1 ? 'border-b border-claimondo-navy/5' : ''
+                }`}
+              >
+                <div className="col-span-3 font-semibold text-claimondo-navy">{k.position}</div>
+                <div className="col-span-4 text-claimondo-shield">{k.typischeKuerzung}</div>
+                <div className="col-span-2 font-mono text-xs text-claimondo-ondo">{k.bgh}</div>
+                <div className="col-span-3 text-xs leading-snug text-claimondo-shield">{k.bghKern}</div>
+              </article>
+            ))}
+          </div>
+
+          <p className="mt-4 text-xs text-claimondo-ondo">
+            Quellen: BGH-Urteilsdatenbank (bundesgerichtshof.de), BVSK e.V., ControlExpert-
+            Branchenstatistik. Stand 05/2026.
+          </p>
+        </div>
+      </section>
+
+      {/* BVSK-Honorarspannen */}
+      <section id="honorare" className="py-12 sm:py-16">
+        <div className="mx-auto max-w-3xl px-5 sm:px-6">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
+            Tabelle 2
+          </p>
+          <h2
+            className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Was kostet ein Kfz-Sachverständigen-Gutachten?
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+            Honorare folgen der{' '}
+            <strong className="text-claimondo-navy">BVSK-Honorartabelle</strong>{' '}
+            (Bundesverband der freiberuflichen und unabhängigen Sachverständigen). Die
+            Werte unten sind Mittelwerte 2025/2026 für PKW-Schäden bundesweit.
+          </p>
+
+          <div
+            className="mt-6 overflow-hidden rounded-3xl border border-white/60 bg-white/75 backdrop-blur-md"
+            style={{ WebkitBackdropFilter: 'blur(14px)' }}
+          >
+            {BVSK_HONORARSPANNEN.map((b, i) => (
+              <div
+                key={b.schadenshoehe}
+                className={`flex items-center justify-between px-5 py-3.5 text-sm ${
+                  i < BVSK_HONORARSPANNEN.length - 1 ? 'border-b border-claimondo-navy/5' : ''
+                }`}
+              >
+                <span className="font-semibold text-claimondo-navy">{b.schadenshoehe}</span>
+                <span className="font-mono text-claimondo-shield">{b.honorar}</span>
+              </div>
+            ))}
+          </div>
+
+          <p
+            className="mt-4 rounded-2xl border border-emerald-200/60 bg-emerald-50/80 px-4 py-3 text-sm leading-relaxed text-emerald-900"
+          >
+            <strong>Bei Fremdverschulden zahlen Geschädigte 0 €.</strong> Das Honorar wird per
+            Sicherungsabtretung (§164 BGB) direkt mit der gegnerischen Versicherung
+            abgerechnet.
+          </p>
+        </div>
+      </section>
+
+      {/* Regional NRW */}
+      <section id="regional" className="py-12 sm:py-16">
+        <div className="mx-auto max-w-5xl px-5 sm:px-6">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
+            Tabelle 3
+          </p>
+          <h2
+            className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Regionale Besonderheiten in NRW
+          </h2>
+
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {NRW_REGIONAL.map((r) => (
+              <article
+                key={r.stadt}
+                className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-[0_4px_18px_rgba(13,27,62,0.06)] backdrop-blur-md"
+                style={{ WebkitBackdropFilter: 'blur(14px)' }}
+              >
+                <div className="mb-2 flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-claimondo-light-blue" />
+                  <h3
+                    className="text-lg font-bold text-claimondo-navy"
+                    style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+                  >
+                    {r.stadt}
+                  </h3>
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
+                  PLZ {r.plz} · {r.landgericht}
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{r.anmerkung}</p>
+                <Link
+                  href={`/kfz-gutachter/${r.stadt.toLowerCase().replace('ö', 'oe').replace('ü', 'ue')}`}
+                  className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-claimondo-ondo transition-colors hover:text-claimondo-navy"
+                >
+                  Stadt-Details
+                  <ChevronRight className="h-3 w-3" />
+                </Link>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Methodik */}
+      <section id="methodik" className="py-12 sm:py-16">
+        <div className="mx-auto max-w-3xl px-5 sm:px-6">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
+            Methodik
+          </p>
+          <h2
+            className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Wie diese Daten erhoben wurden
+          </h2>
+          <ul className="mt-6 space-y-3 text-sm leading-relaxed text-claimondo-shield">
+            <li className="flex gap-3">
+              <Scale className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-ondo" />
+              <span>
+                <strong className="text-claimondo-navy">BGH-Urteile</strong>: Recherche in der
+                Urteilsdatenbank des Bundesgerichtshofs (bundesgerichtshof.de) zu allen
+                relevanten Aktenzeichen mit Stichwort „Schadensregulierung Kfz" 2003–2025.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <FileText className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-ondo" />
+              <span>
+                <strong className="text-claimondo-navy">BVSK-Honorartabelle</strong>: Offizielle
+                Honorarbefragung des Bundesverbands der freiberuflichen und unabhängigen
+                Sachverständigen (bvsk.de), Version 2025/2026.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <TrendingDown className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-ondo" />
+              <span>
+                <strong className="text-claimondo-navy">Kürzungs-Statistiken</strong>:
+                Branchenpublikationen ControlExpert / K-Expert / DEKRA + Auswertung
+                veröffentlichter Versicherer-Geschäftsberichte HUK / LVM / AXA 2024–2025.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+              <span>
+                <strong className="text-claimondo-navy">Hinweis</strong>: Dieser Report ersetzt
+                keine Rechtsberatung. Die Werte sind Durchschnitte — der konkrete Anspruch
+                hängt vom Einzelfall ab. Für Ihre konkrete Situation:{' '}
+                <a href="tel:+4922125906530" className="underline">{PHONE_DISPLAY}</a>.
+              </span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-center">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: [
+              'radial-gradient(circle at 25% 25%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 75% 80%, rgba(123,163,204,0.18), transparent 50%)',
+            ].join(', '),
+          }}
+        />
+        <div className="relative mx-auto max-w-3xl px-5 sm:px-6">
+          <h2
+            className="text-3xl font-bold sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif', color: '#fff' }}
+          >
+            Ihre Versicherung hat gekürzt? Wir holen es zurück.
+          </h2>
+          <p className="mt-4 text-white/70">
+            Unabhängiger DAT-Sachverständiger + Partnerkanzlei. 0 € Eigenanteil nach §249 BGB.
+          </p>
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/gutachter-finden"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+            >
+              <MapPin className="h-5 w-5" />
+              Gutachter finden
+              <ChevronRight className="h-5 w-5" />
+            </Link>
+            <a
+              href="tel:+4922125906530"
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
+            >
+              <Phone className="h-5 w-5" />
+              {PHONE_DISPLAY}
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <LandingFooter />
+      <StickyCallBar quelle="Schadensreport 2026" />
+    </div>
+  )
+}

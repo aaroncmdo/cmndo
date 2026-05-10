@@ -280,6 +280,67 @@ export function howToSchema(args: {
   }
 }
 
+// Article-Schema — für Reports, Long-Form-Content, News.
+// Princeton GEO: Article mit datePublished + author + Statistics-Density
+// hat hohe Citation-Wahrscheinlichkeit in AI-Antworten.
+export function articleSchema(args: {
+  headline: string
+  description: string
+  datePublished: string
+  dateModified?: string
+  url: string
+  image?: string
+  authorName?: string
+  wordCount?: number
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: args.headline,
+    description: args.description,
+    datePublished: args.datePublished,
+    dateModified: args.dateModified ?? args.datePublished,
+    url: args.url,
+    ...(args.image && { image: args.image }),
+    author: {
+      '@type': args.authorName ? 'Person' : 'Organization',
+      name: args.authorName ?? SITE_NAME,
+      ...(args.authorName ? {} : { url: SITE_URL }),
+    },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    ...(args.wordCount && { wordCount: args.wordCount }),
+    inLanguage: 'de-DE',
+  }
+}
+
+// Dataset-Schema — für Original-Daten-Veröffentlichungen (Schadensreport).
+// AI-Suchmaschinen zitieren Datasets häufig direkt als Quelle.
+export function datasetSchema(args: {
+  name: string
+  description: string
+  url: string
+  datePublished: string
+  keywords?: string[]
+  measurementTechnique?: string
+  variableMeasured?: string[]
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: args.name,
+    description: args.description,
+    url: args.url,
+    datePublished: args.datePublished,
+    creator: { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    license: `${SITE_URL}/datenschutz`,
+    inLanguage: 'de-DE',
+    ...(args.keywords && { keywords: args.keywords.join(', ') }),
+    ...(args.measurementTechnique && { measurementTechnique: args.measurementTechnique }),
+    ...(args.variableMeasured && { variableMeasured: args.variableMeasured }),
+  }
+}
+
 // Person-Schema — für About-Us-Page einzeln nutzbar.
 export function personSchema(args: {
   name: string
