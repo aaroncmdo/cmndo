@@ -27,13 +27,20 @@ export async function createClient(options: { remember?: boolean } = {}) {
     ? options.remember
     : cookieStore.get(REMEMBER_COOKIE_NAME)?.value !== '0'
 
+  // AAR-login-loop: Auth-Cookies müssen für alle *.claimondo.de-Subdomains
+  // gelten — ohne Domain-Scope werden Cookies nur für die aktuelle Domain
+  // (z.B. claimondo.de) gesetzt und app.claimondo.de sieht sie nicht.
+  // Das führt zu: Login auf claimondo.de → Redirect zu app.claimondo.de →
+  // getUser()=null → zurück auf /login → Loop.
+  const cookieDomain = process.env.NODE_ENV === 'production' ? '.claimondo.de' : undefined
+
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookieOptions: remember
-        ? { maxAge: ONE_YEAR_SECONDS, path: '/', sameSite: 'lax' }
-        : { maxAge: undefined, path: '/', sameSite: 'lax' },
+        ? { maxAge: ONE_YEAR_SECONDS, path: '/', sameSite: 'lax', domain: cookieDomain }
+        : { maxAge: undefined, path: '/', sameSite: 'lax', domain: cookieDomain },
       cookies: {
         getAll() {
           return cookieStore.getAll()
@@ -44,8 +51,8 @@ export async function createClient(options: { remember?: boolean } = {}) {
               // Wenn remember=false, alle Auth-Cookies als Session-Cookies
               // schreiben (kein maxAge → Browser loescht beim Schliessen).
               const finalOpts = remember
-                ? opts
-                : { ...opts, maxAge: undefined, expires: undefined }
+                ? { ...opts, domain: cookieDomain }
+                : { ...opts, maxAge: undefined, expires: undefined, domain: cookieDomain }
               cookieStore.set(name, value, finalOpts)
             })
           } catch {

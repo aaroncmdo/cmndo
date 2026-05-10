@@ -26,6 +26,9 @@ export async function login(formData: FormData) {
   // ihn fuer cookieOptions, und auch die Middleware nutzt ihn bei
   // spaeteren Token-Rotationen.
   const cookieStore = await cookies()
+  // AAR-login-loop: Domain auf .claimondo.de setzen damit alle Subdomains
+  // (claimondo.de, app.claimondo.de) dieselben Cookies sehen.
+  const cookieDomain = process.env.NODE_ENV === 'production' ? '.claimondo.de' : undefined
   cookieStore.set(REMEMBER_COOKIE_NAME, remember ? '1' : '0', {
     path: '/',
     sameSite: 'lax',
@@ -34,6 +37,7 @@ export async function login(formData: FormData) {
     // (Bei Logout wird er via supabase signOut nicht entfernt; das ist OK,
     // er hat ohne Auth-Cookies keine Wirkung.)
     maxAge: ONE_YEAR_SECONDS,
+    domain: cookieDomain,
   })
 
   const supabase = await createClient({ remember })
@@ -97,6 +101,7 @@ export async function login(formData: FormData) {
     sameSite: 'lax',
     path: '/',
     maxAge: 0,
+    domain: cookieDomain,
   })
 
   // 2FA aktiv? → direkt nach /login/2fa, nicht über Browser-Roundtrip
@@ -120,6 +125,7 @@ export async function login(formData: FormData) {
     sameSite: 'lax',
     path: '/',
     maxAge: 3 * 24 * 60 * 60,
+    domain: cookieDomain,
   })
 
   // BUG-82: revalidatePath vor dem redirect() ist NOTWENDIG damit der
