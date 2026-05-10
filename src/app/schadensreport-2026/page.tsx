@@ -274,11 +274,83 @@ export default function SchadensreportPage() {
         </div>
       </section>
 
+      {/* Markt-Block — Original-Daten aus Wettbewerber-Analyse 04/2026 */}
+      <section id="markt" className="py-12 sm:py-16">
+        <div className="mx-auto max-w-5xl px-5 sm:px-6">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
+            Tabelle 2
+          </p>
+          <h2
+            className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Der Markt für Kfz-Schadensregulierung in NRW 2026
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+            Eigene Wettbewerbs-Analyse mit 10 validierten Datenquellen
+            (DataForSEO, SE Ranking, SerpApi, DAT API, Chrome SERP, Google Maps,
+            Ads Transparency Center). Stand April 2026.
+          </p>
+
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            {[
+              { wert: '23', label: 'Direkt-Wettbewerber NRW', sub: 'aktiv mit Webseite + Adresse' },
+              { wert: '89', label: 'DAT-Expert-Partner NRW', sub: 'Claimondo-Netzwerk' },
+              { wert: '0 %', label: 'AI-Search-Sichtbarkeit', sub: 'aller 23 Wettbewerber' },
+              { wert: '138', label: 'Google-Maps-Einträge', sub: 'in 23 NRW-Städten' },
+              { wert: '1.668', label: 'Traffic/Mo Marktführer', sub: 'unfallpaten.de (April 26)' },
+              { wert: '−30 %', label: 'Marktführer Rückgang', sub: 'seit Peak Januar 2025' },
+              { wert: '€ 5,98', label: 'CPC „kfz gutachter [Stadt]"', sub: 'transaktional, Difficulty 3-37' },
+              { wert: '130+', label: 'organische Wettbewerber DE', sub: 'bundesweit identifiziert' },
+            ].map((m) => (
+              <div
+                key={m.label}
+                className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-[0_4px_18px_rgba(13,27,62,0.06)] backdrop-blur-md"
+                style={{ WebkitBackdropFilter: 'blur(14px)' }}
+              >
+                <div
+                  className="text-2xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-3xl"
+                  style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+                >
+                  {m.wert}
+                </div>
+                <p className="mt-1 text-xs font-semibold leading-tight text-claimondo-ondo">
+                  {m.label}
+                </p>
+                <p className="mt-1 text-[11px] leading-tight text-claimondo-shield/70">
+                  {m.sub}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div
+            className="mt-6 rounded-2xl border-l-4 border-claimondo-light-blue bg-claimondo-light-blue/10 p-5 text-sm leading-relaxed text-claimondo-shield"
+          >
+            <p className="font-bold text-claimondo-navy">Schlüssel-Erkenntnis:</p>
+            <p className="mt-1">
+              Der Marktführer{' '}
+              <a href="https://unfallpaten.de" target="_blank" rel="noopener" className="underline">unfallpaten.de</a>
+              {' '}hat seit dem Google Helpful Content Update (Januar 2025) etwa 30 % seines
+              organischen Traffics verloren — von 2.784 auf 1.668 Visits/Monat. Bei
+              gleichzeitig 0 % AI-Search-Sichtbarkeit aller 23 NRW-Wettbewerber öffnet
+              sich ein einmaliges Zeitfenster für strukturierte Daten + Schema-Markup +
+              Answer-Capsule-Content.
+            </p>
+          </div>
+
+          <p className="mt-4 text-xs text-claimondo-ondo">
+            Quellen: SE Ranking AI Search Visibility, DataForSEO Keyword-DB,
+            DAT-API Partner-Netz, SerpApi Google Maps, Wettbewerber-Funnel-Audit Q1/2026.
+          </p>
+        </div>
+      </section>
+
       {/* BVSK-Honorarspannen */}
       <section id="honorare" className="py-12 sm:py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            Tabelle 2
+            Tabelle 3
           </p>
           <h2
             className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
@@ -324,7 +396,7 @@ export default function SchadensreportPage() {
       <section id="regional" className="py-12 sm:py-16">
         <div className="mx-auto max-w-5xl px-5 sm:px-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            Tabelle 3
+            Tabelle 4
           </p>
           <h2
             className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
@@ -363,6 +435,51 @@ export default function SchadensreportPage() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Auswertung Claimondo — Platzhalter bis Operations-Daten erhoben sind */}
+      <section id="auswertung-claimondo" className="py-12 sm:py-16">
+        <div className="mx-auto max-w-3xl px-5 sm:px-6">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
+            In Vorbereitung
+          </p>
+          <h2
+            className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Auswertung Claimondo 2024–2026
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+            Wir veröffentlichen ab Q3 2026 die anonymisierte Auswertung unserer
+            bearbeiteten Mandate. Geplante Datenpunkte:
+          </p>
+          <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {[
+              'Erfolgsquote pro Kürzungsposition (UPE, Wertminderung, Nutzungsausfall)',
+              'Durchschnittlicher € Zugewinn pro Fall durch unabhängige Regulierung',
+              'Kürzungs-Quote pro Versicherer (HUK, AXA, LVM, Allianz, ERGO)',
+              'Reaktionszeit pro Versicherer (Tage bis Erst-Reaktion)',
+              'Quote: zahlt nach 1. Mahnung / 2. Mahnung / nur nach Klage',
+              'Schadens-Typ-Verteilung (Auffahrunfall / Parkschaden / Wild / sonstige)',
+              'Top-5 NRW-Städte nach Fallvolumen',
+              'Mittlere Bearbeitungszeit (Meldung bis Auszahlung)',
+              'Vorschaden-Quote + ø Wertminderungs-Differenz mit/ohne Doku',
+              'Reklamations-Quote + Anteil wiederkehrender Mandanten',
+            ].map((item) => (
+              <li
+                key={item}
+                className="flex items-start gap-2 rounded-xl border border-claimondo-border/60 bg-white/40 px-3.5 py-2.5 text-xs leading-snug text-claimondo-shield"
+              >
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-claimondo-light-blue" />
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-5 text-xs text-claimondo-ondo">
+            Datengrundlage: bearbeitete Mandate über Claimondo-Plattform 2024–2026,
+            anonymisiert nach DSGVO. Erste Veröffentlichung Q3 2026 als jährlicher Update.
+          </p>
         </div>
       </section>
 
