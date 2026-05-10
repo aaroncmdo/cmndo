@@ -1,5 +1,6 @@
 'use client'
 
+import 'mapbox-gl/dist/mapbox-gl.css'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'

@@ -1,5 +1,6 @@
 'use client'
 
+import 'mapbox-gl/dist/mapbox-gl.css'
 // AAR-387: Mapbox-Vogelperspektive-Karte für die Kunden-Live-Ansicht.
 // Drei Marker (Ziel, SV, Kunde) + zwei Routen (Luftlinien-Fallback wenn
 // keine gespeicherte Polyline existiert). fitBounds hält alle aktiven
