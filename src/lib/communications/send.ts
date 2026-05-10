@@ -17,6 +17,7 @@ export async function sendCommunication(
   data: Record<string, string>,
   options?: { forceEmail?: boolean; skipWhatsapp?: boolean },
 ): Promise<void> {
+  // options is intentionally simple — Baileys routing is transparent to callers
   const config = COMMUNICATION_REGISTRY[triggerName]
   if (!config) {
     console.warn(`[COMM] Unknown trigger: ${triggerName}`)
@@ -44,8 +45,23 @@ export async function sendCommunication(
         data.absender_kb_id,
       )
     } else {
-      const { sendWhatsApp } = await import('@/lib/whatsapp')
-      result = await sendWhatsApp(data.telefon, buildMessage(config.description, data))
+      // Baileys-first: wenn Service erreichbar → Baileys, sonst Twilio-Fallback
+      const message = buildMessage(config.description, data)
+      const { sendWhatsAppText } = await import('@/lib/whatsapp/baileys-client')
+      const baileysResult = await sendWhatsAppText(data.telefon, message)
+      if (baileysResult.ok) {
+        result = { success: true }
+      } else if (
+        baileysResult.code === 'service_unavailable' ||
+        baileysResult.code === 'baileys_not_connected' ||
+        baileysResult.code === 'config_missing'
+      ) {
+        // Baileys nicht erreichbar → Twilio-Fallback
+        const { sendWhatsApp } = await import('@/lib/whatsapp')
+        result = await sendWhatsApp(data.telefon, message)
+      } else {
+        result = { success: false, error: baileysResult.error }
+      }
     }
 
     if (!result.success) {

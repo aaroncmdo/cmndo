@@ -18,7 +18,7 @@ export default async function DispatchLeads({
 
   let query = supabase
     .from('leads')
-    .select('id, vorname, nachname, telefon, email, qualifizierungs_phase, schadens_fall_typ, service_typ, source_channel, flow_link_geoeffnet, flow_link_abgeschlossen, created_at, updated_at')
+    .select('id, vorname, nachname, telefon, email, qualifizierungs_phase, schadens_fall_typ, service_typ, source_channel, flow_link_geoeffnet, flow_link_abgeschlossen, whatsapp_verfuegbar, created_at, updated_at')
     .order('created_at', { ascending: false })
     .limit(200)
 
