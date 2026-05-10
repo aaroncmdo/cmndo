@@ -7,6 +7,38 @@ import { revalidatePath } from 'next/cache'
 import { getSlotsFuerFall, type DokumentKatalogRow, type DokumentKategorie } from '@/lib/dokumente/katalog'
 import { buildKatalogContext } from '@/lib/dokumente/ruleEvaluator'
 
+export type VorschadenAbrechnungsStatus = 'ja' | 'nein' | 'teilweise' | 'unbekannt'
+
+// 2026-05-10 Aaron-Briefing: Frage „War der Vorschaden mit der Versicherung
+// abgerechnet?" im Onboarding-Wizard. Wert wird auf claim.vorschaden_mit_vs_abgerechnet
+// geschrieben — Anwalt/SV nutzt das bei der Schadensregulierung.
+export async function setzeVorschadenAbrechnung(
+  fallId: string,
+  wert: VorschadenAbrechnungsStatus,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!fallId) return { ok: false, error: 'fall_id fehlt' }
+  const admin = createAdminClient()
+
+  const { data: fall } = await admin
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .single()
+
+  if (!fall?.claim_id) return { ok: false, error: 'Fall hat keinen verknüpften Claim' }
+
+  const { error } = await admin
+    .from('claims')
+    .update({ vorschaden_mit_vs_abgerechnet: wert })
+    .eq('id', fall.claim_id as string)
+
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath(`/kunde/faelle/${fallId}`)
+  revalidatePath(`/kunde/onboarding`)
+  return { ok: true }
+}
+
 // AAR-323: Angereicherter Pflichtdokument-Eintrag für den Onboarding-Wizard.
 // Joined pflichtdokumente + dokument_katalog (ohne SQL-JOIN weil Supabase-Policies
 // dokument_katalog erlauben, pflichtdokumente aber mit FK auf katalog nicht). Ein

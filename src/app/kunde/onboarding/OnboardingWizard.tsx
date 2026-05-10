@@ -13,8 +13,10 @@ import {
   uploadPflichtdokument,
   uploadKundenDokument,
   markiereAlleSpaeterNachreichen,
+  setzeVorschadenAbrechnung,
   type PflichtdokumentStand,
   type FreierSlot,
+  type VorschadenAbrechnungsStatus,
 } from './actions'
 import type { ClaimFull } from '@/lib/claims/types'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
@@ -237,6 +239,33 @@ export default function OnboardingWizard({
     fieldsFound: number
   } | null>(null)
   const [welcomeOcrLoading, setWelcomeOcrLoading] = useState(false)
+
+  // 2026-05-10 Vorschaden-Doku-Pipeline: lokaler Status der Abrechnungs-Frage
+  // damit Card sofort verschwindet wenn Kunde geklickt hat (kein Reload nötig).
+  // Initial aus claim laden — wenn schon gesetzt, Card wird gar nicht gezeigt.
+  type ClaimWithVorschadenAbrechnung = ClaimFull & {
+    hat_vorschaeden?: boolean | null
+    vorschaden_mit_vs_abgerechnet?: VorschadenAbrechnungsStatus | null
+  }
+  const claimWA = claim as ClaimWithVorschadenAbrechnung | null
+  const [vorschadenAbrechnung, setVorschadenAbrechnung] = useState<VorschadenAbrechnungsStatus | null>(
+    (claimWA?.vorschaden_mit_vs_abgerechnet as VorschadenAbrechnungsStatus | null) ?? null,
+  )
+  const [vorschadenAbrechnungSaving, setVorschadenAbrechnungSaving] = useState<VorschadenAbrechnungsStatus | null>(null)
+
+  const zeigeVorschadenAbrechnungsFrage = !!claimWA?.hat_vorschaeden && !vorschadenAbrechnung
+
+  function speichereVorschadenAbrechnung(wert: VorschadenAbrechnungsStatus) {
+    if (!fall?.id) return
+    setVorschadenAbrechnungSaving(wert)
+    startTransition(async () => {
+      const res = await setzeVorschadenAbrechnung(fall.id, wert)
+      if (res.ok) {
+        setVorschadenAbrechnung(wert)
+      }
+      setVorschadenAbrechnungSaving(null)
+    })
+  }
   const [welcomeOcrError, setWelcomeOcrError] = useState<string | null>(null)
 
   function handleWelcomeOcr(file: File) {
@@ -601,6 +630,37 @@ export default function OnboardingWizard({
                         {claim.polizei_aktenzeichen && <DataRow label="Aktenzeichen" value={String(claim.polizei_aktenzeichen)} />}
                       </ClaimDataCard>
                     )}
+                  </div>
+                )}
+
+                {/* Vorschaden-Abrechnungs-Frage — nur wenn CarDentity oder
+                    Kunde-Selbstauskunft Vorschaden gemeldet hat. */}
+                {zeigeVorschadenAbrechnungsFrage && (
+                  <div className="mt-5 rounded-2xl border border-claimondo-ondo/30 bg-claimondo-ondo/5 p-5">
+                    <p className="text-sm font-semibold text-claimondo-navy">
+                      Wurde der Vorschaden mit der Versicherung abgerechnet?
+                    </p>
+                    <p className="mt-1 text-xs text-claimondo-ondo">
+                      Wichtig für die Rechtslage — nicht abgerechnete Vorschäden bleiben
+                      Ihr Anspruch und werden nur mit dem aktuellen Schaden verrechnet.
+                    </p>
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      {([
+                        { wert: 'ja', label: 'Ja, vollständig' },
+                        { wert: 'teilweise', label: 'Teilweise' },
+                        { wert: 'nein', label: 'Nein' },
+                        { wert: 'unbekannt', label: 'Weiß ich nicht' },
+                      ] as const).map(({ wert, label }) => (
+                        <button
+                          key={wert}
+                          onClick={() => speichereVorschadenAbrechnung(wert)}
+                          disabled={!!vorschadenAbrechnungSaving}
+                          className="rounded-xl border border-claimondo-border bg-white px-3 py-2.5 text-sm font-medium text-claimondo-navy transition-all hover:border-claimondo-ondo hover:bg-claimondo-ondo/10 disabled:opacity-50 active:scale-[0.98]"
+                        >
+                          {vorschadenAbrechnungSaving === wert ? '…' : label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
