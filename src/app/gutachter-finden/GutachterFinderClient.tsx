@@ -186,12 +186,12 @@ function createSvMarkerEl(vorname: string, aktiv: boolean): HTMLElement {
 }
 
 // ——— Haupt-Komponente ———
-type Props = {
+export type GutachterFinderClientProps = {
   aktiveSVs: AktiverSV[]
   svLeads: SvLead[]
 }
 
-export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
+export function GutachterFinderClient({ aktiveSVs, svLeads }: GutachterFinderClientProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
   const kundeMarkerRef = useRef<Marker | null>(null)
