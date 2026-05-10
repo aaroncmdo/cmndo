@@ -26,7 +26,18 @@ export default function PasswortVergessenPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-[#f8f9fb]">
+    <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-[#f2f3f7]">
+      {/* Ambient-Gradient Spotlights */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: [
+            'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.2), transparent 65%)',
+            'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.12), transparent 70%)',
+          ].join(', '),
+        }}
+      />
       <div className="w-full max-w-sm relative z-10">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold tracking-tight">
@@ -36,7 +47,7 @@ export default function PasswortVergessenPage() {
           <p className="mt-2 text-sm text-claimondo-ondo">Passwort zurücksetzen</p>
         </div>
 
-        <div className="bg-white border border-claimondo-border rounded-3xl p-8 shadow-lg">
+        <div className="rounded-3xl border border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_8px_28px_rgba(13,27,62,0.08)] p-8">
           {!submitted ? (
             <>
               <div className="flex items-center gap-3 mb-6">
@@ -72,7 +83,7 @@ export default function PasswortVergessenPage() {
                   isLoading={loading}
                   loadingText="Wird gesendet..."
                   disabled={!email.trim()}
-                  className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm active:scale-[0.98] transition-all mt-1"
+                  className="w-full py-3.5 rounded-full bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm active:scale-[0.98] transition-all mt-1"
                 >
                   Reset-Link senden
                 </LoadingButton>

@@ -83,7 +83,18 @@ export default function PasswortZuruecksetzenPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-[#f8f9fb]">
+    <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-[#f2f3f7]">
+      {/* Ambient-Gradient Spotlights */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: [
+            'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.2), transparent 65%)',
+            'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.12), transparent 70%)',
+          ].join(', '),
+        }}
+      />
       <div className="w-full max-w-sm relative z-10">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold tracking-tight">
@@ -93,7 +104,7 @@ export default function PasswortZuruecksetzenPage() {
           <p className="mt-2 text-sm text-claimondo-ondo">Neues Passwort setzen</p>
         </div>
 
-        <div className="bg-white border border-claimondo-border rounded-3xl p-8 shadow-lg">
+        <div className="rounded-3xl border border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_8px_28px_rgba(13,27,62,0.08)] p-8">
           {phase === 'verifying' && (
             <p className="text-center text-claimondo-ondo text-sm py-8">Reset-Link wird geprüft …</p>
           )}
@@ -110,7 +121,7 @@ export default function PasswortZuruecksetzenPage() {
               </p>
               <Link
                 href="/passwort-vergessen"
-                className="inline-block w-full py-3 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-sm transition-colors"
+                className="inline-block w-full py-3 rounded-full bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-sm transition-colors text-center"
               >
                 Neuen Reset-Link anfordern
               </Link>
@@ -184,7 +195,7 @@ export default function PasswortZuruecksetzenPage() {
                   type="submit"
                   isLoading={submitting}
                   loadingText="Wird gespeichert..."
-                  className="w-full py-3.5 rounded-xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm active:scale-[0.98] transition-all mt-1"
+                  className="w-full py-3.5 rounded-full bg-[#1E3A5F] hover:bg-[#4573A2] text-white disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm active:scale-[0.98] transition-all mt-1"
                 >
                   Passwort speichern
                 </LoadingButton>
