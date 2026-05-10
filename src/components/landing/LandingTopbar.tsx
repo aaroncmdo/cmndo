@@ -105,7 +105,7 @@ export function LandingTopbar({ authenticatedUser, locale }: Props) {
             </Link>
           ) : (
             <Link
-              href="/login"
+              href="https://app.claimondo.de/login"
               className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-4 py-2 text-sm font-semibold text-claimondo-navy backdrop-blur-sm transition-all duration-200 hover:border-claimondo-navy/15 hover:bg-white active:scale-[0.97]"
             >
               Anmelden

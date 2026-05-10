@@ -94,7 +94,7 @@ export async function LandingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="transition-colors hover:text-white">
+                <Link href="https://app.claimondo.de/login" className="transition-colors hover:text-white">
                   {t('partner.login')}
                 </Link>
               </li>
