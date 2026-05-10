@@ -1,0 +1,13 @@
+# Auth-State darf NICHT ins Repo (enthält private Keys + WhatsApp-Sessions)
+auth_info_baileys/
+
+# PM2-Logs
+logs/
+
+# npm
+node_modules/
+package-lock.json
+
+# Lokale Test-Dateien
+*.local
+.env
