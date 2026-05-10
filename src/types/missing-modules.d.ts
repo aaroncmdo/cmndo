@@ -3,44 +3,48 @@
 // bei Bedarf. Die echten Packages werden installiert sobald das Feature
 // produktionsreif ist (AAR-8xx Backlog).
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyValue = any
+
 declare module 'three' {
-  export const WebGLRenderer: unknown
-  export const Scene: unknown
-  export const PerspectiveCamera: unknown
-  export const AmbientLight: unknown
-  export const DirectionalLight: unknown
-  export const MeshStandardMaterial: unknown
-  export const Mesh: unknown
-  export const BoxGeometry: unknown
-  export const SphereGeometry: unknown
-  export const Group: unknown
-  export const Vector3: unknown
-  export const Quaternion: unknown
-  export const Matrix4: unknown
-  export const Color: unknown
-  export const TextureLoader: unknown
-  export const PMREMGenerator: unknown
-  export const RGBAFormat: unknown
-  export const HalfFloatType: unknown
-  export const Clock: unknown
-  export const MathUtils: unknown
-  export const MeshPhongMaterial: unknown
-  export const MeshLambertMaterial: unknown
-  export const Float32BufferAttribute: unknown
-  export const BufferGeometry: unknown
-  export const Points: unknown
-  export const PointsMaterial: unknown
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const THREE: any
-  export default THREE
+  export const WebGLRenderer: AnyValue
+  export const Scene: AnyValue
+  export const PerspectiveCamera: AnyValue
+  export const AmbientLight: AnyValue
+  export const DirectionalLight: AnyValue
+  export const MeshStandardMaterial: AnyValue
+  export const Mesh: AnyValue
+  export const BoxGeometry: AnyValue
+  export const SphereGeometry: AnyValue
+  export const Group: AnyValue
+  export const Vector3: AnyValue
+  export const Quaternion: AnyValue
+  export const Matrix4: AnyValue
+  export const Color: AnyValue
+  export const TextureLoader: AnyValue
+  export const PMREMGenerator: AnyValue
+  export const RGBAFormat: AnyValue
+  export const HalfFloatType: AnyValue
+  export const SRGBColorSpace: AnyValue
+  export const Clock: AnyValue
+  export const MathUtils: AnyValue
+  export const MeshPhongMaterial: AnyValue
+  export const MeshLambertMaterial: AnyValue
+  export const Float32BufferAttribute: AnyValue
+  export const BufferGeometry: AnyValue
+  export const Points: AnyValue
+  export const PointsMaterial: AnyValue
+  export const CanvasTexture: AnyValue
+  export type Texture = AnyValue
+  export const default: AnyValue
 }
 
 declare module 'three/examples/jsm/loaders/OBJLoader.js' {
-  export const OBJLoader: unknown
+  export const OBJLoader: AnyValue
 }
 
 declare module 'three/examples/jsm/loaders/RGBELoader.js' {
-  export const RGBELoader: unknown
+  export const RGBELoader: AnyValue
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
