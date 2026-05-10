@@ -16,7 +16,13 @@ import { isOnWhatsApp } from './baileys-client'
 const CACHE_TTL_DAYS = 30
 const CACHE_TTL_MS = CACHE_TTL_DAYS * 24 * 60 * 60 * 1000
 
-type Entity = 'lead' | 'profile'
+type Entity = 'lead' | 'profile' | 'gfa'
+
+const TABLE_BY_ENTITY: Record<Entity, string> = {
+  lead: 'leads',
+  profile: 'profiles',
+  gfa: 'gutachter_finder_anfragen',
+}
 
 export type AvailabilityResult = {
   verfuegbar: boolean | null  // null = unbekannt (Service down + nichts im Cache)
@@ -35,7 +41,7 @@ export async function getCachedAvailability(
   entityId: string,
 ): Promise<{ verfuegbar: boolean | null; geprueftAm: string | null }> {
   const admin = createAdminClient()
-  const table = entity === 'lead' ? 'leads' : 'profiles'
+  const table = TABLE_BY_ENTITY[entity]
   const { data } = await admin
     .from(table)
     .select('whatsapp_verfuegbar, whatsapp_geprueft_am')
@@ -72,7 +78,7 @@ export async function checkAndCacheAvailability(
   }
 
   const admin = createAdminClient()
-  const table = entity === 'lead' ? 'leads' : 'profiles'
+  const table = TABLE_BY_ENTITY[entity]
 
   // 1) Cache lesen
   const cached = await getCachedAvailability(entity, entityId)
