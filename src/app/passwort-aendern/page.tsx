@@ -60,14 +60,25 @@ export default function PasswortAendernPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f8f9fb] px-5">
-      <div className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center bg-[#f2f3f7] px-5 relative overflow-hidden">
+      {/* Ambient-Gradient Spotlights */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: [
+            'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.2), transparent 65%)',
+            'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.12), transparent 70%)',
+          ].join(', '),
+        }}
+      />
+      <div className="w-full max-w-sm relative z-10">
         <div className="mb-8 text-center">
           <span className="text-3xl font-bold tracking-tight"><span className="text-[#0D1B3E]">Claim</span><span className="text-[#4573A2]">ondo</span></span>
           <p className="mt-1 text-sm text-claimondo-ondo">Bitte ändern Sie Ihr Passwort</p>
         </div>
 
-        <div className="bg-white border border-claimondo-border rounded-2xl p-8">
+        <div className="rounded-3xl border border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_8px_28px_rgba(13,27,62,0.08)] p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
               <KeyIcon className="w-5 h-5 text-amber-400" />
@@ -121,7 +132,7 @@ export default function PasswortAendernPage() {
               type="submit"
               isLoading={loading}
               loadingText="Wird gespeichert..."
-              className="w-full py-3.5 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white disabled:opacity-50 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
+              className="w-full py-3.5 rounded-full bg-claimondo-navy hover:bg-claimondo-shield text-white disabled:opacity-50 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
             >
               Passwort ändern
             </LoadingButton>
