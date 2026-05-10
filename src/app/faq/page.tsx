@@ -62,6 +62,10 @@ export default function FaqPage() {
           ]),
         ])}
       />
+      {/* H1 explizit in der Server-Component fuer Crawler/AI-Suchmaschinen.
+          FaqClient rendert seinen eigenen Hero-H1 nochmal als Glass-Variante,
+          aber der hier ist garantiert im initialen SSR-HTML. */}
+      <h1 className="sr-only">Häufige Fragen zum Kfz-Schaden — BGH-belegt</h1>
       <FaqClient />
     </>
   )

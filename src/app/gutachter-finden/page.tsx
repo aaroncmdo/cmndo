@@ -68,6 +68,12 @@ export default async function GutachterFindenPage() {
           ]),
         ])}
       />
+      {/* H1 explizit in der Server-Component fuer Crawler/AI-Suchmaschinen.
+          Der Map-Client hat keinen sichtbaren H1 (UX-Entscheidung — die GPS-
+          Karte fuellt den Viewport), aber Crawler brauchen den Topic-Anker. */}
+      <h1 className="sr-only">
+        Kfz-Gutachter in Ihrer Nähe finden — sofort buchen, kostenfrei nach §249 BGB
+      </h1>
       <GutachterFinderClient aktiveSVs={aktiveSVs} svLeads={svLeads} />
     </>
   )
