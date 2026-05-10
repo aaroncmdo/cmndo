@@ -155,6 +155,9 @@ function isPublicPath(pathname: string): boolean {
     '/wie-es-funktioniert',
     '/faq',
     '/ueber-uns',
+    // 2026-05-10: Schadensreport-Datenpublikation — höchster GEO-Hebel
+    // laut Aaron-Briefing. Muss unauthenticated indexierbar sein.
+    '/schadensreport-2026',
     // robots.txt + sitemap.xml + opengraph-image — von Next.js auto-routes
     // generiert, dürfen nie hinter Auth liegen.
     '/robots.txt',
