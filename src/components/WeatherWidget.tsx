@@ -65,9 +65,9 @@ export default function WeatherWidget({ lat, lng }: { lat: number | null; lng: n
   if (!weather) {
     return (
       <div className="bg-white/60 border border-claimondo-border rounded-2xl p-5 max-w-[300px] animate-pulse">
-        <div className="h-4 w-20 bg-claimondo-bg rounded mb-3" />
-        <div className="h-8 w-16 bg-claimondo-bg rounded mb-2" />
-        <div className="h-3 w-32 bg-claimondo-bg rounded" />
+        <div className="h-4 w-20 bg-[#f8f9fb] rounded mb-3" />
+        <div className="h-8 w-16 bg-[#f8f9fb] rounded mb-2" />
+        <div className="h-3 w-32 bg-[#f8f9fb] rounded" />
       </div>
     )
   }

@@ -32,15 +32,12 @@ interface Props {
 }
 
 const STATUS_LABEL: Record<FallStatusValue, string> = {
-  // Welle-7
-  onboarding: 'Onboarding (W7)',
-  in_bearbeitung: 'In Bearbeitung (W7)',
-  vs_kontakt: 'VS-Kontakt (W7)',
-  reguliert: 'Reguliert (W7)',
-  abgelehnt: 'Abgelehnt (W7)',
-  kanzlei: 'An Kanzlei (W7)',
-  storniert: 'Storniert',
-  // Welle-6 Backward-Compat
+  onboarding: 'Onboarding',
+  in_bearbeitung: 'In Bearbeitung',
+  vs_kontakt: 'VS-Kontakt',
+  reguliert: 'Reguliert',
+  abgelehnt: 'Abgelehnt',
+  kanzlei: 'Kanzlei',
   ersterfassung: 'Ersterfassung',
   'sv-gesucht': 'SV gesucht',
   'sv-zugewiesen': 'SV zugewiesen',
@@ -125,8 +122,8 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-claimondo-navy">Aktueller Status</label>
-          <div className="w-full rounded-md border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm font-mono text-claimondo-navy">
+          <label className="text-xs font-medium text-[#0D1B3E]">Aktueller Status</label>
+          <div className="w-full rounded-md border border-claimondo-border bg-[#f8f9fb] px-3 py-2 text-sm font-mono text-claimondo-navy">
             {currentStatus}
           </div>
         </div>
@@ -138,7 +135,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
           <select
             value={neuerStatus}
             onChange={(e) => setNeuerStatus(e.target.value as FallStatusValue | '')}
-            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
           >
             <option value="">– bitte wählen –</option>
             {ALLOWED_STATUS_VALUES.map((s) => (
@@ -159,7 +156,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
             onChange={(e) => setBegruendung(e.target.value)}
             rows={4}
             placeholder="Warum wird der Status manuell überschrieben? (z.B. Legacy-Migration, außergerichtliche Einigung, …)"
-            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-[#4573A2] focus:outline-none"
           />
           <p className="text-xs text-claimondo-ondo">
             {begruendung.trim().length} / min. 10 Zeichen —{' '}
@@ -189,7 +186,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
             type="button"
             onClick={() => handleOpenChange(false)}
             disabled={pending}
-            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
+            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-[#f8f9fb] disabled:opacity-50"
           >
             Abbrechen
           </button>

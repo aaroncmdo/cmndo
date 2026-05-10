@@ -9,12 +9,11 @@ import {
   ExternalLinkIcon,
 } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
-import EmptyState from '@/components/shared/EmptyState'
 
 const PRIO_COLORS: Record<string, string> = {
   kritisch: 'bg-red-50 text-red-300 border-red-800',
   dringend: 'bg-amber-50 text-amber-300 border-amber-800',
-  normal: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border',
+  normal: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border',
 }
 
 const PRIO_LABELS: Record<string, string> = {
@@ -72,7 +71,7 @@ export default async function GutachterTasksPage() {
           title="Meine Tasks"
           icon={ClipboardListIcon}
           actions={
-            <span className="bg-claimondo-bg text-claimondo-navy text-xs font-medium px-2.5 py-1 rounded-full">
+            <span className="bg-[#f8f9fb] text-claimondo-navy text-xs font-medium px-2.5 py-1 rounded-full">
               {offeneTasks.length} offen
             </span>
           }
@@ -90,14 +89,10 @@ export default async function GutachterTasksPage() {
 
         {/* Tasks */}
         {offeneTasks.length === 0 ? (
-          <EmptyState
-            icon={CheckCircle2Icon}
-            title="Alle Tasks erledigt 🎉"
-            description="Sehr gut. Neue Tasks erscheinen automatisch nach Termin-Abschlüssen oder Doku-Anforderungen."
-            actions={[
-              { label: 'Heute öffnen', href: '/gutachter/heute' },
-            ]}
-          />
+          <div className="bg-white border border-claimondo-border rounded-2xl p-12 text-center">
+            <CheckCircle2Icon className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
+            <p className="text-claimondo-ondo text-sm">Keine offenen Tasks. Alles erledigt!</p>
+          </div>
         ) : (
           <div className="space-y-2">
             {offeneTasks.map(task => {

@@ -62,7 +62,7 @@ export default function KommunikationTab({
       </div>
 
       <aside className="bg-white border border-claimondo-border rounded-xl p-4 h-fit">
-        <h3 className="text-xs font-semibold text-claimondo-navy uppercase tracking-wider mb-3">
+        <h3 className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider mb-3">
           Teilnehmer ({teilnehmer.length})
         </h3>
         {teilnehmer.length === 0 ? (
@@ -87,7 +87,7 @@ export default function KommunikationTab({
                     </span>
                   )}
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-claimondo-navy truncate">{name}</p>
+                    <p className="text-xs font-medium text-[#0D1B3E] truncate">{name}</p>
                     <p className="text-[10px] text-claimondo-ondo">{ROLLE_LABEL[t.rolle]}</p>
                   </div>
                 </li>

@@ -28,19 +28,11 @@ export async function LandingFooter() {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
           {/* Spalte 1: Brand mit Schild + Wortmarke */}
           <div>
-            <Link href="/" aria-label="Claimondo Startseite" className="group inline-flex items-center gap-2.5">
-              <span className="relative flex h-9 w-9 shrink-0 overflow-hidden rounded-[10px] shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-transform duration-200 group-hover:scale-[1.04]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/claimondo-shield.svg" alt="" width={36} height={36} className="h-9 w-9" />
-              </span>
-              <span
-                className="text-xl font-bold tracking-tight"
-                style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
-              >
-                claim<span className="text-claimondo-light-blue">ondo</span>
-              </span>
-            </Link>
-            <p className="mt-4 text-sm leading-relaxed text-white/70">{t('tagline')}</p>
+            <div className="text-xl font-bold">
+              <span>Claim</span>
+              <span className="text-claimondo-light-blue">ondo</span>
+            </div>
+            <p className="mt-2 text-sm text-white/70">{t('tagline')}</p>
           </div>
 
           {/* Spalte 2: Produkt */}
@@ -48,7 +40,7 @@ export async function LandingFooter() {
             <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
               {t('product.heading')}
             </h4>
-            <ul className="mt-4 space-y-2.5 text-sm text-white/75">
+            <ul className="mt-3 space-y-2 text-sm text-white/70">
               <li>
                 <Link href="/gutachter-finden" className="transition-colors hover:text-white">
                   Gutachter finden
@@ -82,7 +74,7 @@ export async function LandingFooter() {
             <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
               {t('partner.heading')}
             </h4>
-            <ul className="mt-4 space-y-2.5 text-sm text-white/75">
+            <ul className="mt-3 space-y-2 text-sm text-white/70">
               <li>
                 <Link href="/gutachter-partner" className="transition-colors hover:text-white">
                   Gutachter werden
@@ -106,7 +98,7 @@ export async function LandingFooter() {
             <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
               {t('legal.heading')}
             </h4>
-            <ul className="mt-4 space-y-2.5 text-sm text-white/75">
+            <ul className="mt-3 space-y-2 text-sm text-white/70">
               <li>
                 <Link href="/impressum" className="transition-colors hover:text-white">
                   Impressum
@@ -131,16 +123,13 @@ export async function LandingFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-8 md:flex-row">
-          <p className="text-xs text-claimondo-ondo/70 sm:text-sm">
-            © {year} Claimondo GmbH · Hansaring 10, 50670 Köln · {t('rights')}
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+          <p className="text-sm text-claimondo-ondo/70">
+            © {year} Claimondo GmbH. {t('rights')}
           </p>
-          <div className="flex gap-5 text-sm text-white/75">
-            <a
-              href="tel:+4922125906530"
-              className="rounded-full px-2 py-1 transition-colors hover:bg-white/5 hover:text-white"
-            >
-              0221 25906530
+          <div className="flex gap-4 text-sm text-white/70">
+            <a href="tel:+4922112345678" className="hover:text-white">
+              0221 123 456 78
             </a>
             <a
               href="mailto:hallo@claimondo.de"

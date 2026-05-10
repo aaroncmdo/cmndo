@@ -257,7 +257,7 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
   return (
     <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden flex flex-col">
       {/* Info-Banner */}
-      <div className="flex items-start gap-3 px-4 py-3 bg-claimondo-ondo/10 border-b border-claimondo-border">
+      <div className="flex items-start gap-3 px-4 py-3 bg-claimondo-ondo/10 border-b border-[#e4e7ef]">
         <span className="shrink-0 mt-0.5 text-claimondo-navy">
           <InfoIcon width={16} height={16} />
         </span>
@@ -286,7 +286,7 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
                 key={`sep-${b.dayKey}`}
                 className="flex items-center gap-2 py-2"
               >
-                <div className="flex-1 h-px bg-claimondo-border" />
+                <div className="flex-1 h-px bg-[#e4e7ef]" />
                 <span className="text-[11px] text-claimondo-ondo px-2">
                   — {b.label} —
                 </span>
@@ -328,7 +328,7 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
           rows={1}
           maxLength={2000}
           placeholder="Nachricht an die Gruppe schreiben …"
-          className="flex-1 resize-none rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
+          className="flex-1 resize-none rounded-lg border border-[#e4e7ef] bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
           disabled={sending}
         />
         <button
@@ -360,7 +360,7 @@ function MessageRow({
   if (msg.is_system) {
     return (
       <div className="flex justify-center">
-        <div className="px-3 py-1.5 rounded-full bg-white border border-claimondo-border text-[11px] text-claimondo-ondo max-w-[75%] text-center">
+        <div className="px-3 py-1.5 rounded-full bg-white border border-[#e4e7ef] text-[11px] text-claimondo-ondo max-w-[75%] text-center">
           {msg.nachricht}
           <span className="ml-2 text-claimondo-light-blue">
             {TIME.format(new Date(msg.created_at))}
@@ -397,7 +397,7 @@ function MessageRow({
           className={`rounded-2xl px-3.5 py-2 text-sm leading-relaxed whitespace-pre-wrap break-words ${
             isOwn
               ? 'bg-claimondo-navy text-white rounded-br-md'
-              : 'bg-white text-claimondo-navy border border-claimondo-border rounded-bl-md'
+              : 'bg-white text-claimondo-navy border border-[#e4e7ef] rounded-bl-md'
           } ${pending ? 'opacity-60' : ''}`}
         >
           {msg.nachricht}

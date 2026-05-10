@@ -68,7 +68,3 @@ tmp/
 #      der String beim nächsten Build wieder dieselbe kaputte Klasse →
 #      self-perpetuating Loop. Repro 2026-05-08 (PR #611-Followup).
 docs/portals-review/screenshots/feldmodus/
-
-# Build-Artefakte (Plan-C-Notfall lokal)
-build.tar.gz
-*.tar.gz

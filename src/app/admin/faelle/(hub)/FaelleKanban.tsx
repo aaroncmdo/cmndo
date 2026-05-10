@@ -154,7 +154,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
           <span className="text-claimondo-ondo/70 text-xs">{filtered.length}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex gap-0.5 bg-claimondo-bg rounded-lg p-0.5">
+          <div className="flex gap-0.5 bg-[#f8f9fb] rounded-lg p-0.5">
             {(['aktive', 'deaktivierte', 'alle'] as const).map(f => (
               <button key={f} onClick={() => setAktivFilter(f)}
                 className={`text-[10px] font-medium px-2 py-1 rounded-md transition-colors ${aktivFilter === f ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'}`}>
@@ -185,7 +185,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
                   {/* Column header: 28px */}
                   <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
                     <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
-                    <span className="text-claimondo-ondo text-[10px] font-medium bg-claimondo-bg px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
+                    <span className="text-claimondo-ondo text-[10px] font-medium bg-[#f8f9fb] px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
                   </div>
                   <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
 
@@ -315,7 +315,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
             </button>
             {menuOpen && (
               <div className="absolute right-1 top-6 bg-white border border-claimondo-border rounded-lg shadow-lg py-1 w-36 z-30">
-                <Link href={`/faelle/${fall.id}`} className="block px-3 py-1.5 text-xs text-claimondo-navy hover:bg-claimondo-bg">Öffnen</Link>
+                <Link href={`/faelle/${fall.id}`} className="block px-3 py-1.5 text-xs text-claimondo-navy hover:bg-[#f8f9fb]">Öffnen</Link>
                 <button onClick={() => { setMenuOpen(false); setModal('deactivate'); setGrund(''); setError('') }} className="w-full text-left px-3 py-1.5 text-xs text-amber-600 hover:bg-amber-50">Deaktivieren</button>
                 <button onClick={() => { setMenuOpen(false); setModal('delete'); setError('') }} className="w-full text-left px-3 py-1.5 text-xs text-red-500 hover:bg-red-50">Löschen</button>
               </div>
@@ -325,11 +325,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
         <Link href={`/faelle/${fall.id}`} onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-2">
             {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-claimondo-ondo/70 line-through' : 'text-claimondo-navy'}`}>{fall.kunde_name}</p>}
-            <FallCardBadges
-              chatCount={fall.ungelesene_nachrichten ?? 0}
-              updateCount={fall.ungelesene_updates ?? 0}
-              kundeUploadCount={fall.ungesehene_kunde_uploads ?? 0}
-            />
+            <FallCardBadges chatCount={fall.ungelesene_nachrichten ?? 0} updateCount={fall.ungelesene_updates ?? 0} />
             {/* AAR-770: Mitteilungs-Pulse — kleiner Punkt wenn offene Mitteilung anliegt */}
             {fall.mitteilung && (
               <span
@@ -356,7 +352,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
             )}
           </div>
           <div className="flex flex-wrap gap-1 mt-1">
-            {fall.kennzeichen && <span className="bg-claimondo-bg text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
+            {fall.kennzeichen && <span className="bg-[#f8f9fb] text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
             {fall.schadens_fall_typ && <span className="bg-claimondo-ondo/5 text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadens_fall_typ] ?? fall.schadens_fall_typ}</span>}
           </div>
           {(fall.betreuer_name || fall.sv_name) && (
@@ -430,7 +426,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
         <p className="text-xs text-claimondo-ondo/70 mb-4">Alle Daten werden unwiderruflich entfernt.</p>
         {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
         <div className="flex gap-2">
-          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border">Abbrechen</button>
+          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border">Abbrechen</button>
           <button disabled={processing} onClick={async () => {
             setProcessing(true)
             const result = await deleteFall(fall.id)
@@ -451,7 +447,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
         </select>
         {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
         <div className="flex gap-2">
-          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border">Abbrechen</button>
+          <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border">Abbrechen</button>
           <button disabled={processing || !grund} onClick={async () => {
             setProcessing(true)
             try { await deactivateFall(fall.id, grund, ''); onRefresh() } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }

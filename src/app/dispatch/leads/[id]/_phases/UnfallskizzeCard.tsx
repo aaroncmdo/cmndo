@@ -5,7 +5,7 @@
 // Bestätigung im FlowLink ist Follow-up.
 
 import { useState, useTransition } from 'react'
-import { SparklesIcon, CheckCircle2Icon, RefreshCwIcon, LoaderIcon, XIcon, MoveIcon } from 'lucide-react'
+import { SparklesIcon, CheckCircle2Icon, RefreshCwIcon, LoaderIcon, XIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import {
   generateAndSaveUnfallskizze,
@@ -131,7 +131,7 @@ export function UnfallskizzeCard({
           />
           {generiertAm && (
             <p className="text-[10px] text-claimondo-ondo/70">
-              Generiert am {new Date(generiertAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
+              Generiert am {new Date(generiertAm).toLocaleString('de-DE')}
             </p>
           )}
           {!bestaetigt && (
@@ -158,7 +158,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={generate}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
               >
                 <RefreshCwIcon className="w-3.5 h-3.5" />
                 Neu generieren
@@ -167,7 +167,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={clear}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
               >
                 <XIcon className="w-3.5 h-3.5" />
                 Verwerfen
@@ -175,26 +175,15 @@ export function UnfallskizzeCard({
             </div>
           )}
           {bestaetigt && (
-            <div className="flex items-center gap-3 flex-wrap">
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                disabled={pending}
-                className="inline-flex items-center gap-1 text-[11px] text-claimondo-ondo hover:text-claimondo-navy"
-              >
-                <MoveIcon className="w-3 h-3" />
-                Elemente bearbeiten
-              </button>
-              <button
-                type="button"
-                onClick={clear}
-                disabled={pending}
-                className="inline-flex items-center gap-1 text-[11px] text-claimondo-ondo hover:text-claimondo-navy"
-              >
-                <XIcon className="w-3 h-3" />
-                Freigabe zurückziehen + neu generieren
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={clear}
+              disabled={pending}
+              className="inline-flex items-center gap-1 text-[11px] text-claimondo-ondo hover:text-claimondo-navy"
+            >
+              <XIcon className="w-3 h-3" />
+              Freigabe zurückziehen + neu generieren
+            </button>
           )}
         </div>
       )}

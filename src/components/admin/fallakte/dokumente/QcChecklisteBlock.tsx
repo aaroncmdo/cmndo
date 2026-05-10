@@ -117,7 +117,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
 
   return (
     <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-claimondo-border flex items-center justify-between bg-claimondo-bg">
+      <div className="px-4 py-2.5 border-b border-claimondo-border flex items-center justify-between bg-[#f8f9fb]">
         <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider flex items-center gap-2">
           <ClipboardCheckIcon className="w-3.5 h-3.5" /> QC-Checkliste (Filmcheck)
         </h3>
@@ -152,7 +152,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
                 : v === false
                   ? { bg: 'bg-red-50 border-red-200 text-red-700', txt: 'Nein' }
                   : {
-                      bg: 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo',
+                      bg: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-ondo',
                       txt: '—',
                     }
             return (
@@ -185,7 +185,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
             type="button"
             onClick={handleSpeichern}
             disabled={qcPending}
-            className="px-3 py-1.5 rounded-md bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+            className="px-3 py-1.5 rounded-md bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50"
           >
             Zwischenstand speichern
           </button>

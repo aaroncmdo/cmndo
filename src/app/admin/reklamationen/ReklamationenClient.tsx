@@ -61,7 +61,7 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
           {['eingereicht', 'pruefung', 'berechtigt', 'abgelehnt', 'alle'].map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`px-3 py-1.5 text-xs font-medium leading-tight text-center rounded-full border transition-colors ${
-                filter === f ? 'bg-claimondo-ondo text-white border-claimondo-ondo' : 'border-claimondo-border text-claimondo-ondo'
+                filter === f ? 'bg-[#4573A2] text-white border-[#4573A2]' : 'border-claimondo-border text-claimondo-ondo'
               }`}>{f === 'alle' ? 'Alle' : STATUS_BADGE[f]?.label ?? f}</button>
           ))}
         </div>
@@ -74,12 +74,12 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <p className="text-sm font-medium text-claimondo-navy">{svNameMap[r.sv_id] ?? '—'} — Fall {fallNrMap[r.fall_id] ?? r.fall_id.slice(0, 8)}</p>
-                    <p className="text-xs text-claimondo-ondo">{GRUND_LABELS[r.grund] ?? r.grund} · {new Date(r.eingereicht_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}</p>
+                    <p className="text-xs text-claimondo-ondo">{GRUND_LABELS[r.grund] ?? r.grund} · {new Date(r.eingereicht_am).toLocaleDateString('de-DE')}</p>
                   </div>
                   <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
                 </div>
                 <p className="text-xs text-claimondo-navy mb-2">{r.begruendung}</p>
-                <p className="text-[10px] text-claimondo-ondo/70">Frist bis: {new Date(r.frist_bis).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}</p>
+                <p className="text-[10px] text-claimondo-ondo/70">Frist bis: {new Date(r.frist_bis).toLocaleDateString('de-DE')}</p>
 
                 {r.admin_begruendung && <p className="text-xs text-claimondo-ondo mt-2 italic">Admin: {r.admin_begruendung}</p>}
 
@@ -89,7 +89,7 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
                       <div className="space-y-2">
                         <textarea value={adminGrund} onChange={e => setAdminGrund(e.target.value)}
                           placeholder="Admin-Begründung (bei Ablehnung Pflicht)"
-                          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-xs resize-none focus:outline-none focus:border-claimondo-ondo" rows={2} />
+                          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-xs resize-none focus:outline-none focus:border-[#4573A2]" rows={2} />
                         <div className="flex gap-2">
                           <button onClick={() => handleEntscheidung(r.id, 'berechtigt')} disabled={loading}
                             className="px-3 py-1.5 text-xs font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 disabled:opacity-50">Berechtigt</button>

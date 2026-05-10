@@ -63,7 +63,7 @@ export default function InlineEditField({
         ? 'border-green-300'
         : status === 'error'
           ? 'border-red-300'
-          : 'border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo'
+          : 'border-claimondo-border hover:border-claimondo-border focus:border-[#4573A2]'
 
   const common = {
     value: draft,

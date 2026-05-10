@@ -1,4 +1,4 @@
-﻿// AAR-843: TimelineView — Container für Future-Section + Vergangenheits-Verlauf
+// AAR-843: TimelineView — Container für Future-Section + Vergangenheits-Verlauf
 //
 // Layout A laut Aaron-Hinweis 2: Future-Section oben, dann chronologische
 // Liste der Events absteigend (neueste zuerst).
@@ -34,13 +34,13 @@ export function TimelineView({
     return (
       <div className="space-y-1">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-medium text-claimondo-light-blue uppercase tracking-wide">Verlauf</h3>
+          <h3 className="text-xs font-medium text-[#7BA3CC] uppercase tracking-wide">Verlauf</h3>
           {fullTabHref && (
-            <a href={fullTabHref} className="text-[11px] text-claimondo-ondo hover:underline">Alle anzeigen →</a>
+            <a href={fullTabHref} className="text-[11px] text-[#4573A2] hover:underline">Alle anzeigen →</a>
           )}
         </div>
         {events.length === 0 ? (
-          <p className="text-xs text-claimondo-light-blue py-3">Noch keine Events erfasst</p>
+          <p className="text-xs text-[#7BA3CC] py-3">Noch keine Events erfasst</p>
         ) : (
           <div className="border border-[#E2E8F3] rounded-xl bg-white px-3">
             {events.map((e) => (
@@ -59,9 +59,9 @@ export function TimelineView({
 
       {/* Vergangenheits-Verlauf */}
       <div>
-        <h3 className="text-sm font-semibold text-claimondo-navy mb-2">Bisheriger Verlauf</h3>
+        <h3 className="text-sm font-semibold text-[#0D1B3E] mb-2">Bisheriger Verlauf</h3>
         {events.length === 0 ? (
-          <div className="border-2 border-dashed border-[#E2E8F3] rounded-xl py-10 text-center text-sm text-claimondo-light-blue">
+          <div className="border-2 border-dashed border-[#E2E8F3] rounded-xl py-10 text-center text-sm text-[#7BA3CC]">
             Noch keine Events im Verlauf
           </div>
         ) : (

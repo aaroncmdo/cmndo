@@ -39,11 +39,11 @@ export default async function OnboardingPage({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  let profile: { vorname?: string | null } | null = null
+  let profile: { vorname?: string | null; onboarding_completed_at?: string | null } | null = null
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('vorname')
+      .select('vorname, onboarding_completed_at')
       .eq('id', user.id)
       .single()
     if (error) throw new Error(`profiles.select: ${error.message}`)
@@ -53,12 +53,8 @@ export default async function OnboardingPage({
   }
 
   const { step } = await searchParams
+  if (profile?.onboarding_completed_at && !step) redirect('/kunde')
 
-  // Onboarding ist pro FALL strukturiert, nicht pro User.
-  // Wir laden den NEUSTEN unvollständigen Fall — wenn keiner existiert,
-  // ist das Onboarding insgesamt durch und wir leiten zurück nach /kunde.
-  // (Kein Profil-Flag-Check mehr — das hat einen Loop verursacht wenn der
-  //  Kunde einen zweiten Fall bekam.)
   type FallRow = {
     id: string
     fall_nummer: string | null
@@ -71,15 +67,13 @@ export default async function OnboardingPage({
     hat_vorschaeden: boolean | null
     lead_id: string | null
     besichtigungsort_adresse: string | null
-    onboarding_complete: boolean | null
   } | null
   let fall: FallRow = null
   try {
     const { data, error } = await supabase
       .from('v_faelle_mit_aktuellem_termin')
-      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse, onboarding_complete')
+      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse')
       .eq('kunde_id', user.id)
-      .eq('onboarding_complete', false)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -88,9 +82,6 @@ export default async function OnboardingPage({
   } catch (err) {
     return <DiagPage stage="fall-load" error={err} />
   }
-
-  // Kein offener Fall mehr → Onboarding fertig, raus.
-  if (!fall && !step) redirect('/kunde')
 
   let svName: string | null = null
   let terminDatum: string | null = null

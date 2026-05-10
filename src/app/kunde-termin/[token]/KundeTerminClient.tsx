@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // AAR-702: Mini-Flow UI — Kunde sieht SV-Vorschlag, kann annehmen oder
 // eigenen Termin vorschlagen. Kein Login.
@@ -26,7 +26,7 @@ export default function KundeTerminClient({
   const neuDate = termin.vorgeschlagenes_datum ? new Date(termin.vorgeschlagenes_datum) : null
 
   function fmt(d: Date) {
-    return d.toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
+    return d.toLocaleString('de-DE', {
       weekday: 'long',
       day: '2-digit',
       month: '2-digit',
@@ -73,7 +73,7 @@ export default function KundeTerminClient({
           <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl text-emerald-600">✓</span>
           </div>
-          <h1 className="text-xl font-semibold text-claimondo-navy mb-2">Geschafft</h1>
+          <h1 className="text-xl font-semibold text-[#0D1B3E] mb-2">Geschafft</h1>
           <p className="text-sm text-claimondo-ondo">{doneMsg}</p>
         </div>
       </PageWrapper>
@@ -84,10 +84,10 @@ export default function KundeTerminClient({
     <PageWrapper>
       <div className="space-y-5">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#4573A2]">
             {termin.fall_nummer ? `Fall ${termin.fall_nummer}` : 'Terminvorschlag'}
           </p>
-          <h1 className="text-xl font-semibold text-claimondo-navy mt-1">
+          <h1 className="text-xl font-semibold text-[#0D1B3E] mt-1">
             Hallo {termin.kunde_vorname}
           </h1>
           <p className="text-sm text-claimondo-ondo mt-2">
@@ -101,14 +101,14 @@ export default function KundeTerminClient({
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">
               Ursprünglicher Termin
             </p>
-            <p className="text-sm text-claimondo-navy mt-0.5 line-through">{fmt(altDate)}</p>
+            <p className="text-sm text-[#0D1B3E] mt-0.5 line-through">{fmt(altDate)}</p>
           </div>
           {neuDate && (
             <div className="border-t border-claimondo-border pt-3">
-              <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
+              <p className="text-[10px] uppercase tracking-wider text-[#4573A2]">
                 Neuer Vorschlag
               </p>
-              <p className="text-base font-semibold text-claimondo-navy mt-0.5">{fmt(neuDate)}</p>
+              <p className="text-base font-semibold text-[#0D1B3E] mt-0.5">{fmt(neuDate)}</p>
               {termin.gegenvorschlag_grund && (
                 <p className="text-xs text-claimondo-ondo mt-2">
                   Begründung: {termin.gegenvorschlag_grund}
@@ -131,7 +131,7 @@ export default function KundeTerminClient({
                 type="button"
                 onClick={handleAccept}
                 disabled={pending}
-                className="w-full min-h-[48px] rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors disabled:opacity-60"
+                className="w-full min-h-[48px] rounded-xl bg-[#4573A2] text-white text-sm font-semibold hover:bg-[#1E3A5F] transition-colors disabled:opacity-60"
               >
                 {pending ? 'Wird verarbeitet…' : 'Vorschlag annehmen'}
               </button>
@@ -140,7 +140,7 @@ export default function KundeTerminClient({
               type="button"
               onClick={() => setView('gegenvorschlag')}
               disabled={pending}
-              className="w-full min-h-[48px] rounded-xl border border-claimondo-ondo text-claimondo-ondo text-sm font-semibold hover:bg-claimondo-ondo/5 transition-colors disabled:opacity-60"
+              className="w-full min-h-[48px] rounded-xl border border-[#4573A2] text-[#4573A2] text-sm font-semibold hover:bg-[#4573A2]/5 transition-colors disabled:opacity-60"
             >
               Anderen Termin vorschlagen
             </button>
@@ -148,7 +148,7 @@ export default function KundeTerminClient({
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="text-xs font-medium text-claimondo-navy block mb-1">
+              <label className="text-xs font-medium text-[#0D1B3E] block mb-1">
                 Ihr Wunschtermin
               </label>
               <input
@@ -156,11 +156,11 @@ export default function KundeTerminClient({
                 value={neuesDatum}
                 onChange={(e) => setNeuesDatum(e.target.value)}
                 min={new Date().toISOString().slice(0, 16)}
-                className="w-full rounded-xl border border-claimondo-border px-3 min-h-[44px] text-base text-claimondo-navy focus:outline-none focus:border-claimondo-ondo"
+                className="w-full rounded-xl border border-claimondo-border px-3 min-h-[44px] text-base text-[#0D1B3E] focus:outline-none focus:border-[#4573A2]"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-claimondo-navy block mb-1">
+              <label className="text-xs font-medium text-[#0D1B3E] block mb-1">
                 Begründung (optional)
               </label>
               <textarea
@@ -168,7 +168,7 @@ export default function KundeTerminClient({
                 value={grund}
                 onChange={(e) => setGrund(e.target.value)}
                 placeholder="z. B. „Bin zu der Zeit beruflich verhindert"
-                className="w-full rounded-xl border border-claimondo-border px-3 py-2 text-base text-claimondo-navy focus:outline-none focus:border-claimondo-ondo resize-none"
+                className="w-full rounded-xl border border-claimondo-border px-3 py-2 text-base text-[#0D1B3E] focus:outline-none focus:border-[#4573A2] resize-none"
               />
             </div>
             <div className="flex gap-2 pt-1">
@@ -176,7 +176,7 @@ export default function KundeTerminClient({
                 type="button"
                 onClick={() => setView('overview')}
                 disabled={pending}
-                className="flex-1 min-h-[44px] rounded-xl bg-claimondo-bg text-claimondo-navy text-sm font-medium hover:bg-claimondo-border"
+                className="flex-1 min-h-[44px] rounded-xl bg-[#f8f9fb] text-claimondo-navy text-sm font-medium hover:bg-claimondo-border"
               >
                 Zurück
               </button>
@@ -184,7 +184,7 @@ export default function KundeTerminClient({
                 type="button"
                 onClick={handleCounter}
                 disabled={pending || !neuesDatum}
-                className="flex-1 min-h-[44px] rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-60"
+                className="flex-1 min-h-[44px] rounded-xl bg-[#4573A2] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-60"
               >
                 {pending ? 'Wird gesendet…' : 'Vorschlag senden'}
               </button>
@@ -198,7 +198,7 @@ export default function KundeTerminClient({
 
 function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-3xl p-6 md:p-8 shadow-xl shadow-black/5 border border-claimondo-border">
         {children}
       </div>

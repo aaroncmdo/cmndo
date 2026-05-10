@@ -29,9 +29,9 @@ export default function LeaderboardClient({ dispatch, kundenbetreuer, monatLabel
       />
 
       <div className="flex gap-2">
-        <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
-        <Link href="/admin/team/leaderboard" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg"><TrophyIcon className="w-3.5 h-3.5 inline mr-1.5" />Leaderboard</Link>
-        <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
+        <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
+        <Link href="/admin/team/leaderboard" className="px-3 py-1.5 bg-[#1E3A5F] text-white text-xs font-medium rounded-lg"><TrophyIcon className="w-3.5 h-3.5 inline mr-1.5" />Leaderboard</Link>
+        <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -55,7 +55,7 @@ export default function LeaderboardClient({ dispatch, kundenbetreuer, monatLabel
               </tr></thead>
               <tbody>
                 {dispatch.map((d, i) => (
-                  <tr key={d.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
+                  <tr key={d.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors">
                     <td className="px-4 py-3">
                       {i < 3 ? <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full border text-xs font-bold ${MEDAL[i]}`}>{i + 1}</span> : <span className="text-claimondo-ondo text-xs pl-2">{i + 1}</span>}
                     </td>
@@ -94,7 +94,7 @@ export default function LeaderboardClient({ dispatch, kundenbetreuer, monatLabel
               </tr></thead>
               <tbody>
                 {kundenbetreuer.map((k, i) => (
-                  <tr key={k.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
+                  <tr key={k.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors">
                     <td className="px-4 py-3">
                       {i < 3 ? <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full border text-xs font-bold ${MEDAL[i]}`}>{i + 1}</span> : <span className="text-claimondo-ondo text-xs pl-2">{i + 1}</span>}
                     </td>

@@ -52,7 +52,7 @@ function GewinnverteilungSection({
             </div>
             <div className="text-center">
               <p className="text-claimondo-ondo text-xs mb-1">Kanzlei (25%)</p>
-              <p className="text-claimondo-light-blue text-xl font-bold tabular-nums">{eur(kanzleiGewinn)}</p>
+              <p className="text-[#7BA3CC] text-xl font-bold tabular-nums">{eur(kanzleiGewinn)}</p>
             </div>
           </div>
           {/* Visual bar */}
@@ -165,7 +165,7 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
             </div>
           )}
 
-          <div className="mt-4 p-3 bg-claimondo-bg/50 rounded-xl">
+          <div className="mt-4 p-3 bg-[#f8f9fb]/50 rounded-xl">
             <p className="text-claimondo-ondo text-xs">
               Google Ads CPL-Werte können manuell in der Datenbank erfasst werden.
               API-Endpoint <code className="text-claimondo-ondo">/api/google-ads/sync</code> ist vorbereitet.
@@ -225,18 +225,18 @@ function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfra
                 </thead>
                 <tbody>
                   {anfragen.map(a => (
-                    <tr key={a.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg transition-colors">
+                    <tr key={a.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb] transition-colors">
                       <td className="px-5 py-3 text-claimondo-navy">{a.sv_name}</td>
                       <td className="px-5 py-3 text-center text-claimondo-navy">{a.gewuenschte_faelle ?? '—'}/Mo</td>
                       <td className="px-5 py-3 text-center text-claimondo-navy">{a.gewuenschter_radius_km ?? '—'}km</td>
                       <td className="px-5 py-3 text-claimondo-ondo text-xs max-w-[200px] truncate">{a.nachricht ?? '—'}</td>
                       <td className="px-5 py-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[a.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[a.status] ?? 'bg-[#f8f9fb] text-claimondo-ondo'}`}>
                           {a.status}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-right text-claimondo-ondo text-xs tabular-nums">
-                        {new Date(a.erstellt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                        {new Date(a.erstellt_am).toLocaleDateString('de-DE')}
                       </td>
                     </tr>
                   ))}
@@ -284,11 +284,11 @@ function KanzleiProvisionSection({
 
           <div className="p-5">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="text-center p-3 bg-claimondo-bg rounded-xl">
+              <div className="text-center p-3 bg-[#f8f9fb] rounded-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Vollmachten gesamt</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{vollmachtenGesamt}</p>
               </div>
-              <div className="text-center p-3 bg-claimondo-bg rounded-xl">
+              <div className="text-center p-3 bg-[#f8f9fb] rounded-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Provision gesamt</p>
                 <p className="text-purple-600 text-2xl font-bold tabular-nums">{eur(provisionGesamt)}</p>
               </div>
@@ -307,7 +307,7 @@ function KanzleiProvisionSection({
                 <p className="text-xs text-claimondo-ondo font-medium mb-2">Letzte Vollmachten (Kanzlei)</p>
                 <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
                   {letzteVollmachten.map(v => (
-                    <div key={v.id} className="flex items-center justify-between px-3 py-2 bg-claimondo-bg rounded-lg text-xs">
+                    <div key={v.id} className="flex items-center justify-between px-3 py-2 bg-[#f8f9fb] rounded-lg text-xs">
                       <span className="text-claimondo-navy font-medium">{v.name}</span>
                       <div className="flex items-center gap-3">
                         <span className="text-purple-600 font-semibold tabular-nums">150,00 &euro;</span>
@@ -336,17 +336,17 @@ function InvestitionProFallSection() {
             Investition pro Fall
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-claimondo-bg/50 rounded-xl text-center">
+            <div className="p-4 bg-[#f8f9fb]/50 rounded-xl text-center">
               <p className="text-claimondo-ondo text-xs mb-2">Marketing-Investition / Fall</p>
               <p className="text-claimondo-navy text-2xl font-bold">150,00 &euro;</p>
               <p className="text-claimondo-ondo/70 text-xs mt-1">CPA fix an Maik</p>
             </div>
-            <div className="p-4 bg-claimondo-bg/50 rounded-xl text-center">
+            <div className="p-4 bg-[#f8f9fb]/50 rounded-xl text-center">
               <p className="text-claimondo-ondo text-xs mb-2">Ausloeser</p>
               <p className="text-amber-400 text-sm font-medium">Unterschriebene SA</p>
               <p className="text-claimondo-ondo/70 text-xs mt-1">Nur Faelle mit Schadensanzeige</p>
             </div>
-            <div className="p-4 bg-claimondo-bg/50 rounded-xl text-center">
+            <div className="p-4 bg-[#f8f9fb]/50 rounded-xl text-center">
               <p className="text-claimondo-ondo text-xs mb-2">Maik-Provision</p>
               <p className="text-emerald-400 text-sm font-medium">CPA (150&euro;) - Google CPL</p>
               <p className="text-claimondo-ondo/70 text-xs mt-1">Differenz = seine Marge</p>
@@ -407,10 +407,10 @@ function GutachterAbrechnungen({ svRows, gutachterAnzahlungenGesamt }: {
                   {svRows.map(sv => {
                     const guthabenColor = sv.guthaben <= 0 ? 'text-red-400' : sv.guthaben < 500 ? 'text-amber-400' : 'text-emerald-400'
                     return (
-                      <tr key={sv.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
+                      <tr key={sv.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors">
                         <td className="px-5 py-3 text-claimondo-navy">{sv.name}</td>
                         <td className="px-5 py-3">
-                          <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-claimondo-bg text-claimondo-navy">
+                          <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-[#f8f9fb] text-claimondo-navy">
                             {sv.paket}
                           </span>
                         </td>
@@ -700,7 +700,7 @@ export default async function FinancePage() {
           actions={
             <div className="flex items-center gap-2 text-[10px] font-medium">
               <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">MRR {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(mrr)}</span>
-              <span className="bg-claimondo-ondo/5 text-claimondo-ondo px-2 py-0.5 rounded-full">{(aktiveSvs ?? []).length} SVs</span>
+              <span className="bg-[#4573A2]/5 text-[#4573A2] px-2 py-0.5 rounded-full">{(aktiveSvs ?? []).length} SVs</span>
               {kanzleiVollmachtenDiesenMonat > 0 && (
                 <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Vollmachten</span>
               )}

@@ -104,7 +104,7 @@ export default function PasswortZuruecksetzenPage() {
           <p className="mt-2 text-sm text-claimondo-ondo">Neues Passwort setzen</p>
         </div>
 
-        <div className="rounded-3xl border border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_8px_28px_rgba(13,27,62,0.08)] p-8">
+        <div className="bg-white border border-claimondo-border rounded-3xl p-8 shadow-lg">
           {phase === 'verifying' && (
             <p className="text-center text-claimondo-ondo text-sm py-8">Reset-Link wird geprüft …</p>
           )}
@@ -165,7 +165,7 @@ export default function PasswortZuruecksetzenPage() {
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
                   />
                 </div>
 
@@ -181,7 +181,7 @@ export default function PasswortZuruecksetzenPage() {
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
                   />
                 </div>
 

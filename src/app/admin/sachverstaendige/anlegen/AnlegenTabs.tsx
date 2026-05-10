@@ -56,7 +56,7 @@ export default function AnlegenTabs({ onSuccess }: {
               disabled={t.disabled}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap border ${
                 t.disabled
-                  ? 'bg-claimondo-bg text-claimondo-ondo/50 border-claimondo-border cursor-not-allowed'
+                  ? 'bg-[#f8f9fb] text-claimondo-ondo/50 border-claimondo-border cursor-not-allowed'
                   : isActive
                   ? colors.active
                   : colors.idle

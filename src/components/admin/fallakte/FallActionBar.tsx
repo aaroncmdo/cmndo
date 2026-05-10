@@ -92,7 +92,7 @@ export function FallActionBar({
       <button
         type="button"
         onClick={() => setPaketOpen(true)}
-        className="inline-flex items-center gap-1.5 text-xs font-medium rounded-md border border-claimondo-border bg-white px-2.5 py-1.5 hover:bg-claimondo-bg text-claimondo-navy"
+        className="inline-flex items-center gap-1.5 text-xs font-medium rounded-md border border-claimondo-border bg-white px-2.5 py-1.5 hover:bg-[#f8f9fb] text-claimondo-navy"
       >
         <InboxIcon className="w-3.5 h-3.5" />
         Kanzlei-Paket einlesen
@@ -113,7 +113,7 @@ export function FallActionBar({
   )
 
   const triggerList = triggerOpen && (
-    <div className="bg-claimondo-bg border border-claimondo-border rounded-md px-3 py-2">
+    <div className="bg-[#f8f9fb] border border-claimondo-border rounded-md px-3 py-2">
       <PhaseTriggerList fields={result.trigger_fields} />
     </div>
   )

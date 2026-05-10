@@ -14,16 +14,7 @@ export default async function DispatchLayout({
   const { user, initials } = await requirePortalAccess(['dispatch', 'admin'])
 
   return (
-    <div className="h-screen relative overflow-hidden" style={{ background: '#f2f3f7' }}>
-      {/* Atmosphärische Hintergrund-Spotlights — identisch mit Admin-Layout */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute inset-0" style={{
-          background: [
-            'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.10), transparent 65%)',
-            'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.06), transparent 70%)',
-          ].join(', '),
-        }} />
-      </div>
+    <div className="h-screen bg-claimondo-bg relative overflow-hidden">
       <RealtimeLeadAlert />
       <DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />
 

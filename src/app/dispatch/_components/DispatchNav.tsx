@@ -51,19 +51,17 @@ export default function DispatchNav({
       }}
       headerSlot={
         <>
-          <div className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/claimondo-shield.svg" alt="" width={28} height={28} className="h-7 w-7 shrink-0" />
+          <div className="flex items-center gap-2">
             <span className="text-xl font-bold tracking-tight">
               <span className="text-white">Claim</span>
-              <span className="text-claimondo-light-blue">ondo</span>
+              <span className="text-[#7BA3CC]">ondo</span>
             </span>
             <TasksPill userId={userId} href="/dispatch/dashboard" />
           </div>
-          <p className="text-[10px] mt-1 uppercase tracking-wider text-claimondo-light-blue/80 px-0.5">
-            Dispatch-Portal
+          <p className="text-[10px] mt-1 uppercase tracking-wider text-[#7BA3CC] bg-[#1E3A5F] inline-block px-2 py-0.5 rounded">
+            Dispatch
           </p>
-          <p className="text-xs mt-0.5 text-claimondo-light-blue truncate">{email}</p>
+          <p className="text-xs mt-1 text-[#7BA3CC]">{email}</p>
         </>
       }
       footerSlot={

@@ -177,10 +177,10 @@ function ProviderCard({
       onClick={onSelect}
       className={`w-full text-left rounded-xl border-2 p-4 transition-colors ${
         !enabled
-          ? 'border-claimondo-border bg-claimondo-bg text-claimondo-ondo/70 cursor-not-allowed'
+          ? 'border-claimondo-border bg-[#f8f9fb] text-claimondo-ondo/70 cursor-not-allowed'
           : selected
-          ? 'border-claimondo-ondo bg-claimondo-ondo/5'
-          : 'border-claimondo-border hover:border-claimondo-ondo/50 bg-white'
+          ? 'border-[#4573A2] bg-[#4573A2]/5'
+          : 'border-claimondo-border hover:border-[#4573A2]/50 bg-white'
       }`}
     >
       <p className={`text-sm font-semibold ${enabled ? 'text-claimondo-navy' : 'text-claimondo-ondo/70'}`}>{label}</p>

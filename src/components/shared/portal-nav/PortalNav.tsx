@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // AAR-778: Shared Portal-Nav für alle Portale.
 // Zwei Varianten:
@@ -87,10 +87,8 @@ export function PortalNav({
 
   function renderDarkItem(item: PortalNavItem) {
     const active = isActive(item.href, item.exact)
-    const cls = `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-300 ${
-      active
-        ? 'bg-white/10 text-white font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] border border-white/10'
-        : 'text-claimondo-light-blue hover:bg-white/6 hover:text-white border border-transparent'
+    const cls = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
+      active ? 'bg-[#1E3A5F] text-white font-semibold' : 'text-[#7BA3CC] hover:bg-white/5 hover:text-white'
     }`
     if (item.external) {
       return (
@@ -117,7 +115,7 @@ export function PortalNav({
         key={item.href}
         href={item.href}
         className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-500 ${
-          active ? 'bg-claimondo-ondo text-white' : 'text-claimondo-ondo hover:bg-claimondo-bg'
+          active ? 'bg-claimondo-ondo text-white' : 'text-claimondo-ondo hover:bg-[#f8f9fb]'
         }`}
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -133,11 +131,7 @@ export function PortalNav({
         <aside
           role="navigation"
           aria-label={ariaLabel ?? 'Portal-Navigation'}
-          className={`hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 border-r border-white/8 ${className}`}
-          style={{
-            background: 'linear-gradient(180deg, #0D1B3E 0%, #0f2147 60%, #0D1B3E 100%)',
-            boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
-          }}
+          className={`hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 bg-[#0D1B3E] ${className}`}
         >
           {headerSlot && <div className="px-5 py-5">{headerSlot}</div>}
 
@@ -148,7 +142,7 @@ export function PortalNav({
                 className={`space-y-0.5 ${i > 0 ? 'pt-3 mt-3 border-t border-white/10' : 'pb-4'}`}
               >
                 {section.label && (
-                  <p className="px-3 pt-1 pb-1 text-[10px] uppercase tracking-wider text-claimondo-light-blue/70 font-semibold">
+                  <p className="px-3 pt-1 pb-1 text-[10px] uppercase tracking-wider text-[#7BA3CC]/70 font-semibold">
                     {section.label}
                   </p>
                 )}
@@ -167,20 +161,13 @@ export function PortalNav({
         {mobileItems && mobileItems.length > 0 && (
           <nav
             aria-label="Mobile Navigation"
-            className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center border-t border-white/10"
-            style={{
-              background: 'rgba(13,27,62,0.95)',
-              backdropFilter: 'saturate(180%) blur(20px)',
-              WebkitBackdropFilter: 'saturate(180%) blur(20px)',
-              paddingTop: 8,
-              paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
-              boxShadow: '0 -4px 24px rgba(0,0,0,0.2)',
-            }}
+            className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-dark shadow-ios-md"
+            style={{ paddingTop: 8, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
           >
             {mobileItems.map((item) => {
               const active = isActive(item.href, item.exact)
               const cls = `flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-2 py-1 rounded-xl transition-all ${
-                active ? 'text-white bg-white/12' : 'text-claimondo-light-blue'
+                active ? 'text-white bg-[#1E3A5F]' : 'text-[#7BA3CC]'
               }`
               if (item.external) {
                 return (
@@ -208,12 +195,7 @@ export function PortalNav({
     <aside
       role="navigation"
       aria-label={ariaLabel ?? 'Portal-Navigation'}
-      className={`w-56 shrink-0 border-r border-white/40 backdrop-blur-xl overflow-y-auto ${className}`}
-      style={{
-        background: 'rgba(255,255,255,0.75)',
-        WebkitBackdropFilter: 'saturate(180%) blur(20px)',
-        backdropFilter: 'saturate(180%) blur(20px)',
-      }}
+      className={`w-56 shrink-0 border-r border-claimondo-border bg-white overflow-y-auto ${className}`}
     >
       <div className="flex flex-col gap-0.5 p-3">
         {sections.map((section, i) => (

@@ -1,4 +1,4 @@
-﻿// AAR-843: Future-Projection-Section ("voraussichtlich nächste Schritte")
+// AAR-843: Future-Projection-Section ("voraussichtlich nächste Schritte")
 //
 // Aaron-Hinweis 3: prominent rendern, eigenes Card-Layout. Bei Endzustand
 // (Phase 9_*) komplett ausgeblendet.
@@ -19,11 +19,11 @@ export function TimelineFutureSection({ events, viewerRole }: Props) {
     <div className="border border-[#E2E8F3] rounded-2xl bg-gradient-to-br from-[#0D1B3E]/[0.03] to-[#7BA3CC]/[0.05] p-4 space-y-3">
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center">
-          <ClockIcon className="w-4 h-4 text-claimondo-ondo" />
+          <ClockIcon className="w-4 h-4 text-[#4573A2]" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-claimondo-navy">Voraussichtlich nächste Schritte</h3>
-          <p className="text-[11px] text-claimondo-light-blue">Geschätzt — keine Garantie</p>
+          <h3 className="text-sm font-semibold text-[#0D1B3E]">Voraussichtlich nächste Schritte</h3>
+          <p className="text-[11px] text-[#7BA3CC]">Geschätzt — keine Garantie</p>
         </div>
       </div>
 
@@ -34,9 +34,9 @@ export function TimelineFutureSection({ events, viewerRole }: Props) {
           const label   = viewerRole === 'kunde' ? p.labelKunde : p.labelInternal
           return (
             <li key={`${p.event_typ}-${idx}`} className="flex items-center gap-2 text-sm">
-              <Icon className="w-4 h-4 text-claimondo-light-blue shrink-0" />
-              <span className="text-claimondo-navy flex-1">{label}</span>
-              <span className={`text-xs ${p.isRange ? 'text-claimondo-light-blue' : 'text-claimondo-ondo font-medium'}`}>
+              <Icon className="w-4 h-4 text-[#7BA3CC] shrink-0" />
+              <span className="text-[#0D1B3E] flex-1">{label}</span>
+              <span className={`text-xs ${p.isRange ? 'text-[#7BA3CC]' : 'text-[#4573A2] font-medium'}`}>
                 {p.estimatedHorizon}
               </span>
             </li>

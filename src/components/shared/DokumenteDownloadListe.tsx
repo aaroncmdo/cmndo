@@ -1,4 +1,4 @@
-﻿// AAR-727: Shared raw-file Dokument-Liste — read-only Download-Ansicht.
+// AAR-727: Shared raw-file Dokument-Liste — read-only Download-Ansicht.
 //
 // Portal-übergreifend (Kunde/Makler) dupliziert war die Darstellung einer
 // Liste von `fall_dokumente`-Rohdateien mit Download-Link. SV/Admin nutzen
@@ -45,7 +45,7 @@ export interface DokumenteDownloadListeProps {
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return ''
   try {
-    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+    return new Date(iso).toLocaleDateString('de-DE', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -181,7 +181,7 @@ export default function DokumenteDownloadListe({
             href={d.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-claimondo-bg hover:bg-claimondo-border transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#f8f9fb] hover:bg-claimondo-border transition-colors"
           >
             <Icon className="w-4 h-4 text-claimondo-ondo shrink-0" />
             <span className="text-sm text-claimondo-navy truncate flex-1">{d.name}</span>
@@ -192,7 +192,7 @@ export default function DokumenteDownloadListe({
         ) : (
           <div
             key={d.id}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-claimondo-bg opacity-60"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#f8f9fb] opacity-60"
           >
             <Icon className="w-4 h-4 text-claimondo-ondo shrink-0" />
             <span className="text-sm text-claimondo-navy truncate flex-1">{d.name}</span>

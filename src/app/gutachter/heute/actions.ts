@@ -29,23 +29,11 @@ export async function startOrResumeTagesSession(
     return { success: false, error: 'Keine Termine für heute gefunden.' }
   }
 
-  // C8: aktuellen Standort als sachverstaendige.standort_lat/lng schreiben
-  // damit FeldmodusPage beim Server-Render den echten Origin sieht.
-  // Best-effort: Fehler hier brechen den Tagesmodus-Start NICHT.
-  if (origin && Number.isFinite(origin.lat) && Number.isFinite(origin.lng)) {
-    try {
-      await supabase
-        .from('sachverstaendige')
-        .update({ standort_lat: origin.lat, standort_lng: origin.lng })
-        .eq('id', sv.id)
-    } catch (err) {
-      console.error('[startOrResumeTagesSession] origin-update failed:', err)
-    }
-  }
-
   const today = new Date()
   const session = await ensureTagesSession(sv.id, today, terminIds)
   if (!session) {
+    // AAR-707: Detail steckt im Server-Log (siehe ensureTagesSession).
+    // User-facing-Hinweis statt nur 'create_failed'.
     return {
       success: false,
       error: 'Tagesroute konnte nicht angelegt werden. Bitte später nochmal versuchen oder Server-Log prüfen.',

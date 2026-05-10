@@ -73,9 +73,7 @@ export async function runPhase5(svContext, reportRef = { notes: [] }) {
   }
 
   const terminId = fixtures.termin_id ?? null
-  // forceTerminAufHeute braucht sachverstaendige.id (NICHT auth.users.id),
-  // weil sv_tages_session.sv_id auf sachverstaendige(id) zeigt.
-  const svUserId = fixtures.sv_sachverstaendige_id ?? fixtures.sv_user_id ?? null
+  const svUserId = fixtures.sv_user_id ?? null
 
   if (!terminId) {
     const msg = 'fixtures.termin_id nicht gesetzt — Seed hat keinen Termin angelegt'

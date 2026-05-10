@@ -73,7 +73,7 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
               <span className="text-claimondo-ondo">Sendedatum (OCR)</span>
               <p className="text-claimondo-navy font-medium">
                 {fallAS.anschlussschreiben_sendedatum
-                  ? new Date(fallAS.anschlussschreiben_sendedatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
+                  ? new Date(fallAS.anschlussschreiben_sendedatum).toLocaleDateString('de-DE')
                   : 'Nicht erkannt'}
               </p>
             </div>
@@ -112,7 +112,7 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-2 bg-white hover:bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-xs font-medium px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 bg-white hover:bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-xs font-medium px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
           >
             {uploading ? (
               <Loader2Icon className="w-3.5 h-3.5 animate-spin" />

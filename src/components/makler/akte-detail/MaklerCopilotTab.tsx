@@ -205,7 +205,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
                   type="button"
                   onClick={() => void ask(s.query)}
                   disabled={streaming}
-                  className="text-left px-3 py-2.5 rounded-xl border border-claimondo-border bg-white hover:border-claimondo-ondo hover:bg-claimondo-ondo/5 text-sm text-claimondo-navy inline-flex items-center gap-2 disabled:opacity-50"
+                  className="text-left px-3 py-2.5 rounded-xl border border-[#e4e7ef] bg-white hover:border-claimondo-ondo hover:bg-claimondo-ondo/5 text-sm text-claimondo-navy inline-flex items-center gap-2 disabled:opacity-50"
                 >
                   <span className="text-claimondo-ondo">{s.icon}</span>
                   <span className="flex-1">{s.label}</span>
@@ -249,7 +249,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
           rows={1}
           maxLength={2000}
           placeholder="Fragen Sie den Copilot …"
-          className="flex-1 resize-none rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
+          className="flex-1 resize-none rounded-lg border border-[#e4e7ef] bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
           disabled={streaming}
         />
         <button
@@ -278,7 +278,7 @@ function AssistantBubble({ children }: { children: React.ReactNode }) {
       >
         <SparklesIcon width={16} height={16} />
       </div>
-      <div className="flex-1 max-w-[85%] bg-white border border-claimondo-border rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
+      <div className="flex-1 max-w-[85%] bg-white border border-[#e4e7ef] rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
         {children}
       </div>
     </div>
@@ -317,7 +317,7 @@ function MessageRow({
       >
         <SparklesIcon width={16} height={16} />
       </div>
-      <div className="flex-1 max-w-[85%] bg-white border border-claimondo-border rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
+      <div className="flex-1 max-w-[85%] bg-white border border-[#e4e7ef] rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
         {empty && isLastAssistant ? (
           <span className="inline-flex items-center gap-2 text-claimondo-ondo">
             <Loader2Icon width={14} height={14} className="animate-spin" />

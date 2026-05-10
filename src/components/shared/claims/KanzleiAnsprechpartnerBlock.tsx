@@ -1,4 +1,4 @@
-﻿// AAR-842: Kanzlei-Ansprechpartner-Block
+// AAR-842: Kanzlei-Ansprechpartner-Block
 //
 // Zwei Variants laut Master-Doc 9.3:
 //   normal     — neutrale Card neben dem KB-Block (Sidebar)
@@ -60,15 +60,15 @@ export function KanzleiAnsprechpartnerBlock({
       )}
 
       <div className="flex items-center gap-2">
-        <ScaleIcon className="w-5 h-5 text-claimondo-ondo" />
-        <h2 className="text-sm font-semibold text-claimondo-navy">Dein Ansprechpartner Kanzlei</h2>
+        <ScaleIcon className="w-5 h-5 text-[#4573A2]" />
+        <h2 className="text-sm font-semibold text-[#0D1B3E]">Dein Ansprechpartner Kanzlei</h2>
       </div>
 
       <div className="space-y-3">
         {/* Identity */}
         <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-full bg-claimondo-navy/10 flex items-center justify-center shrink-0">
-            <ScaleIcon className="w-6 h-6 text-claimondo-navy" />
+          <div className="w-12 h-12 rounded-full bg-[#0D1B3E]/10 flex items-center justify-center shrink-0">
+            <ScaleIcon className="w-6 h-6 text-[#0D1B3E]" />
           </div>
           <div className="min-w-0">
             <p className="text-xs text-claimondo-ondo">{kontaktperson ?? 'Kanzlei'}</p>
@@ -78,7 +78,7 @@ export function KanzleiAnsprechpartnerBlock({
 
         {/* QR-Codes nur bei Partnerkanzlei (URLs gesetzt + SVGs gerendert) */}
         {(whatsappQrSvg || terminQrSvg) && (
-          <div className="flex gap-3 justify-around bg-claimondo-bg rounded-lg p-3">
+          <div className="flex gap-3 justify-around bg-[#f8f9fb] rounded-lg p-3">
             {whatsappQrSvg && whatsappUrl && (
               <a
                 href={whatsappUrl}
@@ -90,7 +90,7 @@ export function KanzleiAnsprechpartnerBlock({
                   className="w-20 h-20"
                   dangerouslySetInnerHTML={{ __html: whatsappQrSvg }}
                 />
-                <span className="text-[10px] text-claimondo-ondo font-medium">WhatsApp</span>
+                <span className="text-[10px] text-[#4573A2] font-medium">WhatsApp</span>
               </a>
             )}
             {terminQrSvg && terminUrl && (
@@ -104,7 +104,7 @@ export function KanzleiAnsprechpartnerBlock({
                   className="w-20 h-20"
                   dangerouslySetInnerHTML={{ __html: terminQrSvg }}
                 />
-                <span className="text-[10px] text-claimondo-ondo font-medium">Termin</span>
+                <span className="text-[10px] text-[#4573A2] font-medium">Termin</span>
               </a>
             )}
           </div>
@@ -117,7 +117,7 @@ export function KanzleiAnsprechpartnerBlock({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-[#3a6290] transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-[#4573A2] text-white text-xs font-medium hover:bg-[#3a6290] transition-colors"
             >
               <MessageSquareIcon className="w-4 h-4" />
               WhatsApp öffnen
@@ -128,7 +128,7 @@ export function KanzleiAnsprechpartnerBlock({
               href={terminUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 border-claimondo-ondo text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/5 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 border-[#4573A2] text-[#4573A2] text-xs font-medium hover:bg-[#4573A2]/5 transition-colors"
             >
               <CalendarPlusIcon className="w-4 h-4" />
               Termin buchen
@@ -141,7 +141,7 @@ export function KanzleiAnsprechpartnerBlock({
           {telefon && (
             <a
               href={`tel:${telefon}`}
-              className="inline-flex items-center min-h-[36px] text-xs text-claimondo-ondo hover:underline"
+              className="inline-flex items-center min-h-[36px] text-xs text-[#4573A2] hover:underline"
             >
               📞 {telefon}
             </a>
@@ -149,7 +149,7 @@ export function KanzleiAnsprechpartnerBlock({
           {email && (
             <a
               href={`mailto:${email}`}
-              className="inline-flex items-center min-h-[36px] text-xs text-claimondo-ondo hover:underline truncate"
+              className="inline-flex items-center min-h-[36px] text-xs text-[#4573A2] hover:underline truncate"
             >
               ✉️ {email}
             </a>

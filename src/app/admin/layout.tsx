@@ -72,12 +72,12 @@ export default async function AdminLayout({
       <AdminNav email={user.email ?? ''} initials={initials} userId={user.id} meineTasksCount={meineTasksCount ?? 0} />
 
       {/* Main content area — offset by sidebar width on desktop */}
-      <div className="md:ml-56 h-screen flex flex-col relative z-10" style={{ background: 'transparent' }}>
+      <div className="md:ml-56 h-screen flex flex-col relative z-10">
         {/* AAR-725: UpdatesNav ersetzt MitteilungszentralePanel + alte
             NotificationBell. Tasks haben jetzt eigene Pill (AAR-723). */}
         {/* Mobile header — AAR-727 Glass-Dark mit subtilem Shadow */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
-          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
+          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
           <UpdatesNav variant="dark" />
         </header>
 

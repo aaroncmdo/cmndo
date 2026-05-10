@@ -57,12 +57,12 @@ export default function GoogleSettingsClient({
             <p className="font-medium text-claimondo-navy">Verbunden mit {googleEmail ?? 'Google'}</p>
           </div>
           {connectedAt && (
-            <p className="text-xs text-claimondo-ondo">Seit {new Date(connectedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}</p>
+            <p className="text-xs text-claimondo-ondo">Seit {new Date(connectedAt).toLocaleDateString('de-DE')}</p>
           )}
           {!confirmDisconnect ? (
             <button
               onClick={() => setConfirmDisconnect(true)}
-              className="px-4 py-2 text-sm font-medium bg-white border border-claimondo-border text-claimondo-navy rounded-lg hover:bg-claimondo-bg"
+              className="px-4 py-2 text-sm font-medium bg-white border border-claimondo-border text-claimondo-navy rounded-lg hover:bg-[#f8f9fb]"
             >
               Verbindung trennen
             </button>
@@ -92,7 +92,7 @@ export default function GoogleSettingsClient({
         </a>
       )}
 
-      <div className="bg-claimondo-bg border border-claimondo-border rounded-lg p-4 text-xs text-claimondo-navy space-y-1">
+      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-lg p-4 text-xs text-claimondo-navy space-y-1">
         <p className="font-semibold">Datenschutz:</p>
         <p>• Wir speichern nur den Refresh-Token (verschluesselt) — keine Email-Inhalte, kein Kalender-Lese-Zugriff.</p>
         <p>• Scopes: nur calendar.events (Termine erstellen) + userinfo.email (deine Google-Adresse).</p>

@@ -1,17 +1,11 @@
 'use server'
 
-// Aaron 2026-04-30 / 2026-05-02: Vertragseditor — Server-Actions für PDF-
-// Upload mit Unterschriftsposition. Pro Slot UND pro Sachverstaendigem
-// kann eine eigene Vorlage hinterlegt werden, plus eine "_default"-
-// Vorlage als Fallback fuer SVs ohne eigene Konfig.
-//
-// Storage-Layout (Bucket fall-dokumente):
-//   vertraege-vorlagen/{slotId}/_default/{ts}.pdf      (+ .json Sidecar)
-//   vertraege-vorlagen/{slotId}/{svId}/{ts}.pdf        (+ .json Sidecar)
-//
-// Legacy: vertraege-vorlagen/{slotId}/{ts}.pdf (ohne Unter-Ordner) wird
-// vom Loader noch als zweiter Fallback gelesen, damit alte Uploads nicht
-// neu hochgeladen werden muessen.
+// Aaron 2026-04-30: Vertragseditor — Server-Actions für PDF-Upload mit
+// Unterschriftsposition. PDFs landen in Storage-Bucket `fall-dokumente`
+// unter `vertraege-vorlagen/{slotId}/{ts}.pdf`. Daneben wird die
+// Konfig (page, x, y, w, h) als JSON-Sidecar abgelegt:
+// `vertraege-vorlagen/{slotId}/{ts}.json`. Die jüngste Version je
+// Slot ist die aktive.
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -66,10 +60,11 @@ export type UploadResult =
     }
   | { ok: false; error: string }
 
-/** svId=null → Default-Vorlage, sonst SV-spezifisch. */
+/** Lädt ein PDF hoch, ermittelt die Größe der ersten Seite und
+ *  speichert es mit Timestamp im Storage. Konfig kommt im zweiten
+ *  Schritt via saveVertragsKonfig. */
 export async function uploadVertragPdf(
   slotId: SlotId,
-  svId: string | null,
   formData: FormData,
 ): Promise<UploadResult> {
   const auth = await requireAdmin()
@@ -87,6 +82,7 @@ export async function uploadVertragPdf(
 
   const bytes = new Uint8Array(await file.arrayBuffer())
 
+  // Größe der ersten Seite ermitteln
   let pageCount = 0
   let firstPageW = 595
   let firstPageH = 842
@@ -105,8 +101,7 @@ export async function uploadVertragPdf(
   }
 
   const ts = Date.now()
-  const targetKey = svId ?? '_default'
-  const path = `vertraege-vorlagen/${slotId}/${targetKey}/${ts}.pdf`
+  const path = `vertraege-vorlagen/${slotId}/${ts}.pdf`
   const db = createAdminClient()
   const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' })
   const { error: upErr } = await db.storage
@@ -125,6 +120,7 @@ export async function uploadVertragPdf(
   }
 }
 
+/** Speichert die Signaturposition als JSON-Sidecar zum PDF. */
 export async function saveVertragsKonfig(
   storagePath: string,
   konfig: VertragsKonfig,
@@ -155,41 +151,10 @@ export type VorlageEntry = {
   signed_url: string | null
   ts: number
   konfig: VertragsKonfig | null
-  /** Quelle: 'sv' wenn dieser SV eine eigene Vorlage hat, 'default' wenn auf
-   *  die Default-Vorlage zurueckgefallen wurde, 'legacy' fuer alte
-   *  flat-uploads ohne Unter-Ordner. */
-  quelle: 'sv' | 'default' | 'legacy'
 }
 
-async function ladeJuengstePdf(
-  db: ReturnType<typeof createAdminClient>,
-  dir: string,
-): Promise<{ name: string; ts: number } | null> {
-  const { data: files, error } = await db.storage
-    .from('fall-dokumente')
-    .list(dir, { sortBy: { column: 'name', order: 'desc' }, limit: 50 })
-  if (error || !files) return null
-  const pdf = files.find((f) => f.name.endsWith('.pdf'))
-  if (!pdf) return null
-  const stem = pdf.name.replace(/\.pdf$/, '')
-  return { name: pdf.name, ts: Number(stem) || 0 }
-}
-
-async function ladeKonfig(
-  db: ReturnType<typeof createAdminClient>,
-  jsonPath: string,
-): Promise<VertragsKonfig | null> {
-  const { data: jsonBlob } = await db.storage.from('fall-dokumente').download(jsonPath)
-  if (!jsonBlob) return null
-  try {
-    return JSON.parse(await jsonBlob.text()) as VertragsKonfig
-  } catch {
-    return null
-  }
-}
-
-/** svId=null → Default-Vorlagen. Sonst: erst SV, dann Default, dann Legacy. */
-export async function listVertragsVorlagen(svId?: string | null): Promise<{
+/** Listet pro Slot die jüngste Vorlage (PDF + Konfig falls vorhanden). */
+export async function listVertragsVorlagen(): Promise<{
   ok: boolean
   vorlagen: VorlageEntry[]
   error?: string
@@ -201,50 +166,34 @@ export async function listVertragsVorlagen(svId?: string | null): Promise<{
   const result: VorlageEntry[] = []
 
   for (const slotId of SLOT_IDS) {
-    let pdfPath: string | null = null
-    let ts = 0
-    let quelle: VorlageEntry['quelle'] = 'default'
-
-    if (svId) {
-      const svDir = `vertraege-vorlagen/${slotId}/${svId}`
-      const found = await ladeJuengstePdf(db, svDir)
-      if (found) {
-        pdfPath = `${svDir}/${found.name}`
-        ts = found.ts
-        quelle = 'sv'
-      }
-    }
-
-    if (!pdfPath) {
-      const defDir = `vertraege-vorlagen/${slotId}/_default`
-      const found = await ladeJuengstePdf(db, defDir)
-      if (found) {
-        pdfPath = `${defDir}/${found.name}`
-        ts = found.ts
-        quelle = 'default'
-      }
-    }
-
-    // Legacy-Fallback: vertraege-vorlagen/{slot}/{ts}.pdf (flat)
-    if (!pdfPath) {
-      const flatDir = `vertraege-vorlagen/${slotId}`
-      const { data: files } = await db.storage
-        .from('fall-dokumente')
-        .list(flatDir, { sortBy: { column: 'name', order: 'desc' }, limit: 50 })
-      const flat = (files ?? []).find((f) => f.name.endsWith('.pdf') && /^\d+\.pdf$/.test(f.name))
-      if (flat) {
-        pdfPath = `${flatDir}/${flat.name}`
-        ts = Number(flat.name.replace(/\.pdf$/, '')) || 0
-        quelle = 'legacy'
-      }
-    }
-
-    if (!pdfPath) continue
+    const { data: files, error } = await db.storage
+      .from('fall-dokumente')
+      .list(`vertraege-vorlagen/${slotId}`, {
+        sortBy: { column: 'name', order: 'desc' },
+        limit: 50,
+      })
+    if (error || !files) continue
+    const pdf = files.find((f) => f.name.endsWith('.pdf'))
+    if (!pdf) continue
+    const stem = pdf.name.replace(/\.pdf$/, '')
+    const ts = Number(stem) || 0
+    const pdfPath = `vertraege-vorlagen/${slotId}/${pdf.name}`
+    const jsonPath = `vertraege-vorlagen/${slotId}/${stem}.json`
 
     const { data: signed } = await db.storage
       .from('fall-dokumente')
       .createSignedUrl(pdfPath, 3600)
-    const konfig = await ladeKonfig(db, pdfPath.replace(/\.pdf$/, '.json'))
+
+    let konfig: VertragsKonfig | null = null
+    const { data: jsonBlob } = await db.storage.from('fall-dokumente').download(jsonPath)
+    if (jsonBlob) {
+      try {
+        const text = await jsonBlob.text()
+        konfig = JSON.parse(text) as VertragsKonfig
+      } catch {
+        konfig = null
+      }
+    }
 
     result.push({
       slotId,
@@ -252,36 +201,8 @@ export async function listVertragsVorlagen(svId?: string | null): Promise<{
       signed_url: signed?.signedUrl ?? null,
       ts,
       konfig,
-      quelle,
     })
   }
 
   return { ok: true, vorlagen: result }
-}
-
-export type SvOption = { id: string; label: string }
-
-/** Liste aller aktiven SVs für die Editor-Auswahl. */
-export async function listSvsForEditor(): Promise<{
-  ok: boolean
-  svs: SvOption[]
-  error?: string
-}> {
-  const auth = await requireAdmin()
-  if (!auth.ok) return { ok: false, svs: [], error: auth.error }
-
-  const db = createAdminClient()
-  const { data, error } = await db
-    .from('sachverstaendige')
-    .select('id, profiles:profile_id(vorname, nachname, email)')
-    .order('id')
-  if (error) return { ok: false, svs: [], error: error.message }
-
-  type Row = { id: string; profiles: { vorname: string | null; nachname: string | null; email: string | null } | { vorname: string | null; nachname: string | null; email: string | null }[] | null }
-  const svs: SvOption[] = ((data ?? []) as Row[]).map((row) => {
-    const p = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
-    const name = p ? [p.vorname, p.nachname].filter(Boolean).join(' ').trim() || p.email || row.id : row.id
-    return { id: row.id, label: name as string }
-  })
-  return { ok: true, svs }
 }

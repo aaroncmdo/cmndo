@@ -176,7 +176,7 @@ export default function MultiChannelChat({
               key={c.id}
               onClick={() => setActiveKanal(c.id)}
               className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors whitespace-nowrap ${
-                active ? 'border-claimondo-ondo text-claimondo-navy' : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
+                active ? 'border-[#4573A2] text-[#0D1B3E]' : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               <Icon className="w-4 h-4" style={{ color: c.color }} />
@@ -192,7 +192,7 @@ export default function MultiChannelChat({
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-claimondo-bg">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f8f9fb]">
         {messages.length === 0 ? (
           <p className="text-center text-claimondo-ondo/70 text-sm py-10">Noch keine Nachrichten in diesem Kanal.</p>
         ) : (
@@ -208,7 +208,7 @@ export default function MultiChannelChat({
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
           placeholder={`Nachricht ueber ${visibleChannels.find(c => c.id === activeKanal)?.label}...`}
-          className="flex-1 px-4 py-2.5 bg-claimondo-bg border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
+          className="flex-1 px-4 py-2.5 bg-[#f8f9fb] border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-[#4573A2]"
           disabled={sending}
         />
         <button
@@ -283,11 +283,11 @@ function MessageBubble({ message, currentUserId }: { message: Nachricht; current
 
   return (
     <div className={`flex ${alignRight ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${bubbleCls}`}>
-        {showRolleLabel && message.sender_rolle && (
-          <p className={`text-[10px] font-semibold mb-0.5 uppercase tracking-wider ${labelCls}`}>
-            {message.sender_rolle}
-          </p>
+      <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+        alignRight ? 'bg-[#4573A2] text-white' : 'bg-white border border-claimondo-border text-claimondo-navy'
+      }`}>
+        {!alignRight && message.sender_rolle && (
+          <p className="text-[10px] font-semibold text-claimondo-ondo mb-0.5 uppercase">{message.sender_rolle}</p>
         )}
         <p className="text-sm whitespace-pre-wrap">{message.nachricht}</p>
         {message.hat_anhang && message.anhang_url && (
@@ -295,8 +295,8 @@ function MessageBubble({ message, currentUserId }: { message: Nachricht; current
             Anhang oeffnen
           </a>
         )}
-        <p className={`text-[10px] mt-1 ${timeCls}`}>
-          {new Date(message.created_at).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
+        <p className={`text-[10px] mt-1 ${alignRight ? 'text-white/60' : 'text-claimondo-ondo/70'}`}>
+          {new Date(message.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>
     </div>

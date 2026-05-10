@@ -55,8 +55,6 @@ export type KundeFallView = {
   vollmacht_signiert_am: string | null
   abgeschlossen_am: string | null
   besichtigungsort_adresse: string | null
-  /** kanzlei_wunsch = claims.kanzlei_wunsch (SSoT für Kanzlei-Entscheidung). */
-  kanzlei_wunsch: string | null
   /** schadens_adresse/plz/ort = claims.schadenort_*. */
   schadens_adresse: string | null
   schadens_plz: string | null
@@ -80,7 +78,6 @@ type ClaimRow = {
   kundenbetreuer_id: string | null
   created_at: string | null
   lead_id: string | null
-  kanzlei_wunsch: string | null
 }
 
 type FallRow = {
@@ -142,7 +139,7 @@ const FALL_SELECT =
   'id, claim_id, fall_nummer, status, sa_unterschrieben, sv_id, gutachten_eingegangen_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, vollmacht_status, vollmacht_signiert_am, abgeschlossen_am, besichtigungsort_adresse, nachbesichtigung_status, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_adresse, schadens_plz, schadens_ort'
 
 const CLAIM_SELECT =
-  'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, created_at, lead_id, kanzlei_wunsch'
+  'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, created_at, lead_id'
 
 /**
  * Lädt alle Fälle, die einem Kunden gehören, in der Shape, die FallKarte +
@@ -308,7 +305,6 @@ export async function getKundeFaelle(
       polizei_vor_ort: claim.polizei_vor_ort,
       vollmacht_status: fall.vollmacht_status,
       vollmacht_signiert_am: fall.vollmacht_signiert_am,
-      kanzlei_wunsch: claim.kanzlei_wunsch ?? null,
       abgeschlossen_am: fall.abgeschlossen_am,
       besichtigungsort_adresse: fall.besichtigungsort_adresse,
       // CMM-28α: faelle-first Mapping (siehe FallRow-Kommentar oben).

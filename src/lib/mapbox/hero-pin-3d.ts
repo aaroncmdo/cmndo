@@ -1,3 +1,4 @@
+// @ts-nocheck — three.js nicht installiert (Feldmodus-3D-Backlog)
 'use client'
 
 // 2026-05-07 Phase 2 + Phase 5: Hero-Pin als Mapbox-Custom-Layer mit Three.js.

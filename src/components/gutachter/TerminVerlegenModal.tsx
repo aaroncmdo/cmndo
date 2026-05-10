@@ -42,7 +42,7 @@ type Props = {
 
 function fmtDate(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+  return d.toLocaleDateString('de-DE', {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
@@ -50,7 +50,7 @@ function fmtDate(iso: string): string {
 }
 
 function fmtTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
+  return new Date(iso).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
   })
@@ -215,7 +215,7 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
       )}
 
       {/* Eigener Slot */}
-      <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-3 mb-4">
+      <div className="rounded-xl border border-claimondo-border bg-[#f8f9fb] p-3 mb-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo mb-2">
           Anderer Slot
         </p>
@@ -250,7 +250,7 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
         <button
           onClick={onClose}
           disabled={submitting}
-          className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors disabled:opacity-50"
+          className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-[#f8f9fb] hover:bg-claimondo-border transition-colors disabled:opacity-50"
         >
           Abbrechen
         </button>

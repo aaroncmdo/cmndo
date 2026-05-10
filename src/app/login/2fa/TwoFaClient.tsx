@@ -168,8 +168,8 @@ export default function TwoFaClient({
               onClick={() => setMethod('sms')}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
                 method === 'sms'
-                  ? 'bg-claimondo-navy text-white'
-                  : 'text-claimondo-ondo hover:text-claimondo-navy'
+                  ? 'bg-[#0D1B3E] text-white'
+                  : 'text-claimondo-ondo hover:text-[#0D1B3E]'
               }`}
             >
               <SmartphoneIcon className="w-3.5 h-3.5" />
@@ -180,8 +180,8 @@ export default function TwoFaClient({
               onClick={() => setMethod('email')}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
                 method === 'email'
-                  ? 'bg-claimondo-navy text-white'
-                  : 'text-claimondo-ondo hover:text-claimondo-navy'
+                  ? 'bg-[#0D1B3E] text-white'
+                  : 'text-claimondo-ondo hover:text-[#0D1B3E]'
               }`}
             >
               <MailIcon className="w-3.5 h-3.5" />
@@ -202,7 +202,7 @@ export default function TwoFaClient({
               onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               onKeyDown={e => e.key === 'Enter' && handleSubmit()}
               autoFocus
-              className="w-full text-center text-2xl font-mono tracking-[0.5em] bg-claimondo-bg border border-claimondo-border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent"
+              className="w-full text-center text-2xl font-mono tracking-[0.5em] bg-[#f8f9fb] border border-claimondo-border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent"
               placeholder="000000"
             />
           </div>
@@ -212,7 +212,7 @@ export default function TwoFaClient({
               type="checkbox"
               checked={rememberMe}
               onChange={e => setRememberMe(e.target.checked)}
-              className="rounded border-claimondo-border text-claimondo-ondo focus:ring-claimondo-ondo"
+              className="rounded border-claimondo-border text-[#4573A2] focus:ring-[#4573A2]"
             />
             <span className="text-sm text-claimondo-navy">Angemeldet bleiben (30 Tage)</span>
           </label>
@@ -234,7 +234,7 @@ export default function TwoFaClient({
           <button
             onClick={handleResend}
             disabled={resendCooldown > 0}
-            className="w-full mt-3 py-2 text-xs text-claimondo-ondo hover:text-claimondo-ondo transition-colors disabled:opacity-40 flex items-center justify-center gap-1"
+            className="w-full mt-3 py-2 text-xs text-claimondo-ondo hover:text-[#4573A2] transition-colors disabled:opacity-40 flex items-center justify-center gap-1"
           >
             <RefreshCwIcon className="w-3 h-3" />
             {resendCooldown > 0 ? `Code erneut senden (${resendCooldown}s)` : 'Code erneut senden'}

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // AAR-730: Kunden-zentrierte Chat-Timeline für KB-Portal.
 //
@@ -118,9 +118,9 @@ export default function ChatTimelineView({
     const d = new Date(iso)
     const today = new Date()
     if (d.toDateString() === today.toDateString()) {
-      return d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+      return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
     }
-    return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
   }
 
   async function handleSend() {
@@ -141,12 +141,12 @@ export default function ChatTimelineView({
   return (
     <div className="bg-white rounded-2xl border border-claimondo-border flex flex-col h-[600px]">
       {/* Filter-Bar */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-claimondo-border bg-claimondo-bg">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-claimondo-border bg-[#f8f9fb]">
         <span className="text-xs text-claimondo-ondo">Fall-Filter:</span>
         <select
           value={fallFilter}
           onChange={e => setFallFilter(e.target.value)}
-          className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-claimondo-ondo"
+          className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-[#4573A2]"
         >
           <option value="alle">Alle Fälle ({fallOptions.length})</option>
           {fallOptions.map(f => (
@@ -173,7 +173,7 @@ export default function ChatTimelineView({
                 <div className={`max-w-[75%] ${isOutbound ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
                   {/* Badges: Fall + Kanal */}
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] font-semibold text-claimondo-ondo bg-claimondo-bg rounded px-1.5 py-0.5">
+                    <span className="text-[10px] font-semibold text-claimondo-ondo bg-[#f8f9fb] rounded px-1.5 py-0.5">
                       #{fallNummer(m.fall_id)}
                     </span>
                     <span
@@ -188,8 +188,8 @@ export default function ChatTimelineView({
                   <div
                     className={`rounded-2xl px-3 py-2 text-sm ${
                       isOutbound
-                        ? 'bg-claimondo-ondo text-white'
-                        : 'bg-claimondo-bg text-claimondo-navy'
+                        ? 'bg-[#4573A2] text-white'
+                        : 'bg-[#f8f9fb] text-claimondo-navy'
                     }`}
                   >
                     {m.nachricht}
@@ -209,7 +209,7 @@ export default function ChatTimelineView({
             <select
               value={replyFallId ?? ''}
               onChange={e => setReplyFallId(e.target.value)}
-              className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-claimondo-ondo"
+              className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-[#4573A2]"
             >
               {fallOptions.map(f => (
                 <option key={f.fallId} value={f.fallId}>
@@ -221,7 +221,7 @@ export default function ChatTimelineView({
           <select
             value={replyKanal ?? ''}
             onChange={e => setReplyKanal(e.target.value as ChatKanal)}
-            className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-claimondo-ondo"
+            className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-[#4573A2]"
           >
             {visibleChannels.map(c => (
               <option key={c.id} value={c.id}>{c.label}</option>
@@ -237,13 +237,13 @@ export default function ChatTimelineView({
             }}
             placeholder="Nachricht eingeben…"
             rows={2}
-            className="flex-1 resize-none px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo"
+            className="flex-1 resize-none px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:border-[#4573A2]"
           />
           <button
             type="button"
             onClick={handleSend}
             disabled={!input.trim() || sending || !replyFallId || !replyKanal}
-            className="self-end inline-flex items-center justify-center w-10 h-10 rounded-lg bg-claimondo-shield text-white hover:bg-claimondo-ondo disabled:opacity-40"
+            className="self-end inline-flex items-center justify-center w-10 h-10 rounded-lg bg-[#1E3A5F] text-white hover:bg-[#4573A2] disabled:opacity-40"
             aria-label="Senden"
           >
             <SendIcon className="w-4 h-4" />

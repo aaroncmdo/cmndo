@@ -33,7 +33,7 @@ export default function ClaimondoKundenHeader({
           <div className="flex items-center gap-2.5">
             <Avatar url={svAvatarUrl} name={svAnzeigename} size="xs" />
             <div className="text-right">
-              <p className="text-xs font-medium text-claimondo-navy leading-tight">{svAnzeigename}</p>
+              <p className="text-xs font-medium text-[#0D1B3E] leading-tight">{svAnzeigename}</p>
               <p className="text-[10px] text-claimondo-ondo leading-tight">im Auftrag von Claimondo</p>
             </div>
           </div>

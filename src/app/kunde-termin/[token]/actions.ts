@@ -181,7 +181,7 @@ export async function counterByToken(
 
   // Timeline + Chat-System-Message
   if (termin.fall_id) {
-    const terminStr = neueStartZeit.toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
+    const terminStr = neueStartZeit.toLocaleString('de-DE', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -206,7 +206,7 @@ export async function counterByToken(
           .select('email, telefon, vorname')
           .eq('id', sv.profile_id)
           .single()
-        const terminStr = neueStartZeit.toLocaleString('de-DE', { timeZone: 'Europe/Berlin',
+        const terminStr = neueStartZeit.toLocaleString('de-DE', {
           weekday: 'long',
           day: '2-digit',
           month: '2-digit',

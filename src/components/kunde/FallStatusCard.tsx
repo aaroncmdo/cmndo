@@ -1,6 +1,9 @@
 'use client'
 
-import { CalendarIcon, TruckIcon, FileTextIcon, ShieldCheckIcon, MailIcon, ClockIcon, XCircleIcon, PartyPopperIcon, CheckCircle2Icon, AlertCircleIcon, ScaleIcon } from 'lucide-react'
+// AAR-558 (C9) Brutto-Leak-Fix: Keine `regulierung_betrag` / `zahlung_betrag`-
+// Felder mehr — Kunde sieht Brutto-Beträge nicht. Die Auszahlungs-Summe kommt
+// ausschließlich aus AuszahlungCard (auszahlung_kunde_betrag aus faelle_kunde_view).
+import { CalendarIcon, TruckIcon, FileTextIcon, ShieldCheckIcon, MailIcon, ClockIcon, XCircleIcon, PartyPopperIcon, CheckCircle2Icon, AlertCircleIcon } from 'lucide-react'
 import { formatDatum } from '@/lib/format'
 
 type StatusFall = {
@@ -138,10 +141,10 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
 
   // ── Welle-6 Werte (Backward-Compatibility für ältere Fälle) ──────────────
   if (s === 'ersterfassung' || s === 'sv-gesucht' || s === 'sv-zugewiesen')
-    return { icon: CalendarIcon, title: 'Dein Termin wird vorbereitet', description: 'Wir suchen den besten Sachverständigen in deiner Nähe. Du wirst benachrichtigt sobald der Termin steht.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', border: 'border-claimondo-border' }
+    return { icon: CalendarIcon, title: 'Dein Termin wird vorbereitet', description: 'Wir suchen den besten Sachverständigen in deiner Nähe. Du wirst benachrichtigt sobald der Termin steht.', color: 'text-claimondo-ondo', bg: 'bg-[#f8f9fb]', border: 'border-claimondo-border' }
 
   if (s === 'sv-termin')
-    return { icon: CalendarIcon, title: 'Dein Termin steht!', description: `${sv} kommt zum vereinbarten Termin. Halte dein Fahrzeug bereit und stelle sicher, dass alle Schäden zugänglich sind.`, action: 'Termin verschieben? Ruf uns an.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', border: 'border-claimondo-border' }
+    return { icon: CalendarIcon, title: 'Dein Termin steht!', description: `${sv} kommt zum vereinbarten Termin. Halte dein Fahrzeug bereit und stelle sicher, dass alle Schäden zugänglich sind.`, action: 'Termin verschieben? Ruf uns an.', color: 'text-claimondo-ondo', bg: 'bg-[#f8f9fb]', border: 'border-claimondo-border' }
 
   if (s === 'besichtigung' || s === 'begutachtung-laeuft')
     return { icon: TruckIcon, title: 'Sachverständiger ist unterwegs', description: `${sv} ist auf dem Weg zu dir. Du wirst benachrichtigt wenn er gleich da ist.`, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-200' }
@@ -168,7 +171,7 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
     return { icon: CheckCircle2Icon, title: 'Dein Fall ist abgeschlossen!', description: 'Alles erledigt. Vielen Dank für dein Vertrauen!', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200' }
 
   if (s === 'storniert')
-    return { icon: AlertCircleIcon, title: 'Dein Fall wurde storniert', description: 'Bei Rückfragen erreichst du uns jederzeit per WhatsApp oder Telefon.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', border: 'border-claimondo-border' }
+    return { icon: AlertCircleIcon, title: 'Dein Fall wurde storniert', description: 'Bei Rückfragen erreichst du uns jederzeit per WhatsApp oder Telefon.', color: 'text-claimondo-ondo', bg: 'bg-[#f8f9fb]', border: 'border-claimondo-border' }
 
-  return { icon: ClockIcon, title: 'Dein Fall wird bearbeitet', description: 'Wir kümmern uns um alles. Du wirst über jeden Schritt informiert.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', border: 'border-claimondo-border' }
+  return { icon: ClockIcon, title: 'Dein Fall wird bearbeitet', description: 'Wir kümmern uns um alles. Du wirst über jeden Schritt informiert.', color: 'text-claimondo-ondo', bg: 'bg-[#f8f9fb]', border: 'border-claimondo-border' }
 }

@@ -6,7 +6,6 @@ import NeuLeadDrawer from './_components/NeuLeadDrawer'
 import LeadsViewToggle from './_components/LeadsViewToggle'
 import { PHASE_OPTIONS } from './_components/leadPhaseConstants'
 import PageHeader from '@/components/shared/PageHeader'
-import { Chip, ChipRow } from '@/components/ui/Chip'
 
 export default async function DispatchLeads({
   searchParams,
@@ -34,7 +33,10 @@ export default async function DispatchLeads({
       <PageHeader
         title="Leads"
         actions={
-          <span className="text-sm text-claimondo-ondo">{leads?.length ?? 0} Ergebnisse</span>
+          <>
+            <span className="text-sm text-claimondo-ondo">{leads?.length ?? 0} Ergebnisse</span>
+            <NeuLeadDrawer />
+          </>
         }
       />
 
@@ -44,7 +46,11 @@ export default async function DispatchLeads({
           <Chip
             key={opt.value}
             href={opt.value ? `/dispatch/leads?phase=${opt.value}` : '/dispatch/leads'}
-            variant={activePhase === opt.value ? 'selected' : 'default'}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
+              activePhase === opt.value
+                ? 'bg-claimondo-navy text-white'
+                : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb]'
+            }`}
           >
             {opt.label}
           </Chip>

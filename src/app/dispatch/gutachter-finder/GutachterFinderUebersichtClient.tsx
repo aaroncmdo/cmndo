@@ -133,7 +133,7 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
       {svName && (
         <div className="mx-4 mb-3 px-3 py-2.5 rounded-ios-sm bg-claimondo-bg border border-claimondo-border">
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-semibold mb-1">
-            Zugeordneter {anfrage.matching_typ === 'sv_lead' ? 'DAT-Expert' : 'Sachverständiger'}
+            {anfrage.matching_typ === 'lead_fallback' ? 'DAT-Expert (extern — anrufen!)' : 'Zugeordneter Sachverständiger'}
           </p>
           <div className="flex items-center justify-between gap-2">
             <p className="text-sm font-semibold text-claimondo-navy">{svName}</p>
@@ -201,18 +201,26 @@ export default function GutachterFinderUebersichtClient({
   return (
     <div className="space-y-4">
       {/* Filter-Tabs */}
-      <div className="flex gap-2">
-        {(['offen', 'alle'] as const).map((tab) => (
+      <div className="flex flex-wrap gap-2">
+        {([
+          { key: 'offen', label: 'Offen' },
+          { key: 'anruf', label: `Anruf nötig${anrufNoetig.length > 0 ? ` (${anrufNoetig.length})` : ''}` },
+          { key: 'alle', label: 'Alle' },
+        ] as const).map((tab) => (
           <button
-            key={tab}
-            onClick={() => setFilter(tab)}
+            key={tab.key}
+            onClick={() => setFilter(tab.key)}
             className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-colors ${
-              filter === tab
-                ? 'bg-claimondo-navy text-white'
+              filter === tab.key
+                ? tab.key === 'anruf'
+                  ? 'bg-amber-500 text-white'
+                  : 'bg-claimondo-navy text-white'
+                : tab.key === 'anruf' && anrufNoetig.length > 0
+                ? 'bg-amber-50 text-amber-700 border border-amber-300 hover:bg-amber-100'
                 : 'bg-white text-claimondo-navy border border-claimondo-border hover:bg-claimondo-bg'
             }`}
           >
-            {tab === 'offen' ? 'Offen' : 'Alle'}
+            {tab.label}
           </button>
         ))}
       </div>

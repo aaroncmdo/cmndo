@@ -3,9 +3,8 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import SVKalenderClient from './SVKalenderClient'
+import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
-import KalenderListeEmpty from './KalenderListeEmpty'
-import KalenderRealtimeRefresh from '@/components/kalender/KalenderRealtimeRefresh'
 
 // AAR-229 W5 / F-12: Kalender + Termine merge mit View-Toggle.
 export default async function SVKalenderPage({
@@ -30,24 +29,21 @@ export default async function SVKalenderPage({
   const { isGoogleConnected } = await import('@/lib/google/oauth-client')
   const gcalConnected = await isGoogleConnected(user.id)
 
-  // Live-Termine Phase 3: Cache-Read statt Live-API-Call.
-  // Cron sync-external-calendars (alle 5 Min) hält sv_kalender_events_cache
-  // aktuell — Page-Load von 4-8s auf <1s. KalenderRealtimeRefresh unten
-  // triggert router.refresh() wenn neue Events eintreffen.
-  const now = new Date()
-  const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
-  const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
-  const { data: cachedEvents } = await supabase
-    .from('sv_kalender_events_cache')
-    .select('start_zeit, end_zeit')
-    .eq('sv_id', sv.id)
-    .gte('start_zeit', fromIso)
-    .lte('start_zeit', toIso)
-    .order('start_zeit')
-  const externalBusy = (cachedEvents ?? []).map((e) => ({
-    start: e.start_zeit as string,
-    end: e.end_zeit as string,
-  }))
+  // AAR-google-cal-drift: Externe Google-Termine der aktuellen + nächsten
+  // Woche als Busy-Slots laden, damit SV im Kalender-Tab seine private
+  // Belegung sieht. Fail-silent — leerer Array bei nicht-verbunden.
+  let externalBusy: { start: string; end: string }[] = []
+  if (gcalConnected) {
+    const now = new Date()
+    const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
+    const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
+    try {
+      const { getSvBusySlots } = await import('@/lib/google-calendar/busy-slots')
+      externalBusy = await getSvBusySlots(user.id, fromIso, toIso)
+    } catch (err) {
+      console.warn('[gutachter/kalender] Busy-Slots:', err instanceof Error ? err.message : err)
+    }
+  }
 
   // CMM-25: Kalender zeigt nur Termine, deren Auftrag bereits durch die
   // Sicherungsabtretung bestätigt wurde. Reine Dispatcher-Slot-Blocks
@@ -127,7 +123,7 @@ export default async function SVKalenderPage({
         <PageHeader
           title="Kalender"
           actions={
-            <div className="flex gap-1 bg-claimondo-bg rounded-lg p-0.5">
+            <div className="flex gap-1 bg-[#f8f9fb] rounded-lg p-0.5">
               <Link
                 href="/gutachter/kalender?view=kalender"
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
@@ -161,7 +157,6 @@ export default async function SVKalenderPage({
           }))}
           externalBusy={externalBusy}
           verlegteSlots={verlegteSlots}
-          claimondoTermineByStart={claimondoTermineByStart}
         />
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -177,11 +172,11 @@ export default async function SVKalenderPage({
             const name = fall.lead_id && leadMap[fall.lead_id] ? leadMap[fall.lead_id] : '—'
             return (
               <Link key={fall.id} href={`/gutachter/fall/${fall.id}`}
-                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-claimondo-bg transition-colors">
+                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-[#f8f9fb] transition-colors">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-claimondo-navy">
-                      {t.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })} — {t.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} Uhr
+                      {t.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} — {t.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
                     </p>
                     <p className="text-xs text-claimondo-ondo mt-0.5">{name} · {fall.schadens_ort ?? '—'}</p>
                   </div>

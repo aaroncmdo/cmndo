@@ -56,7 +56,7 @@ export default async function KanzleiBoard() {
           <h2 className="text-sm font-semibold text-claimondo-navy">Zugewiesene Kanzleien</h2>
         </div>
         <table className="w-full text-sm">
-          <thead className="bg-claimondo-bg text-xs uppercase text-claimondo-ondo">
+          <thead className="bg-[#f8f9fb] text-xs uppercase text-claimondo-ondo">
             <tr>
               <th className="text-left px-4 py-2">Fall</th>
               <th className="text-left px-4 py-2">Kanzlei</th>
@@ -83,10 +83,10 @@ export default async function KanzleiBoard() {
                     {p.telefon ?? ''}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-navy">{fall?.status ?? '—'}</span>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-navy">{fall?.status ?? '—'}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
-                    {p.created_at ? new Date(p.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
+                    {p.created_at ? new Date(p.created_at).toLocaleDateString('de-DE') : '—'}
                   </td>
                 </tr>
               )
@@ -118,10 +118,10 @@ export default async function KanzleiBoard() {
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                   e.status === 'processed' ? 'bg-emerald-100 text-emerald-700' :
                   e.status === 'error' ? 'bg-red-100 text-red-700' :
-                  'bg-claimondo-bg text-claimondo-ondo'
+                  'bg-[#f8f9fb] text-claimondo-ondo'
                 }`}>{e.status}</span>
                 <span className="text-xs text-claimondo-ondo/70">
-                  {new Date(e.created_at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  {new Date(e.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default async function KanzleiBoard() {
         </div>
         <div className="divide-y divide-claimondo-border">
           {(lexdriveTasks ?? []).map(t => (
-            <Link key={t.id} href={`/faelle/${t.fall_id}`} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors text-sm">
+            <Link key={t.id} href={`/faelle/${t.fall_id}`} className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors text-sm">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-claimondo-navy">{t.titel}</p>
@@ -148,7 +148,7 @@ export default async function KanzleiBoard() {
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                   t.prioritaet === 'kritisch' ? 'bg-red-100 text-red-700' :
                   t.prioritaet === 'dringend' ? 'bg-amber-100 text-amber-700' :
-                  'bg-claimondo-bg text-claimondo-ondo'
+                  'bg-[#f8f9fb] text-claimondo-ondo'
                 }`}>{t.prioritaet}</span>
               </div>
             </Link>
@@ -169,7 +169,7 @@ function KpiBox({
 }) {
   const cls = {
     violet: 'bg-violet-50 border-violet-200 text-violet-700',
-    blue: 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo',
+    blue: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-ondo',
     amber: 'bg-amber-50 border-amber-200 text-amber-700',
   }[color]
   return (

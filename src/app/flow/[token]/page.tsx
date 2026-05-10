@@ -35,7 +35,7 @@ export default async function FlowPage({
     // BUG-100: Token-Expiry prüfen
     if (flowLink.expires_at && new Date(flowLink.expires_at) < new Date()) {
       return (
-        <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x23F3;</div>
             <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link abgelaufen</h1>
@@ -50,7 +50,7 @@ export default async function FlowPage({
     // hat seine Zugangsdaten + Magic-Link bereits per Email erhalten.
     if (flowLink.status === 'abgeschlossen') {
       return (
-        <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x2705;</div>
             <h1 className="text-xl font-bold text-claimondo-navy mb-2">Alles bereit</h1>
@@ -60,7 +60,7 @@ export default async function FlowPage({
             </p>
             <a
               href="/login"
-              className="inline-block w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
+              className="inline-block w-full min-h-14 py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base active:scale-[0.98] transition-all"
             >
               Zum Login
             </a>

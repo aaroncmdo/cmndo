@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // AAR-840: Endzustand-Dropdown für ActionBar-Slot des FallIdentityHeader
 //
@@ -27,8 +27,8 @@ type Props = {
 const ITEMS: { mode: EndzustandMode; label: string; icon: typeof CheckCircleIcon; tone: string }[] = [
   { mode: 'reguliert',           label: 'Reguliert',           icon: CheckCircleIcon, tone: 'text-emerald-700' },
   { mode: 'abgelehnt',           label: 'Abgelehnt',           icon: XCircleIcon,     tone: 'text-rose-700' },
-  { mode: 'storniert',           label: 'Stornieren',          icon: PauseCircleIcon, tone: 'text-claimondo-light-blue' },
-  { mode: 'in_kommunikation_vs', label: 'In Kommunikation mit VS', icon: PhoneCallIcon, tone: 'text-claimondo-ondo' },
+  { mode: 'storniert',           label: 'Stornieren',          icon: PauseCircleIcon, tone: 'text-[#7BA3CC]' },
+  { mode: 'in_kommunikation_vs', label: 'In Kommunikation mit VS', icon: PhoneCallIcon, tone: 'text-[#4573A2]' },
 ]
 
 export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props) {
@@ -62,8 +62,8 @@ export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props
           title={isAlreadyFinal ? 'Claim ist bereits in einem Endzustand' : 'Endzustand setzen'}
           className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
             isAlreadyFinal
-              ? 'bg-claimondo-bg border-[#E2E8F3] text-claimondo-light-blue cursor-not-allowed'
-              : 'bg-white border-[#E2E8F3] text-claimondo-navy hover:bg-claimondo-bg'
+              ? 'bg-[#f8f9fb] border-[#E2E8F3] text-[#7BA3CC] cursor-not-allowed'
+              : 'bg-white border-[#E2E8F3] text-[#0D1B3E] hover:bg-[#f8f9fb]'
           }`}
         >
           Endzustand
@@ -77,7 +77,7 @@ export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props
                 key={item.mode}
                 type="button"
                 onClick={() => { setOpen(false); setModalMode(item.mode) }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-claimondo-navy hover:bg-claimondo-bg text-left"
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#0D1B3E] hover:bg-[#f8f9fb] text-left"
               >
                 <item.icon className={`w-4 h-4 ${item.tone}`} />
                 {item.label}
@@ -87,7 +87,7 @@ export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props
             <button
               type="button"
               onClick={() => { setOpen(false); setModalMode('in_kommunikation_vs') }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-claimondo-ondo hover:bg-claimondo-bg text-left"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[#4573A2] hover:bg-[#f8f9fb] text-left"
             >
               <PhoneCallIcon className="w-3.5 h-3.5" />
               In Kommunikation mit VS (Phase 6)

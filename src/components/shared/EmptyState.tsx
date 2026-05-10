@@ -1,39 +1,39 @@
-// Server-Component-Wrapper für EmptyState.
-//
-// Warum diese Aufteilung:
-//   - Viele Aufrufer sind Server-Components und übergeben `icon` als LucideIcon-
-//     Function. Function-Props sind NICHT serialisierbar über die Server/Client-
-//     Grenze (Next.js App-Router-Fehler "Functions cannot be passed to Client
-//     Components").
-//   - Lösung: LucideIcon hier auf dem Server zu JSX rendern (ReactNode ist
-//     serialisierbar) und als `iconNode` an EmptyStateClient durchreichen.
-//
-// Alle bestehenden Aufrufer können unverändert bleiben (`icon={FolderOpenIcon}`).
+// AAR-414 / AAR-769 Phase 3: Zentrale Empty-State-Primitive. Vollständig
+// auf Primitives migriert (Card, Stack, Icon, Text, Button) — kein Tailwind
+// mehr im Render. Action mit `href` wird per <a>-Wrapper außerhalb des
+// Buttons unterstützt, weil <Button>-Primitive keinen Link-Modus hat.
 
 import type { LucideIcon } from 'lucide-react'
+import { Button, Card, Icon, Stack, Text } from '@/components/primitives'
+import type { ButtonTone } from '@/components/primitives/Button/Button.types'
 import { tokens } from '@/lib/design-tokens'
-import EmptyStateClient from './EmptyStateClient'
 
-export type EmptyStateAction = {
-  label: string
-  onClick?: () => void
-  href?: string
-  variant?: 'primary' | 'secondary' | 'ghost'
+type ActionVariant = 'primary' | 'secondary' | 'ghost'
+
+const ACTION_TO_TONE: Record<ActionVariant, ButtonTone> = {
+  primary: 'navy',
+  secondary: 'ghost',
+  ghost: 'ghost',
 }
 
 export interface EmptyStateProps {
   icon?: LucideIcon
   title: string
   description?: string
-  /** Single Action (Backwards-Compat). Wenn `actions` gesetzt ist, wird `action` ignoriert. */
-  action?: EmptyStateAction
-  actions?: EmptyStateAction[]
+  action?: {
+    label: string
+    onClick?: () => void
+    href?: string
+    variant?: ActionVariant
+  }
+  /** Mehrere Actions — wird über action (singular) gemappt wenn beide gesetzt sind. */
+  actions?: Array<{ label: string; onClick?: () => void; href?: string; variant?: ActionVariant }>
   variant?: 'default' | 'compact'
   className?: string
 }
 
 export default function EmptyState({
-  icon: IconComp,
+  icon,
   title,
   description,
   action,
@@ -41,21 +41,51 @@ export default function EmptyState({
   variant = 'default',
   className = '',
 }: EmptyStateProps) {
+  const padding = variant === 'compact' ? 6 : 12
   const iconSize = variant === 'compact' ? 32 : 40
-  const iconNode = IconComp ? (
-    <IconComp size={iconSize} color={tokens.colors.lightBlue} />
-  ) : undefined
 
-  const actionList = actions ?? (action ? [action] : [])
+  const actionTone = ACTION_TO_TONE[action?.variant ?? 'primary']
 
-  return (
-    <EmptyStateClient
-      iconNode={iconNode}
-      title={title}
-      description={description}
-      actions={actionList}
-      variant={variant}
-      className={className}
-    />
+  const actionEl = action ? (
+    action.href ? (
+      <a
+        href={action.href}
+        style={{ textDecoration: 'none', display: 'inline-block', marginTop: tokens.spacing[4] }}
+      >
+        <Button tone={actionTone} size="md" onPress={() => {}}>
+          {action.label}
+        </Button>
+      </a>
+    ) : (
+      <div style={{ marginTop: tokens.spacing[4] }}>
+        <Button tone={actionTone} size="md" onPress={action.onClick ?? (() => {})}>
+          {action.label}
+        </Button>
+      </div>
+    )
+  ) : null
+
+  const inner = (
+    <Card p={padding}>
+      <Stack gap={2} align="center">
+        {icon && (
+          <Icon icon={icon} size={iconSize} color="lightBlue" />
+        )}
+        <Text variant="headingSm" color="navy" align="center">
+          {title}
+        </Text>
+        {description && (
+          <Text variant="bodySm" color="ondo" align="center">
+            {description}
+          </Text>
+        )}
+        {actionEl}
+      </Stack>
+    </Card>
   )
+
+  if (className) {
+    return <div className={className}>{inner}</div>
+  }
+  return inner
 }

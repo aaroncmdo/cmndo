@@ -185,31 +185,8 @@ async function seedLeadDirekt(kundeId) {
     .limit(1)
 
   if (vorhandene && vorhandene.length > 0) {
-    // 2026-05-08: Bestehenden Lead UPDATEN damit Smoke-Re-Runs immer
-    // einen frischen Hard-Gate-erfüllten Lead haben (status=quali-offen,
-    // qualifizierungs_phase=in-qualifizierung, alle Q1-Q4-Felder).
-    const id = vorhandene[0].id
-    const { error: updErr } = await db
-      .from('leads')
-      .update({
-        status: 'quali-offen',
-        qualifizierungs_phase: 'in-qualifizierung',
-        unfallhergang: 'Auffahrunfall auf der Inneren Kanalstraße in Köln. Unfallgegner hat nicht rechtzeitig gebremst, Heck am Test-Fahrzeug stark beschädigt.',
-        schuldfrage: 'gegner',
-        schaden_sichtbar: true,
-        polizei_vor_ort: false,
-        schadentyp: 'auffahrunfall',
-        kennzeichen: 'K-TS 1234',
-        fahrzeug_hersteller: 'Volkswagen',
-        fahrzeug_modell: 'Golf VII',
-        fahrzeug_baujahr: 2018,
-        fahrzeug_fahrbereit: true,
-        gegner_kennzeichen: 'K-XY 9999',
-      })
-      .eq('id', id)
-    if (updErr) log(`WARNUNG: Lead-Update für ${id} fehlgeschlagen: ${updErr.message}`)
-    else log(`Lead A (Direkt-Webform) UPDATEd: ${id}`)
-    return id
+    log(`Lead A (Direkt-Webform) bereits vorhanden: ${vorhandene[0].id}`)
+    return vorhandene[0].id
   }
 
   const { data, error } = await db
@@ -243,16 +220,6 @@ async function seedLeadDirekt(kundeId) {
       schadens_art: 'unfall',
       service_typ: 'nur_gutachter',
       sachschaden_flag: true,
-      // 2026-05-08 Erweiterung: qualifizierungs_phase explizit setzen damit
-      // DispatchShell-Routing nicht auf 'neu' fällt + Q4/Q6/Q7/Q8 erfüllen
-      // damit Phase 4 (Stammdaten) im Smoke nicht zurückblockt.
-      qualifizierungs_phase: 'in-qualifizierung',
-      kennzeichen: 'K-TS 1234',
-      fahrzeug_hersteller: 'Volkswagen',
-      fahrzeug_modell: 'Golf VII',
-      fahrzeug_baujahr: 2018,
-      fahrzeug_fahrbereit: true,
-      gegner_kennzeichen: 'K-XY 9999',
       // 2026-05-08: Hard-Gate-Felder für Phase 2 (Dispatch-SV-Suche).
       // Dispatch-SV-Panel rendert den "Gutachter suchen"-Button nur wenn
       // qualification-engine q1+q2+q3 alle true sind:

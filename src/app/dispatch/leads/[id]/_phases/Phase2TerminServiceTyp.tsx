@@ -34,6 +34,9 @@ export default function Phase2TerminServiceTyp() {
     wunschtermin_wochentage?: number[] | null
   }
   const [pending, startTransition] = useTransition()
+  const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState<string>(
+    l.besichtigungsort_adresse ?? '',
+  )
   const [serviceTyp, setServiceTypLocal] = useState<'komplett' | 'nur_gutachter'>(
     l.service_typ ?? 'komplett',
   )
@@ -185,7 +188,7 @@ export default function Phase2TerminServiceTyp() {
       {/* AAR-264: Wunschtermin GANZ OBEN — „Wann" ist wichtiger als „Wo" für
           das Gespräch. Auto-Save 500ms Debounce. Der Wunschtermin fließt
           ins SV-Matching ein (verfuegbarAmWunschtermin + Score-Bonus). */}
-      <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 space-y-3">
+      <div className="bg-[#f8f9fb] border border-claimondo-border rounded-xl p-4 space-y-3">
         {/* AAR-270: Wochentag-Picker — vor dem datetime-local-Input.
             Mehrfachauswahl, Default=Egal. Filtert die SV-Slot-Vorschläge. */}
         <div className="space-y-1.5">
@@ -255,26 +258,41 @@ export default function Phase2TerminServiceTyp() {
         )}
       </div>
 
-      {/* Besichtigungsadresse — spiegelt dasselbe Feld wie Phase 1.
-          Hier immer sichtbar: Phase 2 = SV-Terminplanung, Ort immer nötig. */}
-      <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 space-y-2">
+      {/* Besichtigungsadresse für SV-Dispatch — CMM-26: nur EIN Picker, der
+         in besichtigungsort_* schreibt. Der Unfallort gehört zu Phase 1
+         (Schadenereignis) und wird hier nicht mehr editiert. Wenn kein
+         expliziter Besichtigungsort gesetzt ist, fällt SV-Matching auf
+         unfallort_lat/lng (Phase 1) bzw. kunde_lat/lng zurück
+         (siehe listSvSuggestionsForLead). */}
+      <div className="glass-light border border-claimondo-border rounded-ios-md p-5 space-y-3">
         <div className="flex items-center gap-2">
           <MapPinIcon className="w-4 h-4 text-claimondo-ondo" />
-          <span className="text-xs font-semibold text-claimondo-navy">Wo steht das Fahrzeug?</span>
-          {besichtigungsortAdresse && (
-            <CheckCircleIcon className="w-3.5 h-3.5 text-green-500 ml-auto shrink-0" />
+          <h3 className="text-sm font-semibold text-claimondo-navy">Besichtigungsadresse</h3>
+          {hasKoordinaten && (
+            <span className="ml-auto text-[10px] text-green-600 font-medium flex items-center gap-1">
+              <CheckCircle2Icon className="w-3 h-3" /> Koordinaten ok
+            </span>
           )}
         </div>
-        <p className="text-[10px] text-claimondo-ondo">
-          Adresse wo der Gutachter das Fahrzeug besichtigen soll (Werkstatt, Stellplatz o.ä.)
+        <p className="text-[11px] text-claimondo-ondo">
+          Wo soll der Gutachter das Fahrzeug besichtigen? Leer lassen = SV fährt
+          zum Unfallort aus Phase 1. Bei abweichender Werkstatt / Halter-Adresse
+          hier eintragen — SV-Vorschläge werden anhand dieser Adresse gerankt.
         </p>
         <GooglePlaceAutocomplete
           defaultValue={besichtigungsortAdresse}
-          placeholder="Werkstatt / Stellplatz-Adresse"
+          placeholder='z. B. „Werkstatt Müller, Musterstr. 1, 80331 München" oder leer = Unfallort'
           onSelect={saveBesichtigungsort}
-          onBlur={(current) => { if (!current.trim()) clearBesichtigungsort() }}
-          className="w-full px-2 py-1.5 border border-claimondo-border rounded-lg text-xs"
+          onBlur={(current) => {
+            if (!current.trim()) clearBesichtigungsort()
+          }}
+          className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
         />
+        {l.unfallort && !besichtigungsortAdresse && (
+          <p className="text-[10px] text-claimondo-ondo italic">
+            Fallback aktiv: SV-Matching nutzt Unfallort aus Phase 1 ({l.unfallort}).
+          </p>
+        )}
       </div>
 
       {/* SV + Termin */}
@@ -347,7 +365,7 @@ export default function Phase2TerminServiceTyp() {
           type="button"
           disabled={pending}
           onClick={() => setPhase(1)}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
         >
           ← Zurück zu Phase 1
         </button>
@@ -355,7 +373,7 @@ export default function Phase2TerminServiceTyp() {
           <button
             type="button"
             disabled={pending}
-            onClick={() => setPhase(4)}
+            onClick={() => setPhase(3)}
             className="flex-1 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-50 flex items-center justify-center gap-2"
           >
             Weiter zu Phase 4 →

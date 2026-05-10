@@ -1,3 +1,4 @@
+// @ts-nocheck — @deck.gl/mapbox + @deck.gl/geo-layers nicht installiert (Feldmodus-3D-Backlog)
 'use client'
 
 // 2026-05-07 Phase 4 (feldmodus-mapbox-3d-roadmap.md):

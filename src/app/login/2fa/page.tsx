@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import TwoFaClient from './TwoFaClient'
-import TwoFaSkipRedirect from './TwoFaSkipRedirect'
 import { roleToPath } from '@/lib/auth/role-redirect'
 
 // KFZ-184: 2FA SMS-Code Eingabe nach Email+Passwort Login.
@@ -32,16 +31,12 @@ export default async function TwoFaPage() {
   // Wenn Google-Login: 2FA ueberspringen — direkt ins Rollen-Portal.
   if (user.app_metadata?.provider === 'google') redirect(targetPath)
 
-  // AAR-2fa-loop-fix: Wenn der User keine 2FA aktiv hat, KEIN redirect()
-  // hier — Server-Components können kein Cookie setzen, und der Middleware-
-  // Check (!claimondo_2fa_verified) würde sofort wieder zurück zu /login/2fa
-  // schicken → Endlos-Loop in production. Stattdessen rendern wir einen
-  // Client-Bridge der via Server-Action das Skip-Cookie zuverlässig setzt
-  // + dann hart navigiert.
-  const zweiFaAktiv =
-    profile?.twofa_aktiviert === true || profile?.twofa_email_aktiviert === true
-  if (!zweiFaAktiv) {
-    return <TwoFaSkipRedirect targetPath={targetPath} />
+  // 2FA nicht aktiviert: direkt ins Rollen-Portal (Middleware-Cookie wird in
+  // der Login-Action gesetzt, AAR-562). Wenn der Cookie abgelaufen ist und
+  // der User hier landet, sendet er sich selbst in den nächsten Loop — deshalb
+  // redirect auf das echte Portal, nicht auf `/` (sonst Landing-Page).
+  if (profile?.twofa_aktiviert === false && profile?.twofa_email_aktiviert === false) {
+    redirect(targetPath)
   }
 
   const telefon = profile?.twofa_telefon ?? profile?.telefon

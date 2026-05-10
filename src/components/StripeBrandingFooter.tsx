@@ -10,7 +10,7 @@ import { LockIcon } from 'lucide-react'
 
 export default function StripeBrandingFooter() {
   return (
-    <div className="mt-4 px-4 py-3 bg-claimondo-bg border border-claimondo-border rounded-xl">
+    <div className="mt-4 px-4 py-3 bg-[#f8f9fb] border border-claimondo-border rounded-xl">
       <div className="flex items-center justify-center gap-2 text-[11px] text-claimondo-ondo mb-2">
         <LockIcon className="w-3 h-3" />
         <span>Sichere Zahlung abgewickelt durch</span>

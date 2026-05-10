@@ -245,7 +245,7 @@ export default function Phase6StatusTracking({
                     : s.state === 'warning'
                       ? 'bg-red-500 text-white'
                       : s.state === 'disabled'
-                        ? 'bg-claimondo-bg text-claimondo-ondo/50'
+                        ? 'bg-[#f8f9fb] text-claimondo-ondo/50'
                         : 'bg-claimondo-border text-claimondo-ondo/70'
                 }`}
               >

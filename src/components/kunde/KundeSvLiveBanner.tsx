@@ -110,16 +110,16 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
   const ankunftIso =
     eta != null ? new Date(Date.now() + eta * 60_000) : null
   const ankunftLabel = ankunftIso
-    ? ankunftIso.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+    ? ankunftIso.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
     : null
 
   return (
     <div className="rounded-2xl bg-claimondo-navy text-white px-4 py-3 flex items-center gap-3">
-      <NavigationIcon className="w-4 h-4 shrink-0 text-claimondo-light-blue" />
+      <NavigationIcon className="w-4 h-4 shrink-0 text-[#7BA3CC]" />
       <div className="flex-1 min-w-0">
         <span className="text-sm font-semibold">{vorname} ist unterwegs</span>
         {ankunftLabel && (
-          <span className="text-sm text-claimondo-light-blue ml-2">
+          <span className="text-sm text-[#7BA3CC] ml-2">
             · Ankunft ca. {ankunftLabel}
             {eta != null && ` (${eta} Min.)`}
           </span>

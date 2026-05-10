@@ -91,7 +91,7 @@ export default function FinanceClient({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
           <Link
             href="/admin/finance/provisionen"
-            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-claimondo-ondo hover:shadow-sm transition-all"
+            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -113,7 +113,7 @@ export default function FinanceClient({
           </Link>
           <Link
             href="/admin/finance/kanzlei"
-            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-claimondo-ondo hover:shadow-sm transition-all"
+            className="group glass-light border border-claimondo-border rounded-ios-md p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -207,7 +207,7 @@ export default function FinanceClient({
                   </thead>
                   <tbody>
                     {tabellenDaten.map((row) => (
-                      <tr key={row.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
+                      <tr key={row.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors">
                         <td className="px-5 py-3">
                           <Link
                             href={`/faelle/${row.id}`}
@@ -248,7 +248,7 @@ export default function FinanceClient({
                     href={`/faelle/${row.id}`}
                     target="_blank"
                     rel="noopener"
-                    className="block px-5 py-4 hover:bg-claimondo-bg/40 transition-colors"
+                    className="block px-5 py-4 hover:bg-[#f8f9fb]/40 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-1">
                       <div>

@@ -12,18 +12,11 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { parseIsochrone } from './isochrone-parse'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { checkSvFreeBusyBatch, getBusyWindows, type BusyWindow } from '@/lib/google-calendar/freebusy'
-import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
-import { precomputeSvSlotEtas, isSlotReachable } from './reachability'
 import {
   TERMIN_DAUER_MIN,
   TERMIN_PUFFER_MIN,
   naechsterWerktag10Uhr,
 } from './termin-konstanten'
-
-// AAR-CMM: Minimal-Puffer zwischen erreichbarem Termin und ETA-Eintreffen.
-// Wenn ein SV von Termin A 10:45 endet und Termin B 11:00 beginnt, müssen
-// 5 min Sicherheits-Puffer obendrauf (Aussteigen, Parken, Kunde finden).
-const ETA_SICHERHEITS_PUFFER_MIN = 5
 
 export type SvMatchInput = {
   fallLat: number
@@ -148,136 +141,6 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
   if (!svsRaw) return []
   const svs = svsRaw as unknown as Array<Record<string, unknown>>
 
-  // AAR-CMM: Mapbox-ETA Büro → Fall für alle SVs in einem Matrix-Call.
-  // Ersetzt die Haversine-Luftlinie als primäres Score-Kriterium und ist
-  // Voraussetzung für die Adjacent-Termin-Reachability weiter unten.
-  const svsMitStandort = svs.filter(
-    (sv) => sv.standort_lat != null && sv.standort_lng != null,
-  )
-  const bueroEtaArr = await mapboxEtaMatrix(
-    { lat: fallLat, lng: fallLng },
-    svsMitStandort.map((sv) => ({
-      lat: Number(sv.standort_lat),
-      lng: Number(sv.standort_lng),
-    })),
-  )
-  const bueroEtaMap = new Map<string, number | null>()
-  svsMitStandort.forEach((sv, i) => bueroEtaMap.set(sv.id as string, bueroEtaArr[i]))
-
-  // Adjacent-Termin-Reachability vorbereiten: für den effektiven Check-
-  // zeitpunkt alle Termine ±4h um die Wunschtermin-Zeit laden, lead/fall-
-  // Locations holen, eine Matrix-Call für Reachability.
-  type TerminMitOrt = {
-    id: string
-    sv_id: string
-    start_zeit: string
-    end_zeit: string
-    lead_id: string | null
-    fall_id: string | null
-    lat: number | null
-    lng: number | null
-  }
-  const adjTermineBySv = new Map<string, TerminMitOrt[]>()
-  if (wunschterminStart && wunschterminEnd) {
-    const adjStart = new Date(wunschterminStart.getTime() - 4 * 60 * 60_000).toISOString()
-    const adjEnd = new Date(wunschterminEnd.getTime() + 4 * 60 * 60_000).toISOString()
-    const candidateSvIds = svs.map((sv) => sv.id as string)
-    const { data: nearTermineRaw } = await db
-      .from('gutachter_termine')
-      .select('id, sv_id, lead_id, fall_id, start_zeit, end_zeit')
-      .in('sv_id', candidateSvIds)
-      .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
-      .gte('end_zeit', adjStart)
-      .lte('start_zeit', adjEnd)
-      .order('start_zeit', { ascending: true })
-
-    const nearTermine = (nearTermineRaw ?? []) as Array<{
-      id: string
-      sv_id: string
-      lead_id: string | null
-      fall_id: string | null
-      start_zeit: string
-      end_zeit: string
-    }>
-
-    const leadIds = Array.from(new Set(nearTermine.map((t) => t.lead_id).filter((x): x is string => !!x)))
-    const fallIds = Array.from(new Set(nearTermine.map((t) => t.fall_id).filter((x): x is string => !!x)))
-    const [{ data: leadLocs }, { data: fallLocs }] = await Promise.all([
-      leadIds.length > 0
-        ? db.from('leads').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', leadIds)
-        : Promise.resolve({ data: [] as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }> }),
-      fallIds.length > 0
-        ? db.from('faelle').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', fallIds)
-        : Promise.resolve({ data: [] as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }> }),
-    ])
-    const leadLocMap = new Map(
-      ((leadLocs ?? []) as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>)
-        .map((l) => [l.id, { lat: l.besichtigungsort_lat, lng: l.besichtigungsort_lng }]),
-    )
-    const fallLocMap = new Map(
-      ((fallLocs ?? []) as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>)
-        .map((f) => [f.id, { lat: f.besichtigungsort_lat, lng: f.besichtigungsort_lng }]),
-    )
-
-    for (const t of nearTermine) {
-      let lat: number | null = null
-      let lng: number | null = null
-      if (t.fall_id) {
-        const loc = fallLocMap.get(t.fall_id)
-        if (loc?.lat != null && loc?.lng != null) {
-          lat = loc.lat
-          lng = loc.lng
-        }
-      }
-      if (lat == null && t.lead_id) {
-        const loc = leadLocMap.get(t.lead_id)
-        if (loc?.lat != null && loc?.lng != null) {
-          lat = loc.lat
-          lng = loc.lng
-        }
-      }
-      const arr = adjTermineBySv.get(t.sv_id) ?? []
-      arr.push({ ...t, lat, lng })
-      adjTermineBySv.set(t.sv_id, arr)
-    }
-  }
-
-  // Pro SV den unmittelbar vorherigen + nachfolgenden Termin extrahieren,
-  // dessen Locations gesammelt für eine Matrix-Call.
-  const adjLocsList: Array<{ lat: number; lng: number }> = []
-  type AdjEntry = {
-    prevTermin: TerminMitOrt | null
-    nextTermin: TerminMitOrt | null
-    prevIdx: number
-    nextIdx: number
-  }
-  const adjEntryMap = new Map<string, AdjEntry>()
-  if (wunschterminStart && wunschterminEnd) {
-    for (const sv of svs) {
-      const svId = sv.id as string
-      const all = adjTermineBySv.get(svId) ?? []
-      const prev = all
-        .filter((t) => new Date(t.end_zeit).getTime() <= wunschterminStart.getTime())
-        .sort((a, b) => new Date(b.end_zeit).getTime() - new Date(a.end_zeit).getTime())[0] ?? null
-      const next = all
-        .filter((t) => new Date(t.start_zeit).getTime() >= wunschterminEnd.getTime())
-        .sort((a, b) => new Date(a.start_zeit).getTime() - new Date(b.start_zeit).getTime())[0] ?? null
-      const entry: AdjEntry = { prevTermin: prev, nextTermin: next, prevIdx: -1, nextIdx: -1 }
-      if (prev?.lat != null && prev?.lng != null) {
-        entry.prevIdx = adjLocsList.length
-        adjLocsList.push({ lat: prev.lat, lng: prev.lng })
-      }
-      if (next?.lat != null && next?.lng != null) {
-        entry.nextIdx = adjLocsList.length
-        adjLocsList.push({ lat: next.lat, lng: next.lng })
-      }
-      adjEntryMap.set(svId, entry)
-    }
-  }
-  const adjEtas = adjLocsList.length > 0
-    ? await mapboxEtaMatrix({ lat: fallLat, lng: fallLng }, adjLocsList)
-    : []
-
   // AAR-694 Teil A + AAR-718: FreeBusy-Batch-Check läuft IMMER (nicht
   // mehr nur bei explizitem Wunschtermin). Ohne Wunschtermin nutzen wir
   // den impliziten Check-Zeitpunkt (nächster Werktag 10:00). Puffer
@@ -378,42 +241,6 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
       const freiImKalender = fbStatus !== 'belegt'
       verfuegbarAmWunschtermin = freiInGutachterTermine && freiImKalender
 
-      // AAR-CMM Reachability: Prüfen ob SV von Vorgänger-Termin (oder Büro)
-      // den Besichtigungsort rechtzeitig erreichen kann — und ob er nach dem
-      // Termin den Folge-Termin noch packt. ETA aus Mapbox-Matrix.
-      let reachable = true
-      let reachableGrund: string | null = null
-      const adj = adjEntryMap.get(sv.id as string)
-      if (verfuegbarAmWunschtermin && adj) {
-        if (adj.prevTermin && adj.prevIdx >= 0) {
-          const prevEta = adjEtas[adj.prevIdx]
-          if (prevEta != null) {
-            const verfMin = (wunschterminStart.getTime() - new Date(adj.prevTermin.end_zeit).getTime()) / 60_000
-            if (prevEta + ETA_SICHERHEITS_PUFFER_MIN > verfMin) {
-              reachable = false
-              reachableGrund = `nicht erreichbar (${prevEta} min Fahrt vom Vortermin, nur ${Math.round(verfMin)} min Lücke)`
-            }
-          }
-        } else if (bueroEtaMap.get(sv.id as string) != null) {
-          // Erster Termin des Tages: ETA vom Büro reicht als Sanity-Check.
-          // Wir blocken aber nicht — der SV startet von zu Hause, das ist sein
-          // Job. Nur Reason-Info.
-        }
-        if (reachable && adj.nextTermin && adj.nextIdx >= 0) {
-          const nextEta = adjEtas[adj.nextIdx]
-          if (nextEta != null) {
-            const verfMin = (new Date(adj.nextTermin.start_zeit).getTime() - wunschterminEnd.getTime()) / 60_000
-            if (nextEta + ETA_SICHERHEITS_PUFFER_MIN > verfMin) {
-              reachable = false
-              reachableGrund = `nicht erreichbar (${nextEta} min Fahrt zum Folgetermin, nur ${Math.round(verfMin)} min Lücke)`
-            }
-          }
-        }
-      }
-      if (verfuegbarAmWunschtermin && !reachable) {
-        verfuegbarAmWunschtermin = false
-      }
-
       if (verfuegbarAmWunschtermin) {
         if (hatExplicitWunsch) {
           wunschterminBonus = 40
@@ -422,23 +249,13 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
           reasons.push(`am nächsten Werktag 10:00 frei`)
         }
       } else {
-        naechsterFreierSlot = await findNextFreeSlotForSv(
-          db,
-          sv.id as string,
-          wunschterminStart,
-          profileId,
-          { lat: fallLat, lng: fallLng },
+        naechsterFreierSlot = await findNextFreeSlotForSv(db, sv.id as string, wunschterminStart, profileId)
+        const belegtWo = !freiInGutachterTermine ? 'Claimondo-Termin' : 'Privatkalender'
+        reasons.push(
+          hatExplicitWunsch
+            ? `am Wunschtermin belegt (${belegtWo})`
+            : `am nächsten Werktag 10:00 belegt (${belegtWo})`,
         )
-        if (reachableGrund) {
-          reasons.push(reachableGrund)
-        } else {
-          const belegtWo = !freiInGutachterTermine ? 'Claimondo-Termin' : 'Privatkalender'
-          reasons.push(
-            hatExplicitWunsch
-              ? `am Wunschtermin belegt (${belegtWo})`
-              : `am nächsten Werktag 10:00 belegt (${belegtWo})`,
-          )
-        }
       }
     }
 
@@ -509,7 +326,6 @@ async function findNextFreeSlotForSv(
   svId: string,
   ab: Date,
   profileId?: string | null,
-  candidate?: { lat: number; lng: number } | null,
 ): Promise<string | null> {
   const inZwoelfWochen = new Date(ab.getTime() + 12 * 7 * 24 * 60 * 60 * 1000)
 
@@ -522,29 +338,11 @@ async function findNextFreeSlotForSv(
     .lte('start_zeit', inZwoelfWochen.toISOString())
     .order('start_zeit', { ascending: true })
 
-  // AAR-2026-05-07: Per-SV Wochentag-Sperre. Default ist [] (kein Block über
-  // Wochenende-Hardcode hinaus). SVs koennen z.B. [2,3,4] = Di/Mi/Do setzen.
-  const { data: svRow } = await db
-    .from('sachverstaendige')
-    .select('blockierte_wochentage')
-    .eq('id', svId)
-    .maybeSingle()
-  const blockierteWochentage = new Set<number>(
-    ((svRow?.blockierte_wochentage as number[] | null) ?? []) as number[],
-  )
-
   // AAR-719: Private Kalender-Busy-Windows vorab laden.
   let busyWindows: BusyWindow[] = []
   if (profileId) {
     busyWindows = await getBusyWindows(profileId, ab.toISOString(), inZwoelfWochen.toISOString())
   }
-
-  // AAR-CMM PR B: ETA-Vorberechnung — eine Mapbox-Matrix-Call statt
-  // pro-Slot-Lookup. Wenn keine Candidate-Location übergeben wird, läuft
-  // die Suche wie bisher (nur direkte Konflikt-Checks ohne ETA).
-  const slotEtaCtx = candidate
-    ? await precomputeSvSlotEtas(db, svId, candidate, ab.toISOString(), inZwoelfWochen.toISOString())
-    : null
 
   const kandidat = new Date(ab)
   // Bei Konflikt am exakten Wunschtermin → ab nächstem halbstündigem Slot weiter.
@@ -555,13 +353,7 @@ async function findNextFreeSlotForSv(
   while (kandidat < inZwoelfWochen && i < maxIter) {
     i++
     const wochentag = kandidat.getDay()
-    if (
-      wochentag !== 0 &&
-      wochentag !== 6 &&
-      !blockierteWochentage.has(wochentag) &&
-      kandidat.getHours() >= 9 &&
-      kandidat.getHours() < 16
-    ) {
+    if (wochentag !== 0 && wochentag !== 6 && kandidat.getHours() >= 9 && kandidat.getHours() < 16) {
       // Fenster um den Slot-Start: [t-puffer, t+dauer+puffer]
       const fensterStart = new Date(kandidat.getTime() - TERMIN_PUFFER_MIN * 60_000)
       const fensterEnd = new Date(kandidat.getTime() + (TERMIN_DAUER_MIN + TERMIN_PUFFER_MIN) * 60_000)
@@ -573,23 +365,7 @@ async function findNextFreeSlotForSv(
         new Date(b.start) < fensterEnd && new Date(b.end) > fensterStart,
       )
 
-      if (!konfliktIntern && !konfliktPrivat) {
-        // ETA-Reachability als zusätzlicher Filter
-        if (slotEtaCtx) {
-          const slotEnde = new Date(kandidat.getTime() + TERMIN_DAUER_MIN * 60_000)
-          const reach = isSlotReachable(kandidat, slotEnde, slotEtaCtx)
-          if (!reach.reachable) {
-            // Slot frei aber unerreichbar — weitersuchen
-            kandidat.setTime(kandidat.getTime() + 30 * 60_000)
-            if (kandidat.getHours() >= 17) {
-              kandidat.setDate(kandidat.getDate() + 1)
-              kandidat.setHours(9, 0, 0, 0)
-            }
-            continue
-          }
-        }
-        return kandidat.toISOString()
-      }
+      if (!konfliktIntern && !konfliktPrivat) return kandidat.toISOString()
     }
     // Zum nächsten 30-min-Slot weiter.
     kandidat.setTime(kandidat.getTime() + 30 * 60_000)

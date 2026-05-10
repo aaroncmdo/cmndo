@@ -8,7 +8,6 @@ import { FolderOpenIcon } from 'lucide-react'
 import FallKarte from '@/components/kunde/FallKarte'
 import { ladeFallKartenMeta } from '@/lib/kunde/fall-karte-loader'
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
-import EmptyState from '@/components/shared/EmptyState'
 
 export const dynamic = 'force-dynamic'
 

@@ -122,7 +122,7 @@ export function FallakteDrawer({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg transition-colors text-sm font-medium"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:bg-[#f8f9fb] transition-colors text-sm font-medium"
         aria-label="Komplette Akte öffnen"
       >
         <PaperclipIcon className="w-4 h-4" />
@@ -139,7 +139,7 @@ export function FallakteDrawer({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="p-2 hover:bg-claimondo-bg rounded-lg"
+                className="p-2 hover:bg-[#f8f9fb] rounded-lg"
                 aria-label="Schließen"
               >
                 <XIcon className="w-5 h-5" />
@@ -263,7 +263,7 @@ function TeamListe({
                   nummer={m.telefon}
                   variant="inline"
                   label="Anrufen"
-                  className="!px-3 !py-1.5 !rounded-lg !border !border-claimondo-border !bg-white !text-claimondo-navy !text-xs !font-medium hover:!bg-claimondo-bg"
+                  className="!px-3 !py-1.5 !rounded-lg !border !border-claimondo-border !bg-white !text-claimondo-navy !text-xs !font-medium hover:!bg-[#f8f9fb]"
                 />
               )}
             </div>
@@ -295,7 +295,7 @@ function DateienListe({ dokumente }: { dokumente: DocLite[] }) {
         return (
           <li
             key={d.id ?? i}
-            className="flex items-center gap-3 p-3 rounded-lg border border-claimondo-border bg-white hover:bg-claimondo-bg"
+            className="flex items-center gap-3 p-3 rounded-lg border border-claimondo-border bg-white hover:bg-[#f8f9fb]"
           >
             <FileTextIcon className="w-5 h-5 text-claimondo-ondo/70 shrink-0" />
             <div className="flex-1 min-w-0">
@@ -346,7 +346,7 @@ function TimelineListe({ events }: { events: TimelineEventLite[] }) {
             )}
             {datum && (
               <p className="text-[10px] text-claimondo-ondo/70 mt-1">
-                {new Date(datum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
+                {new Date(datum).toLocaleString('de-DE')}
               </p>
             )}
           </li>
@@ -382,7 +382,7 @@ function ChatListe({
             return (
               <li
                 key={n.id ?? i}
-                className="p-3 rounded-lg bg-claimondo-bg border border-claimondo-border"
+                className="p-3 rounded-lg bg-[#f8f9fb] border border-claimondo-border"
               >
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-medium text-claimondo-navy">
@@ -390,7 +390,7 @@ function ChatListe({
                   </p>
                   {datum && (
                     <p className="text-[10px] text-claimondo-ondo/70">
-                      {new Date(datum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
+                      {new Date(datum).toLocaleString('de-DE')}
                     </p>
                   )}
                 </div>

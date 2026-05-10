@@ -91,14 +91,14 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
         type="datetime-local"
         value={datum}
         onChange={e => setDatum(e.target.value)}
-        className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+        className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
       />
       <input
         type="text"
         value={notiz}
         onChange={e => setNotiz(e.target.value)}
         placeholder="Notiz"
-        className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-gray-400"
+        className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder-gray-400"
       />
 
       <div className="flex gap-2">

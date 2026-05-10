@@ -16,10 +16,7 @@ import type { CreateMitteilungInput, EmpfaengerRolle, KontextTyp, MitteilungKate
 //   - kunde             → /kunde/faelle/{id}
 //   - makler            → /makler/akten/{id}
 //   - admin/kb/kanzlei  → /faelle/{id} (geteilte Fallakte)
-//
-// 2026-05-07: kontext_typ='claim' neu — wir speichern claim_id als SSoT, lösen
-// per Lookup auf fall_id für die UI-Route auf. Async, weil DB-Hop nötig.
-async function autoRouteUrl(
+function autoRouteUrl(
   kontextTyp: KontextTyp | undefined,
   kontextId: string | undefined,
   rolle: EmpfaengerRolle,
@@ -29,29 +26,13 @@ async function autoRouteUrl(
   // Portal-Base-Pfad über zentrale Quelle.
   const portalBase = roleToPath(rolle)
 
-  // Helper: rolle-spezifische Fall-Route bauen.
-  const fallRoute = (fallId: string): string => {
-    if (rolle === 'sachverstaendiger') return `/gutachter/fall/${fallId}`
-    if (rolle === 'kunde') return `/kunde/faelle/${fallId}`
-    if (rolle === 'makler') return `/makler/akten/${fallId}`
-    return `/faelle/${fallId}`
-  }
-
   switch (kontextTyp) {
     case 'fall':
-      return fallRoute(kontextId)
-    case 'claim': {
-      // claim → fall lookup. faelle.claim_id ist FK seit CMM-Phase-1.5.
-      const admin = createAdminClient()
-      const { data } = await admin
-        .from('faelle')
-        .select('id')
-        .eq('claim_id', kontextId)
-        .limit(1)
-        .maybeSingle()
-      const fallId = data?.id as string | undefined
-      return fallId ? fallRoute(fallId) : null
-    }
+      if (rolle === 'sachverstaendiger') return `/gutachter/fall/${kontextId}`
+      if (rolle === 'kunde') return `/kunde/faelle/${kontextId}`
+      if (rolle === 'makler') return `/makler/akten/${kontextId}`
+      // admin / kundenbetreuer / dispatch / kanzlei → geteilte Fallakte
+      return `/faelle/${kontextId}`
     case 'lead':
       if (rolle === 'dispatch') return `/dispatch/leads/${kontextId}`
       if (rolle === 'makler') return `/makler/leads/${kontextId}`

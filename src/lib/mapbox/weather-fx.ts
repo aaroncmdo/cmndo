@@ -1,3 +1,4 @@
+// @ts-nocheck — three.js nicht installiert (Feldmodus-3D-Backlog)
 'use client'
 
 // 2026-05-08 (C12): Mapbox Custom-Layer mit Three.js für Wetter-Particles

@@ -51,7 +51,7 @@ export default function LogoUploader({ logoUrl, uploading, onFile, onClear, disa
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors ${
             isDragActive
               ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5'
-              : 'border-claimondo-border bg-claimondo-bg hover:border-[var(--brand-secondary)] hover:bg-claimondo-bg'
+              : 'border-claimondo-border bg-[#f8f9fb] hover:border-[var(--brand-secondary)] hover:bg-[#f8f9fb]'
           } ${uploading || disabled ? 'pointer-events-none opacity-60' : ''}`}
         >
           <input {...getInputProps()} />

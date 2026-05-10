@@ -59,10 +59,10 @@ type SonstigesEintrag = { id: number; label: string }
 
 const STATUS_UI: Record<string, { label: string; bg: string; text: string; icon: typeof CheckCircle2Icon }> = {
   gesendet: { label: 'Anfrage gesendet — warte auf Foto', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: ClockIcon },
-  geoeffnet: { label: 'Kunde hat Anfrage geöffnet', bg: 'bg-claimondo-bg border-claimondo-border', text: 'text-claimondo-ondo', icon: ClockIcon },
+  geoeffnet: { label: 'Kunde hat Anfrage geöffnet', bg: 'bg-[#f8f9fb] border-claimondo-border', text: 'text-claimondo-ondo', icon: ClockIcon },
   hochgeladen: { label: 'Foto eingegangen', bg: 'bg-green-50 border-green-200', text: 'text-green-700', icon: CheckCircle2Icon },
   fehlgeschlagen: { label: 'Upload fehlgeschlagen — manuell nacharbeiten', bg: 'bg-red-50 border-red-200', text: 'text-red-700', icon: AlertCircleIcon },
-  abgelehnt: { label: 'Manuelle Erfassung gewählt', bg: 'bg-claimondo-bg border-claimondo-border', text: 'text-claimondo-ondo', icon: XCircleIcon },
+  abgelehnt: { label: 'Manuelle Erfassung gewählt', bg: 'bg-[#f8f9fb] border-claimondo-border', text: 'text-claimondo-ondo', icon: XCircleIcon },
 }
 
 export default function DokumenteAnfordernCard({
@@ -337,7 +337,7 @@ export default function DokumenteAnfordernCard({
               <span className="font-semibold">Fahrzeugschein:</span> {zb1Cfg.label}
               {zb1HochgeladenAm && zb1Status === 'hochgeladen' && (
                 <span className="block text-[10px] text-claimondo-ondo font-normal mt-0.5">
-                  {new Date(zb1HochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
+                  {new Date(zb1HochgeladenAm).toLocaleString('de-DE')}
                 </span>
               )}
             </p>
@@ -358,7 +358,7 @@ export default function DokumenteAnfordernCard({
               <span className="font-semibold">Polizeibericht:</span> {poliCfg.label}
               {polizeiberichtHochgeladenAm && polizeiberichtStatus === 'hochgeladen' && (
                 <span className="block text-[10px] text-claimondo-ondo font-normal mt-0.5">
-                  {new Date(polizeiberichtHochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
+                  {new Date(polizeiberichtHochgeladenAm).toLocaleString('de-DE')}
                 </span>
               )}
             </p>
@@ -381,7 +381,7 @@ export default function DokumenteAnfordernCard({
         </label>
 
         {/* Fahrzeugschein */}
-        <div className={`rounded-lg border p-3 ${selectFahrzeugschein ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+        <div className={`rounded-lg border p-3 ${selectFahrzeugschein ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -426,7 +426,7 @@ export default function DokumenteAnfordernCard({
 
         {/* Polizeibericht — nur wenn polizei_vor_ort=true UND polizeibericht_pflicht=true */}
         {zeigePolizeibericht && (
-          <div className={`rounded-lg border p-3 ${selectPolizeibericht ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+          <div className={`rounded-lg border p-3 ${selectPolizeibericht ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
             <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -460,7 +460,7 @@ export default function DokumenteAnfordernCard({
         {/* AAR-unfallfotos: Unfallfotos-Slot. Multi-File — Kunde kann mehrere
             Fotos via denselben Link hochladen. Nach Upload läuft Haiku-Vision
             und füllt leads.fahrzeugschaden_beschreibung automatisch. */}
-        <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+        <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-claimondo-ondo bg-[#f8f9fb]/30' : 'border-claimondo-border'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -497,8 +497,8 @@ export default function DokumenteAnfordernCard({
             </div>
           )}
           {unfallfotosAnalyseStatus === 'laeuft' && (
-            <div className="mt-2 flex items-center gap-2 text-[11px] text-claimondo-ondo bg-claimondo-bg border border-claimondo-border rounded px-2 py-1.5">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-claimondo-bg0 animate-pulse shrink-0" />
+            <div className="mt-2 flex items-center gap-2 text-[11px] text-claimondo-ondo bg-[#f8f9fb] border border-claimondo-border rounded px-2 py-1.5">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#f8f9fb]0 animate-pulse shrink-0" />
               <span>Foto{fotosCount === 1 ? '' : 's'} eingegangen — Claude analysiert den Schaden …</span>
             </div>
           )}
@@ -699,7 +699,7 @@ export default function DokumenteAnfordernCard({
         <button
           type="button"
           onClick={addSonstiges}
-          className="w-full text-[11px] text-claimondo-ondo border border-dashed border-claimondo-ondo/50 rounded-lg py-1.5 hover:bg-claimondo-bg flex items-center justify-center gap-1"
+          className="w-full text-[11px] text-claimondo-ondo border border-dashed border-claimondo-ondo/50 rounded-lg py-1.5 hover:bg-[#f8f9fb] flex items-center justify-center gap-1"
         >
           <PlusIcon className="w-3.5 h-3.5" />
           Weiteres Dokument hinzufügen
@@ -718,7 +718,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('whatsapp')}
               disabled={!telefon}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                kanal === 'whatsapp' ? 'bg-[#25D366] text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
+                kanal === 'whatsapp' ? 'bg-[#25D366] text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb]'
               } disabled:opacity-40`}
             >
               <MessageSquareIcon className="w-4 h-4" />
@@ -729,7 +729,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('sms')}
               disabled={!telefon}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                kanal === 'sms' ? 'bg-amber-500 text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
+                kanal === 'sms' ? 'bg-amber-500 text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb]'
               } disabled:opacity-40`}
             >
               <PhoneIcon className="w-4 h-4" />
@@ -740,7 +740,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('email')}
               disabled={!email}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                kanal === 'email' ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
+                kanal === 'email' ? 'bg-claimondo-ondo text-white' : 'bg-[#f8f9fb] text-claimondo-ondo hover:bg-[#f8f9fb]'
               } disabled:opacity-40`}
             >
               <MailIcon className="w-4 h-4" />

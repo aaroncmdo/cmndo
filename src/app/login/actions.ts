@@ -101,7 +101,6 @@ export async function login(formData: FormData) {
     sameSite: 'lax',
     path: '/',
     maxAge: 0,
-    domain: cookieDomain,
   })
 
   // 2FA aktiv? → direkt nach /login/2fa, nicht über Browser-Roundtrip
@@ -125,7 +124,6 @@ export async function login(formData: FormData) {
     sameSite: 'lax',
     path: '/',
     maxAge: 3 * 24 * 60 * 60,
-    domain: cookieDomain,
   })
 
   // BUG-82: revalidatePath vor dem redirect() ist NOTWENDIG damit der

@@ -175,7 +175,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
   return (
     <div className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-claimondo-navy">Endpoint-Register</h3>
+        <h3 className="text-sm font-semibold text-[#0D1B3E]">Endpoint-Register</h3>
         <StatusBadge colorCls="text-amber-700 bg-amber-50 uppercase">
           Manueller Modus
         </StatusBadge>
@@ -201,7 +201,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                   className={`flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg transition-colors text-left ${
                     done
                       ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
-                      : 'text-claimondo-navy bg-claimondo-bg hover:bg-claimondo-ondo hover:text-white'
+                      : 'text-claimondo-navy bg-[#f8f9fb] hover:bg-[#4573A2] hover:text-white'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -224,7 +224,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
         {activeEvent && (
           <div className="space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-claimondo-navy">Auslösen: {activeEvent.label}</h3>
+              <h3 className="font-semibold text-[#0D1B3E]">Auslösen: {activeEvent.label}</h3>
               <button onClick={() => setActiveEvent(null)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
                 <XIcon className="w-5 h-5" />
               </button>
@@ -263,7 +263,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                   <select
                     value={payload[field] ?? ''}
                     onChange={e => setPayload({ ...payload, [field]: e.target.value })}
-                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-claimondo-ondo"
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
                   >
                     <option value="">Bitte wählen</option>
                     <option value="tag14">Tag 14</option>
@@ -274,7 +274,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                   <select
                     value={payload[field] ?? ''}
                     onChange={e => setPayload({ ...payload, [field]: e.target.value })}
-                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-claimondo-ondo"
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
                   >
                     <option value="">Bitte wählen</option>
                     <option value="warten">Warten</option>
@@ -285,7 +285,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                   <select
                     value={payload[field] ?? ''}
                     onChange={e => setPayload({ ...payload, [field]: e.target.value })}
-                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-claimondo-ondo"
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
                   >
                     <option value="">Bitte wählen</option>
                     <option value="banktransfer_direkt">Banktransfer direkt</option>
@@ -298,7 +298,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                     value={payload[field] ?? ''}
                     onChange={e => setPayload({ ...payload, [field]: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-claimondo-ondo"
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
                   />
                 ) : (
                   <input
@@ -312,14 +312,14 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                     }
                     value={payload[field] ?? ''}
                     onChange={e => setPayload({ ...payload, [field]: e.target.value })}
-                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-claimondo-ondo"
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm focus:outline-none focus:border-[#4573A2]"
                   />
                 )}
               </div>
             ))}
 
             <div className="flex gap-2 pt-2">
-              <button onClick={() => setActiveEvent(null)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-claimondo-bg rounded-lg">
+              <button onClick={() => setActiveEvent(null)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-[#f8f9fb] rounded-lg">
                 Abbrechen
               </button>
               <button onClick={handleSubmit} disabled={pending}

@@ -95,7 +95,7 @@ export default async function DispatchSvDetailPage({
               <div className="flex items-center gap-2">
                 <MailIcon className="w-4 h-4 text-claimondo-ondo/70" />
                 {profile?.email ? (
-                  <a href={`mailto:${profile.email}`} className="text-claimondo-ondo hover:underline">{profile.email}</a>
+                  <a href={`mailto:${profile.email}`} className="text-[#4573A2] hover:underline">{profile.email}</a>
                 ) : <span className="text-claimondo-ondo/70">—</span>}
               </div>
             </div>
@@ -125,7 +125,7 @@ export default async function DispatchSvDetailPage({
                 <p className="text-[10px] text-claimondo-ondo/70 uppercase mb-1">Gebiet PLZ</p>
                 <div className="flex flex-wrap gap-1">
                   {(svRec.gebiet_plz as string[]).slice(0, 20).map((plz, i) => (
-                    <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-claimondo-bg text-claimondo-navy">{plz}</span>
+                    <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-[#f8f9fb] text-claimondo-navy">{plz}</span>
                   ))}
                   {(svRec.gebiet_plz as string[]).length > 20 && (
                     <span className="text-[10px] text-claimondo-ondo/70">+{(svRec.gebiet_plz as string[]).length - 20} weitere</span>
@@ -154,7 +154,7 @@ export default async function DispatchSvDetailPage({
                     <FallStatusBadge status={f.status} size="sm" />
                     {f.sv_termin && (
                       <span className="text-[10px] text-claimondo-ondo tabular-nums">
-                        {new Date(f.sv_termin).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}
+                        {new Date(f.sv_termin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                       </span>
                     )}
                   </div>
@@ -181,7 +181,7 @@ export default async function DispatchSvDetailPage({
                   {paketFaelleGenutzt} / {paketFaelleGesamt}
                 </p>
               </div>
-              <div className="h-1.5 bg-claimondo-bg rounded-full overflow-hidden">
+              <div className="h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full ${auslastungProzent >= 80 ? 'bg-red-500' : auslastungProzent >= 50 ? 'bg-amber-500' : 'bg-emerald-500'}`}
                   style={{ width: `${Math.min(100, auslastungProzent)}%` }}
@@ -214,7 +214,7 @@ export default async function DispatchSvDetailPage({
                 <span className="text-claimondo-navy">Portal-Zugang {svRec.portal_zugang_freigeschaltet ? 'frei' : 'gesperrt'}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-claimondo-bg text-claimondo-ondo">Anzahlung: {(svRec.anzahlung_status as string) ?? '—'}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#f8f9fb] text-claimondo-ondo">Anzahlung: {(svRec.anzahlung_status as string) ?? '—'}</span>
               </div>
             </div>
           </div>

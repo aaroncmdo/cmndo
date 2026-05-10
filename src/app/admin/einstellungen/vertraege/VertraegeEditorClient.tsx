@@ -71,7 +71,7 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
             actions={
               <button
                 onClick={() => setCreateOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium rounded-xl transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium rounded-xl transition-colors"
               >
                 <PlusIcon className="w-4 h-4" />
                 Neue Vorlage
@@ -182,7 +182,7 @@ function VorlageCard({
             value={inhalt}
             onChange={e => setInhalt(e.target.value)}
             rows={14}
-            className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+            className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
           />
         </div>
         <label className="flex items-center gap-2 text-sm text-claimondo-navy mb-3 cursor-pointer">
@@ -206,7 +206,7 @@ function VorlageCard({
           </LoadingButton>
           <button
             onClick={onCancelEdit}
-            className="px-4 py-2 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
+            className="px-4 py-2 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb]"
           >
             Abbrechen
           </button>
@@ -228,14 +228,14 @@ function VorlageCard({
                 Aktiv
               </span>
             ) : (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo font-medium">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo font-medium">
                 Inaktiv
               </span>
             )}
           </div>
           <p className="text-xs text-claimondo-ondo">
-            Erstellt {new Date(vorlage.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
-            {vorlage.aktiv && ` · Aktiv seit ${new Date(vorlage.gueltig_ab).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}`}
+            Erstellt {new Date(vorlage.created_at).toLocaleDateString('de-DE')}
+            {vorlage.aktiv && ` · Aktiv seit ${new Date(vorlage.gueltig_ab).toLocaleDateString('de-DE')}`}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -244,7 +244,7 @@ function VorlageCard({
               <button
                 onClick={onEdit}
                 disabled={isPending}
-                className="px-3 py-1.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-xs hover:bg-claimondo-bg"
+                className="px-3 py-1.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-xs hover:bg-[#f8f9fb]"
               >
                 Editieren
               </button>
@@ -325,7 +325,7 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
                 onChange={e => setInhalt(e.target.value)}
                 rows={16}
                 placeholder="<p>Vertragstext...</p>"
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
             <label className="flex items-center gap-2 text-sm text-claimondo-navy cursor-pointer">
@@ -340,7 +340,7 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
             {err && <p className="text-red-600 text-sm">{err}</p>}
           </div>
           <div className="px-5 py-4 border-t border-claimondo-border flex gap-2 justify-end">
-            <button onClick={onClose} className="px-4 py-2 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg">
+            <button onClick={onClose} className="px-4 py-2 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-[#f8f9fb]">
               Abbrechen
             </button>
             <LoadingButton
@@ -368,7 +368,7 @@ function Field({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+        className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
       />
     </div>
   )

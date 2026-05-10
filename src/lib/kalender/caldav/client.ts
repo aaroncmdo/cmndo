@@ -12,7 +12,6 @@
 // Healthcheck-Cron + UI saubere Meldungen geben können.
 
 import { DAVClient } from 'tsdav'
-import { buildIcsEvent, generateIcalUid, type IcsEventInput } from './ical-builder'
 
 export class CalDavError extends Error {
   code: 'auth_failed' | 'network' | 'not_found' | 'other'
@@ -237,8 +236,6 @@ export async function listCalendarEvents(
   for (const obj of objects) {
     const data = (obj as { data?: string }).data
     if (typeof data !== 'string' || !data.includes('BEGIN:VEVENT')) continue
-    // Einfacher Split pro VEVENT-Block — robust gegen mehrere Events in
-    // einer Kalender-Object-Datei (selten, aber tsdav kann das).
     const blocks = data.split('BEGIN:VEVENT')
     for (let i = 1; i < blocks.length; i++) {
       const block = blocks[i].split('END:VEVENT')[0]
@@ -246,7 +243,6 @@ export async function listCalendarEvents(
       const endMatch = DTEND_RE.exec(block)
       if (!startMatch) continue
       const start = parseIcalDateTime(startMatch[1])
-      // Wenn DTEND fehlt (zulässig in iCalendar), nehmen wir start + 1h.
       const end = endMatch
         ? parseIcalDateTime(endMatch[1])
         : (start ? new Date(new Date(start).getTime() + 60 * 60_000).toISOString() : null)
@@ -257,31 +253,17 @@ export async function listCalendarEvents(
   return events
 }
 
-// AAR-872: Vollstaendigere Event-Daten (UID, Titel, Location) fuer den
-// „Stop hinzufuegen"-Flow auf der Heute-Page. Wir koennen `listCalendarEvents`
-// nicht direkt erweitern weil er in busy-slots-Hot-Paths laeuft — hier eine
-// Sibling-Variante mit zusaetzlichem Property-Parsing.
-export type CalDavEventFull = {
+// AAR-716: Erweiterter Event-Typ mit Metadaten für CalDAV-Write-Back.
+export type CalDavEventFull = CalDavEvent & {
   uid: string
-  summary: string | null
-  location: string | null
-  start: string
-  end: string
+  summary: string
+  location?: string
+  objectUrl?: string
 }
 
-const UID_RE = /^UID(?:;[^:]*)?:(.+)$/m
-const SUMMARY_RE = /^SUMMARY(?:;[^:]*)?:(.+)$/m
-const LOCATION_RE = /^LOCATION(?:;[^:]*)?:(.+)$/m
-
-function unfoldIcal(s: string): string {
-  // RFC 5545: lange Lines werden mit CRLF + Whitespace umgebrochen.
-  return s.replace(/\r?\n[ \t]/g, '')
-}
-
-function unescapeIcalText(s: string): string {
-  // RFC 5545: \\, \,, \;, \n im TEXT-Wert.
-  return s.replace(/\\([\\,;nN])/g, (_, c) => (c === 'n' || c === 'N' ? '\n' : c))
-}
+const SUMMARY_RE = /^SUMMARY:(.+)$/m
+const LOCATION_RE = /^LOCATION:(.+)$/m
+const UID_RE = /^UID:(.+)$/m
 
 export async function listCalendarEventsFull(
   creds: CalDavCredentials,
@@ -297,27 +279,18 @@ export async function listCalendarEventsFull(
   let objects: unknown[]
   try {
     objects = (await Promise.race([
-      client.fetchCalendarObjects({
-        calendar: cal,
-        timeRange: { start: rangeStartIso, end: rangeEndIso },
-      }),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), REQUEST_TIMEOUT_MS * 3),
-      ),
+      client.fetchCalendarObjects({ calendar: cal, timeRange: { start: rangeStartIso, end: rangeEndIso } }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), REQUEST_TIMEOUT_MS * 3)),
     ])) as unknown[]
   } catch (err) {
-    throw new CalDavError(
-      `Event-Liste konnte nicht geladen werden: ${err instanceof Error ? err.message : String(err)}`,
-      'other',
-      err,
-    )
+    throw new CalDavError(`Event-Liste konnte nicht geladen werden: ${err instanceof Error ? err.message : String(err)}`, 'other', err)
   }
 
   const events: CalDavEventFull[] = []
   for (const obj of objects) {
-    const raw = (obj as { data?: string }).data
-    if (typeof raw !== 'string' || !raw.includes('BEGIN:VEVENT')) continue
-    const data = unfoldIcal(raw)
+    const raw = obj as { data?: string; url?: string }
+    const data = raw.data
+    if (typeof data !== 'string' || !data.includes('BEGIN:VEVENT')) continue
     const blocks = data.split('BEGIN:VEVENT')
     for (let i = 1; i < blocks.length; i++) {
       const block = blocks[i].split('END:VEVENT')[0]
@@ -325,185 +298,87 @@ export async function listCalendarEventsFull(
       const endMatch = DTEND_RE.exec(block)
       if (!startMatch) continue
       const start = parseIcalDateTime(startMatch[1])
-      const end = endMatch
-        ? parseIcalDateTime(endMatch[1])
-        : (start ? new Date(new Date(start).getTime() + 60 * 60_000).toISOString() : null)
+      const end = endMatch ? parseIcalDateTime(endMatch[1]) : (start ? new Date(new Date(start).getTime() + 60 * 60_000).toISOString() : null)
       if (!start || !end) continue
-      const uidMatch = UID_RE.exec(block)
-      const summaryMatch = SUMMARY_RE.exec(block)
-      const locationMatch = LOCATION_RE.exec(block)
-      events.push({
-        uid: (uidMatch?.[1] ?? '').trim() || `caldav-${start}-${i}`,
-        summary: summaryMatch ? unescapeIcalText(summaryMatch[1].trim()) : null,
-        location: locationMatch ? unescapeIcalText(locationMatch[1].trim()) : null,
-        start,
-        end,
-      })
+      const uid = (UID_RE.exec(block)?.[1] ?? '').trim()
+      const summary = (SUMMARY_RE.exec(block)?.[1] ?? '').trim()
+      const location = LOCATION_RE.exec(block)?.[1]?.trim()
+      events.push({ start, end, uid, summary, ...(location ? { location } : {}), objectUrl: raw.url })
     }
   }
   return events
 }
 
-// ===== AAR-716: Write-Operationen ============================================
-//
-// CalDAV-PUT pattern (Apple iCloud + Fastmail + Nextcloud):
-//   PUT <calendarUrl>/<filename>.ics
-//   If-None-Match: *      (Create — 412 wenn Datei schon da)
-//   If-Match: <etag>      (Update — Server akzeptiert Update nur wenn
-//                          das Etag noch passt)
-//
-// tsdav abstrahiert das via createCalendarObject / updateCalendarObject.
-// Bei Apple iCloud landet das Objekt in einem vom Server gewählten Pfad —
-// die finale URL liefert tsdav per `.url` zurück, die wir persistieren.
-//
-// Fail-soft: Aufrufer müssen try/catch wickeln; wir loggen + werfen
-// CalDavError. Der Termin-Flow geht bei Sync-Fehler weiter.
+type CalDavEventInput = {
+  uid?: string
+  summary: string
+  description?: string
+  location?: string
+  startIso: string
+  endIso: string
+}
 
-export type CalDavCreateInput = {
+function buildIcs(event: CalDavEventInput & { uid: string }): string {
+  const fmt = (iso: string) => iso.replace(/[-:]/g, '').replace('.000', '')
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Claimondo//DE',
+    'BEGIN:VEVENT',
+    `UID:${event.uid}`,
+    `DTSTAMP:${fmt(new Date().toISOString())}`,
+    `DTSTART:${fmt(event.startIso)}`,
+    `DTEND:${fmt(event.endIso)}`,
+    `SUMMARY:${event.summary}`,
+  ]
+  if (event.description) lines.push(`DESCRIPTION:${event.description.replace(/\n/g, '\\n')}`)
+  if (event.location) lines.push(`LOCATION:${event.location}`)
+  lines.push('END:VEVENT', 'END:VCALENDAR')
+  return lines.join('\r\n')
+}
+
+export async function createCalendarEvent({
+  creds,
+  calendarUrl,
+  event,
+}: {
   creds: CalDavCredentials
   calendarUrl: string
-  event: Omit<IcsEventInput, 'uid'> & { uid?: string }
+  event: CalDavEventInput
+}): Promise<{ objectUrl: string; uid: string }> {
+  const uid = event.uid ?? `claimondo-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  const ics = buildIcs({ ...event, uid })
+  const client = await createClient(creds)
+  const calendars = await client.fetchCalendars()
+  const cal = calendars.find((c) => String(c.url) === calendarUrl) ?? calendars[0]
+  if (!cal) throw new CalDavError('Kalender nicht gefunden', 'not_found')
+
+  const objectUrl = `${String(cal.url).replace(/\/$/, '')}/${uid}.ics`
+  await client.createCalendarObject({ calendar: cal, filename: `${uid}.ics`, iCalString: ics })
+  return { objectUrl, uid }
 }
 
-export type CalDavCreateResult = {
-  objectUrl: string
-  uid: string
-}
-
-/**
- * Erstellt ein Event auf dem CalDAV-Server. Generiert UID + ICS-Body und
- * sendet via tsdav.createCalendarObject. Liefert objectUrl + uid zurück
- * für späteres Update/Delete.
- */
-export async function createCalendarEvent(
-  input: CalDavCreateInput,
-): Promise<CalDavCreateResult> {
-  const uid = input.event.uid ?? generateIcalUid()
-  const ics = buildIcsEvent({ ...input.event, uid })
-  const filename = `${uid}.ics`
-
-  try {
-    const client = await createClient(input.creds)
-    const calendars = await client.fetchCalendars()
-    const cal = calendars.find((c) => String(c.url) === input.calendarUrl) ?? calendars[0]
-    if (!cal) {
-      throw new CalDavError('Kein Kalender gefunden', 'not_found')
-    }
-
-    const res = await Promise.race([
-      client.createCalendarObject({
-        calendar: cal,
-        filename,
-        iCalString: ics,
-      }),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new CalDavError('Timeout beim Create', 'network')), REQUEST_TIMEOUT_MS),
-      ),
-    ])
-
-    // tsdav liefert ein Response-ähnliches Objekt mit .url (string)
-    const objectUrl = extractObjectUrl(res, cal.url, filename)
-    if (!objectUrl) {
-      throw new CalDavError('Server lieferte keine Objekt-URL zurück', 'other')
-    }
-    return { objectUrl, uid }
-  } catch (err) {
-    if (err instanceof CalDavError) throw err
-    throw new CalDavError(
-      `Event-Create fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`,
-      'other',
-      err,
-    )
-  }
-}
-
-export type CalDavUpdateInput = {
+export async function updateCalendarEvent({
+  creds,
+  objectUrl,
+  event,
+}: {
   creds: CalDavCredentials
   objectUrl: string
-  event: IcsEventInput
+  event: CalDavEventInput & { uid: string }
+}): Promise<void> {
+  const ics = buildIcs(event)
+  const client = await createClient(creds)
+  await client.updateCalendarObject({ calendarObject: { url: objectUrl, data: ics, etag: '' } })
 }
 
-/**
- * Aktualisiert ein bestehendes CalDAV-Event per PUT auf seine objectUrl.
- * UID muss unverändert bleiben. Wir holen das aktuelle Etag nicht — Apple
- * akzeptiert PUT ohne If-Match (Last-Write-Wins). Falls strenger Server
- * 412 zurückgibt, müsste der Aufrufer Re-Fetch + Retry machen — heute
- * out-of-scope.
- */
-export async function updateCalendarEvent(input: CalDavUpdateInput): Promise<void> {
-  const ics = buildIcsEvent(input.event)
-  try {
-    const client = await createClient(input.creds)
-    await Promise.race([
-      client.updateCalendarObject({
-        calendarObject: {
-          url: input.objectUrl,
-          data: ics,
-          // etag null = Server-seitiges Last-Write-Wins
-          etag: '*',
-        },
-      }),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new CalDavError('Timeout beim Update', 'network')), REQUEST_TIMEOUT_MS),
-      ),
-    ])
-  } catch (err) {
-    if (err instanceof CalDavError) throw err
-    throw new CalDavError(
-      `Event-Update fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`,
-      'other',
-      err,
-    )
-  }
-}
-
-export type CalDavDeleteInput = {
+export async function deleteCalendarEvent({
+  creds,
+  objectUrl,
+}: {
   creds: CalDavCredentials
   objectUrl: string
-}
-
-/**
- * Löscht ein CalDAV-Event. 404 vom Server gilt als Erfolg (idempotent).
- */
-export async function deleteCalendarEvent(input: CalDavDeleteInput): Promise<void> {
-  try {
-    const client = await createClient(input.creds)
-    await Promise.race([
-      client.deleteCalendarObject({
-        calendarObject: { url: input.objectUrl, etag: '*' },
-      }),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new CalDavError('Timeout beim Delete', 'network')), REQUEST_TIMEOUT_MS),
-      ),
-    ])
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    if (/404|not.?found/i.test(msg)) return // idempotent — Event war eh schon weg
-    if (err instanceof CalDavError) throw err
-    throw new CalDavError(`Event-Delete fehlgeschlagen: ${msg}`, 'other', err)
-  }
-}
-
-function extractObjectUrl(
-  response: unknown,
-  calendarUrl: string,
-  filename: string,
-): string | null {
-  // tsdav-Antworten haben unterschiedliche Shapes je nach Version. Wir
-  // versuchen mehrere Pfade defensiv:
-  if (response && typeof response === 'object') {
-    const r = response as { url?: unknown; headers?: { get?: (k: string) => string | null } }
-    if (typeof r.url === 'string' && r.url.length > 0) return r.url
-    const loc = r.headers?.get?.('location') ?? r.headers?.get?.('Location')
-    if (typeof loc === 'string' && loc.length > 0) {
-      // Location kann relativ sein → an calendarUrl anhängen
-      if (loc.startsWith('http')) return loc
-      const base = calendarUrl.replace(/\/$/, '')
-      return `${base}/${loc.replace(/^\//, '')}`
-    }
-  }
-  // Fallback: Wir kennen den Filename, hängen ihn an calendarUrl —
-  // funktioniert bei Apple iCloud zuverlässig.
-  const base = calendarUrl.replace(/\/$/, '')
-  return `${base}/${filename}`
+}): Promise<void> {
+  const client = await createClient(creds)
+  await client.deleteCalendarObject({ calendarObject: { url: objectUrl, etag: '' } })
 }

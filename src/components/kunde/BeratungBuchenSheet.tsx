@@ -32,18 +32,17 @@ export default function BeratungBuchenSheet({
   fallId,
   open,
   onClose,
-  defaultKanal = 'video',
+  defaultKanal,
 }: {
   fallId: string
   open: boolean
   onClose: () => void
-  /** Vorausgewaehlter Kanal — Video oder Telefon (Rueckruftermin). */
   defaultKanal?: 'video' | 'telefon'
 }) {
   const [step, setStep] = useState<Step>(1)
   const [thema, setThema] = useState<string>(THEMEN[0])
   const [beschreibung, setBeschreibung] = useState('')
-  const [kanal, setKanal] = useState<'video' | 'telefon'>(defaultKanal)
+  const [kanal, setKanal] = useState<'video' | 'telefon'>(defaultKanal ?? 'video')
 
   const [slots, setSlots] = useState<FreeSlot[] | null>(null)
   const [kbName, setKbName] = useState<string | null>(null)
@@ -140,14 +139,14 @@ export default function BeratungBuchenSheet({
         <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
           <div>
             <p className="text-xs uppercase tracking-wider text-claimondo-ondo">Beratungstermin</p>
-            <p className="text-sm font-semibold text-claimondo-navy">
+            <p className="text-sm font-semibold text-[#0D1B3E]">
               {step === 'success' ? 'Termin bestätigt' : `Schritt ${step} von 3`}
             </p>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="w-9 h-9 rounded-full hover:bg-claimondo-bg flex items-center justify-center"
+            className="w-9 h-9 rounded-full hover:bg-[#f8f9fb] flex items-center justify-center"
             aria-label="Schließen"
           >
             <XIcon className="w-5 h-5 text-claimondo-ondo" />
@@ -163,14 +162,14 @@ export default function BeratungBuchenSheet({
                 <select
                   value={thema}
                   onChange={(e) => setThema(e.target.value)}
-                  className="w-full min-h-11 px-3 rounded-xl border-2 border-claimondo-border focus:border-claimondo-ondo focus:outline-none bg-white text-sm"
+                  className="w-full min-h-11 px-3 rounded-xl border-2 border-claimondo-border focus:border-[#4573A2] focus:outline-none bg-white text-sm"
                 >
                   {THEMEN.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-claimondo-navy mb-2">
+                <label className="block text-sm font-medium text-[#0D1B3E] mb-2">
                   Kurze Beschreibung <span className="text-xs font-normal text-claimondo-ondo">(optional)</span>
                 </label>
                 <textarea
@@ -179,7 +178,7 @@ export default function BeratungBuchenSheet({
                   rows={3}
                   placeholder="z. B. ‚Ich habe eine Rückfrage zur Höhe der Regulierung'"
                   // AAR-452: text-base verhindert iOS-Autozoom beim Fokus
-                  className="w-full px-3 py-2 rounded-xl border-2 border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-base resize-none"
+                  className="w-full px-3 py-2 rounded-xl border-2 border-claimondo-border focus:border-[#4573A2] focus:outline-none text-base resize-none"
                 />
                 <p className="mt-1 text-xs text-claimondo-ondo">{beschreibung.length}/200 Zeichen</p>
               </div>
@@ -191,7 +190,7 @@ export default function BeratungBuchenSheet({
                     type="button"
                     onClick={() => setKanal('video')}
                     className={`flex items-center justify-center gap-2 min-h-11 rounded-xl border-2 text-sm font-medium transition-all ${
-                      kanal === 'video' ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo/60'
+                      kanal === 'video' ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#0D1B3E]' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo/60'
                     }`}
                   >
                     <VideoIcon className="w-4 h-4" /> Video-Call
@@ -200,7 +199,7 @@ export default function BeratungBuchenSheet({
                     type="button"
                     onClick={() => setKanal('telefon')}
                     className={`flex items-center justify-center gap-2 min-h-11 rounded-xl border-2 text-sm font-medium transition-all ${
-                      kanal === 'telefon' ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo/60'
+                      kanal === 'telefon' ? 'border-[#4573A2] bg-[#4573A2]/5 text-[#0D1B3E]' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo/60'
                     }`}
                   >
                     <PhoneIcon className="w-4 h-4" /> Telefon
@@ -246,11 +245,11 @@ export default function BeratungBuchenSheet({
                               setSelectedUhrzeit(null)
                             }}
                             className={`flex flex-col items-center py-2 rounded-xl border-2 transition-all ${
-                              isSelected ? 'border-claimondo-ondo bg-claimondo-ondo/5' : 'border-claimondo-border hover:border-claimondo-ondo/60'
+                              isSelected ? 'border-[#4573A2] bg-[#4573A2]/5' : 'border-claimondo-border hover:border-claimondo-ondo/60'
                             }`}
                           >
                             <span className="text-xs text-claimondo-ondo uppercase">
-                              {date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short' })}
+                              {date.toLocaleDateString('de-DE', { weekday: 'short' })}
                             </span>
                             <span className="text-sm font-semibold text-claimondo-navy">
                               {date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}
@@ -276,7 +275,7 @@ export default function BeratungBuchenSheet({
                               onClick={() => setSelectedUhrzeit(u)}
                               className={`min-h-11 rounded-xl border-2 text-sm font-medium transition-all ${
                                 isSelected
-                                  ? 'border-claimondo-ondo bg-claimondo-ondo text-white'
+                                  ? 'border-[#4573A2] bg-[#4573A2] text-white'
                                   : 'border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo/60'
                               }`}
                             >
@@ -323,7 +322,7 @@ export default function BeratungBuchenSheet({
               <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
                 <CheckIcon className="w-7 h-7 text-emerald-600" strokeWidth={3} />
               </div>
-              <p className="text-lg font-semibold text-claimondo-navy">Termin gebucht!</p>
+              <p className="text-lg font-semibold text-[#0D1B3E]">Termin gebucht!</p>
               <p className="mt-1.5 text-sm text-claimondo-ondo">
                 Sie erhalten in Kürze eine WhatsApp-Bestätigung.
               </p>
@@ -333,14 +332,14 @@ export default function BeratungBuchenSheet({
 
         {/* Footer */}
         {step !== 'success' && (
-          <div className="flex items-center justify-between gap-2 px-5 py-4 border-t border-claimondo-border bg-claimondo-bg">
+          <div className="flex items-center justify-between gap-2 px-5 py-4 border-t border-claimondo-border bg-[#f8f9fb]">
             <button
               type="button"
               onClick={() => {
                 if (step === 1) handleClose()
                 else setStep((step - 1) as Step)
               }}
-              className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl text-sm font-medium text-claimondo-navy hover:bg-claimondo-bg transition-colors"
+              className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl text-sm font-medium text-claimondo-navy hover:bg-[#f8f9fb] transition-colors"
             >
               {step === 1 ? 'Abbrechen' : (<><ArrowLeftIcon className="w-4 h-4" /> Zurück</>)}
             </button>
@@ -377,7 +376,7 @@ export default function BeratungBuchenSheet({
           </div>
         )}
         {step === 'success' && (
-          <div className="px-5 py-4 border-t border-claimondo-border bg-claimondo-bg">
+          <div className="px-5 py-4 border-t border-claimondo-border bg-[#f8f9fb]">
             <button
               type="button"
               onClick={handleClose}
@@ -396,7 +395,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4 text-sm">
       <span className="text-claimondo-ondo shrink-0">{label}</span>
-      <span className="font-medium text-claimondo-navy text-right">{value}</span>
+      <span className="font-medium text-[#0D1B3E] text-right">{value}</span>
     </div>
   )
 }

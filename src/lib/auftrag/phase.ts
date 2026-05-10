@@ -59,12 +59,6 @@ export function getAuftragsPhase(input: AuftragPhaseInput): AuftragsPhase {
     if (now >= t - FENSTER_VOR_MS && now <= t + FENSTER_NACH_MS) {
       return 'besichtigung'
     }
-    // Termin liegt in der Vergangenheit (> 4h), SV hat Besichtigung nicht
-    // über App abgehakt → wir nehmen an dass sie stattgefunden hat und
-    // zeigen Phase "gutachten" (GutachtenUploadBanner statt leerem Termin-State).
-    if (now > t + FENSTER_NACH_MS) {
-      return 'gutachten'
-    }
   }
 
   // 1. termin — Default

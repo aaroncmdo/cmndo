@@ -266,7 +266,7 @@ export default function KarteHubClient({ svs }: Props) {
     <div className="h-full flex flex-col lg:flex-row bg-white rounded-xl overflow-hidden border border-claimondo-border relative">
       {/* Linker Bereich: Header + Karte */}
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-claimondo-border bg-claimondo-bg/60 shrink-0">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-claimondo-border bg-[#f8f9fb]/60 shrink-0">
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-semibold text-claimondo-navy">Sachverständige</h2>
             <span className="text-xs text-claimondo-ondo">
@@ -283,7 +283,7 @@ export default function KarteHubClient({ svs }: Props) {
           </div>
           <Link
             href="/admin/sachverstaendige/anlegen"
-            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white hover:bg-claimondo-navy"
+            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-[#4573A2] text-white hover:bg-[#0D1B3E]"
           >
             + Neuer SV
           </Link>
@@ -292,7 +292,7 @@ export default function KarteHubClient({ svs }: Props) {
       </div>
 
       {/* Rechte Spalte: Liste */}
-      <aside className="lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-claimondo-border bg-claimondo-bg flex flex-col">
+      <aside className="lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-claimondo-border bg-[#f8f9fb] flex flex-col">
         <div className="p-3 border-b border-claimondo-border bg-white shrink-0">
           <div className="relative">
             <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
@@ -300,7 +300,7 @@ export default function KarteHubClient({ svs }: Props) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="SV suchen (Name, Paket, Typ)"
-              className="w-full pl-7 pr-2 py-1.5 text-xs bg-claimondo-bg border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+              className="w-full pl-7 pr-2 py-1.5 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
             />
           </div>
           <p className="text-[10px] text-claimondo-ondo/70 mt-1.5">

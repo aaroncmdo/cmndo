@@ -44,7 +44,7 @@ export default function FaelleHubTabs({
             href={tab.href}
             className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-2 ${
               active
-                ? 'border-claimondo-navy text-claimondo-navy'
+                ? 'border-[#0D1B3E] text-[#0D1B3E]'
                 : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy hover:border-claimondo-border'
             }`}
           >

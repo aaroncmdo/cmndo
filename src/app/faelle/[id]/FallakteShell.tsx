@@ -35,6 +35,8 @@ import type { ClaimTimelineEvent } from '@/lib/claims/timeline-queries'
 import type { ProjectedEvent } from '@/lib/claims/timeline-projection'
 // AAR-746 (Phase B): Shared Identity-Header — neu auch im Admin-Portal.
 import { FallIdentityHeader } from '@/components/shared/fall-header'
+// AAR-770: Mitteilungs-Banner ganz oben in der Fallakte
+import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 // AAR-776: Shared Tab-Bar
 import { FallakteTabs } from '@/components/shared/fall-tabs'
 
@@ -103,10 +105,6 @@ type ShellProps = {
   // AAR-843: Timeline-Daten für den Verlaufs-Tab (server-seitig geladen)
   timelineEvents: ClaimTimelineEvent[]
   futureEvents: ProjectedEvent[]
-  // No-Show + Kunde-Verlegung Banner (claim > fall > auftrag SSoT)
-  kundeNoShowCount?: number
-  letzterNoShowAm?: string | null
-  kundeVerlegungVorhanden?: boolean
 }
 
 export default function FallakteShell({
@@ -124,8 +122,6 @@ export default function FallakteShell({
   claimStatus,
   claimKanzleiWunsch,
   kanzleiPaketPending,
-  kundeNoShowCount = 0,
-  kundeVerlegungVorhanden = false,
   timelineEvents,
   futureEvents,
 }: ShellProps) {
@@ -176,30 +172,9 @@ export default function FallakteShell({
               FallIdentityHeader zeigt Fallnummer · Kunde · Ort, die ActionBar-
               Buttons landen im actions-Slot rechts. Phase-Label weggelassen —
               steht bereits in der Aside-Phasen-Pipeline, keine Dopplung mehr. */}
-          <div className="px-4 sm:px-6 pt-4 space-y-2">
-            {/* No-Show-Banner aus claim.kunde_no_show_count */}
-            {kundeNoShowCount > 0 && (
-              <div className="rounded-2xl border-2 border-rose-300 bg-rose-50 p-4">
-                <p className="text-sm font-semibold text-rose-900">
-                  {kundeNoShowCount === 1
-                    ? 'Termin wurde verpasst'
-                    : `${kundeNoShowCount} Termine wurden verpasst`}
-                </p>
-                <p className="text-xs text-rose-800 mt-1">
-                  Der Kunde war beim letzten Termin nicht vor Ort und hat keinen Bescheid gegeben.
-                  Ggf. mit Kundenbetreuer + Gutachter abstimmen.
-                </p>
-              </div>
-            )}
-            {/* Hinweis: Kunde hat in den letzten 7 Tagen einen Termin verlegt. */}
-            {kundeVerlegungVorhanden && (
-              <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4">
-                <p className="text-sm font-semibold text-amber-900">Termin durch Kunde verschoben</p>
-                <p className="text-xs text-amber-800 mt-1">
-                  Der Kunde hat den Termin selbst verlegt. Keine Bestätigung erforderlich — der neue Slot ist bereits aktiv.
-                </p>
-              </div>
-            )}
+          {/* AAR-770: Mitteilungs-Banner ganz oben — vor dem Identity-Header */}
+          <div className="px-4 sm:px-6 pt-4">
+            <FallMitteilungenBanner fallId={fall.id} rolle={userRolle} />
           </div>
           <FallIdentityHeader
             rolle="admin"

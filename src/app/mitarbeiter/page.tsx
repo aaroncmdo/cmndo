@@ -121,12 +121,12 @@ export default async function MitarbeiterDashboard() {
                 const href = lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : '#'
                 const overdue = new Date(r.start_zeit) < new Date()
                 return (
-                  <Link key={r.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
+                  <Link key={r.id} href={href} className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
                         <p className={`text-xs ${overdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
-                          {new Date(r.start_zeit).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                          {new Date(r.start_zeit).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                           {overdue && ' (überfällig)'}
                         </p>
                       </div>
@@ -157,16 +157,16 @@ export default async function MitarbeiterDashboard() {
                 const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; fall_nummer: string | null } | null)
                 const href = fall ? `/faelle/${fall.id}` : '#'
                 return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
+                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-claimondo-navy truncate">{t.titel}</p>
                         <p className="text-xs text-claimondo-ondo">
-                          {new Date(t.start_zeit).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                          {new Date(t.start_zeit).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                           {fall?.fall_nummer ? ` · ${fall.fall_nummer}` : ''}
                         </p>
                       </div>
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{t.typ}</span>
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo">{t.typ}</span>
                     </div>
                   </Link>
                 )
@@ -187,13 +187,13 @@ export default async function MitarbeiterDashboard() {
         </div>
         <div className="divide-y divide-claimondo-border">
           {(faelle ?? []).map(f => (
-            <Link key={f.id} href={`/faelle/${f.id}`} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
+            <Link key={f.id} href={`/faelle/${f.id}`} className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-claimondo-navy">{f.fall_nummer ?? f.id.slice(0, 8)}</p>
                   <p className="text-xs text-claimondo-ondo">{f.kennzeichen ?? '—'}</p>
                 </div>
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.status}</span>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#f8f9fb] text-claimondo-ondo">{f.status}</span>
               </div>
             </Link>
           ))}
@@ -216,12 +216,12 @@ export default async function MitarbeiterDashboard() {
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                   t.prioritaet === 'kritisch' ? 'bg-red-100 text-red-700' :
                   t.prioritaet === 'dringend' ? 'bg-amber-100 text-amber-700' :
-                  'bg-claimondo-bg text-claimondo-ondo'
+                  'bg-[#f8f9fb] text-claimondo-ondo'
                 }`}>{t.prioritaet}</span>
                 <span className="truncate text-claimondo-navy">{t.titel}</span>
               </div>
               <span className="text-xs text-claimondo-ondo/70 flex-shrink-0 ml-2">
-                {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }) : '—'}
+                {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '—'}
               </span>
             </div>
           ))}
@@ -244,7 +244,7 @@ function KpiBox({
   color: 'blue' | 'violet' | 'emerald' | 'amber'
 }) {
   const colorCls = {
-    blue: 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo',
+    blue: 'bg-[#f8f9fb] border-claimondo-border text-claimondo-ondo',
     violet: 'bg-violet-50 border-violet-200 text-violet-700',
     emerald: 'bg-emerald-50 border-emerald-200 text-emerald-700',
     amber: 'bg-amber-50 border-amber-200 text-amber-700',

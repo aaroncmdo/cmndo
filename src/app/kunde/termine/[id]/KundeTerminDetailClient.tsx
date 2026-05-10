@@ -82,7 +82,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string; icon: typeof Ch
   },
   abgesagt: {
     label: 'Abgesagt',
-    cls: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border',
+    cls: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
     icon: AlertCircleIcon,
   },
   abgeschlossen: {
@@ -104,18 +104,18 @@ export default function KundeTerminDetailClient({
   const start = new Date(termin.start_zeit)
   const ende = termin.end_zeit ? new Date(termin.end_zeit) : null
 
-  const datum = start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+  const datum = start.toLocaleDateString('de-DE', {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
     year: 'numeric',
   })
-  const uhrzeit = start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
-  const endzeit = ende?.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+  const uhrzeit = start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const endzeit = ende?.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 
   const status = STATUS_LABEL[termin.status] ?? {
     label: termin.status,
-    cls: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border',
+    cls: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border',
     icon: ClockIcon,
   }
   const StatusIcon = status.icon
@@ -312,7 +312,7 @@ export default function KundeTerminDetailClient({
             </p>
           </div>
           {mapsEmbedSrc && (
-            <div className="aspect-video w-full bg-claimondo-bg">
+            <div className="aspect-video w-full bg-[#f8f9fb]">
               <iframe
                 src={mapsEmbedSrc}
                 width="100%"

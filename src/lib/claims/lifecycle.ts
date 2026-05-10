@@ -40,36 +40,9 @@ export type ClaimLifecycle = {
   aktiveSideQuests: AuftragRow[]
   /** Aktiver Auftrag (für Anzeige der Termin/ETA-Details). */
   aktiverAuftrag: AuftragRow | null
-  /** Kunde-No-Show-Counter (aus claim.kunde_no_show_count). */
-  kundeNoShowCount: number
-  /** Zeitstempel des letzten verpassten Termins. */
-  letzterNoShowAm: string | null
 }
 
 export type ClaimLifecycleInput = {
-  /**
-   * Claim-SSoT-Daten. Reihenfolge der Wahrheit: claim > fall > auftrag.
-   * Felder die ueberall gleich sein sollen (no_show, schadensdaten) kommen
-   * primaer vom claim — fall + auftrag liefern Sub-Workflow-Status.
-   */
-  claim: {
-    kunde_no_show_count: number | null
-    letzter_no_show_am: string | null
-    /** CMM-32 Polish: 'partnerkanzlei' = Komplettservice via LexDrive,
-     *  'eigene_kanzlei' = Kunde regelt selbst nach Kanzleipaket-Versand. */
-    kanzlei_wunsch?:
-      | 'partnerkanzlei'
-      | 'eigene_kanzlei'
-      | 'keine_kanzlei'
-      | 'noch_unentschieden'
-      | 'nicht_gefragt'
-      | null
-    /** Zeitstempel des Kanzleipaket-Versands an die externe Kanzlei. */
-    kanzlei_uebergeben_am?: string | null
-    /** Endzustand-Status — 'an_externe_kanzlei_uebergeben' triggert Abschluss
-     *  ohne dass wir VS-Kommunikation fuehren. */
-    status?: string | null
-  } | null
   /** Lead-Felder die den Erfassungs-Status beschreiben. */
   lead: {
     sa_unterschrieben: boolean | null
@@ -115,10 +88,7 @@ export function mainPhaseOf(sub: ClaimSubPhase): ClaimMainPhase {
 }
 
 export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
-  const { claim, lead, auftraege, kanzleiFall } = input
-  // Claim-Felder: SSoT fuer Querschnitts-Daten (no_show etc.).
-  const kundeNoShowCount = (claim?.kunde_no_show_count as number | null) ?? 0
-  const letzterNoShowAm = (claim?.letzter_no_show_am as string | null) ?? null
+  const { lead, auftraege, kanzleiFall } = input
 
   const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten') ?? null
   const sideQuests = auftraege.filter(
@@ -126,11 +96,6 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
   )
 
   // ── Abschluss ───────────────────────────────────────────────────────────
-  // Drei Wege zum Abschluss:
-  //   1. Kanzlei-Auszahlung erfolgt (Standardpfad ueber LexDrive)
-  //   2. claim.status='an_externe_kanzlei_uebergeben' (eigene Kanzlei,
-  //      Kunde hat Paket bekommen, wir kuemmern uns ab da nicht mehr)
-  //   3. Manuelle Endzustaende abgelehnt/storniert (eigene Phase, hier nicht)
   if (
     kanzleiFall?.status === 'auszahlung' &&
     kanzleiFall.ausgezahlt_am &&
@@ -141,37 +106,6 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
       subPhase: 'abgeschlossen',
       aktiveSideQuests: [],
       aktiverAuftrag: null,
-      kundeNoShowCount,
-      letzterNoShowAm,
-    }
-  }
-  if (claim?.status === 'an_externe_kanzlei_uebergeben') {
-    return {
-      mainPhase: 'abschluss',
-      subPhase: 'abgeschlossen',
-      aktiveSideQuests: [],
-      aktiverAuftrag: null,
-      kundeNoShowCount,
-      letzterNoShowAm,
-    }
-  }
-
-  // A3: Kunde reguliert selbst — kanzlei_faelle wurde durch setKanzleiWunsch
-  // gelöscht, claim.kanzlei_wunsch='keine_kanzlei'. Sobald das Erstgutachten
-  // QC-freigegeben ist (alle auftraege abgeschlossen), ist Claimondo durch.
-  if (
-    claim?.kanzlei_wunsch === 'keine_kanzlei' &&
-    !kanzleiFall &&
-    auftraege.length > 0 &&
-    auftraege.every((a) => a.status === 'abgeschlossen')
-  ) {
-    return {
-      mainPhase: 'abschluss',
-      subPhase: 'abgeschlossen',
-      aktiveSideQuests: [],
-      aktiverAuftrag: null,
-      kundeNoShowCount,
-      letzterNoShowAm,
     }
   }
 
@@ -187,8 +121,6 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
       subPhase: sub,
       aktiveSideQuests: sideQuests,
       aktiverAuftrag: sideQuests[0] ?? null,
-      kundeNoShowCount,
-      letzterNoShowAm,
     }
   }
 
@@ -206,8 +138,6 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
       subPhase: subMap[erstgutachten.status],
       aktiveSideQuests: [],
       aktiverAuftrag: erstgutachten,
-      kundeNoShowCount,
-      letzterNoShowAm,
     }
   }
 
@@ -222,8 +152,6 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
       subPhase: sub,
       aktiveSideQuests: [],
       aktiverAuftrag: null,
-      kundeNoShowCount,
-      letzterNoShowAm,
     }
   }
 
@@ -233,8 +161,6 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
     subPhase: 'sa_offen',
     aktiveSideQuests: [],
     aktiverAuftrag: null,
-    kundeNoShowCount,
-    letzterNoShowAm,
   }
 }
 

@@ -19,7 +19,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 export const dynamic = 'force-dynamic'
 
 function fmtDatum(iso: string): string {
-  return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+  return new Date(iso).toLocaleDateString('de-DE', {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
@@ -27,17 +27,13 @@ function fmtDatum(iso: string): string {
   })
 }
 function fmtUhrzeit(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
+  return new Date(iso).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
   })
 }
 
-export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+export async function GET() {
   const db = createAdminClient()
 
   // Pending-Slots laden, die noch nicht eskaliert wurden

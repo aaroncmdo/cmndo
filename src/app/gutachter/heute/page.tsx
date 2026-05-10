@@ -49,12 +49,15 @@ export type HeuteTerminFull = {
   sv_briefing_text: string | null
   // AAR-724: Noch nicht vom SV angesehen → roter Punkt auf der Card.
   gesehen_am: string | null
-  // Auftrag-Kontext (CMM-32f) für Vor-Ort-Vorbereitung
-  auftrag_typ: string | null
+  // Feldmodus-Sprint: erweiterte Kunden-/Termin-Felder für TagesrouteSidebar
+  kunde_anrede?: 'herr' | 'frau' | 'divers' | null
+  kunde_avatar_url?: string | null
+  stop_weather?: { description: string; emoji: string; temp: number } | null
+  auftrag_typ?: string | null
+  hat_vorschaeden?: boolean
+  vorschaden_anzahl?: number | null
+  vorschaden_letzter_datum?: string | null
   einzusammelnde_dokumente: Array<{ slot_id: string; label: string }>
-  hat_vorschaeden: boolean | null
-  vorschaden_anzahl: number | null
-  vorschaden_letzter_datum: string | null
 }
 
 function isoDate(d: Date): string {
@@ -371,13 +374,7 @@ export default async function HeutePage() {
       schadens_ort: (fall?.schadens_ort as string) ?? (lead?.schadens_ort as string) ?? null,
       sv_briefing_text: (fall?.sv_briefing_text as string) ?? null,
       gesehen_am: (t.gesehen_am as string | null) ?? null,
-      auftrag_typ: auftragMap.get((t.fall_id ?? '') as string)?.typ ?? null,
-      einzusammelnde_dokumente:
-        pflichtListMap.get((t.fall_id ?? '') as string) ?? [],
-      hat_vorschaeden: (fall?.hat_vorschaeden as boolean | null) ?? null,
-      vorschaden_anzahl: (fall?.vorschaden_anzahl as number | null) ?? null,
-      vorschaden_letzter_datum:
-        (fall?.vorschaden_letzter_datum as string | null) ?? null,
+      einzusammelnde_dokumente: [],
     }
   })
 

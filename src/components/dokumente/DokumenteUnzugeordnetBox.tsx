@@ -57,7 +57,7 @@ export default function DokumenteUnzugeordnetBox({
                     {doc.dokument_typ === 'kunde-nachreichung' ? 'Nachreichung' : 'Sonstiges'}
                   </StatusBadge>
                   <span className="text-[9px] text-claimondo-ondo">
-                    {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                    {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE')}
                   </span>
                 </div>
                 {doc.beschreibung && (
@@ -73,7 +73,7 @@ export default function DokumenteUnzugeordnetBox({
                   href={doc.previewUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-claimondo-ondo/70 hover:text-claimondo-ondo p-1"
+                  className="text-claimondo-ondo/70 hover:text-[#4573A2] p-1"
                   title="Dokument öffnen"
                 >
                   <ExternalLinkIcon className="w-3.5 h-3.5" />

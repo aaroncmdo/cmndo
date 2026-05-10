@@ -187,10 +187,6 @@
     {
       "path": "/api/cron/verlegung-eskalation",
       "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/cron/google-bewertungen",
-      "schedule": "0 3 * * *"
     }
   ]
 }

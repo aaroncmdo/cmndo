@@ -141,8 +141,8 @@ export default function DokumenteListeSortierbar({
                             {...prov.draggableProps}
                             className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs ${
                               snap.isDragging
-                                ? 'bg-claimondo-ondo/5 border-claimondo-ondo shadow-sm'
-                                : 'bg-claimondo-bg border-claimondo-border'
+                                ? 'bg-[#4573A2]/5 border-[#4573A2] shadow-sm'
+                                : 'bg-[#f8f9fb] border-claimondo-border'
                             }`}
                           >
                             <span

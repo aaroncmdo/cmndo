@@ -54,8 +54,6 @@ export type AuftragCardProps = {
   statusLabel: string
   /** CMM-24: Anzahl offener Pflicht-Dokumente — gelber Badge wenn >0. */
   offeneDokumente?: number
-  /** 2026-05-07 Design-Review Item 1.5: Density-Mode. Compact = ohne Showroom-
-   *  Banner, weniger Padding, knappere Meta-Zeilen. */
   density?: 'comfortable' | 'compact'
 }
 
@@ -107,12 +105,8 @@ export default function AuftragCard(props: AuftragCardProps) {
     .join(' ')
     .trim() || null
 
-  const compact = props.density === 'compact'
-  const cardPad = compact ? 'p-3 sm:p-3.5' : 'p-4 sm:p-5'
-  const cardSpacing = compact ? 'space-y-1.5' : 'space-y-3'
-
   return (
-    <div className={`relative bg-white rounded-2xl border border-claimondo-border ${cardPad} ${cardSpacing} hover:border-claimondo-ondo transition-colors group min-h-[80px]`}>
+    <div className="relative bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-ondo transition-colors group">
       {/* CMM-25: Stretched-Link über die ganze Card. Card-Click ist die
           einzige Aktion — der SV öffnet seinen Auftrag, sonst nichts. */}
       <Link
@@ -121,35 +115,8 @@ export default function AuftragCard(props: AuftragCardProps) {
         className="absolute inset-0 z-0 rounded-2xl"
       />
 
-      {/* Mobile-Header (<lg) — Portal-Review SV4: Name prominent oben,
-          Kennzeichen + Fahrzeug + Fall-Nr klein darunter. Status-Pill
-          rechts. Verhindert Truncate des Namens auf 390 px. */}
-      <div className="relative z-10 flex items-start justify-between gap-2 pointer-events-none lg:hidden">
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className="text-base font-semibold text-[var(--brand-primary)] flex items-center gap-1.5 min-w-0">
-            <UserIcon className="w-4 h-4 text-claimondo-ondo/70 shrink-0" />
-            <span className="truncate">{kundeName}</span>
-          </p>
-          <div className="flex items-center gap-2 flex-wrap text-[11px] text-claimondo-ondo">
-            {props.fall.kennzeichen && (
-              <span className="inline-flex items-center rounded-md border border-claimondo-navy/70 bg-white px-1.5 py-0 font-mono text-[10px] tracking-wide text-claimondo-navy">
-                {props.fall.kennzeichen}
-              </span>
-            )}
-            {fahrzeug && <span className="truncate">{fahrzeug}</span>}
-            <span className="font-mono text-[var(--brand-secondary)]">
-              {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
-            </span>
-          </div>
-        </div>
-        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo whitespace-nowrap">
-          {props.statusLabel}
-        </span>
-      </div>
-
-      {/* Desktop-Header (lg+) — CMM-32 Walkthrough: Kennzeichen prominent
-          + Kunde in derselben Zeile, Fall-Nr klein darunter */}
-      <div className="relative z-10 hidden lg:flex items-start justify-between gap-2 pointer-events-none">
+      {/* Header — CMM-32 Walkthrough: Kennzeichen prominent + Kunde, Fall-Nr klein */}
+      <div className="relative z-10 flex items-start justify-between gap-2 pointer-events-none">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             {props.fall.kennzeichen && (
@@ -169,49 +136,33 @@ export default function AuftragCard(props: AuftragCardProps) {
               {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
             </span>
           </p>
+          <div className="flex items-center gap-2 flex-wrap text-[11px] text-claimondo-ondo">
+            {props.fall.kennzeichen && (
+              <span className="inline-flex items-center rounded-md border border-claimondo-navy/70 bg-white px-1.5 py-0 font-mono text-[10px] tracking-wide text-claimondo-navy">
+                {props.fall.kennzeichen}
+              </span>
+            )}
+            {fahrzeug && <span className="truncate">{fahrzeug}</span>}
+            <span className="font-mono text-[var(--brand-secondary)]">
+              {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
+            </span>
+          </div>
         </div>
-        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo whitespace-nowrap">
+        <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-[#f8f9fb] text-claimondo-ondo whitespace-nowrap">
           {props.statusLabel}
         </span>
       </div>
 
-      {/* 2026-05-07 (Aaron-Spec, Iteration 2): Showroom-Banner full-width
-          statt mittiges Quadrat. 16:9-Verhältnis fühlt sich auf Card-Breite
-          besser an, der Showroom-Render hat mehr Platz, Logo zentriert
-          floatet als Wand-Display. Vignette + Spotlight bleiben für Tiefe. */}
-      {props.fall.fahrzeug_hersteller && !compact && (
-        <div className="relative z-10 pointer-events-none">
-          <div
-            className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-claimondo-navy/20 shadow-md"
-            style={{
-              backgroundImage: 'url(/auftrag/showroom-bg.webp)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
-            {/* Vignette: oberer Rand etwas dunkler, unterer Boden klar */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/15" />
-            {/* Spotlight-Halo zentriert hinter dem Logo */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background:
-                  'radial-gradient(circle at 50% 45%, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0) 55%)',
-              }}
-            />
-            {/* Fahrzeug-Render: angle=56 → front-driver-side ¾ (Aaron-Default 2026-05-09). */}
-            <div className="absolute inset-x-0 bottom-0 flex items-end justify-center pb-2">
-              <FahrzeugRenderImage
-                hersteller={props.fall.fahrzeug_hersteller}
-                modell={props.fall.fahrzeug_modell ?? null}
-                lackfarbe={(props.fall.lackfarbe_code as LackfarbeCode | null) ?? null}
-                baujahr={props.fall.fahrzeug_baujahr ?? null}
-                width={300}
-                angle={56}
-                dark
-              />
-            </div>
-          </div>
+      {/* CMM-32: Fahrzeug-Render-Vorschau */}
+      {props.fall.fahrzeug_hersteller && (
+        <div className="relative z-10 flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/10 py-2 pointer-events-none">
+          <FahrzeugRenderImage
+            hersteller={props.fall.fahrzeug_hersteller}
+            modell={props.fall.fahrzeug_modell ?? null}
+            lackfarbe={(props.fall.lackfarbe_code as LackfarbeCode | null) ?? null}
+            baujahr={props.fall.fahrzeug_baujahr ?? null}
+            width={180}
+          />
         </div>
       )}
 

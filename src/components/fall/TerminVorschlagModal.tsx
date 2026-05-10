@@ -129,7 +129,7 @@ export default function TerminVorschlagModal({
               value={datetime}
               onChange={e => setDatetime(e.target.value)}
               required
-              className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2]"
             />
           </div>
 
@@ -141,7 +141,7 @@ export default function TerminVorschlagModal({
               rows={2}
               maxLength={200}
               placeholder="z.B. anderer Zeitpunkt passt besser ins Einsatzgebiet"
-              className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo resize-none"
+              className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#4573A2] resize-none"
             />
           </div>
 
@@ -150,7 +150,7 @@ export default function TerminVorschlagModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:bg-claimondo-bg transition-colors"
+              className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:bg-[#f8f9fb] transition-colors"
             >
               Abbrechen
             </button>

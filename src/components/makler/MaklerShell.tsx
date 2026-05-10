@@ -71,19 +71,17 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
       >
         <div className="px-5 py-5">
           <div className="flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/claimondo-shield.svg" alt="" width={24} height={24} className="h-6 w-6 shrink-0" />
             <span className="text-xl font-bold tracking-tight">
               <span className="text-white">Claim</span>
-              <span className="text-claimondo-light-blue">ondo</span>
+              <span className="text-claimondo-shield">ondo</span>
             </span>
             {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
             <TasksPill userId={userId} href="/makler" />
           </div>
-          <p className="text-[10px] mt-1 uppercase tracking-wider text-claimondo-light-blue bg-claimondo-shield inline-block px-2 py-0.5 rounded">
+          <p className="text-[10px] mt-1 uppercase tracking-wider text-claimondo-shield bg-[#1E3A5F] inline-block px-2 py-0.5 rounded">
             Makler
           </p>
-          <p className="text-xs mt-1 text-claimondo-light-blue truncate">{makler.firma}</p>
+          <p className="text-xs mt-1 text-claimondo-shield truncate">{makler.firma}</p>
         </div>
 
         <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
@@ -95,8 +93,8 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
                   active
-                    ? 'bg-claimondo-shield text-white font-semibold'
-                    : 'text-claimondo-light-blue hover:bg-white/5 hover:text-white'
+                    ? 'bg-[#1E3A5F] text-white font-semibold'
+                    : 'text-claimondo-shield hover:bg-white/5 hover:text-white'
                 }`}
               >
                 <item.icon style={{ width: 17, height: 17 }} />
@@ -116,14 +114,14 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
               <p className="text-sm text-white/90 truncate">
                 {makler.ansprechpartner_vorname}
               </p>
-              <p className="text-[11px] text-claimondo-light-blue truncate">{email}</p>
+              <p className="text-[11px] text-claimondo-shield truncate">{email}</p>
             </div>
             <UpdatesNav variant="dark" />
           </div>
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-claimondo-shield hover:bg-white/5 hover:text-white"
             >
               <LogOutIcon style={{ width: 17, height: 17 }} />
               Abmelden
@@ -138,9 +136,9 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
         <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
           <span className="text-lg font-bold tracking-tight">
             <span className="text-white">Claim</span>
-            <span className="text-claimondo-light-blue">ondo</span>
+            <span className="text-claimondo-shield">ondo</span>
           </span>
-          <span className="text-[10px] uppercase tracking-wider text-claimondo-light-blue bg-claimondo-shield px-2 py-0.5 rounded">
+          <span className="text-[10px] uppercase tracking-wider text-claimondo-shield bg-[#1E3A5F] px-2 py-0.5 rounded">
             Makler
           </span>
         </header>
@@ -166,7 +164,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-2 py-1 rounded-xl transition-all ${
-                active ? 'text-white bg-claimondo-shield' : 'text-claimondo-shield'
+                active ? 'text-white bg-[#1E3A5F]' : 'text-claimondo-shield'
               }`}
             >
               <item.icon style={{ width: 20, height: 20 }} />

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // CMM-32e: KB-QC-Card. Zeigt Hauptgutachten + Anlagen + Pflichtdokumente-
 // Status. „Kanzleipaket freigeben"-Button setzt den Auftrag final ab und
@@ -102,7 +102,7 @@ export default function VollstaendigkeitsCheckCard({
 
   if (!hatGutachten) {
     return (
-      <div className="rounded-2xl bg-claimondo-bg border border-claimondo-border px-4 py-3 text-sm text-claimondo-ondo">
+      <div className="rounded-2xl bg-[#f8f9fb] border border-claimondo-border px-4 py-3 text-sm text-claimondo-ondo">
         Vollständigkeits-Check erscheint sobald der Gutachter sein Gutachten hochgeladen hat.
       </div>
     )
@@ -290,7 +290,7 @@ export default function VollstaendigkeitsCheckCard({
             <button
               onClick={() => setRejectMode(true)}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-claimondo-border hover:bg-claimondo-bg text-claimondo-navy text-sm font-semibold px-4 py-2 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-claimondo-border hover:bg-[#f8f9fb] text-claimondo-navy text-sm font-semibold px-4 py-2 transition-colors"
             >
               <ArrowLeftCircleIcon className="w-4 h-4" />
               Nachbesserung anfordern
@@ -331,7 +331,7 @@ export default function VollstaendigkeitsCheckCard({
                   const state = rejectDoks[doc.id]
                   const flagged = !!state?.flagged
                   return (
-                    <div key={doc.id} className="rounded-lg border border-claimondo-border bg-claimondo-bg p-2.5 space-y-2">
+                    <div key={doc.id} className="rounded-lg border border-claimondo-border bg-[#f8f9fb] p-2.5 space-y-2">
                       <label className="flex items-center gap-2.5 cursor-pointer">
                         <input
                           type="checkbox"

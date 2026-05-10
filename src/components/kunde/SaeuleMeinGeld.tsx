@@ -53,12 +53,19 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
         </div>
       )}
 
-      {showGefordert && (
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-claimondo-ondo">Ihre Forderung</span>
-          <span className="text-claimondo-navy font-semibold">{fmt(gefordert)}</span>
-        </div>
-      )}
+      <div className="space-y-3">
+        {showGefordert ? (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-claimondo-ondo">Ihre Forderung</span>
+            <span className="text-claimondo-navy font-semibold">{fmt(gefordert)}</span>
+          </div>
+        ) : (
+          <p className="text-xs text-claimondo-ondo/70">Beträge werden nach Gutachten-Erstellung angezeigt.</p>
+        )}
+        <p className="text-[11px] text-claimondo-ondo">
+          Die ausgezahlte Summe sehen Sie nach der Regulierung in der Auszahlungs-Card.
+        </p>
+      </div>
 
       {saved && weg && (
         <p className="text-xs text-claimondo-ondo">Auszahlung: {weg === 'kundenkonto' ? 'Auf mein Konto' : 'Direkt an Werkstatt'}</p>
@@ -68,8 +75,8 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
         <div className="border-t border-claimondo-border pt-3 space-y-2">
           <p className="text-xs font-semibold text-claimondo-navy">Wohin soll die Auszahlung gehen?</p>
           <div className="flex gap-2">
-            <button disabled={pending} onClick={() => handleSaveWeg('kundenkonto')} className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50">Auf mein Konto</button>
-            <button disabled={pending} onClick={() => handleSaveWeg('werkstatt_direkt')} className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50">Direkt an Werkstatt</button>
+            <button disabled={pending} onClick={() => handleSaveWeg('kundenkonto')} className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50">Auf mein Konto</button>
+            <button disabled={pending} onClick={() => handleSaveWeg('werkstatt_direkt')} className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-xs font-medium hover:bg-[#f8f9fb] disabled:opacity-50">Direkt an Werkstatt</button>
           </div>
         </div>
       )}

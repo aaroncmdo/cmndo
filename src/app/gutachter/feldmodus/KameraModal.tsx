@@ -229,7 +229,7 @@ export default function KameraModal({
           <button
             type="button"
             onClick={handleCapture}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-white text-black text-sm font-semibold hover:bg-claimondo-bg"
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-white text-black text-sm font-semibold hover:bg-[#f8f9fb]"
           >
             <CameraIcon className="w-5 h-5" />
             Foto aufnehmen

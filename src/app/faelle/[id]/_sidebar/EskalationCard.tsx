@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // Eskalations-Card in der Fallakten-Sidebar (KB-Sicht). Zeigt aktuellen
 // Status, oeffnet Modal mit Admin-Auswahl. Eskalation = Admin uebernimmt
@@ -107,7 +107,7 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
           type="button"
           onClick={() => setOpen(true)}
           disabled={pending}
-          className="w-full text-left px-2 py-1.5 rounded-md border border-claimondo-border hover:bg-claimondo-bg disabled:opacity-50"
+          className="w-full text-left px-2 py-1.5 rounded-md border border-claimondo-border hover:bg-[#f8f9fb] disabled:opacity-50"
         >
           <p className="text-xs font-medium text-claimondo-navy">An Admin eskalieren</p>
           <p className="text-[10px] text-claimondo-ondo mt-0.5">
@@ -127,7 +127,7 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Schließen"
-                className="text-claimondo-ondo hover:text-claimondo-navy p-1 rounded hover:bg-claimondo-bg"
+                className="text-claimondo-ondo hover:text-claimondo-navy p-1 rounded hover:bg-[#f8f9fb]"
               >
                 <XIcon className="w-4 h-4" />
               </button>
@@ -158,7 +158,7 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
                         type="button"
                         onClick={() => handleEskalieren(a.id, fullName)}
                         disabled={pending}
-                        className="w-full flex items-center justify-between gap-2 rounded-lg border border-claimondo-border hover:bg-claimondo-bg px-3 py-2 text-left disabled:opacity-50"
+                        className="w-full flex items-center justify-between gap-2 rounded-lg border border-claimondo-border hover:bg-[#f8f9fb] px-3 py-2 text-left disabled:opacity-50"
                       >
                         <div>
                           <p className="text-sm font-semibold text-claimondo-navy">{fullName}</p>

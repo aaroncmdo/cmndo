@@ -65,7 +65,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
       >
         {messages.length === 0 && !error && (
           <div className="text-sm text-claimondo-ondo">
-            <p className="font-medium text-claimondo-navy mb-1">
+            <p className="font-medium text-[#0D1B3E] mb-1">
               Hi{userName ? ' ' + userName.split(' ')[0] : ''} — was kann ich für dich tun?
             </p>
             <p className="text-xs text-claimondo-ondo">
@@ -93,7 +93,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
           if (m.role === 'assistant') {
             return (
               <div key={i} className="flex justify-start">
-                <div className="max-w-[85%] bg-claimondo-bg text-claimondo-navy rounded-2xl rounded-bl-sm px-3 py-2 text-sm whitespace-pre-wrap">
+                <div className="max-w-[85%] bg-[#f8f9fb] text-claimondo-navy rounded-2xl rounded-bl-sm px-3 py-2 text-sm whitespace-pre-wrap">
                   {m.text}
                 </div>
               </div>
@@ -130,7 +130,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-claimondo-bg rounded-2xl rounded-bl-sm px-3 py-2 text-xs text-claimondo-ondo inline-flex items-center gap-2">
+            <div className="bg-[#f8f9fb] rounded-2xl rounded-bl-sm px-3 py-2 text-xs text-claimondo-ondo inline-flex items-center gap-2">
               <Loader2Icon className="w-3 h-3 animate-spin" /> Denkt nach…
             </div>
           </div>
@@ -147,7 +147,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
       </div>
 
       {messages.length === 0 && (
-        <div className="border-t border-claimondo-border px-4 py-2 bg-claimondo-bg">
+        <div className="border-t border-claimondo-border px-4 py-2 bg-[#f8f9fb]">
           <div className="flex items-center gap-2">
             <div className="flex-1 min-w-0">
               {isCapturing ? (
@@ -215,7 +215,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
               placeholder={placeholder}
               rows={3}
               disabled={isLoading}
-              className="w-full resize-none text-sm text-claimondo-navy px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent disabled:bg-claimondo-bg"
+              className="w-full resize-none text-sm text-claimondo-navy px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:ring-2 focus:ring-[#4573A2] focus:border-transparent disabled:bg-[#f8f9fb]"
             />
             <div className="flex items-end justify-between gap-2">
               <VoiceRecordButton onTranscript={handleTranscript} disabled={isLoading} />

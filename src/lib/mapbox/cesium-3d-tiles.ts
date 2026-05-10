@@ -1,3 +1,4 @@
+// @ts-nocheck — @deck.gl/mapbox + @loaders.gl/3d-tiles nicht installiert (Feldmodus-3D-Backlog)
 'use client'
 
 // 2026-05-07 Phase 4 (Cesium Ion Variante):

@@ -16,8 +16,7 @@ export default function KartenAnzeigeToggle() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     const stored = window.localStorage.getItem(KARTEN_GEBIET_LS_KEY)
-    // Default: an — nur deaktiviert wenn explizit '0' gesetzt.
-    setEnabled(stored !== '0')
+    setEnabled(stored === '1')
   }, [])
 
   function toggle() {

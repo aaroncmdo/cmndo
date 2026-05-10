@@ -116,7 +116,7 @@ export default function BankdatenBanner({
       </div>
 
       <div className="flex gap-2">
-        <button onClick={() => setShowForm(false)} className="flex-1 px-3 py-2.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-sm font-medium hover:bg-claimondo-bg">
+        <button onClick={() => setShowForm(false)} className="flex-1 px-3 py-2.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-sm font-medium hover:bg-[#f8f9fb]">
           Abbrechen
         </button>
         <button disabled={pending} onClick={handleSubmit} className="flex-1 px-3 py-2.5 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 disabled:opacity-50">

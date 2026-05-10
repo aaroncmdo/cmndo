@@ -26,7 +26,6 @@ import {
   gotoAndShoot,
   assertDb,
   loadFixtureIds,
-  saveFixtureIds,
   waitForMitteilung,
   loginAs,
   logPhase,
@@ -219,11 +218,6 @@ export async function runPhase3(svContext, phase2Result) {
     }
   }
 
-  // termin_id in Fixtures speichern damit Phase 5+ sie aus tmp/e2e-fixture-ids.json lesen können
-  if (terminId) {
-    saveFixtureIds({ termin_id: terminId, auftrag_id: terminId })
-  }
-
   logPhase(3, `Phase 3 abgeschlossen: ${result.toUpperCase()}`)
-  return { phase: 3, result, notes, auftragId: terminId, terminId }
+  return { phase: 3, result, notes, auftragId: terminId }
 }

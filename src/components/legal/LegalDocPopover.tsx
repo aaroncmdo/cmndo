@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // Popover-Modal zur Anzeige eines Legal-Dokuments (AGB, Datenschutz,
 // Impressum, Nutzungsbedingungen). Wird in den FlowLink- und Onboarding-
@@ -30,8 +30,8 @@ export default function LegalDocPopover({ titel, markdown, children, variant = '
   const [open, setOpen] = useState(false)
 
   const triggerCls = variant === 'button'
-    ? `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border border-claimondo-border bg-white hover:bg-claimondo-bg text-claimondo-navy transition-colors ${className ?? ''}`
-    : `text-claimondo-ondo underline hover:text-claimondo-shield ${className ?? ''}`
+    ? `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border border-claimondo-border bg-white hover:bg-[#f8f9fb] text-claimondo-navy transition-colors ${className ?? ''}`
+    : `text-[#4573A2] underline hover:text-[#1E3A5F] ${className ?? ''}`
 
   return (
     <>
@@ -60,7 +60,7 @@ export default function LegalDocPopover({ titel, markdown, children, variant = '
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo/70 hover:text-claimondo-ondo"
+                className="p-1.5 rounded-lg hover:bg-[#f8f9fb] text-claimondo-ondo/70 hover:text-claimondo-ondo"
                 aria-label="Schließen"
               >
                 <XIcon className="w-4 h-4" />
@@ -71,11 +71,11 @@ export default function LegalDocPopover({ titel, markdown, children, variant = '
               <LegalDocBody markdown={markdown} />
             </div>
 
-            <div className="px-5 py-3 border-t border-claimondo-border bg-claimondo-bg flex-shrink-0">
+            <div className="px-5 py-3 border-t border-claimondo-border bg-[#f8f9fb] flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="w-full px-4 py-2.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-shield text-white text-sm font-medium transition-colors"
+                className="w-full px-4 py-2.5 rounded-lg bg-claimondo-navy hover:bg-[#1E3A5F] text-white text-sm font-medium transition-colors"
               >
                 Schließen
               </button>

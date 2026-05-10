@@ -151,7 +151,7 @@ export default function VersicherungAutocomplete({
                     ? 'border-green-300'
                     : isFreitext
                       ? 'border-amber-300'
-                      : 'border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo'
+                      : 'border-claimondo-border hover:border-claimondo-border focus:border-[#4573A2]'
           }`}
         />
         <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -171,8 +171,8 @@ export default function VersicherungAutocomplete({
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => pick(s)}
-              className={`w-full text-left px-3 py-2 text-xs hover:bg-claimondo-bg ${
-                i === activeIdx ? 'bg-claimondo-bg' : ''
+              className={`w-full text-left px-3 py-2 text-xs hover:bg-[#f8f9fb] ${
+                i === activeIdx ? 'bg-[#f8f9fb]' : ''
               } ${i > 0 ? 'border-t border-claimondo-border' : ''}`}
             >
               <p className="font-medium text-claimondo-navy">{s.name}</p>

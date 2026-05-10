@@ -47,7 +47,7 @@ export default function FallSidebar({
   const { fall, lead } = useFall()
 
   return (
-    <aside className="w-full lg:w-[340px] shrink-0 bg-claimondo-bg border-l border-claimondo-border overflow-y-auto p-4 space-y-3">
+    <aside className="w-full lg:w-[340px] shrink-0 bg-[#f8f9fb] border-l border-claimondo-border overflow-y-auto p-4 space-y-3">
       {/* Quick Actions (phase-abhängig) */}
       <QuickActions />
 

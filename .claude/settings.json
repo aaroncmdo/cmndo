@@ -10,8 +10,5 @@
     ],
     "defaultMode": "bypassPermissions"
   },
-  "hooks": {},
-  "enabledPlugins": {
-    "seo-geo@opc-skills": true
-  }
+  "hooks": {}
 }

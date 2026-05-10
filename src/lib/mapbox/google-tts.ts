@@ -1,14 +1,8 @@
 'use client'
 
-// Google Cloud TTS Client-Modul.
-// Gleiche Architektur wie elevenlabs-tts.ts: Browser callt unseren Proxy
-// /api/google-tts, der den Google-API-Key server-side hält.
-//
-// Voice: de-DE-Neural2-F — neutrale weibliche Neural2-Stimme, klingt
-// deutlich natürlicher als Web-Speech-API-Stimmen auf Windows/Android.
-//
-// Fallback-Kette in speakInstruction (turn-by-turn.ts):
-//   Google TTS → ElevenLabs → Web Speech API
+// Google Cloud TTS Client — ruft /api/google/tts (Server-Proxy).
+// Caching: Blob-URL pro Text, wiederverwendet bis Page-Reload.
+// Pattern identisch zu elevenlabs-tts.ts.
 
 const audioCache = new Map<string, string>() // text → blob URL
 let active: HTMLAudioElement | null = null
@@ -18,7 +12,7 @@ const inFlight = new Map<string, Promise<boolean>>()
 async function probeAvailability(): Promise<boolean> {
   if (googleTtsAvailable != null) return googleTtsAvailable
   try {
-    const res = await fetch('/api/google-tts', {
+    const res = await fetch('/api/google/tts', {
       method: 'POST',
       body: JSON.stringify({ probe: true }),
       headers: { 'Content-Type': 'application/json' },
@@ -35,10 +29,6 @@ export function isGoogleTtsEnabled(): boolean {
   return typeof window !== 'undefined'
 }
 
-/**
- * Spielt Text via Google Cloud TTS (de-DE-Neural2-F) ab.
- * Returns true bei Erfolg, false bei Fehler (Caller fällt auf ElevenLabs/WebSpeech).
- */
 export async function speakViaGoogleTts(text: string): Promise<boolean> {
   if (typeof window === 'undefined') return false
   if (!(await probeAvailability())) return false
@@ -46,20 +36,20 @@ export async function speakViaGoogleTts(text: string): Promise<boolean> {
   const existing = inFlight.get(text)
   if (existing) return existing
 
-  const p = (async (): Promise<boolean> => {
+  const p = (async () => {
     try {
       let url = audioCache.get(text)
       if (!url) {
-        const res = await fetch('/api/google-tts', {
+        const res = await fetch('/api/google/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text }),
         })
-        const contentType = res.headers.get('content-type') ?? ''
+        const contentType = res.headers.get('content-type') || ''
         if (!res.ok || !contentType.startsWith('audio/')) {
           if (contentType.startsWith('application/json')) {
-            const body = (await res.json().catch(() => null)) as { blocked?: boolean } | null
-            if (body?.blocked) googleTtsAvailable = false
+            const body = (await res.json().catch(() => null)) as { ok?: boolean } | null
+            if (body?.ok === false) googleTtsAvailable = false
           }
           return false
         }
@@ -73,9 +63,12 @@ export async function speakViaGoogleTts(text: string): Promise<boolean> {
       }
       const audio = new Audio(url)
       active = audio
-      await audio.play().catch(() => { /* noop — autoplay-Policy */ })
+      await audio.play().catch((err) => {
+        console.warn('[google-tts-client] play error:', err)
+      })
       return true
-    } catch {
+    } catch (err) {
+      console.warn('[google-tts-client] error:', err)
       return false
     }
   })()

@@ -58,7 +58,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
           description={`${mitarbeiter.length} Mitarbeiter · ${monatLabel}`}
           icon={UsersIcon}
           actions={
-            <button onClick={() => { setShowDialog(true); setError(null); setSuccess(null) }} className="flex items-center gap-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+            <button onClick={() => { setShowDialog(true); setError(null); setSuccess(null) }} className="flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
               <UserPlusIcon className="w-4 h-4" /> Neuer Mitarbeiter
             </button>
           }
@@ -66,9 +66,9 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
       </div>
 
       <div className="flex gap-2 mb-4">
-        <Link href="/admin/team" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg">Übersicht</Link>
-        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
-        <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
+        <Link href="/admin/team" className="px-3 py-1.5 bg-[#1E3A5F] text-white text-xs font-medium rounded-lg">Übersicht</Link>
+        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
+        <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
       </div>
 
       {success && <div className="bg-green-50 border border-green-800 rounded-xl p-4 mb-4"><p className="text-green-300 text-sm">{success}</p></div>}
@@ -90,7 +90,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
 
       <div className="flex gap-2 mb-4">
         {['alle', 'dispatch', 'kundenbetreuer', 'admin', 'entwicklung'].map(k => (
-          <button key={k} onClick={() => setFilterKat(k)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${filterKat === k ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg/50 text-claimondo-ondo hover:text-claimondo-navy'}`}>
+          <button key={k} onClick={() => setFilterKat(k)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${filterKat === k ? 'bg-claimondo-navy text-white' : 'bg-[#f8f9fb]/50 text-claimondo-ondo hover:text-claimondo-navy'}`}>
             {k === 'alle' ? 'Alle' : KAT_LABELS[k] ?? k}
           </button>
         ))}
@@ -117,11 +117,11 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
                 const loadMax = isD ? 50 : (m.kapazitaet_max ?? 100)
                 const pct = loadMax > 0 ? Math.min(100, Math.round((load / loadMax) * 100)) : 0
                 return (
-                  <tr key={m.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors cursor-pointer" onClick={() => router.push(`/admin/team/${m.id}`)}>
+                  <tr key={m.id} className="border-b border-claimondo-border/50 hover:bg-[#f8f9fb]/40 transition-colors cursor-pointer" onClick={() => router.push(`/admin/team/${m.id}`)}>
                     <td className="px-4 py-3"><div className="text-claimondo-navy font-medium">{name(m)}</div><div className="text-claimondo-ondo text-xs">{m.email}</div></td>
-                    <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ROLLE_COLORS[m.rolle] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{ROLLE_LABELS[m.rolle] ?? m.rolle}</span></td>
-                    <td className="px-4 py-3">{m.kategorie ? <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${KAT_COLORS[m.kategorie] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{KAT_LABELS[m.kategorie] ?? m.kategorie}</span> : <span className="text-claimondo-ondo/70 text-xs">—</span>}</td>
-                    <td className="px-4 py-3"><div className="flex items-center gap-2"><div className="w-20 h-2 bg-claimondo-bg rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-claimondo-ondo'}`} style={{ width: `${pct}%` }} /></div><span className="text-claimondo-ondo text-xs tabular-nums">{load}/{loadMax}</span></div></td>
+                    <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ROLLE_COLORS[m.rolle] ?? 'bg-[#f8f9fb] text-claimondo-navy'}`}>{ROLLE_LABELS[m.rolle] ?? m.rolle}</span></td>
+                    <td className="px-4 py-3">{m.kategorie ? <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${KAT_COLORS[m.kategorie] ?? 'bg-[#f8f9fb] text-claimondo-navy'}`}>{KAT_LABELS[m.kategorie] ?? m.kategorie}</span> : <span className="text-claimondo-ondo/70 text-xs">—</span>}</td>
+                    <td className="px-4 py-3"><div className="flex items-center gap-2"><div className="w-20 h-2 bg-[#f8f9fb] rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-[#4573A2]'}`} style={{ width: `${pct}%` }} /></div><span className="text-claimondo-ondo text-xs tabular-nums">{load}/{loadMax}</span></div></td>
                     <td className="px-4 py-3">{isD
                       ? <div className="flex items-center gap-1.5 text-xs"><ActivityIcon className="w-3.5 h-3.5 text-amber-400" /><span className="text-claimondo-navy">{leads?.total ?? 0} Leads</span><span className="text-claimondo-ondo/70">·</span><span className="text-green-400">{leads?.konvertiert ?? 0} konv.</span></div>
                       : <div className="flex items-center gap-1.5 text-xs"><ActivityIcon className="w-3.5 h-3.5 text-green-400" /><span className="text-claimondo-navy">{aktive} aktiv</span><span className="text-claimondo-ondo/70">·</span><span className="text-green-400">{abg} abg.</span></div>
@@ -149,18 +149,18 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neuer Mitarbeiter</h2>
         <form onSubmit={handleCreate} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Vorname</label><input name="vorname" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Nachname</label><input name="nachname" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Vorname</label><input name="vorname" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Nachname</label><input name="nachname" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           </div>
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">E-Mail</label><input name="email" type="email" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">E-Mail</label><input name="email" type="email" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Rolle</label><select name="rolle" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="kundenbetreuer">Kundenbetreuer</option><option value="dispatch">Dispatcher</option><option value="admin">Admin</option><option value="kanzlei">Kanzlei</option></select></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option></select></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Rolle</label><select name="rolle" required className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="kundenbetreuer">Kundenbetreuer</option><option value="dispatch">Dispatcher</option><option value="admin">Admin</option><option value="kanzlei">Kanzlei</option></select></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option></select></div>
           </div>
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">Kapazitaet (max. Faelle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Kapazitaet (max. Faelle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-[#f8f9fb] border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
+            <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-[#f8f9fb] hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
             <button type="submit" disabled={loading} className="flex-1 bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50">{loading ? 'Erstelle...' : 'Erstellen'}</button>
           </div>
         </form>

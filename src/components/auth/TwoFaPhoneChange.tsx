@@ -72,7 +72,7 @@ export function TwoFaPhoneChange({
     <>
       <div className="rounded-xl border border-claimondo-border bg-white p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-2">
-          <ShieldCheckIcon className="w-4 h-4 text-claimondo-ondo" />
+          <ShieldCheckIcon className="w-4 h-4 text-[#4573A2]" />
           <h3 className="text-sm font-semibold text-claimondo-navy">2FA-Telefonnummer</h3>
         </div>
         <p className="text-xs text-claimondo-ondo">
@@ -109,7 +109,7 @@ export function TwoFaPhoneChange({
               <button
                 type="button"
                 onClick={() => !pending && setOpen(false)}
-                className="p-1.5 rounded-md hover:bg-claimondo-bg"
+                className="p-1.5 rounded-md hover:bg-[#f8f9fb]"
                 aria-label="Schließen"
               >
                 <XIcon className="w-4 h-4 text-claimondo-ondo" />
@@ -133,7 +133,7 @@ export function TwoFaPhoneChange({
                       value={neuePhone}
                       onChange={(e) => setNeuePhone(e.target.value)}
                       placeholder="+49 151 12345678 oder 0151 12345678"
-                      className="w-full text-sm rounded-md border border-claimondo-border px-2 py-2 outline-none focus:border-claimondo-ondo"
+                      className="w-full text-sm rounded-md border border-claimondo-border px-2 py-2 outline-none focus:border-[#4573A2]"
                     />
                   </div>
                 </>
@@ -157,7 +157,7 @@ export function TwoFaPhoneChange({
                       value={code}
                       onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
                       placeholder="123456"
-                      className="w-full text-lg font-mono tracking-widest rounded-md border border-claimondo-border px-2 py-2 outline-none focus:border-claimondo-ondo text-center"
+                      className="w-full text-lg font-mono tracking-widest rounded-md border border-claimondo-border px-2 py-2 outline-none focus:border-[#4573A2] text-center"
                     />
                   </div>
                   <button
@@ -191,7 +191,7 @@ export function TwoFaPhoneChange({
                 type="button"
                 onClick={() => !pending && setOpen(false)}
                 disabled={pending}
-                className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg disabled:opacity-50"
+                className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb] disabled:opacity-50"
               >
                 Abbrechen
               </button>

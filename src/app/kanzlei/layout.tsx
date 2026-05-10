@@ -27,17 +27,8 @@ export default async function KanzleiLayout({
   // Content scrollt innen. Das Main hat keinen max-width-Cap mehr — sonst
   // entsteht rechts ein grauer Balken auf breiten Screens.
   return (
-    <div className="h-screen flex flex-col overflow-hidden relative" style={{ background: '#f2f3f7' }}>
-      {/* Atmosphärische Hintergrund-Spotlights — identisch mit Admin-Layout */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute inset-0" style={{
-          background: [
-            'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.10), transparent 65%)',
-            'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.06), transparent 70%)',
-          ].join(', '),
-        }} />
-      </div>
-      <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between shrink-0 relative z-10">
+    <div className="h-screen bg-[#f8f9fb] flex flex-col overflow-hidden">
+      <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -55,7 +46,7 @@ export default async function KanzleiLayout({
         </div>
         <div className="flex items-center gap-3">
           <UpdatesNav variant="dark" />
-          <span className="text-claimondo-light-blue text-sm">{displayName}</span>
+          <span className="text-[#7BA3CC] text-sm">{displayName}</span>
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"

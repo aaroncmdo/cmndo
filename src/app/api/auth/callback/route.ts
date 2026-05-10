@@ -27,18 +27,7 @@ export async function GET(request: Request) {
           .eq('id', user.id)
           .single()
 
-        // Magic-Link-Flows (Kunden-Welcome) haben force_password_change=true —
-        // Google-OAuth-Logins bekommen es auf false gesetzt.
-        const isGoogleLogin = user.app_metadata?.provider === 'google'
-        if (isGoogleLogin) {
-          await supabase
-            .from('profiles')
-            .update({ auth_provider: 'google', force_password_change: false })
-            .eq('id', user.id)
-        }
-
-        // next-Param hat Vorrang vor rollenbasiertem Redirect.
-        const dest = next ?? roleToPath(profile?.rolle as string | null | undefined)
+        const dest = roleToPath(profile?.rolle as string | null | undefined)
         return NextResponse.redirect(`${origin}${dest}`)
       }
     }

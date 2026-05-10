@@ -161,26 +161,6 @@ const COLUMN_PROFILES: Record<Rolle, string> = {
   kanzlei: COLUMNS_KANZLEI.join(','),
 }
 
-// Gutachten-OCR-Felder (siehe migration 20260502001441_claims_gutachten_ocr.sql).
-// Sichtbar AUSSCHLIESSLICH für Admin — KB/SV/Kanzlei/Kunde dürfen die
-// extrahierten Schadensummen nicht sehen, weil OCR-Werte vor manueller
-// Verifikation potenziell falsch sind und diese Beträge sonst Erwartungen
-// in Richtung VS-Zahlung wecken könnten.
-const OCR_FIELDS = [
-  'reparaturkosten_netto',
-  'reparaturkosten_brutto',
-  'minderwert',
-  'restwert',
-  'wiederbeschaffungswert',
-  'wiederbeschaffungsdauer_tage',
-  'nutzungsausfall_tage',
-  'totalschaden',
-  'gutachten_datum',
-  'gutachten_ocr_processed_at',
-  'gutachten_ocr_raw',
-  'gutachten_ocr_error',
-] as const
-
 // ─── getClaimForRole ────────────────────────────────────────────────────────
 export async function getClaimForRole(
   supabase: DbClient,
@@ -198,16 +178,7 @@ export async function getClaimForRole(
     return null
   }
 
-  if (!data) return null
-
-  // OCR-Felder für alle Nicht-Admin-Rollen entfernen — auch für KB.
-  if (rolle !== 'admin') {
-    const sanitized = { ...(data as unknown as Record<string, unknown>) }
-    for (const f of OCR_FIELDS) delete sanitized[f]
-    return sanitized as unknown as ClaimFull
-  }
-
-  return data as unknown as ClaimFull
+  return (data as ClaimFull | null) ?? null
 }
 
 // ─── resolveClaimId ─────────────────────────────────────────────────────────

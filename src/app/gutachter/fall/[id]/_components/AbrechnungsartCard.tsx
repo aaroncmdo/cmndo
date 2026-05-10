@@ -102,7 +102,7 @@ export function AbrechnungsartCard({
             className={`text-left px-3 py-2 rounded-ios-sm border text-xs transition-colors ${
               art === o.value
                 ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
-                : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-claimondo-bg'
+                : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <p className="font-medium">{o.label}</p>

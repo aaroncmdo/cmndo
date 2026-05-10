@@ -8,18 +8,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* CMM-32 Polish: FE-Schrift (Fälschungserschwerende Schrift) — die offizielle
-   deutsche Kennzeichen-Schrift für den Kennzeichenhalter. Font-Datei liegt
-   in public/fonts/fe-schrift.ttf. Nur TTF referenziert — kein woff2-Request,
-   kein 404 im Network-Tab. */
-@font-face {
-  font-family: 'FE-Schrift';
-  src: url('/fonts/fe-schrift.ttf') format('truetype');
-  font-weight: 400 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 html[lang="ar"] {
   font-family: 'Noto Sans Arabic', var(--font-montserrat), system-ui, sans-serif;
 }
@@ -280,51 +268,6 @@ p, li, blockquote, article, .prose {
    Die Utilities sind bewusst als eigene Klassen und nicht als Tailwind-
    Custom-Utility modelliert — sie bündeln bg + border + backdrop-filter,
    was in Tailwind nur über Multi-Step arbeit gehen würde. */
-/* glass-card: Premium iOS-Glass — der Login-Page-Standard.
-   rgba(.82) + 24px-Blur + border(.65) + iOS-Shadow mit Navy-Tint.
-   Für Card-Container auf hellem Hintergrund (Portale, Auth-Pages). */
-.glass-card {
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 20px 60px rgba(13, 27, 62, 0.10), 0 4px 16px rgba(13, 27, 62, 0.06), 0 1px 0 rgba(255, 255, 255, 0.9) inset;
-  backdrop-filter: saturate(180%) blur(24px);
-  -webkit-backdrop-filter: saturate(180%) blur(24px);
-}
-
-/* glass-card-sm: Kompakte Variante für kleinere Cards / Chips. */
-.glass-card-sm {
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  box-shadow: 0 8px 28px rgba(13, 27, 62, 0.08), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
-  backdrop-filter: saturate(160%) blur(16px);
-  -webkit-backdrop-filter: saturate(160%) blur(16px);
-}
-
-/* glass-navy: Dunkle Premium-Variante für Navy-Hintergrund-Sections. */
-.glass-navy {
-  background: rgba(13, 27, 62, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30), 0 4px 16px rgba(0, 0, 0, 0.15);
-  backdrop-filter: saturate(180%) blur(24px);
-  -webkit-backdrop-filter: saturate(180%) blur(24px);
-}
-
-/* ambient-bg: Heller App-Hintergrund mit atmosphärischen Spotlight-Gradienten. */
-.ambient-bg {
-  background: #f2f3f7;
-  position: relative;
-}
-.ambient-bg::before {
-  content: '';
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(65% 55% at 85% 0%, rgba(123, 163, 204, 0.12), transparent 65%),
-    radial-gradient(55% 65% at 0% 100%, rgba(69, 115, 162, 0.08), transparent 70%);
-  z-index: 0;
-}
-
 .glass-light {
   background-color: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.4);
@@ -359,69 +302,6 @@ p, li, blockquote, article, .prose {
    entfernt, .glass-bg als Body-Surface bleibt hier. */
 .glass-bg {
   background: #f8f9fb;
-}
-
-/* ─── Glass-System — Standard fuer Modals + Inhaltskarten ───────────────────
-   Drei zusammengehoerige Stufen, die zusammen das Layered-Glass-Pattern
-   liefern (siehe Kunde-Chat-Modal als Referenz):
-
-   .glass-shell  — aeusseres Modal (groesste Tiefe, viel Blur, kraeftige Border)
-   .glass-panel  — innere Sub-Card (mittlere Tiefe, weniger Blur, leichte Border)
-   .glass-edge   — Variante von .glass-shell die seitlich an die Quelle-Card
-                   anknüpft: keine linke Rundung + keine linke Border, fließt
-                   damit aus einer Sidebar-Card heraus.
-
-   Verwendung:
-   <div className="glass-shell rounded-2xl ..."> ... </div>
-   <div className="glass-panel rounded-2xl ..."> ... </div>
-*/
-/* Modal-Hülle: solide white (keine eigene Transparenz/Blur — der Glass-Look
-   kommt vom Backdrop dahinter, nicht vom Modal selbst). Damit ist der
-   Modal-Inhalt klar lesbar, kein Mud-Effekt durch doppelte Filter. */
-.glass-shell {
-  background-color: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 24px 48px -12px rgba(13, 27, 62, 0.3);
-}
-
-/* Innere Sub-Card im Modal — leichtes Off-White damit die Subdivision
-   sichtbar bleibt, ohne eigenes Blur. */
-.glass-panel {
-  background-color: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 0 1px 2px 0 rgba(13, 27, 62, 0.06);
-}
-
-/* Modal-Variante mit linker Anbindung an die Source-Card. Solide white,
-   kein linker Rand + Rundung damit es nahtlos in die Card uebergeht. */
-.glass-edge {
-  background-color: rgba(255, 255, 255, 0.96);
-  border-top: 1px solid rgba(255, 255, 255, 0.6);
-  border-right: 1px solid rgba(255, 255, 255, 0.6);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-  border-left: 0;
-  box-shadow: 0 24px 48px -12px rgba(13, 27, 62, 0.3);
-}
-
-/* Wenn Chat-Modal offen: alles in der Sidebar AUSSER den Cards
-   abdunkeln + leicht blurren. Cards selbst (KB/Gutachter/Admin) sind
-   nicht in `.kunde-sidebar-rest`, deshalb bleiben sie sharp. */
-aside.kunde-sidebar[data-chat-open] .kunde-sidebar-rest {
-  opacity: 0.25;
-  filter: blur(2px);
-  pointer-events: none;
-  transition: opacity 0.2s, filter 0.2s;
-}
-
-/* Source-Card im offenen Zustand — solide white, ohne rechte Kante,
-   damit sie sich mit der glass-edge zu einem L-foermigen Block fuegt. */
-.glass-card-source {
-  background-color: rgba(255, 255, 255, 0.96);
-  border-top: 1px solid rgba(255, 255, 255, 0.6);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-  border-left: 1px solid rgba(255, 255, 255, 0.6);
-  border-right: 0;
-  box-shadow: -8px 0 24px -8px rgba(13, 27, 62, 0.2);
 }
 
 /* ─── Droplet-UI: Tropfen-Animationen ───────────────────────────────────── */
@@ -564,15 +444,29 @@ aside.kunde-sidebar[data-chat-open] .kunde-sidebar-rest {
   animation: wx-sun-pulse 4s ease-in-out infinite;
   pointer-events: none;
 }
-/* 2026-05-08: Der frühere Override-Block wurde komplett entfernt.
-   Begründung: PR #519 hat einen Workaround eingeführt, der die kaputte
-   width-arbitrary-value-Klasse mit leerem CSS-var-Aufruf neutralisierte.
-   PR #611-Repro bei Aaron hat aber gezeigt, dass der Override-Block
-   selbst (Selektor + erläuternder Comment + Doku in audit-findings.md)
-   das defekte Klassen-Pattern als Such-Token enthielt — Tailwind 4
-   scannt CSS-Files und Markdown im Repo nach Klassen-Tokens, generierte
-   die kaputte Klasse zurück, Parser brach ab, Override greift nie.
-   Self-perpetuating Bug. Lösung: alle Vorkommen des Pattern-Strings
-   aus dem Source genommen (Comment, Markdown), Override entfernt.
-   Falls die Klasse je wieder erscheint: eigene Source suchen statt
-   patchen — nicht die Datei selbst zur Quelle machen. */
+/* ── Wizard iOS-Tokens (PR 3) ── */
+:root {
+  --wiz-r-xs:  10px;
+  --wiz-r-sm:  14px;
+  --wiz-r-md:  18px;
+  --wiz-r-lg:  22px;
+  --wiz-r-xl:  28px;
+  --wiz-r-2xl: 36px;
+  --wiz-fill:       rgba(15, 30, 68, .06);
+  --wiz-fill-2:     rgba(15, 30, 68, .03);
+  --wiz-fill-hover: rgba(15, 30, 68, .10);
+  --wiz-separator:  rgba(15, 30, 68, .08);
+  --wiz-shadow-1: 0 1px 2px rgba(15,30,68,.04);
+  --wiz-shadow-2: 0 2px 6px rgba(15,30,68,.05), 0 8px 24px rgba(15,30,68,.04);
+  --wiz-shadow-3: 0 6px 18px rgba(15,30,68,.07), 0 24px 48px rgba(15,30,68,.06);
+  --wiz-shadow-4: 0 14px 36px rgba(15,30,68,.10), 0 40px 80px rgba(15,30,68,.08);
+  --wiz-ease:     cubic-bezier(.32,.72,0,1);
+  --wiz-ease-out: cubic-bezier(.16,1,.3,1);
+  --wiz-text-2:   #4b5468;
+  --wiz-text-3:   #8a93a6;
+}
+
+@keyframes sheetIn {
+  from { opacity: 0; transform: translateY(16px) scale(.985); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}

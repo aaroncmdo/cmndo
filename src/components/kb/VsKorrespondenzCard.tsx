@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // CMM-42: VS-Korrespondenz erfassen + anzeigen.
 //
@@ -171,7 +171,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
               className={`text-[11px] px-2.5 py-1 rounded-md font-medium transition-colors ${
                 filterRichtung === opt
                   ? 'bg-claimondo-navy text-white'
-                  : 'bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy'
+                  : 'bg-[#f8f9fb] text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
               {opt === 'alle' ? 'Alle' : opt === 'eingehend' ? 'Eingehend' : 'Ausgehend'}
@@ -193,7 +193,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
             const KIcon = KANAL_ICON[e.kanal]
             const fristAbgelaufen = e.naechste_frist != null && new Date(e.naechste_frist).getTime() < Date.now()
             return (
-              <li key={e.id} className="rounded-lg border border-claimondo-border bg-claimondo-bg px-3 py-2">
+              <li key={e.id} className="rounded-lg border border-claimondo-border bg-[#f8f9fb] px-3 py-2">
                 <div className="flex items-start gap-2">
                   <div className="flex flex-col items-center gap-0.5 mt-0.5">
                     <KIcon className="w-4 h-4 text-claimondo-ondo" />

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // Touch-friendly Filter-Chip + Tab-Toggle (Portal-Review C3).
 // Tap-Target = 44px Höhe (iOS HIG). Optional `count` für Filter-Anzahl.
@@ -19,10 +19,10 @@ const BASE_CLS =
 
 const VARIANT_CLS: Record<ChipVariant, string> = {
   default:
-    'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg hover:text-claimondo-navy',
+    'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb] hover:text-claimondo-navy',
   selected: 'bg-claimondo-navy text-white border border-claimondo-navy',
   ghost:
-    'bg-transparent text-claimondo-ondo hover:bg-claimondo-bg hover:text-claimondo-navy',
+    'bg-transparent text-claimondo-ondo hover:bg-[#f8f9fb] hover:text-claimondo-navy',
 }
 
 function ChipBody({

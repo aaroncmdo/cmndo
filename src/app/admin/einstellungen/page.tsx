@@ -62,7 +62,7 @@ export default async function EinstellungenPage() {
             <Link
               key={s.href}
               href={s.href}
-              className="group bg-white border border-claimondo-border rounded-2xl p-5 hover:border-claimondo-ondo hover:shadow-sm transition-all"
+              className="group bg-white border border-claimondo-border rounded-2xl p-5 hover:border-[#4573A2] hover:shadow-sm transition-all"
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-xl ${s.iconBg} flex items-center justify-center shrink-0`}>

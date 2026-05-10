@@ -139,7 +139,7 @@ export default async function MitarbeiterKundentermine() {
           <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
             <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
               <h2 className="text-sm font-semibold text-claimondo-navy">
-                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
                   weekday: 'long',
                   day: '2-digit',
                   month: '2-digit',
@@ -156,7 +156,7 @@ export default async function MitarbeiterKundentermine() {
                 const svName = sv?.profile_id ? svNameMap[sv.profile_id] ?? 'SV' : 'SV'
                 const href = fall ? `/faelle/${fall.id}` : '#'
                 return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
+                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-[#f8f9fb] transition-colors">
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border bg-claimondo-ondo/10 text-claimondo-ondo border-claimondo-ondo/20">
                         <CalendarIcon className="w-3 h-3" />

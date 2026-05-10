@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // AAR-841 Frontend: Modal-Wrapper um KanzleiWunschForm.
 //
@@ -73,12 +73,12 @@ export function KanzleiWunschModal({
     >
       <div className="space-y-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-claimondo-navy/10 flex items-center justify-center shrink-0">
-            <ScaleIcon className="w-5 h-5 text-claimondo-navy" />
+          <div className="w-10 h-10 rounded-full bg-[#0D1B3E]/10 flex items-center justify-center shrink-0">
+            <ScaleIcon className="w-5 h-5 text-[#0D1B3E]" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-claimondo-navy">{headline ?? defaultHeadline}</h2>
-            <p className="text-xs text-claimondo-light-blue mt-0.5">{description ?? defaultDescription}</p>
+            <h2 className="text-base font-semibold text-[#0D1B3E]">{headline ?? defaultHeadline}</h2>
+            <p className="text-xs text-[#7BA3CC] mt-0.5">{description ?? defaultDescription}</p>
           </div>
         </div>
 
@@ -95,7 +95,7 @@ export function KanzleiWunschModal({
             type="button"
             onClick={handleSpaeterFragen}
             disabled={isPending}
-            className="w-full px-4 py-2 rounded-lg border border-[#E2E8F3] text-sm text-claimondo-light-blue hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
+            className="w-full px-4 py-2 rounded-lg border border-[#E2E8F3] text-sm text-[#7BA3CC] hover:bg-[#f8f9fb] disabled:opacity-50 transition-colors"
           >
             {isPending ? 'Wird gespeichert…' : 'Später fragen'}
           </button>
