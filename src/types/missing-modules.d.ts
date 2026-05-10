@@ -36,7 +36,7 @@ declare module 'three' {
   export const PointsMaterial: AnyValue
   export const CanvasTexture: AnyValue
   export type Texture = AnyValue
-  export const default: AnyValue
+  export default AnyValue
 }
 
 declare module 'three/examples/jsm/loaders/OBJLoader.js' {
