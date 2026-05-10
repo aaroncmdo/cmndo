@@ -10,6 +10,18 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /* KFZ-177: ignoreBuildErrors entfernt — tsc ist jetzt sauber */
+  // Turbopack-Alias für 3D-Pakete die NICHT installiert sind (Feldmodus-Backlog).
+  // three/@deck.gl/@loaders.gl würden OOM im CI-Build verursachen (4 GB Runner).
+  // Die Stub-Dateien liefern Proxy-basierte No-Ops — alle Exports die die
+  // @ts-nocheck-Dateien referenzieren sind vorhanden, Build bleibt grün.
+  turbopack: {
+    resolveAlias: {
+      'three': './src/lib/mapbox/__stubs__/three-stub.ts',
+      '@deck.gl/mapbox': './src/lib/mapbox/__stubs__/three-stub.ts',
+      '@deck.gl/geo-layers': './src/lib/mapbox/__stubs__/three-stub.ts',
+      '@loaders.gl/3d-tiles': './src/lib/mapbox/__stubs__/three-stub.ts',
+    },
+  },
   // Production-Source-Maps einschalten — damit User-Errors wie „an.map is not
   // a function" auf den echten File + Zeile zurückverfolgt werden können.
   // Erhöht die Bundle-Größe leicht, aber nur die .map-Files, die werden
