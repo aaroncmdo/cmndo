@@ -28,3 +28,18 @@ PM2 cron-Eintrag auf VPS hinzufügen:
   autorestart: false,
 }
 ```
+
+## Baileys Inbound Logger
+
+Der Baileys-VPS-Service (`services/baileys`) postet eingehende WA-Nachrichten an:
+```
+POST https://cmndo.vercel.app/api/baileys/inbound
+Authorization: Bearer $CRON_SECRET
+```
+
+Benötigte Env-Vars auf dem VPS (in `ecosystem.config.js` unter `env`):
+```
+NEXT_PUBLIC_SITE_URL=https://cmndo.vercel.app
+CRON_SECRET=<gleicher Wert wie in Vercel>
+BAILEYS_AUTH_TOKEN=<lokaler Auth-Token für /check und /send Endpoints>
+```

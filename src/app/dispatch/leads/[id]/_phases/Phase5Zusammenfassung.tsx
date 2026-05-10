@@ -51,6 +51,7 @@ type LeadSnapshot = {
   unfallskizze_svg?: string | null
   unfallskizze_bestaetigt?: boolean | null
   unfallskizze_generiert_am?: string | null
+  whatsapp_verfuegbar?: boolean | null
 }
 
 type AktiverTermin = {
@@ -439,7 +440,14 @@ export default function Phase5Zusammenfassung() {
 
       {/* 3 Versand-Buttons */}
       <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
-        <h3 className="text-sm font-semibold text-claimondo-navy">Versandweg wählen</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-claimondo-navy">Versandweg wählen</h3>
+          {l.whatsapp_verfuegbar === true && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700">
+              📱 Baileys aktiv
+            </span>
+          )}
+        </div>
         {!qualification.canSendFlowLink && (
           <p className="text-[11px] text-amber-700 flex items-start gap-1">
             <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
@@ -452,17 +460,31 @@ export default function Phase5Zusammenfassung() {
             disabled={pending || !qualification.canSendFlowLink || !waNummer}
             onClick={() => send('whatsapp')}
             title={!waNummer ? 'Bitte WhatsApp-Nummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:bg-[#1fa855] disabled:opacity-40 disabled:cursor-not-allowed"
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-white text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+              l.whatsapp_verfuegbar === true
+                ? 'bg-[#25D366] hover:bg-[#1fa855] ring-2 ring-emerald-300 shadow-md'
+                : 'bg-[#25D366] hover:bg-[#1fa855]'
+            }`}
           >
             <MessageSquareIcon className="w-4 h-4" />
-            {pending && sendStatus.kanal === 'whatsapp' ? 'Sende ...' : 'WhatsApp'}
+            {pending && sendStatus.kanal === 'whatsapp' ? 'Sende ...' : (
+              l.whatsapp_verfuegbar === true ? '📱 WhatsApp' : 'WhatsApp'
+            )}
           </button>
           <button
             type="button"
             disabled={pending || !qualification.canSendFlowLink || !waNummer}
             onClick={() => send('sms')}
-            title={!waNummer ? 'Bitte Telefonnummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed"
+            title={
+              l.whatsapp_verfuegbar === true
+                ? 'Kein SMS-Fallback nötig — Kunde ist auf WhatsApp erreichbar'
+                : !waNummer ? 'Bitte Telefonnummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined
+            }
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+              l.whatsapp_verfuegbar === true
+                ? 'bg-claimondo-bg text-claimondo-ondo/60 border border-claimondo-border hover:bg-claimondo-border'
+                : 'bg-amber-500 text-white hover:bg-amber-600'
+            }`}
           >
             <PhoneIcon className="w-4 h-4" />
             {pending && sendStatus.kanal === 'sms' ? 'Sende ...' : 'SMS'}

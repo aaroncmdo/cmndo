@@ -31,6 +31,8 @@ const logger = pino({ level: process.env.LOG_LEVEL ?? 'info' })
 const PORT = Number(process.env.BAILEYS_PORT ?? 3055)
 const AUTH_TOKEN = process.env.BAILEYS_AUTH_TOKEN ?? ''
 const AUTH_DIR = process.env.BAILEYS_AUTH_DIR ?? './auth_info_baileys'
+const NEXT_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cmndo.vercel.app'
+const CRON_SECRET = process.env.CRON_SECRET ?? ''
 
 let sock = null
 let connectionState = 'disconnected' // disconnected | connecting | open
@@ -50,6 +52,63 @@ async function startSock() {
   })
 
   sock.ev.on('creds.update', saveCreds)
+
+  sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    if (type !== 'notify') return
+    for (const msg of messages) {
+      // Nur eingehende Nachrichten (nicht eigene Sends)
+      if (msg.key.fromMe) continue
+
+      const remoteJid = msg.key.remoteJid ?? ''
+      // Gruppen-Nachrichten ignorieren (JID endet auf @g.us)
+      if (remoteJid.endsWith('@g.us')) continue
+
+      // Telefon-Nummer aus JID extrahieren: "4915123456789@s.whatsapp.net" → "4915123456789"
+      const phone = remoteJid.split('@')[0]
+
+      // Nachrichtentext — unterstützt conversation + extendedTextMessage
+      const text =
+        msg.message?.conversation ??
+        msg.message?.extendedTextMessage?.text ??
+        ''
+
+      const hasMedia = !!(
+        msg.message?.imageMessage ||
+        msg.message?.videoMessage ||
+        msg.message?.documentMessage ||
+        msg.message?.audioMessage
+      )
+
+      if (!phone) continue
+
+      try {
+        const res = await fetch(`${NEXT_URL}/api/baileys/inbound`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${CRON_SECRET}`,
+          },
+          body: JSON.stringify({
+            phone,
+            text,
+            message_id: msg.key.id ?? null,
+            timestamp: msg.messageTimestamp
+              ? Number(msg.messageTimestamp)
+              : Date.now(),
+            has_media: hasMedia,
+          }),
+        })
+        if (!res.ok) {
+          const body = await res.text().catch(() => '')
+          logger.warn({ phone, status: res.status, body }, 'inbound-callback fehlgeschlagen')
+        } else {
+          logger.info({ phone, message_id: msg.key.id }, 'inbound-nachricht geloggt')
+        }
+      } catch (err) {
+        logger.error({ err, phone }, 'inbound-callback Netzwerk-Fehler')
+      }
+    }
+  })
 
   sock.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect, qr } = update
