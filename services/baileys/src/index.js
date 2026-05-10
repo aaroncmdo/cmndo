@@ -1,8 +1,11 @@
-// Claimondo Baileys-Service — Phase 1 (Read-Only-Spike).
+// Claimondo Baileys-Service — Phase 1 (Read-Only) + Send-Smoke.
 //
-// Persistente WhatsApp-Web-Connection auf dem VPS, expose'd 3 HTTP-Endpoints:
+// Persistente WhatsApp-Web-Connection auf dem VPS, expose'd 4 HTTP-Endpoints:
 //   GET  /health           — Connection-State (für Monitoring)
 //   POST /check            — Telefon-Nummer auf WhatsApp prüfen ({ phone })
+//   POST /send             — Nachricht senden ({ phone, text }) — Smoke/Test.
+//                            Production-Sends laufen später über die Next.js-
+//                            Send-Wrapper mit Templates/Logging.
 //   GET  /qr               — Aktuelles QR-Code-Bild (nur bei Re-Auth nötig)
 //
 // Auth-State liegt in ./auth_info_baileys/ — bei Neustart wird die Session
@@ -130,6 +133,51 @@ app.post('/check', authenticate, async (req, res) => {
   } catch (err) {
     logger.error({ err }, '/check failed')
     res.status(500).json({ error: 'lookup_failed', message: err?.message })
+  }
+})
+
+app.post('/send', authenticate, async (req, res) => {
+  if (connectionState !== 'open') {
+    return res.status(503).json({ error: 'baileys_not_connected', state: connectionState })
+  }
+  const phone = normalizePhone(req.body?.phone)
+  const text = String(req.body?.text ?? '').trim()
+  if (!phone || phone.length < 8) {
+    return res.status(400).json({ error: 'invalid_phone' })
+  }
+  if (!text) {
+    return res.status(400).json({ error: 'empty_text' })
+  }
+  if (text.length > 4096) {
+    return res.status(400).json({ error: 'text_too_long', max: 4096 })
+  }
+  try {
+    // Pre-Check: Empfänger muss WhatsApp haben — sonst silent fail in Baileys.
+    const candidateJid = phone + '@s.whatsapp.net'
+    const checkResult = await sock.onWhatsApp(candidateJid)
+    const exists =
+      Array.isArray(checkResult) &&
+      checkResult.length > 0 &&
+      checkResult[0]?.exists === true
+    if (!exists) {
+      return res.status(404).json({ error: 'recipient_not_on_whatsapp', phone })
+    }
+    const targetJid = checkResult[0].jid
+    const message = await sock.sendMessage(targetJid, { text })
+    logger.info(
+      { phone, jid: targetJid, message_id: message?.key?.id, text_len: text.length },
+      '/send ok',
+    )
+    res.json({
+      ok: true,
+      phone,
+      jid: targetJid,
+      message_id: message?.key?.id ?? null,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (err) {
+    logger.error({ err, phone }, '/send failed')
+    res.status(500).json({ error: 'send_failed', message: err?.message })
   }
 })
 
