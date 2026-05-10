@@ -10,7 +10,7 @@ import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL }
 export const metadata: Metadata = {
   title: 'Wie es funktioniert — In 3 Schritten zum vollen Schadensersatz',
   description:
-    'Foto, KI-Einschätzung, Gutachter vor Ort: In 3 Schritten zum vollen Anspruch. Erste Bewertung in unter 15 Minuten, Termin in unter 48 Stunden, kostenfrei für unverschuldet Geschädigte.',
+    'Foto · KI-Einschätzung · Gutachter vor Ort. In 3 Schritten zum vollen Schadensersatz. Antwort < 15 Min, Termin < 48 h, kostenfrei nach §249 BGB.',
   keywords: [
     'Kfz-Schaden melden',
     'Unfallschaden online',

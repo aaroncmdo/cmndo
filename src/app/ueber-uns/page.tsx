@@ -29,7 +29,7 @@ import {
 export const metadata: Metadata = {
   title: 'Über Claimondo — Digitale Kfz-Schadensregulierung aus Köln',
   description:
-    'Claimondo ist eine 2025 in Köln gegründete Plattform für vollständige Kfz-Schadensregulierung. Gründer: Nicolas Kitta (CEO) und Aaron Sprafke (COO). 89+ DAT-Partner-Sachverständige, kostenfrei nach §249 BGB.',
+    '2025 in Köln gegründete Plattform für Kfz-Schadensregulierung. Gründer: Nicolas Kitta (CEO) + Aaron Sprafke (COO). 89+ DAT-Partner, kostenfrei nach §249 BGB.',
   alternates: { canonical: '/ueber-uns' },
   openGraph: {
     type: 'profile',

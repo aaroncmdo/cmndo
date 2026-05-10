@@ -25,7 +25,7 @@ const PARTNER_URL = 'https://gutachter.claimondo.de'
 export const metadata: Metadata = {
   title: 'Kfz-Sachverständiger werden — Aufträge ohne Akquise',
   description:
-    'Werden Sie Partner-Gutachter bei Claimondo: vorqualifizierte Aufträge per App, transparente Honorare, Feldmodus mit GPS, automatische Abrechnung. Über 50 Partner bundesweit, 2.400+ abgeschlossene Aufträge.',
+    'Partner-Gutachter werden: vorqualifizierte Aufträge per App, GPS-Feldmodus, automatische Abrechnung. 89+ Partner, 2.400+ Aufträge.',
   keywords: [
     'Kfz-Sachverständiger Aufträge',
     'Gutachter werden',

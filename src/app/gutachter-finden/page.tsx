@@ -9,7 +9,7 @@ import {
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter finden in Ihrer Nähe — sofort & zertifiziert',
   description:
-    'Finden Sie auf der Karte einen freien, unabhängigen Kfz-Sachverständigen in Ihrer Region. Über 50 zertifizierte DAT-Experten bundesweit. Termin in unter 48h. 0 € für unverschuldet Geschädigte.',
+    'Auf der Karte freien Kfz-Sachverständigen finden. 89+ DAT-Experten bundesweit, Termin < 48 h, 0 € für unverschuldet Geschädigte (§249 BGB).',
   keywords: [
     'Kfz-Gutachter finden',
     'Sachverständiger in der Nähe',

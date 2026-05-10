@@ -8,7 +8,7 @@ import {
 export const metadata: Metadata = {
   title: 'FAQ Kfz-Schaden — Was Sie wissen müssen (BGH-belegt)',
   description:
-    'Die wichtigsten Fragen rund um Kfz-Unfall, Gutachter, Wertminderung, Versicherungs-Kürzungen und Anwalt — basierend auf 27 Fachanwalt-Quellen und BGH-Rechtsprechung.',
+    'Antworten zu Kfz-Unfall, Gutachter, Wertminderung, Versicherungs-Kürzungen und Anwalt — BGH-belegt, basierend auf 27 Fachanwalt-Quellen.',
   keywords: [
     'Kfz-Unfall FAQ',
     'Wertminderung Auto',
