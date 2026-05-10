@@ -19,8 +19,14 @@ export async function saveOnboardingStep(
     const { tabelle, spalte } = feld.db_target
     if (!ALLOWED_TABLES.has(tabelle)) continue
     if (!(feld.feld_key in values)) continue
-    const val = values[feld.feld_key]
+    let val = values[feld.feld_key]
     if (val === undefined) continue
+
+    // checkbox → TIMESTAMPTZ: true = jetzt, false = null
+    if (feld.typ === 'checkbox') {
+      val = val === true ? new Date().toISOString() : null
+    }
+
     if (!updatesByTable.has(tabelle)) updatesByTable.set(tabelle, {})
     updatesByTable.get(tabelle)![spalte] = val
   }

@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
+import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
+import type { SvMatchResult } from '@/lib/onboarding/svMatching'
 import type { OnboardingPhase, OnboardingFeld, ConditionalOn } from './types'
 import { TextField } from './fields/TextField'
 import { TextareaField } from './fields/TextareaField'
@@ -53,6 +55,11 @@ export function WizardClient({ phases, onComplete }: Props) {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [animKey, setAnimKey] = useState(0)
+  const [svMatch, setSvMatch] = useState<Extract<SvMatchResult, { ok: true }> | null>(null)
+  const [completed, setCompleted] = useState(false)
+  const geoMatchedRef = useRef(false)
+  const svId = svMatch?.svId ?? null
+  const svName = svMatch?.svName ?? null
 
   // Resume-Support: anfrageId + werte aus sessionStorage laden
   useEffect(() => {
@@ -81,6 +88,22 @@ export function WizardClient({ phases, onComplete }: Props) {
   const totalPhases = currentPhases.length
   const currentPhase = currentPhases[phaseIdx]
 
+  // Sobald eine Phase mit 'slot'-Feld aktiv wird → Browser-Geolocation + SV-Matching
+  const hasSlotFeld = currentPhase?.felder.some(f => f.typ === 'slot') ?? false
+  useEffect(() => {
+    if (!hasSlotFeld || geoMatchedRef.current || svId) return
+    if (!navigator.geolocation) return
+    geoMatchedRef.current = true
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const result = await matcheSvFuerWizard(pos.coords.latitude, pos.coords.longitude)
+        if (result.ok) setSvMatch(result)
+      },
+      () => { /* Standort verweigert — SlotField zeigt Demo-Slots */ },
+      { timeout: 8000, maximumAge: 60_000 },
+    )
+  }, [hasSlotFeld, svId])
+
   const setField = useCallback((key: string, val: unknown) => {
     setValues(prev => ({ ...prev, [key]: val }))
   }, [])
@@ -101,7 +124,12 @@ export function WizardClient({ phases, onComplete }: Props) {
 
       if (phaseIdx >= totalPhases - 1) {
         sessionStorage.removeItem(STORAGE_KEY)
+        // SV- oder Lead-Zuordnung auf GFA persistieren (fire-and-forget, unkritisch)
+        if (svMatch) {
+          speichereZuordnung(result.anfrageId, svMatch).catch(() => {})
+        }
         onComplete?.(result.anfrageId, values)
+        setCompleted(true)
         return
       }
       setPhaseIdx(i => i + 1)
@@ -118,6 +146,43 @@ export function WizardClient({ phases, onComplete }: Props) {
     setAnimKey(k => k + 1)
     setError(null)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (completed) {
+    return (
+      <div style={{
+        fontFamily: 'var(--font-montserrat, Montserrat), sans-serif',
+        textAlign: 'center',
+        padding: 'clamp(48px, 8vw, 80px) 24px',
+        animation: 'sheetIn .5s var(--wiz-ease-out) both',
+      }}>
+        <div style={{
+          width: 72, height: 72, borderRadius: '50%',
+          background: 'linear-gradient(135deg, #34C759, #1a7a35)',
+          display: 'grid', placeItems: 'center',
+          margin: '0 auto 24px',
+          boxShadow: '0 8px 24px rgba(52,199,89,.30)',
+        }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <path d="M20 6 9 17l-5-5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--claimondo-navy)', letterSpacing: '-.024em', marginBottom: 12 }}>
+          Termin erfolgreich angefragt!
+        </h2>
+        <p style={{ fontSize: 16, color: 'var(--wiz-text-2)', maxWidth: 400, margin: '0 auto 32px', lineHeight: 1.6 }}>
+          Ihr Sachverständiger wird sich in Kürze bei Ihnen melden, um den Termin zu bestätigen.
+        </p>
+        <div style={{
+          display: 'inline-flex', gap: 12, padding: '16px 24px',
+          background: 'var(--wiz-fill)', borderRadius: 'var(--wiz-r-lg)',
+          fontSize: 14, color: 'var(--wiz-text-2)', fontWeight: 500,
+        }}>
+          <span>📋</span>
+          Ihre Referenznummer: <strong style={{ color: 'var(--claimondo-navy)', fontFamily: 'monospace' }}>{anfrageId?.slice(-8).toUpperCase()}</strong>
+        </div>
+      </div>
+    )
   }
 
   if (!currentPhase) return null
@@ -251,6 +316,21 @@ export function WizardClient({ phases, onComplete }: Props) {
           </div>
         </div>
 
+        {/* SV-Match-Banner wenn Slot-Phase aktiv + SV gefunden */}
+        {hasSlotFeld && svName && (
+          <div style={{
+            marginBottom: 20, padding: '12px 18px',
+            background: 'rgba(52,199,89,.08)', borderRadius: 'var(--wiz-r-sm)',
+            fontSize: 14, fontWeight: 500, color: '#1a7a35', letterSpacing: '-.005em',
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Sachverständiger in Ihrer Nähe gefunden: <strong>{svName}</strong>
+          </div>
+        )}
+
         {/* Felder */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
           {felder.map(feld => (
@@ -260,6 +340,8 @@ export function WizardClient({ phases, onComplete }: Props) {
               value={values[feld.feld_key]}
               onChange={val => setField(feld.feld_key, val)}
               disabled={isSaving}
+              svId={svId}
+              anfrageId={anfrageId}
             />
           ))}
         </div>
@@ -350,11 +432,15 @@ function FieldRenderer({
   value,
   onChange,
   disabled,
+  svId,
+  anfrageId,
 }: {
   feld: OnboardingFeld
   value: unknown
   onChange: (val: unknown) => void
   disabled: boolean
+  svId?: string | null
+  anfrageId?: string | null
 }) {
   switch (feld.typ) {
     case 'text':
@@ -421,6 +507,8 @@ function FieldRenderer({
           value={(value as string) ?? ''}
           onChange={onChange as (v: string) => void}
           disabled={disabled}
+          svId={svId}
+          anfrageId={anfrageId}
         />
       )
     case 'signature':

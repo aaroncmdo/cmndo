@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import { GutachterFinderLoader } from './GutachterFinderLoader'
-import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
+import { DynamicWizard } from '@/components/onboarding/DynamicWizard'
 import {
   serviceSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL,
@@ -47,17 +46,11 @@ export const metadata: Metadata = {
 }
 
 export default async function GutachterFindenPage() {
-  const [svResult, leadsResult] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
-
-  const aktiveSVs = svResult.ok ? svResult.data : []
-  const svLeads = leadsResult.ok ? leadsResult.data : []
-
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
-          // localBusinessSchema kommt global aus layout.tsx
           serviceSchema({
             name: 'Kfz-Gutachter-Vermittlung',
             description:
@@ -70,13 +63,49 @@ export default async function GutachterFindenPage() {
           ]),
         ])}
       />
-      {/* H1 explizit in der Server-Component fuer Crawler/AI-Suchmaschinen.
-          Der Map-Client hat keinen sichtbaren H1 (UX-Entscheidung — die GPS-
-          Karte fuellt den Viewport), aber Crawler brauchen den Topic-Anker. */}
       <h1 className="sr-only">
         Kfz-Gutachter in Ihrer Nähe finden — sofort buchen, kostenfrei nach §249 BGB
       </h1>
-      <GutachterFinderLoader aktiveSVs={aktiveSVs} svLeads={svLeads} />
+
+      <div style={{
+        minHeight: '100dvh',
+        background: 'linear-gradient(160deg, #f8f9fb 0%, #eef1f6 100%)',
+        padding: 'clamp(24px, 4vw, 56px) clamp(16px, 4vw, 32px)',
+      }}>
+        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+          {/* Hero-Kopf */}
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              background: 'rgba(13,27,62,.06)', borderRadius: 999,
+              padding: '8px 16px', marginBottom: 20,
+              fontSize: 13, fontWeight: 600, color: 'var(--claimondo-navy)', letterSpacing: '-.005em',
+            }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#34C759', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+              Sachverständige in Echtzeit verfügbar
+            </div>
+            <h1 style={{
+              fontSize: 'clamp(26px, 4vw, 38px)',
+              fontWeight: 800, letterSpacing: '-.032em',
+              color: 'var(--claimondo-navy)', lineHeight: 1.12,
+              marginBottom: 14, fontFamily: 'var(--font-montserrat, Montserrat), sans-serif',
+            }}>
+              Kfz-Gutachter in Ihrer Nähe finden
+            </h1>
+            <p style={{
+              fontSize: 'clamp(15px, 2vw, 17px)',
+              color: 'var(--wiz-text-2)', lineHeight: 1.6,
+              maxWidth: 500, margin: '0 auto',
+              fontFamily: 'var(--font-montserrat, Montserrat), sans-serif',
+            }}>
+              Kostenlos für unverschuldet Geschädigte nach §249 BGB.
+              Termin in unter 48 Stunden — bundesweit.
+            </p>
+          </div>
+
+          <DynamicWizard flowKey="gutachter-finden" />
+        </div>
+      </div>
     </>
   )
 }
