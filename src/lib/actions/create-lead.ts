@@ -12,6 +12,7 @@ import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
 import { schritt1Schema, type Schritt1Input } from '@/lib/flow/schemas/schritt1'
 import { createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 import { berechneFehlendeFelder } from '@/lib/flow/fehlende-felder'
+import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 
 type CreateLeadResult =
   | { success: true; leadId: string; abortToSelbstverschulden: boolean }
@@ -122,6 +123,12 @@ export async function createLeadFromSchritt1(
       .update({ fehlende_felder_jsonb: fehlendeFelder })
       .eq('id', lead.id)
   }
+
+  // WhatsApp-Verfügbarkeit prüfen + cachen (fire-and-forget — VPS-PM2,
+  // kein Vercel-Cold-Kill-Risiko). Ergebnis landet in leads.whatsapp_*.
+  void checkAndCacheAvailability('lead', lead.id, data.telefon).catch((err) => {
+    console.error('[whatsapp-check] lead failed:', err)
+  })
 
   // F-02: Dispatch-User über neuen Lead benachrichtigen (fire-and-forget).
   if (!isAbort) {

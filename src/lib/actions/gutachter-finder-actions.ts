@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 
 export type SvLead = {
   id: string
@@ -113,6 +114,16 @@ export async function erstelleGutachterFinderAnfrage(
   if (error) return { ok: false, error: error.message }
 
   const anfrageId = data.id
+
+  // WhatsApp-Verfügbarkeit prüfen + cachen (fire-and-forget — VPS-PM2,
+  // kein Vercel-Cold-Kill-Risiko). Ergebnis landet in
+  // gutachter_finder_anfragen.whatsapp_* — Dispatch sieht im Detail-View
+  // ob WA-Send möglich ist bevor er den SV anruft.
+  if (payload.telefon) {
+    void checkAndCacheAvailability('gfa', anfrageId, payload.telefon).catch((err) => {
+      console.error('[whatsapp-check] gfa failed:', err)
+    })
+  }
 
   // Dispatch-Task: alle dispatch/admin-User informieren dass ein SV angerufen werden muss
   try {
