@@ -257,6 +257,34 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
       })
   }
 
+  // ─── 5d. CarDentity Typ-A Trigger (fire-and-forget) ──────────────────
+  // Wenn ZB1-OCR im Self-Dispatch eine FIN extrahiert hat, jetzt den
+  // Vorschaden-Check anstossen. Endpoint nutzt admin client + schreibt
+  // das Ergebnis nach faelle/vehicles inkl. Timeline-Eintrag. Onboarding-
+  // Wizard zeigt dann conditional die altschaden_fotos + altes_gutachten
+  // Slots wenn vorschaden_check_status='vorschaden_erkannt'.
+  if (anfrage.fin_vin) {
+    fetch(`${APP_URL}/api/cardentity/typ-a`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fall_id: conv.fallId,
+        fin_vin: anfrage.fin_vin as string,
+      }),
+    })
+      .then(async (r) => {
+        if (!r.ok) {
+          console.warn(
+            '[konvertiereAnfrageZuFall] CarDentity-Trigger fehlgeschlagen:',
+            r.status,
+          )
+        }
+      })
+      .catch((err) => {
+        console.warn('[konvertiereAnfrageZuFall] CarDentity-Trigger Exception:', err)
+      })
+  }
+
   // ─── 6. Magic-Link senden ────────────────────────────────────────────
   // generateLink statt signInWithOtp damit wir die URL mit eigenem
   // redirect_to zur Fallakte versehen können. Dispatch sieht dann auch in
