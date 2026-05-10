@@ -317,6 +317,31 @@ export default function TagesrouteMap({
       if (map.isStyleLoaded()) {
         removeRouteLayer(map, 'main')
       }
+      // Blitzer/Hazards/Stau auch ohne aktive Route laden — Isochrone als
+      // BBox wenn vorhanden, sonst 20-km-Radius um SV-Standort.
+      if (svOrigin) {
+        const fallbackBbox = isochronePolygon && isochronePolygon.length >= 3
+          ? bboxForIsochrone(isochronePolygon)
+          : bboxForRoute([[svOrigin.lng, svOrigin.lat]], 20)
+        void Promise.all([
+          fetchBlitzerInBbox(fallbackBbox),
+          fetchHereHazards(fallbackBbox),
+          fetchHereFlow(fallbackBbox),
+        ]).then(([blitzerFeatures, hazardFeatures, flowFeatures]) => {
+          const m2 = mapRef.current
+          if (!m2) return
+          const attach = () => {
+            if (!blitzerRef.current) blitzerRef.current = attachBlitzerLayer(m2, blitzerFeatures)
+            else blitzerRef.current.update(blitzerFeatures)
+            if (!hazardsRef.current) hazardsRef.current = attachHazardLayer(m2, hazardFeatures)
+            else hazardsRef.current.update(hazardFeatures)
+            if (!flowRef.current) flowRef.current = attachFlowLayer(m2, flowFeatures)
+            else flowRef.current.update(flowFeatures)
+          }
+          if (m2.isStyleLoaded()) attach()
+          else m2.once('idle', attach)
+        }).catch(() => { /* best-effort */ })
+      }
       return
     }
     let cancelled = false
