@@ -362,5 +362,152 @@
       "p2": "Claimondo, tüm hasar tazminatı sürecini koordine eder: DAT sertifikalı bilirkişiler tarafından bağımsız bilirkişi raporu, LexDrive ortak hukuk bürosu aracılığıyla hukuki takip ve §249 BGB kapsamında hak edilen tüm taleplerin eksiksiz ödenmesi — onarım, değer kaybı, kullanım kaybı, kiralık araç, manevi tazminat. Kazada kusuru bulunmayan mağdurlar için hizmet ücretsizdir.",
       "p3": "Ortak ağı şu anda Kuzey Ren-Westfalya'da 89+ DAT-Expert bilirkişiyi kapsamakta olup yaklaşık 460 bilirkişiyle ülke genelinde ölçeklenme planlanmaktadır. Randevular genellikle 48 saat içinde alınabilmektedir. Bağımsız bilirkişi talep hakkının yasal dayanağı §249 BGB ve süregelen BGH içtihadıdır (özellikle VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     }
+  },
+  "gutachter_finder": {
+    "legal": "Kusursuz mağdurlar için ücretsiz · §249 BGB",
+    "routing": {
+      "heading": "Şu anda kaza yerinde misiniz?",
+      "sub": "Süreci durumunuza göre ayarlıyoruz.",
+      "cta_vor_ort": "Evet, kaza yerindeyim — Hemen kayıt",
+      "cta_termin": "Hayır — Randevuyu sonra al"
+    },
+    "vor_ort_fotos": {
+      "step_label": "Adım 1 / 2 · Fotoğraflar",
+      "heading": "Kazadan fotoğraflar",
+      "sub": "En az bir fotoğraf — tercihen dört (genel görünüm, hasar yakın, plaka, çevre). GPS ve zaman otomatik kaydedilir.",
+      "cta_min": "En az bir fotoğraf",
+      "cta_weiter": "Devam ({count} {count, plural, one {fotoğraf} other {fotoğraf}}) →",
+      "btn_erstes": "İlk fotoğrafı çek",
+      "btn_weiteres": "Başka fotoğraf",
+      "uploading": "Fotoğraf ekleniyor …",
+      "zurueck": "← Geri"
+    },
+    "vor_ort_kontakt": {
+      "step_label": "Adım 2 / 2 · İletişim",
+      "heading": "Sizi nasıl ulaşabiliriz?",
+      "sub": "Önümüzdeki 5 dakika içinde sizi geri arayıp bir bilirkişi göndereceğiz.",
+      "placeholder_vorname": "Ad",
+      "placeholder_nachname": "Soyad",
+      "placeholder_telefon": "Telefon numarası",
+      "placeholder_email": "E-posta adresi",
+      "cta": "Acil yardım talep et →",
+      "sending": "Gönderiliyor …",
+      "zurueck": "← Fotoğrafları değiştir"
+    },
+    "vor_ort_erfolg": {
+      "heading": "Acil yardım yolda",
+      "sub": "{telefon} numaranızı önümüzdeki 5 dakika içinde geri arayacağız.",
+      "fotos_gespeichert": "{count} {count, plural, one {fotoğraf} other {fotoğraf}} kaydedildi",
+      "gps_label": "GPS"
+    },
+    "wann": {
+      "heading": "Bilirkişiye ne zaman ihtiyacınız var?",
+      "sub": "Süreci durumunuza göre ayarlıyoruz.",
+      "sofort_titel": "Hemen",
+      "sofort_sub": "Kaza yerindeyim — Ekspres Değerlendirme",
+      "heute_titel": "Bugün",
+      "heute_sub": "Gün içinde — esnek randevu",
+      "tage_titel": "Önümüzdeki günlerde",
+      "tage_sub": "Randevuyu rahatça ayarla"
+    },
+    "schaden": {
+      "heading": "Ne oldu?",
+      "sub": "Hasarınız için doğru bilirkişiyi atayabilmemiz adına.",
+      "kz_label": "Kazaya neden olanın plakası",
+      "kz_placeholder": "K AB 1234",
+      "kz_unbekannt": "Plaka bilinmiyor / Kaçak sürücü mü?",
+      "kz_unbekannt_set": "✓ Plaka bilinmiyor",
+      "weiter": "İleri →",
+      "zurueck": "← Geri",
+      "auffahrunfall": "Arkadan çarpma",
+      "parkschaden": "Park hasarı",
+      "kreuzungsunfall": "Kavşak kazası",
+      "wildschaden": "Vahşi hayvan hasarı",
+      "sonstiges": "Diğer hasar"
+    },
+    "fahrzeug": {
+      "heading": "Araç türü nedir?",
+      "sub": "Uygun uzmanlığa sahip bir bilirkişi seçiyoruz.",
+      "weiter": "İleri →",
+      "zurueck": "← Geri",
+      "pkw": "Otomobil",
+      "motorrad": "Motosiklet",
+      "transporter": "Minibüs",
+      "lkw": "Kamyon",
+      "wohnmobil": "Karavan"
+    },
+    "gps": {
+      "heading": "Yakınınızdaki bilirkişi",
+      "sub": "Size en yakın müsait DAT-sertifikalı bilirkişiyi hemen gösteriyoruz.",
+      "cta": "Konum izni ver",
+      "loading": "Konum belirleniyor …",
+      "hint": "Yalnızca bilirkişi araması için · Veriler kaydedilmez",
+      "fehler_denied": "Konum erişimi reddedildi — lütfen tarayıcı ayarlarından izin verin.",
+      "fehler_generic": "Konum belirlenemedi."
+    },
+    "karte": {
+      "banner": "Yakınınızda {count} {count, plural, one {bilirkişi} other {bilirkişi}}",
+      "banner_keine": "Yakınınızda bilirkişi bulunamadı"
+    },
+    "detail": {
+      "entfernt": "{km} km uzaklıkta",
+      "dat_badge": "DAT Expert Partner",
+      "freie_termine": "Uygun Randevular",
+      "termin_reservieren": "Randevu rezerve et →",
+      "legal": "Kusursuz mağdurlar için ücretsiz · 0 € katkı payı",
+      "slot_aendern": "değiştir"
+    },
+    "ansprueche": {
+      "badge": "§249 BGB kapsamındaki hakkınız",
+      "heading": "Hiçbir hakkınızdan vazgeçmeyin",
+      "sub": "Sigortalar <highlight_8von10>10'da 8</highlight_8von10> vakada kesinti yapar. Avukatsız tazminat alanlar genellikle ilk kesentiyi kabul eder ve ortalama <highlight_3000>3.000 €</highlight_3000> kaybeder.",
+      "sub_8von10": "10'da 8",
+      "sub_3000": "3.000 €",
+      "voll_badge": "Önerilen",
+      "voll_heading": "Tam olarak tazmin ettirin",
+      "voll_li1": "Bağımsız bilirkişi tüm hasar kalemlerini belgeler",
+      "voll_li2": "Yılda 2.000+ dava deneyimli uzman avukat, 30 gün içinde talep gönderir",
+      "voll_li3": "Tüm iletişimi biz üstleniriz",
+      "voll_kostenlos": "Size 0 € — sigorta avukat + bilirkişi ücretini öder",
+      "beispiel_label": "Örnek · 4.800 € hasar miktarı",
+      "beispiel_plus": "Artı, normalde kesilen tutarlar",
+      "beispiel_anwalt": "Avukatınız tam tutarı talep eder",
+      "nur_gutachten": "Yalnızca bilirkişi raporu — kendiniz tazmin edin →",
+      "zurueck": "← Başka randevu seç"
+    },
+    "formular": {
+      "heading": "İletişim bilgileriniz",
+      "placeholder_vorname": "Ad",
+      "placeholder_nachname": "Soyad",
+      "placeholder_telefon": "Telefon numarası",
+      "placeholder_email": "E-posta adresi",
+      "signatur_label": "İmzanız",
+      "signatur_hint": "Parmağınızla buraya imza atın",
+      "signatur_neu": "yeniden çiz",
+      "agb_text": "Bir KFZ bilirkişisi aracılığı ve hasar tazminatı için görevlendirme yapıyorum. Tüm masraflar karşı tarafın sigortası tarafından karşılanır. <link_agb>Kullanım Koşulları</link_agb>, <link_datenschutz>Gizlilik Politikası</link_datenschutz> ve <link_nutzung>Hizmet Koşulları</link_nutzung> koşullarını kabul ediyorum.",
+      "agb_link": "Kullanım Koşulları",
+      "datenschutz_link": "Gizlilik Politikası",
+      "nutzung_link": "Hizmet Koşulları",
+      "legal_toggle_mehr": "Tam hukuki metin",
+      "legal_toggle_weniger": "Daha az",
+      "legal_volltext": "Claimondo GmbH (i.Gr.), Hansaring 10, 50670 Köln adresini; aracımdaki kaza hasarını değerlendirmek üzere sertifikalı bir KFZ bilirkişisi temini ve iş ortağı bir hukuk bürosu aracılığıyla tam hasar tazminatı için yetkilendiriyorum. Bilirkişi ve avukatlık ücretleri, §249 BGB uyarınca kaza failinin zorunlu sorumluluk sigortası tarafından karşılanır. Tarafıma herhangi bir masraf yansıtılmaz.",
+      "cta_senden": "Bilirkişiyi şimdi gönder →",
+      "cta_senden_termin": "Randevuyu onayla →",
+      "sending": "Rezervasyon işleniyor …",
+      "hint_meldung": "Bilirkişiniz 30 dakika içinde sizinle iletişime geçecek"
+    },
+    "erfolg": {
+      "heading": "Randevu onaylandı!",
+      "sub": "{sv_vorname} seçtiğiniz randevu zamanında yanınızda olacak.",
+      "magic_link_heading": "Giriş bağlantısı içeren e-posta gönderildi",
+      "magic_link_sub": "{email} adresine gönderilen e-postadaki bağlantıya tıklayın — oluşturulan dava, randevu ve tüm belgelerle doğrudan portala yönlendirileceksiniz.",
+      "email_hint": "Kısa süre içinde e-posta ile bir onay alacaksınız. Bilirkişiniz önceden telefonla bilgi verecek.",
+      "zb1_heading": "Aracı onayla — 1 tıklama",
+      "zb1_sub": "Ruhsattan fotoğraf çekin — FIN, araç sahibi ve modeli otomatik olarak okuyoruz. Sonradan yazmanıza gerek kalmaz ve ön hasarların varlığı anında kontrol edilir.",
+      "zb1_cta": "Ruhsatı tara",
+      "zb1_scanning": "Okunuyor …",
+      "zb1_felder": "{count} alan tanındı",
+      "zb1_fin_hint": "Aracınızda ön hasar bulunup bulunmadığını arka planda kontrol ediyoruz — varsa sorun değil, bunu otomatik olarak dikkate alıyoruz."
+    }
   }
 }
