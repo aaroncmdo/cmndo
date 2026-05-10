@@ -5,6 +5,7 @@ import Link from 'next/link'
 import SVKalenderClient from './SVKalenderClient'
 import PageHeader from '@/components/shared/PageHeader'
 import KalenderListeEmpty from './KalenderListeEmpty'
+import KalenderRealtimeRefresh from '@/components/kalender/KalenderRealtimeRefresh'
 
 // AAR-229 W5 / F-12: Kalender + Termine merge mit View-Toggle.
 export default async function SVKalenderPage({
@@ -29,28 +30,24 @@ export default async function SVKalenderPage({
   const { isGoogleConnected } = await import('@/lib/google/oauth-client')
   const gcalConnected = await isGoogleConnected(user.id)
 
-  // 2026-05-06 (Kelvin Gall-Fix): Externe Termine als Busy-Slots laden —
-  // Google + CalDAV (Apple). Vorher nur bei gcalConnected, dadurch sahen
-  // Apple-only-SVs ihre privaten Termine nicht im SV-Kalender.
-  // getSvBusySlots prueft selbst auf vorhandene Quellen.
-  const { data: hatCaldav } = await supabase
-    .from('sv_kalender_verbindungen')
-    .select('id')
+  // Live-Termine Phase 3: Cache-Read statt Live-API-Call.
+  // Cron sync-external-calendars (alle 5 Min) hält sv_kalender_events_cache
+  // aktuell — Page-Load von 4-8s auf <1s. KalenderRealtimeRefresh unten
+  // triggert router.refresh() wenn neue Events eintreffen.
+  const now = new Date()
+  const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
+  const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
+  const { data: cachedEvents } = await supabase
+    .from('sv_kalender_events_cache')
+    .select('start_zeit, end_zeit')
     .eq('sv_id', sv.id)
-    .eq('provider', 'caldav')
-    .maybeSingle()
-  let externalBusy: { start: string; end: string }[] = []
-  if (gcalConnected || hatCaldav) {
-    const now = new Date()
-    const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
-    const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
-    try {
-      const { getSvBusySlots } = await import('@/lib/google-calendar/busy-slots')
-      externalBusy = await getSvBusySlots(user.id, fromIso, toIso)
-    } catch (err) {
-      console.warn('[gutachter/kalender] Busy-Slots:', err instanceof Error ? err.message : err)
-    }
-  }
+    .gte('start_zeit', fromIso)
+    .lte('start_zeit', toIso)
+    .order('start_zeit')
+  const externalBusy = (cachedEvents ?? []).map((e) => ({
+    start: e.start_zeit as string,
+    end: e.end_zeit as string,
+  }))
 
   // CMM-25: Kalender zeigt nur Termine, deren Auftrag bereits durch die
   // Sicherungsabtretung bestätigt wurde. Reine Dispatcher-Slot-Blocks
@@ -124,6 +121,7 @@ export default async function SVKalenderPage({
 
   return (
     <div className="h-full flex flex-col">
+      <KalenderRealtimeRefresh svId={sv.id} />
       {/* View-Toggle */}
       <div className="px-4 py-2 bg-white border-b border-claimondo-border shrink-0">
         <PageHeader
