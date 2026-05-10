@@ -1,7 +1,7 @@
-// Typ-Stubs für @deck.gl/* und @loaders.gl/* — kein eigenes @types-Paket.
-// three + @types/three sind installiert und brauchen keinen Stub mehr.
-// deck.gl-Packages werden ebenfalls als Peer-Dependencies nachgezogen
-// und hier nur als minimal-Stub gehalten bis vollständige Typen geprüft sind.
+// Typ-Stubs für @deck.gl/* und @loaders.gl/*.
+// Diese Packages haben zu viele Typ-Abhängigkeiten für den CI-Build (OOM).
+// Die Dateien die sie nutzen (cesium-3d-tiles, google-3d-tiles) haben @ts-nocheck.
+// Stubs sind nur Defense-in-Depth falls ein anderer Import die Module referenziert.
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyConstructor = new (...args: any[]) => any
