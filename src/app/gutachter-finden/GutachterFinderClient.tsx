@@ -242,7 +242,12 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
   })
 
   // ——— Karte initialisieren ———
+  // 2026-05-10 Performance: Init verschoben bis User in GPS-Phase ist.
+  // Spart die schwere Mapbox-WebGL-Init + Tile-Requests in Phase 1-3
+  // (Wann/Schaden/Fahrzeug) wo die Map noch gar nicht sichtbar ist.
   useEffect(() => {
+    // Map erst ab GPS-Phase initialisieren — vorher braucht's sie nicht
+    if (phase === 'wann' || phase === 'schaden' || phase === 'fahrzeug') return
     if (mapRef.current || !mapContainerRef.current) return
     if (!ensureMapboxInitialized()) return
 
@@ -287,7 +292,7 @@ export function GutachterFinderClient({ aktiveSVs, svLeads }: Props) {
       map.remove()
       mapRef.current = null
     }
-  }, [])
+  }, [phase])
 
   // ——— SV-Marker zeichnen wenn Liste bekannt ———
   const zeichneSvMarker = useCallback(
