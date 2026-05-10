@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { PhoneIcon, CheckCircleIcon, ClockIcon, PenSquareIcon, UserIcon, MapPinIcon, CalendarIcon, FileSignatureIcon } from 'lucide-react'
+import { PhoneIcon, CheckCircleIcon, ClockIcon, PenSquareIcon, UserIcon, MapPinIcon, CalendarIcon, FileSignatureIcon, AlertCircleIcon } from 'lucide-react'
 import type { GutachterFinderAnfrage } from './actions'
 import { aktualisiereAnfrageStatus } from './actions'
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
+  entwurf: { label: 'Offen — anrufen', color: 'bg-orange-100 text-orange-800' },
   neu: { label: 'Neu', color: 'bg-amber-100 text-amber-800' },
   in_bearbeitung: { label: 'In Bearbeitung', color: 'bg-blue-100 text-blue-700' },
   sv_kontaktiert: { label: 'SV kontaktiert', color: 'bg-claimondo-ondo/10 text-claimondo-ondo' },
@@ -37,7 +38,7 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
 
   const svName = anfrage.sv_name ?? anfrage.sv_lead_name ?? null
   const svTelefon = anfrage.sv_telefon ?? anfrage.sv_lead_telefon ?? null
-  const istOffen = lokalerStatus === 'neu' || lokalerStatus === 'in_bearbeitung'
+  const istOffen = lokalerStatus === 'entwurf' || lokalerStatus === 'neu' || lokalerStatus === 'in_bearbeitung'
 
   function wechsleStatus(neuerStatus: string) {
     setLokalerStatus(neuerStatus)
@@ -112,6 +113,22 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
         </div>
       </div>
 
+      {/* Entwurf-Banner — Wizard nicht abgeschlossen, nur Telefon vorhanden */}
+      {lokalerStatus === 'entwurf' && (
+        <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-orange-50 border border-orange-200 flex items-center gap-2">
+          <PhoneIcon className="w-4 h-4 text-orange-600 shrink-0" />
+          <span className="text-xs font-semibold text-orange-800">Wizard abgebrochen — bitte anrufen und Daten aufnehmen</span>
+        </div>
+      )}
+
+      {/* Anruf-Banner für Lead-Fallback — SV muss manuell kontaktiert werden */}
+      {anfrage.matching_typ === 'lead_fallback' && lokalerStatus !== 'sv_kontaktiert' && lokalerStatus !== 'termin_bestaetigt' && lokalerStatus !== 'abgeschlossen' && (
+        <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-amber-50 border border-amber-200 flex items-center gap-2">
+          <AlertCircleIcon className="w-4 h-4 text-amber-600 shrink-0" />
+          <span className="text-xs font-semibold text-amber-800">DAT-SV — bitte manuell anrufen!</span>
+        </div>
+      )}
+
       {/* SV-Block — zeigt wen wir anrufen müssen */}
       {svName && (
         <div className="mx-4 mb-3 px-3 py-2.5 rounded-ios-sm bg-claimondo-bg border border-claimondo-border">
@@ -168,11 +185,18 @@ export default function GutachterFinderUebersichtClient({
 }: {
   anfragen: GutachterFinderAnfrage[]
 }) {
-  const [filter, setFilter] = useState<'offen' | 'alle'>('offen')
+  const [filter, setFilter] = useState<'offen' | 'anruf' | 'alle'>('offen')
 
-  const sichtbare = filter === 'offen'
-    ? anfragen.filter((a) => a.status === 'neu' || a.status === 'in_bearbeitung' || a.status === 'sv_kontaktiert')
-    : anfragen
+  const anrufNoetig = anfragen.filter(
+    (a) => a.matching_typ === 'lead_fallback' && a.status !== 'sv_kontaktiert' && a.status !== 'termin_bestaetigt' && a.status !== 'abgeschlossen' && a.status !== 'storniert',
+  )
+
+  const sichtbare =
+    filter === 'offen'
+      ? anfragen.filter((a) => a.status === 'entwurf' || a.status === 'neu' || a.status === 'in_bearbeitung' || a.status === 'sv_kontaktiert')
+      : filter === 'anruf'
+      ? anrufNoetig
+      : anfragen
 
   return (
     <div className="space-y-4">
