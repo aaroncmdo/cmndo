@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<title>Termin-Strecke — Claimondo Gutachter-Finder</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --c-navy:       #0D1B3E;
+  --c-shield:     #1E3A5F;
+  --c-ondo:       #4573A2;
+  --c-light-blue: #7BA3CC;
+
+  /* iOS-leaning surfaces */
+  --c-bg:         #f2f3f7;
+  --c-bg-2:       #fafbfd;
+  --c-card:       #ffffff;
+  --c-fill:       rgba(15,30,68,.06);     /* iOS .systemFill */
+  --c-fill-2:     rgba(15,30,68,.03);     /* tertiary */
+  --c-separator:  rgba(15,30,68,.08);
+  --c-border:     rgba(15,30,68,.10);
+
+  --c-text:       #0D1B3E;
+  --c-text-2:     #4b5468;     /* secondary */
+  --c-text-3:     #8a93a6;     /* tertiary */
+
+  --c-success:    #34C759;     /* iOS green */
+  --c-amber:      #FF9F0A;
+  --c-red:        #FF3B30;
+
+  --r-xs:  10px;
+  --r-sm:  14px;
+  --r-md:  18px;
+  --r-lg:  22px;
+  --r-xl:  28px;
+  --r-2xl: 36px;
+
+  --shadow-1:  0 1px 2px rgba(15,30,68,.04);
+  --shadow-2:  0 2px 6px rgba(15,30,68,.05), 0 8px 24px rgba(15,30,68,.04);
+  --shadow-3:  0 6px 18px rgba(15,30,68,.07), 0 24px 48px rgba(15,30,68,.06);
+  --shadow-4:  0 14px 36px rgba(15,30,68,.10), 0 40px 80px rgba(15,30,68,.08);
+
+  --f-sans:    'Montserrat', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+
+  /* iOS easing */
+  --ease:      cubic-bezier(.32,.72,0,1);
+  --ease-out:  cubic-bezier(.16,1,.3,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--f-sans);
+  background: var(--c-bg);
+  color: var(--c-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -.005em;
+  min-height: 100vh;
+}
+
+/* Subtle ambient gradient (iOS depth) */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,.18), transparent 60%),
+    radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,.08), transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+
+/* ─── Header (iOS Translucent NavBar) ───────────── */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,.78);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  border-bottom: 1px solid rgba(15,30,68,.06);
+}
+.header-inner {
+  max-width: 1180px; margin: 0 auto;
+  padding: 0 clamp(20px,4vw,48px);
+  height: 56px;
+  display: flex; align-items: center; gap: 32px;
+}
+.logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; text-decoration: none; }
+.logo-mark {
+  width: 32px; height: 32px; border-radius: 9px;
+  background: var(--c-navy);
+  display: grid; place-items: center;
+  color: #fff;
+}
+.logo-wordmark {
+  font-size: 18px; font-weight: 700; letter-spacing: -.024em; color: var(--c-text);
+}
+.logo-wordmark span { color: var(--c-ondo); }
+.header-spacer { flex: 1; }
+.header-tel {
+  font-size: 14px; font-weight: 600;
+  color: var(--c-text); letter-spacing: -.01em;
+  display: flex; align-items: center; gap: 8px;
+  text-decoration: none;
+  padding: 8px 14px; border-radius: 999px;
+  background: var(--c-fill);
+  transition: background .2s var(--ease);
+}
+.header-tel:hover { background: rgba(15,30,68,.10); }
+.header-tel svg { color: var(--c-ondo); }
+
+/* ─── Layout-Shell ──────────────────────────────── */
+.shell {
+  position: relative; z-index: 1;
+  max-width: 1180px; margin: 0 auto;
+  padding: clamp(28px,5vw,56px) clamp(20px,4vw,48px) 96px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 340px;
+  gap: 32px;
+  align-items: flex-start;
+}
+@media (max-width: 980px) {
+  .shell { grid-template-columns: 1fr; gap: 20px; }
+  .sidebar { order: -1; }
+}
+
+/* ─── Eyebrow (iOS-style: small caps, subtle) ───── */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600;
+  color: var(--c-ondo);
+  letter-spacing: -.005em;
+}
+.eyebrow::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--c-ondo);
+}
+
+.flow-head { margin-bottom: 28px; }
+.flow-head h1 {
+  margin-top: 14px;
+  font-size: clamp(28px,3.4vw,44px);
+  font-weight: 700; letter-spacing: -.03em; line-height: 1.08;
+  color: var(--c-text);
+}
+.flow-head h1 .accent { color: var(--c-ondo); }
+.flow-head .lede {
+  margin-top: 12px;
+  font-size: 16px; color: var(--c-text-2); line-height: 1.55;
+  max-width: 560px; font-weight: 400;
+  letter-spacing: -.01em;
+}
+
+/* ─── Step-Indicator (iOS-Activity-Rings vibe) ──── */
+.step-rail {
+  background: var(--c-card);
+  border-radius: var(--r-xl);
+  padding: 22px 26px 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-2);
+  position: relative;
+}
+.step-rail-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  position: relative;
+}
+.step-rail-line {
+  position: absolute; top: 19px; left: 11%; right: 11%;
+  height: 3px; border-radius: 2px;
+  background: var(--c-fill);
+  z-index: 0;
+}
+.step-rail-line-fill {
+  position: absolute; top: 19px; left: 11%;
+  height: 3px; border-radius: 2px; z-index: 1;
+  background: linear-gradient(90deg, var(--c-navy), var(--c-ondo));
+  transition: width .55s var(--ease-out);
+}
+.step-cell {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; position: relative; z-index: 2;
+  cursor: pointer;
+}
+.step-circle {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--c-card);
+  border: 2px solid var(--c-fill);
+  color: var(--c-text-3);
+  display: grid; place-items: center;
+  font-weight: 600; font-size: 15px;
+  letter-spacing: -.01em;
+  transition: all .35s var(--ease);
+}
+.step-cell.done .step-circle {
+  background: var(--c-navy); border-color: var(--c-navy); color: #fff;
+  transform: scale(1.04);
+}
+.step-cell.active .step-circle {
+  background: var(--c-ondo); border-color: var(--c-ondo); color: #fff;
+  box-shadow: 0 0 0 6px rgba(69,115,162,.16);
+  transform: scale(1.06);
+}
+.step-cell.done .step-num-text { display: none; }
+.step-cell.done .step-check { display: block; }
+.step-check { display: none; }
+.step-label {
+  margin-top: 12px;
+  font-size: 12px; font-weight: 500; color: var(--c-text-3);
+  letter-spacing: -.005em;
+  transition: color .25s var(--ease);
+}
+.step-cell.active .step-label { color: var(--c-text); font-weight: 600; }
+.step-cell.done .step-label { color: var(--c-text-2); font-weight: 500; }
+
+@media (max-width: 640px) {
+  .step-label { font-size: 11px; }
+  .step-circle { width: 34px; height: 34px; font-size: 13px; }
+  .step-rail-line, .step-rail-line-fill { top: 16px; height: 2.5px; }
+}
+
+/* ─── Phase-Card (iOS Sheet) ────────────────────── */
+.phase-card {
+  background: var(--c-card);
+  border-radius: var(--r-2xl);
+  padding: 36px clamp(22px,3vw,40px);
+  box-shadow: var(--shadow-3);
+  position: relative;
+  animation: sheetIn .42s var(--ease-out) both;
+}
+@keyframes sheetIn {
+  from { opacity: 0; transform: translateY(16px) scale(.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.phase-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 24px; margin-bottom: 32px; padding-bottom: 28px;
+  border-bottom: 1px solid var(--c-separator);
+}
+.phase-title-eyebrow {
+  font-size: 13px; font-weight: 600;
+  color: var(--c-ondo);
+  letter-spacing: -.005em;
+}
+.phase-title h2 {
+  font-size: 24px; font-weight: 700; letter-spacing: -.024em;
+  color: var(--c-text); line-height: 1.18; margin-top: 6px;
+}
+.phase-title p {
+  margin-top: 10px; font-size: 15px; color: var(--c-text-2); line-height: 1.55;
+  max-width: 480px; letter-spacing: -.005em;
+}
+.phase-counter {
+  flex-shrink: 0;
+  font-size: 13px; font-weight: 600;
+  color: var(--c-text-2);
+  background: var(--c-fill);
+  border-radius: 999px;
+  padding: 8px 14px;
+  letter-spacing: -.005em;
+}
+.phase-counter strong { color: var(--c-text); font-weight: 700; }
+
+/* ─── Form Elements ─────────────────────────────── */
+.field-grid { display: grid; gap: 22px; }
+.field-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+@media (max-width: 600px) { .field-grid.cols-2 { grid-template-columns: 1fr; } }
+.field { display: flex; flex-direction: column; gap: 10px; }
+.field-label {
+  font-size: 14px; font-weight: 600; color: var(--c-text);
+  letter-spacing: -.01em;
+  display: flex; align-items: center; gap: 6px;
+}
+.field-label .req { color: var(--c-amber); font-size: 13px; }
+.field-hint {
+  font-size: 13px; color: var(--c-text-3); margin-top: -2px;
+  letter-spacing: -.005em; line-height: 1.45;
+}
+
+/* iOS-style filled inputs */
+.field-input,
+.field-select,
+.field-textarea {
+  width: 100%;
+  background: var(--c-fill);
+  border: 1.5px solid transparent;
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  font-size: 16px;
+  color: var(--c-text);
+  font-family: var(--f-sans);
+  letter-spacing: -.01em;
+  transition: all .2s var(--ease);
+}
+.field-input:hover,
+.field-textarea:hover,
+.field-select:hover { background: rgba(15,30,68,.08); }
+.field-input:focus,
+.field-select:focus,
+.field-textarea:focus {
+  outline: none;
+  background: var(--c-card);
+  border-color: var(--c-ondo);
+  box-shadow: 0 0 0 4px rgba(69,115,162,.12);
+}
+.field-input::placeholder,
+.field-textarea::placeholder { color: var(--c-text-3); }
+.field-textarea { resize: vertical; min-height: 120px; line-height: 1.55; }
+
+/* ─── iOS Segmented Control (für Pill-Choice) ─── */
+.segmented {
+  display: inline-flex; padding: 3px;
+  background: var(--c-fill);
+  border-radius: var(--r-sm);
+  width: 100%;
+  position: relative;
+}
+.segmented-item {
+  flex: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 14px;
+  font-size: 14px; font-weight: 600;
+  color: var(--c-text-2);
+  border-radius: 11px;
+  cursor: pointer;
+  user-select: none;
+  position: relative; z-index: 1;
+  transition: color .25s var(--ease);
+  letter-spacing: -.01em;
+}
+.segmented-item input { display: none; }
+.segmented-item.active {
+  background: var(--c-card);
+  color: var(--c-text);
+  box-shadow: 0 1px 2px rgba(15,30,68,.04), 0 3px 8px rgba(15,30,68,.06);
+}
+.segmented-item:not(.active):hover { color: var(--c-text); }
+.seg-icon { font-size: 14px; line-height: 1; opacity: .8; }
+
+/* Wider option-cards (toggle-grid) iOS-Sheet style */
+.toggle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 480px) { .toggle-grid { grid-template-columns: 1fr; } }
+.toggle-card {
+  background: var(--c-card);
+  border: 1.5px solid var(--c-separator);
+  border-radius: var(--r-md);
+  padding: 18px;
+  display: flex; gap: 14px; align-items: center;
+  cursor: pointer; transition: all .22s var(--ease);
+  position: relative;
+}
+.toggle-card:hover {
+  border-color: var(--c-light-blue);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-1);
+}
+.toggle-card.active {
+  border-color: var(--c-ondo);
+  background: linear-gradient(135deg, rgba(69,115,162,.06), rgba(123,163,204,.04));
+  box-shadow: var(--shadow-2);
+}
+.toggle-card-icon {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 13px; background: var(--c-fill);
+  display: grid; place-items: center;
+  color: var(--c-ondo); transition: all .22s var(--ease);
+}
+.toggle-card.active .toggle-card-icon {
+  background: var(--c-ondo); color: #fff;
+  box-shadow: 0 6px 14px rgba(69,115,162,.28);
+}
+.toggle-card-text strong {
+  display: block; font-size: 15px; font-weight: 600; color: var(--c-text);
+  margin-bottom: 3px; letter-spacing: -.012em;
+}
+.toggle-card-text span {
+  font-size: 13px; color: var(--c-text-2); line-height: 1.45;
+  letter-spacing: -.005em;
+}
+
+/* ─── Termin-Slot-Picker (iOS Calendar) ─────────── */
+.slot-section { display: flex; flex-direction: column; gap: 24px; }
+.slot-eyebrow {
+  font-size: 13px; font-weight: 600; color: var(--c-text-2);
+  margin-bottom: 12px; letter-spacing: -.005em;
+}
+.day-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 8px;
+}
+.day-cell {
+  background: var(--c-card);
+  border: 1.5px solid var(--c-separator);
+  border-radius: var(--r-md);
+  padding: 14px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; transition: all .22s var(--ease); position: relative;
+}
+.day-cell:hover {
+  border-color: var(--c-light-blue);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-1);
+}
+.day-cell.active {
+  border-color: var(--c-navy);
+  background: var(--c-navy); color: #fff;
+  box-shadow: 0 8px 22px rgba(13,27,62,.22);
+  transform: translateY(-2px);
+}
+.day-cell.unavailable { opacity: .35; cursor: not-allowed; }
+.day-cell.unavailable:hover { transform: none; border-color: var(--c-separator); box-shadow: none; }
+.day-weekday {
+  font-size: 11px; font-weight: 600;
+  color: var(--c-text-3); letter-spacing: -.005em;
+}
+.day-cell.active .day-weekday { color: rgba(255,255,255,.65); }
+.day-num {
+  font-size: 24px; font-weight: 700;
+  color: var(--c-text); line-height: 1;
+  letter-spacing: -.024em;
+}
+.day-cell.active .day-num { color: #fff; }
+.day-month { font-size: 11px; color: var(--c-text-3); font-weight: 500; letter-spacing: -.005em; }
+.day-cell.active .day-month { color: rgba(255,255,255,.65); }
+.day-availability {
+  margin-top: 4px; font-size: 10px; font-weight: 600;
+  color: var(--c-success); letter-spacing: -.005em;
+}
+.day-cell.active .day-availability { color: #6FE299; }
+
+.slot-time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+.slot-time {
+  background: var(--c-fill);
+  border: 1.5px solid transparent;
+  border-radius: var(--r-sm);
+  padding: 14px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; transition: all .22s var(--ease);
+}
+.slot-time:hover {
+  background: rgba(15,30,68,.10);
+  transform: translateY(-1px);
+}
+.slot-time.active {
+  background: var(--c-ondo); border-color: var(--c-ondo); color: #fff;
+  box-shadow: 0 8px 20px rgba(69,115,162,.32);
+  transform: translateY(-2px);
+}
+.slot-time-h {
+  font-size: 17px; font-weight: 700;
+  color: var(--c-text); letter-spacing: -.024em;
+}
+.slot-time.active .slot-time-h { color: #fff; }
+.slot-time-len { font-size: 11px; color: var(--c-text-3); font-weight: 500; letter-spacing: -.005em; }
+.slot-time.active .slot-time-len { color: rgba(255,255,255,.7); }
+
+/* ─── Summary (iOS List) ────────────────────────── */
+.summary-list {
+  background: var(--c-fill-2);
+  border-radius: var(--r-md);
+  padding: 4px 0;
+  overflow: hidden;
+}
+.summary-row {
+  display: grid; grid-template-columns: 130px 1fr auto;
+  gap: 16px; align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--c-separator);
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-key {
+  font-size: 13px; font-weight: 600;
+  color: var(--c-text-2); letter-spacing: -.005em;
+}
+.summary-val {
+  font-size: 15px; color: var(--c-text); line-height: 1.45; font-weight: 500;
+  letter-spacing: -.01em;
+}
+.summary-val .sub {
+  display: block; font-size: 13px; color: var(--c-text-3); font-weight: 400;
+  margin-top: 3px; letter-spacing: -.005em;
+}
+.summary-edit {
+  font-size: 14px; font-weight: 600; color: var(--c-ondo);
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px; border-radius: 999px;
+  transition: background .15s var(--ease);
+  letter-spacing: -.005em;
+}
+.summary-edit:hover { background: rgba(69,115,162,.10); }
+@media (max-width: 600px) {
+  .summary-row { grid-template-columns: 1fr; gap: 6px; padding: 14px 16px; }
+  .summary-edit { justify-self: flex-start; }
+  .summary-list { padding: 0; }
+}
+
+/* DSGVO Checkbox iOS-style */
+.dsgvo {
+  margin-top: 24px; padding: 18px 20px;
+  background: var(--c-fill-2);
+  border-radius: var(--r-md);
+  display: flex; gap: 14px; align-items: flex-start;
+  cursor: pointer;
+}
+.dsgvo .check {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--c-separator);
+  background: var(--c-card);
+  display: grid; place-items: center;
+  transition: all .22s var(--ease);
+  margin-top: 1px;
+}
+.dsgvo .check svg { width: 14px; height: 14px; color: #fff; opacity: 0; transition: opacity .15s var(--ease); }
+.dsgvo input { display: none; }
+.dsgvo input:checked + .check { background: var(--c-ondo); border-color: var(--c-ondo); }
+.dsgvo input:checked + .check svg { opacity: 1; }
+.dsgvo span { font-size: 13px; color: var(--c-text-2); line-height: 1.55; letter-spacing: -.005em; }
+.dsgvo a { color: var(--c-ondo); text-decoration: none; font-weight: 500; }
+.dsgvo a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ─── Phase-Footer (iOS sticky-feel) ────────────── */
+.phase-footer {
+  margin-top: 32px; padding-top: 24px;
+  border-top: 1px solid var(--c-separator);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+}
+.btn-back, .btn-next {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 22px;
+  border-radius: 999px;
+  font-size: 15px; font-weight: 600;
+  letter-spacing: -.01em;
+  transition: all .25s var(--ease);
+  white-space: nowrap;
+  min-height: 48px;
+}
+.btn-back {
+  background: var(--c-fill);
+  color: var(--c-text);
+}
+.btn-back:hover:not(:disabled) {
+  background: rgba(15,30,68,.10);
+  transform: translateY(-1px);
+}
+.btn-back:disabled { opacity: .35; cursor: not-allowed; }
+
+.btn-next {
+  background: var(--c-ondo);
+  color: #fff;
+  padding: 14px 26px;
+  box-shadow: 0 4px 12px rgba(69,115,162,.30), 0 1px 2px rgba(69,115,162,.18);
+}
+.btn-next:hover:not(:disabled) {
+  background: #3a6291;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(69,115,162,.36), 0 2px 4px rgba(69,115,162,.20);
+}
+.btn-next:active:not(:disabled) { transform: translateY(0); }
+.btn-next:disabled { opacity: .42; cursor: not-allowed; box-shadow: none; transform: none; }
+.btn-next.success {
+  background: var(--c-success);
+  box-shadow: 0 4px 12px rgba(52,199,89,.36), 0 1px 2px rgba(52,199,89,.20);
+}
+.btn-next.success:hover:not(:disabled) {
+  background: #2db94f;
+  box-shadow: 0 8px 22px rgba(52,199,89,.40);
+}
+
+/* ─── SIDEBAR — SV Card + Trust ─────────────────── */
+.sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; }
+@media (max-width: 980px) { .sidebar { position: static; } }
+
+.sv-card {
+  background: var(--c-card);
+  border-radius: var(--r-xl);
+  padding: 24px;
+  box-shadow: var(--shadow-3);
+  position: relative; overflow: hidden;
+}
+.sv-card::before {
+  content: '';
+  position: absolute; inset: 0 0 auto 0; height: 92px;
+  background:
+    radial-gradient(80% 100% at 0% 0%, rgba(123,163,204,.55) 0%, transparent 70%),
+    linear-gradient(135deg, var(--c-navy) 0%, var(--c-shield) 100%);
+  z-index: 0;
+}
+.sv-card-eyebrow {
+  position: relative; z-index: 1;
+  font-size: 12px; font-weight: 500;
+  color: rgba(255,255,255,.65);
+  letter-spacing: -.005em;
+}
+.sv-card-status {
+  position: relative; z-index: 1;
+  margin-top: 4px;
+  font-size: 14px; font-weight: 600; color: #fff;
+  display: flex; align-items: center; gap: 8px;
+  letter-spacing: -.01em;
+}
+.sv-avatar {
+  position: relative; z-index: 2;
+  margin-top: 28px;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--c-light-blue), var(--c-ondo));
+  border: 4px solid var(--c-card);
+  display: grid; place-items: center;
+  color: #fff; font-weight: 700; font-size: 22px;
+  letter-spacing: -.02em;
+  box-shadow: var(--shadow-2);
+}
+.sv-name {
+  margin-top: 14px;
+  font-size: 18px; font-weight: 700; color: var(--c-text);
+  letter-spacing: -.018em;
+}
+.sv-title {
+  margin-top: 3px;
+  font-size: 13px; color: var(--c-text-2); font-weight: 500;
+  letter-spacing: -.005em;
+}
+.sv-rating {
+  margin-top: 12px;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 14px; color: var(--c-text); font-weight: 600;
+  letter-spacing: -.01em;
+}
+.sv-rating .stars { color: #FFB800; letter-spacing: -1px; }
+.sv-rating-count { color: var(--c-text-3); font-weight: 400; }
+
+.sv-meta {
+  margin-top: 18px; padding: 14px;
+  background: var(--c-fill-2);
+  border-radius: var(--r-sm);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+.sv-meta-item { display: flex; flex-direction: column; gap: 3px; }
+.sv-meta-key {
+  font-size: 11px; font-weight: 500;
+  color: var(--c-text-3); letter-spacing: -.005em;
+}
+.sv-meta-val {
+  font-size: 14px; font-weight: 700; color: var(--c-text);
+  letter-spacing: -.012em;
+}
+.sv-meta-val.success { color: var(--c-success); }
+
+.trust-card {
+  background: var(--c-card);
+  border-radius: var(--r-xl);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-2);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.trust-card-title {
+  font-size: 13px; font-weight: 600; color: var(--c-text-2);
+  letter-spacing: -.005em;
+}
+.trust-pill {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: var(--c-text); font-weight: 500;
+  letter-spacing: -.01em;
+}
+.trust-pill .check {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(52,199,89,.14);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.trust-pill .check svg { color: var(--c-success); }
+
+.live-hint {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px 16px;
+  background: rgba(52,199,89,.08);
+  border-radius: var(--r-sm);
+  font-size: 13px; color: #1a7f3e;
+  font-weight: 500; line-height: 1.45;
+  letter-spacing: -.005em;
+}
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--c-success); flex-shrink: 0;
+  margin-top: 5px;
+  box-shadow: 0 0 0 0 rgba(52,199,89,.6);
+  animation: pulseDot 2.2s infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52,199,89,.5); }
+  50%      { box-shadow: 0 0 0 7px rgba(52,199,89,0); }
+}
+
+/* ─── Final Success ─────────────────────────────── */
+.success-screen {
+  text-align: center;
+  padding: 40px 16px 16px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 18px;
+}
+.success-mark {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--c-success) 0%, #2db94f 100%);
+  display: grid; place-items: center;
+  color: #fff;
+  box-shadow: 0 14px 32px rgba(52,199,89,.36), 0 4px 8px rgba(52,199,89,.18);
+  animation: popMark .55s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes popMark {
+  0%   { opacity: 0; transform: scale(.55); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.success-screen h2 {
+  font-size: 28px; font-weight: 700; letter-spacing: -.028em;
+  color: var(--c-text); line-height: 1.18;
+  max-width: 480px;
+}
+.success-screen .lede {
+  font-size: 15px; color: var(--c-text-2); line-height: 1.55;
+  max-width: 460px; letter-spacing: -.005em;
+}
+.success-meta {
+  margin-top: 8px;
+  font-size: 13px; font-weight: 600;
+  color: var(--c-ondo);
+  background: rgba(69,115,162,.10);
+  padding: 10px 18px;
+  border-radius: 999px;
+  letter-spacing: -.005em;
+}
+.success-next {
+  margin-top: 16px; padding: 22px 24px;
+  background: var(--c-fill-2);
+  border-radius: var(--r-md);
+  text-align: left;
+  max-width: 460px; width: 100%;
+}
+.success-next-title {
+  font-size: 13px; font-weight: 600; color: var(--c-text-2);
+  margin-bottom: 14px; letter-spacing: -.005em;
+}
+.success-next ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.success-next li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 14px; color: var(--c-text); line-height: 1.5;
+  letter-spacing: -.005em;
+}
+.success-next li .ic {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(69,115,162,.12);
+  display: grid; place-items: center;
+  color: var(--c-ondo); flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.phase[hidden] { display: none !important; }
+
+/* Spec note (entfernen vor Production) */
+.spec-note {
+  margin-top: 24px;
+  padding: 16px 18px;
+  background: rgba(255,159,10,.08);
+  border-radius: var(--r-sm);
+  font-size: 12px; color: #855600;
+  line-height: 1.6; letter-spacing: -.005em;
+}
+.spec-note strong { font-weight: 700; }
+.spec-note code {
+  background: rgba(255,159,10,.16);
+  padding: 1px 6px; border-radius: 5px;
+  font-family: ui-monospace, monospace; font-size: 11px;
+  color: #6b4400;
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <span class="logo-mark">
+        <svg width="18" height="20" viewBox="0 0 100 110">
+          <path d="M50 4 L92 20 L92 56 C92 78 74 94 50 100 C26 94 8 78 8 56 L8 20 Z" fill="none" stroke="#fff" stroke-width="6"/>
+        </svg>
+      </span>
+      <span class="logo-wordmark">claim<span>ondo</span></span>
+    </a>
+    <div class="header-spacer"></div>
+    <a href="tel:0221XXXXXXX" class="header-tel">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      0221 XXX XX XX
+    </a>
+  </div>
+</header>
+
+<main class="shell">
+
+  <div>
+    <div class="flow-head">
+      <span class="eyebrow">Schritt für Schritt — sicher buchen</span>
+      <h1>Wir vereinbaren Ihren <span class="accent">Gutachtertermin</span>.</h1>
+      <p class="lede">Vier kurze Fragen, dann ein Termin in der Nähe. Antwort innerhalb 15 Minuten — alle weiteren Schritte übernehmen wir für Sie.</p>
+    </div>
+
+    <div class="step-rail">
+      <div class="step-rail-row">
+        <div class="step-rail-line"></div>
+        <div class="step-rail-line-fill" id="rail-fill" style="width:0%"></div>
+        <div class="step-cell active" data-step="1">
+          <div class="step-circle"><span class="step-num-text">1</span><svg class="step-check" viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="step-label">Schaden</div>
+        </div>
+        <div class="step-cell" data-step="2">
+          <div class="step-circle"><span class="step-num-text">2</span><svg class="step-check" viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="step-label">Fahrzeug</div>
+        </div>
+        <div class="step-cell" data-step="3">
+          <div class="step-circle"><span class="step-num-text">3</span><svg class="step-check" viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="step-label">Termin</div>
+        </div>
+        <div class="step-cell" data-step="4">
+          <div class="step-circle"><span class="step-num-text">4</span><svg class="step-check" viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="step-label">Kontakt</div>
+        </div>
+        <div class="step-cell" data-step="5">
+          <div class="step-circle"><span class="step-num-text">5</span><svg class="step-check" viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="step-label">Bestätigung</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PHASE 1 ────────────────────── -->
+    <section class="phase-card phase" id="phase-1">
+      <div class="phase-header">
+        <div class="phase-title">
+          <span class="phase-title-eyebrow">Schritt 1 von 5</span>
+          <h2>Was ist passiert?</h2>
+          <p>Drei Pflichtangaben für eine erste Einschätzung. Details kommen später — keine Sorge, das geht schnell.</p>
+        </div>
+        <span class="phase-counter"><strong>1</strong> / 5</span>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label class="field-label">Wer ist verantwortlich? <span class="req">*</span></label>
+          <div class="segmented" data-name="schuldfrage">
+            <label class="segmented-item active"><input type="radio" name="schuldfrage" value="gegner" checked/>Der Unfallgegner</label>
+            <label class="segmented-item"><input type="radio" name="schuldfrage" value="unklar"/>Noch unklar</label>
+            <label class="segmented-item"><input type="radio" name="schuldfrage" value="teilschuld"/>Teilschuld</label>
+          </div>
+          <span class="field-hint">Bei eigener Schuld läuft die Regulierung über Ihre Kasko — bitte rufen Sie uns an.</span>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Ist das Fahrzeug noch fahrbereit? <span class="req">*</span></label>
+          <div class="toggle-grid" data-name="fahrbereit">
+            <label class="toggle-card active">
+              <input type="radio" name="fahrbereit" value="ja" checked hidden/>
+              <span class="toggle-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+              </span>
+              <div class="toggle-card-text"><strong>Ja, fahrbereit</strong><span>Termin beim Gutachter oder bei mir</span></div>
+            </label>
+            <label class="toggle-card">
+              <input type="radio" name="fahrbereit" value="nein" hidden/>
+              <span class="toggle-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8h20v8H2z"/><path d="M2 12h20"/><path d="M6 4v4M18 4v4"/></svg>
+              </span>
+              <div class="toggle-card-text"><strong>Nicht fahrbereit</strong><span>Standort wird angefahren</span></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Schaden in Stichworten <span class="req">*</span></label>
+          <textarea class="field-textarea" name="schaden_kurz" placeholder="z. B. Auffahrunfall an Ampel, hinten links eingedrückt, Stoßstange hängt"></textarea>
+          <span class="field-hint">Drei bis vier Sätze reichen. Der Gutachter klärt vor Ort die Details.</span>
+        </div>
+      </div>
+
+      <div class="phase-footer">
+        <button class="btn-back" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Zurück
+        </button>
+        <button class="btn-next" data-next="2">
+          Weiter — Fahrzeug
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ─── PHASE 2 ────────────────────── -->
+    <section class="phase-card phase" id="phase-2" hidden>
+      <div class="phase-header">
+        <div class="phase-title">
+          <span class="phase-title-eyebrow">Schritt 2 von 5</span>
+          <h2>Welches Fahrzeug?</h2>
+          <p>Kennzeichen reicht für den Anfang. Marke / Modell + Baujahr beschleunigen die Vorab-Kalkulation.</p>
+        </div>
+        <span class="phase-counter"><strong>2</strong> / 5</span>
+      </div>
+
+      <div class="field-grid cols-2">
+        <div class="field">
+          <label class="field-label">Kennzeichen <span class="req">*</span></label>
+          <input class="field-input" name="kennzeichen" placeholder="K-AB 1234" style="text-transform:uppercase;letter-spacing:.04em;"/>
+          <span class="field-hint">Alternativ: ZB1 (Fahrzeugschein) fotografieren — wir lesen alles automatisch.</span>
+        </div>
+        <div class="field">
+          <label class="field-label">Baujahr <span class="req">*</span></label>
+          <input class="field-input" type="number" name="baujahr" min="1980" max="2026" placeholder="2019"/>
+        </div>
+        <div class="field">
+          <label class="field-label">Hersteller</label>
+          <select class="field-select" name="hersteller">
+            <option value="">Bitte wählen…</option>
+            <option>BMW</option><option>Mercedes-Benz</option><option>Volkswagen</option>
+            <option>Audi</option><option>Opel</option><option>Ford</option>
+            <option>Porsche</option><option>Anderes…</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Modell</label>
+          <input class="field-input" name="modell" placeholder="z. B. 320d, A-Klasse, Golf 8"/>
+        </div>
+      </div>
+
+      <div class="phase-footer">
+        <button class="btn-back" data-back="1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Zurück
+        </button>
+        <button class="btn-next" data-next="3">
+          Weiter — Termin wählen
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ─── PHASE 3 ────────────────────── -->
+    <section class="phase-card phase" id="phase-3" hidden>
+      <div class="phase-header">
+        <div class="phase-title">
+          <span class="phase-title-eyebrow">Schritt 3 von 5</span>
+          <h2>Wann passt es Ihnen?</h2>
+          <p>Echte Verfügbarkeit von <strong style="color:var(--c-text);font-weight:600;">M. Konzog</strong> — direkt aus dem Gutachter-Kalender.</p>
+        </div>
+        <span class="phase-counter"><strong>3</strong> / 5</span>
+      </div>
+
+      <div class="slot-section">
+        <div>
+          <div class="slot-eyebrow">Tag wählen</div>
+          <div class="day-strip">
+            <div class="day-cell active"><span class="day-weekday">Mo</span><span class="day-num">12</span><span class="day-month">Mai</span><span class="day-availability">4 frei</span></div>
+            <div class="day-cell"><span class="day-weekday">Di</span><span class="day-num">13</span><span class="day-month">Mai</span><span class="day-availability">3 frei</span></div>
+            <div class="day-cell unavailable"><span class="day-weekday">Mi</span><span class="day-num">14</span><span class="day-month">Mai</span><span class="day-availability" style="color:var(--c-text-3);">voll</span></div>
+            <div class="day-cell"><span class="day-weekday">Do</span><span class="day-num">15</span><span class="day-month">Mai</span><span class="day-availability">6 frei</span></div>
+            <div class="day-cell"><span class="day-weekday">Fr</span><span class="day-num">16</span><span class="day-month">Mai</span><span class="day-availability">2 frei</span></div>
+            <div class="day-cell unavailable"><span class="day-weekday">Sa</span><span class="day-num">17</span><span class="day-month">Mai</span><span class="day-availability" style="color:var(--c-text-3);">—</span></div>
+            <div class="day-cell"><span class="day-weekday">Mo</span><span class="day-num">19</span><span class="day-month">Mai</span><span class="day-availability">5 frei</span></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="slot-eyebrow">Uhrzeit · Mo, 12. Mai 2026</div>
+          <div class="slot-time-grid">
+            <div class="slot-time"><span class="slot-time-h">08:00</span><span class="slot-time-len">~ 45 Min</span></div>
+            <div class="slot-time active"><span class="slot-time-h">10:30</span><span class="slot-time-len">~ 45 Min</span></div>
+            <div class="slot-time"><span class="slot-time-h">13:15</span><span class="slot-time-len">~ 45 Min</span></div>
+            <div class="slot-time"><span class="slot-time-h">15:30</span><span class="slot-time-len">~ 45 Min</span></div>
+          </div>
+        </div>
+
+        <div class="live-hint">
+          <span class="live-dot"></span>
+          <span>Live-Verfügbarkeit aus dem Gutachter-Kalender. Der Termin wird sofort reserviert sobald Sie weiterklicken.</span>
+        </div>
+      </div>
+
+      <div class="phase-footer">
+        <button class="btn-back" data-back="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Zurück
+        </button>
+        <button class="btn-next" data-next="4">
+          Slot reservieren
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ─── PHASE 4 ────────────────────── -->
+    <section class="phase-card phase" id="phase-4" hidden>
+      <div class="phase-header">
+        <div class="phase-title">
+          <span class="phase-title-eyebrow">Schritt 4 von 5</span>
+          <h2>Wie erreichen wir Sie?</h2>
+          <p>Wir senden die Termin-Bestätigung per WhatsApp oder Email — und einen sicheren Link für die weiteren Schritte.</p>
+        </div>
+        <span class="phase-counter"><strong>4</strong> / 5</span>
+      </div>
+
+      <div class="field-grid cols-2">
+        <div class="field">
+          <label class="field-label">Vorname <span class="req">*</span></label>
+          <input class="field-input" name="vorname" placeholder="Max"/>
+        </div>
+        <div class="field">
+          <label class="field-label">Nachname <span class="req">*</span></label>
+          <input class="field-input" name="nachname" placeholder="Mustermann"/>
+        </div>
+        <div class="field">
+          <label class="field-label">Telefon (für WhatsApp) <span class="req">*</span></label>
+          <input class="field-input" type="tel" name="telefon" placeholder="+49 170 1234567"/>
+          <span class="field-hint">Wir prüfen automatisch ob WhatsApp verfügbar ist — sonst SMS.</span>
+        </div>
+        <div class="field">
+          <label class="field-label">Email</label>
+          <input class="field-input" type="email" name="email" placeholder="max@example.de"/>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:24px;">
+        <label class="field-label">Bevorzugter Kanal</label>
+        <div class="segmented" data-name="kanal">
+          <label class="segmented-item active"><input type="radio" name="kanal" value="whatsapp" checked/>WhatsApp</label>
+          <label class="segmented-item"><input type="radio" name="kanal" value="email"/>Email</label>
+          <label class="segmented-item"><input type="radio" name="kanal" value="anruf"/>Anruf</label>
+        </div>
+      </div>
+
+      <div class="phase-footer">
+        <button class="btn-back" data-back="3">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Zurück
+        </button>
+        <button class="btn-next" data-next="5">
+          Weiter — Bestätigung
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ─── PHASE 5 ────────────────────── -->
+    <section class="phase-card phase" id="phase-5" hidden>
+      <div class="phase-header">
+        <div class="phase-title">
+          <span class="phase-title-eyebrow">Schritt 5 von 5</span>
+          <h2>Alles richtig?</h2>
+          <p>Letzte Sicherheits-Prüfung. Mit einem Klick reservieren wir Ihren Termin verbindlich.</p>
+        </div>
+        <span class="phase-counter"><strong>5</strong> / 5</span>
+      </div>
+
+      <div class="summary-list">
+        <div class="summary-row">
+          <div class="summary-key">Schaden</div>
+          <div class="summary-val">Auffahrunfall — Gegner haftet, fahrbereit<span class="sub">"Auffahrunfall an Ampel, hinten links eingedrückt"</span></div>
+          <button class="summary-edit" data-back="1">Ändern <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="summary-row">
+          <div class="summary-key">Fahrzeug</div>
+          <div class="summary-val">BMW 320d · Baujahr 2019 · K-AB 1234</div>
+          <button class="summary-edit" data-back="2">Ändern <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="summary-row">
+          <div class="summary-key">Termin</div>
+          <div class="summary-val">Montag, 12. Mai 2026 · 10:30 Uhr<span class="sub">M. Konzog · 4,7 km entfernt</span></div>
+          <button class="summary-edit" data-back="3">Ändern <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="summary-row">
+          <div class="summary-key">Kontakt</div>
+          <div class="summary-val">Max Mustermann · +49 170 1234567<span class="sub">WhatsApp bevorzugt · max@example.de</span></div>
+          <button class="summary-edit" data-back="4">Ändern <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+
+      <label class="dsgvo">
+        <input type="checkbox" id="dsgvo-ok"/>
+        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <span>
+          Ich stimme der Verarbeitung meiner Daten gemäß <a href="/datenschutz">Datenschutz­erklärung</a> zu. Claimondo darf mich zur Auftragsabwicklung per WhatsApp, Email und Telefon kontaktieren. Dieses Einverständnis kann jederzeit widerrufen werden.
+        </span>
+      </label>
+
+      <div class="phase-footer">
+        <button class="btn-back" data-back="4">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Zurück
+        </button>
+        <button class="btn-next success" data-next="6" id="submit-btn" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Termin verbindlich buchen
+        </button>
+      </div>
+    </section>
+
+    <!-- ─── PHASE 6 — Success ─────────── -->
+    <section class="phase-card phase" id="phase-6" hidden>
+      <div class="success-screen">
+        <div class="success-mark">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2>Termin gebucht. Wir kümmern uns um den Rest.</h2>
+        <p class="lede">Eine Bestätigung mit allen Details ist gerade per WhatsApp an Ihre Nummer gegangen. Sie erhalten zusätzlich einen sicheren Link zur Fall-Akte.</p>
+        <span class="success-meta">Fall-Nr · CL-2026-0512-K3M9</span>
+
+        <div class="success-next">
+          <div class="success-next-title">Was als Nächstes passiert</div>
+          <ul>
+            <li>
+              <span class="ic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span><strong>Innerhalb 15 Min:</strong> WhatsApp mit dem sicheren Onboarding-Link.</span>
+            </li>
+            <li>
+              <span class="ic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span><strong>Bis morgen:</strong> Vollmacht digital unterschreiben — wir kümmern uns um die Anwaltskanzlei.</span>
+            </li>
+            <li>
+              <span class="ic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              <span><strong>Mo, 12. Mai · 10:30:</strong> Termin mit M. Konzog. Erinnerung 24 h vorher.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="spec-note">
+      <strong>// Implementierungs-Hinweis:</strong>&nbsp;
+      Phasen + Felder werden aus DB-Konfig geladen — Tabellen <code>onboarding_phasen</code> + <code>onboarding_felder</code>. Pro Eintrag: <code>phase_key</code>, <code>label</code>, <code>typ</code>, <code>pflicht</code>, <code>db_target</code>, <code>conditional_on</code>. Wizard rendert dynamisch — gleiche Komponenten wiederverwendbar für SV-Onboarding, Mandantenfragebogen, etc.
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sv-card">
+      <div class="sv-card-eyebrow">Ihr Sachverständiger</div>
+      <div class="sv-card-status">
+        <span class="live-dot" style="margin-top:0;"></span>
+        Heute online · Antwort &lt; 15 Min
+      </div>
+      <div class="sv-avatar">MK</div>
+      <div class="sv-name">M. Konzog</div>
+      <div class="sv-title">DAT-Expert · BVSK-zertifiziert · Köln</div>
+      <div class="sv-rating">
+        <span class="stars">★★★★★</span>
+        <span>4,9</span>
+        <span class="sv-rating-count">· 247 Bewertungen</span>
+      </div>
+      <div class="sv-meta">
+        <div class="sv-meta-item"><span class="sv-meta-key">Entfernung</span><span class="sv-meta-val">4,7 km</span></div>
+        <div class="sv-meta-item"><span class="sv-meta-key">Frühster Termin</span><span class="sv-meta-val success">Heute 16:30</span></div>
+        <div class="sv-meta-item"><span class="sv-meta-key">Ø Reaktion</span><span class="sv-meta-val">8 Min</span></div>
+        <div class="sv-meta-item"><span class="sv-meta-key">Sprachen</span><span class="sv-meta-val">DE · EN · TR</span></div>
+      </div>
+    </div>
+
+    <div class="trust-card">
+      <span class="trust-card-title">Was Sie absichert</span>
+      <div class="trust-pill"><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span> 0 € für Sie — die Gegnerseite zahlt</div>
+      <div class="trust-pill"><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span> Termin kostenfrei stornierbar</div>
+      <div class="trust-pill"><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span> Rechtsanwaltskanzlei inklusive</div>
+      <div class="trust-pill"><span class="check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span> DSGVO-konform · Daten in DE</div>
+    </div>
+
+    <div class="live-hint">
+      <span class="live-dot"></span>
+      <span><strong style="font-weight:700;color:#106d36;">Live-Daten.</strong> Verfügbarkeiten werden alle 30 Sek. mit dem Gutachter-Kalender abgeglichen.</span>
+    </div>
+  </aside>
+
+</main>
+
+<script>
+  const TOTAL = 5;
+  let current = 1;
+  const phases = document.querySelectorAll('.phase');
+  const cells  = document.querySelectorAll('.step-cell');
+  const fill   = document.getElementById('rail-fill');
+  const dsgvo  = document.getElementById('dsgvo-ok');
+  const submit = document.getElementById('submit-btn');
+
+  function setPhase(n) {
+    phases.forEach(p => p.hidden = p.id !== `phase-${n}`);
+    cells.forEach((c, i) => {
+      c.classList.toggle('active', i + 1 === n);
+      c.classList.toggle('done', i + 1 < n);
+    });
+    const pct = n >= 6 ? 100 : ((n - 1) / (TOTAL - 1)) * 100;
+    fill.style.width = `${pct}%`;
+    current = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('[data-next]').forEach(b => b.addEventListener('click', () => setPhase(parseInt(b.dataset.next, 10))));
+  document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => setPhase(parseInt(b.dataset.back, 10))));
+
+  cells.forEach(c => c.addEventListener('click', () => {
+    const n = parseInt(c.dataset.step, 10);
+    if (n <= current) setPhase(n);
+  }));
+
+  document.querySelectorAll('.segmented').forEach(group => {
+    group.querySelectorAll('.segmented-item').forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        group.querySelectorAll('.segmented-item').forEach(s => s.classList.remove('active'));
+        item.classList.add('active');
+        const r = item.querySelector('input[type=radio]');
+        if (r) r.checked = true;
+      });
+    });
+  });
+
+  document.querySelectorAll('.toggle-grid').forEach(group => {
+    group.querySelectorAll('.toggle-card').forEach(c => {
+      c.addEventListener('click', e => {
+        e.preventDefault();
+        group.querySelectorAll('.toggle-card').forEach(s => s.classList.remove('active'));
+        c.classList.add('active');
+        const r = c.querySelector('input[type=radio]');
+        if (r) r.checked = true;
+      });
+    });
+  });
+
+  document.querySelectorAll('.day-strip .day-cell').forEach(d => {
+    d.addEventListener('click', () => {
+      if (d.classList.contains('unavailable')) return;
+      document.querySelectorAll('.day-cell').forEach(s => s.classList.remove('active'));
+      d.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.slot-time').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.slot-time').forEach(s => s.classList.remove('active'));
+      t.classList.add('active');
+    });
+  });
+
+  dsgvo.addEventListener('change', () => { submit.disabled = !dsgvo.checked; });
+</script>
+
+</body>
+</html>
