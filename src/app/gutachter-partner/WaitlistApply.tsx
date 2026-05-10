@@ -80,7 +80,7 @@ export default function WaitlistApply() {
   }, [])
 
   // Geocoding bei PLZ-Änderung (debounced)
-  const updateMap = useCallback((g: GeoResult) => {
+  const updateMap = useCallback(async (g: GeoResult) => {
     const map = mapInstanceRef.current
     if (!map) return
     map.flyTo({ center: [g.lng, g.lat], zoom: 9.5, duration: 1200 })
@@ -96,17 +96,38 @@ export default function WaitlistApply() {
       .setLngLat([g.lng, g.lat])
       .addTo(map)
 
-    // 30km-Kreis als Polygon
-    const points = 64
-    const coords: [number, number][] = []
-    const kmPerDegLat = 111
-    const kmPerDegLng = 111 * Math.cos((g.lat * Math.PI) / 180)
-    for (let i = 0; i <= points; i++) {
-      const angle = (i / points) * 2 * Math.PI
-      const dLat = (STANDARD_RADIUS_KM / kmPerDegLat) * Math.cos(angle)
-      const dLng = (STANDARD_RADIUS_KM / kmPerDegLng) * Math.sin(angle)
-      coords.push([g.lng + dLng, g.lat + dLat])
+    // Mapbox Isochrone API — echte Fahrt-Isochrone statt geometrischer Kreis
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+    let coords: [number, number][] | null = null
+    if (token) {
+      try {
+        const meters = STANDARD_RADIUS_KM * 1000
+        const isoUrl =
+          `https://api.mapbox.com/isochrone/v1/mapbox/driving/${g.lng},${g.lat}` +
+          `?contours_meters=${meters}&polygons=true&denoise=1&generalize=0&access_token=${token}`
+        const res = await fetch(isoUrl)
+        if (res.ok) {
+          const data = await res.json()
+          const ring = data?.features?.[0]?.geometry?.coordinates?.[0] as [number, number][] | undefined
+          if (ring && ring.length >= 3) coords = ring
+        }
+      } catch { /* Fallback auf Kreis */ }
     }
+
+    // Fallback: geometrischer 30km-Kreis wenn Isochrone-API scheitert
+    if (!coords) {
+      const points = 64
+      coords = []
+      const kmPerDegLat = 111
+      const kmPerDegLng = 111 * Math.cos((g.lat * Math.PI) / 180)
+      for (let i = 0; i <= points; i++) {
+        const angle = (i / points) * 2 * Math.PI
+        const dLat = (STANDARD_RADIUS_KM / kmPerDegLat) * Math.cos(angle)
+        const dLng = (STANDARD_RADIUS_KM / kmPerDegLng) * Math.sin(angle)
+        coords.push([g.lng + dLng, g.lat + dLat])
+      }
+    }
+
     const source = map.getSource('einsatzgebiet') as mapboxgl.GeoJSONSource | undefined
     if (source) {
       source.setData({
