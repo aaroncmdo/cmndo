@@ -32,15 +32,17 @@ export default function BeratungBuchenSheet({
   fallId,
   open,
   onClose,
+  defaultKanal,
 }: {
   fallId: string
   open: boolean
   onClose: () => void
+  defaultKanal?: 'video' | 'telefon'
 }) {
   const [step, setStep] = useState<Step>(1)
   const [thema, setThema] = useState<string>(THEMEN[0])
   const [beschreibung, setBeschreibung] = useState('')
-  const [kanal, setKanal] = useState<'video' | 'telefon'>('video')
+  const [kanal, setKanal] = useState<'video' | 'telefon'>(defaultKanal ?? 'video')
 
   const [slots, setSlots] = useState<FreeSlot[] | null>(null)
   const [kbName, setKbName] = useState<string | null>(null)

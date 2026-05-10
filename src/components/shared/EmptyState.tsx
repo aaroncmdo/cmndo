@@ -26,6 +26,8 @@ export interface EmptyStateProps {
     href?: string
     variant?: ActionVariant
   }
+  /** Mehrere Actions — wird über action (singular) gemappt wenn beide gesetzt sind. */
+  actions?: Array<{ label: string; onClick?: () => void; href?: string; variant?: ActionVariant }>
   variant?: 'default' | 'compact'
   className?: string
 }

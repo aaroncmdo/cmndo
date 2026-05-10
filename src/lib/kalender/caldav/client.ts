@@ -236,8 +236,6 @@ export async function listCalendarEvents(
   for (const obj of objects) {
     const data = (obj as { data?: string }).data
     if (typeof data !== 'string' || !data.includes('BEGIN:VEVENT')) continue
-    // Einfacher Split pro VEVENT-Block — robust gegen mehrere Events in
-    // einer Kalender-Object-Datei (selten, aber tsdav kann das).
     const blocks = data.split('BEGIN:VEVENT')
     for (let i = 1; i < blocks.length; i++) {
       const block = blocks[i].split('END:VEVENT')[0]
@@ -245,7 +243,6 @@ export async function listCalendarEvents(
       const endMatch = DTEND_RE.exec(block)
       if (!startMatch) continue
       const start = parseIcalDateTime(startMatch[1])
-      // Wenn DTEND fehlt (zulässig in iCalendar), nehmen wir start + 1h.
       const end = endMatch
         ? parseIcalDateTime(endMatch[1])
         : (start ? new Date(new Date(start).getTime() + 60 * 60_000).toISOString() : null)
@@ -254,4 +251,134 @@ export async function listCalendarEvents(
     }
   }
   return events
+}
+
+// AAR-716: Erweiterter Event-Typ mit Metadaten für CalDAV-Write-Back.
+export type CalDavEventFull = CalDavEvent & {
+  uid: string
+  summary: string
+  location?: string
+  objectUrl?: string
+}
+
+const SUMMARY_RE = /^SUMMARY:(.+)$/m
+const LOCATION_RE = /^LOCATION:(.+)$/m
+const UID_RE = /^UID:(.+)$/m
+
+export async function listCalendarEventsFull(
+  creds: CalDavCredentials,
+  calendarUrl: string,
+  rangeStartIso: string,
+  rangeEndIso: string,
+): Promise<CalDavEventFull[]> {
+  const client = await createClient(creds)
+  const calendars = await client.fetchCalendars()
+  const cal = calendars.find((c) => String(c.url) === calendarUrl) ?? calendars[0]
+  if (!cal) return []
+
+  let objects: unknown[]
+  try {
+    objects = (await Promise.race([
+      client.fetchCalendarObjects({ calendar: cal, timeRange: { start: rangeStartIso, end: rangeEndIso } }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), REQUEST_TIMEOUT_MS * 3)),
+    ])) as unknown[]
+  } catch (err) {
+    throw new CalDavError(`Event-Liste konnte nicht geladen werden: ${err instanceof Error ? err.message : String(err)}`, 'other', err)
+  }
+
+  const events: CalDavEventFull[] = []
+  for (const obj of objects) {
+    const raw = obj as { data?: string; url?: string }
+    const data = raw.data
+    if (typeof data !== 'string' || !data.includes('BEGIN:VEVENT')) continue
+    const blocks = data.split('BEGIN:VEVENT')
+    for (let i = 1; i < blocks.length; i++) {
+      const block = blocks[i].split('END:VEVENT')[0]
+      const startMatch = DTSTART_RE.exec(block)
+      const endMatch = DTEND_RE.exec(block)
+      if (!startMatch) continue
+      const start = parseIcalDateTime(startMatch[1])
+      const end = endMatch ? parseIcalDateTime(endMatch[1]) : (start ? new Date(new Date(start).getTime() + 60 * 60_000).toISOString() : null)
+      if (!start || !end) continue
+      const uid = (UID_RE.exec(block)?.[1] ?? '').trim()
+      const summary = (SUMMARY_RE.exec(block)?.[1] ?? '').trim()
+      const location = LOCATION_RE.exec(block)?.[1]?.trim()
+      events.push({ start, end, uid, summary, ...(location ? { location } : {}), objectUrl: raw.url })
+    }
+  }
+  return events
+}
+
+type CalDavEventInput = {
+  uid?: string
+  summary: string
+  description?: string
+  location?: string
+  startIso: string
+  endIso: string
+}
+
+function buildIcs(event: CalDavEventInput & { uid: string }): string {
+  const fmt = (iso: string) => iso.replace(/[-:]/g, '').replace('.000', '')
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Claimondo//DE',
+    'BEGIN:VEVENT',
+    `UID:${event.uid}`,
+    `DTSTAMP:${fmt(new Date().toISOString())}`,
+    `DTSTART:${fmt(event.startIso)}`,
+    `DTEND:${fmt(event.endIso)}`,
+    `SUMMARY:${event.summary}`,
+  ]
+  if (event.description) lines.push(`DESCRIPTION:${event.description.replace(/\n/g, '\\n')}`)
+  if (event.location) lines.push(`LOCATION:${event.location}`)
+  lines.push('END:VEVENT', 'END:VCALENDAR')
+  return lines.join('\r\n')
+}
+
+export async function createCalendarEvent({
+  creds,
+  calendarUrl,
+  event,
+}: {
+  creds: CalDavCredentials
+  calendarUrl: string
+  event: CalDavEventInput
+}): Promise<{ objectUrl: string; uid: string }> {
+  const uid = event.uid ?? `claimondo-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  const ics = buildIcs({ ...event, uid })
+  const client = await createClient(creds)
+  const calendars = await client.fetchCalendars()
+  const cal = calendars.find((c) => String(c.url) === calendarUrl) ?? calendars[0]
+  if (!cal) throw new CalDavError('Kalender nicht gefunden', 'not_found')
+
+  const objectUrl = `${String(cal.url).replace(/\/$/, '')}/${uid}.ics`
+  await client.createCalendarObject({ calendar: cal, filename: `${uid}.ics`, iCalString: ics })
+  return { objectUrl, uid }
+}
+
+export async function updateCalendarEvent({
+  creds,
+  objectUrl,
+  event,
+}: {
+  creds: CalDavCredentials
+  objectUrl: string
+  event: CalDavEventInput & { uid: string }
+}): Promise<void> {
+  const ics = buildIcs(event)
+  const client = await createClient(creds)
+  await client.updateCalendarObject({ calendarObject: { url: objectUrl, data: ics, etag: '' } })
+}
+
+export async function deleteCalendarEvent({
+  creds,
+  objectUrl,
+}: {
+  creds: CalDavCredentials
+  objectUrl: string
+}): Promise<void> {
+  const client = await createClient(creds)
+  await client.deleteCalendarObject({ calendarObject: { url: objectUrl, etag: '' } })
 }

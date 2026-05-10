@@ -41,6 +41,15 @@ export type HeuteTerminFull = {
   sv_briefing_text: string | null
   // AAR-724: Noch nicht vom SV angesehen → roter Punkt auf der Card.
   gesehen_am: string | null
+  // Feldmodus-Sprint: erweiterte Kunden-/Termin-Felder für TagesrouteSidebar
+  kunde_anrede?: string | null
+  kunde_avatar_url?: string | null
+  stop_weather?: { description: string; emoji: string; temp: number } | null
+  auftrag_typ?: string | null
+  hat_vorschaeden?: boolean
+  vorschaden_anzahl?: number | null
+  vorschaden_letzter_datum?: string | null
+  einzusammelnde_dokumente: string[]
 }
 
 function isoDate(d: Date): string {
@@ -180,6 +189,7 @@ export default async function HeutePage() {
       schadens_ort: (fall?.schadens_ort as string) ?? (lead?.schadens_ort as string) ?? null,
       sv_briefing_text: (fall?.sv_briefing_text as string) ?? null,
       gesehen_am: (t.gesehen_am as string | null) ?? null,
+      einzusammelnde_dokumente: [],
     }
   })
 

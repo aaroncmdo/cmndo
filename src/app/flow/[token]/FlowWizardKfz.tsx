@@ -124,6 +124,8 @@ export default function FlowWizardKfz({
   flowLinkId?: string | null
   lead: LeadData
   gutachter?: GutachterInfo | null
+  // legalDocs wird serverseitig übergeben aber im Wizard noch nicht genutzt.
+  legalDocs?: Record<string, unknown>
 }) {
   const [stepIndex, setStepIndex] = useState(0)
   const [datenschutz, setDatenschutz] = useState(false)

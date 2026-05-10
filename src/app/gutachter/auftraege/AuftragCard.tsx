@@ -54,6 +54,7 @@ export type AuftragCardProps = {
   statusLabel: string
   /** CMM-24: Anzahl offener Pflicht-Dokumente — gelber Badge wenn >0. */
   offeneDokumente?: number
+  density?: 'comfortable' | 'compact'
 }
 
 type TerminMeta =

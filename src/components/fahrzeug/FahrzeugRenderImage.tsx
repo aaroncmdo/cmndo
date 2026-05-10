@@ -86,6 +86,7 @@ type Props = {
   width?: number
   className?: string
   alt?: string
+  dark?: boolean
 }
 
 type Stage = 'imagin' | 'simpleicons' | 'clearbit' | 'icon'

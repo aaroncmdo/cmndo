@@ -57,3 +57,29 @@ export async function createErstgutachtenAuftragWennNoetig(
 
   return { auftragId: inserted.id as string }
 }
+
+// Side-Quest-Aufträge: Nachbesichtigung, Stellungnahme, etc.
+export type SideQuestTyp = 'nachbesichtigung' | 'stellungnahme' | 'ergaenzungsgutachten'
+
+export async function createSideQuestAuftrag(
+  admin: SupabaseClient,
+  claimId: string,
+  typ: SideQuestTyp,
+): Promise<{ auftragId: string | null; error?: string }> {
+  const { data: fall } = await admin
+    .from('faelle')
+    .select('id, sv_id')
+    .eq('claim_id', claimId)
+    .maybeSingle()
+
+  if (!fall) return { auftragId: null, error: 'Fall nicht gefunden' }
+
+  const { data, error } = await admin
+    .from('auftraege')
+    .insert({ fall_id: fall.id as string, sv_id: fall.sv_id as string | null, typ, status: 'geplant', reihenfolge: 1 })
+    .select('id')
+    .single()
+
+  if (error || !data) return { auftragId: null, error: error?.message }
+  return { auftragId: data.id as string }
+}
