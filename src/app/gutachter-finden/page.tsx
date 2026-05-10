@@ -1,5 +1,11 @@
 import type { Metadata } from 'next'
-import { GutachterFinderClient } from './GutachterFinderClient'
+import dynamic from 'next/dynamic'
+import type { GutachterFinderClientProps } from './GutachterFinderClient'
+
+const GutachterFinderClient = dynamic<GutachterFinderClientProps>(
+  () => import('./GutachterFinderClient').then(m => ({ default: m.GutachterFinderClient })),
+  { ssr: false },
+)
 import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import {
   serviceSchema, breadcrumbsSchema,

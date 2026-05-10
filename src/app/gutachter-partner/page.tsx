@@ -20,7 +20,9 @@ import {
   faqPageSchema,
   jsonLdScript,
 } from '@/lib/seo/jsonld'
-import WaitlistApply from './WaitlistApply'
+import dynamic from 'next/dynamic'
+
+const WaitlistApply = dynamic(() => import('./WaitlistApply'), { ssr: false })
 
 const PARTNER_URL = 'https://gutachter.claimondo.de'
 
