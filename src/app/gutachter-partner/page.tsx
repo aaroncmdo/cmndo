@@ -1,176 +1,165 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
-  ClipboardList,
-  MapPin,
-  CreditCard,
+  Banknote,
   Smartphone,
+  ShieldCheck,
   ChevronRight,
-  Star,
-  Shield,
-  Zap,
-  Users,
-  BarChart3,
-  CheckCircle2,
   ArrowRight,
+  CheckCircle2,
   Calendar,
   FileText,
-  Car,
+  Briefcase,
   TrendingUp,
+  ScanLine,
+  Receipt,
 } from 'lucide-react'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript } from '@/lib/seo/jsonld'
+import {
+  serviceSchema,
+  breadcrumbsSchema,
+  faqPageSchema,
+  jsonLdScript,
+} from '@/lib/seo/jsonld'
+import WaitlistApply from './WaitlistApply'
 
 const PARTNER_URL = 'https://gutachter.claimondo.de'
 
 export const metadata: Metadata = {
-  title: 'Kfz-Sachverständiger werden — Aufträge ohne Akquise',
+  title: 'Kfz-Sachverständiger werden — Aufträge ohne Akquise | Claimondo',
   description:
-    'Partner-Gutachter werden: vorqualifizierte Aufträge per App, GPS-Feldmodus, automatische Abrechnung. 89+ Partner, 2.400+ Aufträge.',
+    'Partner-Plattform für DAT-Expert-Sachverständige. 100% BVSK-Honorar, Direkt-Auszahlung über Sicherungsabtretung, App-Vermittlung. Aktuell 89 Partner in NRW, Skalierung bundesweit.',
   keywords: [
     'Kfz-Sachverständiger Aufträge',
-    'Gutachter werden',
-    'Sachverständigen-Plattform',
+    'DAT-Expert Plattform',
+    'BVSK-Gutachter Partner',
+    'Sachverständiger werden',
     'Kfz-Gutachten Auftrag',
-    'DAT-Experte',
-    'BVSK-Gutachter',
-    'Schadensgutachter Job',
-    'freier Sachverständiger',
-    'Gutachter App',
+    'freier Sachverständiger Plattform',
+    'öbuv Gutachter Partner',
   ],
-  alternates: {
-    canonical: `${PARTNER_URL}/`,
-  },
+  alternates: { canonical: PARTNER_URL },
   openGraph: {
     type: 'website',
     locale: 'de_DE',
-    siteName: 'Claimondo Gutachter-Partner',
+    siteName: 'Claimondo Partner',
     url: PARTNER_URL,
     title: 'Kfz-Sachverständiger werden — Aufträge ohne Akquise',
     description:
-      'Vorqualifizierte Aufträge per App, transparente Honorare, automatische Abrechnung. 50+ Partner, 2.400+ Aufträge.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Partner-Gutachter werden' }],
+      '100% BVSK-Honorar. Direkt-Auszahlung über Sicherungsabtretung. App-Vermittlung. Werd Partner.',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo Partner-Plattform' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Kfz-Sachverständiger werden — Aufträge ohne Akquise',
-    description: 'Vorqualifizierte Aufträge per App, transparente Honorare, automatische Abrechnung.',
+    description:
+      '100% BVSK-Honorar. Direkt-Auszahlung über Sicherungsabtretung. App-Vermittlung.',
     images: ['/og-default.png'],
   },
 }
 
-// Gutachter-Partner-Landingpage — serviert unter gutachter.claimondo.de
-// via Middleware-Rewrite aus src/middleware.ts
+// ─── Inhalts-Konstanten (B2B-ToV: Du-Form, keine Floskeln) ─────────────
 
-const STATS = [
-  { value: '50+', label: 'Partner-Gutachter bundesweit' },
-  { value: '2.400+', label: 'abgeschlossene Aufträge' },
-  { value: '48h', label: 'Berichtfertigstellung' },
-  { value: '4,8★', label: 'Kundenzufriedenheit' },
+const STATS: Array<{ value: string; label: string; sub: string }> = [
+  { value: '89', label: 'DAT-Partner in NRW', sub: 'Stand 04/2026 · gestaffelte Aufnahme' },
+  { value: '100%', label: 'BVSK-Honorar', sub: 'keine Plattform-Provision' },
+  { value: '§164 BGB', label: 'Sicherungsabtretung', sub: 'Direkt-Zahlung gegnerische Versicherung' },
+  { value: '460', label: 'Skalierungsziel bundesweit', sub: 'Maßstab für Aufnahme-Pipeline' },
 ]
 
-const VORTEILE = [
+const SAEULEN: Array<{ icon: typeof Banknote; title: string; text: string }> = [
   {
-    icon: ClipboardList,
-    title: 'Aufträge ohne Akquise',
-    text: 'Claimondo übernimmt Marketing, Leadgewinnung und Kundenkontakt. Du erhältst fertig terminierte Aufträge direkt in der App — ohne Kaltakquise.',
+    icon: Banknote,
+    title: '100 % BVSK — null Provision',
+    text: 'Du rechnest nach BVSK-Honorartabelle ab. Claimondo behält keinen Cent von deinem Honorar. Plattform-Kosten trägt die Anwaltsseite über das gesetzliche Anspruchskonstrukt.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Direkt-Zahlung über Sicherungsabtretung',
+    text: 'Geschädigter tritt das Honorar nach §164 BGB direkt an dich ab. Die gegnerische Versicherung zahlt auf dein Konto — nicht den Umweg über den Kunden. Forderungsausfall geht über LexDrive (Partnerkanzlei).',
   },
   {
     icon: Smartphone,
-    title: 'Digitale Komplettlösung',
-    text: 'Feldmodus mit GPS-Navigation, digitale Schadenerfassung, automatische Berichtvorlagen, Kalender-Sync und Dokumenten-Upload — alles in einer App.',
-  },
-  {
-    icon: CreditCard,
-    title: 'Faire & pünktliche Abrechnung',
-    text: 'Transparente Honorarvereinbarung, automatische Monatsabrechnung, keine versteckten Gebühren. Dein Geld kommt — pünktlich, jeden Monat.',
-  },
-  {
-    icon: Shield,
-    title: 'Rückendeckung durch unser Team',
-    text: 'Dispatch-Team koordiniert Termine, Admin-Support bei Fragen, Kanzlei-Partner für rechtliche Absicherung. Du bist nicht allein.',
-  },
-  {
-    icon: MapPin,
-    title: 'Aufträge in deiner Region',
-    text: 'Wir matchen Aufträge nach deinem Standort und deiner Isochrone. Du fährst kurze Wege — kein stundenlanger Fahrtaufwand für einzelne Termine.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Wachse mit uns',
-    text: 'Je mehr du lieferst, desto mehr bekommst du. Bewertungen, SLA-Performance und Kapazitäten bestimmen deinen Rang im Netzwerk.',
+    title: 'App-First — kein Telefon-Marathon',
+    text: 'Auftrag erscheint als Push, du nimmst an oder lehnst ab. Termin-Kalender, Foto-Upload, Berichte, Abrechnung — alles in der App. Kein WhatsApp-Chaos, keine Excel-Tabellen.',
   },
 ]
 
-const SCHRITTE = [
+const SCHRITTE: Array<{
+  nr: string
+  icon: typeof FileText
+  title: string
+  text: string
+}> = [
   {
     nr: '01',
     icon: FileText,
-    title: 'Profil anlegen',
-    text: 'Lade deine Zulassung, Haftpflicht und Pflichtdokumente hoch. Unser Team prüft und schaltet dich innerhalb von 48 Stunden frei.',
+    title: 'Auftrag rein',
+    text: 'Claimondo qualifiziert den Schaden und matcht ihn nach Standort + Auslastung. Du bekommst eine Push-Nachricht mit Fall-Eckdaten.',
   },
   {
     nr: '02',
     icon: Calendar,
-    title: 'Aufträge empfangen',
-    text: 'Sobald du freigeschaltet bist, bekommst du Auftragsanfragen per App und WhatsApp. Annehmen, ablehnen — volle Kontrolle.',
+    title: 'Termin annehmen',
+    text: 'Du siehst Vorschlagstermin (oder schlägst selbst einen vor). Kunde bestätigt — der Termin landet im Kalender, samt GPS-Adresse.',
   },
   {
     nr: '03',
-    icon: Car,
-    title: 'Begutachtung durchführen',
-    text: 'Fahre zum Termin mit der Claimondo-App. Feldmodus führt dich durch die Schadenerfassung. Bericht in 48 Stunden fertig.',
+    icon: ScanLine,
+    title: 'Vor-Ort-Begutachtung',
+    text: 'Foto-Aufnahme + Schadensdaten direkt in der App. Optional: Voll-Gutachten in deiner gewohnten Software, Upload als PDF.',
   },
   {
     nr: '04',
-    icon: CreditCard,
-    title: 'Abrechnung — automatisch',
-    text: 'Kein Rechnungen schreiben. Jeder abgeschlossene Auftrag wird erfasst. Abrechnung läuft automatisch zum Monatsende.',
+    icon: Receipt,
+    title: 'Auszahlung',
+    text: 'Honorar-Rechnung an gegnerische Versicherung läuft automatisch über LexDrive. Zahlung trifft direkt bei dir ein — meist 4–8 Wochen nach Gutachten.',
   },
 ]
 
-const FEATURES = [
-  'Digitale Schadenerfassung mit Foto-Upload',
-  'GPS-Routing zum Besichtigungsort',
-  'Automatische Berichterstellung',
-  'Kalender-Integration (Google / Apple)',
-  'WhatsApp-Benachrichtigungen',
-  'Echtzeit-Auftragsstatus',
-  'Monatliche Abrechnungsübersicht',
-  'Direkter Draht zum Dispatch-Team',
+const FAQS: Array<{ frage: string; antwort: string }> = [
+  {
+    frage: 'Was kostet mich die Plattform?',
+    antwort:
+      'Nichts. Du behältst 100% des BVSK-Honorars. Claimondo verdient nicht an deinem Honorar, sondern an der gesetzlichen Vertretung über LexDrive (§249 BGB-Anwaltskostenpauschale, RVG nach Streitwert). Das ist exakt das Modell mit dem zertifizierte Sachverständige seit Jahren mit Anwaltskanzleien zusammenarbeiten — nur digital.',
+  },
+  {
+    frage: 'Wer haftet wenn die Versicherung das Honorar kürzt?',
+    antwort:
+      'LexDrive (unsere Partnerkanzlei, Kevin Genter, Köln) setzt das volle BVSK-Honorar gegenüber der gegnerischen Versicherung durch — auch gerichtlich. Die Sicherungsabtretung nach §164 BGB wandert über uns an LexDrive. Forderungsausfall ist ein Anwalts-Risiko, nicht deins.',
+  },
+  {
+    frage: 'Wie viele Aufträge bekomme ich realistisch?',
+    antwort:
+      'Wir nehmen Partner regional gestaffelt auf — abhängig von Schadenfrequenz in der jeweiligen PLZ. Aktuell sind es 89 DAT-Partner in NRW, das Skalierungsziel sind ~460 bundesweit. In Köln/Düsseldorf-Region: 8–20 Aufträge/Monat sind realistisch sobald deine Region freigeschaltet ist. Wir versprechen keine Volumen — sondern echtes Matching ohne Akquise.',
+  },
+  {
+    frage: 'Brauche ich DAT-Expert-Zertifizierung?',
+    antwort:
+      'DAT-Expert oder vergleichbare Zertifizierung (öbuv, IHK-zertifiziert, BVSK-Mitgliedschaft) ist Pflicht. Wir vermitteln nur an unabhängige, qualifizierte Sachverständige — sonst hält das Gutachten der Versicherungs-Prüfung nicht stand. Wenn du noch keine Zertifizierung hast, ist das kein Showstopper für die Bewerbung — wir reden im Erstgespräch darüber.',
+  },
+  {
+    frage: 'Welche Software muss ich nutzen?',
+    antwort:
+      'Deine eigene. DAT-SilverDAT, Audatex, GTÜ-Software, sherpa — was du gewohnt bist. Die Claimondo-App ergänzt für Foto-Aufnahme + Datenfluss zur Kanzlei, ersetzt aber nichts. PDF-Upload deines Gutachtens reicht.',
+  },
+  {
+    frage: 'Wie schnell zahlt die Versicherung?',
+    antwort:
+      'Üblich sind 4–8 Wochen nach Gutachten-Versand. Bei strittigen Fällen (Haftung, Honorarhöhe) zieht es sich über LexDrive in den Mahnbescheid oder die Klage — du bekommst dein Geld trotzdem, weil die Sicherungsabtretung der Anwaltskanzlei das Inkasso-Risiko überträgt.',
+  },
+  {
+    frage: 'Bin ich angestellt bei Claimondo?',
+    antwort:
+      'Nein — du bleibst freier Sachverständiger mit eigener Haftpflicht und Steuer. Wir vermitteln Aufträge, du bist Auftragnehmer des jeweiligen Geschädigten. Kein Arbeitsvertrag, keine Provision, keine Exklusivität. Du kannst parallel weiter deine eigenen Aufträge machen.',
+  },
+  {
+    frage: 'Was ist mit der Kanzlei LexDrive — wer ist das?',
+    antwort:
+      'LexDrive ist eine Kölner Rechtsanwaltskanzlei (Kevin Genter, Ismail Emir) die ausschließlich KFZ-Haftpflicht-Schadensregulierung macht. Sie übernimmt für alle Claimondo-Fälle die Anspruchsdurchsetzung gegen die gegnerische Versicherung. Du arbeitest mit der Kanzlei zusammen — ohne dass du Mandantenakquise machen musst.',
+  },
 ]
 
-const FALLBEISPIELE = [
-  {
-    fahrzeug: 'Opel Karl',
-    tag: 'Verborgene Totalschäden',
-    situation: 'Von außen: nur Kratzer und eine leichte Delle sichtbar. Versicherungs-Gutachter: kosmetischer Schaden, kein strukturelles Problem.',
-    ergebnis: 'Nach Demontage durch unabhängigen Gutachter: Rahmenlängsträger verschoben — Totalschaden.',
-    verlust: '€7.000',
-    verlustText: 'wären ohne unabhängiges Gutachten einfach verloren gegangen.',
-    farbe: 'from-red-900/30 to-transparent',
-    borderFarbe: 'border-red-500/20',
-  },
-  {
-    fahrzeug: 'Tesla Model 3',
-    tag: 'E-Auto Sonderwissen',
-    situation: 'Standard-Gutachten mit DAT/Audatex: €22.000. Das Programm kannte die Verbundzeiten für US-Fahrzeuge nicht — Steuergeräte unter Schwellerblenden nicht erfasst.',
-    ergebnis: 'Mit Tesla-Originaldaten und Spezial-Gutachter: €48.000.',
-    verlust: '+€26.000',
-    verlustText: 'mehr für den Kunden — durch Fachwissen, das Standard-Software nicht liefert.',
-    farbe: 'from-amber-900/20 to-transparent',
-    borderFarbe: 'border-amber-500/20',
-  },
-  {
-    fahrzeug: 'NDR-Reportage-Fall',
-    tag: 'Automatisierte Kürzungen',
-    situation: 'ControlExpert-Prüfbericht ohne Fahrzeugbesichtigung: Schadensumme auf €2.000 gedrückt. Der Versicherer hatte gezahlt, der Fall galt als abgeschlossen.',
-    ergebnis: 'Unabhängiges Gutachten nach Demontage: €9.000 tatsächlicher Schaden.',
-    verlust: '€7.000',
-    verlustText: 'verloren — ohne Widerspruch. BGH VI ZR 65/18 hätte den vollen Betrag gesichert.',
-    farbe: 'from-[#4573A2]/20 to-transparent',
-    borderFarbe: 'border-[#4573A2]/30',
-  },
-]
+// ─── Page ────────────────────────────────────────────────────────────
 
 export default function GutachterPartnerPage() {
   return (
@@ -181,17 +170,18 @@ export default function GutachterPartnerPage() {
           serviceSchema({
             name: 'Partner-Programm für Kfz-Sachverständige',
             description:
-              'Plattform für unabhängige Kfz-Sachverständige: vorqualifizierte Aufträge per App, GPS-Feldmodus, automatische Abrechnung, Dispatch-Support. Aktuell über 50 Partner bundesweit.',
+              'Plattform für DAT-Expert-zertifizierte Kfz-Sachverständige. Auftragsvermittlung über App, 100% BVSK-Honorar, Sicherungsabtretung-basierte Direkt-Zahlung über die gegnerische Versicherung.',
             url: PARTNER_URL,
           }),
           breadcrumbsSchema([
             { name: 'Claimondo', url: 'https://claimondo.de/' },
-            { name: 'Gutachter werden', url: PARTNER_URL },
+            { name: 'Partner werden', url: PARTNER_URL },
           ]),
+          faqPageSchema(FAQS),
         ])}
       />
 
-      {/* ── Topbar — Glass auf Navy mit Schild-Logo ─────────── */}
+      {/* ── Topbar — Glass auf Navy ─────────────────────────── */}
       <header
         className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl"
         style={{
@@ -200,15 +190,7 @@ export default function GutachterPartnerPage() {
           backdropFilter: 'saturate(180%) blur(24px)',
         }}
       >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 -bottom-px h-px"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent 0%, rgba(123,163,204,0.18) 50%, transparent 100%)',
-          }}
-        />
-        <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link href="/" aria-label="Claimondo Startseite" className="group flex items-center gap-2.5">
             <span className="relative flex h-9 w-9 shrink-0 overflow-hidden rounded-[10px] shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-transform duration-200 group-hover:scale-[1.04]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -222,15 +204,16 @@ export default function GutachterPartnerPage() {
                 claim<span className="text-[#7BA3CC]">ondo</span>
               </span>
               <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#7BA3CC]">
-                Gutachter
+                Partner
               </span>
             </span>
           </Link>
           <nav className="hidden items-center gap-0.5 md:flex">
             {[
-              { href: '#vorteile', label: 'Vorteile' },
-              { href: '#so-funktioniert-es', label: "So funktioniert's" },
-              { href: '#app', label: 'Die App' },
+              { href: '#warum', label: 'Warum' },
+              { href: '#ablauf', label: 'Ablauf' },
+              { href: '#honorar', label: 'Honorar' },
+              { href: '#faq', label: 'FAQ' },
             ].map((link) => (
               <a
                 key={link.href}
@@ -241,106 +224,106 @@ export default function GutachterPartnerPage() {
               </a>
             ))}
           </nav>
-          <Link
-            href="/gutachter/willkommen"
+          <a
+            href="#waitlist"
             className="inline-flex items-center gap-1.5 rounded-full bg-[#4573A2] px-5 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(69,115,162,0.5)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_6px_18px_rgba(123,163,204,0.55)] active:scale-[0.97]"
           >
-            Jetzt bewerben
+            Auf die Warteliste
             <ChevronRight className="h-4 w-4" />
-          </Link>
+          </a>
         </div>
       </header>
 
       {/* ── Hero ───────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
-        {/* Hintergrund-Glow */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-[#4573A2]/20 blur-[120px]" />
           <div className="absolute -bottom-32 right-1/4 h-96 w-96 rounded-full bg-[#1E3A5F]/40 blur-[120px]" />
         </div>
 
-        <div className="relative mx-auto max-w-5xl px-4 py-24 text-center sm:px-6 sm:py-36">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#4573A2]/40 bg-[#4573A2]/10 px-4 py-1.5 text-sm font-semibold text-[#7BA3CC]">
-            <Star className="h-3.5 w-3.5 fill-[#7BA3CC]" />
-            Deutschlands führendes KFZ-Gutachter-Netzwerk
+        <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-20 sm:px-6 sm:pt-28">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#4573A2]/40 bg-[#4573A2]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-[#7BA3CC]">
+            DAT-Expert · BVSK · §164 BGB-Sicherungsabtretung
           </div>
 
           <h1
-            className="mx-auto max-w-4xl text-balance text-5xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-6xl md:text-7xl"
+            className="max-w-4xl text-balance text-5xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-6xl md:text-7xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             Mehr Aufträge.{' '}
             <span className="bg-gradient-to-r from-[#7BA3CC] to-[#4573A2] bg-clip-text text-transparent">
-              Weniger Verwaltung.
-            </span>
+              100 % BVSK.
+            </span>{' '}
+            Null Bürokratie.
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-balance text-lg leading-relaxed text-white/65 sm:text-xl">
-            Claimondo übernimmt Akquise, Koordination und Abrechnung.
-            Du begutachtest — wir regeln den Rest.
+          <p className="mt-6 max-w-2xl text-balance text-lg leading-relaxed text-white/65 sm:text-xl">
+            Claimondo ist die Plattform-Schicht zwischen Geschädigtem,
+            Sachverständigem und Anwalt. Wir liefern dir vorqualifizierte
+            Haftpflicht-Schadensgutachten — ohne Akquise, ohne Provision, ohne
+            Forderungsausfall-Risiko.
           </p>
 
-          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link
-              href="/gutachter/willkommen"
-              className="inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
-            >
-              Jetzt als Gutachter bewerben
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-            <a
-              href="#so-funktioniert-es"
-              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
-            >
-              Mehr erfahren
-            </a>
-          </div>
-
-          {/* Stats */}
-          <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {/* Stats — ehrliche Zahlen */}
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {STATS.map((s) => (
               <div
                 key={s.label}
                 className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur"
               >
-                <div className="text-3xl font-extrabold text-white">{s.value}</div>
-                <div className="mt-1 text-xs text-white/50">{s.label}</div>
+                <div className="text-2xl font-extrabold leading-tight text-white sm:text-3xl">
+                  {s.value}
+                </div>
+                <div className="mt-1 text-[11px] font-medium text-white/65">{s.label}</div>
+                <div className="mt-0.5 text-[10px] text-white/35">{s.sub}</div>
               </div>
             ))}
+          </div>
+
+          <div className="mt-10 flex flex-col items-start gap-3 sm:flex-row">
+            <a
+              href="#waitlist"
+              className="inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
+            >
+              Auf die Warteliste — Gebiet sehen
+              <ArrowRight className="h-5 w-5" />
+            </a>
+            <a
+              href="#warum"
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
+            >
+              Wie genau funktioniert das?
+            </a>
           </div>
         </div>
       </section>
 
-      {/* ── Vorteile ───────────────────────────────────────── */}
-      <section id="vorteile" className="py-24">
+      {/* ── Drei Säulen ───────────────────────────────────── */}
+      <section id="warum" className="border-y border-white/10 bg-[#0a1428]/60 py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="text-center">
-            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">Warum Claimondo?</div>
-            <h2
-              className="text-balance text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl"
-              style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
-            >
-              Alles was du brauchst —{' '}
-              <span className="text-[#7BA3CC]">nichts was du nicht willst</span>
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-white/50">
-              Konzentriere dich auf dein Handwerk. Den Rest erledigt Claimondo.
-            </p>
+          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">
+            Warum Claimondo
           </div>
+          <h2
+            className="max-w-3xl text-balance text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Drei Dinge die andere Plattformen nicht liefern.
+          </h2>
 
-          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {VORTEILE.map((v) => {
-              const Icon = v.icon
+          <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
+            {SAEULEN.map((s) => {
+              const Icon = s.icon
               return (
                 <div
-                  key={v.title}
-                  className="group rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur transition-all hover:border-[#4573A2]/50 hover:bg-white/8"
+                  key={s.title}
+                  className="group rounded-3xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur transition-all hover:border-[#4573A2]/50 hover:bg-white/[0.08]"
                 >
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#4573A2]/20">
+                  <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#4573A2]/20">
                     <Icon className="h-6 w-6 text-[#7BA3CC]" />
                   </div>
-                  <h3 className="text-lg font-bold text-white">{v.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-white/55">{v.text}</p>
+                  <h3 className="text-xl font-bold text-white">{s.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-white/60">{s.text}</p>
                 </div>
               )
             })}
@@ -348,66 +331,20 @@ export default function GutachterPartnerPage() {
         </div>
       </section>
 
-      {/* ── Fallbeispiele ─────────────────────────────────── */}
-      <section className="border-y border-white/10 bg-[#060e1f] py-24">
+      {/* ── Ablauf ──────────────────────────────────────────── */}
+      <section id="ablauf" className="py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="text-center">
-            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">Warum deine Arbeit zählt</div>
-            <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-              Echte Fälle. Echte Unterschiede.
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-white/50">
-              Das ist der Unterschied zwischen einem Versicherungs-Gutachter und dir.
-            </p>
+          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">
+            Ablauf — vier Schritte
           </div>
+          <h2
+            className="max-w-3xl text-balance text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Vom Push bis zur Auszahlung.
+          </h2>
 
-          <div className="mt-16 grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {FALLBEISPIELE.map((f) => (
-              <div
-                key={f.fahrzeug}
-                className={`relative overflow-hidden rounded-3xl border ${f.borderFarbe} bg-gradient-to-br ${f.farbe} bg-white/5 p-6 backdrop-blur`}
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-white/70">
-                    {f.tag}
-                  </span>
-                  <span className="text-xs font-bold text-white/40">{f.fahrzeug}</span>
-                </div>
-
-                <p className="text-sm leading-relaxed text-white/55">{f.situation}</p>
-
-                <div className="my-4 border-t border-white/10" />
-
-                <p className="text-sm leading-relaxed text-white/80">
-                  <span className="font-semibold text-white">Ergebnis nach unabhängigem Gutachten:</span>{' '}
-                  {f.ergebnis}
-                </p>
-
-                <div className="mt-4 rounded-2xl bg-white/5 p-4">
-                  <div className="text-3xl font-black tracking-tight text-white">{f.verlust}</div>
-                  <div className="mt-1 text-xs text-white/50">{f.verlustText}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-10 text-center text-sm text-white/30">
-            Quellen: NDR-Reportage „Versicherungs-Gutachter vs. unabhängige Sachverständige" · BGH VI ZR 65/18 · BGH VI ZR 174/24
-          </p>
-        </div>
-      </section>
-
-      {/* ── So funktioniert's ──────────────────────────────── */}
-      <section id="so-funktioniert-es" className="border-y border-white/10 bg-[#0a1428] py-24">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="text-center">
-            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">Der Weg zum ersten Auftrag</div>
-            <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-              In 4 Schritten startklar
-            </h2>
-          </div>
-
-          <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {SCHRITTE.map((s, i) => {
               const Icon = s.icon
               return (
@@ -415,170 +352,186 @@ export default function GutachterPartnerPage() {
                   {i < SCHRITTE.length - 1 && (
                     <div className="absolute left-[calc(50%+2rem)] top-6 hidden h-px w-full bg-gradient-to-r from-[#4573A2]/40 to-transparent lg:block" />
                   )}
-                  <div className="text-center">
-                    <div className="relative mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-[#4573A2]/40 bg-[#4573A2]/15">
-                      <Icon className="h-7 w-7 text-[#7BA3CC]" />
-                      <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#4573A2] text-[10px] font-black text-white">
-                        {s.nr.slice(1)}
+                  <div className="relative">
+                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#4573A2]/40 bg-[#4573A2]/15">
+                      <Icon className="h-6 w-6 text-[#7BA3CC]" />
+                      <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#4573A2] text-[10px] font-black text-white">
+                        {s.nr}
                       </div>
                     </div>
                     <h3 className="text-base font-bold text-white">{s.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-white/50">{s.text}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-white/55">{s.text}</p>
                   </div>
                 </div>
               )
             })}
           </div>
-
-          <div className="mt-16 text-center">
-            <Link
-              href="/gutachter/willkommen"
-              className="inline-flex items-center gap-2 rounded-2xl bg-[#4573A2] px-8 py-4 text-base font-bold text-white shadow-xl shadow-[#4573A2]/30 transition-all hover:bg-[#7BA3CC]"
-            >
-              Jetzt starten — kostenlos bewerben
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-            <p className="mt-3 text-sm text-white/40">Bewerbung dauert ca. 5 Minuten · Freischaltung in 48h</p>
-          </div>
         </div>
       </section>
 
-      {/* ── App-Features ──────────────────────────────────── */}
-      <section id="app" className="py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
-            <div>
-              <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">Die Claimondo-App</div>
-              <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
-                Dein digitales Büro —{' '}
-                <span className="text-[#7BA3CC]">immer dabei</span>
-              </h2>
-              <p className="mt-4 text-lg text-white/55">
-                Vom Auftragseingang bis zur Abrechnung: alles läuft über die Claimondo-Plattform.
-                Kein Papierkram, keine Excel-Tabellen, kein Chaos.
+      {/* ── Honorar-Erklärung ─────────────────────────────── */}
+      <section id="honorar" className="border-y border-white/10 bg-[#060e1f] py-24">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">
+            Honorar &amp; Auszahlung
+          </div>
+          <h2
+            className="max-w-3xl text-balance text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            BVSK 100 %. Direkt von der Versicherung. §164 BGB.
+          </h2>
+
+          <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-7 backdrop-blur">
+              <Briefcase className="h-7 w-7 text-[#7BA3CC]" />
+              <h3 className="mt-4 text-lg font-bold text-white">So läuft die Abrechnung</h3>
+              <ol className="mt-4 space-y-3 text-sm text-white/65">
+                <li className="flex gap-3">
+                  <span className="font-bold text-[#7BA3CC]">1</span>
+                  <span>
+                    Geschädigter unterzeichnet die Sicherungsabtretung an dich.
+                    Damit ist dein Honorar rechtlich abgesichert (§164 BGB,
+                    BGH VI ZR 174/24).
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-bold text-[#7BA3CC]">2</span>
+                  <span>
+                    Du erstellst dein Gutachten. Honorar nach BVSK-Tabelle 100% —
+                    keine Plattform-Provision, keine Pauschalen-Kürzung.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-bold text-[#7BA3CC]">3</span>
+                  <span>
+                    LexDrive (Partnerkanzlei Köln) reicht das Honorar bei der
+                    gegnerischen Versicherung ein und setzt es durch — auch
+                    gerichtlich falls nötig.
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-bold text-[#7BA3CC]">4</span>
+                  <span>
+                    Versicherung zahlt direkt auf dein Konto. Übliche Frist:
+                    4–8 Wochen. Streitfälle laufen über LexDrive — kein Risiko
+                    für dich.
+                  </span>
+                </li>
+              </ol>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-7 backdrop-blur">
+              <TrendingUp className="h-7 w-7 text-[#7BA3CC]" />
+              <h3 className="mt-4 text-lg font-bold text-white">Was Claimondo verdient</h3>
+              <p className="mt-4 text-sm leading-relaxed text-white/65">
+                Wir verdienen <span className="font-semibold text-white">nicht an deinem Honorar</span>.
+                Unser Anteil kommt aus der gesetzlichen Anwaltskostenpauschale
+                (§249 BGB) die LexDrive gegenüber der Versicherung geltend macht.
+                Das ist genau das Modell mit dem etablierte Anwalts-SV-
+                Kooperationen seit Jahrzehnten arbeiten.
               </p>
-
-              <ul className="mt-8 space-y-3">
-                {FEATURES.map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-sm text-white/70">
-                    <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-[#4573A2]" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Mock App-Screen */}
-            <div className="relative">
-              <div className="rounded-3xl border border-[#4573A2]/30 bg-[#0D1B3E] p-6 shadow-2xl shadow-[#4573A2]/10">
-                {/* Fake App UI */}
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs font-semibold text-[#7BA3CC]">Heute, 09:15</div>
-                    <div className="text-lg font-bold text-white">3 neue Aufträge</div>
-                  </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#4573A2]/20">
-                    <BarChart3 className="h-5 w-5 text-[#7BA3CC]" />
-                  </div>
-                </div>
-
-                {[
-                  { name: 'BMW 520d · Köln-Ehrenfeld', km: '4,2 km', time: '10:30 Uhr', status: 'Neu' },
-                  { name: 'VW Passat · Düsseldorf-Mitte', km: '12 km', time: '14:00 Uhr', status: 'Bestätigt' },
-                  { name: 'Audi A4 · Bonn-Beuel', km: '28 km', time: '16:30 Uhr', status: 'Neu' },
-                ].map((a, i) => (
-                  <div
-                    key={i}
-                    className="mb-3 flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3"
-                  >
-                    <div>
-                      <div className="text-sm font-semibold text-white">{a.name}</div>
-                      <div className="mt-0.5 flex items-center gap-2 text-xs text-white/40">
-                        <MapPin className="h-3 w-3" /> {a.km}
-                        <span>·</span>
-                        <Calendar className="h-3 w-3" /> {a.time}
-                      </div>
-                    </div>
-                    <div className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      a.status === 'Neu'
-                        ? 'bg-[#4573A2]/30 text-[#7BA3CC]'
-                        : 'bg-emerald-500/20 text-emerald-400'
-                    }`}>
-                      {a.status}
-                    </div>
-                  </div>
-                ))}
-
-                <div className="mt-4 flex gap-2">
-                  <div className="flex-1 rounded-xl bg-[#4573A2]/20 p-3 text-center">
-                    <div className="text-2xl font-extrabold text-white">€2.840</div>
-                    <div className="text-[10px] text-white/40">Honorar Mai</div>
-                  </div>
-                  <div className="flex-1 rounded-xl bg-emerald-500/10 p-3 text-center">
-                    <div className="text-2xl font-extrabold text-emerald-400">12</div>
-                    <div className="text-[10px] text-white/40">Aufträge Mai</div>
-                  </div>
-                </div>
+              <div className="mt-5 rounded-2xl bg-[#4573A2]/15 p-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-[#7BA3CC]">
+                  Folge für dich
+                </p>
+                <p className="mt-1 text-sm text-white">
+                  Mehr Aufträge bei gleichem Honorar. Keine Provision, kein
+                  Inkasso-Risiko, keine Vorfinanzierung.
+                </p>
               </div>
-
-              {/* Dekorativ */}
-              <div className="absolute -right-4 -top-4 h-32 w-32 rounded-full bg-[#4573A2]/15 blur-3xl" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Testimonial / Trust ───────────────────────────── */}
-      <section className="border-y border-white/10 bg-[#0a1428] py-20">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
-          <div className="flex justify-center gap-1 text-[#7BA3CC]">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="h-5 w-5 fill-[#7BA3CC]" />
-            ))}
-          </div>
-          <blockquote className="mt-6 text-2xl font-semibold italic leading-relaxed text-white sm:text-3xl">
-            &ldquo;Seit ich bei Claimondo bin, habe ich 40 % mehr Aufträge als vorher.
-            Die App spart mir täglich zwei Stunden Verwaltungszeit.&rdquo;
-          </blockquote>
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4573A2] text-sm font-bold text-white">
-              MS
+      {/* ── Waitlist + Live-Karte ─────────────────────────── */}
+      <section id="waitlist" className="py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mb-10 max-w-3xl">
+            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">
+              Warteliste — Region zuerst freischalten
             </div>
-            <div className="text-left">
-              <div className="text-sm font-semibold text-white">Michael S.</div>
-              <div className="text-xs text-white/40">Öbuv. Kfz-Sachverständiger · München · 3 Jahre bei Claimondo</div>
-            </div>
+            <h2
+              className="text-balance text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl"
+              style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+            >
+              Trag dich ein — sieh dein Gebiet sofort.
+            </h2>
+            <p className="mt-4 text-base text-white/55">
+              Wir nehmen Partner regional gestaffelt auf. Sobald deine Region
+              dran ist (üblicherweise innerhalb 2–6 Wochen), melden wir uns mit
+              einem 15-Minuten-Onboarding-Call.
+            </p>
           </div>
+
+          <WaitlistApply />
         </div>
       </section>
 
-      {/* ── Finales CTA ───────────────────────────────────── */}
-      <section className="py-28">
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-          <Users className="mx-auto mb-4 h-12 w-12 text-[#4573A2]" />
+      {/* ── FAQ ───────────────────────────────────────────── */}
+      <section id="faq" className="border-y border-white/10 bg-[#0a1428]/60 py-24">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-[#7BA3CC]">
+            Fragen &amp; Antworten
+          </div>
           <h2
             className="text-balance text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Bereit? Dann leg los.
+            Was Sachverständige uns am häufigsten fragen.
           </h2>
-          <p className="mt-4 text-lg text-white/55">
-            Die Bewerbung dauert 5 Minuten. Unser Team meldet sich innerhalb von 24 Stunden.
-            Freischaltung in 48 Stunden.
+
+          <div className="mt-12 space-y-3">
+            {FAQS.map((f) => (
+              <details
+                key={f.frage}
+                className="group rounded-2xl border border-white/10 bg-white/5 backdrop-blur transition-all open:bg-white/[0.07]"
+              >
+                <summary className="flex cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left">
+                  <span className="text-base font-semibold text-white">{f.frage}</span>
+                  <ChevronRight className="h-5 w-5 flex-shrink-0 text-[#7BA3CC] transition-transform group-open:rotate-90" />
+                </summary>
+                <div className="border-t border-white/10 px-6 py-5 text-sm leading-relaxed text-white/65">
+                  {f.antwort}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Finales CTA ──────────────────────────────────── */}
+      <section className="py-24">
+        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
+          <h2
+            className="text-balance text-4xl font-bold leading-[1.05] tracking-[-0.02em] text-white sm:text-5xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Wenn das passt — trag dich ein.
+          </h2>
+          <p className="mt-4 text-base text-white/55">
+            Eintrag dauert 3 Minuten. Erstgespräch dauert 15.
           </p>
-          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/gutachter/willkommen"
+          <div className="mt-8 flex justify-center">
+            <a
+              href="#waitlist"
               className="inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-9 py-4 text-lg font-bold text-white shadow-[0_12px_36px_rgba(69,115,162,0.55)] transition-all duration-200 hover:bg-[#7BA3CC] hover:shadow-[0_16px_44px_rgba(123,163,204,0.60)] active:scale-[0.98]"
             >
-              Kostenlos bewerben
+              Jetzt eintragen
               <ArrowRight className="h-5 w-5" />
-            </Link>
+            </a>
           </div>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-white/30">
-            <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Keine Gebühren</span>
-            <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Kein Risiko</span>
-            <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Freischaltung in 48h</span>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-4 text-sm text-white/35">
+            <span className="flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Keine Gebühren
+            </span>
+            <span className="flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Keine Exklusivität
+            </span>
+            <span className="flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Antwort in 2 Werktagen
+            </span>
           </div>
         </div>
       </section>
@@ -590,17 +543,29 @@ export default function GutachterPartnerPage() {
             <div className="flex items-center gap-1">
               <span className="text-lg font-bold text-white">Claim</span>
               <span className="text-lg font-bold text-[#7BA3CC]">ondo</span>
-              <span className="ml-2 text-sm text-white/30">Gutachter-Netzwerk</span>
+              <span className="ml-2 text-sm text-white/30">Partner-Plattform</span>
             </div>
-            <div className="flex gap-6 text-sm text-white/40">
-              <Link href="/" className="hover:text-white">Für Kunden</Link>
-              <Link href="/impressum" className="hover:text-white">Impressum</Link>
-              <Link href="/datenschutz" className="hover:text-white">Datenschutz</Link>
-              <a href="mailto:gutachter@claimondo.de" className="hover:text-white">gutachter@claimondo.de</a>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/40">
+              <Link href="/" className="hover:text-white">
+                Für Geschädigte
+              </Link>
+              <Link href="/ueber-uns" className="hover:text-white">
+                Über Claimondo
+              </Link>
+              <Link href="/impressum" className="hover:text-white">
+                Impressum
+              </Link>
+              <Link href="/datenschutz" className="hover:text-white">
+                Datenschutz
+              </Link>
+              <a href="mailto:partner@claimondo.de" className="hover:text-white">
+                partner@claimondo.de
+              </a>
             </div>
           </div>
           <p className="mt-6 text-center text-xs text-white/20">
-            © {new Date().getFullYear()} Claimondo GmbH · KFZ-Schadenmanagement · Deutschlandweit
+            © {new Date().getFullYear()} Claimondo GmbH · Hansaring 10, 50670 Köln · Partner-Programm
+            für DAT-Expert-Sachverständige
           </p>
         </div>
       </footer>
