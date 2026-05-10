@@ -125,6 +125,14 @@ const DOC_INFO: Record<string, { warum: string; wo: string }> = {
     warum: 'Der SV-Bericht zu früheren Schäden grenzt Alt- von Neuschaden ab — schützt vor Kürzungen durch die Versicherung.',
     wo: 'Falls Sie damals ein Gutachten hatten, liegt der Bericht bei Ihren Unterlagen — oder anfordern beim damaligen Sachverständigen.',
   },
+  altschaden_fotos: {
+    warum: 'Fotos eines früheren Schadens helfen dem Gutachter, den aktuellen Schaden sauber abzugrenzen. Ohne Vergleichsfotos kann die Versicherung den Vorschaden vom aktuellen abziehen.',
+    wo: 'Auf Ihrem Phone (Galerie / Cloud-Backup vom alten Datum), in alten WhatsApp-Chats oder bei der Werkstatt die damals repariert hat.',
+  },
+  altes_gutachten: {
+    warum: 'Ein früheres Gutachten zum Vorschaden ist die beste Abgrenzung zum aktuellen Schaden. Der neue Sachverständige spart Zeit und Sie stärken Ihre rechtliche Position erheblich.',
+    wo: 'In Ihren Unterlagen vom letzten Schadensfall — oft als PDF per E-Mail vom damaligen Gutachter erhalten oder beim damaligen Anwalt anfordern.',
+  },
   mietwagenrechnung: {
     warum: 'Die Mietwagenkosten werden von der gegnerischen Versicherung erstattet, wenn der Zeitraum und die Klasse nachgewiesen sind.',
     wo: 'Die Rechnung erhalten Sie von der Mietwagenfirma — meist am Ende der Mietdauer per E-Mail.',
