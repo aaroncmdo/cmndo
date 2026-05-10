@@ -246,14 +246,48 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
           )}
         </section>
 
-        {/* SV-Kontakt */}
-        {(svName || svTelefon) && (
+        {/* Lead-Fallback — prominenter Anruf-Block */}
+        {anfrage.matching_typ === 'lead_fallback' && (
+          <section className="bg-amber-50 border-2 border-amber-300 rounded-ios-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <PhoneIcon className="w-4 h-4 text-amber-700" />
+              <h2 className="text-sm font-semibold text-amber-800">Manueller Anruf erforderlich</h2>
+            </div>
+            <p className="text-xs text-amber-700 mb-3 leading-relaxed">
+              Kein Claimondo-SV in diesem Gebiet verfügbar. Der zugeordnete DAT-Expert muss
+              telefonisch kontaktiert werden — Terminbestätigung liegt beim Dispatcher.
+            </p>
+            {svName && <p className="text-sm font-semibold text-claimondo-navy mb-2">{svName}</p>}
+            {svTelefon && (
+              <a
+                href={`tel:${svTelefon}`}
+                className="flex items-center justify-center gap-2 w-full text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 px-4 py-2.5 rounded-ios-sm transition-colors"
+              >
+                <PhoneIcon className="w-4 h-4" />
+                {svTelefon} anrufen
+              </a>
+            )}
+            {svEmail && (
+              <a
+                href={`mailto:${svEmail}`}
+                className="flex items-center justify-center gap-2 w-full mt-2 text-sm text-amber-700 border border-amber-300 hover:bg-amber-100 px-4 py-2 rounded-ios-sm transition-colors"
+              >
+                <MailIcon className="w-4 h-4" />
+                E-Mail senden
+              </a>
+            )}
+            <p className="mt-3 text-[10px] text-amber-600">
+              Wunschtermin: <strong>{anfrage.wunschtermin ? new Date(anfrage.wunschtermin).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</strong>
+            </p>
+          </section>
+        )}
+
+        {/* SV-Kontakt (registrierter Claimondo-SV) */}
+        {anfrage.matching_typ !== 'lead_fallback' && (svName || svTelefon) && (
           <section className="bg-white rounded-ios-lg shadow-ios-md p-4">
             <div className="flex items-center gap-2 mb-3">
               <UserIcon className="w-4 h-4 text-claimondo-ondo" />
-              <h2 className="text-sm font-semibold text-claimondo-navy">
-                {anfrage.matching_typ === 'sv_lead' ? 'DAT-Expert' : 'Sachverständiger'}
-              </h2>
+              <h2 className="text-sm font-semibold text-claimondo-navy">Sachverständiger</h2>
             </div>
             <p className="text-sm font-semibold text-claimondo-navy mb-3">{svName}</p>
             {svTelefon && (
@@ -290,10 +324,14 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
         <section className="bg-claimondo-bg border border-claimondo-border rounded-ios-lg p-4">
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-semibold mb-2">Matching</p>
           <p className="text-xs text-gray-600">
-            {anfrage.matching_typ === 'sv_polygon'
-              ? 'Isochrone-Match — SV-Gebiet enthält Schadenort'
+            {anfrage.matching_typ === 'isochron'
+              ? 'Isochrone-Match — Claimondo-SV bedient dieses Gebiet'
+              : anfrage.matching_typ === 'lead_fallback'
+              ? 'Lead-Fallback — kein Claimondo-SV verfügbar, DAT-Expert im 30-km-Radius'
+              : anfrage.matching_typ === 'sv_polygon'
+              ? 'Isochrone-Match (legacy)'
               : anfrage.matching_typ === 'sv_lead'
-              ? 'DAT-Expert-Lead — nächstgelegener externer Gutachter'
+              ? 'DAT-Expert-Lead (legacy)'
               : 'Kein automatisches Matching'}
           </p>
         </section>

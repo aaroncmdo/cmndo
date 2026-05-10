@@ -17,6 +17,12 @@ export type GutachterFinderAnfrage = {
   sa_unterzeichnet_am: string | null
   status: string
   erstellt_am: string
+  // Wizard-Felder (PR 5)
+  schuldfrage: string | null
+  fahrzeug_hersteller: string | null
+  fahrzeug_modell: string | null
+  fahrzeug_baujahr: number | null
+  bevorzugter_kanal: string | null
   sv_name: string | null
   sv_telefon: string | null
   sv_lead_name: string | null
@@ -34,6 +40,7 @@ export async function ladeGutachterFinderAnfragen(): Promise<{
     .select(`
       id, vorname, nachname, email, telefon, kennzeichen,
       schadentyp, schadenort, wunschtermin, matching_typ,
+      schuldfrage, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, bevorzugter_kanal,
       sa_unterzeichnet_am, status, erstellt_am,
       zugeordneter_sv:sachverstaendige(
         firmenname,
@@ -51,6 +58,8 @@ export async function ladeGutachterFinderAnfragen(): Promise<{
       kennzeichen: string | null; schadentyp: string; schadenort: string | null
       wunschtermin: string | null; matching_typ: string | null; sa_unterzeichnet_am: string | null
       status: string; erstellt_am: string
+      schuldfrage: string | null; fahrzeug_hersteller: string | null; fahrzeug_modell: string | null
+      fahrzeug_baujahr: number | null; bevorzugter_kanal: string | null
       zugeordneter_sv: { firmenname: string | null; profiles: { anzeigename?: string; telefon?: string } | { anzeigename?: string; telefon?: string }[] | null } | null
       sv_lead: { name: string; telefon: string | null } | null
     }
@@ -73,6 +82,11 @@ export async function ladeGutachterFinderAnfragen(): Promise<{
       sa_unterzeichnet_am: r.sa_unterzeichnet_am,
       status: r.status,
       erstellt_am: r.erstellt_am,
+      schuldfrage: r.schuldfrage,
+      fahrzeug_hersteller: r.fahrzeug_hersteller,
+      fahrzeug_modell: r.fahrzeug_modell,
+      fahrzeug_baujahr: r.fahrzeug_baujahr,
+      bevorzugter_kanal: r.bevorzugter_kanal,
       sv_name: svRaw?.firmenname ?? (svProfile as { anzeigename?: string } | null)?.anzeigename ?? null,
       sv_telefon: (svProfile as { telefon?: string } | null)?.telefon ?? null,
       sv_lead_name: svLead?.name ?? null,
