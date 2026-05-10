@@ -1,10 +1,11 @@
 'use client'
 
 // Kombinierte Live-Karten-Form für gutachter.claimondo.de.
-// PLZ-Eingabe geocodet sich (debounced) → Karte zeigt Standort + 30km-Kreis
+// PLZ-Eingabe geocodet sich (debounced) → Karte zeigt Standort + echte Fahrt-Isochrone
 // (= Standard-Paket-Gebiet als Conversion-Trigger). Submit ruft die
 // Waitlist-Server-Action.
 
+import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState, useTransition, useCallback } from 'react'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox'
 import { stelleWaitlistAnfrage } from '@/lib/actions/gutachter-waitlist'
