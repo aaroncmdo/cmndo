@@ -365,7 +365,7 @@ export async function sendStatusWhatsApp(
       const sid = tplName ? getTemplateSid(tplName) : null
 
       if (sid && tplName) {
-        // Template-Versand via Twilio Content API
+        // Template-Versand via Twilio Content API (Baileys unterstützt keine Templates)
         const { sendWhatsAppTemplate } = await import('./whatsapp/send-template')
         const tplVars: Record<string, string> = {
           '1': vorname || 'Kunde',
@@ -376,15 +376,32 @@ export async function sendStatusWhatsApp(
           console.error(`[whatsapp] Template send failed:`, err)
         })
       } else {
-        // Legacy: reiner Text
-        await sendWhatsApp(telefon, nachricht).catch(err => {
-          console.error(`[whatsapp] Twilio send failed:`, err)
+        // Baileys-first für reinen Text: wenn Service erreichbar → Baileys, sonst Twilio
+        const { sendWhatsAppText } = await import('./whatsapp/baileys-client')
+        const baileysResult = await sendWhatsAppText(telefon, nachricht)
+        if (
+          !baileysResult.ok &&
+          (baileysResult.code === 'service_unavailable' ||
+            baileysResult.code === 'baileys_not_connected' ||
+            baileysResult.code === 'config_missing')
+        ) {
+          // Baileys nicht verfügbar → Twilio-Fallback
+          await sendWhatsApp(telefon, nachricht).catch(err => {
+            console.error(`[whatsapp] Twilio fallback failed:`, err)
+            supabase.from('timeline').insert({
+              fall_id: fallId, typ: 'system',
+              titel: 'WhatsApp-Versand fehlgeschlagen',
+              beschreibung: `Nachricht an ${telefon} konnte nicht gesendet werden.`,
+            }).then(() => {})
+          })
+        } else if (!baileysResult.ok) {
+          console.error(`[whatsapp] Baileys send failed: ${baileysResult.error}`)
           supabase.from('timeline').insert({
             fall_id: fallId, typ: 'system',
             titel: 'WhatsApp-Versand fehlgeschlagen',
-            beschreibung: `Nachricht an ${telefon} konnte nicht gesendet werden.`,
+            beschreibung: `Nachricht an ${telefon}: ${baileysResult.error}`,
           }).then(() => {})
-        })
+        }
       }
     }
 

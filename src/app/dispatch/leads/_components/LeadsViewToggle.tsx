@@ -26,8 +26,16 @@ type Lead = {
   source_channel: string | null
   flow_link_geoeffnet: boolean | null
   flow_link_abgeschlossen: boolean | null
+  whatsapp_verfuegbar: boolean | null
   created_at: string
   updated_at: string
+}
+
+function waPill(verfuegbar: boolean | null, telefon: string | null): { label: string; cls: string } | null {
+  if (!telefon) return null
+  if (verfuegbar === true) return { label: '📱 WA', cls: 'bg-emerald-100 text-emerald-700' }
+  if (verfuegbar === false) return { label: '📵', cls: 'bg-claimondo-bg text-claimondo-ondo/50' }
+  return { label: '⏳ WA?', cls: 'bg-amber-50 text-amber-600' }
 }
 
 function flowLinkBadge(offen: boolean | null, abgeschlossen: boolean | null): { label: string; cls: string } {
@@ -81,6 +89,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
           <p className="px-4 py-12 text-center text-sm text-claimondo-ondo/70">Keine Leads gefunden</p>
         ) : leads.map((lead) => {
           const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
+          const wa = waPill(lead.whatsapp_verfuegbar, lead.telefon)
           return (
             <Link
               key={lead.id}
@@ -101,6 +110,9 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                     {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
                   </span>
                   <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
+                  {wa && (
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${wa.cls}`}>{wa.label}</span>
+                  )}
                   <span className="text-[10px] text-claimondo-ondo">
                     {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
                   </span>
@@ -132,6 +144,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
             <tr className="border-b border-claimondo-border bg-claimondo-bg/50">
               <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Name</th>
               <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Telefon</th>
+              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>WA</th>
               <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Status</th>
               <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>FlowLink</th>
               <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Service</th>
@@ -142,6 +155,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
           <tbody className="divide-y divide-claimondo-border">
             {leads.map((lead) => {
               const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
+              const wa = waPill(lead.whatsapp_verfuegbar, lead.telefon)
               return (
                 <tr key={lead.id} className="hover:bg-claimondo-bg/50 transition-colors">
                   <td className={cellPadCls}>
@@ -157,6 +171,13 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                       <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
                     ) : (
                       <span className="text-claimondo-ondo/50">—</span>
+                    )}
+                  </td>
+                  <td className={cellPadCls}>
+                    {wa ? (
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${wa.cls}`}>{wa.label}</span>
+                    ) : (
+                      <span className="text-claimondo-ondo/40 text-[10px]">—</span>
                     )}
                   </td>
                   <td className={cellPadCls}>
@@ -183,7 +204,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
             })}
             {leads.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-claimondo-ondo/70">Keine Leads gefunden</td>
+                <td colSpan={8} className="px-4 py-12 text-center text-sm text-claimondo-ondo/70">Keine Leads gefunden</td>
               </tr>
             )}
           </tbody>
@@ -229,6 +250,7 @@ function KanbanView({ leads }: { leads: Lead[] }) {
             <div className="space-y-1.5 max-h-[70vh] overflow-y-auto">
               {bucket.map((lead) => {
                 const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
+                const wa = waPill(lead.whatsapp_verfuegbar, lead.telefon)
                 return (
                   <Link
                     key={lead.id}
@@ -246,6 +268,9 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                     )}
                     <div className="flex items-center gap-1 mt-1.5">
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
+                      {wa && (
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${wa.cls}`}>{wa.label}</span>
+                      )}
                       <span className="text-[9px] text-claimondo-ondo/70 ml-auto">
                         {new Date(lead.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}
                       </span>
