@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Lightweight ping for offline-detection (no DB query)
+// Lightweight ping für offline-detection — explizites Content-Length: 0
+// verhindert dass nginx/Browser auf ein Ende des Response-Streams wartet.
 export async function HEAD() {
-  return new Response(null, { status: 200 })
+  return new Response(null, {
+    status: 200,
+    headers: { 'Content-Length': '0', 'Cache-Control': 'no-store' },
+  })
 }
 
 export async function GET() {
