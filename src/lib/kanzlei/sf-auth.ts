@@ -1,22 +1,24 @@
-// AAR-kanzlei-oauth: Salesforce OAuth2 Password-Grant-Flow.
+// AAR-kanzlei-oauth: Salesforce OAuth2 Client-Credentials-Flow (Server-to-Server).
 //
-// Stand der Kanzlei-Integration nach dem Meeting mit dem LexDrive-Dev
-// (2026-04-21): HMAC fällt weg, stattdessen SF-Standard-OAuth2 mit
-// grant_type=password. Password ist die Konkatenation aus User-Passwort
-// + Security-Token (SF-spezifisch). Token hat 5 Min TTL.
+// 2026-05-11: Migration von grant_type=password → grant_type=client_credentials.
+// LexDrive hat die Connected-App umgestellt — der Salesforce-User
+// (aaron.sprafke@claimondo.de) ist jetzt als `clientCredentialsFlowUser` in
+// der App-Policy hinterlegt. Claimondo authentisiert sich als App, nicht als
+// User — keine username/password/security_token mehr im Request.
 //
-// Wir cachen den Token in-Memory pro Node-Prozess. In Serverless (Vercel)
-// ist der Cache pro Lambda-Container — das ist ok, weil das Refresh-Fenster
-// großzügig ist (4-5 Requests pro Mandat).
+// Wir cachen den Token in-Memory pro Node-Prozess. Bei Single-Process-PM2
+// auf dem VPS ist der Cache prozesslang stabil — 4-5 Requests pro Mandat
+// passen locker in das 5-Min-TTL.
 //
-// Env-Variablen siehe .env.local / Vercel:
-//   KANZLEI_SF_AUTH_URL       — z. B. https://test.salesforce.com/services/oauth2/token
+// Env-Variablen siehe .env.local:
+//   KANZLEI_SF_AUTH_URL       — My-Domain-URL: https://ruby-momentum-209.my.salesforce.com/services/oauth2/token
+//                              (NICHT login.salesforce.com — Client-Credentials braucht My-Domain)
 //   KANZLEI_SF_API_URL        — Basis für Apex-REST-Endpoints
-//   KANZLEI_SF_USERNAME
-//   KANZLEI_SF_PASSWORD       — nur Passwort, ohne Security-Token
-//   KANZLEI_SF_SECURITY_TOKEN
-//   KANZLEI_SF_CLIENT_ID      — Connected-App Client-ID
-//   KANZLEI_SF_CLIENT_SECRET  — Connected-App Client-Secret
+//   KANZLEI_SF_CLIENT_ID      — Connected-App Consumer Key
+//   KANZLEI_SF_CLIENT_SECRET  — Connected-App Consumer Secret
+//
+// Deprecated (nicht mehr verwendet, koennen aus .env entfernt werden):
+//   KANZLEI_SF_USERNAME, KANZLEI_SF_PASSWORD, KANZLEI_SF_SECURITY_TOKEN
 
 interface SfTokenCache {
   token: string
@@ -36,17 +38,14 @@ export type SfAuthResult =
 
 export async function getSfAccessToken(): Promise<SfAuthResult> {
   const authUrl = process.env.KANZLEI_SF_AUTH_URL
-  const username = process.env.KANZLEI_SF_USERNAME
-  const password = process.env.KANZLEI_SF_PASSWORD
-  const securityToken = process.env.KANZLEI_SF_SECURITY_TOKEN
   const clientId = process.env.KANZLEI_SF_CLIENT_ID
   const clientSecret = process.env.KANZLEI_SF_CLIENT_SECRET
 
-  if (!authUrl || !username || !password || !securityToken || !clientId || !clientSecret) {
+  if (!authUrl || !clientId || !clientSecret) {
     return {
       ok: false,
       error:
-        'Kanzlei-SF-Config unvollständig — mindestens eine der KANZLEI_SF_*-Env-Vars fehlt',
+        'Kanzlei-SF-Config unvollstaendig — KANZLEI_SF_AUTH_URL / CLIENT_ID / CLIENT_SECRET fehlt',
     }
   }
 
@@ -56,15 +55,13 @@ export async function getSfAccessToken(): Promise<SfAuthResult> {
     return { ok: true, token: cache.token, instanceUrl: cache.instanceUrl }
   }
 
-  // SF-Standard: password + securityToken concatenated
-  const passwordPlusToken = `${password}${securityToken}`
-
+  // Client-Credentials-Flow: nur client_id + client_secret. Der Salesforce-
+  // User ist in der Connected-App-Policy als clientCredentialsFlowUser
+  // hinterlegt (aaron.sprafke@claimondo.de) — Requests laufen unter dem.
   const body = new URLSearchParams({
-    grant_type: 'password',
+    grant_type: 'client_credentials',
     client_id: clientId,
     client_secret: clientSecret,
-    username,
-    password: passwordPlusToken,
   })
 
   try {
