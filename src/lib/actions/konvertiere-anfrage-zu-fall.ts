@@ -351,6 +351,19 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
     })
     .eq('id', anfrageId)
 
+  // 2026-05-12 Funnel v3 Backlog: Conversion-Event fire-and-forget
+  try {
+    const { trackConversionEvent } = await import('@/lib/analytics/track-conversion')
+    void trackConversionEvent({
+      flow_key: 'gutachter-finden',
+      phase_key: 'submit',
+      event_type: 'konvertiert',
+      anfrage_id: anfrageId,
+      service_typ: serviceTyp,
+      kanzlei_wunsch: (anfrage.kanzlei_wunsch as string | null) ?? null,
+    })
+  } catch { /* silent */ }
+
   return {
     ok: true,
     fallId: conv.fallId,
