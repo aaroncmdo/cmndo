@@ -50,9 +50,8 @@ export type HeuteTerminFull = {
   // AAR-724: Noch nicht vom SV angesehen → roter Punkt auf der Card.
   gesehen_am: string | null
   // Feldmodus-Sprint: erweiterte Kunden-/Termin-Felder für TagesrouteSidebar
-  kunde_anrede?: 'herr' | 'frau' | 'divers' | null
-  kunde_avatar_url?: string | null
-  stop_weather?: { description: string; emoji: string; temp: number } | null
+  // (kunde_anrede / kunde_avatar_url / stop_weather sind oben schon deklariert,
+  // hier nur die fehlenden Feldmodus-Felder ergaenzen)
   auftrag_typ?: string | null
   hat_vorschaeden?: boolean
   vorschaden_anzahl?: number | null
