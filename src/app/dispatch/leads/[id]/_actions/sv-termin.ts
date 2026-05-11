@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { SvSuggestion } from './types'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
+import { checkSvReachability, precomputeSvSlotEtas } from '@/lib/dispatch/reachability'
 
 /**
  * Sticky-SV-Lookup: hat dieser Lead bereits einen gewohnten SV? Match per
