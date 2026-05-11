@@ -17,6 +17,11 @@ export type SvLead = {
   lng: number
   telefon: string | null
   email: string | null
+  // 2026-05-11: Iso-Polygon (GeoJSON) + Einsatzradius — wird auf der
+  // Marketing-Karte als Halo um den SV-Marker gerendert. NULL = noch nicht
+  // berechnet (sollte nie vorkommen nach dem Excel-Import).
+  isochrone_polygon: unknown
+  paket_umkreis_km: number | null
 }
 
 export type AktiverSV = {
@@ -56,7 +61,7 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLead[] } | { ok
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('sv_leads')
-    .select('id,name,vorname,firma,adresse,plz,ort,lat,lng,telefon,email')
+    .select('id,name,vorname,firma,adresse,plz,ort,lat,lng,telefon,email,isochrone_polygon,paket_umkreis_km')
     .eq('ist_aktiv', true)
   if (error) return { ok: false, error: error.message }
   return { ok: true, data: data as SvLead[] }
