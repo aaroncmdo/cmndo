@@ -50,13 +50,15 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
 
   return (
     <div className="space-y-3">
-      {/* Toggle */}
-      <div className="flex items-center gap-1 bg-claimondo-bg rounded-lg p-0.5 w-fit">
+      {/* Segmented Control (Design-Brief §8.1) */}
+      <div className="inline-flex p-[3px] bg-claimondo-navy/[0.06] rounded-2xl w-fit">
         <button
           type="button"
           onClick={() => setView('liste')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'
+          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-[14px] text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+            view === 'liste'
+              ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
+              : 'text-claimondo-shield hover:text-claimondo-navy'
           }`}
         >
           <ListIcon className="w-3.5 h-3.5" />
@@ -65,8 +67,10 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
         <button
           type="button"
           onClick={() => setView('kanban')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-            view === 'kanban' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'
+          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-[14px] text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+            view === 'kanban'
+              ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
+              : 'text-claimondo-shield hover:text-claimondo-navy'
           }`}
         >
           <LayoutGridIcon className="w-3.5 h-3.5" />
@@ -84,26 +88,26 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
   const rowPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   const cellPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   return (
-    <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
+    <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] overflow-hidden border border-claimondo-navy/[0.06]">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-claimondo-border bg-claimondo-bg/50">
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Name</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Telefon</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Status</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">FlowLink</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Service</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Erstellt</th>
-              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs"></th>
+            <tr className="border-b border-claimondo-navy/[0.08] bg-claimondo-navy/[0.03]">
+              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Name</th>
+              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Telefon</th>
+              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Status</th>
+              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">FlowLink</th>
+              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Service</th>
+              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Erstellt</th>
+              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-claimondo-border">
+          <tbody className="divide-y divide-claimondo-navy/[0.06]">
             {leads.map((lead) => {
               const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
               const wa = waPill(lead.whatsapp_verfuegbar, lead.telefon)
               return (
-                <tr key={lead.id} className="hover:bg-claimondo-bg/50 transition-colors">
+                <tr key={lead.id} className="hover:bg-claimondo-navy/[0.03] transition-colors">
                   <td className="px-4 py-3">
                     <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-claimondo-ondo">
                       {lead.vorname} {lead.nachname}
@@ -179,7 +183,7 @@ function KanbanView({ leads }: { leads: Lead[] }) {
       {phasenOrder.map((phase) => {
         const bucket = gruppen[phase] ?? []
         return (
-          <div key={phase} className="min-w-[260px] w-[260px] bg-claimondo-bg rounded-xl p-2 space-y-2 flex-shrink-0">
+          <div key={phase} className="min-w-[260px] w-[260px] bg-claimondo-navy/[0.04] rounded-2xl p-3 space-y-2 flex-shrink-0 border border-claimondo-navy/[0.06]">
             <div className="flex items-center justify-between px-1">
               <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${PHASE_BADGES[phase] ?? 'bg-claimondo-border text-claimondo-ondo'}`}>
                 {PHASE_LABELS[phase] ?? phase}
@@ -194,7 +198,7 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                   <Link
                     key={lead.id}
                     href={`/dispatch/leads/${lead.id}`}
-                    className="block bg-white rounded-lg border border-claimondo-border p-2.5 hover:border-claimondo-ondo transition-colors"
+                    className="block bg-white rounded-2xl border border-claimondo-navy/[0.08] p-3 hover:border-claimondo-ondo hover:-translate-y-[1px] hover:shadow-[0_2px_6px_rgba(15,30,68,.05)] transition-all duration-200"
                   >
                     <p className="text-xs font-medium text-claimondo-navy truncate">
                       {lead.vorname} {lead.nachname}
