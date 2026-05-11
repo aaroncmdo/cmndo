@@ -27,6 +27,8 @@ import { setGrueneKarteAngefragt } from '../_actions/gruene-karte'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { parseKennzeichen, buildKennzeichen } from '@/lib/format/kennzeichen'
+import { LACKFARBE_OPTIONS, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
+import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import {
   CarIcon,
   ShieldIcon,

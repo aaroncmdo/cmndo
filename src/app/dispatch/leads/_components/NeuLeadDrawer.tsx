@@ -37,6 +37,8 @@ const INITIAL: CreateManualLeadInput = {
 export default function NeuLeadDrawer() {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
+  const [open, setOpen] = useState(false)
+  const [data, setData] = useState(INITIAL)
 
   function handleClick() {
     startTransition(async () => {
