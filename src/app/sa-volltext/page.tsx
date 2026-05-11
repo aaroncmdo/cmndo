@@ -2,8 +2,19 @@
 
 export default function SAVolltextPage() {
   return (
-    <div className="min-h-screen bg-claimondo-bg py-10 px-5">
-      <div className="max-w-2xl mx-auto bg-white border border-claimondo-border rounded-2xl shadow-sm p-8">
+    <div className="relative min-h-screen bg-claimondo-bg py-12 px-4 sm:px-6">
+      {/* Ambient-Gradient */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: [
+            'radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,0.18), transparent 60%)',
+            'radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,0.08), transparent 70%)',
+          ].join(', '),
+        }}
+      />
+      <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] p-8 sm:p-10">
         <div className="mb-6">
           <PageHeader title="Sicherungsabtretung und Unterschriftsvollmacht" size="lg" />
         </div>
