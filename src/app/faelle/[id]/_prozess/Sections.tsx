@@ -33,6 +33,7 @@ import {
 import { triggerLexDriveEventManually } from '../lexdrive-actions'
 // AAR-561 (C12): Konfrontations-Dispatch-Lite-Trigger aus KB-Seite
 import { triggerKonfrontationFromAdmin } from '../_actions/konfrontation-trigger'
+import { pushMandatManuell } from '../_actions/push-mandat-manuell'
 import EndpointRegister from '../_components/LexDriveTriggerPanel'
 import InlineEditField from '../_stammdaten/InlineEditField'
 
@@ -98,10 +99,28 @@ const KUERZUNGSTYP_LABEL: Record<string, { label: string; color: string }> = {
 
 // ─── 1. Kanzlei + E-Akte ───────────────────────────────────────────────────
 export function KanzleiEakteSection() {
-  const { fall, userRolle } = useFall()
+  const { fall, userRolle, refreshFall } = useFall()
   const mandatsnummer = fall.mandatsnummer as string | null
   const uebergebenAm = fmtDate(fall.kanzlei_uebergeben_am)
   const canTrigger = userRolle === 'admin' || userRolle === 'kundenbetreuer'
+  const [pushing, startPush] = useTransition()
+
+  function handleRePush() {
+    startPush(async () => {
+      const result = await pushMandatManuell(fall.id as string)
+      if (!result.ok) {
+        toast.error(result.error ?? 'Mandat-Push fehlgeschlagen')
+        return
+      }
+      toast.success(
+        result.mandatsnummer
+          ? `Mandat gepusht. Salesforce-ID: ${result.mandatsnummer}`
+          : 'Mandat erneut gesendet (Idempotent, kein neuer SF-Record)',
+      )
+      refreshFall?.()
+    })
+  }
+
   return (
     <Card
       icon={<ScaleIcon className="w-4 h-4 text-claimondo-ondo" />}
@@ -113,6 +132,27 @@ export function KanzleiEakteSection() {
         <Info label="E-Akte übergeben" value={uebergebenAm} />
         <Info label="Service-Typ" value={(fall.service_typ as string) ?? 'komplett'} />
       </div>
+      {canTrigger && (
+        <div className="pt-2 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleRePush}
+            disabled={pushing}
+            className="rounded-full bg-claimondo-ondo text-white text-xs font-semibold px-4 py-2 hover:bg-claimondo-light-blue active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {pushing
+              ? 'Sende…'
+              : mandatsnummer
+                ? 'Mandat erneut pushen'
+                : 'Mandat an Kanzlei pushen'}
+          </button>
+          {!mandatsnummer && (
+            <span className="text-xs text-claimondo-shield/70">
+              Noch kein Mandat bei LexDrive. Push erneut auslösen wenn initial fehlgeschlagen.
+            </span>
+          )}
+        </div>
+      )}
       {canTrigger && (
         <div className="pt-2">
           <EndpointRegister fallId={fall.id} />
