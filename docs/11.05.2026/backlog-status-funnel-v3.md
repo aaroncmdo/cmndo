@@ -34,7 +34,7 @@
 | #799 | conversion_events Tabelle + Tracking-Hook | ✅ merged |
 | — | **ZB1-OCR-Field-Type im Wizard** | ⏳ pending (~3h) |
 | — | **Mehr Onboarding-Phasen (Fotos, Polizei, Gegner)** | ⏳ pending (~4-6h) |
-| — | **220 TS-Errors aufräumen + ignoreBuildErrors raus** | ⏳ Subagent läuft |
+| #801 | **220 TS-Errors aufräumen + ignoreBuildErrors raus** | ✅ merged (217 → 0 Errors) |
 
 ## Was steht offen
 
@@ -74,17 +74,23 @@
 7. `kanzlei` — existiert (Conditional)
 8. `sa` — existiert
 
-### 3. 220 TS-Errors aufräumen (Subagent)
+### 3. 220 TS-Errors aufräumen ✅ ABGESCHLOSSEN
 
-**Status:** Subagent `kitta/aar-ts-cleanup-post-polish-v2` läuft seit ~30min im Hintergrund.
+**Status:** PR #801 gemerged 2026-05-12 01:12.
 
-**Auftrag (siehe Subagent-Prompt):**
-- Errors auf 0 bringen (aktuell ~220 Cascading-Folgen aus PRs #771-775)
-- `typescript.ignoreBuildErrors: true` aus `next.config.ts` entfernen
-- Lokaler Build muss durchlaufen
-- PR auf main mergen
+**Ergebnis:**
+- 217 → 0 TS-Errors via `npx tsc --noEmit`
+- `typescript.ignoreBuildErrors: true` aus `next.config.ts` entfernt (war explizit als temporär markiert)
+- Lokaler Build: `✓ Compiled successfully in 42s`
+- Keine `@ts-expect-error` eingesetzt — saubere Fixes
+- 3 dead-code-Blöcke entfernt: Katalog-Loop in create-pflicht.ts, GutachtenOcrCard-Block in faelle/page.tsx, bueroEtaMap-Fallback in findBestSV.ts
 
-**Wenn der Subagent fertig ist:** Status hier updaten + nächstes Item starten (ZB1-OCR).
+**Top-5 Files (Anzahl Fixes):**
+1. `src/app/kunde/layout.tsx` (45) — kbCard/adminCard/svCard/lexdriveQr/fallOptionsForChat aus Git-History rekonstruiert
+2. `src/app/gutachter/feldmodus/FeldmodusClient.tsx` (34) — TBT-Hooks + WakeLock + Position-Fallback restauriert
+3. `src/lib/mitteilungen/create-mitteilung.ts` (23) — autoRouteUrl-Return-Type korrigiert
+4. `src/app/kunde/onboarding/OnboardingWizard.tsx` (20) — welcomeOcrResult-State + handleWelcomeOcr wiederhergestellt
+5. `src/app/kunde/faelle/[id]/FallDetailSections.tsx` (16) — useEffect/useRef/SendIcon-Imports + Types
 
 ## Sequenz nach Subagent-Completion
 
