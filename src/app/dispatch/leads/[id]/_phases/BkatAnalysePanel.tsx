@@ -134,7 +134,7 @@ export default function BkatAnalysePanel({
             <SparklesIcon className="w-3.5 h-3.5" />
             {loading ? 'Analysiere …' : 'Erneut analysieren'}
           </button>
-        </div>
+        </>
       )}
 
       {!result && !initialUnfallart && loading && (
@@ -199,6 +199,7 @@ export default function BkatAnalysePanel({
                 </span>
               )}
             </div>
+          )}
 
           <div>
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo mb-1">

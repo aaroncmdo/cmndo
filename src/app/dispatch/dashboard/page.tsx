@@ -241,8 +241,8 @@ export default async function DispatchDashboard() {
                   <p className="text-sm text-claimondo-navy truncate">{task.titel}</p>
                   <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE') : ''}</p>
                 </div>
-              )
-            })}
+              </div>
+            ))}
             {tasks.length === 0 && (
               <p className="px-5 py-8 text-sm text-claimondo-ondo/70 text-center">Keine offenen Tasks</p>
             )}

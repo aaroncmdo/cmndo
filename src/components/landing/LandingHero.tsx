@@ -122,7 +122,7 @@ export async function LandingHero({ authenticatedUser }: Props) {
           <Phone className="h-4 w-4" aria-hidden="true" />
           <span>{t('phone_label')}</span>
           <span className="font-semibold">{PHONE_DISPLAY}</span>
-        </a>
+        </div>
 
         {/* 3 Stat-Pills als Glass-Cards. Schwebend, nicht aufgereiht — gibt
             Asymmetrie ohne den Hero-Center-Look zu zerstören. */}

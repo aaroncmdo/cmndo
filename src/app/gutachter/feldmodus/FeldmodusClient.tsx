@@ -298,6 +298,9 @@ export default function FeldmodusClient({
       </div>
       </div>
 
+      {/* Floating-Cards (ab md) — outerer Fragment-Wrapper */}
+      {sessionStatus !== 'arrived' && (
+        <>
           {/* AktuellerStopCard — mid-left, Hauptinteraktion (ab md) */}
           {aktuellerStop && (
             <GlassPanel

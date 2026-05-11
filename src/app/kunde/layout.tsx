@@ -220,7 +220,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             </div>
             <OutboxBadge />
             <UpdatesNav variant="dark" />
-          </div>
+          </Link>
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
