@@ -72,14 +72,14 @@ export default function TerminCard({
 
   return (
     <div
-      className={`absolute left-16 right-2 rounded-xl px-3 py-2 shadow-sm transition-opacity ${
+      className={`absolute left-16 right-2 rounded-2xl px-3.5 py-2.5 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
         vergangen
           ? 'bg-claimondo-bg border border-claimondo-border opacity-60'
           : termin.status === 'verlegung_pending'
-            ? 'bg-amber-50 border-2 border-dashed border-amber-400'
+            ? 'bg-amber-50 border-2 border-dashed border-amber-400 shadow-[0_2px_6px_rgba(15,30,68,.05)]'
             : termin.status === 'verlegt'
               ? 'bg-claimondo-border/30 border border-claimondo-border opacity-70 italic'
-              : 'bg-white border border-claimondo-border hover:border-[color:var(--brand-primary,var(--brand-secondary))]'
+              : 'bg-white border border-claimondo-border hover:border-claimondo-ondo hover:-translate-y-[1px] shadow-[0_1px_2px_rgba(15,30,68,.04),0_4px_12px_rgba(15,30,68,.04)] hover:shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)]'
       }`}
       style={{ top: `${topPx}px`, minHeight: `${heightPx}px` }}
     >
@@ -126,7 +126,7 @@ export default function TerminCard({
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-[#3a6290] rounded-lg px-2.5 py-1 font-medium"
+          className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-[#3a6290] rounded-full px-3 py-1.5 font-semibold tracking-[-.005em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 hover:-translate-y-[1px]"
           onClick={(e) => e.stopPropagation()}
         >
           <NavigationIcon className="w-3 h-3" /> Route starten
@@ -136,13 +136,13 @@ export default function TerminCard({
         {termin.fall_id ? (
           <Link
             href={`/gutachter/fall/${termin.fall_id}`}
-            className="inline-flex items-center gap-1 text-xs text-[color:var(--brand-primary,var(--brand-secondary))] hover:text-[var(--brand-primary)] rounded-lg px-2 py-1 font-medium"
+            className="inline-flex items-center gap-1 text-xs text-[color:var(--brand-primary,var(--brand-secondary))] hover:text-claimondo-shield rounded-full px-3 py-1.5 font-semibold tracking-[-.005em] bg-claimondo-navy/[0.06] hover:bg-claimondo-navy/[0.10] transition-all duration-200"
           >
             <ExternalLinkIcon className="w-3 h-3" /> Fall öffnen
           </Link>
         ) : (
           <span
-            className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1 font-medium"
+            className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-3 py-1.5 font-semibold tracking-[-.005em]"
             title="Termin ist reserviert, aber der Kunde hat die SA noch nicht unterschrieben. Fallakte wird erst danach angelegt."
           >
             SA ausstehend

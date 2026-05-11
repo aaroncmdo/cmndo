@@ -208,9 +208,9 @@ export default function TagesrouteSidebar({
               key={t.id}
               className={`transition-colors ${
                 isActive
-                  ? 'bg-claimondo-ondo/20'
+                  ? 'bg-claimondo-ondo/10 border-l-2 border-claimondo-ondo'
                   : istVerlegt
-                  ? 'bg-slate-400/20 hover:bg-slate-400/30'
+                  ? 'bg-claimondo-navy/[0.06] hover:bg-claimondo-navy/[0.10]'
                   : 'hover:bg-white/30'
               }`}
             >
