@@ -10,6 +10,74 @@ import { revalidatePath } from 'next/cache'
 import type { SvSuggestion } from './types'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 
+/**
+ * Sticky-SV-Lookup: hat dieser Lead bereits einen gewohnten SV? Match per
+ * lead.kunde_id ODER per E-Mail/Telefon auf claim_parties. SV muss aktiv sein.
+ * Wiederhergestellt aus Commit 3a93881b — wurde durch Polish-Sweep verloren.
+ */
+async function findStickySvForLead(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  lead: Record<string, unknown>,
+): Promise<string | null> {
+  // 1) Direkt ueber lead.kunde_id (Match-Modal)
+  const kundeId = (lead.kunde_id as string | null) ?? null
+  if (kundeId) {
+    const { data } = await supabase
+      .from('faelle')
+      .select('sv_id')
+      .eq('kunde_id', kundeId)
+      .not('sv_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const svId = (data?.sv_id as string | null) ?? null
+    if (svId) {
+      const { data: sv } = await supabase
+        .from('sachverstaendige')
+        .select('id, status')
+        .eq('id', svId)
+        .maybeSingle()
+      if (sv && sv.status !== 'inaktiv') return sv.id as string
+    }
+  }
+
+  // 2) Ueber Kontakt-Match auf claim_parties
+  const kontakte: string[] = []
+  for (const k of ['email', 'halter_email']) {
+    const v = lead[k] as string | null | undefined
+    if (v) kontakte.push(`email.ilike.${v}`)
+  }
+  for (const k of ['telefon', 'halter_telefon']) {
+    const v = lead[k] as string | null | undefined
+    if (v) kontakte.push(`telefon.eq.${v}`)
+  }
+  if (kontakte.length === 0) return null
+
+  const { data: parties } = await supabase
+    .from('claim_parties')
+    .select('claim_id')
+    .or(kontakte.join(','))
+    .limit(10)
+  const claimIds = ((parties ?? []) as Array<{ claim_id: string }>).map((p) => p.claim_id)
+  if (claimIds.length === 0) return null
+
+  const { data: faelle } = await supabase
+    .from('faelle')
+    .select('sv_id, claim_id, created_at')
+    .in('claim_id', claimIds)
+    .not('sv_id', 'is', null)
+    .order('created_at', { ascending: false })
+  for (const f of (faelle ?? []) as Array<{ sv_id: string }>) {
+    const { data: sv } = await supabase
+      .from('sachverstaendige')
+      .select('id, status')
+      .eq('id', f.sv_id)
+      .maybeSingle()
+    if (sv && sv.status !== 'inaktiv') return sv.id as string
+  }
+  return null
+}
+
 export async function listSvSuggestionsForLead(leadId: string): Promise<{
   success: boolean
   suggestions?: SvSuggestion[]
