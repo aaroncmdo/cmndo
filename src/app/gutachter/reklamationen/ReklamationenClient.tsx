@@ -3,7 +3,7 @@
 // AAR-93: SV-Portal Reklamations-Liste + Dialog
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { PlusIcon, XIcon, ShieldCheckIcon } from 'lucide-react'
+import { PlusIcon, XIcon, ShieldCheckIcon, AlertCircleIcon } from 'lucide-react'
 import { createReklamation } from './actions'
 // AAR-664 (Folge): Konstante aus non-`'use server'`-Datei.
 import { REKLAMATIONS_GRUENDE } from './constants'

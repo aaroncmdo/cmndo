@@ -9,15 +9,6 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  // 2026-05-11: Temporaer ignoreBuildErrors aktiviert. Der grosse Polish-Sweep
-  // (PRs #771-775) hat viele TS-Errors als Kollateralschaden hinterlassen
-  // (geloeschte Hilfs-Funktionen, fehlende Imports, useState-Drift). Turbopack
-  // selbst kompiliert sauber durch — nur der separate TS-Check im Build-Step
-  // blockt. Wir deployen erst die kritischen Polish-Improvements live, dann
-  // gehen wir die TS-Errors in einem Folge-PR systematisch durch.
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   // VPS-Deploy: `output: 'standalone'` erzeugt .next/standalone/ mit server.js
   // + minimal node_modules — der deploy-vps.yml-Workflow tart das in /var/www
   // und pm2 startet server.js. Ohne standalone schaeft cp -r .next/static

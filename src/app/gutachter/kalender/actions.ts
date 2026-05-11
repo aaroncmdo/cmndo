@@ -38,6 +38,8 @@ export async function setTermin(fallId: string, termin: string) {
   const primary = aktive[0] ?? null
   const altere = aktive.slice(1)
 
+  let syncTerminId: string | null = null
+
   if (primary) {
     const { error } = await supabase
       .from('gutachter_termine')

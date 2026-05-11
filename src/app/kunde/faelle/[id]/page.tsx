@@ -100,6 +100,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     let svName: string | null = null
     let svTelefon: string | null = null
     let svVerifiziert = false
+    let svGooglePlaceId: string | null = null
+    let svAvatarUrl: string | null = null
+    let svBeschreibung: string | null = null
     if (fall.sv_id) {
       const { data: sv } = await admin
         .from('sachverstaendige')
@@ -142,8 +145,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
-    // Dokumente laden — abgelehnte Iterationen (KB-Reject-Loop) werden
-    // dem Kunden nicht gezeigt; er sieht nur die aktive Version.
+    // Dokumente laden — alle Dokumente des Claims, die fuer den Kunden
+    // sichtbar sind. Abgelehnte Iterationen werden ausgeblendet.
+    let claimFallIds: string[] = [id]
+    if (fall.claim_id) {
+      const { data: claimFaelle } = await admin
+        .from('faelle')
+        .select('id')
+        .eq('claim_id', fall.claim_id as string)
+      claimFallIds = ((claimFaelle ?? []) as Array<{ id: string }>).map((f) => f.id)
+      if (claimFallIds.length === 0) claimFallIds = [id]
+    }
     const { data: dokumenteRaw } = await admin.from('fall_dokumente')
       .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am, sichtbar_fuer')
       .in('fall_id', claimFallIds)
@@ -402,6 +414,27 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         }
       }
     }
+    // Gutachten-PDF aus dem Storage-Bucket
+    let gutachtenUrlAusBucket: string | null = null
+    if (fall.claim_id) {
+      const { data: gut } = await admin
+        .from('fall_dokumente')
+        .select('storage_path')
+        .in('fall_id', claimFallIds)
+        .eq('dokument_typ', 'gutachten')
+        .like('storage_path', `claim/${fall.claim_id as string}/gutachten/%`)
+        .is('geloescht_am', null)
+        .is('abgelehnt_am', null)
+        .order('hochgeladen_am', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (gut?.storage_path) {
+        gutachtenUrlAusBucket = admin.storage
+          .from('fall-dokumente')
+          .getPublicUrl(gut.storage_path as string).data.publicUrl
+      }
+    }
+
     const claimLifecycle = getClaimLifecycle({
       lead: leadInputForLifecycle,
       auftraege,

@@ -23,7 +23,9 @@ import StopListItem from './StopListItem'
 import GlassPanel from '@/components/shared/GlassPanel'
 import NaviHud, { pickHighestPriorityNotice, formatNaviDistance, type NaviNotice } from './NaviHud'
 import { useFieldTracking } from './useFieldTracking'
-import { markArrived, pauseFokusmodus, startStop } from './actions'
+import { useTurnByTurn } from './useTurnByTurn'
+import { useWakeLock } from '@/hooks/useWakeLock'
+import { markArrived, pauseFokusmodus, startStop, exitArrivedToRoute } from './actions'
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
@@ -61,6 +63,15 @@ export default function FeldmodusClient({
     sv.live_tracking_enabled &&
     sessionStatus !== 'finished' &&
     sessionStatus !== 'paused'
+
+  // Portal-Review SV1: Screen bleibt an solange der Modus läuft.
+  const wakeLockActive =
+    sessionStatus !== 'finished' && sessionStatus !== 'paused'
+  const wakeLockStatus = useWakeLock(wakeLockActive)
+
+  // Portal-Review SV1: Mobile-Bottom-Sheet für die Stop-Liste.
+  const [mobileSheetExpanded, setMobileSheetExpanded] = useState(true)
+  const mobileSheetEnabled = sessionStatus !== 'arrived'
 
   // Geofence setzt nur Flag — AktuellerStopCard entscheidet wann Akte öffnet
   const onGeofenceReached = useCallback(() => {
@@ -104,6 +115,65 @@ export default function FeldmodusClient({
     targetLng: aktuellerStop?.lng ?? null,
     onGeofenceReached,
   })
+
+  // Position-Fallback: bei GPS-Denied → sv.standort als Anker
+  const position = livePosition ?? (
+    sv.standort_lat != null && sv.standort_lng != null
+      ? { lat: sv.standort_lat, lng: sv.standort_lng, heading: null }
+      : null
+  )
+
+  // Turn-by-Turn-Navigation
+  const [tbtVoiceOn, setTbtVoiceOn] = useState(true)
+  const tbtActive =
+    sessionStatus !== 'arrived' &&
+    sessionStatus !== 'finished' &&
+    !!aktuellerStop?.lat &&
+    !!aktuellerStop?.lng
+  const tbt = useTurnByTurn({
+    origin: tbtActive && position ? { lat: position.lat, lng: position.lng } : null,
+    destination:
+      tbtActive && aktuellerStop?.lat != null && aktuellerStop?.lng != null
+        ? { lat: aktuellerStop.lat, lng: aktuellerStop.lng }
+        : null,
+    position: position ? { lat: position.lat, lng: position.lng } : null,
+    voiceEnabled: tbtVoiceOn,
+  })
+
+  // NaviHud-Notice-Stack
+  const [mapNotice, setMapNotice] = useState<NaviNotice | null>(null)
+  const naviNotice = useMemo<NaviNotice | null>(() => {
+    let laneNotice: NaviNotice | null = null
+    let maneuverNotice: NaviNotice | null = null
+    if (tbt.upcomingStep && tbt.distanceToNextManeuver != null) {
+      const step = tbt.upcomingStep
+      const distLabel = formatNaviDistance(tbt.distanceToNextManeuver)
+      const lanes = step.bannerInstructions[0]?.lanes
+      if (lanes && lanes.length > 1 && tbt.distanceToNextManeuver < 300) {
+        laneNotice = {
+          type: 'lane',
+          lanes,
+          maneuverInstruction: step.instruction,
+          distanceLabel: distLabel,
+        }
+      }
+      maneuverNotice = {
+        type: 'maneuver',
+        maneuverType: step.maneuverType,
+        modifier: step.maneuverModifier,
+        instruction: step.instruction,
+        distanceLabel: distLabel,
+        streetName: step.name,
+      }
+    }
+    return pickHighestPriorityNotice({
+      blitzer: mapNotice?.type === 'blitzer' ? mapNotice : null,
+      hazard: mapNotice?.type === 'hazard' ? mapNotice : null,
+      reroute: mapNotice?.type === 'reroute' ? mapNotice : null,
+      lane: laneNotice,
+      maneuver: maneuverNotice,
+    })
+  }, [mapNotice, tbt.upcomingStep, tbt.distanceToNextManeuver])
 
   // Auto-Losfahren: sobald der SV den Feldmodus für einen aktiven Stop öffnet,
   // markieren wir den Termin als "losgefahren" — generiert Tracking-Token,

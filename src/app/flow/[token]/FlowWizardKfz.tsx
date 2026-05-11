@@ -23,6 +23,7 @@ import {
   UserIcon,
   PenToolIcon,
   Trash2Icon,
+  XIcon,
 } from 'lucide-react'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import LegalDocPopover from '@/components/legal/LegalDocPopover'
@@ -149,8 +150,11 @@ export default function FlowWizardKfz({
   flowLinkId?: string | null
   lead: LeadData
   gutachter?: GutachterInfo | null
-  // legalDocs wird serverseitig übergeben aber im Wizard noch nicht genutzt.
-  legalDocs?: Record<string, unknown>
+  // legalDocs wird serverseitig übergeben — datenschutz + agb mit Titel/Markdown.
+  legalDocs?: {
+    datenschutz?: { titel: string; markdown: string }
+    agb?: { titel: string; markdown: string }
+  }
 }) {
   const [stepIndex, setStepIndex] = useState(0)
   const [datenschutz, setDatenschutz] = useState(false)
@@ -402,7 +406,7 @@ export default function FlowWizardKfz({
                     />
                     <span className="text-sm text-claimondo-ondo leading-relaxed">
                       Ich habe die{' '}
-                      <LegalDocPopover titel={legalDocs.datenschutz.titel} markdown={legalDocs.datenschutz.markdown}>
+                      <LegalDocPopover titel={legalDocs?.datenschutz?.titel ?? 'Datenschutzerklärung'} markdown={legalDocs?.datenschutz?.markdown ?? ''}>
                         Datenschutzerklärung
                       </LegalDocPopover>{' '}
                       gelesen und stimme der Verarbeitung meiner Daten zu. <span className="text-red-400">*</span>
@@ -576,7 +580,7 @@ export default function FlowWizardKfz({
                   <span className="text-sm text-claimondo-ondo leading-relaxed">
                     Ja, ich möchte den kostenlosen Service nutzen. Alle Kosten trägt die gegnerische Versicherung.
                     Ich stimme den{' '}
-                    <LegalDocPopover titel={legalDocs.agb.titel} markdown={legalDocs.agb.markdown}>
+                    <LegalDocPopover titel={legalDocs?.agb?.titel ?? 'AGB'} markdown={legalDocs?.agb?.markdown ?? ''}>
                       AGB
                     </LegalDocPopover>{' '}
                     und der Widerrufsbelehrung zu. <span className="text-red-400">*</span>

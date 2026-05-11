@@ -18,6 +18,7 @@ import {
   fetchDrivingRoute,
   type TrafficRoute,
   MAPBOX_STYLE_STANDARD,
+  MAPBOX_STYLE_STANDARD_SATELLITE,
   DEFAULT_FIELD_MAP_CONFIG,
   getMapboxLightPreset,
   tryAddSvCar3dModel,

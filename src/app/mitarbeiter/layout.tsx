@@ -6,6 +6,7 @@ import MitarbeiterNav from './_components/MitarbeiterNav'
 import TasksPill from '@/components/shared/TasksPill'
 import UpdatesNav from '@/components/shared/updates'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 
 export default async function MitarbeiterLayout({
   children,

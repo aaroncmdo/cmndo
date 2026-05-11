@@ -8,9 +8,14 @@ import type { ReactNode } from 'react'
 import { Button, Card, Stack, Text } from '@/components/primitives'
 import type { ButtonTone } from '@/components/primitives/Button/Button.types'
 import { tokens } from '@/lib/design-tokens'
-import type { EmptyStateAction } from './EmptyState'
-
 type ActionVariant = 'primary' | 'secondary' | 'ghost'
+
+export type EmptyStateAction = {
+  label: string
+  onClick?: () => void
+  href?: string
+  variant?: ActionVariant
+}
 
 const ACTION_TO_TONE: Record<ActionVariant, ButtonTone> = {
   primary: 'navy',
@@ -19,7 +24,7 @@ const ACTION_TO_TONE: Record<ActionVariant, ButtonTone> = {
 }
 
 function renderAction(a: EmptyStateAction) {
-  const tone = ACTION_TO_TONE[a.variant ?? 'primary']
+  const tone = ACTION_TO_TONE[(a.variant ?? 'primary') as ActionVariant]
   const btn = (
     <Button tone={tone} size="md" onPress={a.onClick ?? (() => {})}>
       {a.label}

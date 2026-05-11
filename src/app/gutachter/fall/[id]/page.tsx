@@ -561,11 +561,7 @@ export default async function GutachterFallPage({
       nachrichten={nachrichten ?? []}
       kundenbetreuer={kundenbetreuer}
       chatTeilnehmer={chatTeilnehmer}
-      aktiverTermin={
-        aktiverTermin
-          ? { ...aktiverTermin, verstrichen: aktiverTerminVerstrichen }
-          : null
-      }
+      aktiverTermin={aktiverTermin as unknown as Parameters<typeof FallDetailClient>[0]['aktiverTermin']}
       fallDokumente={fallDokumente}
       kuerzungen={kuerzungen}
       abrechnungAusgezahltAm={(abrechnung as { abgerechnet_am?: string | null } | null)?.abgerechnet_am ?? null}

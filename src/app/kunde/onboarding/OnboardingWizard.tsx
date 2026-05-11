@@ -231,6 +231,47 @@ export default function OnboardingWizard({
     fieldsFound: number
   } | null>(null)
 
+  // AAR-664: ZB1-OCR im Welcome-Step damit Pflichtdaten ohne manuelles Tippen
+  // ankommen.
+  const [welcomeOcrResult, setWelcomeOcrResult] = useState<{
+    extracted: Record<string, string | null>
+    fieldsFound: number
+  } | null>(null)
+  const [welcomeOcrLoading, setWelcomeOcrLoading] = useState(false)
+  const [welcomeOcrError, setWelcomeOcrError] = useState<string | null>(null)
+
+  function handleWelcomeOcr(file: File) {
+    if (!fall?.id) return
+    setWelcomeOcrLoading(true)
+    setWelcomeOcrError(null)
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const base64 = typeof reader.result === 'string' ? reader.result : ''
+      try {
+        const res = await fetch('/api/ocr-fahrzeugschein', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fall_id: fall.id, image_base64: base64 }),
+        }).then((r) => r.json())
+        if (res?.success && res.extracted) {
+          setWelcomeOcrResult({
+            extracted: res.extracted,
+            fieldsFound: res.fields_found ?? 0,
+          })
+          router.refresh()
+        } else {
+          setWelcomeOcrError(res?.message ?? 'Fahrzeugschein konnte nicht ausgelesen werden.')
+        }
+      } catch (err) {
+        console.warn('[Welcome ZB1-OCR]', err)
+        setWelcomeOcrError('Netzwerkfehler — bitte später erneut versuchen.')
+      } finally {
+        setWelcomeOcrLoading(false)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
   // CMM-21: lokaler File-Counter pro Slot — wird optimistisch nach jedem
   // erfolgreichen Upload hochgezählt damit der Kunde direktes Feedback hat,
   // ohne page-refresh zu brauchen.

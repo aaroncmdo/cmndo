@@ -674,22 +674,9 @@ export default async function FallaktePage({
         </div>
       )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
-      {userRolle === 'admin' && gutachtenOcr && claimId && (
-        <div className="mb-4">
-          {/* CMM-32 Walkthrough: GutachtenOcrCard ist jetzt 'use client' mit
-              Edit-Mode + Re-Run. Sie braucht claim_id/fall_id/auftrag_id
-              fuer die Server-Actions. erstgutachtenAuftragId wurde oben
-              geladen. */}
-          <GutachtenOcrCard
-            data={{
-              ...(gutachtenOcr as unknown as Record<string, unknown>),
-              claim_id: claimId,
-              fall_id: id,
-              auftrag_id: erstgutachtenAuftragId,
-            } as unknown as Parameters<typeof GutachtenOcrCard>[0]['data']}
-          />
-        </div>
-      )}
+      {/* GutachtenOcrCard wurde im Polish-Sweep aus dieser Page entfernt —
+          Daten-Loader (gutachtenOcr, erstgutachtenAuftragId, GutachtenOcrCard-
+          Import) sind nicht mehr im Scope. Re-Integration siehe Folge-PR. */}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
       {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
           Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}

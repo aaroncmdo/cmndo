@@ -153,7 +153,7 @@ export default function FallakteShell({
 
   return (
     <FallProvider fall={fall} lead={lead} userRolle={userRolle}>
-      <FallRealtimeRefresh fallId={fall.id} claimId={claimId ?? null} />
+      <FallRealtimeRefresh fallId={fall.id} />
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-96px)] gap-0">
         {/* AAR-567 (V1) / AAR-727: Linke Spalte — Glass-Panel (aside). */}
         <aside className="lg:w-72 xl:w-80 shrink-0 overflow-y-auto">
