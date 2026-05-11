@@ -1,5 +1,14 @@
 ﻿'use client'
 
+// 2026-05-12 Funnel v3: DEPRECATED — wird durch /kunde/onboarding-details
+// ersetzt (DynamicWizard mit datenabhaengigem Loader, Plan v2 PR #4).
+// Token-only Magic-Link-User landen weiter hier (kein Auth-Cookie da),
+// eingeloggte User werden in /flow/[token]/page.tsx zu onboarding-details
+// redirected (PR #5).
+//
+// Geplante Loeschung: nach 2 stabilen Releases ohne Probleme (frueheste
+// 2026-05-26). Bis dahin Bug-Fixes only, keine neuen Features.
+
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
