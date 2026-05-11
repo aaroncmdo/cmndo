@@ -133,7 +133,7 @@ export default function SachverstaendigeList({
             }`}
           >
             {t.label} <span className="text-claimondo-ondo/70 ml-1">{t.count}</span>
-          </button>
+          </Chip>
         ))}
       </div>
 

@@ -844,7 +844,7 @@ function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
         placeholder={placeholder}
         className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       />
-    </label>
+    </div>
   )
 }
 
@@ -864,7 +864,7 @@ function ControlledRow({ label, value, onChange, type = 'text', placeholder }: {
         placeholder={placeholder}
         className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
       />
-    </label>
+    </div>
   )
 }
 
@@ -886,6 +886,6 @@ function SelectRow({ label, value, onChange, options }: {
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
-    </label>
+    </div>
   )
 }
