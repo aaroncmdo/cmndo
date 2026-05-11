@@ -61,3 +61,8 @@ export const Tiles3DLoader = stub
 export const CesiumIonLoader = stub
 export const OBJLoader = stub
 export const RGBELoader = stub
+// 2026-05-11 VPS-Deploy: three/examples/jsm/loaders/OBJLoader.js importiert
+// `Loader` direkt aus 'three'. Turbopack macht statische Export-Analyse und
+// failt wenn der Named-Export fehlt — auch wenn der Proxy zur Runtime alles
+// abfaengt. Loader explizit ergaenzen.
+export const Loader = stub
