@@ -548,6 +548,9 @@ function FieldRenderer({
           onChange={onChange as (v: string) => void}
           disabled={disabled}
           svId={svId}
+          // 2026-05-11 Funnel v2: SlotField ist Tier-aware. preSelectedSvLeadId
+          // kommt von der Karten-Auswahl (claimondo:select-sv Event).
+          svLeadId={preSelectedSvLeadId}
           anfrageId={anfrageId}
         />
       )

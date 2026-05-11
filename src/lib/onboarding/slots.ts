@@ -199,11 +199,40 @@ export async function ladeFreieSlots(
   return result
 }
 
+/**
+ * 2026-05-11 Funnel v2: Tier-aware Slot-Loader. Wrapper um ladeFreieSlots
+ * (Tier 1, echte SVs) und getStandardSlots (Tier 3, sv_leads).
+ *
+ * Wird vom SlotField im DynamicWizard genutzt — dieser bekommt entweder
+ * eine svId oder svLeadId aus den Wizard-Values (gesetzt durch die
+ * Karten-Auswahl in /gutachter-finden).
+ */
+export async function ladeSlotsFuerTier(input: {
+  svId?: string | null
+  svLeadId?: string | null
+  datumVon: Date
+  datumBis: Date
+  schadenort?: { lat: number; lng: number } | null
+}): Promise<TagVerfuegbarkeit[]> {
+  if (input.svId) {
+    return ladeFreieSlots(input.svId, input.datumVon, input.datumBis, input.schadenort)
+  }
+  if (input.svLeadId) {
+    const { getStandardSlots } = await import('@/lib/slots/standard-availability')
+    return getStandardSlots(input.svLeadId, input.datumVon, input.datumBis)
+  }
+  // Weder Tier 1 noch Tier 3 — leere Liste, SlotField faellt auf Demo zurueck
+  return []
+}
+
 export async function reserviereSlot(
   anfrageId: string,
   svId: string,
   vonISO: string,
   bisISO: string,
+  // 2026-05-11 Funnel v2: bei Tier-3-Termin (sv_leads) wird sv_lead_id statt
+  // sv_id gesetzt. Mindestens einer von beiden Pflicht.
+  svLeadId: string | null = null,
 ): Promise<{ ok: true; terminId: string } | { ok: false; error: string }> {
   const supabase = createAdminClient()
 
@@ -213,22 +242,26 @@ export async function reserviereSlot(
     .update({
       reservierter_slot_von: vonISO,
       reservierter_slot_bis: bisISO,
-      reservierter_sv_id: svId,
+      reservierter_sv_id: svLeadId ? null : svId,
+      zugeordneter_sv_lead_id: svLeadId ?? null,
+      matching_typ: svLeadId ? 'lead_fallback' : 'isochron',
     })
     .eq('id', anfrageId)
 
   if (gfaErr) return { ok: false, error: gfaErr.message }
 
   // Vorläufigen Termin mit status='reserviert' anlegen.
-  // Nach SA-Signatur → bestaetigeSlot() → status='geplant'.
-  // Nach TTL-Cron (30 Min ohne Signatur) → status='abgelehnt'.
+  // Tier 1 (svId): wird nach SA via bestaetigeSlot() auf 'geplant' gesetzt.
+  // Tier 3 (svLeadId): bleibt bei 'pre_flowlink_reserviert', Dispatcher
+  // bestaetigt manuell mit dem SV per Telefon.
   const { data: terminData, error: terminErr } = await supabase
     .from('gutachter_termine')
     .insert({
-      sv_id: svId,
+      sv_id: svLeadId ? null : svId,
+      sv_lead_id: svLeadId,
       start_zeit: vonISO,
       end_zeit: bisISO,
-      status: 'reserviert',
+      status: svLeadId ? 'pre_flowlink_reserviert' : 'reserviert',
       typ: 'vor_ort',
     })
     .select('id')

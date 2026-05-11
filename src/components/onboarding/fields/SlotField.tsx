@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { ladeFreieSlots } from '@/lib/onboarding/slots'
+import { ladeSlotsFuerTier } from '@/lib/onboarding/slots'
 import type { TagVerfuegbarkeit } from '@/lib/onboarding/slots'
 import type { OnboardingFeld } from '../types'
 
@@ -10,13 +10,15 @@ interface Props {
   value: string
   onChange: (val: string) => void
   disabled?: boolean
-  // svId wird vom WizardClient übergeben sobald der SV bekannt ist.
-  // Wenn kein svId vorhanden, werden statische Demo-Slots angezeigt.
+  // 2026-05-11 Funnel v2: Tier-aware. Genau eine der beiden IDs ist gesetzt
+  // sobald der SV (Karten-Click oder Auto-Geo-Match) feststeht. Wenn keine
+  // gesetzt: statische Demo-Slots fuer fruehe Wizard-Phasen.
   svId?: string | null
+  svLeadId?: string | null
   anfrageId?: string | null
 }
 
-export function SlotField({ feld, value, onChange, disabled, svId, anfrageId }: Props) {
+export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anfrageId }: Props) {
   const [tage, setTage] = useState<TagVerfuegbarkeit[]>([])
   const [ladeFehler, setLadeFehler] = useState<string | null>(null)
   const [laedt, setLaedt] = useState(false)
@@ -31,13 +33,18 @@ export function SlotField({ feld, value, onChange, disabled, svId, anfrageId }: 
       const von = new Date()
       von.setHours(0, 0, 0, 0)
       const bis = new Date(von)
-      bis.setDate(von.getDate() + 7)
+      bis.setDate(von.getDate() + 14) // 2026-05-11: 14 Tage statt 7 (Tier-3 hat weniger Slots/Tag)
 
-      if (svId) {
-        const result = await ladeFreieSlots(svId, von, bis)
+      if (svId || svLeadId) {
+        const result = await ladeSlotsFuerTier({
+          svId: svId ?? null,
+          svLeadId: svLeadId ?? null,
+          datumVon: von,
+          datumBis: bis,
+        })
         setTage(result)
       } else {
-        // Demo-Slots wenn kein SV ausgewählt (Wizard noch in früher Phase)
+        // Demo-Slots wenn weder Tier-1 noch Tier-3 SV ausgewählt
         setTage(generateDemoTage(von, bis))
       }
     } catch (err) {
@@ -45,7 +52,7 @@ export function SlotField({ feld, value, onChange, disabled, svId, anfrageId }: 
     } finally {
       setLaedt(false)
     }
-  }, [svId])
+  }, [svId, svLeadId])
 
   useEffect(() => {
     ladeDaten()
