@@ -33,7 +33,14 @@ function fmtUhrzeit(iso: string): string {
   })
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Audit-Fix #4: CRON_SECRET-Auth ergaenzt — vorher konnte jeder die Route
+  // ohne Header triggern und damit Eskalations-Events fluten.
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const db = createAdminClient()
 
   // Pending-Slots laden, die noch nicht eskaliert wurden

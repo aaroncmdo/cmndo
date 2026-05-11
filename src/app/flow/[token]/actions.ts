@@ -20,8 +20,19 @@ export async function enrichFlowLeadByFin(token: string, fin: string): Promise<{
     return { success: false, error: 'FIN-Format ungueltig (17 alphanumerische Zeichen)' }
   }
 
-  const { data: flow } = await admin.from('flow_links').select('lead_id').eq('token', token).single()
+  // Audit-Fix #3: Token-Status + Expiry pruefen — vorher konnte mit einem
+  // bereits abgeschlossenen oder abgelaufenen Token weiter die FIN-Anreicherung
+  // getriggert werden, was Leads-Daten ueberschreibt.
+  const { data: flow } = await admin
+    .from('flow_links')
+    .select('lead_id, status, expires_at')
+    .eq('token', token)
+    .single()
   if (!flow?.lead_id) return { success: false, error: 'Flow-Link ungueltig' }
+  if (flow.status === 'abgeschlossen') return { success: false, error: 'Flow-Link bereits abgeschlossen' }
+  if (flow.expires_at && new Date(flow.expires_at) < new Date()) {
+    return { success: false, error: 'Flow-Link abgelaufen' }
+  }
 
   await admin.from('leads').update({ fin: cleaned }).eq('id', flow.lead_id)
 
@@ -170,7 +181,11 @@ const ROLLE_LABEL: Record<string, string> = {
   kanzlei: 'Kanzlei',
 }
 
-export type CreateKundeAccountResult =
+// Audit-Fix #9: Type bleibt intern — Export aus 'use server'-Datei macht
+// das Type-Objekt zur Runtime im Client-Bundle zu `undefined`. Siehe
+// AAR-664-Pattern. Wenn dieser Type extern gebraucht wird → in eine
+// separate types.ts-Datei verschieben und dort exportieren.
+type CreateKundeAccountResult =
   | { success: true; password: string; magicLink: string | null }
   | { success: false; error: string }
 
