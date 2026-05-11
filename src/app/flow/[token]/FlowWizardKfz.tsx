@@ -454,10 +454,8 @@ export default function FlowWizardKfz({
                   Weiter
                 </button>
 
-            {/* CMM-14: Step 'weitere-angaben' (Werkstatt + Fotos) entfernt —
-                Foto-Upload + Werkstatt-Erfassung gehören ins Onboarding nach
-                Magic-Link-Login, nicht in den FlowLink. */}
-
+              </div>
+            )}
             {/* CMM-14: Step 'weitere-angaben' (Werkstatt + Fotos) entfernt —
                 Foto-Upload + Werkstatt-Erfassung gehören ins Onboarding nach
                 Magic-Link-Login, nicht in den FlowLink. */}
@@ -688,8 +686,6 @@ export default function FlowWizardKfz({
             </button>
           </div>
         )}
-      {/* 2026-05-11 Build-Fix: pre-existing JSX-Drift. Quick-Repair, sauberer Refactor in Folge-PR. */}
-        </div>
       </div>
     </div>
   )

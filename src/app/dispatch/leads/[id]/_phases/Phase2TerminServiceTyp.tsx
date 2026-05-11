@@ -49,9 +49,6 @@ export default function Phase2TerminServiceTyp() {
   const [wochentage, setWochentage] = useState<number[]>(l.wunschtermin_wochentage ?? [])
   const wunschterminDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [toast, setToast] = useState('')
-  const [besichtigungsortAdresse, setBesichtigungsortAdresse] = useState(
-    l.besichtigungsort_adresse ?? '',
-  )
 
   // AAR-264: Debounced auto-save (500ms) für Wunschtermin
   useEffect(() => {

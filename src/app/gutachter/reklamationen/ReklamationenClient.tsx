@@ -121,7 +121,6 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           </div>
         )}
       </div>
-      )}
 
       {/* Dialog */}
       <Modal open={showDialog} onClose={() => setShowDialog(false)} noPadding hideCloseButton maxWidth={512} ariaLabel="Neue Reklamation">
