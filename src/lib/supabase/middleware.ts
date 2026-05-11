@@ -149,6 +149,22 @@ function isPublicPath(pathname: string): boolean {
     // ins Portal. Ohne diesen Eintrag landet der Besucher auf /login und
     // kann gar keinen Schaden melden.
     '/schaden-melden',
+    // 2026-05-11: Neue Marketing-Pages aus PR #748 / #749 / #772 — waren
+    // in der Allowlist vergessen, anonyme Besucher landeten auf /login.
+    '/ersteinschaetzung',
+    '/beratung-anfragen',
+    '/makler/partner-werden',
+    // Weitere bestehende Marketing-Pages explizit, damit nichts mehr unbeabsichtigt
+    // hinter den Auth-Guard rutscht:
+    '/vorteile',
+    '/wie-es-funktioniert',
+    '/faq',
+    '/ueber-uns',
+    '/kfz-gutachter',
+    '/gutachter-finden',
+    '/gutachter-partner',
+    '/schadensreport-2026',
+    '/sa-volltext',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
