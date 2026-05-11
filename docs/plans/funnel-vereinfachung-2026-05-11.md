@@ -7,6 +7,84 @@ Detail-Erfassung wandert ins Kunde-Onboarding.
 
 ---
 
+## 0. Business-Phasen + Verantwortlichkeiten (Aaron 2026-05-12)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  LEAD-PHASE                                                             │
+│  ─────────                                                              │
+│  Tabelle:        leads + gutachter_finder_anfragen                       │
+│  Verantwortlich: Dispatcher                                              │
+│  Eintritts-Wege:                                                         │
+│    1. Self-Dispatch via /gutachter-finden (DynamicWizard)                │
+│    2. Telefon-Inbound → Dispatcher legt Lead an /dispatch/leads/new      │
+│    3. Webform /schaden-melden                                            │
+│    4. Webhook von Partnerkanal (Maik, Versicherung)                      │
+│  Aktionen: SV-Matching, Termin reservieren, Lead-Validierung,            │
+│            FlowLink an Kunde, optional SA-Signatur als Trigger           │
+│                                                                         │
+│                              │                                          │
+│                              ▼                                          │
+│                                                                         │
+│  ┌─────────────────────────────────────────────────┐                    │
+│  │  KONVERTIERUNG (lead → claim)                   │                    │
+│  │  Trigger:                                       │                    │
+│  │    - SA-Signatur im Self-Dispatch-Wizard        │                    │
+│  │    - Wizard-Submit gutachter-finden             │                    │
+│  │    - Dispatch-Knopf "Convert Lead to Claim"     │                    │
+│  │  Funktionen:                                    │                    │
+│  │    - convertLeadToClaim() (Felder-Mapping)      │                    │
+│  │    - konvertiereAnfrageZuFall() (User+Magic-L.) │                    │
+│  │  Side-Effects:                                  │                    │
+│  │    - kundenbetreuer_id (KB-Round-Robin) setzen  │                    │
+│  │    - Magic-Link an Kunden-Email                 │                    │
+│  └─────────────────────────────────────────────────┘                    │
+│                                                                         │
+│                              │                                          │
+│                              ▼                                          │
+│                                                                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│  CLAIM-PHASE                                                            │
+│  ───────────                                                            │
+│  Tabelle:        claims + faelle (+ leads bleibt als Snapshot)           │
+│  Verantwortlich: Kundenbetreuer (KB) — übernimmt erst hier!              │
+│                                                                         │
+│  Sub-Phase "Onboarding" (Kunde füllt aus, KB überwacht):                 │
+│    Page:         /kunde/onboarding-details                               │
+│    Engine:       DynamicWizard mit flow_key='kunde-onboarding'           │
+│    Loader:       ladeNoetigePhasen(fallId) — Skip wenn schon erfüllt     │
+│    Felder:       claims.hergang_kunde_text, faelle.service_typ,          │
+│                  claims.kanzlei_wunsch, faelle.sa_signatur_data_url      │
+│    Skip-Quellen: Was Dispatcher in der Lead-Phase eingetragen hat        │
+│                  (via convertLeadToClaim mapping) wird übersprungen      │
+│                                                                         │
+│  Sub-Phase "Active Claim":                                               │
+│    Mandat-Push, Anschlussschreiben, Regulierung, Auszahlung              │
+│    KB führt komplette Akte, Kunde sieht Status im Portal                 │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Was die Trennung für Code bedeutet
+
+- **Self-Dispatch-Wizard (`/gutachter-finden`)** schreibt in `gutachter_finder_anfragen` → noch kein Lead-Eintrag in `leads`. Erst beim Submit kommt `konvertiereAnfrageZuFall` und legt Lead + Claim + Fall an.
+- **Dispatcher-Lead-Anlage** schreibt direkt in `leads`. Erst SA-Signatur (FlowLink) oder manueller "Convert"-Klick triggert Claim-Erstellung.
+- **`ladeNoetigePhasen` liest `claims` und `faelle`** — Dispatcher-Eingaben sind nach Conversion drin, werden vom Wizard automatisch geskippt.
+- **KB ist erst NACH Conversion verantwortlich** — `claims.kundenbetreuer_id` wird vom Round-Robin in `convertLeadToClaim` gesetzt.
+
+### Felder-Mapping (Lead → Claim via convertLeadToClaim)
+
+| leads-Spalte | claims-Spalte | Wer setzt es |
+|---|---|---|
+| `unfallhergang` | `hergang_kunde_text` | Dispatcher Phase 1 oder Wizard-Hergang-Phase |
+| `polizei_vor_ort` | `polizei_vor_ort` | Dispatcher oder Onboarding-Schaden-Phase |
+| `gegner_versicherung_id` | `gegner_versicherung_id` | Dispatcher (Grüne-Karte-OCR) |
+| `kunden_konstellation` | `kunden_konstellation` | Dispatcher Phase 1 |
+| `schadens_datum` | `schadentag` | Dispatcher oder Onboarding |
+| `service_typ` (Lead-Initial) | `faelle.service_typ` | Wizard "service"-Phase |
+| `kanzlei_wunsch` | `claims.kanzlei_wunsch` | Wizard "kanzlei"-Phase |
+
+---
+
 ## 1. SV-Tier-Modell (Stand 2026-05-11)
 
 | Tier | Tabelle | Anzahl | Kalender | Priorität |
