@@ -228,7 +228,7 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
     return { ok: false, error: `Konvertierung fehlgeschlagen: ${conv.error}` }
   }
 
-  // ─── 5b. Service-Typ aus Z35-Wahl auf Fall setzen ────────────────────
+  // ─── 5b. Service-Typ + Kanzlei-Wunsch aus Wizard-Wahl auf Fall+Claim setzen ─
   // regulierungs_modus='vollstaendig' → service_typ='komplett' (Anwalt + Gutachter)
   // regulierungs_modus='nur_gutachten' → service_typ='nur_gutachter'
   // null/undefined → default 'komplett' (Anfragen vor PR #668 hatten noch
@@ -240,11 +240,38 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
     .update({ service_typ: serviceTyp })
     .eq('id', conv.fallId)
 
+  // 2026-05-12 Funnel v3 PR #7: kanzlei_wunsch aus dem Wizard auf den Claim
+  // propagieren — Plan v3 will Komplett+Partnerkanzlei-Wahl bereits im
+  // Lead-Pfad. Ohne dieses Update bliebe claims.kanzlei_wunsch auf null,
+  // pushMandatToKanzlei wuerde wegen istPartnerkanzlei=false skippen.
+  //
+  // Default-Fallback fuer service_typ='komplett' ohne explizite Wahl:
+  // 'partnerkanzlei' (LexDrive). Das ist konsistent mit Plan v3 (Komplett
+  // = Partnerkanzlei) und bewahrt Backward-Compat fuer Anfragen ohne
+  // Wizard-Kanzlei-Phase.
+  if (serviceTyp === 'komplett') {
+    const kanzleiWunsch =
+      ((anfrage.kanzlei_wunsch as string | null | undefined) ?? 'partnerkanzlei') as
+        | 'partnerkanzlei' | 'eigene_kanzlei' | 'keine_kanzlei'
+    // claim_id aus faelle lesen
+    const { data: fallRow } = await admin
+      .from('faelle')
+      .select('claim_id')
+      .eq('id', conv.fallId)
+      .maybeSingle()
+    if (fallRow?.claim_id) {
+      await admin
+        .from('claims')
+        .update({ kanzlei_wunsch: kanzleiWunsch, kanzlei_wunsch_gefragt_am: new Date().toISOString() })
+        .eq('id', fallRow.claim_id as string)
+    }
+  }
+
   // ─── 5c. LexDrive Mandant-Push (fire-and-forget) ─────────────────────
-  // Bei service_typ='komplett' bekommt die Partner-Kanzlei den Mandanten
-  // gepusht. pushMandatToKanzlei prüft selbst service_typ + Feature-Flag
-  // KANZLEI_API_ENABLED und schreibt bei Fehler eine Timeline-Warnung.
-  // Fehler hier dürfen die Konvertierung NICHT blockieren.
+  // Bei service_typ='komplett' + kanzlei_wunsch='partnerkanzlei' bekommt die
+  // Partner-Kanzlei den Mandanten gepusht. pushMandatToKanzlei prueft beides
+  // selber + Feature-Flag KANZLEI_API_ENABLED + schreibt bei Fehler eine
+  // Timeline-Warnung. Fehler hier duerfen die Konvertierung NICHT blockieren.
   if (serviceTyp === 'komplett') {
     pushMandatToKanzlei(conv.fallId)
       .then((res) => {
