@@ -72,10 +72,11 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
 
   // Fall + Kunde-Anrede laden. Telefon wird aus faelle.kunde_telefon (Fall-
   // Snapshot aus convertLeadToFall) genommen. Anrede via profiles (kunde_id).
+  // claim_id mitladen — kanzlei_wunsch liegt am Claim, nicht am Fall.
   const { data: fall, error: fallErr } = await db
     .from('faelle')
     .select(
-      'id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_email, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, vorsteuerabzugsberechtigt, kennzeichen',
+      'id, claim_id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_email, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, vorsteuerabzugsberechtigt, kennzeichen, mandatsnummer',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -83,8 +84,22 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     return { success: false, error: `Fall nicht gefunden: ${fallErr?.message ?? fallId}` }
   }
 
-  if ((fall.service_typ as string | null) !== 'komplett') {
-    return { success: false, skipped: true, error: 'service_typ_not_komplett' }
+  // Push-Berechtigung: komplett-Paket ODER kunde hat post-hoc partnerkanzlei
+  // gewaehlt (nur_gutachter-Pfad mit nachtraeglicher Wahl). Beide Pfade
+  // brauchen die Kanzlei.
+  let kanzleiWunsch: string | null = null
+  if (fall.claim_id) {
+    const { data: claim } = await db
+      .from('claims')
+      .select('kanzlei_wunsch')
+      .eq('id', fall.claim_id)
+      .maybeSingle()
+    kanzleiWunsch = (claim?.kanzlei_wunsch as string | null) ?? null
+  }
+  const istKomplett = (fall.service_typ as string | null) === 'komplett'
+  const istPartnerkanzlei = kanzleiWunsch === 'partnerkanzlei'
+  if (!istKomplett && !istPartnerkanzlei) {
+    return { success: false, skipped: true, error: 'kein_komplett_oder_partnerkanzlei' }
   }
 
   let anrede: 'Herr' | 'Frau' | 'Divers' | null = null
