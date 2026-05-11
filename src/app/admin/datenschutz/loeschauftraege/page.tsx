@@ -24,10 +24,10 @@ type AuftragRow = {
 
 const STATUS_META: Record<AuftragRow['status'], { label: string; color: string; icon: typeof ClockIcon }> = {
   eingereicht: { label: 'Eingereicht', color: 'bg-amber-100 text-amber-800 border-amber-200', icon: ClockIcon },
-  bestaetigt: { label: '14d Karenz', color: 'bg-blue-100 text-blue-800 border-blue-200', icon: ClockIcon },
+  bestaetigt: { label: '14d Karenz', color: 'bg-claimondo-ondo/10 text-claimondo-ondo border-claimondo-ondo/30', icon: ClockIcon },
   ausgefuehrt: { label: 'Ausgeführt', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', icon: CheckCircleIcon },
-  abgelehnt: { label: 'Abgelehnt', color: 'bg-gray-100 text-gray-700 border-gray-200', icon: XCircleIcon },
-  storniert: { label: 'Storniert', color: 'bg-gray-100 text-gray-700 border-gray-200', icon: XCircleIcon },
+  abgelehnt: { label: 'Abgelehnt', color: 'bg-claimondo-navy/[0.06] text-claimondo-shield border-claimondo-border', icon: XCircleIcon },
+  storniert: { label: 'Storniert', color: 'bg-claimondo-navy/[0.06] text-claimondo-shield border-claimondo-border', icon: XCircleIcon },
 }
 
 export default async function AdminDsgvoLoeschauftraegePage() {

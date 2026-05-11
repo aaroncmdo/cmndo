@@ -170,7 +170,7 @@ export default function FinanceClient({
                 <Bar
                   dataKey="faelle"
                   name="Fälle"
-                  fill="#3b82f6"
+                  fill="#4573A2"
                   radius={[6, 6, 0, 0]}
                   maxBarSize={48}
                 />
