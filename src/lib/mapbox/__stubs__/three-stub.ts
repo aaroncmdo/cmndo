@@ -61,8 +61,37 @@ export const Tiles3DLoader = stub
 export const CesiumIonLoader = stub
 export const OBJLoader = stub
 export const RGBELoader = stub
-// 2026-05-11 VPS-Deploy: three/examples/jsm/loaders/OBJLoader.js importiert
-// `Loader` direkt aus 'three'. Turbopack macht statische Export-Analyse und
-// failt wenn der Named-Export fehlt — auch wenn der Proxy zur Runtime alles
-// abfaengt. Loader explizit ergaenzen.
+// 2026-05-11 VPS-Deploy: three/examples/jsm/loaders/*.js importieren Named-
+// Exports direkt aus 'three'. Turbopack macht statische Export-Analyse und
+// failt wenn ein Export fehlt — auch wenn der Proxy zur Runtime alles
+// abfaengt. Alle in three/examples/jsm/* referenzierten Top-Level-Exports
+// proaktiv hier ergaenzen, sonst Build-Break pro Iteration.
 export const Loader = stub
+export const DataTextureLoader = stub
+export const DataUtils = stub
+export const FileLoader = stub
+export const FloatType = stub
+export const LinearFilter = stub
+export const LinearSRGBColorSpace = stub
+// Verwandte Filter/Format/Type-Konstanten die three/examples/jsm/loaders
+// haeufig importiert, proaktiv hier um Build-Loop zu vermeiden.
+export const NearestFilter = stub
+export const RepeatWrapping = stub
+export const ClampToEdgeWrapping = stub
+export const RGBFormat = stub
+export const UnsignedByteType = stub
+export const UVMapping = stub
+export const ImageLoader = stub
+export const CompressedTextureLoader = stub
+export const CubeTextureLoader = stub
+export const AudioLoader = stub
+export const AnimationClip = stub
+export const Bone = stub
+export const SkinnedMesh = stub
+export const Skeleton = stub
+export const VectorKeyframeTrack = stub
+export const QuaternionKeyframeTrack = stub
+export const NumberKeyframeTrack = stub
+export const InterpolateLinear = stub
+export const InterpolateSmooth = stub
+export const InterpolateDiscrete = stub
