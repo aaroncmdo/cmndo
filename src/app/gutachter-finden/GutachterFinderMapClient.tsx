@@ -17,10 +17,15 @@ import { useEffect, useRef, useState } from 'react'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox'
 import type { Map as MapboxMap, Marker, Popup } from 'mapbox-gl'
 import { ChevronUp, Search, MapPin } from 'lucide-react'
-import type { SvLead } from '@/lib/actions/gutachter-finder-actions'
+import type { SvLead, AktiverSV } from '@/lib/actions/gutachter-finder-actions'
 
 type Props = {
+  /** Tier-3 Lead-Partner (sv_leads). Werden als kleine graue Marker
+   * ohne Iso-Halo dargestellt — Fallback wenn kein Tier-1 die Region deckt. */
   svLeads: SvLead[]
+  /** Tier-1 Pro/Premium-SVs mit Calendar-Sync. Werden mit Iso-Halo + Premium-
+   * Marker dargestellt — die "richtigen" Partner. */
+  aktiveSVs?: AktiverSV[]
   /** Server-Component-Rendered DynamicWizard fuer die Sidebar. */
   wizardSlot: React.ReactNode
 }
@@ -34,7 +39,7 @@ const DEFAULT_ZOOM = 8.5
 const COL_ONDO = '#4573A2'
 const COL_NAVY = '#0D1B3E'
 
-export function GutachterFinderMapClient({ svLeads, wizardSlot }: Props) {
+export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }: Props) {
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const markersRef = useRef<Marker[]>([])
@@ -82,55 +87,100 @@ export function GutachterFinderMapClient({ svLeads, wizardSlot }: Props) {
         },
       })
 
-      // Iso-Polygone als GeoJSON-Source
-      const features = svLeads
-        .filter((s) => s.isochrone_polygon)
+      // 2026-05-12 Plan v3 Backlog: Iso-Halos NUR fuer Tier-1 (echte SVs aus
+      // sachverstaendige). Tier-3 (sv_leads) bleibt ohne Iso — zu viele Marker
+      // sonst und Iso ist nicht echte Verfuegbarkeit, sondern Standard-25km.
+      const tier1Features = aktiveSVs
+        .filter((s) => s.isochrone_polygon && s.standort_lat != null && s.standort_lng != null)
         .map((s) => ({
           type: 'Feature' as const,
-          properties: { id: s.id, name: s.firma ?? s.name },
+          properties: { id: s.id, name: s.firmenname ?? '', tier: 'pro' },
           geometry: s.isochrone_polygon as GeoJSON.Polygon,
         }))
 
-      if (features.length > 0) {
-        map.addSource('sv-isos', {
+      if (tier1Features.length > 0) {
+        map.addSource('sv-isos-pro', {
           type: 'geojson',
-          data: { type: 'FeatureCollection', features },
+          data: { type: 'FeatureCollection', features: tier1Features },
         })
 
+        // Tier-1 Halo: Ondo-Fill mit hoeherer Opacity als vorher
         map.addLayer({
-          id: 'sv-isos-fill',
+          id: 'sv-isos-pro-fill',
           type: 'fill',
-          source: 'sv-isos',
+          source: 'sv-isos-pro',
           paint: {
             'fill-color': COL_ONDO,
-            'fill-opacity': 0.08,
+            'fill-opacity': 0.12,
           },
         })
 
         map.addLayer({
-          id: 'sv-isos-outline',
+          id: 'sv-isos-pro-outline',
           type: 'line',
-          source: 'sv-isos',
+          source: 'sv-isos-pro',
           paint: {
             'line-color': COL_ONDO,
-            'line-width': 1,
-            'line-opacity': 0.35,
+            'line-width': 2,
+            'line-opacity': 0.55,
           },
         })
       }
 
-      // Marker pro SV
+      // ─── Tier-1 Marker (echte SVs) — Premium-Look ──────────────────
+      aktiveSVs.forEach((sv) => {
+        if (sv.standort_lat == null || sv.standort_lng == null) return
+        const name = sv.firmenname ?? ''
+        const initials = name.split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'SV'
+        const el = document.createElement('div')
+        el.style.cursor = 'pointer'
+        // Premium-Look: groesserer Kreis, ondo Ring, Gold-Akzent-Badge
+        el.innerHTML = `
+          <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom">
+            <div style="width:44px;height:44px;border-radius:50%;border:3px solid ${COL_ONDO};background:linear-gradient(135deg,#fff 60%,rgba(243,192,83,0.12));display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:14px;font-weight:800;color:${COL_NAVY};box-shadow:0 6px 18px rgba(13,27,62,0.22);position:relative">
+              ${initials}
+              <div style="position:absolute;bottom:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:#34C759;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
+              <div style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#F3C053;border:2px solid #fff;display:grid;place-items:center;font-size:9px;font-weight:900;color:${COL_NAVY}">★</div>
+            </div>
+            <div style="margin-top:4px;padding:2px 8px;border-radius:999px;background:${COL_NAVY};color:#fff;font-family:Inter,Montserrat,sans-serif;font-size:10px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;box-shadow:0 2px 8px rgba(13,27,62,0.30)">
+              Pro
+            </div>
+          </div>
+        `
+
+        const popupHTML = `
+          <div style="padding:14px 16px;font-family:Montserrat,system-ui,sans-serif;min-width:220px;max-width:280px">
+            <div style="display:inline-block;padding:2px 8px;border-radius:999px;background:#F3C053;color:${COL_NAVY};font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">★ Premium-Partner</div>
+            <div style="font-size:13px;font-weight:700;color:${COL_NAVY};line-height:1.3;letter-spacing:-.01em">${name}</div>
+            <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:11px;color:#10b981;font-weight:600">
+              <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block"></span>
+              Verfuegbar mit Kalender-Sync
+            </div>
+            <button onclick="document.dispatchEvent(new CustomEvent('claimondo:select-sv', { detail: '${sv.id}' }))" style="margin-top:10px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px 12px;cursor:pointer;letter-spacing:-.01em">
+              Diesen Premium-Gutachter anfragen
+            </button>
+          </div>
+        `
+        const popup = new mapboxgl.Popup({ offset: 28, closeButton: true, maxWidth: '280px' }).setHTML(popupHTML)
+        const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat([sv.standort_lng, sv.standort_lat])
+          .setPopup(popup)
+          .addTo(map)
+        markersRef.current.push(marker)
+      })
+
+      // ─── Tier-3 Marker (Lead-Partner) — kleiner, grau, ohne Iso ───
       svLeads.forEach((sv) => {
         const initials = (sv.firma ?? sv.name).split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
         const el = document.createElement('div')
         el.style.cursor = 'pointer'
+        // Tier-3-Look: kleiner Kreis, neutraler Border, kein Gold-Akzent
         el.innerHTML = `
-          <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom">
-            <div style="width:38px;height:38px;border-radius:50%;border:3px solid ${COL_ONDO};background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:13px;font-weight:700;color:${COL_NAVY};box-shadow:0 4px 12px rgba(13,27,62,0.18);position:relative">
+          <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom;opacity:0.92">
+            <div style="width:32px;height:32px;border-radius:50%;border:2px solid #8a93a6;background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:11px;font-weight:700;color:#4b5468;box-shadow:0 2px 8px rgba(13,27,62,0.12);position:relative">
               ${initials}
-              <div style="position:absolute;bottom:-2px;right:-2px;width:11px;height:11px;border-radius:50%;background:#34C759;border:2px solid #fff"></div>
             </div>
-            <div style="margin-top:4px;padding:2px 7px;border-radius:999px;background:rgba(13,27,62,0.85);color:#fff;font-family:Inter,Montserrat,sans-serif;font-size:10px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(13,27,62,0.25)">
+            <div style="margin-top:3px;padding:1px 6px;border-radius:999px;background:rgba(13,27,62,0.70);color:#fff;font-family:Inter,Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;backdrop-filter:blur(8px)">
               ${sv.ort ?? ''}
             </div>
           </div>
@@ -210,7 +260,9 @@ export function GutachterFinderMapClient({ svLeads, wizardSlot }: Props) {
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
             </span>
             <span className="text-xs font-semibold text-claimondo-ondo">
-              {svLeads.length} Sachverstaendige in Echtzeit verfuegbar
+              {aktiveSVs.length > 0
+                ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} weitere Sachverstaendige`
+                : `${svLeads.length} Sachverstaendige in Echtzeit verfuegbar`}
             </span>
           </div>
         </div>

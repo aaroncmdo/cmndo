@@ -5,7 +5,7 @@ import {
   jsonLdScript, SITE_URL,
 } from '@/lib/seo/jsonld'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
-import { ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
+import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
 import { GutachterFinderMapClient } from './GutachterFinderMapClient'
 
 export const metadata: Metadata = {
@@ -49,8 +49,12 @@ export const metadata: Metadata = {
 // Karte zeigt 62 sv_leads als Marker + Iso-Einsatzgebiete als Halos.
 // SEO-H1 bleibt als sr-only, Visual-H1 ist im GutachterFinderMapClient.
 export default async function GutachterFindenPage() {
-  const svLeadsResult = await ladeSvLeads()
+  const [svLeadsResult, aktiveSVsResult] = await Promise.all([
+    ladeSvLeads(),
+    ladeAktiveSVs(),
+  ])
   const svLeads = svLeadsResult.ok ? svLeadsResult.data : []
+  const aktiveSVs = aktiveSVsResult.ok ? aktiveSVsResult.data : []
 
   return (
     <>
@@ -75,6 +79,7 @@ export default async function GutachterFindenPage() {
 
       <GutachterFinderMapClient
         svLeads={svLeads}
+        aktiveSVs={aktiveSVs}
         wizardSlot={<DynamicWizard flowKey="gutachter-finden" />}
       />
     </>
