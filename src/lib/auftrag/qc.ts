@@ -49,17 +49,12 @@ export async function gibKanzleipaketFrei(
 
   const { data: auftrag } = await db
     .from('auftraege')
-    .select('id, fall_id, claim_id, gutachten_url, gutachten_final_freigegeben, status')
+    .select('id, fall_id, gutachten_url, gutachten_final_freigegeben, status')
     .eq('id', auftragId)
     .maybeSingle()
   if (!auftrag) return { ok: false, error: 'Auftrag nicht gefunden' }
   if (auftrag.gutachten_final_freigegeben) return { ok: true }
   if (!auftrag.gutachten_url) return { ok: false, error: 'Kein Gutachten hochgeladen' }
-
-  // Phase 1.5b: auftraege.claim_id ist NOT NULL (Trigger füllt aus faelle).
-  // Defensive Prüfung trotzdem — falls historische Daten oder Trigger-Drift.
-  const claimIdForKanzleifall = auftrag.claim_id as string | null
-  if (!claimIdForKanzleifall) return { ok: false, error: 'Auftrag hat keinen Claim' }
 
   const now = new Date().toISOString()
 
@@ -74,63 +69,26 @@ export async function gibKanzleipaketFrei(
     .eq('id', auftragId)
   if (aErr) return { ok: false, error: aErr.message }
 
-  // A3: wenn der Kunde bereits VOR der QC-Freigabe 'keine_kanzlei' gewählt
-  // hat (selten — Banner erscheint normalerweise erst hier), keinen
-  // kanzlei_faelle anlegen. Der Kunde reguliert selbst. Bei späterem
-  // Wechsel auf partnerkanzlei/eigene_kanzlei legt setKanzleiWunsch ihn nach.
-  const { data: claimWunsch } = await db
-    .from('claims')
-    .select('kanzlei_wunsch')
-    .eq('id', claimIdForKanzleifall)
+  // Kanzlei-Fall anlegen falls noch keiner existiert
+  const { data: existing } = await db
+    .from('kanzlei_faelle')
+    .select('id')
+    .eq('fall_id', auftrag.fall_id)
     .maybeSingle()
-  const istKeineKanzlei = (claimWunsch?.kanzlei_wunsch as string | null) === 'keine_kanzlei'
 
-  if (!istKeineKanzlei) {
-    const { data: existing } = await db
+  if (!existing) {
+    const { error: kErr } = await db
       .from('kanzlei_faelle')
-      .select('id')
-      .eq('claim_id', claimIdForKanzleifall)
-      .maybeSingle()
-
-    if (!existing) {
-      const { error: kErr } = await db
-        .from('kanzlei_faelle')
-        .insert({
-          claim_id: claimIdForKanzleifall,
-          // fall_id wird vom Sync-Trigger nachgezogen.
-          status: 'versicherungskontakt',
-        })
-      if (kErr) return { ok: false, error: kErr.message }
-    }
+      .insert({
+        fall_id: auftrag.fall_id,
+        status: 'versicherungskontakt',
+      })
+    if (kErr) return { ok: false, error: kErr.message }
   }
-
-  // CMM-32 Polish: Auto-Trigger Kanzlei-Wunsch-Frage. Sobald die QC durch
-  // ist, brauchen wir vom Kunden eine Entscheidung — Komplettservice via
-  // LexDrive, eigene Kanzlei oder Selbst-Einreichen. Wir setzen
-  // 'noch_unentschieden' (statt dem default 'nicht_gefragt'), damit das
-  // lila Top-Banner im Stepper erscheint und der Kunde geprompt wird.
-  await db
-    .from('claims')
-    .update({
-      kanzlei_wunsch: 'noch_unentschieden',
-      kanzlei_wunsch_gefragt_am: new Date().toISOString(),
-      kanzlei_wunsch_gefragt_in_phase: 'phase_4_re_frage',
-    })
-    .eq('id', claimIdForKanzleifall)
-    .eq('kanzlei_wunsch', 'nicht_gefragt')
 
   revalidatePath(`/faelle/${auftrag.fall_id}`)
   revalidatePath(`/kunde/faelle/${auftrag.fall_id}`)
   revalidatePath(`/gutachter/fall/${auftrag.fall_id}`)
-
-  // Gutachten-OCR fire-and-forget — Auftrag wird nicht durch den OCR-Status
-  // blockiert. Fehler landen in claims.gutachten_ocr_error für späteren Retry.
-  void import('@/lib/ai/gutachten-ocr')
-    .then(({ extractGutachtenAndSaveToClaim }) =>
-      extractGutachtenAndSaveToClaim(auftragId),
-    )
-    .catch((err) => console.warn('[qc] OCR-Trigger fehlgeschlagen:', err))
-
   return { ok: true }
 }
 
@@ -151,7 +109,7 @@ export async function gutachtenAbgeben(
 
   const { data: auftrag } = await db
     .from('auftraege')
-    .select('id, fall_id, claim_id, sv_id, gutachten_url, gutachten_final_freigegeben, zurueckweisung_grund')
+    .select('id, fall_id, sv_id, gutachten_url, gutachten_final_freigegeben, zurueckweisung_grund')
     .eq('id', auftragId)
     .maybeSingle()
   if (!auftrag) return { ok: false, error: 'Auftrag nicht gefunden' }
@@ -159,8 +117,13 @@ export async function gutachtenAbgeben(
     return { ok: false, error: 'Auftrag ist bereits final freigegeben' }
   }
 
-  // Phase 1.5b: auftrag.claim_id direkt verfügbar (Trigger befüllt aus faelle.claim_id).
-  const claimId = auftrag.claim_id as string | null
+  // Auftrag-zu-Claim-Pfad ermitteln
+  const { data: fall } = await db
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', auftrag.fall_id)
+    .maybeSingle()
+  const claimId = fall?.claim_id as string | null
   if (!claimId) return { ok: false, error: 'Claim nicht gefunden' }
 
   // CMM-32e: Pick die jüngste Datei für diesen Auftrag (egal ob als
@@ -222,26 +185,6 @@ export async function gutachtenAbgeben(
   revalidatePath(`/faelle/${auftrag.fall_id}`)
   revalidatePath(`/gutachter/fall/${auftrag.fall_id}`)
   revalidatePath(`/kunde/faelle/${auftrag.fall_id}`)
-
-  // Gutachten-OCR fire-and-forget. Bei Re-Submit (nach Reject) lief die
-  // OCR ggf. schon auf der alten Datei — vor dem Trigger den Idempotenz-
-  // Marker zuruecksetzen, damit die neue URL frisch verarbeitet wird.
-  void (async () => {
-    try {
-      await db
-        .from('claims')
-        .update({
-          gutachten_ocr_processed_at: null,
-          gutachten_ocr_error: null,
-        })
-        .eq('id', claimId)
-      const { extractGutachtenAndSaveToClaim } = await import('@/lib/ai/gutachten-ocr')
-      await extractGutachtenAndSaveToClaim(auftragId)
-    } catch (err) {
-      console.warn('[gutachtenAbgeben] OCR-Trigger fehlgeschlagen:', err)
-    }
-  })()
-
   return { ok: true }
 }
 

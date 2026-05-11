@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { BarChart3Icon } from 'lucide-react'
 
 // KFZ-155: Lead-Preise Verteilung — wieviel Umsatz pro Lead-Preis-Kategorie.

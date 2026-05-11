@@ -21,7 +21,6 @@ export default function FallCardBadges({
   return (
     <div className="flex items-center gap-1">
       {chatCount > 0 && <DropletBadge count={chatCount} tone="ondo" />}
-      {kundeUploadCount > 0 && <DropletBadge count={kundeUploadCount} tone="warning" />}
       {updateCount > 0 && <DropletBadge count={updateCount} tone="danger" />}
     </div>
   )

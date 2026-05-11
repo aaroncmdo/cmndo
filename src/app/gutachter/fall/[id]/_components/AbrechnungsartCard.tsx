@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-315: SV-Post-Termin-Block. Erscheint ab Subphase „gutachten-erstellen"
 // (also nach der Vor-Ort-Besichtigung). SV trägt ein was er mit dem Kunden

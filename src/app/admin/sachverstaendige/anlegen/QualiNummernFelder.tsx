@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-515 Welle 2: Conditional Nummern-Felder für Gruppe-B-Qualifikationen.
 //

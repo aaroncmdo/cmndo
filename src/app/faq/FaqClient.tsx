@@ -43,7 +43,7 @@ export default function FaqClient() {
   const treffer = gefilterte.reduce((acc, g) => acc + g.fragen.length, 0)
 
   return (
-    <div className="min-h-screen" style={{ background: '#f8f9fb' }}>
+    <div className="min-h-screen bg-claimondo-bg">
       <LandingTopbar authenticatedUser={null} />
 
       {/* Header — Glass-Pass mit Spotlights */}
@@ -59,41 +59,41 @@ export default function FaqClient() {
           }}
         />
         <div className="mx-auto max-w-2xl px-4 sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#4573A2] shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
             Häufige Fragen
           </div>
           <h1
-            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-[#0D1B3E] sm:text-5xl md:text-6xl"
+            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             Was Sie wissen müssen
           </h1>
-          <p className="mt-5 text-balance text-base text-[#4573A2] sm:text-lg">
+          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
             Basierend auf 27 Fachanwalt-Quellen, BGH-Rechtsprechung und über 2.400 Fällen.
           </p>
 
           {/* Such-Pill */}
           <div className="mx-auto mt-8 max-w-md">
-            <div className="flex items-center gap-2 rounded-full border border-white/60 bg-white/85 px-4 py-2.5 shadow-[0_4px_16px_rgba(13,27,62,0.06)] backdrop-blur-md focus-within:ring-2 focus-within:ring-[#4573A2]/30">
-              <Search className="h-4 w-4 shrink-0 text-[#7BA3CC]" />
+            <div className="flex items-center gap-2 rounded-full border border-white/60 bg-white/85 px-4 py-2.5 shadow-[0_4px_16px_rgba(13,27,62,0.06)] backdrop-blur-md focus-within:ring-2 focus-within:ring-claimondo-ondo/30">
+              <Search className="h-4 w-4 shrink-0 text-claimondo-light-blue" />
               <input
                 type="search"
                 value={suche}
                 onChange={(e) => setSuche(e.target.value)}
                 placeholder="Wertminderung, UPE, HUK, …"
-                className="w-full bg-transparent text-sm text-[#0D1B3E] placeholder:text-[#7BA3CC] focus:outline-none"
+                className="w-full bg-transparent text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none"
               />
               {suche && (
                 <button
                   onClick={() => setSuche('')}
-                  className="text-xs text-[#4573A2] hover:text-[#0D1B3E]"
+                  className="text-xs text-claimondo-ondo hover:text-claimondo-navy"
                 >
                   ×
                 </button>
               )}
             </div>
             {suche && (
-              <p className="mt-2 text-xs text-[#7BA3CC]">
+              <p className="mt-2 text-xs text-claimondo-light-blue">
                 {treffer === 0 ? 'Keine Treffer — versuchen Sie ein anderes Stichwort' : `${treffer} Treffer`}
               </p>
             )}
@@ -118,7 +118,7 @@ export default function FaqClient() {
         <div className="mx-auto max-w-3xl space-y-6 px-4 sm:px-6">
           {gefilterte.length === 0 && (
             <div
-              className="rounded-3xl border border-white/60 bg-white/70 p-8 text-center text-sm text-[#4573A2] backdrop-blur-md"
+              className="rounded-3xl border border-white/60 bg-white/70 p-8 text-center text-sm text-claimondo-ondo backdrop-blur-md"
               style={{ WebkitBackdropFilter: 'blur(14px)' }}
             >
               Keine Antworten zu „{suche}". Versuchen Sie ein anderes Stichwort oder rufen Sie
@@ -133,11 +133,11 @@ export default function FaqClient() {
               style={{ WebkitBackdropFilter: 'blur(14px)' }}
             >
               <h2
-                className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-[#4573A2]"
+                className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo"
               >
                 {g.gruppe}
               </h2>
-              <div className="mt-4 space-y-6 divide-y divide-[#e4e7ef]/60">
+              <div className="mt-4 space-y-6 divide-y divide-claimondo-border/60">
                 {g.fragen.map((f, i) => {
                   const id = slugify(f.frage)
                   return (
@@ -150,7 +150,7 @@ export default function FaqClient() {
                     >
                       <div className="flex items-start gap-3">
                         <h3
-                          className="flex-1 text-base font-bold leading-snug text-[#0D1B3E] sm:text-lg"
+                          className="flex-1 text-base font-bold leading-snug text-claimondo-navy sm:text-lg"
                           style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
                           itemProp="name"
                         >
@@ -159,13 +159,13 @@ export default function FaqClient() {
                         <a
                           href={`#${id}`}
                           aria-label="Direkt-Link zu dieser Frage"
-                          className="mt-1 shrink-0 rounded-full p-1 text-[#7BA3CC] opacity-0 transition-opacity hover:bg-[#4573A2]/10 hover:text-[#4573A2] focus:opacity-100 group-hover:opacity-100"
+                          className="mt-1 shrink-0 rounded-full p-1 text-claimondo-light-blue opacity-0 transition-opacity hover:bg-claimondo-ondo/10 hover:text-claimondo-ondo focus:opacity-100 group-hover:opacity-100"
                         >
                           <Link2 className="h-3.5 w-3.5" />
                         </a>
                       </div>
                       <div
-                        className="mt-3 text-sm leading-relaxed text-[#1E3A5F]"
+                        className="mt-3 text-sm leading-relaxed text-claimondo-shield"
                         itemScope
                         itemType="https://schema.org/Answer"
                         itemProp="acceptedAnswer"
@@ -182,7 +182,7 @@ export default function FaqClient() {
       </section>
 
       {/* CTA */}
-      <section className="relative isolate overflow-hidden bg-[#0D1B3E] py-20 text-center">
+      <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-center">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -206,7 +206,7 @@ export default function FaqClient() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/schaden-melden"
-              className="inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-[#7BA3CC] active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               Schaden melden — 0 € Kosten
               <ChevronRight className="h-5 w-5" />

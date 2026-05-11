@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-386: Feldmodus-Variant des DokumentSlot mit in-app-Kamera (KameraModal).
 // Unterscheidet sich vom shared `DokumentSlot` nur in einem Punkt: der

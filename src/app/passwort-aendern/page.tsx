@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -74,11 +74,11 @@ export default function PasswortAendernPage() {
       />
       <div className="w-full max-w-sm relative z-10">
         <div className="mb-8 text-center">
-          <span className="text-3xl font-bold tracking-tight"><span className="text-[#0D1B3E]">Claim</span><span className="text-[#4573A2]">ondo</span></span>
+          <span className="text-3xl font-bold tracking-tight"><span className="text-claimondo-navy">Claim</span><span className="text-claimondo-ondo">ondo</span></span>
           <p className="mt-1 text-sm text-claimondo-ondo">Bitte ändern Sie Ihr Passwort</p>
         </div>
 
-        <div className="rounded-3xl border border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_8px_28px_rgba(13,27,62,0.08)] p-8">
+        <div className="bg-white border border-claimondo-border rounded-2xl p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
               <KeyIcon className="w-5 h-5 text-amber-400" />
@@ -102,7 +102,7 @@ export default function PasswortAendernPage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
               />
             </div>
 
@@ -118,7 +118,7 @@ export default function PasswortAendernPage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-[#f8f9fb] text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
               />
             </div>
 
@@ -132,7 +132,7 @@ export default function PasswortAendernPage() {
               type="submit"
               isLoading={loading}
               loadingText="Wird gespeichert..."
-              className="w-full py-3.5 rounded-full bg-claimondo-navy hover:bg-claimondo-shield text-white disabled:opacity-50 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
+              className="w-full py-3.5 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white disabled:opacity-50 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
             >
               Passwort ändern
             </LoadingButton>

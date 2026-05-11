@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // Kombinierte Live-Karten-Form für gutachter.claimondo.de.
 // PLZ-Eingabe geocodet sich (debounced) → Karte zeigt Standort + echte Fahrt-Isochrone
@@ -253,7 +253,7 @@ export default function WaitlistApply() {
         </div>
         <div className="relative h-[420px] overflow-hidden rounded-3xl border border-white/10 lg:h-auto">
           <div ref={mapRef} className="absolute inset-0" />
-          <div className="absolute left-4 top-4 rounded-xl border border-white/15 bg-[#0D1B3E]/85 px-3 py-2 text-xs font-medium text-white backdrop-blur-md">
+          <div className="absolute left-4 top-4 rounded-xl border border-white/15 bg-claimondo-navy/85 px-3 py-2 text-xs font-medium text-white backdrop-blur-md">
             Dein Einsatzgebiet — {STANDARD_RADIUS_KM} km um {geo?.ort ?? plz}
           </div>
         </div>
@@ -312,7 +312,7 @@ export default function WaitlistApply() {
           />
         </div>
 
-        <h4 className="mt-8 text-xs font-semibold uppercase tracking-widest text-[#7BA3CC]">
+        <h4 className="mt-8 text-xs font-semibold uppercase tracking-widest text-claimondo-light-blue">
           Qualifikation
         </h4>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -322,7 +322,7 @@ export default function WaitlistApply() {
           <Field name="oebuv_bestellungsnummer" label="öbuv-Bestellungs-Nr." />
         </div>
 
-        <h4 className="mt-8 text-xs font-semibold uppercase tracking-widest text-[#7BA3CC]">
+        <h4 className="mt-8 text-xs font-semibold uppercase tracking-widest text-claimondo-light-blue">
           Geschäft (optional)
         </h4>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -345,7 +345,7 @@ export default function WaitlistApply() {
         <button
           type="submit"
           disabled={pending}
-          className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#4573A2] px-7 py-4 text-base font-bold text-white shadow-[0_10px_32px_rgba(69,115,162,0.45)] transition-all hover:bg-[#7BA3CC] disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-claimondo-ondo px-7 py-4 text-base font-bold text-white shadow-[0_10px_32px_rgba(69,115,162,0.45)] transition-all hover:bg-claimondo-light-blue disabled:cursor-not-allowed disabled:opacity-60"
         >
           {pending ? (
             <>
@@ -369,8 +369,8 @@ export default function WaitlistApply() {
           <div className="relative h-[480px] overflow-hidden rounded-3xl border border-white/10 bg-white/5">
             <div ref={mapRef} className="absolute inset-0" />
             <div className="pointer-events-none absolute left-4 top-4 max-w-xs">
-              <div className="rounded-xl border border-white/15 bg-[#0D1B3E]/85 px-3 py-2 backdrop-blur-md">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-[#7BA3CC]">
+              <div className="rounded-xl border border-white/15 bg-claimondo-navy/85 px-3 py-2 backdrop-blur-md">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-claimondo-light-blue">
                   Dein Gebiet
                 </p>
                 <p className="mt-0.5 text-sm font-medium text-white">
@@ -382,8 +382,8 @@ export default function WaitlistApply() {
             </div>
             {!geo && !geocoding && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="rounded-2xl border border-white/10 bg-[#0D1B3E]/70 px-5 py-3 text-center backdrop-blur-md">
-                  <MapPin className="mx-auto h-5 w-5 text-[#7BA3CC]" />
+                <div className="rounded-2xl border border-white/10 bg-claimondo-navy/70 px-5 py-3 text-center backdrop-blur-md">
+                  <MapPin className="mx-auto h-5 w-5 text-claimondo-light-blue" />
                   <p className="mt-2 text-xs text-white/70">
                     PLZ eintragen → Standard-Paket-Gebiet erscheint
                   </p>
@@ -429,7 +429,7 @@ function Field({
     <label className={`flex flex-col ${className ?? ''}`}>
       <span className="mb-1 text-xs font-medium text-white/65">
         {label}
-        {required && <span className="ml-0.5 text-[#7BA3CC]">*</span>}
+        {required && <span className="ml-0.5 text-claimondo-light-blue">*</span>}
       </span>
       <input
         name={name}
@@ -439,7 +439,7 @@ function Field({
         pattern={pattern}
         value={value}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-[#4573A2] focus:bg-white/10"
+        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-claimondo-ondo focus:bg-white/10"
       />
       {hint && <span className="mt-1 text-[11px] text-white/40">{hint}</span>}
     </label>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -10,7 +10,7 @@ export function Footer() {
   if (APP_PREFIXES.some(p => pathname.startsWith(p))) return null
 
   return (
-    <footer className="w-full border-t border-[#1E3A5F]/10 bg-[#0D1B3E] text-white mt-auto">
+    <footer className="w-full border-t border-claimondo-shield/10 bg-claimondo-navy text-white mt-auto">
       <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm font-[family-name:var(--font-montserrat)]">
         <p className="text-white/60">
           &copy; {new Date().getFullYear()} Claimondo GmbH i.G.

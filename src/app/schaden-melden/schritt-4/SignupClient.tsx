@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -159,11 +159,11 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
       </div>
 
       {showMaklerBox && (
-        <div className="rounded-xl border border-claimondo-border bg-[#f8f9fb] p-4">
+        <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-4">
           <div className="flex items-start gap-3">
-            <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#4573A2]" />
+            <Info className="mt-0.5 h-5 w-5 shrink-0 text-claimondo-ondo" />
             <div className="flex-1">
-              <div className="font-semibold text-[#0D1B3E]">
+              <div className="font-semibold text-claimondo-navy">
                 Sie wurden von {lead.maklerFirma} zu uns vermittelt.
               </div>
               <p className="mt-1 text-sm text-claimondo-ondo">
@@ -231,7 +231,7 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
                 <Link
                   href="/agb"
                   target="_blank"
-                  className="text-[#4573A2] underline"
+                  className="text-claimondo-ondo underline"
                 >
                   AGB
                 </Link>
@@ -260,7 +260,7 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
                 <Link
                   href="/datenschutz"
                   target="_blank"
-                  className="text-[#4573A2] underline"
+                  className="text-claimondo-ondo underline"
                 >
                   Datenschutzerklärung
                 </Link>
@@ -279,7 +279,7 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
       <Button
         type="submit"
         disabled={submitting}
-        className="w-full bg-[#0D1B3E] text-white hover:bg-[#0D1B3E]/90"
+        className="w-full bg-claimondo-navy text-white hover:bg-claimondo-navy/90"
       >
         {submitting ? (
           <>

@@ -301,13 +301,8 @@ async function main() {
       if (svErr) logFehler('sachverstaendige Standort', svErr)
       else log(`SV-Standort gesetzt: ${SV_STANDORT.adresse} (${SV_STANDORT.lat}, ${SV_STANDORT.lng})`)
 
-      // Frische SV-Tages-Session anlegen (idle, kein Termin).
-      // 2026-05-08: TZ-Fix — feldmodus/page.tsx liest datum als
-      // Local-Mitternacht→toISOString→slice. Bei späten CET-Stunden
-      // ergibt das einen Vortags-String. Wir matchen exakt diese Logik.
-      const heuteDate = new Date()
-      heuteDate.setHours(0, 0, 0, 0)
-      const heute = heuteDate.toISOString().slice(0, 10)
+      // Frische SV-Tages-Session anlegen (idle, kein Termin)
+      const heute = new Date().toISOString().slice(0, 10)
       const { error: sessErr } = await db
         .from('sv_tages_session')
         .upsert({

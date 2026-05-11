@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-490 (M8): Abrechnungen-Client — 4 Summary-Cards, Monats-Navigator,
 // Provisions-Tabelle mit Status-Badge + Hold-Countdown, CSV-Export.

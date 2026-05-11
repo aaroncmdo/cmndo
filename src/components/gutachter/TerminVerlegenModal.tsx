@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-864: SV-Termin-Verlegen-Modal mit Routen-Check + Top-3-Vorschlägen.
 //
@@ -42,7 +42,7 @@ type Props = {
 
 function fmtDate(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+  return d.toLocaleDateString('de-DE', {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
@@ -50,7 +50,7 @@ function fmtDate(iso: string): string {
 }
 
 function fmtTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
+  return new Date(iso).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
   })

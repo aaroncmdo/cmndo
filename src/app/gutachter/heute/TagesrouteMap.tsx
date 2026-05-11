@@ -24,7 +24,6 @@ import {
   attachBlitzerLayer,
   fetchBlitzerInBbox,
   bboxForRoute,
-  bboxForIsochrone,
   type BlitzerLayerHandle,
   attachHazardLayer,
   fetchHereHazards,
@@ -317,31 +316,6 @@ export default function TagesrouteMap({
       if (map.isStyleLoaded()) {
         removeRouteLayer(map, 'main')
       }
-      // Blitzer/Hazards/Stau auch ohne aktive Route laden — Isochrone als
-      // BBox wenn vorhanden, sonst 20-km-Radius um SV-Standort.
-      if (svOrigin) {
-        const fallbackBbox = isochronePolygon && isochronePolygon.length >= 3
-          ? bboxForIsochrone(isochronePolygon)
-          : bboxForRoute([[svOrigin.lng, svOrigin.lat]], 20)
-        void Promise.all([
-          fetchBlitzerInBbox(fallbackBbox),
-          fetchHereHazards(fallbackBbox),
-          fetchHereFlow(fallbackBbox),
-        ]).then(([blitzerFeatures, hazardFeatures, flowFeatures]) => {
-          const m2 = mapRef.current
-          if (!m2) return
-          const attach = () => {
-            if (!blitzerRef.current) blitzerRef.current = attachBlitzerLayer(m2, blitzerFeatures)
-            else blitzerRef.current.update(blitzerFeatures)
-            if (!hazardsRef.current) hazardsRef.current = attachHazardLayer(m2, hazardFeatures)
-            else hazardsRef.current.update(hazardFeatures)
-            if (!flowRef.current) flowRef.current = attachFlowLayer(m2, flowFeatures)
-            else flowRef.current.update(flowFeatures)
-          }
-          if (m2.isStyleLoaded()) attach()
-          else m2.once('idle', attach)
-        }).catch(() => { /* best-effort */ })
-      }
       return
     }
     let cancelled = false
@@ -364,17 +338,9 @@ export default function TagesrouteMap({
 
         // 2026-05-08 (Aaron-Brief): Blitzer + Hazards + Stau-Linien auch
         // im Heute-Hub damit der SV vor Tagesmodus-Start sieht was auf
-        // der Strecke wartet. Route-BBox (3 km Puffer) hat Vorrang;
-        // Isochrone-Polygon als Fallback wenn keine Route — deckt
-        // das gesamte Einsatzgebiet ab. Cache-TTL = 2 min.
-        const blitzerBbox =
-          aktivCoords.length >= 2
-            ? bboxForRoute(aktivCoords, 3)
-            : isochronePolygon && isochronePolygon.length >= 3
-              ? bboxForIsochrone(isochronePolygon)
-              : null
-        if (blitzerBbox) {
-          const bbox = blitzerBbox
+        // der Strecke wartet. Buffer 3 km, parallel-fetch, best-effort.
+        if (aktivCoords.length >= 2) {
+          const bbox = bboxForRoute(aktivCoords, 3)
           void Promise.all([
             fetchBlitzerInBbox(bbox),
             fetchHereHazards(bbox),
@@ -429,7 +395,7 @@ export default function TagesrouteMap({
     })
 
     return () => { cancelled = true }
-  }, [svOrigin, aktivStops, validStops, onRouteStatsChange, isochronePolygon])
+  }, [svOrigin, aktivStops, validStops, onRouteStatsChange])
 
   // Intro-Handle für Heute→Feldmodus-Übergang: nach Mount einmalig
   // exponieren. Animiert auf Pitch 60 + Zoom 15 mit Bearing zum ersten

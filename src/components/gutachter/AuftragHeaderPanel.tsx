@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // CMM-32 Walkthrough: SV-Header-Banner — kombiniert Stepper, Termin-Daten,
 // Navigation, SV-Briefing und „vor Ort einzusammeln"-Liste in einem
@@ -34,7 +34,6 @@ import {
   terminAblehnen,
   terminGegenvorschlag,
 } from '@/lib/actions/termin-actions'
-import { meldeNoShow } from '@/lib/actions/storno-actions'
 import {
   terminVerlegungBestaetigen,
   terminVerlegungAblehnen,
@@ -56,9 +55,6 @@ export type AuftragTerminInfo = {
   gegenvorschlag_von: string | null
   /** AAR-864: TRUE wenn Kunde die Verlegung initiiert hat — SV bestätigt. */
   verlegung_initiator_kunde?: boolean | null
-  /** CMM-32 Polish: Server-Side berechneter Verstrichen-Flag.
-   *  Triggert den roten "Termin verstrichen — bitte rückmelden"-Banner. */
-  verstrichen?: boolean
 }
 
 type Props = {
@@ -80,13 +76,13 @@ function fmtTermin(iso: string | null): { datum: string; uhrzeit: string } | nul
   try {
     const d = new Date(iso)
     return {
-      datum: d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+      datum: d.toLocaleDateString('de-DE', {
         weekday: 'long',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
       }),
-      uhrzeit: d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
+      uhrzeit: d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
     }
   } catch {
     return null
@@ -103,7 +99,7 @@ export default function AuftragHeaderPanel({
   pflichtSlots,
 }: Props) {
   const router = useRouter()
-  const [modal, setModal] = useState<'ablehnen' | 'gegenvorschlag' | 'verlegen' | 'noshow' | null>(null)
+  const [modal, setModal] = useState<'ablehnen' | 'gegenvorschlag' | 'verlegen' | null>(null)
   const [grund, setGrund] = useState('')
   const [neuerTermin, setNeuerTermin] = useState('')
   const [loading, setLoading] = useState(false)
@@ -115,12 +111,6 @@ export default function AuftragHeaderPanel({
 
   const istReserviert = termin?.status === 'reserviert'
   const istBestaetigt = termin?.status === 'bestaetigt'
-  // CMM-32 Polish: Verstrichen-Flag kommt server-side aus page.tsx mit
-  // strikten Guards (Stunden + Tolernz, durchgefuehrt_am NULL,
-  // sv_angekommen_am NULL, sv_unterwegs_seit NULL, status='bestaetigt').
-  // Damit kann der SV den Banner nicht durch lokales Datum/Uhrzeit-
-  // Drift fehlinterpretieren.
-  const istVerstrichen = !!termin?.verstrichen && phase === 'termin'
   const istEigenerGegenvorschlag =
     termin?.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'sv'
   // AAR-864: Verlegung-Pending-State — Hinweis nur sichtbar solange wir noch
@@ -178,19 +168,6 @@ export default function AuftragHeaderPanel({
     }
   }
 
-  async function handleNoShow() {
-    setLoading(true)
-    const res = await meldeNoShow(fallId)
-    setLoading(false)
-    if (res.success) {
-      setModal(null)
-      router.refresh()
-    } else {
-      // eslint-disable-next-line no-alert
-      alert(`Fehler: ${res.error ?? 'unbekannt'}`)
-    }
-  }
-
   async function handleGegenvorschlag() {
     if (!neuerTermin) return
     setLoading(true)
@@ -210,11 +187,9 @@ export default function AuftragHeaderPanel({
   return (
     <div
       className={
-        istVerstrichen
-          ? 'rounded-2xl bg-rose-50 border-2 border-rose-400 overflow-hidden'
-          : istVerlegungPending
-            ? 'rounded-2xl bg-amber-50 border-2 border-amber-400 overflow-hidden'
-            : 'rounded-2xl bg-claimondo-navy/[0.06] border border-claimondo-navy/15 backdrop-blur-sm overflow-hidden'
+        istVerlegungPending
+          ? 'rounded-2xl bg-amber-50 border-2 border-amber-400 overflow-hidden'
+          : 'rounded-2xl bg-claimondo-navy/[0.06] border border-claimondo-navy/15 backdrop-blur-sm overflow-hidden'
       }
     >
       {/* Sektion 1 — Stepper (weiß, Aaron lässt Platz für künftige Inhalte) */}
@@ -226,42 +201,36 @@ export default function AuftragHeaderPanel({
             const istQc = isCurrent && p.key === 'gutachten' && gutachtenInQc
             // AAR-864: bei Verlegung-Pending → Termin-Phase amber + Warndreieck
             const istVerlegungWarn = istVerlegungPending && p.key === 'termin'
-            // CMM-32 Polish: Verstrichener Termin → Termin-Phase rose
-            const istVerstrichenWarn = istVerstrichen && p.key === 'termin'
-            const Icon = istVerlegungWarn || istVerstrichenWarn ? AlertTriangleIcon : p.icon
+            const Icon = istVerlegungWarn ? AlertTriangleIcon : p.icon
             return (
               <React.Fragment key={p.key}>
                 <div className="flex items-center gap-3 shrink-0">
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
-                      istVerstrichenWarn
-                        ? 'bg-rose-500 text-white ring-2 ring-rose-300'
-                        : istVerlegungWarn
-                          ? 'bg-amber-500 text-white ring-2 ring-amber-300'
-                          : isDone
-                            ? 'bg-emerald-500 text-white'
-                            : istQc
-                              ? 'bg-violet-600 text-white ring-2 ring-violet-300'
-                              : isCurrent
-                                ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
-                                : 'bg-white/60 text-claimondo-ondo/60 border border-claimondo-border'
+                      istVerlegungWarn
+                        ? 'bg-amber-500 text-white ring-2 ring-amber-300'
+                        : isDone
+                          ? 'bg-emerald-500 text-white'
+                          : istQc
+                            ? 'bg-violet-600 text-white ring-2 ring-violet-300'
+                            : isCurrent
+                              ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
+                              : 'bg-white/60 text-claimondo-ondo/60 border border-claimondo-border'
                     }`}
                   >
-                    {istVerstrichenWarn || istVerlegungWarn || !isDone ? <Icon className="w-4 h-4" /> : <CheckIcon className="w-4 h-4" />}
+                    {istVerlegungWarn || !isDone ? <Icon className="w-4 h-4" /> : <CheckIcon className="w-4 h-4" />}
                   </div>
                   <p
                     className={`text-sm font-semibold whitespace-nowrap ${
-                      istVerstrichenWarn
-                        ? 'text-rose-700'
-                        : istVerlegungWarn
-                          ? 'text-amber-700'
-                          : istQc
-                            ? 'text-violet-700'
-                            : isCurrent
-                              ? 'text-claimondo-navy'
-                              : isDone
-                                ? 'text-emerald-700'
-                                : 'text-claimondo-ondo/60'
+                      istVerlegungWarn
+                        ? 'text-amber-700'
+                        : istQc
+                          ? 'text-violet-700'
+                          : isCurrent
+                            ? 'text-claimondo-navy'
+                            : isDone
+                              ? 'text-emerald-700'
+                              : 'text-claimondo-ondo/60'
                     }`}
                   >
                     {istQc ? 'Vollständigkeits-Check' : AUFTRAGS_PHASE_LABEL[p.key]}
@@ -358,53 +327,8 @@ export default function AuftragHeaderPanel({
         </div>
       )}
 
-      {/* CMM-32 Polish: Verstrichen-Banner — Termin liegt > 60min in der
-          Vergangenheit ohne sv_angekommen_am / durchgefuehrt_am. Server-
-          side Flag mit strikten Guards (siehe page.tsx). Banner ersetzt
-          Sektion 2 (Navi/Verlegen) — der SV soll erstmal Rückmeldung
-          geben statt navigieren. */}
-      {istVerstrichen && termin && (
-        <div className="border-t-2 border-rose-400 bg-rose-50 px-6 py-3.5">
-          <div className="flex items-start gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-rose-100 border border-rose-300 flex items-center justify-center shrink-0">
-              <AlertTriangleIcon className="w-4 h-4 text-rose-700" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-rose-900">
-                Termin verstrichen — bitte rückmelden
-              </p>
-              <p className="text-xs text-rose-800 mt-0.5">
-                {fmt
-                  ? `Geplant war ${fmt.datum}, ${fmt.uhrzeit} Uhr. `
-                  : ''}
-                Ohne Rückmeldung wird der Fall nach 5 Werktagen automatisch
-                storniert. Bitte angeben was passiert ist.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 ml-11">
-            <button
-              onClick={() => setModal('noshow')}
-              disabled={loading}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-3 py-1.5 transition-colors disabled:opacity-50"
-            >
-              <XCircleIcon className="w-3.5 h-3.5" />
-              Kunde war nicht da
-            </button>
-            <button
-              onClick={() => setModal('verlegen')}
-              disabled={loading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-300 bg-white text-rose-800 hover:bg-rose-100 text-sm font-medium px-3 py-1.5 transition-colors disabled:opacity-50"
-            >
-              <ClockIcon className="w-3.5 h-3.5" />
-              Neuen Termin vorschlagen
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Sektion 2 — Termin + Navi (während Besichtigung + Verstrichen ausblenden) */}
-      {phase !== 'besichtigung' && !istVerstrichen && termin && !abgeschlossen && (istBestaetigt || istReserviert || istEigenerGegenvorschlag) && (
+      {/* Sektion 2 — Termin + Navi (während Besichtigung ausblenden) */}
+      {phase !== 'besichtigung' && termin && !abgeschlossen && (istBestaetigt || istReserviert || istEigenerGegenvorschlag) && (
         <div className="border-t border-claimondo-navy/10 px-6 py-3.5">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -549,32 +473,6 @@ export default function AuftragHeaderPanel({
             className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50"
           >
             {loading ? 'Wird abgelehnt…' : 'Ja, ablehnen'}
-          </button>
-        </div>
-      </Modal>
-
-      {/* CMM-32 Polish: No-Show-Bestätigungs-Modal — der SV bestätigt
-          dass der Kunde nicht erschienen ist. Inkrementiert no_show_count;
-          ab 2x triggert Auto-Storno (KFZ-202). */}
-      <Modal open={modal === 'noshow'} onClose={() => setModal(null)} maxWidth={420} ariaLabel="Kunde war nicht da">
-        <h3 className="text-lg font-semibold text-claimondo-navy mb-2">Kunde war nicht da?</h3>
-        <p className="text-sm text-claimondo-ondo mb-4">
-          Wir benachrichtigen den Kunden und legen einen Ersatztermin-Task für Claimondo an.
-          Beim zweiten Mal wird der Fall automatisch storniert.
-        </p>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setModal(null)}
-            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors"
-          >
-            Abbrechen
-          </button>
-          <button
-            onClick={handleNoShow}
-            disabled={loading}
-            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 transition-colors disabled:opacity-50"
-          >
-            {loading ? 'Wird gemeldet…' : 'Ja, war nicht da'}
           </button>
         </div>
       </Modal>

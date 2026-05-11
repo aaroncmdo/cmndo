@@ -1,4 +1,4 @@
-// Mitarbeiter-Kundentermine. Zeigt SV-Besichtigungen der Fälle die ich
+﻿// Mitarbeiter-Kundentermine. Zeigt SV-Besichtigungen der Fälle die ich
 // als KB/LB betreue (faelle.kundenbetreuer_id = user.id). Unterschied zu
 // /mitarbeiter/termine: dort sind MEINE Termine (Rückrufe etc., bei denen
 // ich anwesend bin). Hier sind Kunden-Termine meiner Fälle (SV-Besich-
@@ -139,7 +139,7 @@ export default async function MitarbeiterKundentermine() {
           <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
             <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
               <h2 className="text-sm font-semibold text-claimondo-navy">
-                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
                   weekday: 'long',
                   day: '2-digit',
                   month: '2-digit',

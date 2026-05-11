@@ -94,50 +94,50 @@ export async function runPhase9(adminContext, prevResult = { notes: [] }) {
     await page.waitForTimeout(2000)
     logPhase(9, `Fallakte URL: ${page.url()}`)
 
-    // --- Schritt 9b: Prozess-Tab öffnen (enthält LexDriveTriggerPanel) ------
-    // FallakteShell.tsx:57-63 — TABS: uebersicht|dokumente|kommunikation|prozess|verlauf|timeline
-    // LexDrive-Panel liegt in _prozess/Sections.tsx, importiert als EndpointRegister.
-    // Filmcheck-Tab existiert NICHT im aktuellen Layout.
-    logPhase(9, 'Suche Prozess-Tab (enthält LexDrive-Trigger)')
-    const prozessTabSelectors = [
-      page.getByRole('button', { name: /^Prozess$/i }),
-      page.getByText('Prozess', { exact: true }),
+    // --- Schritt 9b: Filmcheck-Tab oder Dokumente-Tab öffnen ----------------
+    logPhase(9, 'Suche Filmcheck-Tab')
+    const filmcheckTabSelectors = [
+      page.getByRole('tab', { name: /Filmcheck/i }),
+      page.getByRole('button', { name: /Filmcheck/i }),
+      page.getByText('Filmcheck', { exact: false }),
     ]
 
-    let prozessTab = null
-    for (const tab of prozessTabSelectors) {
-      if (await tab.isVisible({ timeout: 3000 }).catch(() => false)) {
-        prozessTab = tab
+    let filmcheckTab = null
+    for (const tab of filmcheckTabSelectors) {
+      if (await tab.isVisible({ timeout: 2000 }).catch(() => false)) {
+        filmcheckTab = tab
         break
       }
     }
 
-    if (prozessTab) {
-      logPhase(9, 'Prozess-Tab gefunden — klicke')
-      await clickAndShoot(page, prozessTab, 'phase9-prozess-tab')
-      await page.waitForTimeout(1500)
+    if (filmcheckTab) {
+      logPhase(9, 'Filmcheck-Tab gefunden — klicke')
+      await clickAndShoot(page, filmcheckTab, 'phase9-filmcheck-tab')
     } else {
-      logSoft(9, 'Prozess-Tab nicht gefunden — FallakteShell.tsx prüfen')
-      notes.push('SOFT: Prozess-Tab nicht gefunden in /faelle/[id] — Tab ggf. für diese Rolle ausgeblendet')
+      logSoft(9, 'Filmcheck-Tab nicht gefunden — versuche Dokumente-Tab')
+      notes.push('SOFT: Filmcheck-Tab nicht gefunden — Tab fehlt im Layout oder heißt anders. Prüfe: src/app/faelle/[id]/FallakteShell.tsx Tab-Konfiguration')
       result = 'soft'
+
+      const dokuTab = page.getByRole('tab', { name: /Dokument/i })
+      if (await dokuTab.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await clickAndShoot(page, dokuTab, 'phase9-dokumente-tab')
+      }
     }
 
-    // Screenshot Prozess-Tab-Zustand
+    // Screenshot Filmcheck-Zustand
     await page.screenshot({
-      path: `${process.env._SMOKE_OUT_DIR ?? '.'}/phase9-prozess-state.png`,
+      path: `${process.env._SMOKE_OUT_DIR ?? '.'}/phase9-filmcheck-state.png`,
     }).catch(() => {})
 
-    // --- Schritt 9c: "Fall an LexDrive übergeben" suchen -------------------
-    // _prozess/Sections.tsx:595: Button "Fall an LexDrive übergeben"
-    // LexDriveTriggerPanel hat eine Auswahl-Liste mit Event-Buttons
-    logPhase(9, 'Suche LexDrive-Übergabe-Button im Prozess-Tab')
+    // --- Schritt 9c: "Freigeben + Kanzlei übergeben" suchen ----------------
+    logPhase(9, 'Suche "Freigeben + Kanzlei übergeben"-Button')
 
     const freigebeSelectors = [
-      page.getByRole('button', { name: /Fall an LexDrive übergeben/i }),
-      page.getByRole('button', { name: /LexDrive.*übergeben/i }),
+      page.getByRole('button', { name: /Freigeben.*Kanzlei/i }),
       page.getByRole('button', { name: /Kanzlei.*übergeben/i }),
       page.getByRole('button', { name: /Kanzlei übergeben/i }),
       page.getByRole('button', { name: /Freigeben/i }),
+      page.getByRole('button', { name: /LexDrive.*senden/i }),
       page.locator('[data-testid="kanzlei-freigabe-btn"]'),
     ]
 
@@ -150,7 +150,7 @@ export async function runPhase9(adminContext, prevResult = { notes: [] }) {
     }
 
     if (freigebeBtn) {
-      logPhase(9, 'LexDrive-Übergabe-Button gefunden — klicke')
+      logPhase(9, '"Freigeben + Kanzlei übergeben"-Button gefunden — klicke')
       await clickAndShoot(page, freigebeBtn, 'phase9-kanzlei-freigabe')
       await page.waitForTimeout(3000)
 
@@ -163,9 +163,9 @@ export async function runPhase9(adminContext, prevResult = { notes: [] }) {
 
       logPhase(9, `Nach Freigabe URL: ${page.url()}`)
     } else {
-      const msg = 'LexDrive-Übergabe-Button nicht gefunden im Prozess-Tab'
+      const msg = '"Freigeben + Kanzlei übergeben"-Button nicht gefunden — LexDriveTriggerPanel möglicherweise nicht gerendert'
       logSoft(9, msg)
-      notes.push(`SOFT: ${msg} — _prozess/Sections.tsx:595. Möglicherweise: Prozess-Tab nicht aktiv, faelle.status passt nicht, oder Rolle sieht Button nicht`)
+      notes.push(`SOFT: ${msg} — Prüfe: faelle.status muss 'gutachten-eingegangen' sein und Admin-Rolle darf den Button sehen. src/app/faelle/[id]/_components/LexDriveTriggerPanel.tsx`)
       result = 'soft'
     }
 

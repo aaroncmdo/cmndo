@@ -440,14 +440,7 @@ export default function Phase5Zusammenfassung() {
 
       {/* 3 Versand-Buttons */}
       <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-claimondo-navy">Versandweg wählen</h3>
-          {l.whatsapp_verfuegbar === true && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700">
-              📱 Baileys aktiv
-            </span>
-          )}
-        </div>
+        <h3 className="text-sm font-semibold text-claimondo-navy">Versandweg wählen</h3>
         {!qualification.canSendFlowLink && (
           <p className="text-[11px] text-amber-700 flex items-start gap-1">
             <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />

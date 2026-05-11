@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-538 (C1): Trigger-Felder-Liste für den PhaseHeader.
 // Zeigt welche Felder wann gesetzt wurden + von welcher Quelle.

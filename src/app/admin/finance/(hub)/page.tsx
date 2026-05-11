@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+﻿import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { FINANCE } from '@/lib/finance/constants'
@@ -236,7 +236,7 @@ function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfra
                         </span>
                       </td>
                       <td className="px-5 py-3 text-right text-claimondo-ondo text-xs tabular-nums">
-                        {new Date(a.erstellt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                        {new Date(a.erstellt_am).toLocaleDateString('de-DE')}
                       </td>
                     </tr>
                   ))}

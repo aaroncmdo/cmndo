@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin'
+﻿import { createAdminClient } from '@/lib/supabase/admin'
 import { createKanzleiCheckoutSession } from '@/lib/stripe/kanzlei-checkout'
 import KanzleiCheckoutClient from './KanzleiCheckoutClient'
 
@@ -99,7 +99,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
               <span className="text-3xl">✅</span>
               <div>
                 <h1 className="text-2xl font-bold text-claimondo-navy">Bereits bezahlt</h1>
-                <p className="text-claimondo-ondo">Diese Rechnung wurde am {abrechnung.bezahlt_am ? new Date(abrechnung.bezahlt_am as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'} bezahlt.</p>
+                <p className="text-claimondo-ondo">Diese Rechnung wurde am {abrechnung.bezahlt_am ? new Date(abrechnung.bezahlt_am as string).toLocaleDateString('de-DE') : '—'} bezahlt.</p>
               </div>
             </div>
             <div className="border rounded-xl p-4 bg-green-50 border-green-200">
@@ -199,7 +199,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
               <span>{Number(abrechnung.endbetrag_brutto).toFixed(2).replace('.', ',')} €</span>
             </div>
             <p className="text-xs text-claimondo-ondo/70 pt-1">
-              Faellig am: {abrechnung.faelligkeitsdatum ? new Date(abrechnung.faelligkeitsdatum as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
+              Faellig am: {abrechnung.faelligkeitsdatum ? new Date(abrechnung.faelligkeitsdatum as string).toLocaleDateString('de-DE') : '—'}
             </p>
           </div>
         </div>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-755 (Phase D): aus dem DokumenteTab-Monolithen extrahiert.
 // Zeigt System-generierte/externe Dokumente (SA, Vollmacht, Gutachten,

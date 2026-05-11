@@ -84,14 +84,12 @@ export default function TagesrouteStartCard({
   const subLabel = subLabelParts.join(' · ')
 
   return (
-    // 2026-05-06: Card-Innen transparent — Wrapper im HeuteClient bringt
-    // den glassy-Look. Hier nur Padding + Text + Button.
-    <div className="p-4">
-      <div className="flex items-center gap-2 mb-2 text-claimondo-navy">
-        <MapIcon className="w-4 h-4" />
+    <div className="rounded-xl border border-claimondo-border bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)] p-4 text-white shadow-sm">
+      <div className="flex items-center gap-2 mb-2">
+        <MapIcon className="w-4 h-4 text-[var(--brand-accent)]" />
         <h3 className="text-sm font-semibold">Tagesroute</h3>
       </div>
-      <p className="text-xs text-claimondo-ondo mb-3">{subLabel}</p>
+      <p className="text-xs text-claimondo-ondo/50 mb-3">{subLabel}</p>
       <button
         type="button"
         disabled={disabled}
@@ -99,8 +97,8 @@ export default function TagesrouteStartCard({
         title={disabledReason ?? undefined}
         className={`w-full inline-flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
           disabled
-            ? 'bg-claimondo-border/40 text-claimondo-ondo/50 cursor-not-allowed'
-            : 'bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white shadow-ios-sm'
+            ? 'bg-white/10 text-claimondo-ondo/50 cursor-not-allowed'
+            : 'bg-[var(--brand-secondary)] hover:bg-[var(--brand-accent)] text-white'
         }`}
       >
         <PlayCircleIcon className="w-4 h-4" />

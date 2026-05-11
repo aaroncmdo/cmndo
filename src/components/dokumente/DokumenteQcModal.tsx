@@ -1,4 +1,4 @@
-// AAR-326 (Child 6 von AAR-320): QC-Modal für hochgeladene Dokumente.
+﻿// AAR-326 (Child 6 von AAR-320): QC-Modal für hochgeladene Dokumente.
 //
 // Flow: KB klickt auf ein hochgeladenes Dokument, das noch nicht geprüft ist.
 // Modal zeigt Preview + zwei Aktionen:
@@ -108,7 +108,7 @@ export default function DokumenteQcModal({
         {doc && (
           <div className="space-y-4 pt-1">
             {/* Datei-Info */}
-            <div className="rounded-lg border border-claimondo-border bg-[#f8f9fb] px-3 py-2.5">
+            <div className="rounded-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5">
               <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-semibold">
                 {doc.label}
               </p>
@@ -124,14 +124,14 @@ export default function DokumenteQcModal({
                     href={doc.previewUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[11px] text-[#4573A2] hover:underline shrink-0"
+                    className="inline-flex items-center gap-1 text-[11px] text-claimondo-ondo hover:underline shrink-0"
                   >
                     <ExternalLinkIcon className="w-3 h-3" /> Öffnen
                   </a>
                 )}
               </div>
               <p className="mt-1 text-[10px] text-claimondo-ondo">
-                Hochgeladen: {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                Hochgeladen: {new Date(doc.hochgeladen_am).toLocaleDateString('de-DE')}
               </p>
             </div>
 
@@ -146,7 +146,7 @@ export default function DokumenteQcModal({
                   rows={3}
                   disabled={pending}
                   placeholder="Was muss der Kunde nachbessern? (min. 10 Zeichen)"
-                  className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+                  className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
                 />
                 <p className="mt-1 text-[10px] text-claimondo-ondo/70">
                   Der Kunde bekommt eine WhatsApp/SMS/Email-Benachrichtigung mit dieser Begründung.
@@ -170,7 +170,7 @@ export default function DokumenteQcModal({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={pending}
-                className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-[#f8f9fb] disabled:opacity-50"
+                className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-claimondo-bg disabled:opacity-50"
               >
                 Schließen
               </button>
@@ -207,7 +207,7 @@ export default function DokumenteQcModal({
                   setError(null)
                 }}
                 disabled={pending}
-                className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-[#f8f9fb] disabled:opacity-50"
+                className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-claimondo-bg disabled:opacity-50"
               >
                 Zurück
               </button>

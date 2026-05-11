@@ -115,7 +115,6 @@ export async function POST(req: NextRequest) {
           fahrzeug_modell: extracted.fahrzeug_modell ?? null,
           fahrzeug_farbe: extracted.fahrzeug_farbe ?? null,
           brn: extracted.brn ?? null,
-          ...halterUpdate,
         })
         .eq('id', leadId)
       if (updateError) {

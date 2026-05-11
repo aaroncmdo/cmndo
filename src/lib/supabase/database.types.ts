@@ -807,59 +807,11 @@ export type Database = {
           },
         ]
       }
-      anruf_log: {
-        Row: {
-          created_at: string
-          erstellt_von: string | null
-          id: string
-          lead_id: string
-          notiz: string | null
-          status: string
-          zeitpunkt: string
-        }
-        Insert: {
-          created_at?: string
-          erstellt_von?: string | null
-          id?: string
-          lead_id: string
-          notiz?: string | null
-          status: string
-          zeitpunkt?: string
-        }
-        Update: {
-          created_at?: string
-          erstellt_von?: string | null
-          id?: string
-          lead_id?: string
-          notiz?: string | null
-          status?: string
-          zeitpunkt?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "anruf_log_erstellt_von_fkey"
-            columns: ["erstellt_von"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "anruf_log_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "leads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       auftraege: {
         Row: {
           abgeschlossen_am: string | null
-          claim_id: string
           erstellt_am: string
           fall_id: string
-          grundhonorar_brutto: number | null
-          grundhonorar_netto: number | null
           gutachten_final_freigegeben: boolean
           gutachten_url: string | null
           id: string
@@ -874,11 +826,8 @@ export type Database = {
         }
         Insert: {
           abgeschlossen_am?: string | null
-          claim_id: string
           erstellt_am?: string
           fall_id: string
-          grundhonorar_brutto?: number | null
-          grundhonorar_netto?: number | null
           gutachten_final_freigegeben?: boolean
           gutachten_url?: string | null
           id?: string
@@ -893,11 +842,8 @@ export type Database = {
         }
         Update: {
           abgeschlossen_am?: string | null
-          claim_id?: string
           erstellt_am?: string
           fall_id?: string
-          grundhonorar_brutto?: number | null
-          grundhonorar_netto?: number | null
           gutachten_final_freigegeben?: boolean
           gutachten_url?: string | null
           id?: string
@@ -911,34 +857,6 @@ export type Database = {
           zurueckweisung_grund?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "auftraege_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "claims"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "auftraege_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "v_claim_for_gast"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "auftraege_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "v_claim_full"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "auftraege_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "v_claim_listing"
-            referencedColumns: ["claim_id"]
-          },
           {
             foreignKeyName: "auftraege_fall_id_fkey"
             columns: ["fall_id"]
@@ -1499,7 +1417,6 @@ export type Database = {
           anrede: string | null
           arbeitsunfaehig_bis: string | null
           arbeitsunfaehig_seit: string | null
-          beziehung_zum_halter: string | null
           claim_id: string
           created_at: string
           created_by_user_id: string | null
@@ -1519,10 +1436,6 @@ export type Database = {
           ist_gewerbe: boolean
           ist_halter: boolean
           kennzeichen: string | null
-          kennzeichen_buchstaben: string | null
-          kennzeichen_kreis: string | null
-          kennzeichen_suffix: string | null
-          kennzeichen_zahl: string | null
           krankenhaus_name: string | null
           mobil: string | null
           nachname: string | null
@@ -1555,7 +1468,6 @@ export type Database = {
           anrede?: string | null
           arbeitsunfaehig_bis?: string | null
           arbeitsunfaehig_seit?: string | null
-          beziehung_zum_halter?: string | null
           claim_id: string
           created_at?: string
           created_by_user_id?: string | null
@@ -1575,10 +1487,6 @@ export type Database = {
           ist_gewerbe?: boolean
           ist_halter?: boolean
           kennzeichen?: string | null
-          kennzeichen_buchstaben?: string | null
-          kennzeichen_kreis?: string | null
-          kennzeichen_suffix?: string | null
-          kennzeichen_zahl?: string | null
           krankenhaus_name?: string | null
           mobil?: string | null
           nachname?: string | null
@@ -1611,7 +1519,6 @@ export type Database = {
           anrede?: string | null
           arbeitsunfaehig_bis?: string | null
           arbeitsunfaehig_seit?: string | null
-          beziehung_zum_halter?: string | null
           claim_id?: string
           created_at?: string
           created_by_user_id?: string | null
@@ -1631,10 +1538,6 @@ export type Database = {
           ist_gewerbe?: boolean
           ist_halter?: boolean
           kennzeichen?: string | null
-          kennzeichen_buchstaben?: string | null
-          kennzeichen_kreis?: string | null
-          kennzeichen_suffix?: string | null
-          kennzeichen_zahl?: string | null
           krankenhaus_name?: string | null
           mobil?: string | null
           nachname?: string | null
@@ -1873,26 +1776,16 @@ export type Database = {
           anzahl_beteiligte_total: number
           auslandskennzeichen: boolean | null
           bkat_unfallart: string | null
-          brn: string | null
           claim_nummer: string | null
           created_at: string
           created_by_user_id: string | null
           created_via: string
-          eigene_policennr: string | null
-          eigene_versicherung: string | null
           endzustand_gesetzt_am: string | null
           endzustand_gesetzt_durch_user_id: string | null
           endzustand_grund: string | null
           entdeckt_am: string | null
           fahrerflucht: boolean | null
           fall_typ: string | null
-          finanzierung_bank: string | null
-          finanzierung_leasing: string
-          finanzierungsgeber_adresse: string | null
-          finanzierungsgeber_name: string | null
-          finanzierungsgeber_vertragsnr: string | null
-          firma_name: string | null
-          firma_ustid: string | null
           gegner_aktenzeichen: string | null
           gegner_bekannt: boolean
           gegner_versicherung_id: string | null
@@ -1900,40 +1793,6 @@ export type Database = {
           gegnerisches_vehicle_id: string | null
           geschaedigter_party_id: string | null
           geschaedigter_user_id: string | null
-          gewerbe_flag: boolean
-          gutachten_datum: string | null
-          gutachten_erstzulassung: string | null
-          gutachten_fahrzeug_typ: string | null
-          gutachten_farbcode: string | null
-          gutachten_farbe: string | null
-          gutachten_fin: string | null
-          gutachten_kalkulationssystem: string | null
-          gutachten_karosseriezustand: string | null
-          gutachten_kennzeichen: string | null
-          gutachten_kraftstoff: string | null
-          gutachten_lackmaterial_eur: number | null
-          gutachten_lackmesswert_max_my: number | null
-          gutachten_laufleistung_km: number | null
-          gutachten_lohnsatz_ak_eur: number | null
-          gutachten_lohnsatz_kar_eur: number | null
-          gutachten_lohnsatz_lack_eur: number | null
-          gutachten_materialkosten_eur: number | null
-          gutachten_mietwagen_klasse: string | null
-          gutachten_mietwagen_tagessatz_eur: number | null
-          gutachten_nutzungsausfall_tagessatz_eur: number | null
-          gutachten_ocr_error: string | null
-          gutachten_ocr_manuell_ueberschrieben: boolean
-          gutachten_ocr_processed_at: string | null
-          gutachten_ocr_raw: Json | null
-          gutachten_seitenzahl: number | null
-          gutachten_sv_honorar_brutto: number | null
-          gutachten_sv_honorar_netto: number | null
-          gutachten_tuv_bis: string | null
-          gutachten_verbringung_eur: number | null
-          gutachten_vorschaeden_text: string | null
-          gutachten_zeit_ak_std: number | null
-          gutachten_zeit_kar_std: number | null
-          gutachten_zeit_lack_std: number | null
           halter_ungleich_fahrer: boolean
           hat_abschleppung: boolean
           hat_mietwagen: boolean
@@ -1943,32 +1802,18 @@ export type Database = {
           hergang_kunde_text: string | null
           hergang_sv_text: string | null
           id: string
-          kanzlei_ansprechpartner_email: string | null
-          kanzlei_ansprechpartner_name: string | null
-          kanzlei_ansprechpartner_telefon: string | null
-          kanzlei_uebergeben_am: string | null
           kanzlei_wunsch: string
           kanzlei_wunsch_gefragt_am: string | null
           kanzlei_wunsch_gefragt_in_phase: string | null
-          kunde_email: string | null
-          kunde_no_show_count: number
           kunden_konstellation: string | null
           kundenbetreuer_id: string | null
           lead_id: string | null
-          leasinggeber_name: string | null
-          letzter_no_show_am: string | null
-          letzter_sv_no_show_am: string | null
-          minderwert: number | null
-          nutzungsausfall_tage: number | null
           phase: string
           polizei_aktenzeichen: string | null
           polizei_bericht_vorhanden: boolean
           polizei_vor_ort: boolean
           polizeibericht_status: string | null
           regulierungs_betrag: number | null
-          reparaturkosten_brutto: number | null
-          reparaturkosten_netto: number | null
-          restwert: number | null
           sachschaden_beschreibung: string | null
           schadenart: string
           schadenort_adresse: string | null
@@ -1980,10 +1825,7 @@ export type Database = {
           schadenort_plz: string | null
           schadentag: string
           schadenzeit: string | null
-          spezifikation: string | null
           status: string
-          sv_no_show_count: number
-          totalschaden: boolean | null
           unfall_konstellation: string | null
           unfallskizze_ablehnung_grund: string | null
           unfallskizze_bestaetigt: boolean | null
@@ -1996,37 +1838,23 @@ export type Database = {
           verjaehrt_am: string | null
           verursacher_party_id: string | null
           verursacher_user_id: string | null
-          vorsteuerabzugsberechtigt: boolean
           vs_ablehnungs_grund: string | null
-          wiederbeschaffungsdauer_tage: number | null
-          wiederbeschaffungswert: number | null
-          zeugen_kontakte: Json | null
         }
         Insert: {
           abgeschlossen_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
           bkat_unfallart?: string | null
-          brn?: string | null
           claim_nummer?: string | null
           created_at?: string
           created_by_user_id?: string | null
           created_via?: string
-          eigene_policennr?: string | null
-          eigene_versicherung?: string | null
           endzustand_gesetzt_am?: string | null
           endzustand_gesetzt_durch_user_id?: string | null
           endzustand_grund?: string | null
           entdeckt_am?: string | null
           fahrerflucht?: boolean | null
           fall_typ?: string | null
-          finanzierung_bank?: string | null
-          finanzierung_leasing?: string
-          finanzierungsgeber_adresse?: string | null
-          finanzierungsgeber_name?: string | null
-          finanzierungsgeber_vertragsnr?: string | null
-          firma_name?: string | null
-          firma_ustid?: string | null
           gegner_aktenzeichen?: string | null
           gegner_bekannt?: boolean
           gegner_versicherung_id?: string | null
@@ -2034,40 +1862,6 @@ export type Database = {
           gegnerisches_vehicle_id?: string | null
           geschaedigter_party_id?: string | null
           geschaedigter_user_id?: string | null
-          gewerbe_flag?: boolean
-          gutachten_datum?: string | null
-          gutachten_erstzulassung?: string | null
-          gutachten_fahrzeug_typ?: string | null
-          gutachten_farbcode?: string | null
-          gutachten_farbe?: string | null
-          gutachten_fin?: string | null
-          gutachten_kalkulationssystem?: string | null
-          gutachten_karosseriezustand?: string | null
-          gutachten_kennzeichen?: string | null
-          gutachten_kraftstoff?: string | null
-          gutachten_lackmaterial_eur?: number | null
-          gutachten_lackmesswert_max_my?: number | null
-          gutachten_laufleistung_km?: number | null
-          gutachten_lohnsatz_ak_eur?: number | null
-          gutachten_lohnsatz_kar_eur?: number | null
-          gutachten_lohnsatz_lack_eur?: number | null
-          gutachten_materialkosten_eur?: number | null
-          gutachten_mietwagen_klasse?: string | null
-          gutachten_mietwagen_tagessatz_eur?: number | null
-          gutachten_nutzungsausfall_tagessatz_eur?: number | null
-          gutachten_ocr_error?: string | null
-          gutachten_ocr_manuell_ueberschrieben?: boolean
-          gutachten_ocr_processed_at?: string | null
-          gutachten_ocr_raw?: Json | null
-          gutachten_seitenzahl?: number | null
-          gutachten_sv_honorar_brutto?: number | null
-          gutachten_sv_honorar_netto?: number | null
-          gutachten_tuv_bis?: string | null
-          gutachten_verbringung_eur?: number | null
-          gutachten_vorschaeden_text?: string | null
-          gutachten_zeit_ak_std?: number | null
-          gutachten_zeit_kar_std?: number | null
-          gutachten_zeit_lack_std?: number | null
           halter_ungleich_fahrer?: boolean
           hat_abschleppung?: boolean
           hat_mietwagen?: boolean
@@ -2077,32 +1871,18 @@ export type Database = {
           hergang_kunde_text?: string | null
           hergang_sv_text?: string | null
           id?: string
-          kanzlei_ansprechpartner_email?: string | null
-          kanzlei_ansprechpartner_name?: string | null
-          kanzlei_ansprechpartner_telefon?: string | null
-          kanzlei_uebergeben_am?: string | null
           kanzlei_wunsch?: string
           kanzlei_wunsch_gefragt_am?: string | null
           kanzlei_wunsch_gefragt_in_phase?: string | null
-          kunde_email?: string | null
-          kunde_no_show_count?: number
           kunden_konstellation?: string | null
           kundenbetreuer_id?: string | null
           lead_id?: string | null
-          leasinggeber_name?: string | null
-          letzter_no_show_am?: string | null
-          letzter_sv_no_show_am?: string | null
-          minderwert?: number | null
-          nutzungsausfall_tage?: number | null
           phase?: string
           polizei_aktenzeichen?: string | null
           polizei_bericht_vorhanden?: boolean
           polizei_vor_ort?: boolean
           polizeibericht_status?: string | null
           regulierungs_betrag?: number | null
-          reparaturkosten_brutto?: number | null
-          reparaturkosten_netto?: number | null
-          restwert?: number | null
           sachschaden_beschreibung?: string | null
           schadenart?: string
           schadenort_adresse?: string | null
@@ -2114,10 +1894,7 @@ export type Database = {
           schadenort_plz?: string | null
           schadentag: string
           schadenzeit?: string | null
-          spezifikation?: string | null
           status?: string
-          sv_no_show_count?: number
-          totalschaden?: boolean | null
           unfall_konstellation?: string | null
           unfallskizze_ablehnung_grund?: string | null
           unfallskizze_bestaetigt?: boolean | null
@@ -2130,37 +1907,23 @@ export type Database = {
           verjaehrt_am?: string | null
           verursacher_party_id?: string | null
           verursacher_user_id?: string | null
-          vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
-          wiederbeschaffungsdauer_tage?: number | null
-          wiederbeschaffungswert?: number | null
-          zeugen_kontakte?: Json | null
         }
         Update: {
           abgeschlossen_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
           bkat_unfallart?: string | null
-          brn?: string | null
           claim_nummer?: string | null
           created_at?: string
           created_by_user_id?: string | null
           created_via?: string
-          eigene_policennr?: string | null
-          eigene_versicherung?: string | null
           endzustand_gesetzt_am?: string | null
           endzustand_gesetzt_durch_user_id?: string | null
           endzustand_grund?: string | null
           entdeckt_am?: string | null
           fahrerflucht?: boolean | null
           fall_typ?: string | null
-          finanzierung_bank?: string | null
-          finanzierung_leasing?: string
-          finanzierungsgeber_adresse?: string | null
-          finanzierungsgeber_name?: string | null
-          finanzierungsgeber_vertragsnr?: string | null
-          firma_name?: string | null
-          firma_ustid?: string | null
           gegner_aktenzeichen?: string | null
           gegner_bekannt?: boolean
           gegner_versicherung_id?: string | null
@@ -2168,40 +1931,6 @@ export type Database = {
           gegnerisches_vehicle_id?: string | null
           geschaedigter_party_id?: string | null
           geschaedigter_user_id?: string | null
-          gewerbe_flag?: boolean
-          gutachten_datum?: string | null
-          gutachten_erstzulassung?: string | null
-          gutachten_fahrzeug_typ?: string | null
-          gutachten_farbcode?: string | null
-          gutachten_farbe?: string | null
-          gutachten_fin?: string | null
-          gutachten_kalkulationssystem?: string | null
-          gutachten_karosseriezustand?: string | null
-          gutachten_kennzeichen?: string | null
-          gutachten_kraftstoff?: string | null
-          gutachten_lackmaterial_eur?: number | null
-          gutachten_lackmesswert_max_my?: number | null
-          gutachten_laufleistung_km?: number | null
-          gutachten_lohnsatz_ak_eur?: number | null
-          gutachten_lohnsatz_kar_eur?: number | null
-          gutachten_lohnsatz_lack_eur?: number | null
-          gutachten_materialkosten_eur?: number | null
-          gutachten_mietwagen_klasse?: string | null
-          gutachten_mietwagen_tagessatz_eur?: number | null
-          gutachten_nutzungsausfall_tagessatz_eur?: number | null
-          gutachten_ocr_error?: string | null
-          gutachten_ocr_manuell_ueberschrieben?: boolean
-          gutachten_ocr_processed_at?: string | null
-          gutachten_ocr_raw?: Json | null
-          gutachten_seitenzahl?: number | null
-          gutachten_sv_honorar_brutto?: number | null
-          gutachten_sv_honorar_netto?: number | null
-          gutachten_tuv_bis?: string | null
-          gutachten_verbringung_eur?: number | null
-          gutachten_vorschaeden_text?: string | null
-          gutachten_zeit_ak_std?: number | null
-          gutachten_zeit_kar_std?: number | null
-          gutachten_zeit_lack_std?: number | null
           halter_ungleich_fahrer?: boolean
           hat_abschleppung?: boolean
           hat_mietwagen?: boolean
@@ -2211,32 +1940,18 @@ export type Database = {
           hergang_kunde_text?: string | null
           hergang_sv_text?: string | null
           id?: string
-          kanzlei_ansprechpartner_email?: string | null
-          kanzlei_ansprechpartner_name?: string | null
-          kanzlei_ansprechpartner_telefon?: string | null
-          kanzlei_uebergeben_am?: string | null
           kanzlei_wunsch?: string
           kanzlei_wunsch_gefragt_am?: string | null
           kanzlei_wunsch_gefragt_in_phase?: string | null
-          kunde_email?: string | null
-          kunde_no_show_count?: number
           kunden_konstellation?: string | null
           kundenbetreuer_id?: string | null
           lead_id?: string | null
-          leasinggeber_name?: string | null
-          letzter_no_show_am?: string | null
-          letzter_sv_no_show_am?: string | null
-          minderwert?: number | null
-          nutzungsausfall_tage?: number | null
           phase?: string
           polizei_aktenzeichen?: string | null
           polizei_bericht_vorhanden?: boolean
           polizei_vor_ort?: boolean
           polizeibericht_status?: string | null
           regulierungs_betrag?: number | null
-          reparaturkosten_brutto?: number | null
-          reparaturkosten_netto?: number | null
-          restwert?: number | null
           sachschaden_beschreibung?: string | null
           schadenart?: string
           schadenort_adresse?: string | null
@@ -2248,10 +1963,7 @@ export type Database = {
           schadenort_plz?: string | null
           schadentag?: string
           schadenzeit?: string | null
-          spezifikation?: string | null
           status?: string
-          sv_no_show_count?: number
-          totalschaden?: boolean | null
           unfall_konstellation?: string | null
           unfallskizze_ablehnung_grund?: string | null
           unfallskizze_bestaetigt?: boolean | null
@@ -2264,11 +1976,7 @@ export type Database = {
           verjaehrt_am?: string | null
           verursacher_party_id?: string | null
           verursacher_user_id?: string | null
-          vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
-          wiederbeschaffungsdauer_tage?: number | null
-          wiederbeschaffungswert?: number | null
-          zeugen_kontakte?: Json | null
         }
         Relationships: [
           {
@@ -4672,44 +4380,6 @@ export type Database = {
           },
         ]
       }
-      google_bewertungen_cache: {
-        Row: {
-          anzahl_bewertungen: number | null
-          created_at: string
-          durchschnitt: number | null
-          id: string
-          photo_reference: string | null
-          profile_id: string
-          zuletzt_aktualisiert_am: string
-        }
-        Insert: {
-          anzahl_bewertungen?: number | null
-          created_at?: string
-          durchschnitt?: number | null
-          id?: string
-          photo_reference?: string | null
-          profile_id: string
-          zuletzt_aktualisiert_am?: string
-        }
-        Update: {
-          anzahl_bewertungen?: number | null
-          created_at?: string
-          durchschnitt?: number | null
-          id?: string
-          photo_reference?: string | null
-          profile_id?: string
-          zuletzt_aktualisiert_am?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "google_bewertungen_cache_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       gutachten: {
         Row: {
           auftragsnummer: string | null
@@ -6370,7 +6040,6 @@ export type Database = {
       kanzlei_faelle: {
         Row: {
           ausgezahlt_am: string | null
-          claim_id: string
           erstellt_am: string
           fall_id: string
           id: string
@@ -6380,7 +6049,6 @@ export type Database = {
         }
         Insert: {
           ausgezahlt_am?: string | null
-          claim_id: string
           erstellt_am?: string
           fall_id: string
           id?: string
@@ -6390,7 +6058,6 @@ export type Database = {
         }
         Update: {
           ausgezahlt_am?: string | null
-          claim_id?: string
           erstellt_am?: string
           fall_id?: string
           id?: string
@@ -6399,34 +6066,6 @@ export type Database = {
           vs_kontakt_am?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "kanzlei_faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: true
-            referencedRelation: "claims"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kanzlei_faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: true
-            referencedRelation: "v_claim_for_gast"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kanzlei_faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: true
-            referencedRelation: "v_claim_full"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "kanzlei_faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: true
-            referencedRelation: "v_claim_listing"
-            referencedColumns: ["claim_id"]
-          },
           {
             foreignKeyName: "kanzlei_faelle_fall_id_fkey"
             columns: ["fall_id"]
@@ -9869,7 +9508,6 @@ export type Database = {
           anzahlung_status: string | null
           arbeitet_eigenstaendig: boolean
           bestellungs_kammer: string | null
-          blockierte_wochentage: number[]
           brand_accent: string | null
           brand_extracted_at: string | null
           brand_primary: string | null
@@ -9969,7 +9607,6 @@ export type Database = {
           anzahlung_status?: string | null
           arbeitet_eigenstaendig?: boolean
           bestellungs_kammer?: string | null
-          blockierte_wochentage?: number[]
           brand_accent?: string | null
           brand_extracted_at?: string | null
           brand_primary?: string | null
@@ -10069,7 +9706,6 @@ export type Database = {
           anzahlung_status?: string | null
           arbeitet_eigenstaendig?: boolean
           bestellungs_kammer?: string | null
-          blockierte_wochentage?: number[]
           brand_accent?: string | null
           brand_extracted_at?: string | null
           brand_primary?: string | null
@@ -10708,63 +10344,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      sv_leads: {
-        Row: {
-          adresse: string
-          aktualisiert_am: string
-          dat_id: string | null
-          dat_url: string | null
-          email: string | null
-          erstellt_am: string
-          firma: string | null
-          id: string
-          ist_aktiv: boolean
-          lat: number
-          lng: number
-          name: string
-          ort: string | null
-          plz: string | null
-          quelle: string
-          telefon: string | null
-        }
-        Insert: {
-          adresse: string
-          aktualisiert_am?: string
-          dat_id?: string | null
-          dat_url?: string | null
-          email?: string | null
-          erstellt_am?: string
-          firma?: string | null
-          id?: string
-          ist_aktiv?: boolean
-          lat: number
-          lng: number
-          name: string
-          ort?: string | null
-          plz?: string | null
-          quelle?: string
-          telefon?: string | null
-        }
-        Update: {
-          adresse?: string
-          aktualisiert_am?: string
-          dat_id?: string | null
-          dat_url?: string | null
-          email?: string | null
-          erstellt_am?: string
-          firma?: string | null
-          id?: string
-          ist_aktiv?: boolean
-          lat?: number
-          lng?: number
-          name?: string
-          ort?: string | null
-          plz?: string | null
-          quelle?: string
-          telefon?: string | null
-        }
-        Relationships: []
       }
       sv_live_location: {
         Row: {
@@ -12284,7 +11863,6 @@ export type Database = {
           datum: string
           id: string
           kanal: string
-          naechste_frist: string | null
           notiz: string | null
           richtung: string
           status: string
@@ -12302,7 +11880,6 @@ export type Database = {
           datum?: string
           id?: string
           kanal: string
-          naechste_frist?: string | null
           notiz?: string | null
           richtung: string
           status?: string
@@ -12320,7 +11897,6 @@ export type Database = {
           datum?: string
           id?: string
           kanal?: string
-          naechste_frist?: string | null
           notiz?: string | null
           richtung?: string
           status?: string

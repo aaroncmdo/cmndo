@@ -23,9 +23,7 @@ import StopListItem from './StopListItem'
 import GlassPanel from '@/components/shared/GlassPanel'
 import NaviHud, { pickHighestPriorityNotice, formatNaviDistance, type NaviNotice } from './NaviHud'
 import { useFieldTracking } from './useFieldTracking'
-import { useTurnByTurn } from './useTurnByTurn'
-import { useWakeLock } from '@/hooks/useWakeLock'
-import { markArrived, pauseFokusmodus, startStop, exitArrivedToRoute } from './actions'
+import { markArrived, pauseFokusmodus, startStop } from './actions'
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
@@ -63,22 +61,6 @@ export default function FeldmodusClient({
     sv.live_tracking_enabled &&
     sessionStatus !== 'finished' &&
     sessionStatus !== 'paused'
-
-  // Portal-Review SV1: Screen bleibt an solange der Modus läuft.
-  // Wichtig wenn der SV das Telefon im Auto-Halter hat — sonst muss er
-  // alle paar Minuten entsperren um auf die Karte zu schauen.
-  const wakeLockActive =
-    sessionStatus !== 'finished' && sessionStatus !== 'paused'
-  const wakeLockStatus = useWakeLock(wakeLockActive)
-
-  // Portal-Review SV1: Mobile-Bottom-Sheet für die Stop-Liste damit die
-  // Map auf 390-px-Geräten Full-Bleed bleibt statt halb von der Sidebar
-  // geschluckt zu werden. Default expanded damit der SV beim Einstieg in
-  // den Modus seine Stops sieht; Toggle via Chevron oben am Sheet.
-  // SvFallakteView (sessionStatus='arrived') bleibt full-screen — das
-  // ist ein längerer Interaction-Mode, kein Sheet.
-  const [mobileSheetExpanded, setMobileSheetExpanded] = useState(true)
-  const mobileSheetEnabled = sessionStatus !== 'arrived'
 
   // Geofence setzt nur Flag — AktuellerStopCard entscheidet wann Akte öffnet
   const onGeofenceReached = useCallback(() => {
@@ -123,78 +105,6 @@ export default function FeldmodusClient({
     onGeofenceReached,
   })
 
-  // 2026-05-07 (Aaron-Smoke MAP3): TBT braucht eine Position. Wenn GPS
-  // denied/timeout, fallback auf sv.standort_lat/lng (Heimat-Standort aus
-  // DB) damit TBT-Banner + Camera-follow + Routing zumindest aktiv sind.
-  // Im echten Live-Mode überschreibt livePosition den Fallback sobald
-  // verfügbar.
-  const position = livePosition ?? (
-    sv.standort_lat != null && sv.standort_lng != null
-      ? { lat: sv.standort_lat, lng: sv.standort_lng, heading: null }
-      : null
-  )
-
-  // Turn-by-Turn-Navigation: aktiv solange wir unterwegs sind (nicht arrived).
-  // Voice ist standardmäßig an, kann via Banner-Button toggled werden.
-  const [tbtVoiceOn, setTbtVoiceOn] = useState(true)
-  const tbtActive =
-    sessionStatus !== 'arrived' &&
-    sessionStatus !== 'finished' &&
-    !!aktuellerStop?.lat &&
-    !!aktuellerStop?.lng
-  const tbt = useTurnByTurn({
-    origin: tbtActive && position ? { lat: position.lat, lng: position.lng } : null,
-    destination:
-      tbtActive && aktuellerStop?.lat != null && aktuellerStop?.lng != null
-        ? { lat: aktuellerStop.lat, lng: aktuellerStop.lng }
-        : null,
-    position: position ? { lat: position.lat, lng: position.lng } : null,
-    voiceEnabled: tbtVoiceOn,
-  })
-
-  // 2026-05-08 (C10) NaviHud-Notice-Stack:
-  //   - mapNotice (Blitzer/Hazard/Reroute) wird von FeldmodusMap via
-  //     onMapNotice-Callback gemeldet
-  //   - laneNotice + maneuverNotice aus useTurnByTurn step.bannerInstructions
-  //   - kombiniert via pickHighestPriorityNotice (Blitzer > Hazard >
-  //     Reroute > Lane > Maneuver)
-  const [mapNotice, setMapNotice] = useState<NaviNotice | null>(null)
-  const naviNotice = useMemo<NaviNotice | null>(() => {
-    // Lane-Notice nur wenn der nächste Step Lane-Annotations hat UND
-    // wir nahe genug am Maneuver sind (< 300 m). Sonst kommt das zu
-    // früh und SV stresst sich überflüssig.
-    let laneNotice: NaviNotice | null = null
-    let maneuverNotice: NaviNotice | null = null
-    if (tbt.upcomingStep && tbt.distanceToNextManeuver != null) {
-      const step = tbt.upcomingStep
-      const distLabel = formatNaviDistance(tbt.distanceToNextManeuver)
-      const lanes = step.bannerInstructions[0]?.lanes
-      if (lanes && lanes.length > 1 && tbt.distanceToNextManeuver < 300) {
-        laneNotice = {
-          type: 'lane',
-          lanes,
-          maneuverInstruction: step.instruction,
-          distanceLabel: distLabel,
-        }
-      }
-      maneuverNotice = {
-        type: 'maneuver',
-        maneuverType: step.maneuverType,
-        modifier: step.maneuverModifier,
-        instruction: step.instruction,
-        distanceLabel: distLabel,
-        streetName: step.name,
-      }
-    }
-    return pickHighestPriorityNotice({
-      blitzer: mapNotice?.type === 'blitzer' ? mapNotice : null,
-      hazard: mapNotice?.type === 'hazard' ? mapNotice : null,
-      reroute: mapNotice?.type === 'reroute' ? mapNotice : null,
-      lane: laneNotice,
-      maneuver: maneuverNotice,
-    })
-  }, [mapNotice, tbt.upcomingStep, tbt.distanceToNextManeuver])
-
   // Auto-Losfahren: sobald der SV den Feldmodus für einen aktiven Stop öffnet,
   // markieren wir den Termin als "losgefahren" — generiert Tracking-Token,
   // berechnet ETA und benachrichtigt den Kunden via WhatsApp. Ohne diesen
@@ -218,15 +128,12 @@ export default function FeldmodusClient({
   // (z.B. durch Zeit-Fallback auf einem anderen Gerät, oder durch eine
   // andere Tab-Instanz) gesetzt wird, schaltet die UI ohne Reload in den
   // arrived-State und öffnet die Fallakte.
-  // useId-Suffix verhindert Strict-Mode-Doppel-Mount-Crash (Memory
-  // feedback_realtime_channel_ids).
-  const feldmodusTerminChannelSuffix = useId()
   useEffect(() => {
     const terminId = aktuellerStop?.termin_id
     if (!terminId) return
     const supabase = createClient()
     const channel = supabase
-      .channel(`feldmodus-termin-${terminId}-${feldmodusTerminChannelSuffix}`)
+      .channel(`feldmodus-termin-${terminId}`)
       .on(
         'postgres_changes',
         {
@@ -250,7 +157,7 @@ export default function FeldmodusClient({
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [aktuellerStop?.termin_id, feldmodusTerminChannelSuffix])
+  }, [aktuellerStop?.termin_id])
 
   // AAR-388: Beim Mount Recovery fahren + Sync-Listeners registrieren.
   // Hängengebliebene 'uploading'-Items aus Tab-Reload zurück auf 'pending'.
@@ -331,23 +238,11 @@ export default function FeldmodusClient({
     )
 
   return (
-    // 2026-05-07: Echtes Full-Bleed-Layout. Map ist Bühne unter ALLEM (auch
-    // auf Desktop), Sidebar wird zur schwebenden Glass-Card. Vorher war die
-    // Sidebar auf Desktop eine 400px-Spalte die der Map die Hälfte vom
-    // Viewport gefressen hat — der Premium-Feel kam nicht durch.
-    //
-    // Glass-Pattern (siehe AAR-769 GlassPanel + Heute-Sidebar): bg-white/65
-    // + backdrop-blur-md + border-white/40 + shadow-ios-lg. Map bleibt
-    // 100vw × 100vh, Overlays schweben über ihr.
-    // 2026-05-07 Fix: Tailwind h-screen greift nicht durch zur mapboxgl-map
-    // (Debug-Skript: height = 0). Inline-Style mit absoluten Werten setzt
-    // die Höhe deterministisch — keine cascade-Abhängigkeit.
-    <div className="relative" style={{ height: '100vh', width: '100vw' }}>
+    <div className="h-screen w-screen flex flex-col">
       <OfflineStatusBanner />
-
-      {/* Karte als Background-Layer — full-bleed, absolut positioniert
-          unter allen Overlays. */}
-      <div className="absolute inset-0 z-0">
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+      {/* Karte — oben auf mobile, links auf desktop */}
+      <div className="relative flex-1 min-h-0 lg:flex-1">
         <FeldmodusMap
           sv={sv}
           stops={stops}
@@ -367,56 +262,41 @@ export default function FeldmodusClient({
         />
       </div>
 
-      {/* Desktop (lg+): keine Sidebar mehr — die einzelnen Bedien-Elemente
-          schweben als individuelle Glass-Cards über der Map.
-          Layout:
-            top-left   FokusHeader-Pill (Exit + Stop-Counter + Status)
-            mid-left   AktuellerStopCard / SvFallakteView (Hauptinteraktion)
-            bottom-left  Stops-Liste collapsed (kommend + erledigt)
-          TbtBanner top-center (rendert weiter unten in eigenem Block).
-          GPS-/Wake-Lock-Banner bleiben rechts. */}
-      {sessionStatus === 'arrived' && aktuellerStop ? (
-        // 2026-05-07 (Aaron-Smoke MAP3): Vor-Ort = Modal-Popover. Vorher
-        // war SvFallakteView ein 420px-Floating-Side-Panel — Aaron will
-        // einen vollwertigen Popover der den Fallakte-Detail überlagert
-        // weil die echte Vor-Ort-Erfassung noch nicht da ist.
-        // Mit Backdrop-Dim damit der SV den Modus-Wechsel klar wahrnimmt.
-        <div className="hidden md:block fixed inset-0 z-40 bg-claimondo-navy/30 backdrop-blur-sm">
-          <GlassPanel
-            variant="prominent"
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(720px,92vw)] h-[min(85vh,800px)] flex flex-col overflow-hidden"
-          >
-            <SvFallakteView
-              fallId={aktuellerStop.fall_id}
-              sessionId={session.id}
-              terminId={aktuellerStop.termin_id}
-              onAdvanced={onAdvanced}
-              onBackToRoute={handleBackToRoute}
-              onPauseBackToRoute={async () => {
-                const res = await pauseFokusmodus(session.id)
-                if (res.success) {
-                  setSessionStatus('paused')
-                  router.push('/gutachter/heute?info=Tagesmodus+pausiert')
-                } else {
-                  toast.error(res.error ?? 'Pausieren fehlgeschlagen')
-                }
-              }}
-            />
-          </GlassPanel>
-        </div>
-      ) : (
-        <>
-          {/* Floating Header-Pill — top-left, kompakt (ab md sichtbar) */}
-          <GlassPanel className="hidden md:block absolute top-4 left-4 z-30 overflow-hidden">
-            <FokusHeader
-              sessionId={session.id}
-              sessionStatus={sessionStatus}
-              aktuellerIndex={aktuellerStopIndex}
-              totalStops={stops.length}
-              distanceMeters={distanceMeters}
-              variant="light"
-            />
-          </GlassPanel>
+      {/* Sidebar — unten auf mobile, rechts auf desktop.
+          AAR-386: Im arrived-State zeigt SvFallakteView statt RouteSidebar. */}
+      <div className="flex-1 min-h-0 overflow-y-auto lg:flex-none lg:w-[380px] lg:border-l lg:border-white/10">
+        {sessionStatus === 'arrived' && aktuellerStop ? (
+          <SvFallakteView
+            fallId={aktuellerStop.fall_id}
+            sessionId={session.id}
+            terminId={aktuellerStop.termin_id}
+            onAdvanced={onAdvanced}
+            onPauseBackToRoute={async () => {
+              const res = await pauseFokusmodus(session.id)
+              if (res.success) {
+                setSessionStatus('paused')
+                router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+              } else {
+                toast.error(res.error ?? 'Pausieren fehlgeschlagen')
+              }
+            }}
+          />
+        ) : (
+          <RouteSidebar
+            sessionId={session.id}
+            sessionStatus={sessionStatus}
+            stops={stops}
+            aktuellerStopIndex={aktuellerStopIndex}
+            svPosition={position ? { lat: position.lat, lng: position.lng } : null}
+            distanceMeters={distanceMeters}
+            svInGeofence={svInGeofence}
+            permissionState={permissionState}
+            onAdvanced={onAdvanced}
+            onArrived={onArrived}
+          />
+        )}
+      </div>
+      </div>
 
           {/* AktuellerStopCard — mid-left, Hauptinteraktion (ab md) */}
           {aktuellerStop && (

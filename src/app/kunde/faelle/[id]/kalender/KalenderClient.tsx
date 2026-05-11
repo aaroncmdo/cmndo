@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -121,7 +121,7 @@ export default function KalenderClient({
       {selectedDay && (
         <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-3 font-semibold">
-            Verfügbare Zeiten — {selectedDay.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long' })}
+            Verfügbare Zeiten — {selectedDay.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
           </p>
           {selectedSlots.length === 0 ? (
             <p className="text-sm text-claimondo-ondo/70 text-center py-4">Keine verfügbaren Zeiten an diesem Tag.</p>

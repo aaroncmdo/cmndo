@@ -121,7 +121,7 @@ export function projectNextEvents(input: {
 function formatDeShort(iso: string): string {
   try {
     const d = new Date(iso)
-    return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
   } catch {
     return iso
   }

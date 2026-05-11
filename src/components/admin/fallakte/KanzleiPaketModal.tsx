@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-539 (C2): Kanzlei-Paket-Reader-Modal.
 // Ein Dialog der je nach aktueller Phase die passenden Paket-Typen zeigt,

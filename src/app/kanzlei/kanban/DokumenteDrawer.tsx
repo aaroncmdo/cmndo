@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-kanzlei-portal PR 3: Drawer von rechts mit Liste aller Dokumente
 // des Falls. Lädt aus fall_dokumente — RLS in Migration 20260421151144

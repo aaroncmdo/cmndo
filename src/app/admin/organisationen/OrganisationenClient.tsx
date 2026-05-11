@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Building2Icon, GraduationCapIcon, CreditCardIcon, CheckCircleIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
@@ -110,7 +110,7 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                      {new Date(o.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                      {new Date(o.created_at).toLocaleDateString('de-DE')}
                     </td>
                   </tr>
                 )

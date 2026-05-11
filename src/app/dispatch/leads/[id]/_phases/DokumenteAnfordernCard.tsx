@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-352: Kombinierte Dokumenten-Anfrage-Karte — ersetzt Zb1UploadCard und
 // PolizeiberichtUploadCard. Der Dispatcher wählt per Checkbox welche Dokumente
@@ -337,7 +337,7 @@ export default function DokumenteAnfordernCard({
               <span className="font-semibold">Fahrzeugschein:</span> {zb1Cfg.label}
               {zb1HochgeladenAm && zb1Status === 'hochgeladen' && (
                 <span className="block text-[10px] text-claimondo-ondo font-normal mt-0.5">
-                  {new Date(zb1HochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
+                  {new Date(zb1HochgeladenAm).toLocaleString('de-DE')}
                 </span>
               )}
             </p>
@@ -358,7 +358,7 @@ export default function DokumenteAnfordernCard({
               <span className="font-semibold">Polizeibericht:</span> {poliCfg.label}
               {polizeiberichtHochgeladenAm && polizeiberichtStatus === 'hochgeladen' && (
                 <span className="block text-[10px] text-claimondo-ondo font-normal mt-0.5">
-                  {new Date(polizeiberichtHochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
+                  {new Date(polizeiberichtHochgeladenAm).toLocaleString('de-DE')}
                 </span>
               )}
             </p>

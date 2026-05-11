@@ -66,42 +66,6 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // 2026-05-08 (C13): TTS-Phrasen (statische MP3s aus dem Pre-Generation-
-  // Lauf). Stale-while-revalidate damit Voice auch offline weiter spielt
-  // sobald die Phrase einmal angesprochen wurde.
-  if (url.pathname.startsWith('/tts/')) {
-    event.respondWith(
-      caches.open(TTS_CACHE).then(async (cache) => {
-        const cached = await cache.match(event.request)
-        const networkPromise = fetch(event.request).then((res) => {
-          if (res.ok) cache.put(event.request, res.clone())
-          return res
-        }).catch(() => cached)
-        return cached || networkPromise
-      }),
-    )
-    return
-  }
-
-  // 2026-05-08 (C13): Mapbox-Tiles + Style + Sprite. Stale-while-
-  // revalidate damit der SV in einem Funkloch die letzten Tiles noch
-  // sieht. Quota-Begrenzung über Browser-Default (Cache-Storage hat
-  // typisch 50-200 MB pro Origin — reicht für Mapbox-Standard auf
-  // ~500 km²).
-  if (url.hostname === 'api.mapbox.com' && (url.pathname.includes('/tiles/') || url.pathname.includes('/sprite') || url.pathname.includes('/styles/') || url.pathname.includes('/v4/'))) {
-    event.respondWith(
-      caches.open(TILE_CACHE).then(async (cache) => {
-        const cached = await cache.match(event.request)
-        const networkPromise = fetch(event.request).then((res) => {
-          if (res.ok) cache.put(event.request, res.clone()).catch(() => {})
-          return res
-        }).catch(() => cached)
-        return cached || networkPromise
-      }),
-    )
-    return
-  }
-
   // Alles andere: explizit pass-through — SW garantiert keine Interferenz.
   // Insbesondere RSC-Streams (`?_rsc=`), Auth-Routes und API.
   event.respondWith(fetch(event.request))

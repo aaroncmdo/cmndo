@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-755 (Phase D): aus dem DokumenteTab-Monolithen extrahiert.
 // AAR-170 QC-Checkliste (Filmcheck). 9 Tri-State-Checkboxen (null/true/

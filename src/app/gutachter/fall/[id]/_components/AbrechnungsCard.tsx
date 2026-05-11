@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-293: SV-Abrechnungs-Card für Phase 6.x. Zeigt Honorar (faelle.gutachten_betrag),
 // Leadpreis + Netto-Auszahlung. Kunden-Auszahlungsbetrag ist NICHT für SV bestimmt.

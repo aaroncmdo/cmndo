@@ -1,4 +1,4 @@
-// AAR-843: Einzel-Event-Card in der TimelineView
+﻿// AAR-843: Einzel-Event-Card in der TimelineView
 
 import { getEventDisplay, eventLabel, KATEGORIE_LABEL, type TimelineEventKategorie } from '../timeline-event-mappings'
 import type { ClaimTimelineEvent } from '@/lib/claims/timeline-queries'
@@ -10,23 +10,23 @@ type Props = {
 }
 
 const TONE_BG: Record<string, string> = {
-  neutral: 'bg-[#f8f9fb]',
-  info:    'bg-[#7BA3CC]/15',
+  neutral: 'bg-claimondo-bg',
+  info:    'bg-claimondo-light-blue/15',
   success: 'bg-emerald-50',
   warning: 'bg-amber-50',
   danger:  'bg-rose-50',
-  brand:   'bg-[#0D1B3E]/10',
-  ondo:    'bg-[#4573A2]/15',
+  brand:   'bg-claimondo-navy/10',
+  ondo:    'bg-claimondo-ondo/15',
 }
 
 const TONE_TEXT: Record<string, string> = {
-  neutral: 'text-[#7BA3CC]',
-  info:    'text-[#4573A2]',
+  neutral: 'text-claimondo-light-blue',
+  info:    'text-claimondo-ondo',
   success: 'text-emerald-700',
   warning: 'text-amber-700',
   danger:  'text-rose-700',
-  brand:   'text-[#0D1B3E]',
-  ondo:    'text-[#4573A2]',
+  brand:   'text-claimondo-navy',
+  ondo:    'text-claimondo-ondo',
 }
 
 function formatRelativeOrDate(iso: string): string {
@@ -42,9 +42,9 @@ function formatRelativeOrDate(iso: string): string {
   if (diffH < 24)   return `vor ${diffH} Std`
   if (diffD < 7)    return `vor ${diffD} Tag${diffD === 1 ? '' : 'en'}`
 
-  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+  return d.toLocaleDateString('de-DE', {
     day: '2-digit', month: '2-digit', year: 'numeric',
-  }) + ' · ' + d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+  }) + ' · ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 }
 
 export function TimelineEventCard({ event, viewerRole, showKategorieBadge = false }: Props) {
@@ -59,14 +59,14 @@ export function TimelineEventCard({ event, viewerRole, showKategorieBadge = fals
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-sm font-medium text-[#0D1B3E]">{label}</span>
+          <span className="text-sm font-medium text-claimondo-navy">{label}</span>
           {showKategorieBadge && (
-            <span className="text-[10px] uppercase tracking-wide text-[#7BA3CC]">
+            <span className="text-[10px] uppercase tracking-wide text-claimondo-light-blue">
               {KATEGORIE_LABEL[display.kategorie as TimelineEventKategorie] ?? display.kategorie}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 text-xs text-[#7BA3CC] mt-0.5">
+        <div className="flex items-center gap-2 text-xs text-claimondo-light-blue mt-0.5">
           <span>{formatRelativeOrDate(event.event_at)}</span>
           {event.actor_rolle && event.actor_rolle !== 'system' && (
             <>
@@ -78,7 +78,7 @@ export function TimelineEventCard({ event, viewerRole, showKategorieBadge = fals
         {event.detail_url_path && (
           <a
             href={event.detail_url_path}
-            className="inline-block mt-1 text-xs text-[#4573A2] hover:underline"
+            className="inline-block mt-1 text-xs text-claimondo-ondo hover:underline"
           >
             Details ansehen →
           </a>

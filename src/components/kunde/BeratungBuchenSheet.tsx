@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-368: 3-Schritt-Modal für Kunden-seitige Buchung eines 30-Min-Beratungs-
 // termins beim zugeordneten Kundenbetreuer. Dauer = 30min (laut
@@ -32,18 +32,17 @@ export default function BeratungBuchenSheet({
   fallId,
   open,
   onClose,
-  defaultKanal = 'video',
+  defaultKanal,
 }: {
   fallId: string
   open: boolean
   onClose: () => void
-  /** Vorausgewaehlter Kanal — Video oder Telefon (Rueckruftermin). */
   defaultKanal?: 'video' | 'telefon'
 }) {
   const [step, setStep] = useState<Step>(1)
   const [thema, setThema] = useState<string>(THEMEN[0])
   const [beschreibung, setBeschreibung] = useState('')
-  const [kanal, setKanal] = useState<'video' | 'telefon'>(defaultKanal)
+  const [kanal, setKanal] = useState<'video' | 'telefon'>(defaultKanal ?? 'video')
 
   const [slots, setSlots] = useState<FreeSlot[] | null>(null)
   const [kbName, setKbName] = useState<string | null>(null)
@@ -250,7 +249,7 @@ export default function BeratungBuchenSheet({
                             }`}
                           >
                             <span className="text-xs text-claimondo-ondo uppercase">
-                              {date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short' })}
+                              {date.toLocaleDateString('de-DE', { weekday: 'short' })}
                             </span>
                             <span className="text-sm font-semibold text-claimondo-navy">
                               {date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}

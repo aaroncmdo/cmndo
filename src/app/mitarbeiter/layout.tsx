@@ -1,4 +1,4 @@
-// AAR-61: Mitarbeiter-Portal Layout mit Sidebar
+﻿// AAR-61: Mitarbeiter-Portal Layout mit Sidebar
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
@@ -6,7 +6,6 @@ import MitarbeiterNav from './_components/MitarbeiterNav'
 import TasksPill from '@/components/shared/TasksPill'
 import UpdatesNav from '@/components/shared/updates'
 import { roleToPath } from '@/lib/auth/role-redirect'
-import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 
 export default async function MitarbeiterLayout({
   children,
@@ -24,8 +23,9 @@ export default async function MitarbeiterLayout({
     .single()
 
   // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
-  // auf /login. Audit 2026-05-06: 'dispatch' raus — Dispatch hat eigenes
-  // Portal /dispatch und sollte nicht im KB-Portal landen.
+  // auf /login.
+  // Audit-Fix #1: dispatch hat eigenes /dispatch/* Portal — gehört NICHT
+  // ins KB-Portal (sah Leads die er nicht sehen sollte).
   if (!profile || !['kundenbetreuer', 'admin'].includes(profile.rolle)) {
     redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
   }

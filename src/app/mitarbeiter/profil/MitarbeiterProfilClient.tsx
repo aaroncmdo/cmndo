@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-369: Client-Komponente für die Mitarbeiter-Profilseite.
 // Speichert anzeigename + profilbeschreibung via updateProfilText.

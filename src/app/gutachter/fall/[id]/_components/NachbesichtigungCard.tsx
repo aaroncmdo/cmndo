@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-294 / AAR-398: Conditional NachbesichtigungCard. DB-Felder verifiziert:
 // nachbesichtigung_status, _angefordert_am, _termin_datum, _ergebnis.

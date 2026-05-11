@@ -111,16 +111,10 @@ export default function KundeKbChat({
           const row = payload.new as Nachricht
           if (!validSenders.has(row.sender_id ?? '')) return
           setMessages((prev) => {
+            // Audit-Fix #7: Wenn Server-Action die echte ID schon zurueckgegeben
+            // hat (Optimistic wurde via setMessages replace ersetzt), sehen
+            // wir die ID hier — skip Realtime-Insert um Duplikat zu vermeiden.
             if (prev.some((m) => m.id === row.id)) return prev
-            const optimistic = prev.find(
-              (m) =>
-                m.id.startsWith('optimistic-') &&
-                m.sender_id === row.sender_id &&
-                m.nachricht === row.nachricht,
-            )
-            if (optimistic) {
-              return prev.map((m) => (m.id === optimistic.id ? row : m))
-            }
             return [...prev, row]
           })
           if (row.sender_id !== currentUserId) void markKundeChatMessagesRead(kanal)
@@ -171,6 +165,14 @@ export default function KundeKbChat({
         setMessages((prev) => prev.filter((m) => m.id !== optimistic.id))
         setInput(text)
         setSendError(res.error ?? 'Nachricht konnte nicht gesendet werden')
+        return
+      }
+      // Audit-Fix #7: Optimistic durch echte DB-ID ersetzen — beim
+      // anschliessenden Realtime-Insert dedupt der id-Check sauber.
+      if (res.messageId) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === optimistic.id ? { ...m, id: res.messageId! } : m)),
+        )
       }
     })
   }

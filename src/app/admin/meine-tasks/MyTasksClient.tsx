@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -111,7 +111,7 @@ export default function MyTasksClient({
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs ${isOverdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
-                        {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }) : '—'}
+                        {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '—'}
                       </span>
                     </td>
                     <td className="px-4 py-3">

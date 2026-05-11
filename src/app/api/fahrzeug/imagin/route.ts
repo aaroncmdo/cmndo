@@ -12,32 +12,32 @@
 import { NextRequest } from 'next/server'
 import { buildImaginUrl, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 
+export const runtime = 'edge'
+
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams
   const hersteller = sp.get('make')
   const modell = sp.get('model')
   const lackfarbe = sp.get('paint') as LackfarbeCode | null
   const baujahr = sp.get('year')
-  const angleRaw = sp.get('angle')
-  const angle = angleRaw != null ? Number(angleRaw) : undefined
 
-  const url = buildImaginUrl({ hersteller, modell, lackfarbe, baujahr, angle })
-  if (!url) return new Response('missing-params', { status: 404, headers: { 'Cache-Control': 'no-store' } })
+  const url = buildImaginUrl({ hersteller, modell, lackfarbe, baujahr })
+  if (!url) return new Response('missing-params', { status: 404 })
 
   let upstream: Response
   try {
     upstream = await fetch(url, { cache: 'no-store' })
   } catch {
-    return new Response('upstream-fetch-failed', { status: 502, headers: { 'Cache-Control': 'no-store' } })
+    return new Response('upstream-fetch-failed', { status: 502 })
   }
 
   if (!upstream.ok) {
-    return new Response('upstream-error', { status: upstream.status, headers: { 'Cache-Control': 'no-store' } })
+    return new Response('upstream-error', { status: upstream.status })
   }
 
   const errorHeader = upstream.headers.get('x-imaginstudio-error')
   if (errorHeader) {
-    return new Response(`imagin-access-error: ${errorHeader}`, { status: 404, headers: { 'Cache-Control': 'no-store' } })
+    return new Response(`imagin-access-error: ${errorHeader}`, { status: 404 })
   }
 
   const buf = await upstream.arrayBuffer()

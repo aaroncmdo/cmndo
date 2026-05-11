@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-138 / W4: Phase 1 Qualifizierung. Ersetzt Schritt0HardGate.tsx.
 // Basiert auf der alten Hard-Gate-Form, erweitert um:

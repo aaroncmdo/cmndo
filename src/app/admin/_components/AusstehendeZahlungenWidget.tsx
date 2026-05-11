@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { AlertCircleIcon, ArrowRightIcon, EuroIcon } from 'lucide-react'
 import { StatusBadge as SharedStatusBadge } from '@/components/shared/StatusBadge'

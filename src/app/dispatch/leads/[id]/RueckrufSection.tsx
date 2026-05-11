@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-637: Rückruf-Daten liegen jetzt auf admin_termine (typ='rueckruf',
 // lead_id=...). Die Komponente lädt den offenen Rückruf-Termin selbst via

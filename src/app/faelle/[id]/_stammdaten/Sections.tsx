@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-162 / W2: Fallakte Stammdaten-Sections.
 // Die Notion-Spec schlägt 8 einzelne Section-Dateien vor — da jede nur
@@ -269,7 +269,7 @@ function VersicherungStammdaten({ versicherungId }: { versicherungId: string | n
     )
   }
   return (
-    <div className="sm:col-span-2 bg-[#f8f9fb] border border-claimondo-border rounded-lg px-3 py-2 space-y-1">
+    <div className="sm:col-span-2 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 space-y-1">
       <p className="text-[10px] uppercase tracking-wider text-claimondo-navy font-semibold">
         Stammdaten (aus versicherungen-Tabelle)
       </p>
@@ -387,8 +387,8 @@ export function NutzungsausfallSection() {
                 onClick={() => updateField('fahrzeug_fahrbereit', val)}
                 className={`px-3 py-1 rounded-md text-xs font-medium border ${
                   selected
-                    ? 'bg-[#4573A2] text-white border-[#4573A2]'
-                    : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-[#f8f9fb]'
+                    ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
+                    : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-claimondo-bg'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {opt === 'ja' ? 'Ja' : opt === 'nein' ? 'Nein' : 'Noch unklar'}
@@ -533,7 +533,7 @@ export function ZeugenKontakteSection() {
         {zeugen.map((z, idx) => (
           <div
             key={idx}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-lg border border-claimondo-border bg-[#f8f9fb]"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-lg border border-claimondo-border bg-claimondo-bg"
           >
             <input
               className="text-sm px-2 py-1 rounded bg-white border border-claimondo-border"
@@ -581,7 +581,7 @@ export function ZeugenKontakteSection() {
           <button
             type="button"
             onClick={addZeuge}
-            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-[#4573A2] text-white hover:bg-[#1E3A5F] transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white hover:bg-claimondo-shield transition-colors"
           >
             <PlusIcon className="w-3.5 h-3.5" /> Zeuge hinzufügen
           </button>

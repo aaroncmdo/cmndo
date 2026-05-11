@@ -1,4 +1,4 @@
-// AAR-68: Mitarbeiter Reklamationen — gefiltert auf KB-Faelle
+﻿// AAR-68: Mitarbeiter Reklamationen — gefiltert auf KB-Faelle
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -61,10 +61,10 @@ export default async function MitarbeiterReklamationen() {
                     }`}>{r.status ?? '—'}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                    {r.eingereicht_am ? new Date(r.eingereicht_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
+                    {r.eingereicht_am ? new Date(r.eingereicht_am).toLocaleDateString('de-DE') : '—'}
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                    {r.frist_bis ? new Date(r.frist_bis).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
+                    {r.frist_bis ? new Date(r.frist_bis).toLocaleDateString('de-DE') : '—'}
                   </td>
                 </tr>
               )

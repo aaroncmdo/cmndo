@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // CMM-23 / CMM-32: Vollständige Dokumenten-Liste am SV-Auftrag.
 // Kategorisiert: Hauptgutachten, Nachbesserung, Anlagen, Pflichtdokumente,
@@ -28,7 +28,7 @@ export type WeiteresDokument = {
 function fmtDate(iso: string | null): string {
   if (!iso) return '—'
   try {
-    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+    return new Date(iso).toLocaleDateString('de-DE', {
       day: '2-digit', month: '2-digit', year: '2-digit',
     })
   } catch { return iso }

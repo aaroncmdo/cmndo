@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-527 (A3): Tab-Nav für den Partner-Hub.
 

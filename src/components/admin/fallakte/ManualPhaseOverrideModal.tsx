@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-573 (V7): Manueller Phase-Override-Modal (Admin-only).
 // Zeigt eine nach Haupt-Phase gruppierte Liste aller 52 `aktuelle_phase`-

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-542 (C5): Admin-Debug-Modal pro Pflicht-Matrix-Slot.
 // AAR-781: Migriert auf Modal-Primitive (ESC-Handling durch Modal übernommen).

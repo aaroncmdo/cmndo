@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
 import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConstants'
@@ -235,36 +235,11 @@ export default async function DispatchDashboard() {
             </h2>
           </div>
           <div className="divide-y divide-claimondo-border max-h-[400px] overflow-y-auto">
-            {tasks.map((task) => {
-              const leadId = leadIdForTask(task)
-              const fallId = !leadId && task.fall_id ? task.fall_id : null
-              const href = leadId
-                ? `/dispatch/leads/${leadId}`
-                : fallId
-                  ? `/faelle/${fallId}`
-                  : null
-              const inner = (
-                <>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-claimondo-navy truncate">{task.titel}</p>
-                    <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : ''}</p>
-                  </div>
-                  {task.prioritaet === 'dringend' && (
-                    <span className="text-[10px] font-medium bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Dringend</span>
-                  )}
-                </>
-              )
-              return href ? (
-                <Link
-                  key={task.id}
-                  href={href}
-                  className="px-5 py-3 flex items-center gap-3 hover:bg-claimondo-bg transition-colors"
-                >
-                  {inner}
-                </Link>
-              ) : (
-                <div key={task.id} className="px-5 py-3 flex items-center gap-3">
-                  {inner}
+            {tasks.map((task) => (
+              <div key={task.id} className="px-5 py-3 flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-claimondo-navy truncate">{task.titel}</p>
+                  <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE') : ''}</p>
                 </div>
               )
             })}

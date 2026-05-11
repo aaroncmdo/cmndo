@@ -1,4 +1,4 @@
-// CMM-2 Debug-Endpunkt: zeigt für eine claim_id den rohen Loader-Output
+﻿// CMM-2 Debug-Endpunkt: zeigt für eine claim_id den rohen Loader-Output
 // je Rolle als JSON. Dient ausschließlich der Verifikation, dass
 // `getClaimForRole` für alle 5 Rollen die richtigen Spalten + Sub-Entities
 // liefert. Admin-only.

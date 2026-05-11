@@ -1,4 +1,4 @@
-// AAR-436: Admin-Dashboard für Anthropic-Token-Usage und Cache-Hit-Rate.
+﻿// AAR-436: Admin-Dashboard für Anthropic-Token-Usage und Cache-Hit-Rate.
 import PageHeader from '@/components/shared/PageHeader'
 
 import { createClient } from '@/lib/supabase/server'

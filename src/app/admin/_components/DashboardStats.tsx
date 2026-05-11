@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { TrendingUpIcon, BarChart3Icon } from 'lucide-react'
 
 // KFZ-155: Row 4 — kompakte Charts/Stats fuer das Dashboard.

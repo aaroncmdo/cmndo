@@ -1,4 +1,4 @@
-// AAR-448: Vollwertige Termin-Detail-Card für das Kunden-Portal.
+﻿// AAR-448: Vollwertige Termin-Detail-Card für das Kunden-Portal.
 // Zeigt SV-Begutachtung ODER KB-Videotermin mit allen Metadaten und
 // Quick-Actions (Anrufen, Navigieren, Verschieben, Absagen, ICS-Export).
 

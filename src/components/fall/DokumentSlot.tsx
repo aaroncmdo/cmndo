@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-Phase0 (0.1): Wiederverwendbare Drop-Zone für einen einzelnen
 // Pflicht- oder Optional-Slot. Zeigt Status-Badge, Preview, Größe,
@@ -44,13 +44,13 @@ type Props = {
 const STATUS_BADGE: Record<DokumentSlotStatus, { label: string; className: string }> = {
   ausstehend: { label: 'Ausstehend', className: 'bg-amber-50 text-amber-700 border-amber-200' },
   hochgeladen: { label: 'Hochgeladen', className: 'bg-green-50 text-green-700 border-green-200' },
-  geprueft: { label: 'Geprüft', className: 'bg-[#4573A2]/10 text-[#0D1B3E] border-[#4573A2]/30' },
+  geprueft: { label: 'Geprüft', className: 'bg-claimondo-ondo/10 text-claimondo-navy border-claimondo-ondo/30' },
   abgelehnt: { label: 'Abgelehnt', className: 'bg-red-50 text-red-700 border-red-200' },
   nachgereicht_angefordert: {
     label: 'Nachzureichen',
     className: 'bg-orange-50 text-orange-700 border-orange-200',
   },
-  optional: { label: 'Optional', className: 'bg-[#f8f9fb] text-claimondo-ondo border-claimondo-border' },
+  optional: { label: 'Optional', className: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' },
 }
 
 const ACCEPTED = 'image/jpeg,image/png,image/webp,application/pdf'
@@ -121,7 +121,7 @@ export default function DokumentSlot({
   return (
     <div
       className={`rounded-xl border ${
-        dragOver ? 'border-[#4573A2] bg-[#4573A2]/5' : 'border-claimondo-border bg-white'
+        dragOver ? 'border-claimondo-ondo bg-claimondo-ondo/5' : 'border-claimondo-border bg-white'
       } p-4 transition-colors`}
       onDragOver={e => {
         e.preventDefault()
@@ -133,7 +133,7 @@ export default function DokumentSlot({
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-[#0D1B3E] truncate">{slotLabel}</p>
+            <p className="text-sm font-medium text-claimondo-navy truncate">{slotLabel}</p>
             {istPflicht && (
               <span className="text-[10px] font-semibold text-red-600 uppercase">Pflicht</span>
             )}
@@ -146,8 +146,8 @@ export default function DokumentSlot({
       </div>
 
       {hasFile && (
-        <div className="flex items-center gap-2 mb-3 text-xs text-claimondo-navy bg-[#f8f9fb] rounded-lg px-3 py-2">
-          <FileIcon className="w-3.5 h-3.5 text-[#4573A2] flex-shrink-0" />
+        <div className="flex items-center gap-2 mb-3 text-xs text-claimondo-navy bg-claimondo-bg rounded-lg px-3 py-2">
+          <FileIcon className="w-3.5 h-3.5 text-claimondo-ondo flex-shrink-0" />
           <span className="truncate flex-1">{localFile!.name}</span>
           {localStatus === 'hochgeladen' || localStatus === 'geprueft' ? (
             <CheckCircle2Icon className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
@@ -163,7 +163,7 @@ export default function DokumentSlot({
             type="button"
             disabled={isPending}
             onClick={() => inputRef.current?.click()}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1E3A5F] hover:bg-[#4573A2] text-white text-xs font-medium disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-claimondo-shield hover:bg-claimondo-ondo text-white text-xs font-medium disabled:opacity-50"
           >
             {isPending ? (
               <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
@@ -176,7 +176,7 @@ export default function DokumentSlot({
             type="button"
             disabled={isPending}
             onClick={() => cameraRef.current?.click()}
-            className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] text-xs font-medium disabled:opacity-50"
+            className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-claimondo-ondo text-claimondo-ondo text-xs font-medium disabled:opacity-50"
           >
             <CameraIcon className="w-3.5 h-3.5" />
             Foto

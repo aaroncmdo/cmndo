@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { TrophyIcon, UsersIcon, GiftIcon, ArrowUpIcon, ArrowDownIcon, MinusIcon } from 'lucide-react'

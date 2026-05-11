@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-344 Pfad A: Self-Service-Komponente zum Ändern der 2FA-Telefonnummer.
 // Zwei-Stufen-UI: Nummer eingeben → SMS-Code bestätigen. Funktioniert auf
@@ -72,7 +72,7 @@ export function TwoFaPhoneChange({
     <>
       <div className="rounded-xl border border-claimondo-border bg-white p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-2">
-          <ShieldCheckIcon className="w-4 h-4 text-[#4573A2]" />
+          <ShieldCheckIcon className="w-4 h-4 text-claimondo-ondo" />
           <h3 className="text-sm font-semibold text-claimondo-navy">2FA-Telefonnummer</h3>
         </div>
         <p className="text-xs text-claimondo-ondo">
@@ -87,7 +87,7 @@ export function TwoFaPhoneChange({
             reset()
             setOpen(true)
           }}
-          className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E]"
+          className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy"
         >
           Nummer ändern
         </button>
@@ -109,7 +109,7 @@ export function TwoFaPhoneChange({
               <button
                 type="button"
                 onClick={() => !pending && setOpen(false)}
-                className="p-1.5 rounded-md hover:bg-[#f8f9fb]"
+                className="p-1.5 rounded-md hover:bg-claimondo-bg"
                 aria-label="Schließen"
               >
                 <XIcon className="w-4 h-4 text-claimondo-ondo" />
@@ -133,7 +133,7 @@ export function TwoFaPhoneChange({
                       value={neuePhone}
                       onChange={(e) => setNeuePhone(e.target.value)}
                       placeholder="+49 151 12345678 oder 0151 12345678"
-                      className="w-full text-sm rounded-md border border-claimondo-border px-2 py-2 outline-none focus:border-[#4573A2]"
+                      className="w-full text-sm rounded-md border border-claimondo-border px-2 py-2 outline-none focus:border-claimondo-ondo"
                     />
                   </div>
                 </>
@@ -157,7 +157,7 @@ export function TwoFaPhoneChange({
                       value={code}
                       onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
                       placeholder="123456"
-                      className="w-full text-lg font-mono tracking-widest rounded-md border border-claimondo-border px-2 py-2 outline-none focus:border-[#4573A2] text-center"
+                      className="w-full text-lg font-mono tracking-widest rounded-md border border-claimondo-border px-2 py-2 outline-none focus:border-claimondo-ondo text-center"
                     />
                   </div>
                   <button
@@ -191,7 +191,7 @@ export function TwoFaPhoneChange({
                 type="button"
                 onClick={() => !pending && setOpen(false)}
                 disabled={pending}
-                className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-[#f8f9fb] disabled:opacity-50"
+                className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg disabled:opacity-50"
               >
                 Abbrechen
               </button>
@@ -200,7 +200,7 @@ export function TwoFaPhoneChange({
                   type="button"
                   onClick={sendCode}
                   disabled={pending || !neuePhone.trim()}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
                 >
                   {pending && <LoaderIcon className="w-3 h-3 animate-spin" />}
                   Code senden
@@ -210,7 +210,7 @@ export function TwoFaPhoneChange({
                   type="button"
                   onClick={confirm}
                   disabled={pending || code.length !== 6}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
                 >
                   {pending && <LoaderIcon className="w-3 h-3 animate-spin" />}
                   Bestätigen

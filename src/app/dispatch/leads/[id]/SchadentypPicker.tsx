@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-81 + AAR-83 + AAR-114: Schadentyp-Picker (Notion-Spec 14.04.2026 §3)
 // 5 Typen mit icon/beschreibung_ma/kundenbeispiel/dispatch_hinweis/farbe

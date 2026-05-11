@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-544 (C7): Detail-Modal für einen einzelnen Timeline-Event.
 // AAR-781: Migriert auf Modal-Primitive.

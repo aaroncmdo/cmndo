@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-864: Banner im Kunde-Portal, wenn der SV eine Verlegung beantragt hat.
 // Zeigt alten + neuen Termin, Grund (falls angegeben), bietet Bestätigen

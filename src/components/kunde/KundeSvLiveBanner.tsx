@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // CMM-36: Kunden-seitiger Live-Banner für SV-Anfahrt + Vor-Ort-Status.
 // Stilistisch identisch zum SvUnterwegsInfo des SV-Portals (navy/Navigation),
@@ -110,7 +110,7 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
   const ankunftIso =
     eta != null ? new Date(Date.now() + eta * 60_000) : null
   const ankunftLabel = ankunftIso
-    ? ankunftIso.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+    ? ankunftIso.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
     : null
 
   return (

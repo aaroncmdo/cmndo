@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-162 / W2 + AAR-163 / W3: Quick-Actions-Sidebar — phase-abhängige Buttons.
 // AAR-756 (Phase E): Rule-Logic nach `@/lib/admin/jetzt-zu-tun` ausgelagert.
@@ -82,7 +82,7 @@ function ActionButton({
       disabled={disabled}
       onClick={onClick}
       title={title}
-      className="w-full text-left px-2 py-1.5 rounded-md border border-claimondo-border hover:bg-[#f8f9fb] disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full text-left px-2 py-1.5 rounded-md border border-claimondo-border hover:bg-claimondo-bg disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <p className="text-xs font-medium text-claimondo-navy">{label}</p>
       {action.description && (

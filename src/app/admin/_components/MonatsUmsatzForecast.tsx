@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { TrendingUpIcon, CalendarIcon } from 'lucide-react'
 
 // KFZ-155: Monats-Umsatz "laufend + geplant" fuer den Finance-Tab.

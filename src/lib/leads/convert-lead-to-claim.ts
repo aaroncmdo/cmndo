@@ -35,7 +35,6 @@ import {
   resolveFallEntityFks,
 } from '@/lib/lead-fall-mapping'
 import { parseUhrzeit } from '@/lib/format/zeit'
-import { parseKennzeichen } from '@/lib/format/kennzeichen'
 import type { ClaimInsert } from '@/lib/claims/types'
 
 export type ConvertLeadToClaimInput = {
@@ -108,23 +107,8 @@ export async function convertLeadToClaim(
     null
 
   // ─── Schritt 7a: KB Round-Robin (falls nicht angegeben) ─────────────────
-  // WICHTIG: lead.zugewiesen_an ist meistens der Dispatcher der den Lead
-  // qualifiziert hat — Dispatcher dürfen NIEMALS als KB zugewiesen werden,
-  // sie haben keinen Zugriff auf Fallakten. Wir validieren die Rolle und
-  // fallen auf Round-Robin zurueck wenn die Rolle nicht passt.
   let kundenbetreuerId: string | null =
     input.kundenbetreuerId ?? (lead.zugewiesen_an as string | null) ?? null
-  if (kundenbetreuerId) {
-    const { data: candidate } = await admin
-      .from('profiles')
-      .select('rolle, aktiv')
-      .eq('id', kundenbetreuerId)
-      .maybeSingle()
-    const rolle = (candidate?.rolle as string | null) ?? null
-    if (!candidate?.aktiv || !rolle || !['kundenbetreuer', 'admin'].includes(rolle)) {
-      kundenbetreuerId = null
-    }
-  }
   if (!kundenbetreuerId) {
     kundenbetreuerId = await pickKundenbetreuerRoundRobin(admin)
   }
@@ -161,7 +145,7 @@ export async function convertLeadToClaim(
     ursache: (lead.schadensursache as string | null) ?? null,
     unfall_konstellation: (lead.unfall_konstellation as string | null) ?? null,
 
-    // — Schadensort (Unfallort)
+    // — Schadensort (aus unfallort + Geo)
     schadenort_adresse:
       (lead.unfallort as string | null) ??
       (lead.fahrzeug_standort_adresse as string | null) ??
@@ -172,7 +156,6 @@ export async function convertLeadToClaim(
     schadenort_lng: (lead.kunde_lng as number | null) ?? null,
     schadenort_kategorie: (lead.unfallort_kategorie as string | null) ?? null,
     schadenort_land: 'DE',
-
 
     // — Hergang
     hergang_kunde_text:
@@ -217,23 +200,6 @@ export async function convertLeadToClaim(
     anzahl_beteiligte_total:
       ((lead.gegner_anzahl_beteiligte as number | null) ?? 0) + 1,
 
-    // — Gewerbe / Privat / Leasing
-    gewerbe_flag: Boolean(lead.gewerbe_flag ?? false),
-    vorsteuerabzugsberechtigt: Boolean(lead.vorsteuerabzugsberechtigt ?? false),
-    firma_name: (lead.firma_name as string | null) ?? null,
-    firma_ustid: (lead.firma_ustid as string | null) ?? null,
-    finanzierung_leasing:
-      (['keine', 'leasing', 'finanzierung'] as const).includes(
-        lead.finanzierung_leasing as 'keine' | 'leasing' | 'finanzierung',
-      )
-        ? (lead.finanzierung_leasing as string)
-        : 'keine',
-    leasinggeber_name: (lead.leasing_geber as string | null) ?? null,
-    finanzierungsgeber_name: (lead.finanzierungsgeber_name as string | null) ?? null,
-    finanzierungsgeber_adresse: (lead.finanzierungsgeber_adresse as string | null) ?? null,
-    finanzierungsgeber_vertragsnr: (lead.finanzierungsgeber_vertragsnr as string | null) ?? null,
-    finanzierung_bank: (lead.finanzierung_bank as string | null) ?? null,
-
     // — Klassifikation
     kunden_konstellation: (lead.kunden_konstellation as string | null) ?? null,
 
@@ -260,16 +226,6 @@ export async function convertLeadToClaim(
     // später vom Dispatcher (am Telefon) oder vom Kunden im Portal
     // (KanzleiWunschModal) gesetzt.
     kanzlei_wunsch: 'nicht_gefragt',
-
-    // Direktes Email-Feld auf claims — kein JOIN über claim_parties nötig
-    kunde_email: (lead.email as string | null) ?? null,
-
-    // — Neu nachgezogen (vorher fehlende Felder)
-    brn: (lead.brn as string | null) ?? null,
-    eigene_versicherung: (lead.eigene_versicherung as string | null) ?? null,
-    eigene_policennr: (lead.eigene_policennr as string | null) ?? null,
-    zeugen_kontakte: (lead.zeugen_kontakte as import('@/lib/supabase/database.types').Json | null) ?? null,
-    spezifikation: (lead.spezifikation as string | null) ?? null,
   }
 
   const { data: claim, error: claimErr } = await admin
@@ -287,30 +243,6 @@ export async function convertLeadToClaim(
 
   const claimId = claim.id as string
   const claimNummer = (claim.claim_nummer as string | null) ?? null
-
-  // ─── Schritt 3b: Unfallskizze SVG → fall-dokumente Bucket (non-critical) ─
-  // Die SVG liegt als Inline-Text in claims.unfallskizze_svg. Für das
-  // Kanzleipaket und Downloads brauchen wir eine öffentliche URL.
-  // Nur hochladen wenn die Skizze auch freigegeben ist (bestaetigt=true).
-  const skizzeSvg = (lead.unfallskizze_svg as string | null) ?? null
-  const skizzeBestaetigt = (lead.unfallskizze_bestaetigt as boolean | null) === true
-  if (skizzeSvg && skizzeBestaetigt) {
-    try {
-      const skizzePath = `claim/${claimId}/unfallskizze/unfallskizze.svg`
-      const { error: uploadErr } = await admin.storage
-        .from('fall-dokumente')
-        .upload(skizzePath, Buffer.from(skizzeSvg, 'utf-8'), {
-          contentType: 'image/svg+xml',
-          upsert: true,
-        })
-      if (!uploadErr) {
-        const { data: urlData } = admin.storage.from('fall-dokumente').getPublicUrl(skizzePath)
-        await admin.from('claims').update({ unfallskizze_url: urlData.publicUrl }).eq('id', claimId)
-      }
-    } catch {
-      /* non-critical — Skizze bleibt als SVG-Text im Claim erhalten */
-    }
-  }
 
   // ─── Cleanup-Wrapper ────────────────────────────────────────────────────
   // Bei Fehler in den Folge-Steps löschen wir den Claim wieder. Sub-Entities
@@ -347,10 +279,6 @@ export async function convertLeadToClaim(
       hat_personenschaden: Boolean(lead.personenschaden_flag ?? false),
       vehicle_id: (lead.vehicle_id as string | null) ?? null,
       kennzeichen: (lead.kennzeichen as string | null) ?? null,
-      kennzeichen_kreis: (lead.kennzeichen_kreis as string | null) ?? null,
-      kennzeichen_buchstaben: (lead.kennzeichen_buchstaben as string | null) ?? null,
-      kennzeichen_zahl: (lead.kennzeichen_zahl as string | null) ?? null,
-      kennzeichen_suffix: (lead.kennzeichen_suffix as string | null) ?? null,
       quelle: 'lead_konvertierung',
       created_by_user_id: input.triggerByUserId ?? null,
     },
@@ -380,15 +308,6 @@ export async function convertLeadToClaim(
       // Kann null sein, wenn der Gegner nur per KZ/Versicherung erfasst wurde.
       nachname: (lead.gegner_name as string | null) ?? null,
       kennzeichen: (lead.gegner_kennzeichen as string | null) ?? null,
-      ...(() => {
-        const parts = parseKennzeichen(lead.gegner_kennzeichen as string | null)
-        return parts ? {
-          kennzeichen_kreis: parts.kreis,
-          kennzeichen_buchstaben: parts.buchstaben,
-          kennzeichen_zahl: parts.zahl,
-          kennzeichen_suffix: parts.suffix,
-        } : {}
-      })(),
       fahrzeugtyp_klartext: (lead.gegner_fahrzeugtyp as string | null) ?? null,
       versicherung_id: (lead.gegner_versicherung_id as string | null) ?? null,
       versicherung_klartext: (lead.gegner_versicherung as string | null) ?? null,
@@ -495,99 +414,6 @@ export async function convertLeadToClaim(
     console.error('[convertLeadToClaim] leads-Update fehlgeschlagen:', leadUpdErr)
   }
 
-  // ─── Schritt 10: fall_dokumente nachholen (non-critical) ───────────────────
-  // Während des Uploads im Dispatch-Lead war noch kein Fall vorhanden, deshalb
-  // hat insertFallDokument() früh returned (if (!fallId) return). Die Dateien
-  // liegen im Bucket, aber die fall_dokumente-Rows fehlen. Wir lesen die
-  // Mirror-Felder des Leads und erstellen die fehlenden Rows nach.
-  // Fehler hier brechen die Konvertierung nicht ab — die Docs sind im Bucket.
-  try {
-    await migriereLeadDokumenteZuFall(admin, input.leadId, fallId, lead, now)
-  } catch (err) {
-    console.error('[convertLeadToClaim] fall_dokumente-Migration fehlgeschlagen:', err)
-  }
-
-  // ─── Schritt 11: Pflichtdokumente initialisieren (non-critical) ─────────────
-  // ZB1 ist immer Pflicht. Polizeibericht wenn Polizei vor Ort + Bericht pflicht.
-  // Bereits hochgeladene Dokumente werden nicht nochmals angefordert.
-  try {
-    const frist = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
-    const pflichtInserts: Array<Record<string, unknown>> = []
-
-    const zb1Url = (lead.zb1_url as string | null) ?? null
-    if (!zb1Url) {
-      pflichtInserts.push({
-        fall_id: fallId,
-        dokument_typ: 'fahrzeugschein',
-        status: 'ausstehend',
-        pflicht: true,
-        quelle: 'system',
-        angefordert_von_rolle: 'system',
-        angefordert_am: now,
-        frist,
-        sort_order: 1,
-        begruendung: 'Fahrzeugschein wird für die Gutachtenerstellung benötigt.',
-      })
-    }
-
-    const polizeiUrl = (lead.polizeibericht_url as string | null) ?? null
-    const polizeiVorOrt = Boolean(lead.polizei_vor_ort ?? false)
-    const polizeibrichtPflicht = Boolean(lead.polizeibericht_pflicht ?? false)
-    if (polizeiVorOrt && polizeibrichtPflicht && !polizeiUrl) {
-      pflichtInserts.push({
-        fall_id: fallId,
-        dokument_typ: 'polizeibericht',
-        status: 'ausstehend',
-        pflicht: true,
-        quelle: 'system',
-        angefordert_von_rolle: 'system',
-        angefordert_am: now,
-        frist,
-        sort_order: 2,
-        begruendung: 'Polizeiliche Unfallmitteilung erforderlich.',
-      })
-    }
-
-    if (pflichtInserts.length > 0) {
-      await admin.from('pflichtdokumente').insert(pflichtInserts)
-    }
-  } catch (err) {
-    console.error('[convertLeadToClaim] pflichtdokumente-Init fehlgeschlagen:', err)
-  }
-
-  // ─── Schritt 12: auftraege-Erstgutachten anlegen (F-04 Fix 2026-05-08) ────
-  // CMM-32 hat die auftraege-Tabelle eingeführt + Backfill für Bestands-
-  // fälle. Bei NEUEN Fällen wurde aber bisher kein Auftrag angelegt — das
-  // SV-Portal /gutachter/auftraege blieb leer obwohl der SV per faelle.sv_id
-  // bereits zugeordnet war.
-  // Logik analog zum CMM-32b-Backfill: wenn der Fall einen sv_id hat,
-  // erzeuge sofort einen Erstgutachten-Auftrag mit Status 'beauftragt'.
-  // Idempotent: prüft ob schon ein Erstgutachten-Eintrag für diesen Fall
-  // existiert.
-  try {
-    const svIdAufFall = fallInsert.sv_id ?? null
-    if (svIdAufFall) {
-      const { data: vorhandenAuftrag } = await admin
-        .from('auftraege')
-        .select('id')
-        .eq('fall_id', fallId)
-        .eq('typ', 'erstgutachten')
-        .maybeSingle()
-      if (!vorhandenAuftrag) {
-        await admin.from('auftraege').insert({
-          fall_id: fallId,
-          claim_id: claimId,
-          sv_id: svIdAufFall,
-          typ: 'erstgutachten',
-          status: 'termin',
-          reihenfolge: 1,
-        } as never)
-      }
-    }
-  } catch (err) {
-    console.error('[convertLeadToClaim] auftraege-Erstgutachten-Insert fehlgeschlagen:', err)
-  }
-
   return {
     ok: true,
     claimId,
@@ -596,137 +422,6 @@ export async function convertLeadToClaim(
     fallNummer,
     kundenbetreuerId,
     idempotent: false,
-  }
-}
-
-// ─── Helper: Mirror-Felder → fall_dokumente ─────────────────────────────────
-// Extrahiert den Storage-Pfad aus einer Supabase-Public-URL.
-// Format: https://{project}.supabase.co/storage/v1/object/public/fall-dokumente/{path}
-function storagePathAusUrl(url: string): string | null {
-  const marker = '/object/public/fall-dokumente/'
-  const idx = url.indexOf(marker)
-  return idx >= 0 ? url.slice(idx + marker.length) : null
-}
-
-async function migriereLeadDokumenteZuFall(
-  admin: ReturnType<typeof createAdminClient>,
-  leadId: string,
-  fallId: string,
-  lead: Record<string, unknown>,
-  now: string,
-): Promise<void> {
-  const inserts: Array<Record<string, unknown>> = []
-
-  // Polizeibericht
-  const polizeiUrl = (lead.polizeibericht_url as string | null) ?? null
-  if (polizeiUrl) {
-    const storagePath = storagePathAusUrl(polizeiUrl)
-    if (storagePath) {
-      inserts.push({
-        fall_id: fallId,
-        lead_id: leadId,
-        dokument_typ: 'polizeibericht',
-        storage_path: storagePath,
-        uploaded_by_kunde: true,
-        hochgeladen_am: (lead.polizeibericht_hochgeladen_am as string | null) ?? now,
-        beschreibung: 'Polizeiliche Unfallmitteilung',
-        quelle: 'lead_migration',
-      })
-    }
-  }
-
-  // Fahrzeugschein (ZB1)
-  const zb1Url = (lead.zb1_url as string | null) ?? null
-  if (zb1Url) {
-    const storagePath = storagePathAusUrl(zb1Url)
-    if (storagePath) {
-      inserts.push({
-        fall_id: fallId,
-        lead_id: leadId,
-        dokument_typ: 'fahrzeugschein',
-        storage_path: storagePath,
-        uploaded_by_kunde: true,
-        hochgeladen_am: (lead.zb1_hochgeladen_am as string | null) ?? now,
-        beschreibung: 'Fahrzeugschein / ZB1',
-        quelle: 'lead_migration',
-      })
-    }
-  }
-
-  // Unfallfotos / Schadensfotos (JSONB-Array auf dem Lead)
-  const fotoUrls = Array.isArray(lead.schadensfoto_urls)
-    ? (lead.schadensfoto_urls as string[])
-    : []
-  for (const url of fotoUrls) {
-    const storagePath = storagePathAusUrl(url)
-    if (storagePath) {
-      inserts.push({
-        fall_id: fallId,
-        lead_id: leadId,
-        dokument_typ: 'schadensfotos',
-        storage_path: storagePath,
-        uploaded_by_kunde: true,
-        hochgeladen_am: now,
-        beschreibung: 'Schadensfoto',
-        quelle: 'lead_migration',
-      })
-    }
-  }
-
-  // Weitere Dokument-Typen via dokument_upload_anfragen (kein Mirror-Feld auf leads)
-  // Querys alle abgeschlossenen Slots für den Lead und migriert die fehlenden Rows.
-  const ANFRAGE_SLOT_MAP: Record<string, string> = {
-    sachschaden_foto: 'sachschaden_foto',
-    sachschaden_rechnung: 'sachschaden_rechnung',
-    aerztliches_attest: 'aerztliches_attest',
-    diagnosebericht: 'diagnosebericht',
-    zeugenaussage: 'zeugenaussage',
-  }
-  const { data: anfragen } = await admin
-    .from('dokument_upload_anfragen')
-    .select('slots')
-    .eq('lead_id', leadId)
-  for (const anfrage of anfragen ?? []) {
-    const slots = anfrage.slots as Array<{
-      slot_id: string
-      doc_url: string | null
-      hochgeladen: boolean
-      label: string
-      hochgeladen_am: string | null
-    }>
-    for (const slot of slots ?? []) {
-      const dokTyp = ANFRAGE_SLOT_MAP[slot.slot_id]
-      if (!dokTyp || !slot.hochgeladen || !slot.doc_url) continue
-      const storagePath = storagePathAusUrl(slot.doc_url)
-      if (!storagePath) continue
-      inserts.push({
-        fall_id: fallId,
-        lead_id: leadId,
-        dokument_typ: dokTyp,
-        storage_path: storagePath,
-        uploaded_by_kunde: true,
-        hochgeladen_am: slot.hochgeladen_am ?? now,
-        beschreibung: slot.label,
-        quelle: 'lead_migration',
-      })
-    }
-  }
-
-  if (inserts.length === 0) return
-
-  // Idempotenz: nur einfügen wenn die Kombination fall_id + storage_path noch
-  // nicht existiert (verhindert Doppel-Rows bei wiederholtem Aufruf).
-  const { data: existing } = await admin
-    .from('fall_dokumente')
-    .select('storage_path')
-    .eq('fall_id', fallId)
-    .in('quelle', ['lead_migration'])
-
-  const existingPaths = new Set((existing ?? []).map((r) => r.storage_path as string))
-  const neueInserts = inserts.filter((r) => !existingPaths.has(r.storage_path as string))
-
-  if (neueInserts.length > 0) {
-    await admin.from('fall_dokumente').insert(neueInserts)
   }
 }
 
@@ -745,60 +440,30 @@ async function generateFallNummer(
 }
 
 // ─── Helper: KB Round-Robin (min aktive Fälle gewinnt) ──────────────────────
-// Priorität: kundenbetreuer zuerst. Admin nur als Fallback wenn kein aktiver
-// KB unter der Schwelle von 100 Fällen verfügbar ist.
-const KB_ADMIN_FALLBACK_SCHWELLE = 100
-
-async function countAktiveFaelle(
-  admin: ReturnType<typeof createAdminClient>,
-  profileId: string,
-): Promise<number> {
-  const { count } = await admin
-    .from('faelle')
-    .select('id', { count: 'exact', head: true })
-    .eq('kundenbetreuer_id', profileId)
-    .not('status', 'in', '("abgeschlossen","storniert","reguliert","abgelehnt")')
-  return count ?? 0
-}
-
 async function pickKundenbetreuerRoundRobin(
   admin: ReturnType<typeof createAdminClient>,
 ): Promise<string | null> {
-  // 1. Alle aktiven KBs laden
-  const { data: kbList } = await admin
+  const { data: betreuer } = await admin
     .from('profiles')
     .select('id')
-    .eq('rolle', 'kundenbetreuer')
-    .eq('aktiv', true)
-    .limit(50)
+    .in('rolle', ['kundenbetreuer', 'admin'])
+    .limit(20)
 
-  const kbs = (kbList ?? []) as Array<{ id: string }>
+  if (!betreuer || betreuer.length === 0) return null
 
-  if (kbs.length > 0) {
-    // Aktive Fälle pro KB zählen
-    const counts: Record<string, number> = {}
-    for (const kb of kbs) {
-      counts[kb.id] = await countAktiveFaelle(admin, kb.id)
-    }
-
-    // KBs unter Schwelle bevorzugen; falls alle drüber → trotzdem least-busy KB nehmen
-    const unterSchwelle = kbs.filter(kb => counts[kb.id] < KB_ADMIN_FALLBACK_SCHWELLE)
-    const pool = unterSchwelle.length > 0 ? unterSchwelle : kbs
-    return pool.reduce(
-      (m, kb) => (counts[kb.id] < counts[m.id] ? kb : m),
-      pool[0],
-    ).id
+  const counts: Record<string, number> = {}
+  for (const b of betreuer) {
+    const { count } = await admin
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .eq('kundenbetreuer_id', b.id as string)
+      .not('status', 'in', '("abgeschlossen","storniert","reguliert","abgelehnt")')
+    counts[b.id as string] = count ?? 0
   }
 
-  // 2. Kein aktiver KB → Admin als Fallback (erster aktiver Admin, ältester zuerst)
-  const { data: adminList } = await admin
-    .from('profiles')
-    .select('id')
-    .eq('rolle', 'admin')
-    .eq('aktiv', true)
-    .order('created_at', { ascending: true })
-    .limit(1)
-
-  const admins = (adminList ?? []) as Array<{ id: string }>
-  return admins[0]?.id ?? null
+  return betreuer.reduce(
+    (m, b) =>
+      (counts[b.id as string] ?? 0) < (counts[m.id as string] ?? 0) ? b : m,
+    betreuer[0],
+  ).id as string
 }

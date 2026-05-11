@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-213: Lead-Preis-Tabelle-Link geht jetzt über Callback an
 // WillkommenClient — dort wird der Overlay statt einem neuen Tab geöffnet.

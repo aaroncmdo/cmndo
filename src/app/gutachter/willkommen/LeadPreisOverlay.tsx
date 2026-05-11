@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-213: Lead-Preis-Tabelle als Overlay statt externer Tab. Zeigt die
 // 33 Stufen + einen ROI-Rechner der dem SV anzeigt wieviel er netto pro

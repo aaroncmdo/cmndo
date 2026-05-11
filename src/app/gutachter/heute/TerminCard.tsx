@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-381: Termin-Card auf dem vertikalen Tageskalender-Rail.
 // Positioniert per absolute-top anhand Startzeit, Höhe proportional zur Dauer.

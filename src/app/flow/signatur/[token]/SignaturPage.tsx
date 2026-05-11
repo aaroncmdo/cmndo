@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -125,7 +125,7 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
 
 function SuccessScreen() {
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-5">
+    <div className="min-h-screen bg-claimondo-bg flex items-center justify-center px-5">
       <div className="text-center max-w-xs">
         <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-green-500/15 flex items-center justify-center">
           <CheckIcon className="w-8 h-8 text-green-400" />
@@ -174,11 +174,11 @@ function SignatureStep({
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] flex flex-col">
+    <div className="min-h-screen bg-claimondo-bg flex flex-col">
       {/* Progress bar */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1 bg-[#f8f9fb]">
+      <div className="fixed top-0 inset-x-0 z-10 h-1 bg-claimondo-bg">
         <div
-          className="h-full bg-[#4573A2] transition-all duration-500"
+          className="h-full bg-claimondo-ondo transition-all duration-500"
           style={{ width: step === 1 ? '50%' : '100%' }}
         />
       </div>
@@ -231,7 +231,7 @@ function SignatureStep({
           <button
             onClick={handleSubmit}
             disabled={isEmpty || submitting}
-            className="w-full py-4 rounded-2xl bg-[#1E3A5F] hover:bg-[#4573A2] text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+            className="w-full py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
           >
             {submitting ? 'Wird übermittelt …' : buttonLabel}
           </button>

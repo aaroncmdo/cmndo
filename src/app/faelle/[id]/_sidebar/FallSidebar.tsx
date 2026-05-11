@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-162 / W2: Fallakte-Sidebar (340px, sticky).
 // Zeigt Kurzinfo + Flags + Ansprechpartner. Die Stubs QuickActions + SlaAlerts
@@ -47,7 +47,7 @@ export default function FallSidebar({
   const { fall, lead } = useFall()
 
   return (
-    <aside className="w-full lg:w-[340px] shrink-0 bg-[#f8f9fb] border-l border-claimondo-border overflow-y-auto p-4 space-y-3">
+    <aside className="w-full lg:w-[340px] shrink-0 bg-claimondo-bg border-l border-claimondo-border overflow-y-auto p-4 space-y-3">
       {/* Quick Actions (phase-abhängig) */}
       <QuickActions />
 
@@ -81,7 +81,7 @@ export default function FallSidebar({
           <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} className="text-[11px]" />
         )}
         {lead?.email && (
-          <a href={`mailto:${lead.email}`} className="text-[11px] text-[#4573A2] hover:underline flex items-center gap-1 truncate">
+          <a href={`mailto:${lead.email}`} className="text-[11px] text-claimondo-ondo hover:underline flex items-center gap-1 truncate">
             <MailIcon className="w-3 h-3" /> {lead.email}
           </a>
         )}

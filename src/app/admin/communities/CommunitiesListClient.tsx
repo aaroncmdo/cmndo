@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { UsersIcon, PlusIcon, ShieldCheckIcon } from 'lucide-react'
@@ -75,7 +75,7 @@ export default function CommunitiesListClient({ communities }: { communities: Co
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-claimondo-ondo">
-                    {new Date(c.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                    {new Date(c.created_at).toLocaleDateString('de-DE')}
                   </td>
                 </tr>
               ))}

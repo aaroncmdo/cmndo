@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-778: Migriert auf shared PortalNav (dark variant, 2 Sektionen).
 

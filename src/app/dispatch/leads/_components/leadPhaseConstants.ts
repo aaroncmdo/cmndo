@@ -1,4 +1,4 @@
-// AAR-179 Follow-up: Shared Phase-Konstanten, damit page.tsx und
+﻿// AAR-179 Follow-up: Shared Phase-Konstanten, damit page.tsx und
 // LeadsViewToggle dieselbe Quelle der Wahrheit nutzen (vorher Duplikation).
 
 export const PHASE_OPTIONS = [

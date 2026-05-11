@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-137 / W3: Phase-Stepper. 6 Steps horizontal.
 // Grün = erledigt, Blau = aktiv, Grau = noch nicht erreicht.
@@ -123,9 +123,25 @@ export default function PhaseHeader({
                 onClick={() => canNavigate && setPhase(nr)}
                 disabled={!canNavigate}
                 aria-current={isActive ? 'step' : undefined}
-                className={`flex items-center gap-2 min-h-11 px-3 rounded-lg text-xs font-medium transition-colors ${cls.wrapper}`}
+                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  isActive
+                    ? 'bg-claimondo-ondo text-white shadow-sm'
+                    : isDone
+                      ? 'bg-green-50 text-green-700 hover:bg-green-100 cursor-pointer'
+                      : canNavigate
+                        ? 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border cursor-pointer'
+                        : 'bg-claimondo-bg text-claimondo-ondo/50 cursor-not-allowed'
+                }`}
               >
-                <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${cls.circle}`}>
+                <span
+                  className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${
+                    isActive
+                      ? 'bg-white text-claimondo-ondo'
+                      : isDone
+                        ? 'bg-green-500 text-white'
+                        : 'bg-white text-claimondo-ondo/70 border border-claimondo-border'
+                  }`}
+                >
                   {isDone && !isActive ? <CheckIcon className="w-3 h-3" /> : nr}
                 </span>
                 <span>{label}</span>

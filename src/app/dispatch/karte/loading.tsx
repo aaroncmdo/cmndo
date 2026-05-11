@@ -1,4 +1,4 @@
-export default function KarteLoading() {
+﻿export default function KarteLoading() {
   return (
     <div className="flex h-full w-full">
       {/* Sidebar skeleton */}

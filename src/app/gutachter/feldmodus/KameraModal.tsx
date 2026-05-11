@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-386: In-App-Kamera-Modal für den Feldmodus-Upload.
 // Nutzt `navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })`

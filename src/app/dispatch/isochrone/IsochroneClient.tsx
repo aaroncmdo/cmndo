@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-112: Isochrone-Client — Lead-Auswahl + SV-Vorschlagsliste via findBestSV
 import { useState, useTransition } from 'react'
@@ -165,16 +165,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                         {s.name}
                       </Link>
                       <span className="text-xs text-claimondo-ondo">{s.paket}</span>
-                      <span className="text-xs tabular-nums">
-                        {s.etaFromBueroMin != null ? (
-                          <>
-                            <span className="font-semibold">{s.etaFromBueroMin} min</span>
-                            <span className="text-[10px] text-claimondo-ondo/70 ml-1">({s.distanzKm.toFixed(1)} km)</span>
-                          </>
-                        ) : (
-                          <>{s.distanzKm.toFixed(1)} km</>
-                        )}
-                      </span>
+                      <span className="text-xs tabular-nums">{s.distanzKm.toFixed(1)} km</span>
                       <span className="text-xs tabular-nums font-semibold">{s.score.toFixed(1)}</span>
                       <span className={`text-xs tabular-nums ${s.kontingentFrei <= 2 ? 'text-red-600 font-semibold' : 'text-claimondo-navy'}`}>
                         {s.kontingentFrei}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-137 / W3: DispatchShell — 2-Column Layout.
 // Links: Phase-Stepper + aktive Phase. Rechts: fixe Sidebar (Timer, Disqual,

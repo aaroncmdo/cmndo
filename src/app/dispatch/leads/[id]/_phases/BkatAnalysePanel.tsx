@@ -118,21 +118,18 @@ export default function BkatAnalysePanel({
         <span className="text-[10px] text-claimondo-ondo uppercase tracking-wider">BKat</span>
       </div>
 
-      {/* Bereits gespeicherter Schadentyp (vor Auto-Analyse oder aus früherer
-         Sitzung) — direkt anzeigen, keine Re-Analyse triggern. */}
-      {!result && initialUnfallart && (
-        <div className="bg-white rounded-lg border border-claimondo-ondo/30 p-3 flex items-center justify-between gap-2">
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">Schadentyp</p>
-            <p className="text-sm font-semibold text-claimondo-navy">
-              {UNFALLART_LABEL[initialUnfallart] ?? initialUnfallart}
-            </p>
-          </div>
+      {!result && (
+        <>
+          <p className="text-xs text-claimondo-ondo">
+            Analysiert den Unfallhergang + ggf. den Polizeibericht und schlägt
+            die passende Unfallart vor. TBNRs werden nur angezeigt — nicht
+            gespeichert, ausser die Polizei war vor Ort.
+          </p>
           <button
             type="button"
             onClick={analyze}
             disabled={loading}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-claimondo-ondo/30 text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/10 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50"
           >
             <SparklesIcon className="w-3.5 h-3.5" />
             {loading ? 'Analysiere …' : 'Erneut analysieren'}
@@ -164,8 +161,8 @@ export default function BkatAnalysePanel({
         </div>
       )}
 
-      {data && data.unfallart && (
-        <div className="space-y-2">
+      {data && data.vorschlaege.length > 0 && (
+        <div className="space-y-3">
           <div className="flex items-center gap-2 text-xs text-claimondo-ondo">
             <span>Quelle: <span className="font-medium text-claimondo-navy">{sourceLabel}</span></span>
             {data.schuld_hint && SCHULD_LABEL[data.schuld_hint] && (
@@ -176,13 +173,24 @@ export default function BkatAnalysePanel({
             )}
           </div>
 
-          <div className="bg-white rounded-lg border border-claimondo-ondo/30 p-3 space-y-1.5">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">Erkannter Schadentyp</p>
-                <p className="text-sm font-semibold text-claimondo-navy">
-                  {UNFALLART_LABEL[data.unfallart] ?? data.unfallart}
-                </p>
+          {data.unfallart && (
+            <div className="bg-white rounded-lg border border-claimondo-ondo/30 p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">Empfohlene Unfallart</p>
+                  <p className="text-sm font-semibold text-claimondo-navy">
+                    {UNFALLART_LABEL[data.unfallart] ?? data.unfallart}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => uebernehmen(data.unfallart!)}
+                  disabled={saving}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  <CheckCircleIcon className="w-3.5 h-3.5" />
+                  Übernehmen
+                </button>
               </div>
               {autoSaved && (
                 <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5 font-medium">
@@ -192,21 +200,37 @@ export default function BkatAnalysePanel({
               )}
             </div>
 
-            {/* Top-TBNR inline — nur Behördenkennzeichen + Kurzbezeichnung */}
-            {topTbnr && (
-              <div className="flex items-start gap-1.5 text-xs text-claimondo-navy/70 pt-1 border-t border-claimondo-border/50">
-                <span className="font-mono text-claimondo-ondo shrink-0">{topTbnr.tbnr}</span>
-                <span>{topTbnr.tatbestand.kurzform ?? topTbnr.tatbestand.bezeichnung}</span>
-                {topTbnr.tatbestand.paragraph_num != null && (
-                  <span className="shrink-0 text-claimondo-ondo/60">
-                    · § {topTbnr.tatbestand.paragraph_num} {topTbnr.tatbestand.vorschrift}
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo mb-1">
+              TBNR-Kandidaten ({data.vorschlaege.length})
+              {data.source !== 'ocr' && (
+                <span className="ml-2 normal-case tracking-normal text-amber-700">
+                  — nicht gespeichert (Polizei nicht vor Ort)
+                </span>
+              )}
+              {data.source === 'ocr' && polizeiVorOrt && (
+                <span className="ml-2 normal-case tracking-normal text-emerald-700">
+                  — bestätigt aus Polizeibericht
+                </span>
+              )}
+            </p>
+            <ul className="space-y-1">
+              {data.vorschlaege.map((v) => (
+                <li
+                  key={v.tbnr}
+                  className="flex items-start gap-2 text-xs bg-white/70 rounded-md px-2 py-1.5 border border-claimondo-border"
+                >
+                  <span className="font-mono font-medium text-claimondo-ondo shrink-0">{v.tbnr}</span>
+                  <span className="text-claimondo-navy flex-1">
+                    <span className="font-medium">{v.tatbestand.kurzform ?? v.tatbestand.bezeichnung}</span>
+                    {v.tatbestand.paragraph_num != null && (
+                      <span className="text-claimondo-ondo/70"> · § {v.tatbestand.paragraph_num} {v.tatbestand.vorschrift}</span>
+                    )}
                   </span>
-                )}
-                {data.source === 'ocr' && polizeiVorOrt && (
-                  <span className="ml-auto shrink-0 text-emerald-700">aus Polizeibericht</span>
-                )}
-              </div>
-            )}
+                  <span className="text-[10px] text-claimondo-ondo/70 shrink-0">{v.confidence}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}

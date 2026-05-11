@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -161,7 +161,7 @@ export default function KalenderEinstellungenClient({
             )}
             {caldav.lastSyncAt && (
               <p className="text-[11px] text-claimondo-ondo/70">
-                Letzter Check: {new Date(caldav.lastSyncAt).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })}
+                Letzter Check: {new Date(caldav.lastSyncAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
               </p>
             )}
             {caldav.lastError && (

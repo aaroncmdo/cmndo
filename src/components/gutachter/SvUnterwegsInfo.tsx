@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // CMM-36: Zeigt dem SV seinen Live-Tracking-Status unterhalb des Steppers.
 // Erscheint nur wenn Tracking aktiv (isTracking=true). Zeigt Name, ETA und
@@ -7,36 +7,31 @@
 import { NavigationIcon } from 'lucide-react'
 import type { GeoTrackingState } from '@/hooks/useGeoTracking'
 
-type Props = {
+export function SvUnterwegsInfo({
+  tracking,
+  svVorname,
+}: {
   tracking: GeoTrackingState
-  /** Fallback: Termin-Startzeit wenn GPS nicht verfügbar (ISO-String) */
-  terminStartIso?: string | null
-}
-
-export function SvUnterwegsInfo({ tracking, terminStartIso }: Props) {
+  svVorname: string | null
+}) {
   if (!tracking.isTracking) return null
 
+  const name = svVorname ?? 'Sie sind'
   const ankunft = tracking.etaAnkunftzeit
-    ? tracking.etaAnkunftzeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
-    : null
-
-  // Fallback: Termin-Startzeit anzeigen wenn keine GPS-ETA verfügbar
-  const terminFallback = !ankunft && terminStartIso
-    ? new Date(terminStartIso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+    ? tracking.etaAnkunftzeit.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
     : null
 
   return (
     <div className="rounded-2xl bg-claimondo-navy text-white px-4 py-3 flex items-center gap-3">
       <NavigationIcon className="w-4 h-4 shrink-0 text-claimondo-light-blue" />
       <div className="flex-1 min-w-0">
-        <span className="text-sm font-semibold">Sie sind unterwegs</span>
-        <span className="text-sm text-claimondo-light-blue ml-2">
-          {ankunft
-            ? `· Ankunft ca. ${ankunft}${tracking.etaMinuten ? ` (${tracking.etaMinuten} Min.)` : ''}`
-            : terminFallback
-              ? `· Termin um ${terminFallback} Uhr`
-              : '· Ankunft wird berechnet…'}
-        </span>
+        <span className="text-sm font-semibold">{name} ist unterwegs</span>
+        {ankunft && (
+          <span className="text-sm text-claimondo-light-blue ml-2">
+            · Ankunft ca. {ankunft}
+            {tracking.etaMinuten && ` (${tracking.etaMinuten} Min.)`}
+          </span>
+        )}
       </div>
     </div>
   )

@@ -27,9 +27,8 @@ export async function LandingHero({ authenticatedUser }: Props) {
 
   return (
     <section
-      className="relative isolate overflow-hidden"
+      className="relative isolate overflow-hidden bg-claimondo-bg"
       aria-labelledby="hero-heading"
-      style={{ background: '#f8f9fb' }}
     >
       {/* Atmosphärische Hintergrund-Spotlights — 3 radiale Gradients,
           asymmetrisch verteilt, geben dem Glass-Look Tiefe. */}
@@ -82,7 +81,7 @@ export async function LandingHero({ authenticatedUser }: Props) {
           {t('headline')}
         </h1>
 
-        <p className="mt-5 max-w-2xl text-balance text-base leading-relaxed text-claimondo-ondo sm:mt-6 sm:text-lg">
+        <p className="mt-6 max-w-2xl text-base leading-relaxed text-claimondo-ondo sm:text-lg">
           {t('subheadline')}
         </p>
 
@@ -119,11 +118,7 @@ export async function LandingHero({ authenticatedUser }: Props) {
           )}
         </div>
 
-        <a
-          href={`tel:${PHONE_TEL}`}
-          aria-label={t('phone_aria')}
-          className="mt-8 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm text-claimondo-ondo transition-colors hover:bg-claimondo-navy/5 hover:text-claimondo-navy"
-        >
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-claimondo-ondo">
           <Phone className="h-4 w-4" aria-hidden="true" />
           <span>{t('phone_label')}</span>
           <span className="font-semibold">{PHONE_DISPLAY}</span>
@@ -143,10 +138,9 @@ export async function LandingHero({ authenticatedUser }: Props) {
               }}
             >
               <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10"
-                style={{ background: 'rgba(69,115,162,0.12)' }}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10 sm:h-10 sm:w-10"
               >
-                <Icon className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: '#4573A2' }} />
+                <Icon className="h-4 w-4 text-claimondo-ondo sm:h-5 sm:w-5" />
               </div>
               <div className="flex flex-1 items-baseline gap-2 sm:mt-2 sm:flex-col sm:items-start sm:gap-0">
                 <span

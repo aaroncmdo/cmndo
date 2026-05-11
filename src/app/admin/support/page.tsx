@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 
@@ -57,7 +57,7 @@ export default async function SupportPage() {
                   return (
                     <tr key={p.id} className="border-b border-claimondo-border hover:bg-claimondo-bg">
                       <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">
-                        {new Date(p.erstellt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(p.erstellt_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="px-4 py-3 text-claimondo-navy text-xs">{name}</td>
                       <td className="px-4 py-3">

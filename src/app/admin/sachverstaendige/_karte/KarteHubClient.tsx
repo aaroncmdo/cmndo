@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-690: Karten-Rückbau. Google Maps statt Mapbox-3D. Ein Pin pro SV am
 // Büro-Standort, Isochrone-Polygon in derselben Typ-Farbe, Klick →

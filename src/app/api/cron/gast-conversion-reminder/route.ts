@@ -10,15 +10,12 @@ export async function GET(request: Request) {
   const admin = createAdminClient()
   const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
-  // Gast-Filter via account_typ='gast' — sobald der User konvertiert wird,
-  // setzt server-actions.ts:285+302 den Wert auf 'voll'. Vorher gab es hier
-  // einen .is('verified_at', null)-Filter — die Spalte existiert nicht und
-  // erzeugte 400 Bad Request → 500 im Cron (Vercel-Log 2026-05-05 10:00 UTC).
   const { data: gaeste, error } = await admin
     .from('profiles')
     .select('id, email, anzeigename')
     .eq('account_typ', 'gast')
     .lt('created_at', cutoff)
+    .is('verified_at', null)
     .limit(100)
 
   if (error) {

@@ -150,7 +150,7 @@ export default async function UeberUnsPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#f8f9fb' }}>
+    <div className="min-h-screen bg-claimondo-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
@@ -198,7 +198,7 @@ export default async function UeberUnsPage() {
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             {t('hero.headline')}{' '}
-            <span style={{ color: '#4573A2' }}>{t('hero.headline_accent')}</span>
+            <span className="text-claimondo-ondo">{t('hero.headline_accent')}</span>
           </h1>
           <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
             {t('hero.subline')}
@@ -271,7 +271,7 @@ export default async function UeberUnsPage() {
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             In Deutschland verlieren Unfallbeteiligte im Schnitt{' '}
-            <span style={{ color: '#4573A2' }}>33 % ihres Schadensanspruchs</span>{' '}
+            <span className="text-claimondo-ondo">33 % ihres Schadensanspruchs</span>{' '}
             — weil Versicherungen kürzen und niemand widerspricht.
           </h2>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-claimondo-shield sm:text-lg">
@@ -306,11 +306,8 @@ export default async function UeberUnsPage() {
                   className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-[0_8px_28px_rgba(13,27,62,0.10)]"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
-                  <div
-                    className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl"
-                    style={{ background: 'rgba(69,115,162,0.12)' }}
-                  >
-                    <Icon className="h-5 w-5" style={{ color: '#4573A2' }} />
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-claimondo-ondo/12">
+                    <Icon className="h-5 w-5 text-claimondo-ondo" />
                   </div>
                   <h3
                     className="text-lg font-bold text-claimondo-navy"
@@ -395,7 +392,7 @@ export default async function UeberUnsPage() {
 
               <blockquote
                 className="mt-6 flex gap-3 rounded-2xl px-4 py-3.5"
-                style={{ background: 'rgba(69,115,162,0.06)', borderLeft: '3px solid #7BA3CC' }}
+                style={{ background: 'rgba(69,115,162,0.06)', borderLeft: '3px solid var(--color-claimondo-light-blue)' }}
               >
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
                 <div>
@@ -492,8 +489,8 @@ export default async function UeberUnsPage() {
         />
         <div className="relative mx-auto max-w-3xl px-5 sm:px-6">
           <h2
-            className="text-3xl font-bold sm:text-4xl"
-            style={{ fontFamily: 'Montserrat, system-ui, sans-serif', color: '#fff' }}
+            className="text-3xl font-bold text-white sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             Direkt reden — schneller als jede Versicherung
           </h2>

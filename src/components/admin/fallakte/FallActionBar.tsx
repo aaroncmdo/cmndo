@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-567 (V1): Action-Bar oberhalb der Tab-Bar — ersetzt Teile des alten
 // PhaseHeader. Enthält die funktionalen Buttons (Status-Override, Kanzlei-

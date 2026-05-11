@@ -41,6 +41,10 @@ export async function createTask(formData: FormData) {
 }
 
 export async function updateTaskStatus(taskId: string, newStatus: string) {
+  // Audit-Fix #6: Rollen-Check ergaenzt — vorher konnten kunde/sv die Action
+  // direkt aufrufen und beliebige Tasks erledigen/zurueckziehen.
+  await requireRole(['admin'])
+
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
@@ -68,6 +72,9 @@ export async function updateTaskStatus(taskId: string, newStatus: string) {
 }
 
 export async function deleteTask(taskId: string) {
+  // Audit-Fix #6: Rollen-Check ergaenzt.
+  await requireRole(['admin'])
+
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')

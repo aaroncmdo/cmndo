@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-154: Task-Kanban Rewrite.
 // - Status-Dropdown entfernt, Statuswechsel ausschliesslich per Drag & Drop
@@ -439,7 +439,7 @@ function TaskCard({
       {isAutoResolved && (
         <div
           className="mb-2 inline-flex items-center gap-1 text-[10px] text-claimondo-ondo/70"
-          title={`Automatisch erledigt am ${task.auto_resolved_am ? new Date(task.auto_resolved_am).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }) : ''} weil ${task.auto_resolved_grund ?? ''}`}
+          title={`Automatisch erledigt am ${task.auto_resolved_am ? new Date(task.auto_resolved_am).toLocaleString('de-DE') : ''} weil ${task.auto_resolved_grund ?? ''}`}
         >
           <svg
             width="10"

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-500 N5: Shared-Form für Benachrichtigungs-Präferenzen. Wird in den
 // Settings-Sections aller Rollen verwendet (Kunde/SV/Makler). Drei Bereiche:
@@ -264,40 +264,40 @@ export function NotificationPreferencesForm({
       {/* Ruhezeiten */}
       <section>
         <div className="flex items-center gap-2 mb-2">
-          <MoonIcon width={14} height={14} className="text-[#4573A2]" />
-          <h3 className="text-sm font-semibold text-[#0D1B3E]">Ruhezeiten</h3>
+          <MoonIcon width={14} height={14} className="text-claimondo-ondo" />
+          <h3 className="text-sm font-semibold text-claimondo-navy">Ruhezeiten</h3>
         </div>
-        <p className="text-xs text-[#4573A2] mb-3">
+        <p className="text-xs text-claimondo-ondo mb-3">
           In diesem Zeitfenster werden normale Nachrichten nicht gesendet. Wichtige
           Nachrichten (z.&nbsp;B. Gutachter-Ankunft, Eskalationsfrist) erreichen Sie
           auch in Ruhezeiten.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <label className="block">
-            <span className="text-xs uppercase tracking-wider text-[#4573A2] font-medium">Von</span>
+            <span className="text-xs uppercase tracking-wider text-claimondo-ondo font-medium">Von</span>
             <input
               type="time"
               value={quietStart}
               onChange={(e) => setQuietStart(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-[#e4e7ef] bg-white px-3 py-2 text-sm text-[#0D1B3E] focus:outline-none focus:ring-2 focus:ring-[#4573A2]/40"
+              className="mt-1 w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40"
             />
           </label>
           <label className="block">
-            <span className="text-xs uppercase tracking-wider text-[#4573A2] font-medium">Bis</span>
+            <span className="text-xs uppercase tracking-wider text-claimondo-ondo font-medium">Bis</span>
             <input
               type="time"
               value={quietEnd}
               onChange={(e) => setQuietEnd(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-[#e4e7ef] bg-white px-3 py-2 text-sm text-[#0D1B3E] focus:outline-none focus:ring-2 focus:ring-[#4573A2]/40"
+              className="mt-1 w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40"
             />
           </label>
           <label className="block">
-            <span className="text-xs uppercase tracking-wider text-[#4573A2] font-medium">Zeitzone</span>
+            <span className="text-xs uppercase tracking-wider text-claimondo-ondo font-medium">Zeitzone</span>
             <input
               type="text"
               value={timezone}
               readOnly
-              className="mt-1 w-full rounded-lg border border-[#e4e7ef] bg-[#f8f9fb] px-3 py-2 text-sm text-[#4573A2]"
+              className="mt-1 w-full rounded-lg border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm text-claimondo-ondo"
             />
           </label>
         </div>
@@ -309,10 +309,10 @@ export function NotificationPreferencesForm({
       {/* Kanäle */}
       <section>
         <div className="flex items-center gap-2 mb-2">
-          <BellIcon width={14} height={14} className="text-[#4573A2]" />
-          <h3 className="text-sm font-semibold text-[#0D1B3E]">Kanäle komplett abschalten</h3>
+          <BellIcon width={14} height={14} className="text-claimondo-ondo" />
+          <h3 className="text-sm font-semibold text-claimondo-navy">Kanäle komplett abschalten</h3>
         </div>
-        <p className="text-xs text-[#4573A2] mb-3">
+        <p className="text-xs text-claimondo-ondo mb-3">
           Deaktiviert alle Benachrichtigungen für diesen Kanal — unabhängig vom Event-Typ.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -321,15 +321,15 @@ export function NotificationPreferencesForm({
             return (
               <label
                 key={channel}
-                className="flex items-center gap-3 p-3 rounded-lg border border-[#e4e7ef] bg-[#f8f9fb] hover:bg-white cursor-pointer"
+                className="flex items-center gap-3 p-3 rounded-lg border border-claimondo-border bg-claimondo-bg hover:bg-white cursor-pointer"
               >
                 <input
                   type="checkbox"
                   checked={!isOptedOut}
                   onChange={() => toggleChannelOptOut(channel)}
-                  className="w-4 h-4 rounded border-[#e4e7ef] text-[#0D1B3E] focus:ring-[#4573A2]/40"
+                  className="w-4 h-4 rounded border-claimondo-border text-claimondo-navy focus:ring-claimondo-ondo/40"
                 />
-                <span className="text-sm text-[#0D1B3E]">{CHANNEL_LABELS[channel].long}</span>
+                <span className="text-sm text-claimondo-navy">{CHANNEL_LABELS[channel].long}</span>
               </label>
             )
           })}
@@ -339,28 +339,28 @@ export function NotificationPreferencesForm({
       {/* Feintuning */}
       {categories.length > 0 ? (
         <section>
-          <h3 className="text-sm font-semibold text-[#0D1B3E] mb-2">Feintuning pro Ereignis</h3>
-          <p className="text-xs text-[#4573A2] mb-3">
+          <h3 className="text-sm font-semibold text-claimondo-navy mb-2">Feintuning pro Ereignis</h3>
+          <p className="text-xs text-claimondo-ondo mb-3">
             Welche Ereignisse sollen auf welchem Kanal ankommen? Haken = ja, leer = nein.
           </p>
           <div className="space-y-4">
             {categories.map((cat) => (
               <div
                 key={cat.id}
-                className="rounded-xl border border-[#e4e7ef] overflow-hidden"
+                className="rounded-xl border border-claimondo-border overflow-hidden"
               >
-                <div className="px-4 py-2 bg-[#f8f9fb] border-b border-[#e4e7ef]">
-                  <h4 className="text-xs font-semibold text-[#0D1B3E] uppercase tracking-wider">
+                <div className="px-4 py-2 bg-claimondo-bg border-b border-claimondo-border">
+                  <h4 className="text-xs font-semibold text-claimondo-navy uppercase tracking-wider">
                     {cat.label}
                   </h4>
                 </div>
-                <div className="divide-y divide-[#e4e7ef]">
+                <div className="divide-y divide-claimondo-border">
                   {cat.events.map((eventType) => (
                     <div
                       key={eventType}
                       className="px-4 py-2.5 grid grid-cols-1 sm:grid-cols-[1fr_auto] items-center gap-2"
                     >
-                      <span className="text-sm text-[#0D1B3E]">
+                      <span className="text-sm text-claimondo-navy">
                         {EVENT_LABELS[eventType] ?? eventType}
                       </span>
                       <div className="flex items-center gap-3">
@@ -370,14 +370,14 @@ export function NotificationPreferencesForm({
                           return (
                             <label
                               key={channel}
-                              className={`flex items-center gap-1.5 text-xs ${disabledByChannelOptOut ? 'opacity-40' : 'text-[#0D1B3E]'}`}
+                              className={`flex items-center gap-1.5 text-xs ${disabledByChannelOptOut ? 'opacity-40' : 'text-claimondo-navy'}`}
                             >
                               <input
                                 type="checkbox"
                                 checked={enabled && !disabledByChannelOptOut}
                                 disabled={disabledByChannelOptOut}
                                 onChange={() => toggleEventChannel(eventType, channel)}
-                                className="w-3.5 h-3.5 rounded border-[#e4e7ef] text-[#0D1B3E] focus:ring-[#4573A2]/40"
+                                className="w-3.5 h-3.5 rounded border-claimondo-border text-claimondo-navy focus:ring-claimondo-ondo/40"
                               />
                               <span>{CHANNEL_LABELS[channel].short}</span>
                             </label>
@@ -398,7 +398,7 @@ export function NotificationPreferencesForm({
         <button
           type="submit"
           disabled={isPending || saveState.status === 'saving'}
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-[#0D1B3E] text-white text-sm font-semibold hover:bg-[#1E3A5F] disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
         >
           {isPending || saveState.status === 'saving' ? (
             <Loader2Icon width={14} height={14} className="animate-spin" />

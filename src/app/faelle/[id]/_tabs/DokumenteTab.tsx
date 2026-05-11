@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // Admin-Fallakte Dokumente-Tab.
 // AAR-755 (Phase D): Ehemals 739-LOC-Monolith. Nach Dekomposition
@@ -97,16 +97,16 @@ const DOK_LABELS: Record<string, string> = {
 const STATUS_CFG: Record<string, { bg: string; text: string; icon: typeof CheckCircle2Icon }> = {
   ausstehend: { bg: 'bg-amber-50', text: 'text-amber-600', icon: ClockIcon },
   nachgereicht_angefordert: { bg: 'bg-orange-50', text: 'text-orange-600', icon: BellIcon },
-  hochgeladen: { bg: 'bg-[#f8f9fb]', text: 'text-claimondo-ondo', icon: CheckCircle2Icon },
+  hochgeladen: { bg: 'bg-claimondo-bg', text: 'text-claimondo-ondo', icon: CheckCircle2Icon },
   geprueft: { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: CheckCircle2Icon },
 }
 
 const KAT_COLORS: Record<string, string> = {
-  gutachten: 'bg-[#f8f9fb] text-claimondo-ondo',
+  gutachten: 'bg-claimondo-bg text-claimondo-ondo',
   rechtlich: 'bg-amber-50 text-amber-700',
   kunden_upload: 'bg-emerald-50 text-emerald-700',
   kanzlei: 'bg-claimondo-ondo/10 text-claimondo-navy',
-  sonstiges: 'bg-[#f8f9fb] text-claimondo-ondo',
+  sonstiges: 'bg-claimondo-bg text-claimondo-ondo',
 }
 
 type DokumenteTabProps = {
@@ -272,7 +272,7 @@ export default function DokumenteTab({
 
       {/* Pflichtdokumente Checkliste */}
       <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-claimondo-border bg-[#f8f9fb]">
+        <div className="px-4 py-2.5 border-b border-claimondo-border bg-claimondo-bg">
           <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
             Pflichtdokumente
           </h3>
@@ -368,7 +368,7 @@ export default function DokumenteTab({
       {/* AAR-326: Zu prüfende Uploads */}
       {zuPruefendeUploads.length > 0 && (
         <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-claimondo-border bg-[#f8f9fb]">
+          <div className="px-4 py-2.5 border-b border-claimondo-border bg-claimondo-bg">
             <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider flex items-center gap-2">
               <FileCheckIcon className="w-3.5 h-3.5" /> Zu prüfende Uploads
               <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-claimondo-ondo/10 text-claimondo-ondo text-[10px] tabular-nums">
@@ -450,7 +450,7 @@ export default function DokumenteTab({
 
       {/* Alle Dateien */}
       <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-claimondo-border flex items-center justify-between bg-[#f8f9fb]">
+        <div className="px-4 py-2.5 border-b border-claimondo-border flex items-center justify-between bg-claimondo-bg">
           <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
             Alle Dateien ({dokumente.length})
           </h3>
@@ -461,7 +461,7 @@ export default function DokumenteTab({
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder="Suche..."
-                className="pl-7 pr-2 py-1 text-xs bg-[#f8f9fb] border border-claimondo-border rounded-lg w-32 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+                className="pl-7 pr-2 py-1 text-xs bg-claimondo-bg border border-claimondo-border rounded-lg w-32 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
               />
             </div>
           )}
@@ -477,7 +477,7 @@ export default function DokumenteTab({
               return (
                 <div
                   key={dok.id}
-                  className="flex items-center justify-between px-4 py-2.5 hover:bg-[#f8f9fb] transition-colors"
+                  className="flex items-center justify-between px-4 py-2.5 hover:bg-claimondo-bg transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <FileTextIcon className="w-4 h-4 text-claimondo-ondo/70 shrink-0" />
@@ -491,7 +491,7 @@ export default function DokumenteTab({
                           <span className="text-[9px] text-claimondo-ondo/70">{dok.quelle}</span>
                         )}
                         <span className="text-[9px] text-claimondo-ondo/70">
-                          {new Date(dok.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                          {new Date(dok.created_at).toLocaleDateString('de-DE')}
                         </span>
                       </div>
                     </div>

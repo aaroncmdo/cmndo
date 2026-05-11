@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useMemo } from 'react'
 import { MapPinIcon, ClockIcon, CheckCircleIcon, CarIcon, RefreshCwIcon, XCircleIcon, CalendarIcon, MapIcon } from 'lucide-react'
@@ -269,7 +269,7 @@ export default function KundeTrackingClient({
               return new Date(tz).toISOString().slice(0, 16)
             }
             const formatDe = (d: Date) =>
-              d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+              d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
             type Vorschlag = { key: string; label: string; sub: string; datum: Date }
             const vorschlaege: Vorschlag[] = []
             if (base && !Number.isNaN(base.getTime())) {

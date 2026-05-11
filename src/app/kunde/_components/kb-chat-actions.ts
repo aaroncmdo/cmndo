@@ -14,7 +14,7 @@ export async function sendKundeChatMessage(params: {
   kanal: KundeChatKanal
   empfaengerId: string
   fallId?: string | null
-}): Promise<{ ok: boolean; error?: string }> {
+}): Promise<{ ok: boolean; error?: string; messageId?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
@@ -27,16 +27,23 @@ export async function sendKundeChatMessage(params: {
     .single()
 
   const admin = createAdminClient()
-  const { error } = await admin.from('nachrichten').insert({
-    fall_id: params.fallId ?? null,
-    kanal: params.kanal,
-    sender_id: user.id,
-    sender_rolle: profile?.rolle ?? 'kunde',
-    empfaenger_id: params.empfaengerId,
-    nachricht: params.nachricht,
-    richtung: 'outbound',
-    gelesen: false,
-  })
+  // Audit-Fix #7: messageId zurueckgeben damit Client das optimistic
+  // Element deterministisch ersetzen kann (statt per sender_id+nachricht
+  // Heuristik die bei zwei schnellen Sends mit gleichem Text doppelt).
+  const { data: inserted, error } = await admin
+    .from('nachrichten')
+    .insert({
+      fall_id: params.fallId ?? null,
+      kanal: params.kanal,
+      sender_id: user.id,
+      sender_rolle: profile?.rolle ?? 'kunde',
+      empfaenger_id: params.empfaengerId,
+      nachricht: params.nachricht,
+      richtung: 'outbound',
+      gelesen: false,
+    })
+    .select('id')
+    .single()
   if (error) {
     console.error('[sendKundeChatMessage] insert error:', error.message)
     return { ok: false, error: error.message }
@@ -51,7 +58,7 @@ export async function sendKundeChatMessage(params: {
   // Insert nicht zuverlaessig zurueck-las (Race) — Effekt: Nachricht
   // verschwand kurz nach dem Senden aus der UI. Realtime + Optimistic
   // reichen vollstaendig, der Server muss den /kunde-Cache nicht anfassen.
-  return { ok: true }
+  return { ok: true, messageId: inserted?.id as string | undefined }
 }
 
 export async function markKundeChatMessagesRead(kanal: KundeChatKanal): Promise<{ ok: boolean }> {

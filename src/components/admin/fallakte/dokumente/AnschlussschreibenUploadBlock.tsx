@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-755 (Phase D): aus dem DokumenteTab-Monolithen extrahiert.
 // Upload-Box für das Anschlussschreiben (AS). Zeigt im Post-Upload-Fall
@@ -73,7 +73,7 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
               <span className="text-claimondo-ondo">Sendedatum (OCR)</span>
               <p className="text-claimondo-navy font-medium">
                 {fallAS.anschlussschreiben_sendedatum
-                  ? new Date(fallAS.anschlussschreiben_sendedatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
+                  ? new Date(fallAS.anschlussschreiben_sendedatum).toLocaleDateString('de-DE')
                   : 'Nicht erkannt'}
               </p>
             </div>

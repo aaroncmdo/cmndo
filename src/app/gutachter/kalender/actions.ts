@@ -38,7 +38,6 @@ export async function setTermin(fallId: string, termin: string) {
   const primary = aktive[0] ?? null
   const altere = aktive.slice(1)
 
-  let syncTerminId: string | null = null
   if (primary) {
     const { error } = await supabase
       .from('gutachter_termine')
@@ -79,6 +78,18 @@ export async function setTermin(fallId: string, termin: string) {
         }
       })(),
     ])
+  }
+
+  // AAR-704C: ältere aktive Termine cancellen damit nur einer aktiv bleibt
+  if (altere.length > 0) {
+    await supabase
+      .from('gutachter_termine')
+      .update({
+        status: 'storniert',
+        cancelled_at: new Date().toISOString(),
+        sv_ablehnung_grund: 'Vom SV durch neuen Termin ersetzt (manuelle Verschiebung)',
+      })
+      .in('id', altere.map((t) => t.id as string))
   }
 
   // AAR-704C: ältere aktive Termine cancellen damit nur einer aktiv bleibt

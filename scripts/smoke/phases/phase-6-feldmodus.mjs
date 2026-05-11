@@ -236,35 +236,6 @@ export async function runPhase6(svContext, reportRef = { notes: [] }, phase5Resu
 
       // Warte nochmal 5s — manchmal dauert der Realtime-Sub
       await page.waitForTimeout(5_000)
-
-      // 2026-05-08: Service-Role-Forced-Arrive damit Phase 7+8 die SvFallakte-
-      // View und den BesichtigungAbschliessenButton sehen. Die Smoke-Pipeline
-      // testet weiterhin den UI-Pfad oben (auto-arrive); wenn das fehlschlägt
-      // (typisch headless ohne useWatchPosition-Permission-Events), zwingen
-      // wir die DB+Session-Zustände damit die Cascade nicht alle Folgephasen
-      // verfälscht.
-      const dbForce = getServiceDb()
-      if (terminId) {
-        const nowIso = new Date().toISOString()
-        await dbForce.from('gutachter_termine').update({
-          sv_angekommen_am: nowIso,
-          besichtigung_gestartet_am: nowIso,
-        }).eq('id', terminId)
-      }
-      // sessionStatus auf arrived setzen
-      const todaySession = new Date()
-      todaySession.setHours(0, 0, 0, 0)
-      const datum = todaySession.toISOString().slice(0, 10)
-      const svId = (loadFixtureIds() ?? {}).sv_sachverstaendige_id
-      if (svId) {
-        await dbForce.from('sv_tages_session')
-          .update({ status: 'arrived', aktueller_termin_id: terminId })
-          .eq('sv_id', svId).eq('datum', datum)
-      }
-      logPhase(6, 'Forced-Arrive via Service-Role gesetzt (Workaround für headless GPS)')
-      // Page neu laden damit Server-Components den neuen Zustand rendern
-      await page.reload({ waitUntil: 'networkidle' }).catch(() => {})
-      await page.waitForTimeout(2_000)
     }
 
     // Screenshot nach Arrive

@@ -11,8 +11,6 @@ import { readPromoCookie, isValidPromoCodeFormat } from '@/lib/flow/promo-attrib
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
 import { schritt1Schema, type Schritt1Input } from '@/lib/flow/schemas/schritt1'
 import { createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
-import { berechneFehlendeFelder } from '@/lib/flow/fehlende-felder'
-import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 
 type CreateLeadResult =
   | { success: true; leadId: string; abortToSelbstverschulden: boolean }
@@ -100,35 +98,6 @@ export async function createLeadFromSchritt1(
       error: error?.message ?? 'Lead konnte nicht angelegt werden',
     }
   }
-
-  // Sofort nach Insert: fehlende_felder_jsonb berechnen und speichern.
-  const fehlendeFelder = berechneFehlendeFelder({
-    schuldfrage: data.schuldfrage,
-    schadentyp: data.schadentyp,
-    polizei_vor_ort: data.polizei_vor_ort,
-    ist_fahrzeughalter: data.ist_fahrzeughalter,
-    hat_vorschaeden: data.hat_vorschaeden,
-    finanzierung_leasing: data.finanzierung_leasing ?? 'keine',
-    personenschaden_flag: data.personenschaden_flag,
-    mietwagen_flag: data.mietwagen_flag ?? null,
-    vorname: data.vorname,
-    nachname: data.nachname,
-    email: data.email,
-    telefon: data.telefon,
-  })
-
-  if (fehlendeFelder.length > 0) {
-    await admin
-      .from('leads')
-      .update({ fehlende_felder_jsonb: fehlendeFelder })
-      .eq('id', lead.id)
-  }
-
-  // WhatsApp-Verfügbarkeit prüfen + cachen (fire-and-forget — VPS-PM2,
-  // kein Vercel-Cold-Kill-Risiko). Ergebnis landet in leads.whatsapp_*.
-  void checkAndCacheAvailability('lead', lead.id, data.telefon).catch((err) => {
-    console.error('[whatsapp-check] lead failed:', err)
-  })
 
   // F-02: Dispatch-User über neuen Lead benachrichtigen (fire-and-forget).
   if (!isAbort) {

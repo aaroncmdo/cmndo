@@ -1,4 +1,4 @@
-// AAR-85: SLA-Monitoring Admin-Widget — zeigt pending + breached SLAs
+﻿// AAR-85: SLA-Monitoring Admin-Widget — zeigt pending + breached SLAs
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { AlertTriangleIcon, ClockIcon, CheckCircleIcon } from 'lucide-react'
@@ -88,7 +88,7 @@ export default async function SlaMonitoringPage() {
                   </td>
                   <td className="px-4 py-3 text-claimondo-navy">{SLA_LABEL[sla.sla_typ as SlaTyp]}</td>
                   <td className="px-4 py-3 text-claimondo-ondo">
-                    {breach.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    {breach.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     {!isBreached && (
                       <span className={`ml-2 text-xs ${restMin < 30 ? 'text-amber-600 font-medium' : 'text-claimondo-ondo/70'}`}>
                         {restMin > 0 ? `noch ${restMin} Min` : 'überfällig'}

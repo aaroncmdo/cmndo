@@ -102,7 +102,7 @@ export default function FokusHeader({
             Stop {Math.min(aktuellerIndex + 1, totalStops)}/{totalStops}
           </span>
           {distLabel && (
-            <span className={`inline-flex items-center gap-1 text-xs ${isLight ? 'text-claimondo-ondo' : 'text-claimondo-ondo/50'}`}>
+            <span className="inline-flex items-center gap-1 text-xs text-claimondo-ondo/50">
               <GaugeIcon className="w-3.5 h-3.5" />
               {distLabel}
             </span>

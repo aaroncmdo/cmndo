@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
@@ -515,7 +515,7 @@ export default async function AbrechnungPage() {
                       </td>
                       <td className="px-4 py-3 text-claimondo-ondo text-xs">{e.beschreibung ?? '—'}</td>
                       <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">
-                        {new Date(e.eingezahlt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                        {new Date(e.eingezahlt_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </td>
                     </tr>
                   ))}
@@ -525,29 +525,22 @@ export default async function AbrechnungPage() {
           </div>
         )}
 
-        {/* Monatsabrechnung — 2026-05-07 Design-Review: Beta-Pill explizit
-            damit der SV nicht denkt der Button sei kaputt; ETA-Hinweis im
-            Subtitle statt nur grauer Hilfsfußzeile. */}
+        {/* Monatsabrechnung */}
         <div className="bg-white rounded-2xl border border-claimondo-border p-6">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-claimondo-navy font-semibold">Monatsabrechnung</h2>
-                <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
-                  Beta
-                </span>
-              </div>
-              <p className="text-claimondo-ondo text-sm mt-0.5">PDF-Export Ihrer monatlichen Abrechnung — folgt mit dem nächsten Release.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-claimondo-navy font-semibold">Monatsabrechnung</h2>
+              <p className="text-claimondo-ondo text-sm mt-0.5">PDF-Export Ihrer monatlichen Abrechnung</p>
             </div>
             <button
               disabled
-              title="PDF-Download folgt mit dem nächsten Release."
               className="flex items-center gap-2 bg-claimondo-bg text-claimondo-ondo text-sm font-medium py-2.5 px-4 rounded-xl cursor-not-allowed opacity-50"
             >
               <DownloadIcon className="w-4 h-4" />
               PDF Download
             </button>
           </div>
+          <p className="text-claimondo-ondo/70 text-xs mt-3">Coming soon — PDF-Abrechnungen werden in Kürze verfügbar sein.</p>
         </div>
       </div>
     </div>

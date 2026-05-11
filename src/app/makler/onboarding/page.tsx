@@ -1,4 +1,4 @@
-// AAR-483 (M1): Defensiver Fallback für Makler ohne zugeordnete makler-Row.
+﻿// AAR-483 (M1): Defensiver Fallback für Makler ohne zugeordnete makler-Row.
 // Das sollte durch den Signup-Flow nicht passieren — wenn doch, dem User
 // einen klaren Hinweis + Support-Kontakt anzeigen statt 404/Crash.
 //

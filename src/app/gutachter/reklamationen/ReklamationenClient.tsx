@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-93: SV-Portal Reklamations-Liste + Dialog
 import { useState, useTransition } from 'react'
@@ -9,7 +9,6 @@ import { createReklamation } from './actions'
 import { REKLAMATIONS_GRUENDE } from './constants'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
-import EmptyState from '@/components/shared/EmptyState'
 
 type Reklamation = {
   id: string
@@ -79,25 +78,6 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
         </button>
       </div>
 
-      {reklamationen.length === 0 ? (
-        // 2026-05-07 EmptyState-Iter-2: Vorher kahles Card mit Icon + Satz.
-        // Reklamationen sind ein erwünschter Empty-State („alles läuft gut!")
-        // — die Komposition kommuniziert das klar und bietet trotzdem einen
-        // Pfad, falls der SV doch eine einreichen will.
-        <EmptyState
-          icon={ShieldCheckIcon}
-          title="Keine Reklamationen — alles läuft sauber"
-          description="Hier siehst du Reklamationen zu deinen Aufträgen (z.B. Kunde war nicht da, Schaden anders als gemeldet, Mehraufwand). Nutze den Button oben rechts, sobald ein Fall einen Mehraufwand rechtfertigt."
-          actions={
-            faelle.length > 0
-              ? [
-                  { label: 'Neue Reklamation', onClick: () => setShowDialog(true), variant: 'primary' },
-                  { label: 'Meine Fälle', href: '/gutachter/faelle', variant: 'secondary' },
-                ]
-              : [{ label: 'Aufträge ansehen', href: '/gutachter/auftraege', variant: 'primary' }]
-          }
-        />
-      ) : (
       <div className="bg-white rounded-xl border border-claimondo-border divide-y divide-claimondo-border">
         {reklamationen.map(r => {
           const fall = Array.isArray(r.faelle) ? r.faelle[0] : r.faelle
@@ -128,12 +108,18 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
                 </div>
               )}
               <p className="text-[10px] text-claimondo-ondo/70">
-                Eingereicht: {new Date(r.eingereicht_am).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                {r.bearbeitet_am && ` · Bearbeitet: ${new Date(r.bearbeitet_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}`}
+                Eingereicht: {new Date(r.eingereicht_am).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                {r.bearbeitet_am && ` · Bearbeitet: ${new Date(r.bearbeitet_am).toLocaleDateString('de-DE')}`}
               </p>
             </div>
           )
         })}
+        {reklamationen.length === 0 && (
+          <div className="p-12 text-center">
+            <AlertCircleIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-2" />
+            <p className="text-sm text-claimondo-ondo/70">Keine Reklamationen vorhanden.</p>
+          </div>
+        )}
       </div>
       )}
 

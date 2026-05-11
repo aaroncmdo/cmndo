@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-637: Rückruf-Section in der Admin/KB-Fallakte. Liest + schreibt
 // admin_termine mit typ='rueckruf' + fall_id. Parallel zur Lead-Rückruf-
@@ -91,21 +91,21 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
         type="datetime-local"
         value={datum}
         onChange={e => setDatum(e.target.value)}
-        className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2]"
+        className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
       />
       <input
         type="text"
         value={notiz}
         onChange={e => setNotiz(e.target.value)}
         placeholder="Notiz"
-        className="w-full bg-[#f8f9fb] border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#4573A2] placeholder-gray-400"
+        className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-gray-400"
       />
 
       <div className="flex gap-2">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex-1 bg-[#4573A2] hover:bg-[#0D1B3E] disabled:opacity-50 text-white text-[11px] font-medium rounded-lg px-2 py-1.5 transition-colors"
+          className="flex-1 bg-claimondo-ondo hover:bg-claimondo-navy disabled:opacity-50 text-white text-[11px] font-medium rounded-lg px-2 py-1.5 transition-colors"
         >
           {saving ? '...' : 'Speichern'}
         </button>

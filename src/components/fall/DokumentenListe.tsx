@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-Phase0 (0.2): Rendert eine Liste von DokumentSlots mit Fortschritts-
 // Zähler und Pflicht/Optional-Gruppierung. Wird von DokumenteUebersichtCard
@@ -37,7 +37,7 @@ export default function DokumentenListe({ slots, fallId }: Props) {
       {total > 0 && (
         <div className="flex items-center justify-between text-xs text-claimondo-ondo">
           <span>Pflichtdokumente</span>
-          <span className="font-medium text-[#0D1B3E]">
+          <span className="font-medium text-claimondo-navy">
             {done}/{total} erledigt
           </span>
         </div>

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import AdminNav from './_components/AdminNav'
@@ -55,7 +55,16 @@ export default async function AdminLayout({
     .in('status', ['offen', 'in-bearbeitung'])
 
   return (
-    <div className="h-screen bg-claimondo-bg relative overflow-hidden">
+    <div className="h-screen relative overflow-hidden" style={{ background: '#f2f3f7' }}>
+      {/* Atmosphärische Hintergrund-Spotlights — identisch mit Login-Page */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+        <div className="absolute inset-0" style={{
+          background: [
+            'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.10), transparent 65%)',
+            'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.06), transparent 70%)',
+          ].join(', '),
+        }} />
+      </div>
       {/* Spotlight search (Cmd+K) */}
       <Spotlight />
 

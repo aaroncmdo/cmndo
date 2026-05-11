@@ -1,4 +1,4 @@
-import Avatar from '@/components/shared/Avatar'
+﻿import Avatar from '@/components/shared/Avatar'
 
 // AAR-423: Claimondo-Header für Kunden-Seiten. Claimondo-Logo + Name bleibt
 // immer dominant; der SV erscheint nur als Avatar + Name + „im Auftrag von

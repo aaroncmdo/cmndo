@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-289: Full-Screen-Drawer „Komplette Akte". Wird über den [📎 Akte]-Button
 // im FallHeader geöffnet. Backdrop-Click + Escape-Key schließen. Tab-Bar
@@ -346,7 +346,7 @@ function TimelineListe({ events }: { events: TimelineEventLite[] }) {
             )}
             {datum && (
               <p className="text-[10px] text-claimondo-ondo/70 mt-1">
-                {new Date(datum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
+                {new Date(datum).toLocaleString('de-DE')}
               </p>
             )}
           </li>
@@ -390,7 +390,7 @@ function ChatListe({
                   </p>
                   {datum && (
                     <p className="text-[10px] text-claimondo-ondo/70">
-                      {new Date(datum).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
+                      {new Date(datum).toLocaleString('de-DE')}
                     </p>
                   )}
                 </div>

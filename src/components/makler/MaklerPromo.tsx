@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-491 (M9): Promo & QR-Code Client-Komponente. Code + Landing-Link
 // (Copy-Buttons), QR-Code-Downloads (SVG + PNG), Share (WhatsApp/Email/

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-526 (A2): Client-Component für das Tab-Nav. Liest pathname um den
 // aktiven Tab zu markieren. Reklamations-Badge kommt vom Server-Layout.

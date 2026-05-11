@@ -1,4 +1,4 @@
-// AAR-558 (C9): Auszahlungs-Card für das Kunde-Portal.
+﻿// AAR-558 (C9): Auszahlungs-Card für das Kunde-Portal.
 // Zeigt AUSSCHLIESSLICH den Netto-Kunden-Anteil (auszahlung_kunde_betrag).
 // NIE regulierung_betrag (Brutto inkl. SV-Honorar) und NIE
 // auszahlung_gutachter_betrag. Datenquelle: faelle_kunde_view (C8), die

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-558 (C9) Brutto-Leak-Fix: Diese Säule zeigt dem Kunden KEINE Brutto-
 // Beträge mehr (regulierung_betrag / zahlung_betrag / kuerzungs_betrag).
@@ -53,12 +53,19 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
         </div>
       )}
 
-      {showGefordert && (
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-claimondo-ondo">Ihre Forderung</span>
-          <span className="text-claimondo-navy font-semibold">{fmt(gefordert)}</span>
-        </div>
-      )}
+      <div className="space-y-3">
+        {showGefordert ? (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-claimondo-ondo">Ihre Forderung</span>
+            <span className="text-claimondo-navy font-semibold">{fmt(gefordert)}</span>
+          </div>
+        ) : (
+          <p className="text-xs text-claimondo-ondo/70">Beträge werden nach Gutachten-Erstellung angezeigt.</p>
+        )}
+        <p className="text-[11px] text-claimondo-ondo">
+          Die ausgezahlte Summe sehen Sie nach der Regulierung in der Auszahlungs-Card.
+        </p>
+      </div>
 
       {saved && weg && (
         <p className="text-xs text-claimondo-ondo">Auszahlung: {weg === 'kundenkonto' ? 'Auf mein Konto' : 'Direkt an Werkstatt'}</p>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-100: 5-Step Onboarding Wizard
 // AAR-125: Deep-Link via ?step=dokumente springt direkt in Step 3 (Dokumente)
@@ -231,76 +231,6 @@ export default function OnboardingWizard({
     fieldsFound: number
   } | null>(null)
 
-  // Welcome-Step ZB1-Schnellstart — Kunde fotografiert Fahrzeugschein direkt nach
-  // dem Begrüßungsscreen, OCR füllt FIN/HSN/TSN/Kennzeichen/Halter in den Claim
-  // damit die Pflichtdaten nicht später manuell eingetippt werden müssen.
-  const [welcomeOcrResult, setWelcomeOcrResult] = useState<{
-    extracted: Record<string, string | null>
-    fieldsFound: number
-  } | null>(null)
-  const [welcomeOcrLoading, setWelcomeOcrLoading] = useState(false)
-
-  // 2026-05-10 Vorschaden-Doku-Pipeline: lokaler Status der Abrechnungs-Frage
-  // damit Card sofort verschwindet wenn Kunde geklickt hat (kein Reload nötig).
-  // Initial aus claim laden — wenn schon gesetzt, Card wird gar nicht gezeigt.
-  type ClaimWithVorschadenAbrechnung = ClaimFull & {
-    hat_vorschaeden?: boolean | null
-    vorschaden_mit_vs_abgerechnet?: VorschadenAbrechnungsStatus | null
-  }
-  const claimWA = claim as ClaimWithVorschadenAbrechnung | null
-  const [vorschadenAbrechnung, setVorschadenAbrechnung] = useState<VorschadenAbrechnungsStatus | null>(
-    (claimWA?.vorschaden_mit_vs_abgerechnet as VorschadenAbrechnungsStatus | null) ?? null,
-  )
-  const [vorschadenAbrechnungSaving, setVorschadenAbrechnungSaving] = useState<VorschadenAbrechnungsStatus | null>(null)
-
-  const zeigeVorschadenAbrechnungsFrage = !!claimWA?.hat_vorschaeden && !vorschadenAbrechnung
-
-  function speichereVorschadenAbrechnung(wert: VorschadenAbrechnungsStatus) {
-    if (!fall?.id) return
-    setVorschadenAbrechnungSaving(wert)
-    startTransition(async () => {
-      const res = await setzeVorschadenAbrechnung(fall.id, wert)
-      if (res.ok) {
-        setVorschadenAbrechnung(wert)
-      }
-      setVorschadenAbrechnungSaving(null)
-    })
-  }
-  const [welcomeOcrError, setWelcomeOcrError] = useState<string | null>(null)
-
-  function handleWelcomeOcr(file: File) {
-    if (!fall?.id) return
-    setWelcomeOcrLoading(true)
-    setWelcomeOcrError(null)
-    const reader = new FileReader()
-    reader.onload = async () => {
-      const base64 = typeof reader.result === 'string' ? reader.result : ''
-      try {
-        const res = await fetch('/api/ocr-fahrzeugschein', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fall_id: fall.id, image_base64: base64 }),
-        }).then((r) => r.json())
-        if (res?.success && res.extracted) {
-          setWelcomeOcrResult({
-            extracted: res.extracted,
-            fieldsFound: res.fields_found ?? 0,
-          })
-          // refresh damit Claim-Daten im nächsten Step (Fall) sichtbar sind
-          router.refresh()
-        } else {
-          setWelcomeOcrError(res?.message ?? 'Fahrzeugschein konnte nicht ausgelesen werden.')
-        }
-      } catch (err) {
-        console.warn('[Welcome ZB1-OCR]', err)
-        setWelcomeOcrError('Netzwerkfehler — bitte später erneut versuchen.')
-      } finally {
-        setWelcomeOcrLoading(false)
-      }
-    }
-    reader.readAsDataURL(file)
-  }
-
   // CMM-21: lokaler File-Counter pro Slot — wird optimistisch nach jedem
   // erfolgreichen Upload hochgezählt damit der Kunde direktes Feedback hat,
   // ohne page-refresh zu brauchen.
@@ -453,14 +383,14 @@ export default function OnboardingWizard({
       <div className="flex-1 flex flex-col px-5 pt-16 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
           <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
-            {/* Welcome — mit optionalem Fahrzeugschein-OCR-Schnellstart */}
+            {/* Welcome */}
             {currentStep.id === 'welcome' && (
               <div>
                 <div className="mb-4"><SparklesIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">Willkommen bei Claimondo, {vorname}!</h1>
                 <p className="mt-3 text-sm text-claimondo-ondo leading-relaxed">
-                  Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
-                  Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.
+                  Wir kuemmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
+                  Dieser kurze Einstieg zeigt Ihnen Ihre naechsten Schritte — dauert ca. 3 Minuten.
                 </p>
 
                 {/* Schnellstart per ZB1-Scan: spart manuelle Eingabe von FIN, HSN/TSN, Halter */}
@@ -582,7 +512,7 @@ export default function OnboardingWizard({
                   <div className="mt-4 space-y-3">
                     <ClaimDataCard title="Schadensereignis">
                       {claim.schadentag && (
-                        <DataRow label="Datum" value={new Date(claim.schadentag).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: 'long', year: 'numeric' })} />
+                        <DataRow label="Datum" value={new Date(claim.schadentag).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })} />
                       )}
                       {claim.schadenzeit && <DataRow label="Uhrzeit" value={String(claim.schadenzeit).slice(0, 5)} />}
                       {claim.schadenort_adresse && (
@@ -633,37 +563,6 @@ export default function OnboardingWizard({
                   </div>
                 )}
 
-                {/* Vorschaden-Abrechnungs-Frage — nur wenn CarDentity oder
-                    Kunde-Selbstauskunft Vorschaden gemeldet hat. */}
-                {zeigeVorschadenAbrechnungsFrage && (
-                  <div className="mt-5 rounded-2xl border border-claimondo-ondo/30 bg-claimondo-ondo/5 p-5">
-                    <p className="text-sm font-semibold text-claimondo-navy">
-                      Wurde der Vorschaden mit der Versicherung abgerechnet?
-                    </p>
-                    <p className="mt-1 text-xs text-claimondo-ondo">
-                      Wichtig für die Rechtslage — nicht abgerechnete Vorschäden bleiben
-                      Ihr Anspruch und werden nur mit dem aktuellen Schaden verrechnet.
-                    </p>
-                    <div className="mt-4 grid grid-cols-2 gap-2">
-                      {([
-                        { wert: 'ja', label: 'Ja, vollständig' },
-                        { wert: 'teilweise', label: 'Teilweise' },
-                        { wert: 'nein', label: 'Nein' },
-                        { wert: 'unbekannt', label: 'Weiß ich nicht' },
-                      ] as const).map(({ wert, label }) => (
-                        <button
-                          key={wert}
-                          onClick={() => speichereVorschadenAbrechnung(wert)}
-                          disabled={!!vorschadenAbrechnungSaving}
-                          className="rounded-xl border border-claimondo-border bg-white px-3 py-2.5 text-sm font-medium text-claimondo-navy transition-all hover:border-claimondo-ondo hover:bg-claimondo-ondo/10 disabled:opacity-50 active:scale-[0.98]"
-                        >
-                          {vorschadenAbrechnungSaving === wert ? '…' : label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Korrekturhinweis */}
                 <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
                   Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer
@@ -693,10 +592,10 @@ export default function OnboardingWizard({
                       <p className="text-xs uppercase tracking-wider text-emerald-700 font-semibold">Termin verbindlich bestätigt</p>
                     </div>
                     <p className="text-lg font-bold text-claimondo-navy">
-                      {new Date(termin.datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                      {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                     </p>
                     <p className="text-sm font-medium text-claimondo-navy">
-                      {new Date(termin.datum).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} Uhr
+                      {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
                     </p>
                     {termin.ort && (
                       <p className="mt-3 text-sm text-claimondo-navy flex items-start gap-1.5">
@@ -799,13 +698,17 @@ export default function OnboardingWizard({
               // Pflicht-Slots existieren noch). Im gelben Fall schiebt der
               // Banner im Layout das Re-Engagement.
               //
-              // CMM-33 Fix: pflichtSlots nutzen statt pflichtDocs + docStatus.
-              // PflichtdokumenteSection-Uploads aktualisieren docStatus nicht —
-              // sie rufen router.refresh(), wodurch pflichtSlots als Prop neu
-              // vom Server kommt. d.status via ?? war nie erreichbar weil
-              // docStatus[d.id] immer defined ist (initialisiert als 'ausstehend').
-              const offenePflicht = pflichtSlots.filter(
-                (s) => s.pflicht && s.status !== 'erfuellt',
+              // CMM-22 Bugfix: gleiche Smart-Filter-Sicht wie der Banner
+              // (relevanteSlotIds), Pflicht aus der DB-Row, optimistische
+              // docStatus-Override für sofortiges Feedback nach einem Upload.
+              // Vorher zählte das Ende ungefiltert über pflichtDocs und
+              // ignorierte den Smart-Filter — dadurch tauchten Slots wie
+              // gewerbenachweis/freigabe_bank auf die der Banner gar nicht
+              // anzeigt (3 vs 4-Diskrepanz).
+              const offenePflicht = pflichtDocs.filter(
+                (d) => relevanteSlotIds.has(d.slot_id)
+                  && d.pflicht
+                  && (docStatus[d.id] ?? d.status) !== 'hochgeladen',
               ).length
               const allesErfuellt = offenePflicht === 0
               return (

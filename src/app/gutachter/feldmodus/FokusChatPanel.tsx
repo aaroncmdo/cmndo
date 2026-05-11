@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-383: Fokus-Chat-Panel für den Feldmodus.
 // Minimal-invasive Eigenimplementierung (kein MultiChannelChat-Wrapping),
@@ -213,9 +213,7 @@ export default function FokusChatPanel({
       <button
         type="button"
         onClick={() => setExpanded(true)}
-        className="fixed z-40 px-3 py-2 flex items-center gap-3 bg-white/65 backdrop-blur-md border border-white/40 shadow-ios-md hover:bg-white/80 transition-colors
-          bottom-0 left-0 right-0 border-t border-l-0 border-r-0 border-b-0 rounded-t-2xl
-          lg:bottom-4 lg:left-4 lg:right-auto lg:w-[380px] lg:rounded-2xl lg:border"
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[var(--brand-primary)]/20 shadow-lg px-4 py-2 flex items-center gap-3 hover:bg-claimondo-bg"
         aria-label="Chat öffnen"
       >
         <div className="relative">

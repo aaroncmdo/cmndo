@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-559 (C10): Upload-Formular für technische Stellungnahme.
 // Zeigt VS-Kürzungspositionen als Kontext, dann PDF-Upload + optionale Notiz.

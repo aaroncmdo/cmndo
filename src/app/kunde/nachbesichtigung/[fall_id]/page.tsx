@@ -1,4 +1,4 @@
-// AAR-558 (C9): Nachbesichtigungs-Picker mit fall-spezifischer Route.
+﻿// AAR-558 (C9): Nachbesichtigungs-Picker mit fall-spezifischer Route.
 // Target der WA-Template T-Nachbesichtigung; ersetzt die alte flache Route
 // (die nur 1 Datum akzeptierte) durch den neuen 1-3-Slot-Picker inkl.
 // SV-Konfrontations-Radio. RLS-Check via faelle_kunde_view (security_invoker).

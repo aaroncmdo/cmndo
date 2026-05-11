@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useMemo } from 'react'
 import {
@@ -21,7 +21,7 @@ export type ActivityEvent = {
 }
 
 const TYPE_CONFIG: Record<string, { icon: typeof ArrowRightIcon; color: string }> = {
-  status: { icon: ArrowRightIcon, color: 'text-[#4573A2]' },
+  status: { icon: ArrowRightIcon, color: 'text-claimondo-ondo' },
   kommunikation: { icon: MessageSquareIcon, color: 'text-claimondo-ondo' },
   dokument: { icon: FileTextIcon, color: 'text-emerald-500' },
   task: { icon: CheckCircleIcon, color: 'text-amber-500' },
@@ -102,13 +102,13 @@ export default function FallActivityFeed({
             const cfg = TYPE_CONFIG[ev.typ] ?? TYPE_CONFIG.notiz
             const Icon = cfg.icon
             return (
-              <div key={ev.id} className="flex items-start gap-2 px-1 py-1.5 rounded-md hover:bg-[#f8f9fb]/50">
+              <div key={ev.id} className="flex items-start gap-2 px-1 py-1.5 rounded-md hover:bg-claimondo-bg/50">
                 <Icon className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${cfg.color}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1">
                     <p className="text-[11px] text-claimondo-navy leading-snug truncate">{ev.titel}</p>
                     {ev.from_lead && (
-                      <span className="flex-shrink-0 text-[8px] font-medium text-claimondo-ondo/70 bg-[#f8f9fb] px-1 py-0.5 rounded">
+                      <span className="flex-shrink-0 text-[8px] font-medium text-claimondo-ondo/70 bg-claimondo-bg px-1 py-0.5 rounded">
                         Aus Lead
                       </span>
                     )}

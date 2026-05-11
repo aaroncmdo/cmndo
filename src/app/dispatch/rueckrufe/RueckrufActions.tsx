@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useTransition, useState } from 'react'
 import { markRueckrufErledigtMitErgebnis } from './actions'
@@ -111,26 +111,23 @@ export default function RueckrufActions({
           className="w-full bg-white border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
         />
       )}
-
-      <div className="flex items-center gap-2">
-        <button
-          onClick={abschicken}
-          disabled={pending}
-          className="px-3 py-1.5 rounded-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-[11px] font-medium disabled:opacity-50 transition-colors"
-        >
-          {pending ? '…' : 'Speichern'}
-        </button>
-        <button
-          onClick={() => { setOffen(false); setNotiz(''); setFolgetermin('') }}
-          disabled={pending}
-          className="p-1.5 rounded-lg border border-claimondo-border text-claimondo-navy hover:bg-white disabled:opacity-50 transition-colors"
-        >
-          <XIcon className="w-3.5 h-3.5" />
-        </button>
-        {toast && toast !== 'OK' && (
-          <span className="text-[10px] text-red-600">{toast}</span>
-        )}
-      </div>
+      <button
+        disabled={pending}
+        onClick={() => handle(() => markAngerufen(leadId))}
+        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-600 text-white text-xs font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+      >
+        <CheckIcon className="w-3.5 h-3.5" />
+        Angerufen
+      </button>
+      <button
+        disabled={pending}
+        onClick={() => handle(() => markNichtErreicht(leadId))}
+        className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg transition-colors disabled:opacity-50"
+      >
+        <XIcon className="w-3.5 h-3.5" />
+        Nicht erreicht
+        {anrufVersuche >= 1 && <span className="text-[9px] text-red-500 ml-1">({anrufVersuche}/2)</span>}
+      </button>
     </div>
   )
 }

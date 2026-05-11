@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-289: Schlanke Shell für die SV-Fallakte mit Phasen-Stepper, Akte-Drawer
 // und 2-Spalten-Layout (Desktop) bzw. stacked (Mobile).
@@ -67,7 +67,6 @@ import type { AnforderbarerSlot } from '@/components/dokumente/AnforderungsModal
 // CMM-36: Geo-Tracking
 import { useGeoTracking } from '@/hooks/useGeoTracking'
 import { SvUnterwegsInfo } from '@/components/gutachter/SvUnterwegsInfo'
-import { ShieldAlertIcon } from 'lucide-react'
 
 type Lead = {
   vorname: string | null
@@ -95,12 +94,6 @@ type TerminInfo = {
   sv_angekommen_am?: string | null
   sv_unterwegs_seit?: string | null
   sv_eta_minuten?: number | null
-  durchgefuehrt_am?: string | null
-  verlegung_initiator_kunde?: boolean | null
-  /** CMM-32 Polish: Server-side berechnet — Termin liegt > 60min in der
-   *  Vergangenheit ohne durchgefuehrt_am/sv_angekommen_am und keiner der
-   *  Folgezustände wurde erreicht. Triggert den roten Banner. */
-  verstrichen?: boolean
 }
 
 type Pflichtdoc = {
@@ -162,6 +155,9 @@ type Props = {
       Nachbesichtigung/Konfrontation als Mitteilung wenn aktiv, MeinFallStatusCard).
       Wird direkt nach dem FallHeader vor dem 2-Spalten-Layout gerendert. */
   topServerBlocks?: React.ReactNode
+  /** CMM-32: Vor-Ort-Trigger („Bin angekommen" + Navigieren) wandert ans
+      Ende der Seite — Aaron-Spec, damit der Banner oben aufgeräumt bleibt. */
+  vorOrtCard?: React.ReactNode
   /** CMM-33: Pflicht-Slots für die zentrale Dokumente-Sektion unten rechts. */
   pflichtSlots?: PflichtSlotForView[]
   /** CMM-23: Auftrags-Phase für den Stepper in der linken Sidebar. */
@@ -335,10 +331,7 @@ export default function FallDetailClient(props: Props) {
 
   return (
     <div className="min-h-full bg-claimondo-bg -mx-2 sm:-mx-3 lg:-mx-4 -mb-2 sm:-mb-3 lg:-mb-4 -mt-2 sm:-mt-3 lg:-mt-4 [&_.rounded-2xl]:shadow-sm">
-      <FallRealtimeRefresh
-        fallId={fall.id as string}
-        claimId={((fall as { claim_id?: string | null }).claim_id) ?? null}
-      />
+      <FallRealtimeRefresh fallId={fall.id as string} />
       <FallWindowDropzone fallId={fall.id as string} />
       {/* AAR-864 Polish: Akten-Header sticky direkt am Wrapper-Oberrand.
           Negativer top kompensiert das main-Padding (p-2/3/4) damit der
@@ -361,7 +354,7 @@ export default function FallDetailClient(props: Props) {
 
       {/* Stepper + Termin-Banner als verschmolzener Header — volle Breite */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
-        <SvUnterwegsInfo tracking={geoTracking} terminStartIso={aktiverTermin?.start_zeit ?? null} />
+        <SvUnterwegsInfo tracking={geoTracking} svVorname={props.svVorname ?? null} />
         {/* CMM-32 Walkthrough: AuftragHeaderPanel verschmilzt Stepper +
             Termin-Banner zu einem Block. Termin-Sektion zeigt sich nur
             solange der Auftrag aktiv ist (vor Regulierungs-Phase). */}
@@ -377,23 +370,6 @@ export default function FallDetailClient(props: Props) {
               pflichtSlots={props.pflichtSlots ?? []}
             />
           )}
-        {!!fall.hat_vorschaeden && (
-          <div className="rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-              <ShieldAlertIcon className="w-4 h-4 text-amber-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-claimondo-navy">
-                {fall.vorschaden_anzahl != null
-                  ? `${String(fall.vorschaden_anzahl)} Vorschäden gemeldet`
-                  : 'Vorschäden gemeldet'}
-              </p>
-              <p className="text-xs text-claimondo-ondo mt-0.5">
-                Der Kunde hat Vorschäden am Fahrzeug angegeben. Zugehörige Unterlagen finden Sie in der Dokumente-Sektion.
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* CMM-23: Server-rendered Top-Blocks (Briefing + Einzuholen-Banner,
@@ -439,6 +415,31 @@ export default function FallDetailClient(props: Props) {
           <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
         )}
 
+        {!!fall.hat_vorschaeden && (
+          <div className="rounded-2xl bg-amber-50/40 border border-amber-200 p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">⚠️</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-claimondo-navy">
+                  Vorschäden gemeldet
+                </p>
+                <p className="text-xs text-claimondo-ondo mt-1">
+                  Der Kunde hat{' '}
+                  <span className="font-medium text-claimondo-navy">
+                    {fall.vorschaden_anzahl != null
+                      ? `${String(fall.vorschaden_anzahl)} Vorschäden`
+                      : 'Vorschäden'}
+                  </span>{' '}
+                  am Fahrzeug angegeben. Reparaturrechnungen werden — falls
+                  vorhanden — über den gelben Banner mit nachgereicht.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <GutachtenCard
           fallId={fall.id as string}
           fallNummer={fallNummer}
@@ -456,6 +457,13 @@ export default function FallDetailClient(props: Props) {
           }
         />
       </div>
+
+      {/* CMM-32: Vor-Ort-Trigger ganz unten */}
+      {props.vorOrtCard && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6">
+          {props.vorOrtCard}
+        </div>
+      )}
 
     </div>
   )

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-698: Termin-Detail-View — Mobile-first, vier Sektionen:
 //   1. Header mit Datum/Status-Badge
@@ -104,14 +104,14 @@ export default function KundeTerminDetailClient({
   const start = new Date(termin.start_zeit)
   const ende = termin.end_zeit ? new Date(termin.end_zeit) : null
 
-  const datum = start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+  const datum = start.toLocaleDateString('de-DE', {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
     year: 'numeric',
   })
-  const uhrzeit = start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
-  const endzeit = ende?.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+  const uhrzeit = start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const endzeit = ende?.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 
   const status = STATUS_LABEL[termin.status] ?? {
     label: termin.status,

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-289: Router-Komponente für linke Spalte. Rendert je nach Subphase einen
 // kompakten Hint + CTA „Aktion in der Akte". Echte Aktionen (Termin annehmen,

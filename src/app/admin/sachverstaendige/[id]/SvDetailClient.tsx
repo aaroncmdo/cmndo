@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -396,17 +396,6 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             options={SCHADENARTEN}
             selected={schadenarten}
             onToggle={(v) => toggleTag(schadenarten, setSchadenarten, v)}
-          />
-        </div>
-
-        <div>
-          <label className="block text-claimondo-ondo text-xs mb-1">Google Place ID</label>
-          <input
-            type="text"
-            name="google_place_id"
-            defaultValue={sv.googlePlaceId ?? ''}
-            className={inputCls}
-            placeholder="ChIJ... (Google Maps Place ID für Bewertungs-Widget)"
           />
         </div>
 

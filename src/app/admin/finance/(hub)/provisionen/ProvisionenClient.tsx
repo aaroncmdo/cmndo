@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-92: Maik-Provisionen Client UI mit Inline-CPL + Confirm/Reverse
 import { useState, useTransition } from 'react'

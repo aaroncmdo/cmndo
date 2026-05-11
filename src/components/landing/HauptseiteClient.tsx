@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // Claimondo Hauptseite — vollständige 12-Sektionen Landing-Page.
 // Design: Montserrat (Headings/UI) · Noto Sans (Fließtext via globals.css)
@@ -150,11 +150,11 @@ function HeroSection() {
               </div>
               <Link
                 href="/gutachter-finden"
-                className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#7BA3CC]/40 bg-[#7BA3CC]/10 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:border-[#7BA3CC] hover:bg-[#7BA3CC]/20"
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-claimondo-light-blue/40 bg-claimondo-light-blue/10 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:border-claimondo-light-blue hover:bg-claimondo-light-blue/20"
               >
-                <Search className="h-4 w-4 text-[#7BA3CC]" />
+                <Search className="h-4 w-4 text-claimondo-light-blue" />
                 Gutachter in meiner Nähe finden
-                <ArrowRight className="h-3.5 w-3.5 text-[#7BA3CC]" />
+                <ArrowRight className="h-3.5 w-3.5 text-claimondo-light-blue" />
               </Link>
               <a
                 href="https://wa.me/49221XXXXXXX"
@@ -298,21 +298,25 @@ const INFO_CARDS = [
   {
     icon: FileText,
     title: 'Freie Gutachterwahl',
+    href: '/vorteile',
     body: 'Sie dürfen Ihren Gutachter selbst wählen. Die gegnerische Versicherung hat kein Mitspracherecht — auch wenn sie Ihnen etwas anderes suggeriert. Nutzen Sie dieses Recht.',
   },
   {
     icon: Scale,
     title: 'Mehr als nur Reparaturkosten',
+    href: '/vorteile',
     body: 'Nutzungsausfall, Mietwagen, merkantile Wertminderung, Anwaltskosten — alles zahlt die gegnerische Versicherung. Die wenigsten Geschädigten kennen alle Positionen.',
   },
   {
     icon: Shield,
     title: 'Ab 750 € gilt: Gutachten statt KVA',
+    href: '/ersteinschaetzung',
     body: 'Ein vollständiges Gutachten ist Ihr gutes Recht — und deutlich mehr wert als ein Werkstatt-Kostenvoranschlag. Ab ca. 750 € Schaden haben Sie Anspruch auf einen unabhängigen Sachverständigen.',
   },
   {
     icon: Clock,
     title: 'Unterschreiben Sie nichts vorschnell',
+    href: '/faq',
     body: 'Das erste Angebot der Versicherung ist selten das vollständige. Wer zu früh unterschreibt, verschenkt oft hunderte Euro. Lassen Sie alles prüfen — bevor Sie zustimmen.',
   },
 ]
@@ -333,21 +337,20 @@ function VersicherungSection() {
           </p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
-          {INFO_CARDS.map(({ icon: Icon, title, body }, i) => (
+          {INFO_CARDS.map(({ icon: Icon, title, href, body }, i) => (
             <FadeUp key={title} delay={i * 80}>
-              <div className="group flex flex-col gap-0 rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_1px_3px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(13,27,62,.1)]">
+              <Link href={href} className="group flex flex-col gap-0 rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_1px_3px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(13,27,62,.1)]">
                 <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef4fb]">
                   <Icon className="h-[18px] w-[18px] text-claimondo-ondo" />
                 </div>
                 <h3 className="mb-3 text-[17px] font-bold tracking-[-0.02em] text-claimondo-navy">
                   {title}
                 </h3>
-                {/* Noto Sans via globals.css p rule */}
                 <p className="flex-1 text-sm leading-relaxed text-gray-500 mb-5">{body}</p>
                 <span className="inline-flex items-center gap-1 text-sm font-semibold text-claimondo-navy transition-all group-hover:gap-2">
                   Mehr erfahren <ChevronRight className="h-3.5 w-3.5" />
                 </span>
-              </div>
+              </Link>
             </FadeUp>
           ))}
         </div>

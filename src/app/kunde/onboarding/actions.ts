@@ -606,14 +606,17 @@ export async function uploadPflichtdokument(
       sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
     })
 
-    // CMM-23: Polizeibericht-Upload triggert automatisch BKat-OCR via after()
-    // damit der Trigger nach Response-Send zuverlässig durchläuft. Ergebnis
-    // landet auf leads.bkat_unfallart und wird in Phase 4 (Stammdaten) im
-    // BkatAnalysePanel angezeigt — der Dispatcher braucht die Klassifikation
-    // für die Datenanfrage.
+    // CMM-23: Polizeibericht-Upload triggert automatisch BKat-OCR (fire-and-forget).
+    // Läuft asynchron, blockiert den Upload-Response nicht. Ergebnis landet auf
+    // leads.bkat_unfallart und wird in Phase 4 (Stammdaten) im BkatAnalysePanel
+    // angezeigt — der Dispatcher braucht die Klassifikation für die Datenanfrage.
     if (slotTyp === 'polizeibericht' && fall.lead_id) {
-      const { scheduleBkatAnalyseAfterUpload } = await import('@/lib/bkat/auto-trigger')
-      scheduleBkatAnalyseAfterUpload(admin, fall.lead_id, publicUrl)
+      const leadId = fall.lead_id
+      import('@/lib/bkat/auto-trigger').then(({ triggerAutoBkatOcr }) =>
+        triggerAutoBkatOcr(admin, leadId, publicUrl).catch((err) =>
+          console.warn('[uploadPflichtdokument] triggerAutoBkatOcr:', err instanceof Error ? err.message : err),
+        ),
+      )
     }
 
     revalidatePath('/kunde/onboarding')

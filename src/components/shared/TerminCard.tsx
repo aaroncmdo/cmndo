@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-727 Kandidat 3: Shared TerminCard für SV-Fallakte + potenzielle
 // Read-only-Ansicht in anderen Portalen (Makler, Admin).
@@ -93,13 +93,13 @@ const TONE_CLASSES: Record<StatusUi['tone'], string> = {
   emerald: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   amber: 'bg-amber-50 text-amber-800 border-amber-200',
   red: 'bg-rose-50 text-rose-800 border-rose-200',
-  gray: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border',
+  gray: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border',
 }
 
 function fmtDate(iso: string | null): string | null {
   if (!iso) return null
   try {
-    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+    return new Date(iso).toLocaleDateString('de-DE', {
       weekday: 'long',
       day: '2-digit',
       month: 'long',

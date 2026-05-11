@@ -20,15 +20,12 @@ export type AuftragRow = {
   zurueckgewiesen_am: string | null
   erstellt_am: string
   updated_at: string
-  grundhonorar_netto: number | null
-  grundhonorar_brutto: number | null
 }
 
 const AUFTRAG_SELECT =
   'id, fall_id, sv_id, typ, status, reihenfolge, vorheriger_auftrag_id, ' +
   'gutachten_url, gutachten_final_freigegeben, abgeschlossen_am, ' +
-  'zurueckweisung_grund, zurueckgewiesen_am, erstellt_am, updated_at, ' +
-  'grundhonorar_netto, grundhonorar_brutto'
+  'zurueckweisung_grund, zurueckgewiesen_am, erstellt_am, updated_at'
 
 /** Alle Aufträge eines Falls, sortiert nach Reihenfolge (1 = ältester). */
 export async function getAlleAuftraege(

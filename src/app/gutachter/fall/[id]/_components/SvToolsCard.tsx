@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-757 (VollClient-Auflösung): bündelt die vier unique Tools-Flows die
 // bisher über die 7 VollClient-Tabs verstreut waren:

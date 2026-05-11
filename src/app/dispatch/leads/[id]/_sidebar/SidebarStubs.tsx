@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-142 / W8: Sidebar Widgets (final).
 // Enthält alle 5 fixen Sidebar-Komponenten:

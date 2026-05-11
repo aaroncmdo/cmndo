@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-542 (C5): Pflicht-Doc-Matrix — gruppierte Anzeige aller Katalog-Slots
 // mit ihrem aktuellen Pflicht/Optional/Disabled-Status pro Fall.

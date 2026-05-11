@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-805: Shared-Spotlight — Cmd+K Quick-Search-Modal.
 //
@@ -28,7 +28,7 @@ export type SpotlightGroup = {
   label: string
   /** Lucide-Icon links neben jedem Treffer. */
   icon: LucideIcon
-  /** Tailwind-Klasse für Icon-Color, z.B. 'text-[#4573A2]'. */
+  /** Tailwind-Klasse für Icon-Color, z.B. 'text-claimondo-ondo'. */
   iconColor?: string
   /** Tailwind-Klasse für Hover/Selected-Hintergrund, z.B. 'hover:bg-amber-50'. */
   hoverBg?: string
@@ -163,7 +163,7 @@ export function Spotlight({
             placeholder={placeholder}
             className="flex-1 text-sm text-claimondo-navy placeholder-gray-400 outline-none bg-transparent"
           />
-          <kbd className="text-[10px] text-claimondo-ondo/70 bg-[#f8f9fb] px-1.5 py-0.5 rounded font-mono">ESC</kbd>
+          <kbd className="text-[10px] text-claimondo-ondo/70 bg-claimondo-bg px-1.5 py-0.5 rounded font-mono">ESC</kbd>
         </div>
 
         {/* Loading */}
@@ -179,7 +179,7 @@ export function Spotlight({
                 .map((g) => {
                   const Icon = g.icon
                   const iconColor = g.iconColor ?? 'text-claimondo-ondo'
-                  const hoverBg = g.hoverBg ?? 'hover:bg-[#f8f9fb]'
+                  const hoverBg = g.hoverBg ?? 'hover:bg-claimondo-bg'
                   const selectedBg = hoverBg.replace('hover:', '')
                   return (
                     <div key={g.key}>
@@ -208,7 +208,7 @@ export function Spotlight({
                               )}
                             </div>
                             {r.status && (
-                              <span className="text-[10px] text-claimondo-ondo/70 bg-[#f8f9fb] px-1.5 py-0.5 rounded shrink-0">
+                              <span className="text-[10px] text-claimondo-ondo/70 bg-claimondo-bg px-1.5 py-0.5 rounded shrink-0">
                                 {r.status}
                               </span>
                             )}
@@ -229,7 +229,7 @@ export function Spotlight({
         {!loading && query.length < 2 && (
           <div className="px-4 py-4 text-center text-claimondo-ondo/70 text-xs">
             Mindestens 2 Zeichen eingeben ·{' '}
-            <kbd className="bg-[#f8f9fb] px-1 py-0.5 rounded font-mono">Cmd+K</kbd>
+            <kbd className="bg-claimondo-bg px-1 py-0.5 rounded font-mono">Cmd+K</kbd>
           </div>
         )}
       </div>

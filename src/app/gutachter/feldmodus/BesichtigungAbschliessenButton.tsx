@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-386: Abschluss-Button im Feldmodus-Fallakte-Footer.
 // Warnt wenn Pflichtdokumente offen sind (Confirm-Dialog), delegiert an

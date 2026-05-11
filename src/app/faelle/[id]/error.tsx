@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-271: window.location.reload() statt reset()
 // AAR-650: Error-Message + Digest anzeigen damit der konkrete Ursache-Stack
@@ -34,7 +34,7 @@ export default function FallakteError({ error, reset }: { error: Error & { diges
           Bitte versuchen Sie es erneut. Falls das Problem bestehen bleibt, kontaktieren Sie den Support mit folgender Info.
         </p>
         {(error.message || error.digest || error.stack) && (
-          <div className="text-left mb-3 rounded-lg bg-[#f8f9fb] border border-claimondo-border px-3 py-2.5 space-y-2 max-h-80 overflow-y-auto">
+          <div className="text-left mb-3 rounded-lg bg-claimondo-bg border border-claimondo-border px-3 py-2.5 space-y-2 max-h-80 overflow-y-auto">
             {error.message && (
               <p className="text-[11px] font-mono text-claimondo-navy break-all">{error.message}</p>
             )}
@@ -57,7 +57,7 @@ export default function FallakteError({ error, reset }: { error: Error & { diges
                 /* noop */
               }
             }}
-            className="px-4 py-2 bg-white border border-claimondo-border text-claimondo-navy font-medium text-xs rounded-lg hover:bg-[#f8f9fb] transition-colors"
+            className="px-4 py-2 bg-white border border-claimondo-border text-claimondo-navy font-medium text-xs rounded-lg hover:bg-claimondo-bg transition-colors"
           >
             {copied ? 'Kopiert ✓' : 'Fehlerbericht kopieren'}
           </button>
@@ -65,13 +65,13 @@ export default function FallakteError({ error, reset }: { error: Error & { diges
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => reset()}
-            className="px-5 py-2.5 bg-[#4573A2] text-white font-medium text-sm rounded-xl hover:bg-[#1E3A5F] transition-colors"
+            className="px-5 py-2.5 bg-claimondo-ondo text-white font-medium text-sm rounded-xl hover:bg-claimondo-shield transition-colors"
           >
             Erneut versuchen
           </button>
           <button
             onClick={() => window.location.reload()}
-            className="px-5 py-2.5 bg-white border border-claimondo-border text-claimondo-navy font-medium text-sm rounded-xl hover:bg-[#f8f9fb] transition-colors"
+            className="px-5 py-2.5 bg-white border border-claimondo-border text-claimondo-navy font-medium text-sm rounded-xl hover:bg-claimondo-bg transition-colors"
           >
             Seite neu laden
           </button>

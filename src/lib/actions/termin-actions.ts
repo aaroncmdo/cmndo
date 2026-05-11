@@ -471,14 +471,14 @@ export async function terminGegenvorschlag({
           const props = {
             kundenVorname: kundenVorname ?? 'Kunde',
             fallNummer: fallData?.fall_nummer ?? '—',
-            alterTerminDatum: altDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+            alterTerminDatum: altDate.toLocaleDateString('de-DE', {
               weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
             }),
-            alterTerminUhrzeit: altDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
-            neuerTerminDatum: neuDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+            alterTerminUhrzeit: altDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+            neuerTerminDatum: neuDate.toLocaleDateString('de-DE', {
               weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
             }),
-            neuerTerminUhrzeit: neuDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
+            neuerTerminUhrzeit: neuDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
             grund: grund || null,
             svName: svNameForMail,
             responseUrl,

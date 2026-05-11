@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { loadAusstehende, StatusBadge } from './AusstehendeZahlungenWidget'
 
 // KFZ-155: Volle Tabelle mit allen ausstehenden Zahlungen — wird im

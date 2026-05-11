@@ -113,12 +113,8 @@ export async function tryAddSvCar3dModel(
           source: SV_CAR_3D_SOURCE_ID,
           slot: 'top',
           paint: {
-            // PBR-Materialwerte: Roughness 0.25 gibt mehr Carlack-Glanz als 0.35.
-            // AO-Intensity 0.85 zeichnet Spalt-Schatten (Türen, Radkästen) plastisch.
-            // Emissive-Strength 0.12 hält Sichtbarkeit in Nacht-Szenen.
-            'model-roughness': 0.25,
-            'model-emissive-strength': 0.12,
-            'model-ambient-occlusion-intensity': 0.85,
+            'model-roughness': 0.35,
+            'model-emissive-strength': 0.15,
             'model-scale': [1.6, 1.6, 1.6],
             'model-cast-shadows': true,
             'model-receive-shadows': true,

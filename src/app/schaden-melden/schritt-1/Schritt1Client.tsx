@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -483,7 +483,7 @@ export function Schritt1Client() {
             <Label htmlFor="fahrzeug_standort_adresse">
               Wo steht das Fahrzeug aktuell?{' '}
               {watch('fahrzeug_standort_lat') != null && (
-                <span className="text-[#4573A2] text-xs ml-1">✓ Standort erfasst</span>
+                <span className="text-claimondo-ondo text-xs ml-1">✓ Standort erfasst</span>
               )}
             </Label>
             <GooglePlaceAutocomplete

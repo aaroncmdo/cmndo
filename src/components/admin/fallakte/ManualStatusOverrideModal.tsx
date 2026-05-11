@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-560 (C11): Manueller Status-Override-Modal (Admin-only).
 // Zeigt eine Liste aller 21 faelle.status-Werte, verlangt Pflicht-Begründung
@@ -32,15 +32,12 @@ interface Props {
 }
 
 const STATUS_LABEL: Record<FallStatusValue, string> = {
-  // Welle-7
-  onboarding: 'Onboarding (W7)',
-  in_bearbeitung: 'In Bearbeitung (W7)',
-  vs_kontakt: 'VS-Kontakt (W7)',
-  reguliert: 'Reguliert (W7)',
-  abgelehnt: 'Abgelehnt (W7)',
-  kanzlei: 'An Kanzlei (W7)',
-  storniert: 'Storniert',
-  // Welle-6 Backward-Compat
+  onboarding: 'Onboarding',
+  in_bearbeitung: 'In Bearbeitung',
+  vs_kontakt: 'VS-Kontakt',
+  reguliert: 'Reguliert',
+  abgelehnt: 'Abgelehnt',
+  kanzlei: 'Kanzlei',
   ersterfassung: 'Ersterfassung',
   'sv-gesucht': 'SV gesucht',
   'sv-zugewiesen': 'SV zugewiesen',

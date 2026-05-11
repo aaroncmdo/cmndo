@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-352: Mobile-first Multi-Slot-Upload-UI.
 // Zeigt eine Liste der angefragten Dokumente mit Status pro Slot.
@@ -144,12 +144,12 @@ export default function MultiSlotUploadClient({
   const alleHochgeladen = slots.every((s) => s.hochgeladen)
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] py-6 px-4">
+    <div className="min-h-screen bg-claimondo-bg py-6 px-4">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-6">
           <span className="text-2xl font-bold tracking-tight">
-            <span className="text-[#0D1B3E]">Claim</span>
-            <span className="text-[#7BA3CC]">ondo</span>
+            <span className="text-claimondo-navy">Claim</span>
+            <span className="text-claimondo-light-blue">ondo</span>
           </span>
           <p className="text-xs text-claimondo-ondo mt-1">Dokumenten-Upload</p>
         </div>
@@ -167,9 +167,9 @@ export default function MultiSlotUploadClient({
                 jedes Dokument wird sofort gespeichert.
               </p>
               <div className="pt-2">
-                <div className="h-1.5 bg-[#f8f9fb] rounded-full overflow-hidden">
+                <div className="h-1.5 bg-claimondo-bg rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#4573A2] transition-all"
+                    className="h-full bg-claimondo-ondo transition-all"
                     style={{
                       width: `${(slots.filter((s) => s.hochgeladen).length / slots.length) * 100}%`,
                     }}
@@ -317,7 +317,7 @@ function SlotCard({
   return (
     <div className="rounded-xl border border-claimondo-border p-3 space-y-2">
       <div className="flex items-start gap-2">
-        <FileTextIcon className="w-4 h-4 text-[#4573A2] mt-0.5 shrink-0" />
+        <FileTextIcon className="w-4 h-4 text-claimondo-ondo mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-claimondo-navy">{slot.label}</p>
           <p className="text-[11px] text-claimondo-ondo">{SLOT_HINTS[slot.slot_id]}</p>
@@ -330,7 +330,7 @@ function SlotCard({
             <button
               type="button"
               onClick={() => cameraInputRef.current?.click()}
-              className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-[#0D1B3E] text-white text-xs font-semibold hover:bg-[#1E3A5F]"
+              className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
             >
               <CameraIcon className="w-5 h-5" />
               Fotografieren
@@ -338,7 +338,7 @@ function SlotCard({
             <button
               type="button"
               onClick={() => galleryInputRef.current?.click()}
-              className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-white border border-[#4573A2] text-[#4573A2] text-xs font-semibold hover:bg-[#f8f9fb]"
+              className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-white border border-claimondo-ondo text-claimondo-ondo text-xs font-semibold hover:bg-claimondo-bg"
             >
               <ImageIcon className="w-5 h-5" />
               Galerie
@@ -365,7 +365,7 @@ function SlotCard({
 
       {state.action === 'vorschau' && state.previewUrl && (
         <>
-          <div className="rounded-lg overflow-hidden border border-claimondo-border bg-[#f8f9fb]">
+          <div className="rounded-lg overflow-hidden border border-claimondo-border bg-claimondo-bg">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={state.previewUrl} alt={`${slot.label}-Vorschau`} className="w-full h-auto" />
           </div>
@@ -373,14 +373,14 @@ function SlotCard({
             <button
               type="button"
               onClick={onReset}
-              className="px-2 py-2.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-semibold hover:bg-[#f8f9fb]"
+              className="px-2 py-2.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-semibold hover:bg-claimondo-bg"
             >
               Nochmal
             </button>
             <button
               type="button"
               onClick={onUpload}
-              className="flex items-center justify-center gap-1 px-2 py-2.5 rounded-lg bg-[#0D1B3E] text-white text-xs font-semibold hover:bg-[#1E3A5F]"
+              className="flex items-center justify-center gap-1 px-2 py-2.5 rounded-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
             >
               <CheckCircle2Icon className="w-4 h-4" />
               Verwenden
@@ -391,7 +391,7 @@ function SlotCard({
 
       {state.action === 'uploading' && (
         <div className="py-4 text-center space-y-2">
-          <div className="w-8 h-8 mx-auto border-4 border-[#4573A2] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 mx-auto border-4 border-claimondo-ondo border-t-transparent rounded-full animate-spin" />
           <p className="text-xs font-semibold text-claimondo-navy">Wird hochgeladen ...</p>
           {slot.slot_id === 'fahrzeugschein' && slot.ocr && (
             <p className="text-[10px] text-claimondo-ondo">Daten werden ausgelesen — bitte warten</p>
@@ -425,7 +425,7 @@ function SlotCard({
             <button
               type="button"
               onClick={onReset}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#4573A2] text-[#4573A2] text-xs font-semibold hover:bg-[#f8f9fb]"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-claimondo-ondo text-claimondo-ondo text-xs font-semibold hover:bg-claimondo-bg"
             >
               <CameraIcon className="w-3 h-3" />
               Weiteres Foto hochladen
@@ -443,7 +443,7 @@ function SlotCard({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0D1B3E] text-white text-xs font-semibold hover:bg-[#1E3A5F]"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
           >
             <RefreshCwIcon className="w-3 h-3" />
             Erneut

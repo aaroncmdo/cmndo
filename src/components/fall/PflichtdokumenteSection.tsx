@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // CMM-33: Zentrale Pflichtdokumente-Section für alle Rollen + Onboarding.
 //
@@ -51,7 +51,7 @@ export type PflichtSlotForView = {
 }
 
 export type PflichtSectionRolle = 'kunde' | 'kb' | 'admin' | 'sv' | 'kanzlei'
-export type PflichtSectionVariant = 'banner' | 'card' | 'popover' | 'embedded'
+export type PflichtSectionVariant = 'banner' | 'card' | 'popover'
 
 const UPLOAD_ALLOWED: Record<PflichtSectionRolle, boolean> = {
   kunde: true,
@@ -74,7 +74,7 @@ function StatusPill({ status, pflicht }: { status: PflichtSlotForView['status'];
   if (status === 'erfuellt') {
     return (
       <span className="inline-flex items-center gap-1 text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-        <CheckCircle2Icon className="w-3 h-3" /> {pflicht ? 'Pflicht hochgeladen' : 'Hochgeladen'}
+        <CheckCircle2Icon className="w-3 h-3" /> Hochgeladen
       </span>
     )
   }
@@ -166,7 +166,7 @@ function SlotCard({
   const isErfuellt = slot.status === 'erfuellt'
   const containerClass = isErfuellt
     ? 'rounded-xl border border-emerald-200 bg-emerald-50/40 p-3'
-    : 'rounded-xl border border-claimondo-border bg-[#f8f9fb] p-3'
+    : 'rounded-xl border border-claimondo-border bg-claimondo-bg p-3'
 
   return (
     <li className={containerClass}>
@@ -286,7 +286,7 @@ export default function PflichtdokumenteSection({
   const offenPflicht = offen.filter((s) => s.pflicht).length
 
   // Banner verschwindet automatisch wenn alle Slots erfüllt sind.
-  if ((variant === 'banner' || variant === 'embedded') && offen.length === 0) return null
+  if (variant === 'banner' && offen.length === 0) return null
   // Bei card / popover: nichts rendern wenn keine Slots existieren.
   if (slots.length === 0) return null
 
@@ -349,22 +349,19 @@ export default function PflichtdokumenteSection({
   }
 
   // ─── Banner-Variante: Click-Tile → Pop-over ────────────────────────────
-  if (variant === 'banner' || variant === 'embedded') {
+  if (variant === 'banner') {
     const headline =
       offenPflicht > 0
         ? `${offenPflicht} Pflichtdokument${offenPflicht === 1 ? '' : 'e'} fehlen noch`
         : `${offen.length} Dokument${offen.length === 1 ? '' : 'e'} können hochgeladen werden`
 
-    // Embedded: kein eigener border/rounded — sitzt in einem Outer-Wrapper
-    // (z.B. ClaimStepper). Banner: mit eigenem Card-Style.
-    const buttonCls =
-      variant === 'embedded'
-        ? 'w-full text-left bg-amber-50 px-4 py-3 hover:bg-amber-100/60 transition-colors'
-        : 'w-full text-left rounded-2xl bg-amber-50 border border-amber-200 p-4 hover:bg-amber-100/60 hover:border-amber-300 transition-colors'
-
     return (
       <>
-        <button type="button" onClick={() => setPopoverOpen(true)} className={buttonCls}>
+        <button
+          type="button"
+          onClick={() => setPopoverOpen(true)}
+          className="w-full text-left rounded-2xl bg-amber-50 border border-amber-200 p-4 hover:bg-amber-100/60 hover:border-amber-300 transition-colors"
+        >
           <div className="flex items-center gap-3">
             <AlertCircleIcon className="w-5 h-5 text-amber-600 shrink-0" />
             <div className="flex-1 min-w-0">

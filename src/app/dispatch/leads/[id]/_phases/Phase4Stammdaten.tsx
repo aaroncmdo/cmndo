@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-140 / W6: Phase 4 Stammdaten mit Inline-Edit + Auto-Save on-blur.
 // Alle Felder sind einzeln editierbar und werden beim Verlassen des Inputs
@@ -19,9 +19,6 @@ import { useCarQuery } from '../_hooks/useCarQuery'
 // AAR-352: Zb1UploadCard + PolizeiberichtUploadCard ersetzt durch
 // DokumenteAnfordernCard (kombinierte Multi-Slot-Anfrage in einem Link).
 import DokumenteAnfordernCard from './DokumenteAnfordernCard'
-import SchadentypPicker from '../SchadentypPicker'
-import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
-import { LACKFARBE_OPTIONS, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 import BkatAnalysePanel from './BkatAnalysePanel'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
 import { requestCardentityTypBForLead, enrichLeadCardentity } from '../_actions/cardentity'
@@ -731,21 +728,6 @@ export default function Phase4Stammdaten() {
 
   return (
     <div className="space-y-4">
-      {/* Dokumente anfragen — ganz oben: Dispatcher schickt den Link bevor
-          er in die Stammdaten einsteigt, Kunde lädt parallel hoch. */}
-      <DokumenteAnfordernCard
-        leadId={leadId}
-        lead={l as Record<string, unknown>}
-        zb1HochgeladenAm={l.zb1_hochgeladen_am ?? null}
-        polizeiberichtHochgeladenAm={l.polizeibericht_hochgeladen_am ?? null}
-        telefon={l.telefon ?? null}
-        email={l.email ?? null}
-        unfallfotosVorhanden={hatUnfallfotos}
-        unfallfotosAnfragenDefault={unfallfotosAnfragen}
-        schadensfotoUrls={l.schadensfoto_urls ?? null}
-        sachschadenBeschreibung={l.fahrzeugschaden_beschreibung ?? null}
-      />
-
       {/* CMM-23: KI-Analyse (OCR first, LLM-Fallback). Hier in Phase 4 statt
          Phase 3 — der Kunden-Polizeibericht-Upload triggert den Auto-OCR
          schon im Onboarding (uploadPflichtdokument), die Daten-Anfrage an
@@ -754,24 +736,13 @@ export default function Phase4Stammdaten() {
       <BkatAnalysePanel
         leadId={lead.id}
         polizeiVorOrt={l.polizei_vor_ort ?? null}
-        initialUnfallart={l.bkat_unfallart ?? null}
         onSchadentypGesetzt={() => router.refresh()}
-      />
-
-      {/* Schadentyp — zwischen BKAT-Identifizierung und Schadenbeschreibung */}
-      <SchadentypPicker
-        leadId={lead.id}
-        initialTyp={l.schadentyp as Parameters<typeof SchadentypPicker>[0]['initialTyp']}
-        initialFreitext={l.schadentyp_freitext ?? null}
-        gegnerKennzeichen={l.gegner_kennzeichen ?? null}
-        initialKamera={l.parkplatz_kamera ?? null}
-        onSaved={() => router.refresh()}
       />
 
       {/* AAR-665-Follow: Schadenbeschreibungs-Card (WAS am Auto kaputt).
           Optional, kein Hard-Gate. Mit „Kunde hat Unfallfotos"-Checkmark
           für Bulk-Anforderung via DokumenteAnfordernCard. */}
-      <div className="rounded-xl bg-white border border-[#e4e7ef] p-4 space-y-3">
+      <div className="rounded-xl bg-white border border-claimondo-border p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <p className="text-xs font-semibold text-claimondo-navy flex items-center gap-1.5">
             <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
@@ -796,13 +767,23 @@ export default function Phase4Stammdaten() {
           <input
             type="checkbox"
             checked={unfallfotosAnfragen}
-            onChange={(e) => setUnfallfotosAnfragen(e.target.checked)}
+            onChange={(e) => {
+              const checked = e.target.checked
+              setUnfallfotosAnfragen(checked)
+              if (checked) {
+                requestAnimationFrame(() => {
+                  document
+                    .getElementById('dokumente-anfordern-card')
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                })
+              }
+            }}
             className="mt-0.5 w-4 h-4 accent-claimondo-ondo"
           />
           <span className="text-xs text-claimondo-navy">
             <span className="font-medium">Kunde hat Unfallfotos</span>
             <span className="text-claimondo-ondo">
-              {' '}— bei Anforderung oben (Fahrzeugschein / Polizei / Fotos in einem
+              {' '}— bei Anforderung unten (Fahrzeugschein / Polizei / Fotos in einem
               Link) werden die Fotos mitgeordert. Claude füllt danach automatisch
               die Beschreibung.
             </span>
@@ -1327,13 +1308,13 @@ export default function Phase4Stammdaten() {
         {/* AAR-177 Fix #1: CardentityButton (Typ-A) entfernt — Anreicherung
             läuft automatisch nach ZB1-OCR.
             AAR-311: Cardentity Typ-B (15€/Detailbericht) als manueller Trigger
-            für Vorschadenverdacht im Erstgespräch.
-            AAR-cardentity-fetch: Typ-A-Manual-Trigger wieder hinzu — bei
-            FIN-Eingabe ohne ZB1-Upload muss der Dispatcher es explizit
-            triggern können. */}
-        <div className="sm:col-span-2 pt-2 border-t border-claimondo-border space-y-3">
-          <CardentityTypAButton
-            leadId={leadId}
+            für Vorschadenverdacht im Erstgespräch. */}
+        <div className="sm:col-span-2 pt-2 border-t border-claimondo-border">
+          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1.5">
+            Vorschaden-Detailbericht
+          </p>
+          <CardentityTypBButton
+            action={() => requestCardentityTypBForLead(leadId)}
             finVorhanden={!!l.fin}
             enrichedAt={l.cardentity_enriched_at ?? null}
           />
@@ -1495,14 +1476,6 @@ export default function Phase4Stammdaten() {
             fieldName="gegner_schadennummer"
             leadId={leadId}
           />
-          <InlineField
-            label="Versicherungsnummer Gegner (optional)"
-            value={l.gegner_versicherungsnummer}
-            fieldName="gegner_versicherungsnummer"
-            leadId={leadId}
-            placeholder="Versicherungsschein-Nr."
-            hint="Steht auf der Grünen Karte / dem Versicherungsausweis"
-          />
           {/* CMM-26: Unfalldatum, Unfall-Uhrzeit und Unfallort sind in Phase 1
               (Erstkontakt) Owner. Phase 4 bezieht sich nur noch auf Gegner +
               Versicherung. Wenn Korrekturen am Unfall-Block nötig werden, geht
@@ -1567,7 +1540,7 @@ export default function Phase4Stammdaten() {
       <div className="flex gap-2 mt-2">
         <button
           type="button"
-          onClick={() => setPhase(2)}
+          onClick={() => setPhase(3)}
           className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg text-sm font-semibold flex items-center justify-center gap-2"
         >
           ← Zurück zu Phase 2

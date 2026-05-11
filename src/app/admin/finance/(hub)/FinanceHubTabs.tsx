@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-528 (A4): Tab-Nav für den Finanzen-Hub.
 

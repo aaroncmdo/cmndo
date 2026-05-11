@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-691: Drawer-Wrapper für Intercepting-Routes unter
 // /admin/sachverstaendige. Rendert ein Fixed-Positioned Overlay-Drawer

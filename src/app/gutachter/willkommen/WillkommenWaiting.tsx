@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // Supabase-Propagierungs-Lag: Wenn ein Admin einen neuen SV anlegt und der
 // SV sich sofort einloggt, ist der sachverstaendige-Eintrag oft noch nicht
@@ -15,7 +15,7 @@ export default function WillkommenWaiting() {
   }, [])
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f9fb] gap-4 text-center px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-claimondo-bg gap-4 text-center px-4">
       <div className="w-10 h-10 rounded-full border-4 border-claimondo-navy/20 border-t-claimondo-navy animate-spin" />
       <p className="text-sm font-semibold text-claimondo-navy">Konto wird eingerichtet …</p>
       <p className="text-xs text-claimondo-ondo max-w-xs leading-relaxed">

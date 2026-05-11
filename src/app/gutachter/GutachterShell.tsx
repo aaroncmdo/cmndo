@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
@@ -25,17 +25,16 @@ import {
 } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
 import OutboxBadge from '@/components/offline/OutboxBadge'
-import { SupportSidebarPanel } from '@/components/support/SupportSidebarPanel'
+import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 import SVSpotlight from './_components/SVSpotlight'
-// 2026-05-06: WeatherBanner-Import entfernt — pro-Stop-Wetter ersetzt globalen Banner
+import WeatherBanner from '@/components/shared/WeatherBanner'
 import { toInitials } from '@/components/shared/KundeAvatar'
 // CMM-36: Geo-Tracking startet beim App-Öffnen
 import { useGeoPosition } from '@/hooks/useGeoPosition'
-import { GeoPermissionPrompt } from '@/components/gutachter/GeoPermissionPrompt'
 
 // AAR-222: Sidebar-Refactor von 18 flachen Items auf 10 in 4 Sektionen.
 // Removed Items (Dashboard, Mitteilungen, Tasks, Stellungnahmen, Termine,
@@ -49,10 +48,6 @@ type NavItem = {
   icon: typeof MapPinIcon
   // badge: optional Render-Funktion die einen Counter zurückgibt
   badgeKey?: 'auftraege' | 'posteingang' | 'neueTermine'
-  // 2026-05-07 Design-Review: Beta-Pill am Nav-Item — signalisiert dass das
-  // Feature noch in Entwicklung ist. Statistiken hat aktuell nur einen
-  // Coming-Soon-Stub, soll aber als Roadmap-Hint sichtbar bleiben.
-  beta?: boolean
 }
 
 type NavSection = {
@@ -80,10 +75,16 @@ const NAV_SECTIONS_BASE: NavSection[] = [
   // laufen über UpdatesNav. /gutachter/posteingang bleibt als Route erhalten
   // (Legacy-Bookmarks), taucht aber nicht mehr in der Sidebar auf.
   {
-    title: 'Geschäft',
+    title: 'Finanzen',
     items: [
       // AAR-244: Lead-Preise als Tab in Abrechnung integriert (kein eigener
       // Nav-Punkt mehr). Route /gutachter/leadpreise bleibt für Bookmarks.
+      { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
+    ],
+  },
+  {
+    title: 'Verwaltung',
+    items: [
       // CMM-17: 'Mein Gebiet' aus Nav entfernt — Aaron-Spec, kommt später als
       // eigenes Feature-Ticket zurück.
       { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
@@ -130,19 +131,12 @@ export default function GutachterShell({
   svId?: string | null
 }) {
   const pathname = usePathname()
-  // CMM-32-mapbox: /heute und /feldmodus laufen wieder im normalen Wrapper.
-  // Map+Termine-Layout ist Sache der Page-Komponenten — Shell behandelt sie
-  // wie jede andere Route (Sidebar links, navy-Outer drumherum, rounded-l-2xl
-  // Content-Wrapper). Vorher: isFullscreenMap-Flag entfernte Padding/Rounded
-  // und der Sidebar-Hide für Feldmodus überlagerte die Karte mit dem
-  // FeldmodusLayout — beides gefiel Aaron nicht.
-  const isFeldmodus = false
+  // Feldmodus übernimmt den vollen Viewport — Sidebar + FAB ausblenden damit
+  // sie nicht über der Mapbox-Karte rendern (Sidebar hat lg:z-[1100] > z-50).
+  const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [showSupport, setShowSupport] = useState(false)
-  // CMM-36: Geo-Tracking beim App-Öffnen starten — feuert watchPosition
-  // erst nach Permission 'granted'. Der Prompt wird per Klick auf den
-  // GeoPermissionPrompt-Banner ausgeloest, nicht silent beim ersten Render.
-  const geoState = useGeoPosition(svId ?? null)
+  // CMM-36: Geo-Tracking beim App-Öffnen starten
+  useGeoPosition(svId ?? null)
   // AAR-245: Verwaltung nicht mehr collapsible — alle Sektionen flach +
   // direkt sichtbar, konsistent zu Tagesgeschäft/Kommunikation/Finanzen.
   // AAR-222: Sektions-basierte Nav. Team/Community werden conditional in
@@ -313,7 +307,7 @@ export default function GutachterShell({
       {!isFeldmodus && <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] overflow-hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
@@ -350,12 +344,12 @@ export default function GutachterShell({
                 )}
               </Link>
             ) : (
-              <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></Link>
+              <Link href="/gutachter" className="text-xl font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></Link>
             )}
             {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
             <TasksPill userId={userId} href="/gutachter/tasks" />
           </div>
-          <p className="text-[#7BA3CC] text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
+          <p className="text-claimondo-light-blue text-xs mt-0.5">{firmenname ?? 'Gutachter-Portal'}</p>
         </div>
 
         {/* AAR-222: Gruppierte Nav mit Section-Headers + Badge-Counter
@@ -422,7 +416,7 @@ export default function GutachterShell({
           <button
             type="button"
             onClick={() => setShowSupport(true)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium bg-white text-[#0D1B3E] hover:bg-[#f8f9fb] transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors"
             aria-label="Hilfe und Support öffnen"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -444,9 +438,9 @@ export default function GutachterShell({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-semibold truncate">{displayName}</p>
-              <p className="text-[#7BA3CC] text-xs">Sachverständiger</p>
+              <p className="text-claimondo-light-blue text-xs">Sachverständiger</p>
             </div>
-            <UserIcon className="w-4 h-4 text-[#7BA3CC] group-hover:text-white shrink-0" />
+            <UserIcon className="w-4 h-4 text-claimondo-light-blue group-hover:text-white shrink-0" />
           </Link>
           {/* AAR-720: Einstellungen-Knopf unter Profil — Hub für Kalender,
               später weitere Konfigurations-Bereiche (Benachrichtigungen,
@@ -454,12 +448,22 @@ export default function GutachterShell({
           <Link
             href="/gutachter/einstellungen"
             onClick={() => setSidebarOpen(false)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-white hover:bg-white/5 transition-colors"
+          >
+            <SettingsIcon className="w-4 h-4" /> Einstellungen
+          </Link>
+          {/* AAR-720: Einstellungen-Knopf unter Profil — Hub für Kalender,
+              später weitere Konfigurations-Bereiche (Benachrichtigungen,
+              2FA, etc.). */}
+          <Link
+            href="/gutachter/einstellungen"
+            onClick={() => setSidebarOpen(false)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-white hover:bg-white/5 transition-colors"
           >
             <SettingsIcon className="w-4 h-4" /> Einstellungen
           </Link>
           <button onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-[#7BA3CC] hover:text-red-400 hover:bg-white/5 transition-colors">
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-red-400 hover:bg-white/5 transition-colors">
             <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>
@@ -501,38 +505,37 @@ export default function GutachterShell({
               />
             </Link>
           ) : (
-            <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-[#7BA3CC]">ondo</span></span>
+            <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
           )}
           {/* AAR-252: Glocke im Mobile-Header — war vorher nur im Wetter-
               Banner, das aber bei SVs ohne standort_lat nicht rendert. */}
           <UpdatesNav variant="dark" />
         </header>
 
-        {/* 2026-05-06: WeatherBanner entfernt + Action-Items free-floating.
-            OutboxBadge + UpdatesNav schweben oben-rechts ohne Background-
-            Wrapper. position:fixed pinnt sie an Viewport-Edge, z-20 damit
-            sie über Main-Content rendern (Sidebar lg:z-[1100] ist drüber,
-            Modale auch — passt). Hidden auf Mobile, da gibt's eine eigene
-            Header-Bar (lg:hidden Mobile-Header oben). */}
-        <div className="hidden lg:flex items-center gap-2 fixed top-3 right-4 z-20">
-          <OutboxBadge />
-          <UpdatesNav variant="dark" />
+        {/* AAR-864 Polish: beide Wrapper (Wetter + Content) öffnen sich nach
+            rechts (rounded-r-none, kein right-padding) und schließen links
+            bündig zur Sidebar mit gleichem Abstand ab (pl-2 sm:pl-3 lg:pl-4
+            + rounded-l-2xl). Der navy-Hintergrund des Outer-Containers zieht
+            sich rechts durch. */}
+        <div className="pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4">
+          <WeatherBanner
+            standortLat={standortLat ?? null}
+            standortLng={standortLng ?? null}
+            trailingSlot={
+              <>
+                <OutboxBadge />
+                <UpdatesNav variant="dark" />
+              </>
+            }
+          />
         </div>
 
-        <div className="flex-1 overflow-hidden pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4">
+        <div className="flex-1 pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4 overflow-hidden">
           <main
             id="main-content"
             role="main"
-            className="h-full overflow-y-auto bg-[#f8f9fb] rounded-l-2xl rounded-r-none shadow-sm p-2 sm:p-3 lg:p-4"
+            className="h-full overflow-y-auto rounded-l-2xl rounded-r-none bg-claimondo-bg shadow-sm p-2 sm:p-3 lg:p-4"
           >
-            {/* CMM-32 Polish: Standort-CTA — sichtbar wenn Browser-Permission
-                noch 'prompt' oder 'denied' ist; sonst rendert null.
-                2026-05-07: Banner steuert seine `mb-3` selbst, damit kein
-                Wrapper-Whitespace bleibt wenn die Component null rendert. */}
-            <GeoPermissionPrompt
-              permission={geoState.permission}
-              onRequest={geoState.requestPermission}
-            />
             {children}
           </main>
         </div>

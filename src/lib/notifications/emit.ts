@@ -2,9 +2,14 @@
 // (z.B. signSAandCreateFall → emitEvent('fall.created')). Schreibt Event-Row
 // + triggert Worker fire-and-forget. Cron-Fallback greift falls Worker-Call
 // fehlschlägt oder die Vercel-Instanz während processing stirbt.
+//
+// AAR-764: Nach dem Event-Insert läuft der Mitteilungs-Resolver und legt
+// Tasks basierend auf der EVENT_TO_TASK-Map an. Fire-and-forget wie der
+// Worker-Trigger — Fehler werden geloggt aber blockieren den Caller nicht.
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { EventType, EventPayloads } from './types'
+import { resolveTasksFromEvent } from '@/lib/resolver/resolve-tasks-from-event'
 
 export async function emitEvent<T extends EventType>(
   eventType: T,
@@ -54,6 +59,20 @@ export async function emitEvent<T extends EventType>(
     body: JSON.stringify({ eventId: data.id }),
   }).catch((e) => {
     console.error('[emit] worker-trigger failed (fallback-cron nimmt es auf):', e)
+  })
+
+  // AAR-764: Tasks aus Event ableiten — fire-and-forget, blockiert den
+  // Caller nicht. Resolver logged intern bei Fehlern.
+  resolveTasksFromEvent(
+    eventType,
+    payload as unknown as Record<string, unknown>,
+    {
+      fallId: opts?.fallId ?? payloadFallId ?? null,
+      triggeredBy: opts?.triggeredBy ?? null,
+      eventId: data.id,
+    },
+  ).catch((e) => {
+    console.error('[emit] AAR-764 task-resolver failed:', e)
   })
 
   return { eventId: data.id }

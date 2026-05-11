@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -143,7 +143,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-mono text-claimondo-navy bg-claimondo-bg px-3 py-1.5 rounded-lg">{m.twilio_whatsapp_nummer as string}</span>
-                  <span className="text-[10px] text-claimondo-ondo/70">seit {m.twilio_nummer_provisioned_am ? new Date(m.twilio_nummer_provisioned_am as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}</span>
+                  <span className="text-[10px] text-claimondo-ondo/70">seit {m.twilio_nummer_provisioned_am ? new Date(m.twilio_nummer_provisioned_am as string).toLocaleDateString('de-DE') : '—'}</span>
                 </div>
                 <button
                   onClick={async () => {

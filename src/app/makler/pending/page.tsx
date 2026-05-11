@@ -1,4 +1,4 @@
-// AAR-483 (M1): Warte-Seite für Makler mit status != 'aktiv'. Freundliche
+﻿// AAR-483 (M1): Warte-Seite für Makler mit status != 'aktiv'. Freundliche
 // UX ohne Sidebar (User ist nicht freigeschaltet → keine Portal-Navigation).
 //
 // AAR-807: Auf PageHeader align='center' migriert. Icon-Circle als

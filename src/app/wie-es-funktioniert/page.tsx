@@ -45,9 +45,9 @@ const SCHRITTE = [
   {
     nr: '01',
     icon: Camera,
-    farbe: 'text-[#4573A2]',
-    bg: 'bg-[#4573A2]/10',
-    border: 'border-[#4573A2]/20',
+    farbe: 'text-claimondo-ondo',
+    bg: 'bg-claimondo-ondo/10',
+    border: 'border-claimondo-ondo/20',
     title: 'Schaden erfassen',
     subtitle: '5 Minuten · Keine Anmeldung nötig',
     text: 'Beschreiben Sie kurz den Unfallhergang und laden Sie Fotos hoch — oder diktieren Sie uns den Schaden per Sprache. Wir brauchen keinen Papierkram, keine Formulare, kein Fax.',
@@ -61,9 +61,9 @@ const SCHRITTE = [
   {
     nr: '02',
     icon: Brain,
-    farbe: 'text-[#1E3A5F]',
-    bg: 'bg-[#1E3A5F]/10',
-    border: 'border-[#1E3A5F]/20',
+    farbe: 'text-claimondo-shield',
+    bg: 'bg-claimondo-shield/10',
+    border: 'border-claimondo-shield/20',
     title: 'KI-Ersteinschätzung',
     subtitle: 'Sofort · Kostenlos · Unverbindlich',
     text: 'Unsere KI analysiert Fotos und Beschreibung und liefert in Sekunden eine erste Einschätzung: Reparaturkosten, Wiederbeschaffungswert und ob sich ein Gutachten lohnt.',
@@ -77,9 +77,9 @@ const SCHRITTE = [
   {
     nr: '03',
     icon: UserCheck,
-    farbe: 'text-[#0D1B3E]',
-    bg: 'bg-[#0D1B3E]/10',
-    border: 'border-[#0D1B3E]/20',
+    farbe: 'text-claimondo-navy',
+    bg: 'bg-claimondo-navy/10',
+    border: 'border-claimondo-navy/20',
     title: 'Gutachter & Anwalt',
     subtitle: '48h Bericht · 0 € für Sie',
     text: 'Ein unabhängiger Gutachter aus Ihrem Umkreis kommt zu Ihnen. Der Bericht liegt in 48 Stunden vor. Unsere Partnerkanzlei reguliert danach Ihren vollen Anspruch gegenüber der gegnerischen Versicherung.',
@@ -101,7 +101,7 @@ const FAKTEN = [
 
 export default function WieEsFunktioniertPage() {
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen bg-claimondo-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
@@ -153,16 +153,16 @@ export default function WieEsFunktioniertPage() {
           }}
         />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#4573A2] shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
             So einfach geht&apos;s
           </div>
           <h1
-            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-[#0D1B3E] sm:text-5xl md:text-6xl"
+            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             Ihr Unfall. Unser Problem.
           </h1>
-          <p className="mt-5 text-balance text-base text-[#4573A2] sm:text-lg">
+          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
             In 3 Schritten zum vollen Schadensersatz — wir übernehmen alles.
           </p>
         </div>
@@ -190,9 +190,9 @@ export default function WieEsFunktioniertPage() {
             const Icon = f.icon
             return (
               <div key={f.label} className="flex flex-col items-center py-6 text-center">
-                <Icon className="mb-2 h-5 w-5 text-[#4573A2]" />
-                <div className="text-xl font-extrabold text-[#0D1B3E]">{f.wert}</div>
-                <div className="mt-0.5 text-xs text-[#4573A2]">{f.label}</div>
+                <Icon className="mb-2 h-5 w-5 text-claimondo-ondo" />
+                <div className="text-xl font-extrabold text-claimondo-navy">{f.wert}</div>
+                <div className="mt-0.5 text-xs text-claimondo-ondo">{f.label}</div>
               </div>
             )
           })}
@@ -217,20 +217,20 @@ export default function WieEsFunktioniertPage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <span className="text-4xl font-black text-[#e4e7ef]">{s.nr}</span>
+                    <span className="text-4xl font-black text-claimondo-border">{s.nr}</span>
                     <div>
                       <h2
-                        className="text-2xl font-bold text-[#0D1B3E]"
+                        className="text-2xl font-bold text-claimondo-navy"
                         style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
                       >{s.title}</h2>
-                      <div className="mt-0.5 text-sm font-semibold text-[#4573A2]">{s.subtitle}</div>
+                      <div className="mt-0.5 text-sm font-semibold text-claimondo-ondo">{s.subtitle}</div>
                     </div>
                   </div>
-                  <p className="mt-4 text-base leading-relaxed text-[#1E3A5F]">{s.text}</p>
+                  <p className="mt-4 text-base leading-relaxed text-claimondo-shield">{s.text}</p>
                   <ul className="mt-6 space-y-2">
                     {s.details.map((d) => (
-                      <li key={d} className="flex items-center gap-2 text-sm text-[#4573A2]">
-                        <ChevronRight className="h-4 w-4 flex-shrink-0 text-[#4573A2]" />
+                      <li key={d} className="flex items-center gap-2 text-sm text-claimondo-ondo">
+                        <ChevronRight className="h-4 w-4 flex-shrink-0 text-claimondo-ondo" />
                         {d}
                       </li>
                     ))}
@@ -243,7 +243,7 @@ export default function WieEsFunktioniertPage() {
       </section>
 
       {/* CTA */}
-      <section className="relative isolate overflow-hidden bg-[#0D1B3E] py-20 text-center">
+      <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-center">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -267,7 +267,7 @@ export default function WieEsFunktioniertPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/schaden-melden"
-              className="inline-flex items-center gap-2 rounded-full bg-[#4573A2] px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-[#7BA3CC] active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               Schaden melden
               <ChevronRight className="h-5 w-5" />

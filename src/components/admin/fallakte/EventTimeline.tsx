@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-544 (C7): Render-Component für den unified Event-Stream.
 // Gruppiert Events nach Datum, zeigt Source-Icons + Severity-Farben und

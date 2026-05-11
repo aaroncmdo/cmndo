@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-409: Filter- + Such-Leiste für das SV-Fälle-Archiv. Schreibt alle
 // Filter-Änderungen in die URL (router.replace, debounce für Text-Input),

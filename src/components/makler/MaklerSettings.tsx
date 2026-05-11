@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-492 (M10): Einstellungen-Client mit 7 Card-Sections. Jede Section
 // hat ihren eigenen Save-Button + lokalen Loading-/Error-/Success-State.

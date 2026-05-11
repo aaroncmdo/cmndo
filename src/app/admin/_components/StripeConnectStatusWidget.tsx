@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { CreditCardIcon, AlertTriangleIcon, CheckCircle2Icon } from 'lucide-react'
 
 // KFZ-155: Stripe-Connect Auszahlungen Status fuer den Finance-Tab.
@@ -156,7 +156,7 @@ export default async function StripeConnectStatusWidget() {
                         <td className="py-2 text-claimondo-ondo truncate max-w-[280px]">{e.beschreibung ?? '—'}</td>
                         <td className="py-2 text-right text-emerald-600 font-semibold tabular-nums">{fmtEur(Number(e.betrag))}</td>
                         <td className="py-2 text-right text-claimondo-ondo/70 tabular-nums">
-                          {e.eingezahlt_am ? new Date(e.eingezahlt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
+                          {e.eingezahlt_am ? new Date(e.eingezahlt_am).toLocaleDateString('de-DE') : '—'}
                         </td>
                       </tr>
                     ))}

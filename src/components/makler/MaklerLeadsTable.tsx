@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-485 (M3): Makler-Leads-Tabelle mit Filter-Chips und Consent-gesteuerter
 // Click-Through-Logik. Design-Tokens: Claimondo Navy/Ondo-Blue/Shield.
@@ -120,7 +120,7 @@ export function MaklerLeadsTable({ leads }: Props) {
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e4e7ef]">
+              <tbody className="divide-y divide-claimondo-border">
                 {filtered.map((lead) => (
                   <LeadRow
                     key={lead.id}
@@ -133,7 +133,7 @@ export function MaklerLeadsTable({ leads }: Props) {
           </div>
 
           {/* Mobile-Karten */}
-          <ul className="md:hidden divide-y divide-[#e4e7ef]">
+          <ul className="md:hidden divide-y divide-claimondo-border">
             {filtered.map((lead) => (
               <LeadCard
                 key={lead.id}

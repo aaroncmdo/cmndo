@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-179 P3-H + P3-I: Leads-Übersicht mit Toggle zwischen Liste (Tabelle)
 // und Kanban (Karten gruppiert nach qualifizierungs_phase). Der Dispatcher
@@ -50,26 +50,28 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
 
   return (
     <div className="space-y-3">
-      {/* Toggle-Reihe — View-Toggle links + DensityToggle rechts (nur in
-          Liste-View, im Kanban macht Density wenig Unterschied). */}
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2 w-fit">
-          <Chip
-            variant={view === 'liste' ? 'selected' : 'default'}
-            onClick={() => setView('liste')}
-          >
-            <ListIcon className="w-3.5 h-3.5" />
-            Liste
-          </Chip>
-          <Chip
-            variant={view === 'kanban' ? 'selected' : 'default'}
-            onClick={() => setView('kanban')}
-          >
-            <LayoutGridIcon className="w-3.5 h-3.5" />
-            Kanban
-          </Chip>
-        </div>
-        {view === 'liste' && <DensityToggle listKey="dispatch-leads" />}
+      {/* Toggle */}
+      <div className="flex items-center gap-1 bg-claimondo-bg rounded-lg p-0.5 w-fit">
+        <button
+          type="button"
+          onClick={() => setView('liste')}
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+            view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'
+          }`}
+        >
+          <ListIcon className="w-3.5 h-3.5" />
+          Liste
+        </button>
+        <button
+          type="button"
+          onClick={() => setView('kanban')}
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+            view === 'kanban' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'
+          }`}
+        >
+          <LayoutGridIcon className="w-3.5 h-3.5" />
+          Kanban
+        </button>
       </div>
 
       {view === 'liste' ? <ListView leads={leads} density={density} /> : <KanbanView leads={leads} />}
@@ -83,73 +85,17 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
   const cellPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   return (
     <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
-      {/* Mobile/Tablet-Card-Liste (<lg) — Portal-Review D3 */}
-      <div className="lg:hidden divide-y divide-claimondo-border">
-        {leads.length === 0 ? (
-          <p className="px-4 py-12 text-center text-sm text-claimondo-ondo/70">Keine Leads gefunden</p>
-        ) : leads.map((lead) => {
-          const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
-          const wa = waPill(lead.whatsapp_verfuegbar, lead.telefon)
-          return (
-            <Link
-              key={lead.id}
-              href={`/dispatch/leads/${lead.id}`}
-              className={`flex items-start justify-between gap-3 hover:bg-claimondo-bg active:bg-claimondo-ondo/5 transition-colors ${rowPadCls}`}
-            >
-              <div className={`flex-1 min-w-0 ${compact ? 'space-y-0.5' : 'space-y-1.5'}`}>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-claimondo-navy truncate">
-                    {lead.vorname} {lead.nachname}
-                  </p>
-                  <span className="text-[10px] text-claimondo-ondo/70 shrink-0 tabular-nums">
-                    {new Date(lead.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
-                    {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
-                  </span>
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
-                  {wa && (
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${wa.cls}`}>{wa.label}</span>
-                  )}
-                  <span className="text-[10px] text-claimondo-ondo">
-                    {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-[11px] text-claimondo-ondo/80">
-                  {lead.telefon ? (
-                    <span className="truncate">{lead.telefon}</span>
-                  ) : (
-                    <span className="text-claimondo-ondo/50">Keine Telefonnummer</span>
-                  )}
-                  {lead.schadens_fall_typ && (
-                    <>
-                      <span className="text-claimondo-ondo/40">·</span>
-                      <span className="truncate">{lead.schadens_fall_typ}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-              <ExternalLinkIcon className="w-4 h-4 text-claimondo-ondo/60 shrink-0 mt-0.5" />
-            </Link>
-          )
-        })}
-      </div>
-
-      {/* Desktop-Tabelle (lg+) */}
-      <div className="overflow-x-auto hidden lg:block">
+      <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-claimondo-border bg-claimondo-bg/50">
-              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Name</th>
-              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Telefon</th>
-              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>WA</th>
-              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Status</th>
-              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>FlowLink</th>
-              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Service</th>
-              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}>Erstellt</th>
-              <th className={`text-left ${cellPadCls} font-medium text-claimondo-ondo text-xs`}></th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Name</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Telefon</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Status</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">FlowLink</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Service</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs">Erstellt</th>
+              <th className="text-left px-4 py-3 font-medium text-claimondo-ondo text-xs"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-claimondo-border">
@@ -158,7 +104,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
               const wa = waPill(lead.whatsapp_verfuegbar, lead.telefon)
               return (
                 <tr key={lead.id} className="hover:bg-claimondo-bg/50 transition-colors">
-                  <td className={cellPadCls}>
+                  <td className="px-4 py-3">
                     <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-claimondo-ondo">
                       {lead.vorname} {lead.nachname}
                     </Link>
@@ -173,14 +119,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                       <span className="text-claimondo-ondo/50">—</span>
                     )}
                   </td>
-                  <td className={cellPadCls}>
-                    {wa ? (
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${wa.cls}`}>{wa.label}</span>
-                    ) : (
-                      <span className="text-claimondo-ondo/40 text-[10px]">—</span>
-                    )}
-                  </td>
-                  <td className={cellPadCls}>
+                  <td className="px-4 py-3">
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                       {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
                     </span>
@@ -188,13 +127,13 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                   <td className={cellPadCls}>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
                   </td>
-                  <td className={`${cellPadCls} text-xs text-claimondo-ondo`}>
+                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
                     {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
                   </td>
-                  <td className={`${cellPadCls} text-xs text-claimondo-ondo/70`}>
-                    {new Date(lead.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
+                    {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </td>
-                  <td className={cellPadCls}>
+                  <td className="px-4 py-3">
                     <Link href={`/dispatch/leads/${lead.id}`} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
                       <ExternalLinkIcon className="w-4 h-4" />
                     </Link>
@@ -204,7 +143,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
             })}
             {leads.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-sm text-claimondo-ondo/70">Keine Leads gefunden</td>
+                <td colSpan={7} className="px-4 py-12 text-center text-sm text-claimondo-ondo/70">Keine Leads gefunden</td>
               </tr>
             )}
           </tbody>
@@ -268,11 +207,8 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                     )}
                     <div className="flex items-center gap-1 mt-1.5">
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
-                      {wa && (
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${wa.cls}`}>{wa.label}</span>
-                      )}
                       <span className="text-[9px] text-claimondo-ondo/70 ml-auto">
-                        {new Date(lead.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' })}
+                        {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                       </span>
                     </div>
                   </Link>

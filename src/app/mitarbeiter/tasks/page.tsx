@@ -1,4 +1,4 @@
-// AAR-68: Mitarbeiter Tasks-Liste
+﻿// AAR-68: Mitarbeiter Tasks-Liste
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -62,7 +62,7 @@ export default async function MitarbeiterTasks({ searchParams }: {
                   'bg-claimondo-bg text-claimondo-ondo'
                 }`}>{t.prioritaet}</span>
                 <span className="text-xs text-claimondo-ondo/70">
-                  {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }) : '—'}
+                  {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '—'}
                 </span>
               </div>
             </div>

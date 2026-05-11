@@ -17,10 +17,6 @@ import dynamic from 'next/dynamic'
 import TagesrouteSidebar, { type TagesroutePflichtStat } from './TagesrouteSidebar'
 import TagesrouteStartCard from './TagesrouteStartCard'
 import TagesvorbereitungButton from '../auftraege/TagesvorbereitungButton'
-import PrivatStopAddSheet from './PrivatStopAddSheet'
-import GlassPanel from '@/components/shared/GlassPanel'
-import { removePrivatStop, type PrivatStopRow } from './private-stops-actions'
-import { toast } from 'sonner'
 import type { HeuteTerminFull } from './page'
 import type { RouteStats, TagesrouteMapHandle, TagesrouteStop } from './TagesrouteMap'
 
@@ -216,71 +212,42 @@ export default function HeuteClient({
   const mapHeight: number | string = isLargeScreen ? '100%' : MAP_HEIGHT_MOBILE
 
   return (
-    // 2026-05-06: Map = Background. Auf Desktop (lg+) füllt sie den
-    // gesamten Bereich rechts der Sidebar (256px), bündig zu allen
-    // Viewport-Kanten. Cards floaten oben-rechts darüber. Mobile: Stack.
-    <div className="relative lg:fixed lg:top-0 lg:right-0 lg:bottom-0 lg:left-64 lg:z-10">
-      {/* Map als Background — füllt den gesamten Container */}
-      <TagesrouteMap
-        svOrigin={origin}
-        stops={stops}
-        activeStopId={activeStopId}
-        onStopClick={setActiveStopId}
-        height={mapHeight}
-        onRouteStatsChange={setRouteStats}
-        onReady={handleMapReady}
-        isochronePolygon={isochronePolygon}
-        showGebiet={showGebiet}
-      />
-
-      {/* Termine-Overlay — Mobile: gestackt unter Map (mt-4).
-          Desktop (lg+): floating absolute top-right über der Map.
-          2026-05-06: alle Cards mit IDENTISCHEM Glassy-Style:
-          bg-white/65 + backdrop-blur-xl + shadow-ios-md. Konsistenz. */}
-      <div
-        className="space-y-4 mt-4 lg:mt-0 lg:absolute lg:top-4 lg:right-4 lg:bottom-4 lg:w-[420px] lg:overflow-y-auto lg:z-10"
-      >
-        {/* Tagesvorbereitung-Header */}
-        <GlassPanel className="px-3 py-2 flex items-center gap-2 text-xs text-claimondo-navy">
-          <span className="font-medium whitespace-nowrap">Tagesvorbereitung:</span>
-          <TagesvorbereitungButton />
-        </GlassPanel>
-
-        {/* Termine-Liste */}
-        <GlassPanel className="overflow-hidden">
-          <TagesrouteSidebar
-            termine={termine}
-            pflichtStats={pflichtStats}
-            svOrigin={origin}
-            activeStopId={activeStopId}
-            onStopClick={setActiveStopId}
-            privatStops={privatStops}
-            onAddPrivatStop={() => setAddSheetOpen(true)}
-            onRemovePrivatStop={handlePrivatStopRemove}
-          />
-        </GlassPanel>
-
-        {/* Tagesroute-Start-Card — Wrapper glassy wie die anderen, Innen behält
-            die Card ihren Navy-Akzent für den CTA-Look. */}
-        <GlassPanel className="overflow-hidden">
-          <TagesrouteStartCard
-            terminIds={terminIds}
-            hasActiveSession={hasActiveSession}
-            disabledReason={disabledReason}
-            geschaetzteFahrzeitMinuten={routeStats?.dauerMin ?? null}
-            distanzKm={routeStats?.distanzKm ?? null}
-            origin={origin}
-            onIntroAnimate={triggerIntroAnimation}
-          />
-        </GlassPanel>
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 p-4">
+      {/* Linke Spalte: Tageskalender-Rail */}
+      <div className="bg-white border border-claimondo-border rounded-xl p-4 overflow-y-auto max-h-[calc(100vh-180px)]">
+        <h2 className="text-sm font-semibold text-claimondo-navy mb-3">
+          Tageskalender
+        </h2>
+        <TageskalenderRail termine={termine} svOrigin={origin} />
       </div>
 
-      <PrivatStopAddSheet
-        open={addSheetOpen}
-        onClose={() => setAddSheetOpen(false)}
-        existingExternalIds={existingExternalIds}
-        onAdded={handlePrivatStopAdded}
-      />
+      {/* Rechte Spalte: KPIs + Start-Karte */}
+      <div className="space-y-3">
+        <TagesrouteStartCard
+          terminIds={terminIds}
+          hasActiveSession={hasActiveSession}
+          disabledReason={disabledReason}
+        />
+        <div className="bg-white border border-claimondo-border rounded-xl p-4">
+          <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider">
+            Termine heute
+          </p>
+          <p className="text-2xl font-semibold text-claimondo-navy mt-1">
+            {aktiveTermine.length}
+          </p>
+        </div>
+        {/* Aaron 2026-04-30: Tagesvorbereitung-Export auch hier auf Heute-Seite */}
+        <div className="bg-white border border-claimondo-border rounded-xl p-4">
+          <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider mb-2">
+            Tagesvorbereitung
+          </p>
+          <TagesvorbereitungButton />
+          <p className="text-[10px] text-claimondo-ondo/70 mt-2 leading-tight">
+            CSV mit allen Stammdaten der Tagestermine — Import in
+            AutoiXpert / Audatex / Excel.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

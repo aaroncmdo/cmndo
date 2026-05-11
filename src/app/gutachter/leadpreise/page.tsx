@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { TagIcon } from 'lucide-react'
 import { getGutachterForUser } from '@/lib/gutachter'

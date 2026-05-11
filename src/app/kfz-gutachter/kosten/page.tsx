@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Phone, Euro, ShieldCheck, FileText, AlertTriangle } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
@@ -65,7 +65,7 @@ const FAQS = [
 
 export default function KostenPage() {
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen bg-claimondo-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([

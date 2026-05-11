@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-114: 8-Minuten-Gespraechsleitfaden-Timer (Notion-Spec 14.04.2026 §1)
 // Phasen: 0-2min empathisch reden lassen, 2-4min Q1/Q2/Q3, 4-5min Nutzen,

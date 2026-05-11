@@ -107,7 +107,7 @@ async function fetchCaldavEvents(
       titel: e.summary,
       start_zeit: e.start,
       end_zeit: e.end,
-      location: e.location,
+      location: e.location ?? null,
     }))
   } catch (err) {
     console.warn('[private-events] CalDAV-Fetch fehlgeschlagen:', err instanceof Error ? err.message : err)

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Montserrat, Noto_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
@@ -133,6 +133,12 @@ export const viewport = {
   themeColor: "#0D1B3E",
 };
 
+// Next.js 15+: themeColor gehört in den separaten viewport-Export.
+// 2026-05-08: aus metadata raus migriert (Deprecation-Warning Sweep).
+export const viewport = {
+  themeColor: "#0D1B3E",
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -171,7 +177,7 @@ export default async function RootLayout({
             websiteSchema(),
           ])}
         />
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-medium focus:text-[#1E3A5F] focus:ring-2 focus:ring-[#4573A2]">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-medium focus:text-claimondo-shield focus:ring-2 focus:ring-claimondo-ondo">
           Zum Hauptinhalt springen
         </a>
         <NextIntlClientProvider locale={locale} messages={messages}>

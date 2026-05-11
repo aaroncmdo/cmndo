@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
@@ -325,11 +325,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
         <Link href={`/faelle/${fall.id}`} onClick={e => e.stopPropagation()}>
           <div className="flex items-center gap-2">
             {fall.kunde_name && <p className={`text-xs font-medium truncate ${fall.ist_aktiv === false ? 'text-claimondo-ondo/70 line-through' : 'text-claimondo-navy'}`}>{fall.kunde_name}</p>}
-            <FallCardBadges
-              chatCount={fall.ungelesene_nachrichten ?? 0}
-              updateCount={fall.ungelesene_updates ?? 0}
-              kundeUploadCount={fall.ungesehene_kunde_uploads ?? 0}
-            />
+            <FallCardBadges chatCount={fall.ungelesene_nachrichten ?? 0} updateCount={fall.ungelesene_updates ?? 0} />
             {/* AAR-770: Mitteilungs-Pulse — kleiner Punkt wenn offene Mitteilung anliegt */}
             {fall.mitteilung && (
               <span

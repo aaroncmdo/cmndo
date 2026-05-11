@@ -71,7 +71,7 @@ export async function inviteGegnerViaAirdrop(
     return { ok: false, error: 'KEINE_BERECHTIGUNG_FUER_EINLADUNG' }
   }
 
-  if (['storniert', 'reguliert', 'abgelehnt', 'an_externe_kanzlei_uebergeben'].includes(claim.status ?? '')) {
+  if (['storniert', 'verjaehrt', 'reguliert_vollstaendig'].includes(claim.status ?? '')) {
     return { ok: false, error: 'CLAIM_NICHT_MEHR_OFFEN' }
   }
 
@@ -399,7 +399,7 @@ function cleanPhone(phone: string): string {
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+    return new Date(iso).toLocaleDateString('de-DE', {
       day: '2-digit', month: '2-digit', year: 'numeric',
     })
   } catch { return iso }

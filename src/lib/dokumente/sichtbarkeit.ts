@@ -33,12 +33,6 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   // AAR-353: Vorschaden-Dokumente (CarDentity-Trigger) + Kaufvertrag als Beleg
   reparaturrechnung_vorschaden: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
   kaufvertrag: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
-  // 2026-05-10: Vorschaden-Doku-Pipeline Aaron-Briefing
-  // Kunde lädt selbst hoch wenn CarDentity Vorschaden meldet — alle Beteiligten
-  // (Admin/Dispatch/KB/SV) sehen die Dokumente, Kanzlei kommt erst spaeter ins
-  // Mandat und braucht's nicht.
-  altschaden_fotos: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
-  altes_gutachten: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   // AAR-353: Freigabe der Bank bei Leasing/Finanzierung (kein SV/Kanzlei)
   freigabe_bank: ['admin', 'dispatch', 'kundenbetreuer', 'kunde'],
 

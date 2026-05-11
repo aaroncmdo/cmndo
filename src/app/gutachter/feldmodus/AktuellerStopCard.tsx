@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-382 / Auto-Arrive: Expanded Card für den aktiven Stop im Fokus-Modus.
 // Keine manuellen "Losfahren"/"Ich bin angekommen"-Buttons mehr — Ankunft wird
@@ -8,7 +8,7 @@
 // Beim Auslösen ruft onArrived() — FeldmodusClient setzt sessionStatus='arrived'
 // → Fallakte öffnet automatisch.
 
-import { useEffect, useId, useMemo, useRef, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   PhoneIcon,
@@ -34,12 +34,6 @@ export interface AktuellerStopCardProps {
   svPosition: { lat: number; lng: number } | null
   svInGeofence: boolean
   permissionState: 'pending' | 'granted' | 'denied'
-  /**
-   * 2026-05-08 (C1): Live-Distanz vom SV zum aktuellen Stop in Metern.
-   * Steuert ob die Card im Compact- oder Expanded-Layout rendert. null
-   * = unbekannt → expanded (sicherer Default vor erstem GPS-Tick).
-   */
-  distanceMeters: number | null
   onAdvanced: (nextTerminId: string | null) => void
   onArrived: (lat: number, lng: number, via: 'geofence' | 'manuell' | 'termin_uhrzeit') => void
 }
@@ -72,33 +66,10 @@ export default function AktuellerStopCard({
   svPosition,
   svInGeofence,
   permissionState,
-  distanceMeters,
   onAdvanced,
   onArrived,
 }: AktuellerStopCardProps) {
   const [pending, startTransition] = useTransition()
-
-  // 2026-05-08 C1 (Smart-Collapse):
-  //   - Während der Anfahrt (distance > 500 m) zeigt die Card nur Header
-  //     + Adresse + Distanz/ETA-Pille — die Map dominiert. Niemand will
-  //     beim Fahren einen 12-zeiligen Briefing-Block lesen.
-  //   - Sobald < 500 m oder GPS unbekannt: voll expanded.
-  //   - User-Override via Chevron-Toggle persistiert nur den Manual-State
-  //     bis zum nächsten Distance-Übergang. Pragmatisch: wer expanded
-  //     hat will lesen, wer collapsed hat will Map.
-  // Briefing bekommt zusätzlich einen eigenen Disclosure-Toggle weil es
-  // auch im expanded-Mode oft zu lang ist (Cardentity-Briefings sind
-  // 200-400 Wörter).
-  const distanceShort = formatDistanceShort(distanceMeters)
-  // 2026-05-08 Aaron-UI-Audit: vorher war bei distanceMeters=null
-  // (initial-Mount, GPS noch nicht da) der Default `expanded` — die
-  // Card hat dann 30 % der Map-Hälfte besetzt obwohl der SV gerade
-  // erst rausgegangen ist und die Map sehen will. Jetzt Compact als
-  // sicherer Default: bei null oder > 500 m → compact. Click expandiert.
-  const autoCompact = distanceMeters == null || distanceMeters > COMPACT_DISTANCE_THRESHOLD_M
-  const [manualMode, setManualMode] = useState<'compact' | 'expanded' | null>(null)
-  const isCompact = manualMode != null ? manualMode === 'compact' : autoCompact
-  const [briefingOpen, setBriefingOpen] = useState(false)
 
   // AAR-384 + Auto-Arrive: Termin-State live beobachten (Kunde-Tracking +
   // sv_angekommen_am + besichtigung_gestartet_am).
@@ -137,7 +108,7 @@ export default function AktuellerStopCard({
         setBesichtigungGestartetAm((data.besichtigung_gestartet_am as string | null) ?? null)
       })
     const channel = supabase
-      .channel(`sv-termin-state-${stop.termin_id}-${channelSuffix}`)
+      .channel(`sv-termin-state-${stop.termin_id}`)
       .on(
         'postgres_changes',
         {
@@ -228,14 +199,39 @@ export default function AktuellerStopCard({
     stop.lng,
   ])
 
-  // 2026-05-07 (Aaron-Smoke): Termin-Uhrzeit-Fallback DEAKTIVIERT.
-  // Vorher schickte der setTimeout den SV automatisch in den arrived-
-  // Modus sobald die Termin-Start-Zeit erreicht war — egal wo er
-  // gerade ist. Aaron: „Erst wenn ich da bin auf 50 m soll das aufgehen".
-  // arrived wird jetzt NUR über Geofence (50m, sofort) ausgelöst.
-  // Wenn GPS denied ist, bleibt der SV im Anfahrts-Modus und kann
-  // manuell „Besichtigung abschließen" drücken — aber NICHT direkt vom
-  // arrived-Modus ohne Geofence-Trigger.
+  // Phase 3 — Fallback: Terminuhrzeit erreicht und GPS nicht überall
+  useEffect(() => {
+    if (besichtigungLaeuft) return
+    if (permissionState === 'granted' && kundeTracking.aktiviert) return
+    const startMs = new Date(stop.start_zeit).getTime()
+    const delay = Math.max(0, startMs - Date.now())
+    const timer = setTimeout(() => {
+      if (besichtigungFiredRef.current) return
+      besichtigungFiredRef.current = true
+      void markBesichtigungGestartet(sessionId, stop.termin_id, 'termin_uhrzeit')
+        .then((res) => {
+          if (res.success) {
+            onArrived(stop.lat ?? 0, stop.lng ?? 0, 'termin_uhrzeit')
+          } else {
+            besichtigungFiredRef.current = false
+          }
+        })
+        .catch(() => {
+          besichtigungFiredRef.current = false
+        })
+    }, delay)
+    return () => clearTimeout(timer)
+  }, [
+    besichtigungLaeuft,
+    permissionState,
+    kundeTracking.aktiviert,
+    sessionId,
+    stop.termin_id,
+    stop.start_zeit,
+    stop.lat,
+    stop.lng,
+    onArrived,
+  ])
 
   function onAbschliessen() {
     startTransition(async () => {
@@ -263,52 +259,12 @@ export default function AktuellerStopCard({
     if (permissionState === 'denied') {
       return 'GPS verweigert — Ankunft wird zur Terminuhrzeit erkannt'
     }
-    // 2026-05-08: Anzeige matched echte Geofence-Größe — PR #604 hat
-    // den Radius von 100 m auf 50 m reduziert, der Hinweis-String ist
-    // nachgezogen.
-    return 'Auto-Ankunft aktiv (Geofence 50 m)'
+    return 'Auto-Ankunft aktiv (Geofence 100 m)'
   })()
 
-  if (isCompact) {
-    // 2026-05-08 C9: Glass-Look kommt vom umschließenden GlassPanel
-    // (variant="prominent"). Die Card selbst ist transparent — kein
-    // bg-white das den Backdrop-Blur überlagert. Hover bleibt subtil.
-    return (
-      <button
-        type="button"
-        onClick={() => setManualMode('expanded')}
-        aria-label="Stop-Details ausklappen"
-        className="w-full text-left rounded-xl text-claimondo-navy px-4 py-3 hover:bg-white/30 transition-colors flex items-center gap-3"
-      >
-        <MapPinIcon className="w-5 h-5 text-[color:var(--brand-primary,var(--brand-secondary))] shrink-0" />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            {stop.kennzeichen && (
-              <span className="font-mono text-xs font-semibold text-claimondo-navy">{stop.kennzeichen}</span>
-            )}
-            <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
-              {formatUhrzeit(stop.start_zeit)}
-            </span>
-          </div>
-          <p className="text-sm font-medium truncate">{stop.adresse}</p>
-        </div>
-        {distanceShort && (
-          <span className="text-xs font-semibold text-[color:var(--brand-primary,var(--brand-secondary))] shrink-0">
-            {distanceShort}
-          </span>
-        )}
-        <ChevronDownIcon className="w-4 h-4 text-claimondo-ondo shrink-0" />
-      </button>
-    )
-  }
-
   return (
-    // 2026-05-08 C9: Card-Background transparent damit der Glass-Effekt
-    // vom umschließenden GlassPanel durchkommt. Vorher hatte bg-white
-    // den Backdrop-Blur überschattet → solid weißer Block statt frosted
-    // Glass.
-    <div className="rounded-xl text-claimondo-navy p-4 space-y-3">
-      {/* Header — mit optionalem Collapse-Toggle */}
+    <div className="rounded-xl bg-white text-claimondo-navy p-4 shadow-sm space-y-3">
+      {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--brand-primary,var(--brand-secondary))]">
@@ -344,7 +300,7 @@ export default function AktuellerStopCard({
         <p className="text-xs text-claimondo-ondo">{stop.kunde_name}</p>
       </div>
 
-      {/* Adresse + Distanz */}
+      {/* Adresse */}
       <div className="flex items-start gap-2 text-sm text-claimondo-navy">
         <MapPinIcon className="w-4 h-4 text-[color:var(--brand-primary,var(--brand-secondary))] mt-0.5" />
         <p className="flex-1">{stop.adresse}</p>
@@ -382,82 +338,12 @@ export default function AktuellerStopCard({
         </a>
       )}
 
-      {/* Vorschäden-Hinweis (Cardentity) */}
-      {stop.hat_vorschaeden && (stop.vorschaden_anzahl ?? 0) > 0 && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs flex items-start gap-2">
-          <AlertTriangleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-amber-900">
-              {stop.vorschaden_anzahl} Vorschaden{stop.vorschaden_anzahl === 1 ? '' : '-Einträge'} im Cardentity-Bericht
-            </p>
-            {stop.vorschaden_letzter_datum && (
-              <p className="text-amber-800 mt-0.5">
-                Letzter Eintrag: {new Date(stop.vorschaden_letzter_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
-              </p>
-            )}
-            <p className="text-amber-800/80 mt-0.5">
-              → Vor Ort prüfen ob die Beschädigungen sich überschneiden.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Einzusammelnde Pflichtdokumente */}
-      {stop.einzusammelnde_dokumente.length > 0 && (
-        <div className="rounded-lg border border-[color:var(--brand-primary,var(--brand-secondary))]/20 bg-[color:var(--brand-primary,var(--brand-secondary))]/5 px-3 py-2 space-y-1.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-claimondo-navy">
-            <FileTextIcon className="w-3.5 h-3.5" />
-            Einzusammeln vor Ort
-            <span className="text-[10px] font-normal text-claimondo-ondo">
-              ({stop.einzusammelnde_dokumente.length} offen)
-            </span>
-          </div>
-          <ul className="space-y-0.5 text-xs text-claimondo-navy">
-            {stop.einzusammelnde_dokumente.map((d) => (
-              <li key={d.slot_id} className="flex items-start gap-1.5">
-                <span className="text-claimondo-ondo mt-0.5">•</span>
-                <span>{d.label}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Auftrag-Typ-Badge (wenn nicht erstgutachten) */}
-      {stop.auftrag_typ && stop.auftrag_typ !== 'erstgutachten' && (
-        <p className="text-[11px] text-claimondo-ondo">
-          Auftrag:{' '}
-          <span className="font-semibold uppercase text-claimondo-navy">
-            {stop.auftrag_typ === 'nachbesichtigung' ? 'Nachbesichtigung' : stop.auftrag_typ === 'stellungnahme' ? 'Stellungnahme' : stop.auftrag_typ}
-          </span>
-        </p>
-      )}
-
-      {/* SV-Briefing — 2026-05-08 C1: Disclosure-Toggle.
-          Default collapsed weil der Briefing-Text 200-400 Wörter hat
-          (Cardentity-Output) und sonst 80 % der Card vollnimmt. SV
-          öffnet das gezielt vor dem Aussteigen. */}
+      {/* SV-Briefing */}
       {stop.briefing_text && (
         <div className="border-t border-claimondo-border pt-3">
-          <button
-            type="button"
-            onClick={() => setBriefingOpen((v) => !v)}
-            aria-expanded={briefingOpen}
-            className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo hover:text-claimondo-navy transition-colors"
-          >
-            <span>Briefing</span>
-            {briefingOpen ? <ChevronUpIcon className="w-3.5 h-3.5" /> : <ChevronDownIcon className="w-3.5 h-3.5" />}
-            {!briefingOpen && (
-              <span className="ml-auto text-[10px] normal-case tracking-normal text-claimondo-ondo/70 font-normal">
-                Anzeigen
-              </span>
-            )}
-          </button>
-          {briefingOpen && (
-            <p className="mt-2 text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
-              {stop.briefing_text}
-            </p>
-          )}
+          <p className="text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
+            {stop.briefing_text}
+          </p>
         </div>
       )}
 
@@ -468,8 +354,7 @@ export default function AktuellerStopCard({
         </div>
       )}
 
-      {/* Aktionen — Portal-Review SV1: Primary-CTA min-h-14 (56px Daumen-
-          Reach beim Fahren) statt vorher py-2.5 (~36px). */}
+      {/* Aktionen */}
       <div className="flex flex-col gap-2 pt-2">
         {besichtigungLaeuft && sessionStatus !== 'finished' && (
           <button
@@ -487,7 +372,7 @@ export default function AktuellerStopCard({
           href={mapsLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium min-h-12 px-4 hover:bg-claimondo-bg"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 hover:bg-claimondo-bg"
         >
           <NavigationIcon className="w-4 h-4" />
           In Google Maps öffnen

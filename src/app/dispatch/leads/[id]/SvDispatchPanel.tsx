@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-115: SV-Zuweisung + Termin-Reservierung im Lead-Detail (Dispatch-Portal)
 // Dispatcher waehlt vor FlowLink-Versand einen SV aus den Isochrone-Vorschlaegen
@@ -34,8 +34,6 @@ import {
 import type { DebugSvMatchingResponse } from '@/lib/dispatch/debugSvMatching'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Modal } from '@/components/primitives/Modal'
-import SvKalenderVergleichModal from './SvKalenderVergleichModal'
-import { CalendarDaysIcon } from 'lucide-react'
 
 type SvWithSlots = SvSuggestion & { slots: SlotCandidate[] }
 
@@ -326,8 +324,8 @@ export default function SvDispatchPanel({
                 className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white hover:bg-emerald-50 border border-amber-200 hover:border-emerald-300 text-xs disabled:opacity-50"
               >
                 <span className="text-claimondo-navy">
-                  Slot {i + 1}: {s.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })} ·{' '}
-                  {s.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })} – {e.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
+                  Slot {i + 1}: {s.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} ·{' '}
+                  {s.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} – {e.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
                 </span>
                 <span className="flex items-center gap-1 text-emerald-600 font-medium">
                   <CheckIcon className="w-3.5 h-3.5" /> Akzeptieren
@@ -375,7 +373,7 @@ export default function SvDispatchPanel({
           <div>
             <p className={`text-[10px] uppercase ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-700' : 'text-amber-700'}`}>Termin</p>
             <p className={`font-medium ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>
-              {start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })}
+              {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
               {' · '}
               {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
               {' – '}
@@ -497,23 +495,14 @@ export default function SvDispatchPanel({
                 <p className="text-[10px] text-claimondo-ondo uppercase font-medium">
                   {topSuggestions.length} Vorschläge · Klick auf Slot reserviert sofort
                 </p>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setKalenderOpen(true)}
-                    className="text-[10px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
-                  >
-                    <CalendarDaysIcon className="w-3 h-3" /> Kalender vergleichen
-                  </button>
-                  <button
-                    type="button"
-                    onClick={triggerSearch}
-                    disabled={pending || topLoading}
-                    className="text-[10px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
-                  >
-                    <RefreshCwIcon className="w-3 h-3" /> neu suchen
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={triggerSearch}
+                  disabled={pending || topLoading}
+                  className="text-[10px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
+                >
+                  <RefreshCwIcon className="w-3 h-3" /> neu suchen
+                </button>
               </div>
 
               <div className="space-y-2">
@@ -727,25 +716,6 @@ export default function SvDispatchPanel({
           )}
         </>
       )}
-
-      <SvKalenderVergleichModal
-        open={kalenderOpen}
-        onClose={() => setKalenderOpen(false)}
-        leadId={leadId}
-        svIds={[
-          ...((topSuggestions ?? []).map((s) => s.svId)),
-          ...((extraSuggestions ?? []).map((s) => s.svId)),
-        ]}
-        wunschterminIso={wunschterminIso ?? null}
-        onReserved={() => {
-          setToast('Termin reserviert')
-          setTopSuggestions(null)
-          setExtraSuggestions(null)
-          setSelectedSv(null)
-          setShowManual(false)
-          setTimeout(() => setToast(''), 3000)
-        }}
-      />
 
       <Modal open={debugOpen} onClose={() => setDebugOpen(false)} noPadding hideCloseButton maxWidth={672} ariaLabel="SV-Matching Debug">
         <div className="max-h-[85vh] overflow-hidden flex flex-col">

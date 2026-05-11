@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-559 (C10): Konfrontations-Termin-Card für das SV-Portal.
 // Sichtbar wenn der Kunde (via C9-Picker) um SV-Präsenz bei der

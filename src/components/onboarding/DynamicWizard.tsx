@@ -4,12 +4,11 @@ import type { OnboardingPhase, OnboardingFeld, FieldOption, DbTarget, Conditiona
 
 interface Props {
   flowKey: string
-  onComplete?: Parameters<typeof WizardClient>[0]['onComplete']
 }
 
 // Server-Component: lädt Phasen + Felder aus onboarding_phasen / onboarding_felder,
 // wrappt den WizardClient (Client-Component) der state + animation hält.
-export async function DynamicWizard({ flowKey, onComplete }: Props) {
+export async function DynamicWizard({ flowKey }: Props) {
   const supabase = await createClient()
 
   const { data: phasenRows, error } = await supabase
@@ -78,5 +77,5 @@ export async function DynamicWizard({ flowKey, onComplete }: Props) {
     )
   }
 
-  return <WizardClient phases={phases} onComplete={onComplete} />
+  return <WizardClient phases={phases} flowKey={flowKey} />
 }

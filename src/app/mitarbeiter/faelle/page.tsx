@@ -1,4 +1,4 @@
-// AAR-68: Mitarbeiter Faelle-Liste — alle dem KB zugewiesenen Faelle
+﻿// AAR-68: Mitarbeiter Faelle-Liste — alle dem KB zugewiesenen Faelle
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -47,7 +47,7 @@ export default async function MitarbeiterFaelle() {
                   <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.status}</span>
                 </td>
                 <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
-                  {new Date(f.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+                  {new Date(f.created_at).toLocaleDateString('de-DE')}
                 </td>
               </tr>
             ))}

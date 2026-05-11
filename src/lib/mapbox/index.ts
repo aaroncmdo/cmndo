@@ -63,7 +63,6 @@ export {
 export {
   fetchBlitzerInBbox,
   bboxForRoute,
-  bboxForIsochrone,
   attachBlitzerLayer,
   BLITZER_LAYER_ID,
   type BlitzerFeature,

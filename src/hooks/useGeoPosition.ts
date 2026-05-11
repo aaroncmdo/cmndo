@@ -11,7 +11,7 @@
 // Fallseite öffnet — sie läuft sobald irgendeine Gutachter-Portal-Seite offen
 // ist.
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { berechneEta } from '@/lib/mapbox/eta'
 import { haversineMeters } from '@/lib/gps/geofence'
@@ -35,77 +35,15 @@ function imAnfahrtsFenster(auftrag: NonNullable<AktiverAuftrag>): boolean {
   return now >= fensterStart && now <= fensterEnde
 }
 
-export type GeoPermission = 'granted' | 'prompt' | 'denied' | 'unsupported'
+export type GeoPermission = PermissionState | 'unsupported'
 
-export type GeoPositionState = {
-  permission: GeoPermission
-  /** Triggert den Browser-Prompt; gibt zurueck wenn der User entschieden hat. */
-  requestPermission: () => Promise<void>
-}
-
-export function useGeoPosition(svId: string | null): GeoPositionState {
+export function useGeoPosition(svId: string | null) {
   const watchIdRef = useRef<number | null>(null)
   const auftragRef = useRef<AktiverAuftrag>(null)
   const lastEtaCallRef = useRef<number>(0)
   const ankunftGefeuertRef = useRef<boolean>(false)
   const [, force] = useState(0)
-  const [permission, setPermission] = useState<GeoPermission>('unsupported')
   const supabase = createClient()
-
-  // Permission-State live spiegeln (Permissions-API hat onchange).
-  // Damit kann der Browser nach dem Prompt automatisch starten ohne
-  // dass wir pollen muessen; wenn der User in den Settings die
-  // Permission widerruft, lassen wir auch das mitlaufen.
-  useEffect(() => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      setPermission('unsupported')
-      return
-    }
-    // iOS Safari < 16 hat permissions.query fuer geolocation nicht — wir
-    // nehmen 'prompt' als sicheren Default und ueberlassen die Entscheidung
-    // dem User-Klick auf den Aktivieren-Button (der dann getCurrentPosition
-    // ruft und der iOS-Sheet erscheint).
-    if (!navigator.permissions?.query) {
-      setPermission('prompt')
-      return
-    }
-    let cancelled = false
-    let statusRef: PermissionStatus | null = null
-    const handler = () => {
-      if (cancelled || !statusRef) return
-      setPermission(statusRef.state as GeoPermission)
-    }
-    navigator.permissions
-      .query({ name: 'geolocation' as PermissionName })
-      .then((status) => {
-        if (cancelled) return
-        statusRef = status
-        setPermission(status.state as GeoPermission)
-        status.addEventListener('change', handler)
-      })
-      .catch(() => setPermission('prompt'))
-    return () => {
-      cancelled = true
-      if (statusRef) statusRef.removeEventListener('change', handler)
-    }
-  }, [])
-
-  const requestPermission = useCallback(async () => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return
-    return new Promise<void>((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        () => {
-          setPermission('granted')
-          resolve()
-        },
-        (err) => {
-          if (err.code === err.PERMISSION_DENIED) setPermission('denied')
-          resolve()
-        },
-        { enableHighAccuracy: false, maximumAge: 60_000, timeout: 10_000 },
-      )
-    })
-  }, [])
 
   // Aktiven Auftrag laden + periodisch refreshen
   useEffect(() => {
@@ -130,14 +68,9 @@ export function useGeoPosition(svId: string | null): GeoPositionState {
     }
   }, [svId])
 
-  // GPS-Watch — startet erst sobald die Permission auf 'granted' steht.
-  // Damit triggert der watchPosition-Aufruf nicht selbst den Prompt; das
-  // uebernimmt requestPermission() per User-Klick (oder ein bereits
-  // erteilter Persistent-Grant). Wechselt der Permission-State auf
-  // 'granted', startet der Watch automatisch ohne weitere Interaktion.
+  // GPS-Watch
   useEffect(() => {
     if (!svId || typeof navigator === 'undefined' || !navigator.geolocation) return
-    if (permission !== 'granted') return
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       async (pos) => {
@@ -227,7 +160,5 @@ export function useGeoPosition(svId: string | null): GeoPositionState {
         watchIdRef.current = null
       }
     }
-  }, [svId, permission]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  return { permission, requestPermission }
+  }, [svId]) // eslint-disable-line react-hooks/exhaustive-deps
 }

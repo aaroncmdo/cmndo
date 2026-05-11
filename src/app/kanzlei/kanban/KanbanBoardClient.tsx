@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-kanzlei-portal PR 3: Kanban-Board-Client mit 10 Spalten + Karten +
 // 3-Punkte-Menü mit Quick-Actions (Kanzlei-Paket + Dokumenten-Drawer).

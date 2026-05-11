@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import {
@@ -253,7 +253,7 @@ function PflichtdokumenteCard({
               </div>
               {d.hochgeladenAm && (
                 <p className="text-[10px] text-claimondo-ondo mt-0.5">
-                  Hochgeladen: {new Date(d.hochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })}
+                  Hochgeladen: {new Date(d.hochgeladenAm).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
                 </p>
               )}
               {d.status === 'abgelehnt' && d.adminNotiz && (

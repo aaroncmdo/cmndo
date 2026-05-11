@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-781: Migriert auf Modal-Primitive.
 import Link from 'next/link'
@@ -61,7 +61,7 @@ export default function DrillDownModal({
                       {item.betrag != null ? eur(item.betrag) : '—'}
                     </td>
                     <td className="px-4 py-2 text-right text-claimondo-ondo">
-                      {item.datum ? new Date(item.datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
+                      {item.datum ? new Date(item.datum).toLocaleDateString('de-DE') : '—'}
                     </td>
                   </tr>
                 ))}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-639: Kalender-View + Liste-Toggle für Kunden-Termine.
 // Liste: Kommend/Verlauf-Sektionen (wie bisher).
@@ -168,7 +168,7 @@ export default function KundeTermineClient({
               <ChevronLeftIcon className="w-4 h-4" />
             </button>
             <span className="text-sm font-semibold text-claimondo-navy capitalize">
-              {month.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', month: 'long', year: 'numeric' })}
+              {month.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
             </span>
             <button
               type="button"
@@ -238,7 +238,7 @@ export default function KundeTermineClient({
           {selectedKey && selectedTermine.length > 0 && (
             <div className="border-t border-claimondo-border px-4 py-3 space-y-2">
               <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
-                {new Date(selectedKey + 'T12:00:00').toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+                {new Date(selectedKey + 'T12:00:00').toLocaleDateString('de-DE', {
                   weekday: 'long', day: '2-digit', month: 'long',
                 })}
               </p>
@@ -329,7 +329,7 @@ function TerminCard({
             </span>
           </div>
           <p className="text-sm text-claimondo-navy mt-1">
-            {start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long' })}
+            {start.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
             {' · '}
             {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
           </p>

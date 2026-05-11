@@ -1,4 +1,4 @@
-// AAR-162 / W2: Fallakte Server-Page.
+﻿// AAR-162 / W2: Fallakte Server-Page.
 // Lädt alle Fall-Daten und delegiert an FallakteShell.
 // AAR-172: Der 210-KB-Monolith FallakteClient.old.tsx wurde gelöscht, nachdem
 // die neue Shell-Architektur alle W2-W5-Tickets abdeckt.
@@ -16,8 +16,6 @@ import { getAlleSlots } from '@/lib/dokumente/katalog'
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
 import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
 import RegulierungCard from '@/components/kb/RegulierungCard'
-import VsKorrespondenzCard, { type VsKorrespondenzEintrag } from '@/components/kb/VsKorrespondenzCard'
-import KanzleiSlaStatusCard from '@/components/kb/KanzleiSlaStatusCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
 import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
@@ -48,9 +46,6 @@ import { projectNextEvents } from '@/lib/claims/timeline-projection'
 import { getActiveKanzleiPaket, getPartnerKanzleiSettings, isKanzleiPaketPending } from '@/lib/kanzlei/queries'
 import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
 import { KanzleiAnsprechpartnerBlock } from '@/components/shared/claims'
-// Gutachten-OCR-Auswertung — admin-only Card mit den extrahierten
-// Schadensummen aus dem QC-freigegebenen Gutachten.
-import GutachtenOcrCard from '@/components/admin/fallakte/GutachtenOcrCard'
 
 export default async function FallaktePage({
   params,
@@ -73,69 +68,16 @@ export default async function FallaktePage({
   let claimStatus: string | null = null
   let claimPhase: string | null = null
   let claimKanzleiWunsch: string | null = null
-  let claimNoShowCount = 0
-  let claimLetzterNoShowAm: string | null = null
   if (claimId) {
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, phase, kanzlei_wunsch, kunde_no_show_count, letzter_no_show_am')
+      .select('status, phase, kanzlei_wunsch')
       .eq('id', claimId)
       .maybeSingle()
     claimStatus        = (claimRow?.status         as string | null) ?? null
     claimPhase         = (claimRow?.phase          as string | null) ?? null
     claimKanzleiWunsch = (claimRow?.kanzlei_wunsch as string | null) ?? null
-    claimNoShowCount   = (claimRow?.kunde_no_show_count as number | null) ?? 0
-    claimLetzterNoShowAm = (claimRow?.letzter_no_show_am as string | null) ?? null
   }
-
-  // erstgutachten-Auftrag-ID fuer die OCR-Card (Re-Run-Trigger). Nur fuer
-  // Admins relevant; KB sieht die Card nicht.
-  let erstgutachtenAuftragId: string | null = null
-
-  // Gutachten-OCR-Daten (admin-only) — separater Select damit die OCR-Werte
-  // nicht in den allgemeinen claimRow-Pfad fliessen, der auch für andere
-  // Rollen indirekt sichtbar werden könnte. CMM-32 Walkthrough: erweitert
-  // um Cluster A (Fahrzeug), B (Zustand), C (Reparatur), D (Mietwagen),
-  // E (SV-Meta) — siehe migration claims_gutachten_ocr_extended.
-  let gutachtenOcr: Awaited<ReturnType<typeof loadGutachtenOcr>> = null
-  async function loadGutachtenOcr() {
-    if (!claimId) return null
-    const { data } = await supabase
-      .from('claims')
-      .select(
-        'reparaturkosten_netto, reparaturkosten_brutto, minderwert, restwert, ' +
-          'wiederbeschaffungswert, wiederbeschaffungsdauer_tage, nutzungsausfall_tage, ' +
-          'totalschaden, gutachten_datum, gutachten_ocr_processed_at, gutachten_ocr_error, ' +
-          'gutachten_ocr_manuell_ueberschrieben, ' +
-          'gutachten_fin, gutachten_kennzeichen, gutachten_erstzulassung, ' +
-          'gutachten_laufleistung_km, gutachten_tuv_bis, gutachten_fahrzeug_typ, ' +
-          'gutachten_farbe, gutachten_farbcode, gutachten_kraftstoff, ' +
-          'gutachten_vorschaeden_text, gutachten_lackmesswert_max_my, gutachten_karosseriezustand, ' +
-          'gutachten_zeit_ak_std, gutachten_zeit_kar_std, gutachten_zeit_lack_std, ' +
-          'gutachten_lohnsatz_ak_eur, gutachten_lohnsatz_kar_eur, gutachten_lohnsatz_lack_eur, ' +
-          'gutachten_materialkosten_eur, gutachten_lackmaterial_eur, gutachten_verbringung_eur, ' +
-          'gutachten_mietwagen_klasse, gutachten_mietwagen_tagessatz_eur, gutachten_nutzungsausfall_tagessatz_eur, ' +
-          'gutachten_sv_honorar_netto, gutachten_sv_honorar_brutto, gutachten_kalkulationssystem, gutachten_seitenzahl',
-      )
-      .eq('id', claimId)
-      .maybeSingle()
-    return data
-  }
-
-  // Recent kunde-getriebene Verlegung (letzte 7 Tage, neuer Termin still
-  // bestaetigt) -> KB/Admin sehen einen amber-Banner als Hinweis.
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-  const { data: recentVerlegung } = await supabase
-    .from('gutachter_termine')
-    .select('id, start_zeit, created_at')
-    .eq('fall_id', id)
-    .eq('verlegung_initiator_kunde', true)
-    .eq('status', 'bestaetigt')
-    .gte('created_at', sevenDaysAgo)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  const kundeVerlegungVorhanden = !!recentVerlegung
   // userRolle für Timeline-Rolle und viele andere Stellen (Auth + RLS),
   // wird unten erneut für FallakteRolle-Cast verwendet.
 
@@ -146,42 +88,6 @@ export default async function FallaktePage({
     .eq('id', user.id)
     .single()
   const userRolle = ((profile?.rolle as FallakteRolle | null) ?? 'kunde') as FallakteRolle
-
-  // A4 P0: KB öffnet die Fallakte → alle ungesehenen Kunde-Uploads
-  // markieren. Analog admin_termine.gesehen_am (AAR-724) — der Counter
-  // im Kanban verschwindet beim nächsten Reload. Best-effort, kein Block
-  // wenn Update fehlschlägt.
-  if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
-    try {
-      const seenAdmin = createAdminClient()
-      await seenAdmin
-        .from('fall_dokumente')
-        .update({ kb_gesehen_am: new Date().toISOString() })
-        .eq('fall_id', id)
-        .eq('uploaded_by_kunde', true)
-        .is('kb_gesehen_am', null)
-        .is('geloescht_am', null)
-    } catch (err) {
-      console.error('[A4 P0] mark-seen kunde-uploads failed:', err)
-    }
-  }
-
-  // OCR-Auswertung NUR für Admin laden — andere Rollen bekommen `null`
-  // und damit keinen Render-Pfad.
-  if (userRolle === 'admin') {
-    gutachtenOcr = await loadGutachtenOcr()
-    // erstgutachten-Auftrag-ID fuer den OCR-Re-Run-Trigger.
-    const adminClient = createAdminClient()
-    const { data: erstgutachtenRow } = await adminClient
-      .from('auftraege')
-      .select('id')
-      .eq('fall_id', id)
-      .eq('typ', 'erstgutachten')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    erstgutachtenAuftragId = (erstgutachtenRow?.id as string | null) ?? null
-  }
 
   // AAR-843: Timeline + Future-Projection laden (nach userRolle-Auflösung,
   // weil RLS via security_invoker auf der View die Auth braucht).
@@ -722,107 +628,25 @@ export default async function FallaktePage({
 
   // CMM-32i: Kanzlei-Fall-Lifecycle-Daten für RegulierungCard. Existiert nur
   // nach KB-Freigabe (gibKanzleipaketFrei legt den Eintrag an).
-  // A2: VS-Reaktions-Daten (gekuerzt, abgelehnt, quotiert, nachbesichtigung)
-  // werden mitgegeben damit KB einen Quick-Action-Button für Stellungnahme/
-  // Nachbesichtigung sieht.
-  type VsReaktionTyp = 'gekuerzt' | 'voll_reguliert' | 'abgelehnt' | 'mehr_zeit' | 'nachbesichtigung' | 'quotiert'
   let regulierungCardProps: {
     fallId: string
-    claimId: string | null
     status: 'versicherungskontakt' | 'auszahlung'
     vsKontaktAm: string | null
     ausgezahltAm: string | null
-    kanzleiWunsch:
-      | 'partnerkanzlei'
-      | 'eigene_kanzlei'
-      | 'keine_kanzlei'
-      | 'noch_unentschieden'
-      | 'nicht_gefragt'
-      | null
-    kanzleiUebergebenAm: string | null
-    vsReaktion: {
-      typ: VsReaktionTyp | null
-      am: string | null
-      kuerzungGrund: string | null
-      ablehnungsgrund: string | null
-      quoteProzent: number | null
-    }
   } | null = null
-  // CMM-42: VS-Korrespondenz-Liste fuer die VsKorrespondenzCard (admin/kb).
-  let vsKorrespondenzEintraege: VsKorrespondenzEintrag[] = []
-  let vsVersicherungVorgabe: string | null = null
-  if ((userRolle === 'admin' || userRolle === 'kundenbetreuer') && claimId) {
-    const adminCli = createAdminClient()
-    const { data: vsk } = await adminCli
-      .from('vs_korrespondenz')
-      .select('id, datum, richtung, kanal, versicherung, aktenzeichen, betreff, notiz, naechste_frist')
-      .eq('claim_id', claimId)
-      .order('datum', { ascending: false })
-      .limit(50)
-    vsKorrespondenzEintraege = (vsk ?? []).map((row) => ({
-      id: row.id as string,
-      datum: row.datum as string,
-      richtung: row.richtung as 'eingehend' | 'ausgehend',
-      kanal: row.kanal as 'email' | 'post' | 'fax' | 'telefon' | 'portal',
-      versicherung: (row.versicherung as string | null) ?? null,
-      aktenzeichen: (row.aktenzeichen as string | null) ?? null,
-      betreff: (row.betreff as string | null) ?? null,
-      notiz: (row.notiz as string | null) ?? null,
-      naechste_frist: (row.naechste_frist as string | null) ?? null,
-    }))
-    // Versicherungs-Name als Vorgabe — erst aus juengstem Eintrag, sonst aus claim_parties
-    const juengsterMitVS = vsKorrespondenzEintraege.find((e) => e.versicherung)
-    if (juengsterMitVS?.versicherung) {
-      vsVersicherungVorgabe = juengsterMitVS.versicherung
-    }
-  }
-
   if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
     const adminCli = createAdminClient()
-    // CMM-37: Read via claim_id (kanonisch).
-    const { data: kf } = claimId ? await adminCli
+    const { data: kf } = await adminCli
       .from('kanzlei_faelle')
       .select('status, vs_kontakt_am, ausgezahlt_am')
-      .eq('claim_id', claimId)
-      .maybeSingle() : { data: null }
-    // CMM-32 Polish: kanzlei_wunsch + uebergeben_am fuer den Toggle.
-    const { data: claimForWunsch } = claimId ? await adminCli
-      .from('claims')
-      .select('kanzlei_wunsch, kanzlei_uebergeben_am')
-      .eq('id', claimId)
-      .maybeSingle() : { data: null }
-    // A2: VS-Reaktions-Daten (LexDrive-Webhooks setzen diese auf faelle).
-    const { data: vsRaw } = await adminCli
-      .from('faelle')
-      .select('vs_reaktion_typ, vs_reaktion_am, vs_kuerzung_grund, vs_ablehnungsgrund, vs_quote_prozent')
-      .eq('id', id)
+      .eq('fall_id', id)
       .maybeSingle()
-    // Card immer rendern wenn Admin/KB + Claim vorhanden ist — der
-    // KB-Toggle muss auch ohne Kanzlei-Fall sichtbar sein, sonst kann
-    // niemand den eigene-Kanzlei-Pfad anstossen.
-    if (claimId && (kf || claimForWunsch)) {
+    if (kf) {
       regulierungCardProps = {
         fallId: id,
-        claimId,
-        status: (kf?.status as 'versicherungskontakt' | 'auszahlung') ?? 'versicherungskontakt',
-        vsKontaktAm: (kf?.vs_kontakt_am as string | null) ?? null,
-        ausgezahltAm: (kf?.ausgezahlt_am as string | null) ?? null,
-        kanzleiWunsch:
-          (claimForWunsch?.kanzlei_wunsch as
-            | 'partnerkanzlei'
-            | 'eigene_kanzlei'
-            | 'keine_kanzlei'
-            | 'noch_unentschieden'
-            | 'nicht_gefragt'
-            | null) ?? null,
-        kanzleiUebergebenAm: (claimForWunsch?.kanzlei_uebergeben_am as string | null) ?? null,
-        vsReaktion: {
-          typ: (vsRaw?.vs_reaktion_typ as VsReaktionTyp | null) ?? null,
-          am: (vsRaw?.vs_reaktion_am as string | null) ?? null,
-          kuerzungGrund: (vsRaw?.vs_kuerzung_grund as string | null) ?? null,
-          ablehnungsgrund: (vsRaw?.vs_ablehnungsgrund as string | null) ?? null,
-          quoteProzent: (vsRaw?.vs_quote_prozent as number | null) ?? null,
-        },
+        status: (kf.status as 'versicherungskontakt' | 'auszahlung') ?? 'versicherungskontakt',
+        vsKontaktAm: (kf.vs_kontakt_am as string | null) ?? null,
+        ausgezahltAm: (kf.ausgezahlt_am as string | null) ?? null,
       }
     }
   }
@@ -847,23 +671,6 @@ export default async function FallaktePage({
       {regulierungCardProps && (
         <div className="mb-4">
           <RegulierungCard {...regulierungCardProps} />
-        </div>
-      )}
-      {/* CMM-38: Kanzlei-SLA-Status (offene Fristen + Mahnungs-Stand) */}
-      {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && (
-        <div className="mb-4">
-          <KanzleiSlaStatusCard fallId={id} />
-        </div>
-      )}
-      {/* CMM-42: VS-Korrespondenz erfassen + anzeigen (admin/kb) */}
-      {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && claimId && (
-        <div className="mb-4">
-          <VsKorrespondenzCard
-            fallId={id}
-            claimId={claimId}
-            eintraege={vsKorrespondenzEintraege}
-            versicherungVorgabe={vsVersicherungVorgabe}
-          />
         </div>
       )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
@@ -901,7 +708,7 @@ export default async function FallaktePage({
               <a
                 key={f.id}
                 href={`/faelle/${f.id}`}
-                className="text-[#4573A2] hover:underline font-medium text-sm"
+                className="text-claimondo-ondo hover:underline font-medium text-sm"
               >
                 {f.fall_nummer ?? f.id.slice(0, 8)}
                 {f.kennzeichen && ` (${f.kennzeichen})`}
@@ -924,9 +731,6 @@ export default async function FallaktePage({
         claimStatus={claimStatus}
         claimKanzleiWunsch={claimKanzleiWunsch}
         kanzleiPaketPending={kanzleiPaketPending}
-        kundeNoShowCount={claimNoShowCount}
-        letzterNoShowAm={claimLetzterNoShowAm}
-        kundeVerlegungVorhanden={kundeVerlegungVorhanden}
         timelineEvents={timelineEvents}
         futureEvents={futureEvents}
         dokumenteTabProps={{

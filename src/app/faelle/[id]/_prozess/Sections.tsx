@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // AAR-164 / W4: ProzessTab Sections (8 Stück).
 // AAR-167: Trigger-Buttons für Stellungnahme / Rüge / Klage.
@@ -91,7 +91,7 @@ function fmtEuro(v: unknown): string | null {
 }
 
 const KUERZUNGSTYP_LABEL: Record<string, { label: string; color: string }> = {
-  technisch: { label: 'Technisch', color: 'bg-[#f8f9fb] text-claimondo-navy border-claimondo-border' },
+  technisch: { label: 'Technisch', color: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
   argumentativ: { label: 'Argumentativ', color: 'bg-purple-50 text-purple-800 border-purple-200' },
   gemischt: { label: 'Gemischt', color: 'bg-amber-50 text-amber-800 border-amber-200' },
 }
@@ -104,7 +104,7 @@ export function KanzleiEakteSection() {
   const canTrigger = userRolle === 'admin' || userRolle === 'kundenbetreuer'
   return (
     <Card
-      icon={<ScaleIcon className="w-4 h-4 text-[#4573A2]" />}
+      icon={<ScaleIcon className="w-4 h-4 text-claimondo-ondo" />}
       title="Kanzlei + E-Akte"
       subtitle="LexDrive-Partnerkanzlei, 24+ Events (manuell + Webhook)"
     >
@@ -127,7 +127,7 @@ export function AsSection() {
   const { fall } = useFall()
   return (
     <Card
-      icon={<SendIcon className="w-4 h-4 text-[#4573A2]" />}
+      icon={<SendIcon className="w-4 h-4 text-claimondo-ondo" />}
       title="Anspruchsschreiben (AS)"
       subtitle="1-2 Werktage nach E-Akte-Übergabe (SLA)"
     >
@@ -290,7 +290,7 @@ export function VsReaktionSection() {
                   type="button"
                   disabled={pending}
                   onClick={triggerTechnischeStellungnahme}
-                  className="px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
                 >
                   Stellungnahme von SV anfordern
                 </button>
@@ -337,7 +337,7 @@ export function StellungnahmeSection() {
   }
   return (
     <Card
-      icon={<FileTextIcon className="w-4 h-4 text-[#4573A2]" />}
+      icon={<FileTextIcon className="w-4 h-4 text-claimondo-ondo" />}
       title="Technische Stellungnahme SV"
       subtitle="SLA: 72h / 3 WT nach Beauftragung — WA-Reminder 48h, KB-Eskalation 72h"
     >
@@ -355,7 +355,7 @@ export function StellungnahmeSection() {
             onClick={() =>
               trigger(() => requestTechnischeStellungnahme(fall.id), 'Stellungnahme beauftragt')
             }
-            className="px-3 py-1.5 rounded-md bg-[#4573A2] text-white text-xs font-medium hover:bg-[#0D1B3E] disabled:opacity-50"
+            className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
           >
             SV mit Stellungnahme beauftragen
           </button>
@@ -536,7 +536,7 @@ export function NachbesichtigungSection() {
       )}
 
       {ergebnis && (
-        <div className="rounded-md bg-[#f8f9fb] border border-claimondo-border p-3 text-[11px] text-claimondo-navy">
+        <div className="rounded-md bg-claimondo-bg border border-claimondo-border p-3 text-[11px] text-claimondo-navy">
           <strong className="block mb-1">Ergebnis:</strong>
           {ergebnis}
         </div>
@@ -629,8 +629,8 @@ export function AuszahlungSection() {
       </div>
 
       {isAdminSicht ? (
-        <div className="rounded-md border border-[#EBF1F8] bg-[#f8f9fb] p-3 space-y-2">
-          <h4 className="text-xs font-semibold text-[#0D1B3E]">Split (Admin-Sicht)</h4>
+        <div className="rounded-md border border-[#EBF1F8] bg-claimondo-bg p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-claimondo-navy">Split (Admin-Sicht)</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="rounded border border-claimondo-border bg-white p-2 space-y-1">
               <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">Kunde</p>
@@ -670,7 +670,7 @@ export function AuszahlungSection() {
             </div>
           </div>
           <div className="flex items-start gap-2 rounded-md border border-[#EBF1F8] bg-white p-2">
-            <EyeIcon className="w-3.5 h-3.5 text-[#4573A2] mt-0.5 shrink-0" />
+            <EyeIcon className="w-3.5 h-3.5 text-claimondo-ondo mt-0.5 shrink-0" />
             <p className="text-[11px] text-claimondo-ondo">
               Sichtbarkeit: Kunde sieht nur Kunden-Betrag (<code>faelle_kunde_view</code>),
               SV nur das Honorar (<code>faelle_sv_view</code>). Admin/KB sehen den vollen Split.
@@ -681,7 +681,7 @@ export function AuszahlungSection() {
           </p>
         </div>
       ) : (
-        <div className="rounded-md border border-claimondo-border bg-[#f8f9fb] p-3 text-[11px] text-claimondo-navy">
+        <div className="rounded-md border border-claimondo-border bg-claimondo-bg p-3 text-[11px] text-claimondo-navy">
           Split-Anzeige nur für Admin + Kundenbetreuer sichtbar.
         </div>
       )}

@@ -1,4 +1,4 @@
-import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
+﻿import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
 
 export default function GutachterKalenderLoading() {
   return (

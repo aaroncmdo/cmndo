@@ -1,4 +1,4 @@
-import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
+﻿import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
 
 // AAR-414: auf LoadingSkeleton-Primitive migriert
 export default function AdminLoading() {
