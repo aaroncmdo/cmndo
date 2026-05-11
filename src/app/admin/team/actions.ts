@@ -52,13 +52,20 @@ export async function createMitarbeiter(formData: FormData): Promise<{ email: st
   })
   if (profileError) throw new Error(`Profil erstellen fehlgeschlagen: ${profileError.message}`)
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
-  await sendCommunication('mitarbeiter_einladung', {
-    email,
-    vorname,
-    subject: 'Einladung zu Claimondo',
-    html: `<p>Hallo ${vorname},</p><p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p><p>E-Mail: <strong>${email}</strong></p><p>Einmalpasswort: <strong>${password}</strong></p><p><a href="${appUrl}/login">Jetzt einloggen</a></p>`,
-  })
+  // Audit-Fix #8: sendCommunication darf den Mitarbeiter-Anlage-Flow nicht
+  // abbrechen wenn Twilio/SMTP ausfaellt — User ist schon in der DB. Admin
+  // bekommt Email+Passwort als Return-Wert und kann manuell weitergeben.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+  try {
+    await sendCommunication('mitarbeiter_einladung', {
+      email,
+      vorname,
+      subject: 'Einladung zu Claimondo',
+      html: `<p>Hallo ${vorname},</p><p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p><p>E-Mail: <strong>${email}</strong></p><p>Einmalpasswort: <strong>${password}</strong></p><p><a href="${appUrl}/login">Jetzt einloggen</a></p>`,
+    })
+  } catch (err) {
+    console.error('[createMitarbeiter] Einladungs-Email fehlgeschlagen:', err)
+  }
   revalidatePath('/admin/team')
   return { email, password }
 }
