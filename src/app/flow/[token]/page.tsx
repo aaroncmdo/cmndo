@@ -1,5 +1,5 @@
-﻿import { createServiceClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+﻿import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { notFound, redirect } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
 import { getAllLegalDocs } from '@/lib/legal/get-doc'
 // AAR-316 W2: Sprach-Banner für nicht-deutsche Kunden
@@ -127,6 +127,31 @@ export default async function FlowPage({
     .maybeSingle()
 
   if (!lead) return notFound()
+
+  // 2026-05-12 Funnel v2 PR #5: Wenn User eingeloggt + Fall existiert,
+  // direkt zum datenabhaengigen Onboarding redirecten — ersetzt den
+  // 891-LOC FlowWizardKfz fuer alle Magic-Link-Logins. FlowWizardKfz
+  // bleibt als Fallback fuer Token-Magic-Links ohne Login.
+  try {
+    const supabase = await createClient()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    if (user) {
+      const { data: fallFuerKunde } = await svc
+        .from('faelle')
+        .select('id, kunde_id')
+        .eq('lead_id', leadId)
+        .eq('kunde_id', user.id)
+        .limit(1)
+        .maybeSingle()
+      if (fallFuerKunde?.id) {
+        redirect(`/kunde/onboarding-details?fall_id=${fallFuerKunde.id}`)
+      }
+    }
+  } catch (err) {
+    // Auth-Check soll nie die FlowWizardKfz-Anzeige blockieren — bei
+    // Fehler fallen wir auf den Legacy-Pfad zurueck.
+    console.warn('[flow/[token]] Auth-Check fuer Onboarding-Redirect:', err)
+  }
 
   // AAR-99: Reservierten SV+Termin laden fuer Schritt 2
   const { data: terminMitSv } = await svc
