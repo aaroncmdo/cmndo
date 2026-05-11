@@ -26,11 +26,25 @@ jobs:
       - name: Build (standalone)
         run: npm run build
         env:
+          # NEXT_PUBLIC_* werden zur Build-Zeit in den Client-Bundle gebaked.
+          # Alle Vars die im Browser/Client-Code via process.env.NEXT_PUBLIC_*
+          # genutzt werden, MÜSSEN hier stehen — sonst sind sie zur Runtime
+          # undefined und Features (Maps, Cesium, HERE) fallen still aus.
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
           NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
+          NEXT_PUBLIC_GOOGLE_MAPS_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_KEY }}
+          NEXT_PUBLIC_GOOGLE_MAPS_3D_TILES_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_3D_TILES_KEY }}
+          NEXT_PUBLIC_HERE_API_KEY: ${{ secrets.NEXT_PUBLIC_HERE_API_KEY }}
+          NEXT_PUBLIC_CESIUM_ION_TOKEN: ${{ secrets.NEXT_PUBLIC_CESIUM_ION_TOKEN }}
+          NEXT_PUBLIC_CESIUM_ION_ASSET_ID: ${{ secrets.NEXT_PUBLIC_CESIUM_ION_ASSET_ID }}
+          NEXT_PUBLIC_FELDMODUS_CESIUM_TILES: ${{ secrets.NEXT_PUBLIC_FELDMODUS_CESIUM_TILES }}
+          NEXT_PUBLIC_FELDMODUS_GOOGLE_TILES: ${{ secrets.NEXT_PUBLIC_FELDMODUS_GOOGLE_TILES }}
           NEXT_PUBLIC_IMAGIN_CUSTOMER: ${{ secrets.NEXT_PUBLIC_IMAGIN_CUSTOMER }}
           NEXT_PUBLIC_ELEVENLABS_VOICE_ID: ${{ secrets.NEXT_PUBLIC_ELEVENLABS_VOICE_ID }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Artefakt packen
