@@ -1318,7 +1318,12 @@ export default function Phase4Stammdaten() {
           <CardentityTypBButton
             action={() => requestCardentityTypBForLead(leadId)}
             finVorhanden={!!l.fin}
-            enrichedAt={l.cardentity_enriched_at ?? null}
+            initial={{
+              fetchedAt: (l.cardentity_enriched_at as string | null) ?? null,
+              vorschadenVorhanden: (l.hat_vorschaeden as boolean | null) ?? null,
+              vorschadenAnzahl: (l.vorschaden_anzahl as number | null) ?? null,
+              letzterVorschadenDatum: (l.vorschaden_letzter_datum as string | null) ?? null,
+            }}
           />
 
           <div>

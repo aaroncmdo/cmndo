@@ -39,6 +39,20 @@ export default function NeuLeadDrawer() {
   const [pending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
   const [data, setData] = useState(INITIAL)
+  const [error, setError] = useState<string | null>(null)
+
+  function handleSubmit() {
+    setError(null)
+    startTransition(async () => {
+      const result = await createManualLead(data)
+      if (result.success && result.leadId) {
+        router.push(`/dispatch/leads/${result.leadId}`)
+        setOpen(false)
+      } else {
+        setError(result.error ?? 'Lead konnte nicht angelegt werden')
+      }
+    })
+  }
 
   function handleClick() {
     startTransition(async () => {

@@ -79,6 +79,7 @@ export default async function DispatchRueckrufe({
         {termine.map((t) => {
           const lead = t.lead
           if (!lead) return null
+          const isOverdue = new Date(t.start_zeit).getTime() < Date.now()
           return (
             <div key={t.id} className="flex items-center gap-4 px-5 py-4">
               <div className="flex-1 min-w-0">
