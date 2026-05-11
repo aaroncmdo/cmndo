@@ -96,7 +96,7 @@ export default function FaelleFilterBar({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Fall-Nr, Kunde oder Ort"
-            className="w-full pl-9 pr-8 py-2 rounded-xl border border-claimondo-border bg-claimondo-bg text-sm text-claimondo-navy placeholder:text-claimondo-ondo/70 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] focus:bg-white"
+            className="w-full pl-9 pr-8 py-3 rounded-[14px] border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-sm text-claimondo-navy tracking-[-.005em] placeholder:text-[#8a93a6] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]"
           />
           {query && (
             <button
@@ -117,10 +117,10 @@ export default function FaelleFilterBar({
             key={key}
             type="button"
             onClick={() => setFilter(key)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-full text-xs font-semibold tracking-[-.005em] whitespace-nowrap transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
               initialFilter === key
-                ? 'bg-[var(--brand-primary)] text-white'
-                : 'bg-white text-claimondo-ondo hover:text-claimondo-navy border border-claimondo-border'
+                ? 'bg-[var(--brand-primary,#4573A2)] text-white shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)]'
+                : 'bg-claimondo-navy/[0.06] text-claimondo-shield hover:bg-claimondo-navy/[0.10] hover:text-claimondo-navy'
             }`}
           >
             {label}
