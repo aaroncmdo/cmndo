@@ -159,6 +159,29 @@ export async function setKanzleiWunsch(
         console.warn('[setKanzleiWunsch] kanzlei_faelle re-insert:', insErr.message)
       }
     }
+
+    // 2026-05-11: Post-hoc Partnerkanzlei-Wahl loest Mandat-Push aus.
+    // Greift wenn Kunde im nur_gutachter-Pfad startet und am Ende doch
+    // die Partnerkanzlei waehlt — pushMandatToKanzlei pruefte vorher nur
+    // service_typ='komplett' und hat das verpasst. Idempotent via
+    // pushMandatToKanzlei (skipt wenn mandatsnummer schon gesetzt).
+    if (wunsch === 'partnerkanzlei') {
+      try {
+        const { data: fallRow } = await admin
+          .from('faelle')
+          .select('id, mandatsnummer')
+          .eq('claim_id', claimId)
+          .maybeSingle()
+        if (fallRow?.id && !fallRow.mandatsnummer) {
+          const { pushMandatToKanzlei } = await import('@/lib/kanzlei/push-mandat')
+          pushMandatToKanzlei(fallRow.id as string).catch((err) =>
+            console.warn('[setKanzleiWunsch] pushMandatToKanzlei async fail:', err),
+          )
+        }
+      } catch (err) {
+        console.warn('[setKanzleiWunsch] pushMandatToKanzlei trigger:', err)
+      }
+    }
   }
 
   // Timeline-Audit
