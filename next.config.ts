@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // VPS-Deploy: `output: 'standalone'` erzeugt .next/standalone/ mit server.js
+  // + minimal node_modules — der deploy-vps.yml-Workflow tart das in /var/www
+  // und pm2 startet server.js. Ohne standalone schaeft cp -r .next/static
+  // fehl (das ist genau der Fehler aus Run #25694487759).
+  output: 'standalone',
   // Turbopack-Alias für 3D-Pakete die NICHT installiert sind (Feldmodus-Backlog).
   // three/@deck.gl/@loaders.gl würden OOM im CI-Build verursachen (4 GB Runner).
   // Die Stub-Dateien liefern Proxy-basierte No-Ops — alle Exports die die
