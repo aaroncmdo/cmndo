@@ -276,7 +276,18 @@ export default function FlowWizardKfz({
   // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-claimondo-bg flex flex-col">
+    <div className="relative min-h-screen overflow-x-hidden bg-claimondo-bg flex flex-col">
+      {/* Ambient-Gradient nach Brief §5 */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10"
+        style={{
+          background: [
+            'radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,0.18), transparent 60%)',
+            'radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,0.08), transparent 70%)',
+          ].join(', '),
+        }}
+      />
       {/* CMM-14: Verstecktes Login-Form für den Auto-Login nach Account-
           Anlage. Submit zu Route-Handler /api/auth/login-after-flow — der
           macht signInWithPassword + Set-Cookie + 303-Redirect. Browser
@@ -290,33 +301,34 @@ export default function FlowWizardKfz({
         <input type="hidden" name="email" defaultValue="" />
         <input type="hidden" name="password" defaultValue="" />
       </form>
-      {/* Progress bar */}
-      <div className="fixed top-0 inset-x-0 z-10 h-1.5 bg-claimondo-bg">
-        <div className="h-full bg-claimondo-ondo transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
-      </div>
 
-      {/* Step indicator */}
-      <div className="fixed top-4 left-0 right-0 z-10 flex justify-center">
-        <div className="flex items-center gap-2">
+      {/* Sticky-Glass-Step-Indicator (iOS Brief §8.6) */}
+      <div className="sticky top-0 z-20 border-b border-claimondo-navy/[0.06] bg-white/[0.78] backdrop-blur-[22px] backdrop-saturate-150">
+        <div className="h-1 w-full bg-claimondo-navy/[0.06]">
+          <div className="h-full bg-gradient-to-r from-claimondo-navy to-claimondo-ondo transition-all duration-500 ease-[cubic-bezier(.16,1,.3,1)]" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="mx-auto flex max-w-lg items-center justify-center gap-2 px-5 py-3">
           {STEPS.map((s, i) => (
             <div key={s.id} className="flex items-center gap-2">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
-                i < stepIndex ? 'bg-emerald-500 text-white' :
-                i === stepIndex ? 'bg-claimondo-ondo text-white' :
-                'bg-claimondo-border text-claimondo-ondo/70'
+              <div className={`grid h-8 w-8 place-items-center rounded-full border-2 text-xs font-semibold tracking-[-.01em] transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${
+                i < stepIndex
+                  ? 'bg-claimondo-navy border-claimondo-navy text-white scale-[1.04]'
+                  : i === stepIndex
+                    ? 'bg-claimondo-ondo border-claimondo-ondo text-white scale-[1.06] shadow-[0_0_0_5px_rgba(69,115,162,.16)]'
+                    : 'bg-white border-claimondo-navy/[0.10] text-[#8a93a6]'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
               </div>
-              {i < STEPS.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-claimondo-border'}`} />}
+              {i < STEPS.length - 1 && <div className={`h-0.5 w-6 rounded-full transition-colors ${i < stepIndex ? 'bg-claimondo-ondo' : 'bg-claimondo-navy/[0.06]'}`} />}
             </div>
           ))}
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col px-5 pt-16 pb-40 sm:pb-32 max-w-lg mx-auto w-full">
+      <div className="flex-1 flex flex-col px-4 sm:px-5 pt-5 pb-32 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
+          <div key={currentStep.id} className="bg-white rounded-[36px] px-6 py-7 shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]">
 
             {/* ═══ SCHRITT 1: ZUSAMMENFASSUNG + DATENSCHUTZ ═══ */}
             {currentStep.id === 'zusammenfassung' && (
@@ -449,15 +461,13 @@ export default function FlowWizardKfz({
 
                 <button
                   onClick={() => setStepIndex(stepIndexById('sa'))}
-                  className="w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
+                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
                   Weiter
                 </button>
 
-            {/* CMM-14: Step 'weitere-angaben' (Werkstatt + Fotos) entfernt —
-                Foto-Upload + Werkstatt-Erfassung gehören ins Onboarding nach
-                Magic-Link-Login, nicht in den FlowLink. */}
-
+              </div>
+            )}
             {/* CMM-14: Step 'weitere-angaben' (Werkstatt + Fotos) entfernt —
                 Foto-Upload + Werkstatt-Erfassung gehören ins Onboarding nach
                 Magic-Link-Login, nicht in den FlowLink. */}
@@ -569,7 +579,7 @@ export default function FlowWizardKfz({
                 <button
                   onClick={handleSignSA}
                   disabled={!signatureBlob || !saAccepted || submittingSA}
-                  className="w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
                   {submittingSA ? 'Wird verarbeitet ...' : 'SA unterzeichnen'}
                 </button>
@@ -641,7 +651,7 @@ export default function FlowWizardKfz({
                     </div>
                     <a
                       href={magicLink ?? '/kunde/onboarding'}
-                      className="block w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base text-center active:scale-[0.98] transition-all"
+                      className="block w-full text-center min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                     >
                       Zu meinem Portal
                     </a>
@@ -669,7 +679,7 @@ export default function FlowWizardKfz({
                 setStepIndex(1) // → gutachter
               }}
               disabled={!datenschutz || !editVorname || !editNachname}
-              className="w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+              className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
             >
               Weiter
             </button>
@@ -679,17 +689,16 @@ export default function FlowWizardKfz({
         {/* Zurück-Button (auf Schritt 2 und 3) */}
         {(currentStep.id === 'gutachter' ||
           currentStep.id === 'sa') && (
-          <div className="pt-2">
+          <div className="pt-3 flex justify-center">
             <button
               onClick={() => setStepIndex(stepIndex - 1)}
-              className="w-full py-3 text-sm text-claimondo-ondo hover:text-claimondo-navy transition-colors"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy/[0.06] hover:bg-claimondo-navy/[0.10] text-claimondo-navy text-sm font-semibold tracking-[-.01em] px-5 py-3 min-h-11 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:-translate-y-[1px]"
             >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
               Zurück
             </button>
           </div>
         )}
-      {/* 2026-05-11 Build-Fix: pre-existing JSX-Drift. Quick-Repair, sauberer Refactor in Folge-PR. */}
-        </div>
       </div>
     </div>
   )
@@ -709,13 +718,13 @@ function StepHeader({ question, sub, icon }: { question: string; sub?: string; i
 
 function EditableInput({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   return (
-    <div>
-      <label className="block text-xs text-claimondo-ondo mb-1">{label}</label>
+    <div className="flex flex-col gap-2">
+      <label className="block text-sm font-semibold text-claimondo-navy tracking-[-.01em]">{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo focus:bg-white transition-colors"
+        className="w-full px-4 py-3.5 rounded-[14px] border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-base text-claimondo-navy tracking-[-.01em] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:border-claimondo-ondo focus:bg-white focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
       />
     </div>
   )
@@ -723,9 +732,9 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-xl bg-claimondo-bg border border-claimondo-border">
-      <span className="text-xs text-claimondo-ondo">{label}</span>
-      <span className="text-sm text-claimondo-navy break-words">{value}</span>
+    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-2xl bg-claimondo-navy/[0.03] border border-claimondo-navy/[0.06]">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a93a6]">{label}</span>
+      <span className="text-sm text-claimondo-navy break-words tracking-[-.005em]">{value}</span>
     </div>
   )
 }

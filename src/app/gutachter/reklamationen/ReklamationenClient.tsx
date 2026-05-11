@@ -71,14 +71,14 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           title={faelle.length === 0
             ? 'Keine Fälle vorhanden — Reklamationen können nur zu vorhandenen Fällen eingereicht werden.'
             : 'Neue Reklamation einreichen'}
-          className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary)] disabled:bg-claimondo-border disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 text-sm font-semibold tracking-[-.01em] px-5 py-3 min-h-11 rounded-full bg-[var(--brand-primary,#4573A2)] text-white shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 hover:-translate-y-[1px] hover:shadow-[0_8px_22px_rgba(69,115,162,.36),0_2px_4px_rgba(69,115,162,.20)] disabled:bg-claimondo-border disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
         >
           <PlusIcon className="w-4 h-4" />
           Neue Reklamation
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-claimondo-border divide-y divide-claimondo-border">
+      <div className="bg-white rounded-3xl border border-claimondo-border divide-y divide-claimondo-border shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] overflow-hidden">
         {reklamationen.map(r => {
           const fall = Array.isArray(r.faelle) ? r.faelle[0] : r.faelle
           return (
@@ -93,11 +93,11 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
                     Grund: <span className="font-medium">{REKLAMATIONS_GRUENDE.find(g => g.value === r.grund)?.label ?? r.grund}</span>
                   </p>
                 </div>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${
-                  r.status === 'offen' ? 'bg-amber-100 text-amber-700' :
-                  r.status === 'in-bearbeitung' ? 'bg-claimondo-bg text-claimondo-ondo' :
-                  r.status === 'erledigt' ? 'bg-emerald-100 text-emerald-700' :
-                  'bg-red-100 text-red-700'
+                <span className={`text-xs font-semibold tracking-[-.005em] px-2.5 py-1 rounded-full flex-shrink-0 ${
+                  r.status === 'offen' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                  r.status === 'in-bearbeitung' ? 'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border' :
+                  r.status === 'erledigt' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                  'bg-red-50 text-red-700 border border-red-200'
                 }`}>{r.status}</span>
               </div>
               <p className="text-sm text-claimondo-navy">{r.begruendung}</p>
@@ -121,7 +121,6 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           </div>
         )}
       </div>
-      )}
 
       {/* Dialog */}
       <Modal open={showDialog} onClose={() => setShowDialog(false)} noPadding hideCloseButton maxWidth={512} ariaLabel="Neue Reklamation">
@@ -136,7 +135,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           <div>
             <label className="block text-xs font-medium text-claimondo-navy mb-1">Fall</label>
             <select value={form.fallId} onChange={e => setForm(f => ({ ...f, fallId: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-lg text-sm" required>
+              className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-[14px] px-4 py-3 text-sm text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" required>
               <option value="">Bitte Fall wählen</option>
               {faelle.map(f => (
                 <option key={f.id} value={f.id}>
@@ -149,7 +148,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           <div>
             <label className="block text-xs font-medium text-claimondo-navy mb-1">Grund</label>
             <select value={form.grund} onChange={e => setForm(f => ({ ...f, grund: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-lg text-sm" required>
+              className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-[14px] px-4 py-3 text-sm text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" required>
               <option value="">Bitte Grund wählen</option>
               {REKLAMATIONS_GRUENDE.map(g => (
                 <option key={g.value} value={g.value}>{g.label}</option>
@@ -162,18 +161,18 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
               Begründung <span className="text-claimondo-ondo/70">(min. 30 Zeichen, {form.begruendung.length}/30)</span>
             </label>
             <textarea value={form.begruendung} onChange={e => setForm(f => ({ ...f, begruendung: e.target.value }))}
-              rows={4} className="w-full px-3 py-2 border rounded-lg text-sm" required minLength={30} />
+              rows={4} className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-[14px] px-4 py-3 text-sm text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)] resize-none" required minLength={30} />
           </div>
 
           {error && <p className="text-sm text-red-500 bg-red-50 p-2 rounded">{error}</p>}
 
           <div className="flex gap-2 justify-end">
             <button type="button" onClick={() => setShowDialog(false)}
-              className="px-4 py-2 text-sm text-claimondo-ondo hover:text-claimondo-navy">
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy/[0.06] text-claimondo-navy text-sm font-semibold tracking-[-.01em] px-5 py-3 min-h-11 transition-all duration-200 hover:bg-claimondo-navy/[0.10] hover:-translate-y-[1px]">
               Abbrechen
             </button>
             <button type="submit" disabled={pending}
-              className="px-4 py-2 text-sm font-medium bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary)] disabled:opacity-50">
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-primary,#4573A2)] text-white text-sm font-semibold tracking-[-.01em] px-5 py-3 min-h-11 shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 hover:-translate-y-[1px] hover:shadow-[0_8px_22px_rgba(69,115,162,.36),0_2px_4px_rgba(69,115,162,.20)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0">
               {pending ? 'Sende...' : 'Reklamation einreichen'}
             </button>
           </div>

@@ -78,7 +78,7 @@ export default function PasswortAendernPage() {
           <p className="mt-1 text-sm text-claimondo-ondo">Bitte ändern Sie Ihr Passwort</p>
         </div>
 
-        <div className="bg-white border border-claimondo-border rounded-2xl p-8">
+        <div className="bg-white rounded-3xl p-8 shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)]">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
               <KeyIcon className="w-5 h-5 text-amber-400" />
@@ -102,7 +102,7 @@ export default function PasswortAendernPage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                className="w-full px-4 py-3.5 rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-[#8a93a6] text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]"
               />
             </div>
 
@@ -118,12 +118,12 @@ export default function PasswortAendernPage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                className="w-full px-4 py-3.5 rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-[#8a93a6] text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]"
               />
             </div>
 
             {error && (
-              <p className="text-sm text-red-400 rounded-xl bg-red-50/50 border border-red-900 px-4 py-3 text-center">
+              <p className="text-sm text-red-600 rounded-2xl bg-red-50 border border-red-200 px-4 py-3 text-center">
                 {error}
               </p>
             )}
@@ -132,7 +132,7 @@ export default function PasswortAendernPage() {
               type="submit"
               isLoading={loading}
               loadingText="Wird gespeichert..."
-              className="w-full py-3.5 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white disabled:opacity-50 font-semibold text-sm active:scale-[0.98] transition-all mt-1"
+              className="w-full py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white disabled:opacity-40 font-semibold text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] hover:shadow-[0_8px_22px_rgba(69,115,162,.36),0_2px_4px_rgba(69,115,162,.20)] active:translate-y-0 active:scale-[0.98] transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] mt-1"
             >
               Passwort ändern
             </LoadingButton>

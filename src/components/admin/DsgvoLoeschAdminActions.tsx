@@ -47,7 +47,7 @@ export default function DsgvoLoeschAdminActions({ auftragId, status }: Props) {
           type="button"
           onClick={bestaetigen}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-ondo px-3.5 py-1.5 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-[#3a6291] hover:-translate-y-[1px] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
         >
           <CheckIcon width={12} height={12} />
           {pending ? 'wartet …' : 'Bestätigen'}
@@ -59,7 +59,7 @@ export default function DsgvoLoeschAdminActions({ auftragId, status }: Props) {
           type="button"
           onClick={() => setConfirmDirect(true)}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-red-700 transition-all duration-200 hover:bg-red-50 hover:-translate-y-[1px] disabled:opacity-50"
         >
           <FlameIcon width={12} height={12} />
           Direkt ausführen
@@ -74,7 +74,7 @@ export default function DsgvoLoeschAdminActions({ auftragId, status }: Props) {
               type="button"
               onClick={ausfuehren}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(220,38,38,.30)] transition-all duration-200 hover:bg-red-700 hover:-translate-y-[1px] disabled:opacity-50"
             >
               <FlameIcon width={12} height={12} />
               {pending ? 'läuft …' : 'Ja, ausführen'}
@@ -83,7 +83,7 @@ export default function DsgvoLoeschAdminActions({ auftragId, status }: Props) {
               type="button"
               onClick={() => setConfirmDirect(false)}
               disabled={pending}
-              className="rounded-lg border border-claimondo-border bg-white px-3 py-1.5 text-xs font-semibold text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50"
+              className="rounded-full border border-claimondo-border bg-white px-3.5 py-1.5 text-xs font-semibold text-claimondo-navy transition-colors hover:bg-claimondo-bg disabled:opacity-50"
             >
               Abbrechen
             </button>

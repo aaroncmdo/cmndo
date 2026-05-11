@@ -195,10 +195,10 @@ export default function GutachterPartnerClient() {
   if (done) {
     return (
       <div className="flex flex-col items-center justify-center text-center py-20 px-6">
-        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-6">
-          <CheckIcon className="w-8 h-8 text-green-600" />
+        <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-6">
+          <CheckIcon className="w-8 h-8 text-emerald-500" />
         </div>
-        <h2 className="text-2xl font-bold text-claimondo-navy mb-3">Du stehst auf der Liste.</h2>
+        <h2 className="text-2xl font-bold text-claimondo-navy mb-3 tracking-[-.024em]" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>Du stehst auf der Liste.</h2>
         <p className="text-claimondo-ondo max-w-sm">
           Sobald deine Region verfügbar ist, melden wir uns persönlich. Kein Spam, versprochen.
         </p>
@@ -240,29 +240,29 @@ export default function GutachterPartnerClient() {
 
         {/* Linke Seite — Formular */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white rounded-2xl border border-[#e2e6ee] shadow-sm p-6 space-y-4">
-            <h2 className="text-base font-semibold text-claimondo-navy">Persönliche Daten</h2>
+          <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-6 space-y-4">
+            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">Persönliche Daten</h2>
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
-                <span className="text-xs font-medium text-claimondo-navy mb-1 block">Vorname <span className="text-red-500">*</span></span>
-                <input {...field('vorname')} required className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="Max" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Vorname <span className="text-red-500">*</span></span>
+                <input {...field('vorname')} required className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="Max" />
               </label>
               <label className="block">
-                <span className="text-xs font-medium text-claimondo-navy mb-1 block">Nachname <span className="text-red-500">*</span></span>
-                <input {...field('nachname')} required className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="Mustermann" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Nachname <span className="text-red-500">*</span></span>
+                <input {...field('nachname')} required className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="Mustermann" />
               </label>
             </div>
             <label className="block">
-              <span className="text-xs font-medium text-claimondo-navy mb-1 block">E-Mail <span className="text-red-500">*</span></span>
-              <input {...field('email')} type="email" required className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="max@buero.de" />
+              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">E-Mail <span className="text-red-500">*</span></span>
+              <input {...field('email')} type="email" required className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="max@buero.de" />
             </label>
             <label className="block">
-              <span className="text-xs font-medium text-claimondo-navy mb-1 block">Telefon</span>
-              <input {...field('telefon')} type="tel" className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="+49 221 …" />
+              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Telefon</span>
+              <input {...field('telefon')} type="tel" className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="+49 221 …" />
             </label>
             <label className="block">
-              <span className="text-xs font-medium text-claimondo-navy mb-1 block">PLZ deines Standorts <span className="text-red-500">*</span></span>
-              <input {...field('plz')} required maxLength={5} className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="50670" />
+              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">PLZ deines Standorts <span className="text-red-500">*</span></span>
+              <input {...field('plz')} required maxLength={5} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="50670" />
               {ortLabel && (
                 <p className="mt-1.5 text-xs text-claimondo-ondo flex items-center gap-1">
                   <MapPinIcon className="w-3 h-3" />
@@ -273,8 +273,8 @@ export default function GutachterPartnerClient() {
           </div>
 
           {/* Qualifikationen */}
-          <div className="bg-white rounded-2xl border border-[#e2e6ee] shadow-sm p-6 space-y-4">
-            <h2 className="text-base font-semibold text-claimondo-navy">Qualifikation</h2>
+          <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-6 space-y-4">
+            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">Qualifikation</h2>
             <div className="grid grid-cols-2 gap-2">
               {QUALI_OPTIONS.map(opt => {
                 const checked = opt.value === 'ihk' ? ihkZertifikat : qualifikationen.includes(opt.value)
@@ -283,13 +283,13 @@ export default function GutachterPartnerClient() {
                     key={opt.value}
                     type="button"
                     onClick={() => toggleQuali(opt.value)}
-                    className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors text-left ${
+                    className={`flex items-center gap-2 rounded-2xl border-[1.5px] px-4 py-3 text-sm font-semibold tracking-[-.01em] text-left transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
                       checked
-                        ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
-                        : 'border-[#e2e6ee] bg-claimondo-bg text-gray-500 hover:border-claimondo-ondo/40'
+                        ? 'border-claimondo-ondo bg-gradient-to-br from-claimondo-ondo/[0.06] to-claimondo-light-blue/[0.04] text-claimondo-navy shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)]'
+                        : 'border-claimondo-navy/[0.08] bg-white text-claimondo-shield hover:border-claimondo-light-blue hover:-translate-y-[1px]'
                     }`}
                   >
-                    <div className={`w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center ${checked ? 'bg-claimondo-ondo border-claimondo-ondo' : 'border-gray-300'}`}>
+                    <div className={`w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition-colors ${checked ? 'bg-claimondo-ondo border-claimondo-ondo' : 'border-claimondo-navy/20'}`}>
                       {checked && <CheckIcon className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
                     </div>
                     {opt.label}
@@ -300,44 +300,44 @@ export default function GutachterPartnerClient() {
             {/* Bedingte Nummern-Felder */}
             {qualifikationen.includes('dat_expert') && (
               <label className="block">
-                <span className="text-xs font-medium text-claimondo-navy mb-1 block">DAT-Expert-Nr.</span>
-                <input {...field('dat_expert_nr')} className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="z.B. DAT-12345" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">DAT-Expert-Nr.</span>
+                <input {...field('dat_expert_nr')} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="z.B. DAT-12345" />
               </label>
             )}
             {qualifikationen.includes('bvsk') && (
               <label className="block">
-                <span className="text-xs font-medium text-claimondo-navy mb-1 block">BVSK-Mitglieds-Nr.</span>
-                <input {...field('bvsk_nr')} className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="z.B. BVSK-6789" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">BVSK-Mitglieds-Nr.</span>
+                <input {...field('bvsk_nr')} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="z.B. BVSK-6789" />
               </label>
             )}
             {qualifikationen.includes('oebuv') && (
               <label className="block">
-                <span className="text-xs font-medium text-claimondo-navy mb-1 block">öbuv-Bestellungs-Nr.</span>
-                <input {...field('oebuv_nr')} className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="z.B. IHK-NW-001" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">öbuv-Bestellungs-Nr.</span>
+                <input {...field('oebuv_nr')} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="z.B. IHK-NW-001" />
               </label>
             )}
           </div>
 
           {/* Geschäft */}
-          <div className="bg-white rounded-2xl border border-[#e2e6ee] shadow-sm p-6 space-y-4">
-            <h2 className="text-base font-semibold text-claimondo-navy">Geschäft <span className="text-xs font-normal text-gray-400">(optional)</span></h2>
+          <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-6 space-y-4">
+            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">Geschäft <span className="text-xs font-normal text-[#8a93a6]">(optional)</span></h2>
             <label className="block">
-              <span className="text-xs font-medium text-claimondo-navy mb-1 block">Unternehmen / Büro</span>
-              <input {...field('firma')} className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="Mustermann Sachverständigenbüro GmbH" />
+              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Unternehmen / Büro</span>
+              <input {...field('firma')} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="Mustermann Sachverständigenbüro GmbH" />
             </label>
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
-                <span className="text-xs font-medium text-claimondo-navy mb-1 block">Jahre Erfahrung</span>
-                <input {...field('jahre_erfahrung')} type="number" min={0} max={50} className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="10" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Jahre Erfahrung</span>
+                <input {...field('jahre_erfahrung')} type="number" min={0} max={50} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="10" />
               </label>
               <label className="block">
-                <span className="text-xs font-medium text-claimondo-navy mb-1 block">Aufträge / Monat</span>
-                <input {...field('auftraege_monat')} type="number" min={0} max={999} className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="20" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Aufträge / Monat</span>
+                <input {...field('auftraege_monat')} type="number" min={0} max={999} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="20" />
               </label>
             </div>
             <label className="block">
-              <span className="text-xs font-medium text-claimondo-navy mb-1 block">Fachschwerpunkte</span>
-              <input {...field('fachschwerpunkte')} className="w-full rounded-xl border border-[#e2e6ee] bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 focus:border-claimondo-ondo" placeholder="z. B. E-Auto, Oldtimer, Lkw" />
+              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Fachschwerpunkte</span>
+              <input {...field('fachschwerpunkte')} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" placeholder="z. B. E-Auto, Oldtimer, Lkw" />
             </label>
           </div>
 
@@ -348,7 +348,7 @@ export default function GutachterPartnerClient() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full flex items-center justify-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white font-semibold rounded-xl py-3.5 text-sm transition-colors disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold rounded-full py-3.5 text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] hover:shadow-[0_8px_22px_rgba(69,115,162,.36),0_2px_4px_rgba(69,115,162,.20)] active:translate-y-0 transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
           >
             {pending ? (
               <LoaderIcon className="w-4 h-4 animate-spin" />
@@ -359,21 +359,21 @@ export default function GutachterPartnerClient() {
               </>
             )}
           </button>
-          <p className="text-xs text-center text-gray-400 leading-relaxed">
+          <p className="text-xs text-center text-[#8a93a6] leading-relaxed">
             Mit dem Absenden bestätigst du, dass wir dich kontaktieren dürfen. Keine Datenweitergabe an Dritte.
           </p>
         </form>
 
         {/* Rechte Seite — Karte */}
         <div className="lg:sticky lg:top-6 space-y-3">
-          <div className="bg-white rounded-2xl border border-[#e2e6ee] shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#e2e6ee] flex items-center justify-between">
+          <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] overflow-hidden">
+            <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-claimondo-navy">Dein Gebiet</h3>
+                <h3 className="text-sm font-bold text-claimondo-navy tracking-[-.018em]">Dein Gebiet</h3>
                 {ortLabel && coord ? (
                   <p className="text-xs text-claimondo-ondo mt-0.5">{radiusKm} km um {ortLabel}</p>
                 ) : (
-                  <p className="text-xs text-gray-400 mt-0.5">PLZ eingeben um Gebiet zu sehen</p>
+                  <p className="text-xs text-[#8a93a6] mt-0.5">PLZ eingeben um Gebiet zu sehen</p>
                 )}
               </div>
               {coord && (
@@ -385,13 +385,13 @@ export default function GutachterPartnerClient() {
             </div>
             <div ref={mapContainer} style={{ height: 360 }} className="w-full" />
             {!MAPBOX_TOKEN && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-50 text-sm text-gray-400">
+              <div className="absolute inset-0 flex items-center justify-center bg-claimondo-bg text-sm text-[#8a93a6]">
                 Karte nicht verfügbar (NEXT_PUBLIC_MAPBOX_TOKEN fehlt)
               </div>
             )}
           </div>
 
-          <div className="bg-claimondo-navy/5 border border-claimondo-border rounded-2xl px-5 py-4 text-xs text-claimondo-ondo leading-relaxed">
+          <div className="bg-claimondo-navy/[0.04] border border-claimondo-navy/[0.08] rounded-2xl px-5 py-4 text-xs text-claimondo-ondo leading-relaxed">
             <strong className="text-claimondo-navy block mb-1">Standardgebiet: {radiusKm} km Radius (≈ {flächeKm2(radiusKm).toLocaleString('de-DE')} km² Fläche).</strong>
             Pro/Premium-Pakete liefern größere Radien — das besprechen wir im Erstgespräch.
           </div>

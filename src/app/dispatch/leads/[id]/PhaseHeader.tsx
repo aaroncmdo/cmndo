@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // AAR-137 / W3: Phase-Stepper. 6 Steps horizontal.
 // Grün = erledigt, Blau = aktiv, Grau = noch nicht erreicht.
@@ -9,6 +9,9 @@
 // Portal-Review D1 (2026-05-07): Mobile-Layout ist auf <lg eine kompakte
 // Pill „Phase X: Label" + Dot-Tracker → Tap öffnet Bottom-Sheet mit allen
 // Phasen als full-width Buttons (44 px Tap-Target). Desktop unverändert.
+//
+// 2026-05-11: iOS-Glass-Polish — Step-Rail-Pattern (Design-Brief §8.6):
+// Active = ondo + Ring-Glow + scale, Done = emerald-Check, Idle = white + Border.
 
 import { useState } from 'react'
 import { CheckIcon } from 'lucide-react'
@@ -40,17 +43,17 @@ function classesFor({
   canNavigate: boolean
 }) {
   const wrapper = isActive
-    ? 'bg-claimondo-ondo text-white shadow-sm'
+    ? 'bg-claimondo-ondo text-white shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] scale-[1.02]'
     : isDone
-      ? 'bg-green-50 text-green-700 hover:bg-green-100 cursor-pointer'
+      ? 'bg-claimondo-navy/[0.06] text-claimondo-navy hover:bg-claimondo-navy/[0.10] cursor-pointer'
       : canNavigate
-        ? 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border cursor-pointer'
-        : 'bg-claimondo-bg text-claimondo-ondo/50 cursor-not-allowed'
+        ? 'bg-white text-claimondo-shield border border-claimondo-navy/[0.08] hover:border-claimondo-ondo hover:text-claimondo-navy cursor-pointer'
+        : 'bg-white/60 text-claimondo-shield/50 border border-claimondo-navy/[0.06] cursor-not-allowed'
   const circle = isActive
-    ? 'bg-white text-claimondo-ondo'
+    ? 'bg-white text-claimondo-ondo shadow-[0_0_0_4px_rgba(69,115,162,.16)]'
     : isDone
-      ? 'bg-green-500 text-white'
-      : 'bg-white text-claimondo-ondo/70 border border-claimondo-border'
+      ? 'bg-emerald-500 text-white shadow-[0_0_0_3px_rgba(52,199,89,.18)]'
+      : 'bg-white text-claimondo-shield/70 border border-claimondo-navy/[0.10]'
   return { wrapper, circle }
 }
 
@@ -84,27 +87,27 @@ export default function PhaseHeader({
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="w-full flex items-center justify-between gap-3 min-h-12 px-4 rounded-lg bg-claimondo-ondo text-white text-sm font-medium shadow-sm"
+          className="w-full flex items-center justify-between gap-3 min-h-12 px-5 rounded-full bg-claimondo-ondo text-white text-sm font-semibold tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] active:scale-[0.98]"
         >
-          <span className="flex items-center gap-2">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white/15 text-[11px] font-bold">
+          <span className="flex items-center gap-2.5">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/20 text-[12px] font-bold">
               {currentPhase}
             </span>
             <span>{currentLabel}</span>
           </span>
-          <span className="text-white/80 text-xs">Wechseln →</span>
+          <span className="text-white/80 text-xs font-medium">Wechseln →</span>
         </button>
         {/* Dot-Tracker — visualisiert Progress in einer dezenten Zeile */}
-        <div className="mt-2 flex items-center justify-center gap-1.5">
+        <div className="mt-3 flex items-center justify-center gap-2">
           {PHASE_LABELS.map(({ nr }) => {
             const isCurr = nr === currentPhase
             const isDone = completed[nr]
             const cls = isCurr
-              ? 'w-3 h-3 bg-claimondo-ondo'
+              ? 'w-3 h-3 bg-claimondo-ondo shadow-[0_0_0_3px_rgba(69,115,162,.16)]'
               : isDone
-                ? 'w-2 h-2 bg-green-500'
-                : 'w-2 h-2 bg-claimondo-border'
-            return <span key={nr} className={`rounded-full transition-all ${cls}`} aria-hidden />
+                ? 'w-2 h-2 bg-emerald-500'
+                : 'w-2 h-2 bg-claimondo-navy/[0.12]'
+            return <span key={nr} className={`rounded-full transition-all duration-200 ${cls}`} aria-hidden />
           })}
         </div>
       </div>
@@ -123,31 +126,17 @@ export default function PhaseHeader({
                 onClick={() => canNavigate && setPhase(nr)}
                 disabled={!canNavigate}
                 aria-current={isActive ? 'step' : undefined}
-                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'bg-claimondo-ondo text-white shadow-sm'
-                    : isDone
-                      ? 'bg-green-50 text-green-700 hover:bg-green-100 cursor-pointer'
-                      : canNavigate
-                        ? 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border cursor-pointer'
-                        : 'bg-claimondo-bg text-claimondo-ondo/50 cursor-not-allowed'
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${cls.wrapper}`}
               >
                 <span
-                  className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${
-                    isActive
-                      ? 'bg-white text-claimondo-ondo'
-                      : isDone
-                        ? 'bg-green-500 text-white'
-                        : 'bg-white text-claimondo-ondo/70 border border-claimondo-border'
-                  }`}
+                  className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold transition-all ${cls.circle}`}
                 >
                   {isDone && !isActive ? <CheckIcon className="w-3 h-3" /> : nr}
                 </span>
                 <span>{label}</span>
               </button>
               {idx < PHASE_LABELS.length - 1 && (
-                <span className={`h-px w-3 sm:w-6 ${isDone ? 'bg-green-300' : 'bg-claimondo-border'}`} />
+                <span className={`h-px w-3 sm:w-6 ${isDone ? 'bg-emerald-300' : 'bg-claimondo-navy/[0.10]'}`} />
               )}
             </li>
           )
@@ -156,8 +145,8 @@ export default function PhaseHeader({
 
       {/* Bottom-Sheet — wird auf Mobile durch die Pill geöffnet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl px-4 pb-6 pt-3">
-          <SheetTitle className="text-claimondo-navy mb-3">Phase wechseln</SheetTitle>
+        <SheetContent side="bottom" className="rounded-t-[28px] px-4 pb-6 pt-3 border-t border-white/65 bg-white/95 backdrop-blur-xl">
+          <SheetTitle className="text-claimondo-navy mb-3 tracking-[-.018em]">Phase wechseln</SheetTitle>
           <div className="space-y-2">
             {PHASE_LABELS.map(({ nr, label }) => {
               const isActive = currentPhase === nr
@@ -175,13 +164,13 @@ export default function PhaseHeader({
                   }}
                   disabled={!canNavigate}
                   aria-current={isActive ? 'step' : undefined}
-                  className={`w-full flex items-center gap-3 min-h-14 px-4 rounded-lg text-sm font-medium transition-colors ${cls.wrapper}`}
+                  className={`w-full flex items-center gap-3 min-h-14 px-4 rounded-2xl text-sm font-semibold tracking-[-.005em] transition-all duration-200 ${cls.wrapper}`}
                 >
-                  <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0 ${cls.circle}`}>
+                  <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0 transition-all ${cls.circle}`}>
                     {isDone && !isActive ? <CheckIcon className="w-3.5 h-3.5" /> : nr}
                   </span>
                   <span className="flex-1 text-left">{label}</span>
-                  {isDone && <CheckIcon className="w-4 h-4 text-green-600 shrink-0" />}
+                  {isDone && <CheckIcon className="w-4 h-4 text-emerald-600 shrink-0" />}
                 </button>
               )
             })}

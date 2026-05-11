@@ -204,7 +204,7 @@ export default function KalenderClient({
           <button
             type="button"
             onClick={() => goWeek(-7)}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-claimondo-border hover:bg-claimondo-ondo/5"
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-claimondo-navy/[0.06] hover:bg-claimondo-navy/[0.10] transition-colors"
             aria-label="Vorherige Woche"
           >
             <ChevronLeftIcon className="w-4 h-4 text-claimondo-navy" />
@@ -223,7 +223,7 @@ export default function KalenderClient({
           <button
             type="button"
             onClick={() => goWeek(7)}
-            className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-claimondo-border hover:bg-claimondo-ondo/5"
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-claimondo-navy/[0.06] hover:bg-claimondo-navy/[0.10] transition-colors"
             aria-label="Nächste Woche"
           >
             <ChevronRightIcon className="w-4 h-4 text-claimondo-navy" />
@@ -239,7 +239,7 @@ export default function KalenderClient({
           <button
             type="button"
             onClick={() => openSpontan()}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-shield"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-claimondo-ondo text-white text-xs font-semibold tracking-[-.005em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:bg-[#3a6291] hover:-translate-y-[0.5px] transition-all duration-200"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             Spontan-Termin

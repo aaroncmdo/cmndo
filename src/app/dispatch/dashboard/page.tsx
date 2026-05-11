@@ -116,7 +116,7 @@ export default async function DispatchDashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((s) => (
-          <Link key={s.label} href={s.href} className="bg-white rounded-ios-lg shadow-ios-sm p-5 flex items-center gap-4 hover:shadow-ios-md transition-shadow">
+          <Link key={s.label} href={s.href} className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] border border-claimondo-navy/[0.06] p-5 flex items-center gap-4 hover:-translate-y-[1px] hover:shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] transition-all duration-200">
             <div className={`w-11 h-11 rounded-lg ${s.bg} flex items-center justify-center`}>
               <s.icon className={`w-5 h-5 ${s.color}`} />
             </div>
@@ -129,8 +129,8 @@ export default async function DispatchDashboard() {
       </div>
 
       {/* Rückrufe-Timeline: chronologische Liste, Click → Rückrufe-Liste mit Auto-Open-Popover */}
-      <div className="bg-white rounded-ios-lg shadow-ios-md">
-        <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
+      <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] border border-claimondo-navy/[0.06]">
+        <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
           <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
             <PhoneIcon className="w-4 h-4 text-amber-600" />
             Rückrufe-Timeline
@@ -144,7 +144,7 @@ export default async function DispatchDashboard() {
             Alle anzeigen
           </Link>
         </div>
-        <ul className="divide-y divide-claimondo-border max-h-[320px] overflow-y-auto">
+        <ul className="divide-y divide-claimondo-navy/[0.06] max-h-[320px] overflow-y-auto">
           {kommendeRueckrufe.map((r) => {
             const lead = r.lead
             if (!lead) return null
@@ -157,7 +157,7 @@ export default async function DispatchDashboard() {
               <li key={r.id}>
                 <Link
                   href={`/dispatch/rueckrufe?open=${r.id}`}
-                  className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-bg transition-colors"
+                  className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-navy/[0.03] transition-colors"
                 >
                   {!r.gesehen_am && (
                     <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-label="Neu" />
@@ -197,14 +197,14 @@ export default async function DispatchDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live-Feed: Neueste Leads */}
-        <div className="bg-white rounded-ios-lg shadow-ios-md">
-          <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
+        <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] border border-claimondo-navy/[0.06]">
+          <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
             <h2 className="text-sm font-semibold text-claimondo-navy">Neueste Leads</h2>
             <Link href="/dispatch/leads" className="text-xs text-claimondo-ondo hover:underline">Alle anzeigen</Link>
           </div>
-          <div className="divide-y divide-claimondo-border max-h-[400px] overflow-y-auto">
+          <div className="divide-y divide-claimondo-navy/[0.06] max-h-[400px] overflow-y-auto">
             {recentLeads.map((lead) => (
-              <Link key={lead.id} href={`/dispatch/leads/${lead.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-bg transition-colors">
+              <Link key={lead.id} href={`/dispatch/leads/${lead.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-navy/[0.03] transition-colors">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-claimondo-navy truncate">
                     {lead.vorname} {lead.nachname}
@@ -224,8 +224,8 @@ export default async function DispatchDashboard() {
         </div>
 
         {/* Meine Tasks */}
-        <div className="bg-white rounded-ios-lg shadow-ios-md">
-          <div className="px-5 py-4 border-b border-claimondo-border">
+        <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] border border-claimondo-navy/[0.06]">
+          <div className="px-5 py-4 border-b border-claimondo-navy/[0.06]">
             <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
               <ClockIcon className="w-4 h-4 text-claimondo-ondo/70" />
               Offene Dispatch-Tasks
@@ -234,7 +234,7 @@ export default async function DispatchDashboard() {
               )}
             </h2>
           </div>
-          <div className="divide-y divide-claimondo-border max-h-[400px] overflow-y-auto">
+          <div className="divide-y divide-claimondo-navy/[0.06] max-h-[400px] overflow-y-auto">
             {tasks.map((task) => (
               <div key={task.id} className="px-5 py-3 flex items-center gap-3">
                 <div className="flex-1 min-w-0">
