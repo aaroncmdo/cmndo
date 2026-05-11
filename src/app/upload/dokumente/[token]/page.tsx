@@ -20,7 +20,7 @@ export default async function DokumenteUploadPage({
     if (status.reason === 'already_complete') {
       return (
         <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border max-w-md w-full p-10 text-center space-y-4">
+          <div className="bg-white rounded-[36px] shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] max-w-md w-full p-10 text-center space-y-4 animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]">
             <div className="text-5xl">✓</div>
             <h1 className="text-xl font-semibold text-claimondo-navy">Vielen Dank!</h1>
           </div>
@@ -34,7 +34,7 @@ export default async function DokumenteUploadPage({
         : { title: 'Link nicht gültig', text: 'Dieser Upload-Link ist ungültig. Bitte prüfen Sie die URL oder kontaktieren Sie Ihren Ansprechpartner.' }
     return (
       <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border max-w-md w-full p-8 text-center space-y-3">
+        <div className="bg-white rounded-[36px] shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] max-w-md w-full p-8 text-center space-y-3 animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]">
           <div className="text-3xl">⚠</div>
           <h1 className="text-lg font-semibold text-claimondo-navy">{cfg.title}</h1>
           <p className="text-sm text-claimondo-ondo">{cfg.text}</p>

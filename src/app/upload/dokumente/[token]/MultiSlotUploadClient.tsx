@@ -144,7 +144,17 @@ export default function MultiSlotUploadClient({
   const alleHochgeladen = slots.every((s) => s.hochgeladen)
 
   return (
-    <div className="min-h-screen bg-claimondo-bg py-6 px-4">
+    <div className="relative min-h-screen overflow-hidden bg-claimondo-bg py-6 px-4">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: [
+            'radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,0.18), transparent 60%)',
+            'radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,0.08), transparent 70%)',
+          ].join(', '),
+        }}
+      />
       <div className="max-w-md mx-auto">
         <div className="text-center mb-6">
           <span className="text-2xl font-bold tracking-tight">
@@ -157,7 +167,7 @@ export default function MultiSlotUploadClient({
         {alleHochgeladen ? (
           <AbschlussCard vorname={vorname} />
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-6 space-y-4">
+          <div className="bg-white rounded-3xl shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] p-6 space-y-4">
             <div className="space-y-1">
               <h1 className="text-lg font-semibold text-claimondo-navy">
                 Hallo {vorname || 'und willkommen'}!
@@ -456,7 +466,7 @@ function SlotCard({
 
 function AbschlussCard({ vorname }: { vorname: string }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-6 text-center space-y-3">
+    <div className="bg-white rounded-3xl shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] p-6 text-center space-y-3">
       <div className="w-14 h-14 mx-auto bg-green-100 rounded-full flex items-center justify-center">
         <CheckCircle2Icon className="w-8 h-8 text-green-600" />
       </div>
