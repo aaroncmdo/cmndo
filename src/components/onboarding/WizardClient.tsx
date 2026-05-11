@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
+import { finalizeGutachterFinderAnfrage } from './finalizeAnfrage'
 import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
 import type { SvMatchResult } from '@/lib/onboarding/svMatching'
 import type { OnboardingPhase, OnboardingFeld, ConditionalOn } from './types'
@@ -43,12 +44,12 @@ function validatePhase(felder: OnboardingFeld[], vals: Record<string, unknown>):
 
 interface Props {
   phases: OnboardingPhase[]
-  onComplete?: (anfrageId: string, values: Record<string, unknown>) => void
+  flowKey: string
 }
 
 const STORAGE_KEY = 'claimondo-wizard-state'
 
-export function WizardClient({ phases, onComplete }: Props) {
+export function WizardClient({ phases, flowKey }: Props) {
   const [phaseIdx, setPhaseIdx] = useState(0)
   const [values, setValues] = useState<Record<string, unknown>>({})
   const [anfrageId, setAnfrageId] = useState<string | null>(null)
@@ -128,7 +129,18 @@ export function WizardClient({ phases, onComplete }: Props) {
         if (svMatch) {
           speichereZuordnung(result.anfrageId, svMatch).catch(() => {})
         }
-        onComplete?.(result.anfrageId, values)
+        // Finalize: Anfrage → Fall + Magic-Link. Nur für gutachter-finden Flow,
+        // andere Flows (z. B. SV-Onboarding) nutzen den Wizard ebenfalls und
+        // brauchen keine Konvertierung in einen Schadensfall.
+        if (flowKey === 'gutachter-finden') {
+          const finalize = await finalizeGutachterFinderAnfrage(result.anfrageId)
+          if (!finalize.ok) {
+            // Anfrage liegt als status='entwurf' in der DB — Dispatch sieht sie
+            // und kann manuell konvertieren. Trotzdem completed=true damit der
+            // Kunde Bestätigung sieht.
+            console.error('[WizardClient] Finalize fehlgeschlagen:', finalize.error)
+          }
+        }
         setCompleted(true)
         return
       }
