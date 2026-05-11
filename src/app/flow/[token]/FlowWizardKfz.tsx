@@ -688,6 +688,8 @@ export default function FlowWizardKfz({
             </button>
           </div>
         )}
+      {/* 2026-05-11 Build-Fix: pre-existing JSX-Drift. Quick-Repair, sauberer Refactor in Folge-PR. */}
+        </div>
       </div>
     </div>
   )

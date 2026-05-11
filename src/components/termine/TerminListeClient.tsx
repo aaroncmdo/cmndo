@@ -186,8 +186,8 @@ function Row({ r, dispatchLinks, onRueckrufClick }: { r: Normalized; dispatchLin
   const isOverdue = r.status !== 'erledigt' && r.status !== 'abgesagt' && r.status !== 'abgelehnt' && start < now
   const datum = start.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 
-  return (
-    <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-claimondo-bg transition-colors">
+  const inner = (
+    <>
       <span className={`flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full border shrink-0 ${meta.cls}`}>
         <Icon className="w-3 h-3" />
         {meta.label}
