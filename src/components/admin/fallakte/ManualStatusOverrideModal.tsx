@@ -53,6 +53,7 @@ const STATUS_LABEL: Record<FallStatusValue, string> = {
   'regulierung-laeuft': 'Regulierung läuft',
   'zahlung-eingegangen': 'Zahlung eingegangen',
   abgeschlossen: 'Abgeschlossen',
+  storniert: 'Storniert',
 }
 
 export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentStatus }: Props) {

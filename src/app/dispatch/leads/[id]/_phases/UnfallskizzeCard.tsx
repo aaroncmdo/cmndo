@@ -5,7 +5,7 @@
 // Bestätigung im FlowLink ist Follow-up.
 
 import { useState, useTransition } from 'react'
-import { SparklesIcon, CheckCircle2Icon, RefreshCwIcon, LoaderIcon, XIcon } from 'lucide-react'
+import { SparklesIcon, CheckCircle2Icon, RefreshCwIcon, LoaderIcon, XIcon, MoveIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import {
   generateAndSaveUnfallskizze,

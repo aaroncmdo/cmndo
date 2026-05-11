@@ -182,15 +182,7 @@ export default function BkatAnalysePanel({
                     {UNFALLART_LABEL[data.unfallart] ?? data.unfallart}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => uebernehmen(data.unfallart!)}
-                  disabled={saving}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
-                >
-                  <CheckCircleIcon className="w-3.5 h-3.5" />
-                  Übernehmen
-                </button>
+                {/* 2026-05-11: Manueller Uebernehmen-Button entfernt — Auto-Save in analyze() macht das schon. */}
               </div>
               {autoSaved && (
                 <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5 font-medium">

@@ -6,6 +6,7 @@ import NeuLeadDrawer from './_components/NeuLeadDrawer'
 import LeadsViewToggle from './_components/LeadsViewToggle'
 import { PHASE_OPTIONS } from './_components/leadPhaseConstants'
 import PageHeader from '@/components/shared/PageHeader'
+import { Chip, ChipRow } from '@/components/ui/Chip'
 
 export default async function DispatchLeads({
   searchParams,
@@ -70,7 +71,7 @@ export default async function DispatchLeads({
           transform: 'translateX(-50%)',
         }}
       >
-        <NeuLeadDrawer fab />
+        <NeuLeadDrawer />
       </div>
     </div>
   )

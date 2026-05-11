@@ -27,6 +27,8 @@ import { setGrueneKarteAngefragt } from '../_actions/gruene-karte'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { parseKennzeichen, buildKennzeichen } from '@/lib/format/kennzeichen'
+import { LACKFARBE_OPTIONS, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
+import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import {
   CarIcon,
   ShieldIcon,
@@ -1316,7 +1318,12 @@ export default function Phase4Stammdaten() {
           <CardentityTypBButton
             action={() => requestCardentityTypBForLead(leadId)}
             finVorhanden={!!l.fin}
-            enrichedAt={l.cardentity_enriched_at ?? null}
+            initial={{
+              fetchedAt: (l.cardentity_enriched_at as string | null) ?? null,
+              vorschadenVorhanden: (l.hat_vorschaeden as boolean | null) ?? null,
+              vorschadenAnzahl: (l.vorschaden_anzahl as number | null) ?? null,
+              letzterVorschadenDatum: (l.vorschaden_letzter_datum as string | null) ?? null,
+            }}
           />
 
           <div>
