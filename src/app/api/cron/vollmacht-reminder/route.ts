@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   // (Timestamp, NULL bedeutet „noch nicht unterschrieben").
   const { data: faelle, error: faelleErr } = await db
     .from('faelle')
-    .select('id, fall_nummer, lead_id, kundenbetreuer_id, created_at, vollmacht_signiert_am')
+    .select('id, fall_nummer, lead_id, kundenbetreuer_id, created_at, vollmacht_signiert_am, mandatsnummer')
     .eq('service_typ', 'komplett')
     .not('status', 'in', '("abgeschlossen","storniert")')
     .is('vollmacht_signiert_am', null)
@@ -84,6 +84,26 @@ export async function GET(request: Request) {
     if (existing && existing > 0) continue // Bereits gesendet
 
     if (isDay7Plus) {
+      // 2026-05-11: Auto-Re-Push wenn initialer Push hat keinen mandatsnummer
+      // hinterlassen — bedeutet LexDrive-Side hat das Mandat nie erhalten.
+      // pushMandatToKanzlei ist idempotent (X-Claimondo-Event-Id pro Aufruf).
+      if (!fall.mandatsnummer) {
+        try {
+          const { pushMandatToKanzlei } = await import('@/lib/kanzlei/push-mandat')
+          const result = await pushMandatToKanzlei(fall.id as string)
+          await db.from('timeline').insert({
+            fall_id: fall.id,
+            typ: 'webhook',
+            titel: result.success
+              ? 'Mandat-Re-Push (Auto): erfolgreich'
+              : `Mandat-Re-Push (Auto): fehlgeschlagen — ${result.error ?? 'unbekannt'}`,
+            beschreibung: `Tag-7+-Retry: initialer Push hatte keine mandatsnummer hinterlassen.`,
+          })
+        } catch (err) {
+          console.warn('[vollmacht-reminder] Auto-Re-Push:', err)
+        }
+      }
+
       // Admin-Task erstellen
       const { error: taskErr } = await db.from('tasks').insert({
         fall_id: fall.id,
