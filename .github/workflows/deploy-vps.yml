@@ -26,6 +26,10 @@ jobs:
       - name: Build (standalone)
         run: npm run build
         env:
+          # 2026-05-11: Heap auf 6 GB hochziehen — Next.js 16 Turbopack mit
+          # ~600+ Routes + TS-Strict-Check ueberschritt vorher das Default-
+          # 4-GB-Limit (Run #25689532132 starb mit "JavaScript heap out of memory").
+          NODE_OPTIONS: --max-old-space-size=6144
           # NEXT_PUBLIC_* werden zur Build-Zeit in den Client-Bundle gebaked.
           # Alle Vars die im Browser/Client-Code via process.env.NEXT_PUBLIC_*
           # genutzt werden, MÜSSEN hier stehen — sonst sind sie zur Runtime
