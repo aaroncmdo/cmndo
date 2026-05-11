@@ -141,10 +141,19 @@ export async function ladeNoetigePhasen(
         conditional_on: (f.conditional_on as ConditionalOn | null) ?? null,
       }))
 
-    // Skip wenn ALLE Pflichtfelder schon einen DB-Wert haben
+    // Skip wenn ALLE Pflichtfelder schon einen DB-Wert haben.
+    //
+    // 2026-05-12 Funnel v3 PR #9: lookup via beiden Pfaden — feld_key
+    // (Standard-Match wenn Wizard-Key = DB-Spalte) und db_target.spalte
+    // (wenn sie abweichen, z.B. dsgvo_onboarding → dsgvo_zustimmung_am).
+    // So greift die Skip-Logik auch wenn der Wizard ein anderes Feld-Naming
+    // hat als die DB-Spalte.
     const pflichtFelder = felder.filter(f => f.pflicht)
     const allePflichtErfuellt = pflichtFelder.length > 0 && pflichtFelder.every(f => {
-      const v = prefilled[f.feld_key]
+      const valByKey = prefilled[f.feld_key]
+      const dbSpalte = f.db_target?.spalte ?? null
+      const valBySpalte = dbSpalte ? prefilled[dbSpalte] : undefined
+      const v = valByKey ?? valBySpalte
       return v !== null && v !== undefined && v !== ''
     })
 
