@@ -57,10 +57,28 @@ export function WizardClient({ phases, flowKey }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [animKey, setAnimKey] = useState(0)
   const [svMatch, setSvMatch] = useState<Extract<SvMatchResult, { ok: true }> | null>(null)
+  // 2026-05-11: SV-Pre-Selection ueber DOM-Event aus der Mapbox-Karte
+  // (GutachterFinderMapClient). Wird beim Finalize an speichereZuordnung
+  // weitergereicht damit der gewaehlte SV-Lead im konvertierten Lead landet.
+  const [preSelectedSvLeadId, setPreSelectedSvLeadId] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
   const geoMatchedRef = useRef(false)
   const svId = svMatch?.svId ?? null
   const svName = svMatch?.svName ?? null
+
+  // 2026-05-11: Click auf einen SV-Marker in der Karte sendet ein
+  // claimondo:select-sv CustomEvent mit der sv_leads.id. Wir merken sie
+  // uns und reichen sie beim Finalize an speichereZuordnung weiter.
+  useEffect(() => {
+    function handleSelect(e: Event) {
+      const ce = e as CustomEvent<string>
+      if (typeof ce.detail === 'string' && ce.detail.length > 0) {
+        setPreSelectedSvLeadId(ce.detail)
+      }
+    }
+    document.addEventListener('claimondo:select-sv', handleSelect)
+    return () => document.removeEventListener('claimondo:select-sv', handleSelect)
+  }, [])
 
   // Resume-Support: anfrageId + werte aus sessionStorage laden
   useEffect(() => {
@@ -126,7 +144,17 @@ export function WizardClient({ phases, flowKey }: Props) {
       if (phaseIdx >= totalPhases - 1) {
         sessionStorage.removeItem(STORAGE_KEY)
         // SV- oder Lead-Zuordnung auf GFA persistieren (fire-and-forget, unkritisch)
-        if (svMatch) {
+        // Reihenfolge: User-Klick auf Karte hat Vorrang vor Auto-Geo-Matching.
+        if (preSelectedSvLeadId) {
+          speichereZuordnung(result.anfrageId, {
+            ok: true,
+            typ: 'lead',
+            svId: null,
+            svLeadId: preSelectedSvLeadId,
+            svName: '',
+            distanzKm: 0,
+          }).catch(() => {})
+        } else if (svMatch) {
           speichereZuordnung(result.anfrageId, svMatch).catch(() => {})
         }
         // Finalize: Anfrage → Fall + Magic-Link. Nur für gutachter-finden Flow,
