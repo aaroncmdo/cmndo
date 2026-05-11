@@ -26,6 +26,7 @@ import {
 import UpdatesNav from '@/components/shared/updates'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { SupportButton } from '@/components/support/SupportButton'
+import { SupportSidebarPanel } from '@/components/support/SupportSidebarPanel'
 import TasksPill from '@/components/shared/TasksPill'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
@@ -48,6 +49,8 @@ type NavItem = {
   icon: typeof MapPinIcon
   // badge: optional Render-Funktion die einen Counter zurückgibt
   badgeKey?: 'auftraege' | 'posteingang' | 'neueTermine'
+  // Markiert Items die noch im Beta-Status sind (Statistiken etc.).
+  beta?: boolean
 }
 
 type NavSection = {
@@ -135,6 +138,7 @@ export default function GutachterShell({
   // sie nicht über der Mapbox-Karte rendern (Sidebar hat lg:z-[1100] > z-50).
   const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showSupport, setShowSupport] = useState(false)
   // CMM-36: Geo-Tracking beim App-Öffnen starten
   useGeoPosition(svId ?? null)
   // AAR-245: Verwaltung nicht mehr collapsible — alle Sektionen flach +

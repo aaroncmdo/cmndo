@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getMyNotificationPreferences } from '@/lib/actions/notification-preferences'
 import { NotificationPreferencesForm } from '@/components/notifications/NotificationPreferencesForm'
 import PageHeader from '@/components/shared/PageHeader'
+import DsgvoLoeschCard from '@/components/kunde/DsgvoLoeschCard'
 
 export const dynamic = 'force-dynamic'
 

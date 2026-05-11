@@ -6,6 +6,7 @@ import { getMyNotificationPreferences } from '@/lib/actions/notification-prefere
 // AAR-707: Google-Verbindungs-Status aus profiles.google_refresh_token (Single
 // Source of Truth — sachverstaendige.kalender_sync_aktiv ist Legacy-Drift).
 import { isGoogleConnected } from '@/lib/google/oauth-client'
+import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -45,6 +46,7 @@ export default async function ProfilPage() {
 
   const prefsRes = await getMyNotificationPreferences()
   const googleConnected = user ? await isGoogleConnected(user.id) : false
+  const bewertung = bewertungRes?.data ?? null
 
   return (
     <>

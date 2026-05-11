@@ -161,6 +161,11 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
 
   const candidates: SvMatchCandidate[] = []
 
+  // Polish-Cleanup: Mapbox-ETA-Map wurde im Polish-Sweep verloren. Bis ein
+  // dediziertes Reachability-Helper-Modul wieder existiert, fallback auf
+  // distanzKm im Score-Block unten.
+  const bueroEtaMap: Map<string, number | null> = new Map()
+
   for (const sv of svs) {
     const reasons: string[] = []
 

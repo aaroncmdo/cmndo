@@ -208,7 +208,7 @@ export default function ProfilClient({
             {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis */}
             <div className="flex items-center gap-4 pb-4 border-b border-claimondo-border">
               <AvatarUpload
-                currentUrl={profile.avatar_url ?? googleAvatarUrl ?? null}
+                currentUrl={profile.avatar_url ?? null}
                 initials={initials || '??'}
                 size="md"
               />

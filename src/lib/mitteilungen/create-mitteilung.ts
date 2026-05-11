@@ -20,7 +20,7 @@ function autoRouteUrl(
   kontextTyp: KontextTyp | undefined,
   kontextId: string | undefined,
   rolle: EmpfaengerRolle,
-): Promise<string | null> {
+): string | null {
   if (!kontextTyp || !kontextId) return null
 
   // Portal-Base-Pfad über zentrale Quelle.

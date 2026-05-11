@@ -1,7 +1,7 @@
 ﻿'use client'
 
-import { useState } from 'react'
-import { CalendarIcon } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { CalendarIcon, SendIcon } from 'lucide-react'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { waehleGegenvorschlagSlot } from './actions'
 import Link from 'next/link'
@@ -21,6 +21,19 @@ import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
 type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null; sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null }
+type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean; anhang_url: string | null; created_at: string }
+type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url?: string | null }
+
+const TABS = [
+  { key: 'uebersicht' as const, label: 'Übersicht' },
+  { key: 'dokumente' as const, label: 'Dokumente' },
+  { key: 'chat' as const, label: 'Chat' },
+]
+
+async function markNachrichtenGelesen(_fallId: string): Promise<void> {
+  // Pre-Polish stub — Server-Action wurde im polish-sweep entfernt.
+  // Cleanup: TODO in Folge-PR durch echte mark-read-action ersetzen.
+}
 
 const ROLLE_LABEL: Record<string, string> = { kunde: 'Sie', admin: 'Claimondo', kundenbetreuer: 'Ihr Betreuer', gutachter: 'Gutachter', sachverstaendiger: 'Gutachter', system: 'System' }
 const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-claimondo-ondo', admin: 'bg-claimondo-navy', kundenbetreuer: 'bg-claimondo-shield', gutachter: 'bg-claimondo-shield', sachverstaendiger: 'bg-claimondo-shield', system: 'bg-claimondo-ondo/70' }
@@ -56,6 +69,7 @@ export default function FallDetailSections({
   chatTeilnehmer?: unknown[]
   aktiverTermin?: AktiverTermin | null
 }) {
+  const [activeTab, setActiveTab] = useState<'uebersicht' | 'dokumente' | 'chat'>('uebersicht')
   return (
     <div>
       {/* Tab-Leiste */}
@@ -191,7 +205,7 @@ export default function FallDetailSections({
       )}
 
       {activeTab === 'chat' && (
-        <ChatTab fallId={fall.id as string} nachrichten={nachrichten} userId={userId} teilnehmer={chatTeilnehmer ?? []} />
+        <ChatTab fallId={fall.id as string} nachrichten={(nachrichten ?? []) as Nachricht[]} userId={userId ?? ''} teilnehmer={(chatTeilnehmer ?? []) as ChatTeilnehmer[]} />
       )}
     </div>
   )

@@ -6,6 +6,9 @@ import { SearchIcon, HardHatIcon, MapPinIcon } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
 import { KundeAvatar } from '@/components/shared/KundeAvatar'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { useDensityPreference } from '@/hooks/useDensityPreference'
+import DensityToggle from '@/components/shared/DensityToggle'
+import { Chip } from '@/components/ui/Chip'
 
 // AAR-54: Tabellen-Ansicht für Sachverständige (statt Karte).
 // AAR-151: Aus src/app/admin/sachverstaendige/ verschoben in src/components/,

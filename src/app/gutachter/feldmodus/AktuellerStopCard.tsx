@@ -8,7 +8,7 @@
 // Beim Auslösen ruft onArrived() — FeldmodusClient setzt sessionStatus='arrived'
 // → Fallakte öffnet automatisch.
 
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import {
   PhoneIcon,
@@ -34,6 +34,7 @@ export interface AktuellerStopCardProps {
   svPosition: { lat: number; lng: number } | null
   svInGeofence: boolean
   permissionState: 'pending' | 'granted' | 'denied'
+  distanceMeters: number | null
   onAdvanced: (nextTerminId: string | null) => void
   onArrived: (lat: number, lng: number, via: 'geofence' | 'manuell' | 'termin_uhrzeit') => void
 }
@@ -66,10 +67,14 @@ export default function AktuellerStopCard({
   svPosition,
   svInGeofence,
   permissionState,
+  distanceMeters,
   onAdvanced,
   onArrived,
 }: AktuellerStopCardProps) {
   const [pending, startTransition] = useTransition()
+  const distanceShort = formatDistanceShort(distanceMeters)
+  const [manualMode, setManualMode] = useState<'compact' | 'expanded' | null>(null)
+  void manualMode
 
   // AAR-384 + Auto-Arrive: Termin-State live beobachten (Kunde-Tracking +
   // sv_angekommen_am + besichtigung_gestartet_am).

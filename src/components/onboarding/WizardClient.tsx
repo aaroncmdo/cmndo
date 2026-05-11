@@ -387,6 +387,7 @@ export function WizardClient({ phases, flowKey, prefilledValues }: Props) {
               disabled={isSaving}
               svId={svId}
               anfrageId={anfrageId}
+              preSelectedSvLeadId={preSelectedSvLeadId}
             />
           ))}
         </div>
@@ -479,6 +480,7 @@ function FieldRenderer({
   disabled,
   svId,
   anfrageId,
+  preSelectedSvLeadId,
 }: {
   feld: OnboardingFeld
   value: unknown
@@ -486,6 +488,7 @@ function FieldRenderer({
   disabled: boolean
   svId?: string | null
   anfrageId?: string | null
+  preSelectedSvLeadId?: string | null
 }) {
   switch (feld.typ) {
     case 'text':

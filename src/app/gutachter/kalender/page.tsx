@@ -5,6 +5,8 @@ import Link from 'next/link'
 import SVKalenderClient from './SVKalenderClient'
 import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
+import KalenderRealtimeRefresh from '@/components/kalender/KalenderRealtimeRefresh'
+import KalenderListeEmpty from './KalenderListeEmpty'
 
 // AAR-229 W5 / F-12: Kalender + Termine merge mit View-Toggle.
 export default async function SVKalenderPage({

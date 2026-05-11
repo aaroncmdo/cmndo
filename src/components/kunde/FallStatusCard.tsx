@@ -3,7 +3,7 @@
 // AAR-558 (C9) Brutto-Leak-Fix: Keine `regulierung_betrag` / `zahlung_betrag`-
 // Felder mehr — Kunde sieht Brutto-Beträge nicht. Die Auszahlungs-Summe kommt
 // ausschließlich aus AuszahlungCard (auszahlung_kunde_betrag aus faelle_kunde_view).
-import { CalendarIcon, TruckIcon, FileTextIcon, ShieldCheckIcon, MailIcon, ClockIcon, XCircleIcon, PartyPopperIcon, CheckCircle2Icon, AlertCircleIcon } from 'lucide-react'
+import { CalendarIcon, TruckIcon, FileTextIcon, ShieldCheckIcon, MailIcon, ClockIcon, XCircleIcon, PartyPopperIcon, CheckCircle2Icon, AlertCircleIcon, ScaleIcon } from 'lucide-react'
 import { formatDatum } from '@/lib/format'
 
 type StatusFall = {

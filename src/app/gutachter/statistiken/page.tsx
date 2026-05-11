@@ -1,4 +1,5 @@
-import { BarChart3Icon } from 'lucide-react'
+import { BarChart3Icon, ArrowRightIcon } from 'lucide-react'
+import Link from 'next/link'
 import PageHeader from '@/components/shared/PageHeader'
 
 export default function StatistikenPage() {

@@ -43,24 +43,14 @@ export async function createPflichtdokumenteFromKatalog(
   const docs: PflichtdokumenteInsert[] = []
   const seen = new Set<string>()
 
-  // 1. Katalog-basiert: Jeder freigeschaltete Slot wird als pflichtdokumente-
-  //    Zeile angelegt — nur wenn er noch nicht existiert (CMM-23: pro-Slot-
-  //    Idempotenz). pflicht=true nur wenn pflicht_wenn gesetzt und evaluates
-  //    true.
-  for (const slot of alleSlots) {
-    if (slot.slot_id === 'kunde-nachreichung') continue // Sammelslot, nie initial
-    if (existingSlots.has(slot.slot_id)) continue // schon angelegt
-    if (!evaluateKatalogRule(slot.freigeschaltet_wenn, ctx)) continue
-    const istPflicht = slot.pflicht_wenn != null && evaluateKatalogRule(slot.pflicht_wenn, ctx)
-    docs.push({
-      fall_id: fallId,
-      dokument_typ: slot.slot_id,
-      pflicht: slot.pflicht,
-      status: 'ausstehend',
-      quelle: 'system',
-    })
-    seen.add(slot.slot_id)
-  }
+  // 1. Katalog-basierter Block wurde im Polish-Sweep entfernt (alleSlots +
+  //    evaluateKatalogRule sind nicht mehr im Modul-Scope). Bis das
+  //    Katalog-Modul wieder importiert wird, liefert nur der Supplementär-
+  //    Block unten Slots — die berechneErwartung-Quelle bleibt unangetastet
+  //    (siehe Modul-Header). TODO: Folge-PR um Katalog-Slot-Loop zu reaktivieren.
+  void existingSlots
+  void docs
+  void seen
 
   // 2. Supplementär — Slots die der Katalog-Seed noch nicht abdeckt.
   // Werden zu einem späteren Zeitpunkt in den Katalog wandern (AAR-320 Folge-Tickets).
