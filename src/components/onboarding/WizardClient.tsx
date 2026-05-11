@@ -45,13 +45,18 @@ function validatePhase(felder: OnboardingFeld[], vals: Record<string, unknown>):
 interface Props {
   phases: OnboardingPhase[]
   flowKey: string
+  // 2026-05-11 Funnel v2 PR #4: vom Loader vorbefuellte Werte. Felder die in
+  // prefilledValues vorhanden sind, werden NICHT mehr im Wizard abgefragt
+  // (Pflicht-Phasen-Skip passiert schon im Loader; hier ist es nur fuer
+  // ggf. wieder editierbar gemachte Optionalfelder relevant).
+  prefilledValues?: Record<string, unknown>
 }
 
 const STORAGE_KEY = 'claimondo-wizard-state'
 
-export function WizardClient({ phases, flowKey }: Props) {
+export function WizardClient({ phases, flowKey, prefilledValues }: Props) {
   const [phaseIdx, setPhaseIdx] = useState(0)
-  const [values, setValues] = useState<Record<string, unknown>>({})
+  const [values, setValues] = useState<Record<string, unknown>>(prefilledValues ?? {})
   const [anfrageId, setAnfrageId] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
