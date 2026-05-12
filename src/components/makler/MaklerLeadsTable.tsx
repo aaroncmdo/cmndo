@@ -16,6 +16,7 @@ import { UserPlusIcon } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import EmptyState from '@/components/shared/EmptyState'
+import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import type { MaklerLeadRow, ConsentLabel } from '@/lib/makler/queries'
 
 type FilterKey = 'alle' | 'offen' | 'konvertiert' | 'disqualifiziert'
@@ -98,19 +99,19 @@ export function MaklerLeadsTable({ leads }: Props) {
         <div className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
           {/* Desktop-Tabelle */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-claimondo-bg text-left text-xs text-claimondo-ondo uppercase tracking-wider">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Fahrzeug</th>
-                  <th className="px-4 py-3 font-medium">Unfalldatum</th>
-                  <th className="px-4 py-3 font-medium">Eingang</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Consent</th>
-                  <th className="px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-claimondo-border">
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>Name</Th>
+                  <Th>Fahrzeug</Th>
+                  <Th>Unfalldatum</Th>
+                  <Th>Eingang</Th>
+                  <Th>Status</Th>
+                  <Th>Consent</Th>
+                  <Th />
+                </Tr>
+              </Thead>
+              <Tbody>
                 {filtered.map((lead) => (
                   <LeadRow
                     key={lead.id}
@@ -118,8 +119,8 @@ export function MaklerLeadsTable({ leads }: Props) {
                     onMinimalClick={() => setDrawerLead(lead)}
                   />
                 ))}
-              </tbody>
-            </table>
+              </Tbody>
+            </Table>
           </div>
 
           {/* Mobile-Karten */}
@@ -169,21 +170,21 @@ function LeadRow({
   }
 
   return (
-    <tr className={rowClass} onClick={clickable ? handleClick : undefined}>
-      <td className="px-4 py-3 text-claimondo-navy">{nameLabel(lead)}</td>
-      <td className="px-4 py-3 text-claimondo-ondo">{fahrzeugLabel(lead)}</td>
-      <td className="px-4 py-3 text-claimondo-ondo">{formatDate(lead.unfalldatum)}</td>
-      <td className="px-4 py-3 text-claimondo-ondo">{formatDate(lead.created_at)}</td>
-      <td className="px-4 py-3">
+    <Tr className={rowClass} onClick={clickable ? handleClick : undefined}>
+      <Td>{nameLabel(lead)}</Td>
+      <Td className="!text-claimondo-ondo">{fahrzeugLabel(lead)}</Td>
+      <Td className="!text-claimondo-ondo">{formatDate(lead.unfalldatum)}</Td>
+      <Td className="!text-claimondo-ondo">{formatDate(lead.created_at)}</Td>
+      <Td>
         <LeadStatusBadge status={lead.status} disqualifiziert={lead.disqualifiziert} />
-      </td>
-      <td className="px-4 py-3">
+      </Td>
+      <Td>
         <ConsentBadge label={lead.consent_label} />
-      </td>
-      <td className="px-4 py-3 text-right">
+      </Td>
+      <Td className="text-right">
         {clickable ? <span className="text-claimondo-ondo text-xs">Öffnen →</span> : null}
-      </td>
-    </tr>
+      </Td>
+    </Tr>
   )
 }
 

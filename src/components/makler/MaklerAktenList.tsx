@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { FolderOpenIcon, LockIcon } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
 import EmptyState from '@/components/shared/EmptyState'
+import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { FALL_STATUS_COLORS, FALL_STATUS_LABELS, FALL_STATUS_LABELS_SHORT } from '@/lib/statusLabels'
 import type { MaklerAkteRow, AktenFilter } from '@/lib/makler/queries'
 
@@ -114,19 +115,19 @@ export function MaklerAktenList({ akten, counts, currentFilter }: Props) {
         <div className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
           {/* Desktop-Tabelle */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-claimondo-bg text-left text-xs text-claimondo-ondo uppercase tracking-wider">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Akte</th>
-                  <th className="px-4 py-3 font-medium">Kunde</th>
-                  <th className="px-4 py-3 font-medium">Phase</th>
-                  <th className="px-4 py-3 font-medium">SV-Termin</th>
-                  <th className="px-4 py-3 font-medium">Schadenhöhe</th>
-                  <th className="px-4 py-3 font-medium">Letzte Aktivität</th>
-                  <th className="px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-claimondo-border">
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>Akte</Th>
+                  <Th>Kunde</Th>
+                  <Th>Phase</Th>
+                  <Th>SV-Termin</Th>
+                  <Th>Schadenhöhe</Th>
+                  <Th>Letzte Aktivität</Th>
+                  <Th />
+                </Tr>
+              </Thead>
+              <Tbody>
                 {akten.map((a) => (
                   <AkteRow
                     key={a.id}
@@ -134,8 +135,8 @@ export function MaklerAktenList({ akten, counts, currentFilter }: Props) {
                     onMinimalClick={() => setDrawerAkte(a)}
                   />
                 ))}
-              </tbody>
-            </table>
+              </Tbody>
+            </Table>
           </div>
 
           {/* Mobile-Karten */}
@@ -182,34 +183,34 @@ function AkteRow({
   }
 
   return (
-    <tr
+    <Tr
       className={clickable ? 'hover:bg-claimondo-bg cursor-pointer' : 'opacity-80'}
       onClick={clickable ? handleClick : undefined}
     >
-      <td className="px-4 py-3 font-mono text-xs text-claimondo-navy">
+      <Td className="font-mono text-xs">
         {akte.fall_nummer ?? akte.id.slice(0, 8)}
-      </td>
-      <td className="px-4 py-3 text-claimondo-navy">
+      </Td>
+      <Td>
         <div className="flex items-center gap-2">
           <span>{kundeName(akte)}</span>
           {akte.consent_scope === 'minimal' ? <MinimalBadge /> : null}
         </div>
         <p className="text-xs text-claimondo-ondo mt-0.5">{fahrzeugLabel(akte)}</p>
-      </td>
-      <td className="px-4 py-3">
+      </Td>
+      <Td>
         <PhasePill akte={akte} />
-      </td>
-      <td className="px-4 py-3 text-claimondo-ondo">{formatDate(akte.sv_termin)}</td>
-      <td className="px-4 py-3 text-claimondo-navy">
+      </Td>
+      <Td className="!text-claimondo-ondo">{formatDate(akte.sv_termin)}</Td>
+      <Td>
         {formatAmount(akte.schadens_hoehe_netto)}
-      </td>
-      <td className="px-4 py-3 text-claimondo-ondo">
+      </Td>
+      <Td className="!text-claimondo-ondo">
         {relativeFromNow(akte.updated_at ?? akte.created_at)}
-      </td>
-      <td className="px-4 py-3 text-right">
+      </Td>
+      <Td className="text-right">
         {clickable ? <span className="text-claimondo-ondo text-xs">Öffnen →</span> : null}
-      </td>
-    </tr>
+      </Td>
+    </Tr>
   )
 }
 

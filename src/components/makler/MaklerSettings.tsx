@@ -40,6 +40,15 @@ import {
 } from '@/components/notifications/NotificationPreferencesForm'
 import { Modal } from '@/components/primitives/Modal'
 import { SectionCard as SharedSectionCard } from '@/components/shared/SectionCard'
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  DataTableContainer,
+} from '@/components/shared/DataTable'
 
 const DATE_SHORT = new Intl.DateTimeFormat('de-DE', {
   day: '2-digit',
@@ -509,27 +518,27 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
           Keine aktiven Consents.
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-xs uppercase tracking-wide text-claimondo-ondo">
-              <tr className="border-b border-claimondo-border">
-                <th className="text-left py-2 font-semibold">Kunde</th>
-                <th className="text-left py-2 font-semibold">Fall</th>
-                <th className="text-left py-2 font-semibold">Scope</th>
-                <th className="text-left py-2 font-semibold">Seit</th>
-                <th className="text-right py-2 font-semibold">Aktion</th>
-              </tr>
-            </thead>
-            <tbody>
+        <DataTableContainer variant="plain">
+          <Table>
+            <Thead className="!bg-transparent !tracking-wide">
+              <Tr className="border-b border-claimondo-border">
+                <Th className="text-left !px-0 !py-2 !font-semibold">Kunde</Th>
+                <Th className="text-left !px-0 !py-2 !font-semibold">Fall</Th>
+                <Th className="text-left !px-0 !py-2 !font-semibold">Scope</Th>
+                <Th className="text-left !px-0 !py-2 !font-semibold">Seit</Th>
+                <Th className="text-right !px-0 !py-2 !font-semibold">Aktion</Th>
+              </Tr>
+            </Thead>
+            <Tbody className="divide-y-0">
               {consents.map((c) => (
-                <tr
+                <Tr
                   key={c.id}
                   className="border-b border-claimondo-border last:border-b-0"
                 >
-                  <td className="py-2.5 text-claimondo-navy">
+                  <Td className="!px-0 !py-2.5">
                     {c.kunde_name ?? '–'}
-                  </td>
-                  <td className="py-2.5">
+                  </Td>
+                  <Td className="!px-0 !py-2.5">
                     {c.fall_id ? (
                       <Link
                         href={`/makler/akten/${c.fall_id}`}
@@ -540,8 +549,8 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                     ) : (
                       <span className="text-claimondo-shield">–</span>
                     )}
-                  </td>
-                  <td className="py-2.5">
+                  </Td>
+                  <Td className="!px-0 !py-2.5">
                     <span
                       className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-full ${
                         c.consent_scope === 'vollzugriff'
@@ -552,11 +561,11 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                       <ShieldCheckIcon width={10} height={10} />
                       {c.consent_scope === 'vollzugriff' ? 'Vollzugriff' : 'Minimal'}
                     </span>
-                  </td>
-                  <td className="py-2.5 text-claimondo-navy whitespace-nowrap">
+                  </Td>
+                  <Td className="!px-0 !py-2.5 whitespace-nowrap">
                     {fmtDate(c.consent_gegeben_am)}
-                  </td>
-                  <td className="py-2.5 text-right">
+                  </Td>
+                  <Td className="!px-0 !py-2.5 text-right">
                     <button
                       type="button"
                       onClick={() => setConfirmId(c.id)}
@@ -570,12 +579,12 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                       )}
                       Widerrufen
                     </button>
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </Tbody>
+          </Table>
+        </DataTableContainer>
       )}
 
       {error ? (
