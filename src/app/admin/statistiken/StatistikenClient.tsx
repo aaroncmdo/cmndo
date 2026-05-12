@@ -7,6 +7,9 @@ import {
 } from 'recharts'
 import DrillDownModal from '@/components/admin/DrillDownModal'
 import PageHeader from '@/components/shared/PageHeader'
+import {
+  Table, Thead, Tbody, Tr, ClickableTr, Th, Td, DataTableContainer,
+} from '@/components/shared/DataTable'
 import type { DrillDownItem } from '@/lib/analytics'
 import type {
   UserStatistikRolle,
@@ -550,25 +553,25 @@ export default function StatistikenClient({
                       <Bar dataKey="summeKuerzung" fill={ONDO_BLUE} radius={[0, 6, 6, 0]} cursor="pointer" onClick={((d: { fallIds?: string[]; label?: string }) => d.fallIds && openDrillDown(`Kürzungsgrund: ${d.label}`, d.fallIds, 'regulierungs_klassifizierung.kuerzung_betrag_netto')) as any} />
                     </BarChart>
                   </ResponsiveContainer>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead><tr className="border-b border-claimondo-border text-[10px] text-claimondo-ondo uppercase">
-                        <th className="text-left py-2 px-2">Grund</th><th className="text-right py-2 px-2">Fälle</th>
-                        <th className="text-right py-2 px-2">Summe</th><th className="text-right py-2 px-2">Ø Kürzung</th>
-                      </tr></thead>
+                  <DataTableContainer variant="plain">
+                    <Table>
+                      <Thead className="!bg-transparent text-[10px]"><Tr className="border-b border-claimondo-border">
+                        <Th className="!px-2 !py-2 text-left">Grund</Th><Th className="!px-2 !py-2 text-right">Fälle</Th>
+                        <Th className="!px-2 !py-2 text-right">Summe</Th><Th className="!px-2 !py-2 text-right">Ø Kürzung</Th>
+                      </Tr></Thead>
                       <tbody>
                         {kuerzungData.map(d => (
-                          <tr key={d.grund} className="border-b border-claimondo-border hover:bg-claimondo-bg cursor-pointer"
+                          <ClickableTr key={d.grund} className="border-b border-claimondo-border"
                             onClick={() => openDrillDown(`Kürzungsgrund: ${d.label}`, d.fallIds, 'regulierungs_klassifizierung.kuerzung_betrag_netto')}>
-                            <td className="py-2 px-2 text-claimondo-navy">{d.label}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{d.count}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-navy font-medium">{fmtEur(d.summeKuerzung)}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{fmtEur(d.avgKuerzung)}</td>
-                          </tr>
+                            <Td className="!px-2 !py-2">{d.label}</Td>
+                            <Td className="!px-2 !py-2 text-right tabular-nums !text-claimondo-ondo">{d.count}</Td>
+                            <Td className="!px-2 !py-2 text-right tabular-nums font-medium">{fmtEur(d.summeKuerzung)}</Td>
+                            <Td className="!px-2 !py-2 text-right tabular-nums !text-claimondo-ondo">{fmtEur(d.avgKuerzung)}</Td>
+                          </ClickableTr>
                         ))}
                       </tbody>
-                    </table>
-                  </div>
+                    </Table>
+                  </DataTableContainer>
                 </div>
               )}
             </ChartCard>
@@ -593,28 +596,28 @@ export default function StatistikenClient({
                       <Tooltip {...tooltipStyle} />
                     </PieChart>
                   </ResponsiveContainer>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead><tr className="border-b border-claimondo-border text-[10px] text-claimondo-ondo uppercase">
-                        <th className="text-left py-2 px-2">Konstellation</th><th className="text-right py-2 px-2">Fälle</th>
-                        <th className="text-right py-2 px-2">Anteil</th><th className="text-right py-2 px-2">Ø Schadenhöhe</th>
-                        <th className="text-right py-2 px-2">Ø Dauer</th><th className="text-right py-2 px-2">Konversion</th>
-                      </tr></thead>
+                  <DataTableContainer variant="plain">
+                    <Table>
+                      <Thead className="!bg-transparent text-[10px]"><Tr className="border-b border-claimondo-border">
+                        <Th className="!px-2 !py-2 text-left">Konstellation</Th><Th className="!px-2 !py-2 text-right">Fälle</Th>
+                        <Th className="!px-2 !py-2 text-right">Anteil</Th><Th className="!px-2 !py-2 text-right">Ø Schadenhöhe</Th>
+                        <Th className="!px-2 !py-2 text-right">Ø Dauer</Th><Th className="!px-2 !py-2 text-right">Konversion</Th>
+                      </Tr></Thead>
                       <tbody>
                         {unfallData.map(d => (
-                          <tr key={d.typ} className="border-b border-claimondo-border hover:bg-claimondo-bg cursor-pointer"
+                          <ClickableTr key={d.typ} className="border-b border-claimondo-border"
                             onClick={() => openDrillDown(`Unfall: ${d.label}`, d.fallIds, 'faelle.unfall_konstellation')}>
-                            <td className="py-2 px-2 text-claimondo-navy">{d.label}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{d.count}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{unfallTotal > 0 ? `${Math.round((d.count / unfallTotal) * 100)}%` : '—'}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-navy font-medium">{d.avgBetrag > 0 ? fmtEur(d.avgBetrag) : '—'}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{d.avgDauer != null ? `${d.avgDauer} T` : '—'}</td>
-                            <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{d.konversionPct != null ? `${d.konversionPct}%` : '—'}</td>
-                          </tr>
+                            <Td className="!px-2 !py-2">{d.label}</Td>
+                            <Td className="!px-2 !py-2 text-right tabular-nums !text-claimondo-ondo">{d.count}</Td>
+                            <Td className="!px-2 !py-2 text-right tabular-nums !text-claimondo-ondo">{unfallTotal > 0 ? `${Math.round((d.count / unfallTotal) * 100)}%` : '—'}</Td>
+                            <Td className="!px-2 !py-2 text-right tabular-nums font-medium">{d.avgBetrag > 0 ? fmtEur(d.avgBetrag) : '—'}</Td>
+                            <Td className="!px-2 !py-2 text-right tabular-nums !text-claimondo-ondo">{d.avgDauer != null ? `${d.avgDauer} T` : '—'}</Td>
+                            <Td className="!px-2 !py-2 text-right tabular-nums !text-claimondo-ondo">{d.konversionPct != null ? `${d.konversionPct}%` : '—'}</Td>
+                          </ClickableTr>
                         ))}
                       </tbody>
-                    </table>
-                  </div>
+                    </Table>
+                  </DataTableContainer>
                 </div>
               )}
             </ChartCard>
@@ -666,37 +669,37 @@ export default function StatistikenClient({
               {heatmapData.maxCount > 0 && (
                 <div className="mt-5">
                   <h4 className="text-xs font-medium text-claimondo-ondo mb-3">Wer-trifft-Wen Matrix (Eigenes Fahrzeug vs. Gegner)</h4>
-                  <div className="overflow-x-auto">
-                    <table className="text-[10px]">
-                      <thead>
-                        <tr>
-                          <th className="py-1.5 px-2 text-left text-claimondo-ondo font-medium">Eigenes ↓ \ Gegner →</th>
+                  <DataTableContainer variant="plain">
+                    <Table className="!w-auto text-[10px]">
+                      <Thead className="!bg-transparent !normal-case !tracking-normal">
+                        <Tr>
+                          <Th className="!py-1.5 !px-2 text-left !text-claimondo-ondo">Eigenes ↓ \ Gegner →</Th>
                           {heatmapData.typLabels.map(t => (
-                            <th key={t} className="py-1.5 px-2 text-center text-claimondo-ondo font-medium">{FAHRZEUGTYP_LABELS[t]}</th>
+                            <Th key={t} className="!py-1.5 !px-2 text-center !text-claimondo-ondo">{FAHRZEUGTYP_LABELS[t]}</Th>
                           ))}
-                        </tr>
-                      </thead>
+                        </Tr>
+                      </Thead>
                       <tbody>
                         {heatmapData.typLabels.map(eigen => (
-                          <tr key={eigen}>
-                            <td className="py-1.5 px-2 text-claimondo-navy font-medium">{FAHRZEUGTYP_LABELS[eigen]}</td>
+                          <Tr key={eigen}>
+                            <Td className="!py-1.5 !px-2 font-medium">{FAHRZEUGTYP_LABELS[eigen]}</Td>
                             {heatmapData.typLabels.map(gegner => {
                               const cell = heatmapData.matrix[eigen]?.[gegner]
                               const count = cell?.count ?? 0
                               const intensity = heatmapData.maxCount > 0 ? count / heatmapData.maxCount : 0
                               return (
-                                <td key={gegner} className="py-1.5 px-2 text-center tabular-nums"
+                                <Td key={gegner} className="!py-1.5 !px-2 text-center tabular-nums"
                                   style={{ backgroundColor: count > 0 ? `rgba(69, 115, 162, ${0.1 + intensity * 0.7})` : 'transparent', color: intensity > 0.5 ? '#fff' : '#374151' }}
                                   title={count > 0 ? `${count} Fälle, Ø ${fmtEur(cell?.avgBetrag ?? 0)}` : ''}>
                                   {count > 0 ? count : '·'}
-                                </td>
+                                </Td>
                               )
                             })}
-                          </tr>
+                          </Tr>
                         ))}
                       </tbody>
-                    </table>
-                  </div>
+                    </Table>
+                  </DataTableContainer>
                 </div>
               )}
 
@@ -798,24 +801,24 @@ export default function StatistikenClient({
           {/* Community Leaderboard */}
           {rolle === 'community_member' && leaderboard.length > 0 && (
             <ChartCard title="Community Leaderboard">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead><tr className="border-b border-claimondo-border text-[10px] text-claimondo-ondo uppercase">
-                    <th className="text-left py-2 px-2">Rang</th><th className="text-left py-2 px-2">SV</th>
-                    <th className="text-right py-2 px-2">Fälle</th><th className="text-right py-2 px-2">Umsatz</th>
-                  </tr></thead>
+              <DataTableContainer variant="plain">
+                <Table>
+                  <Thead className="!bg-transparent text-[10px]"><Tr className="border-b border-claimondo-border">
+                    <Th className="!px-2 !py-2 text-left">Rang</Th><Th className="!px-2 !py-2 text-left">SV</Th>
+                    <Th className="!px-2 !py-2 text-right">Fälle</Th><Th className="!px-2 !py-2 text-right">Umsatz</Th>
+                  </Tr></Thead>
                   <tbody>
                     {leaderboard.map(l => (
-                      <tr key={l.sv_id} className="border-b border-claimondo-border">
-                        <td className="py-2 px-2 text-claimondo-navy font-medium">#{l.rang}</td>
-                        <td className="py-2 px-2 text-claimondo-navy">{svNameMap[l.sv_id] ?? l.sv_id.slice(0, 8)}</td>
-                        <td className="py-2 px-2 text-right tabular-nums text-claimondo-ondo">{l.faelle_count}</td>
-                        <td className="py-2 px-2 text-right tabular-nums text-claimondo-navy font-medium">{fmtEur(Number(l.umsatz_netto))}</td>
-                      </tr>
+                      <Tr key={l.sv_id} className="border-b border-claimondo-border">
+                        <Td className="!px-2 !py-2 font-medium">#{l.rang}</Td>
+                        <Td className="!px-2 !py-2">{svNameMap[l.sv_id] ?? l.sv_id.slice(0, 8)}</Td>
+                        <Td className="!px-2 !py-2 text-right tabular-nums !text-claimondo-ondo">{l.faelle_count}</Td>
+                        <Td className="!px-2 !py-2 text-right tabular-nums font-medium">{fmtEur(Number(l.umsatz_netto))}</Td>
+                      </Tr>
                     ))}
                   </tbody>
-                </table>
-              </div>
+                </Table>
+              </DataTableContainer>
             </ChartCard>
           )}
 

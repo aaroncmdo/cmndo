@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 export const metadata: Metadata = {
   title: 'Datenschutzerklärung | Claimondo',
@@ -85,54 +86,54 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-bold text-claimondo-navy tracking-[-.018em] mb-3">5. Auftragsverarbeiter</h2>
           <p>Wir setzen folgende Dienstleister als Auftragsverarbeiter ein:</p>
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-claimondo-shield/20">
-                  <th className="text-left py-2 pr-4 font-semibold">Anbieter</th>
-                  <th className="text-left py-2 pr-4 font-semibold">Sitz</th>
-                  <th className="text-left py-2 font-semibold">Zweck</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1E3A5F]/10">
-                <tr>
-                  <td className="py-2 pr-4">Supabase Inc.</td>
-                  <td className="py-2 pr-4">USA (Standard Contractual Clauses)</td>
-                  <td className="py-2">Datenbank, Authentifizierung, Dateispeicherung</td>
-                </tr>
-                <tr>
-                  <td className="py-2 pr-4">Vercel Inc.</td>
-                  <td className="py-2 pr-4">USA (SCC)</td>
-                  <td className="py-2">Hosting, CDN, Serverless Functions</td>
-                </tr>
-                <tr>
-                  <td className="py-2 pr-4">Stripe Payments Europe Ltd.</td>
-                  <td className="py-2 pr-4">Irland</td>
-                  <td className="py-2">Zahlungsabwicklung</td>
-                </tr>
-                <tr>
-                  <td className="py-2 pr-4">Twilio Ireland Ltd.</td>
-                  <td className="py-2 pr-4">Irland</td>
-                  <td className="py-2">SMS-Verifizierung</td>
-                </tr>
-                <tr>
-                  <td className="py-2 pr-4">Google Ireland Ltd.</td>
-                  <td className="py-2 pr-4">Irland</td>
-                  <td className="py-2">Maps, Calendar, OAuth, Vision API</td>
-                </tr>
-                <tr>
-                  <td className="py-2 pr-4">Resend Inc.</td>
-                  <td className="py-2 pr-4">USA (sobald aktiv)</td>
-                  <td className="py-2">E-Mail-Versand</td>
-                </tr>
-                <tr>
-                  <td className="py-2 pr-4">Functional Software Inc. (Sentry)</td>
-                  <td className="py-2 pr-4">USA (sobald aktiv)</td>
-                  <td className="py-2">Fehler-Monitoring, Performance-Tracking</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <DataTableContainer variant="plain" className="mt-3">
+            <Table className="border-collapse">
+              <Thead className="!bg-transparent !text-inherit !text-sm !normal-case !tracking-normal">
+                <Tr className="border-b border-claimondo-shield/20">
+                  <Th className="!px-0 !pr-4 !py-2 !font-semibold text-left">Anbieter</Th>
+                  <Th className="!px-0 !pr-4 !py-2 !font-semibold text-left">Sitz</Th>
+                  <Th className="!px-0 !py-2 !font-semibold text-left">Zweck</Th>
+                </Tr>
+              </Thead>
+              <Tbody className="!divide-[#1E3A5F]/10">
+                <Tr>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">Supabase Inc.</Td>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">USA (Standard Contractual Clauses)</Td>
+                  <Td className="!px-0 !py-2 !text-inherit">Datenbank, Authentifizierung, Dateispeicherung</Td>
+                </Tr>
+                <Tr>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">Vercel Inc.</Td>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">USA (SCC)</Td>
+                  <Td className="!px-0 !py-2 !text-inherit">Hosting, CDN, Serverless Functions</Td>
+                </Tr>
+                <Tr>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">Stripe Payments Europe Ltd.</Td>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">Irland</Td>
+                  <Td className="!px-0 !py-2 !text-inherit">Zahlungsabwicklung</Td>
+                </Tr>
+                <Tr>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">Twilio Ireland Ltd.</Td>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">Irland</Td>
+                  <Td className="!px-0 !py-2 !text-inherit">SMS-Verifizierung</Td>
+                </Tr>
+                <Tr>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">Google Ireland Ltd.</Td>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">Irland</Td>
+                  <Td className="!px-0 !py-2 !text-inherit">Maps, Calendar, OAuth, Vision API</Td>
+                </Tr>
+                <Tr>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">Resend Inc.</Td>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">USA (sobald aktiv)</Td>
+                  <Td className="!px-0 !py-2 !text-inherit">E-Mail-Versand</Td>
+                </Tr>
+                <Tr>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">Functional Software Inc. (Sentry)</Td>
+                  <Td className="!px-0 !pr-4 !py-2 !text-inherit">USA (sobald aktiv)</Td>
+                  <Td className="!px-0 !py-2 !text-inherit">Fehler-Monitoring, Performance-Tracking</Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         </section>
 
         {/* 6. Speicherdauer */}

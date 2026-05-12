@@ -1,5 +1,6 @@
 ﻿import Link from 'next/link'
 import { loadAusstehende, StatusBadge } from './AusstehendeZahlungenWidget'
+import { Table, Thead, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 // KFZ-155: Volle Tabelle mit allen ausstehenden Zahlungen — wird im
 // Finance-Tab eingebunden. Nutzt loadAusstehende() aus dem Widget,
@@ -40,47 +41,47 @@ export default async function AusstehendeZahlungenTable() {
           <p className="text-sm text-claimondo-ondo">Keine offenen Forderungen.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-claimondo-border bg-claimondo-bg">
-                <th className="text-left px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Empfaenger</th>
-                <th className="text-left px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Email</th>
-                <th className="text-right px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Betrag</th>
-                <th className="text-center px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Faellig seit</th>
-                <th className="text-left px-5 py-3 text-[11px] text-claimondo-ondo font-semibold uppercase tracking-wide">Status</th>
-              </tr>
-            </thead>
+        <DataTableContainer variant="plain">
+          <Table>
+            <Thead className="border-b border-claimondo-border !text-[11px] !tracking-wide">
+              <Tr>
+                <Th className="!px-5 !font-semibold text-left">Empfaenger</Th>
+                <Th className="!px-5 !font-semibold text-left">Email</Th>
+                <Th className="!px-5 !font-semibold text-right">Betrag</Th>
+                <Th className="!px-5 !font-semibold text-center">Faellig seit</Th>
+                <Th className="!px-5 !font-semibold text-left">Status</Th>
+              </Tr>
+            </Thead>
             <tbody>
               {rows.map(r => (
-                <tr key={r.key} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg transition-colors">
-                  <td className="px-5 py-3">
+                <Tr key={r.key} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg transition-colors">
+                  <Td className="!px-5">
                     <Link href={r.href} className="text-claimondo-navy font-medium hover:text-claimondo-ondo">
                       {r.name}
                     </Link>
-                  </td>
-                  <td className="px-5 py-3 text-claimondo-ondo text-xs">{r.email ?? '—'}</td>
-                  <td className="px-5 py-3 text-right text-claimondo-navy font-semibold tabular-nums">{fmtEur(r.betrag)}</td>
-                  <td className="px-5 py-3 text-center text-claimondo-ondo tabular-nums">
+                  </Td>
+                  <Td className="!px-5 !text-claimondo-ondo text-xs">{r.email ?? '—'}</Td>
+                  <Td className="!px-5 text-right font-semibold tabular-nums">{fmtEur(r.betrag)}</Td>
+                  <Td className="!px-5 text-center !text-claimondo-ondo tabular-nums">
                     {r.faelligSeitTage !== null ? `${r.faelligSeitTage} ${r.faelligSeitTage === 1 ? 'Tag' : 'Tage'}` : '—'}
-                  </td>
-                  <td className="px-5 py-3">
+                  </Td>
+                  <Td className="!px-5">
                     <StatusBadge status={r.status} />
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               ))}
             </tbody>
             <tfoot>
-              <tr className="bg-claimondo-bg border-t border-claimondo-border">
-                <td colSpan={2} className="px-5 py-2.5 text-xs text-claimondo-ondo font-semibold">
+              <Tr className="bg-claimondo-bg border-t border-claimondo-border">
+                <Td colSpan={2} className="!px-5 !py-2.5 text-xs !text-claimondo-ondo font-semibold">
                   {totalCount} offene Forderungen
-                </td>
-                <td className="px-5 py-2.5 text-right text-amber-600 font-bold tabular-nums">{fmtEur(totalSum)}</td>
-                <td colSpan={2}></td>
-              </tr>
+                </Td>
+                <Td className="!px-5 !py-2.5 text-right !text-amber-600 font-bold tabular-nums">{fmtEur(totalSum)}</Td>
+                <Td colSpan={2} className="!px-5 !py-2.5"></Td>
+              </Tr>
             </tfoot>
-          </table>
-        </div>
+          </Table>
+        </DataTableContainer>
       )}
     </div>
   )

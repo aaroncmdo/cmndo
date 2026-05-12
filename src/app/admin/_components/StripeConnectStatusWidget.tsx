@@ -1,5 +1,6 @@
 ﻿import { createClient } from '@/lib/supabase/server'
 import { CreditCardIcon, AlertTriangleIcon, CheckCircle2Icon } from 'lucide-react'
+import { Table, Tr, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 // KFZ-155: Stripe-Connect Auszahlungen Status fuer den Finance-Tab.
 //
@@ -148,20 +149,22 @@ export default async function StripeConnectStatusWidget() {
                 <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-2">
                   Letzte SV-Einzahlungen via Stripe
                 </p>
-                <table className="w-full text-xs">
-                  <tbody>
-                    {s.einzahlungen.map(e => (
-                      <tr key={e.id} className="border-b border-claimondo-border">
-                        <td className="py-2 text-claimondo-navy">{e.typ ?? 'Anzahlung'}</td>
-                        <td className="py-2 text-claimondo-ondo truncate max-w-[280px]">{e.beschreibung ?? '—'}</td>
-                        <td className="py-2 text-right text-emerald-600 font-semibold tabular-nums">{fmtEur(Number(e.betrag))}</td>
-                        <td className="py-2 text-right text-claimondo-ondo/70 tabular-nums">
-                          {e.eingezahlt_am ? new Date(e.eingezahlt_am).toLocaleDateString('de-DE') : '—'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <DataTableContainer variant="plain">
+                  <Table className="!text-xs">
+                    <tbody>
+                      {s.einzahlungen.map(e => (
+                        <Tr key={e.id} className="border-b border-claimondo-border">
+                          <Td className="!px-0 !py-2">{e.typ ?? 'Anzahlung'}</Td>
+                          <Td className="!px-0 !py-2 !text-claimondo-ondo truncate max-w-[280px]">{e.beschreibung ?? '—'}</Td>
+                          <Td className="!px-0 !py-2 text-right !text-emerald-600 font-semibold tabular-nums">{fmtEur(Number(e.betrag))}</Td>
+                          <Td className="!px-0 !py-2 text-right !text-claimondo-ondo/70 tabular-nums">
+                            {e.eingezahlt_am ? new Date(e.eingezahlt_am).toLocaleDateString('de-DE') : '—'}
+                          </Td>
+                        </Tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </DataTableContainer>
               </div>
             )}
 

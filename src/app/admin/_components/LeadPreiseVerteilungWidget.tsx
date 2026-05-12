@@ -1,5 +1,6 @@
 ﻿import { createClient } from '@/lib/supabase/server'
 import { BarChart3Icon } from 'lucide-react'
+import { Table, Thead, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 // KFZ-155: Lead-Preise Verteilung — wieviel Umsatz pro Lead-Preis-Kategorie.
 //
@@ -111,29 +112,31 @@ export default async function LeadPreiseVerteilungWidget() {
                 <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-3">
                   Nach Preis-Typ
                 </p>
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-claimondo-border">
-                      <th className="text-left py-2 text-claimondo-ondo font-medium">Typ</th>
-                      <th className="text-right py-2 text-claimondo-ondo font-medium">Anzahl</th>
-                      <th className="text-right py-2 text-claimondo-ondo font-medium">Summe</th>
-                      <th className="text-right py-2 text-claimondo-ondo font-medium">Anteil</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(data.typBreakdown).map(([typ, v]) => {
-                      const pct = data.total > 0 ? (v.summe / data.total) * 100 : 0
-                      return (
-                        <tr key={typ} className="border-b border-claimondo-border">
-                          <td className="py-2 text-claimondo-navy capitalize">{typ}</td>
-                          <td className="py-2 text-right text-claimondo-navy tabular-nums">{v.anzahl}</td>
-                          <td className="py-2 text-right text-claimondo-navy font-medium tabular-nums">{fmtEur(v.summe)}</td>
-                          <td className="py-2 text-right text-claimondo-ondo tabular-nums">{pct.toFixed(0)}%</td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
+                <DataTableContainer variant="plain">
+                  <Table className="!text-xs">
+                    <Thead className="!bg-transparent !normal-case !tracking-normal">
+                      <Tr className="border-b border-claimondo-border">
+                        <Th className="!px-0 !py-2 text-left">Typ</Th>
+                        <Th className="!px-0 !py-2 text-right">Anzahl</Th>
+                        <Th className="!px-0 !py-2 text-right">Summe</Th>
+                        <Th className="!px-0 !py-2 text-right">Anteil</Th>
+                      </Tr>
+                    </Thead>
+                    <tbody>
+                      {Object.entries(data.typBreakdown).map(([typ, v]) => {
+                        const pct = data.total > 0 ? (v.summe / data.total) * 100 : 0
+                        return (
+                          <Tr key={typ} className="border-b border-claimondo-border">
+                            <Td className="!px-0 !py-2 capitalize">{typ}</Td>
+                            <Td className="!px-0 !py-2 text-right tabular-nums">{v.anzahl}</Td>
+                            <Td className="!px-0 !py-2 text-right font-medium tabular-nums">{fmtEur(v.summe)}</Td>
+                            <Td className="!px-0 !py-2 text-right !text-claimondo-ondo tabular-nums">{pct.toFixed(0)}%</Td>
+                          </Tr>
+                        )
+                      })}
+                    </tbody>
+                  </Table>
+                </DataTableContainer>
               </div>
             </div>
           )}

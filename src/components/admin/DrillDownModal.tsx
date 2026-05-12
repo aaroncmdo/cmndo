@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { XIcon } from 'lucide-react'
 import type { DrillDownItem } from '@/lib/analytics'
 import { Modal } from '@/components/primitives'
+import { Table, Thead, Tr, Th, Td } from '@/components/shared/DataTable'
 
 export default function DrillDownModal({
   title,
@@ -38,35 +39,35 @@ export default function DrillDownModal({
           {items.length === 0 ? (
             <p className="text-center text-claimondo-ondo/70 text-sm py-8">Keine Einträge</p>
           ) : (
-            <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-claimondo-bg">
-                <tr className="border-b border-claimondo-border">
-                  <th className="text-left px-4 py-2 text-claimondo-ondo">Fall</th>
-                  <th className="text-right px-4 py-2 text-claimondo-ondo">Betrag</th>
-                  <th className="text-right px-4 py-2 text-claimondo-ondo">Datum</th>
-                </tr>
-              </thead>
+            <Table className="!text-xs">
+              <Thead className="sticky top-0 !normal-case !tracking-normal">
+                <Tr className="border-b border-claimondo-border">
+                  <Th className="!py-2 !font-normal text-left">Fall</Th>
+                  <Th className="!py-2 !font-normal text-right">Betrag</Th>
+                  <Th className="!py-2 !font-normal text-right">Datum</Th>
+                </Tr>
+              </Thead>
               <tbody>
                 {items.map(item => (
-                  <tr key={item.id} className="border-b border-claimondo-border hover:bg-claimondo-bg">
-                    <td className="px-4 py-2">
+                  <Tr key={item.id} className="border-b border-claimondo-border hover:bg-claimondo-bg">
+                    <Td className="!py-2">
                       {item.link ? (
                         <Link href={item.link} className="text-claimondo-ondo hover:underline font-medium">{item.label}</Link>
                       ) : (
                         <span className="text-claimondo-navy">{item.label}</span>
                       )}
                       {item.sublabel && <span className="text-claimondo-ondo/70 ml-1">{item.sublabel}</span>}
-                    </td>
-                    <td className="px-4 py-2 text-right text-claimondo-navy tabular-nums font-medium">
+                    </Td>
+                    <Td className="!py-2 text-right tabular-nums font-medium">
                       {item.betrag != null ? eur(item.betrag) : '—'}
-                    </td>
-                    <td className="px-4 py-2 text-right text-claimondo-ondo">
+                    </Td>
+                    <Td className="!py-2 text-right !text-claimondo-ondo">
                       {item.datum ? new Date(item.datum).toLocaleDateString('de-DE') : '—'}
-                    </td>
-                  </tr>
+                    </Td>
+                  </Tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           )}
         </div>
 

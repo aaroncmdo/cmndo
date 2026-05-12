@@ -5,6 +5,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
@@ -123,26 +124,26 @@ export default function WertminderungPage() {
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
             Faustregel-Tabelle nach Fahrzeugalter
           </h2>
-          <div className="mt-6 overflow-hidden rounded-2xl border border-claimondo-border bg-white shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="bg-claimondo-bg text-left text-xs uppercase tracking-wider text-claimondo-ondo">
-                <tr>
-                  <th className="px-4 py-3 font-bold">Alter</th>
-                  <th className="px-4 py-3 font-bold">Faktor</th>
-                  <th className="px-4 py-3 font-bold">Beispiel-Berechnung</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-claimondo-border">
+          <DataTableContainer variant="plain" className="mt-6 overflow-hidden rounded-2xl border border-claimondo-border bg-white shadow-sm">
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th className="!font-bold">Alter</Th>
+                  <Th className="!font-bold">Faktor</Th>
+                  <Th className="!font-bold">Beispiel-Berechnung</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
                 {FAUSTREGEL.map((row) => (
-                  <tr key={row.jahr}>
-                    <td className="px-4 py-3 font-semibold text-claimondo-navy">{row.jahr}</td>
-                    <td className="px-4 py-3 font-bold text-claimondo-ondo">{row.faktor}</td>
-                    <td className="px-4 py-3 text-claimondo-shield">{row.beispiel}</td>
-                  </tr>
+                  <Tr key={row.jahr}>
+                    <Td className="font-semibold">{row.jahr}</Td>
+                    <Td className="font-bold !text-claimondo-ondo">{row.faktor}</Td>
+                    <Td className="!text-claimondo-shield">{row.beispiel}</Td>
+                  </Tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </Tbody>
+            </Table>
+          </DataTableContainer>
           <p className="mt-3 text-xs text-claimondo-ondo">
             Faustregel als Orientierung. Genaue Berechnung mit Sanden/Danner-Formel
             durch zertifizierten Sachverständigen — berücksichtigt Laufleistung,
