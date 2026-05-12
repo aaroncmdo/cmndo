@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { InfoIcon, SendIcon, Loader2Icon } from 'lucide-react'
+import { Button } from '@/components/primitives'
 import { maklerSendMessage } from '@/lib/actions/makler-send-message'
 import type { MaklerChatMessage } from '@/lib/makler/queries'
 
@@ -331,18 +332,21 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
           className="flex-1 resize-none rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
           disabled={sending}
         />
-        <button
+        <Button
           type="submit"
+          tone="navy"
           disabled={!input.trim() || sending}
-          className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50 disabled:cursor-not-allowed"
+          className="shrink-0"
+          iconLeft={
+            sending ? (
+              <Loader2Icon width={14} height={14} className="animate-spin" />
+            ) : (
+              <SendIcon width={14} height={14} />
+            )
+          }
         >
-          {sending ? (
-            <Loader2Icon width={14} height={14} className="animate-spin" />
-          ) : (
-            <SendIcon width={14} height={14} />
-          )}
           Senden
-        </button>
+        </Button>
       </form>
     </div>
   )

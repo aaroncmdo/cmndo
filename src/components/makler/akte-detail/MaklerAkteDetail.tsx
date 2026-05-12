@@ -33,6 +33,8 @@ import { MaklerChatTab } from './MaklerChatTab'
 import { MaklerCopilotTab } from './MaklerCopilotTab'
 // AAR-727 Kandidat 1: Shared Download-Liste — Makler nutzt grid-Variante.
 import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/DokumenteDownloadListe'
+import { SectionCard } from '@/components/shared/SectionCard'
+import EmptyState from '@/components/shared/EmptyState'
 
 type TabKey = 'overview' | 'timeline' | 'documents' | 'chat' | 'copilot'
 
@@ -429,11 +431,10 @@ function OverviewPanel({
       </div>
 
       {hasGutachten ? (
-        <div className="bg-white rounded-ios-md border border-claimondo-border p-6">
-          <h2 className="text-base font-semibold text-claimondo-navy mb-4">
-            Gutachten-Ergebnis
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+        <SectionCard
+          title="Gutachten-Ergebnis"
+          bodyClassName="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3"
+        >
             <InfoRow label="Reparaturkosten" value={fmtEur(fall.reparaturkosten)} />
             <InfoRow label="Wiederbeschaffungswert" value={fmtEur(fall.wiederbeschaffungswert)} />
             <InfoRow label="Wertminderung" value={fmtEur(fall.wertminderung)} />
@@ -458,8 +459,7 @@ function OverviewPanel({
                 {fmtEur(gesamtforderung)}
               </span>
             </div>
-          </div>
-        </div>
+        </SectionCard>
       ) : null}
     </div>
   )
@@ -503,6 +503,8 @@ function NextStepBanner({ fall }: { fall: FallDetail['fall'] }) {
   )
 }
 
+// AAR-frontend-konsolidierung-p2 (P2-T3): dünner Adapter — shared SectionCard mit
+// space-y-2-Body, kein eigenes Card-Markup mehr.
 function InfoCard({
   title,
   children,
@@ -511,10 +513,9 @@ function InfoCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-white rounded-ios-md border border-claimondo-border p-5">
-      <h2 className="text-sm font-semibold text-claimondo-navy mb-3">{title}</h2>
-      <div className="space-y-2">{children}</div>
-    </div>
+    <SectionCard title={title} bodyClassName="space-y-2">
+      {children}
+    </SectionCard>
   )
 }
 
@@ -533,15 +534,10 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function TimelinePanel({ events }: { events: TimelineEvent[] }) {
   if (events.length === 0) {
-    return (
-      <div className="bg-white rounded-ios-md border border-claimondo-border p-10 text-center">
-        <p className="text-sm text-claimondo-ondo">Noch keine Timeline-Events.</p>
-      </div>
-    )
+    return <EmptyState title="Noch keine Timeline-Events." />
   }
   return (
-    <div className="bg-white rounded-ios-md border border-claimondo-border p-6">
-      <h2 className="text-sm font-semibold text-claimondo-navy mb-4">Timeline</h2>
+    <SectionCard title="Timeline">
       <ol className="relative border-l-2 border-claimondo-border pl-6 space-y-4">
         {events.map((e, idx) => (
           <li key={`${e.timestamp}-${idx}`} className="relative">
@@ -574,7 +570,7 @@ function TimelinePanel({ events }: { events: TimelineEvent[] }) {
           </li>
         ))}
       </ol>
-    </div>
+    </SectionCard>
   )
 }
 
