@@ -60,6 +60,11 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
   // "In Ihrer Nähe"-Behauptung im Header ehrlich ist und die Karte direkt
   // zum User zoomt. Bei Deny bleibt es bei NRW-Mittelpunkt + neutralem Badge.
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  // AAR-2026-05-12: sichtbarer Map-Diagnose-Status — damit man ohne DevTools
+  // sieht WARUM die Karte ggf. nicht rendert. 'no-token' = NEXT_PUBLIC_MAPBOX_TOKEN
+  // fehlte im Build. 'auth-error' = Mapbox lehnt die Anfrage ab (401/403,
+  // i.d.R. Token-URL-Restriction). 'ok' = alles gut.
+  const [mapStatus, setMapStatus] = useState<'ok' | 'no-token' | 'auth-error'>('ok')
 
   // Sticky-Marker: wenn der User auf einen SV klickt, merken wir uns die ID
   // und scrollen die Wizard-Sidebar zum Anfang. Spätere Iteration:
@@ -72,7 +77,8 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     const ok = ensureMapboxInitialized()
     if (!ok) {
       // Token-Init failed — fail loud im Smoke statt silent
-      console.error('[gutachter-finden] Mapbox-Init fehlgeschlagen (Token? NEXT_PUBLIC_MAPBOX_TOKEN?)')
+      console.error('[gutachter-finden] Mapbox-Init fehlgeschlagen — NEXT_PUBLIC_MAPBOX_TOKEN ist im Build leer/fehlt')
+      setMapStatus('no-token')
       return
     }
     const map = new mapboxgl.Map({
@@ -85,6 +91,17 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
       antialias: true,
     })
     mapRef.current = map
+
+    // Mapbox-Fehler abfangen — bei 401/403 (Token-Restriction, ungültiger Token)
+    // feuert ein 'error'-Event. Wir machen das sichtbar statt es zu verschlucken.
+    map.on('error', (e) => {
+      const msg = (e?.error as { message?: string } | undefined)?.message ?? ''
+      const status = (e?.error as { status?: number } | undefined)?.status
+      console.error('[gutachter-finden] Mapbox-Fehler:', status, msg, e)
+      if (status === 401 || status === 403 || /unauthorized|forbidden|access token/i.test(msg)) {
+        setMapStatus('auth-error')
+      }
+    })
 
     map.dragRotate.disable()
     map.touchZoomRotate.disableRotation()
@@ -281,6 +298,17 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         className="absolute inset-0"
         style={{ background: 'var(--brand-surface-gradient)' }}
       />
+
+      {/* AAR-Diagnose: sichtbare Map-Fehlermeldung (nur wenn was schiefläuft) —
+          damit man ohne DevTools weiß was los ist. */}
+      {mapStatus !== 'ok' && (
+        <div className="absolute bottom-4 right-4 z-[6] max-w-[420px] rounded-xl bg-amber-50/95 border border-amber-200 px-4 py-3 text-[12.5px] text-amber-900 shadow-lg backdrop-blur-md">
+          <strong className="block mb-0.5">Karte konnte nicht geladen werden</strong>
+          {mapStatus === 'no-token'
+            ? 'NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt. (Console: "[gutachter-finden] Mapbox-Init fehlgeschlagen")'
+            : 'Mapbox lehnt die Anfrage ab (401/403). Der Token ist im Build, aber Mapbox akzeptiert ihn nicht für diese Domain — wahrscheinlich greift noch eine URL-Restriction am Token. (Details in der DevTools-Console.)'}
+        </div>
+      )}
 
       {/* Sehr subtiler Ambient-Schatten unten/links für Tiefe — KEIN Rahmen,
           kein weißer Veil. Diffus, randlos. */}
