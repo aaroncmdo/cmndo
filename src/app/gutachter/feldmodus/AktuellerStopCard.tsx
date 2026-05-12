@@ -73,8 +73,14 @@ export default function AktuellerStopCard({
 }: AktuellerStopCardProps) {
   const [pending, startTransition] = useTransition()
   const distanceShort = formatDistanceShort(distanceMeters)
+  // 2026-05-08 (C1) Smart-Collapse: bei null oder > 500 m Distanz → Card kompakt
+  // (Briefing/Pflichtdoku/Aktionen nehmen sonst 80 % des Viewports beim Fahren).
+  // Tap expandiert. manualMode überschreibt die Auto-Heuristik in beide Richtungen.
+  const autoCompact = distanceMeters == null || distanceMeters > COMPACT_DISTANCE_THRESHOLD_M
   const [manualMode, setManualMode] = useState<'compact' | 'expanded' | null>(null)
-  void manualMode
+  const isCompact = manualMode != null ? manualMode === 'compact' : autoCompact
+  // C1: Briefing default collapsed (200–400-Wörter-Output) — SV öffnet gezielt.
+  const [briefingOpen, setBriefingOpen] = useState(false)
 
   // AAR-384 + Auto-Arrive: Termin-State live beobachten (Kunde-Tracking +
   // sv_angekommen_am + besichtigung_gestartet_am).
@@ -267,9 +273,44 @@ export default function AktuellerStopCard({
     return 'Auto-Ankunft aktiv (Geofence 100 m)'
   })()
 
+  // C1: Kompakt-Variante (weit weg / keine Distanz) — Glass-Look kommt vom
+  // umschließenden GlassPanel, die Card selbst ist transparent. Tap expandiert.
+  if (isCompact) {
+    return (
+      <button
+        type="button"
+        onClick={() => setManualMode('expanded')}
+        aria-label="Stop-Details ausklappen"
+        className="w-full text-left rounded-xl text-claimondo-navy px-4 py-3 hover:bg-white/30 transition-colors flex items-center gap-3"
+      >
+        <MapPinIcon className="w-5 h-5 text-[color:var(--brand-primary,var(--brand-secondary))] shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            {stop.kennzeichen && (
+              <span className="font-mono text-xs font-semibold text-claimondo-navy">{stop.kennzeichen}</span>
+            )}
+            <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
+              {formatUhrzeit(stop.start_zeit)}
+            </span>
+          </div>
+          <p className="text-sm font-medium truncate">{stop.adresse}</p>
+        </div>
+        {distanceShort && (
+          <span className="text-xs font-semibold text-[color:var(--brand-primary,var(--brand-secondary))] shrink-0">
+            {distanceShort}
+          </span>
+        )}
+        <ChevronDownIcon className="w-4 h-4 text-claimondo-ondo shrink-0" />
+      </button>
+    )
+  }
+
   return (
-    <div className="rounded-xl bg-white text-claimondo-navy p-4 shadow-sm space-y-3">
-      {/* Header */}
+    // 2026-05-08 C9: Card-Background transparent damit der Glass-Effekt vom
+    // umschließenden GlassPanel durchkommt — bg-white würde den Backdrop-Blur
+    // überschatten (solid weißer Block statt frosted Glass).
+    <div className="rounded-xl text-claimondo-navy p-4 space-y-3">
+      {/* Header — mit optionalem Collapse-Toggle */}
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--brand-primary,var(--brand-secondary))]">
@@ -343,12 +384,84 @@ export default function AktuellerStopCard({
         </a>
       )}
 
-      {/* SV-Briefing */}
+      {/* Vorschäden-Hinweis (Cardentity-/Vorschadens-Check) */}
+      {stop.hat_vorschaeden && (stop.vorschaden_anzahl ?? 0) > 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs flex items-start gap-2">
+          <AlertTriangleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-amber-900">
+              {stop.vorschaden_anzahl} Vorschaden{stop.vorschaden_anzahl === 1 ? '' : '-Einträge'} bekannt
+            </p>
+            {stop.vorschaden_letzter_datum && (
+              <p className="text-amber-800 mt-0.5">
+                Letzter Eintrag: {new Date(stop.vorschaden_letzter_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+              </p>
+            )}
+            <p className="text-amber-800/80 mt-0.5">
+              → Vor Ort prüfen, ob sich die Beschädigungen überschneiden.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Einzusammelnde Pflichtdokumente vor Ort */}
+      {stop.einzusammelnde_dokumente.length > 0 && (
+        <div className="rounded-lg border border-[color:var(--brand-primary,var(--brand-secondary))]/20 bg-[color:var(--brand-primary,var(--brand-secondary))]/5 px-3 py-2 space-y-1.5">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-claimondo-navy">
+            <FileTextIcon className="w-3.5 h-3.5" />
+            Einzusammeln vor Ort
+            <span className="text-[10px] font-normal text-claimondo-ondo">
+              ({stop.einzusammelnde_dokumente.length} offen)
+            </span>
+          </div>
+          <ul className="space-y-0.5 text-xs text-claimondo-navy">
+            {stop.einzusammelnde_dokumente.map((d) => (
+              <li key={d.slot_id} className="flex items-start gap-1.5">
+                <span className="text-claimondo-ondo mt-0.5">•</span>
+                <span>{d.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Auftrag-Typ-Badge (wenn nicht erstgutachten) */}
+      {stop.auftrag_typ && stop.auftrag_typ !== 'erstgutachten' && (
+        <p className="text-[11px] text-claimondo-ondo">
+          Auftrag:{' '}
+          <span className="font-semibold uppercase text-claimondo-navy">
+            {stop.auftrag_typ === 'nachbesichtigung'
+              ? 'Nachbesichtigung'
+              : stop.auftrag_typ === 'stellungnahme'
+                ? 'Stellungnahme'
+                : stop.auftrag_typ}
+          </span>
+        </p>
+      )}
+
+      {/* SV-Briefing — C1: Disclosure-Toggle, default collapsed (200–400-Wörter-
+          Cardentity-Output nimmt sonst ~80 % der Card; SV öffnet gezielt vor dem Aussteigen). */}
       {stop.briefing_text && (
         <div className="border-t border-claimondo-border pt-3">
-          <p className="text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
-            {stop.briefing_text}
-          </p>
+          <button
+            type="button"
+            onClick={() => setBriefingOpen((v) => !v)}
+            aria-expanded={briefingOpen}
+            className="flex w-full items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-claimondo-ondo hover:text-claimondo-navy transition-colors"
+          >
+            <span>Briefing</span>
+            {briefingOpen ? <ChevronUpIcon className="w-3.5 h-3.5" /> : <ChevronDownIcon className="w-3.5 h-3.5" />}
+            {!briefingOpen && (
+              <span className="ml-auto text-[10px] normal-case tracking-normal text-claimondo-ondo/70 font-normal">
+                Anzeigen
+              </span>
+            )}
+          </button>
+          {briefingOpen && (
+            <p className="mt-2 text-xs leading-relaxed text-claimondo-navy whitespace-pre-wrap">
+              {stop.briefing_text}
+            </p>
+          )}
         </div>
       )}
 
@@ -377,7 +490,7 @@ export default function AktuellerStopCard({
           href={mapsLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 hover:bg-claimondo-bg"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium min-h-12 px-4 hover:bg-claimondo-bg"
         >
           <NavigationIcon className="w-4 h-4" />
           In Google Maps öffnen
