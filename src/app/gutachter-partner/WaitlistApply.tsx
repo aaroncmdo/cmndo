@@ -7,7 +7,10 @@
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState, useTransition, useCallback } from 'react'
-import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox'
+// 2026-05-12: Direkter client-Import, NICHT aus Index — sonst zieht
+// sv-car-3d-three (THREE) ein und crasht das Bundle mit
+// "i.Color is not a constructor". Siehe GutachterFinderMapClient.tsx.
+import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import { stelleWaitlistAnfrage } from '@/lib/actions/gutachter-waitlist'
 import { CheckCircle2, MapPin, Loader2, ArrowRight } from 'lucide-react'
 

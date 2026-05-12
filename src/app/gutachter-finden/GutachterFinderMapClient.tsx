@@ -14,7 +14,12 @@
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
-import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox'
+// 2026-05-12: NICHT aus '@/lib/mapbox' (Index) importieren — der Index
+// re-exportiert sv-car-3d-three (THREE.js am Top-Level) und cesium-3d-tiles,
+// die sonst in den Public-Map-Bundle wandern. THREE.Color hat im minified
+// Turbopack-Build den Constructor verloren → "i.Color is not a constructor"-
+// Crash auf gutachter-finden. Direkter Import aus client.ts vermeidet das.
+import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import type { Map as MapboxMap, Marker, Popup } from 'mapbox-gl'
 import { ChevronUp, Search, MapPin } from 'lucide-react'
 import type { SvLead, AktiverSV } from '@/lib/actions/gutachter-finder-actions'
