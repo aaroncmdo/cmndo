@@ -1,8 +1,8 @@
 # Branding-Rollout — Spec & Audit
 
-**Datum:** 2026-05-12
-**Scope:** Whitelabel-Theming an "allen Ecken und Enden" der App + Vollthema für Kunden eines verifizierten SVs
-**Status:** Spec — auf Aaron-Review wartend
+**Datum:** 2026-05-12 (erweitert 2026-05-12 um Email-Scope)
+**Scope:** Whitelabel-Theming an "allen Ecken und Enden" der App + Vollthema für Kunden eines verifizierten SVs — **inkl. aller Kunden-gerichteten Emails**
+**Status:** In Umsetzung — Phase 1 ✅, Phase 2-Basis ✅, Phase 2-Rest + Phase 4 + Phase 5 (Email) offen → diese Iteration
 
 ---
 
@@ -15,6 +15,7 @@ Das Branding-System existiert **vollständig** (AAR-220, AAR-419/420/422/423/424
 **Aaron-Entscheidungen (12.05.):**
 1. Beides parallel: Smoke-Befund + Coverage-Audit
 2. Kunde-Portal von `light` (4 Vars) auf `full` (27 Vars) upgraden — verifizierter SV propagiert volles Whitelabel zum Kunden
+3. **Emails sind im Scope** — alle Kunden-gerichteten Mails (Welcome, Termin-Bestätigung/Gegenvorschlag, Dokumenten-Anfrage, Flow-Link-Versand, Lead-Reminder) übernehmen das Theme + Logo des verifizierten branded SVs; SV-gerichtete + interne Mails (Admin/Kanzlei/SV-eigene Abrechnung) bleiben Claimondo. Footer behält dezenten "Powered by Claimondo"-Hinweis.
 
 ---
 
@@ -218,6 +219,34 @@ Resolver hat Org-Vorrang (Sub-SVs erben Büro-Theme). Smoke-Tests in Phase 1+2 s
 - `KundenLightBrandingProvider` entfernen falls nicht mehr referenziert
 - `AGENTS.md` ergänzen: "Neue Komponenten nutzen `var(--brand-*)` statt hardcoded `claimondo-*`. Tailwind-Klassen `bg-claimondo-*` greifen automatisch auf Brand."
 
+### Phase 5 — Email-Branding (3-4 h)
+
+**Ziel:** Kunden-gerichtete Emails sehen aus wie vom verifizierten branded SV — Header-Farbe, Button-Farbe, Logo + Firmenname statt Claimondo-Wortmarke. SV-gerichtete + interne Mails (Admin/Kanzlei/SV-eigene Abrechnung) bleiben Claimondo.
+
+**Architektur:** `src/lib/email/google/templates/layout.tsx` (`EmailLayout` + `Heading` + `Button`) ist der zentrale Hebel — bekommt einen optionalen `brand?: { primary: string; secondary: string; logoUrl: string | null; firmenname: string | null }`-Prop:
+- `brand` gesetzt → Header-`backgroundColor` = `brand.primary`, `Button`-`backgroundColor` = `brand.secondary`, `Heading`-Farbe = `brand.primary`; im Header `<Img src={brand.logoUrl}>` (Fallback: `brand.firmenname` als Text, Fallback: "Claimondo")
+- Footer behält **immer** eine dezente Zeile "Powered by Claimondo · Impressum · Datenschutz" — Brand-Trust für Claimondo (Stripe-Pattern), auch im gebrandeten Fall
+- `brand` nicht gesetzt → unverändert Claimondo (alle SV-/Admin-/Kanzlei-Mails)
+
+**Resolver:** ein `resolveEmailBranding(opts: { fallId?: string; leadId?: string; svId?: string }): Promise<EmailBrand | null>` in `src/lib/branding/` — nutzt die gleiche Gate-Logik wie `resolveKundenTheme` (`verifiziert && use_custom_branding && (brand_primary || brand_theme)`), liefert `null` wenn kein Brand greift. Kein neuer DB-Touch (Spalten existieren).
+
+**Customer-facing Flows in `src/lib/email/google/flows.ts` (+ deren Templates), die `brand` durchreichen:**
+- `sendKundeWelcome` — Empfänger = Kunde, SV aus dem Fall
+- `sendSvTerminBestaetigung` — die Kunden-Variante (an den Kunden, nicht den SV-Internal-Teil)
+- `sendKundeTerminGegenvorschlag` / `KundeTerminGegenvorschlag.tsx`
+- `sendDokumenteAnfrage` / `DokumenteAnfrage.tsx` — SV aus dem `dokument_upload_anfragen`→Lead→Fall
+- `sendFlowLinkVersand` / `FlowLinkVersand.tsx` — SV aus dem Flow-Link-Fall
+- Lead-Reminder 1/2/3 (`LeadReminder1/2/3.tsx`) — SV aus dem Lead, falls schon zugewiesen
+- (`TwoFactorCode.tsx` bleibt Claimondo — Auth-Mail, kein Fall-Kontext)
+
+**Smoke nach Phase 5:**
+1. Knallrot-Test-SV (`#E11D48`, verifiziert, `use_custom_branding`) → Kunde-Welcome-Mail rendern (Dev-Preview oder echter Send an Test-Adresse): Header rot, Logo/Firmenname statt Claimondo, "Powered by Claimondo" im Footer
+2. Termin-Bestätigung an Kunde dieses SVs → gebrandet
+3. SV-eigene Abrechnungs-Mail (`sendSvAbrechnung`) → unverändert Claimondo
+4. Admin-Backup-Fehler-Mail → unverändert Claimondo
+
+**Risiko:** Niedrig-mittel. Email-Clients (Outlook!) sind zickig bei `<Img>` + dynamischen Farben — Inline-Styles, keine externen CSS, Logo mit fixer `width`/`height` + `alt`. `react-email`-Components rendern bereits Outlook-safe. Bei Regression: `brand`-Prop weglassen = sofort wieder Claimondo.
+
 ---
 
 ## Risiken & offene Fragen
@@ -241,10 +270,9 @@ Status-Grün/Warning-Gelb/Danger-Rot werden in `generateStatus()` an die Brand-S
 
 ## Empfohlene Reihenfolge
 
-1. **Heute:** Phase 1 (Tailwind-Tokens umbiegen) + Smoke-Test mit Test-SV → 60 % Coverage
-2. **Diese Woche:** Phase 2 (Kunde-Layout-Wrapper + Magic-Links) → Kunde-Portal voll gebrandet
-3. **Nächste Woche:** Phase 3 (Hardcoded-Sweep, parallelisierbar pro Portal mit Subagents)
-4. **Danach:** Phase 4 (Cleanup) + Linear-Ticket "Brand-Trust-Footer" für Claimondo-Visibility-Entscheidung
+1. ✅ **Erledigt:** Phase 1 (Tailwind-Tokens umbiegen), Phase 2-Basis (Kunde-Layout-Wrapper, `/upload/dokumente/[token]`-Magic-Link, `firmenname`-Select, `isBrandingV2Enabled`-Cleanup)
+2. **Diese Iteration:** Phase 2-Rest (`/upload/zb1/[token]` + `/flow/[token]` branden, `KundenLightBrandingProvider` → `full`), Phase 4 (`CookieBanner` → Brand-Vars, `AGENTS.md`-Notiz), **Phase 5 (Email-Branding)**
+3. **Danach:** Phase 3 (Hardcoded-Sweep — größtenteils obsolet durch Phase 1, Rest = Inline-Hex in SV-Hotspots) + Lücke 6 (Logo-Display-Coverage pro Layout verifizieren)
 
 **Geschätzter Aufwand total:** 1-2 Tage konzentriert, oder 3-4 Tage mit Reviews & Smoke pro Phase.
 
@@ -254,10 +282,10 @@ Status-Grün/Warning-Gelb/Danger-Rot werden in `generateStatus()` an die Brand-S
 
 - **Native-App** (`*.native.tsx`-Components in `src/components/primitives/`) — eigener Migrationspfad nötig, da kein Tailwind, sondern `StyleSheet.create()`
 - **PDF-Generation** (`src/lib/abrechnung/kanzlei/generate-pdf.tsx`) — separater Theme-Pfad, eventuell direkt aus DB-Theme rendern
-- **Email-Templates** — bisher noch nicht gebrandet, eigenes Ticket
 - **Marketing-Pages** (`/`, `/faq`, `/gutachter-finden`) — bleiben bewusst Claimondo (kein User-Context = kein Brand-Resolver)
 - **Admin-/Dispatch-/Kanzlei-Portale** — Branding ist nur für SV+Kunde gedacht. Admin/Dispatch/Kanzlei sehen immer Claimondo (interne Tools). Falls Aaron das ändern will: separater Spec.
-- **Mobile-Native** + **PDF-Branding** + **Email-Branding** — siehe oben, eigene Tickets nach Web-Rollout
+- **Mobile-Native** + **PDF-Branding** — siehe oben, eigene Tickets nach Web-Rollout
+- ~~Email-Templates~~ → **jetzt im Scope (Phase 5)**, siehe oben
 
 ---
 
