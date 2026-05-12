@@ -128,10 +128,13 @@ export async function uploadDokumentViaAnfrageToken(
   const slotIdx = anfrage.slots.findIndex((s) => s.slot_id === slotId)
   if (slotIdx === -1) return { success: false, error: `Slot ${slotId} nicht in dieser Anfrage` }
   const slot = anfrage.slots[slotIdx]
-  // AAR-unfallfotos: Multi-File-Slot — weitere Fotos werden angehängt statt
-  // abgelehnt. Einzeldokument-Slots (fahrzeugschein/polizeibericht/sonstiges)
-  // bleiben Single-Upload.
-  if (slot.hochgeladen && slotId !== 'unfallfotos') {
+  // AAR-unfallfotos: Multi-File-Slot — weitere Fotos werden angehängt.
+  // AAR-zb1-wizard: fahrzeugschein erlaubt Mehrfach-Upload, damit der
+  // Kunde im Wizard "Neu fotografieren" klicken kann nach OCR-Fehler
+  // oder bei sichtbar falsch ausgelesenen Werten.
+  // Andere Single-Slots (polizeibericht/sonstiges/…) bleiben blockiert.
+  const erlaubtMehrfach = slotId === 'unfallfotos' || slotId === 'fahrzeugschein'
+  if (slot.hochgeladen && !erlaubtMehrfach) {
     return { success: false, error: 'Dieses Dokument wurde bereits empfangen' }
   }
 
