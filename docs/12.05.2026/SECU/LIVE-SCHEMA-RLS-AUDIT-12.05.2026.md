@@ -46,6 +46,44 @@ Content-Type: application/json
 - **INSERT:** Nicht-privilegierte Caller, die `rolle <> 'kunde'` einfügen wollen, kriegen `rolle := 'kunde'` aufgezwungen.
 - **Warum Trigger statt column-`REVOKE`:** ein `REVOKE UPDATE (rolle) ON profiles FROM authenticated` ist ein No-op, solange das table-level `GRANT UPDATE ON profiles` existiert (PostgreSQL: table-level deckt alle Spalten ab). Der Trigger ist robust gegen später hinzugefügte Spalten und deckt zusätzlich den (theoretischen) INSERT-Race-Vektor ab. Alle legitimen Rollen-Setzer (SV-/Team-/Kunde-Account-Anlage über `createAdminClient`, Lead-Konversion, Airdrop, Admin-Rollenänderungen) laufen über `service_role` → werden vom Trigger durchgelassen; Lese-Zugriff auf `rolle` und UPDATE anderer `profiles`-Spalten sind unberührt.
 
+**Das SQL** (`supabase/migrations/20260512140559_aar_profiles_rolle_lock.sql` — bereits auf Prod appliziert + in `schema_migrations` registriert + verifiziert):
+
+```sql
+CREATE OR REPLACE FUNCTION public.guard_profiles_rolle()
+RETURNS trigger
+LANGUAGE plpgsql
+-- SECURITY INVOKER (default): current_user = aufrufende Rolle (authenticated/anon/service_role/postgres)
+AS $$
+DECLARE
+  privileged boolean := current_user IN ('service_role', 'supabase_admin', 'postgres', 'authenticator')
+                        OR public.is_admin();
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    IF NOT privileged AND NEW.rolle IS DISTINCT FROM 'kunde'::public.user_role THEN
+      NEW.rolle := 'kunde'::public.user_role;
+    END IF;
+    RETURN NEW;
+  END IF;
+  -- UPDATE
+  IF NEW.rolle IS DISTINCT FROM OLD.rolle AND NOT privileged THEN
+    RAISE EXCEPTION 'Rollen-Änderung nur durch Admins oder service_role erlaubt (versucht: % → %)', OLD.rolle, NEW.rolle
+      USING ERRCODE = 'insufficient_privilege';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS guard_profiles_rolle_upd ON public.profiles;
+CREATE TRIGGER guard_profiles_rolle_upd
+  BEFORE UPDATE OF rolle ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.guard_profiles_rolle();
+
+DROP TRIGGER IF EXISTS guard_profiles_rolle_ins ON public.profiles;
+CREATE TRIGGER guard_profiles_rolle_ins
+  BEFORE INSERT ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.guard_profiles_rolle();
+```
+
 > *Hinweis:* Vor dem Fix erlaubte auch die `„Profil erstellen"`-INSERT-Policy theoretisch, eine `profiles`-Zeile mit `rolle='admin'` für eine beliebige `auth.users(id)` anzulegen (praktisch begrenzt durch PK-Konflikt mit der vom App-Code angelegten Zeile). Der `BEFORE INSERT`-Teil des neuen Triggers deckt das jetzt mit ab.
 
 ---
@@ -61,6 +99,44 @@ Dieselbe Mechanik wie #1, auf weiteren Tabellen — jede „self-update"-Policy 
 | `profiles` | siehe #1 | `rolle='admin'` (CRITICAL — **gefixt**) |
 
 **Fix:** `BEFORE UPDATE`-Trigger nach dem Muster von #1 (`guard_profiles_rolle`), die Änderungen an den Privileg-Spalten durch Nicht-Admins blocken (`makler`: `status`, `provision_betrag_*`, `provision_aktiv`, `aktiviert_am`, `gesperrt_*`; `sachverstaendige`: `verifiziert`, `ist_aktiv`, `werbebudget_*`, `use_custom_branding`, Paket-Felder). (column-`REVOKE` allein wirkt nicht, s. §0.) **Systemisch:** ein Review *aller* „self-update"-Policies auf „welche Spalten darf der Owner setzen, welche nicht" — und für die schützenswerten ein Trigger-Guard.
+
+**Vorschlag** (eine Migration — analog zu #1, generischer Spalten-Guard; **noch nicht appliziert**, Spaltennamen vor dem Deploy gegen das Live-Schema verifizieren):
+
+```sql
+-- HIGH-Fix #2: makler / sachverstaendige — Privileg-Spalten gegen Self-Mass-Assignment sperren.
+-- Generischer Trigger: blockt Änderungen an den via TG_ARGV übergebenen Spalten durch nicht-
+-- privilegierte Caller (service_role / Migrations-Rollen / Admins dürfen weiterhin).
+CREATE OR REPLACE FUNCTION public.guard_privileged_columns()
+RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+  col text; old_v text; new_v text;
+BEGIN
+  IF current_user IN ('service_role','supabase_admin','postgres','authenticator') OR public.is_admin() THEN
+    RETURN NEW;
+  END IF;
+  FOREACH col IN ARRAY TG_ARGV LOOP
+    EXECUTE format('SELECT ($1).%I::text, ($2).%I::text', col, col) INTO old_v, new_v USING OLD, NEW;
+    IF old_v IS DISTINCT FROM new_v THEN
+      RAISE EXCEPTION 'Spalte %.% darf nur durch Admins/service_role geändert werden', TG_TABLE_NAME, col
+        USING ERRCODE = 'insufficient_privilege';
+    END IF;
+  END LOOP;
+  RETURN NEW;
+END $$;
+
+DROP TRIGGER IF EXISTS guard_makler_privileged ON public.makler;
+CREATE TRIGGER guard_makler_privileged BEFORE UPDATE ON public.makler
+  FOR EACH ROW EXECUTE FUNCTION public.guard_privileged_columns(
+    'status', 'provision_betrag_komplett_netto', 'provision_betrag_nur_gutachter_netto',
+    'provision_aktiv', 'aktiviert_am'
+  );
+
+DROP TRIGGER IF EXISTS guard_sv_privileged ON public.sachverstaendige;
+CREATE TRIGGER guard_sv_privileged BEFORE UPDATE ON public.sachverstaendige
+  FOR EACH ROW EXECUTE FUNCTION public.guard_privileged_columns(
+    'verifiziert', 'ist_aktiv', 'werbebudget_guthaben_netto', 'use_custom_branding'
+  );
+```
 
 ---
 
