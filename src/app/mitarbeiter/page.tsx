@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { FolderOpenIcon, CheckSquareIcon, MessageCircleIcon, AlertCircleIcon, CalendarIcon, PhoneCallIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { StatCard } from '@/components/shared/StatCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -92,12 +93,12 @@ export default async function MitarbeiterDashboard() {
 
       {/* KPI-Boxen */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <KpiBox icon={FolderOpenIcon} label="Aktive Fälle" value={faelleCount ?? 0} href="/mitarbeiter/faelle" color="blue" />
-        <KpiBox icon={CheckSquareIcon} label="Offene Tasks" value={tasksCount ?? 0} href="/mitarbeiter/tasks" color="violet" />
-        <KpiBox icon={PhoneCallIcon} label="Rückrufe" value={meineRueckrufe.length} href="/mitarbeiter/termine" color="amber" />
-        <KpiBox icon={CalendarIcon} label="Termine" value={meineTermineAnzahl} href="/mitarbeiter/termine" color="blue" />
-        <KpiBox icon={MessageCircleIcon} label="Ungelesen" value={unreadCount ?? 0} href="/mitarbeiter/nachrichten" color="emerald" />
-        <KpiBox icon={AlertCircleIcon} label="Reklamationen" value={reklamationenCount} href="/mitarbeiter/reklamationen" color="amber" />
+        <StatCard size="sm" icon={FolderOpenIcon} label="Aktive Fälle" value={faelleCount ?? 0} href="/mitarbeiter/faelle" tone="ondo" />
+        <StatCard size="sm" icon={CheckSquareIcon} label="Offene Tasks" value={tasksCount ?? 0} href="/mitarbeiter/tasks" tone="ondo" />
+        <StatCard size="sm" icon={PhoneCallIcon} label="Rückrufe" value={meineRueckrufe.length} href="/mitarbeiter/termine" tone="warning" />
+        <StatCard size="sm" icon={CalendarIcon} label="Termine" value={meineTermineAnzahl} href="/mitarbeiter/termine" tone="ondo" />
+        <StatCard size="sm" icon={MessageCircleIcon} label="Ungelesen" value={unreadCount ?? 0} href="/mitarbeiter/nachrichten" tone="success" />
+        <StatCard size="sm" icon={AlertCircleIcon} label="Reklamationen" value={reklamationenCount} href="/mitarbeiter/reklamationen" tone="warning" />
       </div>
 
       {/* Rückrufe + kommende Termine */}
@@ -234,28 +235,3 @@ export default async function MitarbeiterDashboard() {
   )
 }
 
-function KpiBox({
-  icon: Icon, label, value, href, color,
-}: {
-  icon: typeof FolderOpenIcon
-  label: string
-  value: number
-  href: string
-  color: 'blue' | 'violet' | 'emerald' | 'amber'
-}) {
-  const colorCls = {
-    blue: 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo',
-    violet: 'bg-violet-50 border-violet-200 text-violet-700',
-    emerald: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-    amber: 'bg-amber-50 border-amber-200 text-amber-700',
-  }[color]
-  return (
-    <Link href={href} className={`block border rounded-xl p-3 ${colorCls} hover:shadow-sm transition-shadow`}>
-      <div className="flex items-center gap-2 mb-1">
-        <Icon className="w-4 h-4" />
-        <span className="text-xs font-semibold uppercase">{label}</span>
-      </div>
-      <p className="text-2xl font-bold">{value}</p>
-    </Link>
-  )
-}

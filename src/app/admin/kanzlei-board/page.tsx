@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ScaleIcon, MailIcon, AlertCircleIcon, ClockIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { StatCard } from '@/components/shared/StatCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,9 +46,9 @@ export default async function KanzleiBoard() {
 
       {/* KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <KpiBox icon={ScaleIcon} label="Aktive Kanzlei-Parteien" value={kanzleiParteien?.length ?? 0} color="violet" />
-        <KpiBox icon={MailIcon} label="LexDrive-Events" value={webhookEvents?.length ?? 0} color="blue" />
-        <KpiBox icon={AlertCircleIcon} label="Offene LexDrive-Tasks" value={lexdriveTasks?.length ?? 0} color="amber" />
+        <StatCard size="sm" icon={ScaleIcon} tone="ondo" label="Aktive Kanzlei-Parteien" value={kanzleiParteien?.length ?? 0} />
+        <StatCard size="sm" icon={MailIcon} tone="ondo" label="LexDrive-Events" value={webhookEvents?.length ?? 0} />
+        <StatCard size="sm" icon={AlertCircleIcon} tone="warning" label="Offene LexDrive-Tasks" value={lexdriveTasks?.length ?? 0} />
       </div>
 
       {/* Kanzlei-Parteien */}
@@ -162,23 +163,3 @@ export default async function KanzleiBoard() {
   )
 }
 
-function KpiBox({
-  icon: Icon, label, value, color,
-}: {
-  icon: typeof ScaleIcon; label: string; value: number; color: 'violet' | 'blue' | 'amber'
-}) {
-  const cls = {
-    violet: 'bg-violet-50 border-violet-200 text-violet-700',
-    blue: 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo',
-    amber: 'bg-amber-50 border-amber-200 text-amber-700',
-  }[color]
-  return (
-    <div className={`border rounded-xl p-4 ${cls}`}>
-      <div className="flex items-center gap-2 mb-1">
-        <Icon className="w-5 h-5" />
-        <span className="text-xs font-semibold uppercase">{label}</span>
-      </div>
-      <p className="text-3xl font-bold">{value}</p>
-    </div>
-  )
-}

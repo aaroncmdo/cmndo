@@ -4,8 +4,10 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { UsersIcon, ClockIcon, CheckCircle2Icon, WalletIcon } from 'lucide-react'
 import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { StatCard } from '@/components/shared/StatCard'
 
 type Provision = {
   id: string
@@ -105,10 +107,10 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiBox label="Leads" value={String(kpi.total)} color="blue" />
-        <KpiBox label="Pending" value={`${kpi.pending} (${kpi.sumPending.toFixed(2)}€)`} color="amber" />
-        <KpiBox label="Bestaetigt" value={`${kpi.confirmed} (${kpi.sumConfirmed.toFixed(2)}€)`} color="emerald" />
-        <KpiBox label="Auszahlbar" value={`${kpi.sumConfirmed.toFixed(2)}€`} color="violet" />
+        <StatCard size="sm" icon={UsersIcon} tone="ondo" label="Leads" value={String(kpi.total)} />
+        <StatCard size="sm" icon={ClockIcon} tone="warning" label="Pending" value={`${kpi.pending} (${kpi.sumPending.toFixed(2)}€)`} />
+        <StatCard size="sm" icon={CheckCircle2Icon} tone="success" label="Bestätigt" value={`${kpi.confirmed} (${kpi.sumConfirmed.toFixed(2)}€)`} />
+        <StatCard size="sm" icon={WalletIcon} tone="ondo" label="Auszahlbar" value={`${kpi.sumConfirmed.toFixed(2)}€`} />
       </div>
 
       {/* Tabelle */}
@@ -198,17 +200,3 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
   )
 }
 
-function KpiBox({ label, value, color }: { label: string; value: string; color: 'blue' | 'amber' | 'emerald' | 'violet' }) {
-  const cls = {
-    blue: 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo',
-    amber: 'bg-amber-50 border-amber-200 text-amber-700',
-    emerald: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-    violet: 'bg-violet-50 border-violet-200 text-violet-700',
-  }[color]
-  return (
-    <div className={`border rounded-xl p-3 ${cls}`}>
-      <p className="text-xs font-semibold uppercase">{label}</p>
-      <p className="text-xl font-bold mt-1">{value}</p>
-    </div>
-  )
-}
