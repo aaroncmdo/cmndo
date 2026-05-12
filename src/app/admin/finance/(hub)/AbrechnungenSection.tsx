@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { markiereAlsBezahlt, storniereAbrechnung, manuellVersenden, manuellGenerieren } from '../abrechnungen-actions'
 import { Modal } from '@/components/primitives/Modal'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { ABRECHNUNG_STATUS_COLORS, ABRECHNUNG_STATUS_LABELS } from '@/lib/statusLabels'
 
 type Abrechnung = {
@@ -149,40 +150,40 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
               <p className="text-claimondo-ondo/70 text-sm">Keine Abrechnungen gefunden.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-claimondo-border">
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium text-xs">Nr.</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium text-xs">Empfänger</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium text-xs">Zeitraum</th>
-                    <th className="text-right px-4 py-3 text-claimondo-ondo font-medium text-xs">Brutto</th>
-                    <th className="text-center px-4 py-3 text-claimondo-ondo font-medium text-xs">Versand</th>
-                    <th className="text-center px-4 py-3 text-claimondo-ondo font-medium text-xs">Fällig</th>
-                    <th className="text-center px-4 py-3 text-claimondo-ondo font-medium text-xs">Status</th>
-                    <th className="text-right px-4 py-3 text-claimondo-ondo font-medium text-xs">Aktionen</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <DataTableContainer variant="plain">
+              <Table>
+                <Thead className="!bg-transparent border-b border-claimondo-border">
+                  <Tr>
+                    <Th className="text-left !text-claimondo-ondo text-xs">Nr.</Th>
+                    <Th className="text-left !text-claimondo-ondo text-xs">Empfänger</Th>
+                    <Th className="text-left !text-claimondo-ondo text-xs">Zeitraum</Th>
+                    <Th className="text-right !text-claimondo-ondo text-xs">Brutto</Th>
+                    <Th className="text-center !text-claimondo-ondo text-xs">Versand</Th>
+                    <Th className="text-center !text-claimondo-ondo text-xs">Fällig</Th>
+                    <Th className="text-center !text-claimondo-ondo text-xs">Status</Th>
+                    <Th className="text-right !text-claimondo-ondo text-xs">Aktionen</Th>
+                  </Tr>
+                </Thead>
+                <Tbody className="!divide-y-0">
                   {filtered.map(abr => (
-                    <tr key={abr.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg transition-colors">
-                      <td className="px-4 py-3 font-mono text-xs text-claimondo-ondo">{abr.abrechnungs_nr}</td>
-                      <td className="px-4 py-3 text-claimondo-navy text-xs">
+                    <Tr key={abr.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg transition-colors">
+                      <Td className="font-mono text-xs !text-claimondo-ondo">{abr.abrechnungs_nr}</Td>
+                      <Td className="text-xs">
                         <span className="block">{abr.empfaenger_name}</span>
                         <span className="text-[10px] text-claimondo-ondo/70">{abr.empfaenger_typ}</span>
-                      </td>
-                      <td className="px-4 py-3 text-claimondo-ondo text-xs">
+                      </Td>
+                      <Td className="!text-claimondo-ondo text-xs">
                         {fmtDate(abr.abrechnungs_zeitraum_start)} — {fmtDate(abr.abrechnungs_zeitraum_ende)}
-                      </td>
-                      <td className="px-4 py-3 text-right text-claimondo-navy tabular-nums text-xs font-semibold">{eur(abr.summe_brutto)}</td>
-                      <td className="px-4 py-3 text-center text-claimondo-ondo text-xs">{fmtDate(abr.versand_datum)}</td>
-                      <td className="px-4 py-3 text-center text-claimondo-ondo text-xs">{fmtDate(abr.faellig_am)}</td>
-                      <td className="px-4 py-3 text-center">
+                      </Td>
+                      <Td className="text-right tabular-nums text-xs font-semibold">{eur(abr.summe_brutto)}</Td>
+                      <Td className="text-center !text-claimondo-ondo text-xs">{fmtDate(abr.versand_datum)}</Td>
+                      <Td className="text-center !text-claimondo-ondo text-xs">{fmtDate(abr.faellig_am)}</Td>
+                      <Td className="text-center">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${ABRECHNUNG_STATUS_COLORS[abr.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                           {ABRECHNUNG_STATUS_LABELS[abr.status] ?? abr.status}
                         </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
+                      </Td>
+                      <Td className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           {/* PDF Download */}
                           {abr.pdf_path && (
@@ -225,12 +226,12 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                             </button>
                           )}
                         </div>
-                      </td>
-                    </tr>
+                      </Td>
+                    </Tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </Tbody>
+              </Table>
+            </DataTableContainer>
           )}
 
           {/* Bezahlt-Modal */}

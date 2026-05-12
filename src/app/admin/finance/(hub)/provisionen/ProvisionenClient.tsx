@@ -8,6 +8,7 @@ import { UsersIcon, ClockIcon, CheckCircle2Icon, WalletIcon } from 'lucide-react
 import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatCard } from '@/components/shared/StatCard'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { PROVISION_STATUS_COLORS, PROVISION_STATUS_LABELS } from '@/lib/statusLabels'
 
 type Provision = {
@@ -115,33 +116,33 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
       </div>
 
       {/* Tabelle */}
-      <div className="bg-white rounded-ios-lg shadow-ios-md overflow-x-auto">
-        <table className="w-full text-sm min-w-[800px]">
-          <thead className="bg-claimondo-bg text-xs uppercase text-claimondo-ondo">
-            <tr>
-              <th className="text-left px-4 py-2">Lead</th>
-              <th className="text-left px-4 py-2">Quelle</th>
-              <th className="text-left px-4 py-2">Basis</th>
-              <th className="text-left px-4 py-2">CPL</th>
-              <th className="text-left px-4 py-2">Netto</th>
-              <th className="text-left px-4 py-2">Status</th>
-              <th className="text-left px-4 py-2">Aktion</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-claimondo-border">
+      <DataTableContainer variant="plain" className="bg-white rounded-ios-lg shadow-ios-md">
+        <Table className="min-w-[800px]">
+          <Thead>
+            <Tr>
+              <Th className="text-left font-bold !py-2">Lead</Th>
+              <Th className="text-left font-bold !py-2">Quelle</Th>
+              <Th className="text-left font-bold !py-2">Basis</Th>
+              <Th className="text-left font-bold !py-2">CPL</Th>
+              <Th className="text-left font-bold !py-2">Netto</Th>
+              <Th className="text-left font-bold !py-2">Status</Th>
+              <Th className="text-left font-bold !py-2">Aktion</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
             {provisionen.map(p => {
               const leadJoin = Array.isArray(p.leads) ? p.leads[0] : p.leads
               const name = [leadJoin?.vorname, leadJoin?.nachname].filter(Boolean).join(' ') || p.lead_id.slice(0, 8)
               return (
-                <tr key={p.id}>
-                  <td className="px-4 py-3">
+                <Tr key={p.id}>
+                  <Td>
                     <Link href={`/dispatch/leads/${p.lead_id}`} className="text-claimondo-ondo hover:underline font-medium">
                       {name}
                     </Link>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo">{p.source_channel ?? '—'}</td>
-                  <td className="px-4 py-3 tabular-nums">{Number(p.basis_provision).toFixed(2)}€</td>
-                  <td className="px-4 py-3 tabular-nums">
+                  </Td>
+                  <Td className="text-xs !text-claimondo-ondo">{p.source_channel ?? '—'}</Td>
+                  <Td className="tabular-nums">{Number(p.basis_provision).toFixed(2)}€</Td>
+                  <Td className="tabular-nums">
                     {p.status === 'paid' || p.status === 'reversed' ? (
                       p.cpl_actual != null ? `${Number(p.cpl_actual).toFixed(2)}€` : '—'
                     ) : (
@@ -158,15 +159,15 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
                         <span className="text-xs text-claimondo-ondo/70">€</span>
                       </div>
                     )}
-                  </td>
-                  <td className="px-4 py-3 tabular-nums font-medium">{Number(p.netto_provision ?? 0).toFixed(2)}€</td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td className="tabular-nums font-medium">{Number(p.netto_provision ?? 0).toFixed(2)}€</Td>
+                  <Td>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${PROVISION_STATUS_COLORS[p.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                       {PROVISION_STATUS_LABELS[p.status] ?? p.status}
                     </span>
                     {p.reversed_grund && <p className="text-[10px] text-claimondo-ondo/70 mt-0.5">{p.reversed_grund}</p>}
-                  </td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td>
                     <div className="flex gap-1">
                       {p.status === 'pending' && p.cpl_actual != null && (
                         <button disabled={pending} onClick={() => handleConfirm(p.id)}
@@ -181,16 +182,16 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
                         </button>
                       )}
                     </div>
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               )
             })}
             {provisionen.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-12 text-center text-claimondo-ondo/70 text-sm">Keine Provisionen in {monat}</td></tr>
+              <Tr><Td colSpan={7} className="py-12 text-center !text-claimondo-ondo/70 text-sm">Keine Provisionen in {monat}</Td></Tr>
             )}
-          </tbody>
-        </table>
-      </div>
+          </Tbody>
+        </Table>
+      </DataTableContainer>
       {/* Reload-Trigger */}
       {pending && <p className="text-xs text-claimondo-ondo/70 text-center">Speichere…</p>}
       {!pending && <button onClick={() => router.refresh()} className="text-xs text-claimondo-ondo hover:underline">Liste aktualisieren</button>}
