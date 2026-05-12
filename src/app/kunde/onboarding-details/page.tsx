@@ -58,6 +58,28 @@ export default async function OnboardingDetailsPage({
     redirect(`/kunde/faelle/${fallId}`)
   }
 
+  // AAR-zb1-wizard: wenn eine Wizard-Phase ein 'zb1-upload'-Feld enthält,
+  // Token vorab holen. ladeNoetigePhasen liefert die schon gefilterten
+  // Phasen — wenn fahrzeug per kennzeichen-Skip schon raus ist, brauchen
+  // wir auch keinen Token.
+  const hatZb1Feld = wizardState.phases.some(p => p.felder.some(f => f.typ === 'zb1-upload'))
+  let zb1TokenForWizard: string | null = null
+  if (hatZb1Feld) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const adminDb = createAdminClient()
+    const { data: fall } = await adminDb
+      .from('faelle')
+      .select('lead_id')
+      .eq('id', fallId)
+      .maybeSingle()
+    const leadIdFuerZb1 = (fall as { lead_id?: string | null } | null)?.lead_id ?? null
+    if (leadIdFuerZb1) {
+      const { ensureZb1Anfrage } = await import('@/lib/onboarding/ensure-zb1-anfrage')
+      const res = await ensureZb1Anfrage(leadIdFuerZb1)
+      if (res.ok) zb1TokenForWizard = res.token
+    }
+  }
+
   return (
     <div className="min-h-screen bg-claimondo-bg relative isolate overflow-hidden">
       <div
@@ -94,6 +116,8 @@ export default async function OnboardingDetailsPage({
           phases={wizardState.phases}
           flowKey="kunde-onboarding"
           prefilledValues={wizardState.prefilledValues}
+          fallId={fallId}
+          zb1Token={zb1TokenForWizard}
         />
       </div>
     </div>
