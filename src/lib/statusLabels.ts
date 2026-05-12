@@ -198,6 +198,24 @@ export const ABRECHNUNG_STATUS_COLORS: Record<string, string> = Object.fromEntri
   Object.entries(ABRECHNUNG_STATUS_SLOT_MAP).map(([k, slot]) => [k, STATUS_SLOT_CLASSES[slot]]),
 )
 
+// ─── provisionen.status (Maik-/Google-Ads-Provisionen, AAR-92) ─────────────
+// AAR-frontend-konsolidierung-p2 (P2-T2 Teil 2): zentral statt inline Ternary.
+export const PROVISION_STATUS_LABELS: Record<string, string> = {
+  pending: 'Ausstehend',
+  confirmed: 'Bestätigt',
+  paid: 'Ausgezahlt',
+  reversed: 'Storniert',
+}
+const PROVISION_STATUS_SLOT_MAP: Record<string, StatusSlot> = {
+  pending: 'pending',
+  confirmed: 'success',
+  paid: 'done',
+  reversed: 'danger',
+}
+export const PROVISION_STATUS_COLORS: Record<string, string> = Object.fromEntries(
+  Object.entries(PROVISION_STATUS_SLOT_MAP).map(([k, slot]) => [k, STATUS_SLOT_CLASSES[slot]]),
+)
+
 // ─── Schadens-Ursache (Fallakte + Routen + Aufträge) ───────────────────────
 // AAR-410: Zentral statt pro Component hartkodiert.
 

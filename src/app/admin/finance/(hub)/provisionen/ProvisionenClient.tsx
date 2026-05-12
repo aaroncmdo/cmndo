@@ -8,6 +8,7 @@ import { UsersIcon, ClockIcon, CheckCircle2Icon, WalletIcon } from 'lucide-react
 import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatCard } from '@/components/shared/StatCard'
+import { PROVISION_STATUS_COLORS, PROVISION_STATUS_LABELS } from '@/lib/statusLabels'
 
 type Provision = {
   id: string
@@ -160,12 +161,9 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
                   </td>
                   <td className="px-4 py-3 tabular-nums font-medium">{Number(p.netto_provision ?? 0).toFixed(2)}€</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      p.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                      p.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
-                      p.status === 'paid' ? 'bg-claimondo-bg text-claimondo-ondo' :
-                      'bg-red-100 text-red-700'
-                    }`}>{p.status}</span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${PROVISION_STATUS_COLORS[p.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                      {PROVISION_STATUS_LABELS[p.status] ?? p.status}
+                    </span>
                     {p.reversed_grund && <p className="text-[10px] text-claimondo-ondo/70 mt-0.5">{p.reversed_grund}</p>}
                   </td>
                   <td className="px-4 py-3">
