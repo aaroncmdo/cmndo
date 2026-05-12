@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL } from '@/lib/seo/jsonld'
 import { STAEDTE } from './kfz-gutachter/staedte'
 
 const HREFLANG_LOCALES = ['de-DE', 'en-US', 'ar', 'tr-TR', 'pl-PL', 'ru-RU'] as const
@@ -106,16 +106,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.85,
     })),
-    // Gutachter-Partner-Recruiting (Marketing-Seite + Subdomain)
+    // Recruiting-Subdomains — eigene kanonische URLs (claimondo.de/<pfad> 301t dorthin)
     {
-      url: `${SITE_URL}/gutachter-partner`,
+      url: `${GUTACHTER_LANDING_URL}/`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
-      alternates: { languages: langAlternates('/gutachter-partner') },
     },
     {
-      url: 'https://gutachter.claimondo.de/',
+      url: `${MAKLER_LANDING_URL}/`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,

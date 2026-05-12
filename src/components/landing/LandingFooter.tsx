@@ -76,12 +76,12 @@ export async function LandingFooter() {
             </h4>
             <ul className="mt-3 space-y-2 text-sm text-white/70">
               <li>
-                <Link href="/gutachter-partner" className="transition-colors hover:text-white">
+                <Link href="https://gutachter.claimondo.de" className="transition-colors hover:text-white">
                   Gutachter werden
                 </Link>
               </li>
               <li>
-                <Link href="/makler/partner-werden" className="transition-colors hover:text-white">
+                <Link href="https://makler.claimondo.de" className="transition-colors hover:text-white">
                   {t('partner.makler')}
                 </Link>
               </li>
