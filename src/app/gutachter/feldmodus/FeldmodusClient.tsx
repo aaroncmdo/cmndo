@@ -313,68 +313,74 @@ export default function FeldmodusClient({
     )
 
   return (
-    <div className="h-screen w-screen flex flex-col">
-      <OfflineStatusBanner />
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-      {/* Karte — oben auf mobile, links auf desktop */}
-      <div className="relative flex-1 min-h-0 lg:flex-1">
+    // 2026-05-07/08 (C9 + Aaron-Smoke MAP3): Map = Full-Screen-Background, alle
+    // Steuer-Elemente floaten als Glass-Cards darüber. (Der vom 8f088031-Merge
+    // versehentlich eingeschleppte map+sidebar-Split ist hier wieder entfernt —
+    // das war ein Pre-C9-Layout, das mit den C9-Floating-Cards + dem Bottom-Sheet
+    // doppelt rendert.)
+    <div className="relative" style={{ height: '100vh', width: '100vw' }}>
+      {/* Map als Background — füllt den gesamten Viewport */}
+      <div className="absolute inset-0 z-0">
         <FeldmodusMap
           sv={sv}
           stops={stops}
           aktuellerStopIndex={aktuellerStopIndex}
           svPosition={position}
-          // 2026-05-07 (Aaron-Smoke MAP3): Camera folgt der SV-Position
-          // sobald sie verfügbar ist — nicht abhängig von TBT-Route.
-          // Vorher musste TBT-Routing erfolgreich laden bevor follow-mode
-          // aktiv war; bei kaltem Start ohne GPS sah das wie eine static
-          // map aus.
+          // 2026-05-07 (Aaron-Smoke MAP3): Camera folgt der SV-Position sobald
+          // sie verfügbar ist — nicht abhängig von TBT-Route (sonst sah ein
+          // kalter Start ohne GPS wie eine static map aus).
           followSv={!!position}
           // 2026-05-08 (C6): Hero-Pin Arrived-Choreographie
           arrived={sessionStatus === 'arrived'}
-          // 2026-05-08 (C10): Map-side Notices (Blitzer/Hazard/Reroute)
-          // an den Notice-Stack des Clients
+          // 2026-05-08 (C10): Map-side Notices (Blitzer/Hazard/Reroute) an den Notice-Stack
           onMapNotice={setMapNotice}
         />
       </div>
 
-      {/* Sidebar — unten auf mobile, rechts auf desktop.
-          AAR-386: Im arrived-State zeigt SvFallakteView statt RouteSidebar. */}
-      <div className="flex-1 min-h-0 overflow-y-auto lg:flex-none lg:w-[380px] lg:border-l lg:border-white/10">
-        {sessionStatus === 'arrived' && aktuellerStop ? (
-          <SvFallakteView
-            fallId={aktuellerStop.fall_id}
-            sessionId={session.id}
-            terminId={aktuellerStop.termin_id}
-            onAdvanced={onAdvanced}
-            onPauseBackToRoute={async () => {
-              const res = await pauseFokusmodus(session.id)
-              if (res.success) {
-                setSessionStatus('paused')
-                router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
-              } else {
-                toast.error(res.error ?? 'Pausieren fehlgeschlagen')
-              }
-            }}
-          />
-        ) : (
-          <RouteSidebar
-            sessionId={session.id}
-            sessionStatus={sessionStatus}
-            stops={stops}
-            aktuellerStopIndex={aktuellerStopIndex}
-            svPosition={position ? { lat: position.lat, lng: position.lng } : null}
-            distanceMeters={distanceMeters}
-            svInGeofence={svInGeofence}
-            permissionState={permissionState}
-            onAdvanced={onAdvanced}
-            onArrived={onArrived}
-          />
-        )}
-      </div>
-      </div>
+      <OfflineStatusBanner />
 
-      {/* Floating-Cards (ab md) — outerer Fragment-Wrapper */}
-      {sessionStatus !== 'arrived' && (
+      {/* FokusHeader-Pill — top-left (ab md): Exit + Stop-Counter + Status */}
+      <GlassPanel className="hidden md:block absolute top-4 left-4 z-30 overflow-hidden">
+        <FokusHeader
+          sessionId={session.id}
+          sessionStatus={sessionStatus}
+          aktuellerIndex={aktuellerStopIndex}
+          totalStops={stops.length}
+          distanceMeters={distanceMeters}
+          variant="light"
+        />
+      </GlassPanel>
+
+      {/* Hauptinteraktion (ab md):
+          arrived → SvFallakteView als zentrierter Modal-Popover über gedimmter Map
+          (Aaron-Smoke MAP3: vollwertiger Popover + Backdrop-Dim für klaren Modus-Wechsel).
+          sonst  → AktuellerStopCard mid-left + Kommende-Stops-Liste bottom-left, beide
+          als schwebende Glass-Cards. (Mobile: alles im Bottom-Sheet unten.) */}
+      {sessionStatus === 'arrived' && aktuellerStop ? (
+        <div className="hidden md:block fixed inset-0 z-40 bg-claimondo-navy/30 backdrop-blur-sm">
+          <GlassPanel
+            variant="prominent"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(720px,92vw)] h-[min(85vh,800px)] flex flex-col overflow-hidden"
+          >
+            <SvFallakteView
+              fallId={aktuellerStop.fall_id}
+              sessionId={session.id}
+              terminId={aktuellerStop.termin_id}
+              onAdvanced={onAdvanced}
+              onBackToRoute={handleBackToRoute}
+              onPauseBackToRoute={async () => {
+                const res = await pauseFokusmodus(session.id)
+                if (res.success) {
+                  setSessionStatus('paused')
+                  router.push('/gutachter/heute?info=Fokus-Modus+pausiert')
+                } else {
+                  toast.error(res.error ?? 'Pausieren fehlgeschlagen')
+                }
+              }}
+            />
+          </GlassPanel>
+        </div>
+      ) : (
         <>
           {/* AktuellerStopCard — mid-left, Hauptinteraktion (ab md) */}
           {aktuellerStop && (
