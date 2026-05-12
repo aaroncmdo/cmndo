@@ -6,6 +6,7 @@ import { CheckCircle2Icon, XCircleIcon, PlusIcon, FileTextIcon } from 'lucide-re
 import { LoadingButton } from '@/components/ui/loading-button'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
+import { TextField as SharedTextField } from '@/components/shared/forms'
 import {
   createVertragsvorlage,
   updateVertragsvorlage,
@@ -357,19 +358,11 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Adapter — delegiert an shared/forms/TextField.
 function Field({
   label, value, onChange, placeholder,
 }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
-    <div>
-      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
-      <input
-        type="text"
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-      />
-    </div>
+    <SharedTextField label={label} type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
   )
 }

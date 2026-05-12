@@ -7,6 +7,7 @@ import { CheckCircle2Icon, ArrowLeftIcon } from 'lucide-react'
 import { anlegeFall, type AnlegeFallInput } from './actions'
 import { SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import PageHeader from '@/components/shared/PageHeader'
+import { TextField as SharedTextField, SelectField as SharedSelectField } from '@/components/shared/forms'
 
 // KFZ-154 Cleanup-Follow-up: Minimale Fall-Anlage Form fuer Admins.
 // Erstellt einen Lead + Fall in einem Rutsch (analog convertLeadToFall).
@@ -204,6 +205,7 @@ export default function AnlegenFallClient() {
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Adapter — delegiert an shared/forms/TextField.
 function Field({
   label, value, onChange, type = 'text', placeholder, className, required, mono,
 }: {
@@ -217,20 +219,20 @@ function Field({
   mono?: boolean
 }) {
   return (
-    <div className={className}>
-      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        className={`w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] ${mono ? 'font-mono' : ''}`}
-      />
-    </div>
+    <SharedTextField
+      label={label}
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      required={required}
+      inputClassName={mono ? 'font-mono' : undefined}
+      className={className}
+    />
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Adapter — string[]-Options → shared/forms/SelectField.
 function SelectField({
   label, value, onChange, options, placeholder,
 }: {
@@ -240,19 +242,11 @@ function SelectField({
   options: ReadonlyArray<string>
   placeholder?: string
 }) {
+  const opts = [
+    { value: '', label: placeholder ?? '—' },
+    ...options.map((o) => ({ value: o, label: o })),
+  ]
   return (
-    <div>
-      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-      >
-        <option value="">{placeholder ?? '—'}</option>
-        {options.map(opt => (
-          <option key={opt} value={opt}>{opt}</option>
-        ))}
-      </select>
-    </div>
+    <SharedSelectField label={label} value={value} onChange={(e) => onChange(e.target.value)} options={opts} />
   )
 }

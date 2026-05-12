@@ -29,6 +29,7 @@ import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePl
 import { parseKennzeichen, buildKennzeichen } from '@/lib/format/kennzeichen'
 import { LACKFARBE_OPTIONS, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
+import { SectionCard } from '@/components/shared/SectionCard'
 import {
   CarIcon,
   ShieldIcon,
@@ -444,7 +445,9 @@ function ZeugenKontakteEditor({
   )
 }
 
-function Card({
+// AAR-frontend-konsolidierung-p1: dünner Adapter — shared SectionCard mit
+// space-y-4-Body wie die bisherige Phase-4-Card.
+function Phase4SectionCard({
   icon,
   title,
   children,
@@ -454,13 +457,9 @@ function Card({
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-4">
-      <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-        {icon}
-        {title}
-      </h2>
+    <SectionCard icon={icon} title={title} bodyClassName="space-y-4">
       {children}
-    </div>
+    </SectionCard>
   )
 }
 
@@ -798,7 +797,7 @@ export default function Phase4Stammdaten() {
           erfasst bzw. editiert. Doppelte Eingabe verwirrt den MA. */}
 
       {/* Kundenadresse — wird hier in Phase 4 erfasst (nicht beim Lead-Anlegen) */}
-      <Card icon={<MapPinIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Kundenadresse">
+      <Phase4SectionCard icon={<MapPinIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Kundenadresse">
         <div className="space-y-1.5">
           <p className="text-[11px] text-claimondo-ondo">
             Wohnadresse des Kunden — nur als letzter Fallback für die Gutachter-Zuweisung (Priorität: Besichtigungsort → Fahrzeug-Standort → Unfallort → Wohnadresse).
@@ -835,11 +834,11 @@ export default function Phase4Stammdaten() {
             </p>
           )}
         </div>
-      </Card>
+      </Phase4SectionCard>
 
       {/* 1. Fahrzeugdaten — AAR-194: Baujahr OBEN, dann Marke + Modell
           dynamisch via CarQuery (gefiltert nach Baujahr falls gesetzt). */}
-      <Card icon={<CarIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Fahrzeugdaten">
+      <Phase4SectionCard icon={<CarIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Fahrzeugdaten">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* AAR-194: Baujahr als erstes Feld damit CarQuery Marke/Modell
               direkt gefiltert lädt. AAR-199: Baujahr ist OPTIONAL — wird
@@ -1342,10 +1341,10 @@ export default function Phase4Stammdaten() {
             />
           </div>
         </div>
-      </Card>
+      </Phase4SectionCard>
 
       {/* 3. Gegner & Unfall */}
-      <Card icon={<ShieldIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Gegner & Unfall">
+      <Phase4SectionCard icon={<ShieldIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Gegner & Unfall">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Gegner-KZ mit Live-Flags */}
           <div className="space-y-0.5 sm:col-span-2">
@@ -1488,10 +1487,10 @@ export default function Phase4Stammdaten() {
               Versicherung. Wenn Korrekturen am Unfall-Block nötig werden, geht
               der Dispatcher in Phase 1 zurück. */}
         </div>
-      </Card>
+      </Phase4SectionCard>
 
       {/* 4. Zeugen */}
-      <Card icon={<UsersIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Zeugen">
+      <Phase4SectionCard icon={<UsersIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Zeugen">
         <p className="text-[11px] text-claimondo-ondo">
           Nur abfragen bei Unklarheiten zum Hergang. Falls Kontaktdaten vorhanden, kann der
           Kunde diese gleich im Portal-FlowLink eingeben.
@@ -1523,7 +1522,7 @@ export default function Phase4Stammdaten() {
             initialKontakte={l.zeugen_kontakte ?? []}
           />
         )}
-      </Card>
+      </Phase4SectionCard>
 
       {!qualification.q6_gegnerKz && (
         <p className="text-[11px] text-amber-700 flex items-start gap-1 px-1">

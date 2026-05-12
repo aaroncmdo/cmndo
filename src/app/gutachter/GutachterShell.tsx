@@ -456,16 +456,6 @@ export default function GutachterShell({
           >
             <SettingsIcon className="w-4 h-4" /> Einstellungen
           </Link>
-          {/* AAR-720: Einstellungen-Knopf unter Profil — Hub für Kalender,
-              später weitere Konfigurations-Bereiche (Benachrichtigungen,
-              2FA, etc.). */}
-          <Link
-            href="/gutachter/einstellungen"
-            onClick={() => setSidebarOpen(false)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-white hover:bg-white/5 transition-colors"
-          >
-            <SettingsIcon className="w-4 h-4" /> Einstellungen
-          </Link>
           <button onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-red-400 hover:bg-white/5 transition-colors">
             <LogOutIcon className="w-4 h-4" /> Abmelden

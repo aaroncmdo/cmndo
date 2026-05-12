@@ -10,6 +10,7 @@ import {
   type AnlegePaket, type AnlegeCommunityFormData,
 } from '@/app/admin/sachverstaendige/anlegen/constants'
 import PolygonEditor, { type PolygonPath } from './PolygonEditor'
+import { TextField as SharedTextField, SelectField as SharedSelectField } from '@/components/shared/forms'
 
 // KFZ-152 Phase 3: 3-Step Community-Anlegen Wizard.
 // Step 1: Stammdaten + Gebiet (MVP: Adresse + Radius statt Polygon)
@@ -342,17 +343,14 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Adapter — delegiert an shared/forms/TextField.
 function Field({
   label, value, onChange, type = 'text', placeholder,
 }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string
 }) {
   return (
-    <div>
-      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
-      <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" />
-    </div>
+    <SharedTextField label={label} type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
   )
 }
 
@@ -366,22 +364,20 @@ function NumField({ label, value, onChange }: { label: string; value: number; on
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Adapter — string[]-Options → shared/forms/SelectField.
 function SelectField({
   label, value, onChange, options, placeholder,
 }: {
   label: string; value: string; onChange: (v: string) => void
   options: ReadonlyArray<string>; placeholder?: string
 }) {
+  const opts = options.includes('')
+    ? options.map((o) => ({ value: o, label: o === '' ? (placeholder ?? '—') : o }))
+    : [
+        { value: '', label: placeholder ?? 'Bitte wählen...', disabled: true },
+        ...options.map((o) => ({ value: o, label: o })),
+      ]
   return (
-    <div>
-      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)}
-        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo">
-        {!options.includes('') && <option value="" disabled>{placeholder ?? 'Bitte wählen...'}</option>}
-        {options.map(opt => (
-          <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>
-        ))}
-      </select>
-    </div>
+    <SharedSelectField label={label} value={value} onChange={(e) => onChange(e.target.value)} options={opts} />
   )
 }

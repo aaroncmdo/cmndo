@@ -1,11 +1,11 @@
-﻿'use client'
+'use client'
 
-// AAR-483 (M1): Makler-Portal-Shell. Strukturell gespiegelt am DispatchNav
-// (fixed Sidebar desktop + mobile Bottom-Nav). Design-Tokens Claimondo
-// Navy/Ondo-Blue/Shield. Aktives Nav-Item via usePathname-Prefix-Match.
+// AAR-483 (M1) / AAR-frontend-konsolidierung-p1: Makler-Portal-Shell.
+// Thin-Wrapper über die shared PortalNav (dark variant) — wie AdminNav/DispatchNav.
+// Vorher: ~178 Zeilen self-contained Sidebar mit dupliziertem isActive + Item-
+// Rendering + Hard-Hex-BG (#f2f3f7) + text-claimondo-shield-auf-navy (B3, dunkel
+// auf dunkel). Jetzt: nur Makler-spezifische Config (Items, Header-/Footer-Slot).
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import {
   LayoutDashboardIcon,
   UserPlusIcon,
@@ -18,6 +18,7 @@ import {
 import { SupportButton } from '@/components/support/SupportButton'
 import UpdatesNav from '@/components/shared/updates'
 import TasksPill from '@/components/shared/TasksPill'
+import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
 
 type MaklerShellProps = {
   makler: {
@@ -31,8 +32,8 @@ type MaklerShellProps = {
   children: React.ReactNode
 }
 
-const NAV_ITEMS = [
-  { href: '/makler', label: 'Dashboard', icon: LayoutDashboardIcon },
+const MAKLER_NAV_ITEMS: PortalNavItem[] = [
+  { href: '/makler', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
   { href: '/makler/leads', label: 'Leads', icon: UserPlusIcon },
   { href: '/makler/akten', label: 'Akten', icon: FolderOpenIcon },
   { href: '/makler/abrechnungen', label: 'Abrechnungen', icon: ReceiptIcon },
@@ -40,14 +41,9 @@ const NAV_ITEMS = [
   { href: '/makler/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
 ]
 
+const MAKLER_MOBILE_ITEMS = MAKLER_NAV_ITEMS.slice(0, 4)
+
 export function MaklerShell({ makler, email, userId, children }: MaklerShellProps) {
-  const pathname = usePathname()
-
-  function isActive(href: string) {
-    if (href === '/makler') return pathname === '/makler'
-    return pathname === href || pathname?.startsWith(href + '/')
-  }
-
   const initials = makler.ansprechpartner_vorname
     ? makler.ansprechpartner_vorname.substring(0, 2).toUpperCase()
     : (email?.substring(0, 2).toUpperCase() ?? 'MA')
@@ -56,89 +52,73 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
     <div className="h-screen relative overflow-hidden" style={{ background: '#f2f3f7' }}>
       {/* Atmosphärische Hintergrund-Spotlights — identisch mit Admin-Layout */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute inset-0" style={{
-          background: [
-            'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.10), transparent 65%)',
-            'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.06), transparent 70%)',
-          ].join(', '),
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: [
+              'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.10), transparent 65%)',
+              'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.06), transparent 70%)',
+            ].join(', '),
+          }}
+        />
       </div>
-      {/* Desktop Sidebar */}
-      <aside
-        role="navigation"
-        aria-label="Makler-Navigation"
-        className="hidden md:flex flex-col fixed top-0 left-0 h-screen w-60 z-40 bg-claimondo-navy"
-      >
-        <div className="px-5 py-5">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold tracking-tight">
-              <span className="text-white">Claim</span>
-              <span className="text-claimondo-shield">ondo</span>
-            </span>
-            {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
-            <TasksPill userId={userId} href="/makler" />
-          </div>
-          <p className="text-[10px] mt-1 uppercase tracking-wider text-claimondo-shield bg-claimondo-shield inline-block px-2 py-0.5 rounded">
-            Makler
-          </p>
-          <p className="text-xs mt-1 text-claimondo-shield truncate">{makler.firma}</p>
-        </div>
 
-        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
-            const active = isActive(item.href)
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
-                  active
-                    ? 'bg-claimondo-shield text-white font-semibold'
-                    : 'text-claimondo-shield hover:bg-white/5 hover:text-white'
-                }`}
+      <PortalNav
+        variant="dark"
+        ariaLabel="Makler-Navigation"
+        sections={[{ items: MAKLER_NAV_ITEMS }]}
+        mobileItems={MAKLER_MOBILE_ITEMS}
+        headerSlot={
+          <>
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold tracking-tight">
+                <span className="text-white">Claim</span>
+                <span className="text-claimondo-light-blue">ondo</span>
+              </span>
+              {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
+              <TasksPill userId={userId} href="/makler" />
+            </div>
+            <p className="mt-1 inline-block rounded bg-claimondo-shield px-2 py-0.5 text-[10px] uppercase tracking-wider text-claimondo-light-blue">
+              Makler
+            </p>
+            <p className="mt-1 truncate text-xs text-claimondo-light-blue">{makler.firma}</p>
+          </>
+        }
+        footerSlot={
+          <>
+            <SupportButton userName={makler.ansprechpartner_vorname} />
+            <div className="flex items-center gap-3 px-3 py-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-claimondo-ondo text-xs font-semibold text-white">
+                {initials}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm text-white/90">{makler.ansprechpartner_vorname}</p>
+                <p className="truncate text-[11px] text-claimondo-light-blue">{email}</p>
+              </div>
+              <UpdatesNav variant="dark" />
+            </div>
+            <form action="/api/auth/logout" method="POST">
+              <button
+                type="submit"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-claimondo-light-blue transition-colors hover:bg-white/5 hover:text-white"
               >
-                <item.icon style={{ width: 17, height: 17 }} />
-                {item.label}
-              </Link>
-            )
-          })}
-        </nav>
+                <LogOutIcon style={{ width: 17, height: 17 }} />
+                Abmelden
+              </button>
+            </form>
+          </>
+        }
+      />
 
-        <div className="px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
-          <SupportButton userName={makler.ansprechpartner_vorname} />
-          <div className="flex items-center gap-3 px-3 py-2.5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-claimondo-ondo text-white">
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-white/90 truncate">
-                {makler.ansprechpartner_vorname}
-              </p>
-              <p className="text-[11px] text-claimondo-shield truncate">{email}</p>
-            </div>
-            <UpdatesNav variant="dark" />
-          </div>
-          <form action="/api/auth/logout" method="POST">
-            <button
-              type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-claimondo-shield hover:bg-white/5 hover:text-white"
-            >
-              <LogOutIcon style={{ width: 17, height: 17 }} />
-              Abmelden
-            </button>
-          </form>
-        </div>
-      </aside>
-
-      {/* Content-Bereich */}
-      <div className="md:ml-60 h-screen flex flex-col relative z-10">
+      {/* Content-Bereich — Offset durch die fixe PortalNav-Sidebar (w-56) */}
+      <div className="relative z-10 flex h-screen flex-col md:ml-56">
         {/* Mobile header */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
+        <header className="flex shrink-0 items-center justify-between px-4 py-3 glass-dark shadow-ios-md md:hidden">
           <span className="text-lg font-bold tracking-tight">
             <span className="text-white">Claim</span>
-            <span className="text-claimondo-shield">ondo</span>
+            <span className="text-claimondo-light-blue">ondo</span>
           </span>
-          <span className="text-[10px] uppercase tracking-wider text-claimondo-shield bg-claimondo-shield px-2 py-0.5 rounded">
+          <span className="rounded bg-claimondo-shield px-2 py-0.5 text-[10px] uppercase tracking-wider text-claimondo-light-blue">
             Makler
           </span>
         </header>
@@ -146,33 +126,11 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
         <main
           id="main-content"
           role="main"
-          className="flex-1 min-h-0 overflow-y-auto pb-20 md:pb-0"
+          className="min-h-0 flex-1 overflow-y-auto pb-20 md:pb-0"
         >
           {children}
         </main>
       </div>
-
-      {/* Mobile bottom nav (erste 4 Items) */}
-      <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-dark shadow-ios-md"
-        style={{ paddingTop: 8, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
-      >
-        {NAV_ITEMS.slice(0, 4).map((item) => {
-          const active = isActive(item.href)
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-2 py-1 rounded-xl transition-all ${
-                active ? 'text-white bg-claimondo-shield' : 'text-claimondo-shield'
-              }`}
-            >
-              <item.icon style={{ width: 20, height: 20 }} />
-              <span className="text-[9px] font-medium">{item.label}</span>
-            </Link>
-          )
-        })}
-      </nav>
     </div>
   )
 }

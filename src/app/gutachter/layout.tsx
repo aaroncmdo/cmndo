@@ -1,8 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { roleToPath } from '@/lib/auth/role-redirect'
+import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import GutachterShell from './GutachterShell'
 
 export default async function GutachterLayout({
@@ -10,23 +9,8 @@ export default async function GutachterLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rolle, vorname, nachname')
-    .eq('id', user.id)
-    .single()
-
-  // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
-  // auf /login.
-  if (profile?.rolle !== 'sachverstaendiger') {
-    redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
-  }
-
-  const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
+  // K5 / AAR-frontend-konsolidierung-p1: Auth + Rollen-Guard zentralisiert.
+  const { supabase, user, displayName } = await requirePortalAccess(['sachverstaendiger'])
 
   // AAR-70: Konsistenter SV-Lookup nur ueber profile_id (user_id ist deprecated, alle rows haben profile_id)
   // AAR-184 Fix: `freigeschaltet` existiert NICHT — nur `portal_zugang_freigeschaltet`.

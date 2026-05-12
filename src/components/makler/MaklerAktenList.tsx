@@ -9,6 +9,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FolderOpenIcon, LockIcon } from 'lucide-react'
+import { Chip } from '@/components/ui/Chip'
+import EmptyState from '@/components/shared/EmptyState'
+import { FALL_STATUS_COLORS, FALL_STATUS_LABELS, FALL_STATUS_LABELS_SHORT } from '@/lib/statusLabels'
 import type { MaklerAkteRow, AktenFilter } from '@/lib/makler/queries'
 
 type Props = {
@@ -53,6 +56,23 @@ function relativeFromNow(iso: string | null): string {
   return RELATIVE.format(-months, 'month')
 }
 
+// AAR-frontend-konsolidierung-p1: Empty-State-Texte je Filter — gerendert über
+// die shared EmptyState-Komponente (kein eigenes Card-Markup mehr).
+const EMPTY_COPY: Record<AktenFilter, { heading: string; body: string }> = {
+  aktiv: {
+    heading: 'Keine aktiven Akten',
+    body: 'Sobald Ihre Kunden in die Bearbeitung gehen, erscheinen sie hier.',
+  },
+  abgeschlossen: {
+    heading: 'Noch keine abgeschlossenen Akten',
+    body: 'Abgeschlossene Fälle werden hier archiviert.',
+  },
+  storniert: {
+    heading: 'Keine stornierten Akten',
+    body: 'Glück gehabt — keine Ihrer Akten ist storniert.',
+  },
+}
+
 function kundeName(a: MaklerAkteRow): string {
   const parts = [a.kunde_vorname, a.kunde_nachname].filter(Boolean)
   return parts.length ? parts.join(' ') : '(unbekannt)'
@@ -79,28 +99,17 @@ export function MaklerAktenList({ akten, counts, currentFilter }: Props) {
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        <FilterChip
-          active={currentFilter === 'aktiv'}
-          onClick={() => setFilter('aktiv')}
-          label="Aktiv"
-          count={counts.aktiv}
-        />
-        <FilterChip
-          active={currentFilter === 'abgeschlossen'}
-          onClick={() => setFilter('abgeschlossen')}
-          label="Abgeschlossen"
-          count={counts.abgeschlossen}
-        />
-        <FilterChip
-          active={currentFilter === 'storniert'}
-          onClick={() => setFilter('storniert')}
-          label="Storniert"
-          count={counts.storniert}
-        />
+        <Chip variant={currentFilter === 'aktiv' ? 'selected' : 'default'} count={counts.aktiv} onClick={() => setFilter('aktiv')}>Aktiv</Chip>
+        <Chip variant={currentFilter === 'abgeschlossen' ? 'selected' : 'default'} count={counts.abgeschlossen} onClick={() => setFilter('abgeschlossen')}>Abgeschlossen</Chip>
+        <Chip variant={currentFilter === 'storniert' ? 'selected' : 'default'} count={counts.storniert} onClick={() => setFilter('storniert')}>Storniert</Chip>
       </div>
 
       {akten.length === 0 ? (
-        <EmptyState filter={currentFilter} />
+        <EmptyState
+          icon={FolderOpenIcon}
+          title={EMPTY_COPY[currentFilter].heading}
+          description={EMPTY_COPY[currentFilter].body}
+        />
       ) : (
         <div className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
           {/* Desktop-Tabelle */}
@@ -265,70 +274,20 @@ function AkteCard({
 // Pills/Badges
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PHASE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  ersterfassung: { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy', label: 'Ersterfassung' },
-  onboarding: { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy', label: 'Onboarding' },
-  'sv-gesucht': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV-Suche' },
-  'sv-zugewiesen': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV zugewiesen' },
-  'sv-termin': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV-Termin' },
-  besichtigung: { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'Besichtigung' },
-  'begutachtung-laeuft': {
-    bg: 'bg-amber-100',
-    text: 'text-amber-700',
-    label: 'Begutachtung',
-  },
-  'gutachten-eingegangen': {
-    bg: 'bg-emerald-100',
-    text: 'text-emerald-700',
-    label: 'Gutachten da',
-  },
-  filmcheck: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Filmcheck' },
-  'qc-pruefung': { bg: 'bg-amber-100', text: 'text-amber-700', label: 'QC-Prüfung' },
-  'kanzlei-uebergeben': {
-    bg: 'bg-violet-100',
-    text: 'text-violet-700',
-    label: 'Kanzlei',
-  },
-  anschlussschreiben: {
-    bg: 'bg-violet-100',
-    text: 'text-violet-700',
-    label: 'Anschlussschreiben',
-  },
-  regulierung: { bg: 'bg-violet-100', text: 'text-violet-700', label: 'Regulierung' },
-  'regulierung-laeuft': {
-    bg: 'bg-violet-100',
-    text: 'text-violet-700',
-    label: 'Regulierung',
-  },
-  'nachbesichtigung-laeuft': {
-    bg: 'bg-amber-100',
-    text: 'text-amber-700',
-    label: 'Nachbesichtigung',
-  },
-  'vs-abgelehnt': { bg: 'bg-red-100', text: 'text-red-700', label: 'VS abgelehnt' },
-  'zahlung-eingegangen': {
-    bg: 'bg-emerald-100',
-    text: 'text-emerald-700',
-    label: 'Zahlung da',
-  },
-  abgeschlossen: {
-    bg: 'bg-emerald-600/10',
-    text: 'text-emerald-700',
-    label: 'Abgeschlossen',
-  },
-  storniert: { bg: 'bg-red-100', text: 'text-red-700', label: 'Storniert' },
-}
-
+// AAR-frontend-konsolidierung-p1: Phase-Pill nutzt jetzt die zentralen Maps aus
+// lib/statusLabels.ts (FALL_STATUS_COLORS + FALL_STATUS_LABELS_SHORT) statt einer
+// lokalen Farb-/Label-Map — gleiche Status-Codes, harmonisierte Tints.
 function PhasePill({ akte }: { akte: MaklerAkteRow }) {
-  const key = akte.aktuelle_phase ?? akte.status
-  const entry =
-    PHASE_COLORS[akte.status] ??
-    PHASE_COLORS[key] ?? { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy', label: key }
+  const keys = [akte.status, akte.aktuelle_phase].filter(Boolean) as string[]
+  const matchKey = keys.find((k) => FALL_STATUS_COLORS[k]) ?? keys[0] ?? ''
+  const color = FALL_STATUS_COLORS[matchKey] ?? 'bg-claimondo-bg text-claimondo-navy'
+  const label =
+    FALL_STATUS_LABELS_SHORT[matchKey] ?? FALL_STATUS_LABELS[matchKey] ?? matchKey
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${entry.bg} ${entry.text}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${color}`}
     >
-      {entry.label}
+      {label}
     </span>
   )
 }
@@ -345,37 +304,8 @@ function MinimalBadge() {
   )
 }
 
-function FilterChip({
-  active,
-  onClick,
-  label,
-  count,
-}: {
-  active: boolean
-  onClick: () => void
-  label: string
-  count: number
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-        active
-          ? 'bg-claimondo-navy text-white'
-          : 'bg-white text-claimondo-ondo border border-claimondo-border hover:border-claimondo-ondo'
-      }`}
-    >
-      {label}
-      <span className={`ml-1.5 ${active ? 'text-claimondo-shield' : 'text-claimondo-navy'}`}>
-        {count}
-      </span>
-    </button>
-  )
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
-// Mini-Drawer + Empty
+// Mini-Drawer
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MiniDrawer({
@@ -435,33 +365,6 @@ function Row({ dt, dd }: { dt: string; dd: React.ReactNode }) {
     <div className="flex justify-between items-center gap-4">
       <dt className="text-claimondo-ondo">{dt}</dt>
       <dd className="text-claimondo-navy text-right">{dd}</dd>
-    </div>
-  )
-}
-
-function EmptyState({ filter }: { filter: AktenFilter }) {
-  const copy: Record<AktenFilter, { heading: string; body: string }> = {
-    aktiv: {
-      heading: 'Keine aktiven Akten',
-      body: 'Sobald Ihre Kunden in die Bearbeitung gehen, erscheinen sie hier.',
-    },
-    abgeschlossen: {
-      heading: 'Noch keine abgeschlossenen Akten',
-      body: 'Abgeschlossene Fälle werden hier archiviert.',
-    },
-    storniert: {
-      heading: 'Keine stornierten Akten',
-      body: 'Glück gehabt — keine Ihrer Akten ist storniert.',
-    },
-  }
-  const c = copy[filter]
-  return (
-    <div className="bg-white rounded-ios-md border border-claimondo-border p-10 text-center">
-      <div className="mx-auto w-12 h-12 rounded-full bg-claimondo-bg flex items-center justify-center text-claimondo-ondo mb-4">
-        <FolderOpenIcon width={22} height={22} />
-      </div>
-      <h2 className="text-base font-semibold text-claimondo-navy mb-2">{c.heading}</h2>
-      <p className="text-sm text-claimondo-ondo max-w-sm mx-auto">{c.body}</p>
     </div>
   )
 }

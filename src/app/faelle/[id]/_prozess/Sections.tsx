@@ -36,8 +36,11 @@ import { triggerKonfrontationFromAdmin } from '../_actions/konfrontation-trigger
 import { pushMandatManuell } from '../_actions/push-mandat-manuell'
 import EndpointRegister from '../_components/LexDriveTriggerPanel'
 import InlineEditField from '../_stammdaten/InlineEditField'
+import { SectionCard } from '@/components/shared/SectionCard'
 
-function Card({
+// AAR-frontend-konsolidierung-p1: dünner Adapter — shared SectionCard mit
+// space-y-3-Body wie die bisherige Prozess-Card.
+function ProzessSectionCard({
   icon,
   title,
   subtitle,
@@ -49,16 +52,9 @@ function Card({
   children: ReactNode
 }) {
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-3">
-      <div>
-        <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-          {icon}
-          {title}
-        </h3>
-        {subtitle && <p className="text-[11px] text-claimondo-ondo mt-0.5">{subtitle}</p>}
-      </div>
+    <SectionCard icon={icon} title={title} subtitle={subtitle} bodyClassName="space-y-3">
       {children}
-    </div>
+    </SectionCard>
   )
 }
 
@@ -122,7 +118,7 @@ export function KanzleiEakteSection() {
   }
 
   return (
-    <Card
+    <ProzessSectionCard
       icon={<ScaleIcon className="w-4 h-4 text-claimondo-ondo" />}
       title="Kanzlei + E-Akte"
       subtitle="LexDrive-Partnerkanzlei, 24+ Events (manuell + Webhook)"
@@ -158,7 +154,7 @@ export function KanzleiEakteSection() {
           <EndpointRegister fallId={fall.id} />
         </div>
       )}
-    </Card>
+    </ProzessSectionCard>
   )
 }
 
@@ -166,7 +162,7 @@ export function KanzleiEakteSection() {
 export function AsSection() {
   const { fall } = useFall()
   return (
-    <Card
+    <ProzessSectionCard
       icon={<SendIcon className="w-4 h-4 text-claimondo-ondo" />}
       title="Anspruchsschreiben (AS)"
       subtitle="1-2 Werktage nach E-Akte-Übergabe (SLA)"
@@ -186,7 +182,7 @@ export function AsSection() {
         />
         <Info label="Eskalationsstufe" value={fall.vs_eskalationsstufe as string | null} />
       </div>
-    </Card>
+    </ProzessSectionCard>
   )
 }
 
@@ -233,7 +229,7 @@ export function VsReaktionSection() {
   }
 
   return (
-    <Card
+    <ProzessSectionCard
       icon={<ShieldAlertIcon className="w-4 h-4 text-amber-600" />}
       title="VS-Reaktion"
       subtitle="Reguliert / Kürzt / Quotiert / Ablehnt / Schweigt"
@@ -352,7 +348,7 @@ export function VsReaktionSection() {
           </div>
         </div>
       )}
-    </Card>
+    </ProzessSectionCard>
   )
 }
 
@@ -376,7 +372,7 @@ export function StellungnahmeSection() {
     })
   }
   return (
-    <Card
+    <ProzessSectionCard
       icon={<FileTextIcon className="w-4 h-4 text-claimondo-ondo" />}
       title="Technische Stellungnahme SV"
       subtitle="SLA: 72h / 3 WT nach Beauftragung — WA-Reminder 48h, KB-Eskalation 72h"
@@ -415,7 +411,7 @@ export function StellungnahmeSection() {
         SV-Portal: StellungnahmeCard in Fallakte{' '}
         <code className="text-[10px]">/gutachter/fall/{String(fall.id).slice(0, 8)}</code>
       </p>
-    </Card>
+    </ProzessSectionCard>
   )
 }
 
@@ -435,7 +431,7 @@ export function RuegeSection() {
     })
   }
   return (
-    <Card
+    <ProzessSectionCard
       icon={<AlertCircleIcon className="w-4 h-4 text-orange-600" />}
       title="Rüge-Prozess"
       subtitle="Max 2 Runden, danach Klage-Entscheidung (rein juristisch oder mit SV-Stellungnahme)"
@@ -459,7 +455,7 @@ export function RuegeSection() {
           Max. Rüge-Runden erreicht — Klage-Entscheidung erforderlich.
         </div>
       )}
-    </Card>
+    </ProzessSectionCard>
   )
 }
 
@@ -528,7 +524,7 @@ export function NachbesichtigungSection() {
   }
 
   return (
-    <Card
+    <ProzessSectionCard
       icon={<MapPinIcon className="w-4 h-4 text-violet-600" />}
       title="Nachbesichtigung"
       subtitle="Kunde wählt Termin im Portal; Konfrontations-Termin löst Dispatch-Lite (C12) aus"
@@ -592,7 +588,7 @@ export function NachbesichtigungSection() {
       <p className="text-[11px] text-claimondo-ondo">
         Kunden-Portal-Route: <code className="text-[10px]">/kunde/nachbesichtigung</code>
       </p>
-    </Card>
+    </ProzessSectionCard>
   )
 }
 
@@ -616,7 +612,7 @@ export function KlageSection() {
     })
   }
   return (
-    <Card
+    <ProzessSectionCard
       icon={<GavelIcon className="w-4 h-4 text-red-600" />}
       title="Klage-Übergabe an LexDrive"
       subtitle='Fall für Claimondo = „abgeschlossen mit Klage" — Kanzlei übernimmt individuell'
@@ -639,7 +635,7 @@ export function KlageSection() {
         Übergabe-Screen: Termin mit LexDrive-Rechtsberater koordinieren. Kein fixer
         Schwellenwert — die Kanzlei entscheidet individuell ob Klage sinnvoll ist.
       </div>
-    </Card>
+    </ProzessSectionCard>
   )
 }
 
@@ -657,7 +653,7 @@ export function AuszahlungSection() {
   const isAdminSicht = userRolle === 'admin' || userRolle === 'kundenbetreuer'
 
   return (
-    <Card
+    <ProzessSectionCard
       icon={<BanknoteIcon className="w-4 h-4 text-green-600" />}
       title="Auszahlung"
       subtitle="Brutto von VS → Split an Kunde + SV-Honorar. Info-WA an Kunde bei Eingang."
@@ -725,6 +721,6 @@ export function AuszahlungSection() {
           Split-Anzeige nur für Admin + Kundenbetreuer sichtbar.
         </div>
       )}
-    </Card>
+    </ProzessSectionCard>
   )
 }

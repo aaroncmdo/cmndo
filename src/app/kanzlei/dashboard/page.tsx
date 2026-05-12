@@ -13,53 +13,8 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { FolderOpenIcon, ArrowRightIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
-
-const STATUS_PILL: Record<string, { bg: string; text: string; label: string }> = {
-  // Welle-7 Werte (AAR-854 Trigger)
-  onboarding:   { bg: '#eef4fb', text: '#1E3A5F', label: 'Neu' },
-  in_bearbeitung: { bg: '#fffbeb', text: '#b45309', label: 'In Bearbeitung' },
-  vs_kontakt:   { bg: '#fef2f2', text: '#b91c1c', label: 'VS-Kommunikation' },
-  reguliert:    { bg: '#ecfdf5', text: '#047857', label: 'Reguliert' },
-  abgelehnt:    { bg: '#fef2f2', text: '#b91c1c', label: 'Abgelehnt' },
-  kanzlei:      { bg: '#f5f3ff', text: '#6d28d9', label: 'An Kanzlei' },
-  storniert:    { bg: '#f1f3f7', text: '#4b5563', label: 'Storniert' },
-  // Welle-6 Werte (Backward-Compat)
-  ersterfassung: { bg: '#eef4fb', text: '#1E3A5F', label: 'Ersterfassung' },
-  'sv-gesucht': { bg: '#eef4fb', text: '#1E3A5F', label: 'SV gesucht' },
-  'sv-zugewiesen': { bg: '#eef4fb', text: '#1E3A5F', label: 'SV zugewiesen' },
-  'sv-termin': { bg: '#eef4fb', text: '#1E3A5F', label: 'SV-Termin' },
-  besichtigung: { bg: '#fffbeb', text: '#b45309', label: 'Besichtigung' },
-  'begutachtung-laeuft': { bg: '#fffbeb', text: '#b45309', label: 'Begutachtung' },
-  'gutachten-eingegangen': { bg: '#fff7ed', text: '#c2410c', label: 'Gutachten eingegangen' },
-  filmcheck: { bg: '#fff7ed', text: '#c2410c', label: 'Filmcheck' },
-  'qc-pruefung': { bg: '#fff7ed', text: '#c2410c', label: 'QC-Prüfung' },
-  'kanzlei-uebergeben': { bg: '#f5f3ff', text: '#6d28d9', label: 'Kanzlei übergeben' },
-  anschlussschreiben: { bg: '#f5f3ff', text: '#6d28d9', label: 'Anschlussschreiben' },
-  regulierung: { bg: '#ecfdf5', text: '#047857', label: 'Regulierung' },
-  'regulierung-laeuft': { bg: '#ecfdf5', text: '#047857', label: 'Regulierung läuft' },
-  'zahlung-eingegangen': { bg: '#f0fdf4', text: '#15803d', label: 'Zahlung eingegangen' },
-  abgeschlossen: { bg: '#ecfdf5', text: '#047857', label: 'Abgeschlossen' },
-}
-
-// Welle-7 aktuelle_phase-Werte (aus map_claim_phase_to_faelle_phase)
-const PHASE_LABEL: Record<string, string> = {
-  fallakte_wird_angelegt: 'Ersterfassung & Termin',
-  fallakte_angelegt:       'Ersterfassung & Termin',
-  termin_bestaetigt:       'Ersterfassung & Termin',
-  sv_unterwegs:            'Begutachtung',
-  sv_vor_ort:              'Begutachtung',
-  begutachtung_abgeschlossen: 'Begutachtung',
-  gutachten_wird_erstellt: 'Gutachten & QC',
-  gutachten_erstellt:      'Gutachten & QC',
-  qc_bestanden:            'Gutachten & QC',
-  kanzlei_fallakte_angelegt: 'Kanzlei-Übergabe',
-  warten_auf_vs:           'VS-Kommunikation',
-  vs_kontakt_laeuft:       'VS-Kommunikation',
-  vollzahlung_eingegangen: 'Reguliert',
-  ablehnung_kanzlei_prueft: 'Abgelehnt',
-  klage_eingereicht:       'Abgelehnt',
-  fall_akzeptiert_storniert: 'Storniert',
-}
+import FallStatusBadge from '@/components/shared/FallStatusBadge'
+import { AKTUELLE_PHASE_LABELS } from '@/lib/statusLabels'
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—'
@@ -132,9 +87,8 @@ export default async function KanzleiDashboardPage() {
               <tbody>
                 {faelle.map((f) => {
                   const kunde = [f.kunde_vorname, f.kunde_nachname].filter(Boolean).join(' ') || '—'
-                  const statusCfg = STATUS_PILL[(f.status as string) ?? ''] ?? null
                   const phaseKey = String(f.aktuelle_phase ?? '')
-                  const phaseLabel = PHASE_LABEL[phaseKey] ?? phaseKey ?? '—'
+                  const phaseLabel = AKTUELLE_PHASE_LABELS[phaseKey] ?? phaseKey ?? '—'
                   return (
                     <tr
                       key={f.id}
@@ -154,16 +108,7 @@ export default async function KanzleiDashboardPage() {
                       </td>
                       <td className="px-4 py-3 text-claimondo-navy">{phaseLabel}</td>
                       <td className="px-4 py-3">
-                        {statusCfg ? (
-                          <span
-                            className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"
-                            style={{ backgroundColor: statusCfg.bg, color: statusCfg.text }}
-                          >
-                            {statusCfg.label}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-claimondo-ondo/70">{f.status ?? '—'}</span>
-                        )}
+                        <FallStatusBadge status={f.status as string | null} size="md" />
                       </td>
                       <td className="px-4 py-3 font-mono text-[12px] text-claimondo-navy">
                         {f.mandatsnummer ?? '—'}

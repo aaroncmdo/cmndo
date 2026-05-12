@@ -34,8 +34,11 @@ import InlineEditField from './InlineEditField'
 import { getVersicherungById, type VersicherungSuggestion } from '@/app/dispatch/leads/[id]/_actions/versicherungen'
 import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
 import { requestCardentityTypBForFall } from '../_actions/dokumente'
+import { SectionCard } from '@/components/shared/SectionCard'
 
-function Card({
+// AAR-frontend-konsolidierung-p1: dünner Adapter — shared SectionCard mit dem
+// 2-Spalten-Feld-Grid das alle Stammdaten-Sections nutzen.
+function SectionFieldCard({
   icon,
   title,
   hint,
@@ -47,14 +50,14 @@ function Card({
   children: ReactNode
 }) {
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-4">
-      <div className="flex items-center gap-2">
-        {icon}
-        <h2 className="text-sm font-semibold text-claimondo-navy">{title}</h2>
-        {hint && <span className="text-[10px] text-claimondo-ondo/70 ml-auto">{hint}</span>}
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{children}</div>
-    </div>
+    <SectionCard
+      icon={icon}
+      title={title}
+      hint={hint}
+      bodyClassName="grid grid-cols-1 sm:grid-cols-2 gap-4"
+    >
+      {children}
+    </SectionCard>
   )
 }
 
@@ -75,7 +78,7 @@ export function KundendatenSection() {
   const email = (fall.kunde_email as string | null) ?? (lead?.email as string | null) ?? null
   const telefon = (fall.kunde_telefon as string | null) ?? (lead?.telefon as string | null) ?? null
   return (
-    <Card icon={<UserIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Kundendaten">
+    <SectionFieldCard icon={<UserIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Kundendaten">
       <InlineEditField label="Vorname" fieldName="kunde_vorname" value={vorname} />
       <InlineEditField label="Nachname" fieldName="kunde_nachname" value={nachname} />
       <InlineEditField label="E-Mail" fieldName="kunde_email" value={email} />
@@ -87,7 +90,7 @@ export function KundendatenSection() {
          de/tr/ar/ru/pl/en/other — editierbar als Freitext, Validierung
          serverseitig. Eigener Dropdown = nice-to-have Follow-up. */}
       <InlineEditField label="Sprache (de/tr/ar/ru/pl/en/other)" fieldName="sprache" value={f(fall, 'sprache')} hint="AAR-316: Portal-Übersetzung" />
-    </Card>
+    </SectionFieldCard>
   )
 }
 
@@ -101,7 +104,7 @@ export function FahrzeugdatenSection() {
   const hsn = (fall.hsn as string | null) ?? (lead?.hsn as string | null) ?? null
   const tsn = (fall.tsn as string | null) ?? (lead?.tsn as string | null) ?? null
   return (
-    <Card
+    <SectionFieldCard
       icon={<CarIcon className="w-4 h-4 text-claimondo-ondo/70" />}
       title="Fahrzeug & Halter"
       hint="ZB1-OCR aus W3 schreibt Halter-Felder + FIN"
@@ -172,14 +175,14 @@ export function FahrzeugdatenSection() {
           }}
         />
       </div>
-    </Card>
+    </SectionFieldCard>
   )
 }
 
 export function UnfallSection() {
   const { fall } = useFall()
   return (
-    <Card icon={<AlertTriangleIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Unfall">
+    <SectionFieldCard icon={<AlertTriangleIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Unfall">
       <InlineEditField label="Schadensdatum" fieldName="schadens_datum" value={typeof fall.schadens_datum === 'string' ? fall.schadens_datum.slice(0, 10) : null} type="date" />
       <InlineEditField label="Schadensart" fieldName="schadens_art" value={f(fall, 'schadens_art')} />
       <div className="sm:col-span-2">
@@ -223,7 +226,7 @@ export function UnfallSection() {
       <div className="sm:col-span-2">
         <InlineEditField label="Weitere Anmerkungen" fieldName="schadens_beschreibung" value={f(fall, 'schadens_beschreibung')} type="textarea" />
       </div>
-    </Card>
+    </SectionFieldCard>
   )
 }
 
@@ -301,7 +304,7 @@ export function GegnerSection() {
   // ersatzlos weg. FK auf versicherungen-Stammdaten: gegner_versicherung_id.
   const versicherungId = (fall as Record<string, unknown>).gegner_versicherung_id as string | null ?? null
   return (
-    <Card icon={<ShieldIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Gegner & Versicherung">
+    <SectionFieldCard icon={<ShieldIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Gegner & Versicherung">
       <InlineEditField label="Gegner bekannt?" fieldName="gegner_bekannt" value={f(fall, 'gegner_bekannt')} placeholder="Ja / Nein" />
       <div className="sm:col-span-2">
         <InlineEditField label="Gegner Name" fieldName="gegner_name" value={f(fall, 'gegner_name')} />
@@ -315,7 +318,7 @@ export function GegnerSection() {
          Karte — relevant bei Auslandskennzeichen. */}
       <InlineEditField label="Grüne-Karte-Anfrage" fieldName="gegner_versicherung_anfrage_datum" value={typeof fall.gegner_versicherung_anfrage_datum === 'string' ? fall.gegner_versicherung_anfrage_datum.slice(0, 10) : null} type="date" hint="AAR-314: Auslands-KZ" />
       <VersicherungStammdaten versicherungId={versicherungId} />
-    </Card>
+    </SectionFieldCard>
   )
 }
 
@@ -324,13 +327,13 @@ export function VorschaedenSection() {
   // DB-Schema: hat_vorschaeden + vorschaden_anzahl + vorschaden_letzter_datum
   // (vorschaeden_beschreibung liegt auf leads, vorschaden_erkannt=CarDentity, vorschaden_geprueft=KB)
   return (
-    <Card icon={<WrenchIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Vorschäden">
+    <SectionFieldCard icon={<WrenchIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Vorschäden">
       <InlineEditField label="Vorschäden vorhanden?" fieldName="hat_vorschaeden" value={f(fall, 'hat_vorschaeden')} placeholder="Ja / Nein" />
       <InlineEditField label="Anzahl" fieldName="vorschaden_anzahl" value={f(fall, 'vorschaden_anzahl')} type="number" />
       <div className="sm:col-span-2">
         <InlineEditField label="Beschreibung" fieldName="vorschaeden_beschreibung" value={f(fall, 'vorschaeden_beschreibung')} type="textarea" />
       </div>
-    </Card>
+    </SectionFieldCard>
   )
 }
 
@@ -349,7 +352,7 @@ export function NutzungsausfallSection() {
   const editable = canEdit('fahrzeug_fahrbereit')
 
   return (
-    <Card
+    <SectionFieldCard
       icon={<WrenchIcon className="w-4 h-4 text-amber-600" />}
       title="Nutzungsausfall / Mietwagen"
       hint="Manueller Workflow — nur Kanzlei darf bei VS anfragen"
@@ -420,7 +423,7 @@ export function NutzungsausfallSection() {
           sobald die Werkstatt die Reparatur abgeschlossen hat.
         </p>
       </div>
-    </Card>
+    </SectionFieldCard>
   )
 }
 
@@ -430,11 +433,11 @@ export function BesichtigungSection() {
   // AAR-552 Cluster E: besichtigung_datum ersatzlos entfernt — Termin-Datum
   // kommt via v_faelle_mit_aktuellem_termin.aktueller_termin_start.
   return (
-    <Card icon={<MapPinIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Besichtigung">
+    <SectionFieldCard icon={<MapPinIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Besichtigung">
       <div className="sm:col-span-2">
         <InlineEditField label="Besichtigungsort-Adresse" fieldName="besichtigungsort_adresse" value={f(fall, 'besichtigungsort_adresse')} />
       </div>
-    </Card>
+    </SectionFieldCard>
   )
 }
 
@@ -443,7 +446,7 @@ export function KernwerteSection() {
   // DB-Schema: reparaturkosten / wiederbeschaffungswert / restwert / wertminderung /
   // schadens_hoehe_netto — kein kernwert_-Prefix
   return (
-    <Card
+    <SectionFieldCard
       icon={<CalculatorIcon className="w-4 h-4 text-claimondo-ondo/70" />}
       title="Gutachten-Kernwerte"
       hint="LexDrive-OCR überschreibt automatisch — Admin-Override möglich"
@@ -453,7 +456,7 @@ export function KernwerteSection() {
       <InlineEditField label="Restwert (€)" fieldName="restwert" value={f(fall, 'restwert')} type="number" />
       <InlineEditField label="Wertminderung (€)" fieldName="wertminderung" value={f(fall, 'wertminderung')} type="number" />
       <InlineEditField label="Schadenshöhe netto (€)" fieldName="schadens_hoehe_netto" value={f(fall, 'schadens_hoehe_netto')} type="number" />
-    </Card>
+    </SectionFieldCard>
   )
 }
 
@@ -461,7 +464,7 @@ export function KernwerteSection() {
 export function NotizenSection() {
   const { fall } = useFall()
   return (
-    <Card icon={<StickyNoteIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Notizen">
+    <SectionFieldCard icon={<StickyNoteIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Notizen">
       <div className="sm:col-span-2">
         <InlineEditField
           label="Interne Notiz"
@@ -471,7 +474,7 @@ export function NotizenSection() {
           hint="Freitext — für KB/Admin interne Kommunikation"
         />
       </div>
-    </Card>
+    </SectionFieldCard>
   )
 }
 
@@ -521,7 +524,7 @@ export function ZeugenKontakteSection() {
   }
 
   return (
-    <Card
+    <SectionFieldCard
       icon={<UsersIcon className="w-4 h-4 text-claimondo-ondo/70" />}
       title="Zeugen-Kontakte"
       hint={status === 'saving' ? 'Speichert …' : status === 'saved' ? 'Gespeichert' : status === 'error' ? 'Fehler' : undefined}
@@ -587,14 +590,14 @@ export function ZeugenKontakteSection() {
           </button>
         )}
       </div>
-    </Card>
+    </SectionFieldCard>
   )
 }
 
 export function VsStatusSection() {
   const { fall } = useFall()
   return (
-    <Card
+    <SectionFieldCard
       icon={<FileTextIcon className="w-4 h-4 text-claimondo-ondo/70" />}
       title="VS-Status & Regulierung"
     >
@@ -626,6 +629,6 @@ export function VsStatusSection() {
           hint="Nur relevant wenn Fall in abgeschlossen/storniert ist"
         />
       </div>
-    </Card>
+    </SectionFieldCard>
   )
 }

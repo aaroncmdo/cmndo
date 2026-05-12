@@ -39,6 +39,7 @@ import {
   type NotificationPreferencesFormValue,
 } from '@/components/notifications/NotificationPreferencesForm'
 import { Modal } from '@/components/primitives/Modal'
+import { SectionCard as SharedSectionCard } from '@/components/shared/SectionCard'
 
 const DATE_SHORT = new Intl.DateTimeFormat('de-DE', {
   day: '2-digit',
@@ -97,19 +98,21 @@ function NotificationPreferencesCard({
   initial: NotificationPreferencesFormValue
 }) {
   return (
-    <SectionCard
+    <SettingsSectionCard
       icon={<BellIcon width={16} height={16} />}
       title="Kanäle & Ruhezeiten"
       subtitle="Wann und auf welchem Kanal sollen Sie benachrichtigt werden?"
     >
       <NotificationPreferencesForm role="makler" initial={initial} />
-    </SectionCard>
+    </SettingsSectionCard>
   )
 }
 
 // ── Section wrapper ─────────────────────────────────────────────────────────
+// AAR-frontend-konsolidierung-p1: dünner Adapter — shared SectionCard (size="lg")
+// mit der gerahmten Icon-Badge die alle Einstellungen-Sections nutzen.
 
-function SectionCard({
+function SettingsSectionCard({
   icon,
   title,
   subtitle,
@@ -121,20 +124,18 @@ function SectionCard({
   children: React.ReactNode
 }) {
   return (
-    <section className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border">
-        <span className="shrink-0 w-9 h-9 rounded-xl bg-claimondo-bg text-claimondo-ondo border border-claimondo-border flex items-center justify-center">
+    <SharedSectionCard
+      size="lg"
+      title={title}
+      subtitle={subtitle}
+      icon={
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-ondo">
           {icon}
         </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-claimondo-navy">{title}</h2>
-          {subtitle ? (
-            <p className="text-xs text-claimondo-ondo mt-0.5">{subtitle}</p>
-          ) : null}
-        </div>
-      </div>
-      <div className="p-5">{children}</div>
-    </section>
+      }
+    >
+      {children}
+    </SharedSectionCard>
   )
 }
 
@@ -250,7 +251,7 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
   }
 
   return (
-    <SectionCard
+    <SettingsSectionCard
       icon={<UserIcon width={16} height={16} />}
       title="Profil"
       subtitle="Firmen- und Kontaktdaten."
@@ -317,7 +318,7 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
           <SaveFeedback state={state} />
         </div>
       </form>
-    </SectionCard>
+    </SettingsSectionCard>
   )
 }
 
@@ -348,7 +349,7 @@ function BankCard({ profile }: { profile: MaklerFullProfile }) {
   }
 
   return (
-    <SectionCard
+    <SettingsSectionCard
       icon={<LandmarkIcon width={16} height={16} />}
       title="Bankdaten"
       subtitle="Für die Auszahlung Ihrer Provisionen per SEPA."
@@ -393,7 +394,7 @@ function BankCard({ profile }: { profile: MaklerFullProfile }) {
           <SaveFeedback state={state} />
         </div>
       </form>
-    </SectionCard>
+    </SettingsSectionCard>
   )
 }
 
@@ -425,7 +426,7 @@ function PasswortCard() {
   }
 
   return (
-    <SectionCard
+    <SettingsSectionCard
       icon={<KeyRoundIcon width={16} height={16} />}
       title="Passwort ändern"
       subtitle="Mindestens 8 Zeichen, eine Ziffer und ein Buchstabe."
@@ -468,7 +469,7 @@ function PasswortCard() {
           <SaveFeedback state={state} />
         </div>
       </form>
-    </SectionCard>
+    </SettingsSectionCard>
   )
 }
 
@@ -494,7 +495,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
   }
 
   return (
-    <SectionCard
+    <SettingsSectionCard
       icon={<ShieldCheckIcon width={16} height={16} />}
       title="Aktive Kunden-Consents"
       subtitle="Übersicht aller Fälle mit aktivem Zugriff. Kunden können den Zugriff jederzeit selbst widerrufen."
@@ -632,7 +633,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
           </>
         ) : null}
       </Modal>
-    </SectionCard>
+    </SettingsSectionCard>
   )
 }
 
@@ -674,7 +675,7 @@ function NotificationsCard({ prefs }: { prefs: NotificationPreferences }) {
   }
 
   return (
-    <SectionCard
+    <SettingsSectionCard
       icon={<BellIcon width={16} height={16} />}
       title="Benachrichtigungen"
       subtitle="Welche Emails möchten Sie erhalten?"
@@ -706,7 +707,7 @@ function NotificationsCard({ prefs }: { prefs: NotificationPreferences }) {
           <SaveFeedback state={state} />
         </div>
       </form>
-    </SectionCard>
+    </SettingsSectionCard>
   )
 }
 
@@ -714,7 +715,7 @@ function NotificationsCard({ prefs }: { prefs: NotificationPreferences }) {
 
 function LogoutCard() {
   return (
-    <SectionCard
+    <SettingsSectionCard
       icon={<LogOutIcon width={16} height={16} />}
       title="Abmelden"
       subtitle="Session auf diesem Gerät beenden."
@@ -728,7 +729,7 @@ function LogoutCard() {
           Jetzt abmelden
         </button>
       </form>
-    </SectionCard>
+    </SettingsSectionCard>
   )
 }
 

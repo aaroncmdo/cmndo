@@ -11,6 +11,7 @@ import {
   EuroIcon,
   TrendingUpIcon,
 } from 'lucide-react'
+import { StatCard } from '@/components/shared/StatCard'
 import type { DashboardData } from '@/lib/makler/queries'
 
 type Props = {
@@ -65,21 +66,27 @@ export function MaklerDashboard({ makler, data }: Props) {
         <StatCard
           label="Offene Leads"
           value={String(stats.offeneLeads)}
-          icon={<UserPlusIcon width={18} height={18} />}
+          icon={UserPlusIcon}
+          tone="ondo"
         />
         <StatCard
           label="Aktive Akten"
           value={String(stats.aktiveAkten)}
-          icon={<FolderOpenIcon width={18} height={18} />}
+          icon={FolderOpenIcon}
+          tone="navy"
         />
-        <StatCardProvisionen
-          pending={stats.monatPending}
-          freigegeben={stats.monatFreigegeben}
+        <StatCard
+          label="Provisionen diesen Monat"
+          value={EUR.format(stats.monatFreigegeben)}
+          icon={EuroIcon}
+          tone="success"
+          hint={`+ ${EUR.format(stats.monatPending)} ausstehend`}
         />
         <StatCard
           label="Konversion"
           value={`${Math.round(stats.konversion * 100)}%`}
-          icon={<TrendingUpIcon width={18} height={18} />}
+          icon={TrendingUpIcon}
+          tone="ondo"
           hint="Leads → Akten"
         />
       </section>
@@ -169,62 +176,6 @@ export function MaklerDashboard({ makler, data }: Props) {
           </p>
         </div>
       </section>
-    </div>
-  )
-}
-
-function StatCard({
-  label,
-  value,
-  icon,
-  hint,
-}: {
-  label: string
-  value: string
-  icon: React.ReactNode
-  hint?: string
-}) {
-  return (
-    <div className="bg-white rounded-ios-md border border-claimondo-border p-5">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-claimondo-ondo">{label}</span>
-        <span className="text-claimondo-ondo">{icon}</span>
-      </div>
-      <p className="text-2xl font-semibold text-claimondo-navy">{value}</p>
-      {hint ? <p className="text-[11px] text-claimondo-ondo mt-1">{hint}</p> : null}
-    </div>
-  )
-}
-
-function StatCardProvisionen({
-  pending,
-  freigegeben,
-}: {
-  pending: number
-  freigegeben: number
-}) {
-  return (
-    <div className="bg-white rounded-ios-md border border-claimondo-border p-5">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-claimondo-ondo">Provisionen diesen Monat</span>
-        <span className="text-claimondo-ondo">
-          <EuroIcon width={18} height={18} />
-        </span>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <p className="text-xs text-amber-600 mb-0.5">Ausstehend</p>
-          <p className="text-lg font-semibold text-claimondo-navy">
-            {EUR.format(pending)}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-emerald-600 mb-0.5">Freigegeben</p>
-          <p className="text-lg font-semibold text-claimondo-navy">
-            {EUR.format(freigegeben)}
-          </p>
-        </div>
-      </div>
     </div>
   )
 }

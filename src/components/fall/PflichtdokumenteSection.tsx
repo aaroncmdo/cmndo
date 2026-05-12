@@ -32,6 +32,7 @@ import {
   XIcon,
   ChevronRightIcon,
 } from 'lucide-react'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import { uploadPflichtdokument } from '@/app/kunde/onboarding/actions'
 
 // CMM-33: Slot-Shape den die Loader (lib/claims/pflicht-for-fall.ts +
@@ -70,26 +71,31 @@ function fileToBase64(file: File): Promise<string> {
   })
 }
 
-function StatusPill({ status, pflicht }: { status: PflichtSlotForView['status']; pflicht: boolean }) {
+// AAR-frontend-konsolidierung-p1: nutzt den shared StatusBadge (colorCls-
+// Escape-Hatch, da die Pflicht-Tri-State-Farben nicht 1:1 auf die Semantic-
+// Tones passen) statt einer eigenen Pill-<span>.
+function PflichtStatusBadge({ status, pflicht }: { status: PflichtSlotForView['status']; pflicht: boolean }) {
   if (status === 'erfuellt') {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-        <CheckCircle2Icon className="w-3 h-3" /> Hochgeladen
-      </span>
+      <StatusBadge colorCls="bg-emerald-100 text-emerald-800 uppercase tracking-wider">
+        <CheckCircle2Icon className="w-3 h-3" />
+        Hochgeladen
+      </StatusBadge>
     )
   }
   if (status === 'spaeter') {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-claimondo-ondo/10 text-claimondo-ondo">
-        <ClockIcon className="w-3 h-3" /> Später
-      </span>
+      <StatusBadge colorCls="bg-claimondo-ondo/10 text-claimondo-ondo uppercase tracking-wider">
+        <ClockIcon className="w-3 h-3" />
+        Später
+      </StatusBadge>
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+    <StatusBadge colorCls="bg-amber-100 text-amber-800 uppercase tracking-wider">
       <CircleDotIcon className="w-3 h-3" />
       {pflicht ? 'Pflicht offen' : 'Offen'}
-    </span>
+    </StatusBadge>
   )
 }
 
@@ -180,7 +186,7 @@ function SlotCard({
             <p className="text-xs text-claimondo-ondo mt-0.5">{slot.beschreibung}</p>
           )}
         </div>
-        <StatusPill status={slot.status} pflicht={slot.pflicht} />
+        <PflichtStatusBadge status={slot.status} pflicht={slot.pflicht} />
       </div>
 
       {/* Drop-Zone — nur wenn die Rolle hochladen darf */}

@@ -1,6 +1,6 @@
-﻿import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { UsersIcon, EuroIcon, FolderIcon, TrendingUpIcon, ClipboardCheckIcon } from 'lucide-react'
+import { StatCard, type StatCardProps } from '@/components/shared/StatCard'
 
 // KFZ-155: 4 KPI-Cards in einer Row.
 //   - Aktive SVs (portal_zugang_freigeschaltet=true)
@@ -106,13 +106,12 @@ export default async function KpiCards() {
 
   // AAR-618: Jede Karte linkt auf die passende Seite. href zeigt auf den
   // Bereich wo der Admin die dahinterliegenden Datensätze weiterbearbeitet.
-  const cards = [
+  const cards: StatCardProps[] = [
     {
       label: 'Aktive SVs',
       value: fmtNumber(kpis.aktiveSvs),
       icon: UsersIcon,
-      bg: 'bg-claimondo-ondo/10',
-      iconColor: 'text-claimondo-ondo',
+      tone: 'ondo',
       hint: 'Portal-Zugang freigeschaltet',
       href: '/admin/sachverstaendige',
     },
@@ -120,17 +119,15 @@ export default async function KpiCards() {
       label: 'Ausstehende Zahlungen',
       value: fmtEur(kpis.ausstehendGesamt),
       icon: EuroIcon,
-      bg: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-      hint: 'Anzahlungen + ueberfaellige Rechnungen',
+      tone: 'warning',
+      hint: 'Anzahlungen + überfällige Rechnungen',
       href: '/admin/finance/abrechnungen',
     },
     {
-      label: 'Neue Faelle heute',
+      label: 'Neue Fälle heute',
       value: fmtNumber(kpis.neueFaelleHeute),
       icon: FolderIcon,
-      bg: 'bg-purple-50',
-      iconColor: 'text-purple-600',
+      tone: 'navy',
       hint: 'seit 0:00 Uhr',
       href: '/admin/faelle',
     },
@@ -138,8 +135,7 @@ export default async function KpiCards() {
       label: 'Umsatz aktueller Monat',
       value: fmtEur(kpis.umsatzMonat),
       icon: TrendingUpIcon,
-      bg: 'bg-emerald-50',
-      iconColor: 'text-emerald-600',
+      tone: 'success',
       hint: 'bezahlte Rechnungen',
       href: '/admin/finance',
     },
@@ -147,8 +143,7 @@ export default async function KpiCards() {
       label: 'Gutachten → QC',
       value: fmtNumber(kpis.pendingQc),
       icon: ClipboardCheckIcon,
-      bg: kpis.pendingQc > 0 ? 'bg-red-50' : 'bg-claimondo-bg',
-      iconColor: kpis.pendingQc > 0 ? 'text-red-600' : 'text-claimondo-ondo/70',
+      tone: kpis.pendingQc > 0 ? 'danger' : 'neutral',
       hint: 'warten auf Filmcheck',
       href: '/admin/faelle/statistiken',
     },
@@ -156,25 +151,9 @@ export default async function KpiCards() {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-      {cards.map(c => {
-        const Icon = c.icon
-        return (
-          <Link
-            key={c.label}
-            href={c.href}
-            className="bg-white rounded-ios-lg shadow-ios-sm p-4 hover:shadow-ios-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-ondo focus-visible:ring-offset-1"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo font-semibold">{c.label}</p>
-              <div className={`w-7 h-7 rounded-full ${c.bg} flex items-center justify-center`}>
-                <Icon className={`w-3.5 h-3.5 ${c.iconColor}`} />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-claimondo-navy tabular-nums">{c.value}</p>
-            <p className="text-[10px] text-claimondo-ondo/70 mt-1">{c.hint}</p>
-          </Link>
-        )
-      })}
+      {cards.map(c => (
+        <StatCard key={c.label} {...c} />
+      ))}
     </div>
   )
 }

@@ -1,11 +1,9 @@
 ﻿// AAR-61: Mitarbeiter-Portal Layout mit Sidebar
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { LogOutIcon } from 'lucide-react'
 import MitarbeiterNav from './_components/MitarbeiterNav'
 import TasksPill from '@/components/shared/TasksPill'
 import UpdatesNav from '@/components/shared/updates'
-import { roleToPath } from '@/lib/auth/role-redirect'
+import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 
 export default async function MitarbeiterLayout({
@@ -13,25 +11,10 @@ export default async function MitarbeiterLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rolle, vorname, nachname')
-    .eq('id', user.id)
-    .single()
-
-  // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
-  // auf /login.
-  // Audit-Fix #1: dispatch hat eigenes /dispatch/* Portal — gehört NICHT
-  // ins KB-Portal (sah Leads die er nicht sehen sollte).
-  if (!profile || !['kundenbetreuer', 'admin'].includes(profile.rolle)) {
-    redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
-  }
-
-  const displayName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || user.email || ''
+  // K5 / AAR-frontend-konsolidierung-p1: Auth + Rollen-Guard zentralisiert.
+  // Audit-Fix #1: dispatch hat eigenes /dispatch/* Portal — gehört NICHT ins
+  // KB-Portal (sah Leads die er nicht sehen sollte). Admin bleibt erlaubt.
+  const { supabase, user, displayName } = await requirePortalAccess(['kundenbetreuer', 'admin'])
 
   // Unread Nachrichten fuer Sidebar-Badge (non-critical)
   let unread = 0

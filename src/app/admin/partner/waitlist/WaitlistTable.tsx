@@ -6,6 +6,7 @@
 import { useState, useTransition } from 'react'
 import { setzeWaitlistStatus } from '@/lib/actions/gutachter-waitlist'
 import { toast } from 'sonner'
+import { Chip } from '@/components/ui/Chip'
 
 type Eintrag = {
   id: string
@@ -56,20 +57,11 @@ export default function WaitlistTable({ eintraege }: { eintraege: Eintrag[] }) {
   return (
     <div>
       <div className="mb-4 flex flex-wrap gap-2">
-        <FilterChip
-          active={filter === 'alle'}
-          onClick={() => setFilter('alle')}
-          label="Alle"
-          count={eintraege.length}
-        />
+        <Chip variant={filter === 'alle' ? 'selected' : 'default'} count={eintraege.length} onClick={() => setFilter('alle')}>Alle</Chip>
         {STATUS_KEYS.map((k) => (
-          <FilterChip
-            key={k}
-            active={filter === k}
-            onClick={() => setFilter(k)}
-            label={STATUS_LABELS[k].label}
-            count={counts[k] ?? 0}
-          />
+          <Chip key={k} variant={filter === k ? 'selected' : 'default'} count={counts[k] ?? 0} onClick={() => setFilter(k)}>
+            {STATUS_LABELS[k].label}
+          </Chip>
         ))}
       </div>
 
@@ -105,38 +97,6 @@ export default function WaitlistTable({ eintraege }: { eintraege: Eintrag[] }) {
         </div>
       )}
     </div>
-  )
-}
-
-function FilterChip({
-  active,
-  onClick,
-  label,
-  count,
-}: {
-  active: boolean
-  onClick: () => void
-  label: string
-  count: number
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-        active
-          ? 'border-claimondo-navy bg-claimondo-navy text-white'
-          : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo'
-      }`}
-    >
-      {label}
-      <span
-        className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-          active ? 'bg-white/20 text-white' : 'bg-claimondo-bg text-claimondo-ondo'
-        }`}
-      >
-        {count}
-      </span>
-    </button>
   )
 }
 

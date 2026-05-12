@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockIcon, PhoneIcon, Trash2Icon, ShieldOffIcon } from 'lucide-react'
 import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer, resetTwoFaForUser } from '../actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { TextField as SharedTextField } from '@/components/shared/forms'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 
@@ -259,11 +260,9 @@ function KPI({ icon, label, value }: { icon: React.ReactNode; label: string; val
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Adapter — delegiert an shared/forms/TextField (uncontrolled, name/defaultValue).
 function Field({ label, name, defaultValue, type = 'text' }: { label: string; name: string; defaultValue: string; type?: string }) {
   return (
-    <div>
-      <label className="text-sm text-claimondo-ondo mb-1 block">{label}</label>
-      <input name={name} type={type} defaultValue={defaultValue} step={type === 'number' ? 'any' : undefined} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
-    </div>
+    <SharedTextField label={label} name={name} type={type} defaultValue={defaultValue} step={type === 'number' ? 'any' : undefined} />
   )
 }
