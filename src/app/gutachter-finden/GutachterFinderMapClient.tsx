@@ -62,9 +62,12 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   // AAR-2026-05-12: sichtbarer Map-Diagnose-Status — damit man ohne DevTools
   // sieht WARUM die Karte ggf. nicht rendert. 'no-token' = NEXT_PUBLIC_MAPBOX_TOKEN
-  // fehlte im Build. 'auth-error' = Mapbox lehnt die Anfrage ab (401/403,
-  // i.d.R. Token-URL-Restriction). 'ok' = alles gut.
-  const [mapStatus, setMapStatus] = useState<'ok' | 'no-token' | 'auth-error' | 'config-error'>('ok')
+  // fehlte im Build. 'auth-error' = Mapbox lehnt die Anfrage ab (401/403).
+  // 'error' = irgendein anderer Mapbox-Fehler (Message in mapErrorMsg).
+  // 'timeout' = map.on('load') ist nach 12s nicht gefeuert (Style hängt).
+  // 'ok' = alles gut.
+  const [mapStatus, setMapStatus] = useState<'ok' | 'no-token' | 'auth-error' | 'error' | 'timeout'>('ok')
+  const [mapErrorMsg, setMapErrorMsg] = useState<string>('')
 
   // Sticky-Marker: wenn der User auf einen SV klickt, merken wir uns die ID
   // und scrollen die Wizard-Sidebar zum Anfang. Spätere Iteration:
@@ -92,17 +95,27 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     })
     mapRef.current = map
 
-    // Mapbox-Fehler abfangen + sichtbar machen. 401/403 = Token-Problem,
-    // Style-/Layer-/Expression-Validierungsfehler = Config-Bug (z.B. kaputter
-    // interpolate-Ausdruck der die Render-Loop killt → schwarze Karte).
+    // Load-Timeout: wenn die Karte nach 12s noch nicht 'load' gefeuert hat,
+    // hängt der Style (Netzwerk, geblockter Request o.ä.) — sichtbar machen.
+    let loaded = false
+    const loadTimeout = window.setTimeout(() => {
+      if (!loaded) {
+        console.error('[gutachter-finden] Mapbox-Timeout — load-Event nach 12s nicht gefeuert (Style hängt?)')
+        setMapStatus((s) => (s === 'ok' ? 'timeout' : s))
+      }
+    }, 12_000)
+
+    // ALLE Mapbox-Fehler abfangen + verbatim sichtbar machen — ohne DevTools-Raten.
     map.on('error', (e) => {
-      const msg = (e?.error as { message?: string } | undefined)?.message ?? ''
-      const status = (e?.error as { status?: number } | undefined)?.status
+      const errObj = e?.error as { message?: string; status?: number } | undefined
+      const msg = errObj?.message ?? String(e?.error ?? 'unbekannter Mapbox-Fehler')
+      const status = errObj?.status
       console.error('[gutachter-finden] Mapbox-Fehler:', status, msg, e)
+      setMapErrorMsg(`${status ? `[${status}] ` : ''}${msg}`)
       if (status === 401 || status === 403 || /unauthorized|forbidden|access token/i.test(msg)) {
         setMapStatus('auth-error')
-      } else if (/layers?\.|paint\.|interpolate|expression|expected/i.test(msg)) {
-        setMapStatus('config-error')
+      } else {
+        setMapStatus((s) => (s === 'auth-error' ? s : 'error'))
       }
     })
 
@@ -110,6 +123,8 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     map.touchZoomRotate.disableRotation()
 
     map.on('load', () => {
+      loaded = true
+      window.clearTimeout(loadTimeout)
       // 2026-05-12: 3D-Buildings-Layer ENTFERNT — die interpolate-Ausdrücke
       // waren kaputt (Stops als verschachtelte Arrays statt flach), das hat
       // die Mapbox-Render-Loop abgestürzt → schwarze Karte. War nur ein
@@ -272,6 +287,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     }
 
     return () => {
+      window.clearTimeout(loadTimeout)
       document.removeEventListener('claimondo:select-sv', handleSelect)
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
@@ -294,15 +310,23 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
       />
 
       {/* AAR-Diagnose: sichtbare Map-Fehlermeldung (nur wenn was schiefläuft) —
-          damit man ohne DevTools weiß was los ist. */}
+          damit man ohne DevTools weiß was los ist. Bei 'error' wird die
+          Original-Mapbox-Message verbatim angezeigt. */}
       {mapStatus !== 'ok' && (
-        <div className="absolute bottom-4 right-4 z-[6] max-w-[420px] rounded-xl bg-amber-50/95 border border-amber-200 px-4 py-3 text-[12.5px] text-amber-900 shadow-lg backdrop-blur-md">
+        <div className="absolute bottom-4 right-4 z-[6] max-w-[460px] rounded-xl bg-amber-50/95 border border-amber-200 px-4 py-3 text-[12.5px] text-amber-900 shadow-lg backdrop-blur-md">
           <strong className="block mb-0.5">Karte konnte nicht geladen werden</strong>
-          {mapStatus === 'no-token'
-            ? 'NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt. (Console: "[gutachter-finden] Mapbox-Init fehlgeschlagen")'
-            : mapStatus === 'auth-error'
-              ? 'Mapbox lehnt die Anfrage ab (401/403). Der Token ist im Build, aber Mapbox akzeptiert ihn nicht für diese Domain — wahrscheinlich greift noch eine URL-Restriction am Token. (Details in der DevTools-Console.)'
-              : 'Mapbox-Konfigurationsfehler — ein Style-/Layer-Ausdruck ist ungültig und killt die Render-Loop. (Details in der DevTools-Console: "[gutachter-finden] Mapbox-Fehler: ...")'}
+          {mapStatus === 'no-token' && (
+            'NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt.'
+          )}
+          {mapStatus === 'auth-error' && (
+            <>Mapbox lehnt die Anfrage ab (401/403) — Token-URL-Restriction oder ungültiger Token.{mapErrorMsg && <span className="block mt-1 font-mono text-[11px] opacity-75">{mapErrorMsg}</span>}</>
+          )}
+          {mapStatus === 'timeout' && (
+            'Timeout — das Mapbox-Style-Laden hat nach 12s nicht reagiert (Netzwerk geblockt? CSP? api.mapbox.com nicht erreichbar?).'
+          )}
+          {mapStatus === 'error' && (
+            <>Mapbox-Fehler:<span className="block mt-1 font-mono text-[11px] opacity-75">{mapErrorMsg || '(keine Message)'}</span></>
+          )}
         </div>
       )}
 
