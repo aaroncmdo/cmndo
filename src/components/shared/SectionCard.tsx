@@ -44,7 +44,7 @@ export function SectionCard({
   const pad = size === 'lg' ? 'p-7 sm:p-8' : 'p-5'
   const hasHeader = Boolean(title || icon || subtitle || headerAction)
   return (
-    <div className={`rounded-xl border border-claimondo-border bg-white ${pad} ${className ?? ''}`}>
+    <div className={`rounded-ios-md border border-claimondo-border bg-white ${pad} ${className ?? ''}`}>
       {hasHeader ? (
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">

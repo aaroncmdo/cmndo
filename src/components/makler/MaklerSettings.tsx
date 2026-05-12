@@ -129,7 +129,7 @@ function SettingsSectionCard({
       title={title}
       subtitle={subtitle}
       icon={
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-ondo">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-md border border-claimondo-border bg-claimondo-bg text-claimondo-ondo">
           {icon}
         </span>
       }
