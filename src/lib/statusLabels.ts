@@ -41,6 +41,58 @@ export const FALL_STATUS_LABELS: Record<string, string> = {
   'zahlung-eingegangen': 'Zahlung eingegangen',
   abgeschlossen: 'Abgeschlossen',
   storniert: 'Storniert',
+  // AAR-854 / Welle-7: zusätzliche faelle.status-Werte aus dem Trigger-Output
+  // (map_claim_phase_to_faelle_phase) — Kanzlei-Dashboard-Sicht.
+  in_bearbeitung: 'In Bearbeitung',
+  vs_kontakt: 'VS-Kommunikation',
+  reguliert: 'Reguliert',
+  abgelehnt: 'Abgelehnt',
+  kanzlei: 'An Kanzlei',
+}
+
+// AAR-frontend-konsolidierung-p1: Kurzlabels (Tabellen-Spalten / Makler-Sicht)
+// — der Consumer fällt auf FALL_STATUS_LABELS zurück wenn kein Kurzlabel da ist.
+export const FALL_STATUS_LABELS_SHORT: Record<string, string> = {
+  ersterfassung: 'Ersterfassung',
+  onboarding: 'Onboarding',
+  'sv-gesucht': 'SV-Suche',
+  'sv-zugewiesen': 'SV zugewiesen',
+  'sv-termin': 'SV-Termin',
+  besichtigung: 'Besichtigung',
+  'begutachtung-laeuft': 'Begutachtung',
+  'gutachten-eingegangen': 'Gutachten da',
+  filmcheck: 'Filmcheck',
+  'qc-pruefung': 'QC-Prüfung',
+  'kanzlei-uebergeben': 'Kanzlei',
+  anschlussschreiben: 'Anschlussschreiben',
+  regulierung: 'Regulierung',
+  'regulierung-laeuft': 'Regulierung',
+  'nachbesichtigung-laeuft': 'Nachbesichtigung',
+  'vs-abgelehnt': 'VS abgelehnt',
+  'zahlung-eingegangen': 'Zahlung da',
+  abgeschlossen: 'Abgeschlossen',
+  storniert: 'Storniert',
+}
+
+// AAR-frontend-konsolidierung-p1: faelle.aktuelle_phase (Welle-7-Phasen-Enum aus
+// map_claim_phase_to_faelle_phase) → grobe Kanzlei-Phasenbezeichnung.
+export const AKTUELLE_PHASE_LABELS: Record<string, string> = {
+  fallakte_wird_angelegt: 'Ersterfassung & Termin',
+  fallakte_angelegt: 'Ersterfassung & Termin',
+  termin_bestaetigt: 'Ersterfassung & Termin',
+  sv_unterwegs: 'Begutachtung',
+  sv_vor_ort: 'Begutachtung',
+  begutachtung_abgeschlossen: 'Begutachtung',
+  gutachten_wird_erstellt: 'Gutachten & QC',
+  gutachten_erstellt: 'Gutachten & QC',
+  qc_bestanden: 'Gutachten & QC',
+  kanzlei_fallakte_angelegt: 'Kanzlei-Übergabe',
+  warten_auf_vs: 'VS-Kommunikation',
+  vs_kontakt_laeuft: 'VS-Kommunikation',
+  vollzahlung_eingegangen: 'Reguliert',
+  ablehnung_kanzlei_prueft: 'Abgelehnt',
+  klage_eingereicht: 'Abgelehnt',
+  fall_akzeptiert_storniert: 'Storniert',
 }
 
 // ─── Status-Farb-Slots (Token-basiert) ──────────────────────────────────────
@@ -96,6 +148,12 @@ const FALL_STATUS_SLOT_MAP: Record<string, StatusSlot> = {
   'zahlung-eingegangen':   'success',
   abgeschlossen:           'success',
   storniert:               'danger',
+  // AAR-854 / Welle-7-Status (Kanzlei)
+  in_bearbeitung:          'pending',
+  vs_kontakt:              'pending',
+  reguliert:               'success',
+  abgelehnt:               'danger',
+  kanzlei:                 'active',
 }
 
 export const FALL_STATUS_COLORS: Record<string, string> = Object.fromEntries(

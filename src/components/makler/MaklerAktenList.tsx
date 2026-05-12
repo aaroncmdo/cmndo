@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { FolderOpenIcon, LockIcon } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
 import EmptyState from '@/components/shared/EmptyState'
+import { FALL_STATUS_COLORS, FALL_STATUS_LABELS, FALL_STATUS_LABELS_SHORT } from '@/lib/statusLabels'
 import type { MaklerAkteRow, AktenFilter } from '@/lib/makler/queries'
 
 type Props = {
@@ -273,70 +274,20 @@ function AkteCard({
 // Pills/Badges
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PHASE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  ersterfassung: { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy', label: 'Ersterfassung' },
-  onboarding: { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy', label: 'Onboarding' },
-  'sv-gesucht': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV-Suche' },
-  'sv-zugewiesen': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV zugewiesen' },
-  'sv-termin': { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'SV-Termin' },
-  besichtigung: { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy', label: 'Besichtigung' },
-  'begutachtung-laeuft': {
-    bg: 'bg-amber-100',
-    text: 'text-amber-700',
-    label: 'Begutachtung',
-  },
-  'gutachten-eingegangen': {
-    bg: 'bg-emerald-100',
-    text: 'text-emerald-700',
-    label: 'Gutachten da',
-  },
-  filmcheck: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Filmcheck' },
-  'qc-pruefung': { bg: 'bg-amber-100', text: 'text-amber-700', label: 'QC-Prüfung' },
-  'kanzlei-uebergeben': {
-    bg: 'bg-violet-100',
-    text: 'text-violet-700',
-    label: 'Kanzlei',
-  },
-  anschlussschreiben: {
-    bg: 'bg-violet-100',
-    text: 'text-violet-700',
-    label: 'Anschlussschreiben',
-  },
-  regulierung: { bg: 'bg-violet-100', text: 'text-violet-700', label: 'Regulierung' },
-  'regulierung-laeuft': {
-    bg: 'bg-violet-100',
-    text: 'text-violet-700',
-    label: 'Regulierung',
-  },
-  'nachbesichtigung-laeuft': {
-    bg: 'bg-amber-100',
-    text: 'text-amber-700',
-    label: 'Nachbesichtigung',
-  },
-  'vs-abgelehnt': { bg: 'bg-red-100', text: 'text-red-700', label: 'VS abgelehnt' },
-  'zahlung-eingegangen': {
-    bg: 'bg-emerald-100',
-    text: 'text-emerald-700',
-    label: 'Zahlung da',
-  },
-  abgeschlossen: {
-    bg: 'bg-emerald-600/10',
-    text: 'text-emerald-700',
-    label: 'Abgeschlossen',
-  },
-  storniert: { bg: 'bg-red-100', text: 'text-red-700', label: 'Storniert' },
-}
-
+// AAR-frontend-konsolidierung-p1: Phase-Pill nutzt jetzt die zentralen Maps aus
+// lib/statusLabels.ts (FALL_STATUS_COLORS + FALL_STATUS_LABELS_SHORT) statt einer
+// lokalen Farb-/Label-Map — gleiche Status-Codes, harmonisierte Tints.
 function PhasePill({ akte }: { akte: MaklerAkteRow }) {
-  const key = akte.aktuelle_phase ?? akte.status
-  const entry =
-    PHASE_COLORS[akte.status] ??
-    PHASE_COLORS[key] ?? { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy', label: key }
+  const keys = [akte.status, akte.aktuelle_phase].filter(Boolean) as string[]
+  const matchKey = keys.find((k) => FALL_STATUS_COLORS[k]) ?? keys[0] ?? ''
+  const color = FALL_STATUS_COLORS[matchKey] ?? 'bg-claimondo-bg text-claimondo-navy'
+  const label =
+    FALL_STATUS_LABELS_SHORT[matchKey] ?? FALL_STATUS_LABELS[matchKey] ?? matchKey
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${entry.bg} ${entry.text}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${color}`}
     >
-      {entry.label}
+      {label}
     </span>
   )
 }
