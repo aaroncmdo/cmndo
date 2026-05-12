@@ -230,14 +230,15 @@ Resolver hat Org-Vorrang (Sub-SVs erben Büro-Theme). Smoke-Tests in Phase 1+2 s
 
 **Resolver:** ein `resolveEmailBranding(opts: { fallId?: string; leadId?: string; svId?: string }): Promise<EmailBrand | null>` in `src/lib/branding/` — nutzt die gleiche Gate-Logik wie `resolveKundenTheme` (`verifiziert && use_custom_branding && (brand_primary || brand_theme)`), liefert `null` wenn kein Brand greift. Kein neuer DB-Touch (Spalten existieren).
 
-**Customer-facing Flows in `src/lib/email/google/flows.ts` (+ deren Templates), die `brand` durchreichen:**
-- `sendKundeWelcome` — Empfänger = Kunde, SV aus dem Fall
-- `sendSvTerminBestaetigung` — die Kunden-Variante (an den Kunden, nicht den SV-Internal-Teil)
-- `sendKundeTerminGegenvorschlag` / `KundeTerminGegenvorschlag.tsx`
-- `sendDokumenteAnfrage` / `DokumenteAnfrage.tsx` — SV aus dem `dokument_upload_anfragen`→Lead→Fall
-- `sendFlowLinkVersand` / `FlowLinkVersand.tsx` — SV aus dem Flow-Link-Fall
-- Lead-Reminder 1/2/3 (`LeadReminder1/2/3.tsx`) — SV aus dem Lead, falls schon zugewiesen
-- (`TwoFactorCode.tsx` bleibt Claimondo — Auth-Mail, kein Fall-Kontext)
+**Customer-facing Flows (+ deren Templates), die `brand` durchreichen:**
+- ✅ `sendKundeWelcome` (`flows.ts`) — SV aus dem Fall (`resolveEmailBranding({ svId })`)
+- ✅ `sendFlowLinkVersand` (`flows.ts`) — SV aus dem Lead (`resolveEmailBranding({ leadId })`)
+- ✅ `DokumenteAnfrageEmail` (`dispatch/leads/[id]/_actions/dokumente-anfordern.ts`) — SV aus dem Lead
+- ✅ `KundeTerminGegenvorschlagEmail` (`lib/actions/termin-actions.ts`) — SV direkt (`{ svId }`)
+- ⬜ Lead-Reminder 1/2/3 (`LeadReminder1/2/3.tsx`) — beim Reminder-Stage ist meist noch kein SV zugewiesen → würde fast immer Claimondo bleiben; nachgezogen sobald ein Send-Site existiert/relevant ist
+- (`SvTerminBestaetigung` geht an den SV → bleibt Claimondo; `TwoFactorCode.tsx` = Auth-Mail → bleibt Claimondo)
+
+`EmailLayout`, `Heading`, `Button` haben jetzt einen optionalen `brand?: EmailBrand`-Prop (`src/lib/email/google/templates/layout.tsx`). `EmailBrand` = `{ primary; secondary; logoUrl; firmenname } | null | undefined`. `null`/nicht-gesetzt → Claimondo (alle SV-/Admin-/Kanzlei-Mails unverändert).
 
 **Smoke nach Phase 5:**
 1. Knallrot-Test-SV (`#E11D48`, verifiziert, `use_custom_branding`) → Kunde-Welcome-Mail rendern (Dev-Preview oder echter Send an Test-Adresse): Header rot, Logo/Firmenname statt Claimondo, "Powered by Claimondo" im Footer
