@@ -70,8 +70,8 @@ Die ~20 Konflikt-Dateien aus der Schnittmenge außerhalb `app/gutachter/*` (`app
 
 - [x] **0** — `heute/HeuteClient.tsx` (PR #835)
 - [x] **1** — `fall/[id]/page.tsx` — Warnbanner (rot „Termin verstrichen" + amber „Kunde verschoben" + rose „No-Show") + `aktiverTerminVerstrichen` + `zuletztGesehenIds` + `no_show_count` (aus `faelle`, nicht `claims` — Spalte ist umgezogen) zurück in `topServerBlocks`; `VorOrtTriggerCard`/`geforderterBetrag` (CMM-32) behalten. **(PR folgt)**
-- [ ] **2** — `auftraege/AuftragCard.tsx` (SV4-Header; 180px-Render behalten) ← *als nächstes*
-- [ ] **3** — `profil/ProfilClient.tsx` (responsive Felder + Anschrift/Profiltext; `AvatarUpload` behalten)
+- [x] **2** — `auftraege/AuftragCard.tsx` — **Befund korrigiert:** der „SV4-Header" wurde *nicht* durch den Merge verloren, sondern bewusst durch **CMM-32** ersetzt (Kennzeichen prominent + Kunde, Fall-Nr klein) — ein Restore würde CMM-32 zurückrollen. Die *echte* Regression war ein **doppelter Header-Block** (Kennzeichen+Fahrzeug+Fall-Nr ein zweites Mal gerendert) = Merge-Artefakt → entfernt. #640-`FahrzeugRenderImage` (`width=180`, `LackfarbeCode`) unverändert. **(PR folgt)**
+- [ ] **3** — `profil/ProfilClient.tsx` (responsive Felder + Anschrift/Profiltext; `AvatarUpload` behalten) ← *als nächstes*
 - [ ] **4a** — `feldmodus/FeldmodusClient.tsx` `useId()`-Channel-Fix isoliert (Realtime-Crash)
 - [ ] **4b** — `feldmodus/AktuellerStopCard.tsx` C9-Reimplementierung + Glass-Overlay in `FeldmodusClient` (eigene Session)
 - [ ] **5** — `kalender/SVKalenderClient.tsx` (GCal-Badge + Wochen-Nav)
