@@ -2,6 +2,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -139,60 +140,58 @@ export default async function KanzleiAbrechnungenPage() {
       </div>
 
       {/* Tabelle */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg border-b">
-              <tr>
-                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Rechnungsnummer</th>
-                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Monat</th>
-                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Kanzlei</th>
-                <th className="text-right px-4 py-3 font-semibold text-claimondo-ondo">Vollmachten</th>
-                <th className="text-right px-4 py-3 font-semibold text-claimondo-ondo">Betrag (brutto)</th>
-                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Status</th>
-                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Faelligkeit</th>
-                <th className="text-left px-4 py-3 font-semibold text-claimondo-ondo">Bezahlt am</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-claimondo-border">
-              {rows.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-claimondo-ondo/70">
-                    Keine Abrechnungen vorhanden
-                  </td>
-                </tr>
-              )}
-              {rows.map((row) => {
-                const monatName = new Intl.DateTimeFormat('de-DE', { month: 'short' }).format(
-                  new Date(row.abrechnungsjahr, row.abrechnungsmonat - 1, 1),
-                )
-                return (
-                  <tr key={row.id} className="hover:bg-claimondo-bg transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-claimondo-navy">{row.rechnungsnummer}</td>
-                    <td className="px-4 py-3 text-claimondo-navy">{monatName} {row.abrechnungsjahr}</td>
-                    <td className="px-4 py-3 text-claimondo-navy font-medium">{row.kanzlei_name}</td>
-                    <td className="px-4 py-3 text-right text-claimondo-navy">{row.anzahl_vollmachten}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-claimondo-navy">
-                      {row.endbetrag_brutto.toFixed(2).replace('.', ',')} €
-                    </td>
-                    <td className="px-4 py-3"><StatusBadge status={row.status} /></td>
-                    <td className="px-4 py-3 text-claimondo-ondo text-xs">
-                      {row.faelligkeitsdatum
-                        ? new Date(row.faelligkeitsdatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
-                        : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-claimondo-ondo text-xs">
-                      {row.bezahlt_am
-                        ? new Date(row.bezahlt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
-                        : '—'}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTableContainer variant="plain" className="bg-white rounded-xl shadow-sm overflow-hidden border">
+        <Table>
+          <Thead className="text-sm normal-case !tracking-normal border-b">
+            <Tr>
+              <Th className="text-left font-semibold text-claimondo-ondo">Rechnungsnummer</Th>
+              <Th className="text-left font-semibold text-claimondo-ondo">Monat</Th>
+              <Th className="text-left font-semibold text-claimondo-ondo">Kanzlei</Th>
+              <Th className="text-right font-semibold text-claimondo-ondo">Vollmachten</Th>
+              <Th className="text-right font-semibold text-claimondo-ondo">Betrag (brutto)</Th>
+              <Th className="text-left font-semibold text-claimondo-ondo">Status</Th>
+              <Th className="text-left font-semibold text-claimondo-ondo">Faelligkeit</Th>
+              <Th className="text-left font-semibold text-claimondo-ondo">Bezahlt am</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {rows.length === 0 && (
+              <Tr>
+                <Td colSpan={8} className="py-8 text-center !text-claimondo-ondo/70">
+                  Keine Abrechnungen vorhanden
+                </Td>
+              </Tr>
+            )}
+            {rows.map((row) => {
+              const monatName = new Intl.DateTimeFormat('de-DE', { month: 'short' }).format(
+                new Date(row.abrechnungsjahr, row.abrechnungsmonat - 1, 1),
+              )
+              return (
+                <Tr key={row.id} className="hover:bg-claimondo-bg transition-colors">
+                  <Td className="font-mono text-xs">{row.rechnungsnummer}</Td>
+                  <Td>{monatName} {row.abrechnungsjahr}</Td>
+                  <Td className="font-medium">{row.kanzlei_name}</Td>
+                  <Td className="text-right">{row.anzahl_vollmachten}</Td>
+                  <Td className="text-right font-semibold">
+                    {row.endbetrag_brutto.toFixed(2).replace('.', ',')} €
+                  </Td>
+                  <Td><StatusBadge status={row.status} /></Td>
+                  <Td className="!text-claimondo-ondo text-xs">
+                    {row.faelligkeitsdatum
+                      ? new Date(row.faelligkeitsdatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
+                      : '—'}
+                  </Td>
+                  <Td className="!text-claimondo-ondo text-xs">
+                    {row.bezahlt_am
+                      ? new Date(row.bezahlt_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
+                      : '—'}
+                  </Td>
+                </Tr>
+              )
+            })}
+          </Tbody>
+        </Table>
+      </DataTableContainer>
     </div>
   )
 }

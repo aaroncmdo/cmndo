@@ -12,6 +12,7 @@ import {
 } from 'recharts'
 import { TrendingUpIcon, FolderIcon, CalculatorIcon, PercentIcon } from 'lucide-react'
 import { StatCard } from '@/components/shared/StatCard'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -202,21 +203,21 @@ export default function FinanceClient({
           ) : (
             <>
               {/* Desktop table */}
-              <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-claimondo-border">
-                      <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Fall-Nr.</th>
-                      <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Kunde</th>
-                      <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Betrag</th>
-                      <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Provision</th>
-                      <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Datum</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <DataTableContainer variant="plain" className="hidden sm:block">
+                <Table>
+                  <Thead className="!bg-transparent border-b border-claimondo-border">
+                    <Tr>
+                      <Th className="text-left px-5 !text-claimondo-ondo">Fall-Nr.</Th>
+                      <Th className="text-left px-5 !text-claimondo-ondo">Kunde</Th>
+                      <Th className="text-right px-5 !text-claimondo-ondo">Betrag</Th>
+                      <Th className="text-right px-5 !text-claimondo-ondo">Provision</Th>
+                      <Th className="text-right px-5 !text-claimondo-ondo">Datum</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody className="!divide-y-0">
                     {tabellenDaten.map((row) => (
-                      <tr key={row.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
-                        <td className="px-5 py-3">
+                      <Tr key={row.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
+                        <Td className="px-5">
                           <Link
                             href={`/faelle/${row.id}`}
                             target="_blank"
@@ -225,14 +226,14 @@ export default function FinanceClient({
                           >
                             {row.fall_nummer ?? row.id.slice(0, 8)}
                           </Link>
-                        </td>
-                        <td className="px-5 py-3 text-claimondo-navy">{row.kunde}</td>
-                        <td className="px-5 py-3 text-claimondo-navy text-right tabular-nums">{eur(row.betrag)}</td>
-                        <td className="px-5 py-3 text-emerald-400 text-right tabular-nums">{eur(row.provision)}</td>
-                        <td className="px-5 py-3 text-claimondo-ondo text-right text-xs">{fmtDate(row.datum)}</td>
-                      </tr>
+                        </Td>
+                        <Td className="px-5">{row.kunde}</Td>
+                        <Td className="px-5 text-right tabular-nums">{eur(row.betrag)}</Td>
+                        <Td className="px-5 !text-emerald-400 text-right tabular-nums">{eur(row.provision)}</Td>
+                        <Td className="px-5 !text-claimondo-ondo text-right text-xs">{fmtDate(row.datum)}</Td>
+                      </Tr>
                     ))}
-                  </tbody>
+                  </Tbody>
                   <tfoot>
                     <tr className="border-t border-claimondo-border">
                       <td colSpan={2} className="px-5 py-3 text-claimondo-ondo text-sm font-medium">Gesamt</td>
@@ -245,8 +246,8 @@ export default function FinanceClient({
                       <td />
                     </tr>
                   </tfoot>
-                </table>
-              </div>
+                </Table>
+              </DataTableContainer>
 
               {/* Mobile cards */}
               <div className="sm:hidden divide-y divide-claimondo-border/50">

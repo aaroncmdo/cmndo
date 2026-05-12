@@ -9,6 +9,7 @@ import { retryEinzug, markBezahlt, stornoAbrechnung, reIssueAbrechnung } from '.
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 // KFZ-149 Hund-D: Listing aller SV-Monatsabrechnungen mit Filter,
 // Detail-Modal, manuellem Retry und Manuell-bezahlt Button.
@@ -217,59 +218,59 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
       )}
 
       {/* Table */}
-      <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
+      <DataTableContainer variant="plain" className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
         {filtered.length === 0 ? (
           <div className="p-12 text-center text-sm text-claimondo-ondo">Keine Eintraege im Filter <strong>{FILTER_TABS.find(t => t.key === filter)?.label}</strong>.</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg text-[10px] uppercase text-claimondo-ondo tracking-wide">
-              <tr>
-                <th className="text-left px-4 py-3">Rechnung</th>
-                <th className="text-left px-4 py-3">Empfaenger</th>
-                <th className="text-right px-4 py-3">Betrag</th>
-                <th className="text-left px-4 py-3">Status</th>
-                <th className="text-left px-4 py-3">Faellig</th>
-                <th className="text-left px-4 py-3">Bezahlt</th>
-                <th className="text-right px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-claimondo-border">
+          <Table>
+            <Thead className="!text-[10px] !tracking-wide">
+              <Tr>
+                <Th className="text-left font-bold">Rechnung</Th>
+                <Th className="text-left font-bold">Empfaenger</Th>
+                <Th className="text-right font-bold">Betrag</Th>
+                <Th className="text-left font-bold">Status</Th>
+                <Th className="text-left font-bold">Faellig</Th>
+                <Th className="text-left font-bold">Bezahlt</Th>
+                <Th className="text-right font-bold"></Th>
+              </Tr>
+            </Thead>
+            <Tbody>
               {filtered.map(r => {
                 const badge = statusBadge(r)
                 return (
-                  <tr key={r.id} className="hover:bg-claimondo-bg/50 transition-colors">
-                    <td className="px-4 py-3">
+                  <Tr key={r.id} className="hover:bg-claimondo-bg/50 transition-colors">
+                    <Td>
                       <div className="font-mono text-xs text-claimondo-navy">{r.abrechnungs_nr}</div>
                       <div className="text-[10px] text-claimondo-ondo/70">erstellt {fmtDate(r.created_at)}</div>
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       <div className="text-claimondo-navy">{r.empfaenger_name ?? '—'}</div>
                       <div className="text-[10px] text-claimondo-ondo/70">{r.empfaenger_email ?? '—'}</div>
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium text-claimondo-navy">{fmtEur(r.summe_brutto)}</td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td className="text-right font-medium">{fmtEur(r.summe_brutto)}</Td>
+                    <Td>
                       <StatusBadge colorCls={`${badge.bg} ${badge.text}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
                         {badge.label}
                       </StatusBadge>
-                    </td>
-                    <td className="px-4 py-3 text-claimondo-ondo text-xs">{fmtDate(r.faellig_am)}</td>
-                    <td className="px-4 py-3 text-claimondo-ondo text-xs">{fmtDate(r.bezahlt_am)}</td>
-                    <td className="px-4 py-3 text-right">
+                    </Td>
+                    <Td className="!text-claimondo-ondo text-xs">{fmtDate(r.faellig_am)}</Td>
+                    <Td className="!text-claimondo-ondo text-xs">{fmtDate(r.bezahlt_am)}</Td>
+                    <Td className="text-right">
                       <button
                         onClick={() => { setSelected(r); setConfirmMarkBezahlt(false); setBezahltNotiz('') }}
                         className="text-xs text-claimondo-navy hover:text-claimondo-ondo underline"
                       >
                         Details
                       </button>
-                    </td>
-                  </tr>
+                    </Td>
+                  </Tr>
                 )
               })}
-            </tbody>
-          </table>
+            </Tbody>
+          </Table>
         )}
-      </div>
+      </DataTableContainer>
 
       {/* Detail Modal */}
       <Modal open={selected !== null} onClose={() => setSelected(null)} noPadding hideCloseButton maxWidth={672} ariaLabel="Abrechnung-Detail">

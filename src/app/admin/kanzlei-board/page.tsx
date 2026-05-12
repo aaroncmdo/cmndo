@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ScaleIcon, MailIcon, AlertCircleIcon, ClockIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatCard } from '@/components/shared/StatCard'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,47 +57,49 @@ export default async function KanzleiBoard() {
         <div className="px-4 py-3 border-b border-claimondo-border">
           <h2 className="text-sm font-semibold text-claimondo-navy">Zugewiesene Kanzleien</h2>
         </div>
-        <table className="w-full text-sm">
-          <thead className="bg-claimondo-bg text-xs uppercase text-claimondo-ondo">
-            <tr>
-              <th className="text-left px-4 py-2">Fall</th>
-              <th className="text-left px-4 py-2">Kanzlei</th>
-              <th className="text-left px-4 py-2">Kontakt</th>
-              <th className="text-left px-4 py-2">Status</th>
-              <th className="text-left px-4 py-2">Zugewiesen</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-claimondo-border">
-            {(kanzleiParteien ?? []).map(p => {
-              const fallJoin = p.faelle as unknown as { fall_nummer: string | null; status: string | null; kennzeichen: string | null } | { fall_nummer: string | null; status: string | null; kennzeichen: string | null }[] | null
-              const fall = Array.isArray(fallJoin) ? fallJoin[0] : fallJoin
-              return (
-                <tr key={p.id}>
-                  <td className="px-4 py-3">
-                    <Link href={`/faelle/${p.fall_id}`} className="text-claimondo-ondo hover:underline font-medium">
-                      {fall?.fall_nummer ?? (p.fall_id as string).slice(0, 8)}
-                    </Link>
-                    {fall?.kennzeichen && <p className="text-xs text-claimondo-ondo/70">{fall.kennzeichen}</p>}
-                  </td>
-                  <td className="px-4 py-3 text-claimondo-navy">{p.name ?? '—'}</td>
-                  <td className="px-4 py-3 text-claimondo-ondo text-xs">
-                    {p.email ?? '—'}<br />
-                    {p.telefon ?? ''}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-navy">{fall?.status ?? '—'}</span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
-                    {p.created_at ? new Date(p.created_at).toLocaleDateString('de-DE') : '—'}
-                  </td>
-                </tr>
-              )
-            })}
-            {(!kanzleiParteien || kanzleiParteien.length === 0) && (
-              <tr><td colSpan={5} className="px-4 py-8 text-center text-claimondo-ondo/70 text-sm">Keine Kanzleien zugewiesen</td></tr>
-            )}
-          </tbody>
-        </table>
+        <DataTableContainer variant="plain">
+          <Table>
+            <Thead>
+              <Tr>
+                <Th className="text-left font-bold !py-2">Fall</Th>
+                <Th className="text-left font-bold !py-2">Kanzlei</Th>
+                <Th className="text-left font-bold !py-2">Kontakt</Th>
+                <Th className="text-left font-bold !py-2">Status</Th>
+                <Th className="text-left font-bold !py-2">Zugewiesen</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {(kanzleiParteien ?? []).map(p => {
+                const fallJoin = p.faelle as unknown as { fall_nummer: string | null; status: string | null; kennzeichen: string | null } | { fall_nummer: string | null; status: string | null; kennzeichen: string | null }[] | null
+                const fall = Array.isArray(fallJoin) ? fallJoin[0] : fallJoin
+                return (
+                  <Tr key={p.id}>
+                    <Td>
+                      <Link href={`/faelle/${p.fall_id}`} className="text-claimondo-ondo hover:underline font-medium">
+                        {fall?.fall_nummer ?? (p.fall_id as string).slice(0, 8)}
+                      </Link>
+                      {fall?.kennzeichen && <p className="text-xs text-claimondo-ondo/70">{fall.kennzeichen}</p>}
+                    </Td>
+                    <Td>{p.name ?? '—'}</Td>
+                    <Td className="!text-claimondo-ondo text-xs">
+                      {p.email ?? '—'}<br />
+                      {p.telefon ?? ''}
+                    </Td>
+                    <Td>
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-navy">{fall?.status ?? '—'}</span>
+                    </Td>
+                    <Td className="text-xs !text-claimondo-ondo/70">
+                      {p.created_at ? new Date(p.created_at).toLocaleDateString('de-DE') : '—'}
+                    </Td>
+                  </Tr>
+                )
+              })}
+              {(!kanzleiParteien || kanzleiParteien.length === 0) && (
+                <Tr><Td colSpan={5} className="py-8 text-center !text-claimondo-ondo/70 text-sm">Keine Kanzleien zugewiesen</Td></Tr>
+              )}
+            </Tbody>
+          </Table>
+        </DataTableContainer>
       </section>
 
       {/* LexDrive-Webhook-History */}

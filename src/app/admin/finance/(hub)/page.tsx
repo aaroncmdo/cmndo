@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { FINANCE } from '@/lib/finance/constants'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import FinanceClient from './FinanceClient'
 import AbrechnungenSection from './AbrechnungenSection'
 import AusstehendeZahlungenTable from '../../_components/AusstehendeZahlungenTable'
@@ -133,36 +134,36 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
 
           {/* Monatliche CPL-Tabelle */}
           {monatsberichte.length > 0 && (
-            <div className="overflow-x-auto border-t border-claimondo-border pt-4">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="border-b border-claimondo-border">
-                    <th className="text-left px-3 py-2 text-claimondo-ondo">Monat</th>
-                    <th className="text-right px-3 py-2 text-claimondo-ondo">Google CPL</th>
-                    <th className="text-right px-3 py-2 text-claimondo-ondo">Faelle</th>
-                    <th className="text-right px-3 py-2 text-claimondo-ondo">Budget netto</th>
-                    <th className="text-right px-3 py-2 text-claimondo-ondo">Maik Provision</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <DataTableContainer variant="plain" className="border-t border-claimondo-border pt-4">
+              <Table className="!text-xs">
+                <Thead className="!bg-transparent border-b border-claimondo-border">
+                  <Tr>
+                    <Th className="text-left !px-3 !py-2 font-bold !text-claimondo-ondo">Monat</Th>
+                    <Th className="text-right !px-3 !py-2 font-bold !text-claimondo-ondo">Google CPL</Th>
+                    <Th className="text-right !px-3 !py-2 font-bold !text-claimondo-ondo">Faelle</Th>
+                    <Th className="text-right !px-3 !py-2 font-bold !text-claimondo-ondo">Budget netto</Th>
+                    <Th className="text-right !px-3 !py-2 font-bold !text-claimondo-ondo">Maik Provision</Th>
+                  </Tr>
+                </Thead>
+                <Tbody className="!divide-y-0">
                   {monatsberichte.slice(-6).map(mb => (
-                    <tr key={mb.id} className="border-b border-claimondo-border/50">
-                      <td className="px-3 py-2 text-claimondo-navy">{mb.monat}/{mb.jahr}</td>
-                      <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">
+                    <Tr key={mb.id} className="border-b border-claimondo-border/50">
+                      <Td className="!px-3 !py-2">{mb.monat}/{mb.jahr}</Td>
+                      <Td className="!px-3 !py-2 text-right tabular-nums">
                         {Number(mb.maik_google_cpl ?? 0) > 0 ? eur(Number(mb.maik_google_cpl)) : '—'}
-                      </td>
-                      <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">{mb.neue_faelle ?? 0}</td>
-                      <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">
+                      </Td>
+                      <Td className="!px-3 !py-2 text-right tabular-nums">{mb.neue_faelle ?? 0}</Td>
+                      <Td className="!px-3 !py-2 text-right tabular-nums">
                         {Number(mb.marketing_budget_netto ?? 0) > 0 ? eur(Number(mb.marketing_budget_netto)) : '—'}
-                      </td>
-                      <td className="px-3 py-2 text-right text-emerald-400 tabular-nums">
+                      </Td>
+                      <Td className="!px-3 !py-2 text-right !text-emerald-400 tabular-nums">
                         {Number(mb.maik_provision ?? 0) > 0 ? eur(Number(mb.maik_provision)) : '—'}
-                      </td>
-                    </tr>
+                      </Td>
+                    </Tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </Tbody>
+              </Table>
+            </DataTableContainer>
           )}
 
           <div className="mt-4 p-3 bg-claimondo-bg/50 rounded-xl">
@@ -211,38 +212,38 @@ function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfra
           {anfragen.length === 0 ? (
             <div className="p-8 text-center"><p className="text-claimondo-ondo/70 text-sm">Keine Anfragen vorhanden.</p></div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-claimondo-border">
-                    <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Gutachter</th>
-                    <th className="text-center px-5 py-3 text-claimondo-ondo font-medium">Fälle</th>
-                    <th className="text-center px-5 py-3 text-claimondo-ondo font-medium">Radius</th>
-                    <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Nachricht</th>
-                    <th className="text-center px-5 py-3 text-claimondo-ondo font-medium">Status</th>
-                    <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Datum</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <DataTableContainer variant="plain">
+              <Table>
+                <Thead className="!bg-transparent border-b border-claimondo-border">
+                  <Tr>
+                    <Th className="text-left px-5 !text-claimondo-ondo">Gutachter</Th>
+                    <Th className="text-center px-5 !text-claimondo-ondo">Fälle</Th>
+                    <Th className="text-center px-5 !text-claimondo-ondo">Radius</Th>
+                    <Th className="text-left px-5 !text-claimondo-ondo">Nachricht</Th>
+                    <Th className="text-center px-5 !text-claimondo-ondo">Status</Th>
+                    <Th className="text-right px-5 !text-claimondo-ondo">Datum</Th>
+                  </Tr>
+                </Thead>
+                <Tbody className="!divide-y-0">
                   {anfragen.map(a => (
-                    <tr key={a.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg transition-colors">
-                      <td className="px-5 py-3 text-claimondo-navy">{a.sv_name}</td>
-                      <td className="px-5 py-3 text-center text-claimondo-navy">{a.gewuenschte_faelle ?? '—'}/Mo</td>
-                      <td className="px-5 py-3 text-center text-claimondo-navy">{a.gewuenschter_radius_km ?? '—'}km</td>
-                      <td className="px-5 py-3 text-claimondo-ondo text-xs max-w-[200px] truncate">{a.nachricht ?? '—'}</td>
-                      <td className="px-5 py-3 text-center">
+                    <Tr key={a.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg transition-colors">
+                      <Td className="px-5">{a.sv_name}</Td>
+                      <Td className="px-5 text-center">{a.gewuenschte_faelle ?? '—'}/Mo</Td>
+                      <Td className="px-5 text-center">{a.gewuenschter_radius_km ?? '—'}km</Td>
+                      <Td className="px-5 !text-claimondo-ondo text-xs max-w-[200px] truncate">{a.nachricht ?? '—'}</Td>
+                      <Td className="px-5 text-center">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[a.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                           {a.status}
                         </span>
-                      </td>
-                      <td className="px-5 py-3 text-right text-claimondo-ondo text-xs tabular-nums">
+                      </Td>
+                      <Td className="px-5 text-right !text-claimondo-ondo text-xs tabular-nums">
                         {new Date(a.erstellt_am).toLocaleDateString('de-DE')}
-                      </td>
-                    </tr>
+                      </Td>
+                    </Tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </Tbody>
+              </Table>
+            </DataTableContainer>
           )}
         </div>
       </div>
@@ -392,43 +393,43 @@ function GutachterAbrechnungen({ svRows, gutachterAnzahlungenGesamt }: {
               <p className="text-claimondo-ondo/70 text-sm">Keine aktiven Gutachter.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-claimondo-border">
-                    <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Gutachter</th>
-                    <th className="text-left px-5 py-3 text-claimondo-ondo font-medium">Paket</th>
-                    <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Guthaben</th>
-                    <th className="text-center px-5 py-3 text-claimondo-ondo font-medium">Faelle</th>
-                    <th className="text-right px-5 py-3 text-claimondo-ondo font-medium">Leadkosten Monat</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <DataTableContainer variant="plain">
+              <Table>
+                <Thead className="!bg-transparent border-b border-claimondo-border">
+                  <Tr>
+                    <Th className="text-left px-5 !text-claimondo-ondo">Gutachter</Th>
+                    <Th className="text-left px-5 !text-claimondo-ondo">Paket</Th>
+                    <Th className="text-right px-5 !text-claimondo-ondo">Guthaben</Th>
+                    <Th className="text-center px-5 !text-claimondo-ondo">Faelle</Th>
+                    <Th className="text-right px-5 !text-claimondo-ondo">Leadkosten Monat</Th>
+                  </Tr>
+                </Thead>
+                <Tbody className="!divide-y-0">
                   {svRows.map(sv => {
                     const guthabenColor = sv.guthaben <= 0 ? 'text-red-400' : sv.guthaben < 500 ? 'text-amber-400' : 'text-emerald-400'
                     return (
-                      <tr key={sv.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
-                        <td className="px-5 py-3 text-claimondo-navy">{sv.name}</td>
-                        <td className="px-5 py-3">
+                      <Tr key={sv.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
+                        <Td className="px-5">{sv.name}</Td>
+                        <Td className="px-5">
                           <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-claimondo-bg text-claimondo-navy">
                             {sv.paket}
                           </span>
-                        </td>
-                        <td className={`px-5 py-3 text-right tabular-nums font-medium ${guthabenColor}`}>
+                        </Td>
+                        <Td className={`px-5 text-right tabular-nums font-medium !${guthabenColor}`}>
                           {eur(sv.guthaben)}
-                        </td>
-                        <td className="px-5 py-3 text-center text-claimondo-navy tabular-nums">
+                        </Td>
+                        <Td className="px-5 text-center tabular-nums">
                           {sv.faelleGenutzt} / {sv.faelleGesamt}
-                        </td>
-                        <td className="px-5 py-3 text-right tabular-nums text-claimondo-navy">
+                        </Td>
+                        <Td className="px-5 text-right tabular-nums">
                           {sv.leadkostenMonat > 0 ? eur(sv.leadkostenMonat) : '—'}
-                        </td>
-                      </tr>
+                        </Td>
+                      </Tr>
                     )
                   })}
-                </tbody>
-              </table>
-            </div>
+                </Tbody>
+              </Table>
+            </DataTableContainer>
           )}
         </div>
       </div>
