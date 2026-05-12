@@ -9,6 +9,7 @@ import {
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { anlegeBuero } from './actions'
 import { PAKET_KONFIG, paketAnzahlung, ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, type AnlegePaket, type AnlegeBueroFormData } from './constants'
+import { TextField as SharedTextField, SelectField as SharedSelectField } from '@/components/shared/forms'
 
 // ARCH-1 Phase 2 (BLOCK C): 3-Step Buero-Anlegen Wizard fuer den Admin.
 
@@ -783,6 +784,8 @@ function TagSection({
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Adapter — delegiert an shared/forms/
+// TextField. error (BUG-94) → roter Border via error-Prop.
 function Field({
   label, value, onChange, type = 'text', placeholder, className, disabled, error,
 }: {
@@ -793,30 +796,25 @@ function Field({
   placeholder?: string
   className?: string
   disabled?: boolean
-  // BUG-94: error=true rendert roten Border + roter focus-Ring statt blau
+  // BUG-94: error=true rendert roten Border statt blau
   error?: boolean
 }) {
   return (
-    <div className={className}>
-      <label className={`text-xs mb-1.5 block ${error ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        disabled={disabled}
-        className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
-          disabled
-            ? 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo cursor-not-allowed'
-            : error
-            ? 'bg-red-50 border-red-400 text-claimondo-navy placeholder-gray-400 focus:ring-red-400'
-            : 'bg-claimondo-bg border-claimondo-border text-claimondo-navy placeholder-gray-400 focus:ring-[#1E3A5F]'
-        }`}
-      />
-    </div>
+    <SharedTextField
+      label={label}
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      disabled={disabled}
+      error={error ? ' ' : undefined}
+      className={className}
+    />
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Adapter — string[]-Options → shared/
+// forms/SelectField. error (BUG-94) → roter Border.
 function SelectField({
   label, value, onChange, options, placeholder, className, disabled, error,
 }: {
@@ -830,28 +828,21 @@ function SelectField({
   // BUG-94: error=true rendert roten Border statt blau
   error?: boolean
 }) {
+  const opts = options.includes('')
+    ? options.map((o) => ({ value: o, label: o === '' ? (placeholder ?? '—') : o }))
+    : [
+        { value: '', label: placeholder ?? 'Bitte wählen...', disabled: true },
+        ...options.map((o) => ({ value: o, label: o })),
+      ]
   return (
-    <div className={className}>
-      <label className={`text-xs mb-1.5 block ${error ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>{label}</label>
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        disabled={disabled}
-        className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
-          disabled
-            ? 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo cursor-not-allowed'
-            : error
-            ? 'bg-red-50 border-red-400 text-claimondo-navy focus:ring-red-400'
-            : 'bg-claimondo-bg border-claimondo-border text-claimondo-navy focus:ring-[#1E3A5F]'
-        }`}
-      >
-        {!options.includes('') && (
-          <option value="" disabled>{placeholder ?? 'Bitte wählen...'}</option>
-        )}
-        {options.map(opt => (
-          <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>
-        ))}
-      </select>
-    </div>
+    <SharedSelectField
+      label={label}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      options={opts}
+      disabled={disabled}
+      error={error ? ' ' : undefined}
+      className={className}
+    />
   )
 }

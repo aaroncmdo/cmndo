@@ -23,6 +23,7 @@ import {
 } from './constants'
 import SignaturePadInput from '@/components/SignaturePadInput'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import { TextField as SharedTextField } from '@/components/shared/forms'
 
 const STEPS = [
   { key: 'stammdaten', label: 'Stammdaten + Standorte', icon: Building2Icon },
@@ -430,6 +431,7 @@ export default function BueroOnboardingClient({
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Adapter — delegiert an shared/forms/TextField.
 function Field({
   label,
   value,
@@ -450,19 +452,23 @@ function Field({
   className?: string
 }) {
   return (
-    <div className={className}>
-      <label className="text-xs text-claimondo-ondo mb-1.5 block">
-        {label}
-        {required && <span className="text-red-400 ml-0.5">*</span>}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        disabled={disabled}
-        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] disabled:opacity-50"
-      />
-    </div>
+    <SharedTextField
+      label={
+        required ? (
+          <>
+            {label}
+            <span className="ml-0.5 text-rose-500">*</span>
+          </>
+        ) : (
+          label
+        )
+      }
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      disabled={disabled}
+      className={className}
+    />
   )
 }

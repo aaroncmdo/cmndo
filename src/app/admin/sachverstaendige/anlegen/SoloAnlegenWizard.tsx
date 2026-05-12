@@ -13,6 +13,7 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import IsochronePreviewMap from '@/components/maps/IsochronePreviewMap'
 import { anlegeSv, checkEmailExists, type CheckEmailExistsResult } from './actions'
 import WelcomeMailPreviewModal from './WelcomeMailPreviewModal'
+import { TextField as SharedTextField, SelectField as SharedSelectField } from '@/components/shared/forms'
 import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
 import QualiNummernFelder from './QualiNummernFelder'
 
@@ -651,6 +652,8 @@ export default function SoloAnlegenWizard({ onSuccess }: {
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Signatur-Adapter (string-Callback ↔
+// ChangeEvent) — delegiert an shared/forms/TextField, kein eigenes Input-Markup.
 function Field({
   label, value, onChange, type = 'text', placeholder, className,
 }: {
@@ -662,16 +665,14 @@ function Field({
   className?: string
 }) {
   return (
-    <div className={className}>
-      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-      />
-    </div>
+    <SharedTextField
+      label={label}
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={className}
+    />
   )
 }
 
@@ -714,6 +715,9 @@ function TagSection({
   )
 }
 
+// AAR-frontend-konsolidierung-p1: dünner Adapter — string[]-Options → shared/
+// forms/SelectField. Leer-Option-mit-Placeholder-Verhalten wie bisher (außer ''
+// selbst ist valide, z. B. TITEL_OPTIONEN wo '' = 'kein Titel').
 function SelectField({
   label, value, onChange, options, placeholder, className,
 }: {
@@ -724,24 +728,19 @@ function SelectField({
   placeholder?: string
   className?: string
 }) {
+  const opts = options.includes('')
+    ? options.map((o) => ({ value: o, label: o === '' ? (placeholder ?? '—') : o }))
+    : [
+        { value: '', label: placeholder ?? 'Bitte wählen...', disabled: true },
+        ...options.map((o) => ({ value: o, label: o })),
+      ]
   return (
-    <div className={className}>
-      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-      >
-        {/* Leer-Option mit Placeholder-Label nur zeigen falls noch nichts gewaehlt
-            ist, ausser '' selbst ist eine valide Option (z.B. bei TITEL_OPTIONEN
-            wo '' = 'kein Titel'). */}
-        {!options.includes('') && (
-          <option value="" disabled>{placeholder ?? 'Bitte wählen...'}</option>
-        )}
-        {options.map(opt => (
-          <option key={opt} value={opt}>{opt === '' ? (placeholder ?? '—') : opt}</option>
-        ))}
-      </select>
-    </div>
+    <SharedSelectField
+      label={label}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      options={opts}
+      className={className}
+    />
   )
 }
