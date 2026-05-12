@@ -1,5 +1,50 @@
 # Mapbox rendert nicht (gutachter-finden) — Debugging-Log
 
+**Status:** ✅ GELÖST (2026-05-12) — Root Cause: `.mapboxgl-map { position: relative }` aus `mapbox-gl.css` überschrieb die Tailwind-Klasse `.absolute` am Container → Container kollabierte auf Höhe 0 → leerer Canvas, kein Fehler. Fix: `position:absolute; inset:0` als inline-`style` (schlägt die Stylesheet-Klasse). Siehe Abschnitt „Root Cause" unten.
+
+---
+
+## Root Cause (gefunden via Container-Maße-Logging)
+
+Die Diagnose-`console.info` zeigte:
+
+```
+[gutachter-finden] Map-Container beim Init:  1920 × 945   ← ok
+[gutachter-finden] Map-Container nach rAF:   1920 × 0     ← kollabiert nach mapbox-init
+```
+
+`new mapboxgl.Map({ container })` fügt dem Container-`<div>` die Klasse
+`mapboxgl-map` hinzu. `mapbox-gl.css` (importiert, weil die Attribution/Controls
+gestylt sind) enthält `.mapboxgl-map { position: relative; overflow: hidden; ... }`.
+Die Spezifität ist identisch zur Tailwind-Utility `.absolute` (beides eine
+Klasse), aber `mapbox-gl.css` kommt **später** in der CSS-Source-Order → gewinnt
+→ Container wird `position: relative` statt `absolute` → die `inset-0`-Anker
+(`top/right/bottom/left: 0`) greifen nicht mehr → die Container-Höhe = Höhe des
+Flow-Inhalts = **0** (das `<canvas>` ist `position: absolute`, trägt nichts zur
+Höhe bei). Mapbox malt in einen 0px-hohen Canvas → man sieht nur den
+`--brand-surface-gradient`-Hintergrund, **kein** `error`-Event feuert (für
+Mapbox ist alles in Ordnung, der Style ist geladen, es gibt nur nichts zu
+zeichnen).
+
+**Fix:** `position` + `inset` als inline-`style` auf den Container (inline-Styles
+schlagen Stylesheet-Klassen ohne `!important`):
+
+```tsx
+<div ref={containerRef} style={{ position: 'absolute', inset: 0, background: 'var(--brand-surface-gradient)' }} />
+```
+
+Die zusätzlich eingebauten `map.resize()` + `ResizeObserver` bleiben drin —
+robust gegen künftige Container-Größenänderungen, schaden nicht.
+
+**Lehre:** Niemals `position`/`inset`/Layout-kritische Properties via Tailwind-
+Utility-Klasse auf einem Element setzen, dem eine 3rd-Party-Lib (mapbox-gl,
+chart-libs, etc.) eine eigene Klasse mit `position`-Regel verpasst. Inline-Style
+oder eine spezifischere Selector-Regel verwenden.
+
+---
+
+## (Verlauf — vor dem Fix)
+
 **Status:** ungelöst (Stand 2026-05-12)
 **Betroffen:** `/gutachter-finden` auf `app.staging.claimondo.de` (und vermutlich Production — dort nie verifiziert)
 **Datei:** `src/app/gutachter-finden/GutachterFinderMapClient.tsx`

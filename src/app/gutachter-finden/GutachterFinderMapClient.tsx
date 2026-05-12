@@ -321,10 +321,16 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
           falls Mapbox nicht lädt (Token-Restriction o.ä.) — dann sieht's
           wenigstens nach Brand-Surface aus statt nach leerem Weiß. Sobald die
           Map-Tiles laden, decken sie den Gradient ab. */}
+      {/* WICHTIG: position/inset MÜSSEN inline stehen, nicht als Tailwind-Klasse.
+          mapbox-gl fügt dem Container die Klasse `mapboxgl-map` hinzu und
+          `mapbox-gl.css` setzt `.mapboxgl-map { position: relative }` — das
+          würde eine `.absolute`-Utility-Klasse überschreiben (gleiche
+          Spezifität, mapbox-CSS später in der Source-Order) → Container
+          verliert den bottom-Anker → Höhe kollabiert auf 0 → leerer Canvas,
+          KEIN Fehler. Inline-Style schlägt die Stylesheet-Klasse. */}
       <div
         ref={containerRef}
-        className="absolute inset-0"
-        style={{ background: 'var(--brand-surface-gradient)' }}
+        style={{ position: 'absolute', inset: 0, background: 'var(--brand-surface-gradient)' }}
       />
 
       {/* AAR-Diagnose: sichtbare Map-Fehlermeldung (nur wenn was schiefläuft) —
