@@ -351,14 +351,21 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
       </div>
 
       {/* Desktop — Wizard FREISCHWEBEND direkt auf der Karte. Kein Card-Wrapper,
-          keine feste Breite: die Spalte ist dynamisch (clamp 380px..560px,
-          skaliert mit der Viewport-Breite). overflow-y-auto nur damit lange
-          Phasen (Phase 5: 7 Felder) auf kleinen Screens scrollbar bleiben —
-          Scrollbar ist 'thin' + ohne Padding-Gutter, also kein sichtbarer Rahmen. */}
+          dynamische Breite (clamp). WICHTIG: paddingInline 28px — overflow-y-auto
+          impliziert overflow-x:hidden, also würden die ~28px Glass-Pill-Schatten
+          am rechten Spaltenrand abgeschnitten. Das Padding gibt ihnen Raum
+          INNERHALB der Overflow-Box → kein Clip. Spalte ist breiter angesetzt
+          damit nach Abzug des Paddings noch genug Content-Breite bleibt.
+          Negatives left/top kompensiert das Padding visuell (Content sitzt
+          dort wo er soll, das Padding ist nur "Schatten-Raum"). */}
       <div
         ref={sidebarScrollRef}
-        className="hidden lg:flex flex-col absolute top-24 left-8 bottom-8 z-[10] overflow-y-auto"
-        style={{ width: 'clamp(380px, 30vw, 560px)', scrollbarWidth: 'thin' }}
+        className="hidden lg:flex flex-col absolute top-[68px] left-1 bottom-1 z-[10] overflow-y-auto"
+        style={{
+          width: 'clamp(440px, 33vw, 620px)',
+          padding: 28,
+          scrollbarWidth: 'thin',
+        }}
       >
         <div className="flex flex-col gap-1.5 mb-6">
           <h1
