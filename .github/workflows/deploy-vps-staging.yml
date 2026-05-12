@@ -1,0 +1,96 @@
+name: Deploy → VPS (staging.app.claimondo.de)
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Build (standalone)
+        run: npm run build
+        env:
+          # Heap auf 6 GB hochziehen — Next.js 16 Turbopack mit
+          # ~600+ Routes + TS-Strict-Check braucht > 4 GB Default.
+          NODE_OPTIONS: --max-old-space-size=6144
+          # NEXT_PUBLIC_* werden zur Build-Zeit in den Client-Bundle gebaked.
+          # Hier zeigt NEXT_PUBLIC_APP_URL auf staging.app.claimondo.de —
+          # damit landen Magic-Links / Redirects nach Login auf der
+          # Staging-Domain statt auf Production.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL_STAGING }}
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
+          NEXT_PUBLIC_GOOGLE_MAPS_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_KEY }}
+          NEXT_PUBLIC_GOOGLE_MAPS_3D_TILES_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_3D_TILES_KEY }}
+          NEXT_PUBLIC_HERE_API_KEY: ${{ secrets.NEXT_PUBLIC_HERE_API_KEY }}
+          NEXT_PUBLIC_CESIUM_ION_TOKEN: ${{ secrets.NEXT_PUBLIC_CESIUM_ION_TOKEN }}
+          NEXT_PUBLIC_CESIUM_ION_ASSET_ID: ${{ secrets.NEXT_PUBLIC_CESIUM_ION_ASSET_ID }}
+          NEXT_PUBLIC_FELDMODUS_CESIUM_TILES: ${{ secrets.NEXT_PUBLIC_FELDMODUS_CESIUM_TILES }}
+          NEXT_PUBLIC_FELDMODUS_GOOGLE_TILES: ${{ secrets.NEXT_PUBLIC_FELDMODUS_GOOGLE_TILES }}
+          NEXT_PUBLIC_IMAGIN_CUSTOMER: ${{ secrets.NEXT_PUBLIC_IMAGIN_CUSTOMER }}
+          NEXT_PUBLIC_ELEVENLABS_VOICE_ID: ${{ secrets.NEXT_PUBLIC_ELEVENLABS_VOICE_ID }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Artefakt packen
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+          tar -czf deploy-staging.tar.gz -C .next/standalone .
+
+      - name: Deploy auf VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: deploy-staging.tar.gz
+          target: /tmp/
+
+      - name: Restart staging-Prozess
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            mkdir -p /var/www/claimondo-v2-staging-new
+            tar -xzf /tmp/deploy-staging.tar.gz -C /var/www/claimondo-v2-staging-new
+            # .env.local aus dem alten Staging-Verzeichnis übernehmen (Server-
+            # seitige Secrets wie SUPABASE_SERVICE_ROLE_KEY etc.). Fällt
+            # leise zurück wenn noch keins existiert (Erstdeploy-Fall).
+            cp /var/www/claimondo-v2-staging/.env.local /var/www/claimondo-v2-staging-new/.env.local 2>/dev/null || true
+            rm -rf /var/www/claimondo-v2-staging-old 2>/dev/null || true
+            mv /var/www/claimondo-v2-staging /var/www/claimondo-v2-staging-old 2>/dev/null || true
+            mv /var/www/claimondo-v2-staging-new /var/www/claimondo-v2-staging
+            # Idempotenter Restart: alle Prozesse mit dem Namen löschen + neu starten.
+            # PORT=3001 unterscheidet uns von Production (Port 3000) — nginx
+            # routet staging.app.claimondo.de auf 3001.
+            pm2 delete claimondo-v2-staging 2>/dev/null || true
+            PORT=3001 pm2 start /var/www/claimondo-v2-staging/server.js \
+              --name claimondo-v2-staging \
+              --env production \
+              --max-memory-restart 1400M \
+              --cwd /var/www/claimondo-v2-staging
+            pm2 save
+            rm -f /tmp/deploy-staging.tar.gz
+            echo "Staging-Deploy $(date) abgeschlossen"
