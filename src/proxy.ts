@@ -2,61 +2,115 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateSession } from './lib/supabase/middleware'
 
-// 2026-05-09: Domain-Split — claimondo.de = Marketing, app.claimondo.de = App.
-// Marketing-Pages auf app.* werden 301 auf claimondo.de redirected (kein
-// Duplicate-Content für Google). App-Pages auf claimondo.de werden 301 auf
-// app.* redirected (saubere UX, klare Trennung).
+// 2026-05-12: Domain-Layout
+//   claimondo.de            — nur Marketing
+//   www.claimondo.de        — 301 → claimondo.de
+//   app.claimondo.de        — nur Portal (noindex), nackte Subdomain → /login
+//   gutachter.claimondo.de  — Recruiting-Landingpage /gutachter-partner (kanonisch)
+//   makler.claimondo.de     — Recruiting-Landingpage /makler/partner-werden (kanonisch)
 //
-// 2026-05-11: middleware.ts + proxy.ts in proxy.ts konsolidiert. Next.js 16
-// erlaubt nur einen Einstiegspunkt und bevorzugt proxy.ts. middleware.ts
-// wurde deshalb entfernt.
+// Frühere Konsolidierung: 2026-05-09 Domain-Split, 2026-05-11 middleware.ts → proxy.ts.
+
+// ─── Hosts ──────────────────────────────────────────────────────────────
+const HOST_MARKETING = 'claimondo.de'
+const HOST_WWW = 'www.claimondo.de'
+const HOST_APP = 'app.claimondo.de'
+const HOST_GUTACHTER = 'gutachter.claimondo.de'
+const HOST_MAKLER = 'makler.claimondo.de'
+
+// ─── Routen-Klassifizierung ─────────────────────────────────────────────
+// Portal-/App-Routen — gehören auf app.claimondo.de.
 const APP_PREFIXES = [
   '/admin', '/dispatch', '/gutachter/', '/kunde', '/faelle', '/flow',
-  '/upload', '/sv', '/kunde-termin', '/ablehnen',
+  '/upload', '/sv', '/kunde-termin', '/ablehnen', '/makler',
   '/login', '/passwort-vergessen', '/passwort-zuruecksetzen', '/passwort-aendern',
 ]
 
+// Öffentliche Marketing-/Funnel-Routen — bleiben auf claimondo.de.
+// Werden auf app.claimondo.de per 301 zurück auf die Hauptdomain geschickt.
 const MARKETING_PREFIXES = [
   '/vorteile', '/wie-es-funktioniert', '/faq', '/kfz-gutachter',
-  '/gutachter-finden', '/gutachter-partner', '/ueber-uns',
+  '/gutachter-finden', '/ueber-uns',
+  '/schaden-melden', '/ersteinschaetzung', '/beratung-anfragen', '/sa-volltext',
   '/impressum', '/datenschutz', '/agb', '/nutzungsbedingungen',
   '/schadensreport-2026',
 ]
+
+// Marketing-Landingpages mit eigener Subdomain.
+// claimondo.de/<pfad> → 301 auf <host>/   ·   <host>/ → rewrite intern auf <pfad>.
+const SUBDOMAIN_LANDINGPAGES: Record<string, string> = {
+  '/gutachter-partner': HOST_GUTACHTER,
+  '/makler/partner-werden': HOST_MAKLER,
+}
+// Umkehrung: Subdomain-Host → Landingpage-Pfad.
+const LANDINGPAGE_FOR_HOST: Record<string, string> = {}
+for (const [path, host] of Object.entries(SUBDOMAIN_LANDINGPAGES)) {
+  LANDINGPAGE_FOR_HOST[host] = path
+}
 
 function matchesAnyPrefix(pathname: string, prefixes: string[]): boolean {
   return prefixes.some((p) => pathname === p || pathname.startsWith(p.endsWith('/') ? p : p + '/'))
 }
 
+/** 301 auf denselben Pfad/Query unter anderem Host; mit `pathname` zusätzlich den Pfad ersetzen. */
+function redirectToHost(request: NextRequest, hostname: string, pathname?: string): NextResponse {
+  const url = new URL(request.url)
+  url.hostname = hostname
+  url.protocol = 'https:'
+  url.port = ''
+  if (pathname !== undefined) {
+    url.pathname = pathname
+    url.search = ''
+  }
+  return NextResponse.redirect(url, 301)
+}
+
 export async function proxy(request: NextRequest) {
   const hostname = request.headers.get('host') ?? ''
   const pathname = request.nextUrl.pathname
+  const isApi = pathname.startsWith('/api/')
 
-  // Subdomain gutachter.claimondo.de — Partner-Recruiting
-  // /api/* explizit ausgenommen — sonst wird /api/health auf
-  // /gutachter-partner/api/health umgeschrieben (404) und der
-  // useOnlineStatus-Hook löst fälschlicherweise den Offline-Banner aus.
-  if (hostname === 'gutachter.claimondo.de') {
-    const url = request.nextUrl.clone()
-    if (
-      !pathname.startsWith('/gutachter-partner') &&
-      !pathname.startsWith('/api/')
-    ) {
-      url.pathname = `/gutachter-partner${pathname === '/' ? '' : pathname}`
+  // ─── Marketing-Subdomains (gutachter. / makler.) ──────────────────────
+  const subdomainLandingPath = LANDINGPAGE_FOR_HOST[hostname]
+  if (subdomainLandingPath) {
+    // /api/* unverändert durchreichen (Health-Checks etc. — nicht umschreiben).
+    if (isApi) return await updateSession(request)
+    // Root → intern die Landingpage rendern, Adresszeile bleibt "/".
+    if (pathname === '/') {
+      const url = request.nextUrl.clone()
+      url.pathname = subdomainLandingPath
       return NextResponse.rewrite(url)
     }
+    // Direkter Aufruf des langen Pfads → auf die kanonische "/" umleiten.
+    if (pathname === subdomainLandingPath) {
+      return NextResponse.redirect(new URL('/', request.url), 301)
+    }
+    // Alles andere (Logo, Nav, Legal, Cross-Links) → zurück auf die Hauptdomain.
+    return redirectToHost(request, HOST_MARKETING)
   }
 
-  // App-Subdomain (app.claimondo.de): alle Responses mit X-Robots-Tag noindex versehen
-  // und /robots.txt explizit als Disallow: / ausliefern. Verhindert Indexierung der
-  // App-Subdomain selbst wenn Google sie über Links findet.
-  if (hostname === 'app.claimondo.de') {
+  // ─── app.claimondo.de — nur Portal ────────────────────────────────────
+  if (hostname === HOST_APP) {
+    // Eigene robots.txt: App-Subdomain komplett aus dem Index halten.
     if (pathname === '/robots.txt') {
       return new NextResponse(
         'User-agent: *\nDisallow: /\nAllow: /login\nAllow: /passwort-vergessen\n',
         { status: 200, headers: { 'content-type': 'text/plain' } },
       )
     }
-    // /login + /passwort-vergessen bleiben crawlbar (kein noindex)
+    if (isApi) return await updateSession(request)
+    // Nackte App-Subdomain → direkt ins Login.
+    if (pathname === '/') {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    // Marketing-Landingpage versehentlich auf app.* → auf ihre eigene Subdomain.
+    const landingHost = SUBDOMAIN_LANDINGPAGES[pathname]
+    if (landingHost) return redirectToHost(request, landingHost, '/')
+    // Sonstige Marketing-/Funnel-Routen → zurück auf die Hauptdomain.
+    if (matchesAnyPrefix(pathname, MARKETING_PREFIXES)) {
+      return redirectToHost(request, HOST_MARKETING)
+    }
+    // Echte App-Route (oder Unbekanntes): Session-Refresh + noindex (außer Login/Passwort).
     const isPublicAppPath = pathname === '/login' || pathname.startsWith('/passwort-')
     const response = await updateSession(request)
     if (!isPublicAppPath) {
@@ -65,47 +119,35 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
-  // 301-Redirects zwischen Hauptdomain und App-Subdomain
-  const isAppRoute = matchesAnyPrefix(pathname, APP_PREFIXES)
-  const isMarketingRoute = pathname === '/' || matchesAnyPrefix(pathname, MARKETING_PREFIXES)
-
-  if (hostname === 'app.claimondo.de' && isMarketingRoute) {
-    // Marketing-Page auf App-Subdomain → 301 zu Hauptdomain
-    const url = new URL(request.url)
-    url.hostname = 'claimondo.de'
-    url.protocol = 'https:'
-    url.port = ''
-    return NextResponse.redirect(url, 301)
+  // ─── www.claimondo.de → claimondo.de (kanonische Form) ────────────────
+  if (hostname === HOST_WWW) {
+    return redirectToHost(request, HOST_MARKETING)
   }
 
-  if ((hostname === 'claimondo.de' || hostname === 'www.claimondo.de') && isAppRoute) {
-    // App-Page auf Hauptdomain → 301 zur App-Subdomain
-    const url = new URL(request.url)
-    url.hostname = 'app.claimondo.de'
-    url.protocol = 'https:'
-    url.port = ''
-    return NextResponse.redirect(url, 301)
+  // ─── claimondo.de (Hauptdomain, Marketing) ────────────────────────────
+  if (hostname === HOST_MARKETING) {
+    // Subdomain-Landingpages: alter Pfad → eigene Subdomain.
+    // MUSS vor dem APP_PREFIXES-Check stehen — /makler/partner-werden matcht
+    // sonst das /makler-App-Prefix und ginge fälschlich auf app.claimondo.de.
+    const landingHost = SUBDOMAIN_LANDINGPAGES[pathname]
+    if (landingHost) return redirectToHost(request, landingHost, '/')
+    // App-/Portal-Routen → app.claimondo.de.
+    if (!isApi && matchesAnyPrefix(pathname, APP_PREFIXES)) {
+      return redirectToHost(request, HOST_APP)
+    }
+    return await updateSession(request)
   }
 
-  // www.claimondo.de → claimondo.de (kanonische Form, vermeidet Duplicate-Content)
-  if (hostname === 'www.claimondo.de') {
-    const url = new URL(request.url)
-    url.hostname = 'claimondo.de'
-    url.protocol = 'https:'
-    url.port = ''
-    return NextResponse.redirect(url, 301)
-  }
-
+  // ─── localhost / Vercel-Previews / *.staging.claimondo.de ─────────────
   return await updateSession(request)
 }
 
 export const config = {
-  // Vollstaendiger Exclusion-Katalog:
+  // Vollständiger Exclusion-Katalog:
   // .glb → Mapbox 3D-Modell; .js/.json → sw.js + manifest.json;
   // .obj/.mtl → Three.js OBJLoader; Rest → Standard Next.js-Artefakte.
-  // robots.txt und sitemap.xml MUESSEN durch den Proxy, damit
-  // app.claimondo.de eine eigene robots.txt (Disallow: /) zurueckbekommt.
-  // txt/xml deshalb aus dem Exclusion-Pattern entfernt.
+  // robots.txt und sitemap.xml MÜSSEN durch den Proxy (app.claimondo.de
+  // braucht eine eigene robots.txt). txt/xml deshalb NICHT im Exclusion-Pattern.
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|glb|gltf|obj|mtl|hdr|ktx2|woff|woff2|mp4|webm|js|json)$).*)',
   ],
