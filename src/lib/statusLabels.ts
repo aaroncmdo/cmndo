@@ -160,6 +160,44 @@ export const FALL_STATUS_COLORS: Record<string, string> = Object.fromEntries(
   Object.entries(FALL_STATUS_SLOT_MAP).map(([k, slot]) => [k, STATUS_SLOT_CLASSES[slot]]),
 )
 
+// ─── auftraege.status (SV-Auftrags-Lifecycle, CMM-32f) ─────────────────────
+// AAR-frontend-konsolidierung-p2 (P2-T2): zentral statt inline AUFTRAG_STATUS_KURZ.
+export const AUFTRAG_STATUS_LABELS: Record<string, string> = {
+  termin: 'Termin',
+  besichtigung: 'Besichtigung',
+  gutachten: 'Gutachten',
+  abgeschlossen: 'Abgeschlossen',
+}
+const AUFTRAG_STATUS_SLOT_MAP: Record<string, StatusSlot> = {
+  termin: 'pending',
+  besichtigung: 'active',
+  gutachten: 'active',
+  abgeschlossen: 'success',
+}
+export const AUFTRAG_STATUS_COLORS: Record<string, string> = Object.fromEntries(
+  Object.entries(AUFTRAG_STATUS_SLOT_MAP).map(([k, slot]) => [k, STATUS_SLOT_CLASSES[slot]]),
+)
+
+// ─── abrechnungen.status (Rechnungs-/Abrechnungs-Lifecycle) ────────────────
+// AAR-frontend-konsolidierung-p2 (P2-T2): zentral statt inline STATUS_COLORS.
+export const ABRECHNUNG_STATUS_LABELS: Record<string, string> = {
+  entwurf: 'Entwurf',
+  versendet: 'Versendet',
+  bezahlt: 'Bezahlt',
+  ueberfaellig: 'Überfällig',
+  storniert: 'Storniert',
+}
+const ABRECHNUNG_STATUS_SLOT_MAP: Record<string, StatusSlot> = {
+  entwurf: 'neutral',
+  versendet: 'active',
+  bezahlt: 'success',
+  ueberfaellig: 'danger',
+  storniert: 'neutral',
+}
+export const ABRECHNUNG_STATUS_COLORS: Record<string, string> = Object.fromEntries(
+  Object.entries(ABRECHNUNG_STATUS_SLOT_MAP).map(([k, slot]) => [k, STATUS_SLOT_CLASSES[slot]]),
+)
+
 // ─── Schadens-Ursache (Fallakte + Routen + Aufträge) ───────────────────────
 // AAR-410: Zentral statt pro Component hartkodiert.
 

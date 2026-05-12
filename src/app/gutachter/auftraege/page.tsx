@@ -9,18 +9,9 @@ import Link from 'next/link'
 import { BriefcaseIcon } from 'lucide-react'
 import AuftragCard from './AuftragCard'
 import TagesvorbereitungButton from './TagesvorbereitungButton'
-import { getUrsacheLabel } from '@/lib/statusLabels'
+import { getUrsacheLabel, AUFTRAG_STATUS_LABELS } from '@/lib/statusLabels'
 import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
-
-// CMM-32f: Kurzlabels für den auftraege.status-Lifecycle
-// (termin → besichtigung → gutachten → abgeschlossen).
-const AUFTRAG_STATUS_KURZ: Record<string, string> = {
-  termin: 'Termin',
-  besichtigung: 'Besichtigung',
-  gutachten: 'Gutachten',
-  abgeschlossen: 'Abgeschlossen',
-}
 
 export default async function AuftraegePage({
   searchParams,
@@ -217,7 +208,7 @@ export default async function AuftraegePage({
                       : null
                   }
                   ursacheLabel={getUrsacheLabel(fall.schadens_ursache as string | null)}
-                  statusLabel={AUFTRAG_STATUS_KURZ[auftrag.status as string] ?? (auftrag.status as string)}
+                  statusLabel={AUFTRAG_STATUS_LABELS[auftrag.status as string] ?? (auftrag.status as string)}
                   offeneDokumente={offeneDokuMap[fall.id as string] ?? 0}
                 />
               )
