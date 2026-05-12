@@ -272,35 +272,24 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
 
   return (
     <div className="relative w-full" style={{ height: '100dvh' }}>
-      {/* Karte als Vollbild-Background */}
-      <div ref={containerRef} className="absolute inset-0" />
+      {/* Karte als Vollbild-Background. Fallback-Gradient (--brand-surface-gradient)
+          falls Mapbox nicht lädt (Token-Restriction o.ä.) — dann sieht's
+          wenigstens nach Brand-Surface aus statt nach leerem Weiß. Sobald die
+          Map-Tiles laden, decken sie den Gradient ab. */}
+      <div
+        ref={containerRef}
+        className="absolute inset-0"
+        style={{ background: 'var(--brand-surface-gradient)' }}
+      />
 
-      {/* Ambient-Gradient-Overlay (subtil, ganze Karte) */}
+      {/* Sehr subtiler Ambient-Schatten unten/links für Tiefe — KEIN Rahmen,
+          kein weißer Veil. Diffus, randlos. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{
-          background: [
-            'radial-gradient(50% 50% at 100% 100%, rgba(69,115,162,0.08), transparent 60%)',
-            'radial-gradient(40% 30% at 100% 0%, rgba(123,163,204,0.07), transparent 65%)',
-          ].join(', '),
-        }}
-      />
-
-      {/* AAR-glass: Full-bleed Schatten/Scrim hinter dem freischwebenden Wizard.
-          Links am Screen-Rand verankert, volle Höhe, blendet nach rechts aus.
-          Zwei Layer: weißer Veil für Lesbarkeit des Navy-Texts auf der Karte +
-          weicher Navy-Ambient-Shadow für Tiefe. z-[2] = über Map, unter allem
-          Interaktiven. Auf Mobile ausgeblendet (da übernimmt das Bottom-Sheet). */}
-      <div
-        aria-hidden
-        className="hidden lg:block pointer-events-none absolute inset-y-0 left-0 z-[2]"
-        style={{
-          width: 'min(680px, 52vw)',
-          background: [
-            'radial-gradient(60% 75% at 22% 48%, color-mix(in srgb, transparent 87%, var(--brand-primary, var(--claimondo-navy))), transparent 72%)',
-            'linear-gradient(to right, color-mix(in srgb, transparent 38%, white) 0%, color-mix(in srgb, transparent 56%, white) 28%, color-mix(in srgb, transparent 78%, white) 48%, transparent 72%)',
-          ].join(', '),
+          background:
+            'radial-gradient(70% 90% at 8% 60%, color-mix(in srgb, transparent 92%, var(--brand-primary, var(--claimondo-navy))), transparent 75%)',
         }}
       />
 
@@ -333,13 +322,15 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         </div>
       </div>
 
-      {/* Desktop — Wizard FREISCHWEBEND direkt auf der Karte. Kein Card-Wrapper:
-          die WizardClient-Felder sind selbst Glass-Pills, die schweben über
-          der Map. H1 + Subtitle mit text-shadow für Lesbarkeit auf der Karte. */}
+      {/* Desktop — Wizard FREISCHWEBEND direkt auf der Karte. Kein Card-Wrapper,
+          keine feste Breite: die Spalte ist dynamisch (clamp 380px..560px,
+          skaliert mit der Viewport-Breite). overflow-y-auto nur damit lange
+          Phasen (Phase 5: 7 Felder) auf kleinen Screens scrollbar bleiben —
+          Scrollbar ist 'thin' + ohne Padding-Gutter, also kein sichtbarer Rahmen. */}
       <div
         ref={sidebarScrollRef}
-        className="hidden lg:flex flex-col absolute top-24 left-8 bottom-8 w-[440px] z-[10] overflow-y-auto pr-2"
-        style={{ scrollbarWidth: 'thin' }}
+        className="hidden lg:flex flex-col absolute top-24 left-8 bottom-8 z-[10] overflow-y-auto"
+        style={{ width: 'clamp(380px, 30vw, 560px)', scrollbarWidth: 'thin' }}
       >
         <div className="flex flex-col gap-1.5 mb-6">
           <h1
