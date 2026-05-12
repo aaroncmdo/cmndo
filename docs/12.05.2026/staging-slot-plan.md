@@ -1,5 +1,7 @@
 # VPS-Staging-Slot — Setup-Plan
 
+**Status:** ✅ DONE (2026-05-12) — Staging-Slot live, PR #804 gemerged, erster Deploy auf `app.staging.claimondo.de` läuft. Smoke-Workflow + Cert-Renewal-Deadline 2026-08-10 in Memory `project_staging_slot`.
+
 **Datum:** 2026-05-12
 **Ziel:** Eigener Staging-Build auf dem VPS, erreichbar unter `*.staging.claimondo.de`. Jeder Push auf den `staging`-Branch deployt automatisch. Smoke-Tests vor Production-Merge möglich.
 **Auslöser:** PR #803 (ZB1-OCR-Field) kann ohne Preview-Deploy nicht sauber gesmoket werden.
