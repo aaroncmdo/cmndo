@@ -68,3 +68,10 @@ tmp/
 #      der String beim nächsten Build wieder dieselbe kaputte Klasse →
 #      self-perpetuating Loop. Repro 2026-05-08 (PR #611-Followup).
 docs/portals-review/screenshots/feldmodus/
+
+# Tool-Arbeitsverzeichnisse / generierte Outputs / Debug-Screenshots
+.superpowers/
+scripts/knip-output.json
+scripts/knip-classified.json
+scripts/audit-server-actions-output.json
+docs/**/Smoke audits/
