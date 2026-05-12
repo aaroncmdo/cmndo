@@ -206,7 +206,7 @@ export default function ProfilClient({
         <form onSubmit={handleSave} className="max-w-4xl">
           <div className="bg-white rounded-2xl p-6 border border-claimondo-border space-y-4">
             {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis */}
-            <div className="flex items-center gap-4 pb-4 border-b border-claimondo-border">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4 pb-4 border-b border-claimondo-border">
               <AvatarUpload
                 currentUrl={profile.avatar_url ?? null}
                 initials={initials || '??'}
@@ -221,8 +221,8 @@ export default function ProfilClient({
             {/* Fields */}
             <div className="space-y-0">
               {/* E-Mail read-only mit Hinweis */}
-              <div className="flex gap-2 py-2.5 border-b border-claimondo-border/50">
-                <span className="text-claimondo-ondo text-sm w-36 shrink-0">E-Mail</span>
+              <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 border-b border-claimondo-border/50">
+                <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0">E-Mail</span>
                 <div className="flex-1">
                   <span className="text-claimondo-navy text-sm">{email}</span>
                   <p className="text-claimondo-ondo/70 text-[10px] mt-0.5 flex items-center gap-1">
@@ -250,8 +250,8 @@ export default function ProfilClient({
                   <ControlledRow label="Vorname" value={form.vorname} onChange={v => updateField('vorname', v)} />
                   <ControlledRow label="Nachname" value={form.nachname} onChange={v => updateField('nachname', v)} />
                   <ControlledRow label="Telefon" type="tel" value={form.telefon} onChange={v => updateField('telefon', v)} />
-                  <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
-                    <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">Anschrift</span>
+                  <div className={ROW_WRAPPER_CLS}>
+                    <span className={ROW_LABEL_CLS}>Anschrift</span>
                     <div className="flex-1 space-y-2">
                       {mapsReady ? (
                         <GooglePlaceAutocomplete
@@ -285,8 +285,8 @@ export default function ProfilClient({
                     onChange={v => updateField('anzeigename', v)}
                     placeholder="z.B. Max M. — Fallback: Vor- + Nachname"
                   />
-                  <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
-                    <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">Profiltext</span>
+                  <div className={ROW_WRAPPER_CLS}>
+                    <span className={ROW_LABEL_CLS}>Profiltext</span>
                     <textarea
                       value={form.profilbeschreibung}
                       onChange={e => updateField('profilbeschreibung', e.target.value)}
@@ -789,8 +789,8 @@ function SpezSection({
 
 function FieldRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-2 py-2.5 border-b border-claimondo-border/50 last:border-0">
-      <span className="text-claimondo-ondo text-sm w-36 shrink-0">{label}</span>
+    <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 border-b border-claimondo-border/50 last:border-0">
+      <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0">{label}</span>
       <span className="text-claimondo-navy text-sm">{value}</span>
     </div>
   )
@@ -835,8 +835,8 @@ function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
   label: string; name: string; defaultValue: string; type?: string; placeholder?: string
 }) {
   return (
-    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
-      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
+    <div className={ROW_WRAPPER_CLS}>
+      <span className={ROW_LABEL_CLS}>{label}</span>
       <input
         type={type}
         name={name}
@@ -855,8 +855,8 @@ function ControlledRow({ label, value, onChange, type = 'text', placeholder }: {
   label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string
 }) {
   return (
-    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
-      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
+    <div className={ROW_WRAPPER_CLS}>
+      <span className={ROW_LABEL_CLS}>{label}</span>
       <input
         type={type}
         value={value}
@@ -875,8 +875,8 @@ function SelectRow({ label, value, onChange, options }: {
   options: ReadonlyArray<{ value: string; label: string }>
 }) {
   return (
-    <div className="flex gap-2 py-2 border-b border-claimondo-border/50">
-      <span className="text-claimondo-ondo text-sm w-36 shrink-0 pt-2">{label}</span>
+    <div className={ROW_WRAPPER_CLS}>
+      <span className={ROW_LABEL_CLS}>{label}</span>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
