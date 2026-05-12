@@ -11,6 +11,7 @@ import Link from 'next/link'
 import SchadensUrsacheBadge from '@/components/shared/SchadensUrsacheBadge'
 import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { FolderIcon } from 'lucide-react'
 
 type FilterKey = 'alle' | 'versicherungskontakt' | 'auszahlung'
@@ -143,46 +144,45 @@ export default async function GutachterFaellePage({
         {filtered.length === 0 ? (
           <EmptyState title={searchTerm ? `Keine Fälle passen zu „${searchTerm}".` : 'Keine Fälle gefunden.'} />
         ) : (
-          <div className="bg-white rounded-2xl overflow-hidden border border-claimondo-border">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-claimondo-border">
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Fall-Nr.</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Kunde</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Schadentyp</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Ort</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Status</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Seit</th>
-                  </tr>
-                </thead>
-                <tbody>
+          <DataTableContainer variant="plain" className="bg-white rounded-2xl overflow-hidden border border-claimondo-border">
+              <Table>
+                <Thead className="!bg-transparent !text-sm !normal-case !tracking-normal">
+                  <Tr className="border-b border-claimondo-border">
+                    <Th className="text-claimondo-ondo whitespace-nowrap">Fall-Nr.</Th>
+                    <Th className="text-claimondo-ondo">Kunde</Th>
+                    <Th className="text-claimondo-ondo">Schadentyp</Th>
+                    <Th className="text-claimondo-ondo">Ort</Th>
+                    <Th className="text-claimondo-ondo">Status</Th>
+                    <Th className="text-claimondo-ondo whitespace-nowrap">Seit</Th>
+                  </Tr>
+                </Thead>
+                <Tbody className="!divide-y-0">
                   {filtered.map((k) => {
                     const f = fallMap[k.fall_id as string]
                     if (!f) return null
                     const lead = f.lead_id ? leadMap[f.lead_id as string] : null
                     const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
                     return (
-                      <tr
+                      <Tr
                         key={k.id}
                         className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors"
                       >
-                        <td className="px-4 py-3">
+                        <Td>
                           <Link
                             href={`/gutachter/fall/${f.id}`}
                             className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] font-mono text-xs"
                           >
                             {(f.fall_nummer as string | null) ?? (f.id as string).slice(0, 8)}
                           </Link>
-                        </td>
-                        <td className="px-4 py-3 text-claimondo-navy">{name}</td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        </Td>
+                        <Td>{name}</Td>
+                        <Td className="whitespace-nowrap">
                           <SchadensUrsacheBadge ursache={f.schadens_ursache as string | null} plain />
-                        </td>
-                        <td className="px-4 py-3 text-claimondo-ondo text-xs">
+                        </Td>
+                        <Td className="!text-claimondo-ondo text-xs">
                           {(f.schadens_ort as string | null) ?? '—'}
-                        </td>
-                        <td className="px-4 py-3">
+                        </Td>
+                        <Td>
                           <span
                             className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
                               k.status === 'auszahlung'
@@ -192,8 +192,8 @@ export default async function GutachterFaellePage({
                           >
                             {KANZLEI_STATUS_LABEL[k.status as string] ?? (k.status as string)}
                           </span>
-                        </td>
-                        <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">
+                        </Td>
+                        <Td className="!text-claimondo-ondo text-xs whitespace-nowrap">
                           {k.erstellt_am
                             ? new Date(k.erstellt_am as string).toLocaleDateString('de-DE', {
                                 day: '2-digit',
@@ -201,14 +201,13 @@ export default async function GutachterFaellePage({
                                 year: 'numeric',
                               })
                             : '—'}
-                        </td>
-                      </tr>
+                        </Td>
+                      </Tr>
                     )
                   })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </Tbody>
+              </Table>
+          </DataTableContainer>
         )}
       </div>
     </div>

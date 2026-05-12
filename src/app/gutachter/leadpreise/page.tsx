@@ -4,6 +4,7 @@ import { TagIcon } from 'lucide-react'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { paketLabelMitKontingent } from '@/lib/sachverstaendige/kontingent'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 export default async function LeadpreisePage() {
   const supabase = await createClient()
@@ -57,24 +58,26 @@ export default async function LeadpreisePage() {
 
         {/* Tabelle */}
         <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
-          <table className="w-full text-xs">
-            <thead className="bg-claimondo-bg border-b border-claimondo-border">
-              <tr>
-                <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Schadenhöhe (Netto-RK bis)</th>
-                <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Paket-Preis (im Kontingent)</th>
-                <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Einzel-Preis (über Kontingent)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(tabelle ?? []).map((row, i) => (
-                <tr key={i} className="border-b border-claimondo-border hover:bg-claimondo-bg">
-                  <td className="px-4 py-2.5 text-claimondo-navy font-medium tabular-nums">{eur(Number(row.schadenhoehe_bis_netto))} EUR</td>
-                  <td className="px-4 py-2.5 text-right text-claimondo-navy tabular-nums">{eur(Number(row.paketpreis_netto))} EUR</td>
-                  <td className="px-4 py-2.5 text-right text-claimondo-navy tabular-nums">{eur(Number(row.einzelpreis_netto))} EUR</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DataTableContainer variant="plain">
+            <Table className="!text-xs">
+              <Thead className="!normal-case !tracking-normal border-b border-claimondo-border">
+                <Tr>
+                  <Th className="text-claimondo-ondo">Schadenhöhe (Netto-RK bis)</Th>
+                  <Th className="text-right text-claimondo-ondo">Paket-Preis (im Kontingent)</Th>
+                  <Th className="text-right text-claimondo-ondo">Einzel-Preis (über Kontingent)</Th>
+                </Tr>
+              </Thead>
+              <Tbody className="!divide-y-0">
+                {(tabelle ?? []).map((row, i) => (
+                  <Tr key={i} className="border-b border-claimondo-border hover:bg-claimondo-bg">
+                    <Td className="!py-2.5 font-medium tabular-nums">{eur(Number(row.schadenhoehe_bis_netto))} EUR</Td>
+                    <Td className="!py-2.5 text-right tabular-nums">{eur(Number(row.paketpreis_netto))} EUR</Td>
+                    <Td className="!py-2.5 text-right tabular-nums">{eur(Number(row.einzelpreis_netto))} EUR</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
           <div className="px-4 py-3 bg-claimondo-bg border-t border-claimondo-border">
             <p className="text-[10px] text-claimondo-ondo/70">{tabelle?.length ?? 0} Einträge · Alle Preise netto zzgl. 19% MwSt</p>
           </div>

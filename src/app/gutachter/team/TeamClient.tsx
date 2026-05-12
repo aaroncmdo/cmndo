@@ -6,6 +6,7 @@ import { assignPoolLead, toggleSubSvSperre } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { StatCard } from '@/components/shared/StatCard'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 export type SubSvData = {
   id: string
@@ -134,63 +135,65 @@ export default function TeamClient({
               Keine offenen Pool-Leads. Neue Leads werden hier sichtbar sobald der Dispatcher sie deiner Organisation zuweist.
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
-                <tr>
-                  <th className="text-left px-4 py-3">Fall</th>
-                  <th className="text-left px-4 py-3">Standort</th>
-                  <th className="text-left px-4 py-3">Spez/Schaden</th>
-                  <th className="text-left px-4 py-3">Erstellt</th>
-                  <th className="text-left px-4 py-3">Zuweisen an</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-claimondo-border">
-                {poolLeads.map(l => (
-                  <tr key={l.id} className="hover:bg-amber-50/30">
-                    <td className="px-4 py-3">
-                      <div className="font-mono text-xs text-claimondo-navy">{l.fall_nummer}</div>
-                      {l.kennzeichen && <div className="text-[10px] text-claimondo-ondo/70 font-mono">{l.kennzeichen}</div>}
-                      {l.fahrzeug && <div className="text-[10px] text-claimondo-ondo">{l.fahrzeug}</div>}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-claimondo-navy">
-                      {[l.schadens_adresse, l.schadens_plz, l.schadens_ort].filter(Boolean).join(', ') || '—'}
-                    </td>
-                    <td className="px-4 py-3 text-xs">
-                      {l.spezifikation && <div className="text-[var(--brand-secondary)]">{l.spezifikation}</div>}
-                      {l.schadens_art && <div className="text-amber-700">{l.schadens_art}</div>}
-                      {!l.spezifikation && !l.schadens_art && <span className="text-claimondo-ondo/70">—</span>}
-                    </td>
-                    <td className="px-4 py-3 text-[10px] text-claimondo-ondo/70">
-                      {l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE') : '—'}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={assignTargets[l.id] ?? ''}
-                          onChange={e => setAssignTargets(prev => ({ ...prev, [l.id]: e.target.value }))}
-                          disabled={pending}
-                          className="text-xs bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand-secondary)]"
-                        >
-                          <option value="">Wählen...</option>
-                          {eligibleTargets.map(s => (
-                            <option key={s.id} value={s.id}>
-                              {[s.vorname, s.nachname].filter(Boolean).join(' ') || s.id.slice(0, 8)} ({s.paket_faelle_genutzt ?? 0}/{s.paket_faelle_gesamt})
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          onClick={() => handleAssign(l.id)}
-                          disabled={pending || !assignTargets[l.id]}
-                          className="p-1.5 rounded-lg bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] text-white disabled:opacity-40"
-                        >
-                          <ArrowRightIcon className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <DataTableContainer variant="plain">
+              <Table>
+                <Thead className="!text-[10px] !tracking-wide">
+                  <Tr>
+                    <Th>Fall</Th>
+                    <Th>Standort</Th>
+                    <Th>Spez/Schaden</Th>
+                    <Th>Erstellt</Th>
+                    <Th>Zuweisen an</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {poolLeads.map(l => (
+                    <Tr key={l.id} className="hover:bg-amber-50/30">
+                      <Td>
+                        <div className="font-mono text-xs text-claimondo-navy">{l.fall_nummer}</div>
+                        {l.kennzeichen && <div className="text-[10px] text-claimondo-ondo/70 font-mono">{l.kennzeichen}</div>}
+                        {l.fahrzeug && <div className="text-[10px] text-claimondo-ondo">{l.fahrzeug}</div>}
+                      </Td>
+                      <Td className="text-xs">
+                        {[l.schadens_adresse, l.schadens_plz, l.schadens_ort].filter(Boolean).join(', ') || '—'}
+                      </Td>
+                      <Td className="text-xs">
+                        {l.spezifikation && <div className="text-[var(--brand-secondary)]">{l.spezifikation}</div>}
+                        {l.schadens_art && <div className="text-amber-700">{l.schadens_art}</div>}
+                        {!l.spezifikation && !l.schadens_art && <span className="text-claimondo-ondo/70">—</span>}
+                      </Td>
+                      <Td className="!text-claimondo-ondo/70 text-[10px]">
+                        {l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE') : '—'}
+                      </Td>
+                      <Td>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={assignTargets[l.id] ?? ''}
+                            onChange={e => setAssignTargets(prev => ({ ...prev, [l.id]: e.target.value }))}
+                            disabled={pending}
+                            className="text-xs bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand-secondary)]"
+                          >
+                            <option value="">Wählen...</option>
+                            {eligibleTargets.map(s => (
+                              <option key={s.id} value={s.id}>
+                                {[s.vorname, s.nachname].filter(Boolean).join(' ') || s.id.slice(0, 8)} ({s.paket_faelle_genutzt ?? 0}/{s.paket_faelle_gesamt})
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => handleAssign(l.id)}
+                            disabled={pending || !assignTargets[l.id]}
+                            className="p-1.5 rounded-lg bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] text-white disabled:opacity-40"
+                          >
+                            <ArrowRightIcon className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </DataTableContainer>
           )}
         </div>
       )}
@@ -206,60 +209,62 @@ export default function TeamClient({
             </p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
-              <tr>
-                <th className="text-left px-4 py-3">Name</th>
-                <th className="text-left px-4 py-3">Email</th>
-                <th className="text-left px-4 py-3">Paket</th>
-                <th className="text-left px-4 py-3">Status</th>
-                <th className="text-right px-4 py-3">Fälle Monat</th>
-                <th className="text-right px-4 py-3">Werbebudget</th>
-                <th className="text-right px-4 py-3">Aktion</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-claimondo-border">
-              {subSvs.map(s => {
-                const name = [s.vorname, s.nachname].filter(Boolean).join(' ') || '—'
-                const isGesperrt = !!s.gesperrt_seit
-                const status = isGesperrt ? { label: 'Gesperrt', cls: 'bg-red-50 text-red-700' }
-                  : !s.ist_aktiv ? { label: 'Inaktiv', cls: 'bg-claimondo-bg text-claimondo-ondo' }
-                  : !s.portal_zugang_freigeschaltet ? { label: 'Wartet auf Onboarding', cls: 'bg-yellow-50 text-yellow-700' }
-                  : { label: 'Aktiv', cls: 'bg-emerald-50 text-emerald-700' }
-                return (
-                  <tr key={s.id} className={`hover:bg-claimondo-bg/50 ${isGesperrt ? 'opacity-60' : ''}`}>
-                    <td className="px-4 py-3 text-claimondo-navy">{name}</td>
-                    <td className="px-4 py-3 text-claimondo-ondo text-xs">{s.email ?? '—'}</td>
-                    <td className="px-4 py-3 text-claimondo-navy capitalize">{s.paket}</td>
-                    <td className="px-4 py-3">
-                      <StatusBadge colorCls={status.cls}>{status.label}</StatusBadge>
-                    </td>
-                    <td className="px-4 py-3 text-right text-claimondo-navy">
-                      {s.paket_faelle_genutzt ?? 0} / {s.paket_faelle_gesamt}
-                    </td>
-                    <td className="px-4 py-3 text-right text-claimondo-navy">
-                      {s.werbebudget_guthaben_netto != null
-                        ? s.werbebudget_guthaben_netto.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })
-                        : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => handleToggleSperre(s.id, isGesperrt)}
-                        disabled={pending}
-                        className={`inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md font-medium transition-colors disabled:opacity-40 ${
-                          isGesperrt
-                            ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                            : 'bg-red-50 text-red-700 hover:bg-red-100'
-                        }`}
-                      >
-                        {isGesperrt ? <><ShieldCheckIcon className="w-3 h-3" /> Entsperren</> : <><ShieldOffIcon className="w-3 h-3" /> Sperren</>}
-                      </button>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <DataTableContainer variant="plain">
+            <Table>
+              <Thead className="!text-[10px] !tracking-wide">
+                <Tr>
+                  <Th>Name</Th>
+                  <Th>Email</Th>
+                  <Th>Paket</Th>
+                  <Th>Status</Th>
+                  <Th className="text-right">Fälle Monat</Th>
+                  <Th className="text-right">Werbebudget</Th>
+                  <Th className="text-right">Aktion</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {subSvs.map(s => {
+                  const name = [s.vorname, s.nachname].filter(Boolean).join(' ') || '—'
+                  const isGesperrt = !!s.gesperrt_seit
+                  const status = isGesperrt ? { label: 'Gesperrt', cls: 'bg-red-50 text-red-700' }
+                    : !s.ist_aktiv ? { label: 'Inaktiv', cls: 'bg-claimondo-bg text-claimondo-ondo' }
+                    : !s.portal_zugang_freigeschaltet ? { label: 'Wartet auf Onboarding', cls: 'bg-yellow-50 text-yellow-700' }
+                    : { label: 'Aktiv', cls: 'bg-emerald-50 text-emerald-700' }
+                  return (
+                    <Tr key={s.id} className={`hover:bg-claimondo-bg/50 ${isGesperrt ? 'opacity-60' : ''}`}>
+                      <Td>{name}</Td>
+                      <Td className="!text-claimondo-ondo text-xs">{s.email ?? '—'}</Td>
+                      <Td className="capitalize">{s.paket}</Td>
+                      <Td>
+                        <StatusBadge colorCls={status.cls}>{status.label}</StatusBadge>
+                      </Td>
+                      <Td className="text-right">
+                        {s.paket_faelle_genutzt ?? 0} / {s.paket_faelle_gesamt}
+                      </Td>
+                      <Td className="text-right">
+                        {s.werbebudget_guthaben_netto != null
+                          ? s.werbebudget_guthaben_netto.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })
+                          : '—'}
+                      </Td>
+                      <Td className="text-right">
+                        <button
+                          onClick={() => handleToggleSperre(s.id, isGesperrt)}
+                          disabled={pending}
+                          className={`inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md font-medium transition-colors disabled:opacity-40 ${
+                            isGesperrt
+                              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                              : 'bg-red-50 text-red-700 hover:bg-red-100'
+                          }`}
+                        >
+                          {isGesperrt ? <><ShieldCheckIcon className="w-3 h-3" /> Entsperren</> : <><ShieldOffIcon className="w-3 h-3" /> Sperren</>}
+                        </button>
+                      </Td>
+                    </Tr>
+                  )
+                })}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         )}
       </div>
 

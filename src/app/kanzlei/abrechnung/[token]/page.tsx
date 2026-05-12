@@ -1,6 +1,7 @@
 ﻿import { createAdminClient } from '@/lib/supabase/admin'
 import { createKanzleiCheckoutSession } from '@/lib/stripe/kanzlei-checkout'
 import KanzleiCheckoutClient from './KanzleiCheckoutClient'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -153,36 +154,36 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
           <div className="p-6 border-b">
             <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">Positionen</h2>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-claimondo-bg">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-claimondo-ondo">Nr.</th>
-                  <th className="text-left px-4 py-3 font-medium text-claimondo-ondo">Fall-Nr.</th>
-                  <th className="text-left px-4 py-3 font-medium text-claimondo-ondo">Kunde</th>
-                  <th className="text-left px-4 py-3 font-medium text-claimondo-ondo">Vollmacht unterz.</th>
-                  <th className="text-right px-4 py-3 font-medium text-claimondo-ondo">Netto</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-claimondo-border">
+          <DataTableContainer variant="plain">
+            <Table>
+              <Thead className="!normal-case !tracking-normal !text-sm">
+                <Tr>
+                  <Th className="text-claimondo-ondo">Nr.</Th>
+                  <Th className="text-claimondo-ondo">Fall-Nr.</Th>
+                  <Th className="text-claimondo-ondo">Kunde</Th>
+                  <Th className="text-claimondo-ondo">Vollmacht unterz.</Th>
+                  <Th className="text-right text-claimondo-ondo">Netto</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
                 {(positionen ?? []).map((pos) => (
-                  <tr key={pos.id} className="hover:bg-claimondo-bg">
-                    <td className="px-4 py-3 text-claimondo-ondo">{pos.position_nr}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-claimondo-navy">{pos.fall_nr ?? '—'}</td>
-                    <td className="px-4 py-3 text-claimondo-navy">{pos.kunde_name}</td>
-                    <td className="px-4 py-3 text-claimondo-ondo">
+                  <Tr key={pos.id} className="hover:bg-claimondo-bg">
+                    <Td className="!text-claimondo-ondo">{pos.position_nr}</Td>
+                    <Td className="font-mono text-xs">{pos.fall_nr ?? '—'}</Td>
+                    <Td>{pos.kunde_name}</Td>
+                    <Td className="!text-claimondo-ondo">
                       {pos.vollmacht_unterschrieben_am
                         ? new Date(pos.vollmacht_unterschrieben_am as string).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
                         : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-right text-claimondo-navy">
+                    </Td>
+                    <Td className="text-right">
                       {Number(pos.betrag_netto).toFixed(2).replace('.', ',')} €
-                    </td>
-                  </tr>
+                    </Td>
+                  </Tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </Tbody>
+            </Table>
+          </DataTableContainer>
 
           {/* Summen */}
           <div className="p-6 border-t bg-claimondo-bg space-y-2">

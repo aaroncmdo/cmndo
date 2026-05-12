@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { FolderOpenIcon, ArrowRightIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { AKTUELLE_PHASE_LABELS } from '@/lib/statusLabels'
 
 function formatDate(iso: string | null): string {
@@ -69,65 +70,63 @@ export default async function KanzleiDashboardPage() {
       )}
 
       {!error && faelle && faelle.length > 0 && (
-        <div className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wider text-claimondo-ondo">
-                <tr>
-                  <th className="text-left px-4 py-3 font-semibold">Fall-Nr</th>
-                  <th className="text-left px-4 py-3 font-semibold">Kunde</th>
-                  <th className="text-left px-4 py-3 font-semibold">Kennzeichen</th>
-                  <th className="text-left px-4 py-3 font-semibold">Phase</th>
-                  <th className="text-left px-4 py-3 font-semibold">Status</th>
-                  <th className="text-left px-4 py-3 font-semibold">Mandat-Nr</th>
-                  <th className="text-left px-4 py-3 font-semibold">Letzte Änderung</th>
-                  <th className="w-10 px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody>
+        <DataTableContainer variant="plain" className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
+            <Table>
+              <Thead className="!text-[10px]">
+                <Tr>
+                  <Th className="!font-semibold">Fall-Nr</Th>
+                  <Th className="!font-semibold">Kunde</Th>
+                  <Th className="!font-semibold">Kennzeichen</Th>
+                  <Th className="!font-semibold">Phase</Th>
+                  <Th className="!font-semibold">Status</Th>
+                  <Th className="!font-semibold">Mandat-Nr</Th>
+                  <Th className="!font-semibold">Letzte Änderung</Th>
+                  <Th className="w-10" />
+                </Tr>
+              </Thead>
+              <Tbody className="!divide-y-0">
                 {faelle.map((f) => {
                   const kunde = [f.kunde_vorname, f.kunde_nachname].filter(Boolean).join(' ') || '—'
                   const phaseKey = String(f.aktuelle_phase ?? '')
                   const phaseLabel = AKTUELLE_PHASE_LABELS[phaseKey] ?? phaseKey ?? '—'
                   return (
-                    <tr
+                    <Tr
                       key={f.id}
                       className="border-t border-claimondo-border hover:bg-claimondo-bg transition-colors"
                     >
-                      <td className="px-4 py-3 font-mono text-[12px] text-claimondo-navy">
+                      <Td className="font-mono text-[12px]">
                         <Link
                           href={`/kanzlei/fall/${f.id}`}
                           className="hover:underline"
                         >
                           {f.fall_nummer ?? f.id.slice(0, 8)}
                         </Link>
-                      </td>
-                      <td className="px-4 py-3 text-claimondo-navy">{kunde}</td>
-                      <td className="px-4 py-3 font-mono text-[12px] text-claimondo-navy">
+                      </Td>
+                      <Td>{kunde}</Td>
+                      <Td className="font-mono text-[12px]">
                         {f.kennzeichen ?? '—'}
-                      </td>
-                      <td className="px-4 py-3 text-claimondo-navy">{phaseLabel}</td>
-                      <td className="px-4 py-3">
+                      </Td>
+                      <Td>{phaseLabel}</Td>
+                      <Td>
                         <FallStatusBadge status={f.status as string | null} size="md" />
-                      </td>
-                      <td className="px-4 py-3 font-mono text-[12px] text-claimondo-navy">
+                      </Td>
+                      <Td className="font-mono text-[12px]">
                         {f.mandatsnummer ?? '—'}
-                      </td>
-                      <td className="px-4 py-3 text-claimondo-ondo text-xs">
+                      </Td>
+                      <Td className="!text-claimondo-ondo text-xs">
                         {formatDate((f.updated_at as string | null) ?? (f.created_at as string | null))}
-                      </td>
-                      <td className="px-4 py-3 text-claimondo-ondo/70">
+                      </Td>
+                      <Td className="!text-claimondo-ondo/70">
                         <Link href={`/kanzlei/fall/${f.id}`} aria-label="Öffnen">
                           <ArrowRightIcon className="w-4 h-4" />
                         </Link>
-                      </td>
-                    </tr>
+                      </Td>
+                    </Tr>
                   )
                 })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </Tbody>
+            </Table>
+        </DataTableContainer>
       )}
     </div>
   )

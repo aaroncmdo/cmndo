@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { BarChart3Icon, BriefcaseIcon, TrophyIcon, GiftIcon, ClockIcon, PhoneIcon, VideoIcon, AlertTriangleIcon, CalendarIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 type Incentive = { id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string; bedingung: string; wert: number }
@@ -150,26 +151,26 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
       {performanceHistory.length > 0 && (
         <div className="bg-white rounded-2xl border border-claimondo-border p-5 mt-6">
           <h3 className="text-claimondo-ondo text-xs font-semibold uppercase tracking-wider mb-3">Monatsvergleich</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-claimondo-border">
-                <th className="text-left px-3 py-2 text-claimondo-ondo font-medium">Monat</th>
-                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">{stats.isDispatch ? 'Leads' : 'Aktiv'}</th>
-                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">{stats.isDispatch ? 'Konvertiert' : 'Abgeschl.'}</th>
-                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">Umsatz</th>
-              </tr></thead>
-              <tbody>
+          <DataTableContainer variant="plain">
+            <Table>
+              <Thead className="!bg-transparent !text-sm !normal-case !tracking-normal"><Tr className="border-b border-claimondo-border">
+                <Th className="!px-3 !py-2 text-claimondo-ondo">Monat</Th>
+                <Th className="!px-3 !py-2 text-right text-claimondo-ondo">{stats.isDispatch ? 'Leads' : 'Aktiv'}</Th>
+                <Th className="!px-3 !py-2 text-right text-claimondo-ondo">{stats.isDispatch ? 'Konvertiert' : 'Abgeschl.'}</Th>
+                <Th className="!px-3 !py-2 text-right text-claimondo-ondo">Umsatz</Th>
+              </Tr></Thead>
+              <Tbody className="!divide-y-0">
                 {performanceHistory.map(p => (
-                  <tr key={`${p.monat}-${p.jahr}`} className="border-b border-claimondo-border/50">
-                    <td className="px-3 py-2 text-claimondo-navy">{p.monat} {p.jahr}</td>
-                    <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">{stats.isDispatch ? p.leads_qualifiziert : p.aktive_faelle}</td>
-                    <td className="px-3 py-2 text-right text-green-400 tabular-nums">{stats.isDispatch ? p.leads_konvertiert : p.faelle_abgeschlossen}</td>
-                    <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">{fmt(p.umsatz_generiert ?? 0)}</td>
-                  </tr>
+                  <Tr key={`${p.monat}-${p.jahr}`} className="border-b border-claimondo-border/50">
+                    <Td className="!px-3 !py-2">{p.monat} {p.jahr}</Td>
+                    <Td className="!px-3 !py-2 text-right tabular-nums">{stats.isDispatch ? p.leads_qualifiziert : p.aktive_faelle}</Td>
+                    <Td className="!px-3 !py-2 text-right !text-green-400 tabular-nums">{stats.isDispatch ? p.leads_konvertiert : p.faelle_abgeschlossen}</Td>
+                    <Td className="!px-3 !py-2 text-right tabular-nums">{fmt(p.umsatz_generiert ?? 0)}</Td>
+                  </Tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         </div>
       )}
     </div></div>

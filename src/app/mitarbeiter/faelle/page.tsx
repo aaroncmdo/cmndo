@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,42 +22,42 @@ export default async function MitarbeiterFaelle() {
     <div className="space-y-4">
       <PageHeader title="Meine Fälle" description="Alle Ihnen zugewiesenen Fälle, sortiert nach Erstellung." size="lg" />
 
-      <div className="bg-white rounded-xl border border-claimondo-border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-claimondo-bg text-xs uppercase text-claimondo-ondo">
-            <tr>
-              <th className="text-left px-4 py-2">Fall</th>
-              <th className="text-left px-4 py-2">Fahrzeug</th>
-              <th className="text-left px-4 py-2">Status</th>
-              <th className="text-left px-4 py-2">Erstellt</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-claimondo-border">
+      <DataTableContainer variant="plain" className="bg-white rounded-xl border border-claimondo-border overflow-hidden">
+        <Table>
+          <Thead className="!tracking-normal">
+            <Tr>
+              <Th className="!py-2">Fall</Th>
+              <Th className="!py-2">Fahrzeug</Th>
+              <Th className="!py-2">Status</Th>
+              <Th className="!py-2">Erstellt</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
             {(faelle ?? []).map(f => (
-              <tr key={f.id} className="hover:bg-claimondo-bg">
-                <td className="px-4 py-3">
+              <Tr key={f.id} className="hover:bg-claimondo-bg">
+                <Td>
                   <Link href={`/faelle/${f.id}`} className="text-claimondo-ondo hover:underline font-medium">
                     {f.fall_nummer ?? f.id.slice(0, 8)}
                   </Link>
                   {f.kennzeichen && <p className="text-xs text-claimondo-ondo/70">{f.kennzeichen}</p>}
-                </td>
-                <td className="px-4 py-3 text-claimondo-navy">
+                </Td>
+                <Td>
                   {[f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || '—'}
-                </td>
-                <td className="px-4 py-3">
+                </Td>
+                <Td>
                   <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.status}</span>
-                </td>
-                <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
+                </Td>
+                <Td className="!text-claimondo-ondo/70 text-xs">
                   {new Date(f.created_at).toLocaleDateString('de-DE')}
-                </td>
-              </tr>
+                </Td>
+              </Tr>
             ))}
             {(!faelle || faelle.length === 0) && (
-              <tr><td colSpan={4} className="px-4 py-12 text-center text-claimondo-ondo/70 text-sm">Keine Fälle zugewiesen</td></tr>
+              <Tr><Td colSpan={4} className="!py-12 text-center !text-claimondo-ondo/70 text-sm">Keine Fälle zugewiesen</Td></Tr>
             )}
-          </tbody>
-        </table>
-      </div>
+          </Tbody>
+        </Table>
+      </DataTableContainer>
     </div>
   )
 }
