@@ -5,7 +5,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL } from '@/lib/seo/jsonld'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, MAKLER_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY, CONTACT_EMAIL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
   title: 'Makler Partner werden — Kfz-Schäden direkt vermitteln | Claimondo',
@@ -22,13 +22,13 @@ export const metadata: Metadata = {
     'Partner werden Versicherung',
   ],
   alternates: {
-    canonical: '/makler/partner-werden',
+    canonical: `${MAKLER_LANDING_URL}/`,
   },
   openGraph: {
     type: 'website',
     locale: 'de_DE',
     siteName: 'Claimondo',
-    url: `${SITE_URL}/makler/partner-werden`,
+    url: `${MAKLER_LANDING_URL}/`,
     title: 'Makler Partner werden — Kfz-Schäden professionell abwickeln',
     description: 'Kooperation ohne Kosten. Ihre Kunden bekommen Top-Service, Sie stärken die Kundenbindung.',
     images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo Makler-Partnerschaft' }],
@@ -99,11 +99,11 @@ export default function MaklerPartnerWerdenPage() {
             name: 'Claimondo Makler-Partnerschaft',
             description:
               'Versicherungsmakler kooperieren mit Claimondo, um ihren Kunden bei Kfz-Unfallschäden eine vollständige Schadensabwicklung zu bieten — inklusive Gutachter, Regulierung und Durchsetzung aller Ansprüche.',
-            url: `${SITE_URL}/makler/partner-werden`,
+            url: `${MAKLER_LANDING_URL}/`,
           }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
-            { name: 'Makler Partner werden', url: '/makler/partner-werden' },
+            { name: 'Makler Partner werden', url: `${MAKLER_LANDING_URL}/` },
           ]),
         ])}
       />
@@ -302,7 +302,7 @@ export default function MaklerPartnerWerdenPage() {
               Sie sind Kfz-Sachverständiger und suchen Aufträge?
             </p>
             <Link
-              href="/gutachter-partner"
+              href={GUTACHTER_LANDING_URL}
               className="mt-4 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3 text-sm font-bold text-white transition-all hover:bg-claimondo-shield"
             >
               Als Gutachter Partner werden
