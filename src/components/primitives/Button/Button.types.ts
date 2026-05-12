@@ -5,7 +5,8 @@
 
 import type { ReactNode } from 'react'
 
-export type ButtonTone = 'navy' | 'ondo' | 'ghost' | 'danger' | 'success'
+// 'bare' = wie 'ghost' aber ohne Rahmen (borderlose Sekundär-Aktion).
+export type ButtonTone = 'navy' | 'ondo' | 'ghost' | 'bare' | 'danger' | 'success'
 /** sm=36 · md=44 (touchMin) · lg=52 · icon=44×44 quadratisch (Icon-only) */
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon'
 

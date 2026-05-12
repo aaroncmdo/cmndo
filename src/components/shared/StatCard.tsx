@@ -67,7 +67,7 @@ export function StatCard({
       } ${className ?? ''}`}
     >
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo">
+        <p className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-claimondo-ondo">
           {label}
         </p>
         {IconRef ? (

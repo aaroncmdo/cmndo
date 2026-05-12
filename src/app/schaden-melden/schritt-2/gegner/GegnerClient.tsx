@@ -204,7 +204,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
           <Label>Zeugen</Label>
           <Button
             type="button"
-            tone="ghost"
+            tone="bare"
             size="sm"
             onPress={() =>
               fields.length < 5 && append({ name: '', telefon: '' })
@@ -253,7 +253,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
                 </div>
                 <Button
                   type="button"
-                  tone="ghost"
+                  tone="bare"
                   size="icon"
                   onPress={() => remove(i)}
                   ariaLabel={`Zeuge ${i + 1} entfernen`}

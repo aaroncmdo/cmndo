@@ -50,6 +50,11 @@ const toneMap: Record<ButtonTone, ToneStyle> = {
     text: tokens.colors.navy,
     border: tokens.colors.border,
   },
+  bare: {
+    bg: 'transparent',
+    bgHover: GHOST_HOVER_BG,
+    text: tokens.colors.navy,
+  },
   danger: {
     bg: tokens.colors.danger,
     bgHover: DANGER_HOVER,
