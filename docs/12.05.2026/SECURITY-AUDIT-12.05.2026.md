@@ -4,6 +4,8 @@
 
 > **Caveat:** Das Basis-DB-Schema (ursprüngliche `ENABLE ROW LEVEL SECURITY` + `GRANT`s) liegt nicht im Repo (Squash-Baseline-Placeholder-Migrations) — die DB-Findings unten stammen daher aus dem **Live-Supabase-Advisor** (RLS-Audit), nicht aus dem Code. Wo der RLS-Audit „PRÜFEN" sagt, ist das ein offener Punkt, der einen erneuten Live-Schema-Blick braucht.
 
+> **Update 2026-05-12 — Live-Schema-/RLS-Audit durchgeführt:** siehe `LIVE-SCHEMA-RLS-AUDIT-12.05.2026.md` (alle „PRÜFEN"-Punkte aufgelöst, Policy-/GRANT-/Trigger-Ebene direkt geprüft). **Finding #1 daraus — CRITICAL Privilege-Escalation (jeder eingeloggte User konnte via direktem `PATCH /rest/v1/profiles?id=eq.<own-uid>` `{"rolle":"admin"}` Admin werden, komplett am App-Layer vorbei) — ist GEFIXT** (Migration `20260512140559_aar_profiles_rolle_lock`, Trigger `guard_profiles_rolle` auf `profiles`, live auf Prod + verifiziert). Offene Folge-Fixes (#2 makler/sv-Privileg-Spalten via Mass-Assignment, H2 `conversion_events`-RLS, `flow_links` anon-lesbar/-schreibbar, 4 Storage-Buckets `public=true`, `abrechnungen` offen, Audit-Spoofing): §10 dort.
+
 ---
 
 ## Severity-Übersicht
