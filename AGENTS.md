@@ -267,3 +267,23 @@ Reine Layout-Utilities (`flex`/`grid`/`gap-*`/`px-*`/`mt-*`) auf Wrapper-Divs bl
 ## Begründung
 Vor dieser Policy existierten drei „offizielle" Sets nebeneinander mit <10 % Adoption (`ui/*` shadcn fast tot, `primitives/*` ~28 Consumer) — handgerolltes Tailwind war der rationale Default für jeden Entwickler, und Inline-`StatCard`/`FilterChip`/`MiniDrawer`/`SectionCard` reproduzierten sich (Bestandsaufnahme: `docs/12.05.2026/FRONTEND/FRONTEND-REDUNDANZ-AUDIT-12.05.2026.md`, ~3.000–4.500 LOC dupliziert). Eine Schicht festlegen ist der Hebel.
 <!-- END:claimondo-component-set -->
+
+<!-- BEGIN:branding-rules -->
+# Whitelabel-Branding — `var(--brand-*)` statt hardcoded `claimondo-*`
+
+Die App ist whitelabel-fähig: ein verifizierter SV mit `use_custom_branding=true` brandet sein eigenes Portal **und** die Sicht seiner Kunden (Kunde-Portal, Magic-Links `/flow/[token]`, `/upload/zb1/[token]`, `/upload/dokumente/[token]`, Kunden-gerichtete Emails). Das funktioniert über CSS-Custom-Properties, die auf einem Wrapper-Element gesetzt werden (`generateCssVars(theme, 'full')` aus `src/lib/branding/css-vars.ts`).
+
+**Regeln für neue Komponenten:**
+
+* **Tailwind-Klassen `bg-claimondo-*` / `text-claimondo-*` / `border-claimondo-*` greifen automatisch auf das Brand-Theme** — `globals.css` biegt `--color-claimondo-navy` etc. auf `var(--brand-primary, …)` um. Du musst also **nichts** ändern, wenn du diese Klassen nutzt. Tu das auch weiterhin — es ist der Default-Weg.
+* **Inline-Hex-Strings (`#0D1B3E`, `#4573A2`) sind verboten** für Marken-Farben. Wenn du wirklich inline brauchst (3rd-Party-Component-Props, react-email): `var(--brand-primary, #0D1B3E)` mit Claimondo-Fallback.
+* **Brand-Resolver:**
+  * SV-Portal → `resolveBrandTheme(supabase, userId)` (Org-Vorrang für Sub-SVs)
+  * Kunde-Portal → `resolveKundenTheme(userId)` (Gate: `verifiziert && use_custom_branding`)
+  * Magic-Link-Routen → `resolveBrandingFromUploadToken` / `…Zb1Token` / `…FlowToken` aus `src/lib/branding/token-theme.ts`
+  * Emails → `resolveEmailBranding({ svId | fallId | leadId })` aus `token-theme.ts` → liefert `null` wenn kein Brand → Caller rendert Claimondo
+* **Semantische Farben bleiben semantisch:** Status-Grün/Warning-Gelb/Danger-Rot werden in `theme.ts:generateStatus()` an die Brand-Saturation harmonisiert (gewollt). Ein „echtes" Material-Grün (Trust-Marker, Verifizierungs-Badge) darf hardcoded `text-emerald-600` o.ä. bleiben.
+* **Nie** Layout-kritische Properties (`position`, `inset`) per Tailwind-Utility-Klasse auf einem Element, dem eine 3rd-Party-Lib (mapbox-gl etc.) eine eigene Klasse mit `position`-Regel verpasst — inline-`style` nutzen (siehe `GutachterFinderMapClient`-Incident 12.05.).
+
+**Was NICHT gebrandet wird:** Marketing-Pages (`/`, `/faq`, `/gutachter-finden` — kein User-Context), Admin-/Dispatch-/Kanzlei-Portale (interne Tools), Auth-Mails (`TwoFactorCode`), PDF-Generation, Native-App. Siehe `docs/12.05.2026/branding-rollout-spec.md`.
+<!-- END:branding-rules -->
