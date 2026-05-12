@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { TrophyIcon, UsersIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 // KFZ-152 Phase 3: Community-Dashboard fuer Mitglieder.
 // Zeigt das aktuelle Monats-Leaderboard mit Rang, Faelle, Umsatz, Avg-Dauer.
@@ -131,49 +132,51 @@ export default async function CommunityDashboardPage() {
             Noch keine Daten für diesen Monat. Das Leaderboard wird täglich um 04:00 aktualisiert.
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
-              <tr>
-                <th className="text-left px-4 py-3 w-16">Rang</th>
-                <th className="text-left px-4 py-3">Mitglied</th>
-                <th className="text-right px-4 py-3">Fälle</th>
-                <th className="text-right px-4 py-3">Umsatz netto</th>
-                <th className="text-right px-4 py-3">⌀ Bearbeitung</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-claimondo-border">
-              {leaderboard.map(row => {
-                const isMe = row.sv_id === sv.id
-                const name = [row.vorname, row.nachname].filter(Boolean).join(' ') || 'Anonym'
-                return (
-                  <tr key={row.sv_id} className={isMe ? 'bg-[var(--brand-secondary)]/5 border-l-4 border-l-[var(--brand-secondary)]' : ''}>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
-                        row.rang === 1 ? 'bg-amber-100 text-amber-700'
-                        : row.rang === 2 ? 'bg-claimondo-bg text-claimondo-navy'
-                        : row.rang === 3 ? 'bg-orange-100 text-orange-700'
-                        : 'bg-claimondo-bg text-claimondo-ondo'
-                      }`}>
-                        {row.rang ?? '—'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className={`text-sm ${isMe ? 'font-semibold text-[var(--brand-primary)]' : 'text-claimondo-navy'}`}>
-                        {name}{isMe && <span className="ml-2 text-[10px] text-[var(--brand-secondary)]">(Du)</span>}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium text-claimondo-navy">{row.faelle_count}</td>
-                    <td className="px-4 py-3 text-right text-claimondo-navy">
-                      {row.umsatz_netto.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
-                    </td>
-                    <td className="px-4 py-3 text-right text-claimondo-navy text-xs">
-                      {row.durchschnitt_bearbeitungsdauer_h != null ? `${row.durchschnitt_bearbeitungsdauer_h} h` : '—'}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+          <DataTableContainer variant="plain">
+            <Table>
+              <Thead className="!text-[10px] !tracking-wide">
+                <Tr>
+                  <Th className="w-16">Rang</Th>
+                  <Th>Mitglied</Th>
+                  <Th className="text-right">Fälle</Th>
+                  <Th className="text-right">Umsatz netto</Th>
+                  <Th className="text-right">⌀ Bearbeitung</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {leaderboard.map(row => {
+                  const isMe = row.sv_id === sv.id
+                  const name = [row.vorname, row.nachname].filter(Boolean).join(' ') || 'Anonym'
+                  return (
+                    <Tr key={row.sv_id} className={isMe ? 'bg-[var(--brand-secondary)]/5 border-l-4 border-l-[var(--brand-secondary)]' : ''}>
+                      <Td>
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
+                          row.rang === 1 ? 'bg-amber-100 text-amber-700'
+                          : row.rang === 2 ? 'bg-claimondo-bg text-claimondo-navy'
+                          : row.rang === 3 ? 'bg-orange-100 text-orange-700'
+                          : 'bg-claimondo-bg text-claimondo-ondo'
+                        }`}>
+                          {row.rang ?? '—'}
+                        </span>
+                      </Td>
+                      <Td>
+                        <div className={`text-sm ${isMe ? 'font-semibold text-[var(--brand-primary)]' : 'text-claimondo-navy'}`}>
+                          {name}{isMe && <span className="ml-2 text-[10px] text-[var(--brand-secondary)]">(Du)</span>}
+                        </div>
+                      </Td>
+                      <Td className="text-right font-medium">{row.faelle_count}</Td>
+                      <Td className="text-right">
+                        {row.umsatz_netto.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
+                      </Td>
+                      <Td className="text-right text-xs">
+                        {row.durchschnitt_bearbeitungsdauer_h != null ? `${row.durchschnitt_bearbeitungsdauer_h} h` : '—'}
+                      </Td>
+                    </Tr>
+                  )
+                })}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         )}
       </div>
 

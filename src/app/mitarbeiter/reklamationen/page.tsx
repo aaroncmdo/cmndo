@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,50 +32,50 @@ export default async function MitarbeiterReklamationen() {
     <div className="space-y-4">
       <PageHeader title="Reklamationen" description="Reklamationen zu Ihren Fällen." size="lg" />
 
-      <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-claimondo-bg text-xs uppercase text-claimondo-ondo">
-            <tr>
-              <th className="text-left px-4 py-2">Fall</th>
-              <th className="text-left px-4 py-2">Grund</th>
-              <th className="text-left px-4 py-2">Status</th>
-              <th className="text-left px-4 py-2">Eingereicht</th>
-              <th className="text-left px-4 py-2">Frist</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-claimondo-border">
+      <DataTableContainer variant="plain" className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
+        <Table>
+          <Thead className="!tracking-normal">
+            <Tr>
+              <Th className="!py-2">Fall</Th>
+              <Th className="!py-2">Grund</Th>
+              <Th className="!py-2">Status</Th>
+              <Th className="!py-2">Eingereicht</Th>
+              <Th className="!py-2">Frist</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
             {(reklamationen ?? []).map(r => {
               const fall = fallMap.get(r.fall_id as string)
               return (
-                <tr key={r.id} className="hover:bg-claimondo-bg">
-                  <td className="px-4 py-3">
+                <Tr key={r.id} className="hover:bg-claimondo-bg">
+                  <Td>
                     <Link href={`/faelle/${r.fall_id}`} className="text-claimondo-ondo hover:underline font-medium">
                       {fall?.fall_nummer ?? (r.fall_id as string).slice(0, 8)}
                     </Link>
-                  </td>
-                  <td className="px-4 py-3 text-claimondo-navy">{r.grund ?? '—'}</td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td>{r.grund ?? '—'}</Td>
+                  <Td>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       r.status === 'offen' ? 'bg-amber-100 text-amber-700' :
                       r.status === 'erledigt' ? 'bg-emerald-100 text-emerald-700' :
                       'bg-claimondo-bg text-claimondo-ondo'
                     }`}>{r.status ?? '—'}</span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
+                  </Td>
+                  <Td className="!text-claimondo-ondo text-xs">
                     {r.eingereicht_am ? new Date(r.eingereicht_am).toLocaleDateString('de-DE') : '—'}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
+                  </Td>
+                  <Td className="!text-claimondo-ondo text-xs">
                     {r.frist_bis ? new Date(r.frist_bis).toLocaleDateString('de-DE') : '—'}
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               )
             })}
             {(!reklamationen || reklamationen.length === 0) && (
-              <tr><td colSpan={5} className="px-4 py-12 text-center text-claimondo-ondo/70 text-sm">Keine Reklamationen</td></tr>
+              <Tr><Td colSpan={5} className="!py-12 text-center !text-claimondo-ondo/70 text-sm">Keine Reklamationen</Td></Tr>
             )}
-          </tbody>
-        </table>
-      </div>
+          </Tbody>
+        </Table>
+      </DataTableContainer>
     </div>
   )
 }

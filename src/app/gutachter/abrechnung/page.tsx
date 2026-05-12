@@ -4,6 +4,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
 import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 const PAKET_LABELS: Record<string, string> = {
   standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)',
@@ -235,19 +236,18 @@ export default async function AbrechnungPage() {
           ) : (
             <>
               {/* Desktop table */}
-              <div className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-claimondo-border">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-claimondo-border">
-                        <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Fall-Nr.</th>
-                        <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Kunde</th>
-                        <th className="text-right px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Schadenhöhe</th>
-                        <th className="text-right px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Leadpreis</th>
-                        <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Datum</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+              <DataTableContainer variant="plain" className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-claimondo-border">
+                <Table>
+                    <Thead className="!bg-transparent !text-sm !normal-case !tracking-normal">
+                      <Tr className="border-b border-claimondo-border">
+                        <Th className="text-claimondo-ondo whitespace-nowrap">Fall-Nr.</Th>
+                        <Th className="text-claimondo-ondo">Kunde</Th>
+                        <Th className="text-right text-claimondo-ondo whitespace-nowrap">Schadenhöhe</Th>
+                        <Th className="text-right text-claimondo-ondo whitespace-nowrap">Leadpreis</Th>
+                        <Th className="text-claimondo-ondo">Datum</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody className="!divide-y-0">
                       {completedFaelle.map((fall) => {
                         const lead = fall.lead_id ? leadMap[fall.lead_id] : null
                         const name = lead
@@ -278,18 +278,18 @@ export default async function AbrechnungPage() {
                             : '—'
 
                         return (
-                          <tr
+                          <Tr
                             key={fall.id}
                             className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors"
                           >
-                            <td className="px-4 py-3">
+                            <Td>
                               <span className="text-[var(--brand-accent)] font-mono text-xs">
                                 {fall.fall_nummer ?? fall.id.slice(0, 8)}
                               </span>
-                            </td>
-                            <td className="px-4 py-3 text-claimondo-navy">{name}</td>
-                            <td className="px-4 py-3 text-claimondo-navy text-right tabular-nums">{betrag}</td>
-                            <td className="px-4 py-3 text-right tabular-nums">
+                            </Td>
+                            <Td>{name}</Td>
+                            <Td className="text-right tabular-nums">{betrag}</Td>
+                            <Td className="text-right tabular-nums">
                               {abr ? (
                                 <span className={abr.preistyp === 'einzel' ? 'text-amber-400' : 'text-claimondo-navy'}>
                                   {leadpreisStr}
@@ -298,15 +298,14 @@ export default async function AbrechnungPage() {
                               ) : (
                                 <span className="text-claimondo-ondo text-xs">—</span>
                               )}
-                            </td>
-                            <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">{datum}</td>
-                          </tr>
+                            </Td>
+                            <Td className="!text-claimondo-ondo text-xs whitespace-nowrap">{datum}</Td>
+                          </Tr>
                         )
                       })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                    </Tbody>
+                  </Table>
+              </DataTableContainer>
 
               {/* Mobile cards */}
               <div className="sm:hidden space-y-3">
@@ -384,19 +383,19 @@ export default async function AbrechnungPage() {
             </div>
 
             {/* Desktop table */}
-            <div className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-claimondo-border">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-claimondo-border">
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Fall-Nr.</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Anlass</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Status</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Beauftragt</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Hochgeladen</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium whitespace-nowrap">Freigegeben</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <DataTableContainer variant="plain" className="hidden sm:block bg-white rounded-2xl overflow-hidden border border-claimondo-border">
+              <Table>
+                <Thead className="!bg-transparent !text-sm !normal-case !tracking-normal">
+                  <Tr className="border-b border-claimondo-border">
+                    <Th className="text-claimondo-ondo whitespace-nowrap">Fall-Nr.</Th>
+                    <Th className="text-claimondo-ondo">Anlass</Th>
+                    <Th className="text-claimondo-ondo">Status</Th>
+                    <Th className="text-claimondo-ondo whitespace-nowrap">Beauftragt</Th>
+                    <Th className="text-claimondo-ondo whitespace-nowrap">Hochgeladen</Th>
+                    <Th className="text-claimondo-ondo whitespace-nowrap">Freigegeben</Th>
+                  </Tr>
+                </Thead>
+                <Tbody className="!divide-y-0">
                   {stellungnahmen!.map((s) => {
                     const status = (s.technische_stellungnahme_status ?? '') as string
                     const statusLabel =
@@ -413,32 +412,32 @@ export default async function AbrechnungPage() {
                         ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
                         : '—'
                     return (
-                      <tr key={s.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
-                        <td className="px-4 py-3">
+                      <Tr key={s.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
+                        <Td>
                           <Link
                             href={`/gutachter/faelle/${s.id}`}
                             className="text-[var(--brand-accent)] font-mono text-xs hover:underline"
                           >
                             {s.fall_nummer ?? (s.id as string).slice(0, 8)}
                           </Link>
-                        </td>
-                        <td className="px-4 py-3 text-claimondo-navy text-xs">
+                        </Td>
+                        <Td className="text-xs">
                           {((s.vs_kuerzungs_typ as string | null) ?? 'technisch')}
-                        </td>
-                        <td className="px-4 py-3">
+                        </Td>
+                        <Td>
                           <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${statusColor}`}>
                             {statusLabel}
                           </span>
-                        </td>
-                        <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_beauftragt_am as string | null)}</td>
-                        <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_hochgeladen_am as string | null)}</td>
-                        <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_freigabe_am as string | null)}</td>
-                      </tr>
+                        </Td>
+                        <Td className="!text-claimondo-ondo text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_beauftragt_am as string | null)}</Td>
+                        <Td className="!text-claimondo-ondo text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_hochgeladen_am as string | null)}</Td>
+                        <Td className="!text-claimondo-ondo text-xs whitespace-nowrap">{fmt(s.technische_stellungnahme_freigabe_am as string | null)}</Td>
+                      </Tr>
                     )
                   })}
-                </tbody>
-              </table>
-            </div>
+                </Tbody>
+              </Table>
+            </DataTableContainer>
 
             {/* Mobile cards */}
             <div className="sm:hidden space-y-3">
@@ -492,36 +491,36 @@ export default async function AbrechnungPage() {
         {(einzahlungen?.length ?? 0) > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-claimondo-navy mb-4">Einzahlungen</h2>
-            <div className="bg-white rounded-2xl overflow-hidden border border-claimondo-border">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-claimondo-border">
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Typ</th>
-                    <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Betrag</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Beschreibung</th>
-                    <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Datum</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <DataTableContainer variant="plain" className="bg-white rounded-2xl overflow-hidden border border-claimondo-border">
+              <Table>
+                <Thead className="!bg-transparent !text-sm !normal-case !tracking-normal">
+                  <Tr className="border-b border-claimondo-border">
+                    <Th className="text-claimondo-ondo">Typ</Th>
+                    <Th className="text-right text-claimondo-ondo">Betrag</Th>
+                    <Th className="text-claimondo-ondo">Beschreibung</Th>
+                    <Th className="text-claimondo-ondo">Datum</Th>
+                  </Tr>
+                </Thead>
+                <Tbody className="!divide-y-0">
                   {einzahlungen!.map(e => (
-                    <tr key={e.id} className="border-b border-claimondo-border/50">
-                      <td className="px-4 py-3">
+                    <Tr key={e.id} className="border-b border-claimondo-border/50">
+                      <Td>
                         <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-400">
                           {e.typ === 'anzahlung' ? 'Anzahlung' : e.typ === 'nachzahlung' ? 'Nachzahlung' : 'Paketwechsel'}
                         </span>
-                      </td>
-                      <td className="px-4 py-3 text-emerald-400 text-right tabular-nums font-medium">
+                      </Td>
+                      <Td className="!text-emerald-400 text-right tabular-nums font-medium">
                         +{Number(e.betrag).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
-                      </td>
-                      <td className="px-4 py-3 text-claimondo-ondo text-xs">{e.beschreibung ?? '—'}</td>
-                      <td className="px-4 py-3 text-claimondo-ondo text-xs whitespace-nowrap">
+                      </Td>
+                      <Td className="!text-claimondo-ondo text-xs">{e.beschreibung ?? '—'}</Td>
+                      <Td className="!text-claimondo-ondo text-xs whitespace-nowrap">
                         {new Date(e.eingezahlt_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                      </td>
-                    </tr>
+                      </Td>
+                    </Tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </Tbody>
+              </Table>
+            </DataTableContainer>
           </div>
         )}
 

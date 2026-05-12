@@ -11,6 +11,7 @@ import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon } from 'lucide-re
 import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Chip } from '@/components/ui/Chip'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import DensityToggle from '@/components/shared/DensityToggle'
 import { useDensityPreference, type Density } from '@/hooks/useDensityPreference'
 
@@ -88,72 +89,70 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
   const rowPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   const cellPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   return (
-    <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] overflow-hidden border border-claimondo-navy/[0.06]">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-claimondo-navy/[0.08] bg-claimondo-navy/[0.03]">
-              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Name</th>
-              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Telefon</th>
-              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Status</th>
-              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">FlowLink</th>
-              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Service</th>
-              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Erstellt</th>
-              <th className="text-left px-4 py-3 font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-claimondo-navy/[0.06]">
+    <DataTableContainer variant="plain" className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] overflow-hidden border border-claimondo-navy/[0.06]">
+        <Table>
+          <Thead className="!bg-transparent">
+            <Tr className="border-b border-claimondo-navy/[0.08] bg-claimondo-navy/[0.03]">
+              <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Name</Th>
+              <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Telefon</Th>
+              <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Status</Th>
+              <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">FlowLink</Th>
+              <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Service</Th>
+              <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Erstellt</Th>
+              <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]"></Th>
+            </Tr>
+          </Thead>
+          <Tbody className="!divide-claimondo-navy/[0.06]">
             {leads.map((lead) => {
               const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
               const wa = waPill(lead.whatsapp_verfuegbar, lead.telefon)
               return (
-                <tr key={lead.id} className="hover:bg-claimondo-navy/[0.03] transition-colors">
-                  <td className="px-4 py-3">
+                <Tr key={lead.id} className="hover:bg-claimondo-navy/[0.03] transition-colors">
+                  <Td>
                     <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-claimondo-ondo">
                       {lead.vorname} {lead.nachname}
                     </Link>
                     {lead.schadens_fall_typ && (
                       <span className="ml-2 text-[10px] text-claimondo-ondo/70">{lead.schadens_fall_typ}</span>
                     )}
-                  </td>
-                  <td className={cellPadCls}>
+                  </Td>
+                  <Td className={cellPadCls}>
                     {lead.telefon ? (
                       <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
                     ) : (
                       <span className="text-claimondo-ondo/50">—</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
                       {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
                     </span>
-                  </td>
-                  <td className={cellPadCls}>
+                  </Td>
+                  <Td className={cellPadCls}>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
+                  </Td>
+                  <Td className="!text-claimondo-ondo text-xs">
                     {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo/70">
+                  </Td>
+                  <Td className="!text-claimondo-ondo/70 text-xs">
                     {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                  </td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td>
                     <Link href={`/dispatch/leads/${lead.id}`} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">
                       <ExternalLinkIcon className="w-4 h-4" />
                     </Link>
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               )
             })}
             {leads.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-claimondo-ondo/70">Keine Leads gefunden</td>
-              </tr>
+              <Tr>
+                <Td colSpan={7} className="!py-12 text-center text-sm !text-claimondo-ondo/70">Keine Leads gefunden</Td>
+              </Tr>
             )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </Tbody>
+        </Table>
+    </DataTableContainer>
   )
 }
 
