@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { AlertTriangleIcon, ClockIcon, CheckCircleIcon } from 'lucide-react'
 import { SLA_LABEL, type SlaTyp } from '@/lib/sla/tracker'
 import PageHeader from '@/components/shared/PageHeader'
+import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,18 +60,18 @@ export default async function SlaMonitoringPage() {
       </div>
 
       {/* Tabelle */}
-      <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-claimondo-bg">
-            <tr className="text-xs uppercase text-claimondo-ondo">
-              <th className="text-left px-4 py-3">Fall</th>
-              <th className="text-left px-4 py-3">SLA-Typ</th>
-              <th className="text-left px-4 py-3">Frist</th>
-              <th className="text-left px-4 py-3">Status</th>
-              <th className="text-left px-4 py-3">Aktion</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-claimondo-border">
+      <DataTableContainer variant="plain" className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
+        <Table>
+          <Thead>
+            <Tr>
+              <Th className="text-left">Fall</Th>
+              <Th className="text-left">SLA-Typ</Th>
+              <Th className="text-left">Frist</Th>
+              <Th className="text-left">Status</Th>
+              <Th className="text-left">Aktion</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
             {(slas ?? []).map((sla) => {
               const fallJoin = sla.faelle as unknown as { fall_nummer: string | null } | { fall_nummer: string | null }[] | null
               const fallRow = Array.isArray(fallJoin) ? fallJoin[0] : fallJoin
@@ -80,22 +81,22 @@ export default async function SlaMonitoringPage() {
               const restMin = Math.round(restMs / 60_000)
               const isBreached = sla.status === 'breached'
               return (
-                <tr key={sla.id as string} className={isBreached ? 'bg-red-50/40' : ''}>
-                  <td className="px-4 py-3">
+                <Tr key={sla.id as string} className={isBreached ? 'bg-red-50/40' : ''}>
+                  <Td>
                     <Link href={`/faelle/${sla.fall_id}`} className="font-medium text-claimondo-ondo hover:underline">
                       {fallNr}
                     </Link>
-                  </td>
-                  <td className="px-4 py-3 text-claimondo-navy">{SLA_LABEL[sla.sla_typ as SlaTyp]}</td>
-                  <td className="px-4 py-3 text-claimondo-ondo">
+                  </Td>
+                  <Td>{SLA_LABEL[sla.sla_typ as SlaTyp]}</Td>
+                  <Td className="text-claimondo-ondo!">
                     {breach.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     {!isBreached && (
                       <span className={`ml-2 text-xs ${restMin < 30 ? 'text-amber-600 font-medium' : 'text-claimondo-ondo/70'}`}>
                         {restMin > 0 ? `noch ${restMin} Min` : 'überfällig'}
                       </span>
                     )}
-                  </td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td>
                     {isBreached ? (
                       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">Verletzt</span>
                     ) : restMin < 30 ? (
@@ -103,8 +104,8 @@ export default async function SlaMonitoringPage() {
                     ) : (
                       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">Offen</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td>
                     {sla.eskalation_task_id ? (
                       <Link href={`/admin/aufgaben/alle?id=${sla.eskalation_task_id}`} className="text-xs text-claimondo-ondo hover:underline">
                         Task ansehen
@@ -112,20 +113,20 @@ export default async function SlaMonitoringPage() {
                     ) : (
                       <span className="text-xs text-claimondo-ondo/50">—</span>
                     )}
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               )
             })}
             {(!slas || slas.length === 0) && (
-              <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-claimondo-ondo/70 text-sm">
+              <Tr>
+                <Td colSpan={5} className="py-12! text-center text-claimondo-ondo/70! text-sm">
                   Aktuell keine offenen oder verletzten SLAs
-                </td>
-              </tr>
+                </Td>
+              </Tr>
             )}
-          </tbody>
-        </table>
-      </div>
+          </Tbody>
+        </Table>
+      </DataTableContainer>
     </div>
   )
 }

@@ -7,6 +7,7 @@ import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockI
 import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer, resetTwoFaForUser } from '../actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { TextField as SharedTextField } from '@/components/shared/forms'
+import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 
@@ -72,28 +73,30 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
       {performanceHistory.length > 0 && (
         <div className="bg-white rounded-2xl border border-claimondo-border p-5 mb-6">
           <h3 className="text-claimondo-ondo text-xs font-semibold uppercase tracking-wider mb-3">Performance-Verlauf</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-claimondo-border">
-                <th className="text-left px-3 py-2 text-claimondo-ondo font-medium">Monat</th>
-                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">Leads</th>
-                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">Konvertiert</th>
-                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">Abgeschl.</th>
-                <th className="text-right px-3 py-2 text-claimondo-ondo font-medium">Umsatz</th>
-              </tr></thead>
-              <tbody>
+          <DataTableContainer variant="plain">
+            <Table>
+              <Thead className="bg-transparent! text-sm! normal-case! tracking-normal!">
+                <Tr className="border-b border-claimondo-border">
+                  <Th className="text-left px-3! py-2! text-claimondo-ondo!">Monat</Th>
+                  <Th className="text-right px-3! py-2! text-claimondo-ondo!">Leads</Th>
+                  <Th className="text-right px-3! py-2! text-claimondo-ondo!">Konvertiert</Th>
+                  <Th className="text-right px-3! py-2! text-claimondo-ondo!">Abgeschl.</Th>
+                  <Th className="text-right px-3! py-2! text-claimondo-ondo!">Umsatz</Th>
+                </Tr>
+              </Thead>
+              <Tbody className="divide-y-0!">
                 {performanceHistory.map(p => (
-                  <tr key={`${p.monat}-${p.jahr}`} className="border-b border-claimondo-border/50">
-                    <td className="px-3 py-2 text-claimondo-navy">{p.monat} {p.jahr}</td>
-                    <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">{p.leads_qualifiziert}</td>
-                    <td className="px-3 py-2 text-right text-green-400 tabular-nums">{p.leads_konvertiert}</td>
-                    <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">{p.faelle_abgeschlossen}</td>
-                    <td className="px-3 py-2 text-right text-claimondo-navy tabular-nums">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(p.umsatz_generiert ?? 0)}</td>
-                  </tr>
+                  <Tr key={`${p.monat}-${p.jahr}`} className="border-b border-claimondo-border/50">
+                    <Td className="px-3! py-2!">{p.monat} {p.jahr}</Td>
+                    <Td className="px-3! py-2! text-right tabular-nums">{p.leads_qualifiziert}</Td>
+                    <Td className="px-3! py-2! text-right text-green-400! tabular-nums">{p.leads_konvertiert}</Td>
+                    <Td className="px-3! py-2! text-right tabular-nums">{p.faelle_abgeschlossen}</Td>
+                    <Td className="px-3! py-2! text-right tabular-nums">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(p.umsatz_generiert ?? 0)}</Td>
+                  </Tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         </div>
       )}
 

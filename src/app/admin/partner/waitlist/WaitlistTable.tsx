@@ -7,6 +7,7 @@ import { useState, useTransition } from 'react'
 import { setzeWaitlistStatus } from '@/lib/actions/gutachter-waitlist'
 import { toast } from 'sonner'
 import { Chip } from '@/components/ui/Chip'
+import { DataTableContainer, Table, Thead, Tr, Th, Td } from '@/components/shared/DataTable'
 
 type Eintrag = {
   id: string
@@ -70,19 +71,19 @@ export default function WaitlistTable({ eintraege }: { eintraege: Eintrag[] }) {
           <p className="text-sm text-claimondo-ondo">Keine Einträge im aktuellen Filter.</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-claimondo-border bg-white">
-          <table className="w-full text-sm">
-            <thead className="border-b border-claimondo-border bg-claimondo-bg text-xs uppercase tracking-wider text-claimondo-ondo">
+        <DataTableContainer variant="plain" className="overflow-hidden rounded-2xl border border-claimondo-border bg-white">
+          <Table>
+            <Thead className="border-b border-claimondo-border">
               <tr>
-                <th className="px-4 py-3 text-left">Name</th>
-                <th className="px-4 py-3 text-left">Region</th>
-                <th className="px-4 py-3 text-left">Qualifikation</th>
-                <th className="px-4 py-3 text-left">Erfahrung</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Eingegangen</th>
-                <th className="px-4 py-3" />
+                <Th className="text-left">Name</Th>
+                <Th className="text-left">Region</Th>
+                <Th className="text-left">Qualifikation</Th>
+                <Th className="text-left">Erfahrung</Th>
+                <Th className="text-left">Status</Th>
+                <Th className="text-left">Eingegangen</Th>
+                <Th />
               </tr>
-            </thead>
+            </Thead>
             <tbody>
               {filtered.map((e) => (
                 <Row
@@ -93,8 +94,8 @@ export default function WaitlistTable({ eintraege }: { eintraege: Eintrag[] }) {
                 />
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+        </DataTableContainer>
       )}
     </div>
   )
@@ -148,8 +149,8 @@ function Row({
 
   return (
     <>
-      <tr className="border-b border-claimondo-border last:border-b-0 hover:bg-claimondo-bg/40">
-        <td className="px-4 py-3">
+      <Tr className="border-b border-claimondo-border last:border-b-0 hover:bg-claimondo-bg/40">
+        <Td>
           <div className="font-medium text-claimondo-navy">
             {e.vorname} {e.nachname}
           </div>
@@ -166,11 +167,11 @@ function Row({
               </>
             )}
           </div>
-        </td>
-        <td className="px-4 py-3 text-claimondo-navy">
+        </Td>
+        <Td>
           {e.plz} {e.ort ?? ''}
-        </td>
-        <td className="px-4 py-3">
+        </Td>
+        <Td>
           {qualis.length > 0 ? (
             <div className="flex flex-wrap gap-1">
               {qualis.map((q) => (
@@ -185,12 +186,12 @@ function Row({
           ) : (
             <span className="text-xs text-claimondo-ondo/70">—</span>
           )}
-        </td>
-        <td className="px-4 py-3 text-claimondo-ondo">
+        </Td>
+        <Td className="text-claimondo-ondo!">
           {e.jahre_erfahrung ? `${e.jahre_erfahrung}j` : '—'}
           {e.aktuelle_auftraege_pro_monat ? ` · ${e.aktuelle_auftraege_pro_monat}/mo` : ''}
-        </td>
-        <td className="px-4 py-3">
+        </Td>
+        <Td>
           <select
             value={currentStatus}
             onChange={(ev) => changeStatus(ev.target.value as StatusKey)}
@@ -203,26 +204,26 @@ function Row({
               </option>
             ))}
           </select>
-        </td>
-        <td className="px-4 py-3 text-xs text-claimondo-ondo">
+        </Td>
+        <Td className="text-xs text-claimondo-ondo!">
           {new Date(e.erstellt_am).toLocaleDateString('de-DE', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
           })}
-        </td>
-        <td className="px-4 py-3">
+        </Td>
+        <Td>
           <button
             onClick={onToggle}
             className="text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy"
           >
             {expanded ? 'Schließen' : 'Details'}
           </button>
-        </td>
-      </tr>
+        </Td>
+      </Tr>
       {expanded && (
-        <tr className="bg-claimondo-bg/40">
-          <td colSpan={7} className="px-4 py-4">
+        <Tr className="bg-claimondo-bg/40">
+          <Td colSpan={7} className="py-4!">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo">
@@ -287,8 +288,8 @@ function Row({
                 </button>
               </div>
             </div>
-          </td>
-        </tr>
+          </Td>
+        </Tr>
       )}
     </>
   )

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Building2Icon, GraduationCapIcon, CreditCardIcon, CheckCircleIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
 type OrgRow = {
   id: string
@@ -57,36 +58,36 @@ export default function OrganisationenClient({ organisationen }: { organisatione
             <p className="text-sm text-claimondo-ondo">Keine Organisationen gefunden.</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
-              <tr>
-                <th className="text-left px-4 py-3">Organisation</th>
-                <th className="text-left px-4 py-3">Typ</th>
-                <th className="text-left px-4 py-3">Verwalter</th>
-                <th className="text-right px-4 py-3">Mitglieder</th>
-                <th className="text-left px-4 py-3">Status</th>
-                <th className="text-left px-4 py-3">Stripe</th>
-                <th className="text-left px-4 py-3">Erstellt</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-claimondo-border">
+          <Table>
+            <Thead className="text-[10px]! tracking-wide!">
+              <Tr>
+                <Th className="text-left">Organisation</Th>
+                <Th className="text-left">Typ</Th>
+                <Th className="text-left">Verwalter</Th>
+                <Th className="text-right">Mitglieder</Th>
+                <Th className="text-left">Status</Th>
+                <Th className="text-left">Stripe</Th>
+                <Th className="text-left">Erstellt</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
               {filtered.map(o => {
                 const badge = STATUS_BADGE[o.onboarding_status] ?? STATUS_BADGE.pending
                 const TypeIcon = o.typ === 'akademie' ? GraduationCapIcon : Building2Icon
                 return (
-                  <tr key={o.id} className="hover:bg-claimondo-bg/50">
-                    <td className="px-4 py-3">
+                  <Tr key={o.id} className="hover:bg-claimondo-bg/50">
+                    <Td>
                       <div className="flex items-center gap-2">
                         <TypeIcon className="w-4 h-4 text-claimondo-ondo flex-shrink-0" />
                         <span className="font-medium text-claimondo-navy">{o.name}</span>
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       <StatusBadge colorCls={o.typ === 'akademie' ? 'bg-purple-50 text-purple-700' : 'bg-claimondo-bg text-claimondo-ondo'}>
                         {o.typ === 'akademie' ? 'Akademie' : 'Büro'}
                       </StatusBadge>
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       {o.verwalter_name ? (
                         <div>
                           <div className="text-xs text-claimondo-navy">{o.verwalter_name}</div>
@@ -95,28 +96,28 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                       ) : (
                         <span className="text-xs text-claimondo-ondo/70">—</span>
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium text-claimondo-navy">{o.member_count}</td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td className="text-right font-medium">{o.member_count}</Td>
+                    <Td>
                       <StatusBadge colorCls={badge.cls}>
                         <badge.Icon className="w-3 h-3" /> {badge.label}
                       </StatusBadge>
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       {o.has_stripe ? (
                         <CreditCardIcon className="w-4 h-4 text-emerald-500" />
                       ) : (
                         <span className="text-xs text-claimondo-ondo/50">—</span>
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-claimondo-ondo">
+                    </Td>
+                    <Td className="text-xs text-claimondo-ondo!">
                       {new Date(o.created_at).toLocaleDateString('de-DE')}
-                    </td>
-                  </tr>
+                    </Td>
+                  </Tr>
                 )
               })}
-            </tbody>
-          </table>
+            </Tbody>
+          </Table>
         )}
       </div>
     </div>
