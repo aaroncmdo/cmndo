@@ -83,8 +83,6 @@ function defaultBranding(): ResolvedBranding {
   }
 }
 
-// Feature-Flag: AAR-424 V2-Vars-Rollout. Wenn false, bleibt die App auf
-// den 6 V1-Vars (Rollback-Sicherheit in der Roll-Out-Phase).
-export function isBrandingV2Enabled(): boolean {
-  return process.env.NEXT_PUBLIC_BRANDING_V2_ENABLED === 'true'
-}
+// AAR-branding-rest (2026-05-12): isBrandingV2Enabled() entfernt — war ein
+// totes Feature-Flag (NEXT_PUBLIC_BRANDING_V2_ENABLED wurde nirgends
+// abgefragt, V2 läuft seit AAR-460 immer). Kein Consumer im ganzen Repo.
