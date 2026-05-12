@@ -7,6 +7,7 @@ import { CheckCircleIcon, CircleDotIcon, ClockIcon, AlertTriangleIcon, ExternalL
 import { updateManualTaskStatus } from '@/lib/tasks/manual-actions'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
 // KFZ-175: Meine-Tasks Client — Tabs Zugewiesen/Erstellt.
 
@@ -71,50 +72,50 @@ export default function MyTasksClient({
         {tasks.length === 0 ? (
           <div className="p-12 text-center text-sm text-claimondo-ondo/70">Keine Tasks in dieser Ansicht.</div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
-              <tr>
-                <th className="w-10 px-4 py-3"></th>
-                <th className="text-left px-4 py-3">Task</th>
-                <th className="text-left px-4 py-3">Fall/Lead</th>
-                <th className="text-left px-4 py-3">Priorität</th>
-                <th className="text-left px-4 py-3">Fällig</th>
-                <th className="text-left px-4 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-claimondo-border">
+          <Table>
+            <Thead className="text-[10px]! tracking-wide!">
+              <Tr>
+                <Th className="w-10"></Th>
+                <Th className="text-left">Task</Th>
+                <Th className="text-left">Fall/Lead</Th>
+                <Th className="text-left">Priorität</Th>
+                <Th className="text-left">Fällig</Th>
+                <Th className="text-left">Status</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
               {tasks.map(t => {
                 const cfg = STATUS_ICON[t.status] ?? STATUS_ICON.offen
                 const isOverdue = t.faellig_am && new Date(t.faellig_am) < new Date() && t.status !== 'erledigt'
                 return (
-                  <tr key={t.id} className={`hover:bg-claimondo-bg/50 ${isOverdue ? 'bg-red-50/20' : ''}`}>
-                    <td className="px-4 py-3">
+                  <Tr key={t.id} className={`hover:bg-claimondo-bg/50 ${isOverdue ? 'bg-red-50/20' : ''}`}>
+                    <Td>
                       <button onClick={() => handleStatusChange(t.id, t.status === 'erledigt' ? 'offen' : 'erledigt')} disabled={pending}>
                         <cfg.Icon className={`w-4 h-4 ${cfg.cls}`} />
                       </button>
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       <p className={`text-claimondo-navy ${t.status === 'erledigt' ? 'line-through opacity-50' : ''}`}>{t.titel}</p>
                       {t.auto_erstellt && <span className="text-[9px] text-claimondo-ondo/70">auto</span>}
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       {t.fall_id && t.fall_nummer && (
                         <Link href={`/faelle/${t.fall_id}`} className="text-claimondo-ondo hover:underline text-xs flex items-center gap-1">
                           {t.fall_nummer} <ExternalLinkIcon className="w-3 h-3" />
                         </Link>
                       )}
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       <StatusBadge colorCls={PRIO_BADGE[t.prioritaet ?? 'normal']}>
                         {t.prioritaet ?? 'normal'}
                       </StatusBadge>
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       <span className={`text-xs ${isOverdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
                         {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '—'}
                       </span>
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       <select value={t.status} onChange={e => handleStatusChange(t.id, e.target.value)} disabled={pending}
                         className="text-xs bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1 focus:outline-none">
                         <option value="offen">Offen</option>
@@ -122,12 +123,12 @@ export default function MyTasksClient({
                         <option value="erledigt">Erledigt</option>
                         <option value="blockiert">Blockiert</option>
                       </select>
-                    </td>
-                  </tr>
+                    </Td>
+                  </Tr>
                 )
               })}
-            </tbody>
-          </table>
+            </Tbody>
+          </Table>
         )}
       </div>
     </div>

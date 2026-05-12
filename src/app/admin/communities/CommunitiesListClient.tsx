@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { UsersIcon, PlusIcon, ShieldCheckIcon } from 'lucide-react'
 import CommunityAnlegenWizard from './CommunityAnlegenWizard'
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
 type Community = {
   id: string
@@ -47,25 +48,25 @@ export default function CommunitiesListClient({ communities }: { communities: Co
             <p className="text-sm text-claimondo-ondo">Noch keine Communities angelegt.</p>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg text-[10px] uppercase tracking-wide text-claimondo-ondo">
-              <tr>
-                <th className="text-left px-4 py-3">Name</th>
-                <th className="text-left px-4 py-3">Mitglieder</th>
-                <th className="text-left px-4 py-3">Radius</th>
-                <th className="text-left px-4 py-3">Max Fälle/Monat</th>
-                <th className="text-left px-4 py-3">Exklusiv</th>
-                <th className="text-left px-4 py-3">Erstellt</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-claimondo-border">
+          <Table>
+            <Thead className="text-[10px]! tracking-wide!">
+              <Tr>
+                <Th className="text-left">Name</Th>
+                <Th className="text-left">Mitglieder</Th>
+                <Th className="text-left">Radius</Th>
+                <Th className="text-left">Max Fälle/Monat</Th>
+                <Th className="text-left">Exklusiv</Th>
+                <Th className="text-left">Erstellt</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
               {communities.map(c => (
-                <tr key={c.id} className="hover:bg-claimondo-bg/50">
-                  <td className="px-4 py-3 font-medium text-claimondo-navy">{c.name}</td>
-                  <td className="px-4 py-3 text-claimondo-navy">{c.member_count}</td>
-                  <td className="px-4 py-3 text-claimondo-navy">{c.radius_km ? `${c.radius_km} km` : '—'}</td>
-                  <td className="px-4 py-3 text-claimondo-navy">{c.max_faelle_monat ?? '—'}</td>
-                  <td className="px-4 py-3">
+                <Tr key={c.id} className="hover:bg-claimondo-bg/50">
+                  <Td className="font-medium">{c.name}</Td>
+                  <Td>{c.member_count}</Td>
+                  <Td>{c.radius_km ? `${c.radius_km} km` : '—'}</Td>
+                  <Td>{c.max_faelle_monat ?? '—'}</Td>
+                  <Td>
                     {c.exklusiv ? (
                       <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-medium">
                         <ShieldCheckIcon className="w-3 h-3" /> Exklusiv
@@ -73,14 +74,14 @@ export default function CommunitiesListClient({ communities }: { communities: Co
                     ) : (
                       <span className="text-xs text-claimondo-ondo/70">—</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
+                  </Td>
+                  <Td className="text-xs text-claimondo-ondo!">
                     {new Date(c.created_at).toLocaleDateString('de-DE')}
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               ))}
-            </tbody>
-          </table>
+            </Tbody>
+          </Table>
         )}
       </div>
     </div>

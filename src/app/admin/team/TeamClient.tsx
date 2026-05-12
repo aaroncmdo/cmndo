@@ -7,6 +7,7 @@ import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, Activit
 import { createMitarbeiter, deactivateKbWithReassign } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives'
+import { DataTableContainer, Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 
 const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', dispatch: 'Dispatcher', kanzlei: 'Kanzlei' }
 const ROLLE_COLORS: Record<string, string> = { admin: 'bg-red-50 text-red-300', kundenbetreuer: 'bg-green-50 text-green-300', dispatch: 'bg-amber-50 text-amber-300', kanzlei: 'bg-violet-50 text-violet-300' }
@@ -96,18 +97,19 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead><tr className="border-b border-claimondo-border">
-              <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Name</th>
-              <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Rolle</th>
-              <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Kategorie</th>
-              <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Auslastung</th>
-              <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Performance</th>
-              <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Status</th>
-            </tr></thead>
-            <tbody>
+      <DataTableContainer variant="plain" className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
+        <Table>
+          <Thead className="bg-transparent! text-sm! normal-case! tracking-normal!">
+            <Tr className="border-b border-claimondo-border">
+              <Th className="text-left text-claimondo-ondo!">Name</Th>
+              <Th className="text-left text-claimondo-ondo!">Rolle</Th>
+              <Th className="text-left text-claimondo-ondo!">Kategorie</Th>
+              <Th className="text-left text-claimondo-ondo!">Auslastung</Th>
+              <Th className="text-left text-claimondo-ondo!">Performance</Th>
+              <Th className="text-left text-claimondo-ondo!">Status</Th>
+            </Tr>
+          </Thead>
+          <Tbody className="divide-y-0!">
               {filtered.map(m => {
                 const leads = leadsByUser[m.id]
                 const aktive = aktiveFaelleByUser[m.id] ?? 0
@@ -117,16 +119,16 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
                 const loadMax = isD ? 50 : (m.kapazitaet_max ?? 100)
                 const pct = loadMax > 0 ? Math.min(100, Math.round((load / loadMax) * 100)) : 0
                 return (
-                  <tr key={m.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors cursor-pointer" onClick={() => router.push(`/admin/team/${m.id}`)}>
-                    <td className="px-4 py-3"><div className="text-claimondo-navy font-medium">{name(m)}</div><div className="text-claimondo-ondo text-xs">{m.email}</div></td>
-                    <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ROLLE_COLORS[m.rolle] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{ROLLE_LABELS[m.rolle] ?? m.rolle}</span></td>
-                    <td className="px-4 py-3">{m.kategorie ? <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${KAT_COLORS[m.kategorie] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{KAT_LABELS[m.kategorie] ?? m.kategorie}</span> : <span className="text-claimondo-ondo/70 text-xs">—</span>}</td>
-                    <td className="px-4 py-3"><div className="flex items-center gap-2"><div className="w-20 h-2 bg-claimondo-bg rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-claimondo-ondo'}`} style={{ width: `${pct}%` }} /></div><span className="text-claimondo-ondo text-xs tabular-nums">{load}/{loadMax}</span></div></td>
-                    <td className="px-4 py-3">{isD
+                  <ClickableTr key={m.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40!" onClick={() => router.push(`/admin/team/${m.id}`)}>
+                    <Td><div className="text-claimondo-navy font-medium">{name(m)}</div><div className="text-claimondo-ondo text-xs">{m.email}</div></Td>
+                    <Td><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ROLLE_COLORS[m.rolle] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{ROLLE_LABELS[m.rolle] ?? m.rolle}</span></Td>
+                    <Td>{m.kategorie ? <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${KAT_COLORS[m.kategorie] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{KAT_LABELS[m.kategorie] ?? m.kategorie}</span> : <span className="text-claimondo-ondo/70 text-xs">—</span>}</Td>
+                    <Td><div className="flex items-center gap-2"><div className="w-20 h-2 bg-claimondo-bg rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-claimondo-ondo'}`} style={{ width: `${pct}%` }} /></div><span className="text-claimondo-ondo text-xs tabular-nums">{load}/{loadMax}</span></div></Td>
+                    <Td>{isD
                       ? <div className="flex items-center gap-1.5 text-xs"><ActivityIcon className="w-3.5 h-3.5 text-amber-400" /><span className="text-claimondo-navy">{leads?.total ?? 0} Leads</span><span className="text-claimondo-ondo/70">·</span><span className="text-green-400">{leads?.konvertiert ?? 0} konv.</span></div>
                       : <div className="flex items-center gap-1.5 text-xs"><ActivityIcon className="w-3.5 h-3.5 text-green-400" /><span className="text-claimondo-navy">{aktive} aktiv</span><span className="text-claimondo-ondo/70">·</span><span className="text-green-400">{abg} abg.</span></div>
-                    }</td>
-                    <td className="px-4 py-3">
+                    }</Td>
+                    <Td>
                       <div className="flex items-center gap-2">
                         {m.aktiv === false ? <span className="text-red-400 text-xs">Inaktiv</span> : m.force_password_change ? <span className="text-amber-400 text-xs">Einladung</span> : <span className="text-green-400 text-xs flex items-center gap-1"><ShieldCheckIcon className="w-3 h-3" />Aktiv</span>}
                         {/* AAR-634: „Deaktivieren + Fälle verteilen" nur für aktive KB/LB */}
@@ -134,15 +136,14 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
                           <DeactivateReassignButton mitarbeiterId={m.id} name={name(m)} />
                         )}
                       </div>
-                    </td>
-                  </tr>
+                    </Td>
+                  </ClickableTr>
                 )
               })}
-              {filtered.length === 0 && <tr><td colSpan={6} className="px-4 py-12 text-center text-claimondo-ondo">Keine Mitarbeiter.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              {filtered.length === 0 && <Tr><Td colSpan={6} className="py-12! text-center text-claimondo-ondo!">Keine Mitarbeiter.</Td></Tr>}
+            </Tbody>
+          </Table>
+        </DataTableContainer>
 
       {/* AAR-774: Custom-Dialog → shared Modal-Primitive */}
       <Modal open={showDialog} onClose={() => setShowDialog(false)} maxWidth={480} ariaLabel="Neuer Mitarbeiter">

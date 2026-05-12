@@ -10,6 +10,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { SCENARIOS } from '@/lib/smoke/lifecycle-seed'
 import { seedAction, resetAction } from './actions'
 import { RefreshCcwIcon, PlayIcon, ExternalLinkIcon } from 'lucide-react'
+import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -106,30 +107,30 @@ export default async function SmokeLifecyclePage() {
         </span>
       </div>
 
-      <div className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-claimondo-border bg-claimondo-bg">
-              <th className="text-left px-4 py-2 font-medium text-claimondo-ondo">Szenario</th>
-              <th className="text-left px-4 py-2 font-medium text-claimondo-ondo">Erwartung</th>
-              <th className="text-left px-4 py-2 font-medium text-claimondo-ondo">Fall-Nummer</th>
-              <th className="text-left px-4 py-2 font-medium text-claimondo-ondo">Schnellzugriff</th>
-            </tr>
-          </thead>
-          <tbody>
+      <DataTableContainer variant="plain" className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
+        <Table>
+          <Thead className="normal-case! tracking-normal! border-b border-claimondo-border">
+            <Tr>
+              <Th className="text-left py-2!">Szenario</Th>
+              <Th className="text-left py-2!">Erwartung</Th>
+              <Th className="text-left py-2!">Fall-Nummer</Th>
+              <Th className="text-left py-2!">Schnellzugriff</Th>
+            </Tr>
+          </Thead>
+          <Tbody className="divide-y-0!">
             {SCENARIOS.map((s) => {
               const f = fallByScenario.get(s.key)
               return (
-                <tr key={s.key} className="border-b border-claimondo-border/50">
-                  <td className="px-4 py-3">
+                <Tr key={s.key} className="border-b border-claimondo-border/50">
+                  <Td>
                     <p className="font-medium text-claimondo-navy">{s.label}</p>
                     <p className="text-[11px] text-claimondo-ondo/70 font-mono">{s.key}</p>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo max-w-md">{s.expected}</td>
-                  <td className="px-4 py-3 text-xs font-mono text-claimondo-navy">
+                  </Td>
+                  <Td className="text-xs text-claimondo-ondo! max-w-md">{s.expected}</Td>
+                  <Td className="text-xs font-mono">
                     {f?.fall_nummer ?? '—'}
-                  </td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td>
                     {f ? (
                       <div className="flex flex-col gap-1 text-xs">
                         <Link href={`/faelle/${f.id}`} className="inline-flex items-center gap-1 text-[var(--brand-accent)] hover:underline">
@@ -145,13 +146,13 @@ export default async function SmokeLifecyclePage() {
                     ) : (
                       <span className="text-xs text-claimondo-ondo/60">noch nicht geseedet</span>
                     )}
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               )
             })}
-          </tbody>
-        </table>
-      </div>
+          </Tbody>
+        </Table>
+      </DataTableContainer>
 
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 max-w-3xl">
         <p className="font-semibold mb-1">Test-Identitäten</p>

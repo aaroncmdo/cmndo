@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { TrophyIcon, UsersIcon, GiftIcon, ArrowUpIcon, ArrowDownIcon, MinusIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
 type DispatchEntry = { id: string; name: string; leads_qualifiziert: number; leads_konvertiert: number; conversion_rate: number; trend: number }
 type KundenEntry = { id: string; name: string; aktive_faelle: number; faelle_abgeschlossen: number; avg_bearbeitungszeit: number; trend: number }
@@ -43,35 +44,37 @@ export default function LeaderboardClient({ dispatch, kundenbetreuer, monatLabel
             </h2>
             <p className="text-claimondo-ondo text-xs mt-0.5">Sortiert nach Leads qualifiziert</p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-claimondo-border">
-                <th className="text-left px-4 py-3 text-claimondo-ondo font-medium w-10">#</th>
-                <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Name</th>
-                <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Quali.</th>
-                <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Konv.</th>
-                <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Rate</th>
-                <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Trend</th>
-              </tr></thead>
-              <tbody>
+          <DataTableContainer variant="plain">
+            <Table>
+              <Thead className="bg-transparent! text-sm! normal-case! tracking-normal!">
+                <Tr className="border-b border-claimondo-border">
+                  <Th className="text-left text-claimondo-ondo! w-10">#</Th>
+                  <Th className="text-left text-claimondo-ondo!">Name</Th>
+                  <Th className="text-right text-claimondo-ondo!">Quali.</Th>
+                  <Th className="text-right text-claimondo-ondo!">Konv.</Th>
+                  <Th className="text-right text-claimondo-ondo!">Rate</Th>
+                  <Th className="text-right text-claimondo-ondo!">Trend</Th>
+                </Tr>
+              </Thead>
+              <Tbody className="divide-y-0!">
                 {dispatch.map((d, i) => (
-                  <tr key={d.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
-                    <td className="px-4 py-3">
+                  <Tr key={d.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
+                    <Td>
                       {i < 3 ? <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full border text-xs font-bold ${MEDAL[i]}`}>{i + 1}</span> : <span className="text-claimondo-ondo text-xs pl-2">{i + 1}</span>}
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       <Link href={`/admin/team/${d.id}`} className="text-claimondo-navy font-medium hover:text-claimondo-navy transition-colors">{d.name}</Link>
-                    </td>
-                    <td className="px-4 py-3 text-right text-claimondo-navy tabular-nums font-semibold">{d.leads_qualifiziert}</td>
-                    <td className="px-4 py-3 text-right text-green-400 tabular-nums">{d.leads_konvertiert}</td>
-                    <td className="px-4 py-3 text-right text-claimondo-navy tabular-nums">{d.conversion_rate}%</td>
-                    <td className="px-4 py-3 text-right"><TrendBadge value={d.trend} /></td>
-                  </tr>
+                    </Td>
+                    <Td className="text-right tabular-nums font-semibold">{d.leads_qualifiziert}</Td>
+                    <Td className="text-right text-green-400! tabular-nums">{d.leads_konvertiert}</Td>
+                    <Td className="text-right tabular-nums">{d.conversion_rate}%</Td>
+                    <Td className="text-right"><TrendBadge value={d.trend} /></Td>
+                  </Tr>
                 ))}
-                {dispatch.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-claimondo-ondo">Keine Dispatch-Mitarbeiter</td></tr>}
-              </tbody>
-            </table>
-          </div>
+                {dispatch.length === 0 && <Tr><Td colSpan={6} className="py-8! text-center text-claimondo-ondo!">Keine Dispatch-Mitarbeiter</Td></Tr>}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         </div>
 
         {/* Kundenbetreuer Leaderboard */}
@@ -82,35 +85,37 @@ export default function LeaderboardClient({ dispatch, kundenbetreuer, monatLabel
             </h2>
             <p className="text-claimondo-ondo text-xs mt-0.5">Sortiert nach Faelle abgeschlossen</p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead><tr className="border-b border-claimondo-border">
-                <th className="text-left px-4 py-3 text-claimondo-ondo font-medium w-10">#</th>
-                <th className="text-left px-4 py-3 text-claimondo-ondo font-medium">Name</th>
-                <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Aktiv</th>
-                <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Abg.</th>
-                <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Avg Tage</th>
-                <th className="text-right px-4 py-3 text-claimondo-ondo font-medium">Trend</th>
-              </tr></thead>
-              <tbody>
+          <DataTableContainer variant="plain">
+            <Table>
+              <Thead className="bg-transparent! text-sm! normal-case! tracking-normal!">
+                <Tr className="border-b border-claimondo-border">
+                  <Th className="text-left text-claimondo-ondo! w-10">#</Th>
+                  <Th className="text-left text-claimondo-ondo!">Name</Th>
+                  <Th className="text-right text-claimondo-ondo!">Aktiv</Th>
+                  <Th className="text-right text-claimondo-ondo!">Abg.</Th>
+                  <Th className="text-right text-claimondo-ondo!">Avg Tage</Th>
+                  <Th className="text-right text-claimondo-ondo!">Trend</Th>
+                </Tr>
+              </Thead>
+              <Tbody className="divide-y-0!">
                 {kundenbetreuer.map((k, i) => (
-                  <tr key={k.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
-                    <td className="px-4 py-3">
+                  <Tr key={k.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
+                    <Td>
                       {i < 3 ? <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full border text-xs font-bold ${MEDAL[i]}`}>{i + 1}</span> : <span className="text-claimondo-ondo text-xs pl-2">{i + 1}</span>}
-                    </td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td>
                       <Link href={`/admin/team/${k.id}`} className="text-claimondo-navy font-medium hover:text-claimondo-navy transition-colors">{k.name}</Link>
-                    </td>
-                    <td className="px-4 py-3 text-right text-claimondo-navy tabular-nums">{k.aktive_faelle}</td>
-                    <td className="px-4 py-3 text-right text-green-400 tabular-nums font-semibold">{k.faelle_abgeschlossen}</td>
-                    <td className="px-4 py-3 text-right text-claimondo-navy tabular-nums">{k.avg_bearbeitungszeit || '—'}</td>
-                    <td className="px-4 py-3 text-right"><TrendBadge value={k.trend} /></td>
-                  </tr>
+                    </Td>
+                    <Td className="text-right tabular-nums">{k.aktive_faelle}</Td>
+                    <Td className="text-right text-green-400! tabular-nums font-semibold">{k.faelle_abgeschlossen}</Td>
+                    <Td className="text-right tabular-nums">{k.avg_bearbeitungszeit || '—'}</Td>
+                    <Td className="text-right"><TrendBadge value={k.trend} /></Td>
+                  </Tr>
                 ))}
-                {kundenbetreuer.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-claimondo-ondo">Keine Kundenbetreuer</td></tr>}
-              </tbody>
-            </table>
-          </div>
+                {kundenbetreuer.length === 0 && <Tr><Td colSpan={6} className="py-8! text-center text-claimondo-ondo!">Keine Kundenbetreuer</Td></Tr>}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         </div>
       </div>
     </div></div>

@@ -7,6 +7,7 @@ import PhoneButton from '@/components/shared/PhoneButton'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Table, Thead, Tbody, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 
 type Versicherung = {
   id: string
@@ -102,43 +103,43 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
 
       {/* Tabelle */}
       <div className="flex-1 overflow-y-auto">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 bg-white border-b border-claimondo-border z-10">
+        <Table>
+          <Thead className="sticky top-0 z-10 bg-white! text-sm! normal-case! tracking-normal! border-b border-claimondo-border">
             <tr>
-              <th className="text-left px-4 py-2 text-claimondo-ondo font-medium text-xs">Name</th>
-              <th className="text-left px-4 py-2 text-claimondo-ondo font-medium text-xs">Schadentelefon</th>
-              <th className="text-left px-4 py-2 text-claimondo-ondo font-medium text-xs">Schaden-Email</th>
-              <th className="text-left px-4 py-2 text-claimondo-ondo font-medium text-xs">Stadt</th>
-              <th className="text-left px-4 py-2 text-claimondo-ondo font-medium text-xs">Status</th>
+              <Th className="text-left py-2! text-claimondo-ondo! text-xs!">Name</Th>
+              <Th className="text-left py-2! text-claimondo-ondo! text-xs!">Schadentelefon</Th>
+              <Th className="text-left py-2! text-claimondo-ondo! text-xs!">Schaden-Email</Th>
+              <Th className="text-left py-2! text-claimondo-ondo! text-xs!">Stadt</Th>
+              <Th className="text-left py-2! text-claimondo-ondo! text-xs!">Status</Th>
             </tr>
-          </thead>
-          <tbody>
+          </Thead>
+          <Tbody className="divide-y-0!">
             {filtered.map(v => (
-              <tr key={v.id} onClick={() => { setSelected(v); setForm(v); setEditing(false) }}
-                className={`border-b border-claimondo-border hover:bg-claimondo-bg cursor-pointer transition-colors ${!v.ist_aktiv ? 'opacity-50' : ''}`}>
-                <td className="px-4 py-2.5 font-medium text-claimondo-navy text-xs">{v.name}</td>
-                <td className="px-4 py-2.5 text-xs">
+              <ClickableTr key={v.id} onClick={() => { setSelected(v); setForm(v); setEditing(false) }}
+                className={`border-b border-claimondo-border ${!v.ist_aktiv ? 'opacity-50' : ''}`}>
+                <Td className="py-2.5! font-medium text-xs">{v.name}</Td>
+                <Td className="py-2.5! text-xs">
                   {v.schaden_telefon ? (
                     <PhoneButton nummer={v.schaden_telefon} variant="inline" label={v.schaden_telefon} stopPropagation />
                   ) : <span className="text-claimondo-ondo/50">—</span>}
-                </td>
-                <td className="px-4 py-2.5 text-xs">
+                </Td>
+                <Td className="py-2.5! text-xs">
                   {v.schaden_email ? (
                     <a href={`mailto:${v.schaden_email}`} className="text-claimondo-ondo hover:underline flex items-center gap-1" onClick={e => e.stopPropagation()}>
                       <MailIcon className="w-3 h-3" /> {v.schaden_email}
                     </a>
                   ) : <span className="text-claimondo-ondo/50">—</span>}
-                </td>
-                <td className="px-4 py-2.5 text-claimondo-ondo text-xs">{v.stadt ?? '—'}</td>
-                <td className="px-4 py-2.5">
+                </Td>
+                <Td className="py-2.5! text-claimondo-ondo! text-xs">{v.stadt ?? '—'}</Td>
+                <Td className="py-2.5!">
                   <StatusBadge tone={v.ist_aktiv ? 'success' : 'danger'}>
                     {v.ist_aktiv ? 'Aktiv' : 'Deaktiviert'}
                   </StatusBadge>
-                </td>
-              </tr>
+                </Td>
+              </ClickableTr>
             ))}
-          </tbody>
-        </table>
+          </Tbody>
+        </Table>
       </div>
 
       {/* Create-Modal */}
