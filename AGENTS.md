@@ -242,3 +242,27 @@ Faustregel: Welche Server-Component zeigt die geänderte Tabelle/Zeile an? Genau
 
 Vor AAR-800 mischten ~30 Server-Actions throw + Result-Object — Caller mussten beides absichern (try/catch + result.ok), oft brachen Errors stillschweigend durch. AAR-308/309 (`createKundeAccount`) hat das Pattern eingeführt, AAR-800/802 hat es konsequent durchgezogen. AAR-664 hat zusätzlich gezeigt, dass Konstanten/Types **nie** aus `'use server'`-Files exportiert werden dürfen — Client-Bundle macht `undefined` daraus.
 <!-- END:post-task-audit -->
+
+<!-- BEGIN:claimondo-component-set -->
+# Komponenten-Set — verbindlich
+
+Es gibt **drei Layer**, jeder mit einem klaren Zweck. Neuer Frontend-Code nutzt sie; handgerolltes Tailwind-Markup für Komponenten ist kein Standard mehr. (Entscheidung 12.05.2026, Mobile-App = React Native → der `primitives/*`-Dual-File-Pfad gilt. Ausführlich: `docs/12.05.2026/FRONTEND/KOMPONENTEN-SET-POLICY.md`.)
+
+## 1 · Atom-Layer = `@/components/primitives/*`
+Dual-File Web+Native (`*.web.tsx` + `*.native.tsx` + `*.types.ts`), gebunden an `src/lib/design-tokens.ts`. **Pflicht** für: Button, Card/Section-Container, Modal/Sheet/Drawer, Text, Box/Stack/Row, Badge, Icon, CloseButton.
+- **Kein** `<button className="…rounded-…bg-claimondo-navy…">` und **kein** `<div className="bg-white rounded-… border border-claimondo-border p-…">` mehr für neuen Code — das sind `primitives.Button` bzw. `primitives.Card`/`shared/SectionCard`.
+- Neue Atoms kommen hierhin (mit beiden Plattform-Files + `.types.ts`). Werte nur aus `design-tokens.ts`. Web/Native-Asymmetrien als JSDoc ins `.types.ts`.
+
+## 2 · Composite-Layer = `@/components/shared/*`
+Zusammengesetzte Bausteine, gebaut **auf** `primitives/*` (nicht auf rohem Tailwind): `PageHeader`, `StatusBadge`/`FallStatusBadge`, `EmptyState`/`ErrorState`/`LoadingSkeleton`, `StatCard`, `SectionCard`, `forms/TextField`+`forms/SelectField`, `AvatarUpload`, `PhoneButton`, `GlassPanel`/`glass/*`, `portal-nav/*`, `fall-*`, `stammdaten/*`, `TerminCard`, `VersichererSelect`, `NotificationPreferencesForm`, `StepIndicator`, …
+- Muster in **>2 Stellen** → hierhin extrahieren statt es zum dritten Mal inline zu bauen.
+
+## 3 · Web-only Rich-Components = `@/components/ui/*` (shadcn/Radix)
+Erlaubt **nur** für desktop-spezifische Rich-UI ohne sinnvolles Native-Pendant: `table`, `tabs`, `select`, `dialog`, `sheet`, `dropdown-menu`, `checkbox`, `input`, `label`, `textarea`, `separator`, `Chip`, `loading-button`, `PasswordInput`, `sonner`. **Nicht** für Atoms — Buttons/Cards/Badges/Modals kommen aus `primitives/*`, nicht aus `ui/*`. (Die Mobile-App baut Listen/Tabellen/Date-Picker eh mit Native-Patterns neu, ein 1:1-Port ist nicht geplant — daher lohnt Radix' Accessibility-Arbeit für Web-Desktop, ohne die Atom-Konsistenz zu brechen.)
+
+## Was NICHT betroffen ist
+Reine Layout-Utilities (`flex`/`grid`/`gap-*`/`px-*`/`mt-*`) auf Wrapper-Divs bleiben normal — die Regel betrifft *Komponenten*, nicht Spacing. Farb-/Theming-Konventionen siehe Abschnitt „branding-rules".
+
+## Begründung
+Vor dieser Policy existierten drei „offizielle" Sets nebeneinander mit <10 % Adoption (`ui/*` shadcn fast tot, `primitives/*` ~28 Consumer) — handgerolltes Tailwind war der rationale Default für jeden Entwickler, und Inline-`StatCard`/`FilterChip`/`MiniDrawer`/`SectionCard` reproduzierten sich (Bestandsaufnahme: `docs/12.05.2026/FRONTEND/FRONTEND-REDUNDANZ-AUDIT-12.05.2026.md`, ~3.000–4.500 LOC dupliziert). Eine Schicht festlegen ist der Hebel.
+<!-- END:claimondo-component-set -->
