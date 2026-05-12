@@ -21,8 +21,11 @@ import { useEffect, useRef, useState } from 'react'
 // Crash auf gutachter-finden. Direkter Import aus client.ts vermeidet das.
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import type { Map as MapboxMap, Marker, Popup } from 'mapbox-gl'
-import { ChevronUp, Search, MapPin } from 'lucide-react'
+import { ChevronUp, MapPin } from 'lucide-react'
 import type { SvLead, AktiverSV } from '@/lib/actions/gutachter-finder-actions'
+// AAR-glass-s1: Liquid-Glass-Design-System (siehe
+// docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md).
+import { GlassPill, BeratungVereinbarenButton } from '@/components/shared/glass'
 
 type Props = {
   /** Tier-3 Lead-Partner (sv_leads). Werden als kleine graue Marker
@@ -284,18 +287,21 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         }}
       />
 
-      {/* Hero-Header oben — sichtbar für Crawler + Mobile-Status */}
+      {/* Hero-Header oben — Status-Glass-Pill (sichtbar für Crawler + Mobile-Status) */}
       <div className="absolute top-0 left-0 right-0 z-[5] px-4 pt-4 sm:px-6 sm:pt-6 pointer-events-none">
-        <div
-          className="mx-auto max-w-3xl pointer-events-auto"
-          style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
-        >
-          <div className="rounded-full border border-white/65 bg-white/75 backdrop-blur-md backdrop-saturate-150 px-4 py-2 flex items-center gap-2 shadow-[0_2px_12px_rgba(13,27,62,0.08)]">
+        <div className="mx-auto max-w-3xl flex items-center justify-between gap-3 pointer-events-auto">
+          <GlassPill className="px-4 py-2">
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" aria-hidden />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
             </span>
-            <span className="text-xs font-semibold text-claimondo-ondo">
+            <span
+              className="text-xs font-semibold"
+              style={{
+                fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+                color: 'var(--brand-secondary, var(--claimondo-ondo))',
+              }}
+            >
               {userLocation
                 ? aktiveSVs.length > 0
                   ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} Sachverständige in Ihrer Nähe`
@@ -304,29 +310,48 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
                   ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} weitere Sachverständige bundesweit`
                   : `${svLeads.length} Sachverständige bundesweit verfügbar`}
             </span>
-          </div>
+          </GlassPill>
+          {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts */}
+          <BeratungVereinbarenButton className="hidden sm:inline-flex" />
         </div>
       </div>
 
-      {/* Desktop Sidebar — Glass-Panel mit DynamicWizard */}
+      {/* Desktop Sidebar — Glass-Card mit DynamicWizard.
+          AAR-glass-s1: hartkodierte bg-white/82 + backdrop-blur durch
+          Glass-Tokens ersetzt. Card brandet automatisch via color-mix(). */}
       <aside
         ref={sidebarScrollRef}
-        className="hidden lg:flex absolute top-20 left-6 bottom-6 w-[420px] z-[10] overflow-y-auto rounded-[28px] border border-white/65 bg-white/82 backdrop-blur-[22px] backdrop-saturate-150 shadow-[0_14px_36px_rgba(13,27,62,0.10),0_40px_80px_rgba(13,27,62,0.08)]"
+        className="hidden lg:flex absolute top-20 left-6 bottom-6 w-[420px] z-[10] overflow-y-auto rounded-[var(--glass-radius-card)] [background:var(--glass-bg-nested)] [backdrop-filter:var(--glass-blur-strong)] [-webkit-backdrop-filter:var(--glass-blur-strong)] [border:var(--glass-border-nested)] [box-shadow:var(--glass-shadow-card)]"
         style={{ scrollbarWidth: 'thin' }}
       >
         <div className="flex flex-col w-full p-6">
           <div className="mb-4">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-claimondo-ondo">
+            <span
+              className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em]"
+              style={{
+                fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+                color: 'var(--brand-secondary, var(--claimondo-ondo))',
+              }}
+            >
               <MapPin className="h-3 w-3" />
               Schritt für Schritt
             </span>
             <h1
-              className="mt-2 text-[28px] font-bold leading-[1.05] tracking-[-.024em] text-claimondo-navy"
-              style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+              className="mt-2 text-[28px] font-bold leading-[1.05] tracking-[-.024em]"
+              style={{
+                fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+                color: 'var(--brand-primary, var(--claimondo-navy))',
+              }}
             >
               Kfz-Gutachter in Ihrer Nähe finden.
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
+            <p
+              className="mt-2 text-sm leading-relaxed"
+              style={{
+                fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
+                color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 65%, transparent)',
+              }}
+            >
               4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.
             </p>
           </div>
@@ -334,29 +359,54 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         </div>
       </aside>
 
-      {/* Mobile Bottom-Sheet (collapsed by default, klick zum Öffnen) */}
+      {/* Mobile Bottom-Sheet (collapsed by default, klick zum Öffnen).
+          AAR-glass-s1: Glass-Tokens statt hartkodierter bg-white/85. */}
       <div
         className="lg:hidden absolute left-0 right-0 bottom-0 z-[10] transition-[transform] duration-500 ease-[cubic-bezier(.32,.72,0,1)]"
         style={{
           transform: mobileSheetOpen ? 'translateY(0)' : 'translateY(calc(100% - 88px))',
         }}
       >
-        <div className="rounded-t-[32px] border-t border-x border-white/65 bg-white/85 backdrop-blur-[22px] backdrop-saturate-150 shadow-[0_-14px_36px_rgba(13,27,62,0.12)] max-h-[85dvh] overflow-y-auto">
+        <div
+          className="rounded-t-[32px] [background:var(--glass-bg-nested)] [backdrop-filter:var(--glass-blur-strong)] [-webkit-backdrop-filter:var(--glass-blur-strong)] max-h-[85dvh] overflow-y-auto"
+          style={{
+            borderTop: 'var(--glass-border-nested)',
+            borderLeft: 'var(--glass-border-nested)',
+            borderRight: 'var(--glass-border-nested)',
+            boxShadow: '0 -14px 36px color-mix(in srgb, transparent 85%, var(--brand-primary, var(--claimondo-navy)))',
+          }}
+        >
           <button
             onClick={() => setMobileSheetOpen((v) => !v)}
-            className="w-full sticky top-0 z-[1] bg-white/85 backdrop-blur-md px-5 py-3 flex items-center justify-between"
+            className="w-full sticky top-0 z-[1] [background:var(--glass-bg-nested)] [backdrop-filter:var(--glass-blur)] [-webkit-backdrop-filter:var(--glass-blur)] px-5 py-3 flex items-center justify-between"
           >
             <span className="flex items-center gap-2">
-              <span className="block w-10 h-1 rounded-full bg-claimondo-navy/30" />
-              <span className="text-sm font-semibold text-claimondo-navy" style={{ fontFamily: 'Montserrat' }}>
-                {mobileSheetOpen ? 'Gutachter wählen' : 'Anfrage starten'}
+              <span
+                className="block w-10 h-1 rounded-full"
+                style={{ background: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 30%, transparent)' }}
+              />
+              <span
+                className="text-sm font-semibold"
+                style={{
+                  fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+                  color: 'var(--brand-primary, var(--claimondo-navy))',
+                }}
+              >
+                {mobileSheetOpen ? 'Karte zeigen' : 'Anfrage starten'}
               </span>
             </span>
             <ChevronUp
-              className={`h-5 w-5 text-claimondo-ondo transition-transform duration-300 ${mobileSheetOpen ? 'rotate-180' : ''}`}
+              className={`h-5 w-5 transition-transform duration-300 ${mobileSheetOpen ? 'rotate-180' : ''}`}
+              style={{ color: 'var(--brand-secondary, var(--claimondo-ondo))' }}
             />
           </button>
-          <div className="px-5 pb-6 pt-2">{wizardSlot}</div>
+          <div className="px-5 pb-6 pt-2">
+            {/* Beratungs-CTA auch im Mobile-Sheet (top-right ist auf Mobile versteckt) */}
+            <div className="flex justify-end mb-3 sm:hidden">
+              <BeratungVereinbarenButton />
+            </div>
+            {wizardSlot}
+          </div>
         </div>
       </div>
 
