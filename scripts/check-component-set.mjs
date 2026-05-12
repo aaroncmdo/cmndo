@@ -32,6 +32,10 @@ const PATTERNS = [
     re: /function\s+(StatCard|KpiCard|KpiBox|FilterChip|StatusPill|MiniDrawer|SectionCard|InfoRow|InfoCard)\b/,
     msg: 'lokale Reimplementierung eines shared-Pendants',
   },
+  {
+    re: /<table\b/,
+    msg: 'handgerollte <table> → shared/DataTable (Table/Thead/Tbody/Tr/Th/Td + DataTableContainer)',
+  },
 ]
 
 let hits = 0
