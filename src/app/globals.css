@@ -163,6 +163,127 @@ p, li, blockquote, article, .prose {
   --ease-ios: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
     var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+
+  /* ─── AAR-glass-s1 (2026-05-12): Liquid-Glass-Design-System ───
+     Definiert in docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md.
+     Glass-Token nutzt color-mix() auf --brand-*-Resolver-Vars (gesetzt
+     durch resolveBrandTheme/resolveKundenTheme) mit Claimondo-Fallback.
+     B2C-Default = leicht heller Brand-Wash auf weiß.
+     B2B-Dark = via [data-surface="b2b-dark"] Wrapper aktivierbar. */
+  --glass-tint-soft: var(--brand-surface, var(--claimondo-bg));
+  --glass-tint-strong: var(--brand-primary, var(--claimondo-navy));
+
+  --glass-bg: linear-gradient(
+    135deg,
+    color-mix(in srgb, white 88%, var(--glass-tint-soft) 12%) 0%,
+    color-mix(in srgb, white 70%, var(--glass-tint-soft) 30%) 60%,
+    color-mix(in srgb, white 62%, var(--glass-tint-soft) 38%) 100%
+  );
+  --glass-bg-nested: linear-gradient(
+    135deg,
+    color-mix(in srgb, transparent 52%, color-mix(in srgb, white 80%, var(--glass-tint-soft) 20%)) 0%,
+    color-mix(in srgb, transparent 68%, color-mix(in srgb, white 70%, var(--glass-tint-soft) 30%)) 60%,
+    color-mix(in srgb, transparent 74%, color-mix(in srgb, white 65%, var(--glass-tint-soft) 35%)) 100%
+  );
+
+  --glass-blur: blur(32px) saturate(200%);
+  --glass-blur-strong: blur(40px) saturate(200%);
+
+  --glass-border: 1px solid color-mix(in srgb, white 80%, var(--glass-tint-strong) 4%);
+  --glass-border-nested: 1px solid color-mix(in srgb, white 70%, var(--glass-tint-strong) 5%);
+
+  --glass-shadow:
+    0 8px 28px color-mix(in srgb, transparent 90%, var(--glass-tint-strong)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 color-mix(in srgb, transparent 95%, var(--glass-tint-strong));
+  --glass-shadow-card:
+    0 20px 60px color-mix(in srgb, transparent 82%, var(--glass-tint-strong)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 color-mix(in srgb, transparent 96%, var(--glass-tint-strong));
+
+  --glass-radius-pill: 999px;
+  --glass-radius-card: 24px;
+
+  /* CTA-Gradient: leitet aus Brand-Primary mit Claimondo-Ondo als Fallback */
+  --cta-gradient: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--brand-primary, var(--claimondo-ondo)) 95%, transparent) 0%,
+    color-mix(in srgb, var(--brand-primary, var(--claimondo-ondo)) 80%, black 12%) 70%,
+    color-mix(in srgb, var(--brand-primary, var(--claimondo-ondo)) 70%, black 22%) 100%
+  );
+
+  /* Brand-Surface-Gradient für Marketing-Pages ohne Map */
+  --brand-surface-gradient:
+    radial-gradient(circle at 22% 25%, color-mix(in srgb, transparent 82%, var(--brand-shield, var(--claimondo-light-blue))), transparent 38%),
+    radial-gradient(circle at 78% 70%, color-mix(in srgb, transparent 86%, var(--brand-primary, var(--claimondo-ondo))), transparent 42%),
+    linear-gradient(135deg, #f8fafd 0%, #ecf1f7 35%, #e0e8f0 65%, #d4dee9 100%);
+}
+
+/* B2B-Dark-Surface-Override — aktivierbar per [data-surface="b2b-dark"]
+   auf <body> oder einem Container-Wrapper. Wird auf B2B-Marketing-Pages
+   (gutachter-partner, makler-partner-werden) gesetzt. */
+[data-surface="b2b-dark"] {
+  --glass-tint-soft: var(--claimondo-navy);
+  --glass-tint-strong: var(--claimondo-ondo);
+
+  --glass-bg: linear-gradient(
+    135deg,
+    color-mix(in srgb, black 78%, var(--glass-tint-strong) 22%) 0%,
+    color-mix(in srgb, black 68%, var(--glass-tint-strong) 32%) 60%,
+    color-mix(in srgb, black 62%, var(--glass-tint-strong) 38%) 100%
+  );
+  --glass-bg-nested: linear-gradient(
+    135deg,
+    color-mix(in srgb, transparent 40%, color-mix(in srgb, black 70%, var(--glass-tint-strong) 30%)) 0%,
+    color-mix(in srgb, transparent 55%, color-mix(in srgb, black 65%, var(--glass-tint-strong) 35%)) 60%,
+    color-mix(in srgb, transparent 62%, color-mix(in srgb, black 60%, var(--glass-tint-strong) 40%)) 100%
+  );
+
+  --glass-border: 1px solid color-mix(in srgb, white 10%, transparent);
+  --glass-border-nested: 1px solid color-mix(in srgb, white 6%, transparent);
+
+  --glass-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --glass-shadow-card:
+    0 20px 60px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+
+  --brand-surface-gradient:
+    radial-gradient(circle at 22% 25%, color-mix(in srgb, transparent 72%, var(--brand-secondary, var(--claimondo-ondo))), transparent 38%),
+    radial-gradient(circle at 78% 70%, color-mix(in srgb, transparent 78%, var(--brand-primary, var(--claimondo-navy))), transparent 42%),
+    linear-gradient(135deg, #0a142b 0%, #0d1b3e 35%, #122253 65%, #1a2d6b 100%);
+}
+
+/* Reduced-Transparency-Fallback (A11y) */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.96);
+    --glass-bg-nested: rgba(255, 255, 255, 0.92);
+    --glass-blur: blur(0) saturate(100%);
+    --glass-blur-strong: blur(0) saturate(100%);
+  }
+}
+
+/* Print-Styles — Glass-Effekte ausschalten beim Drucken */
+@media print {
+  [class*="glass-"] {
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: 1px solid #d4dee9 !important;
+  }
+}
+
+/* AAR-glass-s1: Placeholder-Farbe für Glass-Inputs — Brand-Secondary (Ondo),
+   getippter Text bleibt Brand-Primary (Navy). Via Klasse weil ::placeholder
+   nicht per inline style setzbar ist. */
+.glass-field-input::placeholder {
+  color: var(--brand-secondary, var(--claimondo-ondo));
+  opacity: 1;
 }
 
 .dark {

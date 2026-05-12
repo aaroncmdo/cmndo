@@ -145,6 +145,64 @@ export const glass = {
 } as const
 
 /**
+ * AAR-glass-s1 (2026-05-12): Liquid-Glass-Design-System.
+ *
+ * Web-CSS-Variable-Quelle: src/app/globals.css (`--glass-bg`, `--glass-blur`,
+ * `--glass-border`, `--glass-shadow`, `--glass-radius-pill`, `--glass-radius-card`).
+ * Web nutzt color-mix() auf --brand-*-Resolver-Vars für Brand-Tinting.
+ *
+ * Native (RN) hat kein color-mix() und keine CSS-Vars — Native-Components in
+ * src/components/primitives/*.native.tsx ziehen aus diesen TS-Konstanten.
+ * Brand-Tinting auf Native via React-Provider-Context + BlurView.
+ *
+ * NICHT mit dem existierenden `glass`-Token oben verwechseln — der ist für
+ * AAR-727 Popovers (kleiner Blur). Dies hier ist das umfassende
+ * Pill/Input/Card-System ab AAR-glass-s1.
+ */
+export const liquidGlass = {
+  blur: 32, // px
+  blurStrong: 40,
+  saturate: 200, // %
+  radius: {
+    pill: 999,
+    card: 24,
+  },
+  // Web-Default-Tints (auf Marketing-Pages ohne Brand-Provider).
+  // Native nutzt diese als Defaults, kann via Theme-Context überschrieben werden.
+  light: {
+    bgGradient: [
+      'rgba(255, 255, 255, 0.88)',
+      'rgba(255, 255, 255, 0.70)',
+      'rgba(255, 255, 255, 0.62)',
+    ],
+    border: 'rgba(255, 255, 255, 0.75)',
+    shadowOuter: 'rgba(13, 27, 62, 0.10)',
+    shadowInsetTop: 'rgba(255, 255, 255, 0.85)',
+  },
+  dark: {
+    bgGradient: [
+      'rgba(13, 27, 62, 0.78)',
+      'rgba(13, 27, 62, 0.68)',
+      'rgba(13, 27, 62, 0.62)',
+    ],
+    border: 'rgba(255, 255, 255, 0.10)',
+    shadowOuter: 'rgba(0, 0, 0, 0.40)',
+    shadowInsetTop: 'rgba(255, 255, 255, 0.10)',
+  },
+} as const
+
+/**
+ * AAR-glass-s1 (2026-05-12): Font-Stack-Token.
+ * Web nutzt next/font/google via --font-montserrat + --font-noto-sans (gesetzt
+ * in layout.tsx). Diese Konstanten existieren parallel für Native-Komponenten
+ * + Test-Mockups.
+ */
+export const fonts = {
+  heading: '"Montserrat", system-ui, sans-serif',
+  body: '"Noto Sans", system-ui, sans-serif',
+} as const
+
+/**
  * Breakpoints für Shell-Varianten.
  * Mobile < 768, Tablet 768-1200, Desktop >= 1200.
  */
@@ -171,6 +229,8 @@ export const tokens = {
   spacing,
   typo,
   glass,
+  liquidGlass,
+  fonts,
   breakpoints,
   touchMin,
 } as const
