@@ -64,7 +64,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
   // sieht WARUM die Karte ggf. nicht rendert. 'no-token' = NEXT_PUBLIC_MAPBOX_TOKEN
   // fehlte im Build. 'auth-error' = Mapbox lehnt die Anfrage ab (401/403,
   // i.d.R. Token-URL-Restriction). 'ok' = alles gut.
-  const [mapStatus, setMapStatus] = useState<'ok' | 'no-token' | 'auth-error'>('ok')
+  const [mapStatus, setMapStatus] = useState<'ok' | 'no-token' | 'auth-error' | 'config-error'>('ok')
 
   // Sticky-Marker: wenn der User auf einen SV klickt, merken wir uns die ID
   // und scrollen die Wizard-Sidebar zum Anfang. Spätere Iteration:
@@ -92,14 +92,17 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     })
     mapRef.current = map
 
-    // Mapbox-Fehler abfangen — bei 401/403 (Token-Restriction, ungültiger Token)
-    // feuert ein 'error'-Event. Wir machen das sichtbar statt es zu verschlucken.
+    // Mapbox-Fehler abfangen + sichtbar machen. 401/403 = Token-Problem,
+    // Style-/Layer-/Expression-Validierungsfehler = Config-Bug (z.B. kaputter
+    // interpolate-Ausdruck der die Render-Loop killt → schwarze Karte).
     map.on('error', (e) => {
       const msg = (e?.error as { message?: string } | undefined)?.message ?? ''
       const status = (e?.error as { status?: number } | undefined)?.status
       console.error('[gutachter-finden] Mapbox-Fehler:', status, msg, e)
       if (status === 401 || status === 403 || /unauthorized|forbidden|access token/i.test(msg)) {
         setMapStatus('auth-error')
+      } else if (/layers?\.|paint\.|interpolate|expression|expected/i.test(msg)) {
+        setMapStatus('config-error')
       }
     })
 
@@ -107,21 +110,12 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     map.touchZoomRotate.disableRotation()
 
     map.on('load', () => {
-      // 3D-Buildings als sanfter Tiefe-Layer
-      map.addLayer({
-        id: '3d-buildings',
-        source: 'composite',
-        'source-layer': 'building',
-        filter: ['==', 'extrude', 'true'],
-        type: 'fill-extrusion',
-        minzoom: 13,
-        paint: {
-          'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'height'], [0, '#dcdfe7'], [40, '#c5cad6'], [120, '#a8aebd']],
-          'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], [13, 0], [13.5, ['get', 'height']]],
-          'fill-extrusion-base': ['interpolate', ['linear'], ['zoom'], [13, 0], [13.5, ['get', 'min_height']]],
-          'fill-extrusion-opacity': 0.6,
-        },
-      })
+      // 2026-05-12: 3D-Buildings-Layer ENTFERNT — die interpolate-Ausdrücke
+      // waren kaputt (Stops als verschachtelte Arrays statt flach), das hat
+      // die Mapbox-Render-Loop abgestürzt → schwarze Karte. War nur ein
+      // dezenter Tiefe-Effekt ab Zoom 13 (Default-Zoom ist 8.5), also kein
+      // Verlust. Falls wieder gewünscht: korrekte interpolate-Syntax nutzen
+      // (['interpolate', ['linear'], input, stop1_in, stop1_out, stop2_in, ...]).
 
       // 2026-05-12 Plan v3 Backlog: Iso-Halos NUR für Tier-1 (echte SVs aus
       // sachverstaendige). Tier-3 (sv_leads) bleibt ohne Iso — zu viele Marker
@@ -306,7 +300,9 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
           <strong className="block mb-0.5">Karte konnte nicht geladen werden</strong>
           {mapStatus === 'no-token'
             ? 'NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt. (Console: "[gutachter-finden] Mapbox-Init fehlgeschlagen")'
-            : 'Mapbox lehnt die Anfrage ab (401/403). Der Token ist im Build, aber Mapbox akzeptiert ihn nicht für diese Domain — wahrscheinlich greift noch eine URL-Restriction am Token. (Details in der DevTools-Console.)'}
+            : mapStatus === 'auth-error'
+              ? 'Mapbox lehnt die Anfrage ab (401/403). Der Token ist im Build, aber Mapbox akzeptiert ihn nicht für diese Domain — wahrscheinlich greift noch eine URL-Restriction am Token. (Details in der DevTools-Console.)'
+              : 'Mapbox-Konfigurationsfehler — ein Style-/Layer-Ausdruck ist ungültig und killt die Render-Loop. (Details in der DevTools-Console: "[gutachter-finden] Mapbox-Fehler: ...")'}
         </div>
       )}
 
