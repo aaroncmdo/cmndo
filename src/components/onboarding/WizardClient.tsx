@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { ChevronLeft, ChevronRight, CheckCircle2, MapPin } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
 import { finalizeGutachterFinderAnfrage } from './finalizeAnfrage'
 import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
@@ -251,22 +251,10 @@ export function WizardClient({ phases, flowKey, prefilledValues }: Props) {
       {/* AAR-glass-s1: Step-Indicator als kompakte Glass-Pill statt großer Card */}
       <GlassStepIndicator current={phaseIdx + 1} total={totalPhases} className="self-start" />
 
-      {/* Phase-Header — freischwebend, kein Card-Wrapper */}
+      {/* Phase-Header — freischwebend, kein Card-Wrapper. Die Phase-Eyebrow
+          ("Schritt N von M") wird NICHT mehr gerendert — der GlassStepIndicator
+          oben zeigt den Schritt-Stand, ein zweiter Counter wäre redundant. */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {currentPhase.eyebrow && (
-          <GlassPill className="self-start px-4 py-2">
-            <MapPin className="h-3 w-3" style={{ color: 'var(--brand-secondary, var(--claimondo-ondo))' }} />
-            <span
-              className="text-[11px] font-bold uppercase tracking-[0.14em]"
-              style={{
-                fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
-                color: 'var(--brand-secondary, var(--claimondo-ondo))',
-              }}
-            >
-              {currentPhase.eyebrow}
-            </span>
-          </GlassPill>
-        )}
         <h2
           style={{
             fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',

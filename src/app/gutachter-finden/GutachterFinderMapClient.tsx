@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from 'react'
 // Crash auf gutachter-finden. Direkter Import aus client.ts vermeidet das.
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import type { Map as MapboxMap, Marker, Popup } from 'mapbox-gl'
-import { ChevronUp, MapPin } from 'lucide-react'
+import { ChevronUp } from 'lucide-react'
 import type { SvLead, AktiverSV } from '@/lib/actions/gutachter-finder-actions'
 // AAR-glass-s1: Liquid-Glass-Design-System (siehe
 // docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md).
@@ -316,48 +316,38 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         </div>
       </div>
 
-      {/* Desktop Sidebar — Glass-Card mit DynamicWizard.
-          AAR-glass-s1: hartkodierte bg-white/82 + backdrop-blur durch
-          Glass-Tokens ersetzt. Card brandet automatisch via color-mix(). */}
-      <aside
+      {/* Desktop — Wizard FREISCHWEBEND direkt auf der Karte. Kein Card-Wrapper:
+          die WizardClient-Felder sind selbst Glass-Pills, die schweben über
+          der Map. H1 + Subtitle mit text-shadow für Lesbarkeit auf der Karte. */}
+      <div
         ref={sidebarScrollRef}
-        className="hidden lg:flex absolute top-20 left-6 bottom-6 w-[420px] z-[10] overflow-y-auto rounded-[var(--glass-radius-card)] [background:var(--glass-bg-nested)] [backdrop-filter:var(--glass-blur-strong)] [-webkit-backdrop-filter:var(--glass-blur-strong)] [border:var(--glass-border-nested)] [box-shadow:var(--glass-shadow-card)]"
+        className="hidden lg:flex flex-col absolute top-24 left-8 bottom-8 w-[440px] z-[10] overflow-y-auto pr-2"
         style={{ scrollbarWidth: 'thin' }}
       >
-        <div className="flex flex-col w-full p-6">
-          <div className="mb-4">
-            <span
-              className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em]"
-              style={{
-                fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
-                color: 'var(--brand-secondary, var(--claimondo-ondo))',
-              }}
-            >
-              <MapPin className="h-3 w-3" />
-              Schritt für Schritt
-            </span>
-            <h1
-              className="mt-2 text-[28px] font-bold leading-[1.05] tracking-[-.024em]"
-              style={{
-                fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
-                color: 'var(--brand-primary, var(--claimondo-navy))',
-              }}
-            >
-              Kfz-Gutachter in Ihrer Nähe finden.
-            </h1>
-            <p
-              className="mt-2 text-sm leading-relaxed"
-              style={{
-                fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
-                color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 65%, transparent)',
-              }}
-            >
-              4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.
-            </p>
-          </div>
-          {wizardSlot}
+        <div className="flex flex-col gap-1.5 mb-6">
+          <h1
+            className="text-[30px] font-extrabold leading-[1.06] tracking-[-.024em]"
+            style={{
+              fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+              color: 'var(--brand-primary, var(--claimondo-navy))',
+              textShadow: '0 1px 0 rgba(255,255,255,.85), 0 0 24px rgba(255,255,255,.7)',
+            }}
+          >
+            Kfz-Gutachter in Ihrer Nähe finden.
+          </h1>
+          <p
+            className="text-sm leading-relaxed font-medium"
+            style={{
+              fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
+              color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 68%, transparent)',
+              textShadow: '0 1px 0 rgba(255,255,255,.6)',
+            }}
+          >
+            4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.
+          </p>
         </div>
-      </aside>
+        {wizardSlot}
+      </div>
 
       {/* Mobile Bottom-Sheet (collapsed by default, klick zum Öffnen).
           AAR-glass-s1: Glass-Tokens statt hartkodierter bg-white/85. */}
