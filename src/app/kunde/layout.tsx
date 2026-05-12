@@ -1,8 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
-import { roleToPath } from '@/lib/auth/role-redirect'
+import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import Image from 'next/image'
 import Link from 'next/link'
 import { LogOutIcon } from 'lucide-react'
@@ -33,19 +32,8 @@ import { generateCssVars } from '@/lib/branding/css-vars'
 export const dynamic = 'force-dynamic'
 
 export default async function KundeLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rolle, vorname, nachname')
-    .eq('id', user.id)
-    .single()
-
-  // AAR-718: Eingeloggte User mit anderer Rolle in ihr eigenes Portal statt
-  // auf /login — sonst wirkt die Seite „rausgeworfen".
-  if (profile?.rolle !== 'kunde') redirect(roleToPath(profile?.rolle as string | null | undefined))
+  // K5 / AAR-frontend-konsolidierung-p1: Auth + Rollen-Guard zentralisiert.
+  const { supabase, user, profile } = await requirePortalAccess(['kunde'])
 
   // AAR-kunde-onboarding-claim: claimFaelleByEmail einmal im Layout
   // aufrufen — deckt alle /kunde/* Pages ab. Sonst muss der User „einmal

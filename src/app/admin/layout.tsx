@@ -1,49 +1,21 @@
-﻿import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { roleToPath } from '@/lib/auth/role-redirect'
-import AdminNav from './_components/AdminNav'
+﻿import AdminNav from './_components/AdminNav'
 import UpdatesNav from '@/components/shared/updates'
 import Spotlight from '@/components/Spotlight'
 import { PageContainer } from '@/components/PageContainer'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
+import { requirePortalAccess } from '@/lib/auth/portal-guard'
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) redirect('/login')
-
-  // KFZ-203 + AAR-628: Rollen-Guard für /admin/*.
-  // Dispatch → eigenes Portal /dispatch/dashboard.
-  // Kundenbetreuer → eigenes Portal /mitarbeiter (Fallakte-Detail teilen
-  //   sich admin/kb/kanzlei unter /faelle/[id], aber die restlichen
-  //   /admin/*-Seiten sind Admin-only).
-  // Sachverständiger / Kunde / Makler sollten hier sowieso nicht ankommen,
-  //   Login-Redirect fängt das ab — zur Sicherheit trotzdem explizit.
-  // AAR-658 Silent-Error-Audit: Query-Error nicht still schlucken — sonst ist
-  // `profileCheck` undefined, keiner der Role-Redirects greift, ein User ohne
-  // Admin-Rolle würde /admin sehen. Defensiv zurück zum Login werfen.
-  const { data: profileCheck, error: profileErr } = await supabase
-    .from('profiles').select('rolle').eq('id', user.id).single()
-  if (profileErr || !profileCheck) {
-    console.error('[admin/layout] Profil-Query:', profileErr?.message ?? 'keine Row')
-    redirect('/login?error=Profil+nicht+ladbar')
-  }
-  // AAR-718: Dupliziertes Hardcoded-Mapping durch zentrale roleToPath
-  // ersetzt — sonst droht Drift wenn eine neue Rolle nur dort, aber nicht
-  // hier ergänzt wird.
-  const profileRolle = profileCheck.rolle as string | undefined
-  if (profileRolle && profileRolle !== 'admin') {
-    redirect(roleToPath(profileRolle))
-  }
-
-  const initials = user.email
-    ? user.email.substring(0, 2).toUpperCase()
-    : 'U'
+  // KFZ-203 + AAR-628 / K5 / AAR-frontend-konsolidierung-p1: Auth + Rollen-Guard
+  // zentralisiert (requirePortalAccess wirft via redirect bei fehlendem Login /
+  // falscher Rolle / nicht ladbarem Profil). Dispatch/Kundenbetreuer landen in
+  // ihrem eigenen Portal — die /admin/*-Seiten sind Admin-only.
+  const { supabase, user, initials } = await requirePortalAccess(['admin'])
 
   // AAR-531: Meine offene Tasks für Aufgaben-Badge.
   // AAR-727: unreadNachrichten-Count entfällt — Posteingang läuft über den
