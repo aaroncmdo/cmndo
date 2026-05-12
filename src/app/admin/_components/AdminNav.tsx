@@ -4,10 +4,6 @@
 // Vorher: 187-Zeilen Self-Contained-Sidebar mit dupliziertem isActive + Item-Rendering.
 // Jetzt: Thin Wrapper — nur Portal-spezifische Config (Items, Slots, Badges).
 
-// AAR-778: Migriert auf shared PortalNav (dark variant).
-// Vorher: 187-Zeilen Self-Contained-Sidebar mit dupliziertem isActive + Item-Rendering.
-// Jetzt: Thin Wrapper — nur Portal-spezifische Config (Items, Slots, Badges).
-
 import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon,
   CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
