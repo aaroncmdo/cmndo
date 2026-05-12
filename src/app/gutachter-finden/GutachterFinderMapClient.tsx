@@ -317,32 +317,42 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         }}
       />
 
-      {/* Hero-Header oben — Status-Glass-Pill links, Beratung-CTA rechts (full-bleed) */}
-      <div className="absolute top-0 left-0 right-0 z-[5] px-4 pt-4 sm:px-6 sm:pt-6 pointer-events-none">
-        <div className="flex items-center justify-between gap-3 pointer-events-auto">
-          <GlassPill className="px-4 py-2">
-            <span className="relative flex h-2 w-2">
+      {/* Hero-Header oben — Status-Glass-Pill links, Beratung-CTA rechts (full-bleed).
+          Mobile: kurzer Pill-Text + Beratung als Icon-only-Pill, sonst läuft's über. */}
+      <div className="absolute top-0 left-0 right-0 z-[5] px-3 pt-3 sm:px-6 sm:pt-6 pointer-events-none">
+        <div className="flex items-center justify-between gap-2 pointer-events-auto">
+          <GlassPill className="px-3 py-2 sm:px-4">
+            <span className="relative flex h-2 w-2 flex-shrink-0">
               <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" aria-hidden />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
             </span>
             <span
-              className="text-xs font-semibold"
+              className="text-[11px] sm:text-xs font-semibold whitespace-nowrap"
               style={{
                 fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
                 color: 'var(--brand-secondary, var(--claimondo-ondo))',
               }}
             >
-              {userLocation
-                ? aktiveSVs.length > 0
-                  ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} Sachverständige in Ihrer Nähe`
-                  : `${svLeads.length} Sachverständige in Ihrer Nähe`
-                : aktiveSVs.length > 0
-                  ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} weitere Sachverständige bundesweit`
-                  : `${svLeads.length} Sachverständige bundesweit verfügbar`}
+              {/* Kurz auf Mobile */}
+              <span className="sm:hidden">
+                {svLeads.length + aktiveSVs.length} SVs {userLocation ? 'in Ihrer Nähe' : 'verfügbar'}
+              </span>
+              {/* Voll ab sm */}
+              <span className="hidden sm:inline">
+                {userLocation
+                  ? aktiveSVs.length > 0
+                    ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} Sachverständige in Ihrer Nähe`
+                    : `${svLeads.length} Sachverständige in Ihrer Nähe`
+                  : aktiveSVs.length > 0
+                    ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} weitere Sachverständige bundesweit`
+                    : `${svLeads.length} Sachverständige bundesweit verfügbar`}
+              </span>
             </span>
           </GlassPill>
-          {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts */}
+          {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
+              kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
           <BeratungVereinbarenButton className="hidden sm:inline-flex" />
+          <BeratungVereinbarenButton label="Beratung" className="sm:hidden flex-shrink-0 text-[12px] px-3" />
         </div>
       </div>
 
