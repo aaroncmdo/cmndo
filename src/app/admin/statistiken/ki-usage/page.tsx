@@ -1,5 +1,6 @@
 ﻿// AAR-436: Admin-Dashboard für Anthropic-Token-Usage und Cache-Hit-Rate.
 import PageHeader from '@/components/shared/PageHeader'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -124,34 +125,36 @@ export default async function KiUsagePage() {
             Keine Usage-Daten in den letzten 7 Tagen.
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-claimondo-bg text-[11px] uppercase tracking-wider text-claimondo-ondo">
-              <tr>
-                <th className="text-left px-4 py-2">Endpoint</th>
-                <th className="text-right px-4 py-2">Calls</th>
-                <th className="text-right px-4 py-2">Input</th>
-                <th className="text-right px-4 py-2">Output</th>
-                <th className="text-right px-4 py-2">Cache-Read</th>
-                <th className="text-right px-4 py-2">Cache-Write</th>
-                <th className="text-right px-4 py-2">Hit-Rate</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-claimondo-border">
-              {aggregated.map((row) => (
-                <tr key={row.endpoint}>
-                  <td className="px-4 py-2 font-medium text-claimondo-navy">{row.endpoint}</td>
-                  <td className="px-4 py-2 text-right text-claimondo-navy">{row.calls.toLocaleString('de-DE')}</td>
-                  <td className="px-4 py-2 text-right text-claimondo-navy">{row.inputTokens.toLocaleString('de-DE')}</td>
-                  <td className="px-4 py-2 text-right text-claimondo-navy">{row.outputTokens.toLocaleString('de-DE')}</td>
-                  <td className="px-4 py-2 text-right text-claimondo-navy">{row.cacheReadTokens.toLocaleString('de-DE')}</td>
-                  <td className="px-4 py-2 text-right text-claimondo-navy">{row.cacheWriteTokens.toLocaleString('de-DE')}</td>
-                  <td className="px-4 py-2 text-right text-claimondo-navy font-medium">
-                    {row.cacheHitRate != null ? `${(row.cacheHitRate * 100).toFixed(1)}%` : '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <DataTableContainer variant="plain">
+            <Table>
+              <Thead className="!text-[11px]">
+                <Tr>
+                  <Th className="!py-2 text-left">Endpoint</Th>
+                  <Th className="!py-2 text-right">Calls</Th>
+                  <Th className="!py-2 text-right">Input</Th>
+                  <Th className="!py-2 text-right">Output</Th>
+                  <Th className="!py-2 text-right">Cache-Read</Th>
+                  <Th className="!py-2 text-right">Cache-Write</Th>
+                  <Th className="!py-2 text-right">Hit-Rate</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {aggregated.map((row) => (
+                  <Tr key={row.endpoint}>
+                    <Td className="!py-2 font-medium">{row.endpoint}</Td>
+                    <Td className="!py-2 text-right">{row.calls.toLocaleString('de-DE')}</Td>
+                    <Td className="!py-2 text-right">{row.inputTokens.toLocaleString('de-DE')}</Td>
+                    <Td className="!py-2 text-right">{row.outputTokens.toLocaleString('de-DE')}</Td>
+                    <Td className="!py-2 text-right">{row.cacheReadTokens.toLocaleString('de-DE')}</Td>
+                    <Td className="!py-2 text-right">{row.cacheWriteTokens.toLocaleString('de-DE')}</Td>
+                    <Td className="!py-2 text-right font-medium">
+                      {row.cacheHitRate != null ? `${(row.cacheHitRate * 100).toFixed(1)}%` : '—'}
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         )}
       </section>
     </div>
