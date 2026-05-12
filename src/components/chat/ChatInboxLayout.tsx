@@ -77,7 +77,11 @@ export default function ChatInboxLayout({
       {/* Sidebar */}
       <aside className="w-80 border-r border-claimondo-border flex flex-col bg-white shrink-0">
         <div className="px-4 py-3 border-b border-claimondo-border sticky top-0 bg-white z-10">
-          <h1 className="text-lg font-semibold text-claimondo-navy">{title}</h1>
+          {/* h2, nicht h1 — die Seite hat ihren Page-H1 schon über PageHeader.
+              Sidebar-Header ist semantisch ein Section-Header. (Re-Fix von #489,
+              das beim Design-System-Merge verloren ging — Doppel-h1 brach den
+              E2E-Test admin-nachrichten mit strict-mode-violation.) */}
+          <h2 className="text-lg font-semibold text-claimondo-navy">{title}</h2>
           <div className="relative mt-2">
             <SearchIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-claimondo-ondo/70" />
             <input
