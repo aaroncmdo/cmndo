@@ -12,22 +12,21 @@ Wir bekommen eine neue Marketing-Subdomain `makler.claimondo.de` — sie soll ex
 
 **Nicht anfassen:** der Prod-Next-Prozess / PM2 (kein Restart nötig — nur `nginx reload`), die nginx-Blöcke für `claimondo.de`, `app.claimondo.de`, `gutachter.claimondo.de` (die ändern sich nicht), irgendwelchen App-Code.
 
----
-
-## Schritt A — DNS
-
-1. Schauen, wohin `gutachter.claimondo.de` zeigt:
-   ```
-   dig +short gutachter.claimondo.de
-   dig +short claimondo.de
-   ```
-2. Prüfen, ob es schon einen Wildcard-Record gibt (`dig +short irgendwas-zufälliges.claimondo.de` — wenn das die VPS-IP liefert, gibt es `*.claimondo.de` und du bist mit DNS fertig).
-3. Falls kein Wildcard: beim DNS-Provider einen `A`-Record `makler.claimondo.de` → dieselbe IP wie `gutachter.claimondo.de` anlegen (und `AAAA`, falls `gutachter` einen hat). TTL wie bei den anderen Subdomains.
-4. Warten bis es auflöst: `dig +short makler.claimondo.de` muss die VPS-IP zeigen.
+**Auch auf Staging:** Zusätzlich soll `makler.staging.claimondo.de` funktionieren (zum Testen vor dem Prod-Go-Live). Siehe Schritt D.
 
 ---
 
-## Schritt B — nginx-Server-Block
+## Schritt A — DNS (vermutlich schon erledigt)
+
+`*.claimondo.de` ist ein Wildcard-Record → `makler.claimondo.de` löst bereits auf `162.55.40.105` auf (Stand 2026-05-12). Nur verifizieren:
+```
+dig +short makler.claimondo.de            # erwartet: 162.55.40.105 (ggf. via CNAME *.cologne.startplatz.de)
+```
+Falls das *nicht* auflöst: A-Record `makler.claimondo.de → 162.55.40.105` beim DNS-Provider anlegen (analog `gutachter.claimondo.de`). Sonst: nichts zu tun, weiter mit Schritt B.
+
+---
+
+## Schritt B — nginx-Server-Block (Prod)
 
 1. Den vorhandenen `gutachter.claimondo.de`-Block finden:
    ```
@@ -80,17 +79,32 @@ Wir bekommen eine neue Marketing-Subdomain `makler.claimondo.de` — sie soll ex
 
 ---
 
-## Verifikation (nach A–C, noch VOR Aarons Code-Deploy)
+## Schritt D — Staging: `makler.staging.claimondo.de`
+
+Der Staging-Slot läuft als eigener Next-Prozess (PM2, Port `3001`, mit Basic-Auth) hinter `*.staging.claimondo.de`.
+
+1. Prüfen, wie der Staging-nginx aufgebaut ist:
+   ```
+   grep -rl "staging.claimondo.de" /etc/nginx/
+   ```
+   - **Wenn dort ein Wildcard-Block `server_name *.staging.claimondo.de;` (oder `~^.+\.staging\.claimondo\.de$`) auf `proxy_pass http://127.0.0.1:3001` zeigt** → `makler.staging.claimondo.de` wird damit schon geroutet, **nichts zu tun**. (Auch das Staging-SSL-Zert ist dann typisch ein Wildcard `*.staging.claimondo.de` und deckt es ab — mit `certbot certificates` checken.)
+   - **Wenn es per Host einzelne Blöcke gibt** (`app.staging.claimondo.de`, `gutachter.staging.claimondo.de` …) → einen analogen `makler.staging.claimondo.de`-Block anlegen: `proxy_pass http://127.0.0.1:3001`, dieselben `proxy_set_header`-Zeilen (inkl. `Host $host`), denselben `auth_basic` / `auth_basic_user_file` wie die anderen Staging-Blöcke, SSL aus dem Staging-Zert. Dann `nginx -t && systemctl reload nginx`. Falls das Staging-Zert kein Wildcard ist: `certbot --nginx --expand -d <bisherige staging-domains> -d makler.staging.claimondo.de`.
+2. Danach (von Aaron) den Branch `kitta/aar-marketing-subdomains` in den Staging-Slot deployen — erst dann rewritet `makler.staging.claimondo.de/` auf die Makler-Seite. (Vorher: liefert die Staging-Startseite — okay.)
+
+---
+
+## Verifikation (nach A–D, noch VOR dem Prod-Code-Deploy)
 
 ```
-dig +short makler.claimondo.de            # → VPS-IP
+dig +short makler.claimondo.de            # → 162.55.40.105
 curl -sI https://makler.claimondo.de/     # → HTTP 200, gültiges Zert (kein -k nötig)
 curl -sI https://gutachter.claimondo.de/  # → unverändert HTTP 200 (Regressions-Check)
 curl -sI https://claimondo.de/            # → unverändert HTTP 200 (Regressions-Check)
+curl -sI -u <staging-user>:<pw> https://makler.staging.claimondo.de/   # → HTTP 200 (nach Staging-Deploy)
 ```
 
-`https://makler.claimondo.de/` zeigt zu diesem Zeitpunkt die normale Claimondo-Marketing-Startseite — das ist korrekt. Nach Aarons Code-Deploy zeigt dieselbe URL dann die Makler-Partner-Seite (musst du nicht prüfen, macht Aaron).
+`https://makler.claimondo.de/` zeigt zu diesem Zeitpunkt die normale Claimondo-Marketing-Startseite — das ist korrekt. Nach dem Code-Deploy (Aaron) zeigt dieselbe URL dann die Makler-Partner-Seite (musst du nicht prüfen, macht Aaron).
 
 ## Berichten
 
-Nach jedem Schritt kurz zurückmelden: was gemacht, welche Datei/welcher Record geändert, Output von `nginx -t` / `dig` / `curl -sI`. Am Ende: Pfad der neuen nginx-Config-Datei + finale Domain-Liste aus `certbot certificates`.
+Nach jedem Schritt kurz zurückmelden: was gemacht, welche Datei/welcher Record geändert, Output von `nginx -t` / `dig` / `curl -sI`. Am Ende: Pfad der neuen nginx-Config-Datei(en) + finale Domain-Liste aus `certbot certificates` (Prod + Staging).

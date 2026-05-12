@@ -42,10 +42,30 @@ const SUBDOMAIN_LANDINGPAGES: Record<string, string> = {
   '/gutachter-partner': HOST_GUTACHTER,
   '/makler/partner-werden': HOST_MAKLER,
 }
-// Umkehrung: Subdomain-Host → Landingpage-Pfad.
+// Umkehrung: Subdomain-Host → Landingpage-Pfad (Prod).
 const LANDINGPAGE_FOR_HOST: Record<string, string> = {}
 for (const [path, host] of Object.entries(SUBDOMAIN_LANDINGPAGES)) {
   LANDINGPAGE_FOR_HOST[host] = path
+}
+
+/**
+ * Landingpage-Pfad für einen Marketing-Subdomain-Host — deckt Prod
+ * (`makler.claimondo.de`) und Staging (`makler.staging.claimondo.de`) ab.
+ * Liefert `undefined`, wenn der Host keine Marketing-Subdomain ist.
+ */
+function landingPathForHost(hostname: string): string | undefined {
+  if (LANDINGPAGE_FOR_HOST[hostname]) return LANDINGPAGE_FOR_HOST[hostname]
+  // Staging-Varianten: <name>.staging.claimondo.de → wie <name>.claimondo.de
+  const stagingMatch = /^([^.]+)\.staging\.claimondo\.de$/.exec(hostname)
+  if (stagingMatch) {
+    const prodHost = `${stagingMatch[1]}.claimondo.de`
+    return LANDINGPAGE_FOR_HOST[prodHost]
+  }
+  return undefined
+}
+
+function isStagingHost(hostname: string): boolean {
+  return hostname.endsWith('.staging.claimondo.de')
 }
 
 function matchesAnyPrefix(pathname: string, prefixes: string[]): boolean {
@@ -70,8 +90,8 @@ export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const isApi = pathname.startsWith('/api/')
 
-  // ─── Marketing-Subdomains (gutachter. / makler.) ──────────────────────
-  const subdomainLandingPath = LANDINGPAGE_FOR_HOST[hostname]
+  // ─── Marketing-Subdomains (gutachter. / makler. — Prod + Staging) ─────
+  const subdomainLandingPath = landingPathForHost(hostname)
   if (subdomainLandingPath) {
     // /api/* unverändert durchreichen (Health-Checks etc. — nicht umschreiben).
     if (isApi) return await updateSession(request)
@@ -85,7 +105,9 @@ export async function proxy(request: NextRequest) {
     if (pathname === subdomainLandingPath) {
       return NextResponse.redirect(new URL('/', request.url), 301)
     }
-    // Alles andere (Logo, Nav, Legal, Cross-Links) → zurück auf die Hauptdomain.
+    // Staging: keinen Cross-Host-Redirect auf die Prod-Domain — einfach rendern.
+    if (isStagingHost(hostname)) return await updateSession(request)
+    // Prod: alles andere (Logo, Nav, Legal, Cross-Links) → zurück auf die Hauptdomain.
     return redirectToHost(request, HOST_MARKETING)
   }
 
