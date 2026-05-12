@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
 import {
   serviceSchema, breadcrumbsSchema,
-  jsonLdScript, SITE_URL,
+  jsonLdScript, GUTACHTER_LANDING_URL,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import GutachterPartnerClient from './GutachterPartnerClient'
 
 export const metadata: Metadata = {
@@ -22,14 +21,13 @@ export const metadata: Metadata = {
     'Partner werden Sachverständiger',
   ],
   alternates: {
-    canonical: `${SITE_URL}/gutachter-partner`,
-    ...buildLanguageAlternates('/gutachter-partner'),
+    canonical: `${GUTACHTER_LANDING_URL}/`,
   },
   openGraph: {
     type: 'website',
     locale: 'de_DE',
     siteName: 'Claimondo',
-    url: `${SITE_URL}/gutachter-partner`,
+    url: `${GUTACHTER_LANDING_URL}/`,
     title: 'Als Kfz-Sachverständiger Partner werden — Claimondo',
     description:
       'Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein — wir vermitteln direkt in Ihrem Einzugsgebiet.',
@@ -52,11 +50,11 @@ export default function GutachterPartnerPage() {
             name: 'Claimondo SV-Partner-Netzwerk',
             description:
               'Kfz-Sachverständige tragen sich in das Claimondo-Netzwerk ein und erhalten Aufträge direkt ohne Eigenakquise. Über 89 DAT-Experten bundesweit.',
-            url: `${SITE_URL}/gutachter-partner`,
+            url: `${GUTACHTER_LANDING_URL}/`,
           }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
-            { name: 'Sachverständiger werden', url: '/gutachter-partner' },
+            { name: 'Sachverständiger werden', url: `${GUTACHTER_LANDING_URL}/` },
           ]),
         ])}
       />
