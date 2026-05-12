@@ -3,6 +3,9 @@
 // Schema.org Templates für deutsche KFZ-Schadensregulierung
 
 export const SITE_URL = 'https://claimondo.de'
+// Marketing-Subdomains für B2B-Recruiting — kanonische Roots der jeweiligen Landingpages.
+export const GUTACHTER_LANDING_URL = 'https://gutachter.claimondo.de'
+export const MAKLER_LANDING_URL = 'https://makler.claimondo.de'
 export const SITE_NAME = 'Claimondo'
 export const PHONE_E164 = '+4922125906530'
 export const PHONE_DISPLAY = '0221 25906530'
