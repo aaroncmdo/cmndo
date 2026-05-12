@@ -16,6 +16,7 @@ import { CheckboxField } from './fields/CheckboxField'
 import { SlotField } from './fields/SlotField'
 import { SignatureField } from './fields/SignatureField'
 import { FileField } from './fields/FileField'
+import { Zb1UploadField } from './fields/Zb1UploadField'
 
 function meetsCondition(cond: ConditionalOn | null | undefined, vals: Record<string, unknown>) {
   if (!cond) return true
@@ -50,11 +51,14 @@ interface Props {
   // (Pflicht-Phasen-Skip passiert schon im Loader; hier ist es nur fuer
   // ggf. wieder editierbar gemachte Optionalfelder relevant).
   prefilledValues?: Record<string, unknown>
+  // AAR-zb1-wizard: vom DynamicWizard injizierte Werte für das Zb1UploadField.
+  fallId?: string | null
+  zb1Token?: string | null
 }
 
 const STORAGE_KEY = 'claimondo-wizard-state'
 
-export function WizardClient({ phases, flowKey, prefilledValues }: Props) {
+export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Token }: Props) {
   const [phaseIdx, setPhaseIdx] = useState(0)
   const [values, setValues] = useState<Record<string, unknown>>(prefilledValues ?? {})
   const [anfrageId, setAnfrageId] = useState<string | null>(null)
@@ -388,6 +392,8 @@ export function WizardClient({ phases, flowKey, prefilledValues }: Props) {
               svId={svId}
               anfrageId={anfrageId}
               preSelectedSvLeadId={preSelectedSvLeadId}
+              fallId={fallId}
+              zb1Token={zb1Token}
             />
           ))}
         </div>
@@ -481,6 +487,8 @@ function FieldRenderer({
   svId,
   anfrageId,
   preSelectedSvLeadId,
+  fallId,
+  zb1Token,
 }: {
   feld: OnboardingFeld
   value: unknown
@@ -489,6 +497,8 @@ function FieldRenderer({
   svId?: string | null
   anfrageId?: string | null
   preSelectedSvLeadId?: string | null
+  fallId?: string | null
+  zb1Token?: string | null
 }) {
   switch (feld.typ) {
     case 'text':
@@ -578,6 +588,17 @@ function FieldRenderer({
           value={(value as string[]) ?? []}
           onChange={onChange as (v: string[]) => void}
           disabled={disabled}
+        />
+      )
+    case 'zb1-upload':
+      return (
+        <Zb1UploadField
+          feld={feld}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          token={zb1Token ?? null}
+          fallId={fallId ?? null}
         />
       )
     default:
