@@ -278,6 +278,14 @@ p, li, blockquote, article, .prose {
   }
 }
 
+/* AAR-glass-s1: Placeholder-Farbe für Glass-Inputs — Brand-Secondary (Ondo),
+   getippter Text bleibt Brand-Primary (Navy). Via Klasse weil ::placeholder
+   nicht per inline style setzbar ist. */
+.glass-field-input::placeholder {
+  color: var(--brand-secondary, var(--claimondo-ondo));
+  opacity: 1;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CheckCircle2, MapPin } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
 import { finalizeGutachterFinderAnfrage } from './finalizeAnfrage'
 import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
@@ -16,6 +16,8 @@ import { CheckboxField } from './fields/CheckboxField'
 import { SlotField } from './fields/SlotField'
 import { SignatureField } from './fields/SignatureField'
 import { FileField } from './fields/FileField'
+// AAR-glass-s1: Liquid-Glass-Design-System.
+import { GlassPill, GlassButton, GlassStepIndicator, BeratungVereinbarenButton } from '@/components/shared/glass'
 
 function meetsCondition(cond: ConditionalOn | null | undefined, vals: Record<string, unknown>) {
   if (!cond) return true
@@ -233,247 +235,157 @@ export function WizardClient({ phases, flowKey, prefilledValues }: Props) {
   if (!currentPhase) return null
 
   const felder = visibleFelder(currentPhase.felder, values)
-  const progress = totalPhases > 1 ? phaseIdx / (totalPhases - 1) : 1
   const isLast = phaseIdx >= totalPhases - 1
 
   return (
-    <div style={{ fontFamily: 'var(--font-montserrat, Montserrat), sans-serif' }}>
-      {/* Step-Rail — AAR-glass-s1: weiße Card → Glass-Tokens */}
-      <div style={{
-        background: 'var(--glass-bg)',
-        backdropFilter: 'var(--glass-blur)',
-        WebkitBackdropFilter: 'var(--glass-blur)',
-        border: 'var(--glass-border)',
-        borderRadius: 'var(--wiz-r-xl)',
-        padding: '22px 26px 24px',
-        marginBottom: 24,
-        boxShadow: 'var(--glass-shadow)',
-        position: 'relative',
-      }}>
-        {/* Verbindungslinie Hintergrund */}
-        <div style={{
-          position: 'absolute', top: 41, left: '11%', right: '11%',
-          height: 3, borderRadius: 2,
-          background: 'var(--wiz-fill)',
-          zIndex: 0,
-        }} />
-        {/* Aktiver Fortschritt */}
-        <div style={{
-          position: 'absolute', top: 41, left: '11%',
-          height: 3, borderRadius: 2, zIndex: 1,
-          background: 'linear-gradient(90deg, var(--claimondo-navy), var(--claimondo-ondo))',
-          width: `${progress * 78}%`,
-          transition: 'width .55s var(--wiz-ease-out)',
-        }} />
-        {/* Schritt-Kreise */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${totalPhases}, 1fr)`,
-          position: 'relative', zIndex: 2,
-        }}>
-          {currentPhases.map((phase, i) => {
-            const isDone = i < phaseIdx
-            const isActive = i === phaseIdx
-            return (
-              <div key={phase.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: '50%',
-                  background: isDone ? 'var(--claimondo-navy)' : isActive ? 'var(--claimondo-ondo)' : '#fff',
-                  border: `2px solid ${isDone ? 'var(--claimondo-navy)' : isActive ? 'var(--claimondo-ondo)' : 'var(--wiz-fill)'}`,
-                  color: isDone || isActive ? '#fff' : 'var(--wiz-text-3)',
-                  display: 'grid', placeItems: 'center',
-                  fontWeight: 600, fontSize: 15, letterSpacing: '-.01em',
-                  transition: 'all .35s var(--wiz-ease)',
-                  transform: isDone ? 'scale(1.04)' : isActive ? 'scale(1.06)' : 'scale(1)',
-                  boxShadow: isActive ? '0 0 0 6px rgba(69,115,162,.16)' : 'none',
-                }}>
-                  {isDone ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ) : (
-                    <span>{i + 1}</span>
-                  )}
-                </div>
-                <span style={{
-                  marginTop: 12,
-                  fontSize: 12, fontWeight: isActive ? 600 : 500,
-                  color: isActive ? 'var(--claimondo-navy)' : isDone ? 'var(--wiz-text-2)' : 'var(--wiz-text-3)',
-                  letterSpacing: '-.005em',
-                  transition: 'color .25s var(--wiz-ease)',
-                }}>
-                  {phase.titel}
-                </span>
-              </div>
-            )
-          })}
-        </div>
+    <div
+      key={animKey}
+      style={{
+        fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 18,
+        animation: 'sheetIn .42s var(--wiz-ease-out) both',
+      }}
+    >
+      {/* AAR-glass-s1: Step-Indicator als kompakte Glass-Pill statt großer Card */}
+      <GlassStepIndicator current={phaseIdx + 1} total={totalPhases} className="self-start" />
+
+      {/* Phase-Header — freischwebend, kein Card-Wrapper */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {currentPhase.eyebrow && (
+          <GlassPill className="self-start px-4 py-2">
+            <MapPin className="h-3 w-3" style={{ color: 'var(--brand-secondary, var(--claimondo-ondo))' }} />
+            <span
+              className="text-[11px] font-bold uppercase tracking-[0.14em]"
+              style={{
+                fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+                color: 'var(--brand-secondary, var(--claimondo-ondo))',
+              }}
+            >
+              {currentPhase.eyebrow}
+            </span>
+          </GlassPill>
+        )}
+        <h2
+          style={{
+            fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+            fontSize: 28,
+            fontWeight: 800,
+            letterSpacing: '-.024em',
+            lineHeight: 1.08,
+            margin: 0,
+            color: 'var(--brand-primary, var(--claimondo-navy))',
+            textShadow: '0 1px 0 rgba(255,255,255,.7), 0 0 20px rgba(255,255,255,.4)',
+          }}
+        >
+          {currentPhase.titel}
+        </h2>
+        {currentPhase.beschreibung && (
+          <p
+            style={{
+              fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
+              fontSize: 14.5,
+              fontWeight: 500,
+              lineHeight: 1.55,
+              maxWidth: 480,
+              margin: 0,
+              color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 65%, transparent)',
+              textShadow: '0 1px 0 rgba(255,255,255,.5)',
+            }}
+          >
+            {currentPhase.beschreibung}
+          </p>
+        )}
       </div>
 
-      {/* Phase-Card mit Sheet-Animation — AAR-glass-s1: weiße Card → Glass-Tokens */}
-      <div
-        key={animKey}
-        style={{
-          background: 'var(--glass-bg-nested)',
-          backdropFilter: 'var(--glass-blur-strong)',
-          WebkitBackdropFilter: 'var(--glass-blur-strong)',
-          border: 'var(--glass-border-nested)',
-          borderRadius: 'var(--wiz-r-2xl)',
-          padding: '36px clamp(22px, 3vw, 40px)',
-          boxShadow: 'var(--glass-shadow-card)',
-          animation: 'sheetIn .42s var(--wiz-ease-out) both',
-        }}
-      >
-        {/* Phase-Header */}
-        <div style={{
-          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-          gap: 24, marginBottom: 32, paddingBottom: 28,
-          borderBottom: '1px solid var(--wiz-separator)',
-        }}>
-          <div>
-            {currentPhase.eyebrow && (
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                fontSize: 13, fontWeight: 600, color: 'var(--claimondo-ondo)',
-                letterSpacing: '-.005em', marginBottom: 6,
-              }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--claimondo-ondo)', display: 'inline-block' }} />
-                {currentPhase.eyebrow}
-              </div>
-            )}
-            <h2 style={{
-              fontSize: 24, fontWeight: 700, letterSpacing: '-.024em',
-              color: 'var(--claimondo-navy)', lineHeight: 1.18, marginTop: 0,
-            }}>
-              {currentPhase.titel}
-            </h2>
-            {currentPhase.beschreibung && (
-              <p style={{
-                marginTop: 10, fontSize: 15, color: 'var(--wiz-text-2)',
-                lineHeight: 1.55, maxWidth: 480, letterSpacing: '-.005em',
-              }}>
-                {currentPhase.beschreibung}
-              </p>
-            )}
-          </div>
-          <div style={{
-            flexShrink: 0,
-            fontSize: 13, fontWeight: 600, color: 'var(--wiz-text-2)',
-            background: 'var(--wiz-fill)', borderRadius: 999, padding: '8px 14px',
-            letterSpacing: '-.005em', whiteSpace: 'nowrap',
-          }}>
-            <strong style={{ color: 'var(--claimondo-navy)', fontWeight: 700 }}>{phaseIdx + 1}</strong>
-            {' / '}{totalPhases}
-          </div>
-        </div>
-
-        {/* SV-Match-Banner wenn Slot-Phase aktiv + SV gefunden */}
-        {hasSlotFeld && svName && (
-          <div style={{
-            marginBottom: 20, padding: '12px 18px',
-            background: 'rgba(52,199,89,.08)', borderRadius: 'var(--wiz-r-sm)',
-            fontSize: 14, fontWeight: 500, color: '#1a7a35', letterSpacing: '-.005em',
-            display: 'flex', alignItems: 'center', gap: 8,
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Sachverständiger in Ihrer Nähe gefunden: <strong>{svName}</strong>
-          </div>
-        )}
-
-        {/* Felder */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-          {felder.map(feld => (
-            <FieldRenderer
-              key={feld.id}
-              feld={feld}
-              value={values[feld.feld_key]}
-              onChange={val => setField(feld.feld_key, val)}
-              disabled={isSaving}
-              svId={svId}
-              anfrageId={anfrageId}
-              preSelectedSvLeadId={preSelectedSvLeadId}
-            />
-          ))}
-        </div>
-
-        {/* Fehleranzeige */}
-        {error && (
-          <div style={{
-            marginTop: 20, padding: '14px 18px',
-            background: 'rgba(255,59,48,.08)',
-            borderRadius: 'var(--wiz-r-sm)',
-            fontSize: 14, fontWeight: 500,
-            color: '#c0392b', letterSpacing: '-.005em',
-          }}>
-            {error}
-          </div>
-        )}
-
-        {/* Phase-Footer */}
-        <div style={{
-          marginTop: 32, paddingTop: 24,
-          borderTop: '1px solid var(--wiz-separator)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
-        }}>
-          <button
-            type="button"
-            disabled={phaseIdx === 0 || isSaving}
-            onClick={handleZurueck}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '14px 22px', borderRadius: 999,
-              fontSize: 15, fontWeight: 600, letterSpacing: '-.01em',
-              background: 'var(--wiz-fill)', color: 'var(--claimondo-navy)',
-              border: 'none', cursor: phaseIdx === 0 ? 'not-allowed' : 'pointer',
-              opacity: phaseIdx === 0 ? .35 : 1,
-              transition: 'all .25s var(--wiz-ease)',
-              fontFamily: 'inherit',
-              minHeight: 48,
-            }}
+      {/* SV-Match-Banner als Glass-Pill wenn Slot-Phase aktiv + SV gefunden */}
+      {hasSlotFeld && svName && (
+        <GlassPill className="self-start gap-2.5">
+          <CheckCircle2 size={16} style={{ color: '#1a7a35' }} />
+          <span
+            className="text-[13px] font-semibold"
+            style={{ fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)', color: '#1a7a35' }}
           >
-            <ChevronLeft size={18} />
-            Zurück
-          </button>
+            Sachverständiger in Ihrer Nähe: <strong>{svName}</strong>
+          </span>
+        </GlassPill>
+      )}
 
-          <button
-            type="button"
+      {/* Felder — jedes Feld ist eine eigene Glass-Pill (siehe FieldRenderer) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {felder.map(feld => (
+          <FieldRenderer
+            key={feld.id}
+            feld={feld}
+            value={values[feld.feld_key]}
+            onChange={val => setField(feld.feld_key, val)}
             disabled={isSaving}
-            onClick={handleWeiter}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '14px 26px', borderRadius: 999,
-              fontSize: 15, fontWeight: 600, letterSpacing: '-.01em',
-              background: 'var(--claimondo-ondo)', color: '#fff',
-              border: 'none', cursor: isSaving ? 'wait' : 'pointer',
-              boxShadow: '0 4px 12px rgba(69,115,162,.30), 0 1px 2px rgba(69,115,162,.18)',
-              transition: 'all .25s var(--wiz-ease)',
-              fontFamily: 'inherit',
-              minHeight: 48,
-              opacity: isSaving ? .7 : 1,
-            }}
-          >
-            {isSaving ? (
-              <>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ animation: 'spin 1s linear infinite' }}>
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeDashoffset="10" strokeLinecap="round" />
-                </svg>
-                Speichern…
-              </>
-            ) : isLast ? (
-              <>
-                Termin buchen
-                <ChevronRight size={18} />
-              </>
-            ) : (
-              <>
-                Weiter
-                <ChevronRight size={18} />
-              </>
-            )}
-          </button>
+            svId={svId}
+            anfrageId={anfrageId}
+            preSelectedSvLeadId={preSelectedSvLeadId}
+          />
+        ))}
+      </div>
+
+      {/* Fehleranzeige — als Glass-Pill in Rosé */}
+      {error && (
+        <div
+          className="rounded-[var(--glass-radius-pill)] px-[22px] py-[14px] [backdrop-filter:var(--glass-blur)] [-webkit-backdrop-filter:var(--glass-blur)]"
+          style={{
+            background: 'color-mix(in srgb, white 78%, #F43F5E 22%)',
+            border: '1px solid color-mix(in srgb, white 60%, #F43F5E 30%)',
+            boxShadow: 'var(--glass-shadow)',
+            fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
+            fontSize: 13.5,
+            fontWeight: 600,
+            color: '#9f1239',
+          }}
+        >
+          {error}
         </div>
+      )}
+
+      {/* Footer — Glass-Button-Reihe: Zurück (secondary) + Weiter/Buchen (cta) + Beratung */}
+      <div className="flex items-center gap-3 flex-wrap mt-1">
+        {phaseIdx > 0 && (
+          <GlassButton
+            variant="secondary"
+            icon={<ChevronLeft size={16} strokeWidth={2.2} />}
+            iconPosition="left"
+            onClick={handleZurueck}
+            disabled={isSaving}
+          >
+            Zurück
+          </GlassButton>
+        )}
+        <GlassButton
+          variant="cta"
+          icon={
+            isSaving ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ animation: 'spin 1s linear infinite' }}>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeDashoffset="10" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <ChevronRight size={16} strokeWidth={2.2} />
+            )
+          }
+          iconPosition="right"
+          onClick={handleWeiter}
+          disabled={isSaving}
+        >
+          {isSaving ? 'Speichern…' : isLast ? 'Termin buchen' : 'Weiter'}
+        </GlassButton>
+        <span
+          className="text-[11px] uppercase tracking-[0.1em] font-bold"
+          style={{
+            fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+            color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 55%, transparent)',
+          }}
+        >
+          oder
+        </span>
+        <BeratungVereinbarenButton />
       </div>
     </div>
   )

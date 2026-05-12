@@ -1,5 +1,8 @@
 'use client'
 
+// AAR-glass-s1: Segmented-Control als Glass-Pill-Container mit CTA-Gradient-
+// Fill für die aktive Option.
+
 import type { OnboardingFeld } from '../types'
 
 interface Props {
@@ -13,59 +16,75 @@ export function SegmentedField({ feld, value, onChange, disabled }: Props) {
   const optionen = feld.optionen ?? []
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <label style={{
-        fontSize: 14, fontWeight: 600, color: 'var(--claimondo-navy)',
-        letterSpacing: '-.01em', display: 'flex', alignItems: 'center', gap: 6,
-      }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0, width: '100%' }}>
+      <label
+        style={{
+          fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+          fontSize: 11,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '.1em',
+          color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 75%, transparent)',
+          padding: '0 22px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+        }}
+      >
         {feld.label}
-        {feld.pflicht && <span style={{ color: '#FF9F0A', fontSize: 13 }}>*</span>}
+        {feld.pflicht && <span style={{ color: 'var(--brand-secondary, var(--claimondo-ondo))', fontSize: 13 }}>*</span>}
       </label>
       {feld.hint && (
-        <span style={{ fontSize: 13, color: 'var(--wiz-text-3)', marginTop: -2, letterSpacing: '-.005em' }}>
+        <span
+          style={{
+            fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
+            fontSize: 12,
+            color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 50%, transparent)',
+            padding: '0 22px',
+            marginTop: -2,
+          }}
+        >
           {feld.hint}
         </span>
       )}
-      <div style={{
-        display: 'inline-flex',
-        padding: 3,
-        background: 'var(--wiz-fill)',
-        borderRadius: 'var(--wiz-r-sm)',
-        width: '100%',
-        position: 'relative',
-      }}>
-        {optionen.map(opt => (
-          <button
-            key={opt.value}
-            type="button"
-            disabled={disabled}
-            onClick={() => onChange(opt.value)}
-            style={{
-              flex: 1,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              padding: '10px 14px',
-              fontSize: 14,
-              fontWeight: 600,
-              color: value === opt.value ? 'var(--claimondo-navy)' : 'var(--wiz-text-2)',
-              borderRadius: 11,
-              cursor: disabled ? 'not-allowed' : 'pointer',
-              letterSpacing: '-.01em',
-              transition: 'color .25s var(--wiz-ease)',
-              background: value === opt.value ? '#fff' : 'transparent',
-              boxShadow: value === opt.value
-                ? '0 1px 2px rgba(15,30,68,.04), 0 3px 8px rgba(15,30,68,.06)'
-                : 'none',
-              border: 'none',
-              fontFamily: 'inherit',
-            }}
-          >
-            {opt.icon && <span style={{ fontSize: 14, lineHeight: 1, opacity: .8 }}>{opt.icon}</span>}
-            {opt.label}
-          </button>
-        ))}
+      <div
+        className="[background:var(--glass-bg)] [backdrop-filter:var(--glass-blur)] [-webkit-backdrop-filter:var(--glass-blur)] [box-shadow:var(--glass-shadow)] rounded-[var(--glass-radius-pill)]"
+        style={{ display: 'flex', padding: 4, border: 'var(--glass-border)', width: '100%', minWidth: 0, gap: 4 }}
+      >
+        {optionen.map(opt => {
+          const isActive = value === opt.value
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              disabled={disabled}
+              onClick={() => onChange(opt.value)}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                padding: '9px 12px',
+                fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
+                fontSize: 13.5,
+                fontWeight: 600,
+                letterSpacing: '-.01em',
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                transition: 'all .22s ease',
+                borderRadius: 999,
+                border: isActive ? '1px solid rgba(255,255,255,.3)' : 'none',
+                background: isActive ? 'var(--cta-gradient)' : 'transparent',
+                color: isActive ? '#fff' : 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 65%, transparent)',
+                boxShadow: isActive ? '0 6px 16px color-mix(in srgb, transparent 65%, var(--brand-primary, var(--claimondo-ondo)))' : 'none',
+              }}
+            >
+              {opt.icon && <span style={{ fontSize: 14, lineHeight: 1, opacity: isActive ? 0.95 : 0.8 }}>{opt.icon}</span>}
+              {opt.label}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

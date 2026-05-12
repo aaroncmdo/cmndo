@@ -70,23 +70,10 @@ export function GlassInput({
           required={required}
           autoComplete={autoComplete}
           onChange={e => onChange?.(e.target.value)}
-          className={cn(
-            'flex-1 min-w-0 w-full bg-transparent border-none outline-none',
-            'placeholder:font-medium',
-            inputClassName,
-          )}
-          style={{
-            color: 'var(--brand-primary, var(--claimondo-navy))',
-            // Placeholder-Color via CSS-Var (cross-browser über data-attribute)
-          }}
+          className={cn('glass-field-input flex-1 min-w-0 w-full bg-transparent border-none outline-none', inputClassName)}
+          style={{ color: 'var(--brand-primary, var(--claimondo-navy))' }}
         />
       </div>
-      <style jsx>{`
-        input::placeholder {
-          color: var(--brand-secondary, var(--claimondo-ondo));
-          opacity: 1;
-        }
-      `}</style>
     </div>
   )
 }
