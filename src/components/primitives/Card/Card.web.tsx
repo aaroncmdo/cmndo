@@ -18,6 +18,7 @@ export function Card({
   shadow = 'sm',
   bordered,
   onPress,
+  className,
 }: CardProps) {
   const [hover, setHover] = useState(false)
 
@@ -70,6 +71,7 @@ export function Card({
       <button
         type="button"
         style={baseStyle}
+        className={className}
         onClick={onPress}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
@@ -79,5 +81,5 @@ export function Card({
     )
   }
 
-  return <div style={baseStyle}>{children}</div>
+  return <div style={baseStyle} className={className}>{children}</div>
 }

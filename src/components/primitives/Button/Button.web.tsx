@@ -16,12 +16,14 @@ const heightMap: Record<ButtonSize, number> = {
   sm: 36,
   md: tokens.touchMin, // 44
   lg: 52,
+  icon: tokens.touchMin, // 44 — quadratisch (Icon-only)
 }
 
 const fontSizeMap: Record<ButtonSize, number> = {
   sm: 13,
   md: 14,
   lg: 16,
+  icon: 14,
 }
 
 type ToneStyle = {
@@ -70,9 +72,11 @@ export function Button({
   disabled,
   onPress,
   type = 'button',
+  className,
 }: ButtonProps) {
   const [hover, setHover] = useState(false)
   const t = toneMap[tone]
+  const isIcon = size === 'icon'
 
   const style: React.CSSProperties = {
     boxSizing: 'border-box',
@@ -81,8 +85,9 @@ export function Button({
     justifyContent: 'center',
     gap: tokens.spacing[2],
     height: heightMap[size],
-    paddingLeft: tokens.spacing[4],
-    paddingRight: tokens.spacing[4],
+    width: isIcon ? heightMap.icon : fullWidth ? '100%' : undefined,
+    paddingLeft: isIcon ? 0 : tokens.spacing[4],
+    paddingRight: isIcon ? 0 : tokens.spacing[4],
     borderRadius: tokens.radius.sm,
     backgroundColor: hover && !disabled ? t.bgHover : t.bg,
     color: t.text,
@@ -92,7 +97,6 @@ export function Button({
     lineHeight: 1,
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.5 : 1,
-    width: fullWidth ? '100%' : undefined,
     transition: 'background-color 120ms ease',
   }
 
@@ -100,6 +104,7 @@ export function Button({
     <button
       type={type}
       style={style}
+      className={className}
       onClick={disabled ? undefined : onPress}
       disabled={disabled}
       onMouseEnter={() => setHover(true)}
