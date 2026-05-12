@@ -31,6 +31,7 @@ const toneMap: Record<ButtonTone, ToneStyle> = {
     text: tokens.colors.navy,
     border: tokens.colors.border,
   },
+  bare: { bg: 'transparent', text: tokens.colors.navy },
   danger: { bg: tokens.colors.danger, text: tokens.colors.white },
   success: { bg: tokens.colors.success, text: tokens.colors.white },
 }

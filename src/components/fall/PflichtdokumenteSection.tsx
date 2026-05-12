@@ -77,7 +77,7 @@ function fileToBase64(file: File): Promise<string> {
 function PflichtStatusBadge({ status, pflicht }: { status: PflichtSlotForView['status']; pflicht: boolean }) {
   if (status === 'erfuellt') {
     return (
-      <StatusBadge colorCls="bg-emerald-100 text-emerald-800 uppercase tracking-wider">
+      <StatusBadge colorCls="bg-emerald-50 text-emerald-700 uppercase tracking-wider">
         <CheckCircle2Icon className="w-3 h-3" />
         Hochgeladen
       </StatusBadge>
@@ -92,7 +92,7 @@ function PflichtStatusBadge({ status, pflicht }: { status: PflichtSlotForView['s
     )
   }
   return (
-    <StatusBadge colorCls="bg-amber-100 text-amber-800 uppercase tracking-wider">
+    <StatusBadge colorCls="bg-amber-50 text-amber-700 uppercase tracking-wider">
       <CircleDotIcon className="w-3 h-3" />
       {pflicht ? 'Pflicht offen' : 'Offen'}
     </StatusBadge>
