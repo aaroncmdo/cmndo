@@ -84,12 +84,6 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
       setMapStatus('no-token')
       return
     }
-    // 2026-05-12: container-Dimensionen loggen — Hauptverdacht für die leere
-    // Karte ist ein 0×0-Canvas (mapbox-gl v3: wenn der Container beim new Map()
-    // noch keine Maße hat, rendert nichts, KEIN Fehler feuert).
-    const rect0 = containerRef.current.getBoundingClientRect()
-    console.info('[gutachter-finden] Map-Container beim Init:', rect0.width, '×', rect0.height)
-
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
@@ -100,15 +94,10 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     })
     mapRef.current = map
 
-    // 2026-05-12: gegen den 0×0-Canvas-Bug — nach dem nächsten Frame UND beim
-    // load-Event resize() aufrufen, falls der Container beim Init noch klein war.
-    // Zusätzlich ein ResizeObserver, der bei jeder Container-Größenänderung
-    // resize() triggert (robust gegen Layout-Settle-Timing).
-    requestAnimationFrame(() => {
-      map.resize()
-      const rect1 = containerRef.current?.getBoundingClientRect()
-      console.info('[gutachter-finden] Map-Container nach rAF:', rect1?.width, '×', rect1?.height)
-    })
+    // resize() nach dem nächsten Frame + beim load-Event, plus ein
+    // ResizeObserver — robust gegen Container-Größenänderungen (Layout-Settle,
+    // Sidebar-Toggle, Viewport-Resize). Schadet nie, kostet nichts.
+    requestAnimationFrame(() => map.resize())
     const resizeObs = new ResizeObserver(() => map.resize())
     resizeObs.observe(containerRef.current)
 
@@ -306,6 +295,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
 
     return () => {
       window.clearTimeout(loadTimeout)
+      resizeObs.disconnect()
       document.removeEventListener('claimondo:select-sv', handleSelect)
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
@@ -362,6 +352,27 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         style={{
           background:
             'radial-gradient(70% 90% at 8% 60%, color-mix(in srgb, transparent 92%, var(--brand-primary, var(--claimondo-navy))), transparent 75%)',
+        }}
+      />
+
+      {/* Frosted-Glass-Schleier hinter der freischwebenden Wizard-Spalte (nur Desktop).
+          KEIN Rahmen, KEINE Card — eine weiche, gemaskte Milchglas-Zone die links
+          full-bleed (top→bottom) liegt und nach RECHTS in den Map-Detailreichtum
+          ausläuft (mask-image fadet sowohl Tint als auch Blur). Beruhigt die Karte
+          unter Headline/Beschreibung/Feldern → Text wird lesbar, ohne dass es nach
+          „Box auf der Karte" aussieht. z-[2]: über dem Ambient-Radial, UNTER Header
+          (z-5) + Wizard (z-10), damit nur die Karte verwischt wird, nicht die UI. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 left-0 z-[2] hidden lg:block"
+        style={{
+          width: 'clamp(520px, 44vw, 820px)',
+          background:
+            'linear-gradient(100deg, color-mix(in srgb, #f8f9fb 80%, transparent) 0%, color-mix(in srgb, #f8f9fb 52%, transparent) 38%, color-mix(in srgb, #f8f9fb 22%, transparent) 64%, transparent 92%)',
+          backdropFilter: 'blur(22px) saturate(1.05)',
+          WebkitBackdropFilter: 'blur(22px) saturate(1.05)',
+          maskImage: 'linear-gradient(to right, #000 0%, #000 60%, rgba(0,0,0,.35) 80%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to right, #000 0%, #000 60%, rgba(0,0,0,.35) 80%, transparent 100%)',
         }}
       />
 
