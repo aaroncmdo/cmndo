@@ -1,5 +1,7 @@
 # VPS-Staging-Slot — Handout für VPS-Claude
 
+**Status:** ✅ DONE (2026-05-12) — VPS-Claude hat alle Schritte ausgeführt: DNS verifiziert, htpasswd angelegt, Wildcard-Cert via Let's Encrypt DNS-Challenge geholt (gültig bis 2026-08-10), nginx-Vhost aktiviert, PM2-Placeholder läuft auf Port 3001. Alle End-to-End-Checks grün.
+
 **Auftrag:** Staging-Slot auf dem VPS einrichten, sodass GitHub Actions automatisch deployt sobald jemand auf den `staging`-Branch pusht.
 
 **Server:** `212.132.119.110` (root-Zugang via SSH-Key)
