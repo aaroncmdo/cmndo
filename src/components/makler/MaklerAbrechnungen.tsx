@@ -24,6 +24,15 @@ import type {
   MaklerProvisionRow,
   ProvisionStatus,
 } from '@/lib/makler/queries'
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  DataTableContainer,
+} from '@/components/shared/DataTable'
 
 const EUR = new Intl.NumberFormat('de-DE', {
   style: 'currency',
@@ -279,36 +288,36 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
             Noch keine Provisionen erfasst.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-claimondo-bg text-xs uppercase tracking-wide text-claimondo-ondo">
-                <tr>
-                  <th className="text-left px-4 py-2.5 font-semibold">Datum</th>
-                  <th className="text-left px-4 py-2.5 font-semibold">Fall</th>
-                  <th className="text-left px-4 py-2.5 font-semibold">Kunde</th>
-                  <th className="text-left px-4 py-2.5 font-semibold">
+          <DataTableContainer variant="plain">
+            <Table>
+              <Thead className="!tracking-wide">
+                <Tr>
+                  <Th className="text-left !font-semibold !py-2.5">Datum</Th>
+                  <Th className="text-left !font-semibold !py-2.5">Fall</Th>
+                  <Th className="text-left !font-semibold !py-2.5">Kunde</Th>
+                  <Th className="text-left !font-semibold !py-2.5">
                     Service
-                  </th>
-                  <th className="text-right px-4 py-2.5 font-semibold">
+                  </Th>
+                  <Th className="text-right !font-semibold !py-2.5">
                     Betrag
-                  </th>
-                  <th className="text-left px-4 py-2.5 font-semibold">
+                  </Th>
+                  <Th className="text-left !font-semibold !py-2.5">
                     Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody className="divide-y-0">
                 {rowsForMonth.map((row) => {
                   const vis = statusVisual(row)
                   return (
-                    <tr
+                    <Tr
                       key={row.id}
                       className="border-t border-claimondo-border hover:bg-claimondo-bg/60"
                     >
-                      <td className="px-4 py-2.5 text-claimondo-navy whitespace-nowrap">
+                      <Td className="!py-2.5 whitespace-nowrap">
                         {fmtDate(row.trigger_at)}
-                      </td>
-                      <td className="px-4 py-2.5">
+                      </Td>
+                      <Td className="!py-2.5">
                         {row.fall_id ? (
                           <Link
                             href={`/makler/akten/${row.fall_id}`}
@@ -321,17 +330,17 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
                             {row.fall_nummer ?? '–'}
                           </span>
                         )}
-                      </td>
-                      <td className="px-4 py-2.5 text-claimondo-navy">
+                      </Td>
+                      <Td className="!py-2.5">
                         {row.kunde_name ?? '–'}
-                      </td>
-                      <td className="px-4 py-2.5 text-claimondo-navy capitalize">
+                      </Td>
+                      <Td className="!py-2.5 capitalize">
                         {row.service_typ ?? '–'}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-semibold text-claimondo-navy whitespace-nowrap">
+                      </Td>
+                      <Td className="!py-2.5 text-right font-semibold whitespace-nowrap">
                         {fmtEur(Number(row.betrag_netto_eur))}
-                      </td>
-                      <td className="px-4 py-2.5">
+                      </Td>
+                      <Td className="!py-2.5">
                         <span
                           title={vis.tooltip}
                           className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-full ${vis.className}`}
@@ -339,13 +348,13 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
                           {vis.icon}
                           {vis.label}
                         </span>
-                      </td>
-                    </tr>
+                      </Td>
+                    </Tr>
                   )
                 })}
-              </tbody>
-            </table>
-          </div>
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         )}
       </section>
     </div>

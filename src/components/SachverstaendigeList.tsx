@@ -9,6 +9,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { useDensityPreference } from '@/hooks/useDensityPreference'
 import DensityToggle from '@/components/shared/DensityToggle'
 import { Chip } from '@/components/ui/Chip'
+import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
 // AAR-54: Tabellen-Ansicht für Sachverständige (statt Karte).
 // AAR-151: Aus src/app/admin/sachverstaendige/ verschoben in src/components/,
@@ -64,7 +65,8 @@ export default function SachverstaendigeList({
   const [search, setSearch] = useState('')
   const [density] = useDensityPreference('sv-liste')
   const compact = density === 'compact'
-  const cellPad = compact ? 'px-3 py-1.5' : 'px-4 py-3'
+  // px-4 py-3 ist der Td-Default — im Compact-Modus per !-Override auf px-3 py-1.5
+  const cellPad = compact ? '!px-3 !py-1.5' : ''
 
   const filtered = useMemo(() => {
     return sachverstaendige.filter(sv => {
@@ -142,21 +144,21 @@ export default function SachverstaendigeList({
 
       {/* Tabelle (Desktop ab lg) — Mobile/Tablet rendern Card-Liste, Portal-Review D3 */}
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-claimondo-bg border-b border-claimondo-border sticky top-0">
-            <tr className="text-left text-[10px] uppercase tracking-wider text-claimondo-ondo">
-              <th className="px-4 py-2.5 font-medium">Name</th>
-              <th className="px-4 py-2.5 font-medium">Typ</th>
-              <th className="px-4 py-2.5 font-medium">Standort</th>
-              <th className="px-4 py-2.5 font-medium">Paket</th>
-              <th className="px-4 py-2.5 font-medium">Auslastung</th>
-              <th className="px-4 py-2.5 font-medium">Status</th>
-              <th className="px-4 py-2.5 font-medium w-10"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-claimondo-border bg-white">
+        <Table>
+          <Thead className="border-b border-claimondo-border sticky top-0">
+            <Tr className="text-left text-[10px] uppercase tracking-wider text-claimondo-ondo">
+              <Th className="!py-2.5">Name</Th>
+              <Th className="!py-2.5">Typ</Th>
+              <Th className="!py-2.5">Standort</Th>
+              <Th className="!py-2.5">Paket</Th>
+              <Th className="!py-2.5">Auslastung</Th>
+              <Th className="!py-2.5">Status</Th>
+              <Th className="!py-2.5 w-10"></Th>
+            </Tr>
+          </Thead>
+          <Tbody className="bg-white">
             {filtered.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-8 text-center text-xs text-claimondo-ondo/70">Keine Sachverständige</td></tr>
+              <Tr><Td colSpan={7} className="!py-8 text-center text-xs !text-claimondo-ondo/70">Keine Sachverständige</Td></Tr>
             ) : filtered.map(sv => {
               const status = getSvStatus({
                 portal_zugang_freigeschaltet: sv.portalZugangFreigeschaltet,
@@ -168,8 +170,8 @@ export default function SachverstaendigeList({
               const stadt = sv.standortAdresse ? sv.standortAdresse.split(',').slice(-2, -1)[0]?.trim() || sv.standortAdresse : '—'
 
               return (
-                <tr key={sv.id} className="hover:bg-[#f0f4f8] transition-colors">
-                  <td className={cellPad}>
+                <Tr key={sv.id} className="hover:bg-[#f0f4f8] transition-colors">
+                  <Td className={cellPad}>
                     <div className="flex items-center gap-2">
                       <KundeAvatar name={sv.name} size={28} tone="ondo-subtle" />
                       <div>
@@ -177,33 +179,33 @@ export default function SachverstaendigeList({
                         {sv.email && <p className="text-[10px] text-claimondo-ondo/70">{sv.email}</p>}
                       </div>
                     </div>
-                  </td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td>
                     <StatusBadge colorCls={typ.cls}>{typ.label}</StatusBadge>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-ondo">
+                  </Td>
+                  <Td className="text-xs !text-claimondo-ondo">
                     <span className="flex items-center gap-1">
                       <MapPinIcon className="w-3 h-3 text-claimondo-ondo/70" />
                       {stadt}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-claimondo-navy font-medium">{paket}</td>
-                  <td className="px-4 py-3 text-xs">
+                  </Td>
+                  <Td className="text-xs font-medium">{paket}</Td>
+                  <Td className="text-xs">
                     <span className={sv.offeneFaelle >= sv.maxFaelleMonat ? 'text-red-600 font-semibold' : 'text-claimondo-navy'}>
                       {sv.offeneFaelle}/{sv.maxFaelleMonat}
                     </span>
-                  </td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td>
                     <StatusBadge colorCls={`${status.bg} ${status.text}`}>{status.label}</StatusBadge>
-                  </td>
-                  <td className="px-4 py-3 text-right">
+                  </Td>
+                  <Td className="text-right">
                     <Link href={`${basePath}/sachverstaendige/${sv.id}`} className="text-claimondo-ondo hover:underline text-xs">→</Link>
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               )
             })}
-          </tbody>
-        </table>
+          </Tbody>
+        </Table>
 
         {/* Mobile/Tablet-Card-Liste (<lg) — drei Felder primary (Name, Standort, Status), Tap = Detail */}
         <div className="lg:hidden divide-y divide-claimondo-border bg-white">
