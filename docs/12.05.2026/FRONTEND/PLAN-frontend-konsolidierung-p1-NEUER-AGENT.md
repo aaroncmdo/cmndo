@@ -9,23 +9,26 @@
 
 ---
 
-## Status — START HIER
+## Status — ✅ ABGESCHLOSSEN (12.05.2026), PR #829
 
-**Branch:** `kitta/aar-frontend-konsolidierung-p1` (lokal + auf `origin`, abgezweigt von `origin/main`=`ca307c88`, enthält schon PR #826 = Policy + `AGENTS.md`-Block `claimondo-component-set`).
-
-**Erledigt** (Commits liegen auf dem Branch, gepusht):
+Alle Tasks T1–T12 erledigt, gepusht, PR #829 (`--base main`). Voller `npm run build` final grün, `tsc --noEmit` grün nach jedem Task.
 
 | Commit | Task | Inhalt |
 |---|---|---|
-| `f3296411` | **T1** ✅ | B1: doppelter `<Link href="/gutachter/einstellungen">`-Block in `src/app/gutachter/GutachterShell.tsx` raus. B2: doppelter Kopf-Kommentar in `src/app/admin/_components/AdminNav.tsx` raus. `DispatchNav.tsx` war nicht doppelt. |
-| `bdef9a4c` | **T2** ✅ | inline `function FilterChip` (3×, −145 LOC) → `@/components/ui/Chip`. Files: `MaklerLeadsTable.tsx`, `MaklerAktenList.tsx`, `WaitlistTable.tsx`. |
+| `f3296411` | **T1** ✅ | doppelter `<Link>`/Kommentar in `GutachterShell.tsx` / `AdminNav.tsx` raus |
+| `bdef9a4c` | **T2** ✅ | inline `function FilterChip` (3×) → `@/components/ui/Chip` |
+| `26f91178` | **T3** ✅ | inline `StatusPill` → `shared/StatusBadge`, inline `EmptyState` → `shared/EmptyState` (`MaklerLeadsTable`, `MaklerAktenList`, `PflichtdokumenteSection`). **Abw.:** `LivePreview.StatusPill` nicht migriert (Laufzeit-Theme-Hex, inkompatibel mit StatusBadge tone/colorCls). |
+| `17d436de` | **T4** ✅ | `shared/StatCard.tsx` neu + 5 Inline migriert (`KpiCards`, `FinanceClient`, `TeamClient`, `MaklerDashboard`×2, `MaklerPromo`). **Abw.:** `primitives/*` haben keine `className`-API → token-gebundenes Tailwind statt `<Card className=…>`; Optik harmonisiert (FinanceClient ohne glass-light, `StatCardProvisionen` → 1 value + hint). 3× `KpiBox` (ProvisionenClient/kanzlei-board/mitarbeiter) NICHT in der Plan-Dateiliste → Phase 2. |
+| `aaa0d5aa` | **T5** ✅ | `shared/SectionCard.tsx` neu + 4 Inline-`Card` migriert via dünne Adapter (`_stammdaten/Sections`, `_prozess/Sections`, `Phase4Stammdaten`, `MaklerSettings`). `TaskCreateModal.tsx` gelöscht (0 Consumer). **Abw.:** `KundeBetreuerStrip.function Card` → `BetreuerCard` umbenannt statt migriert (bespoke Trust-Card, kein Section-Card-Pattern); `SectionCard.icon` ist `ReactNode` nicht `LucideIcon`; voller Build grün. |
+| `3b348edc` | **T6** ✅ | `shared/forms/{TextField,SelectField,index}` neu + 8 Inline-`Field`/`SelectField` migriert via Signatur-Adapter (Solo/Buero/AkademieAnlegenWizard, AnlegenFallClient, CommunityAnlegenWizard, VertraegeEditorClient, MitarbeiterDetail, BueroOnboardingClient). **Abw.:** ClaimSummary/StammdatenDetail (Display-Rows), VsKorrespondenzCard/MietwagenEditCard (Label-Wrapper), WaitlistApply (dark) NICHT migriert — keine Solid-Light-Inputs; Adapter behalten Namen → grep `function Field` nicht leer (gewollt); voller Build grün. |
+| `91ec40be` | **T7** ✅ | `MaklerShell` → shared `PortalNav` (dark) — Thin-Wrapper wie AdminNav, B3 (`text-claimondo-shield` auf navy) geheilt, Sidebar `w-60`→`w-56`. Voller Build grün. |
+| `7a092c8c` | **T8** ✅ | 5 Portal-Layouts (admin/gutachter/kunde/mitarbeiter/makler) → `requirePortalAccess()`. Portal-spezifische Folge-Queries bleiben. Memory `project_appshell_refactor` aktualisiert. **Abw.:** admin/kunde-Avatar-Initialen jetzt aus `profiles.vorname/nachname`. Voller Build grün. |
+| `943f8928` | **T9** ✅ | `kanzlei/dashboard` + `MaklerAktenList` → zentrale Status-Maps + `FallStatusBadge`. `lib/statusLabels.ts` erweitert: Welle-7-Status (`in_bearbeitung`/`vs_kontakt`/`reguliert`/`abgelehnt`/`kanzlei`), `FALL_STATUS_LABELS_SHORT`, `AKTUELLE_PHASE_LABELS`. **Abw.:** Optik harmonisiert (Kanzlei-Status in 7-Slot-Tints statt eigener Hex). Voller Build grün. |
+| `46c0931b` | **T10** ✅ | `ui/{card,badge,avatar}` gelöscht (0 Importe). **Abw.:** `ui/button`-App-Migration auf `primitives.Button` NICHT gemacht — API inkompatibel (`onPress` required, keine `className`, kein Icon-only-Modus) vs. die 8 Consumer im Schaden-melden-Funnel (`className`/`type="submit"`/`onClick`); `ui/button` bleibt eh (dialog/sheet nutzen es) → Phase 2. |
+| `22566160` | **T11** ✅ | `scripts/check-component-set.mjs` (--warn) + `npm run check:component-set`. Baseline 203/639 Files Drift-Verdacht. |
+| — | **T12** ✅ | Finaler voller Build grün, tsc grün, PR #829 erstellt. **Nicht selbst gemergt** bis Aaron-Freigabe (dann gemergt am 12.05.2026). |
 
-**Du machst:** T3 → T12. Empfehlung: in einem eigenen `git worktree` (es laufen 3 parallele Agenten mit Worktree-Locks: `kitta/aar-makler-b2b-landing`, `kitta/aar-polish-marketing`, `kitta/fix-jsx-build-errors-round2` — nicht da reinpfuschen).
-
-```bash
-git fetch origin
-git worktree add ../claimondo-fk-p1 kitta/aar-frontend-konsolidierung-p1   # oder einfach: git checkout kitta/aar-frontend-konsolidierung-p1
-```
+**Phase-2-Backlog (offen):** `ui/button`-App-Migration (braucht `className`-Escape-Hatch in `primitives.Button`), 3× inline `KpiBox`, `MaklerAkteDetail`→`shared/fall-*`, Wizard-Engine-Vereinheitlichung, Stammdaten-Renderer-Konsolidierung, restliche Status-Maps (Termin/Abrechnung/Provision), `<table>`→`ui/table`, Glass-Felder (`shared/glass/*`, `onboarding/fields/*`).
 
 ---
 
