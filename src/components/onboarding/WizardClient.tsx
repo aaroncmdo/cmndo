@@ -238,13 +238,16 @@ export function WizardClient({ phases, flowKey, prefilledValues }: Props) {
 
   return (
     <div style={{ fontFamily: 'var(--font-montserrat, Montserrat), sans-serif' }}>
-      {/* Step-Rail */}
+      {/* Step-Rail — AAR-glass-s1: weiße Card → Glass-Tokens */}
       <div style={{
-        background: '#fff',
+        background: 'var(--glass-bg)',
+        backdropFilter: 'var(--glass-blur)',
+        WebkitBackdropFilter: 'var(--glass-blur)',
+        border: 'var(--glass-border)',
         borderRadius: 'var(--wiz-r-xl)',
         padding: '22px 26px 24px',
         marginBottom: 24,
-        boxShadow: 'var(--wiz-shadow-2)',
+        boxShadow: 'var(--glass-shadow)',
         position: 'relative',
       }}>
         {/* Verbindungslinie Hintergrund */}
@@ -307,14 +310,17 @@ export function WizardClient({ phases, flowKey, prefilledValues }: Props) {
         </div>
       </div>
 
-      {/* Phase-Card mit Sheet-Animation */}
+      {/* Phase-Card mit Sheet-Animation — AAR-glass-s1: weiße Card → Glass-Tokens */}
       <div
         key={animKey}
         style={{
-          background: '#fff',
+          background: 'var(--glass-bg-nested)',
+          backdropFilter: 'var(--glass-blur-strong)',
+          WebkitBackdropFilter: 'var(--glass-blur-strong)',
+          border: 'var(--glass-border-nested)',
           borderRadius: 'var(--wiz-r-2xl)',
           padding: '36px clamp(22px, 3vw, 40px)',
-          boxShadow: 'var(--wiz-shadow-3)',
+          boxShadow: 'var(--glass-shadow-card)',
           animation: 'sheetIn .42s var(--wiz-ease-out) both',
         }}
       >
