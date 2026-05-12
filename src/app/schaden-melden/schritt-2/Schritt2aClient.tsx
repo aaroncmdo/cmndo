@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 import { X, Loader2, Upload } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/primitives'
 import { useFlowStore, type FlowFoto } from '@/lib/flow/flow-store'
 import {
   uploadFoto,
@@ -137,9 +137,9 @@ export function Schritt2aClient({ leadId }: { leadId: string }) {
               : 'Alles bereit für die KI-Analyse'}
           </p>
           <Button
-            onClick={onNext}
+            tone="ondo"
+            onPress={onNext}
             disabled={fotos.length < MIN_FOTOS || pending}
-            className="bg-claimondo-ondo hover:bg-claimondo-shield"
           >
             {pending ? 'Wird gespeichert …' : 'Weiter zur Analyse'}
           </Button>

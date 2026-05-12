@@ -1,22 +1,22 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Sparkles, AlertTriangle, CheckCircle2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/primitives'
 import { useFlowStore } from '@/lib/flow/flow-store'
 import type { VisionResult } from '@/lib/flow/schemas/vision-result'
 
-// AAR-472 C6: Loading-/Ergebnis-State für die Vision-Analyse.
+// AAR-472 C6: Loading-/Ergebnis-State fÃ¼r die Vision-Analyse.
 //
 // Ablauf:
-//  1. onMount → POST /api/vision/lead-analyse mit leadId
-//  2. Während des Calls zeigen wir ein freundliches Loading (mind. 5 s, damit
+//  1. onMount â†’ POST /api/vision/lead-analyse mit leadId
+//  2. WÃ¤hrend des Calls zeigen wir ein freundliches Loading (mind. 5 s, damit
 //     der Nutzer versteht, dass hier etwas passiert und nicht alles sofort
-//     „zu schnell" wirkt).
-//  3. Erfolg → Zusammenfassung + beschädigte Teile + Weiter-Button zu 2c.
-//  4. Fehler → Retry-Button; optional kann der Nutzer direkt zu 2c springen
-//     (Vision ist für den Flow nicht blockierend, das DAT-Follow-Up in C7
+//     â€žzu schnell" wirkt).
+//  3. Erfolg â†’ Zusammenfassung + beschÃ¤digte Teile + Weiter-Button zu 2c.
+//  4. Fehler â†’ Retry-Button; optional kann der Nutzer direkt zu 2c springen
+//     (Vision ist fÃ¼r den Flow nicht blockierend, das DAT-Follow-Up in C7
 //     nutzt die Analyse nur als Input).
 
 const MIN_SHOW_MS = 5000
@@ -109,21 +109,21 @@ function Running() {
         <Loader2 className="h-10 w-10 animate-spin text-claimondo-ondo" aria-hidden />
       </div>
       <h1 className="text-2xl font-bold text-claimondo-navy">
-        KI analysiert Ihre Fotos …
+        KI analysiert Ihre Fotos â€¦
       </h1>
       <p className="mt-3 max-w-md text-sm text-claimondo-ondo">
-        Claude prüft die Aufnahmen auf sichtbare Schäden, schätzt den
+        Claude prÃ¼ft die Aufnahmen auf sichtbare SchÃ¤den, schÃ¤tzt den
         Schweregrad ein und liest Fahrzeug-Hinweise. Das dauert nur wenige
         Sekunden.
       </p>
       <ul className="mt-8 grid max-w-sm gap-2 text-left text-sm text-claimondo-ondo">
         <li className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-claimondo-ondo" aria-hidden />
-          Beschädigte Teile erkennen
+          BeschÃ¤digte Teile erkennen
         </li>
         <li className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-claimondo-ondo" aria-hidden />
-          Schweregrad einschätzen
+          Schweregrad einschÃ¤tzen
         </li>
         <li className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-claimondo-ondo" aria-hidden />
@@ -153,18 +153,15 @@ function ErrorView({
       </h1>
       <p className="mt-2 text-sm text-claimondo-ondo">{message}</p>
       <p className="mt-4 text-xs text-claimondo-ondo">
-        Sie können die Analyse erneut starten oder direkt mit dem nächsten
-        Schritt fortfahren — die Ersteinschätzung ist für die Meldung nicht
+        Sie kÃ¶nnen die Analyse erneut starten oder direkt mit dem nÃ¤chsten
+        Schritt fortfahren â€” die ErsteinschÃ¤tzung ist fÃ¼r die Meldung nicht
         zwingend erforderlich.
       </p>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <Button
-          onClick={onRetry}
-          className="bg-claimondo-ondo hover:bg-claimondo-shield"
-        >
+        <Button tone="ondo" onPress={onRetry}>
           Erneut versuchen
         </Button>
-        <Button variant="outline" onClick={onSkip}>
+        <Button tone="ghost" onPress={onSkip}>
           Ohne Analyse fortfahren
         </Button>
       </div>
@@ -201,7 +198,7 @@ function Done({
             Analyse abgeschlossen
           </h1>
           <p className="text-sm text-claimondo-ondo">
-            Das ist die Ersteinschätzung auf Basis Ihrer Fotos.
+            Das ist die ErsteinschÃ¤tzung auf Basis Ihrer Fotos.
           </p>
         </div>
       </div>
@@ -223,7 +220,7 @@ function Done({
       {result.beschaedigte_teile.length > 0 ? (
         <section className="mt-4 rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-5">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-claimondo-ondo">
-            Erkannte beschädigte Teile
+            Erkannte beschÃ¤digte Teile
           </h2>
           <ul className="flex flex-wrap gap-2">
             {result.beschaedigte_teile.map((teil) => (
@@ -283,14 +280,11 @@ function Done({
 
       <p className="mt-4 text-xs text-claimondo-ondo">
         Konfidenz der KI: {(result.confidence * 100).toFixed(0)} %. Die
-        endgültige Bewertung trifft der Sachverständige vor Ort.
+        endgÃ¼ltige Bewertung trifft der SachverstÃ¤ndige vor Ort.
       </p>
 
       <div className="mt-8 flex justify-end">
-        <Button
-          onClick={onContinue}
-          className="bg-claimondo-ondo hover:bg-claimondo-shield"
-        >
+        <Button tone="ondo" onPress={onContinue}>
           Weiter zu den Gegner-Daten
         </Button>
       </div>

@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/primitives'
 import { InvitationStatusBadge } from '@/components/claims/InvitationStatusBadge'
 import { inviteGegnerViaAirdrop, type InviteGegnerResult } from '@/lib/airdrop/server-actions'
 
@@ -141,7 +141,8 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   oder einer anderen App.
                 </p>
                 <Button
-                  onClick={async () => {
+                  tone="navy"
+                  onPress={async () => {
                     if (typeof navigator !== 'undefined' && navigator.share) {
                       try {
                         await navigator.share({
@@ -196,8 +197,8 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   {result.share_payload.email_body}
                 </pre>
                 <Button
-                  variant="outline"
-                  onClick={() => copyToClipboard(
+                  tone="ghost"
+                  onPress={() => copyToClipboard(
                     result.share_payload.email_subject + '\n\n' + result.share_payload.email_body
                   )}
                 >
@@ -210,8 +211,8 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   {result.magic_link_url}
                 </code>
                 <Button
-                  variant="outline"
-                  onClick={() => copyToClipboard(result.magic_link_url)}
+                  tone="ghost"
+                  onPress={() => copyToClipboard(result.magic_link_url)}
                 >
                   {copied ? '✓ Kopiert' : '🔗 Link kopieren'}
                 </Button>

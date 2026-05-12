@@ -29,6 +29,8 @@ export type ButtonProps = {
   onPress?: () => void
   /** HTML-Form-Type (nur Web, RN ignoriert) */
   type?: 'button' | 'submit' | 'reset'
+  /** Accessible Name (Web: aria-label, Native: accessibilityLabel) — Pflicht für Icon-only-Buttons ohne Text. */
+  ariaLabel?: string
   /**
    * Web-only Escape-Hatch: zusätzliche Tailwind-Klassen (Layout/extra). Native
    * (`.native.tsx`) ignoriert das. Token-abgeleitete inline-styles gewinnen bei

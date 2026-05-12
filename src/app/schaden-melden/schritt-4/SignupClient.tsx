@@ -11,7 +11,7 @@ import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/primitives'
 import { PasswordInput } from '@/components/ui/PasswordInput'
 import { useFlowStore } from '@/lib/flow/flow-store'
 import { schritt4Schema, type Schritt4FormValues } from '@/lib/flow/schemas/schritt4'
@@ -278,8 +278,9 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
 
       <Button
         type="submit"
+        tone="navy"
+        fullWidth
         disabled={submitting}
-        className="w-full bg-claimondo-navy text-white hover:bg-claimondo-navy/90"
       >
         {submitting ? (
           <>
