@@ -26,4 +26,10 @@ export type CardProps = {
   bordered?: boolean
   /** Macht die Card klickbar — Web: <button>, Native: <Pressable> */
   onPress?: () => void
+  /**
+   * Web-only Escape-Hatch: zusätzliche Tailwind-Klassen (Layout/Hover/extra).
+   * Native (`.native.tsx`) ignoriert das. Token-abgeleitete inline-styles
+   * gewinnen bei Konflikten — nur nutzen wenn die Token-Props nicht reichen.
+   */
+  className?: string
 }

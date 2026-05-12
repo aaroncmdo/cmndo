@@ -11,12 +11,14 @@ const heightMap: Record<ButtonSize, number> = {
   sm: 36,
   md: tokens.touchMin,
   lg: 52,
+  icon: tokens.touchMin, // 44 — quadratisch
 }
 
 const fontSizeMap: Record<ButtonSize, number> = {
   sm: 13,
   md: 14,
   lg: 16,
+  icon: 14,
 }
 
 type ToneStyle = { bg: string; text: string; border?: string }
@@ -44,10 +46,12 @@ export function Button({
   onPress,
 }: ButtonProps) {
   const t = toneMap[tone]
+  const isIcon = size === 'icon'
 
   const containerStyle = {
     height: heightMap[size],
-    paddingHorizontal: tokens.spacing[4],
+    width: isIcon ? heightMap.icon : undefined,
+    paddingHorizontal: isIcon ? 0 : tokens.spacing[4],
     borderRadius: tokens.radius.sm,
     backgroundColor: t.bg,
     borderWidth: t.border ? 1 : 0,
@@ -76,7 +80,7 @@ export function Button({
       ]}
     >
       {iconLeft ? <View>{iconLeft}</View> : null}
-      <Text style={textStyle}>{children}</Text>
+      {isIcon ? children : <Text style={textStyle}>{children}</Text>}
       {iconRight ? <View>{iconRight}</View> : null}
     </Pressable>
   )
