@@ -63,16 +63,19 @@ p, li, blockquote, article, .prose {
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* AAR-460 F2: Claimondo-Brand-Tokens — damit `bg-claimondo-navy`,
-     `text-claimondo-ondo`, `border-claimondo-border` in jedem
-     Component funktionieren ohne Hex-Hardcoding. */
-  --color-claimondo-navy: var(--claimondo-navy);
-  --color-claimondo-ondo: var(--claimondo-ondo);
-  --color-claimondo-shield: var(--claimondo-shield);
-  --color-claimondo-light-blue: var(--claimondo-light-blue);
-  --color-claimondo-bg: var(--claimondo-bg);
-  --color-claimondo-card: var(--claimondo-card);
-  --color-claimondo-border: var(--claimondo-border);
+  /* AAR-460 F2 + AAR-glass-s0 (2026-05-12): Claimondo-Brand-Tokens auf
+     Brand-Resolver-Vars umgebogen. Wenn ein SV-/Kunde-Layout den
+     resolveBrandTheme()-Wrapper drumherum hat, propagieren --brand-*
+     Vars und Tailwind-Klassen wie `bg-claimondo-navy` greifen
+     transitiv auf das Brand-Theme statt auf statisches Claimondo.
+     Marketing-Pages ohne Provider behalten Claimondo via Fallback. */
+  --color-claimondo-navy: var(--brand-primary, var(--claimondo-navy));
+  --color-claimondo-ondo: var(--brand-secondary, var(--claimondo-ondo));
+  --color-claimondo-shield: var(--brand-sidebar-active, var(--claimondo-shield));
+  --color-claimondo-light-blue: var(--brand-accent, var(--claimondo-light-blue));
+  --color-claimondo-bg: var(--brand-background, var(--claimondo-bg));
+  --color-claimondo-card: var(--brand-surface, var(--claimondo-card));
+  --color-claimondo-border: var(--brand-border, var(--claimondo-border));
 
   /* AAR-727: iOS-Tokens für Tailwind.
      Nutzung: `rounded-ios-md`, `shadow-ios-lg`, `font-apple`, `ease-ios`. */
@@ -94,22 +97,23 @@ p, li, blockquote, article, .prose {
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  /* AAR-460 F2: Primary/Accent/Ring auf Claimondo-Brand umgebogen
-     (vorher generisches shadcn-Schwarz). Aaron 17.04. — Fallakte und
-     andere Components sollen direkt Claimondo-Navy zeigen ohne
-     Hex-Hardcoding. */
-  --primary: #0D1B3E;
+  /* AAR-460 F2 + AAR-glass-s0 (2026-05-12): Primary/Accent/Ring auf
+     Brand-Resolver-Vars umgebogen. Wenn ein gebrandetes Portal
+     (SV/Kunde) aktiv ist, ziehen shadcn-Buttons + Inputs + Switches
+     + Sliders + Focus-Rings das Brand-Theme. Marketing-Pages ohne
+     Provider behalten Claimondo via Fallback-Hex. */
+  --primary: var(--brand-primary, #0D1B3E);
   --primary-foreground: #ffffff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: #4573A2;
+  --accent: var(--brand-accent, #4573A2);
   --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: #4573A2;
+  --ring: var(--brand-secondary, #4573A2);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
