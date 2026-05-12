@@ -16,13 +16,21 @@ Wir bekommen eine neue Marketing-Subdomain `makler.claimondo.de` — sie soll ex
 
 ---
 
-## Schritt A — DNS (vermutlich schon erledigt)
+## Schritt A — DNS (Aaron, beim Provider)
 
-`*.claimondo.de` ist ein Wildcard-Record → `makler.claimondo.de` löst bereits auf `162.55.40.105` auf (Stand 2026-05-12). Nur verifizieren:
+**Korrektur 2026-05-12 (VPS-Claude-Befund):** Es gibt **keinen** `*.claimondo.de`-Wildcard, und `makler.claimondo.de` löst aktuell **nicht** auf. DNS für `claimondo.de` liegt bei **IONOS** (`ns10xx.ui-dns.{org,biz,com,de}`). Die VPS-IP ist `212.132.119.110` (nicht `162.55.40.105` — vermutlich Server-Migration), und genau dorthin zeigen `claimondo.de` und `gutachter.claimondo.de`.
+
+→ **Aaron** muss bei IONOS für die Zone `claimondo.de` einen A-Record anlegen:
 ```
-dig +short makler.claimondo.de            # erwartet: 162.55.40.105 (ggf. via CNAME *.cologne.startplatz.de)
+makler   A   212.132.119.110     (TTL z.B. 300–3600 s, analog gutachter)
 ```
-Falls das *nicht* auflöst: A-Record `makler.claimondo.de → 162.55.40.105` beim DNS-Provider anlegen (analog `gutachter.claimondo.de`). Sonst: nichts zu tun, weiter mit Schritt B.
+Verifikation (auf dem VPS, nach Propagation):
+```
+dig +short makler.claimondo.de            # erwartet: 212.132.119.110
+```
+Solange das nicht auflöst: **Schritt C (SSL via ACME http-01) und die HTTPS-Verifikation pausieren** — Schritt B (nginx-Block) ist davon unabhängig und kann vorab gemacht werden.
+
+(Staging: `*.staging.claimondo.de`-Wildcard existiert, `makler.staging.claimondo.de` löst bereits auf `212.132.119.110` auf. ✓ Kein DNS-Eingriff für Staging nötig.)
 
 ---
 
@@ -54,49 +62,32 @@ Falls das *nicht* auflöst: A-Record `makler.claimondo.de → 162.55.40.105` bei
 
 ---
 
-## Schritt C — SSL-Zertifikat
+## Schritt C — SSL-Zertifikat (erst NACHDEM DNS auflöst)
 
-1. Aktuelles Zertifikat ansehen:
-   ```
-   certbot certificates
-   ```
-   Notieren, welches Zertifikat `claimondo.de` / `app.claimondo.de` / `gutachter.claimondo.de` abdeckt und welche Domains da drin sind.
+**Korrektur 2026-05-12:** Prod hat kein einzelnes Shared-Zert über claimondo+app+gutachter, sondern mehrere überlappende (`claimondo.de`, `claimondo.de-0001`, …); der `gutachter.claimondo.de`-nginx-Block nutzt ein **eigenständiges** Zert `/etc/letsencrypt/live/gutachter.claimondo.de/`. → Für `makler.claimondo.de` analog ein **eigenständiges** Zert anlegen, **kein `--expand`**:
+```
+certbot --nginx -d makler.claimondo.de
+```
+(Wenn certbot fragt, ob es die nginx-Config anpassen soll: ja — es trägt dann `ssl_certificate /etc/letsencrypt/live/makler.claimondo.de/...` in den Block ein und ersetzt den vorläufigen gutachter-Zert-Pfad aus Schritt B.)
 
-2. Dasselbe Zertifikat um `makler.claimondo.de` erweitern (alle bisherigen Domains beibehalten, nur `-d makler.claimondo.de` ergänzen). Beispiel — die Domain-Liste an das anpassen, was `certbot certificates` zeigt:
-   ```
-   certbot --nginx --expand \
-     -d claimondo.de -d www.claimondo.de \
-     -d app.claimondo.de -d gutachter.claimondo.de \
-     -d makler.claimondo.de
-   ```
-   (Wenn certbot fragt, ob es die nginx-Config anpassen soll: ja.)
-
-3. Reload + Auto-Renewal-Check:
-   ```
-   nginx -t && systemctl reload nginx
-   certbot renew --dry-run
-   ```
+Reload + Auto-Renewal-Check:
+```
+nginx -t && systemctl reload nginx
+certbot renew --dry-run
+```
 
 ---
 
-## Schritt D — Staging: `makler.staging.claimondo.de`
+## Schritt D — Staging: `makler.staging.claimondo.de` — **nichts zu tun** (VPS-Befund 2026-05-12)
 
-Der Staging-Slot läuft als eigener Next-Prozess (PM2, Port `3001`, mit Basic-Auth) hinter `*.staging.claimondo.de`.
-
-1. Prüfen, wie der Staging-nginx aufgebaut ist:
-   ```
-   grep -rl "staging.claimondo.de" /etc/nginx/
-   ```
-   - **Wenn dort ein Wildcard-Block `server_name *.staging.claimondo.de;` (oder `~^.+\.staging\.claimondo\.de$`) auf `proxy_pass http://127.0.0.1:3001` zeigt** → `makler.staging.claimondo.de` wird damit schon geroutet, **nichts zu tun**. (Auch das Staging-SSL-Zert ist dann typisch ein Wildcard `*.staging.claimondo.de` und deckt es ab — mit `certbot certificates` checken.)
-   - **Wenn es per Host einzelne Blöcke gibt** (`app.staging.claimondo.de`, `gutachter.staging.claimondo.de` …) → einen analogen `makler.staging.claimondo.de`-Block anlegen: `proxy_pass http://127.0.0.1:3001`, dieselben `proxy_set_header`-Zeilen (inkl. `Host $host`), denselben `auth_basic` / `auth_basic_user_file` wie die anderen Staging-Blöcke, SSL aus dem Staging-Zert. Dann `nginx -t && systemctl reload nginx`. Falls das Staging-Zert kein Wildcard ist: `certbot --nginx --expand -d <bisherige staging-domains> -d makler.staging.claimondo.de`.
-2. Danach (von Aaron) den Branch `kitta/aar-marketing-subdomains` in den Staging-Slot deployen — erst dann rewritet `makler.staging.claimondo.de/` auf die Makler-Seite. (Vorher: liefert die Staging-Startseite — okay.)
+`/etc/nginx/sites-available/staging.claimondo.de.conf` hat einen Wildcard-Block `server_name *.staging.claimondo.de` → `proxy_pass http://127.0.0.1:3001` (inkl. `Host $host`, Basic-Auth `/etc/nginx/.htpasswd-staging`). Das Staging-Zert deckt `staging.claimondo.de` + `*.staging.claimondo.de` ab. → `makler.staging.claimondo.de` wird damit schon geroutet + ist TLS-abgedeckt. Kein nginx-/SSL-Eingriff. Es muss nur (von Aaron) der Branch `kitta/aar-marketing-subdomains` in den Staging-Slot deployed werden — erst dann rewritet `makler.staging.claimondo.de/` auf die Makler-Seite.
 
 ---
 
-## Verifikation (nach A–D, noch VOR dem Prod-Code-Deploy)
+## Verifikation (nach A–C, noch VOR dem Prod-Code-Deploy)
 
 ```
-dig +short makler.claimondo.de            # → 162.55.40.105
+dig +short makler.claimondo.de            # → 212.132.119.110
 curl -sI https://makler.claimondo.de/     # → HTTP 200, gültiges Zert (kein -k nötig)
 curl -sI https://gutachter.claimondo.de/  # → unverändert HTTP 200 (Regressions-Check)
 curl -sI https://claimondo.de/            # → unverändert HTTP 200 (Regressions-Check)
