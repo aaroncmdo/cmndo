@@ -194,6 +194,11 @@ export default function FeldmodusClient({
     })
   }, [aktuellerStop, sessionStatus, session.id])
 
+  // useId-Suffix im Realtime-Channel-Namen verhindert einen Crash, wenn dieser
+  // Consumer mehrfach gemountet wird (Strict-Mode-Doppel-Mount oder Layout rendert
+  // ihn mehrmals) — sonst kollidieren zwei Subscriptions auf demselben Channel-Namen.
+  const feldmodusTerminChannelSuffix = useId()
+
   // Realtime-Sub auf den aktiven Termin: wenn besichtigung_gestartet_am
   // (z.B. durch Zeit-Fallback auf einem anderen Gerät, oder durch eine
   // andere Tab-Instanz) gesetzt wird, schaltet die UI ohne Reload in den
@@ -203,7 +208,7 @@ export default function FeldmodusClient({
     if (!terminId) return
     const supabase = createClient()
     const channel = supabase
-      .channel(`feldmodus-termin-${terminId}`)
+      .channel(`feldmodus-termin-${terminId}-${feldmodusTerminChannelSuffix}`)
       .on(
         'postgres_changes',
         {
@@ -227,7 +232,7 @@ export default function FeldmodusClient({
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [aktuellerStop?.termin_id])
+  }, [aktuellerStop?.termin_id, feldmodusTerminChannelSuffix])
 
   // AAR-388: Beim Mount Recovery fahren + Sync-Listeners registrieren.
   // Hängengebliebene 'uploading'-Items aus Tab-Reload zurück auf 'pending'.
