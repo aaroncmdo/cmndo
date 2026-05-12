@@ -13,6 +13,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { UserPlusIcon } from 'lucide-react'
+import { Chip } from '@/components/ui/Chip'
 import type { MaklerLeadRow, ConsentLabel } from '@/lib/makler/queries'
 
 type FilterKey = 'alle' | 'offen' | 'konvertiert' | 'disqualifiziert'
@@ -74,30 +75,10 @@ export function MaklerLeadsTable({ leads }: Props) {
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        <FilterChip
-          active={filter === 'alle'}
-          onClick={() => setFilter('alle')}
-          label="Alle"
-          count={counts.alle}
-        />
-        <FilterChip
-          active={filter === 'offen'}
-          onClick={() => setFilter('offen')}
-          label="Offen"
-          count={counts.offen}
-        />
-        <FilterChip
-          active={filter === 'konvertiert'}
-          onClick={() => setFilter('konvertiert')}
-          label="Konvertiert"
-          count={counts.konvertiert}
-        />
-        <FilterChip
-          active={filter === 'disqualifiziert'}
-          onClick={() => setFilter('disqualifiziert')}
-          label="Disqualifiziert"
-          count={counts.disqualifiziert}
-        />
+        <Chip variant={filter === 'alle' ? 'selected' : 'default'} count={counts.alle} onClick={() => setFilter('alle')}>Alle</Chip>
+        <Chip variant={filter === 'offen' ? 'selected' : 'default'} count={counts.offen} onClick={() => setFilter('offen')}>Offen</Chip>
+        <Chip variant={filter === 'konvertiert' ? 'selected' : 'default'} count={counts.konvertiert} onClick={() => setFilter('konvertiert')}>Konvertiert</Chip>
+        <Chip variant={filter === 'disqualifiziert' ? 'selected' : 'default'} count={counts.disqualifiziert} onClick={() => setFilter('disqualifiziert')}>Disqualifiziert</Chip>
       </div>
 
       {filtered.length === 0 ? (
@@ -319,35 +300,6 @@ function ConsentBadge({ label }: { label: ConsentLabel }) {
     >
       {entry.label}
     </span>
-  )
-}
-
-function FilterChip({
-  active,
-  onClick,
-  label,
-  count,
-}: {
-  active: boolean
-  onClick: () => void
-  label: string
-  count: number
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-        active
-          ? 'bg-claimondo-navy text-white'
-          : 'bg-white text-claimondo-ondo border border-claimondo-border hover:border-claimondo-ondo'
-      }`}
-    >
-      {label}
-      <span className={`ml-1.5 ${active ? 'text-claimondo-shield' : 'text-claimondo-navy'}`}>
-        {count}
-      </span>
-    </button>
   )
 }
 

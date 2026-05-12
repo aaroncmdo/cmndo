@@ -9,6 +9,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FolderOpenIcon, LockIcon } from 'lucide-react'
+import { Chip } from '@/components/ui/Chip'
 import type { MaklerAkteRow, AktenFilter } from '@/lib/makler/queries'
 
 type Props = {
@@ -79,24 +80,9 @@ export function MaklerAktenList({ akten, counts, currentFilter }: Props) {
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        <FilterChip
-          active={currentFilter === 'aktiv'}
-          onClick={() => setFilter('aktiv')}
-          label="Aktiv"
-          count={counts.aktiv}
-        />
-        <FilterChip
-          active={currentFilter === 'abgeschlossen'}
-          onClick={() => setFilter('abgeschlossen')}
-          label="Abgeschlossen"
-          count={counts.abgeschlossen}
-        />
-        <FilterChip
-          active={currentFilter === 'storniert'}
-          onClick={() => setFilter('storniert')}
-          label="Storniert"
-          count={counts.storniert}
-        />
+        <Chip variant={currentFilter === 'aktiv' ? 'selected' : 'default'} count={counts.aktiv} onClick={() => setFilter('aktiv')}>Aktiv</Chip>
+        <Chip variant={currentFilter === 'abgeschlossen' ? 'selected' : 'default'} count={counts.abgeschlossen} onClick={() => setFilter('abgeschlossen')}>Abgeschlossen</Chip>
+        <Chip variant={currentFilter === 'storniert' ? 'selected' : 'default'} count={counts.storniert} onClick={() => setFilter('storniert')}>Storniert</Chip>
       </div>
 
       {akten.length === 0 ? (
@@ -342,35 +328,6 @@ function MinimalBadge() {
       <LockIcon width={10} height={10} />
       Minimal
     </span>
-  )
-}
-
-function FilterChip({
-  active,
-  onClick,
-  label,
-  count,
-}: {
-  active: boolean
-  onClick: () => void
-  label: string
-  count: number
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-        active
-          ? 'bg-claimondo-navy text-white'
-          : 'bg-white text-claimondo-ondo border border-claimondo-border hover:border-claimondo-ondo'
-      }`}
-    >
-      {label}
-      <span className={`ml-1.5 ${active ? 'text-claimondo-shield' : 'text-claimondo-navy'}`}>
-        {count}
-      </span>
-    </button>
   )
 }
 
