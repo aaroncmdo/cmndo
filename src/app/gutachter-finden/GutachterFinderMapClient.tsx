@@ -84,6 +84,12 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
       setMapStatus('no-token')
       return
     }
+    // 2026-05-12: container-Dimensionen loggen — Hauptverdacht für die leere
+    // Karte ist ein 0×0-Canvas (mapbox-gl v3: wenn der Container beim new Map()
+    // noch keine Maße hat, rendert nichts, KEIN Fehler feuert).
+    const rect0 = containerRef.current.getBoundingClientRect()
+    console.info('[gutachter-finden] Map-Container beim Init:', rect0.width, '×', rect0.height)
+
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
@@ -91,9 +97,20 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
       zoom: DEFAULT_ZOOM,
       pitch: 35,
       bearing: -8,
-      antialias: true,
     })
     mapRef.current = map
+
+    // 2026-05-12: gegen den 0×0-Canvas-Bug — nach dem nächsten Frame UND beim
+    // load-Event resize() aufrufen, falls der Container beim Init noch klein war.
+    // Zusätzlich ein ResizeObserver, der bei jeder Container-Größenänderung
+    // resize() triggert (robust gegen Layout-Settle-Timing).
+    requestAnimationFrame(() => {
+      map.resize()
+      const rect1 = containerRef.current?.getBoundingClientRect()
+      console.info('[gutachter-finden] Map-Container nach rAF:', rect1?.width, '×', rect1?.height)
+    })
+    const resizeObs = new ResizeObserver(() => map.resize())
+    resizeObs.observe(containerRef.current)
 
     // Load-Timeout: wenn die Karte nach 12s noch nicht 'load' gefeuert hat,
     // hängt der Style (Netzwerk, geblockter Request o.ä.) — sichtbar machen.
@@ -125,6 +142,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     map.on('load', () => {
       loaded = true
       window.clearTimeout(loadTimeout)
+      map.resize() // 2026-05-12: nochmal resize beim load, falls der Container zwischenzeitlich gewachsen ist
       // 2026-05-12: 3D-Buildings-Layer ENTFERNT — die interpolate-Ausdrücke
       // waren kaputt (Stops als verschachtelte Arrays statt flach), das hat
       // die Mapbox-Render-Loop abgestürzt → schwarze Karte. War nur ein
