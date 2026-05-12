@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { markiereAlsBezahlt, storniereAbrechnung, manuellVersenden, manuellGenerieren } from '../abrechnungen-actions'
 import { Modal } from '@/components/primitives/Modal'
+import { ABRECHNUNG_STATUS_COLORS, ABRECHNUNG_STATUS_LABELS } from '@/lib/statusLabels'
 
 type Abrechnung = {
   id: string
@@ -22,14 +23,6 @@ type Abrechnung = {
 type Props = {
   abrechnungen: Abrechnung[]
   pdfBaseUrl: string
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  entwurf: 'bg-claimondo-bg text-claimondo-ondo',
-  versendet: 'bg-claimondo-bg text-claimondo-ondo',
-  bezahlt: 'bg-emerald-50 text-emerald-600',
-  ueberfaellig: 'bg-red-50 text-red-600',
-  storniert: 'bg-claimondo-bg text-claimondo-ondo/70 line-through',
 }
 
 function eur(val: number) {
@@ -185,8 +178,8 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                       <td className="px-4 py-3 text-center text-claimondo-ondo text-xs">{fmtDate(abr.versand_datum)}</td>
                       <td className="px-4 py-3 text-center text-claimondo-ondo text-xs">{fmtDate(abr.faellig_am)}</td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${STATUS_COLORS[abr.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
-                          {abr.status}
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${ABRECHNUNG_STATUS_COLORS[abr.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                          {ABRECHNUNG_STATUS_LABELS[abr.status] ?? abr.status}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right">
