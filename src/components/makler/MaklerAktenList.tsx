@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FolderOpenIcon, LockIcon } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
+import EmptyState from '@/components/shared/EmptyState'
 import type { MaklerAkteRow, AktenFilter } from '@/lib/makler/queries'
 
 type Props = {
@@ -54,6 +55,23 @@ function relativeFromNow(iso: string | null): string {
   return RELATIVE.format(-months, 'month')
 }
 
+// AAR-frontend-konsolidierung-p1: Empty-State-Texte je Filter — gerendert über
+// die shared EmptyState-Komponente (kein eigenes Card-Markup mehr).
+const EMPTY_COPY: Record<AktenFilter, { heading: string; body: string }> = {
+  aktiv: {
+    heading: 'Keine aktiven Akten',
+    body: 'Sobald Ihre Kunden in die Bearbeitung gehen, erscheinen sie hier.',
+  },
+  abgeschlossen: {
+    heading: 'Noch keine abgeschlossenen Akten',
+    body: 'Abgeschlossene Fälle werden hier archiviert.',
+  },
+  storniert: {
+    heading: 'Keine stornierten Akten',
+    body: 'Glück gehabt — keine Ihrer Akten ist storniert.',
+  },
+}
+
 function kundeName(a: MaklerAkteRow): string {
   const parts = [a.kunde_vorname, a.kunde_nachname].filter(Boolean)
   return parts.length ? parts.join(' ') : '(unbekannt)'
@@ -86,7 +104,11 @@ export function MaklerAktenList({ akten, counts, currentFilter }: Props) {
       </div>
 
       {akten.length === 0 ? (
-        <EmptyState filter={currentFilter} />
+        <EmptyState
+          icon={FolderOpenIcon}
+          title={EMPTY_COPY[currentFilter].heading}
+          description={EMPTY_COPY[currentFilter].body}
+        />
       ) : (
         <div className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
           {/* Desktop-Tabelle */}
@@ -332,7 +354,7 @@ function MinimalBadge() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Mini-Drawer + Empty
+// Mini-Drawer
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MiniDrawer({
@@ -392,33 +414,6 @@ function Row({ dt, dd }: { dt: string; dd: React.ReactNode }) {
     <div className="flex justify-between items-center gap-4">
       <dt className="text-claimondo-ondo">{dt}</dt>
       <dd className="text-claimondo-navy text-right">{dd}</dd>
-    </div>
-  )
-}
-
-function EmptyState({ filter }: { filter: AktenFilter }) {
-  const copy: Record<AktenFilter, { heading: string; body: string }> = {
-    aktiv: {
-      heading: 'Keine aktiven Akten',
-      body: 'Sobald Ihre Kunden in die Bearbeitung gehen, erscheinen sie hier.',
-    },
-    abgeschlossen: {
-      heading: 'Noch keine abgeschlossenen Akten',
-      body: 'Abgeschlossene Fälle werden hier archiviert.',
-    },
-    storniert: {
-      heading: 'Keine stornierten Akten',
-      body: 'Glück gehabt — keine Ihrer Akten ist storniert.',
-    },
-  }
-  const c = copy[filter]
-  return (
-    <div className="bg-white rounded-ios-md border border-claimondo-border p-10 text-center">
-      <div className="mx-auto w-12 h-12 rounded-full bg-claimondo-bg flex items-center justify-center text-claimondo-ondo mb-4">
-        <FolderOpenIcon width={22} height={22} />
-      </div>
-      <h2 className="text-base font-semibold text-claimondo-navy mb-2">{c.heading}</h2>
-      <p className="text-sm text-claimondo-ondo max-w-sm mx-auto">{c.body}</p>
     </div>
   )
 }

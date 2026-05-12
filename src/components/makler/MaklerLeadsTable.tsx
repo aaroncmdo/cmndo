@@ -14,6 +14,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { UserPlusIcon } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
+import { StatusBadge } from '@/components/shared/StatusBadge'
+import EmptyState from '@/components/shared/EmptyState'
 import type { MaklerLeadRow, ConsentLabel } from '@/lib/makler/queries'
 
 type FilterKey = 'alle' | 'offen' | 'konvertiert' | 'disqualifiziert'
@@ -69,7 +71,14 @@ export function MaklerLeadsTable({ leads }: Props) {
   }, [leads, filter])
 
   if (leads.length === 0) {
-    return <EmptyState />
+    return (
+      <EmptyState
+        icon={UserPlusIcon}
+        title="Noch keine Leads"
+        description="Sobald Kunden über Ihren Promo-Code einen Schaden melden, erscheinen sie hier. Teilen Sie Ihren QR-Code, um den ersten Lead zu erzeugen."
+        action={{ label: 'Promo-Code teilen', href: '/makler/promo' }}
+      />
+    )
   }
 
   return (
@@ -166,7 +175,7 @@ function LeadRow({
       <td className="px-4 py-3 text-claimondo-ondo">{formatDate(lead.unfalldatum)}</td>
       <td className="px-4 py-3 text-claimondo-ondo">{formatDate(lead.created_at)}</td>
       <td className="px-4 py-3">
-        <StatusPill status={lead.status} disqualifiziert={lead.disqualifiziert} />
+        <LeadStatusBadge status={lead.status} disqualifiziert={lead.disqualifiziert} />
       </td>
       <td className="px-4 py-3">
         <ConsentBadge label={lead.consent_label} />
@@ -202,7 +211,7 @@ function LeadCard({
         <span>Eingang: {formatDate(lead.created_at)}</span>
       </div>
       <div>
-        <StatusPill status={lead.status} disqualifiziert={lead.disqualifiziert} />
+        <LeadStatusBadge status={lead.status} disqualifiziert={lead.disqualifiziert} />
       </div>
     </div>
   )
@@ -241,7 +250,9 @@ function LeadCard({
 // Badges, Pills
 // ─────────────────────────────────────────────────────────────────────────────
 
-function StatusPill({
+// AAR-frontend-konsolidierung-p1: mappt den Lead-Status auf einen shared
+// StatusBadge-Tone — keine eigene Pill-Reimplementierung mehr.
+function LeadStatusBadge({
   status,
   disqualifiziert,
 }: {
@@ -249,24 +260,20 @@ function StatusPill({
   disqualifiziert: boolean | null
 }) {
   if (disqualifiziert) {
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-claimondo-bg text-claimondo-ondo">
-        disqualifiziert
-      </span>
-    )
+    return <StatusBadge tone="neutral">disqualifiziert</StatusBadge>
   }
-  const cfg: Record<string, { bg: string; text: string }> = {
-    neu: { bg: 'bg-claimondo-ondo/10', text: 'text-claimondo-navy' },
-    qualifiziert: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-    konvertiert: { bg: 'bg-emerald-600/10', text: 'text-emerald-700' },
-  }
-  const entry = cfg[status] ?? { bg: 'bg-claimondo-bg', text: 'text-claimondo-navy' }
   return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${entry.bg} ${entry.text}`}
+    <StatusBadge
+      tone={
+        status === 'qualifiziert' || status === 'konvertiert'
+          ? 'success'
+          : status === 'neu'
+            ? 'info'
+            : 'neutral'
+      }
     >
       {status}
-    </span>
+    </StatusBadge>
   )
 }
 
@@ -362,29 +369,3 @@ function Row({ dt, dd }: { dt: string; dd: string }) {
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Empty-State
-// ─────────────────────────────────────────────────────────────────────────────
-
-function EmptyState() {
-  return (
-    <div className="bg-white rounded-ios-md border border-claimondo-border p-10 text-center">
-      <div className="mx-auto w-12 h-12 rounded-full bg-claimondo-bg flex items-center justify-center text-claimondo-ondo mb-4">
-        <UserPlusIcon width={22} height={22} />
-      </div>
-      <h2 className="text-base font-semibold text-claimondo-navy mb-2">
-        Noch keine Leads
-      </h2>
-      <p className="text-sm text-claimondo-ondo mb-4 max-w-sm mx-auto">
-        Sobald Kunden über Ihren Promo-Code einen Schaden melden, erscheinen sie
-        hier. Teilen Sie Ihren QR-Code, um den ersten Lead zu erzeugen.
-      </p>
-      <Link
-        href="/makler/promo"
-        className="inline-block px-4 py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-shield"
-      >
-        Promo-Code teilen
-      </Link>
-    </div>
-  )
-}
