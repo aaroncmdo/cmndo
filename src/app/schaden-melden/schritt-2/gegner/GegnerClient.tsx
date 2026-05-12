@@ -9,7 +9,7 @@ import { Plus, Trash2, Info } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/primitives'
 import { VersichererSelect } from '@/components/shared/VersichererSelect'
 import { useFlowStore } from '@/lib/flow/flow-store'
 import { updateLeadGegner } from '@/lib/actions/update-lead-gegner'
@@ -204,15 +204,14 @@ export function GegnerClient({ leadId, versicherer }: Props) {
           <Label>Zeugen</Label>
           <Button
             type="button"
-            variant="ghost"
+            tone="ghost"
             size="sm"
-            onClick={() =>
+            onPress={() =>
               fields.length < 5 && append({ name: '', telefon: '' })
             }
             disabled={fields.length >= 5}
-            className="gap-1 text-claimondo-ondo hover:bg-claimondo-bg"
+            iconLeft={<Plus className="h-4 w-4" />}
           >
-            <Plus className="h-4 w-4" />
             Zeuge hinzufügen
           </Button>
         </div>
@@ -254,11 +253,11 @@ export function GegnerClient({ leadId, versicherer }: Props) {
                 </div>
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => remove(i)}
-                  aria-label={`Zeuge ${i + 1} entfernen`}
-                  className="justify-self-end text-claimondo-ondo hover:bg-red-50 hover:text-red-600"
+                  tone="ghost"
+                  size="icon"
+                  onPress={() => remove(i)}
+                  ariaLabel={`Zeuge ${i + 1} entfernen`}
+                  className="justify-self-end"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -271,8 +270,8 @@ export function GegnerClient({ leadId, versicherer }: Props) {
       <div className="sticky bottom-4 flex items-center justify-end rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-4 shadow-[var(--shadow-claimondo-sm)]">
         <Button
           type="submit"
+          tone="ondo"
           disabled={pending}
-          className="bg-claimondo-ondo hover:bg-claimondo-shield"
         >
           {pending ? 'Wird gespeichert …' : 'Weiter zu ZB1'}
         </Button>

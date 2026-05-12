@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/primitives'
 import {
   Select,
   SelectContent,
@@ -883,8 +883,8 @@ export function Schritt1Client() {
       <div className="flex justify-end">
         <Button
           type="submit"
+          tone="ondo"
           disabled={!dsgvoConsent || isPending || !isValid}
-          className="bg-claimondo-ondo hover:bg-claimondo-shield"
         >
           {isPending ? 'Wird gespeichert …' : 'Weiter zu Schritt 2'}
         </Button>

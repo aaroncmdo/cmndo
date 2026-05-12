@@ -44,6 +44,7 @@ export function Button({
   fullWidth,
   disabled,
   onPress,
+  ariaLabel,
 }: ButtonProps) {
   const t = toneMap[tone]
   const isIcon = size === 'icon'
@@ -74,6 +75,7 @@ export function Button({
     <Pressable
       onPress={disabled ? undefined : onPress}
       disabled={disabled}
+      accessibilityLabel={ariaLabel}
       style={({ pressed }: { pressed: boolean }) => [
         containerStyle,
         { opacity: pressed && !disabled ? 0.7 : containerStyle.opacity },

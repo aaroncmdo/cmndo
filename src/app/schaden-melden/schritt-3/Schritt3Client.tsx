@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { Camera, Upload, FileText, Loader2, CheckCircle2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/primitives'
 import { useFlowStore } from '@/lib/flow/flow-store'
 import { updateLeadZb1Manual } from '@/lib/actions/update-lead-zb1-manual'
 import { zb1Schema, type Zb1FormValues } from '@/lib/flow/schemas/schritt3'
@@ -193,10 +193,10 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
             />
             <Button
               type="button"
-              onClick={() => cameraInputRef.current?.click()}
-              className="flex items-center justify-center gap-2 bg-claimondo-ondo hover:bg-claimondo-shield"
+              tone="ondo"
+              onPress={() => cameraInputRef.current?.click()}
+              iconLeft={<Camera className="h-4 w-4" />}
             >
-              <Camera className="h-4 w-4" />
               Mit Kamera scannen
             </Button>
 
@@ -209,11 +209,10 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
             />
             <Button
               type="button"
-              variant="outline"
-              onClick={() => uploadInputRef.current?.click()}
-              className="flex items-center justify-center gap-2 border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg"
+              tone="ghost"
+              onPress={() => uploadInputRef.current?.click()}
+              iconLeft={<Upload className="h-4 w-4" />}
             >
-              <Upload className="h-4 w-4" />
               Datei hochladen
             </Button>
           </div>
@@ -413,8 +412,8 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
 
         <Button
           type="submit"
+          tone="ondo"
           disabled={pending}
-          className="bg-claimondo-ondo hover:bg-claimondo-shield"
         >
           {pending ? 'Wird gespeichert …' : 'Weiter zum Account'}
         </Button>

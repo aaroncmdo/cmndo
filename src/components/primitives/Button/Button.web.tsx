@@ -73,6 +73,7 @@ export function Button({
   onPress,
   type = 'button',
   className,
+  ariaLabel,
 }: ButtonProps) {
   const [hover, setHover] = useState(false)
   const t = toneMap[tone]
@@ -105,6 +106,7 @@ export function Button({
       type={type}
       style={style}
       className={className}
+      aria-label={ariaLabel}
       onClick={disabled ? undefined : onPress}
       disabled={disabled}
       onMouseEnter={() => setHover(true)}
