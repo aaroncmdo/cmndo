@@ -5,6 +5,25 @@ import { NextResponse, type NextRequest } from 'next/server'
 const REMEMBER_COOKIE_NAME = 'cm_remember'
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365
 
+// 2026-05-12: Hinter nginx-Reverse-Proxy ist request.url der INTERNE
+// Listen-Origin (z.B. http://0.0.0.0:3001). Redirects gebaut mit
+// externalUrl(request, '/login') landeten deshalb auf '0.0.0.0:3001/login'.
+// Wir bauen die externe URL stattdessen aus den X-Forwarded-Headers,
+// fallen auf 'host' zurueck, und erst danach auf request.url (lokaler Dev).
+function externalUrl(request: NextRequest, path: string): URL {
+  const forwardedHost = request.headers.get('x-forwarded-host')
+  const forwardedProto = request.headers.get('x-forwarded-proto')
+  if (forwardedHost) {
+    return new URL(path, `${forwardedProto ?? 'https'}://${forwardedHost}`)
+  }
+  const host = request.headers.get('host')
+  if (host) {
+    const proto = forwardedProto ?? (host.startsWith('localhost') || host.startsWith('127.0.0.1') ? 'http' : 'https')
+    return new URL(path, `${proto}://${host}`)
+  }
+  return new URL(path, request.url)
+}
+
 export async function updateSession(request: NextRequest) {
   // AAR-622: Public-Path-Kurzschluss — kein Supabase-Client, kein Auth-Call,
   // kein GoTrue-Hit für Crons (/api/*), Landing-Pages und Login-Flows.
@@ -81,7 +100,7 @@ export async function updateSession(request: NextRequest) {
 
   if (!user) {
     // Nicht eingeloggt + geschützter Pfad → /login
-    response = NextResponse.redirect(new URL('/login', request.url))
+    response = NextResponse.redirect(externalUrl(request, '/login'))
   } else if (request.nextUrl.pathname !== '/login/2fa') {
     // Eingeloggt + geschützter Pfad (auch /admin/*): ZUERST 2FA-Check (KFZ-184)
     const isGoogleUser = user.app_metadata?.provider === 'google'
@@ -91,12 +110,12 @@ export async function updateSession(request: NextRequest) {
     // /gutachter-Portal hat kein 2FA — SVs werden direkt durchgelassen
     const isGutachterPath = request.nextUrl.pathname.startsWith('/gutachter')
     if (!isGoogleUser && !has2faCookie && !hasRememberCookie && !isGutachterPath) {
-      response = NextResponse.redirect(new URL('/login/2fa', request.url))
+      response = NextResponse.redirect(externalUrl(request, '/login/2fa'))
     } else if (request.nextUrl.pathname.startsWith('/admin')) {
       // 2FA OK → Admin-Rollen-Check (KFZ-203: Dispatch-User darf nicht auf /admin/*)
       const rolle = (user.app_metadata?.rolle ?? user.user_metadata?.rolle) as string | undefined
       if (rolle === 'dispatch') {
-        response = NextResponse.redirect(new URL('/dispatch/dashboard', request.url))
+        response = NextResponse.redirect(externalUrl(request, '/dispatch/dashboard'))
       } else {
         response = NextResponse.next({ request: { headers: requestHeaders } })
       }
