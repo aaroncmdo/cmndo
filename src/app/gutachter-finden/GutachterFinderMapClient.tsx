@@ -60,6 +60,11 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
   // "In Ihrer Nähe"-Behauptung im Header ehrlich ist und die Karte direkt
   // zum User zoomt. Bei Deny bleibt es bei NRW-Mittelpunkt + neutralem Badge.
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  // AAR-2026-05-12: sichtbarer Map-Diagnose-Status — damit man ohne DevTools
+  // sieht WARUM die Karte ggf. nicht rendert. 'no-token' = NEXT_PUBLIC_MAPBOX_TOKEN
+  // fehlte im Build. 'auth-error' = Mapbox lehnt die Anfrage ab (401/403,
+  // i.d.R. Token-URL-Restriction). 'ok' = alles gut.
+  const [mapStatus, setMapStatus] = useState<'ok' | 'no-token' | 'auth-error' | 'config-error'>('ok')
 
   // Sticky-Marker: wenn der User auf einen SV klickt, merken wir uns die ID
   // und scrollen die Wizard-Sidebar zum Anfang. Spätere Iteration:
@@ -72,7 +77,8 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     const ok = ensureMapboxInitialized()
     if (!ok) {
       // Token-Init failed — fail loud im Smoke statt silent
-      console.error('[gutachter-finden] Mapbox-Init fehlgeschlagen (Token? NEXT_PUBLIC_MAPBOX_TOKEN?)')
+      console.error('[gutachter-finden] Mapbox-Init fehlgeschlagen — NEXT_PUBLIC_MAPBOX_TOKEN ist im Build leer/fehlt')
+      setMapStatus('no-token')
       return
     }
     const map = new mapboxgl.Map({
@@ -86,25 +92,30 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     })
     mapRef.current = map
 
+    // Mapbox-Fehler abfangen + sichtbar machen. 401/403 = Token-Problem,
+    // Style-/Layer-/Expression-Validierungsfehler = Config-Bug (z.B. kaputter
+    // interpolate-Ausdruck der die Render-Loop killt → schwarze Karte).
+    map.on('error', (e) => {
+      const msg = (e?.error as { message?: string } | undefined)?.message ?? ''
+      const status = (e?.error as { status?: number } | undefined)?.status
+      console.error('[gutachter-finden] Mapbox-Fehler:', status, msg, e)
+      if (status === 401 || status === 403 || /unauthorized|forbidden|access token/i.test(msg)) {
+        setMapStatus('auth-error')
+      } else if (/layers?\.|paint\.|interpolate|expression|expected/i.test(msg)) {
+        setMapStatus('config-error')
+      }
+    })
+
     map.dragRotate.disable()
     map.touchZoomRotate.disableRotation()
 
     map.on('load', () => {
-      // 3D-Buildings als sanfter Tiefe-Layer
-      map.addLayer({
-        id: '3d-buildings',
-        source: 'composite',
-        'source-layer': 'building',
-        filter: ['==', 'extrude', 'true'],
-        type: 'fill-extrusion',
-        minzoom: 13,
-        paint: {
-          'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'height'], [0, '#dcdfe7'], [40, '#c5cad6'], [120, '#a8aebd']],
-          'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], [13, 0], [13.5, ['get', 'height']]],
-          'fill-extrusion-base': ['interpolate', ['linear'], ['zoom'], [13, 0], [13.5, ['get', 'min_height']]],
-          'fill-extrusion-opacity': 0.6,
-        },
-      })
+      // 2026-05-12: 3D-Buildings-Layer ENTFERNT — die interpolate-Ausdrücke
+      // waren kaputt (Stops als verschachtelte Arrays statt flach), das hat
+      // die Mapbox-Render-Loop abgestürzt → schwarze Karte. War nur ein
+      // dezenter Tiefe-Effekt ab Zoom 13 (Default-Zoom ist 8.5), also kein
+      // Verlust. Falls wieder gewünscht: korrekte interpolate-Syntax nutzen
+      // (['interpolate', ['linear'], input, stop1_in, stop1_out, stop2_in, ...]).
 
       // 2026-05-12 Plan v3 Backlog: Iso-Halos NUR für Tier-1 (echte SVs aus
       // sachverstaendige). Tier-3 (sv_leads) bleibt ohne Iso — zu viele Marker
@@ -272,57 +283,95 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
 
   return (
     <div className="relative w-full" style={{ height: '100dvh' }}>
-      {/* Karte als Vollbild-Background */}
-      <div ref={containerRef} className="absolute inset-0" />
+      {/* Karte als Vollbild-Background. Fallback-Gradient (--brand-surface-gradient)
+          falls Mapbox nicht lädt (Token-Restriction o.ä.) — dann sieht's
+          wenigstens nach Brand-Surface aus statt nach leerem Weiß. Sobald die
+          Map-Tiles laden, decken sie den Gradient ab. */}
+      <div
+        ref={containerRef}
+        className="absolute inset-0"
+        style={{ background: 'var(--brand-surface-gradient)' }}
+      />
 
-      {/* Ambient-Gradient-Overlay (subtil) */}
+      {/* AAR-Diagnose: sichtbare Map-Fehlermeldung (nur wenn was schiefläuft) —
+          damit man ohne DevTools weiß was los ist. */}
+      {mapStatus !== 'ok' && (
+        <div className="absolute bottom-4 right-4 z-[6] max-w-[420px] rounded-xl bg-amber-50/95 border border-amber-200 px-4 py-3 text-[12.5px] text-amber-900 shadow-lg backdrop-blur-md">
+          <strong className="block mb-0.5">Karte konnte nicht geladen werden</strong>
+          {mapStatus === 'no-token'
+            ? 'NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt. (Console: "[gutachter-finden] Mapbox-Init fehlgeschlagen")'
+            : mapStatus === 'auth-error'
+              ? 'Mapbox lehnt die Anfrage ab (401/403). Der Token ist im Build, aber Mapbox akzeptiert ihn nicht für diese Domain — wahrscheinlich greift noch eine URL-Restriction am Token. (Details in der DevTools-Console.)'
+              : 'Mapbox-Konfigurationsfehler — ein Style-/Layer-Ausdruck ist ungültig und killt die Render-Loop. (Details in der DevTools-Console: "[gutachter-finden] Mapbox-Fehler: ...")'}
+        </div>
+      )}
+
+      {/* Sehr subtiler Ambient-Schatten unten/links für Tiefe — KEIN Rahmen,
+          kein weißer Veil. Diffus, randlos. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{
-          background: [
-            'radial-gradient(60% 50% at 0% 0%, rgba(13,27,62,0.12), transparent 55%)',
-            'radial-gradient(50% 50% at 100% 100%, rgba(69,115,162,0.08), transparent 60%)',
-          ].join(', '),
+          background:
+            'radial-gradient(70% 90% at 8% 60%, color-mix(in srgb, transparent 92%, var(--brand-primary, var(--claimondo-navy))), transparent 75%)',
         }}
       />
 
-      {/* Hero-Header oben — Status-Glass-Pill (sichtbar für Crawler + Mobile-Status) */}
-      <div className="absolute top-0 left-0 right-0 z-[5] px-4 pt-4 sm:px-6 sm:pt-6 pointer-events-none">
-        <div className="mx-auto max-w-3xl flex items-center justify-between gap-3 pointer-events-auto">
-          <GlassPill className="px-4 py-2">
-            <span className="relative flex h-2 w-2">
+      {/* Hero-Header oben — Status-Glass-Pill links, Beratung-CTA rechts (full-bleed).
+          Mobile: kurzer Pill-Text + Beratung als Icon-only-Pill, sonst läuft's über. */}
+      <div className="absolute top-0 left-0 right-0 z-[5] px-3 pt-3 sm:px-6 sm:pt-6 pointer-events-none">
+        <div className="flex items-center justify-between gap-2 pointer-events-auto">
+          <GlassPill className="px-3 py-2 sm:px-4">
+            <span className="relative flex h-2 w-2 flex-shrink-0">
               <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" aria-hidden />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
             </span>
             <span
-              className="text-xs font-semibold"
+              className="text-[11px] sm:text-xs font-semibold whitespace-nowrap"
               style={{
                 fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
                 color: 'var(--brand-secondary, var(--claimondo-ondo))',
               }}
             >
-              {userLocation
-                ? aktiveSVs.length > 0
-                  ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} Sachverständige in Ihrer Nähe`
-                  : `${svLeads.length} Sachverständige in Ihrer Nähe`
-                : aktiveSVs.length > 0
-                  ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} weitere Sachverständige bundesweit`
-                  : `${svLeads.length} Sachverständige bundesweit verfügbar`}
+              {/* Kurz auf Mobile */}
+              <span className="sm:hidden">
+                {svLeads.length + aktiveSVs.length} SVs {userLocation ? 'in Ihrer Nähe' : 'verfügbar'}
+              </span>
+              {/* Voll ab sm */}
+              <span className="hidden sm:inline">
+                {userLocation
+                  ? aktiveSVs.length > 0
+                    ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} Sachverständige in Ihrer Nähe`
+                    : `${svLeads.length} Sachverständige in Ihrer Nähe`
+                  : aktiveSVs.length > 0
+                    ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} weitere Sachverständige bundesweit`
+                    : `${svLeads.length} Sachverständige bundesweit verfügbar`}
+              </span>
             </span>
           </GlassPill>
-          {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts */}
+          {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
+              kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
           <BeratungVereinbarenButton className="hidden sm:inline-flex" />
+          <BeratungVereinbarenButton label="Beratung" className="sm:hidden flex-shrink-0 text-[12px] px-3" />
         </div>
       </div>
 
-      {/* Desktop — Wizard FREISCHWEBEND direkt auf der Karte. Kein Card-Wrapper:
-          die WizardClient-Felder sind selbst Glass-Pills, die schweben über
-          der Map. H1 + Subtitle mit text-shadow für Lesbarkeit auf der Karte. */}
+      {/* Desktop — Wizard FREISCHWEBEND direkt auf der Karte. Kein Card-Wrapper,
+          dynamische Breite (clamp). WICHTIG: paddingInline 28px — overflow-y-auto
+          impliziert overflow-x:hidden, also würden die ~28px Glass-Pill-Schatten
+          am rechten Spaltenrand abgeschnitten. Das Padding gibt ihnen Raum
+          INNERHALB der Overflow-Box → kein Clip. Spalte ist breiter angesetzt
+          damit nach Abzug des Paddings noch genug Content-Breite bleibt.
+          Negatives left/top kompensiert das Padding visuell (Content sitzt
+          dort wo er soll, das Padding ist nur "Schatten-Raum"). */}
       <div
         ref={sidebarScrollRef}
-        className="hidden lg:flex flex-col absolute top-24 left-8 bottom-8 w-[440px] z-[10] overflow-y-auto pr-2"
-        style={{ scrollbarWidth: 'thin' }}
+        className="hidden lg:flex flex-col absolute top-[68px] left-1 bottom-1 z-[10] overflow-y-auto"
+        style={{
+          width: 'clamp(440px, 33vw, 620px)',
+          padding: 28,
+          scrollbarWidth: 'thin',
+        }}
       >
         <div className="flex flex-col gap-1.5 mb-6">
           <h1

@@ -286,6 +286,15 @@ p, li, blockquote, article, .prose {
   opacity: 1;
 }
 
+/* AAR-2026-05-12 Mobile: iOS Safari zoomt beim Fokus in ein <input>/<textarea>
+   wenn font-size < 16px. !important schlägt den Inline-fontSize:14.5 der
+   Field-Components. Nur unter 640px (sm-Breakpoint) — auf Desktop bleibt 14.5px. */
+@media (max-width: 639px) {
+  .glass-field-input {
+    font-size: 16px !important;
+  }
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
