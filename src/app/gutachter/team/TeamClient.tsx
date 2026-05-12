@@ -5,6 +5,7 @@ import { Building2Icon, GraduationCapIcon, MailIcon, ShieldOffIcon, ShieldCheckI
 import { assignPoolLead, toggleSubSvSperre } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { StatCard } from '@/components/shared/StatCard'
 
 export type SubSvData = {
   id: string
@@ -98,14 +99,14 @@ export default function TeamClient({
 
       {/* KFZ-152 Follow-up: Aggregierte Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard icon={UsersIcon} label="Mitglieder" value={`${stats.mitglieder_aktiv} aktiv`} sub={stats.mitglieder_gesperrt > 0 ? `${stats.mitglieder_gesperrt} gesperrt` : `${stats.mitglieder_gesamt} gesamt`} />
-        <StatCard icon={BarChart3Icon} label="Fälle Monat" value={`${stats.faelle_genutzt} / ${stats.faelle_max}`} sub={`${stats.auslastung_pct}% Auslastung`} highlight={stats.auslastung_pct >= 80} />
-        <StatCard icon={WalletIcon} label="Werbebudget" value={stats.werbebudget_gesamt.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} sub="Gesamt-Guthaben" />
+        <StatCard size="sm" icon={UsersIcon} tone="ondo" label="Mitglieder" value={`${stats.mitglieder_aktiv} aktiv`} hint={stats.mitglieder_gesperrt > 0 ? `${stats.mitglieder_gesperrt} gesperrt` : `${stats.mitglieder_gesamt} gesamt`} />
+        <StatCard size="sm" icon={BarChart3Icon} tone={stats.auslastung_pct >= 80 ? 'warning' : 'ondo'} label="Fälle Monat" value={`${stats.faelle_genutzt} / ${stats.faelle_max}`} hint={`${stats.auslastung_pct}% Auslastung`} />
+        <StatCard size="sm" icon={WalletIcon} tone="ondo" label="Werbebudget" value={stats.werbebudget_gesamt.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} hint="Gesamt-Guthaben" />
         {showPoolSection && (
-          <StatCard icon={InboxIcon} label="Pool-Leads" value={String(stats.pool_leads)} sub="ohne Zuweisung" highlight={stats.pool_leads > 0} />
+          <StatCard size="sm" icon={InboxIcon} tone={stats.pool_leads > 0 ? 'warning' : 'ondo'} label="Pool-Leads" value={String(stats.pool_leads)} hint="ohne Zuweisung" />
         )}
         {!showPoolSection && (
-          <StatCard icon={ActivityIcon} label="Auslastung" value={`${stats.auslastung_pct}%`} sub={`${stats.faelle_max - stats.faelle_genutzt} Slots frei`} />
+          <StatCard size="sm" icon={ActivityIcon} tone="ondo" label="Auslastung" value={`${stats.auslastung_pct}%`} hint={`${stats.faelle_max - stats.faelle_genutzt} Slots frei`} />
         )}
       </div>
 
@@ -270,17 +271,3 @@ export default function TeamClient({
   )
 }
 
-function StatCard({ icon: Icon, label, value, sub, highlight }: {
-  icon: typeof UsersIcon; label: string; value: string; sub: string; highlight?: boolean
-}) {
-  return (
-    <div className={`rounded-xl border p-4 ${highlight ? 'border-amber-200 bg-amber-50/50' : 'border-claimondo-border bg-white'}`}>
-      <div className="flex items-center gap-2 mb-2">
-        <Icon className={`w-4 h-4 ${highlight ? 'text-amber-600' : 'text-[var(--brand-secondary)]'}`} />
-        <span className="text-[10px] uppercase tracking-wide text-claimondo-ondo font-medium">{label}</span>
-      </div>
-      <div className="text-lg font-semibold text-claimondo-navy">{value}</div>
-      <div className="text-[11px] text-claimondo-ondo mt-0.5">{sub}</div>
-    </div>
-  )
-}

@@ -19,6 +19,7 @@ import {
   FolderCheckIcon,
   TrendingUpIcon,
 } from 'lucide-react'
+import { StatCard } from '@/components/shared/StatCard'
 import type { PromoStats } from '@/lib/makler/queries'
 
 type Props = {
@@ -205,28 +206,32 @@ export function MaklerPromo({ code, landingUrl, qrSvg, stats, firma }: Props) {
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <StatCard
+                size="sm"
                 label="Klicks"
                 value={NUM.format(stats.clicks)}
-                icon={<MousePointerClickIcon width={14} height={14} />}
-                tone="blue"
+                icon={MousePointerClickIcon}
+                tone="ondo"
               />
               <StatCard
+                size="sm"
                 label="Leads"
                 value={NUM.format(stats.leads)}
-                icon={<UsersIcon width={14} height={14} />}
+                icon={UsersIcon}
                 tone="navy"
               />
               <StatCard
+                size="sm"
                 label="Akten"
                 value={NUM.format(stats.akten)}
-                icon={<FolderCheckIcon width={14} height={14} />}
-                tone="green"
+                icon={FolderCheckIcon}
+                tone="success"
               />
               <StatCard
+                size="sm"
                 label="Konversion"
                 value={PCT.format(stats.konversion)}
-                icon={<TrendingUpIcon width={14} height={14} />}
-                tone="orange"
+                icon={TrendingUpIcon}
+                tone="warning"
               />
             </div>
           </div>
@@ -303,36 +308,3 @@ export function MaklerPromo({ code, landingUrl, qrSvg, stats, firma }: Props) {
   )
 }
 
-function StatCard({
-  label,
-  value,
-  icon,
-  tone,
-}: {
-  label: string
-  value: string
-  icon: React.ReactNode
-  tone: 'blue' | 'navy' | 'green' | 'orange'
-}) {
-  const toneMap: Record<typeof tone, string> = {
-    blue: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border',
-    navy: 'bg-claimondo-navy/5 text-claimondo-navy border-claimondo-navy/10',
-    green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    orange: 'bg-orange-50 text-orange-700 border-orange-200',
-  }
-  return (
-    <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-3">
-      <div className="flex items-center gap-2">
-        <span
-          className={`inline-flex items-center justify-center w-7 h-7 rounded-lg border ${toneMap[tone]}`}
-        >
-          {icon}
-        </span>
-        <span className="text-[11px] uppercase tracking-wider text-claimondo-ondo font-medium">
-          {label}
-        </span>
-      </div>
-      <p className="mt-1.5 text-xl font-bold text-claimondo-navy">{value}</p>
-    </div>
-  )
-}

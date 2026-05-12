@@ -10,6 +10,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
+import { TrendingUpIcon, FolderIcon, CalculatorIcon, PercentIcon } from 'lucide-react'
+import { StatCard } from '@/components/shared/StatCard'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -60,27 +62,33 @@ export default function FinanceClient({
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-          <KpiCard
+          <StatCard
             label="MRR"
             value={eur(mrr)}
-            sub={`${aktiveSvCount} aktive SVs`}
-            accent="text-emerald-400"
+            hint={`${aktiveSvCount} aktive SVs`}
+            icon={TrendingUpIcon}
+            tone="success"
           />
-          <KpiCard
+          <StatCard
             label="Aktive Fälle"
             value={String(aktiveFaelle)}
-            sub="Diesen Monat"
+            hint="Diesen Monat"
+            icon={FolderIcon}
+            tone="navy"
           />
-          <KpiCard
+          <StatCard
             label="Ø Fallwert"
             value={eur(avgFallwert)}
-            sub="Regulierungsbetrag"
+            hint="Regulierungsbetrag"
+            icon={CalculatorIcon}
+            tone="ondo"
           />
-          <KpiCard
+          <StatCard
             label="Provision"
             value={eur(provisionMonat)}
-            sub="10 % — dieser Monat"
-            accent="text-claimondo-light-blue"
+            hint="10 % — dieser Monat"
+            icon={PercentIcon}
+            tone="ondo"
           />
         </div>
 
@@ -275,24 +283,3 @@ export default function FinanceClient({
   )
 }
 
-// ─── KPI Card ────────────────────────────────────────────────────────────────
-
-function KpiCard({
-  label,
-  value,
-  sub,
-  accent,
-}: {
-  label: string
-  value: string
-  sub: string
-  accent?: string
-}) {
-  return (
-    <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
-      <p className="text-claimondo-ondo text-xs font-medium uppercase tracking-wider mb-2">{label}</p>
-      <p className={`text-2xl font-bold tabular-nums ${accent ?? 'text-claimondo-navy'}`}>{value}</p>
-      <p className="text-claimondo-ondo/70 text-xs mt-1">{sub}</p>
-    </div>
-  )
-}
