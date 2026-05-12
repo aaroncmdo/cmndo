@@ -32,7 +32,7 @@
 | #797 | Tier-1-Iso-Halos prominent + Marker-Differenzierung | ✅ merged |
 | #798 | FlowWizardKfz als DEPRECATED markieren | ✅ merged |
 | #799 | conversion_events Tabelle + Tracking-Hook | ✅ merged |
-| — | **ZB1-OCR-Field-Type im Wizard** | ⏳ pending (~3h) |
+| #803 | **ZB1-OCR-Field-Type im Wizard** | 🟡 PR offen (staging) |
 | — | **Mehr Onboarding-Phasen (Fotos, Polizei, Gegner)** | ⏳ pending (~4-6h) |
 | #801 | **220 TS-Errors aufräumen + ignoreBuildErrors raus** | ✅ merged (217 → 0 Errors) |
 
