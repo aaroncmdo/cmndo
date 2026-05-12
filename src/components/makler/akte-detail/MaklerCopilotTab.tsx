@@ -16,6 +16,7 @@ import {
   UserIcon,
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import { Button } from '@/components/primitives'
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string }
 
@@ -252,18 +253,21 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
           className="flex-1 resize-none rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
           disabled={streaming}
         />
-        <button
+        <Button
           type="submit"
+          tone="navy"
           disabled={!input.trim() || streaming}
-          className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50 disabled:cursor-not-allowed"
+          className="shrink-0"
+          iconLeft={
+            streaming ? (
+              <Loader2Icon width={14} height={14} className="animate-spin" />
+            ) : (
+              <SendIcon width={14} height={14} />
+            )
+          }
         >
-          {streaming ? (
-            <Loader2Icon width={14} height={14} className="animate-spin" />
-          ) : (
-            <SendIcon width={14} height={14} />
-          )}
           Fragen
-        </button>
+        </Button>
       </form>
     </div>
   )
