@@ -275,21 +275,38 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
       {/* Karte als Vollbild-Background */}
       <div ref={containerRef} className="absolute inset-0" />
 
-      {/* Ambient-Gradient-Overlay (subtil) */}
+      {/* Ambient-Gradient-Overlay (subtil, ganze Karte) */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{
           background: [
-            'radial-gradient(60% 50% at 0% 0%, rgba(13,27,62,0.12), transparent 55%)',
             'radial-gradient(50% 50% at 100% 100%, rgba(69,115,162,0.08), transparent 60%)',
+            'radial-gradient(40% 30% at 100% 0%, rgba(123,163,204,0.07), transparent 65%)',
           ].join(', '),
         }}
       />
 
-      {/* Hero-Header oben — Status-Glass-Pill (sichtbar für Crawler + Mobile-Status) */}
+      {/* AAR-glass: Full-bleed Schatten/Scrim hinter dem freischwebenden Wizard.
+          Links am Screen-Rand verankert, volle Höhe, blendet nach rechts aus.
+          Zwei Layer: weißer Veil für Lesbarkeit des Navy-Texts auf der Karte +
+          weicher Navy-Ambient-Shadow für Tiefe. z-[2] = über Map, unter allem
+          Interaktiven. Auf Mobile ausgeblendet (da übernimmt das Bottom-Sheet). */}
+      <div
+        aria-hidden
+        className="hidden lg:block pointer-events-none absolute inset-y-0 left-0 z-[2]"
+        style={{
+          width: 'min(680px, 52vw)',
+          background: [
+            'radial-gradient(60% 75% at 22% 48%, color-mix(in srgb, transparent 87%, var(--brand-primary, var(--claimondo-navy))), transparent 72%)',
+            'linear-gradient(to right, color-mix(in srgb, transparent 38%, white) 0%, color-mix(in srgb, transparent 56%, white) 28%, color-mix(in srgb, transparent 78%, white) 48%, transparent 72%)',
+          ].join(', '),
+        }}
+      />
+
+      {/* Hero-Header oben — Status-Glass-Pill links, Beratung-CTA rechts (full-bleed) */}
       <div className="absolute top-0 left-0 right-0 z-[5] px-4 pt-4 sm:px-6 sm:pt-6 pointer-events-none">
-        <div className="mx-auto max-w-3xl flex items-center justify-between gap-3 pointer-events-auto">
+        <div className="flex items-center justify-between gap-3 pointer-events-auto">
           <GlassPill className="px-4 py-2">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" aria-hidden />
