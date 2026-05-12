@@ -69,8 +69,8 @@ Die ~20 Konflikt-Dateien aus der Schnittmenge außerhalb `app/gutachter/*` (`app
 ## Ausführungs-Reihenfolge & Status
 
 - [x] **0** — `heute/HeuteClient.tsx` (PR #835)
-- [ ] **1** — `fall/[id]/page.tsx` (Warnbanner + verstrichen + No-Show; `VorOrtTriggerCard` behalten) ← *als nächstes*
-- [ ] **2** — `auftraege/AuftragCard.tsx` (SV4-Header; 180px-Render behalten)
+- [x] **1** — `fall/[id]/page.tsx` — Warnbanner (rot „Termin verstrichen" + amber „Kunde verschoben" + rose „No-Show") + `aktiverTerminVerstrichen` + `zuletztGesehenIds` + `no_show_count` (aus `faelle`, nicht `claims` — Spalte ist umgezogen) zurück in `topServerBlocks`; `VorOrtTriggerCard`/`geforderterBetrag` (CMM-32) behalten. **(PR folgt)**
+- [ ] **2** — `auftraege/AuftragCard.tsx` (SV4-Header; 180px-Render behalten) ← *als nächstes*
 - [ ] **3** — `profil/ProfilClient.tsx` (responsive Felder + Anschrift/Profiltext; `AvatarUpload` behalten)
 - [ ] **4a** — `feldmodus/FeldmodusClient.tsx` `useId()`-Channel-Fix isoliert (Realtime-Crash)
 - [ ] **4b** — `feldmodus/AktuellerStopCard.tsx` C9-Reimplementierung + Glass-Overlay in `FeldmodusClient` (eigene Session)

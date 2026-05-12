@@ -69,18 +69,27 @@ export default async function GutachterFallPage({
   // Vorher zeigte die Stammdaten-Card nur "—" weil lead = null war.
   const admin = createAdminClient()
 
-  // AAR-724: Alle ungesehenen Termine dieses Falls auf „gesehen" setzen
-  // sobald der SV die Fallakte öffnet. Best-effort, Fehler nicht blockend.
+  // AAR-724: Alle ungesehenen Termine dieses Falls auf „gesehen" setzen sobald
+  // der SV die Fallakte öffnet. Best-effort, Fehler nicht blockend. RETURNING
+  // liefert die gerade-frisch-gesehenen Termine — daraus die kunde-initiierten
+  // Verlegungen für den gelben „Termin durch Kunde verschoben"-Banner (gilt bis
+  // zum nächsten Reload, da gesehen_am dann gesetzt ist).
+  let zuletztGesehenIds: string[] = []
   try {
-    await supabase
+    const { data: aktualisiert } = await supabase
       .from('gutachter_termine')
       .update({ gesehen_am: new Date().toISOString() })
       .eq('fall_id', id)
       .eq('sv_id', (sv as { id: string }).id)
       .is('gesehen_am', null)
+      .select('id, verlegung_initiator_kunde')
+    zuletztGesehenIds = ((aktualisiert ?? []) as Array<{ id: string; verlegung_initiator_kunde: boolean | null }>)
+      .filter((t) => t.verlegung_initiator_kunde === true)
+      .map((t) => t.id)
   } catch (err) {
     console.error('[AAR-724] auto-mark-seen gutachter_termine failed:', err)
   }
+  const hatNeueKundeVerlegung = zuletztGesehenIds.length > 0
 
   // Fetch all related data in parallel
   const [
@@ -264,6 +273,18 @@ export default async function GutachterFallPage({
       (STATUS_PRIO[a.status as string] ?? 9) - (STATUS_PRIO[b.status as string] ?? 9),
   )[0] ?? null
 
+  // CMM-32 Walkthrough Polish: roter „Termin verstrichen"-Banner wenn der
+  // bestätigte Slot in der Vergangenheit liegt (+ 60 Min Toleranz für SV-
+  // Spätankunft) UND keiner der Folgezustände erreicht wurde (durchgeführt /
+  // SV vor Ort / SV unterwegs — letzteres bekommt eine eigene Unterwegs-Card).
+  // Server-side berechnet, damit kein Client-Clock-Skew die Anzeige triggert.
+  const aktiverTerminVerstrichen = (() => {
+    const t = aktiverTermin
+    if (!t || !t.start_zeit || t.status !== 'bestaetigt') return false
+    if (t.durchgefuehrt_am || t.sv_angekommen_am || t.sv_unterwegs_seit) return false
+    return new Date(t.start_zeit as string).getTime() + 60 * 60 * 1000 < Date.now()
+  })()
+
   // AAR-327: Katalog-Slots für Dokument-Anforderung (rolle=sachverstaendiger).
   // Cachelayer: getAlleSlots dedupliziert intern (TTL 5 min), daher ist der
   // zweite Call praktisch kostenlos.
@@ -388,10 +409,12 @@ export default async function GutachterFallPage({
   // enthalten — separat aus faelle laden für den Storage-Pfad.
   const { data: fallClaim } = await admin
     .from('faelle')
-    .select('claim_id')
+    .select('claim_id, no_show_count')
     .eq('id', id)
     .maybeSingle()
   const claimIdForStorage = (fallClaim?.claim_id as string | null) ?? ''
+  // No-Show-Counter (faelle.no_show_count) für den rose-Banner „Termin(e) verpasst".
+  const noShowCount = (fallClaim?.no_show_count as number | null) ?? 0
 
   // CMM-32e: Abgelehnte Docs mit Kommentar für den SV — nur im Reject-Zustand laden.
   // SV sieht welche Dateien konkret beanstandet wurden + warum.
@@ -486,6 +509,39 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
+      {/* CMM-32 Walkthrough Polish: Termin-Status-Warnbanner (server-side berechnet). */}
+      {aktiverTerminVerstrichen && (
+        <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">
+          <p className="text-sm font-semibold text-red-900">Termin verstrichen</p>
+          <p className="text-xs text-red-800 mt-1">
+            Der bestätigte Besichtigungstermin liegt in der Vergangenheit und wurde nicht abgehakt.
+            Bitte den Status aktualisieren (durchgeführt / Kunde nicht erschienen) oder einen neuen Termin vereinbaren.
+          </p>
+        </div>
+      )}
+      {/* Kunde hat den Termin selbst verlegt — gelb bis zum nächsten Aufruf der
+          Fallakte (auto-gesehen-Mechanik, Quelle: gutachter_termine.verlegung_initiator_kunde). */}
+      {hatNeueKundeVerlegung && (
+        <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4">
+          <p className="text-sm font-semibold text-amber-900">Termin durch Kunde verschoben</p>
+          <p className="text-xs text-amber-800 mt-1">
+            Der Kunde hat den Termin selbst verlegt. Keine Bestätigung von dir nötig — der neue Slot ist bereits aktiv.
+            Diese Markierung verschwindet beim nächsten Aufruf der Fallakte.
+          </p>
+        </div>
+      )}
+      {/* No-Show-Hinweis (faelle.no_show_count). */}
+      {noShowCount > 0 && (
+        <div className="rounded-2xl border-2 border-rose-300 bg-rose-50 p-4">
+          <p className="text-sm font-semibold text-rose-900">
+            {noShowCount === 1 ? 'Termin wurde verpasst' : `${noShowCount} Termine wurden verpasst`}
+          </p>
+          <p className="text-xs text-rose-800 mt-1">
+            Der Kunde war beim letzten Termin nicht vor Ort und hat keinen Bescheid gegeben. Plane Puffer für den
+            Folgetermin ein und stimme dich ggf. mit dem Kundenbetreuer ab.
+          </p>
+        </div>
+      )}
       {/* CMM-32: Gutachten-Upload-Banner — sichtbar nach Besichtigung, vor QC */}
       {zeigeGutachtenUpload && erstgutachtenAuftrag && (
         <GutachtenUploadBanner
