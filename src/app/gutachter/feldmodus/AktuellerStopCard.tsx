@@ -113,7 +113,7 @@ export default function AktuellerStopCard({
         setBesichtigungGestartetAm((data.besichtigung_gestartet_am as string | null) ?? null)
       })
     const channel = supabase
-      .channel(`sv-termin-state-${stop.termin_id}`)
+      .channel(`sv-termin-state-${stop.termin_id}-${channelSuffix}`)
       .on(
         'postgres_changes',
         {
