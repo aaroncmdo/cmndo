@@ -1,5 +1,7 @@
 # RLS & Permissions — Audit
 
+> **🔗 Konsolidiert in [`SECURITY-AUDIT-12.05.2026.md`](./SECURITY-AUDIT-12.05.2026.md)** — der Gesamt-Stand (DB-RLS-Layer aus diesem Audit + App-/Route-/Code-Layer aus dem Code-Security-Audit, dedupliziert, mit gemeinsamer Severity-Übersicht + priorisierter Maßnahmenliste) steht dort. Dieses Dokument bleibt als Detail-Referenz für den DB-Layer (vollständige Lint-Liste, Layer-Tabellen).
+
 **Datum:** 2026-05-12
 **Scope:** DB-Layer RLS-Policies + Application-Layer Permission-Matrix + Drift-Analyse
 **Methodik:** Supabase `list_tables` + Supabase Security Advisor (201 Lints) + Read `src/lib/permissions/matrix.ts` + Subagent Drift-Analyse Code↔DB
