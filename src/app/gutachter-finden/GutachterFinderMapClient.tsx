@@ -31,14 +31,16 @@ type Props = {
   /** Tier-1 Pro/Premium-SVs mit Calendar-Sync. Werden mit Iso-Halo + Premium-
    * Marker dargestellt — die "richtigen" Partner. */
   aktiveSVs?: AktiverSV[]
-  /** Server-Component-Rendered DynamicWizard fuer die Sidebar. */
+  /** Server-Component-Rendered DynamicWizard für die Sidebar. */
   wizardSlot: React.ReactNode
 }
 
-// NRW-Mittelpunkt — gute Start-Ansicht da die 62 SVs hauptsaechlich in NRW
-// liegen (Excel-Import vom 11.05.2026).
+// NRW-Mittelpunkt — gute Start-Ansicht da die 62 SVs hauptsächlich in NRW
+// liegen (Excel-Import vom 11.05.2026). Fallback wenn der User die
+// Geolocation-Permission ablehnt oder kein Standort verfügbar ist.
 const DEFAULT_CENTER: [number, number] = [7.0, 51.0]
 const DEFAULT_ZOOM = 8.5
+const USER_LOCATION_ZOOM = 10.5
 
 // Marker-Color-Tokens (entsprechen den Claimondo-Brand-Variablen)
 const COL_ONDO = '#4573A2'
@@ -51,16 +53,25 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
   const popupRef = useRef<Popup | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
+  // 2026-05-12 Aaron-Smoke: Wir fragen Geolocation beim Page-Load ab, damit
+  // "In Ihrer Nähe"-Behauptung im Header ehrlich ist und die Karte direkt
+  // zum User zoomt. Bei Deny bleibt es bei NRW-Mittelpunkt + neutralem Badge.
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
 
   // Sticky-Marker: wenn der User auf einen SV klickt, merken wir uns die ID
-  // und scrollen die Wizard-Sidebar zum Anfang. Spaetere Iteration:
+  // und scrollen die Wizard-Sidebar zum Anfang. Spätere Iteration:
   // pre_selected_sv-Wert in den DynamicWizard schreiben.
   // (Aktuell reicht der Scroll, weil der Wizard sich Server-side rendert.)
   const sidebarScrollRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
-    ensureMapboxInitialized()
+    const ok = ensureMapboxInitialized()
+    if (!ok) {
+      // Token-Init failed — fail loud im Smoke statt silent
+      console.error('[gutachter-finden] Mapbox-Init fehlgeschlagen (Token? NEXT_PUBLIC_MAPBOX_TOKEN?)')
+      return
+    }
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
@@ -92,9 +103,9 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         },
       })
 
-      // 2026-05-12 Plan v3 Backlog: Iso-Halos NUR fuer Tier-1 (echte SVs aus
+      // 2026-05-12 Plan v3 Backlog: Iso-Halos NUR für Tier-1 (echte SVs aus
       // sachverstaendige). Tier-3 (sv_leads) bleibt ohne Iso — zu viele Marker
-      // sonst und Iso ist nicht echte Verfuegbarkeit, sondern Standard-25km.
+      // sonst und Iso ist nicht echte Verfügbarkeit, sondern Standard-25km.
       const tier1Features = aktiveSVs
         .filter((s) => s.isochrone_polygon && s.standort_lat != null && s.standort_lng != null)
         .map((s) => ({
@@ -159,7 +170,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
             <div style="font-size:13px;font-weight:700;color:${COL_NAVY};line-height:1.3;letter-spacing:-.01em">${name}</div>
             <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:11px;color:#10b981;font-weight:600">
               <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block"></span>
-              Verfuegbar mit Kalender-Sync
+              Verfügbar mit Kalender-Sync
             </div>
             <button onclick="document.dispatchEvent(new CustomEvent('claimondo:select-sv', { detail: '${sv.id}' }))" style="margin-top:10px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px 12px;cursor:pointer;letter-spacing:-.01em">
               Diesen Premium-Gutachter anfragen
@@ -197,7 +208,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
             <div style="font-size:11px;color:#6b7280;margin-top:3px">${sv.adresse}</div>
             <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:11px;color:#10b981;font-weight:600">
               <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block"></span>
-              Verfuegbar in Ihrer Region
+              Verfügbar in Ihrer Region
             </div>
             <button onclick="document.dispatchEvent(new CustomEvent('claimondo:select-sv', { detail: '${sv.id}' }))" style="margin-top:10px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px 12px;cursor:pointer;letter-spacing:-.01em">
               Diesen Gutachter anfragen
@@ -221,10 +232,30 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
       const ce = e as CustomEvent<string>
       setHoveredId(ce.detail)
       sidebarScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
-      // Auf Mobile das Bottom-Sheet auch oeffnen
+      // Auf Mobile das Bottom-Sheet auch öffnen
       setMobileSheetOpen(true)
     }
     document.addEventListener('claimondo:select-sv', handleSelect)
+
+    // 2026-05-12 Aaron-Smoke: Beim Page-Load Geolocation anfragen. Bei
+    // Allow: Map zoomt zum User, Header-Badge wechselt auf "in Ihrer
+    // Nähe". Bei Deny / Timeout: Default-NRW-View bleibt, Header-Badge
+    // sagt "bundesweit". Hinweis: 'navigator.geolocation' braucht HTTPS
+    // im Browser — auf Staging/Production gegeben.
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude
+          const lng = pos.coords.longitude
+          setUserLocation({ lat, lng })
+          map.flyTo({ center: [lng, lat], zoom: USER_LOCATION_ZOOM, duration: 1400, essential: true })
+        },
+        (err) => {
+          console.info('[gutachter-finden] Geolocation verweigert/Fehler:', err.message)
+        },
+        { timeout: 8000, maximumAge: 60_000 },
+      )
+    }
 
     return () => {
       document.removeEventListener('claimondo:select-sv', handleSelect)
@@ -253,7 +284,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         }}
       />
 
-      {/* Hero-Header oben — sichtbar fuer Crawler + Mobile-Status */}
+      {/* Hero-Header oben — sichtbar für Crawler + Mobile-Status */}
       <div className="absolute top-0 left-0 right-0 z-[5] px-4 pt-4 sm:px-6 sm:pt-6 pointer-events-none">
         <div
           className="mx-auto max-w-3xl pointer-events-auto"
@@ -265,9 +296,13 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
             </span>
             <span className="text-xs font-semibold text-claimondo-ondo">
-              {aktiveSVs.length > 0
-                ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} weitere Sachverstaendige`
-                : `${svLeads.length} Sachverstaendige in Echtzeit verfuegbar`}
+              {userLocation
+                ? aktiveSVs.length > 0
+                  ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} Sachverständige in Ihrer Nähe`
+                  : `${svLeads.length} Sachverständige in Ihrer Nähe`
+                : aktiveSVs.length > 0
+                  ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} weitere Sachverständige bundesweit`
+                  : `${svLeads.length} Sachverständige bundesweit verfügbar`}
             </span>
           </div>
         </div>
@@ -283,23 +318,23 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
           <div className="mb-4">
             <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-claimondo-ondo">
               <MapPin className="h-3 w-3" />
-              Schritt fuer Schritt
+              Schritt für Schritt
             </span>
             <h1
               className="mt-2 text-[28px] font-bold leading-[1.05] tracking-[-.024em] text-claimondo-navy"
               style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
             >
-              Kfz-Gutachter in Ihrer Naehe finden.
+              Kfz-Gutachter in Ihrer Nähe finden.
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
-              4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverstaendigen.
+              4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.
             </p>
           </div>
           {wizardSlot}
         </div>
       </aside>
 
-      {/* Mobile Bottom-Sheet (collapsed by default, klick zum oeffnen) */}
+      {/* Mobile Bottom-Sheet (collapsed by default, klick zum Öffnen) */}
       <div
         className="lg:hidden absolute left-0 right-0 bottom-0 z-[10] transition-[transform] duration-500 ease-[cubic-bezier(.32,.72,0,1)]"
         style={{
@@ -314,7 +349,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
             <span className="flex items-center gap-2">
               <span className="block w-10 h-1 rounded-full bg-claimondo-navy/30" />
               <span className="text-sm font-semibold text-claimondo-navy" style={{ fontFamily: 'Montserrat' }}>
-                {mobileSheetOpen ? 'Gutachter waehlen' : 'Anfrage starten'}
+                {mobileSheetOpen ? 'Gutachter wählen' : 'Anfrage starten'}
               </span>
             </span>
             <ChevronUp
@@ -330,7 +365,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         Mapbox · OpenStreetMap
       </div>
 
-      {/* Schreibe HoveredId in den DOM fuer Server-Komponenten die das lesen wollen */}
+      {/* Schreibe HoveredId in den DOM für Server-Komponenten die das lesen wollen */}
       {hoveredId && <input type="hidden" data-selected-sv-id={hoveredId} />}
     </div>
   )
