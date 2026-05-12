@@ -31,6 +31,7 @@ const langsArg = args.find((a) => a.startsWith('--langs='))
 const headed = args.includes('--headed')
 const baseMain = baseArg ? baseArg.split('=')[1] : 'https://claimondo.de'
 const baseGutachter = baseMain.replace('://claimondo.de', '://gutachter.claimondo.de')
+const baseMakler = baseMain.replace('://claimondo.de', '://makler.claimondo.de')
 
 const ALL_LANGS = ['de', 'en', 'ar', 'tr', 'pl', 'ru']
 const langs = langsArg ? langsArg.split('=')[1].split(',') : ALL_LANGS
@@ -53,6 +54,9 @@ const MARKETING_ROUTES = [
 // gutachter.claimondo.de hat keinen Sprachen-Switch (B2B, nur DE) —
 // einzelne Page, ein Screenshot.
 const GUTACHTER_ROUTES = [{ path: '/', name: 'gutachter-b2b-landing' }]
+
+// makler.claimondo.de — analog: B2B, nur DE, eine Landingpage.
+const MAKLER_ROUTES = [{ path: '/', name: 'makler-b2b-landing' }]
 
 // ─── Setup ─────────────────────────────────────────────────────────
 
@@ -178,6 +182,17 @@ for (const route of GUTACHTER_ROUTES) {
   report.results.push({ ...r, lang: 'de', area: 'gutachter', route: route.path })
 }
 
+// ─── makler.claimondo.de (kein Sprachen-Switch) ───────────────────
+
+const mDir = join(OUT_DIR, 'makler')
+mkdirSync(mDir, { recursive: true })
+for (const route of MAKLER_ROUTES) {
+  const url = baseMakler + route.path
+  const screenshotPath = join(mDir, `${route.name}.png`)
+  const r = await smoke(`makler${route.path}`, url, screenshotPath, null)
+  report.results.push({ ...r, lang: 'de', area: 'makler', route: route.path })
+}
+
 // ─── Bonus: gutachter.claimondo.de Form-Live-Karten-Test ───────────
 
 try {
@@ -289,6 +304,20 @@ function renderSummary(report, counts) {
       )
       if (r.screenshot) lines.push(`  - Screenshot: \`${r.screenshot}\``)
       if (r.hint_text) lines.push(`  - Live-Karten-Hint: "${r.hint_text}"`)
+    }
+    lines.push('')
+  }
+
+  // Makler
+  const mRows = report.results.filter((r) => r.area === 'makler')
+  if (mRows.length > 0) {
+    lines.push(`## Makler B2B-Landing`)
+    lines.push('')
+    for (const r of mRows) {
+      lines.push(
+        `- **${r.label}** — ${r.status ? 'HTTP ' + r.status : ''} ${r.error ? '· FEHLER: ' + r.error : ''}`,
+      )
+      if (r.screenshot) lines.push(`  - Screenshot: \`${r.screenshot}\``)
     }
     lines.push('')
   }
