@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Claimondo Maklerportal — Hi-Fi</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a1a; }
+  #root { width: 100%; height: 100%; }
+  @keyframes skeletonPulse {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="hifi-shared.jsx"></script>
+<script type="text/babel" src="hifi-screens.jsx"></script>
+<script type="text/babel">
+const {
+  S1Desktop, S2Desktop, S3Desktop,
+  S1Mobile,  S2Mobile,  S3Mobile,
+  EmptyState, DsgvoModal, LoginScreen, MagicLinkSent,
+  OB1, OB2, OB3,
+  StateVariant,
+} = window;
+
+const { TweaksPanel, TweakSection, TweakSlider, TweakToggle } = window;
+const { useTweaks } = window;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "bodySize": 13.5,
+  "lineHeight": 1.65,
+  "sidebarCompact": false,
+  "roundedCards": true
+}/*EDITMODE-END*/;
+
+function App() {
+  const [tweaks, setTweaks] = useTweaks(TWEAK_DEFAULTS);
+  // setTweaks(key, value) — key-based, provided by useTweaks
+
+  // Inject CSS vars so all screens pick them up
+  const cssVars = {
+    '--body-size':    tweaks.bodySize + 'px',
+    '--body-lh':      tweaks.lineHeight,
+    '--card-radius':  tweaks.roundedCards ? '17px' : '6px',
+    '--sidebar-w':    tweaks.sidebarCompact ? '60px' : '240px',
+  };
+
+  return (
+    <div style={{ width: '100%', height: '100%', ...cssVars }}>
+    <DesignCanvas title="Claimondo Maklerportal — Hi-Fi">
+
+      <DCSection id="desktop" title="Desktop-Screens">
+        <DCArtboard id="s1d" label="01 · Schnellanlage" width={1200} height={820}>
+          <S1Desktop />
+        </DCArtboard>
+        <DCArtboard id="s2d" label="02 · Dashboard" width={1300} height={820}>
+          <S2Desktop />
+        </DCArtboard>
+        <DCArtboard id="s3d" label="03 · Fall-Detail" width={1300} height={820}>
+          <S3Desktop />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="mobile" title="Mobile-Screens">
+        <DCArtboard id="s1m" label="04 · Schnellanlage (Mobile)" width={390} height={844}>
+          <S1Mobile />
+        </DCArtboard>
+        <DCArtboard id="s2m" label="05 · Dashboard (Mobile)" width={390} height={844}>
+          <S2Mobile />
+        </DCArtboard>
+        <DCArtboard id="s3m" label="06 · Fall-Detail (Mobile)" width={390} height={844}>
+          <S3Mobile />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="system" title="Edge Cases &amp; System">
+        <DCArtboard id="empty" label="07 · Dashboard Empty State" width={1300} height={820}>
+          <EmptyState />
+        </DCArtboard>
+        <DCArtboard id="dsgvo" label="08 · DSGVO-Modal" width={1100} height={820}>
+          <DsgvoModal />
+        </DCArtboard>
+        <DCArtboard id="login" label="09 · Login (Magic-Link)" width={900} height={640}>
+          <LoginScreen />
+        </DCArtboard>
+        <DCArtboard id="mlsent" label="10 · Login · Link gesendet" width={900} height={640}>
+          <MagicLinkSent />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="onboarding" title="Onboarding-Flow">
+        <DCArtboard id="ob1" label="11 · Onboarding · Schritt 1" width={960} height={700}>
+          <OB1 />
+        </DCArtboard>
+        <DCArtboard id="ob2" label="12 · Onboarding · Schritt 2" width={960} height={700}>
+          <OB2 />
+        </DCArtboard>
+        <DCArtboard id="ob3" label="13 · Onboarding · Schritt 3" width={960} height={700}>
+          <OB3 />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="states" title="Schnellanlage · State-Varianten">
+        <DCArtboard id="st-empty"   label="State A · Leer"               width={680} height={720}><StateVariant label="Leer"               state="empty"   /></DCArtboard>
+        <DCArtboard id="st-filled"  label="State B · Ausgefüllt"         width={680} height={720}><StateVariant label="Ausgefüllt"         state="filled"  /></DCArtboard>
+        <DCArtboard id="st-error"   label="State C · Validierungsfehler" width={680} height={740}><StateVariant label="Validierungsfehler" state="error"   /></DCArtboard>
+        <DCArtboard id="st-loading" label="State D · Submit Loading"     width={680} height={720}><StateVariant label="Submit Loading"     state="loading" /></DCArtboard>
+        <DCArtboard id="st-success" label="State E · Erfolg"             width={680} height={760}><StateVariant label="Erfolg"             state="success" /></DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+
+    <TweaksPanel>
+      <TweakSection label="Typografie">
+        <TweakSlider label="Body-Textgröße" value={tweaks.bodySize}      min={12}  max={18}  step={0.5}  unit="px" onChange={v => setTweaks('bodySize',      v)} />
+        <TweakSlider label="Zeilenhöhe"     value={tweaks.lineHeight}    min={1.3} max={2.0} step={0.05}           onChange={v => setTweaks('lineHeight',    v)} />
+      </TweakSection>
+      <TweakSection label="Layout">
+        <TweakToggle label="Sidebar kompakt"    value={tweaks.sidebarCompact} onChange={v => setTweaks('sidebarCompact', v)} />
+        <TweakToggle label="Abgerundete Cards"  value={tweaks.roundedCards}   onChange={v => setTweaks('roundedCards',   v)} />
+      </TweakSection>
+    </TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
