@@ -39,9 +39,10 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
         env:
-          # tsc --noEmit OOMt im Default-2-GB-Heap auf GH-Runnern, seit die
-          # Codebase die Schwelle gerissen hat. 4 GB gibt Puffer.
-          NODE_OPTIONS: --max-old-space-size=4096
+          # tsc --noEmit OOMt im Default-2-GB-Heap auf GH-Runnern. 2026-05-12:
+          # 4 GB reichten nicht mehr (Next.js-16-Build-OOM in der TS-Phase),
+          # auf 8 GB hochgezogen — gleicher Wert wie deploy-vps.yml ihn nutzt.
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Lint
         run: npm run lint
@@ -50,7 +51,12 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          NODE_OPTIONS: --max-old-space-size=4096
+          # 2026-05-12: 4 GB → 8 GB. Next.js 16 Build OOMte in der
+          # "Running TypeScript ..."-Post-Compile-Phase (FATAL ERROR:
+          # heap out of memory) — der eigentliche Compile war grün.
+          # Gleicher Heap wie deploy-vps.yml, sonst ist CI rot obwohl
+          # der Production-Deploy durchläuft.
+          NODE_OPTIONS: --max-old-space-size=8192
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
