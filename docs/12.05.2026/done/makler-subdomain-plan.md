@@ -1,5 +1,13 @@
 # Plan — `makler.claimondo.de` Subdomain
 
+> **STATUS 2026-05-12 (nach Umsetzung):**
+> **Geliefert (schlanke Variante, = Plan-Option 7a):** `makler.claimondo.de` ist live — `proxy.ts` rewritet `/` intern auf die bestehende `/makler/partner-werden`-Seite, `claimondo.de/makler/partner-werden` → 301 auf die Subdomain, eigenes SSL-Zert (`certbot --nginx -d makler.claimondo.de`), Sitemap-Eintrag, Footer-Link auf die Subdomain, Canonical auf `makler.claimondo.de`. DNS ist ein expliziter A-Record `makler → 212.132.119.110` (kein `*.claimondo.de`-Wildcard). Im selben Schritt: `gutachter.claimondo.de` an dasselbe Schema angeglichen + `app.claimondo.de` strikt als Portal (`/` → `/login`, `/makler/*`-Portal auf `app.`). Staging: `makler.staging.claimondo.de` funktioniert über den `*.staging`-Wildcard. (PRs #813, #816)
+> **Offen / nächster Schritt — gemeinsam zu reviewen:** dedizierte `/makler-partner/`-B2B-Sales-Landing analog `gutachter-partner` (Hero/Vorteile/ROI/FAQ + Waitlist-Apply-Form) — **zuerst OHNE DB** (`makler_waitlist`-Tabelle bleibt vorerst weg), CTA bleibt Email/Telefon wie auf der heutigen Seite. Danach: Makler-Portal-Aktivierung + `makler_waitlist`-Tabelle (Plan-Punkte 4+5, „kommt hinten dran"). White-Label / Maik-Provision-für-Makler bleiben separates Ticket.
+>
+> Doc nach `done/` verschoben — die Subdomain selbst ist durch; der Rest ist Backlog mit klarem Scope.
+
+---
+
 **Datum:** 2026-05-12
 **Ziel:** Eigene B2B-Akquise-Subdomain für Versicherungsmakler, analog zu `gutachter.claimondo.de`
 **Vorlage:** PR #713 (gutachter.claimondo.de B2B-Sales-Landing mit Waitlist + Live-Karte)
