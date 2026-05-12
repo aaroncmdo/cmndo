@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Claimondo Maklerportal — Wireframes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a1a; }
+  #root { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel">
+
+/* ─── Wireframe tokens ─────────────────────────────────────── */
+const W = {
+  bg: '#f5f4f1',
+  white: '#ffffff',
+  border: '#c0bdb6',
+  fill: '#e4e1da',
+  fillMid: '#ccc9c0',
+  fillDark: '#a8a49a',
+  text: '#1c1a17',
+  muted: '#7a776e',
+  label: '#4a4740',
+  mono: "'IBM Plex Mono', monospace",
+  sketch: "'Caveat', cursive"
+};
+
+/* ─── Atomic primitives ───────────────────────────────────── */
+const Lbl = ({ s = 11, c = W.text, w = 400, style, children }) =>
+<span style={{ fontFamily: W.mono, fontSize: s, color: c, fontWeight: w, lineHeight: 1.4, ...style }}>
+    {children}
+  </span>;
+
+
+const Note = ({ children, style }) =>
+<span style={{ fontFamily: W.sketch, fontSize: 13, color: W.muted, lineHeight: 1.3, ...style }}>
+    {children}
+  </span>;
+
+
+const Rect = ({ w = '100%', h = 14, bg = W.fill, r = 3, style }) =>
+<div style={{ width: w, height: h, background: bg, borderRadius: r, flexShrink: 0, ...style }} />;
+
+
+const Box = ({ w, h, style, children }) =>
+<div style={{
+  width: w, height: h,
+  border: `1.5px solid ${W.border}`,
+  background: W.white,
+  borderRadius: 4,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  ...style
+}}>{children}</div>;
+
+
+const Btn = ({ label, primary, ghost, full, sm, style }) =>
+<div style={{
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+  height: sm ? 28 : 36,
+  padding: '0 14px',
+  background: primary ? W.fillDark : ghost ? 'transparent' : W.white,
+  border: `1.5px solid ${ghost ? 'transparent' : primary ? W.fillDark : W.border}`,
+  borderRadius: 5,
+  width: full ? '100%' : 'auto',
+  flexShrink: 0,
+  cursor: 'pointer',
+  ...style
+}}>
+    <Lbl s={sm ? 10 : 11} c={primary ? W.white : W.text} w={500}>{label}</Lbl>
+  </div>;
+
+
+const Field = ({ label, ph = '', error, note, style }) =>
+<div style={{ display: 'flex', flexDirection: 'column', gap: 4, ...style }}>
+    <Lbl s={10} c={W.label} w={500}>{label}</Lbl>
+    <Box w="100%" h={36} style={{ justifyContent: 'flex-start', padding: '0 10px', borderColor: error ? W.fillDark : W.border }}>
+      <Lbl s={11} c={W.muted}>{ph}</Lbl>
+    </Box>
+    {error && <Lbl s={10} c={W.fillDark}>⚠ {error}</Lbl>}
+    {note && <Note style={{ fontSize: 11 }}>{note}</Note>}
+  </div>;
+
+
+const KPICard = ({ label, value }) =>
+<div style={{
+  flex: 1, background: W.white,
+  border: `1.5px solid ${W.border}`,
+  borderLeft: `4px solid ${W.fillDark}`,
+  borderRadius: 5, padding: '12px 14px',
+  display: 'flex', flexDirection: 'column', gap: 6
+}}>
+    <Lbl s={9} c={W.muted} style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</Lbl>
+    <div style={{ fontFamily: W.mono, fontSize: 26, fontWeight: 700, color: W.text, letterSpacing: '-0.02em', lineHeight: 1 }}>{value}</div>
+  </div>;
+
+
+const Badge = ({ label, filled }) =>
+<div style={{
+  display: 'inline-flex', alignItems: 'center', gap: 5,
+  padding: '3px 8px', borderRadius: 999,
+  background: filled ? W.fillDark : W.fill,
+  border: `1px solid ${W.border}`,
+  flexShrink: 0
+}}>
+    <div style={{ width: 5, height: 5, borderRadius: '50%', background: filled ? W.white : W.muted }} />
+    <Lbl s={10} c={filled ? W.white : W.text}>{label}</Lbl>
+  </div>;
+
+
+const CaseRow = ({ name, plate, status, filled, last }) =>
+<div style={{
+  padding: '11px 14px',
+  borderBottom: last ? 'none' : `1px solid ${W.fill}`,
+  display: 'flex', alignItems: 'center', gap: 12,
+  background: W.white, cursor: 'pointer'
+}}>
+    <div style={{ flex: 1.5, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Lbl s={11} w={500}>{name}</Lbl>
+      <Lbl s={10} c={W.muted}>{plate}</Lbl>
+    </div>
+    <Lbl s={10} c={W.muted} style={{ flex: 1 }}>Letzte Aktion: gestern</Lbl>
+    <Badge label={status} filled={filled} />
+    <Lbl s={11} c={W.muted}>›</Lbl>
+  </div>;
+
+
+const TStep = ({ label, sub, done, active, future }) =>
+<div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', opacity: future ? 0.4 : 1 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 18, flexShrink: 0, paddingTop: 1 }}>
+      <div style={{
+      width: 13, height: 13, borderRadius: '50%', flexShrink: 0,
+      background: done || active ? W.fillDark : 'transparent',
+      border: `2px ${future ? 'dashed' : 'solid'} ${done || active ? W.fillDark : W.border}`
+    }} />
+      <div style={{ width: 1.5, height: 26, background: done ? W.fillDark : W.border, marginTop: 2 }} />
+    </div>
+    <div style={{ paddingBottom: 14 }}>
+      <Lbl s={11} w={500}>{label}</Lbl>
+      {sub && <><br /><Lbl s={10} c={W.muted}>{sub}</Lbl></>}
+    </div>
+  </div>;
+
+
+const NavBar = ({ cta, connected }) =>
+<div style={{ height: 30, background: W.white, borderBottom: `1.5px solid ${W.border}`, display: 'flex', alignItems: 'center', padding: '0 18px', gap: 10, flexShrink: 0 }}>
+    <Rect w={26} h={26} bg={W.fillDark} r={5} />
+    <Rect w={72} h={11} bg={W.fill} />
+    <div style={{ flex: 1 }} />
+    {connected &&
+  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginRight: 10 }}>
+        <div style={{ width: 7, height: 7, borderRadius: '50%', background: W.fillDark }} />
+        <Lbl s={10} c={W.muted}>Verbunden</Lbl>
+      </div>
+  }
+    {cta && <>{cta}<div style={{ width: 8 }} /></>}
+    <div style={{ width: 28, height: 28, borderRadius: '50%', background: W.fillMid, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Lbl s={9} c={W.white}>AB</Lbl>
+    </div>
+  </div>;
+
+
+const Footer = () =>
+<div style={{ padding: '8px 18px', borderTop: `1px solid ${W.fill}`, display: 'flex', gap: 16, flexShrink: 0, background: W.white }}>
+    {['Impressum', 'Datenschutz', 'AGB Maklerbeziehung', 'Provisionsvereinbarung ↓'].map((l, i) =>
+  <Lbl key={i} s={9} c={W.muted}>{l}</Lbl>
+  )}
+  </div>;
+
+
+const ObStepper = ({ step }) =>
+<div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 20, alignSelf: 'center' }}>
+    {[1, 2, 3].map((n, i) =>
+  <React.Fragment key={n}>
+        <div style={{
+      width: 26, height: 26, borderRadius: '50%',
+      background: n <= step ? W.fillDark : W.fill,
+      border: `2px solid ${n === step ? W.fillDark : W.border}`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center'
+    }}>
+          <Lbl s={10} c={n <= step ? W.white : W.muted} w={600}>{n <= step - 1 ? '✓' : n}</Lbl>
+        </div>
+        {i < 2 && <div style={{ width: 48, height: 2, background: n < step ? W.fillDark : W.border }} />}
+      </React.Fragment>
+  )}
+  </div>;
+
+
+const CheckRow = ({ label }) =>
+<div style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
+    <Box w={17} h={17} style={{ flexShrink: 0, marginTop: 1, borderRadius: 3 }} />
+    <Lbl s={11} c={W.label} style={{ lineHeight: 1.55 }}>{label}</Lbl>
+  </div>;
+
+
+/* ─── Screen 1 Desktop — Schnellanlage ────────────────────── */
+const S1Desktop = () =>
+<div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: W.bg, fontFamily: W.mono }}>
+    <NavBar connected />
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 28, height: "821.383px" }}>
+      <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', width: '100%', maxWidth: 860 }}>
+        <div style={{ flex: 1, background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 7, display: 'flex', flexDirection: 'column', gap: 16, padding: "120px", height: "100px" }}>
+          <div>
+            <Lbl s={17} w={600} style={{ display: 'block', letterSpacing: '-0.02em' }}>Neuen Fall anlegen</Lbl>
+            <Lbl s={10} c={W.muted} style={{ display: 'block', marginTop: 4 }}>3 Pflichtfelder · Dauer ca. 30 Sekunden</Lbl>
+          </div>
+          <Field label="Telefonnummer Mandant *" ph="+49 · · ·" note="Klick-zum-Wählen auf Mobilgeräten" />
+          <Field label="Name des Fahrzeughalters *" ph="Vor- und Nachname" />
+          <Field label="Kfz-Kennzeichen *" ph="K-AB 1234" note="Automatisch GROSSBUCHSTABEN" />
+          <div style={{ borderTop: `1px dashed ${W.border}`, paddingTop: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              <Lbl s={10} c={W.muted}>▸  Weitere Schadensdetails (optional, einklappbar)</Lbl>
+            </div>
+            <div style={{ marginTop: 10, padding: 12, background: W.bg, borderRadius: 4, border: `1px dashed ${W.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <Field label="Unfallzeit" ph="TT.MM.JJJJ HH:MM" style={{ flex: 1 }} />
+                <Field label="Polizei beteiligt?" ph="Ja / Nein" style={{ flex: 1 }} />
+              </div>
+              <Field label="Gegnerversicherung" ph="z.B. HUK-Coburg" />
+              <Note>Diese Felder sind bewusst untergeordnet — Claimondo klärt Details per Rückruf</Note>
+            </div>
+          </div>
+          <CheckRow label="DSGVO: Ich habe den Mandanten über die Datenweitergabe informiert. [Link: Datenschutzhinweis]" />
+          <Btn label="An Claimondo übergeben" primary full />
+          <div style={{ background: '#eceae4', border: `1px solid ${W.border}`, borderRadius: 4, padding: '10px 14px' }}>
+            <Lbl s={10} c={W.muted} style={{ display: 'block', lineHeight: 1.65 }}>
+              ✓  Übergeben. Ihr Mandant erhält in 10 Minuten einen Anruf von Claimondo, Sie eine Bestätigungs-E-Mail.
+            </Lbl>
+            <Note>Erscheint nach Submit · danach automatischer Sprung ins Dashboard</Note>
+          </div>
+        </div>
+        <div style={{ width: 200, display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 8 }}>
+          <Note style={{ fontSize: 13 }}>← 3 Pflichtfelder, sonst nichts</Note>
+          <Note style={{ fontSize: 13 }}>← Detail-Panel eingeklappt per Default</Note>
+          <Note style={{ fontSize: 13 }}>← DSGVO nur beim ersten Anlegen als Modal (s. Screen 8)</Note>
+          <Note style={{ fontSize: 13 }}>← Erfolgs-Meldung ersetzt Submit-Button kurz</Note>
+          <div style={{ marginTop: 16, padding: '10px 12px', border: `1px dashed ${W.border}`, borderRadius: 4, background: W.white }}>
+            <Lbl s={10} c={W.muted}>Edge Case:</Lbl><br />
+            <Lbl s={10} c={W.muted} style={{ lineHeight: 1.6 }}>Ungültige Telefonnummer → Inline-Fehler unter Feld</Lbl>
+            <div style={{ marginTop: 8 }}>
+              <Field label="Telefonnummer *" ph="0221abcdef" error="Ungültige Nummer" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <Footer />
+  </div>;
+
+
+/* ─── Screen 2 Desktop — Dashboard ───────────────────────── */
+const S2Desktop = () =>
+<div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: W.bg, fontFamily: W.mono }}>
+    <NavBar cta={<Btn label="+ Fall anlegen" primary sm />} />
+    <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 18, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div>
+          <Lbl s={16} w={600} style={{ display: 'block', letterSpacing: '-0.02em' }}>Guten Morgen, Max Mustermann</Lbl>
+          <Lbl s={10} c={W.muted} style={{ display: 'block', marginTop: 3 }}>April 2026</Lbl>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 12 }}>
+        <KPICard label="Aktive Fälle" value="7" />
+        <KPICard label="Fälle diesen Monat" value="12" />
+        <KPICard label="Provision April" value="840 €" />
+        <KPICard label="Forecast April" value="1.120 €" />
+      </div>
+      <div style={{ flex: 1, background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 6, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ padding: '10px 14px', borderBottom: `1px solid ${W.fill}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+          <Lbl s={12} w={500}>Fälle in Bearbeitung</Lbl>
+          <Lbl s={10} c={W.muted}>Alle anzeigen →</Lbl>
+        </div>
+        {[
+      { name: 'Maria Schulze', plate: 'K-AB 1234', status: 'Rückruf läuft', filled: false },
+      { name: 'Thomas Bauer', plate: 'BN-CD 5678', status: 'Termin gebucht', filled: false },
+      { name: 'Sabine Meier', plate: 'GM-EF 9012', status: 'Regulierung läuft', filled: true },
+      { name: 'Klaus Hoffmann', plate: 'RE-GH 3456', status: 'In Prüfung', filled: true },
+      { name: 'Anna Richter', plate: 'K-IJ 7890', status: 'Rückruf läuft', filled: false }].
+      map((c, i, a) => <CaseRow key={i} {...c} last={i === a.length - 1} />)}
+      </div>
+      <div style={{ background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 6, padding: '10px 14px', display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
+        <Lbl s={10} c={W.label} w={500} style={{ marginRight: 6 }}>Empfehlungs-Tools</Lbl>
+        <Btn label="QR-Visitenkarte bestellen" sm />
+        <Btn label="Mandanten-Mail-Vorlage" sm />
+        <Btn label="Schulungsvideo" sm />
+      </div>
+    </div>
+    <Footer />
+  </div>;
+
+
+/* ─── Screen 3 Desktop — Fall-Detail ─────────────────────── */
+const S3Desktop = () =>
+<div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: W.bg, fontFamily: W.mono }}>
+    <NavBar />
+    <div style={{ flex: 1, padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 14, overflow: 'hidden' }}>
+      <div style={{ background: W.fillMid, borderRadius: 4, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Lbl s={10} c={W.muted}>Geöffnet aus E-Mail · keine Anmeldung nötig</Lbl>
+        <div style={{ flex: 1 }} />
+        <Note style={{ fontSize: 11 }}>dezente Hinweiszeile — bei normalem Login ausgeblendet</Note>
+      </div>
+      <div style={{ background: W.white, border: `1.5px solid ${W.border}`, borderLeft: `4px solid ${W.fillDark}`, borderRadius: 6, padding: '14px 18px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <Lbl s={10} c={W.muted}>CLM-2024-0042</Lbl>
+            <Lbl s={18} w={600} style={{ letterSpacing: '-0.02em' }}>Maria Schulze</Lbl>
+            <div style={{ display: 'flex', gap: 18, marginTop: 2 }}>
+              <Lbl s={10} c={W.muted}>K-AB 1234</Lbl>
+              <Lbl s={10} c={W.muted}>VW Golf 8</Lbl>
+              <Lbl s={10} c={W.muted}>Heckauffahrunfall</Lbl>
+            </div>
+          </div>
+          <Badge label="Rückruf läuft" />
+        </div>
+      </div>
+      <div style={{ flex: 1, display: 'flex', gap: 14, overflow: 'hidden' }}>
+        <div style={{ flex: 2, background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 6, padding: '16px 20px', overflow: 'auto' }}>
+          <Lbl s={12} w={500} style={{ display: 'block', marginBottom: 16 }}>Verlauf</Lbl>
+          <TStep label="Fall angelegt" sub="25.04.2026, 09:15" done />
+          <TStep label="Erstanruf Claimondo → Mandant" sub="läuft…" active />
+          <TStep label="Schadensaufnahme abgeschlossen" future />
+          <TStep label="Werkstatt-Termin gebucht" future />
+          <TStep label="Fahrzeug in Werkstatt" future />
+          <TStep label="Regulierung abgeschlossen" future />
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'auto' }}>
+          <div style={{ background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 6, padding: 16 }}>
+            <Lbl s={11} w={500} style={{ display: 'block', marginBottom: 10 }}>Ansprechpartner Claimondo</Lbl>
+            <Rect w="55%" h={10} bg={W.fill} style={{ marginBottom: 8 }} />
+            <Rect w="75%" h={10} bg={W.fill} style={{ marginBottom: 6 }} />
+            <Rect w="65%" h={10} bg={W.fill} />
+          </div>
+          <div style={{ background: W.bg, border: `1.5px dashed ${W.border}`, borderRadius: 6, padding: 14 }}>
+            <Note style={{ display: 'block', marginBottom: 8 }}>Edge Case: nicht erreichbar</Note>
+            <Badge label="Mandant nicht erreichbar" filled />
+            <div style={{ marginTop: 10 }}><Btn label="Manuell nachfassen" sm /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <Footer />
+  </div>;
+
+
+/* ─── Mobile wrapper ──────────────────────────────────────── */
+const MWrap = ({ title, children }) =>
+<div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: W.bg, fontFamily: W.mono, overflow: 'hidden' }}>
+    <div style={{ height: 26, background: W.fillMid, display: 'flex', alignItems: 'center', padding: '0 14px', justifyContent: 'space-between', flexShrink: 0 }}>
+      <Lbl s={9} c={W.muted}>9:41</Lbl>
+      <Lbl s={9} c={W.muted}>●●●</Lbl>
+    </div>
+    <div style={{ height: 44, background: W.white, borderBottom: `1px solid ${W.border}`, display: 'flex', alignItems: 'center', padding: '0 14px', justifyContent: 'space-between', flexShrink: 0 }}>
+      <Rect w={22} h={22} bg={W.fillDark} r={4} />
+      <Lbl s={12} w={500}>{title}</Lbl>
+      <div style={{ width: 26, height: 26, borderRadius: '50%', background: W.fillMid, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Lbl s={9} c={W.white}>AB</Lbl>
+      </div>
+    </div>
+    <div style={{ flex: 1, overflowY: 'auto' }}>{children}</div>
+  </div>;
+
+
+const S1Mobile = () =>
+<MWrap title="Fall anlegen">
+    <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 13 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ width: 6, height: 6, borderRadius: '50%', background: W.fillDark }} />
+        <Lbl s={9} c={W.muted}>Verbunden</Lbl>
+      </div>
+      <Field label="Telefonnummer Mandant *" ph="+49 · · ·" />
+      <Field label="Name Fahrzeughalter *" ph="Vor- und Nachname" />
+      <Field label="Kfz-Kennzeichen *" ph="K-AB 1234" note="Auto-Capitalization" />
+      <CheckRow label="DSGVO: Mandant über Datenweitergabe informiert" />
+      <Btn label="An Claimondo übergeben" primary full />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 11px', background: W.fill, borderRadius: 4, border: `1px dashed ${W.border}` }}>
+        <Lbl s={10} c={W.muted}>▸  Weitere Schadensdetails (optional)</Lbl>
+      </div>
+    </div>
+    <div style={{ padding: '8px 14px', borderTop: `1px solid ${W.fill}`, background: W.white }}>
+      {['Impressum', 'Datenschutz', 'AGB'].map((l, i) => <Lbl key={i} s={8} c={W.muted} style={{ marginRight: 10 }}>{l}</Lbl>)}
+    </div>
+  </MWrap>;
+
+
+const S2Mobile = () =>
+<MWrap title="Übersicht">
+    <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Lbl s={11} w={600}>April 2026</Lbl>
+        <Btn label="+ Fall anlegen" primary sm />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <KPICard label="Aktive Fälle" value="7" />
+        <KPICard label="Monat ges." value="12" />
+        <KPICard label="Provision" value="840 €" />
+        <KPICard label="Forecast" value="1.120 €" />
+      </div>
+      <div style={{ background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 6, overflow: 'hidden' }}>
+        <div style={{ padding: '9px 12px', borderBottom: `1px solid ${W.fill}` }}>
+          <Lbl s={11} w={500}>Fälle in Bearbeitung</Lbl>
+        </div>
+        {[
+      { name: 'Maria Schulze', plate: 'K-AB 1234', status: 'Rückruf läuft', filled: false },
+      { name: 'Thomas Bauer', plate: 'BN-CD 5678', status: 'Termin gebucht', filled: false },
+      { name: 'Sabine Meier', plate: 'GM-EF 9012', status: 'Regulierung', filled: true }].
+      map((c, i, a) =>
+      <div key={i} style={{ padding: '10px 12px', borderBottom: i < a.length - 1 ? `1px solid ${W.fill}` : 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <div>
+              <Lbl s={11} w={500}>{c.name}</Lbl><br />
+              <Lbl s={9} c={W.muted}>{c.plate}</Lbl>
+            </div>
+            <Badge label={c.status} filled={c.filled} />
+          </div>
+      )}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <Lbl s={10} c={W.label} w={500}>Empfehlungs-Tools</Lbl>
+        <Btn label="QR-Visitenkarte bestellen" sm full />
+        <Btn label="Mandanten-Mail-Vorlage" sm full />
+        <Btn label="Schulungsvideo" sm full />
+      </div>
+    </div>
+  </MWrap>;
+
+
+const S3Mobile = () =>
+<MWrap title="Fall-Detail">
+    <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ background: W.fillMid, borderRadius: 4, padding: '5px 10px' }}>
+        <Lbl s={9} c={W.muted}>Geöffnet aus E-Mail · keine Anmeldung nötig</Lbl>
+      </div>
+      <div style={{ background: W.white, border: `1.5px solid ${W.border}`, borderLeft: `4px solid ${W.fillDark}`, borderRadius: 6, padding: 13 }}>
+        <Lbl s={9} c={W.muted} style={{ display: 'block', marginBottom: 3 }}>CLM-2024-0042</Lbl>
+        <Lbl s={15} w={600}>Maria Schulze</Lbl>
+        <div style={{ margin: '6px 0' }}><Badge label="Rückruf läuft" /></div>
+        <Lbl s={10} c={W.muted}>K-AB 1234 · VW Golf 8</Lbl>
+      </div>
+      <div style={{ background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 6, padding: 14 }}>
+        <Lbl s={11} w={500} style={{ display: 'block', marginBottom: 12 }}>Verlauf</Lbl>
+        <TStep label="Fall angelegt" sub="25.04.2026" done />
+        <TStep label="Erstanruf läuft" active />
+        <TStep label="Schadensaufnahme" future />
+        <TStep label="Werkstatt-Termin" future />
+        <TStep label="Regulierung" future />
+      </div>
+      <div style={{ background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 6, padding: 14 }}>
+        <Lbl s={11} w={500} style={{ display: 'block', marginBottom: 8 }}>Ansprechpartner Claimondo</Lbl>
+        <Rect w="55%" h={10} bg={W.fill} style={{ marginBottom: 7 }} />
+        <Rect w="75%" h={10} bg={W.fill} style={{ marginBottom: 6 }} />
+        <Rect w="65%" h={10} bg={W.fill} />
+      </div>
+    </div>
+  </MWrap>;
+
+
+/* ─── Empty State ─────────────────────────────────────────── */
+const EmptyState = () =>
+<div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: W.bg, fontFamily: W.mono }}>
+    <NavBar cta={<Btn label="+ Fall anlegen" primary sm />} />
+    <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div>
+        <Lbl s={16} w={600} style={{ display: 'block', letterSpacing: '-0.02em' }}>Willkommen, Max Mustermann</Lbl>
+        <Lbl s={10} c={W.muted} style={{ display: 'block', marginTop: 3 }}>April 2026</Lbl>
+      </div>
+      <div style={{ display: 'flex', gap: 12 }}>
+        {['Aktive Fälle', 'Fälle diesen Monat', 'Provision April', 'Forecast April'].map((l, i) =>
+      <KPICard key={i} label={l} value="—" />
+      )}
+      </div>
+      <div style={{ flex: 1, background: W.white, border: `1.5px dashed ${W.border}`, borderRadius: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, padding: 40 }}>
+        <div style={{ width: 52, height: 52, borderRadius: '50%', background: W.fill, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Lbl s={22}>+</Lbl>
+        </div>
+        <Lbl s={14} w={500} style={{ textAlign: 'center' }}>Noch keine Fälle vorhanden</Lbl>
+        <Lbl s={11} c={W.muted} style={{ textAlign: 'center', maxWidth: 340, lineHeight: 1.65 }}>
+          Legen Sie Ihren ersten Mandanten-Fall an, sobald ein Mandant nach einem Unfall anruft.
+        </Lbl>
+        <Btn label="Ersten Fall anlegen" primary />
+        <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <Lbl s={10} c={W.muted}>Empfehlungs-Tools</Lbl>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Btn label="QR-Visitenkarte" sm />
+            <Btn label="Mail-Vorlage" sm />
+            <Btn label="Schulungsvideo" sm />
+          </div>
+        </div>
+      </div>
+    </div>
+    <Footer />
+  </div>;
+
+
+/* ─── DSGVO Modal ─────────────────────────────────────────── */
+const DsgvoModal = () =>
+<div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: W.bg, fontFamily: W.mono }}>
+    <NavBar />
+    <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* dimmed bg */}
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(190,186,178,0.55)' }} />
+      {/* bg content hint */}
+      <div style={{ position: 'absolute', inset: 0, padding: 24, pointerEvents: 'none', opacity: 0.18 }}>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+          {[1, 2, 3, 4].map((i) => <div key={i} style={{ flex: 1, height: 70, background: W.fillDark, borderRadius: 4 }} />)}
+        </div>
+        <div style={{ height: 200, background: W.fillDark, borderRadius: 4 }} />
+      </div>
+      {/* Modal */}
+      <div style={{ position: 'relative', zIndex: 1, background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 8, padding: 28, width: 460, display: 'flex', flexDirection: 'column', gap: 16, boxShadow: '0 8px 32px rgba(0,0,0,.14)' }}>
+        <Lbl s={15} w={600}>Datenschutzhinweis</Lbl>
+        <div style={{ height: 110, background: W.bg, borderRadius: 4, border: `1px solid ${W.border}`, padding: 12, overflowY: 'auto' }}>
+          <Lbl s={10} c={W.muted} style={{ lineHeight: 1.75 }}>
+            [DSGVO-Text einsetzen] Erklärung zur Datenverarbeitung gemäß Art. 13 DSGVO. Zweck: Schadensregulierung durch Claimondo GmbH. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO. Datenweitergabe an Claimondo und beteiligte Werkstätten…
+          </Lbl>
+        </div>
+        <CheckRow label="Ich bestätige, dass ich meinen Mandanten über die Weitergabe seiner Daten an Claimondo GmbH informiert habe." />
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <Btn label="Abbrechen" />
+          <Btn label="Bestätigen und fortfahren" primary />
+        </div>
+        <Note style={{ textAlign: 'center', fontSize: 11 }}>Erscheint nur beim allerersten Mandanten-Anlegen</Note>
+      </div>
+    </div>
+  </div>;
+
+
+/* ─── Login ───────────────────────────────────────────────── */
+const LoginScreen = () =>
+<div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: W.bg, fontFamily: W.mono, alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ width: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+        <Rect w={42} h={42} bg={W.fillDark} r={9} style={{ alignSelf: 'center' }} />
+        <Rect w={96} h={12} bg={W.fillMid} r={3} />
+      </div>
+      <div style={{ background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 8, padding: 26, width: '100%', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <Lbl s={14} w={600}>Anmelden</Lbl>
+        <Lbl s={11} c={W.muted} style={{ lineHeight: 1.6 }}>Geben Sie Ihre E-Mail ein. Sie erhalten einen einmaligen Anmelde-Link.</Lbl>
+        <Field label="E-Mail-Adresse" ph="makler@kanzlei.de" />
+        <Btn label="Login-Link zusenden" primary full />
+        <div style={{ height: 1, background: W.fill }} />
+        <Lbl s={10} c={W.muted} style={{ textAlign: 'center', lineHeight: 1.6 }}>Noch kein Zugang? → Einladung anfordern</Lbl>
+      </div>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {['Impressum', 'Datenschutz', 'AGB'].map((l, i) => <Lbl key={i} s={9} c={W.muted}>{l}</Lbl>)}
+      </div>
+    </div>
+  </div>;
+
+
+/* ─── Magic-Link Bestätigung ──────────────────────────────── */
+const MagicLinkSent = () =>
+<div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: W.bg, fontFamily: W.mono, alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ width: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22 }}>
+      <Rect w={42} h={42} bg={W.fillDark} r={9} style={{ alignSelf: 'center' }} />
+      <div style={{ background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 8, padding: 26, width: '100%', display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center', textAlign: 'center' }}>
+        <div style={{ width: 48, height: 48, borderRadius: '50%', background: W.fill, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Lbl s={20} w={700}>✓</Lbl>
+        </div>
+        <Lbl s={14} w={600}>Link gesendet!</Lbl>
+        <Lbl s={11} c={W.muted} style={{ lineHeight: 1.65 }}>Schauen Sie in Ihr Postfach (makler@kanzlei.de). Der Link ist 15 Minuten gültig.</Lbl>
+        <div style={{ background: W.bg, borderRadius: 4, padding: '9px 14px', width: '100%', border: `1px solid ${W.border}` }}>
+          <Lbl s={10} c={W.muted}>Kein Mail erhalten? → Link erneut senden</Lbl>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {['Impressum', 'Datenschutz', 'AGB'].map((l, i) => <Lbl key={i} s={9} c={W.muted}>{l}</Lbl>)}
+      </div>
+    </div>
+  </div>;
+
+
+/* ─── Onboarding 1–3 ──────────────────────────────────────── */
+const OBWrap = ({ step, title, children }) =>
+<div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: W.bg, fontFamily: W.mono, alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ width: 500, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+        <Rect w={38} h={38} bg={W.fillDark} r={8} style={{ alignSelf: 'center' }} />
+        <Lbl s={16} w={600} style={{ letterSpacing: '-0.02em' }}>Willkommen beim Maklerportal</Lbl>
+        <Lbl s={10} c={W.muted}>Konto einrichten</Lbl>
+      </div>
+      <ObStepper step={step} />
+      <div style={{ background: W.white, border: `1.5px solid ${W.border}`, borderRadius: 8, padding: 26, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <Lbl s={12} w={600}>{title}</Lbl>
+        {children}
+      </div>
+    </div>
+  </div>;
+
+
+const OB1 = () =>
+<OBWrap step={1} title="Schritt 1 · Kanzlei-Profil">
+    <Field label="Kanzleiname *" ph="Maklerbüro Mustermann GmbH" />
+    <div style={{ display: 'flex', gap: 12 }}>
+      <Field label="Vorname *" ph="Max" style={{ flex: 1 }} />
+      <Field label="Nachname *" ph="Mustermann" style={{ flex: 1 }} />
+    </div>
+    <Field label="Telefon" ph="+49 221 · · ·" />
+    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+      <Btn label="Weiter →" primary />
+    </div>
+  </OBWrap>;
+
+
+const OB2 = () =>
+<OBWrap step={2} title="Schritt 2 · Provisionsvereinbarung">
+    <div style={{ height: 110, background: W.bg, borderRadius: 4, border: `1px solid ${W.border}`, padding: 12 }}>
+      <Lbl s={10} c={W.muted} style={{ lineHeight: 1.75 }}>
+        [Volltext: AGB Maklerbeziehung + Provisionsvereinbarung als scrollbarer Bereich]
+      </Lbl>
+    </div>
+    <CheckRow label="Ich akzeptiere die Provisionsvereinbarung und AGB Maklerbeziehung." />
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+      <Btn label="← Zurück" />
+      <Btn label="Weiter →" primary />
+    </div>
+  </OBWrap>;
+
+
+const OB3 = () =>
+<OBWrap step={3} title="Schritt 3 · Kurzeinführung">
+    {[
+  'So legen Sie einen Fall an (30 Sek.)',
+  'Wie Claimondo Ihren Mandanten betreut',
+  'Wo Sie Ihren Provisionsstand einsehen'].
+  map((item, i) =>
+  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 12px', background: W.bg, borderRadius: 4, border: `1px solid ${W.border}` }}>
+        <div style={{ width: 24, height: 24, borderRadius: '50%', background: W.fillDark, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Lbl s={10} c={W.white} w={600}>{i + 1}</Lbl>
+        </div>
+        <Lbl s={11}>{item}</Lbl>
+      </div>
+  )}
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+      <Btn label="← Zurück" />
+      <Btn label="Portal öffnen →" primary />
+    </div>
+  </OBWrap>;
+
+
+/* ─── App ─────────────────────────────────────────────────── */
+function App() {
+  return (
+    <DesignCanvas title="Claimondo Maklerportal — Wireframes">
+
+      <DCSection id="desktop" title="Desktop-Screens">
+        <DCArtboard id="s1d" label="01 · Schnellanlage (Desktop)" width={1000} height={700}>
+          <S1Desktop />
+        </DCArtboard>
+        <DCArtboard id="s2d" label="02 · Dashboard (Desktop)" width={1100} height={720}>
+          <S2Desktop />
+        </DCArtboard>
+        <DCArtboard id="s3d" label="03 · Fall-Detail (Desktop)" width={1100} height={700}>
+          <S3Desktop />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="mobile" title="Mobile-Screens">
+        <DCArtboard id="s1m" label="04 · Schnellanlage (Mobile)" width={375} height={720}>
+          <S1Mobile />
+        </DCArtboard>
+        <DCArtboard id="s2m" label="05 · Dashboard (Mobile)" width={375} height={750}>
+          <S2Mobile />
+        </DCArtboard>
+        <DCArtboard id="s3m" label="06 · Fall-Detail (Mobile)" width={375} height={740}>
+          <S3Mobile />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="system" title="Edge Cases &amp; System-Screens">
+        <DCArtboard id="empty" label="07 · Dashboard Empty State" width={1100} height={720}>
+          <EmptyState />
+        </DCArtboard>
+        <DCArtboard id="dsgvo" label="08 · DSGVO-Hinweis-Modal" width={960} height={660}>
+          <DsgvoModal />
+        </DCArtboard>
+        <DCArtboard id="login" label="09 · Login (Magic-Link)" width={800} height={580}>
+          <LoginScreen />
+        </DCArtboard>
+        <DCArtboard id="mlsent" label="10 · Login · Link gesendet" width={800} height={580}>
+          <MagicLinkSent />
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="onboarding" title="Onboarding-Flow (3 Schritte)">
+        <DCArtboard id="ob1" label="11 · Onboarding Schritt 1" width={800} height={620}>
+          <OB1 />
+        </DCArtboard>
+        <DCArtboard id="ob2" label="12 · Onboarding Schritt 2" width={800} height={620}>
+          <OB2 />
+        </DCArtboard>
+        <DCArtboard id="ob3" label="13 · Onboarding Schritt 3" width={800} height={580}>
+          <OB3 />
+        </DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>);
+
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

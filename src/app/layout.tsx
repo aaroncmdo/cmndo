@@ -1,8 +1,6 @@
 ﻿import type { Metadata } from "next";
 import { Montserrat, Noto_Sans } from "next/font/google";
 import { Toaster } from "sonner";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { CookieBanner } from "@/components/CookieBanner";
@@ -183,8 +181,6 @@ export default async function RootLayout({
           <ServiceWorkerBoot />
           <PersistStorageToast />
         </NextIntlClientProvider>
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );
