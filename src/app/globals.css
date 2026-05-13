@@ -5,6 +5,8 @@
    sonst verwirft PostCSS/Tailwind ihn still. */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+@source not "../../.claude";
+@source not "../../docs";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
