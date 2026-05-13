@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { schritt2cSchema, type Schritt2cInput } from '@/lib/flow/schemas/schritt2c'
+import { assertLeadMutable } from './_helpers/assert-lead-mutable'
 
 // AAR-474 C8: Server-Action — schreibt die Gegner-Daten in `leads`. Validiert
 // server-seitig mit demselben Zod-Schema wie der Client. Rückgabe-Kontrakt wie
@@ -26,6 +27,12 @@ export async function updateLeadGegner(
 
   const d = parsed.data
   const supabase = await createClient()
+
+  // 13.05.2026 Auth-Audit-Fix: Lead muss noch in der Public-Flow-Phase sein.
+  // Verhindert dass eine anon-Session einen längst abgeschlossenen Fall ändert.
+  const guard = await assertLeadMutable(supabase, leadId, 'updateLeadGegner')
+  if (!guard.ok) return { success: false, error: guard.error }
+
   const { error } = await supabase
     .from('leads')
     .update({

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { zb1Schema, type Zb1FormValues } from '@/lib/flow/schemas/schritt3'
+import { assertLeadMutable } from './_helpers/assert-lead-mutable'
 
 // AAR-475 C9: Server-Action für den ZB1-Submit — deckt beide Pfade ab:
 // (a) OCR-Preview wurde vom User bestätigt/korrigiert,
@@ -34,6 +35,11 @@ export async function updateLeadZb1Manual(
   const d = parsed.data
 
   const supabase = await createClient()
+
+  // 13.05.2026 Auth-Audit-Fix: State-Guard für anon-Mutation (siehe
+  // _helpers/assert-lead-mutable.ts).
+  const guard = await assertLeadMutable(supabase, leadId, 'updateLeadZb1Manual')
+  if (!guard.ok) return { success: false, error: guard.error }
 
   const halterUpdate =
     halter && (halter.vorname || halter.nachname)
