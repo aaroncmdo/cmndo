@@ -446,7 +446,7 @@ async function AbrechnungenSectionWrapper() {
     id: string; empfaenger_typ: string; empfaenger_name: string; abrechnungs_nr: string
     abrechnungs_zeitraum_start: string; abrechnungs_zeitraum_ende: string
     summe_brutto: number; versand_datum: string | null; faellig_am: string | null
-    status: string; pdf_path: string | null
+    status: string; pdf_path: string | null; pdf_url: string | null
   }> = []
 
   try {
@@ -456,13 +456,25 @@ async function AbrechnungenSectionWrapper() {
       .order('created_at', { ascending: false })
       .limit(100)
 
-    abrechnungen = (data ?? []).map(d => ({ ...d, summe_brutto: Number(d.summe_brutto) }))
+    // Signed-URL pro Abrechnung erzeugen — abrechnungen-pdf-Bucket ist
+    // public=false (laut Storage-Audit), daher liefert eine raw
+    // `/storage/v1/object/public/...`-URL 400. createSignedUrl mit
+    // 1h TTL (admin-View, browser-cachebar binnen Page-Render).
+    abrechnungen = await Promise.all(
+      (data ?? []).map(async d => {
+        let pdf_url: string | null = null
+        if (d.pdf_path) {
+          const { data: signed } = await supabase.storage
+            .from('abrechnungen-pdf')
+            .createSignedUrl(d.pdf_path as string, 60 * 60)
+          pdf_url = signed?.signedUrl ?? null
+        }
+        return { ...d, summe_brutto: Number(d.summe_brutto), pdf_url }
+      }),
+    )
   } catch { /* table may not exist yet */ }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-  const pdfBaseUrl = `${supabaseUrl}/storage/v1/object/public/abrechnungen-pdf`
-
-  return <AbrechnungenSection abrechnungen={abrechnungen} pdfBaseUrl={pdfBaseUrl} />
+  return <AbrechnungenSection abrechnungen={abrechnungen} />
 }
 
 export default async function FinancePage() {
