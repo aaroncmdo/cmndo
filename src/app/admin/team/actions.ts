@@ -25,7 +25,9 @@ async function requireAdmin() {
   return supabase
 }
 
-export async function createMitarbeiter(formData: FormData): Promise<{ email: string; password: string }> {
+export async function createMitarbeiter(
+  formData: FormData,
+): Promise<{ success: true; email: string; password: string } | { success: false; error: string }> {
   await requireAdmin()
   const email = (formData.get('email') as string).trim().toLowerCase()
   const vorname = (formData.get('vorname') as string).trim()
@@ -33,14 +35,18 @@ export async function createMitarbeiter(formData: FormData): Promise<{ email: st
   const rolle = formData.get('rolle') as string
   const kategorie = (formData.get('kategorie') as string | null) || null
   const kapazitaet = parseInt(formData.get('kapazitaet_max') as string) || 100
-  if (!email || !vorname || !nachname || !rolle) throw new Error('Alle Felder sind erforderlich')
+  if (!email || !vorname || !nachname || !rolle) {
+    return { success: false, error: 'Alle Felder sind erforderlich' }
+  }
 
   const password = generatePassword()
   const admin = createAdminClient()
   const { data: newUser, error: createError } = await admin.auth.admin.createUser({
     email, password, email_confirm: true, user_metadata: { vorname, nachname },
   })
-  if (createError) throw new Error(`Benutzer erstellen fehlgeschlagen: ${createError.message}`)
+  if (createError) {
+    return { success: false, error: `Benutzer erstellen fehlgeschlagen: ${createError.message}` }
+  }
 
   const { error: profileError } = await admin.from('profiles').upsert({
     id: newUser.user.id, email, vorname, nachname, rolle,
@@ -50,7 +56,9 @@ export async function createMitarbeiter(formData: FormData): Promise<{ email: st
     twofa_aktiviert: false,
     twofa_email_aktiviert: false,
   })
-  if (profileError) throw new Error(`Profil erstellen fehlgeschlagen: ${profileError.message}`)
+  if (profileError) {
+    return { success: false, error: `Profil erstellen fehlgeschlagen: ${profileError.message}` }
+  }
 
   // Audit-Fix #8: sendCommunication darf den Mitarbeiter-Anlage-Flow nicht
   // abbrechen wenn Twilio/SMTP ausfaellt — User ist schon in der DB. Admin
@@ -67,10 +75,12 @@ export async function createMitarbeiter(formData: FormData): Promise<{ email: st
     console.error('[createMitarbeiter] Einladungs-Email fehlgeschlagen:', err)
   }
   revalidatePath('/admin/team')
-  return { email, password }
+  return { success: true, email, password }
 }
 
-export async function updateMitarbeiter(formData: FormData) {
+export async function updateMitarbeiter(
+  formData: FormData,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await requireAdmin()
   const id = formData.get('id') as string
   const updates: Record<string, unknown> = {}
@@ -88,11 +98,14 @@ export async function updateMitarbeiter(formData: FormData) {
   if (aktiv !== null) updates.aktiv = aktiv === 'true'
 
   const { error } = await supabase.from('profiles').update(updates).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
   revalidatePath('/admin/team')
+  return { success: true }
 }
 
-export async function createIncentive(formData: FormData) {
+export async function createIncentive(
+  formData: FormData,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await requireAdmin()
   const { error } = await supabase.from('incentives').insert({
     titel: formData.get('titel') as string,
@@ -105,15 +118,20 @@ export async function createIncentive(formData: FormData) {
     gueltig_ab: (formData.get('gueltig_ab') as string) || null,
     gueltig_bis: (formData.get('gueltig_bis') as string) || null,
   })
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
   revalidatePath('/admin/team')
+  return { success: true }
 }
 
-export async function toggleIncentive(id: string, aktiv: boolean) {
+export async function toggleIncentive(
+  id: string,
+  aktiv: boolean,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await requireAdmin()
   const { error } = await supabase.from('incentives').update({ aktiv }).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
   revalidatePath('/admin/team')
+  return { success: true }
 }
 
 // AAR-343: Admin-Reset der 2FA-Telefonnummer (bei Nummern-Wechsel etc).

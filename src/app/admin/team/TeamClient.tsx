@@ -43,6 +43,10 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
     try {
       const fd = new FormData(e.currentTarget)
       const r = await createMitarbeiter(fd)
+      if (!r.success) {
+        setError(r.error)
+        return
+      }
       setSuccess(`${r.email} eingeladen. Passwort: ${r.password}`)
       setShowDialog(false); router.refresh()
     } catch (err) { setError(err instanceof Error ? err.message : 'Fehler') }
