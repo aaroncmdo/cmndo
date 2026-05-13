@@ -1,0 +1,294 @@
+{
+  "startTs": "2026-05-13T12:29:01.964Z",
+  "endTs": "2026-05-13T12:29:20.310Z",
+  "deployBuildDate": "2026-05-13 (Server: nginx/1.24.0, Next.js via VPS)",
+  "tokenChecks": [
+    {
+      "context": "marketing-startseite",
+      "shadowSheet": "KEIN_ELEMENT",
+      "roundedSheet": "KEIN_ELEMENT",
+      "shadowMd": "KEIN_ELEMENT",
+      "shadowFocusOndo": "KEIN_ELEMENT",
+      "tokenViolatorsGray": []
+    },
+    {
+      "context": "gutachter-wizard",
+      "shadowSheet": "KEIN_ELEMENT",
+      "roundedSheet": "KEIN_ELEMENT",
+      "shadowMd": "KEIN_ELEMENT",
+      "shadowFocusOndo": "KEIN_ELEMENT",
+      "tokenViolatorsGray": []
+    },
+    {
+      "context": "dispatch-leads",
+      "shadowSheet": "KEIN_ELEMENT",
+      "roundedSheet": "KEIN_ELEMENT",
+      "shadowMd": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(13, 27, 62, 0.06) 0px 4px 6px -1px, rgba(13, 27, 62, 0.04) 0px 2px 4px -2px",
+      "shadowFocusOndo": "KEIN_ELEMENT",
+      "tokenViolatorsGray": []
+    },
+    {
+      "context": "kunde-portal",
+      "shadowSheet": "KEIN_ELEMENT",
+      "roundedSheet": "KEIN_ELEMENT",
+      "shadowMd": "KEIN_ELEMENT",
+      "shadowFocusOndo": "KEIN_ELEMENT",
+      "tokenViolatorsGray": []
+    },
+    {
+      "context": "kunde-fallakte",
+      "shadowSheet": "KEIN_ELEMENT",
+      "roundedSheet": "KEIN_ELEMENT",
+      "shadowMd": "KEIN_ELEMENT",
+      "shadowFocusOndo": "KEIN_ELEMENT",
+      "tokenViolatorsGray": []
+    }
+  ],
+  "findings": [
+    {
+      "severity": "OK",
+      "id": "MKT-01",
+      "portal": "marketing",
+      "beschreibung": "Hero-H1 korrekt: \"Unfall gehabt?Wir regeln Ihren KFZ-Schaden.\"",
+      "status": "BESTÄTIGT"
+    },
+    {
+      "severity": "P2",
+      "id": "GF-08",
+      "portal": "gutachter-finden",
+      "beschreibung": "Auffahrunfall-Option nicht gefunden — Schritt 2 unbekanntes Layout",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "OK",
+      "id": "DISP-01",
+      "portal": "dispatch",
+      "beschreibung": "SMOKE-Lead in Lead-Liste sichtbar",
+      "status": "BESTÄTIGT"
+    },
+    {
+      "severity": "P2",
+      "id": "DISP-02",
+      "portal": "dispatch",
+      "beschreibung": "Frische GF-Anfrage in Dispatch noch nicht sichtbar (ggf. Realtime-Lag)",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "OK",
+      "id": "KUNDE-01",
+      "portal": "kunde",
+      "beschreibung": "Kunden-Login und Portal-Zugriff funktioniert",
+      "status": "BESTÄTIGT"
+    },
+    {
+      "severity": "P2",
+      "id": "KUNDE-02",
+      "portal": "kunde",
+      "beschreibung": "Status-Stepper nicht per Selector gefunden (ggf. anderer Klassenname)",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "P2",
+      "id": "KUNDE-03",
+      "portal": "kunde",
+      "beschreibung": "Multi-Channel-Inbox Tab/Link nicht gefunden",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "P2",
+      "id": "KUNDE-04",
+      "portal": "kunde",
+      "beschreibung": "Dokument-Upload-Card nicht gefunden",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "P2",
+      "id": "KUNDE-05",
+      "portal": "kunde",
+      "beschreibung": "Termin-Card nicht sichtbar (kein Termin für test-kunde?)",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "OK",
+      "id": "ABR-01",
+      "portal": "abrechnung",
+      "beschreibung": "Abrechnungs-Übersicht erreichbar",
+      "status": "BESTÄTIGT"
+    },
+    {
+      "severity": "P2",
+      "id": "ABR-02",
+      "portal": "abrechnung",
+      "beschreibung": "Keine Abrechnung-Zeile zum Anklicken gefunden",
+      "status": "OFFEN"
+    }
+  ],
+  "consoleErrors": [
+    {
+      "context": "marketing",
+      "type": "warning",
+      "text": "[.WebGL-0x33540177f800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "url": "https://claimondo.de/gutachter-finden"
+    },
+    {
+      "context": "marketing",
+      "type": "warning",
+      "text": "[.WebGL-0x33540177f800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "url": "https://claimondo.de/gutachter-finden"
+    },
+    {
+      "context": "marketing",
+      "type": "warning",
+      "text": "[.WebGL-0x33540177f800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "url": "https://claimondo.de/gutachter-finden"
+    },
+    {
+      "context": "marketing",
+      "type": "warning",
+      "text": "[.WebGL-0x33540177f800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)",
+      "url": "https://claimondo.de/gutachter-finden"
+    },
+    {
+      "context": "marketing",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "dispatch",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "kunde",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "marketing",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "dispatch",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "kunde",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "marketing",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "dispatch",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "kunde",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "marketing",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "dispatch",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "kunde",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "marketing",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "dispatch",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "kunde",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "abrechnung",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "marketing",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "dispatch",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "kunde",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    },
+    {
+      "context": "abrechnung",
+      "type": "error",
+      "text": "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "url": "https://app.claimondo.de/kunde"
+    }
+  ],
+  "networkErrors": [],
+  "shotLog": [
+    "prod-iter-1/marketing/001-001-startseite-oben.png",
+    "prod-iter-1/marketing/002-002-startseite-cta-bereich.png",
+    "prod-iter-1/marketing/003-003-gutachter-finden-schritt1.png",
+    "prod-iter-1/marketing/004-004-gutachter-adresse-eingegeben.png",
+    "prod-iter-1/marketing/005-005-gutachter-schritt2.png",
+    "prod-iter-1/marketing/006-006-gutachter-schritt2-layout.png",
+    "prod-iter-1/dispatch/007-010-login-vor-dispatch.png",
+    "prod-iter-1/dispatch/008-011-login-credentials-eingetragen.png",
+    "prod-iter-1/dispatch/009-012-dispatch-dashboard-nach-login.png",
+    "prod-iter-1/dispatch/010-013-dispatch-leads-liste.png",
+    "prod-iter-1/dispatch/011-014-dispatch-gutachter-finder.png",
+    "prod-iter-1/kunde/012-015-login-vor-kunde.png",
+    "prod-iter-1/kunde/013-016-login-kunde-credentials.png",
+    "prod-iter-1/kunde/014-017-kunde-portal-nach-login.png",
+    "prod-iter-1/kunde/015-018-kunde-dashboard.png",
+    "prod-iter-1/kunde/016-019-kunde-status-bereich.png",
+    "prod-iter-1/kunde/017-021-kunde-dokumente.png",
+    "prod-iter-1/kunde/018-022-kunde-final.png",
+    "prod-iter-1/abrechnung/019-023-abrechnung-uebersicht.png"
+  ]
+}
