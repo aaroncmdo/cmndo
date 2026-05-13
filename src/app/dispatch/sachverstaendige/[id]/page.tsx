@@ -13,6 +13,8 @@ import PhoneButton from '@/components/shared/PhoneButton'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
+import EmptyState from '@/components/shared/EmptyState'
+import { CheckCircle2Icon } from 'lucide-react'
 
 export default async function DispatchSvDetailPage({
   params,
@@ -161,7 +163,7 @@ export default async function DispatchSvDetailPage({
                 )
               })}
               {(!faelle || faelle.length === 0) && (
-                <p className="px-5 py-6 text-sm text-claimondo-ondo/70 text-center">Keine offenen Fälle</p>
+                <EmptyState icon={CheckCircle2Icon} title="Keine offenen Fälle" variant="compact" />
               )}
             </div>
           </div>
