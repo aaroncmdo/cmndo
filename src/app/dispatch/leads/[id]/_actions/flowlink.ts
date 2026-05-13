@@ -5,6 +5,7 @@
 // als Phase-5-Primärweg.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function sendFlowLinkMultiChannel(
@@ -28,7 +29,10 @@ export async function sendFlowLinkMultiChannel(
   // AAR-316: Kundensprache an den FlowLink vererben — Portal-Page liest sie.
   const sprache = (lead.sprache as string | null) ?? 'de'
 
-  const { data: flowLink, error: flowErr } = await supabase
+  // RLS-Phase-1 (#3): flow_links INSERT muss via admin-Client laufen — der
+  // Dispatch-User ist via App-Layer-Guard authentifiziert.
+  const admin = createAdminClient()
+  const { data: flowLink, error: flowErr } = await admin
     .from('flow_links')
     .insert({
       lead_id: leadId,
