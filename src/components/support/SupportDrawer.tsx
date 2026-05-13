@@ -57,7 +57,7 @@ function DrawerHeader({ onClose, closeBtnRef, rolle }: {
             Feature durchdenken
           </button>
           {mode === 'durchdenken' && (
-            <span className="text-[10px] text-violet-600">Brainstorming-Modus aktiv</span>
+            <span className="text-[10px] text-claimondo-navy">Brainstorming-Modus aktiv</span>
           )}
         </div>
       )}

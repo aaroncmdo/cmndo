@@ -6,21 +6,13 @@ import {
   FileSignatureIcon, UserIcon, CarIcon, PenIcon, MailIcon, ExternalLinkIcon,
 } from 'lucide-react'
 import { aktualisiereAnfrageStatus } from '../actions'
-
-const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  neu: { label: 'Neu', color: 'bg-amber-100 text-amber-800' },
-  in_bearbeitung: { label: 'In Bearbeitung', color: 'bg-blue-100 text-blue-700' },
-  sv_kontaktiert: { label: 'SV kontaktiert', color: 'bg-claimondo-ondo/10 text-claimondo-ondo' },
-  termin_bestaetigt: { label: 'Termin bestätigt', color: 'bg-green-100 text-green-700' },
-  abgeschlossen: { label: 'Abgeschlossen', color: 'bg-gray-100 text-gray-500' },
-  storniert: { label: 'Storniert', color: 'bg-red-50 text-red-500' },
-}
+import { STATUS_LABEL } from '../constants'
 
 function Zeile({ label, value }: { label: string; value: React.ReactNode }) {
   if (!value) return null
   return (
     <div className="flex items-start gap-3 py-2.5 border-b border-claimondo-border last:border-0">
-      <span className="text-xs text-gray-400 w-36 shrink-0 pt-0.5">{label}</span>
+      <span className="text-xs text-claimondo-ondo/70 w-36 shrink-0 pt-0.5">{label}</span>
       <span className="text-sm text-claimondo-navy flex-1">{value}</span>
     </div>
   )
@@ -70,7 +62,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
   const svTelefon = anfrage.sv_telefon ?? anfrage.sv_lead_telefon ?? null
   const svEmail = anfrage.sv_lead_email ?? null
   const istOffen = lokalerStatus === 'neu' || lokalerStatus === 'in_bearbeitung' || lokalerStatus === 'sv_kontaktiert'
-  const statusCfg = STATUS_LABEL[lokalerStatus] ?? { label: lokalerStatus, color: 'bg-gray-100 text-gray-600' }
+  const statusCfg = STATUS_LABEL[lokalerStatus] ?? { label: lokalerStatus, color: 'bg-[#f8f9fb] text-claimondo-ondo' }
 
   function wechsleStatus(neuerStatus: string) {
     setLokalerStatus(neuerStatus)
@@ -174,7 +166,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
           )}
           {anfrage.sa_signatur_data_url && (
             <div className="mt-3 border border-claimondo-border rounded-ios-sm p-2 bg-claimondo-bg">
-              <p className="text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider">Unterschrift</p>
+              <p className="text-[10px] text-claimondo-ondo/70 mb-1.5 uppercase tracking-wider">Unterschrift</p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={anfrage.sa_signatur_data_url}
@@ -231,7 +223,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
               </button>
               <button
                 onClick={() => wechsleStatus('abgeschlossen')}
-                className="w-full flex items-center justify-center gap-2 text-sm text-gray-500 border border-gray-200 hover:bg-gray-100 px-4 py-2 rounded-ios-sm transition-colors"
+                className="w-full flex items-center justify-center gap-2 text-sm text-claimondo-ondo border border-claimondo-border hover:bg-[#f8f9fb] px-4 py-2 rounded-ios-sm transition-colors"
               >
                 <ClockIcon className="w-4 h-4" />
                 Abschließen
@@ -311,7 +303,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
             {anfrage.sv_id && (
               <a
                 href={`/dispatch/sachverstaendige/${anfrage.sv_id}`}
-                className="flex items-center justify-center gap-2 w-full mt-2 text-xs text-gray-500 hover:text-claimondo-ondo px-4 py-1.5 transition-colors"
+                className="flex items-center justify-center gap-2 w-full mt-2 text-xs text-claimondo-ondo hover:text-claimondo-ondo px-4 py-1.5 transition-colors"
               >
                 <ExternalLinkIcon className="w-3.5 h-3.5" />
                 SV-Profil öffnen
@@ -323,7 +315,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
         {/* Matching-Info */}
         <section className="bg-claimondo-bg border border-claimondo-border rounded-ios-lg p-4">
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-semibold mb-2">Matching</p>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-claimondo-ondo">
             {anfrage.matching_typ === 'isochron'
               ? 'Isochrone-Match — Claimondo-SV bedient dieses Gebiet'
               : anfrage.matching_typ === 'lead_fallback'

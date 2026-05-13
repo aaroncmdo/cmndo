@@ -4,19 +4,10 @@ import { useState, useTransition } from 'react'
 import { PhoneIcon, CheckCircleIcon, ClockIcon, PenSquareIcon, UserIcon, MapPinIcon, CalendarIcon, FileSignatureIcon, AlertCircleIcon } from 'lucide-react'
 import type { GutachterFinderAnfrage } from './actions'
 import { aktualisiereAnfrageStatus } from './actions'
-
-const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  entwurf: { label: 'Offen — anrufen', color: 'bg-orange-100 text-orange-800' },
-  neu: { label: 'Neu', color: 'bg-amber-100 text-amber-800' },
-  in_bearbeitung: { label: 'In Bearbeitung', color: 'bg-blue-100 text-blue-700' },
-  sv_kontaktiert: { label: 'SV kontaktiert', color: 'bg-claimondo-ondo/10 text-claimondo-ondo' },
-  termin_bestaetigt: { label: 'Termin bestätigt', color: 'bg-green-100 text-green-700' },
-  abgeschlossen: { label: 'Abgeschlossen', color: 'bg-gray-100 text-gray-500' },
-  storniert: { label: 'Storniert', color: 'bg-red-50 text-red-500' },
-}
+import { STATUS_LABEL, STATUS_FALLBACK } from './constants'
 
 function StatusBadge({ status }: { status: string }) {
-  const cfg = STATUS_LABEL[status] ?? { label: status, color: 'bg-gray-100 text-gray-600' }
+  const cfg = STATUS_LABEL[status] ?? { label: status, color: STATUS_FALLBACK.color }
   return (
     <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${cfg.color}`}>
       {cfg.label}
@@ -72,25 +63,25 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
         </div>
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <StatusBadge status={lokalerStatus} />
-          <span className="text-[10px] text-gray-400">{formatDatum(anfrage.erstellt_am)}</span>
+          <span className="text-[10px] text-claimondo-ondo/70">{formatDatum(anfrage.erstellt_am)}</span>
         </div>
       </div>
 
       {/* Details */}
       <div className="px-4 pb-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-        <div className="flex items-center gap-1.5 text-gray-600 col-span-2">
+        <div className="flex items-center gap-1.5 text-claimondo-ondo col-span-2">
           <PenSquareIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
           <span className="font-medium">{anfrage.schadentyp}</span>
-          {anfrage.kennzeichen && <span className="text-gray-400">· {anfrage.kennzeichen}</span>}
+          {anfrage.kennzeichen && <span className="text-claimondo-ondo/70">· {anfrage.kennzeichen}</span>}
         </div>
         {anfrage.schadenort && (
-          <div className="flex items-center gap-1.5 text-gray-500 col-span-2">
+          <div className="flex items-center gap-1.5 text-claimondo-ondo col-span-2">
             <MapPinIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
             <span className="truncate">{anfrage.schadenort}</span>
           </div>
         )}
         {anfrage.wunschtermin && (
-          <div className="flex items-center gap-1.5 text-gray-500 col-span-2">
+          <div className="flex items-center gap-1.5 text-claimondo-ondo col-span-2">
             <CalendarIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
             <span>
               Wunschtermin:{' '}
@@ -169,7 +160,7 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
           </button>
           <button
             onClick={() => wechsleStatus('abgeschlossen')}
-            className="flex items-center gap-1.5 text-xs text-gray-500 border border-gray-200 hover:bg-gray-100 px-3 py-1.5 rounded-full transition-colors"
+            className="flex items-center gap-1.5 text-xs text-claimondo-ondo border border-claimondo-border hover:bg-[#f8f9fb] px-3 py-1.5 rounded-full transition-colors"
           >
             <ClockIcon className="w-3.5 h-3.5" />
             Abschließen

@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { Shield, Phone, ChevronLeft } from 'lucide-react'
 import { ClearFlowOnMount } from './ClearFlowOnMount'
 import PageHeader from '@/components/shared/PageHeader'
+import { SheetCard } from '@/components/shared/SheetCard'
 
 // AAR-469 C3: Abort-Screen bei Schuldfrage = eigenverantwortung. Freundliche
 // Sackgasse mit Kasko-Hinweis + 3 Tipps + Hotline-Verweis. FlowShell wird
@@ -32,7 +33,7 @@ export default async function SelbstverschuldenPage() {
         }}
       />
       <ClearFlowOnMount />
-      <div className="w-full max-w-2xl rounded-[36px] bg-white p-8 sm:p-10 shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)]">
+      <SheetCard size="2xl" padding="md" animateIn={false} className="sm:p-10">
         <Shield className="mb-6 h-14 w-14 text-claimondo-ondo" aria-hidden />
         <PageHeader title={t('heading')} description={t('explanation')} size="lg" />
 
@@ -68,13 +69,13 @@ export default async function SelbstverschuldenPage() {
         <div className="mt-8">
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-ondo px-6 py-3.5 text-sm font-semibold tracking-[-.01em] text-white shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-[#3a6291] hover:-translate-y-[1px] active:translate-y-0"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-ondo px-6 py-3.5 text-sm font-semibold tracking-[-.01em] text-white shadow-cta-ondo transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-[#3a6291] hover:-translate-y-[1px] active:translate-y-0"
           >
             <ChevronLeft className="h-5 w-5 rtl:rotate-180" aria-hidden="true" />
             {t('back_home')}
           </Link>
         </div>
-      </div>
+      </SheetCard>
     </div>
   )
 }

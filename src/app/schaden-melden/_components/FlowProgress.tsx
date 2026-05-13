@@ -24,7 +24,7 @@ export async function FlowProgress({ current }: Props) {
   return (
     <nav
       aria-label={t('aria_label')}
-      className="relative rounded-[28px] bg-white px-5 py-5 sm:px-7 sm:py-6 shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)]"
+      className="relative rounded-[28px] bg-white px-5 py-5 sm:px-7 sm:py-6 shadow-claimondo-md"
     >
       <div
         aria-hidden

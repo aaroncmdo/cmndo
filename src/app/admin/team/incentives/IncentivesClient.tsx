@@ -35,7 +35,11 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); setError(null); setLoading(true)
     try {
-      await createIncentive(new FormData(e.currentTarget))
+      const r = await createIncentive(new FormData(e.currentTarget))
+      if (!r.success) {
+        setError(r.error ?? 'Fehler')
+        return
+      }
       setShowDialog(false); router.refresh()
     } catch (err) { setError(err instanceof Error ? err.message : 'Fehler') }
     finally { setLoading(false) }
@@ -43,7 +47,10 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
 
   async function handleToggle(id: string, aktiv: boolean) {
     setToggling(id)
-    try { await toggleIncentive(id, !aktiv); router.refresh() }
+    try {
+      const r = await toggleIncentive(id, !aktiv)
+      if (r.success) router.refresh()
+    }
     catch { /* ignore */ }
     finally { setToggling(null) }
   }

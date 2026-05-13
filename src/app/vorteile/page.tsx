@@ -202,7 +202,7 @@ export default function VorteilePage() {
         />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div
-            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm"
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm"
           >
             Warum Claimondo?
           </div>
@@ -240,7 +240,7 @@ export default function VorteilePage() {
             return (
               <div
                 key={v.title}
-                className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-[0_8px_28px_rgba(13,27,62,0.10)] sm:p-7"
+                className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg sm:p-7"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-claimondo-ondo/12">
@@ -381,7 +381,7 @@ export default function VorteilePage() {
           <p className="mt-3 text-lg text-white/65">5 Minuten. Kostenlos. Unverbindlich.</p>
           <Link
             href="/schaden-melden"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-8 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-8 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
           >
             Schaden melden — 0 € Kosten
             <ChevronRight className="h-5 w-5" />

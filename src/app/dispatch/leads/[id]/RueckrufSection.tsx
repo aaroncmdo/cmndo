@@ -133,7 +133,7 @@ export default function RueckrufSection({ leadId }: { leadId: string }) {
             value={notiz}
             onChange={e => setNotiz(e.target.value)}
             placeholder="z.B. Kunde ab 14 Uhr erreichbar"
-            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-gray-400"
+            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/60"
           />
         </div>
       </div>

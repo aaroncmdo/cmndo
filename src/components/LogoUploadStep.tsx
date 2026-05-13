@@ -49,6 +49,10 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
         ? await uploadBueroLogo(fd)
         : await uploadSvLogo(fd)
 
+      if (!result.ok) {
+        setError(result.error)
+        return
+      }
       setLogoUrl(result.logo_url)
       // Flag für die einmalige 2s-Brand-Transition (siehe GutachterShell).
       if (typeof window !== 'undefined') {

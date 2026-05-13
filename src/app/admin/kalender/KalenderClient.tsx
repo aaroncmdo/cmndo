@@ -419,18 +419,19 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
     const end = new Date(start.getTime() + dauer * 60 * 1000)
 
     try {
+      let r: { ok: boolean } | { ok: true; id: string } | undefined
       if (mode === 'create') {
-        await createAdminTermin({
+        r = await createAdminTermin({
           typ, titel: titel.trim(),
           start_zeit: start.toISOString(), end_zeit: end.toISOString(),
         })
       } else if (termin) {
-        await updateAdminTermin(termin.id, {
+        r = await updateAdminTermin(termin.id, {
           typ, titel: titel.trim(),
           start_zeit: start.toISOString(), end_zeit: end.toISOString(),
         })
       }
-      onSaved()
+      if (r && r.ok) onSaved()
     } catch { /* */ }
     setLoading(false)
   }
@@ -438,7 +439,10 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
   async function handleDelete() {
     if (!termin) return
     setLoading(true)
-    try { await deleteAdminTermin(termin.id); onSaved() } catch { /* */ }
+    try {
+      const r = await deleteAdminTermin(termin.id)
+      if (r.ok) onSaved()
+    } catch { /* */ }
     setLoading(false)
   }
 
@@ -447,8 +451,8 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
     setLoading(true)
     try {
       const { setAdminTerminStatus } = await import('@/lib/actions/admin-termine-actions')
-      await setAdminTerminStatus(termin.id, status)
-      onSaved()
+      const r = await setAdminTerminStatus(termin.id, status)
+      if (r.ok) onSaved()
     } catch { /* */ }
     setLoading(false)
   }

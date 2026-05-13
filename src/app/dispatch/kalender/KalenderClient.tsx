@@ -7,8 +7,9 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { ChevronLeftIcon, ChevronRightIcon, FilterIcon, PlusIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, FilterIcon, PlusIcon, UserXIcon } from 'lucide-react'
 import SpontanTerminModal from './SpontanTerminModal'
+import EmptyState from '@/components/shared/EmptyState'
 
 export type KalenderSv = {
   id: string
@@ -196,7 +197,8 @@ export default function KalenderClient({
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-xl font-semibold text-claimondo-navy">Kalender</h1>
-          <p className="text-xs text-claimondo-ondo">
+          {/* suppressHydrationWarning: fmtDateLabel nutzt toLocaleDateString — UTC vs. Berlin → #418 */}
+          <p className="text-xs text-claimondo-ondo" suppressHydrationWarning>
             KW {getWeekNumber(weekStart)} · {fmtDateLabel(weekStart)} – {fmtDateLabel(addDays(weekStart, 4))}
           </p>
         </div>
@@ -239,7 +241,7 @@ export default function KalenderClient({
           <button
             type="button"
             onClick={() => openSpontan()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-claimondo-ondo text-white text-xs font-semibold tracking-[-.005em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:bg-[#3a6291] hover:-translate-y-[0.5px] transition-all duration-200"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-claimondo-ondo text-white text-xs font-semibold tracking-[-.005em] shadow-cta-ondo hover:bg-[#3a6291] hover:-translate-y-[0.5px] transition-all duration-200"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             Spontan-Termin
@@ -307,7 +309,8 @@ export default function KalenderClient({
               key={d.toISOString()}
               className="border-b border-l border-claimondo-border bg-claimondo-bg/50 px-2 py-2 text-center"
             >
-              <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo">
+              {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin → React #418 */}
+              <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo" suppressHydrationWarning>
                 {d.toLocaleDateString('de-DE', { weekday: 'short' })}
               </p>
               <p className="text-sm font-semibold text-claimondo-navy">
@@ -411,7 +414,7 @@ export default function KalenderClient({
       </div>
 
       {svList.length === 0 && (
-        <p className="text-xs text-claimondo-ondo">Keine aktiven Sachverständigen.</p>
+        <EmptyState icon={UserXIcon} title="Keine aktiven Sachverständigen" variant="compact" />
       )}
 
       <SpontanTerminModal

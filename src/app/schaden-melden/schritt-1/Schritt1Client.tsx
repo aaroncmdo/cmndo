@@ -496,7 +496,7 @@ export function Schritt1Client() {
                 setValue('fahrzeug_standort_lng', place.lng, { shouldValidate: true })
                 setValue('fahrzeug_standort_place_id', place.place_id, { shouldValidate: true })
               }}
-              className="w-full bg-white border border-claimondo-border rounded-md px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+              className="w-full bg-white border border-claimondo-border rounded-md px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
             />
             <p className="mt-1 text-xs text-claimondo-ondo">
               Wir nutzen die Adresse, um direkt einen Gutachter in deiner Nähe vorzuschlagen.

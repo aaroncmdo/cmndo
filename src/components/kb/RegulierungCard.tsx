@@ -114,7 +114,7 @@ export default function RegulierungCard({
               type="button"
               onClick={handleKontakt}
               disabled={pendingKontakt}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-medium px-3 py-2 transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-medium px-3 py-2 transition-colors"
             >
               <MailIcon className="w-4 h-4" />
               {pendingKontakt ? 'Wird gespeichert…' : 'VS-Kontakt erfasst'}

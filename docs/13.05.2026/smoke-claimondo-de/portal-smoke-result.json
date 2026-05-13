@@ -1,0 +1,75 @@
+{
+  "datum": "2026-05-13T07:09:23.302Z",
+  "screenshots": 39,
+  "perPortal": {
+    "dispatch": 10,
+    "sv": 6,
+    "kanzlei": 11,
+    "makler": 2,
+    "kunde": 10
+  },
+  "findings": [
+    {
+      "severity": "P0",
+      "id": "DISPATCH-LEADS-JSERR",
+      "portal": "dispatch",
+      "beschreibung": "JS-Fehler Lead-Liste: Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full messa",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "P0",
+      "id": "DISPATCH-KALENDER-JSERR",
+      "portal": "dispatch",
+      "beschreibung": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full messa",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "P0",
+      "id": "DISPATCH-LEAD-NEU-JSERR",
+      "portal": "dispatch",
+      "beschreibung": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full messa",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "P1",
+      "id": "SV-KEINE-FAELLE",
+      "portal": "sv",
+      "beschreibung": "Keine Fälle in SV-Liste — Fall-Detail nicht testbar",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "P0",
+      "id": "KANZLEI-KEIN-TESTUSER",
+      "portal": "kanzlei",
+      "beschreibung": "test-kanzlei@claimondo.de existiert nicht auf Staging — Kanzlei-Portal via Admin getestet",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "P1",
+      "id": "KANZLEI-KEINE-FAELLE",
+      "portal": "kanzlei",
+      "beschreibung": "Keine Fälle in Kanzlei-Liste",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "P0",
+      "id": "MAKLER-KEIN-TESTUSER",
+      "portal": "makler",
+      "beschreibung": "test-makler@claimondo.de existiert nicht auf Staging — Blocker B3 aus Vorlauf bestätigt, Makler-Portal nicht testbar",
+      "status": "OFFEN"
+    },
+    {
+      "severity": "P1",
+      "id": "KUNDE-KEIN-MAGIC-LINK-BTN",
+      "portal": "kunde",
+      "beschreibung": "Magic-Link/Kunden-Portal-Button in Dispatch-Lead-Detail nicht gefunden",
+      "status": "OFFEN"
+    }
+  ],
+  "bySeverity": {
+    "P0": 5,
+    "P1": 3,
+    "P2": 0,
+    "P3": 0
+  }
+}

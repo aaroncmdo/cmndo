@@ -259,7 +259,7 @@ export function VoiceRecorderClient() {
         </button>
       </div>
 
-      <div className="rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-6">
+      <div className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-6">
         <div className="flex flex-col items-center gap-4">
           <canvas
             ref={canvasRef}

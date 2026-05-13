@@ -90,7 +90,7 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
               <div className="relative">
                 <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
                 <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
-                  className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-lg text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-48" />
+                  className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-lg text-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-48" />
               </div>
               <button onClick={() => { setCreating(true); setForm({}) }}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-ondo text-white rounded-lg text-xs font-medium hover:bg-claimondo-shield transition-colors">

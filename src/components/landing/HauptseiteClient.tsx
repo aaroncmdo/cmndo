@@ -274,7 +274,7 @@ function ZahlenSection() {
             {ZAHLEN.map(({ zahl, label }, i) => (
               <FadeUp key={zahl} delay={i * 80}>
                 <div
-                  className="rounded-2xl border border-white/60 bg-white/65 px-5 py-5 shadow-[0_4px_18px_rgba(13,27,62,0.06)] backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-[0_8px_28px_rgba(13,27,62,0.10)]"
+                  className="rounded-2xl border border-white/60 bg-white/65 px-5 py-5 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
                   <div
@@ -333,21 +333,21 @@ function VersicherungSection() {
           <h2 className="mt-2 max-w-lg text-3xl font-extrabold leading-tight tracking-[-0.03em] text-claimondo-navy sm:text-4xl">
             Was Ihnen die gegnerische Versicherung oft verschweigt.
           </h2>
-          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-gray-500">
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-claimondo-ondo">
             Vier Dinge, die viele Unfallgeschädigte zu spät erfahren — und die Sie tausende Euro kosten können.
           </p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           {INFO_CARDS.map(({ icon: Icon, title, href, body }, i) => (
             <FadeUp key={title} delay={i * 80}>
-              <Link href={href} className="group flex flex-col gap-0 rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_1px_3px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(13,27,62,.1)]">
+              <Link href={href} className="group flex flex-col gap-0 rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_1px_3px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
                 <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef4fb]">
                   <Icon className="h-[18px] w-[18px] text-claimondo-ondo" />
                 </div>
                 <h3 className="mb-3 text-[17px] font-bold tracking-[-0.02em] text-claimondo-navy">
                   {title}
                 </h3>
-                <p className="flex-1 text-sm leading-relaxed text-gray-500 mb-5">{body}</p>
+                <p className="flex-1 text-sm leading-relaxed text-claimondo-ondo mb-5">{body}</p>
                 <span className="inline-flex items-center gap-1 text-sm font-semibold text-claimondo-navy transition-all group-hover:gap-2">
                   Mehr erfahren <ChevronRight className="h-3.5 w-3.5" />
                 </span>
@@ -399,15 +399,15 @@ function UnterschiedSection() {
           <h2 className="mt-2 max-w-lg text-3xl font-extrabold leading-tight tracking-[-0.03em] text-claimondo-navy sm:text-[38px]">
             Kein Gutachter. Eine komplette Lösung.
           </h2>
-          <p className="mt-3 max-w-md text-[15px] leading-relaxed text-gray-500">
+          <p className="mt-3 max-w-md text-[15px] leading-relaxed text-claimondo-ondo">
             Vier Bausteine, die Claimondo von jedem klassischen Gutachter unterscheiden.
           </p>
         </FadeUp>
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {UNTERSCHIED_CARDS.map(({ icon: Icon, sub, title, body }, i) => (
             <FadeUp key={title} delay={i * 80}>
-              <div className="group flex flex-col rounded-2xl border border-claimondo-border bg-white p-6 shadow-[0_4px_12px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(13,27,62,.1)]">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-[14px] border border-claimondo-ondo/15 bg-claimondo-ondo/10">
+              <div className="group flex flex-col rounded-2xl border border-claimondo-border bg-white p-6 shadow-[0_4px_12px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-claimondo-md border border-claimondo-ondo/15 bg-claimondo-ondo/10">
                   <Icon className="h-6 w-6 text-claimondo-ondo" />
                 </div>
                 <p className="mb-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-claimondo-ondo">
@@ -416,7 +416,7 @@ function UnterschiedSection() {
                 <h3 className="mb-2.5 text-base font-bold leading-snug tracking-[-0.02em] text-claimondo-navy">
                   {title}
                 </h3>
-                <p className="text-[13.5px] leading-relaxed text-gray-500">{body}</p>
+                <p className="text-[13.5px] leading-relaxed text-claimondo-ondo">{body}</p>
               </div>
             </FadeUp>
           ))}
@@ -559,7 +559,7 @@ function ProzessSection() {
           <h2 className="mx-auto mt-2 max-w-xl text-3xl font-extrabold leading-tight tracking-[-0.03em] text-claimondo-navy sm:text-[36px]">
             Von der ersten Sekunde bis zur vollständigen Auszahlung.
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-gray-500">
+          <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-claimondo-ondo">
             Claimondo übernimmt jeden Schritt — Sie müssen sich um nichts kümmern.
           </p>
         </FadeUp>
@@ -588,7 +588,7 @@ function ProzessSection() {
                   </div>
                   <Icon className="mt-3.5 h-7 w-7 text-claimondo-ondo" strokeWidth={1.8} />
                   <h3 className="mt-3 text-[15px] font-bold leading-snug text-claimondo-navy">{title}</h3>
-                  <p className="mt-2 max-w-[160px] text-sm leading-snug text-gray-500">{desc}</p>
+                  <p className="mt-2 max-w-[160px] text-sm leading-snug text-claimondo-ondo">{desc}</p>
                 </div>
               </FadeUp>
             ))}
@@ -639,7 +639,7 @@ function BeraterSection() {
                 <h3 className="mt-1.5 text-[18px] font-bold tracking-[-0.02em] text-claimondo-navy">
                   Marcel M. · Senior Schadensberater
                 </h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-gray-600">
+                <p className="mt-2 text-[15px] leading-relaxed text-claimondo-ondo">
                   Ein fester Ansprechpartner. Von der ersten Sekunde bis zur vollständigen Auszahlung — erreichbar per Telefon, WhatsApp und direkt in Ihrem Portal.
                 </p>
                 <div className="mt-3 flex items-center gap-2">
@@ -695,7 +695,7 @@ function PortalSection() {
             <h2 className="mt-2 text-3xl font-extrabold leading-tight tracking-[-0.03em] text-claimondo-navy sm:text-[36px]">
               Transparenz vom ersten Tag an.
             </h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-gray-500">
+            <p className="mt-3 text-[15px] leading-relaxed text-claimondo-ondo">
               Kein Warten auf Rückrufe. Keine Ungewissheit. Ihr Fall — live und jederzeit einsehbar.
             </p>
             <div className="mt-8 flex flex-col gap-6">
@@ -706,7 +706,7 @@ function PortalSection() {
                   </div>
                   <div>
                     <p className="text-[15px] font-semibold text-claimondo-navy">{title}</p>
-                    <p className="mt-0.5 text-sm leading-relaxed text-gray-500">{sub}</p>
+                    <p className="mt-0.5 text-sm leading-relaxed text-claimondo-ondo">{sub}</p>
                   </div>
                 </div>
               ))}
@@ -732,7 +732,7 @@ function PortalSection() {
                     <div key={c} className="h-2.5 w-2.5 rounded-full" style={{ background: c }} />
                   ))}
                 </div>
-                <div className="flex-1 rounded-md border border-claimondo-border bg-white px-3 py-1 text-center font-mono text-[11px] text-gray-400">
+                <div className="flex-1 rounded-md border border-claimondo-border bg-white px-3 py-1 text-center font-mono text-[11px] text-claimondo-ondo/70">
                   portal.claimondo.de
                 </div>
               </div>
@@ -742,7 +742,7 @@ function PortalSection() {
                   <p className="text-sm font-bold text-claimondo-navy">Willkommen, Max M.</p>
                   <div className="flex items-center gap-2">
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-claimondo-navy font-mono text-[9px] font-bold text-white">MB</div>
-                    <p className="text-[11px] text-gray-400">Ihr Berater</p>
+                    <p className="text-[11px] text-claimondo-ondo/70">Ihr Berater</p>
                   </div>
                 </div>
                 {/* Case card */}
@@ -751,7 +751,7 @@ function PortalSection() {
                     <span className="font-mono text-[13px] font-bold text-claimondo-navy">K-AS-2024-0847</span>
                     <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">Aktiv</span>
                   </div>
-                  <p className="mb-3 text-xs text-gray-400">BMW 520d · Heckschaden · Köln</p>
+                  <p className="mb-3 text-xs text-claimondo-ondo/70">BMW 520d · Heckschaden · Köln</p>
                   {/* Progress dots */}
                   <div className="flex items-center gap-1.5">
                     {['Gutachten', 'Anwalt', 'Regulierung', 'Auszahlung'].map((label, i) => (
@@ -766,7 +766,7 @@ function PortalSection() {
                   </div>
                   <div className="mt-1 flex justify-between">
                     {['Gutachten', 'Anwalt', 'Regulierung', 'Auszahlung'].map((l) => (
-                      <span key={l} className="font-mono text-[9px] text-gray-400">{l}</span>
+                      <span key={l} className="font-mono text-[9px] text-claimondo-ondo/70">{l}</span>
                     ))}
                   </div>
                 </div>
@@ -777,9 +777,9 @@ function PortalSection() {
                     { label: 'Geschätzter Anspruch', val: '6.200 €', sub: 'Inkl. Wertminderung' },
                   ].map(({ label, val, sub }) => (
                     <div key={label} className="rounded-xl border border-claimondo-border bg-white p-3">
-                      <p className="font-mono text-[10px] uppercase tracking-[.1em] text-gray-400">{label}</p>
+                      <p className="font-mono text-[10px] uppercase tracking-[.1em] text-claimondo-ondo/70">{label}</p>
                       <p className="font-mono text-[13px] font-bold text-claimondo-navy">{val}</p>
-                      <p className="text-[11px] text-gray-400">{sub}</p>
+                      <p className="text-[11px] text-claimondo-ondo/70">{sub}</p>
                     </div>
                   ))}
                 </div>
@@ -837,14 +837,14 @@ function ReviewsSection() {
               ))}
             </div>
             <span className="font-mono text-sm font-bold text-claimondo-navy">5,0</span>
-            <span className="text-xs text-gray-400">Google</span>
+            <span className="text-xs text-claimondo-ondo/70">Google</span>
           </div>
         </FadeUp>
 
         <div className="mt-12 grid gap-5 sm:grid-cols-3">
           {REVIEWS.map(({ initials, name, date, text, color }, i) => (
             <FadeUp key={name} delay={i * 80}>
-              <div className="flex h-full flex-col rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_4px_12px_rgba(13,27,62,.05)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(13,27,62,.1)]">
+              <div className="flex h-full flex-col rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_4px_12px_rgba(13,27,62,.05)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
                 <div className="mb-3 flex items-center gap-3">
                   <div
                     className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-base font-bold text-white"
@@ -854,7 +854,7 @@ function ReviewsSection() {
                   </div>
                   <div>
                     <p className="text-[15px] font-bold text-claimondo-navy">{name}</p>
-                    <p className="text-xs text-gray-400">{date}</p>
+                    <p className="text-xs text-claimondo-ondo/70">{date}</p>
                   </div>
                 </div>
                 <div className="mb-3 flex gap-0.5">
@@ -863,9 +863,9 @@ function ReviewsSection() {
                   ))}
                 </div>
                 {/* Noto Sans via p rule */}
-                <p className="flex-1 text-sm italic leading-relaxed text-gray-500">{text}</p>
+                <p className="flex-1 text-sm italic leading-relaxed text-claimondo-ondo">{text}</p>
                 <div className="mt-4 flex items-center justify-between border-t border-claimondo-border pt-3">
-                  <span className="text-xs text-gray-400">Verifizierte Google-Bewertung</span>
+                  <span className="text-xs text-claimondo-ondo/70">Verifizierte Google-Bewertung</span>
                   <div className="flex gap-0.5">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
@@ -1031,7 +1031,7 @@ function FaqSection() {
                 >
                   <div className="border-t border-claimondo-border px-6 pb-5 pt-4">
                     {/* Noto Sans via p rule */}
-                    <p className="text-[15px] leading-relaxed text-gray-500">{a}</p>
+                    <p className="text-[15px] leading-relaxed text-claimondo-ondo">{a}</p>
                   </div>
                 </div>
               </div>

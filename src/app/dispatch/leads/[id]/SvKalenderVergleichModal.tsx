@@ -374,7 +374,7 @@ export default function SvKalenderVergleichModal({
                     Termin (belegt)
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded bg-blue-100 border border-blue-400 border-dashed" />
+                    <span className="inline-block w-3 h-3 rounded bg-claimondo-ondo/20 border border-blue-400 border-dashed" />
                     Route von/zum Besichtigungsort
                   </span>
                   <span className="flex items-center gap-1.5 text-claimondo-ondo">
@@ -385,7 +385,7 @@ export default function SvKalenderVergleichModal({
 
                 {/* Vor erstem Termin — Anfahrt zum SV */}
                 {randSlots.vor && (
-                  <div className="mb-2 flex items-center gap-2 text-[11px] text-blue-800 bg-blue-50 border border-blue-200 rounded-md px-2 py-1.5">
+                  <div className="mb-2 flex items-center gap-2 text-[11px] text-claimondo-navy bg-claimondo-ondo/10 border border-claimondo-ondo/30 rounded-md px-2 py-1.5">
                     <NavigationIcon className="w-3 h-3" />
                     <span>
                       Tagesstart frei — bis zum 1. Termin um {fmtTime(randSlots.vor.bisIso)}
@@ -449,7 +449,7 @@ export default function SvKalenderVergleichModal({
                         data-termin-block
                         className={`absolute left-0 right-2 rounded-lg border-2 border-dashed flex items-center justify-center text-[10px] px-2 transition-colors ${
                           l.reicht
-                            ? 'bg-blue-50 border-blue-300 text-blue-800 cursor-pointer hover:bg-blue-100 hover:border-blue-400'
+                            ? 'bg-claimondo-ondo/10 border-blue-300 text-claimondo-navy cursor-pointer hover:bg-claimondo-ondo/20 hover:border-blue-400'
                             : 'bg-red-50 border-red-300 text-red-700 cursor-not-allowed'
                         }`}
                         style={{ top, height }}
@@ -485,7 +485,7 @@ export default function SvKalenderVergleichModal({
                     const heightPx = Math.max(28, (Math.min(TOTAL_MIN, endMin) - Math.max(0, startMin)) * PX_PER_MIN)
                     return (
                       <div
-                        className="absolute left-0 right-2 rounded-lg border-2 border-blue-600 bg-blue-500/85 text-white px-2 py-1.5 shadow-lg z-10"
+                        className="absolute left-0 right-2 rounded-lg border-2 border-claimondo-ondo bg-claimondo-ondo/85 text-white px-2 py-1.5 shadow-lg z-10"
                         style={{ top, height: heightPx }}
                       >
                         <div className="flex items-center gap-1.5 text-[11px] font-semibold">
@@ -550,7 +550,7 @@ export default function SvKalenderVergleichModal({
 
                 {/* Nach letztem Termin — Restliche Zeit */}
                 {randSlots.nach && (
-                  <div className="mt-2 flex items-center gap-2 text-[11px] text-blue-800 bg-blue-50 border border-blue-200 rounded-md px-2 py-1.5">
+                  <div className="mt-2 flex items-center gap-2 text-[11px] text-claimondo-navy bg-claimondo-ondo/10 border border-claimondo-ondo/30 rounded-md px-2 py-1.5">
                     <NavigationIcon className="w-3 h-3" />
                     <span>
                       Nach letztem Termin ab {fmtTime(randSlots.nach.vonIso)} frei

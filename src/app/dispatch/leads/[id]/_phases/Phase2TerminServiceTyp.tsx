@@ -185,7 +185,7 @@ export default function Phase2TerminServiceTyp() {
       {/* AAR-264: Wunschtermin GANZ OBEN — „Wann" ist wichtiger als „Wo" für
           das Gespräch. Auto-Save 500ms Debounce. Der Wunschtermin fließt
           ins SV-Matching ein (verfuegbarAmWunschtermin + Score-Bonus). */}
-      <div className="bg-white rounded-3xl border border-claimondo-navy/[0.08] shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-5 space-y-4">
+      <div className="bg-white rounded-3xl border border-claimondo-navy/[0.08] shadow-claimondo-md p-5 space-y-4">
         {/* AAR-270: Wochentag-Picker — als iOS-Pills (Segmented-Multiselect).
             Mehrfachauswahl, Default=Egal. Filtert die SV-Slot-Vorschläge. */}
         <div className="space-y-2">
@@ -211,7 +211,7 @@ export default function Phase2TerminServiceTyp() {
                   disabled={pending}
                   className={`min-w-[44px] px-3.5 py-2 rounded-full text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] active:scale-[0.97] ${
                     sel
-                      ? 'bg-claimondo-ondo text-white shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)]'
+                      ? 'bg-claimondo-ondo text-white shadow-cta-ondo'
                       : 'bg-claimondo-navy/[0.06] text-claimondo-navy hover:bg-claimondo-navy/[0.10]'
                   } disabled:opacity-40`}
                 >
@@ -247,7 +247,7 @@ export default function Phase2TerminServiceTyp() {
             value={wunschtermin}
             onChange={(e) => setWunschtermin(e.target.value)}
             min={minDatetime}
-            className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-2xl px-4 py-3 text-base text-claimondo-navy tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]"
+            className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-2xl px-4 py-3 text-base text-claimondo-navy tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
           />
           {wunschtermin && (
             <p className="text-[11px] text-claimondo-ondo font-medium">
@@ -263,7 +263,7 @@ export default function Phase2TerminServiceTyp() {
          expliziter Besichtigungsort gesetzt ist, fällt SV-Matching auf
          unfallort_lat/lng (Phase 1) bzw. kunde_lat/lng zurück
          (siehe listSvSuggestionsForLead). */}
-      <div className="bg-white rounded-3xl border border-claimondo-navy/[0.08] shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-5 space-y-3">
+      <div className="bg-white rounded-3xl border border-claimondo-navy/[0.08] shadow-claimondo-md p-5 space-y-3">
         <div className="flex items-center gap-2">
           <MapPinIcon className="w-4 h-4 text-claimondo-ondo" />
           <h3 className="text-sm font-semibold text-claimondo-navy tracking-[-.012em]">Besichtigungsadresse</h3>
@@ -285,7 +285,7 @@ export default function Phase2TerminServiceTyp() {
           onBlur={(current) => {
             if (!current.trim()) clearBesichtigungsort()
           }}
-          className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-2xl px-4 py-3 text-base text-claimondo-navy tracking-[-.01em] transition-all duration-200 hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]"
+          className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-2xl px-4 py-3 text-base text-claimondo-navy tracking-[-.01em] transition-all duration-200 hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
         />
         {l.unfallort && !besichtigungsortAdresse && (
           <p className="text-[11px] text-claimondo-ondo italic">
@@ -305,7 +305,7 @@ export default function Phase2TerminServiceTyp() {
       />
 
       {/* Service-Typ (Pfad A/B) — Toggle-Cards (Design-Brief §8.2) */}
-      <div className="bg-white rounded-3xl border border-claimondo-navy/[0.08] shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-5 space-y-3">
+      <div className="bg-white rounded-3xl border border-claimondo-navy/[0.08] shadow-claimondo-md p-5 space-y-3">
         <div className="flex items-center gap-2">
           <ScaleIcon className="w-4 h-4 text-claimondo-ondo" />
           <h3 className="text-sm font-semibold text-claimondo-navy tracking-[-.012em]">Service-Typ</h3>
@@ -318,7 +318,7 @@ export default function Phase2TerminServiceTyp() {
             onClick={() => chooseServiceTyp('komplett')}
             className={`text-left p-[18px] rounded-2xl border-[1.5px] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] active:scale-[0.99] ${
               serviceTyp === 'komplett'
-                ? 'border-claimondo-ondo bg-gradient-to-br from-claimondo-ondo/[0.06] to-claimondo-light-blue/[0.04] shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)]'
+                ? 'border-claimondo-ondo bg-gradient-to-br from-claimondo-ondo/[0.06] to-claimondo-light-blue/[0.04] shadow-claimondo-md'
                 : 'border-claimondo-navy/[0.08] hover:border-claimondo-light-blue hover:-translate-y-[1px]'
             } disabled:opacity-50`}
           >
@@ -336,7 +336,7 @@ export default function Phase2TerminServiceTyp() {
             onClick={() => chooseServiceTyp('nur_gutachter')}
             className={`text-left p-[18px] rounded-2xl border-[1.5px] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] active:scale-[0.99] ${
               serviceTyp === 'nur_gutachter'
-                ? 'border-amber-500 bg-gradient-to-br from-amber-500/[0.08] to-amber-500/[0.04] shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)]'
+                ? 'border-amber-500 bg-gradient-to-br from-amber-500/[0.08] to-amber-500/[0.04] shadow-claimondo-md'
                 : 'border-claimondo-navy/[0.08] hover:border-claimondo-light-blue hover:-translate-y-[1px]'
             } disabled:opacity-50`}
           >
@@ -369,7 +369,7 @@ export default function Phase2TerminServiceTyp() {
             type="button"
             disabled={pending}
             onClick={() => setPhase(3)}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-ondo text-white text-sm font-semibold tracking-[-.01em] px-5 py-3.5 min-h-12 shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 hover:bg-[#3a6291] hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40"
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-ondo text-white text-sm font-semibold tracking-[-.01em] px-5 py-3.5 min-h-12 shadow-cta-ondo transition-all duration-200 hover:bg-[#3a6291] hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40"
           >
             Weiter zu Phase 4 →
           </button>

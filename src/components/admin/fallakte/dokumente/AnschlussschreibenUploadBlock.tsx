@@ -40,7 +40,10 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
         return
       }
       const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
-      await uploadAnschlussschreiben(fallId, urlData.publicUrl, file.name)
+      const r = await uploadAnschlussschreiben(fallId, urlData.publicUrl, file.name)
+      if (!r.success) {
+        console.error('[AnschlussschreibenUploadBlock] uploadAnschlussschreiben:', r.error)
+      }
       router.refresh()
     } finally {
       setUploading(false)

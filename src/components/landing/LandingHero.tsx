@@ -57,7 +57,7 @@ export async function LandingHero({ authenticatedUser }: Props) {
       <div className="relative mx-auto flex max-w-5xl flex-col items-center px-4 pb-16 pt-12 text-center sm:px-6 sm:pb-24 sm:pt-20">
         {/* Live-Trust-Badge: Glass-Pill mit pulsierendem Dot */}
         <div
-          className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-white/60 bg-white/65 px-4 py-1.5 text-xs font-semibold text-claimondo-navy shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm"
+          className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-white/60 bg-white/65 px-4 py-1.5 text-xs font-semibold text-claimondo-navy shadow-glass-pill backdrop-blur-md sm:text-sm"
           style={{ WebkitBackdropFilter: 'blur(12px)' }}
         >
           <span className="relative flex h-2 w-2">
@@ -130,7 +130,7 @@ export async function LandingHero({ authenticatedUser }: Props) {
           {STATS.map(({ icon: Icon, wert, label }, i) => (
             <div
               key={label}
-              className="flex items-center gap-3 rounded-2xl border border-white/55 bg-white/55 px-4 py-3.5 text-left shadow-[0_4px_18px_rgba(13,27,62,0.06)] backdrop-blur-lg sm:flex-col sm:items-start sm:gap-1 sm:px-5 sm:py-5"
+              className="flex items-center gap-3 rounded-2xl border border-white/55 bg-white/55 px-4 py-3.5 text-left shadow-glass-card backdrop-blur-lg sm:flex-col sm:items-start sm:gap-1 sm:px-5 sm:py-5"
               style={{
                 WebkitBackdropFilter: 'blur(16px)',
                 // sanfter Tilt der mittleren Card für visuelle Asymmetrie

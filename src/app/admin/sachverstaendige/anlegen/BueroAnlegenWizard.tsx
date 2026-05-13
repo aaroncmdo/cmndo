@@ -464,7 +464,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                       setBueroAnschriftPlaceId(place.place_id)
                       clearFieldError('bueroAnschrift')
                     }}
-                    className={`w-full border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                    className={`w-full border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 ${
                       fieldErrors.has('bueroAnschrift')
                         ? 'bg-red-50 border-red-400 focus:ring-red-400'
                         : 'bg-claimondo-bg border-claimondo-border focus:ring-[#1E3A5F]'
@@ -564,7 +564,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                       defaultValue={std.anschrift}
                       placeholder="Adresse via Auswahl..."
                       onSelect={place => { setStandortPlace(std.id, place); clearFieldError(`std-${std.id}-anschrift`) }}
-                      className={`w-full border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 ${
+                      className={`w-full border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 ${
                         fieldErrors.has(`std-${std.id}-anschrift`)
                           ? 'bg-red-50 border-red-400 focus:ring-red-400'
                           : 'bg-claimondo-bg border-claimondo-border focus:ring-[#1E3A5F]'

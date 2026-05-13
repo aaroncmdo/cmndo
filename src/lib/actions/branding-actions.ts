@@ -26,20 +26,20 @@ async function requireGutachter() {
  * Wird vom LogoUploadStep im Willkommen-Wizard (Solo-Variante) aufgerufen
  * nach erfolgreicher Stripe-Anzahlung.
  */
-export async function uploadSvLogo(formData: FormData): Promise<{
-  logo_url: string
-  brand_primary: string
-  brand_secondary: string
-}> {
+export type UploadLogoResult =
+  | { ok: true; logo_url: string; brand_primary: string; brand_secondary: string }
+  | { ok: false; error: string }
+
+export async function uploadSvLogo(formData: FormData): Promise<UploadLogoResult> {
   const { svId } = await requireGutachter()
 
   const file = formData.get('logo') as File
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
-  if (file.size > 2 * 1024 * 1024) throw new Error('Datei zu groß (max 2 MB)')
+  if (!file || file.size === 0) return { ok: false, error: 'Keine Datei ausgewählt' }
+  if (file.size > 2 * 1024 * 1024) return { ok: false, error: 'Datei zu groß (max 2 MB)' }
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
   if (!['png', 'jpg', 'jpeg', 'svg', 'webp'].includes(ext)) {
-    throw new Error('Nur PNG, JPG, SVG oder WebP erlaubt')
+    return { ok: false, error: 'Nur PNG, JPG, SVG oder WebP erlaubt' }
   }
 
   // AAR-218: Admin-Client für Storage — Identität oben bereits verifiziert.
@@ -48,7 +48,7 @@ export async function uploadSvLogo(formData: FormData): Promise<{
   const { error: uploadErr } = await db.storage
     .from('gutachter-logos')
     .upload(path, file, { contentType: file.type, upsert: true })
-  if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
+  if (uploadErr) return { ok: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
   const { data: urlData } = db.storage.from('gutachter-logos').getPublicUrl(path)
   const logoUrl = urlData.publicUrl
@@ -80,11 +80,11 @@ export async function uploadSvLogo(formData: FormData): Promise<{
     brand_extracted_at: new Date().toISOString(),
     use_custom_branding: true,
   }).eq('id', svId)
-  if (error) throw new Error(`DB-Update fehlgeschlagen: ${error.message}`)
+  if (error) return { ok: false, error: `DB-Update fehlgeschlagen: ${error.message}` }
 
   revalidatePath('/gutachter')
   revalidatePath('/gutachter/willkommen')
-  return { logo_url: logoUrl, brand_primary, brand_secondary }
+  return { ok: true, logo_url: logoUrl, brand_primary, brand_secondary }
 }
 
 /**
@@ -93,17 +93,13 @@ export async function uploadSvLogo(formData: FormData): Promise<{
  * Farben landen auf der Organisation, sodass alle Sub-SVs sie automatisch
  * erben (siehe BrandedLayout / GutachterShell).
  */
-export async function uploadBueroLogo(formData: FormData): Promise<{
-  logo_url: string
-  brand_primary: string
-  brand_secondary: string
-}> {
+export async function uploadBueroLogo(formData: FormData): Promise<UploadLogoResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const organisation_id = formData.get('organisation_id') as string | null
-  if (!organisation_id) throw new Error('organisation_id fehlt')
+  if (!organisation_id) return { ok: false, error: 'organisation_id fehlt' }
 
   // Berechtigung pruefen — nur der Inhaber darf das Buero-Logo setzen
   const db = createAdminClient()
@@ -112,16 +108,16 @@ export async function uploadBueroLogo(formData: FormData): Promise<{
     .eq('id', organisation_id)
     .single()
   if (!org || org.hauptansprechpartner_user_id !== user.id) {
-    throw new Error('Keine Berechtigung für dieses Büro')
+    return { ok: false, error: 'Keine Berechtigung für dieses Büro' }
   }
 
   const file = formData.get('logo') as File
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
-  if (file.size > 2 * 1024 * 1024) throw new Error('Datei zu groß (max 2 MB)')
+  if (!file || file.size === 0) return { ok: false, error: 'Keine Datei ausgewählt' }
+  if (file.size > 2 * 1024 * 1024) return { ok: false, error: 'Datei zu groß (max 2 MB)' }
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
   if (!['png', 'jpg', 'jpeg', 'svg', 'webp'].includes(ext)) {
-    throw new Error('Nur PNG, JPG, SVG oder WebP erlaubt')
+    return { ok: false, error: 'Nur PNG, JPG, SVG oder WebP erlaubt' }
   }
 
   // AAR-218: Storage-Upload via Admin-Client. Pfad: org/<id>/... damit
@@ -130,7 +126,7 @@ export async function uploadBueroLogo(formData: FormData): Promise<{
   const { error: uploadErr } = await db.storage
     .from('gutachter-logos')
     .upload(path, file, { contentType: file.type, upsert: true })
-  if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
+  if (uploadErr) return { ok: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
   const { data: urlData } = db.storage.from('gutachter-logos').getPublicUrl(path)
   const logoUrl = urlData.publicUrl
@@ -176,7 +172,7 @@ export async function uploadBueroLogo(formData: FormData): Promise<{
 
   revalidatePath('/gutachter')
   revalidatePath('/gutachter/willkommen')
-  return { logo_url: logoUrl, brand_primary, brand_secondary }
+  return { ok: true, logo_url: logoUrl, brand_primary, brand_secondary }
 }
 
 /**
@@ -187,11 +183,11 @@ export async function uploadBueroLogo(formData: FormData): Promise<{
 export async function saveSvBrandColors(params: {
   brand_primary: string
   brand_secondary: string
-}): Promise<void> {
+}): Promise<{ ok: boolean; error?: string }> {
   const { svId } = await requireGutachter()
   const hexRe = /^#[0-9a-fA-F]{6}$/
-  if (!hexRe.test(params.brand_primary)) throw new Error('Primaerfarbe ungueltig')
-  if (!hexRe.test(params.brand_secondary)) throw new Error('Sekundaerfarbe ungueltig')
+  if (!hexRe.test(params.brand_primary)) return { ok: false, error: 'Primaerfarbe ungueltig' }
+  if (!hexRe.test(params.brand_secondary)) return { ok: false, error: 'Sekundaerfarbe ungueltig' }
 
   // AAR-220: Theme aus dem manuell gewählten primary regenerieren — secondary
   // bleibt der User-Wert (Override).
@@ -206,8 +202,9 @@ export async function saveSvBrandColors(params: {
     brand_accent: theme.accent,
     brand_theme: theme,
   }).eq('id', svId)
-  if (error) throw new Error(error.message)
+  if (error) return { ok: false, error: error.message }
   revalidatePath('/gutachter')
+  return { ok: true }
 }
 
 /**
@@ -217,14 +214,14 @@ export async function saveBueroBrandColors(params: {
   organisation_id: string
   brand_primary: string
   brand_secondary: string
-}): Promise<void> {
+}): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const hexRe = /^#[0-9a-fA-F]{6}$/
-  if (!hexRe.test(params.brand_primary)) throw new Error('Primaerfarbe ungueltig')
-  if (!hexRe.test(params.brand_secondary)) throw new Error('Sekundaerfarbe ungueltig')
+  if (!hexRe.test(params.brand_primary)) return { ok: false, error: 'Primaerfarbe ungueltig' }
+  if (!hexRe.test(params.brand_secondary)) return { ok: false, error: 'Sekundaerfarbe ungueltig' }
 
   const db = createAdminClient()
   const { data: org } = await db.from('organisationen')
@@ -232,7 +229,7 @@ export async function saveBueroBrandColors(params: {
     .eq('id', params.organisation_id)
     .single()
   if (!org || org.hauptansprechpartner_user_id !== user.id) {
-    throw new Error('Keine Berechtigung')
+    return { ok: false, error: 'Keine Berechtigung' }
   }
 
   // AAR-220: Theme regenerieren mit User-Override für secondary.
@@ -255,4 +252,5 @@ export async function saveBueroBrandColors(params: {
   }).eq('organisation_id', params.organisation_id).eq('ist_parent_account', true)
 
   revalidatePath('/gutachter')
+  return { ok: true }
 }

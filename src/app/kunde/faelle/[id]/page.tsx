@@ -395,6 +395,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       getAlleAuftraege(admin, fall.id as string),
       getKanzleiFall(admin, fall.id as string),
     ])
+    // onboarding_complete lebt auf faelle (nicht leads) — direkt aus dem
+    // bereits geladenen fall-Objekt holen, um den 400-Fehler zu vermeiden.
     let leadInputForLifecycle: {
       sa_unterschrieben: boolean | null
       vollmacht_signiert_am: string | null
@@ -403,14 +405,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     if (fall.lead_id) {
       const { data: leadRow } = await admin
         .from('leads')
-        .select('sa_unterschrieben, vollmacht_signiert_am, onboarding_complete')
+        .select('sa_unterschrieben, vollmacht_signiert_am')
         .eq('id', fall.lead_id as string)
         .maybeSingle()
       if (leadRow) {
         leadInputForLifecycle = {
           sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
           vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
-          onboarding_complete: (leadRow.onboarding_complete as boolean | null) ?? null,
+          onboarding_complete: (fall.onboarding_complete as boolean | null) ?? null,
         }
       }
     }
@@ -571,15 +573,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           fall.nachbesichtigung_status === 'angefordert') && (
           <div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-3">
-              <span className="text-violet-600 text-lg">&#9888;</span>
+              <span className="text-claimondo-navy text-lg">&#9888;</span>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-violet-800">Nachbesichtigung läuft</p>
-                <p className="text-xs text-violet-600">Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.</p>
+                <p className="text-xs text-claimondo-navy">Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.</p>
               </div>
             </div>
             <Link
               href={`/kunde/nachbesichtigung/${fall.id as string}`}
-              className="inline-flex items-center text-xs font-medium rounded-md bg-violet-600 text-white px-3 py-1.5 hover:bg-violet-700"
+              className="inline-flex items-center text-xs font-medium rounded-md bg-claimondo-navy text-white px-3 py-1.5 hover:bg-violet-700"
             >
               Termine vorschlagen
             </Link>
