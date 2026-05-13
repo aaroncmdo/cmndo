@@ -4,19 +4,10 @@ import { useState, useTransition } from 'react'
 import { PhoneIcon, CheckCircleIcon, ClockIcon, PenSquareIcon, UserIcon, MapPinIcon, CalendarIcon, FileSignatureIcon, AlertCircleIcon } from 'lucide-react'
 import type { GutachterFinderAnfrage } from './actions'
 import { aktualisiereAnfrageStatus } from './actions'
-
-const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  entwurf: { label: 'Offen — anrufen', color: 'bg-orange-100 text-orange-800' },
-  neu: { label: 'Neu', color: 'bg-amber-100 text-amber-800' },
-  in_bearbeitung: { label: 'In Bearbeitung', color: 'bg-claimondo-ondo/20 text-claimondo-navy' },
-  sv_kontaktiert: { label: 'SV kontaktiert', color: 'bg-claimondo-ondo/10 text-claimondo-ondo' },
-  termin_bestaetigt: { label: 'Termin bestätigt', color: 'bg-green-100 text-green-700' },
-  abgeschlossen: { label: 'Abgeschlossen', color: 'bg-[#f8f9fb] text-claimondo-ondo' },
-  storniert: { label: 'Storniert', color: 'bg-red-50 text-red-500' },
-}
+import { STATUS_LABEL, STATUS_FALLBACK } from './constants'
 
 function StatusBadge({ status }: { status: string }) {
-  const cfg = STATUS_LABEL[status] ?? { label: status, color: 'bg-[#f8f9fb] text-claimondo-ondo' }
+  const cfg = STATUS_LABEL[status] ?? { label: status, color: STATUS_FALLBACK.color }
   return (
     <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${cfg.color}`}>
       {cfg.label}

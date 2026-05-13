@@ -6,15 +6,7 @@ import {
   FileSignatureIcon, UserIcon, CarIcon, PenIcon, MailIcon, ExternalLinkIcon,
 } from 'lucide-react'
 import { aktualisiereAnfrageStatus } from '../actions'
-
-const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  neu: { label: 'Neu', color: 'bg-amber-100 text-amber-800' },
-  in_bearbeitung: { label: 'In Bearbeitung', color: 'bg-claimondo-ondo/20 text-claimondo-navy' },
-  sv_kontaktiert: { label: 'SV kontaktiert', color: 'bg-claimondo-ondo/10 text-claimondo-ondo' },
-  termin_bestaetigt: { label: 'Termin bestätigt', color: 'bg-green-100 text-green-700' },
-  abgeschlossen: { label: 'Abgeschlossen', color: 'bg-[#f8f9fb] text-claimondo-ondo' },
-  storniert: { label: 'Storniert', color: 'bg-red-50 text-red-500' },
-}
+import { STATUS_LABEL } from '../constants'
 
 function Zeile({ label, value }: { label: string; value: React.ReactNode }) {
   if (!value) return null
