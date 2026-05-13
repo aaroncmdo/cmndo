@@ -7,8 +7,9 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { ChevronLeftIcon, ChevronRightIcon, FilterIcon, PlusIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon, FilterIcon, PlusIcon, UserXIcon } from 'lucide-react'
 import SpontanTerminModal from './SpontanTerminModal'
+import EmptyState from '@/components/shared/EmptyState'
 
 export type KalenderSv = {
   id: string
@@ -413,7 +414,7 @@ export default function KalenderClient({
       </div>
 
       {svList.length === 0 && (
-        <p className="text-xs text-claimondo-ondo">Keine aktiven Sachverständigen.</p>
+        <EmptyState icon={UserXIcon} title="Keine aktiven Sachverständigen" variant="compact" />
       )}
 
       <SpontanTerminModal

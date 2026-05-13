@@ -3,8 +3,9 @@
 // AAR-112: Isochrone-Client — Lead-Auswahl + SV-Vorschlagsliste via findBestSV
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { SearchIcon, TargetIcon, MapPinIcon, ArrowRightIcon, RefreshCwIcon } from 'lucide-react'
+import { SearchIcon, TargetIcon, MapPinIcon, ArrowRightIcon, RefreshCwIcon, InboxIcon } from 'lucide-react'
 import { listSvSuggestionsForLead, type SvSuggestion } from '../leads/[id]/actions'
+import EmptyState from '@/components/shared/EmptyState'
 
 type LeadOption = {
   id: string
@@ -64,7 +65,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
         </div>
         <div className="divide-y divide-claimondo-border max-h-[620px] overflow-y-auto">
           {filtered.length === 0 && (
-            <p className="px-4 py-6 text-xs text-claimondo-ondo/70 text-center">Keine Leads gefunden</p>
+            <EmptyState icon={InboxIcon} title="Keine Leads gefunden" variant="compact" />
           )}
           {filtered.map((l) => {
             const sel = selectedLead?.id === l.id

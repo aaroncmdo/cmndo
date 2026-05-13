@@ -1,8 +1,9 @@
 ﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
+import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon, AlertCircleIcon, InboxIcon, CheckCircleIcon } from 'lucide-react'
 import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConstants'
 import PageHeader from '@/components/shared/PageHeader'
+import EmptyState from '@/components/shared/EmptyState'
 
 export default async function DispatchDashboard() {
   const supabase = await createClient()
@@ -218,7 +219,7 @@ export default async function DispatchDashboard() {
               </Link>
             ))}
             {recentLeads.length === 0 && (
-              <p className="px-5 py-8 text-sm text-claimondo-ondo/70 text-center">Keine Leads vorhanden</p>
+              <EmptyState icon={InboxIcon} title="Keine Leads vorhanden" variant="compact" />
             )}
           </div>
         </div>
@@ -244,7 +245,7 @@ export default async function DispatchDashboard() {
               </div>
             ))}
             {tasks.length === 0 && (
-              <p className="px-5 py-8 text-sm text-claimondo-ondo/70 text-center">Keine offenen Tasks</p>
+              <EmptyState icon={CheckCircleIcon} title="Keine offenen Tasks" variant="compact" />
             )}
           </div>
         </div>
