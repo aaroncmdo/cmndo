@@ -29,6 +29,13 @@ export async function saveOnboardingStep(
 
     if (!updatesByTable.has(tabelle)) updatesByTable.set(tabelle, {})
     updatesByTable.get(tabelle)![spalte] = val
+
+    // 2026-05-13: Signatur-Felder setzen zusätzlich sa_unterzeichnet_am, damit
+    // konvertiere-anfrage-zu-fall.ts (Pflicht-Check auf sa_unterzeichnet_am)
+    // nicht blockiert wird. Vorher landeten alle GFAs auf status='entwurf'.
+    if (feld.typ === 'signature' && typeof val === 'string' && val.length > 100 && tabelle === 'gutachter_finder_anfragen') {
+      updatesByTable.get(tabelle)!['sa_unterzeichnet_am'] = new Date().toISOString()
+    }
   }
 
   let id = anfrageId

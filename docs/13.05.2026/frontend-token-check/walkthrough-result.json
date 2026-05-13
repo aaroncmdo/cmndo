@@ -1,0 +1,141 @@
+{
+  "pass": 27,
+  "fail": 0,
+  "results": [
+    {
+      "label": "01-home",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "02-gutachter-partner",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "03-login-email-tab",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "04-login-telefon-tab",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "05-login-google-tab",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "10-admin-dashboard",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "11-admin-dispatch",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "12-admin-faelle",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "13-admin-sv",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "14-admin-kalender",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "15-admin-tasks",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "16-admin-finance",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "17-admin-abrechnungen",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "18-admin-team",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "19-admin-statistiken",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "20-finance-abrechnungen",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "20-finance-kanzleiabr",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "20-finance-provisionen",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "20-finance-bersicht",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "30-gutachter-home",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "31-sv-heute",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "32-sv-faelle",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "33-sv-gebiet",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "34-sv-kalender",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "35-sv-abrechnung",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "36-sv-statistiken",
+      "hits": [],
+      "err": false
+    },
+    {
+      "label": "37-sv-nachrichten",
+      "hits": [],
+      "err": false
+    }
+  ]
+}

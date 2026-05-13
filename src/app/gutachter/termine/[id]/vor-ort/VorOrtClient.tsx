@@ -227,7 +227,7 @@ export default function VorOrtClient({
                     <button
                       onClick={() => handleCameraClick(doc.key)}
                       disabled={isUploading}
-                      className="flex items-center gap-1.5 bg-[var(--brand-secondary)] hover:bg-[#3a5f87] text-white rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                      className="flex items-center gap-1.5 bg-[var(--brand-secondary)] hover:bg-claimondo-shield text-white rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                     >
                       <CameraIcon className="w-3.5 h-3.5" />
                       {isUploading ? 'Lädt...' : 'Aufnehmen'}
@@ -327,7 +327,7 @@ export default function VorOrtClient({
           className={`w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 text-base font-bold transition-colors ${
             progressPct === 100
               ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-              : 'bg-[var(--brand-primary)] hover:bg-[#162d4a] text-white'
+              : 'bg-[var(--brand-primary)] hover:bg-claimondo-navy text-white'
           }`}
         >
           <ClipboardListIcon className="w-5 h-5" />

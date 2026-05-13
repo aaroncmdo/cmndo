@@ -42,7 +42,7 @@ export default async function KundeTerminPage({
       <div className="relative min-h-screen flex items-center justify-center bg-claimondo-bg px-6 overflow-hidden" style={{ background: 'radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,0.18), transparent 60%), radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,0.08), transparent 70%), #f2f3f7' }}>
         <SheetCard className="text-center">
           <h1 className="text-2xl font-bold text-claimondo-navy tracking-[-.024em] mb-3" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>Link nicht mehr gültig</h1>
-          <p className="text-[15px] text-[#4b5468] leading-relaxed">Dieser Tracking-Link ist nur rund um den Termin gültig.</p>
+          <p className="text-[15px] text-claimondo-ondo/80 leading-relaxed">Dieser Tracking-Link ist nur rund um den Termin gültig.</p>
         </SheetCard>
       </div>
     )
@@ -67,7 +67,7 @@ export default async function KundeTerminPage({
               </svg>
             </div>
             <h1 className="text-2xl font-bold text-claimondo-navy tracking-[-.024em] mb-2" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>Termin abgeschlossen</h1>
-            <p className="text-[15px] text-[#4b5468] leading-relaxed">{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt.</p>
+            <p className="text-[15px] text-claimondo-ondo/80 leading-relaxed">{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt.</p>
           </SheetCard>
         </div>
       )

@@ -205,7 +205,7 @@ export default function KundeTermineClient({
                     isSelected
                       ? 'bg-claimondo-navy text-white'
                       : isToday
-                        ? 'bg-[#eef3f9] text-claimondo-navy font-bold'
+                        ? 'bg-claimondo-ondo/[0.06] text-claimondo-navy font-bold'
                         : 'hover:bg-claimondo-bg text-claimondo-navy'
                   } ${dayTermine.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
                   disabled={dayTermine.length === 0}
@@ -316,7 +316,7 @@ function TerminCard({
       className={`block bg-white rounded-2xl border border-claimondo-border p-4 hover:border-claimondo-ondo/40 hover:shadow-sm transition ${muted ? 'opacity-90' : ''}`}
     >
       <div className="flex items-start gap-3">
-        <div className="w-9 h-9 rounded-xl bg-[#f0f4f8] flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-claimondo-bg flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-claimondo-ondo" />
         </div>
         <div className="flex-1 min-w-0">

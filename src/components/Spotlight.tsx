@@ -49,7 +49,7 @@ export default function Spotlight() {
         label: 'Sachverständige',
         icon: HardHatIcon,
         iconColor: 'text-claimondo-navy',
-        hoverBg: 'hover:bg-purple-50',
+        hoverBg: 'hover:bg-claimondo-navy/[0.05]',
         results: d.sv ?? [],
       },
     ]

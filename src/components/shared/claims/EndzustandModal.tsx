@@ -240,7 +240,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
           <button
             type="submit"
             disabled={isPending}
-            className="px-4 py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-[#1a2d5a] disabled:opacity-50"
+            className="px-4 py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-navy disabled:opacity-50"
           >
             {isPending ? 'Wird gespeichert…' : t.label}
           </button>

@@ -58,7 +58,7 @@ export function Input({
         fullWidth ? 'w-full' : '',
         sizeClassMap[size],
         'bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-2xl px-4',
-        'text-claimondo-navy tracking-[-.01em] placeholder:text-[#8a93a6]',
+        'text-claimondo-navy tracking-[-.01em] placeholder:text-claimondo-ondo/60',
         'transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]',
         'hover:bg-claimondo-navy/[0.08]',
         'focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo',

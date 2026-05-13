@@ -212,7 +212,7 @@ export default function AuftragHeaderPanel({
                         : isDone
                           ? 'bg-emerald-500 text-white'
                           : istQc
-                            ? 'bg-claimondo-navy text-white ring-2 ring-violet-300'
+                            ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-ondo/50'
                             : isCurrent
                               ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
                               : 'bg-white/60 text-claimondo-ondo/60 border border-claimondo-border'

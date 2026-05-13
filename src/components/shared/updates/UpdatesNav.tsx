@@ -150,7 +150,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
     buttonClass = 'bg-red-500 hover:bg-red-600 text-white'
   } else if (unreadTotal > 0) {
     buttonClass = variant === 'dark'
-      ? 'bg-claimondo-shield hover:bg-[#2A4570] text-white'
+      ? 'bg-claimondo-shield hover:bg-claimondo-navy text-white'
       : 'bg-claimondo-navy hover:bg-claimondo-shield text-white'
   } else {
     buttonClass = variant === 'dark'

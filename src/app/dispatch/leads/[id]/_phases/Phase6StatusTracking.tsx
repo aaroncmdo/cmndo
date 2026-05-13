@@ -291,8 +291,8 @@ export default function Phase6StatusTracking({
                 disabled={resendPending || !l.telefon}
                 className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
                   l.whatsapp_verfuegbar === true
-                    ? 'bg-[#25D366] text-white hover:bg-[#1fa855] ring-2 ring-emerald-300'
-                    : 'bg-[#25D366] text-white hover:bg-[#1fa855]'
+                    ? 'bg-[#25D366] text-white hover:brightness-95 ring-2 ring-emerald-300'
+                    : 'bg-[#25D366] text-white hover:brightness-95'
                 }`}
               >
                 <SendIcon className="w-3.5 h-3.5" />

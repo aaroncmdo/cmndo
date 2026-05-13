@@ -123,10 +123,10 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
     return { icon: XCircleIcon, title: 'Die Versicherung hat abgelehnt', description: 'Dein Kundenberater meldet sich bei dir um die nächsten Schritte zu besprechen.', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' }
 
   if (s === 'kanzlei')
-    return { icon: ScaleIcon, title: 'Deine Akte ist bei der Kanzlei', description: `${fall.kanzlei_ansprechpartner_name ?? 'Die Partnerkanzlei'} übernimmt die rechtliche Vertretung für deinen Fall.`, color: 'text-claimondo-ondo', bg: 'bg-[#eef4fb]', border: 'border-claimondo-light-blue' }
+    return { icon: ScaleIcon, title: 'Deine Akte ist bei der Kanzlei', description: `${fall.kanzlei_ansprechpartner_name ?? 'Die Partnerkanzlei'} übernimmt die rechtliche Vertretung für deinen Fall.`, color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo/[0.06]', border: 'border-claimondo-light-blue' }
 
   if (s === 'vs_kontakt')
-    return { icon: MailIcon, title: 'Wir verhandeln mit der Versicherung', description: `Wir sind in direktem Kontakt mit ${fall.gegner_versicherung ?? 'der Versicherung'} und arbeiten an deiner Regulierung.`, color: 'text-claimondo-ondo', bg: 'bg-[#eef4fb]', border: 'border-claimondo-light-blue' }
+    return { icon: MailIcon, title: 'Wir verhandeln mit der Versicherung', description: `Wir sind in direktem Kontakt mit ${fall.gegner_versicherung ?? 'der Versicherung'} und arbeiten an deiner Regulierung.`, color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo/[0.06]', border: 'border-claimondo-light-blue' }
 
   // Welle-7 in_bearbeitung: Feindetails via aktuelle_phase
   if (s === 'onboarding' || s === 'in_bearbeitung') {

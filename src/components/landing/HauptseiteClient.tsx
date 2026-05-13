@@ -341,7 +341,7 @@ function VersicherungSection() {
           {INFO_CARDS.map(({ icon: Icon, title, href, body }, i) => (
             <FadeUp key={title} delay={i * 80}>
               <Link href={href} className="group flex flex-col gap-0 rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_1px_3px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
-                <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef4fb]">
+                <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-claimondo-ondo/[0.06]">
                   <Icon className="h-[18px] w-[18px] text-claimondo-ondo" />
                 </div>
                 <h3 className="mb-3 text-[17px] font-bold tracking-[-0.02em] text-claimondo-navy">
@@ -701,7 +701,7 @@ function PortalSection() {
             <div className="mt-8 flex flex-col gap-6">
               {PORTAL_FEATURES.map(({ icon: Icon, title, sub }) => (
                 <div key={title} className="grid grid-cols-[40px_1fr] gap-3.5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef4fb]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-claimondo-ondo/[0.06]">
                     <Icon className="h-[18px] w-[18px] text-claimondo-ondo" />
                   </div>
                   <div>

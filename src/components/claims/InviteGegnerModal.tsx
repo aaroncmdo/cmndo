@@ -168,7 +168,7 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   href={result.share_payload.whatsapp_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="inline-flex items-center gap-2 bg-[#25D366] hover:brightness-95 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   💬 In WhatsApp öffnen
                 </a>

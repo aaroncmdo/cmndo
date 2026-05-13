@@ -366,7 +366,7 @@ function ChatListe({
   return (
     <div className="space-y-3">
       {focus && (
-        <div className="rounded-lg border border-[var(--brand-accent)] bg-[#f4f8fc] px-3 py-2 text-xs text-[var(--brand-primary)]">
+        <div className="rounded-lg border border-[var(--brand-accent)] bg-claimondo-bg px-3 py-2 text-xs text-[var(--brand-primary)]">
           Fokus auf <strong>{focus.name}</strong> ({ROLLE_LABEL[focus.rolle]}).
           Zum Schreiben den Chat im Haupt-Layout nutzen — hier ist die Akten-
           Ansicht read-only.

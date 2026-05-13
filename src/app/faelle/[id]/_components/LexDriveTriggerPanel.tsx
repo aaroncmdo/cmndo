@@ -253,7 +253,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                           value={opt}
                           checked={payload[field] === opt}
                           onChange={e => setPayload({ ...payload, [field]: e.target.value })}
-                          className="accent-[#4573A2]"
+                          className="accent-claimondo-ondo"
                         />
                         <span className="capitalize">{opt}</span>
                       </label>

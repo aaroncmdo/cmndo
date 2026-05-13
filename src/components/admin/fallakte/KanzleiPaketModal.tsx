@@ -156,7 +156,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
                       type="file"
                       accept="application/pdf,image/*"
                       onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                      className="block w-full text-sm text-claimondo-navy file:mr-3 file:rounded-md file:border-0 file:bg-[#EBF1F8] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-claimondo-navy hover:file:bg-[#d9e5f2]"
+                      className="block w-full text-sm text-claimondo-navy file:mr-3 file:rounded-md file:border-0 file:bg-claimondo-ondo/[0.06] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-claimondo-navy hover:file:bg-claimondo-light-blue/[0.30]"
                     />
                     <p className="text-xs text-claimondo-ondo">
                       Wird im Bucket <code className="font-mono">fall-dokumente</code> unter{' '}
@@ -165,7 +165,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
                   </div>
                 )}
 
-                <div className="rounded-md border border-[#EBF1F8] bg-claimondo-bg p-3">
+                <div className="rounded-md border border-claimondo-ondo/[0.06] bg-claimondo-bg p-3">
                   <p className="text-xs font-medium text-claimondo-navy mb-1.5">Side-Effects (Vorschau)</p>
                   <ul className="list-disc ml-4 space-y-0.5 text-xs text-claimondo-navy">
                     {paket.side_effects.map((s, i) => (
@@ -191,7 +191,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
             type="button"
             onClick={handleSubmit}
             disabled={pending || !paket}
-            className="text-sm rounded-md bg-claimondo-navy text-white px-3 py-1.5 hover:bg-[#162857] disabled:opacity-50"
+            className="text-sm rounded-md bg-claimondo-navy text-white px-3 py-1.5 hover:bg-claimondo-navy disabled:opacity-50"
           >
             {pending ? 'Wird eingelesen …' : 'Paket speichern'}
           </button>
