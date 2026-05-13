@@ -157,7 +157,7 @@ const STATUS_PHASES = [
   { key: 'ersterfassung', label: 'Aufgenommen', description: 'Ihr Fall wird vorbereitet' },
   { key: 'sv-termin', label: 'Gutachter-Termin', description: 'Termin wurde reserviert' },
   { key: 'begutachtung', label: 'Begutachtung', description: 'Gutachter erstellt das Gutachten' },
-  { key: 'kanzlei', label: 'Kanzlei', description: 'Anwalt uebernimmt die Abwicklung' },
+  { key: 'kanzlei', label: 'Kanzlei', description: 'Anwalt übernimmt die Abwicklung' },
   { key: 'regulierung', label: 'Regulierung', description: 'Versicherung zahlt' },
 ]
 
@@ -430,8 +430,8 @@ export default function OnboardingWizard({
                 <div className="mb-4"><SparklesIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">Willkommen bei Claimondo, {vorname}!</h1>
                 <p className="mt-3 text-sm text-claimondo-ondo leading-relaxed">
-                  Wir kuemmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
-                  Dieser kurze Einstieg zeigt Ihnen Ihre naechsten Schritte — dauert ca. 3 Minuten.
+                  Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
+                  Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.
                 </p>
 
                 {/* Schnellstart per ZB1-Scan: spart manuelle Eingabe von FIN, HSN/TSN, Halter */}

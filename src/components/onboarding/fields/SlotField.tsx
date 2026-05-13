@@ -12,7 +12,7 @@ interface Props {
   disabled?: boolean
   // 2026-05-11 Funnel v2: Tier-aware. Genau eine der beiden IDs ist gesetzt
   // sobald der SV (Karten-Click oder Auto-Geo-Match) feststeht. Wenn keine
-  // gesetzt: statische Demo-Slots fuer fruehe Wizard-Phasen.
+  // gesetzt: statische Demo-Slots für frühe Wizard-Phasen.
   svId?: string | null
   svLeadId?: string | null
   anfrageId?: string | null
