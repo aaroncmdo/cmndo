@@ -374,7 +374,7 @@ export default function SvKalenderVergleichModal({
                     Termin (belegt)
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded bg-claimondo-ondo/20 border border-blue-400 border-dashed" />
+                    <span className="inline-block w-3 h-3 rounded bg-claimondo-ondo/20 border border-claimondo-ondo/60 border-dashed" />
                     Route von/zum Besichtigungsort
                   </span>
                   <span className="flex items-center gap-1.5 text-claimondo-ondo">
@@ -449,7 +449,7 @@ export default function SvKalenderVergleichModal({
                         data-termin-block
                         className={`absolute left-0 right-2 rounded-lg border-2 border-dashed flex items-center justify-center text-[10px] px-2 transition-colors ${
                           l.reicht
-                            ? 'bg-claimondo-ondo/10 border-blue-300 text-claimondo-navy cursor-pointer hover:bg-claimondo-ondo/20 hover:border-blue-400'
+                            ? 'bg-claimondo-ondo/10 border-claimondo-ondo/40 text-claimondo-navy cursor-pointer hover:bg-claimondo-ondo/20 hover:border-claimondo-ondo/60'
                             : 'bg-red-50 border-red-300 text-red-700 cursor-not-allowed'
                         }`}
                         style={{ top, height }}
