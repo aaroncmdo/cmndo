@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { KanzleiPaketPDF, type KanzleiPaketData } from '@/lib/pdf/kanzlei-paket'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export async function GET(
   _req: NextRequest,
@@ -73,13 +74,19 @@ export async function GET(
     ? { name: schaedigerPartei.name, versicherung: schaedigerPartei.versicherung_name, versicherungNr: schaedigerPartei.versicherung_nr, telefon: schaedigerPartei.telefon, email: schaedigerPartei.email }
     : null
 
-  const dokumenteMapped = (dokumente ?? []).map(d => ({
-    typ: d.dokument_typ as string | null,
-    datei_url: d.storage_path
-      ? supabase.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl
-      : null,
-    datei_name: (d.original_filename as string | null) ?? null,
-  }))
+  // PDF wird der Kanzlei per Email zugestellt — die Doku-Links müssen mehrere
+  // Tage haltbar sein. TTL = 7d über STORAGE_TTL.email. Sobald
+  // STORAGE_USE_SIGNED_URLS=true gilt, sind die URLs Zugriffs-geschützt;
+  // davor liefert getStorageUrl die heutige public-URL (kein Behavior-Change).
+  const dokumenteMapped = await Promise.all(
+    (dokumente ?? []).map(async d => ({
+      typ: d.dokument_typ as string | null,
+      datei_url: d.storage_path
+        ? await getStorageUrl(supabase, 'fall-dokumente', d.storage_path as string, { context: 'email' })
+        : null,
+      datei_name: (d.original_filename as string | null) ?? null,
+    })),
+  )
   const fotos = dokumenteMapped.filter(d => d.typ?.startsWith('foto'))
   const beweise = dokumenteMapped.filter(d => !d.typ?.startsWith('foto'))
 
