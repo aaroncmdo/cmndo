@@ -263,7 +263,7 @@ function PreviewCard({
       flexDirection: 'column',
       gap: 14,
     }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-success-dark, #1a7a35)', letterSpacing: '-.005em' }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-success, #1a7a35)', letterSpacing: '-.005em' }}>
         ✓ Daten ausgelesen — bitte prüfen und ggf. korrigieren
       </div>
       <EditRow label="Kennzeichen" value={edit.kennzeichen} onChange={v => onChange({ ...edit, kennzeichen: v })} />

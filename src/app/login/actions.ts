@@ -130,6 +130,14 @@ export async function login(formData: FormData) {
   // Next.js Router-Cache die alte RSC-Payload fuer den Ziel-Pfad
   // (z.B. /gutachter, das vor dem Login als 'redirect to /login' gecached
   // wurde) verwirft.
-  revalidatePath(targetPath, 'layout')
+  //
+  // CMM-14: 'layout'-Type triggerte deterministisch 502 Bad Gateway bei
+  // rolle='sachverstaendiger' (Login-Server-Action upstream-crash). Andere
+  // Rollen mit demselben Code-Pfad gehen mit 303. Hypothese: Layout-Cache-
+  // Invalidate-Race mit dem Supabase-Cookie-Adapter im noch-laufenden
+  // Server-Action-Cycle. 'page' ist enger scoped — invalidate nur die Page-
+  // RSC. Layout wird beim nächsten Render eh frisch geladen, die Cache-
+  // Sicherheit bleibt erhalten.
+  revalidatePath(targetPath, 'page')
   redirect(targetPath)
 }
