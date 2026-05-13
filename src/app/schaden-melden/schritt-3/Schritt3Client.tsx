@@ -153,7 +153,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
 
   if (uiMode === 'uploading') {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-12 text-center">
+      <div className="flex flex-col items-center gap-4 rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-12 text-center">
         <Loader2 className="h-8 w-8 animate-spin text-claimondo-ondo" />
         <div>
           <p className="font-semibold text-claimondo-navy">Wir lesen Ihren Fahrzeugschein aus …</p>
@@ -166,7 +166,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
   if (uiMode === 'idle') {
     return (
       <div className="space-y-6">
-        <div className="rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-6">
+        <div className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-6">
           <h2 className="mb-2 text-lg font-semibold text-claimondo-navy">
             Fahrzeugschein scannen
           </h2>

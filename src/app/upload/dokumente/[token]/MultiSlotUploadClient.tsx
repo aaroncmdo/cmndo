@@ -167,7 +167,7 @@ export default function MultiSlotUploadClient({
         {alleHochgeladen ? (
           <AbschlussCard vorname={vorname} />
         ) : (
-          <div className="bg-white rounded-3xl shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] p-6 space-y-4">
+          <div className="bg-white rounded-3xl shadow-sheet p-6 space-y-4">
             <div className="space-y-1">
               <h1 className="text-lg font-semibold text-claimondo-navy">
                 Hallo {vorname || 'und willkommen'}!
@@ -466,7 +466,7 @@ function SlotCard({
 
 function AbschlussCard({ vorname }: { vorname: string }) {
   return (
-    <div className="bg-white rounded-3xl shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] p-6 text-center space-y-3">
+    <div className="bg-white rounded-3xl shadow-sheet p-6 text-center space-y-3">
       <div className="w-14 h-14 mx-auto bg-green-100 rounded-full flex items-center justify-center">
         <CheckCircle2Icon className="w-8 h-8 text-green-600" />
       </div>

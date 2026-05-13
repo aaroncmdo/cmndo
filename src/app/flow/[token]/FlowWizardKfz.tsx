@@ -341,7 +341,7 @@ export default function FlowWizardKfz({
       {/* Content */}
       <div className="flex-1 flex flex-col px-4 sm:px-5 pt-5 pb-32 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div key={currentStep.id} className="bg-white rounded-[36px] px-6 py-7 shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]">
+          <div key={currentStep.id} className="bg-white rounded-claimondo-sheet px-6 py-7 shadow-sheet animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]">
 
             {/* ═══ SCHRITT 1: ZUSAMMENFASSUNG + DATENSCHUTZ ═══ */}
             {currentStep.id === 'zusammenfassung' && (
@@ -474,7 +474,7 @@ export default function FlowWizardKfz({
 
                 <button
                   onClick={() => setStepIndex(stepIndexById('sa'))}
-                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
                   Weiter
                 </button>
@@ -592,7 +592,7 @@ export default function FlowWizardKfz({
                 <button
                   onClick={handleSignSA}
                   disabled={!signatureBlob || !saAccepted || submittingSA}
-                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
                   {submittingSA ? 'Wird verarbeitet ...' : 'SA unterzeichnen'}
                 </button>
@@ -664,7 +664,7 @@ export default function FlowWizardKfz({
                     </div>
                     <a
                       href={magicLink ?? '/kunde/onboarding'}
-                      className="block w-full text-center min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                      className="block w-full text-center min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                     >
                       Zu meinem Portal
                     </a>
@@ -692,7 +692,7 @@ export default function FlowWizardKfz({
                 setStepIndex(1) // → gutachter
               }}
               disabled={!datenschutz || !editVorname || !editNachname}
-              className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+              className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
             >
               Weiter
             </button>
@@ -737,7 +737,7 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-4 py-3.5 rounded-[14px] border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-base text-claimondo-navy tracking-[-.01em] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:border-claimondo-ondo focus:bg-white focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+        className="w-full px-4 py-3.5 rounded-claimondo-md border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-base text-claimondo-navy tracking-[-.01em] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:border-claimondo-ondo focus:bg-white focus:shadow-focus-ondo transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
       />
     </div>
   )

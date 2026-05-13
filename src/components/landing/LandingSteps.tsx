@@ -34,7 +34,7 @@ export async function LandingSteps() {
             return (
               <li
                 key={step.num}
-                className="glass-card relative rounded-2xl p-8 shadow-[0_4px_20px_rgba(13,27,62,0.07)]"
+                className="glass-card relative rounded-2xl p-8 shadow-glass-card"
               >
                 <div
                   className="absolute -left-4 -top-4 flex h-10 w-10 items-center justify-center rounded-full bg-claimondo-navy font-bold text-white"

@@ -43,7 +43,7 @@ function classesFor({
   canNavigate: boolean
 }) {
   const wrapper = isActive
-    ? 'bg-claimondo-ondo text-white shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] scale-[1.02]'
+    ? 'bg-claimondo-ondo text-white shadow-cta-ondo scale-[1.02]'
     : isDone
       ? 'bg-claimondo-navy/[0.06] text-claimondo-navy hover:bg-claimondo-navy/[0.10] cursor-pointer'
       : canNavigate
@@ -87,7 +87,7 @@ export default function PhaseHeader({
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="w-full flex items-center justify-between gap-3 min-h-12 px-5 rounded-full bg-claimondo-ondo text-white text-sm font-semibold tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] active:scale-[0.98]"
+          className="w-full flex items-center justify-between gap-3 min-h-12 px-5 rounded-full bg-claimondo-ondo text-white text-sm font-semibold tracking-[-.01em] shadow-cta-ondo transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] active:scale-[0.98]"
         >
           <span className="flex items-center gap-2.5">
             <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/20 text-[12px] font-bold">
