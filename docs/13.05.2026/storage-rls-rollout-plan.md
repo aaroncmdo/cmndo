@@ -2,7 +2,7 @@
 
 **Datum:** 13.05.2026
 **Spec:** `docs/superpowers/specs/2026-05-13-rls-hardening-phase-1-design.md` §5
-**Status:** Schritt A ausgeliefert (PR #905). Schritt B-D ausstehend.
+**Status (Update 17:00 13.05.):** Schritt A ✅ (#905), B Batch 1 ✅ (#945), B Batch 2 ✅ (vorgearbeitet, kein PR), B Batch 3 ✅ (#947, Option-1-Strategy mit STORAGE_TTL.email), B Batch 4 ✅ (Signatur-Server-Action `unterschrift-upload.ts` bereits implementiert). **Schritt C ✅** (Option 1 entschieden + via `getStorageUrl({context:'email'})` umgesetzt). **Schritt D ⏳ offen** — App-Code-Layer ist für signed-URLs bereit, aber Bucket-Lockdown braucht Pfad-Konvention-Spec (App-Code hat heterogene Pfade: `sv-uploads/{fallId}/...`, `flow/{token}/...`, `{fallId}/...` — die Plan-Annahme `<fall_id>/<file>` greift nicht durchgehend; eine Lookup-Policy via `fall_dokumente.storage_path`-JOIN oder Pfad-Vereinheitlichung muss gewählt werden bevor `public=false` gesetzt werden kann).
 
 ---
 
