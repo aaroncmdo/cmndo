@@ -5,6 +5,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
+import { TrustBlock } from '@/components/landing/TrustBlock'
 import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
@@ -293,6 +294,15 @@ export default function ErsteinschaetzungPage() {
           </div>
         </div>
       </section>
+
+      <TrustBlock
+        stats={[
+          { wert: '< 15 Min', label: 'Ergebnis-Zeit' },
+          { wert: '0 €', label: 'KI-Check' },
+          { wert: '§249 BGB', label: 'Anspruchs-Basis' },
+          { wert: '89+', label: 'Sachverständige' },
+        ]}
+      />
 
       <LandingFooter />
       <StickyCallBar quelle="Ersteinschätzung" />

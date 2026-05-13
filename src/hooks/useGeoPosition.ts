@@ -20,6 +20,8 @@ import { getAktiverAuftrag, type AktiverAuftrag } from '@/lib/auftrag/aktiver-au
 
 const AKTIVER_AUFTRAG_REFRESH_MS = 5 * 60 * 1000  // alle 5 min Termin-Liste neu prüfen
 const ETA_RECALC_MIN_INTERVAL_MS = 30_000           // nicht häufiger als alle 30 s
+const LIVE_UPSERT_MIN_INTERVAL_MS = 15_000           // Drossel: max alle 15 s ein DB-Upsert
+const LIVE_UPSERT_MIN_DISTANCE_M = 25                // oder wenn >25 m seit letztem Schreib
 const FENSTER_PUFFER_MIN = 15
 const FENSTER_FALLBACK_MIN = 90
 const ANKUNFT_RADIUS_M = 100
@@ -41,6 +43,8 @@ export function useGeoPosition(svId: string | null) {
   const watchIdRef = useRef<number | null>(null)
   const auftragRef = useRef<AktiverAuftrag>(null)
   const lastEtaCallRef = useRef<number>(0)
+  const lastUpsertAtRef = useRef<number>(0)
+  const lastUpsertPosRef = useRef<{ lat: number; lng: number } | null>(null)
   const ankunftGefeuertRef = useRef<boolean>(false)
   const [, force] = useState(0)
   const supabase = createClient()
@@ -78,18 +82,28 @@ export function useGeoPosition(svId: string | null) {
         const lng = pos.coords.longitude
         const now = new Date().toISOString()
 
-        // Position immer schreiben (kein ETA-Kontext nötig)
-        await supabase.from('sv_live_location').upsert(
-          {
-            sv_id: svId,
-            fall_id: null,
-            lat,
-            lng,
-            accuracy: pos.coords.accuracy,
-            updated_at: now,
-          },
-          { onConflict: 'sv_id' },
-        )
+        // Drossel: nur upserten wenn ≥15 s vergangen ODER ≥25 m bewegt
+        // Browser-watchPosition feuert sonst alle 1–5 s = hunderte DB-Writes/Min
+        const nowMs = Date.now()
+        const last = lastUpsertPosRef.current
+        const movedM = last ? haversineMeters(lat, lng, last.lat, last.lng) : Infinity
+        const timeOk = nowMs - lastUpsertAtRef.current >= LIVE_UPSERT_MIN_INTERVAL_MS
+        const distOk = movedM >= LIVE_UPSERT_MIN_DISTANCE_M
+        if (timeOk || distOk) {
+          lastUpsertAtRef.current = nowMs
+          lastUpsertPosRef.current = { lat, lng }
+          await supabase.from('sv_live_location').upsert(
+            {
+              sv_id: svId,
+              fall_id: null,
+              lat,
+              lng,
+              accuracy: pos.coords.accuracy,
+              updated_at: now,
+            },
+            { onConflict: 'sv_id' },
+          )
+        }
 
         const auftrag = auftragRef.current
         if (!auftrag) return
