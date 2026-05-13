@@ -286,4 +286,27 @@ Die App ist whitelabel-fähig: ein verifizierter SV mit `use_custom_branding=tru
 * **Nie** Layout-kritische Properties (`position`, `inset`) per Tailwind-Utility-Klasse auf einem Element, dem eine 3rd-Party-Lib (mapbox-gl etc.) eine eigene Klasse mit `position`-Regel verpasst — inline-`style` nutzen (siehe `GutachterFinderMapClient`-Incident 12.05.).
 
 **Was NICHT gebrandet wird:** Marketing-Pages (`/`, `/faq`, `/gutachter-finden` — kein User-Context), Admin-/Dispatch-/Kanzlei-Portale (interne Tools), Auth-Mails (`TwoFactorCode`), PDF-Generation, Native-App. Siehe `docs/12.05.2026/branding-rollout-spec.md`.
+
+## Token-Audit-Drift-Bremse (PR #1025)
+
+CI fährt automatisch `npm run check:token-audit`. Das Script blockt:
+
+* **bracket-hex in className** (z.B. `bg-[#0D1B3E]`) — ersetzen mit `bg-claimondo-navy`
+* **raw inline-hex** in `style={{ color: '#0D1B3E' }}` ohne `var(--brand-*)` Fallback — ersetzen mit `style={{ color: 'var(--brand-primary, #0D1B3E)' }}`
+
+**Whitelist** (dokumentierte Ausnahmen in `src/lib/external-brand-colors.ts`):
+WhatsApp `#25D366`, LinkedIn `#0A66C2`, LexDrive `#0e5be9`, 4 SV-Typ-Map-Marker-Farben (AAR-198), Landing-Cream `#F5F1E8`, Navigation-Gold `#C9A84C`.
+
+**Skip-Header**: Files die zwingend raw inline-hex brauchen (Email-Templates, PDF-Generation, Error-Boundaries vor Tailwind, Mapbox-GL-Markers, SVG-Replikate physischer Objekte) bekommen am Anfang:
+```
+// Token-Audit-Skip: <konkreter Grund>
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
+```
+Das Script erkennt den Header und skippt die Datei komplett.
+
+**Wenn der Audit fehlschlägt:** Fix per Fall:
+1. Hex zu Claimondo-Token mappen (`bg-[#0D1B3E]` → `bg-claimondo-navy`)
+2. Oder zu `var(--brand-*, #fallback)` Pattern umschreiben (für inline-style)
+3. Oder Header setzen + in dieser Liste dokumentieren (für legit Sonderfälle)
+4. Oder neue Brand-Farbe in `external-brand-colors.ts` + Whitelist im Script aufnehmen
 <!-- END:branding-rules -->
