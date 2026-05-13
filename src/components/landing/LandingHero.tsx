@@ -63,11 +63,11 @@ export async function LandingHero({ authenticatedUser }: Props) {
           <span className="relative flex h-2 w-2">
             <span
               className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70"
-              style={{ background: '#22A06B' }}
+              style={{ background: 'var(--brand-success, #22A06B)' }}
             />
             <span
               className="relative inline-flex h-2 w-2 rounded-full"
-              style={{ background: '#22A06B' }}
+              style={{ background: 'var(--brand-success, #22A06B)' }}
             />
           </span>
           {t('trust_badge')}

@@ -344,10 +344,10 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
       {/* SV-Match-Banner als Glass-Pill wenn Slot-Phase aktiv + SV gefunden */}
       {hasSlotFeld && svName && (
         <GlassPill className="self-start gap-2.5">
-          <CheckCircle2 size={16} style={{ color: '#1a7a35' }} />
+          <CheckCircle2 size={16} style={{ color: 'var(--brand-success-dark, #1a7a35)' }} />
           <span
             className="text-[13px] font-semibold"
-            style={{ fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)', color: '#1a7a35' }}
+            style={{ fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)', color: 'var(--brand-success-dark, #1a7a35)' }}
           >
             Sachverständiger in Ihrer Nähe: <strong>{svName}</strong>
           </span>

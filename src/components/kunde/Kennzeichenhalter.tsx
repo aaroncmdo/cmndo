@@ -94,7 +94,7 @@ export default function Kennzeichenhalter({
       {/* EU-Streifen — flat navy, weiße Sterne, keine Gradients */}
       <div
         className="flex flex-col items-center justify-center px-1.5 py-0.5 text-white shrink-0"
-        style={{ backgroundColor: '#0D1B3E' }}
+        style={{ backgroundColor: 'var(--brand-primary, #0D1B3E)' }}
       >
         <svg
           width={sizeCfg.huSize}
