@@ -114,23 +114,23 @@ export const LEAD_STAMMDATEN_FIELD_SCHEMA: LeadFieldDef[] = [
 
   // ── Gegner — Trivial-Felder ───────────────────────────────────────────────
   // gegner_versicherung_id + gegner_versicherung kommen in Phase C
-  // (VersicherungAutocomplete). Hier nur die freien Text-Felder.
-  { block: 'gegner', key: 'gegner_kennzeichen', label: 'Gegner-Kennzeichen' },
+  // (VersicherungAutocomplete). gegner_kennzeichen kommt in Phase C
+  // (KZ-Live-Flag-Berechnung via checkKZFlags + custom-Format).
+  // gegner_versicherungsnummer ist in Phase 4 nicht als InlineField gerendert
+  // (nur im Type) — Backlog falls Konsument auftaucht.
   { block: 'gegner', key: 'gegner_schadennummer', label: 'Schadennummer (optional)' },
-  { block: 'gegner', key: 'gegner_versicherungsnummer', label: 'Gegner-Versicherungsnummer' },
 
   // ── Vorschäden ────────────────────────────────────────────────────────────
-  // hat_vorschaeden + Beschreibung. vorschaden_anzahl / vorschaden_letzter_datum
-  // existieren NICHT in der leads-Tabelle (nur in Type-Annotation) — daher
-  // bewusst weggelassen.
+  // hat_vorschaeden ist in Phase4 ein Button-Toggle (Phase C). Beschreibung
+  // wird conditional gerendert (visibleWhen). vorschaden_anzahl /
+  // vorschaden_letzter_datum existieren nicht in der leads-Tabelle.
   {
-    block: 'vorschaeden', key: 'hat_vorschaeden', label: 'Vorschäden vorhanden?',
-    type: 'select', options: JA_NEIN_OPTIONS,
-  },
-  {
+    // P2-T4.7-B: visibleWhen spiegelt Phase4Stammdaten's `l.hat_vorschaeden === true &&`
+    // conditional-Render exakt. Schema-Renderer übernimmt die Sichtbarkeitslogik.
     block: 'vorschaeden', key: 'vorschaeden_beschreibung', label: 'Beschreibung',
     type: 'textarea', fullWidth: true,
     placeholder: 'Welche Vorschäden? (Bereich / Schadenhöhe)',
+    visibleWhen: (l) => l.hat_vorschaeden === true,
   },
 
   // ── Zeugen ────────────────────────────────────────────────────────────────
