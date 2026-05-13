@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Mapbox-GL erwartet raw hex strings für marker fills + paint properties.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 'use client'
 
 // 2026-05-11: Gutachter-Finder mit Mapbox-Vollbild-Karte (Referenz:
