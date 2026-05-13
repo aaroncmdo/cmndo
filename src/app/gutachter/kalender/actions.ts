@@ -7,15 +7,18 @@ import { ablehnTermin } from '@/lib/termine/sv-ablehnung'
 import { gegenvorschlagTermin } from '@/lib/termine/sv-gegenvorschlag'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
-export async function setTermin(fallId: string, termin: string) {
+export async function setTermin(
+  fallId: string,
+  termin: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
-  if (!sv) throw new Error('Kein Sachverstaendiger gefunden')
+  if (!sv) return { success: false, error: 'Kein Sachverständiger gefunden' }
   const { data: fall } = await supabase.from('faelle').select('id').eq('id', fallId).eq('sv_id', sv.id).maybeSingle()
-  if (!fall) throw new Error('Nicht autorisiert')
+  if (!fall) return { success: false, error: 'Nicht autorisiert' }
 
   // Termin-Datum setzen: upsert in gutachter_termine statt auf faelle.sv_termin
   const startZeit = new Date(termin)
@@ -45,7 +48,7 @@ export async function setTermin(fallId: string, termin: string) {
       .from('gutachter_termine')
       .update({ start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
       .eq('id', primary.id)
-    if (error) throw new Error(error.message)
+    if (error) return { success: false, error: error.message }
     syncTerminId = primary.id as string
   } else {
     const { data: inserted, error } = await supabase
@@ -53,7 +56,7 @@ export async function setTermin(fallId: string, termin: string) {
       .insert({ fall_id: fallId, sv_id: sv.id, start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
       .select('id')
       .single()
-    if (error) throw new Error(error.message)
+    if (error) return { success: false, error: error.message }
     syncTerminId = (inserted?.id as string | null) ?? null
   }
 
@@ -115,6 +118,7 @@ export async function setTermin(fallId: string, termin: string) {
 
   revalidatePath('/gutachter/kalender')
   revalidatePath('/gutachter')
+  return { success: true }
 }
 
 /**
