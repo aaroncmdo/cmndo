@@ -11,7 +11,7 @@
 
 import type { ChangeEvent } from 'react'
 
-export type InputSize = 'md' | 'lg'
+export type InputSize = 'sm' | 'md' | 'lg'
 
 /** Web-Input-Type — auf Native als Hint, dort ignoriert. */
 export type InputType =
@@ -52,4 +52,10 @@ export type InputProps = {
   className?: string
   /** Web only — autoFocus on mount. */
   autoFocus?: boolean
+  /** HTML required-Attribut (Web only — Native macht eigene Validation). */
+  required?: boolean
+  /** Web only — Max-Länge (z.B. PLZ=5). */
+  maxLength?: number
+  /** Web only — `pattern`-Attribut (z.B. PLZ-Regex). */
+  pattern?: string
 }
