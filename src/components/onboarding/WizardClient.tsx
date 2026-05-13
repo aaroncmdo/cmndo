@@ -68,23 +68,35 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
   const [error, setError] = useState<string | null>(null)
   const [animKey, setAnimKey] = useState(0)
   const [svMatch, setSvMatch] = useState<Extract<SvMatchResult, { ok: true }> | null>(null)
-  // 2026-05-11: SV-Pre-Selection ueber DOM-Event aus der Mapbox-Karte
-  // (GutachterFinderMapClient). Wird beim Finalize an speichereZuordnung
-  // weitergereicht damit der gewaehlte SV-Lead im konvertierten Lead landet.
+  // 2026-05-11 → 2026-05-13: SV-Pre-Selection via DOM-Event. Event-Detail ist
+  // jetzt { id, tier } — Tier 'premium' = sachverstaendige.id → svId,
+  // Tier 'lead' = sv_leads.id → svLeadId. Alte String-Form (Tier 3) bleibt
+  // backward-kompatibel als Fallback.
+  const [preSelectedSvId, setPreSelectedSvId] = useState<string | null>(null)
   const [preSelectedSvLeadId, setPreSelectedSvLeadId] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
   const geoMatchedRef = useRef(false)
-  const svId = svMatch?.svId ?? null
+  // Priorität: Karten-Click (preSelectedSvId) vor Geo-Auto-Match (svMatch).
+  const svId = preSelectedSvId ?? svMatch?.svId ?? null
   const svName = svMatch?.svName ?? null
 
-  // 2026-05-11: Click auf einen SV-Marker in der Karte sendet ein
-  // claimondo:select-sv CustomEvent mit der sv_leads.id. Wir merken sie
-  // uns und reichen sie beim Finalize an speichereZuordnung weiter.
   useEffect(() => {
     function handleSelect(e: Event) {
-      const ce = e as CustomEvent<string>
-      if (typeof ce.detail === 'string' && ce.detail.length > 0) {
-        setPreSelectedSvLeadId(ce.detail)
+      const ce = e as CustomEvent<unknown>
+      const detail = ce.detail
+      if (typeof detail === 'object' && detail !== null && 'id' in detail && 'tier' in detail) {
+        const { id, tier } = detail as { id: string; tier: 'premium' | 'lead' }
+        if (typeof id !== 'string' || id.length === 0) return
+        if (tier === 'premium') {
+          setPreSelectedSvId(id)
+          setPreSelectedSvLeadId(null)
+        } else {
+          setPreSelectedSvLeadId(id)
+          setPreSelectedSvId(null)
+        }
+      } else if (typeof detail === 'string' && detail.length > 0) {
+        // Backward-Compat: alte String-Form (immer als sv_lead behandelt)
+        setPreSelectedSvLeadId(detail)
       }
     }
     document.addEventListener('claimondo:select-sv', handleSelect)
@@ -154,9 +166,18 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
 
       if (phaseIdx >= totalPhases - 1) {
         sessionStorage.removeItem(STORAGE_KEY)
-        // SV- oder Lead-Zuordnung auf GFA persistieren (fire-and-forget, unkritisch)
-        // Reihenfolge: User-Klick auf Karte hat Vorrang vor Auto-Geo-Matching.
-        if (preSelectedSvLeadId) {
+        // SV-/Lead-Zuordnung auf GFA persistieren (fire-and-forget, unkritisch).
+        // Priorität: Karten-Click (premium > lead) vor Auto-Geo-Matching.
+        if (preSelectedSvId) {
+          speichereZuordnung(result.anfrageId, {
+            ok: true,
+            typ: 'sv',
+            svId: preSelectedSvId,
+            svLeadId: null,
+            svName: svMatch?.svName ?? '',
+            distanzKm: 0,
+          }).catch(() => {})
+        } else if (preSelectedSvLeadId) {
           speichereZuordnung(result.anfrageId, {
             ok: true,
             typ: 'lead',
