@@ -1,4 +1,6 @@
-# Security-Audit Claimondo-App — 12.05.2026 (konsolidiert)
+# Security-Audit Claimondo-App — 12.05.2026 (konsolidiert) · ✅ DB-LAYER ABGESCHLOSSEN
+
+> **Status (13.05.2026):** DB-/RLS-Layer-Items via 11 PRs am 13.05. abgehakt (siehe `docs/13.05.2026/db-rls-audit/AUDIT-2026-05-13-DONE.md`). App-/Code-Layer-Items sind separate Streams. Duplikat von `SECU/SECURITY-AUDIT-12.05.2026.md`.
 
 **Master-Dokument.** Konsolidiert: (a) Code-Audit per 3 parallelen Senior-Security-Subagenten (Lese-Analyse, kein DB-Zugriff) — Bereiche Auth/Token/RLS-Migrations · API-Routes/Webhooks/Crons/Server-Actions · XSS/Injection/Secrets/Integrationen; (b) den separaten **RLS-/Permissions-Audit vom selben Tag** (`rls-permissions-audit.md` — basiert auf Supabase Security Advisor mit 201 Lints + `list_tables` + Permission-Matrix-Drift-Analyse). Beide Audits decken komplementäre Schichten ab: der RLS-Audit hat den **DB-Layer** (Live-Advisor-Daten), der Code-Audit den **App-/Route-/Code-Layer**.
 
