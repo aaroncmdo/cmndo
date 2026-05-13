@@ -203,7 +203,7 @@ function Done({
         </div>
       </div>
 
-      <section className="rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-5">
+      <section className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-claimondo-ondo">
             Schweregrad
@@ -218,7 +218,7 @@ function Done({
       </section>
 
       {result.beschaedigte_teile.length > 0 ? (
-        <section className="mt-4 rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-5">
+        <section className="mt-4 rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-5">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-claimondo-ondo">
             Erkannte beschÃ¤digte Teile
           </h2>
@@ -237,7 +237,7 @@ function Done({
 
       {result.fahrzeug_hinweise &&
       Object.values(result.fahrzeug_hinweise).some(Boolean) ? (
-        <section className="mt-4 rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-5">
+        <section className="mt-4 rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-5">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-claimondo-ondo">
             Fahrzeug-Hinweise
           </h2>

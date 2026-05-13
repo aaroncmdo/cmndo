@@ -56,7 +56,7 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
         <button
           type="button"
           onClick={() => setView('liste')}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-[14px] text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
             view === 'liste'
               ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
               : 'text-claimondo-shield hover:text-claimondo-navy'
@@ -68,7 +68,7 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
         <button
           type="button"
           onClick={() => setView('kanban')}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-[14px] text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
             view === 'kanban'
               ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
               : 'text-claimondo-shield hover:text-claimondo-navy'
@@ -89,7 +89,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
   const rowPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   const cellPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   return (
-    <DataTableContainer variant="plain" className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] overflow-hidden border border-claimondo-navy/[0.06]">
+    <DataTableContainer variant="plain" className="bg-white rounded-3xl shadow-claimondo-md overflow-hidden border border-claimondo-navy/[0.06]">
         <Table>
           <Thead className="!bg-transparent">
             <Tr className="border-b border-claimondo-navy/[0.08] bg-claimondo-navy/[0.03]">

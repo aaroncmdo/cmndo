@@ -286,7 +286,7 @@ export default function KfzGutachterPillarPage() {
             {TOP_FAQ.map((f) => (
               <details
                 key={f.frage}
-                className="group rounded-2xl border border-white/60 bg-white/70 p-5 backdrop-blur-md shadow-[0_4px_18px_rgba(13,27,62,0.06)] transition-all hover:bg-white/85"
+                className="group rounded-2xl border border-white/60 bg-white/70 p-5 backdrop-blur-md shadow-glass-card transition-all hover:bg-white/85"
               >
                 <summary className="cursor-pointer list-none text-base font-bold text-claimondo-navy">
                   <span className="flex items-center justify-between">

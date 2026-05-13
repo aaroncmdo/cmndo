@@ -74,7 +74,7 @@ export default function PasswortVergessenPage() {
                     placeholder="name@beispiel.de"
                     required
                     autoComplete="email"
-                    className="w-full px-4 py-3.5 rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-[#8a93a6] text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]"
+                    className="w-full px-4 py-3.5 rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-[#8a93a6] text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
                   />
                 </div>
 
@@ -83,7 +83,7 @@ export default function PasswortVergessenPage() {
                   isLoading={loading}
                   loadingText="Wird gesendet..."
                   disabled={!email.trim()}
-                  className="w-full py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-sm tracking-[-.01em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] hover:-translate-y-[1px] hover:shadow-[0_8px_22px_rgba(69,115,162,.36),0_2px_4px_rgba(69,115,162,.20)] active:translate-y-0 active:scale-[0.98] transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] mt-1"
+                  className="w-full py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 active:scale-[0.98] transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] mt-1"
                 >
                   Reset-Link senden
                 </LoadingButton>

@@ -104,7 +104,7 @@ export default function BeratungAnfragenPage() {
           }}
         />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
             0 € · Kein Callcenter · Direkter Kontakt
           </div>
           <h1
@@ -148,7 +148,7 @@ export default function BeratungAnfragenPage() {
               return (
                 <div
                   key={o.title}
-                  className="flex flex-col rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md"
+                  className="flex flex-col rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
                   <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-claimondo-ondo/10">
@@ -247,7 +247,7 @@ export default function BeratungAnfragenPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
               href="tel:+4922125906530"
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <Phone className="h-5 w-5" />
               {PHONE_DISPLAY} anrufen

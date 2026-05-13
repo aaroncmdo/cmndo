@@ -274,7 +274,7 @@ function ZahlenSection() {
             {ZAHLEN.map(({ zahl, label }, i) => (
               <FadeUp key={zahl} delay={i * 80}>
                 <div
-                  className="rounded-2xl border border-white/60 bg-white/65 px-5 py-5 shadow-[0_4px_18px_rgba(13,27,62,0.06)] backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-[0_8px_28px_rgba(13,27,62,0.10)]"
+                  className="rounded-2xl border border-white/60 bg-white/65 px-5 py-5 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
                   <div
@@ -340,7 +340,7 @@ function VersicherungSection() {
         <div className="grid gap-5 sm:grid-cols-2">
           {INFO_CARDS.map(({ icon: Icon, title, href, body }, i) => (
             <FadeUp key={title} delay={i * 80}>
-              <Link href={href} className="group flex flex-col gap-0 rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_1px_3px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(13,27,62,.1)]">
+              <Link href={href} className="group flex flex-col gap-0 rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_1px_3px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
                 <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef4fb]">
                   <Icon className="h-[18px] w-[18px] text-claimondo-ondo" />
                 </div>
@@ -406,8 +406,8 @@ function UnterschiedSection() {
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {UNTERSCHIED_CARDS.map(({ icon: Icon, sub, title, body }, i) => (
             <FadeUp key={title} delay={i * 80}>
-              <div className="group flex flex-col rounded-2xl border border-claimondo-border bg-white p-6 shadow-[0_4px_12px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(13,27,62,.1)]">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-[14px] border border-claimondo-ondo/15 bg-claimondo-ondo/10">
+              <div className="group flex flex-col rounded-2xl border border-claimondo-border bg-white p-6 shadow-[0_4px_12px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-claimondo-md border border-claimondo-ondo/15 bg-claimondo-ondo/10">
                   <Icon className="h-6 w-6 text-claimondo-ondo" />
                 </div>
                 <p className="mb-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-claimondo-ondo">
@@ -844,7 +844,7 @@ function ReviewsSection() {
         <div className="mt-12 grid gap-5 sm:grid-cols-3">
           {REVIEWS.map(({ initials, name, date, text, color }, i) => (
             <FadeUp key={name} delay={i * 80}>
-              <div className="flex h-full flex-col rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_4px_12px_rgba(13,27,62,.05)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(13,27,62,.1)]">
+              <div className="flex h-full flex-col rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_4px_12px_rgba(13,27,62,.05)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
                 <div className="mb-3 flex items-center gap-3">
                   <div
                     className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-base font-bold text-white"

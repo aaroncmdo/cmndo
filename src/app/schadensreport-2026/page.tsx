@@ -182,7 +182,7 @@ export default function SchadensreportPage() {
           }}
         />
         <div className="mx-auto max-w-3xl px-5 text-center sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
             <Sparkles className="h-3.5 w-3.5" />
             Datenreport 2026 · Stand 10.05.2026
           </div>
@@ -204,7 +204,7 @@ export default function SchadensreportPage() {
       <section className="pb-12 sm:pb-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <article
-            className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md sm:p-10"
+            className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
             style={{ WebkitBackdropFilter: 'blur(14px)' }}
           >
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
@@ -305,7 +305,7 @@ export default function SchadensreportPage() {
             ].map((m) => (
               <div
                 key={m.label}
-                className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-[0_4px_18px_rgba(13,27,62,0.06)] backdrop-blur-md"
+                className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <div
@@ -409,7 +409,7 @@ export default function SchadensreportPage() {
             {NRW_REGIONAL.map((r) => (
               <article
                 key={r.stadt}
-                className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-[0_4px_18px_rgba(13,27,62,0.06)] backdrop-blur-md"
+                className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <div className="mb-2 flex items-center gap-2">
@@ -558,7 +558,7 @@ export default function SchadensreportPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/gutachter-finden"
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <MapPin className="h-5 w-5" />
               Gutachter finden

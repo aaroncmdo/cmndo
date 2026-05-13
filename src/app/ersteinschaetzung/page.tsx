@@ -127,7 +127,7 @@ export default function ErsteinschaetzungPage() {
           }}
         />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
             <Brain className="h-3.5 w-3.5" />
             Kostenlos · Sofort · Unverbindlich
           </div>
@@ -143,7 +143,7 @@ export default function ErsteinschaetzungPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/schaden-melden"
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               Jetzt kostenlos einschätzen lassen
               <ChevronRight className="h-5 w-5" />
@@ -209,7 +209,7 @@ export default function ErsteinschaetzungPage() {
               return (
                 <div
                   key={s.nr}
-                  className="flex items-start gap-6 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md sm:p-7"
+                  className="flex items-start gap-6 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md sm:p-7"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
                   <div className="flex-shrink-0">
@@ -278,7 +278,7 @@ export default function ErsteinschaetzungPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/schaden-melden"
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               Ersteinschätzung starten
               <ChevronRight className="h-5 w-5" />

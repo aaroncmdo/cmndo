@@ -104,7 +104,7 @@ export function Schritt2aClient({ leadId }: { leadId: string }) {
         <div
           onClick={onSvgClick}
           role="presentation"
-          className="rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-4 [&_.zone:hover]:fill-[var(--claimondo-ondo)] [&_.zone:hover]:fill-opacity-20 [&_.zone]:cursor-pointer"
+          className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-4 [&_.zone:hover]:fill-[var(--claimondo-ondo)] [&_.zone:hover]:fill-opacity-20 [&_.zone]:cursor-pointer"
           dangerouslySetInnerHTML={{ __html: SVG_INLINE }}
           data-active-zone={activeBereich}
         />
@@ -130,7 +130,7 @@ export function Schritt2aClient({ leadId }: { leadId: string }) {
           />
         ))}
 
-        <div className="sticky bottom-4 flex items-center justify-between rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-4 shadow-[var(--shadow-claimondo-sm)]">
+        <div className="sticky bottom-4 flex items-center justify-between rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-4 shadow-[var(--shadow-claimondo-sm)]">
           <p className="text-sm text-claimondo-ondo">
             {fotos.length < MIN_FOTOS
               ? `Noch ${MIN_FOTOS - fotos.length} Foto${MIN_FOTOS - fotos.length === 1 ? '' : 's'} bis zum nächsten Schritt`

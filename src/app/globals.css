@@ -86,6 +86,24 @@ p, li, blockquote, article, .prose {
   --shadow-ios-sm: var(--shadow-ios-sm);
   --shadow-ios-md: var(--shadow-ios-md);
   --shadow-ios-lg: var(--shadow-ios-lg);
+
+  /* AAR-745d (2026-05-13): Claimondo-Token als Tailwind-Utilities exposen,
+     damit `shadow-claimondo-md` direkt verfügbar ist und nicht
+     `shadow-[var(--shadow-claimondo-md)]` geschrieben werden muss. */
+  --shadow-claimondo-sm: var(--shadow-claimondo-sm);
+  --shadow-claimondo-md: var(--shadow-claimondo-md);
+  --shadow-claimondo-lg: var(--shadow-claimondo-lg);
+  --radius-claimondo-sm: var(--radius-claimondo-sm);
+  --radius-claimondo-md: var(--radius-claimondo-md);
+  --radius-claimondo-lg: var(--radius-claimondo-lg);
+  --radius-claimondo-sheet: var(--radius-claimondo-sheet);
+  /* Semantische Shadow-Tokens für wiederkehrende Inline-Pattern */
+  --shadow-focus-ondo: var(--shadow-focus-ondo);
+  --shadow-cta-ondo: var(--shadow-cta-ondo);
+  --shadow-cta-ondo-hover: var(--shadow-cta-ondo-hover);
+  --shadow-sheet: var(--shadow-sheet);
+  --shadow-glass-card: var(--shadow-glass-card);
+  --shadow-glass-pill: var(--shadow-glass-pill);
   --font-apple: var(--font-apple);
   --ease-ios: var(--ease-ios);
 }
@@ -143,10 +161,34 @@ p, li, blockquote, article, .prose {
   --claimondo-border: #e4e7ef;
 
   /* AAR-460 F2: Claimondo-Shadow-Tokens — bewusst mit Navy-Tint
-     statt neutralem Grau. Nutzbar via `shadow-[var(--shadow-claimondo-md)]`. */
+     statt neutralem Grau. Seit AAR-745d (2026-05-13) im @theme-Block
+     auch als Tailwind-Utilities verfügbar: `shadow-claimondo-sm/md/lg`. */
   --shadow-claimondo-sm: 0 1px 2px rgba(13, 27, 62, 0.04), 0 1px 3px rgba(13, 27, 62, 0.06);
   --shadow-claimondo-md: 0 4px 6px -1px rgba(13, 27, 62, 0.06), 0 2px 4px -2px rgba(13, 27, 62, 0.04);
   --shadow-claimondo-lg: 0 10px 25px -5px rgba(13, 27, 62, 0.1), 0 8px 10px -6px rgba(13, 27, 62, 0.06);
+
+  /* AAR-745d (2026-05-13): Radius-Tokens passend zu src/lib/design-tokens.ts.
+     `sheet` ist die Sonderform für rounded-[36px]-Sheets/Modals (7+ Stellen).
+     Tailwind v4 generiert daraus rounded-claimondo-{sm,md,lg,sheet}. */
+  --radius-claimondo-sm: 8px;
+  --radius-claimondo-md: 14px;
+  --radius-claimondo-lg: 20px;
+  --radius-claimondo-sheet: 36px;
+
+  /* AAR-745d (2026-05-13): Semantische Shadow-Tokens für wiederkehrende
+     Inline-Pattern, die der Smoke 13.05.2026 entdeckt hat.
+     focus-ondo : 24x   — Focus-Ring auf Liquid-Glass-Inputs
+     cta-ondo   : 20x   — Ondo-Button-Standard-Shadow
+     cta-ondo-hover: 7x — Hover-Variante davon
+     sheet      : 15x   — Modal/Sheet-Container-Shadow
+     glass-card : 13x   — Marketing-Glass-Card
+     glass-pill : 9x    — Marketing-Pills (Eyebrow, kleine Badges) */
+  --shadow-focus-ondo: 0 0 0 4px rgba(69, 115, 162, 0.12);
+  --shadow-cta-ondo: 0 4px 12px rgba(69, 115, 162, 0.30), 0 1px 2px rgba(69, 115, 162, 0.18);
+  --shadow-cta-ondo-hover: 0 8px 22px rgba(69, 115, 162, 0.36), 0 2px 4px rgba(69, 115, 162, 0.20);
+  --shadow-sheet: 0 6px 18px rgba(15, 30, 68, 0.07), 0 24px 48px rgba(15, 30, 68, 0.06);
+  --shadow-glass-card: 0 4px 20px rgba(13, 27, 62, 0.06);
+  --shadow-glass-pill: 0 2px 12px rgba(13, 27, 62, 0.06);
 
   /* AAR-727: iOS-inspirierte Design-Tokens.
      - Radius: weiche, konsistente Rundungen pro UI-Primitiv.
