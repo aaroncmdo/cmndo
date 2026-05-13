@@ -295,6 +295,10 @@ export function articleSchema(args: {
   image?: string
   authorName?: string
   wordCount?: number
+  /** Strings wie „BGH VI ZR 65/18" — werden als `citation: CreativeWork[]`
+   * ausgeliefert. Für AI-Engines + Google relevant: legt offen welche
+   * Primärquellen der Artikel referenziert. */
+  citation?: string[]
 }) {
   return {
     '@context': 'https://schema.org',
@@ -312,6 +316,12 @@ export function articleSchema(args: {
     },
     publisher: { '@id': `${SITE_URL}/#organization` },
     ...(args.wordCount && { wordCount: args.wordCount }),
+    ...(args.citation && args.citation.length > 0 && {
+      citation: args.citation.map((c) => ({
+        '@type': 'CreativeWork',
+        name: c,
+      })),
+    }),
     inLanguage: 'de-DE',
   }
 }
