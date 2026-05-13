@@ -115,40 +115,74 @@ export default function ErsteinschaetzungPage() {
       />
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden py-16 text-center sm:py-20">
+      {/* Hero — Navy Premium-Pattern */}
+      <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="ee-hero">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
+          className="pointer-events-none absolute inset-0"
           style={{
             background: [
-              'radial-gradient(circle at 20% 15%, rgba(123,163,204,0.22), transparent 50%)',
-              'radial-gradient(circle at 85% 35%, rgba(69,115,162,0.14), transparent 45%)',
+              'radial-gradient(circle at 15% 20%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 85% 75%, rgba(123,163,204,0.18), transparent 50%)',
             ].join(', '),
           }}
         />
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
-            <Brain className="h-3.5 w-3.5" />
+        <div className="relative mx-auto max-w-3xl px-5 py-16 text-center sm:py-24">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md sm:text-sm">
+            <Brain className="h-3.5 w-3.5" aria-hidden />
             Kostenlos · Sofort · Unverbindlich
           </div>
           <h1
-            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
+            id="ee-hero"
+            className="mt-5 text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Ihr Schaden. In Sekunden bewertet.
+            Ihr Schaden.{' '}
+            <span className="text-claimondo-light-blue">In Sekunden bewertet.</span>
           </h1>
-          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
-            KI analysiert Ihre Fotos — Reparaturkosten, Wiederbeschaffungswert und Gutachten-Empfehlung in unter 15 Minuten.
+          <p className="mx-auto mt-5 max-w-2xl text-balance text-base text-white/80 sm:text-lg">
+            KI analysiert Ihre Fotos — Reparaturkosten, Wiederbeschaffungswert und
+            Gutachten-Empfehlung in unter 15 Minuten.
           </p>
-          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/schaden-melden"
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
+              data-tracking="cta-ee-melden"
             >
               Jetzt kostenlos einschätzen lassen
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5" aria-hidden />
             </Link>
+            <a
+              href="tel:+4922125906530"
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition-all hover:bg-white/10"
+              data-tracking="call-ee-hero"
+            >
+              <Phone className="h-4 w-4" aria-hidden />
+              0221 25906530
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust-Strip */}
+      <section className="border-y border-claimondo-border/60 bg-white" aria-label="KI-Kennzahlen">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">&lt; 15 Min</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">bis zur Ersteinschätzung</div>
+          </div>
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">0 €</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">Kosten · Unverbindlich</div>
+          </div>
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">3 Fotos</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">+ Beschreibung reichen</div>
+          </div>
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">§249 BGB</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">ab 750 € Gutachten-Anspruch</div>
           </div>
         </div>
       </section>
