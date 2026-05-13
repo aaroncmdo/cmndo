@@ -185,7 +185,11 @@ export default function SVKalenderClient({
     setError(null)
     try {
       const dt = `${terminDate}T${terminTime}:00`
-      await setTermin(dialogFall.id, dt)
+      const result = await setTermin(dialogFall.id, dt)
+      if (!result.success) {
+        setError(result.error ?? 'Fehler')
+        return
+      }
       setDialogFall(null)
       router.refresh()
     } catch (e) {

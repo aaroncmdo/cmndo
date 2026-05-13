@@ -75,26 +75,30 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
 
   function handleSpeichern() {
     startQcTransition(async () => {
-      try {
-        await upsertQcCheckliste(fallId, { ...qcState, kommentar: qcKommentar || null })
-        toast.success('QC-Checkliste gespeichert')
-        router.refresh()
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Speichern fehlgeschlagen')
+      const result = await upsertQcCheckliste(fallId, { ...qcState, kommentar: qcKommentar || null })
+      if (!result.success) {
+        toast.error(result.error ?? 'Speichern fehlgeschlagen')
+        return
       }
+      toast.success('QC-Checkliste gespeichert')
+      router.refresh()
     })
   }
 
   function handleBestanden() {
     startQcTransition(async () => {
-      try {
-        await upsertQcCheckliste(fallId, qcState)
-        await qcBestanden(fallId, qcKommentar)
-        toast.success('QC bestanden — Kanzlei-Übergabe läuft')
-        router.refresh()
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'QC-Bestanden fehlgeschlagen')
+      const upsertResult = await upsertQcCheckliste(fallId, qcState)
+      if (!upsertResult.success) {
+        toast.error(upsertResult.error ?? 'QC-Bestanden fehlgeschlagen')
+        return
       }
+      const bestandenResult = await qcBestanden(fallId, qcKommentar)
+      if (!bestandenResult.success) {
+        toast.error(bestandenResult.error ?? 'QC-Bestanden fehlgeschlagen')
+        return
+      }
+      toast.success('QC bestanden — Kanzlei-Übergabe läuft')
+      router.refresh()
     })
   }
 
@@ -104,14 +108,18 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
       return
     }
     startQcTransition(async () => {
-      try {
-        await upsertQcCheckliste(fallId, qcState)
-        await qcNachbesserung(fallId, qcKommentar)
-        toast.success('Nachbesserung angefordert — Task für SV erstellt')
-        router.refresh()
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Nachbesserung fehlgeschlagen')
+      const upsertResult = await upsertQcCheckliste(fallId, qcState)
+      if (!upsertResult.success) {
+        toast.error(upsertResult.error ?? 'Nachbesserung fehlgeschlagen')
+        return
       }
+      const nachbesserungResult = await qcNachbesserung(fallId, qcKommentar)
+      if (!nachbesserungResult.success) {
+        toast.error(nachbesserungResult.error ?? 'Nachbesserung fehlgeschlagen')
+        return
+      }
+      toast.success('Nachbesserung angefordert — Task für SV erstellt')
+      router.refresh()
     })
   }
 

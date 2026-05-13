@@ -18,10 +18,13 @@ import { triggerSV05 } from '@/lib/gutachterTasking'
 import { createNotification } from '@/lib/notifications'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
-export async function saveFilmcheck(fallId: string, notizen: string) {
+export async function saveFilmcheck(
+  fallId: string,
+  notizen: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   // Mandatsnummer generieren (CLM-YYYY-XXXX)
   const year = new Date().getFullYear()
@@ -50,7 +53,7 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
     })
     .eq('id', fallId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   // KFZ-202: Status via State-Machine
   await transitionFallStatus(fallId, 'kanzlei-uebergeben')
@@ -93,16 +96,17 @@ export async function saveFilmcheck(fallId: string, notizen: string) {
   revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
   revalidatePath('/admin/aufgaben/alle')
+  return { success: true }
 }
 
 export async function upsertQcCheckliste(
   fallId: string,
   // AAR-170: Kommentar-Feld (string) neben booleans
   checks: Record<string, boolean | string | null>,
-) {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { data: existing } = await supabase
     .from('qc_checkliste')
@@ -112,19 +116,23 @@ export async function upsertQcCheckliste(
 
   if (existing) {
     const { error } = await supabase.from('qc_checkliste').update(checks).eq('fall_id', fallId)
-    if (error) throw new Error(error.message)
+    if (error) return { success: false, error: error.message }
   } else {
     const { error } = await supabase.from('qc_checkliste').insert({ fall_id: fallId, ...checks })
-    if (error) throw new Error(error.message)
+    if (error) return { success: false, error: error.message }
   }
 
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }
 
-export async function qcBestanden(fallId: string, kommentar: string) {
+export async function qcBestanden(
+  fallId: string,
+  kommentar: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const now = new Date().toISOString()
   const { data: existing } = await supabase
@@ -147,17 +155,24 @@ export async function qcBestanden(fallId: string, kommentar: string) {
   }
 
   // Trigger Filmcheck-Flow (State-Machine + Mails + Tasks)
-  await saveFilmcheck(fallId, kommentar)
+  const filmcheckResult = await saveFilmcheck(fallId, kommentar)
+  if (!filmcheckResult.success) {
+    return filmcheckResult
+  }
 
   const { data: fallForTask } = await supabase.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
   triggerKanzleiPaketTask(fallId, fallForTask?.kundenbetreuer_id ?? null).catch(() => {})
   triggerAsSendedatumTask(fallId, fallForTask?.kundenbetreuer_id ?? null).catch(() => {})
+  return { success: true }
 }
 
-export async function qcNachbesserung(fallId: string, kommentar: string) {
+export async function qcNachbesserung(
+  fallId: string,
+  kommentar: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const now = new Date().toISOString()
   const { data: existing } = await supabase
@@ -252,4 +267,5 @@ export async function qcNachbesserung(fallId: string, kommentar: string) {
 
   revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/aufgaben/alle')
+  return { success: true }
 }
