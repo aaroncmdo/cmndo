@@ -15,16 +15,24 @@
 // — wir laden sie hier dynamisch, damit `Sentry.init` zuverlässig vor jedem
 // Server-Render läuft (vorher hat Next.js 16 den Auto-Loader nicht mehr
 // zuverlässig getroffen, das war der eigentliche Bug).
+//
+// 13.05.2026 round 2: Datei jetzt unter `src/instrumentation.ts` (statt
+// Repo-Root). Next.js mit `src/`-Konvention sucht hier — root-level Variante
+// wurde nicht als Top-Level-Instrumentation erkannt, sondern nur als shared
+// chunk gebundlet (kein `.next/server/instrumentation.js` erzeugt).
+// Imports der Sentry-Configs (im Repo-Root) deshalb mit `../`-Prefix.
 
 import * as Sentry from '@sentry/nextjs'
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    await import('./sentry.server.config')
+    await import('../sentry.server.config')
   }
   if (process.env.NEXT_RUNTIME === 'edge') {
-    await import('./sentry.edge.config')
+    await import('../sentry.edge.config')
   }
+  // eslint-disable-next-line no-console
+  console.log(`[instrumentation] register() fired (runtime=${process.env.NEXT_RUNTIME})`)
 }
 
 export const onRequestError = Sentry.captureRequestError
