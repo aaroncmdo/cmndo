@@ -19,11 +19,11 @@ type Abrechnung = {
   faellig_am: string | null
   status: string
   pdf_path: string | null
+  pdf_url: string | null
 }
 
 type Props = {
   abrechnungen: Abrechnung[]
-  pdfBaseUrl: string
 }
 
 function eur(val: number) {
@@ -35,7 +35,7 @@ function fmtDate(d: string | null) {
   return new Date(d).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
-export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props) {
+export default function AbrechnungenSection({ abrechnungen }: Props) {
   const [filterTyp, setFilterTyp] = useState<string>('alle')
   const [filterStatus, setFilterStatus] = useState<string>('alle')
   const [bezahltModal, setBezahltModal] = useState<{ id: string; brutto: number } | null>(null)
@@ -185,10 +185,10 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                       </Td>
                       <Td className="text-right">
                         <div className="flex items-center justify-end gap-1">
-                          {/* PDF Download */}
-                          {abr.pdf_path && (
+                          {/* PDF Download — signed-URL, 1h TTL */}
+                          {abr.pdf_url && (
                             <a
-                              href={`${pdfBaseUrl}/${abr.pdf_path}`}
+                              href={abr.pdf_url}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-[10px] px-2 py-0.5 rounded bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border"
