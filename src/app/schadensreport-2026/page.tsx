@@ -5,6 +5,7 @@ import {
   Sparkles, MapPin, Phone,
 } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import {
@@ -574,6 +575,8 @@ export default function SchadensreportPage() {
           </div>
         </div>
       </section>
+
+      <ReviewerByline datum={datum} />
 
       <LandingFooter />
       <StickyCallBar quelle="Schadensreport 2026" />
