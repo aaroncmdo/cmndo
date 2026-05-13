@@ -235,10 +235,10 @@ export async function updateFall(
 export async function updateSchadensAdresse(
   fallId: string,
   data: { adresse: string; plz: string; ort?: string },
-) {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('faelle')
@@ -249,7 +249,7 @@ export async function updateSchadensAdresse(
     })
     .eq('id', fallId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   await supabase.from('timeline').insert({
     fall_id: fallId,
@@ -260,17 +260,21 @@ export async function updateSchadensAdresse(
   })
 
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }
 
-export async function saveFinVin(fallId: string, finVin: string) {
+export async function saveFinVin(
+  fallId: string,
+  finVin: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   // FIN-Format: 17 alphanumerisch, ohne I/O/Q
   const cleaned = finVin.trim().toUpperCase()
   if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(cleaned)) {
-    throw new Error('Ungueltige FIN. Muss 17 alphanumerische Zeichen lang sein.')
+    return { success: false, error: 'Ungültige FIN. Muss 17 alphanumerische Zeichen lang sein.' }
   }
 
   const { error } = await supabase
@@ -282,7 +286,7 @@ export async function saveFinVin(fallId: string, finVin: string) {
     })
     .eq('id', fallId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   await supabase.from('timeline').insert({
     fall_id: fallId,
@@ -299,4 +303,5 @@ export async function saveFinVin(fallId: string, finVin: string) {
   } catch (err) { console.error('[AAR-90] enrichFallByFin:', err) }
 
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }

@@ -18,11 +18,14 @@ import { assignKundenbetreuer } from '@/lib/faelle/kb-assignment'
 
 // ─── Fall Status ────────────────────────────────────────────────────────────
 
-export async function updateFallStatus(fallId: string, newStatus: string) {
+export async function updateFallStatus(
+  fallId: string,
+  newStatus: string,
+): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient()
   const serviceClient = createServiceClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   // KFZ-153: Block status change to regulierung/abgeschlossen without Klassifizierung
   if (newStatus === 'regulierung' || newStatus === 'abgeschlossen') {
@@ -32,14 +35,21 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
       .eq('fall_id', fallId)
       .maybeSingle()
     if (!klassifizierung) {
-      throw new Error('Regulierungs-Klassifizierung fehlt. Bitte im Tab "Abrechnung" die Pflicht-Klassifizierung ausfüllen.')
+      return {
+        ok: false,
+        error: 'Regulierungs-Klassifizierung fehlt. Bitte im Tab "Abrechnung" die Pflicht-Klassifizierung ausfüllen.',
+      }
     }
   }
 
   // AAR-88: Zentraler Status-Wechsel via state-machine
   // (validiert Uebergaenge, setzt Timestamps, schreibt Timeline,
   // triggert LexDrive-Email + SLA-Hooks)
-  await transitionFallStatus(fallId, newStatus, { user_id: user.id })
+  try {
+    await transitionFallStatus(fallId, newStatus, { user_id: user.id })
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Status-Wechsel fehlgeschlagen' }
+  }
 
   // Fire-and-forget email notifications on status change
   triggerStatusEmail(serviceClient, fallId, newStatus).catch(() => {})
@@ -213,6 +223,7 @@ export async function updateFallStatus(fallId: string, newStatus: string) {
 
   revalidatePath('/dispatch/dashboard')
   revalidatePath(`/faelle/${fallId}`)
+  return { ok: true }
 }
 
 // ─── Lead Status ────────────────────────────────────────────────────────────
@@ -233,10 +244,10 @@ export async function createLead(data: {
   schadens_art?: string
   // AAR-90: optional FIN bei manuellem Lead-Anlegen → Cardentity-Anreicherung
   fin?: string
-}) {
+}): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase.from('leads').insert({
     vorname: data.vorname,
@@ -254,7 +265,7 @@ export async function createLead(data: {
     zugewiesen_an: user.id,
   })
 
-  if (error) throw new Error(error.message)
+  if (error) return { ok: false, error: error.message }
 
   // Phase 1: Lead-Tasks + Notification
   const { data: newLead } = await supabase.from('leads').select('id').eq('vorname', data.vorname).eq('nachname', data.nachname).order('created_at', { ascending: false }).limit(1).single()
@@ -284,6 +295,7 @@ export async function createLead(data: {
   }
 
   revalidatePath('/dispatch/dashboard')
+  return { ok: true }
 }
 
 // Valid qualification phases (BUG-27 new + old for backward compat)
@@ -295,17 +307,30 @@ const QUALI_PHASES = new Set([
   'gegner-daten', 'gutachtertermin', 'sa-unterschrieben', 'flow-gesendet', 'abgeschlossen',
 ])
 
-export async function updateLeadStatus(leadId: string, newStatus: string) {
+type UpdateLeadStatusResult =
+  | { ok: true; converted: true; fallId: string; linked: ConvertResult['linked'] }
+  | { ok: true; converted: false }
+  | { ok: false; error: string }
+
+export async function updateLeadStatus(
+  leadId: string,
+  newStatus: string,
+): Promise<UpdateLeadStatusResult> {
   const supabase = await createClient()
   const svc = createServiceClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const now = new Date().toISOString()
 
   // Konversion triggers
   if (newStatus === 'umgewandelt' || newStatus === 'abgeschlossen' || newStatus === 'konvertiert') {
-    const result = await convertLeadToFall(svc, leadId, user.id)
+    let result: ConvertResult
+    try {
+      result = await convertLeadToFall(svc, leadId, user.id)
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : 'Konversion fehlgeschlagen' }
+    }
     await svc.from('leads').update({
       qualifizierungs_phase: 'konvertiert',
       status: 'umgewandelt',
@@ -317,7 +342,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
       await resolveTasksForEntity('lead', leadId, 'Lead konvertiert')
     } catch (err) { console.error('[KFZ-151] resolveTasks lead konvertiert:', err) }
     revalidatePath('/dispatch/dashboard')
-    return { converted: true, fallId: result.fallId, linked: result.linked }
+    return { ok: true, converted: true, fallId: result.fallId, linked: result.linked }
   }
 
   const updateData: Record<string, unknown> = { updated_at: now }
@@ -349,7 +374,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
     .update(updateData)
     .eq('id', leadId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { ok: false, error: error.message }
 
   // AAR-92: Maik-Provision reversen bei Disqualifikation/Kalt
   if (newStatus === 'disqualifiziert' || newStatus === 'kalt') {
@@ -363,7 +388,7 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
   }
 
   revalidatePath('/dispatch/dashboard')
-  return { converted: false }
+  return { ok: true, converted: false }
 }
 
 // ─── KFZ-192: Service-Typ setzen ────────────────────────────────────────────
@@ -371,28 +396,33 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
 export async function updateServiceTyp(
   leadId: string,
   serviceTyp: 'komplett' | 'nur_gutachter',
-) {
+): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('leads')
     .update({ service_typ: serviceTyp, updated_at: new Date().toISOString() })
     .eq('id', leadId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { ok: false, error: error.message }
 
   revalidatePath(`/dispatch/leads/${leadId}`)
   revalidatePath('/dispatch/dashboard')
+  return { ok: true }
 }
 
 // ─── Flow-Link ──────────────────────────────────────────────────────────────
 
-export async function sendFlowLink(leadId: string) {
+type SendFlowLinkResult =
+  | { ok: true; token: string; url: string }
+  | { ok: false; error: string }
+
+export async function sendFlowLink(leadId: string): Promise<SendFlowLinkResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const { data: lead } = await supabase
     .from('leads')
@@ -400,7 +430,7 @@ export async function sendFlowLink(leadId: string) {
     .eq('id', leadId)
     .single()
 
-  if (!lead) throw new Error('Lead nicht gefunden')
+  if (!lead) return { ok: false, error: 'Lead nicht gefunden' }
 
   // KFZ-192: service_typ aus Lead in FlowLink kopieren
   const serviceTyp = (lead as Record<string, unknown>).service_typ as string ?? 'komplett'
@@ -412,7 +442,7 @@ export async function sendFlowLink(leadId: string) {
     .select('token')
     .single()
 
-  if (flowErr) throw new Error(`Flow-Link Erstellung fehlgeschlagen: ${flowErr.message}`)
+  if (flowErr) return { ok: false, error: `Flow-Link Erstellung fehlgeschlagen: ${flowErr.message}` }
 
   // AAR-52: FlowLink per WhatsApp an Kunden senden
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
@@ -507,7 +537,7 @@ export async function sendFlowLink(leadId: string) {
   revalidatePath('/dispatch/dashboard')
   revalidatePath(`/dispatch/leads/${leadId}`)
 
-  return { token: flowLink.token, url: flowUrl }
+  return { ok: true, token: flowLink.token, url: flowUrl }
 }
 
 // ─── Lead → Kundenakte Konversion ───────────────────────────────────────────

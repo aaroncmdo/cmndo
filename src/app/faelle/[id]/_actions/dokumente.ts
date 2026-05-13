@@ -190,13 +190,16 @@ const KATEGORIE_SICHTBARKEIT: Record<string, string[]> = {
   'whatsapp-foto': ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
 }
 
-export async function uploadDatei(fallId: string, formData: FormData) {
+export async function uploadDatei(
+  fallId: string,
+  formData: FormData,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const file = formData.get('file') as File | null
-  if (!file || !(file instanceof File)) throw new Error('Keine Datei ausgewaehlt')
+  if (!file || !(file instanceof File)) return { success: false, error: 'Keine Datei ausgewählt' }
 
   const kategorie = (formData.get('kategorie') as string) || 'sonstiges'
 
@@ -217,7 +220,7 @@ export async function uploadDatei(fallId: string, formData: FormData) {
   const { error: uploadErr } = await supabase.storage
     .from('fall-dokumente')
     .upload(storagePath, file, { contentType: file.type })
-  if (uploadErr) throw new Error(uploadErr.message)
+  if (uploadErr) return { success: false, error: uploadErr.message }
 
   const { error: insertErr } = await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
@@ -234,20 +237,21 @@ export async function uploadDatei(fallId: string, formData: FormData) {
     sichtbar_fuer,
   })
 
-  if (insertErr) throw new Error(insertErr.message)
+  if (insertErr) return { success: false, error: insertErr.message }
 
   revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
+  return { success: true }
 }
 
 export async function uploadPflichtdokument(
   fallId: string,
   pflichtdokumentId: string,
   url: string,
-) {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('pflichtdokumente')
@@ -258,15 +262,20 @@ export async function uploadPflichtdokument(
     })
     .eq('id', pflichtdokumentId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }
 
 // KFZ-113: Anschlussschreiben-Upload mit OCR-Extraktion (Sendedatum + Signatur)
-export async function uploadAnschlussschreiben(fallId: string, fileUrl: string, fileName: string) {
+export async function uploadAnschlussschreiben(
+  fallId: string,
+  fileUrl: string,
+  fileName: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   await supabase.from('faelle').update({
     anschlussschreiben_url: fileUrl,
@@ -314,11 +323,12 @@ export async function uploadAnschlussschreiben(fallId: string, fileUrl: string, 
     fall_id: fallId,
     typ: 'system',
     titel: 'Anschlussschreiben hochgeladen',
-    beschreibung: `Datei: ${fileName}. OCR-Extraktion durchgefuehrt.`,
+    beschreibung: `Datei: ${fileName}. OCR-Extraktion durchgeführt.`,
     erstellt_von: user.id,
   })
 
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }
 
 function extractSendedatum(text: string): string | null {

@@ -134,7 +134,13 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
     const snapshot = [...localFaelle]
     setLocalFaelle(prev => prev.map(f => f.id === draggableId ? { ...f, status: newStatus } : f))
 
-    updateFallStatus(draggableId, newStatus).catch((e: unknown) => {
+    updateFallStatus(draggableId, newStatus).then((r) => {
+      if (!r.ok) {
+        setLocalFaelle(snapshot)
+        setToast(r.error ?? 'Fehler')
+        setTimeout(() => setToast(null), 3000)
+      }
+    }).catch((e: unknown) => {
       setLocalFaelle(snapshot)
       setToast(e instanceof Error ? e.message : 'Fehler')
       setTimeout(() => setToast(null), 3000)
