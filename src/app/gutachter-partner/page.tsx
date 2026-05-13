@@ -48,9 +48,12 @@ export const metadata: Metadata = {
 async function getWartelisteAnzahl(): Promise<number> {
   try {
     const supabase = createAdminClient()
+    // Nur echte Warteliste-Einträge zählen (quelle='gutachter-partner-page'),
+    // nicht die DAT-Expert-Imports im Gutachter-Finder (quelle='dat_expert')
     const { count } = await supabase
       .from('sv_leads')
       .select('id', { count: 'exact', head: true })
+      .eq('quelle', 'gutachter-partner-page')
     return count ?? 62
   } catch {
     return 62 // Fallback bei DB-Fehler — Zahl vom 13.05.2026
