@@ -46,14 +46,29 @@ const BEAM_HEIGHT_M = 24
 const BEAM_RADIUS_M = 1.5
 const GROUND_PULSE_MAX_RADIUS_M = 35
 
-const COLOR_GLOW = new THREE.Color('#7BA3CC') // claimondo-light-blue (default)
-const COLOR_HALO = new THREE.Color('#4573A2') // claimondo-ondo
-// 2026-05-08 (C6): Arrived-Choreographie — emerald-Töne signalisieren
-// "Ziel erreicht". Doppelte Pulse-Frequenz erzeugt eine Erfolgs-
-// Animation, die den SV optisch belohnt + ihn auf den arrived-Modal
-// vorbereitet.
-const COLOR_GLOW_ARRIVED = new THREE.Color('#10B981') // emerald-500
-const COLOR_HALO_ARRIVED = new THREE.Color('#059669') // emerald-600
+// 2026-05-14: Lazy-Init via Getter — Turbopack-prod-Build crashte mit
+// "a.Color is not a constructor" weil das Module-Eval die THREE.Color-
+// Constructor-Calls SOFORT bei jedem Page-Load triggerte (auch wenn der
+// 3D-Pin gar nicht aktiviert wird). Ergebnis: jede Route die @/lib/mapbox
+// re-exportiert → App-Root-Crash via CMM-14-Boundary. Lazy-Getter umgeht
+// den Eager-Module-Eval, Three.js wird erst beim ersten Pin-Mount geladen.
+let _heroPinColors: {
+  glow: THREE.Color
+  halo: THREE.Color
+  glowArrived: THREE.Color
+  haloArrived: THREE.Color
+} | null = null
+function heroPinColors() {
+  if (!_heroPinColors) {
+    _heroPinColors = {
+      glow: new THREE.Color('#7BA3CC'),
+      halo: new THREE.Color('#4573A2'),
+      glowArrived: new THREE.Color('#10B981'),
+      haloArrived: new THREE.Color('#059669'),
+    }
+  }
+  return _heroPinColors
+}
 
 /**
  * Liefert eine radial-gradient sprite-Texture für Soft-Glow-Halo.
@@ -167,8 +182,8 @@ export function attachHeroPin3d(
       // 1) Innere Sphere — emissive Pin-Kern.
       const innerGeom = new THREE.SphereGeometry(INNER_RADIUS_M, 32, 16)
       const innerMat = new THREE.MeshStandardMaterial({
-        color: COLOR_GLOW,
-        emissive: COLOR_GLOW,
+        color: heroPinColors().glow,
+        emissive: heroPinColors().glow,
         emissiveIntensity: 2.4,
         metalness: 0.4,
         roughness: 0.3,
@@ -196,7 +211,7 @@ export function attachHeroPin3d(
       //    Cylinder oben transparent, unten emissive, additive blending.
       const beamGeom = new THREE.CylinderGeometry(BEAM_RADIUS_M, BEAM_RADIUS_M * 1.3, BEAM_HEIGHT_M, 16, 1, true)
       const beamMat = new THREE.MeshBasicMaterial({
-        color: COLOR_GLOW,
+        color: heroPinColors().glow,
         transparent: true,
         opacity: 0.45,
         side: THREE.DoubleSide,
@@ -213,7 +228,7 @@ export function attachHeroPin3d(
       //    expandiert. RingGeometry, additive Blending.
       const ringGeom = new THREE.RingGeometry(2, 3, 64)
       groundRingMaterial = new THREE.MeshBasicMaterial({
-        color: COLOR_GLOW,
+        color: heroPinColors().glow,
         transparent: true,
         opacity: 0.6,
         side: THREE.DoubleSide,
@@ -252,8 +267,8 @@ export function attachHeroPin3d(
         // Color-Crossfade in/out arrived (300 ms ease).
         if (state.arrivedSince > 0) {
           const tCross = Math.min(1, (Date.now() - state.arrivedSince) / 300)
-          const target = state.arrived ? COLOR_GLOW_ARRIVED : COLOR_GLOW
-          const haloTarget = state.arrived ? COLOR_HALO_ARRIVED : COLOR_HALO
+          const target = state.arrived ? heroPinColors().glowArrived : heroPinColors().glow
+          const haloTarget = state.arrived ? heroPinColors().haloArrived : heroPinColors().halo
           ;(innerMesh.material as THREE.MeshStandardMaterial).color.lerp(target, tCross)
           ;(innerMesh.material as THREE.MeshStandardMaterial).emissive.lerp(target, tCross)
           ;(beamMesh.material as THREE.MeshBasicMaterial).color.lerp(target, tCross)
