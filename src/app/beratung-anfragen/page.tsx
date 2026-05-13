@@ -5,7 +5,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL } from '@/lib/seo/jsonld'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, CONTACT_EMAIL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
   title: 'Kostenlose Beratung anfragen — Kfz-Unfallschaden · Claimondo',
@@ -83,6 +83,45 @@ export default function BeratungAnfragenPage() {
               'Unverbindliche Erstberatung zu Kfz-Unfallschäden durch das Claimondo-Team. Erreichbar per Telefon, WhatsApp und E-Mail. Antwort in unter 15 Minuten.',
             url: `${SITE_URL}/beratung-anfragen`,
           }),
+          // AAR-881: Page-spezifischer LocalBusiness-Block mit allen drei
+          // Kontaktkanälen — gibt SERP-Knowledge-Panel + Telefon-Snippet die
+          // ContactPoints, die nicht im globalen Layout-Schema stehen.
+          // @id verkettet mit dem globalen LocalBusiness im Root-Layout.
+          {
+            '@context': 'https://schema.org',
+            '@type': 'LegalService',
+            '@id': `${SITE_URL}/#localbusiness`,
+            name: 'Claimondo Schadensberatung',
+            url: `${SITE_URL}/beratung-anfragen`,
+            areaServed: { '@type': 'Country', name: 'Deutschland' },
+            contactPoint: [
+              {
+                '@type': 'ContactPoint',
+                contactType: 'customer service',
+                telephone: PHONE_E164,
+                email: CONTACT_EMAIL,
+                areaServed: 'DE',
+                availableLanguage: ['de', 'en', 'tr', 'ar', 'pl', 'ru'],
+                hoursAvailable: [
+                  {
+                    '@type': 'OpeningHoursSpecification',
+                    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                    opens: '08:00',
+                    closes: '18:00',
+                  },
+                ],
+              },
+              {
+                '@type': 'ContactPoint',
+                contactType: 'customer service',
+                telephone: PHONE_E164,
+                url: `https://wa.me/${PHONE_E164.replace('+', '')}`,
+                areaServed: 'DE',
+                availableLanguage: ['de'],
+                // WhatsApp: Antwort < 15 Min während Geschäftszeiten.
+              },
+            ],
+          },
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Beratung anfragen', url: '/beratung-anfragen' },
