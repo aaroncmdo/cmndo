@@ -96,6 +96,19 @@ const nextConfig: NextConfig = {
         destination: '/gutachter/fall/:id',
         permanent: true,
       },
+      // CMM-14 (14.05.26): /gutachter ist nur noch ein Redirect-Stub auf
+      // /gutachter/heute (AAR-700). Der Server-Component-Redirect über
+      // `redirect('/gutachter/heute')` produzierte deterministisch React-
+      // #310 ("Rendered more hooks than during the previous render") im
+      // Next-AppRouter — Hook-Count diverged zwischen der initialen
+      // /gutachter-RSC-Payload und der /gutachter/heute-Re-Render-Payload.
+      // Als HTTP-301-Redirect umgehen wir RSC komplett — Browser navigiert
+      // direkt, AppRouter sieht nur die finale Ziel-URL.
+      {
+        source: '/gutachter',
+        destination: '/gutachter/heute',
+        permanent: true,
+      },
       // AAR-338: Admin-Dispatch-Board gibt's nicht mehr als Admin-Layout —
       // /dispatch/* ist jetzt das einzige Dispatch-Frontend (Full-Screen).
       {
