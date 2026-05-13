@@ -39,3 +39,6 @@ export type { ModalProps } from './Modal'
 
 export { Drawer } from './Drawer'
 export type { DrawerProps } from './Drawer'
+
+export { Input } from './Input'
+export type { InputProps, InputType, InputSize } from './Input'

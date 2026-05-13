@@ -12,6 +12,7 @@ import SvDispatchPanel from '../SvDispatchPanel'
 import { useDispatchPhase } from '../_lib/phase-context'
 import { setServiceTyp, saveStammdaten } from '../actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import { Input } from '@/components/primitives'
 import { CheckCircle2Icon, CheckCircleIcon, ScaleIcon, CalendarIcon, MapPinIcon } from 'lucide-react'
 
 export default function Phase2TerminServiceTyp() {
@@ -242,12 +243,12 @@ export default function Phase2TerminServiceTyp() {
           <p className="text-[13px] text-claimondo-shield/80 italic tracking-[-.005em]">
             Frage-Guidance: „Wann passt es Ihnen am besten? Je konkreter, desto schneller kommt der Termin."
           </p>
-          <input
-            type="datetime-local"
+          <Input
+            inputType="datetime-local"
             value={wunschtermin}
-            onChange={(e) => setWunschtermin(e.target.value)}
+            onChangeText={setWunschtermin}
             min={minDatetime}
-            className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-2xl px-4 py-3 text-base text-claimondo-navy tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
+            ariaLabel="Wunschtermin des Kunden"
           />
           {wunschtermin && (
             <p className="text-[11px] text-claimondo-ondo font-medium">
