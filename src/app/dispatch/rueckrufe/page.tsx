@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import RueckrufActions from './RueckrufActions'
+import { RueckrufeRealtimeRefresher } from './RueckrufeRealtimeRefresher'
 import PhoneButton from '@/components/shared/PhoneButton'
 import PageHeader from '@/components/shared/PageHeader'
 import EmptyState from '@/components/shared/EmptyState'
@@ -72,6 +73,7 @@ export default async function DispatchRueckrufe({
 
   return (
     <div className="py-6 space-y-4">
+      <RueckrufeRealtimeRefresher />
       <PageHeader
         title="Rückrufe"
         actions={<span className="text-sm text-claimondo-ondo">{termine.length} offen</span>}
