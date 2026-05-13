@@ -450,7 +450,11 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
           <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border">Abbrechen</button>
           <button disabled={processing || !grund} onClick={async () => {
             setProcessing(true)
-            try { await deactivateFall(fall.id, grund, ''); onRefresh() } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
+            try {
+              const res = await deactivateFall(fall.id, grund, '')
+              if (!res.success) setError(res.error ?? 'Fehler')
+              else onRefresh()
+            } catch (e) { setError(e instanceof Error ? e.message : 'Fehler') }
             setProcessing(false); setModal(null)
           }} className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-40">
             {processing ? 'Deaktiviert...' : 'Deaktivieren'}
