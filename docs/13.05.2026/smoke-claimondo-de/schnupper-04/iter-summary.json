@@ -1,0 +1,53 @@
+{
+  "iterName": "schnupper-04",
+  "ok": true,
+  "reason": null,
+  "attempts": 1,
+  "iters": [
+    {
+      "attempt": 1,
+      "startedAt": 1778685053229,
+      "steps": [
+        {
+          "id": "01-gutachter-finden-open",
+          "ok": true,
+          "durationMs": 8333
+        },
+        {
+          "id": "02-warte-bis-marker-da-sind",
+          "ok": true,
+          "durationMs": 3960
+        },
+        {
+          "id": "03-klick-ersten-sv-marker",
+          "ok": true,
+          "durationMs": 1220
+        },
+        {
+          "id": "04-warte-auf-popup",
+          "ok": true,
+          "durationMs": 2272
+        },
+        {
+          "id": "05-klick-anfrage-button-im-popup",
+          "ok": true,
+          "durationMs": 1163
+        },
+        {
+          "id": "06-warte-und-screenshot-detail-view",
+          "ok": true,
+          "durationMs": 2658
+        },
+        {
+          "id": "07-scroll-zum-wizard",
+          "ok": true,
+          "durationMs": 1142
+        }
+      ],
+      "desync": null,
+      "ok": true,
+      "endedAt": 1778685073978,
+      "totalMs": 20749
+    }
+  ]
+}

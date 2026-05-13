@@ -56,6 +56,8 @@ export function TextareaField({ feld, value, onChange, disabled }: Props) {
         }}
       >
         <textarea
+          name={feld.feld_key}
+          data-testid={`feld-${feld.feld_key}`}
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={feld.placeholder ?? ''}
