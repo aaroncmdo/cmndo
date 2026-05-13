@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,8 +49,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Ungültiger Storage-Pfad' }, { status: 400 })
     }
 
-    const { data: publicData } = db.storage.from('fall-dokumente').getPublicUrl(body.storagePath)
-    const publicUrl = publicData.publicUrl
+    const publicUrl = await getStorageUrl(db, 'fall-dokumente', body.storagePath)
+    if (!publicUrl) {
+      return NextResponse.json({ error: 'URL-Generierung fehlgeschlagen' }, { status: 500 })
+    }
 
     await db.from('fall_dokumente').insert({
       fall_id: auftrag.fall_id,
