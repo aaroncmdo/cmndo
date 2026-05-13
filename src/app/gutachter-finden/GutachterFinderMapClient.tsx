@@ -208,7 +208,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
               <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block"></span>
               Verfügbar mit Kalender-Sync
             </div>
-            <button data-testid="sv-anfrage-popup" data-sv-id="${sv.id}" onclick="document.dispatchEvent(new CustomEvent('claimondo:select-sv', { detail: '${sv.id}' }))" style="margin-top:10px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px 12px;cursor:pointer;letter-spacing:-.01em">
+            <button data-testid="sv-anfrage-popup" data-sv-id="${sv.id}" data-sv-tier="premium" onclick="document.dispatchEvent(new CustomEvent('claimondo:select-sv', { detail: { id: '${sv.id}', tier: 'premium' } }))" style="margin-top:10px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px 12px;cursor:pointer;letter-spacing:-.01em">
               Diesen Premium-Gutachter anfragen
             </button>
           </div>
@@ -246,7 +246,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
               <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block"></span>
               Verfügbar in Ihrer Region
             </div>
-            <button data-testid="sv-anfrage-popup" data-sv-id="${sv.id}" onclick="document.dispatchEvent(new CustomEvent('claimondo:select-sv', { detail: '${sv.id}' }))" style="margin-top:10px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px 12px;cursor:pointer;letter-spacing:-.01em">
+            <button data-testid="sv-anfrage-popup" data-sv-id="${sv.id}" data-sv-tier="lead" onclick="document.dispatchEvent(new CustomEvent('claimondo:select-sv', { detail: { id: '${sv.id}', tier: 'lead' } }))" style="margin-top:10px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px 12px;cursor:pointer;letter-spacing:-.01em">
               Diesen Gutachter anfragen
             </button>
           </div>

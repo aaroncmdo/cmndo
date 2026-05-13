@@ -138,6 +138,18 @@ export async function updateSession(request: NextRequest) {
 
 function isPublicPath(pathname: string): boolean {
   if (pathname === '/') return true
+  // Marketing-Premium-Rework 13.05.2026: SEO-Crawler-Endpunkte MÜSSEN
+  // unauthenticated erreichbar sein, sonst sieht Googlebot/GPTBot/ClaudeBot
+  // beim Fetch der Sitemap/robots.txt einen 307 → /login. Die gesamte
+  // Indexierung von claimondo.de wäre damit blockiert.
+  if (
+    pathname === '/sitemap.xml' ||
+    pathname === '/robots.txt' ||
+    pathname === '/llms.txt' ||
+    pathname === '/opengraph-image' ||
+    pathname === '/manifest.json' ||
+    pathname === '/favicon.ico'
+  ) return true
   // BUG-84 follow-up: /passwort-vergessen + /passwort-zuruecksetzen muessen
   // unauthenticated erreichbar sein, sonst redirected die Middleware den
   // User der gerade auf den Reset-Link in seiner Mail geklickt hat zu /login
