@@ -10,6 +10,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { getStorageUrl } from '@/lib/storage/url'
 import {
   processLexDriveEvent,
   type LexDriveEventPayload,
@@ -98,9 +99,10 @@ export async function applyKanzleiPaket(
       return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
     }
     uploadedFilePath = path
-    const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
+    const url = await getStorageUrl(supabase, 'fall-dokumente', path)
+    if (!url) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
     // upload_url in den Payload-Shape der C3-Handler spiegeln
-    values.upload_url = urlData.publicUrl
+    values.upload_url = url
 
     await supabase.from('fall_dokumente').insert({
       fall_id: fallId,

@@ -14,6 +14,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { ZB1ExtractedData } from '@/lib/ocr/zb1-parser'
+import { getStorageUrl } from '@/lib/storage/url'
 
 type Slot = {
   // AAR-unfallfotos: 'unfallfotos' akzeptiert multiple Uploads (Mehr-Foto-Slot).
@@ -147,8 +148,8 @@ export async function uploadDokumentViaAnfrageToken(
     .from('fall-dokumente')
     .upload(path, buf, { contentType, upsert: false })
   if (upErr) return { success: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
-  const { data: publicData } = db.storage.from('fall-dokumente').getPublicUrl(path)
-  const publicUrl = publicData.publicUrl
+  const publicUrl = await getStorageUrl(db, 'fall-dokumente', path)
+  if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
 
   // 3. Zugehörigen Fall finden (falls vorhanden — für fall_dokumente-Insert)
   const { data: fallRow } = await db

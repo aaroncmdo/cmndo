@@ -1,6 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail } from './client'
 import { render } from '@react-email/render'
+// AAR-branding-rest: SV-Whitelabel für Kunden-gerichtete Mails (null = Claimondo)
+import { resolveEmailBranding } from '@/lib/branding/token-theme'
 
 import { KundeWelcomeEmail, subject as kundeWelcomeSubject } from './templates/KundeWelcome'
 import { SvAuftragszusammenfassungEmail, subject as svAuftragSubject } from './templates/SvAuftragszusammenfassung'
@@ -140,6 +142,8 @@ export async function sendKundeWelcome(
     terminInfo,
     // AAR-127: an Template durchreichen — wenn vorhanden, rendert es Magic-Link + Zugangsdaten-Block
     loginInfo: loginInfo ?? null,
+    // AAR-branding-rest: SV-Whitelabel wenn der zugewiesene SV verifiziert+branded ist
+    brand: await resolveEmailBranding({ svId: (fall.sv_id as string | null) ?? null }),
   }
 
   const html = await render(KundeWelcomeEmail(props))
@@ -993,6 +997,8 @@ export async function sendFlowLinkVersand(
       ? new Date(termin.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
       : '—',
     flowUrl,
+    // AAR-branding-rest: SV-Whitelabel wenn der dem Lead zugeordnete SV verifiziert+branded ist
+    brand: await resolveEmailBranding({ leadId }),
   }
 
   try {

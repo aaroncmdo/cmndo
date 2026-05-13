@@ -2,8 +2,8 @@
 // Page. Vorher: SaeuleMeinBetreuer existiert seit AAR-369 als Component,
 // wird aber nicht gerendert; KB + SV waren unsichtbar trotz Daten-Loading
 // auf der Page. Jetzt: 2-Spalten Strip oben auf der Page mit Avatar +
-// Name + Rolle + Chat-Button â€” der Endkunde sieht sofort wer sich um
-// seinen Fall kÃ¼mmert.
+// Name + Rolle + Chat-Button — der Endkunde sieht sofort wer sich um
+// seinen Fall kümmert.
 
 import Link from 'next/link'
 import { MessageSquareIcon, HardHatIcon, HeadphonesIcon, ShieldCheckIcon } from 'lucide-react'
@@ -39,11 +39,11 @@ function BetreuerCard({
 }) {
   const labelMap = {
     kundenbetreuer: 'Ihr Kundenbetreuer',
-    sachverstaendiger: 'Ihr SachverstÃ¤ndiger',
+    sachverstaendiger: 'Ihr Sachverständiger',
   } as const
   const fallbackBeschreibung =
     rolle === 'kundenbetreuer'
-      ? 'PersÃ¶nlicher Ansprechpartner'
+      ? 'Persönlicher Ansprechpartner'
       : 'Erstellt Ihr Gutachten'
   const displayName = name ?? (rolle === 'kundenbetreuer' ? 'Claimondo Team' : 'Wird zugewiesen')
 
@@ -67,9 +67,9 @@ function BetreuerCard({
       </div>
       <Link
         href={`/kunde/faelle/${fallId}#chat`}
-        className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-[var(--brand-secondary)] text-white hover:bg-[#3a6290] transition-colors"
-        aria-label={`Chat mit ${displayName} Ã¶ffnen`}
-        title="Chat Ã¶ffnen"
+        className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-[var(--brand-secondary)] text-white hover:bg-claimondo-shield transition-colors"
+        aria-label={`Chat mit ${displayName} öffnen`}
+        title="Chat öffnen"
       >
         <MessageSquareIcon className="w-4 h-4" />
       </Link>

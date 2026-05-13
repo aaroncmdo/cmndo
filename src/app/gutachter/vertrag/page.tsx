@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CheckIcon } from 'lucide-react'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export default function VertragPage() {
   const router = useRouter()
@@ -83,8 +84,10 @@ export default function VertragPage() {
         if (blob) {
           const path = `gutachter/${svData.id}/vertrag_unterschrift_${Date.now()}.png`
           await supabase.storage.from('fall-dokumente').upload(path, blob, { contentType: 'image/png' })
-          const { data: { publicUrl } } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
-          await supabase.from('sachverstaendige').update({ unterschrift_url: publicUrl }).eq('id', svData.id)
+          const publicUrl = await getStorageUrl(supabase, 'fall-dokumente', path)
+          if (publicUrl) {
+            await supabase.from('sachverstaendige').update({ unterschrift_url: publicUrl }).eq('id', svData.id)
+          }
         }
       }
 

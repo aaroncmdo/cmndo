@@ -2,10 +2,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createHmac } from 'crypto'
 import { notFound } from 'next/navigation'
 import KundeTrackingClient from './KundeTrackingClient'
-import KundenLightBrandingProvider from '@/components/branding/KundenLightBrandingProvider'
 import ClaimondoKundenHeader from '@/components/kunde/ClaimondoKundenHeader'
-import type { BrandTheme } from '@/lib/branding/theme'
 import { hydrateTheme } from '@/lib/branding/theme'
+import { generateCssVars } from '@/lib/branding/css-vars'
 import { terminBeiKundeZuhause } from '@/lib/kunde/termin-heuristik'
 import { SheetCard } from '@/components/shared/SheetCard'
 
@@ -128,26 +127,22 @@ export default async function KundeTerminPage({
     }
   }
 
-  // Light-Branding nur wenn SV verifiziert + Custom-Branding aktiv.
+  // AAR-branding-rest: Full-Branding (27 Vars) wenn SV verifiziert + Custom-Branding
+  // aktiv — der Kunde sieht das volle Whitelabel seines SVs (Aaron-Entscheidung
+  // 12.05.). Claimondo-Header (ClaimondoKundenHeader) bleibt als Attribution.
   const svVerifiziert = !!svRow?.verifiziert_am
   const brandEnabled = svVerifiziert && !!svRow?.use_custom_branding
 
-  const lightTheme: Pick<BrandTheme, 'primary' | 'primaryHover' | 'primaryActive' | 'primarySoft'> | null =
-    brandEnabled
-      ? (() => {
-          const hydrated = hydrateTheme(
-            svRow?.brand_theme as Parameters<typeof hydrateTheme>[0],
-            svRow?.brand_primary ?? null,
-            svRow?.brand_secondary ?? null,
-          )
-          return {
-            primary: hydrated.primary,
-            primaryHover: hydrated.primaryHover,
-            primaryActive: hydrated.primaryActive,
-            primarySoft: hydrated.primarySoft,
-          }
-        })()
-      : null
+  const brandStyle = brandEnabled
+    ? generateCssVars(
+        hydrateTheme(
+          svRow?.brand_theme as Parameters<typeof hydrateTheme>[0],
+          svRow?.brand_primary ?? null,
+          svRow?.brand_secondary ?? null,
+        ),
+        'full',
+      )
+    : undefined
 
   // PLZ-basierte Fallback-Koordinaten
   const PLZ_FALLBACK: Record<string, { lat: number; lng: number }> = {
@@ -168,7 +163,7 @@ export default async function KundeTerminPage({
     .slice(0, 16)
 
   return (
-    <KundenLightBrandingProvider enabled={brandEnabled} theme={lightTheme}>
+    <div style={brandStyle}>
       <div className="min-h-screen flex flex-col bg-claimondo-bg">
         <ClaimondoKundenHeader
           svAnzeigename={svAnzeigename || `${svVorname} ${svNachname}`.trim()}
@@ -200,6 +195,6 @@ export default async function KundeTerminPage({
           />
         </div>
       </div>
-    </KundenLightBrandingProvider>
+    </div>
   )
 }

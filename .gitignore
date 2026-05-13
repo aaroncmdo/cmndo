@@ -69,7 +69,7 @@ tmp/
 #      self-perpetuating Loop. Repro 2026-05-08 (PR #611-Followup).
 docs/portals-review/screenshots/feldmodus/
 
-# Tool-Arbeitsverzeichnisse / generierte Outputs / Debug-Screenshots
+# Tool-Arbeitsverzeichnisse / generierte Outputs / Debug-Screenshots / Audit-Outputs
 .superpowers/
 scripts/knip-output.json
 scripts/knip-classified.json

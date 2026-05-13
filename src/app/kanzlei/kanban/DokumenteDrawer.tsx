@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react'
 import { XIcon, FileTextIcon, DownloadIcon, FileIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Drawer } from '@/components/primitives/Drawer'
+import { getStorageUrlBulk } from '@/lib/storage/url'
 
 type FallDokument = {
   id: string
@@ -111,16 +112,16 @@ export default function DokumenteDrawer({
       }
       const rows = (data ?? []) as FallDokument[]
       setDokumente(rows)
-      // Public-URLs lazy sammeln. Storage.getPublicUrl ist synchron.
+      // URLs parallel sammeln (Helper bulk; Flag default-off liefert public URLs).
+      const bulkUrls = await getStorageUrlBulk(
+        supabase,
+        rows.map((d) => ({ bucket: 'fall-dokumente', path: d.storage_path })),
+      )
       const urls: Record<string, string> = {}
-      for (const d of rows) {
-        if (d.storage_path) {
-          const { data: pub } = supabase.storage
-            .from('fall-dokumente')
-            .getPublicUrl(d.storage_path)
-          urls[d.id] = pub.publicUrl
-        }
-      }
+      rows.forEach((d, i) => {
+        const u = bulkUrls[i]
+        if (u) urls[d.id] = u
+      })
       setBucketPublicUrls(urls)
     })().catch((err) => {
       if (!cancelled) setError(err instanceof Error ? err.message : String(err))

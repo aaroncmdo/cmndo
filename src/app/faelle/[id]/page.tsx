@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getStorageUrlBulk } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import FallakteShell from './FallakteShell'
 // CMM-33: Zentrale Pflichtdokumente-Section für Admin/KB im DokumenteTab.
@@ -16,6 +17,11 @@ import { getAlleSlots } from '@/lib/dokumente/katalog'
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
 import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
 import RegulierungCard from '@/components/kb/RegulierungCard'
+// 13.05.2026 Restore (8f088031-Merge + 693f97f8-ts-cleanup): 3 Cards
+// silent rausgefallen — siehe docs/13.05.26/TICKET-cmm28-followup-admin-kb-fallakte.md
+import VsKorrespondenzCard, { type VsKorrespondenzEintrag } from '@/components/kb/VsKorrespondenzCard'
+import KanzleiSlaStatusCard from '@/components/kb/KanzleiSlaStatusCard'
+import GutachtenOcrCard from '@/components/admin/fallakte/GutachtenOcrCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
 import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
@@ -246,12 +252,14 @@ export default async function FallaktePage({
   })
 
   // AAR-553: fall_dokumente → Legacy-Shape für DokumenteTab + systemDokumente
-  const dokumenteLegacy = (dokumente ?? []).map(d => ({
+  const dokUrlsLegacy = await getStorageUrlBulk(
+    supabase,
+    (dokumente ?? []).map(d => ({ bucket: 'fall-dokumente', path: (d.storage_path as string | null) ?? undefined })),
+  )
+  const dokumenteLegacy = (dokumente ?? []).map((d, i) => ({
     id: d.id as string,
     typ: (d.dokument_typ as string | null) ?? null,
-    datei_url: d.storage_path
-      ? supabase.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl
-      : null,
+    datei_url: dokUrlsLegacy[i],
     datei_name: (d.original_filename as string | null) ?? null,
     datei_groesse: (d.groesse_bytes as number | null) ?? null,
     created_at: (d.hochgeladen_am as string | null) ?? null,
@@ -379,16 +387,18 @@ export default async function FallaktePage({
     hochgeladen_am: string
   }
   const fallDokumenteRows = (fallDokumenteRaw ?? []) as unknown as FallDokumentRow[]
-  const publicUrlFor = (path: string): string | null => {
-    const { data } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
-    return data?.publicUrl ?? null
-  }
-  const unzugeordneteUploads = fallDokumenteRows
-    .filter((r) => r.dokument_typ === 'kunde-nachreichung' || r.dokument_typ === 'sonstiges')
-    .map((r) => ({
+  const unzugeordneteRows = fallDokumenteRows.filter(
+    (r) => r.dokument_typ === 'kunde-nachreichung' || r.dokument_typ === 'sonstiges',
+  )
+  const unzugeordneteUrls = await getStorageUrlBulk(
+    supabase,
+    unzugeordneteRows.map((r) => ({ bucket: 'fall-dokumente', path: r.storage_path })),
+  )
+  const unzugeordneteUploads = unzugeordneteRows
+    .map((r, i) => ({
       id: r.id,
       original_filename: r.original_filename,
-      previewUrl: publicUrlFor(r.storage_path),
+      previewUrl: unzugeordneteUrls[i],
       dokument_typ: r.dokument_typ,
       beschreibung: r.beschreibung,
       hochgeladen_am: r.hochgeladen_am,
@@ -400,20 +410,23 @@ export default async function FallaktePage({
   for (const p of (pflichtdokumente ?? []) as Array<{ dokument_typ: string; status: string }>) {
     if (p.status === 'hochgeladen') pflichtHochgeladenSlots.add(p.dokument_typ)
   }
-  const zuPruefendeUploads = fallDokumenteRows
-    .filter(
-      (r) =>
-        r.dokument_typ !== 'kunde-nachreichung' &&
-        r.dokument_typ !== 'sonstiges' &&
-        pflichtHochgeladenSlots.has(r.dokument_typ),
-    )
-    .map((r) => ({
-      id: r.id,
-      label: slotLabelMap.get(r.dokument_typ) ?? r.dokument_typ,
-      original_filename: r.original_filename,
-      previewUrl: publicUrlFor(r.storage_path),
-      hochgeladen_am: r.hochgeladen_am,
-    }))
+  const zuPruefendeRows = fallDokumenteRows.filter(
+    (r) =>
+      r.dokument_typ !== 'kunde-nachreichung' &&
+      r.dokument_typ !== 'sonstiges' &&
+      pflichtHochgeladenSlots.has(r.dokument_typ),
+  )
+  const zuPruefendeUrls = await getStorageUrlBulk(
+    supabase,
+    zuPruefendeRows.map((r) => ({ bucket: 'fall-dokumente', path: r.storage_path })),
+  )
+  const zuPruefendeUploads = zuPruefendeRows.map((r, i) => ({
+    id: r.id,
+    label: slotLabelMap.get(r.dokument_typ) ?? r.dokument_typ,
+    original_filename: r.original_filename,
+    previewUrl: zuPruefendeUrls[i],
+    hochgeladen_am: r.hochgeladen_am,
+  }))
 
   // Drag&Drop-Items: pflichtdokumente in Shape mit kategorie + sort_order.
   type PflichtSortRow = {
@@ -490,6 +503,73 @@ export default async function FallaktePage({
       .not('status', 'in', '("abgeschlossen","storniert")')
       .order('created_at', { ascending: false })
     otherKundeFaelle = others ?? []
+  }
+
+  // 13.05.2026 Restore: OCR-Auswertung admin-only laden (30 Spalten — pre-Merge
+  // war das eine loadGutachtenOcr()-Hilfsfunktion, inline gehalten da nur eine
+  // Aufrufstelle).
+  let gutachtenOcr: Record<string, unknown> | null = null
+  let erstgutachtenAuftragId: string | null = null
+  if (userRolle === 'admin' && claimId) {
+    const { data: ocr } = await supabase
+      .from('claims')
+      .select(
+        'reparaturkosten_netto, reparaturkosten_brutto, minderwert, restwert, ' +
+          'wiederbeschaffungswert, wiederbeschaffungsdauer_tage, nutzungsausfall_tage, ' +
+          'totalschaden, gutachten_datum, gutachten_ocr_processed_at, gutachten_ocr_error, ' +
+          'gutachten_ocr_manuell_ueberschrieben, ' +
+          'gutachten_fin, gutachten_kennzeichen, gutachten_erstzulassung, ' +
+          'gutachten_laufleistung_km, gutachten_tuv_bis, gutachten_fahrzeug_typ, ' +
+          'gutachten_farbe, gutachten_farbcode, gutachten_kraftstoff, ' +
+          'gutachten_vorschaeden_text, gutachten_lackmesswert_max_my, gutachten_karosseriezustand, ' +
+          'gutachten_zeit_ak_std, gutachten_zeit_kar_std, gutachten_zeit_lack_std, ' +
+          'gutachten_lohnsatz_ak_eur, gutachten_lohnsatz_kar_eur, gutachten_lohnsatz_lack_eur, ' +
+          'gutachten_materialkosten_eur, gutachten_lackmaterial_eur, gutachten_verbringung_eur, ' +
+          'gutachten_mietwagen_klasse, gutachten_mietwagen_tagessatz_eur, gutachten_nutzungsausfall_tagessatz_eur, ' +
+          'gutachten_sv_honorar_netto, gutachten_sv_honorar_brutto, gutachten_kalkulationssystem, gutachten_seitenzahl',
+      )
+      .eq('id', claimId)
+      .maybeSingle()
+    gutachtenOcr = (ocr as Record<string, unknown> | null) ?? null
+    const adminOcr = createAdminClient()
+    const { data: erstgutachtenRow } = await adminOcr
+      .from('auftraege')
+      .select('id')
+      .eq('fall_id', id)
+      .eq('typ', 'erstgutachten')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    erstgutachtenAuftragId = (erstgutachtenRow?.id as string | null) ?? null
+  }
+
+  // 13.05.2026 Restore: VS-Korrespondenz-Liste für VsKorrespondenzCard (admin/kb).
+  // Liest vs_korrespondenz (claim-scoped), neueste zuerst, max. 50.
+  let vsKorrespondenzEintraege: VsKorrespondenzEintrag[] = []
+  let vsVersicherungVorgabe: string | null = null
+  if ((userRolle === 'admin' || userRolle === 'kundenbetreuer') && claimId) {
+    const adminVsk = createAdminClient()
+    const { data: vsk } = await adminVsk
+      .from('vs_korrespondenz')
+      .select('id, datum, richtung, kanal, versicherung, aktenzeichen, betreff, notiz, naechste_frist')
+      .eq('claim_id', claimId)
+      .order('datum', { ascending: false })
+      .limit(50)
+    vsKorrespondenzEintraege = ((vsk ?? []) as Array<Record<string, unknown>>).map((row) => ({
+      id: row.id as string,
+      datum: row.datum as string,
+      richtung: row.richtung as 'eingehend' | 'ausgehend',
+      kanal: row.kanal as 'email' | 'post' | 'fax' | 'telefon' | 'portal',
+      versicherung: (row.versicherung as string | null) ?? null,
+      aktenzeichen: (row.aktenzeichen as string | null) ?? null,
+      betreff: (row.betreff as string | null) ?? null,
+      notiz: (row.notiz as string | null) ?? null,
+      naechste_frist: (row.naechste_frist as string | null) ?? null,
+    }))
+    const juengsterMitVS = vsKorrespondenzEintraege.find((e) => e.versicherung)
+    if (juengsterMitVS?.versicherung) {
+      vsVersicherungVorgabe = juengsterMitVS.versicherung
+    }
   }
 
   // AAR-433: KB Phase-State-Audit — nur für Admin und KB sichtbar.
@@ -588,17 +668,23 @@ export default async function FallaktePage({
         .not('abgelehnt_am', 'is', null)
         .order('abgelehnt_am', { ascending: false })
       type DocRow = { id: string; dokument_typ: string; original_filename: string | null; storage_path: string }
-      const docList = ((dokRows ?? []) as DocRow[]).map((d) => ({
+      const dokRowsTyped = (dokRows ?? []) as DocRow[]
+      const abgelehnteRowsTyped = (abgelehnteRows ?? []) as DocRow[]
+      const [docUrls, abgelehnteUrls] = await Promise.all([
+        getStorageUrlBulk(adminCli, dokRowsTyped.map((d) => ({ bucket: 'fall-dokumente', path: d.storage_path }))),
+        getStorageUrlBulk(adminCli, abgelehnteRowsTyped.map((d) => ({ bucket: 'fall-dokumente', path: d.storage_path }))),
+      ])
+      const docList = dokRowsTyped.map((d, i) => ({
         id: d.id,
         filename: d.original_filename ?? 'Datei',
-        url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
+        url: docUrls[i] ?? '',
         istHaupt: d.dokument_typ === 'gutachten' && !d.storage_path.includes('/nachbesserung/'),
         istNachbesserung: d.storage_path.includes('/nachbesserung/'),
       }))
-      const abgelehnteDocList = ((abgelehnteRows ?? []) as DocRow[]).map((d) => ({
+      const abgelehnteDocList = abgelehnteRowsTyped.map((d, i) => ({
         id: d.id,
         filename: d.original_filename ?? 'Datei',
-        url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
+        url: abgelehnteUrls[i] ?? '',
         istHaupt: false,
         istNachbesserung: false,
       }))
@@ -673,10 +759,40 @@ export default async function FallaktePage({
           <RegulierungCard {...regulierungCardProps} />
         </div>
       )}
+      {/* 13.05.2026 Restore (CMM-38): Kanzlei-SLA-Status (offene Fristen +
+          Mahnungs-Stand) — async Server-Component, lädt eigene Daten. */}
+      {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && (
+        <div className="mb-4">
+          <KanzleiSlaStatusCard fallId={id} />
+        </div>
+      )}
+      {/* 13.05.2026 Restore (CMM-42): VS-Korrespondenz erfassen + anzeigen. */}
+      {(userRolle === 'admin' || userRolle === 'kundenbetreuer') && claimId && (
+        <div className="mb-4">
+          <VsKorrespondenzCard
+            fallId={id}
+            claimId={claimId}
+            eintraege={vsKorrespondenzEintraege}
+            versicherungVorgabe={vsVersicherungVorgabe}
+          />
+        </div>
+      )}
       {kbAktion && <KbPhaseAuditCard aktion={kbAktion} />}
-      {/* GutachtenOcrCard wurde im Polish-Sweep aus dieser Page entfernt —
-          Daten-Loader (gutachtenOcr, erstgutachtenAuftragId, GutachtenOcrCard-
-          Import) sind nicht mehr im Scope. Re-Integration siehe Folge-PR. */}
+      {/* 13.05.2026 Restore (CMM-32 Walkthrough): GutachtenOcrCard ist 'use client'
+          mit Edit-Mode + Re-Run. Braucht claim_id/fall_id/auftrag_id für die
+          Server-Actions. */}
+      {userRolle === 'admin' && gutachtenOcr && claimId && (
+        <div className="mb-4">
+          <GutachtenOcrCard
+            data={{
+              ...gutachtenOcr,
+              claim_id: claimId,
+              fall_id: id,
+              auftrag_id: erstgutachtenAuftragId,
+            } as unknown as Parameters<typeof GutachtenOcrCard>[0]['data']}
+          />
+        </div>
+      )}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
       {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
           Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}

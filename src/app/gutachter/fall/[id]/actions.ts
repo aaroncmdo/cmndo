@@ -9,6 +9,7 @@ import { berechneLeadpreis } from '@/lib/leadpreis'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { createNotification } from '@/lib/notifications'
 import { emitEvent } from '@/lib/notifications/emit'
+import { getStorageUrl } from '@/lib/storage/url'
 
 type ActionResult = { success?: boolean; error?: string }
 
@@ -51,9 +52,8 @@ export async function uploadGutachten(
 
   if (uploadError) return { error: `Upload fehlgeschlagen: ${uploadError.message}` }
 
-  const { data: urlData } = supabase.storage
-    .from('fall-dokumente')
-    .getPublicUrl(filePath)
+  const pdfUrl = await getStorageUrl(supabase, 'fall-dokumente', filePath)
+  if (!pdfUrl) return { error: 'URL-Generierung fehlgeschlagen' }
 
   // AAR-553: fall_dokumente statt dokumente
   const { data: insertedDoc, error: docError } = await supabase.from('fall_dokumente').insert({
@@ -200,7 +200,7 @@ export async function uploadGutachten(
   fetch(`${baseUrl}/api/ocr-gutachten`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fall_id: fallId, pdf_url: urlData.publicUrl }),
+    body: JSON.stringify({ fall_id: fallId, pdf_url: pdfUrl }),
   }).catch(() => {})
 
   // E-Mail an Admin: Gutachten eingegangen
@@ -220,7 +220,7 @@ export async function uploadGutachten(
     await Promise.allSettled([
       emitEvent(
         'gutachten.fertig',
-        { fallId, gutachtenId, pdfUrl: urlData.publicUrl },
+        { fallId, gutachtenId, pdfUrl: pdfUrl },
         { fallId, triggeredBy: user.id },
       ),
       emitEvent(
@@ -276,7 +276,8 @@ export async function uploadDokument(
 
   if (uploadErr) return { error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
-  const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
+  const dokUrl = await getStorageUrl(supabase, 'fall-dokumente', path)
+  if (!dokUrl) return { error: 'URL-Generierung fehlgeschlagen' }
 
   // Determine document type from pflichtdokument if provided
   let dokumentTyp = 'gutachter-dokument'
@@ -352,7 +353,7 @@ export async function uploadDokument(
       .update({
         status: 'hochgeladen',
         quelle: 'gutachter',
-        dokument_url: urlData.publicUrl,
+        dokument_url: dokUrl,
         hochgeladen_am: new Date().toISOString(),
       })
       .eq('id', pflichtdokumentId)

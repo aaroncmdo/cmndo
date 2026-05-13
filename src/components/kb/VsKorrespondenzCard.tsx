@@ -185,7 +185,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
         <p className="text-xs text-claimondo-ondo italic py-4 text-center">
           {eintraege.length === 0
             ? 'Noch keine Korrespondenz erfasst. Trage den ersten Kontakt mit der Versicherung ein.'
-            : 'Keine Eintraege fuer diesen Filter.'}
+            : 'Keine Einträge für diesen Filter.'}
         </p>
       ) : (
         <ol className="space-y-2">
@@ -225,7 +225,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                     )}
                     {e.naechste_frist && (
                       <p className={`text-[11px] mt-1 font-medium ${fristAbgelaufen ? 'text-rose-700' : 'text-violet-700'}`}>
-                        Naechste Frist: {fmtDatum(e.naechste_frist)}{fristAbgelaufen ? ' (abgelaufen)' : ''}
+                        Nächste Frist: {fmtDatum(e.naechste_frist)}{fristAbgelaufen ? ' (abgelaufen)' : ''}
                       </p>
                     )}
                   </div>
@@ -328,7 +328,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
               />
             </Field>
 
-            <Field label="Naechste erwartete Frist (optional)">
+            <Field label="Nächste erwartete Frist (optional)">
               <input
                 type="date"
                 value={naechsteFrist}

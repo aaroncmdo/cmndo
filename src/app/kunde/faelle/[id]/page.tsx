@@ -19,6 +19,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getStorageUrl, getStorageUrlBulk } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { FallPhasenPanel } from '@/components/shared/fall-phases'
@@ -34,6 +35,11 @@ import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
+import KundeAbschlussCard from '@/components/kunde/KundeAbschlussCard'
+import KundeBetreuerStrip from '@/components/kunde/KundeBetreuerStrip'
+import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
+import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
+import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
@@ -162,10 +168,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .is('geloescht_am', null)
       .is('abgelehnt_am', null)
       .order('hochgeladen_am')
-    const dokumente = (dokumenteRaw ?? []).map(d => ({
+    const dokUrls = await getStorageUrlBulk(
+      admin,
+      (dokumenteRaw ?? []).map(d => ({ bucket: 'fall-dokumente', path: d.storage_path as string })),
+    )
+    const dokumente = (dokumenteRaw ?? []).map((d, i) => ({
       id: d.id as string,
       typ: d.dokument_typ as string,
-      datei_url: admin.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl,
+      datei_url: dokUrls[i] ?? '',
       datei_name: (d.original_filename as string | null) ?? null,
       created_at: d.hochgeladen_am as string,
     }))
@@ -264,6 +274,68 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       )
       .eq('id', id)
       .maybeSingle()
+
+    // 13.05.2026 Restore: claim-Row + fall-Extras für die im 8f088031-Merge
+    // verlorenen Cards (KanzleiPfadCard, KundeAusfallEntschaedigungCard,
+    // KundeAbschlussCard.gutachtenUrl, GoogleReviewPrompt-Gating). Der
+    // CMM-28-Loader getKundeFallDetailRecord deckt diese Felder nicht ab.
+    let claimExtra: {
+      kanzlei_uebergeben_am: string | null
+      kanzlei_ansprechpartner_email: string | null
+      kanzlei_ansprechpartner_telefon: string | null
+      totalschaden: boolean | null
+      gutachten_ocr_processed_at: string | null
+      nutzungsausfall_tage: number | null
+      wiederbeschaffungsdauer_tage: number | null
+      gutachten_nutzungsausfall_tagessatz_eur: number | null
+      gutachten_mietwagen_tagessatz_eur: number | null
+    } | null = null
+    if (fall.claim_id) {
+      const { data: cx } = await admin
+        .from('claims')
+        .select(
+          'kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur',
+        )
+        .eq('id', fall.claim_id as string)
+        .maybeSingle()
+      if (cx) {
+        claimExtra = {
+          kanzlei_uebergeben_am: (cx.kanzlei_uebergeben_am as string | null) ?? null,
+          kanzlei_ansprechpartner_email: (cx.kanzlei_ansprechpartner_email as string | null) ?? null,
+          kanzlei_ansprechpartner_telefon: (cx.kanzlei_ansprechpartner_telefon as string | null) ?? null,
+          totalschaden: (cx.totalschaden as boolean | null) ?? null,
+          gutachten_ocr_processed_at: (cx.gutachten_ocr_processed_at as string | null) ?? null,
+          nutzungsausfall_tage: (cx.nutzungsausfall_tage as number | null) ?? null,
+          wiederbeschaffungsdauer_tage: (cx.wiederbeschaffungsdauer_tage as number | null) ?? null,
+          gutachten_nutzungsausfall_tagessatz_eur: (cx.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null,
+          gutachten_mietwagen_tagessatz_eur: (cx.gutachten_mietwagen_tagessatz_eur as number | null) ?? null,
+        }
+      }
+    }
+
+    // Fall-Extras: Mietwagen-Felder + Google-Review-Prompt-Marker (auf faelle).
+    const { data: fallExtra } = await admin
+      .from('faelle')
+      .select(
+        'mietwagen_hat, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am',
+      )
+      .eq('id', id)
+      .maybeSingle()
+    const ausfallProps: React.ComponentProps<typeof KundeAusfallEntschaedigungCard> | null = claimExtra
+      ? {
+          totalschaden: claimExtra.totalschaden,
+          ocrVerarbeitet: !!claimExtra.gutachten_ocr_processed_at,
+          mietwagenHat: !!(fallExtra?.mietwagen_hat as boolean | null),
+          mietwagenSeitDatum: (fallExtra?.mietwagen_seit_datum as string | null) ?? null,
+          mietwagenVermieter: (fallExtra?.mietwagen_vermieter as string | null) ?? null,
+          mietwagenLimitTage: (fallExtra?.mietwagen_limit_tage as number | null) ?? null,
+          mietwagenRechnungVorhanden: !!(fallExtra?.mietwagen_rechnung_vorhanden as boolean | null),
+          nutzungsausfallTage: claimExtra.nutzungsausfall_tage,
+          wiederbeschaffungsdauerTage: claimExtra.wiederbeschaffungsdauer_tage,
+          nutzungsausfallTagessatzEur: claimExtra.gutachten_nutzungsausfall_tagessatz_eur,
+          mietwagenTagessatzEur: claimExtra.gutachten_mietwagen_tagessatz_eur,
+        }
+      : null
 
     // Szenario-Label für Rügefall-Banner
     const fallStatus = (fall.status as string) ?? ''
@@ -431,9 +503,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         .limit(1)
         .maybeSingle()
       if (gut?.storage_path) {
-        gutachtenUrlAusBucket = admin.storage
-          .from('fall-dokumente')
-          .getPublicUrl(gut.storage_path as string).data.publicUrl
+        gutachtenUrlAusBucket = (await getStorageUrl(admin, 'fall-dokumente', gut.storage_path as string)) ?? null
       }
     }
 
@@ -469,6 +539,49 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             description={adresse || undefined}
           />
         </div>
+
+        {/* 13.05.2026 Restore (8f088031-Merge): Abschluss-Aktionen — rendert
+            nur wenn fall.abgeschlossen_am gesetzt. Drei CTAs: PDF Gutachten,
+            Reklamation, Bewerten. Component returns null wenn nicht
+            abgeschlossen. (Portal-Review 5c #576) */}
+        <KundeAbschlussCard
+          fallId={fall.id as string}
+          fallNummer={(fall.fall_nummer as string | null) ?? null}
+          abgeschlossenAm={(fall.abgeschlossen_am as string | null) ?? null}
+          gutachtenUrl={gutachtenUrlFuerSummary}
+          googleReviewUrl={
+            svGooglePlaceId
+              ? `https://search.google.com/local/writereview?placeid=${svGooglePlaceId}`
+              : null
+          }
+        />
+
+        {/* 13.05.2026 Restore: Trust-Cards-Strip — KB + SV mit Avatar, Name,
+            Rolle und Chat-Button. (Portal-Review 5b #575) */}
+        <KundeBetreuerStrip
+          fallId={fall.id as string}
+          kbName={kbName}
+          kbAvatarUrl={kbAvatarUrl}
+          kbBeschreibung={kbBeschreibung}
+          svName={svName}
+          svAvatarUrl={svAvatarUrl}
+          svBeschreibung={svBeschreibung}
+          svVerifiziert={svVerifiziert}
+        />
+
+        {/* 13.05.2026 Restore: Google-Bewertungs-Prompt — nach durchgeführtem
+            SV-Termin, einmalig, nur wenn SV eine google_place_id hat.
+            (CMM-29/30/31/43) */}
+        {svGooglePlaceId &&
+          svName &&
+          !!(svTermin?.durchgefuehrt_am as string | null) &&
+          !(fallExtra?.google_review_prompt_gezeigt_am as string | null) && (
+            <GoogleReviewPrompt
+              fallId={fall.id as string}
+              svName={svName}
+              googlePlaceId={svGooglePlaceId}
+            />
+          )}
 
         {/* CMM-32f: Claim-Stepper — 4 Hauptphasen + aktive Subphase + Termin-
             Sektion (Datum/Uhrzeit/Adresse/Navi). Termin lebt NUR hier, keine
@@ -643,12 +756,38 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           ansprechpartner={{
             name: (fall.kanzlei_ansprechpartner_name as string | null) ?? null,
             position: null,
-            email: null,
-            telefon: null,
+            email: claimExtra?.kanzlei_ansprechpartner_email ?? null,
+            telefon: claimExtra?.kanzlei_ansprechpartner_telefon ?? null,
           }}
           vollmachtSigniertAm={fall.vollmacht_signiert_am as string | null}
-          uebergebenAm={null}
+          uebergebenAm={claimExtra?.kanzlei_uebergeben_am ?? null}
         />
+
+        {/* 13.05.2026 Restore: Kanzlei-Pfad-Wahl. Switch je nach
+            claim.kanzlei_wunsch (Komplettservice / eigene Kanzlei / selbst
+            einreichen / Frage). Bei partnerkanzlei rendert die Card null.
+            (CMM-32 Polish, #416) */}
+        {fall.claim_id && (
+          <KanzleiPfadCard
+            claimId={fall.claim_id as string}
+            kanzleiWunsch={(fall.kanzlei_wunsch as React.ComponentProps<typeof KanzleiPfadCard>['kanzleiWunsch']) ?? null}
+            kanzleiName={(fall.kanzlei_ansprechpartner_name as string | null) ?? null}
+            kanzleiEmail={claimExtra?.kanzlei_ansprechpartner_email ?? null}
+            kanzleiTelefon={claimExtra?.kanzlei_ansprechpartner_telefon ?? null}
+            kanzleiUebergebenAm={claimExtra?.kanzlei_uebergeben_am ?? null}
+            gutachtenFreigegeben={gutachtenFreigegebenFuerSummary}
+            gutachtenUrl={gutachtenUrlAusBucket}
+          />
+        )}
+
+        {/* 13.05.2026 Restore: Mietwagen-/Nutzungsausfall-Card (XOR). Render
+            nur wenn Gutachten OCR-verarbeitet + Schadenstyp klar. Pre-merge
+            war diese Card als ausfallSlot in den ClaimStepper eingehängt;
+            der heutige Stepper akzeptiert diesen Slot nicht mehr, daher
+            standalone. (CMM-32 P3, #416) */}
+        {ausfallProps && (
+          <KundeAusfallEntschaedigungCard {...ausfallProps} />
+        )}
 
         {/* 2-Säulen Layout (Geld + Betreuer) — Anwalt-Säule entfällt durch
             Konsolidierung in MeineKanzleiCard. */}

@@ -3,7 +3,7 @@
 // AAR-431 trackt Kanzlei-SLAs in sla_tracking (target_rolle='kanzlei') und
 // mahnt automatisch in 3 Stufen. Bisher sah der KB den SLA-Stand nur via
 // Tasks („Kanzlei nachfassen"). Diese Card aggregiert die aktiven SLAs
-// direkt im Fall — der KB sieht beim Oeffnen sofort wieviele Tage die
+// direkt im Fall — der KB sieht beim Öffnen sofort wieviele Tage die
 // Kanzlei blockt + welche Mahnungs-Stufe schon raus ist.
 
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -21,8 +21,8 @@ type SlaRow = {
 
 const SLA_LABEL: Record<string, string> = {
   kanzlei_as_versand: 'Anschlussschreiben',
-  kanzlei_ruege_versand: 'Ruege',
-  kanzlei_kuerzung_antwort: 'VS-Kuerzungs-Antwort',
+  kanzlei_ruege_versand: 'Rüge',
+  kanzlei_kuerzung_antwort: 'VS-Kürzungs-Antwort',
   kanzlei_vs_nachfass: 'VS-Nachfassung',
 }
 
@@ -96,9 +96,9 @@ export default async function KanzleiSlaStatusCard({ fallId }: { fallId: string 
             const stufeLabel = stufe === 0
               ? 'Mahnung ausstehend'
               : stufe === 3
-                ? 'Letzte Mahnung versendet — Wechsel pruefen'
+                ? 'Letzte Mahnung versendet — Wechsel prüfen'
                 : `Mahnung Stufe ${stufe} versendet`
-            zeilen2 = `Frist ueberzogen ${breachInfo} · ${stufeLabel}`
+            zeilen2 = `Frist überzogen ${breachInfo} · ${stufeLabel}`
           } else {
             zeilen2 = `Frist faellt ${fmtUntil(sla.breach_at)}`
           }

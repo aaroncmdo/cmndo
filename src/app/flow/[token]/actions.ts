@@ -7,6 +7,7 @@ import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflich
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getStorageUrl } from '@/lib/storage/url'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -125,7 +126,8 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
     : `sa-dokumente/${fallId}/sicherungsabtretung_${Date.now()}.html`
   const blob = new Blob([html], { type: 'text/html' })
   await admin.storage.from('fall-dokumente').upload(path, blob, { contentType: 'text/html' })
-  const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
+  const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
+  if (!publicUrl) throw new Error('URL-Generierung für Sicherungsabtretung fehlgeschlagen')
 
   // Fall updaten mit SA-PDF URL
   await admin.from('faelle').update({ abtretung_pdf: publicUrl }).eq('id', fallId)
