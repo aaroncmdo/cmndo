@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from "next-intl/plugin";
+import path from "path";
 
 // AAR-459 F1: next-intl v4 Plugin. Registriert `src/i18n/request.ts` als
 // Server-Config (liest Cookie `claimondo-locale`, fallback 'de').
@@ -31,6 +32,27 @@ const nextConfig: NextConfig = {
       '@deck.gl/geo-layers': './src/lib/mapbox/__stubs__/three-stub.ts',
       '@loaders.gl/3d-tiles': './src/lib/mapbox/__stubs__/three-stub.ts',
     },
+  },
+  // CMM-14 Follow-up 14.05.26: `next build` (Production) nutzt Webpack, NICHT
+  // Turbopack — der turbopack.resolveAlias greift dort nicht. Folge: echtes
+  // three.js (0.184, pure-ESM) wird gebundlt; ESM/CJS-Interop-Bug minified
+  // `THREE.Color` zu `a.Color = undefined`, Modul-Evaluation crasht im
+  // `/gutachter/heute`-Chunk → React #310 (Re-Try-Loop um den failed dynamic
+  // Import). Webpack-Alias spiegelt die Turbopack-Liste 1:1 auf die Stubs.
+  webpack: (config) => {
+    const stub = path.resolve(__dirname, 'src/lib/mapbox/__stubs__/three-stub.ts')
+    config.resolve = config.resolve ?? {}
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      'three$': stub,
+      'three/examples/jsm/loaders/OBJLoader.js': stub,
+      'three/examples/jsm/loaders/MTLLoader.js': stub,
+      'three/examples/jsm/loaders/RGBELoader.js': stub,
+      '@deck.gl/mapbox': stub,
+      '@deck.gl/geo-layers': stub,
+      '@loaders.gl/3d-tiles': stub,
+    }
+    return config
   },
   // Production-Source-Maps einschalten — damit User-Errors wie „an.map is not
   // a function" auf den echten File + Zeile zurückverfolgt werden können.
