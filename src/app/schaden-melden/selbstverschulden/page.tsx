@@ -69,7 +69,7 @@ export default async function SelbstverschuldenPage() {
         <div className="mt-8">
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-ondo px-6 py-3.5 text-sm font-semibold tracking-[-.01em] text-white shadow-cta-ondo transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-[#3a6291] hover:-translate-y-[1px] active:translate-y-0"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-ondo px-6 py-3.5 text-sm font-semibold tracking-[-.01em] text-white shadow-cta-ondo transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-shield hover:-translate-y-[1px] active:translate-y-0"
           >
             <ChevronLeft className="h-5 w-5 rtl:rotate-180" aria-hidden="true" />
             {t('back_home')}

@@ -117,7 +117,7 @@ export default function BriefingStrukturSections({
             type="button"
             onClick={onRegenerate}
             disabled={pending}
-            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-md bg-[color:var(--brand-primary,#4573A2)] text-white hover:bg-[#3a6290] disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-md bg-[color:var(--brand-primary,#4573A2)] text-white hover:bg-claimondo-shield disabled:opacity-50"
           >
             <SparklesIcon className="w-3.5 h-3.5" />
             {pending ? 'Generiere …' : 'Strukturiertes Briefing generieren'}

@@ -1,0 +1,54 @@
+{
+  "pass": 6,
+  "fail": 0,
+  "results": [
+    {
+      "label": "home",
+      "path": "/",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": [],
+      "screenshot": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\.claude\\worktrees\\aar-session-koord-13-05\\docs\\13.05.2026\\frontend-token-check\\smoke-screenshots\\home.png"
+    },
+    {
+      "label": "login",
+      "path": "/login",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": [],
+      "screenshot": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\.claude\\worktrees\\aar-session-koord-13-05\\docs\\13.05.2026\\frontend-token-check\\smoke-screenshots\\login.png"
+    },
+    {
+      "label": "gutachter-partner",
+      "path": "/gutachter-partner",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": [],
+      "screenshot": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\.claude\\worktrees\\aar-session-koord-13-05\\docs\\13.05.2026\\frontend-token-check\\smoke-screenshots\\gutachter-partner.png"
+    },
+    {
+      "label": "passwort-vergessen",
+      "path": "/passwort-vergessen",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": [],
+      "screenshot": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\.claude\\worktrees\\aar-session-koord-13-05\\docs\\13.05.2026\\frontend-token-check\\smoke-screenshots\\passwort-vergessen.png"
+    },
+    {
+      "label": "datenschutz",
+      "path": "/datenschutz",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": [],
+      "screenshot": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\.claude\\worktrees\\aar-session-koord-13-05\\docs\\13.05.2026\\frontend-token-check\\smoke-screenshots\\datenschutz.png"
+    },
+    {
+      "label": "dev-phases",
+      "path": "/dev/phases",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": [],
+      "screenshot": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\.claude\\worktrees\\aar-session-koord-13-05\\docs\\13.05.2026\\frontend-token-check\\smoke-screenshots\\dev-phases.png"
+    }
+  ]
+}

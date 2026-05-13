@@ -217,7 +217,7 @@ export default function BeratungBuchenSheet({
                 </div>
               )}
               {loadErr && (
-                <div className="rounded-xl border-2 border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+                <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-900">
                   {loadErr}
                 </div>
               )}
@@ -307,7 +307,7 @@ export default function BeratungBuchenSheet({
                 {kbName && <Row label="Berater" value={kbName} />}
               </div>
               {bookErr && (
-                <div className="rounded-xl border-2 border-rose-200 bg-rose-50 p-3 text-sm text-rose-900">
+                <div className="rounded-xl border-2 border-red-200 bg-red-50 p-3 text-sm text-red-900">
                   {bookErr}
                 </div>
               )}
@@ -347,7 +347,7 @@ export default function BeratungBuchenSheet({
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-[#3a6290] transition-colors"
+                className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
               >
                 Weiter <ArrowRightIcon className="w-4 h-4" />
               </button>
@@ -357,7 +357,7 @@ export default function BeratungBuchenSheet({
                 type="button"
                 onClick={() => setStep(3)}
                 disabled={!selectedDatum || !selectedUhrzeit}
-                className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Weiter <ArrowRightIcon className="w-4 h-4" />
               </button>
@@ -367,7 +367,7 @@ export default function BeratungBuchenSheet({
                 type="button"
                 onClick={handleBook}
                 disabled={isPending}
-                className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-[#3a6290] disabled:opacity-60 transition-colors"
+                className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-60 transition-colors"
               >
                 {isPending ? <LoaderIcon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
                 Termin bestätigen
@@ -380,7 +380,7 @@ export default function BeratungBuchenSheet({
             <button
               type="button"
               onClick={handleClose}
-              className="w-full min-h-11 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-[#3a6290] transition-colors"
+              className="w-full min-h-11 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
             >
               Schließen
             </button>

@@ -376,7 +376,7 @@ export default function ProfilClient({
           href="/gutachter/einstellungen/kalender"
           className="bg-white rounded-2xl p-4 border border-claimondo-border mt-5 flex items-center gap-3 hover:border-claimondo-ondo transition-colors group"
         >
-          <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${googleConnected ? 'bg-green-500' : 'bg-zinc-400'}`} />
+          <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${googleConnected ? 'bg-green-500' : 'bg-claimondo-light-blue'}`} />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-claimondo-navy">
               Kalender: {googleConnected ? 'Google verbunden' : 'Nicht verbunden'}

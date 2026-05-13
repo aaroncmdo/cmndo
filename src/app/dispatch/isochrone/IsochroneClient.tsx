@@ -120,7 +120,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                   type="button"
                   disabled={pending}
                   onClick={() => pickLead(selectedLead)}
-                  className="text-[11px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
+                  className="text-[11px] text-claimondo-ondo hover:text-claimondo-shield flex items-center gap-1"
                 >
                   <RefreshCwIcon className="w-3 h-3" /> neu laden
                 </button>

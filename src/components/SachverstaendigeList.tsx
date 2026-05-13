@@ -44,7 +44,7 @@ const TYP_BADGE: Record<string, { label: string; cls: string }> = {
   'kfz-gutachter': { label: 'KFZ-SV', cls: 'bg-claimondo-bg text-claimondo-ondo' },
   'dat-gutachter': { label: 'DAT', cls: 'bg-orange-50 text-orange-700' },
   akademie: { label: 'Akademie', cls: 'bg-green-50 text-green-700' },
-  gutachterbuero: { label: 'Büro', cls: 'bg-purple-50 text-purple-700' },
+  gutachterbuero: { label: 'Büro', cls: 'bg-claimondo-ondo/[0.06] text-claimondo-navy' },
 }
 
 const PAKET_BADGE: Record<string, string> = {

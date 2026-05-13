@@ -352,7 +352,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             type="button"
             onClick={handleAbsagen}
             disabled={absagenPending}
-            className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-rose-300 px-3 text-xs font-medium text-rose-600 disabled:opacity-60 hover:bg-rose-50"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-red-300 px-3 text-xs font-medium text-red-600 disabled:opacity-60 hover:bg-red-50"
           >
             {absagenPending ? 'Wird abgesagt…' : 'Absagen'}
           </button>
@@ -366,12 +366,12 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
       )}
 
       {localStatus === 'abgesagt' && (
-        <p className="mt-3 text-xs font-medium text-rose-600">
+        <p className="mt-3 text-xs font-medium text-red-600">
           Termin abgesagt. Ihr Betreuer wurde informiert und meldet sich bei Ihnen.
         </p>
       )}
       {localError && (
-        <p className="mt-3 text-xs text-rose-600">{localError}</p>
+        <p className="mt-3 text-xs text-red-600">{localError}</p>
       )}
 
       <TerminReschedulingModal

@@ -161,7 +161,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
   const flashClass = flashing
     ? hasKritisch
       ? 'ring-4 ring-red-400/60 animate-pulse'
-      : 'ring-4 ring-[#7BA3CC]/60 animate-pulse'
+      : 'ring-4 ring-claimondo-light-blue/60 animate-pulse'
     : ''
 
   return (

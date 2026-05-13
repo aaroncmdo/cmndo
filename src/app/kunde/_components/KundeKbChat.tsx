@@ -313,7 +313,7 @@ export default function KundeKbChat({
       <div className="shrink-0">
         <div className="glass-panel rounded-2xl px-3 pt-2 pb-2">
         {sendError && (
-          <p className="text-[11px] text-rose-600 mb-1.5 px-1">{sendError}</p>
+          <p className="text-[11px] text-red-600 mb-1.5 px-1">{sendError}</p>
         )}
         {/* Fall-Bezug Chip (nur wenn ein Fall ausgewaehlt) — wie WhatsApp-
             Reply-Preview, schwebt direkt ueber dem Input */}

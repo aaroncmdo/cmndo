@@ -132,7 +132,7 @@ export default function LoginClient({
               placeholder="name@beispiel.de"
               required
               autoComplete="email"
-              className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-claimondo-shield text-sm focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo transition-all"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -143,7 +143,7 @@ export default function LoginClient({
               placeholder="••••••••"
               required
               autoComplete="current-password"
-              className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-claimondo-shield text-sm focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo transition-all"
             />
           </div>
 
@@ -190,7 +190,7 @@ export default function LoginClient({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+49 170 1234567"
-                  className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-claimondo-shield text-sm focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo transition-all"
                 />
               </div>
               {phoneError && (
@@ -217,7 +217,7 @@ export default function LoginClient({
                   onChange={(e) => setOtp(e.target.value)}
                   placeholder="123456"
                   maxLength={6}
-                  className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-zinc-500 text-sm text-center tracking-[0.5em] font-mono focus:outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-700 transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-claimondo-border bg-claimondo-bg text-claimondo-navy placeholder-claimondo-shield text-sm text-center tracking-[0.5em] font-mono focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo transition-all"
                 />
               </div>
               {phoneError && (

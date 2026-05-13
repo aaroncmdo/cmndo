@@ -190,7 +190,7 @@ function FahrzeugDetail({ data }: { data: StammdatenAccordionData }) {
                 <CheckCircle2Icon className="w-3.5 h-3.5" /> Ja
               </span>
             ) : fahrbereit === false ? (
-              <span className="inline-flex items-center gap-1 text-rose-700">
+              <span className="inline-flex items-center gap-1 text-red-700">
                 <XCircleIcon className="w-3.5 h-3.5" /> Nein
               </span>
             ) : null
@@ -404,7 +404,7 @@ function SchadenDetail({ data }: { data: StammdatenAccordionData }) {
               <CheckCircle2Icon className="w-3.5 h-3.5" /> Ja
             </span>
           ) : fahrbereit === false ? (
-            <span className="inline-flex items-center gap-1 text-rose-700">
+            <span className="inline-flex items-center gap-1 text-red-700">
               <XCircleIcon className="w-3.5 h-3.5" /> Nein
             </span>
           ) : null

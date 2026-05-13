@@ -126,7 +126,7 @@ export default function TerminCard({
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-[#3a6290] rounded-full px-3 py-1.5 font-semibold tracking-[-.005em] shadow-cta-ondo transition-all duration-200 hover:-translate-y-[1px]"
+          className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-claimondo-shield rounded-full px-3 py-1.5 font-semibold tracking-[-.005em] shadow-cta-ondo transition-all duration-200 hover:-translate-y-[1px]"
           onClick={(e) => e.stopPropagation()}
         >
           <NavigationIcon className="w-3 h-3" /> Route starten

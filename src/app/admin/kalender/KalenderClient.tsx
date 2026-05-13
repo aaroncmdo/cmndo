@@ -37,7 +37,7 @@ const SV_TYP_BADGE: Record<string, { label: string; color: string }> = {
   'kfz-gutachter': { label: 'KFZ', color: 'bg-claimondo-bg text-claimondo-ondo' },
   'dat-gutachter': { label: 'DAT', color: 'bg-orange-100 text-orange-700' },
   'akademie': { label: 'Akademie', color: 'bg-green-100 text-green-700' },
-  'gutachterbuero': { label: 'Buero', color: 'bg-purple-100 text-purple-700' },
+  'gutachterbuero': { label: 'Buero', color: 'bg-claimondo-ondo/[0.10] text-claimondo-navy' },
 }
 
 const STORAGE_KEY = 'claimondo_admin_kalender_filter'

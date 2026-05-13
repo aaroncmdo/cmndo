@@ -112,13 +112,13 @@ export default function KundeAusfallEntschaedigungCard({
       <section
         className={`rounded-2xl border p-5 space-y-3 ${
           istUeberfaellig
-            ? 'bg-rose-50 border-rose-300'
+            ? 'bg-red-50 border-red-300'
             : className ?? 'bg-white border-claimondo-border'
         }`}
       >
         <header className="flex items-center gap-2">
           <CarIcon
-            className={`w-4 h-4 ${istUeberfaellig ? 'text-rose-700' : 'text-claimondo-shield'}`}
+            className={`w-4 h-4 ${istUeberfaellig ? 'text-red-700' : 'text-claimondo-shield'}`}
           />
           <h3 className="text-sm font-semibold text-claimondo-navy">Dein Mietwagen</h3>
         </header>
@@ -148,7 +148,7 @@ export default function KundeAusfallEntschaedigungCard({
         </dl>
 
         {istUeberfaellig && (
-          <p className="text-xs text-rose-800 bg-rose-100 border border-rose-200 rounded-lg p-2 flex items-start gap-2">
+          <p className="text-xs text-red-800 bg-red-100 border border-red-200 rounded-lg p-2 flex items-start gap-2">
             <AlertCircleIcon className="w-4 h-4 shrink-0 mt-0.5" />
             <span>
               Der Mietwagen hätte spätestens am {formatDate(abgabeDatum)} abgegeben werden müssen.
@@ -260,7 +260,7 @@ function Row({
 }) {
   const valueColor =
     accent === 'rose'
-      ? 'text-rose-700'
+      ? 'text-red-700'
       : accent === 'amber'
         ? 'text-amber-700'
         : 'text-claimondo-navy'

@@ -18,7 +18,7 @@ type Auszahlung = {
 }
 
 const TYP_LABELS: Record<string, string> = { bonus: 'Bonus', provision: 'Provision', sachleistung: 'Sachleistung', freizeit: 'Freizeit' }
-const TYP_COLORS: Record<string, string> = { bonus: 'bg-green-50 text-green-300', provision: 'bg-claimondo-ondo/5 text-claimondo-light-blue', sachleistung: 'bg-violet-50 text-violet-300', freizeit: 'bg-amber-50 text-amber-300' }
+const TYP_COLORS: Record<string, string> = { bonus: 'bg-green-50 text-green-300', provision: 'bg-claimondo-ondo/5 text-claimondo-light-blue', sachleistung: 'bg-claimondo-ondo/[0.06] text-claimondo-ondo/70', freizeit: 'bg-amber-50 text-amber-300' }
 const KAT_LABELS: Record<string, string> = { dispatch: 'Dispatch', kundenbetreuer: 'Kundenbetreuer', alle: 'Alle' }
 
 export default function IncentivesClient({ incentives, auszahlungen }: {

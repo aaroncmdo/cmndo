@@ -224,7 +224,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                       <p className="text-[11px] text-claimondo-navy/80 mt-1 whitespace-pre-wrap">{e.notiz}</p>
                     )}
                     {e.naechste_frist && (
-                      <p className={`text-[11px] mt-1 font-medium ${fristAbgelaufen ? 'text-rose-700' : 'text-violet-700'}`}>
+                      <p className={`text-[11px] mt-1 font-medium ${fristAbgelaufen ? 'text-red-700' : 'text-claimondo-navy'}`}>
                         Nächste Frist: {fmtDatum(e.naechste_frist)}{fristAbgelaufen ? ' (abgelaufen)' : ''}
                       </p>
                     )}

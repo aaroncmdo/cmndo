@@ -137,7 +137,7 @@ export default function KundenMatchCard({ leadId, initialMatchedKundeId }: Props
             </button>
           </>
         )}
-        {error && <p className="text-[10px] text-rose-700 mt-1">{error}</p>}
+        {error && <p className="text-[10px] text-red-700 mt-1">{error}</p>}
       </div>
 
       {open && (

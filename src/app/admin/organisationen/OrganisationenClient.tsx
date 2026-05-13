@@ -83,7 +83,7 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                       </div>
                     </Td>
                     <Td>
-                      <StatusBadge colorCls={o.typ === 'akademie' ? 'bg-purple-50 text-purple-700' : 'bg-claimondo-bg text-claimondo-ondo'}>
+                      <StatusBadge colorCls={o.typ === 'akademie' ? 'bg-claimondo-ondo/[0.06] text-claimondo-navy' : 'bg-claimondo-bg text-claimondo-ondo'}>
                         {o.typ === 'akademie' ? 'Akademie' : 'Büro'}
                       </StatusBadge>
                     </Td>

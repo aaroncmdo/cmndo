@@ -684,17 +684,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* Nachbesichtigung Soft-Blocker */}
         {((fall.status as string) === 'nachbesichtigung-laeuft' ||
           fall.nachbesichtigung_status === 'angefordert') && (
-          <div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 space-y-2">
+          <div className="bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 rounded-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-3">
               <span className="text-claimondo-navy text-lg">&#9888;</span>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-violet-800">Nachbesichtigung läuft</p>
+                <p className="text-sm font-semibold text-claimondo-navy">Nachbesichtigung läuft</p>
                 <p className="text-xs text-claimondo-navy">Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.</p>
               </div>
             </div>
             <Link
               href={`/kunde/nachbesichtigung/${fall.id as string}`}
-              className="inline-flex items-center text-xs font-medium rounded-md bg-claimondo-navy text-white px-3 py-1.5 hover:bg-violet-700"
+              className="inline-flex items-center text-xs font-medium rounded-md bg-claimondo-navy text-white px-3 py-1.5 hover:bg-claimondo-navy"
             >
               Termine vorschlagen
             </Link>

@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { zb1Schema, type Zb1FormValues } from '@/lib/flow/schemas/schritt3'
 import { assertLeadMutable } from './_helpers/assert-lead-mutable'
@@ -70,5 +71,9 @@ export async function updateLeadZb1Manual(
     .eq('id', leadId)
 
   if (error) return { success: false, error: error.message }
+  // 13.05.2026 Server-Actions-Audit Fix: Dispatch nutzt ZB1-Daten + Halter-
+  // Adresse fürs Lead-Routing. Ohne revalidate stale im Detail.
+  revalidatePath('/dispatch/leads')
+  revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true }
 }

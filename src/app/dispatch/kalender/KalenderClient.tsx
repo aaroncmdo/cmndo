@@ -241,7 +241,7 @@ export default function KalenderClient({
           <button
             type="button"
             onClick={() => openSpontan()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-claimondo-ondo text-white text-xs font-semibold tracking-[-.005em] shadow-cta-ondo hover:bg-[#3a6291] hover:-translate-y-[0.5px] transition-all duration-200"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-claimondo-ondo text-white text-xs font-semibold tracking-[-.005em] shadow-cta-ondo hover:bg-claimondo-shield hover:-translate-y-[0.5px] transition-all duration-200"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             Spontan-Termin

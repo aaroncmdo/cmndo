@@ -174,7 +174,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
                 type="button"
                 onClick={capture}
                 disabled={isCapturing}
-                className="text-[11px] text-claimondo-ondo hover:text-[#3a6290] inline-flex items-center gap-1 disabled:opacity-50"
+                className="text-[11px] text-claimondo-ondo hover:text-claimondo-shield inline-flex items-center gap-1 disabled:opacity-50"
               >
                 <RefreshCwIcon className="w-3 h-3" />
                 {screenshot ? 'neu' : 'aufnehmen'}

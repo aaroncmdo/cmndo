@@ -91,7 +91,7 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
               <button
                 type="button"
                 onClick={() => unpin(chat.fallId)}
-                className="p-1 rounded-md hover:bg-rose-50 transition-colors text-claimondo-ondo hover:text-rose-600"
+                className="p-1 rounded-md hover:bg-red-50 transition-colors text-claimondo-ondo hover:text-red-600"
                 aria-label="Chat schließen und zurück in Posteingang"
                 title="Schließen und in Posteingang"
               >

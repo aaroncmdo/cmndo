@@ -163,20 +163,20 @@ export default function VollstaendigkeitsCheckCard({
   }
 
   return (
-    <div className="rounded-2xl bg-white border border-violet-200 px-4 sm:px-6 py-5 space-y-4">
+    <div className="rounded-2xl bg-white border border-claimondo-ondo/30 px-4 sm:px-6 py-5 space-y-4">
       <div className="flex items-start gap-3">
         <FileTextIcon className="w-5 h-5 shrink-0 text-claimondo-navy mt-0.5" />
         <div className="flex-1">
-          <p className="text-sm font-semibold text-violet-900">
+          <p className="text-sm font-semibold text-claimondo-navy">
             {istKorrekturEingereicht ? 'Korrigierte Version eingereicht' : 'Vollständigkeits-Check'}
           </p>
-          <p className="text-xs text-violet-700 mt-0.5">
+          <p className="text-xs text-claimondo-navy mt-0.5">
             {istKorrekturEingereicht
               ? 'SV hat das Gutachten überarbeitet. Prüfe die neue Version und gib das Kanzleipaket frei oder fordere erneut Nachbesserung an.'
               : 'Prüfe ob das Gutachten + alle Pflichtdokumente vorliegen, dann gib das Kanzleipaket frei.'}
           </p>
           {istKorrekturEingereicht && zurueckweisungGrund && (
-            <p className="text-[11px] text-violet-700/80 mt-1 italic">
+            <p className="text-[11px] text-claimondo-navy/80 mt-1 italic">
               Vorherige Begründung: „{zurueckweisungGrund}"
             </p>
           )}
@@ -188,7 +188,7 @@ export default function VollstaendigkeitsCheckCard({
         <div className="flex items-center gap-2 text-sm border-t border-claimondo-border pt-3">
           <FileTextIcon className="w-4 h-4 text-claimondo-navy shrink-0" />
           <span className="font-medium text-claimondo-navy flex-1 truncate">{hauptgutachten.filename}</span>
-          <span className="text-[10px] uppercase tracking-wider text-violet-700 font-semibold">Hauptgutachten</span>
+          <span className="text-[10px] uppercase tracking-wider text-claimondo-navy font-semibold">Hauptgutachten</span>
           <a href={hauptgutachten.url} target="_blank" rel="noopener noreferrer" className="text-claimondo-ondo hover:text-claimondo-navy" title="Öffnen">
             <DownloadIcon className="w-4 h-4" />
           </a>
@@ -197,15 +197,15 @@ export default function VollstaendigkeitsCheckCard({
 
       {/* Nachbesserung — neu eingereichte Dateien aus dem Reject-Loop */}
       {!rejectMode && anlagen.filter((a) => a.istNachbesserung).length > 0 && (
-        <div className="space-y-1.5 rounded-lg bg-violet-50 border border-violet-200 px-3 py-2.5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">
+        <div className="space-y-1.5 rounded-lg bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 px-3 py-2.5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-navy">
             Nachbesserung ({anlagen.filter((a) => a.istNachbesserung).length})
           </p>
           {anlagen.filter((a) => a.istNachbesserung).map((a) => (
             <div key={a.id} className="flex items-center gap-2 text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-claimondo-navy" />
-              <span className="text-violet-900 flex-1 truncate">{a.filename}</span>
-              <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-violet-700 hover:text-violet-900">
+              <span className="text-claimondo-navy flex-1 truncate">{a.filename}</span>
+              <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-claimondo-navy hover:text-claimondo-navy">
                 <DownloadIcon className="w-3 h-3" />
               </a>
             </div>
@@ -298,7 +298,7 @@ export default function VollstaendigkeitsCheckCard({
             <button
               onClick={handleFreigeben}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-sm font-semibold px-4 py-2 transition-colors"
             >
               {pending ? 'Wird freigegeben…' : 'Kanzleipaket freigeben'}
             </button>
@@ -344,7 +344,7 @@ export default function VollstaendigkeitsCheckCard({
                           {doc.filename}
                         </span>
                         {doc.istHaupt && (
-                          <span className="text-[10px] uppercase tracking-wider text-violet-700 font-semibold shrink-0">Haupt</span>
+                          <span className="text-[10px] uppercase tracking-wider text-claimondo-navy font-semibold shrink-0">Haupt</span>
                         )}
                         <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-claimondo-ondo hover:text-claimondo-navy shrink-0" onClick={(e) => e.stopPropagation()}>
                           <DownloadIcon className="w-3 h-3" />

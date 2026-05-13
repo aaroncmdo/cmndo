@@ -429,7 +429,7 @@ export default function FlowWizardKfz({
                 />
 
                 {gutachter ? (
-                  <div className="bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 border border-claimondo-ondo/20 rounded-3xl p-7 text-center mb-6">
+                  <div className="bg-gradient-to-br from-claimondo-ondo/10 to-[#1E3A5F]/5 border border-claimondo-ondo/20 rounded-3xl p-7 text-center mb-6">
                     {gutachter.avatarUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
@@ -477,7 +477,7 @@ export default function FlowWizardKfz({
 
                 <button
                   onClick={() => setStepIndex(stepIndexById('sa'))}
-                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
                   Weiter
                 </button>
@@ -595,7 +595,7 @@ export default function FlowWizardKfz({
                 <button
                   onClick={handleSignSA}
                   disabled={!signatureBlob || !saAccepted || submittingSA}
-                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
                   {submittingSA ? 'Wird verarbeitet ...' : 'SA unterzeichnen'}
                 </button>
@@ -623,7 +623,7 @@ export default function FlowWizardKfz({
                     anzeigen. LexDrive meldet sich proaktiv beim Kunden via
                     Edge-Function — hier nur die Visitenkarte. */}
                 {lead.service_typ === 'komplett' && (
-                  <div className="mb-5 rounded-2xl border border-claimondo-ondo/20 bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 p-5">
+                  <div className="mb-5 rounded-2xl border border-claimondo-ondo/20 bg-gradient-to-br from-claimondo-ondo/10 to-[#1E3A5F]/5 p-5">
                     <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">
                       Ihr juristischer Ansprechpartner
                     </p>
@@ -667,7 +667,7 @@ export default function FlowWizardKfz({
                     </div>
                     <a
                       href={magicLink ?? '/kunde/onboarding'}
-                      className="block w-full text-center min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                      className="block w-full text-center min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                     >
                       Zu meinem Portal
                     </a>
@@ -695,7 +695,7 @@ export default function FlowWizardKfz({
                 setStepIndex(1) // → gutachter
               }}
               disabled={!datenschutz || !editVorname || !editNachname}
-              className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+              className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
             >
               Weiter
             </button>

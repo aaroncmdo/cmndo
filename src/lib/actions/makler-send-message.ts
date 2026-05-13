@@ -4,6 +4,7 @@
 // `gruppenchat`-Kanal des Falls. Consent-Gate erzwingt Vollzugriff —
 // minimal/widerrufen duerfen nicht posten.
 
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentMakler } from '@/lib/makler/queries'
@@ -80,6 +81,14 @@ export async function maklerSendMessage(
       error: error?.message ?? 'Nachricht konnte nicht gesendet werden.',
     }
   }
+
+  // 13.05.2026 Server-Actions-Audit Fix: Makler-Inbox + Fall-Chat (Admin/SV
+  // sehen den Gruppenchat ebenfalls) müssen revalidated werden, sonst sieht
+  // niemand die neue Nachricht ohne Hard-Refresh — Realtime-Subscriptions
+  // greifen nur für Browser, die den Channel schon offen haben.
+  revalidatePath('/makler/nachrichten')
+  revalidatePath(`/makler/akten/${parsed.data.fallId}`)
+  revalidatePath(`/faelle/${parsed.data.fallId}`)
 
   return { success: true, messageId: inserted.id }
 }

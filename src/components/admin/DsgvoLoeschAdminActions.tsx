@@ -47,7 +47,7 @@ export default function DsgvoLoeschAdminActions({ auftragId, status }: Props) {
           type="button"
           onClick={bestaetigen}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-ondo px-3.5 py-1.5 text-xs font-semibold text-white shadow-cta-ondo transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-[#3a6291] hover:-translate-y-[1px] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
+          className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-ondo px-3.5 py-1.5 text-xs font-semibold text-white shadow-cta-ondo transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-shield hover:-translate-y-[1px] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
         >
           <CheckIcon width={12} height={12} />
           {pending ? 'wartet …' : 'Bestätigen'}
