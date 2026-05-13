@@ -9,6 +9,10 @@
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveStammdaten } from '../actions'
+import InlineField from './InlineField'
+// P2-T4.7: Schema-getriebener Renderer für Trivial-Felder (Halter-Block).
+// Weitere Sections folgen in Phase B/C.
+import { LeadSchemaFields } from '@/components/shared/stammdaten/LeadSchemaFields'
 import { checkKZFlags } from '../_lib/gegner-kz-flags'
 import { useDispatchPhase } from '../_lib/phase-context'
 import { useCarQuery } from '../_hooks/useCarQuery'
@@ -178,103 +182,8 @@ function formatBaujahr(raw: string): string {
   return String(y)
 }
 
-/**
- * Generische Inline-Feld-Komponente mit auto-save on-blur.
- * Speichert nur wenn sich der Wert geändert hat. Zeigt Spinner während Save
- * und Haken direkt nach erfolgreichem Save (2s).
- */
-function InlineField({
-  label,
-  value,
-  fieldName,
-  leadId,
-  type = 'text',
-  placeholder,
-  transform,
-  hint,
-  required,
-}: {
-  label: string
-  value: string | null | undefined
-  fieldName: string
-  leadId: string
-  type?: 'text' | 'email' | 'tel' | 'date' | 'time'
-  placeholder?: string
-  transform?: (raw: string) => string
-  hint?: string
-  // AAR-181 Audit-Fix #3: Pflichtfeld-Markierung als dedicated Prop statt
-  // hartcodiert im Label-String (sonst verliert die Markierung den Kontext
-  // bei Label-Änderung).
-  required?: boolean
-}) {
-  const [draft, setDraft] = useState(value ?? '')
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const [, startTransition] = useTransition()
-
-  // AAR-unfallfotos Sync-Fix: InlineField's lokaler Draft blieb bisher auf
-  // seinem Initial-Wert hängen — wenn der Server die Row ändert (z. B.
-  // Haiku-Vision befüllt sachschaden_beschreibung nach Foto-Upload) und
-  // router.refresh() ein neues `value`-Prop liefert, müssen wir den Draft
-  // nachziehen, solange der MA nicht gerade aktiv tippt.
-  useEffect(() => {
-    if (status !== 'idle') return
-    const incoming = value ?? ''
-    setDraft((prev) => (prev === incoming ? prev : incoming))
-  }, [value, status])
-
-  function handleBlur() {
-    const final = transform ? transform(draft) : draft
-    // AAR-223: Draft auf den transformierten Wert setzen, damit der MA nach
-    // dem Blur die formatierte Variante sieht (z.B. „K AB 1234" → „K-AB 1234")
-    // statt seinem Roh-Input. Auch wenn keine DB-Änderung nötig ist, müssen
-    // wir hier den Draft normalisieren — sonst bleibt die Anzeige asymmetrisch
-    // zur DB.
-    if (transform && final !== draft) {
-      setDraft(final)
-    }
-    if (final === (value ?? '')) return
-    setStatus('saving')
-    startTransition(async () => {
-      const r = await saveStammdaten(leadId, { [fieldName]: final || null })
-      if (r.success) {
-        setStatus('saved')
-        setTimeout(() => setStatus('idle'), 2000)
-      } else {
-        setStatus('error')
-        setTimeout(() => setStatus('idle'), 3000)
-      }
-    })
-  }
-
-  return (
-    <div className="space-y-0.5">
-      <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1">
-        {label}
-        {required && <span className="text-red-500" aria-label="Pflichtfeld">*</span>}
-        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
-        {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
-        {status === 'error' && <span className="text-red-500">Fehler</span>}
-      </label>
-      <input
-        type={type}
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={handleBlur}
-        placeholder={placeholder}
-        className={`text-sm font-medium bg-transparent border-b w-full py-0.5 outline-none transition-colors ${
-          status === 'saving'
-            ? 'border-claimondo-ondo'
-            : status === 'saved'
-              ? 'border-green-300'
-              : status === 'error'
-                ? 'border-red-300'
-                : 'border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo'
-        }`}
-      />
-      {hint && <p className="text-[10px] text-claimondo-ondo/70">{hint}</p>}
-    </div>
-  )
-}
+// P2-T4.7: InlineField extrahiert nach ./InlineField, damit
+// LeadSchemaFields (shared) dieselbe Komponente nutzen kann.
 
 // AAR-265: Wrapper für VersicherungAutocomplete mit auto-save.
 // Speichert sowohl gegner_versicherung_id (FK) als auch gegner_versicherung
@@ -1156,15 +1065,13 @@ export default function Phase4Stammdaten() {
                 Nein
               </button>
             </div>
-            {l.hat_vorschaeden === true && (
-              <InlineField
-                label="Beschreibung"
-                value={l.vorschaeden_beschreibung}
-                fieldName="vorschaeden_beschreibung"
-                leadId={leadId}
-                placeholder="Welche Vorschäden? (Bereich / Schadenhöhe)"
-              />
-            )}
+            {/* P2-T4.7-B: Beschreibung via Schema-Renderer (visibleWhen
+                triggert auf hat_vorschaeden=true) statt inline-conditional. */}
+            <LeadSchemaFields
+              block="vorschaeden"
+              lead={l as unknown as Record<string, unknown>}
+              leadId={leadId}
+            />
           </div>
         </div>
 
@@ -1242,50 +1149,15 @@ export default function Phase4Stammdaten() {
             </button>
           </div>
 
+          {/* P2-T4.7: Halter-Felder schema-getrieben (siehe LEAD_STAMMDATEN_FIELD_SCHEMA,
+              Block 'halter'). Visueller Spalten-Spacer nach Geburtsdatum fällt
+              bewusst weg — Schema rendert die 6 Felder in einer kompakten Sequenz.
+              ist_fahrzeughalter bleibt als Toggle-Button oben (Phase4-Custom). */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <InlineField
-              label="Halter Vorname"
-              value={l.halter_vorname}
-              fieldName="halter_vorname"
+            <LeadSchemaFields
+              block="halter"
+              lead={l as unknown as Record<string, unknown>}
               leadId={leadId}
-              placeholder="Vorname"
-            />
-            <InlineField
-              label="Halter Nachname"
-              value={l.halter_nachname}
-              fieldName="halter_nachname"
-              leadId={leadId}
-              placeholder="Nachname"
-            />
-            <InlineField
-              label="Geburtsdatum"
-              value={l.halter_geburtsdatum}
-              fieldName="halter_geburtsdatum"
-              leadId={leadId}
-              placeholder="JJJJ-MM-TT"
-              type="date"
-            />
-            <div /> {/* Spalten-Spacer */}
-            <InlineField
-              label="Straße"
-              value={l.halter_strasse}
-              fieldName="halter_strasse"
-              leadId={leadId}
-              placeholder="Straße + Hausnummer"
-            />
-            <InlineField
-              label="PLZ"
-              value={l.halter_plz}
-              fieldName="halter_plz"
-              leadId={leadId}
-              placeholder="PLZ"
-            />
-            <InlineField
-              label="Ort"
-              value={l.halter_stadt}
-              fieldName="halter_stadt"
-              leadId={leadId}
-              placeholder="Ort"
             />
           </div>
 
@@ -1476,10 +1348,10 @@ export default function Phase4Stammdaten() {
             initialId={l.gegner_versicherung_id}
             initialName={l.gegner_versicherung}
           />
-          <InlineField
-            label="Schadennummer (optional)"
-            value={l.gegner_schadennummer}
-            fieldName="gegner_schadennummer"
+          {/* P2-T4.7-B: gegner_schadennummer via Schema-Renderer. */}
+          <LeadSchemaFields
+            block="gegner"
+            lead={l as unknown as Record<string, unknown>}
             leadId={leadId}
           />
           {/* CMM-26: Unfalldatum, Unfall-Uhrzeit und Unfallort sind in Phase 1

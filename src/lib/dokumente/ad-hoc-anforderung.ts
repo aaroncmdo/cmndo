@@ -11,11 +11,18 @@
 // - Eskalation läuft über AAR-764 Resolver (emit eines Events)
 // - OCR-Routing läuft über AAR-761 (nach Upload an /api/ocr-beleg)
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { emitEvent } from '@/lib/notifications/emit'
 import { randomBytes } from 'node:crypto'
 import type { BelegTyp } from '@/lib/ocr-beleg/types'
+
+function revalidateAnforderungRoutes(fallId: string) {
+  revalidatePath(`/kunde/faelle/${fallId}`)
+  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
+}
 
 export type AdHocKanal = 'whatsapp' | 'sms' | 'email'
 export type AdHocUrgency = 'normal' | 'dringend' | 'eskalation'
@@ -157,6 +164,8 @@ export async function requestDokumentFromKunde(
   // Payload-Kontext, nicht die anfrage_id — das reicht für Phase 1.
   void urgency
 
+  revalidateAnforderungRoutes(fallId)
+
   return {
     success: true,
     anfrage_id: anfrage.id,
@@ -241,11 +250,27 @@ export async function cancelAdHocAnforderung(
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
+  // Fall-ID über lead_id auflösen, damit wir die korrekten Routen revalidieren
+  const { data: anfrageRow } = await admin
+    .from('dokument_upload_anfragen')
+    .select('lead_id')
+    .eq('id', anfrageId)
+    .maybeSingle()
   const { error } = await admin
     .from('dokument_upload_anfragen')
     .update({ status: 'cancelled', updated_at: new Date().toISOString() })
     .eq('id', anfrageId)
   if (error) return { success: false, error: error.message }
+
+  if (anfrageRow?.lead_id) {
+    const { data: fall } = await admin
+      .from('faelle')
+      .select('id')
+      .eq('lead_id', anfrageRow.lead_id)
+      .maybeSingle()
+    if (fall?.id) revalidateAnforderungRoutes(fall.id)
+  }
+
   return { success: true }
 }
 
@@ -309,6 +334,8 @@ export async function resendAdHocAnforderung(
     .from('dokument_upload_anfragen')
     .update({ kanal, gesendet_am: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq('id', anfrageId)
+
+  revalidateAnforderungRoutes(fall.id)
 
   return { success: true }
 }

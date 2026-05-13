@@ -3,10 +3,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function updateProfil(formData: FormData) {
+export async function updateProfil(
+  formData: FormData,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const vorname = (formData.get('vorname') as string)?.trim() || null
   const nachname = (formData.get('nachname') as string)?.trim() || null
@@ -17,7 +19,7 @@ export async function updateProfil(formData: FormData) {
     .update({ vorname, nachname, telefon })
     .eq('id', user.id)
 
-  if (profileErr) throw new Error(profileErr.message)
+  if (profileErr) return { success: false, error: profileErr.message }
 
   // Update sachverstaendige fields
   const gebiet_plz = (formData.get('gebiet_plz') as string)?.trim() || null
@@ -43,7 +45,8 @@ export async function updateProfil(formData: FormData) {
     })
     .eq('profile_id', user.id)
 
-  if (svErr) throw new Error(svErr.message)
+  if (svErr) return { success: false, error: svErr.message }
 
   revalidatePath('/gutachter/profil')
+  return { success: true }
 }
