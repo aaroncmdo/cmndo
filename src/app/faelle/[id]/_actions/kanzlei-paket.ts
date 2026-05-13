@@ -160,17 +160,19 @@ import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 
-export async function setAnschlussschreibenDatum(fallId: string) {
+export async function setAnschlussschreibenDatum(
+  fallId: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('faelle')
     .update({ vs_eskalationsstufe: 'vs-01' })
     .eq('id', fallId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   // KFZ-202: Status via State-Machine (setzt anschlussschreiben_am + Timeline)
   await transitionFallStatus(fallId, 'anschlussschreiben', { user_id: user.id })
@@ -186,19 +188,23 @@ export async function setAnschlussschreibenDatum(fallId: string) {
   }
 
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }
 
-export async function recordZahlung(fallId: string, betrag: number) {
+export async function recordZahlung(
+  fallId: string,
+  betrag: number,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('faelle')
     .update({ regulierung_betrag: betrag })
     .eq('id', fallId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   // KFZ-202: State-Machine (setzt zahlung_eingegangen_am + Timeline)
   await transitionFallStatus(fallId, 'zahlung-eingegangen', { betrag, user_id: user.id })
@@ -216,15 +222,16 @@ export async function recordZahlung(fallId: string, betrag: number) {
   }
 
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }
 
 export async function saveKanzleiAnsprechpartner(
   fallId: string,
   data: { name: string; email: string; telefon: string; position: string },
-) {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('faelle')
@@ -236,20 +243,24 @@ export async function saveKanzleiAnsprechpartner(
     })
     .eq('id', fallId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   revalidatePath(`/faelle/${fallId}`)
   revalidatePath(`/kunde/faelle/${fallId}`)
+  return { success: true }
 }
 
 // KFZ-65: Zahlungseingang-Erfassung mit Positionen
 export async function erfasseZahlungseingang(
   fallId: string,
   data: { zahlungsdatum: string; gesamtbetrag: number; referenz?: string; positionen: { position: string; gefordert: number; gezahlt: number; notiz?: string }[] },
-) {
+): Promise<
+  | { success: true; kuerzung: number; gekuerztePositionen: number }
+  | { success: false; error: string }
+> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { data: zahlung, error: zErr } = await supabase.from('zahlungseingaenge').insert({
     fall_id: fallId,
@@ -259,7 +270,12 @@ export async function erfasseZahlungseingang(
     erfasst_von: user.id,
   }).select('id').single()
 
-  if (zErr || !zahlung) throw new Error(zErr?.message ?? 'Zahlungseingang konnte nicht erstellt werden')
+  if (zErr || !zahlung) {
+    return {
+      success: false,
+      error: zErr?.message ?? 'Zahlungseingang konnte nicht erstellt werden',
+    }
+  }
 
   for (const pos of data.positionen) {
     await supabase.from('zahlungspositionen').insert({
@@ -297,7 +313,7 @@ export async function erfasseZahlungseingang(
   checkFallAutoPhase(fallId).catch(() => {})
 
   revalidatePath(`/faelle/${fallId}`)
-  return { kuerzung, gekuerztePositionen }
+  return { success: true, kuerzung, gekuerztePositionen }
 }
 
 // KFZ-153: Regulierungs-Klassifizierung upsert
@@ -310,10 +326,10 @@ export async function saveRegulierungsKlassifizierung(fallId: string, data: {
   versicherer?: string | null
   begruendung_versicherer?: string | null
   notiz_intern?: string | null
-}) {
+}): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('regulierungs_klassifizierung')
@@ -331,7 +347,8 @@ export async function saveRegulierungsKlassifizierung(fallId: string, data: {
       updated_am: new Date().toISOString(),
     }, { onConflict: 'fall_id' })
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }
