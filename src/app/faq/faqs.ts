@@ -239,4 +239,54 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       },
     ],
   },
+  {
+    gruppe: 'Quotenvorrecht bei Mithaftung',
+    fragen: [
+      {
+        frage: 'Was ist das Quotenvorrecht und wie hilft es mir?',
+        antwort:
+          'Bei Mithaftung (z.B. 50:50) trägt die gegnerische Versicherung nur den prozentualen Anteil — bei 50:50 also nur die Hälfte. Über das Quotenvorrecht springt jedoch Ihre eigene Kaskoversicherung ein und übernimmt bis zu 100 % der bevorrechtigten Positionen: Reparaturkosten, Wertminderung, Sachverständigenkosten und Abschleppkosten. Nicht bevorrechtigt sind Nutzungsausfall und Unkostenpauschale — die laufen nur über die Quote.',
+      },
+      {
+        frage: 'Rechenbeispiel: 50:50-Mithaftung mit 10.000 € Reparatur — was bekomme ich?',
+        antwort:
+          'Reparatur 10.000 € + Wertminderung 1.000 € + Gutachten 800 € + Abschleppen 500 € = 12.300 € bevorrechtigt. Die gegnerische Haftpflicht zahlt 50 % = 6.150 €. Ihre Kasko springt für die fehlenden 6.150 € ein (Quotenvorrecht) — Sie haben praktisch keinen Eigenanteil. Der Höherstufungsschaden (Kasko-Beitragsanstieg) kann anteilig bei der Gegenseite zurückgefordert werden.',
+      },
+      {
+        frage: 'Verliere ich durch das Quotenvorrecht meinen Schadenfreiheitsrabatt?',
+        antwort:
+          'Nicht automatisch. Der Beitragsanstieg durch Kasko-Nutzung (Höherstufungsschaden) ist als Folgeschaden gegen die Gegenseite geltend zu machen — quotenanteilig. Bei 50:50 trägt die Gegenseite 50 % der lebenslangen Mehrbeiträge. Bei 70:30 entsprechend mehr. Unser Anwalt LexDrive berechnet das durch und fordert es zurück.',
+      },
+    ],
+  },
+  {
+    gruppe: 'Scheckheft & Werkstattverweis',
+    fragen: [
+      {
+        frage: 'Wann darf die Versicherung mich auf eine günstigere Werkstatt verweisen?',
+        antwort:
+          'Bei Fahrzeugen unter 3 Jahren: nie — Markenwerkstatt-Stundenverrechnungssätze gelten immer (BGH VI ZR 53/09). Bei Fahrzeugen über 3 Jahren: nur wenn das Scheckheft nicht lückenlos geführt ist. Ein lückenloses Scheckheft — auch beim Vorbesitzer — sichert Ihnen weiterhin die Markenwerkstatt-Sätze. Ohne Scheckheft darf der Versicherer auf eine vergleichbare freie Werkstatt verweisen.',
+      },
+      {
+        frage: 'Was, wenn die "Partnerwerkstatt" der Versicherung 50 km entfernt ist?',
+        antwort:
+          'Die Versicherung darf Sie nicht zu einer Werkstatt verweisen, die räumlich oder qualitativ unzumutbar ist. Bei mehr als 25–30 km Entfernung oder ohne vergleichbare Ausstattung (z.B. Tesla-zertifiziert, Karosseriebank) ist der Verweis unwirksam. Sie behalten Anspruch auf Markenwerkstatt-Sätze in einer Werkstatt Ihrer Wahl.',
+      },
+    ],
+  },
+  {
+    gruppe: 'Restwert & überregionale Börsen',
+    fragen: [
+      {
+        frage: 'Die Versicherung will mir ein Restwert-Angebot aus dem Internet aufdrängen — muss ich das annehmen?',
+        antwort:
+          'Nein. Restwert bemisst sich nach dem regionalen Markt — überregionale Internet-Restwertbörsen sind irrelevant (BGH VI ZR 119/04). Der Aufkäufer aus 300 km Entfernung mag mehr bieten, aber als Privatperson können Sie das Angebot praktisch nicht wahrnehmen. Ihr Gutachter ermittelt 3 konkrete regionale Restwertangebote — das ist die belastbare Grundlage.',
+      },
+      {
+        frage: 'Was, wenn der Versicherer trotzdem auf dem überregionalen Restwert besteht?',
+        antwort:
+          'Dann schreibt LexDrive zurück mit BGH VI ZR 119/04 und den 3 regionalen Angeboten aus dem Gutachten. In 95 % der Fälle akzeptiert die Versicherung die regionalen Werte. Im Streitfall klagen wir vor dem zuständigen Landgericht — die Rechtsprechung ist eindeutig auf Ihrer Seite.',
+      },
+    ],
+  },
 ]
