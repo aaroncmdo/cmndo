@@ -41,25 +41,27 @@ export const STEPS = [
     barrierMs: 12000,
   },
   {
-    id: '02-sv-marker-select',
+    id: '02-wait-for-markers',
     role: ROLES.KUNDE,
-    ui: {
-      action: 'evalCustomEvent',
-      // Test-SV-ID wird im Marker-Popup-Button als CustomEvent-detail dispatched
-      script: 'document.dispatchEvent(new CustomEvent("claimondo:select-sv", { detail: window.__SMOKE_SV_ID__ }))',
-      // ENV-Var SMOKE_TEST_SV_USER_ID wird vor dem Step ins window injected
-    },
-    waitFor: { selector: '[data-testid="sv-detail-sidebar"]', timeoutMs: 4000 },  // TODO selector-verify
+    ui: { action: 'wait', ms: 2500 },
+    waitFor: { selector: '.mapboxgl-marker', timeoutMs: 8000 },
     expectedDbEvents: [],
-    barrierMs: 5000,
+    barrierMs: 11000,
   },
   {
-    id: '03-anfrage-cta-click',
+    id: '03-click-sv-marker',
     role: ROLES.KUNDE,
-    ui: { action: 'click', selector: '[data-testid="anfrage-starten"]' },  // TODO selector-verify
-    waitFor: { selector: '[data-testid="lead-form"]', timeoutMs: 4000 },
+    ui: { action: 'click', selector: '.mapboxgl-marker' },
+    waitFor: { selector: '.mapboxgl-popup-content', timeoutMs: 4000 },
     expectedDbEvents: [],
-    barrierMs: 5000,
+    barrierMs: 6000,
+  },
+  {
+    id: '03b-click-anfrage-popup-button',
+    role: ROLES.KUNDE,
+    ui: { action: 'click', selector: '[data-testid="sv-anfrage-popup"]' },
+    expectedDbEvents: [],
+    barrierMs: 4000,
   },
   {
     id: '04-lead-form-submit',
@@ -74,7 +76,7 @@ export const STEPS = [
         '[name="plz"]': TEST_IDS.testPlz,
         '[name="schadens_typ"]': 'haftpflicht',
       },
-      submit: '[data-testid="lead-submit"]',  // TODO selector-verify
+      submit: '[data-testid="wizard-weiter"]',
     },
     expectedDbEvents: [
       { table: 'leads', kind: 'insert', match: { email: TEST_IDS.kundeEmail } },
@@ -105,14 +107,14 @@ export const STEPS = [
     role: ROLES.KUNDE,
     ui: {
       action: 'fillForm',
-      preActions: [{ action: 'click', selector: '[data-testid="dsgvo-accept"]' }],
+      preActions: [{ action: 'click', selector: '[data-testid="feld-dsgvo"]' }],
       fields: {
         '[name="strasse"]': 'Smoke-Straße 1',
         '[name="plz"]': TEST_IDS.testPlz,
         '[name="ort"]': 'Köln',
         '[name="geburtsdatum"]': '1990-01-15',
       },
-      submit: '[data-testid="phase-1-weiter"]',
+      submit: '[data-testid="wizard-weiter"]',
     },
     expectedDbEvents: [
       { table: 'faelle', kind: 'insert', match: { kunde_email: TEST_IDS.kundeEmail } },
@@ -132,7 +134,7 @@ export const STEPS = [
         '[name="schadens_ort"]': 'Köln Innenstadt',
         '[name="hergang"]': 'Auffahrunfall an Ampel',
       },
-      submit: '[data-testid="phase-2-weiter"]',
+      submit: '[data-testid="wizard-weiter"]',
     },
     expectedDbEvents: [
       { table: 'faelle', kind: 'update', match: { schadens_konstellation: 'haftpflicht-geschaedigt' } },
@@ -151,7 +153,7 @@ export const STEPS = [
         '[name="fahrzeug_marke"]': 'VW',
         '[name="fahrzeug_modell"]': 'Golf',
       },
-      submit: '[data-testid="phase-3-weiter"]',
+      submit: '[data-testid="wizard-weiter"]',
     },
     expectedDbEvents: [
       // CMM-Phase-1.5 Sync-Trigger: faelle-Update → claims-Insert
@@ -170,7 +172,7 @@ export const STEPS = [
         '[name="besichtigungsort_ort"]': 'Köln',
         '[name="wunschtermin"]': '2026-05-20T10:00',
       },
-      submit: '[data-testid="phase-4-absenden"]',
+      submit: '[data-testid="wizard-weiter"]',
     },
     expectedDbEvents: [
       { table: 'gutachter_termine', kind: 'insert', match: { status: 'vorgeschlagen' } },
