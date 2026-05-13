@@ -59,10 +59,10 @@ export function useOnlineStatus(): boolean {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    // Polling: 60s wenn online, 10s wenn offline
+    // Polling: 60s wenn online, 30s wenn offline (vorher 10s → zu aggressiv)
     const startPolling = () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
-      intervalRef.current = setInterval(checkConnection, isOnline ? 60000 : 10000)
+      intervalRef.current = setInterval(checkConnection, isOnline ? 60000 : 30000)
     }
     startPolling()
 
