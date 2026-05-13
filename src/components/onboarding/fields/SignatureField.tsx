@@ -89,6 +89,8 @@ export function SignatureField({ feld, value, onChange, disabled }: Props) {
       )}
       <canvas
         ref={canvasRef}
+        data-testid={`feld-${feld.feld_key}`}
+        data-feld={feld.feld_key}
         width={600}
         height={160}
         style={{
