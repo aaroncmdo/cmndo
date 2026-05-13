@@ -1,0 +1,57 @@
+{
+  "pass": 7,
+  "fail": 0,
+  "admin": [
+    {
+      "label": "admin-dashboard",
+      "path": "/admin",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": []
+    },
+    {
+      "label": "admin-finance",
+      "path": "/admin/finance",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": []
+    },
+    {
+      "label": "admin-faelle",
+      "path": "/admin/faelle",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": []
+    },
+    {
+      "label": "admin-sv",
+      "path": "/admin/sachverstaendige",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": []
+    }
+  ],
+  "sv": [
+    {
+      "label": "gutachter-home",
+      "path": "/gutachter",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": []
+    },
+    {
+      "label": "gutachter-heute",
+      "path": "/gutachter/heute",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": []
+    },
+    {
+      "label": "gutachter-faelle",
+      "path": "/gutachter/faelle",
+      "status": 200,
+      "hasError": false,
+      "forbiddenHits": []
+    }
+  ]
+}

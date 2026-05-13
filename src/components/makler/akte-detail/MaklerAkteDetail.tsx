@@ -141,7 +141,7 @@ export function MaklerAkteDetail({
       </nav>
 
       {/* Header-Card */}
-      <header className="relative rounded-ios-md overflow-hidden bg-gradient-to-br from-claimondo-navy via-[#1E3A5F] to-claimondo-navy p-6 md:p-8 text-white">
+      <header className="relative rounded-ios-md overflow-hidden bg-gradient-to-br from-claimondo-navy via-claimondo-shield to-claimondo-navy p-6 md:p-8 text-white">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold">{fullName(kunde)}</h1>

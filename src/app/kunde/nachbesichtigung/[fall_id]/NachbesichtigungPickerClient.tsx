@@ -146,7 +146,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
           <label
             className={`flex-1 flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
               konfrontation === true
-                ? 'border-claimondo-ondo bg-[#EBF1F8]'
+                ? 'border-claimondo-ondo bg-claimondo-ondo/[0.06]'
                 : 'border-claimondo-border hover:border-claimondo-ondo/60'
             }`}
           >
@@ -162,7 +162,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
           <label
             className={`flex-1 flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
               konfrontation === false
-                ? 'border-claimondo-ondo bg-[#EBF1F8]'
+                ? 'border-claimondo-ondo bg-claimondo-ondo/[0.06]'
                 : 'border-claimondo-border hover:border-claimondo-ondo/60'
             }`}
           >
@@ -183,7 +183,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
           type="button"
           onClick={handleSubmit}
           disabled={pending}
-          className="w-full rounded-md bg-claimondo-navy text-white px-3 py-2.5 text-sm font-medium hover:bg-[#162857] disabled:opacity-50 transition-colors"
+          className="w-full rounded-md bg-claimondo-navy text-white px-3 py-2.5 text-sm font-medium hover:bg-claimondo-navy disabled:opacity-50 transition-colors"
         >
           {pending ? 'Wird eingereicht …' : 'Termine einreichen'}
         </button>

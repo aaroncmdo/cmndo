@@ -82,7 +82,7 @@ export default function KommunikationTab({
                       className="w-8 h-8 rounded-full object-cover border border-claimondo-border"
                     />
                   ) : (
-                    <span className="w-8 h-8 rounded-full bg-[#EBF1F8] text-claimondo-navy flex items-center justify-center text-xs font-semibold">
+                    <span className="w-8 h-8 rounded-full bg-claimondo-ondo/[0.06] text-claimondo-navy flex items-center justify-center text-xs font-semibold">
                       {initials}
                     </span>
                   )}

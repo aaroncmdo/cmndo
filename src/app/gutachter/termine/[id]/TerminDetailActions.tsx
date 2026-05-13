@@ -75,7 +75,7 @@ export default function TerminDetailActions({
         </div>
         <Link
           href={`/gutachter/termine/${terminId}/vor-ort`}
-          className="block w-full text-center bg-[var(--brand-primary)] hover:bg-[#162d4a] text-white rounded-2xl py-3.5 text-base font-semibold transition-colors"
+          className="block w-full text-center bg-[var(--brand-primary)] hover:bg-claimondo-navy text-white rounded-2xl py-3.5 text-base font-semibold transition-colors"
         >
           Vor-Ort-Modus öffnen →
         </Link>
@@ -92,7 +92,7 @@ export default function TerminDetailActions({
         </div>
         <Link
           href={`/gutachter/termine/${terminId}/navigation`}
-          className="block w-full text-center bg-[var(--brand-secondary)] hover:bg-[#3a5f87] text-white rounded-2xl py-3.5 text-base font-semibold transition-colors"
+          className="block w-full text-center bg-[var(--brand-secondary)] hover:bg-claimondo-shield text-white rounded-2xl py-3.5 text-base font-semibold transition-colors"
         >
           Zur Navigation →
         </Link>
@@ -126,7 +126,7 @@ export default function TerminDetailActions({
       <button
         onClick={handleStartNavigation}
         disabled={pending}
-        className="w-full flex items-center justify-center gap-2 bg-[var(--brand-secondary)] hover:bg-[#3a5f87] text-white rounded-2xl py-4 text-base font-bold transition-colors disabled:opacity-50 shadow-lg shadow-[var(--brand-secondary)]/30"
+        className="w-full flex items-center justify-center gap-2 bg-[var(--brand-secondary)] hover:bg-claimondo-shield text-white rounded-2xl py-4 text-base font-bold transition-colors disabled:opacity-50 shadow-lg shadow-[var(--brand-secondary)]/30"
       >
         <NavigationIcon className="w-5 h-5" />
         {pending ? 'Starte...' : 'Navigation starten'}

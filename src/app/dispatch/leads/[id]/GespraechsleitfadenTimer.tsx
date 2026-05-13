@@ -25,8 +25,8 @@ type Phase = {
 const PHASEN: Phase[] = [
   { von: 0, bis: 120, kurz: '0:00 – 2:00', label: 'Kunde erzählen lassen. Empathie. Claimondo kurz vorstellen.', bg: 'bg-claimondo-bg', border: 'border-claimondo-border', text: 'text-claimondo-navy' },
   // AAR-176 P2-E: Q3 ist seit AAR-138 Polizei-vor-Ort, nicht mehr Haftpflicht.
-  { von: 120, bis: 240, kurz: '2:00 – 4:00', label: 'Q1 Hergang + Aufklärung, Q2 Schaden, Q3 Polizei.', bg: 'bg-violet-50', border: 'border-violet-200', text: 'text-violet-800' },
-  { von: 240, bis: 300, kurz: '4:00 – 5:00', label: 'Nutzenversprechen + SV-Termin vormerken.', bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-800' },
+  { von: 120, bis: 240, kurz: '2:00 – 4:00', label: 'Q1 Hergang + Aufklärung, Q2 Schaden, Q3 Polizei.', bg: 'bg-claimondo-light-blue/[0.15]', border: 'border-claimondo-light-blue/40', text: 'text-claimondo-navy' },
+  { von: 240, bis: 300, kurz: '4:00 – 5:00', label: 'Nutzenversprechen + SV-Termin vormerken.', bg: 'bg-claimondo-ondo/[0.10]', border: 'border-claimondo-ondo/30', text: 'text-claimondo-ondo' },
   { von: 300, bis: 420, kurz: '5:00 – 7:00', label: 'Daten erfassen (Name, Tel, Kennzeichen, Schadentyp, Hergang).', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-800' },
   { von: 420, bis: 480, kurz: '7:00 – 8:00', label: 'FlowLink senden + Abschluss.', bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800' },
 ]

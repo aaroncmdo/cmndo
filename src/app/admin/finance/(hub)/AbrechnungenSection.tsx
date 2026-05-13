@@ -138,7 +138,7 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
             <button
               onClick={handleGenerieren}
               disabled={!genMonat || loading === 'gen'}
-              className="bg-claimondo-ondo text-white px-3 py-1 rounded-lg hover:bg-[#3a6590] disabled:opacity-50"
+              className="bg-claimondo-ondo text-white px-3 py-1 rounded-lg hover:bg-claimondo-shield disabled:opacity-50"
             >
               {loading === 'gen' ? 'Generiere...' : 'Generieren'}
             </button>

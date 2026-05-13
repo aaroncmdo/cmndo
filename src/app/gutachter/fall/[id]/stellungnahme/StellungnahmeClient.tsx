@@ -243,7 +243,7 @@ export default function StellungnahmeClient({
             checked={bestaetigt}
             onChange={(e) => setBestaetigt(e.target.checked)}
             disabled={isPending}
-            className="mt-0.5 w-4 h-4 accent-[#0D1B3E]"
+            className="mt-0.5 w-4 h-4 accent-claimondo-navy"
           />
           <span className="text-sm text-claimondo-navy">
             Ich bestätige, dass meine technische Stellungnahme vollständig und korrekt ist
@@ -263,7 +263,7 @@ export default function StellungnahmeClient({
         <button
           type="submit"
           disabled={!file || !bestaetigt || isPending}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-claimondo-navy hover:bg-[#12265a] text-white text-sm font-semibold disabled:opacity-40 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-claimondo-navy hover:bg-claimondo-navy text-white text-sm font-semibold disabled:opacity-40 transition-colors"
         >
           {isPending ? (
             <>

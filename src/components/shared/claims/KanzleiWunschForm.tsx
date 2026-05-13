@@ -193,7 +193,7 @@ export function KanzleiWunschForm({
       <button
         type="submit"
         disabled={isPending}
-        className="w-full px-4 py-2.5 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-[#1a2d5a] disabled:opacity-50 transition-colors"
+        className="w-full px-4 py-2.5 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-navy disabled:opacity-50 transition-colors"
       >
         {isPending ? 'Wird gespeichert…' : submitLabel}
       </button>

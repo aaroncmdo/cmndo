@@ -305,7 +305,7 @@ function CarRender({
   return (
     <div className="space-y-3">
       {/* Imagin-Studio-Render mit Mehrstufen-Fallback (Logo → Auto-Bild → Icon) */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#f4f6fb] via-[#eef1f8] to-[#e6ebf5] border border-claimondo-border/50 flex items-center justify-center p-3 min-h-[140px]">
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-claimondo-bg via-claimondo-ondo/[0.06] to-claimondo-border border border-claimondo-border/50 flex items-center justify-center p-3 min-h-[140px]">
         <FahrzeugRenderImage
           hersteller={hersteller}
           modell={modell}

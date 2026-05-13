@@ -85,7 +85,7 @@ export default function KundeAusfallEntschaedigungCard({
   variant,
 }: Props) {
   const isLexDrive = variant === 'lexdrive'
-  const headingCls = isLexDrive ? 'text-[#0a3fa0]' : 'text-claimondo-navy'
+  const headingCls = isLexDrive ? 'text-claimondo-navy' : 'text-claimondo-navy'
   const iconCls = isLexDrive ? 'text-[#0e5be9]' : 'text-claimondo-shield'
   const amountCls = isLexDrive ? 'text-[#0e5be9]' : 'text-claimondo-navy'
   const labelCls = isLexDrive ? 'text-[#0e5be9]/70' : 'text-claimondo-ondo'

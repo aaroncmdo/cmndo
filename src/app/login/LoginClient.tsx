@@ -156,7 +156,7 @@ export default function LoginClient({
               name="remember"
               type="checkbox"
               defaultChecked={false}
-              className="mt-0.5 w-4 h-4 rounded border-claimondo-border text-claimondo-shield focus:ring-2 focus:ring-[#1E3A5F]"
+              className="mt-0.5 w-4 h-4 rounded border-claimondo-border text-claimondo-shield focus:ring-2 focus:ring-claimondo-shield"
             />
             <label htmlFor="remember" className="text-xs text-claimondo-ondo leading-tight">
               Angemeldet bleiben

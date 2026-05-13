@@ -331,7 +331,7 @@ export default function FlowWizardKfz({
                   ? 'bg-claimondo-navy border-claimondo-navy text-white scale-[1.04]'
                   : i === stepIndex
                     ? 'bg-claimondo-ondo border-claimondo-ondo text-white scale-[1.06] shadow-[0_0_0_5px_rgba(69,115,162,.16)]'
-                    : 'bg-white border-claimondo-navy/[0.10] text-[#8a93a6]'
+                    : 'bg-white border-claimondo-navy/[0.10] text-claimondo-ondo/60'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
               </div>
@@ -405,7 +405,7 @@ export default function FlowWizardKfz({
                       type="checkbox"
                       checked={datenschutz}
                       onChange={e => setDatenschutz(e.target.checked)}
-                      className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-[#4573A2] shrink-0"
+                      className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-claimondo-ondo shrink-0"
                     />
                     <span className="text-sm text-claimondo-ondo leading-relaxed">
                       Ich habe die{' '}
@@ -429,7 +429,7 @@ export default function FlowWizardKfz({
                 />
 
                 {gutachter ? (
-                  <div className="bg-gradient-to-br from-claimondo-ondo/10 to-[#1E3A5F]/5 border border-claimondo-ondo/20 rounded-3xl p-7 text-center mb-6">
+                  <div className="bg-gradient-to-br from-claimondo-ondo/10 to-claimondo-shield/5 border border-claimondo-ondo/20 rounded-3xl p-7 text-center mb-6">
                     {gutachter.avatarUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
@@ -578,7 +578,7 @@ export default function FlowWizardKfz({
                     type="checkbox"
                     checked={saAccepted}
                     onChange={e => setSaAccepted(e.target.checked)}
-                    className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-[#4573A2] shrink-0"
+                    className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-claimondo-ondo shrink-0"
                   />
                   <span className="text-sm text-claimondo-ondo leading-relaxed">
                     Ja, ich möchte den kostenlosen Service nutzen. Alle Kosten trägt die gegnerische Versicherung.
@@ -623,7 +623,7 @@ export default function FlowWizardKfz({
                     anzeigen. LexDrive meldet sich proaktiv beim Kunden via
                     Edge-Function — hier nur die Visitenkarte. */}
                 {lead.service_typ === 'komplett' && (
-                  <div className="mb-5 rounded-2xl border border-claimondo-ondo/20 bg-gradient-to-br from-claimondo-ondo/10 to-[#1E3A5F]/5 p-5">
+                  <div className="mb-5 rounded-2xl border border-claimondo-ondo/20 bg-gradient-to-br from-claimondo-ondo/10 to-claimondo-shield/5 p-5">
                     <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">
                       Ihr juristischer Ansprechpartner
                     </p>
@@ -749,7 +749,7 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 px-4 py-3 rounded-2xl bg-claimondo-navy/[0.03] border border-claimondo-navy/[0.06]">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a93a6]">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-claimondo-ondo/60">{label}</span>
       <span className="text-sm text-claimondo-navy break-words tracking-[-.005em]">{value}</span>
     </div>
   )
