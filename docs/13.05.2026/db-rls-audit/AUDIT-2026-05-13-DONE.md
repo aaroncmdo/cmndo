@@ -1,4 +1,34 @@
-# DB-RLS- + Konsistenz-Audit · 13.05.2026
+# DB-RLS- + Konsistenz-Audit · 13.05.2026 · **DONE**
+
+**Status:** Alle CRITICAL (§1) + HIGH (§2) + MEDIUM (§3) + Performance (§4) Items appliziert + auf staging gemerged. Verbleibend nur die in §6 als „braucht Spec/Toggle" markierten Items (Storage Schritt D, Leaked-Password-Toggle, btree_gist).
+
+## Applizierte Migrationen + PRs
+
+| Audit-§ | Migration | PR |
+|---|---|---|
+| §1.1 finance_eintraege | `20260513151057_aar_finance_eintraege_rls_tighten` | #939 |
+| §1.3 audit-spoof | `20260513151059_aar_audit_spoof_lock` | #939 |
+| §2.2 lead_historie | `20260513151701_aar_lead_historie_lock` | #942 |
+| §2.1 reg_klass | `20260513151707_aar_reg_klass_scope_staff` | #942 |
+| §3.2 search_path | `20260513161849_aar_function_search_path_lock` | #951 |
+| §3.1 secdef-revoke | `20260513162812_aar_secdef_revoke_public` + `_v2` | #953 |
+| §4.1 initplan-optimize | `20260513162416_aar_rls_initplan_optimize` (234 Policies) | #952 |
+| §4.3 fk-indexes | `20260513163628_aar_perf_fk_indexes` (107 Indexes) | #955 |
+| §4.2 permissive-konsolidierung | 5 Migrations: `_faelle_` + `_claims_` + `_leads_` + `_rest_batch` + `_tail_batch_v2` | #960 + #961 |
+| Storage-Rollout Batch 1 | n/a (Code) | #945 |
+| Storage-Rollout Batch 3 | n/a (Code, email-TTL) | #947 |
+| abrechnungen-pdf-Bug (Sweep-Befund) | n/a (Code, signed-URL) | #954 |
+
+**11 PRs, alle gemerged auf staging.** Live-Re-Validate 13.05.2026 17:00: alle 9 Effekt-Checks PASS, Migration-Drift = 0.
+
+## Verbleibendes Backlog (siehe §6)
+
+- Storage Schritt D (Bucket-Lockdown `fall-dokumente`/`gutachten`/`schadensfotos`/`unterschriften`) — braucht Pfad-Konvention-Spec (App-Code-Pfade sind heterogen: `sv-uploads/{fallId}/...`, `flow/{token}/...`, `{fallId}/...`)
+- Auth Leaked-Password-Protection — Aaron-Dashboard-Toggle (5 min, Auth → Providers → "On")
+- btree_gist → extensions-Schema — 1 Lint, hohes Risiko durch AAR-865 EXCLUSION-Constraint
+- `incentives.qual=true`-Härtung — separater Audit (Marketing-Page-Logic prüfen)
+
+---
 
 **Methode:** Live-Inspektion der Prod-DB (`Claimondo-v2`, ref `paizkjajbuxxksdoycev`) über Supabase MCP — `pg_policies`, `pg_class`, `pg_proc`, `storage.buckets`, `supabase_migrations.schema_migrations`, Advisor-Endpoints (security + performance). Reine Lese-Analyse, keine DDL.
 
