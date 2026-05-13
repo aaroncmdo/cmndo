@@ -46,9 +46,9 @@ Credentials wurden im zweiten Run per Env-Var übergeben. Portal-Smoke abgeschlo
 
 ---
 
-### B3 — Kein test-makler User (OPEN)
+### B3 — Kein test-makler User (GEFIXT)
 
-Es existiert kein `test-makler@claimondo.de` Auth-User. Das Makler-Portal (`/makler/*`) kann nur mit einem User der Rolle `makler` betreten werden. Smoke-Skript dokumentiert dies — im nächsten Run entweder den User anlegen oder Aaron bestätigen dass Makler-Portal noch nicht vollständig implementiert ist.
+`test-makler@claimondo.de` (rolle=makler, profile.id=`bbbb2222-0000-4000-8000-000000000020`, Org=`bbbb2222-0000-4000-8000-000000000021`) via `scripts/seed-staging-test-users.mjs` angelegt am 13.05.2026 (Idempotenter Seed, läuft jederzeit wiederholbar). Pendant test-kanzlei + test-sv + test-admin + test-dispatch ebenfalls verifiziert. Damit ist Makler-Portal-Smoke jetzt durchführbar.
 
 ---
 
