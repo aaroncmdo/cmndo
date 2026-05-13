@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
@@ -163,6 +164,17 @@ export async function signupAndConvertLead(input: {
       })
     }
   }
+
+  // 13.05.2026 Server-Actions-Audit Fix: Lead → Fall + ggf. Makler-Consent +
+  // Provision werden hier atomar angelegt. Ohne revalidate sehen Dispatch
+  // (neue Fälle) + Makler (neue Provision + Akte) + Admin-Übersicht ihre
+  // frisch erzeugten Datensätze erst nach Hard-Refresh.
+  revalidatePath('/dispatch/leads')
+  revalidatePath('/dispatch/dashboard')
+  revalidatePath('/admin/faelle')
+  revalidatePath('/admin/finance/provisionen')
+  revalidatePath('/makler/leads')
+  revalidatePath('/makler/akten')
 
   return { success: true, fallId: fall.id, claimId: conv.claimId }
 }

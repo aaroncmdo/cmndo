@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 // AAR-471 C5: Server-Action zum Persistieren der Schadensfoto-URLs im
@@ -19,5 +20,10 @@ export async function updateLeadFotos(leadId: string, fotos: Foto[]): Promise<Re
     .update({ schadensfoto_urls: fotos })
     .eq('id', leadId)
   if (error) return { success: false, error: error.message }
+  // 13.05.2026 Server-Actions-Audit Fix: Dispatch-Lead-Grid + Detail-Page
+  // zeigen schadensfoto_urls; ohne revalidate sieht der Dispatcher die
+  // frisch hochgeladenen Fotos erst nach Hard-Refresh.
+  revalidatePath('/dispatch/leads')
+  revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true }
 }

@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { schritt2cSchema, type Schritt2cInput } from '@/lib/flow/schemas/schritt2c'
 import { assertLeadMutable } from './_helpers/assert-lead-mutable'
@@ -48,5 +49,9 @@ export async function updateLeadGegner(
     .eq('id', leadId)
 
   if (error) return { success: false, error: error.message }
+  // 13.05.2026 Server-Actions-Audit Fix: Dispatch zeigt Gegner-Versicherer
+  // im Lead-Grid + Detail-Page für VS-Routing. Ohne revalidate stale.
+  revalidatePath('/dispatch/leads')
+  revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true }
 }
