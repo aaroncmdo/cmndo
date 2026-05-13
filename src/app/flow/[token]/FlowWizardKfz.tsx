@@ -10,8 +10,8 @@
 // 2026-05-26). Bis dahin Bug-Fixes only, keine neuen Features.
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
+import { uploadFlowSignatur } from '@/lib/actions/unterschrift-upload'
 import {
   CheckIcon,
   FileTextIcon,
@@ -206,16 +206,17 @@ export default function FlowWizardKfz({
     setSubmittingSA(true)
     setError(null)
     try {
-      const supabase = createClient()
-
-      // 1. Unterschrift als PNG hochladen
-      const ts = Date.now()
-      const path = `flow/${token}/sa_${ts}.png`
-      const { error: upErr } = await supabase.storage
-        .from('unterschriften')
-        .upload(path, signatureBlob, { contentType: 'image/png' })
-      if (upErr) throw new Error(upErr.message)
-      const { data: { publicUrl } } = supabase.storage.from('unterschriften').getPublicUrl(path)
+      // 1. Unterschrift als PNG → DataURL → Server-Action mit service_role
+      //    (Batch 4: Anon-Write auf `unterschriften` fällt mit Schritt D)
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = () => reject(new Error('Bild-Encoding fehlgeschlagen'))
+        reader.readAsDataURL(signatureBlob)
+      })
+      const uploadRes = await uploadFlowSignatur(token, dataUrl)
+      if (!uploadRes.ok) throw new Error(uploadRes.error)
+      const publicUrl = uploadRes.url
 
       // 2. Server Action: Fall erstellen
       const result = await signSAandCreateFall(lead.id, publicUrl, flowLinkId ?? null)
