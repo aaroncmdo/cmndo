@@ -1,6 +1,8 @@
-// Schnupper-Map — Marketing-Page-Render + Mapbox-Marker-Click-Demo.
-// Read-only gegen Prod claimondo.de, KEIN DB-Schreib-Effekt, kein Login.
-// Beweist Framework + Live-HUD + Click-Flash + Multi-Track-Barrier.
+// Schnupper-Map — Marketing-Page-Render + Mapbox-Marker-Click + erstes Wizard-
+// Phase-1-Fill (besichtigungsort) + wizard-weiter. Beweist Form-Patch live.
+//
+// Read-only gegen Prod claimondo.de mit deployed Patches. KEIN Submit am Ende —
+// stoppt nach Phase-Wechsel (zeigt Phase 20 termin).
 
 export const TEST_IDS = {}
 export const ROLES = { KUNDE: 'kunde' }
@@ -26,38 +28,43 @@ export const STEPS = [
     id: '03-klick-ersten-sv-marker',
     role: 'kunde',
     ui: { action: 'click', selector: '.mapboxgl-marker' },
-    expectedDbEvents: [],
-    barrierMs: 6000,
-  },
-  {
-    id: '04-warte-auf-popup',
-    role: 'kunde',
-    ui: { action: 'wait', ms: 1800 },
-    waitFor: { selector: '.mapboxgl-popup-content', timeoutMs: 4000 },
+    waitFor: { selector: '.mapboxgl-popup-content', timeoutMs: 5000 },
     expectedDbEvents: [],
     barrierMs: 8000,
   },
   {
-    id: '05-klick-anfrage-button-im-popup',
+    id: '04-klick-anfrage-button',
     role: 'kunde',
-    // Popup-Button hat onclick='document.dispatchEvent(new CustomEvent("claimondo:select-sv",...))'
-    // wir matchen via Text — Playwright kann Text-Selektoren
     ui: { action: 'click', selector: '.mapboxgl-popup-content button' },
-    expectedDbEvents: [],
-    barrierMs: 6000,
-  },
-  {
-    id: '06-warte-und-screenshot-detail-view',
-    role: 'kunde',
-    ui: { action: 'wait', ms: 2200 },
     expectedDbEvents: [],
     barrierMs: 5000,
   },
   {
-    id: '07-scroll-zum-wizard',
+    id: '05-warte-bis-wizard-bereit',
     role: 'kunde',
-    ui: { action: 'scrollBy', y: 200 },
+    ui: { action: 'wait', ms: 1500 },
+    waitFor: { selector: '[data-testid="feld-besichtigungsort"]', timeoutMs: 6000 },
     expectedDbEvents: [],
-    barrierMs: 3000,
+    barrierMs: 9000,
+  },
+  {
+    id: '06-phase-10-besichtigungsort-ausfuellen',
+    role: 'kunde',
+    ui: {
+      action: 'fillForm',
+      fields: { '[name="besichtigungsort"]': 'Smoke-Straße 1, 50667 Köln' },
+      submit: '[data-testid="wizard-weiter"]',
+    },
+    expectedDbEvents: [],
+    barrierMs: 6000,
+  },
+  {
+    id: '07-warte-auf-phase-20',
+    role: 'kunde',
+    ui: { action: 'wait', ms: 1800 },
+    // Phase 20 hat wunschtermin_wann (segmented). data-testid auf SegmentedField
+    // existiert noch nicht — nutze role/text-Indikator: wir warten einfach.
+    expectedDbEvents: [],
+    barrierMs: 4000,
   },
 ]

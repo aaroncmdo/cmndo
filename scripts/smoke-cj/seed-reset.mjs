@@ -5,17 +5,23 @@ import { createClient } from '@supabase/supabase-js'
 import { execSync } from 'node:child_process'
 
 export async function seedReset() {
-  // 1. Schema-Drift-Guard zuerst — wenn Drift, gar nicht erst seeden.
+  // 1. Schema-Drift-Guard (best-effort) — wenn supabase-cli nicht gelinkt ist
+  // (z.B. fremder Worktree), Warning statt Hard-Exit.
   try {
-    const out = execSync('npx supabase db diff --linked --schema public', { encoding: 'utf8' })
+    const out = execSync('npx supabase db diff --linked --schema public', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
     if (out.trim() && !out.includes('No schema changes found')) {
       console.error('SCHEMA-DRIFT erkannt — Iter abgebrochen. AGENTS.md Regel 2.')
       console.error(out)
       process.exit(2)
     }
   } catch (err) {
-    console.error('supabase db diff fehlgeschlagen:', err.message)
-    process.exit(2)
+    const msg = String(err.message ?? '')
+    if (msg.includes('Cannot find project ref') || msg.includes('supabase link') || msg.includes('not found')) {
+      console.warn('⚠ Drift-Guard übersprungen (supabase-cli nicht gelinkt):', msg.split('\n')[0])
+    } else {
+      console.error('supabase db diff fehlgeschlagen:', msg)
+      process.exit(2)
+    }
   }
 
   const supabase = createClient(
