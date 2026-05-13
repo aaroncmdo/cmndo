@@ -78,7 +78,7 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
       )}
 
       {ladeFehler && (
-        <div style={{ fontSize: 13, color: '#c0392b', padding: '12px 16px', background: 'rgba(255,59,48,.08)', borderRadius: 'var(--wiz-r-sm)' }}>
+        <div style={{ fontSize: 13, color: 'var(--brand-danger, #c0392b)', padding: '12px 16px', background: 'rgba(255,59,48,.08)', borderRadius: 'var(--wiz-r-sm)' }}>
           Slots konnten nicht geladen werden: {ladeFehler}
         </div>
       )}
@@ -134,7 +134,7 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
                     {monatLabel}
                   </span>
                   {tag.frei && (
-                    <span style={{ marginTop: 4, fontSize: 10, fontWeight: 600, color: isActive ? '#6FE299' : '#34C759', letterSpacing: '-.005em' }}>
+                    <span style={{ marginTop: 4, fontSize: 10, fontWeight: 600, color: isActive ? 'var(--brand-success-light, #6FE299)' : 'var(--brand-success, #34C759)', letterSpacing: '-.005em' }}>
                       {tag.anzahl_slots} frei
                     </span>
                   )}

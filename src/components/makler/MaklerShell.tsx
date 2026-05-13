@@ -49,7 +49,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
     : (email?.substring(0, 2).toUpperCase() ?? 'MA')
 
   return (
-    <div className="h-screen relative overflow-hidden" style={{ background: '#f2f3f7' }}>
+    <div className="h-screen relative overflow-hidden bg-claimondo-bg">
       {/* Atmosphärische Hintergrund-Spotlights — identisch mit Admin-Layout */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
         <div
