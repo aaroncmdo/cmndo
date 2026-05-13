@@ -16,6 +16,8 @@ export function CheckboxField({ feld, value, onChange, disabled }: Props) {
   return (
     <button
       type="button"
+      data-testid={`feld-${feld.feld_key}`}
+      data-checked={value}
       disabled={disabled}
       onClick={() => onChange(!value)}
       className="[background:var(--glass-bg)] [backdrop-filter:var(--glass-blur)] [-webkit-backdrop-filter:var(--glass-blur)] [box-shadow:var(--glass-shadow)] rounded-[var(--glass-radius-pill)]"

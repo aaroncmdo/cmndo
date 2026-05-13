@@ -76,3 +76,4 @@ scripts/knip-classified.json
 scripts/audit-server-actions-output.json
 docs/**/Smoke audits/
 docs/13.05.2026/smoke-claimondo-de/smoke-summary.json
+.env.test

@@ -355,6 +355,9 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         )}
         <GlassButton
           variant="cta"
+          data-testid="wizard-weiter"
+          data-phase-idx={phaseIdx}
+          data-is-last={isLast}
           icon={
             isSaving ? (
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ animation: 'spin 1s linear infinite' }}>
