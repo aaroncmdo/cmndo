@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export const dynamic = 'force-dynamic'
 
@@ -317,8 +318,11 @@ export async function POST(req: NextRequest) {
             }).eq('id', matchedLeadId)
             console.warn('[AAR-263] Storage-Upload fehlgeschlagen:', upErr.message)
           } else {
-            const { data: publicData } = db.storage.from('fall-dokumente').getPublicUrl(path)
-            const publicUrl = publicData.publicUrl
+            const publicUrl = await getStorageUrl(db, 'fall-dokumente', path)
+            if (!publicUrl) {
+              console.warn('[AAR-263] URL-Generierung fehlgeschlagen')
+              return new NextResponse(EMPTY_TWIML, { status: 200, headers: { 'Content-Type': 'text/xml' } })
+            }
             await db.from('leads').update({
               polizeibericht_status: 'hochgeladen',
               polizeibericht_url: publicUrl,
@@ -397,8 +401,11 @@ export async function POST(req: NextRequest) {
           if (upErr) {
             console.warn('[AAR-182] Storage-Upload fehlgeschlagen:', upErr.message)
           } else {
-            const { data: publicData } = db.storage.from('fall-dokumente').getPublicUrl(path)
-            const publicUrl = publicData.publicUrl
+            const publicUrl = await getStorageUrl(db, 'fall-dokumente', path)
+            if (!publicUrl) {
+              console.warn('[AAR-182] URL-Generierung fehlgeschlagen')
+              return new NextResponse(EMPTY_TWIML, { status: 200, headers: { 'Content-Type': 'text/xml' } })
+            }
 
             // OCR direkt aus dem Buffer laufen lassen (shared parser)
             const { runZB1Ocr } = await import('@/lib/ocr/zb1-parser')

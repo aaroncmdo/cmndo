@@ -11,6 +11,7 @@ import type { Rolle } from '@/lib/claims/types'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 import type { PflichtdokumentStand } from '@/app/kunde/onboarding/actions'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
+import { getStorageUrl } from '@/lib/storage/url'
 
 type PflichtRow = {
   id: string
@@ -128,7 +129,8 @@ export async function getPflichtdokumenteForFall(
       hochgeladen_am: string | null
     }>) {
       if (!d.storage_path) continue
-      const url = admin.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl
+      const url = await getStorageUrl(admin, 'fall-dokumente', d.storage_path)
+      if (!url) continue
       const entry = { name: d.original_filename ?? 'Datei', url }
       if (d.pflichtdokument_id) {
         const arr = filesByPflichtId.get(d.pflichtdokument_id) ?? []

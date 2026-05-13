@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { getStorageUrl } from '@/lib/storage/url'
 
 // AAR-471 C5: Browser-seitiger Upload von Schadens-Fotos. Komprimiert via
 // Canvas auf max. 1600px Longest-Edge + JPG q=0.85 — spart Bandbreite und
@@ -84,8 +85,9 @@ export async function uploadFoto(
   })
   if (error) return { success: false, error: error.message }
 
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
-  return { success: true, url: data.publicUrl }
+  const url = await getStorageUrl(supabase, BUCKET, path)
+  if (!url) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
+  return { success: true, url }
 }
 
 export async function deleteFoto(url: string): Promise<void> {

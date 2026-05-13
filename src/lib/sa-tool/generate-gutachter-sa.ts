@@ -24,6 +24,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export type GenerateGutachterSAResult =
   | { success: true; storagePath: string; publicUrl: string; dokumentId: string }
@@ -181,7 +182,10 @@ export async function generateGutachterSA({
     if (upErr) {
       return { success: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
     }
-    const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(outPath)
+    const publicUrl = await getStorageUrl(admin, 'fall-dokumente', outPath)
+    if (!publicUrl) {
+      return { success: false, error: 'URL-Generierung für hochgeladenes PDF fehlgeschlagen' }
+    }
 
     // 7. fall_dokumente-Row anlegen (AAR-553: dokumente-Tabelle gedroppt)
     // dokument_typ='abtretung' ist der bestehende Enum-Wert für SA-artige Dokumente.
