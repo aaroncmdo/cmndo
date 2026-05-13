@@ -1,3 +1,5 @@
+// Token-Audit-Skip: next/og inline-only API — kein Tailwind/CSS-Var-Support.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
