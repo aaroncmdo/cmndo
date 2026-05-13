@@ -16,13 +16,14 @@ import { mkdirSync, writeFileSync, appendFileSync } from 'node:fs'
 import path from 'node:path'
 
 export class UiDriver {
-  constructor({ marketingBaseUrl, appBaseUrl, outDir, supabaseAdminClient, live = false, pause = false }) {
+  constructor({ marketingBaseUrl, appBaseUrl, outDir, supabaseAdminClient, live = false, pause = false, ignorePageErrors = false }) {
     this.marketingBaseUrl = marketingBaseUrl   // z. B. https://claimondo.de
     this.appBaseUrl = appBaseUrl               // z. B. https://app.staging.claimondo.de
     this.outDir = outDir
     this.supabase = supabaseAdminClient
     this.live = live
     this.pause = pause
+    this.ignorePageErrors = ignorePageErrors
     this.browser = null
     this.contexts = {}   // { kunde, sv, admin } → BrowserContext
     this.pages = {}      // { kunde, sv, admin } → Page
@@ -74,18 +75,33 @@ export class UiDriver {
           transition: outline-color .15s; box-shadow: 0 0 0 4px rgba(239,68,68,.3) !important;
         }
       `
-      const style = document.createElement('style')
-      style.textContent = css
-      document.documentElement.appendChild(style)
-      const mount = () => {
-        if (document.getElementById('smoke-hud')) return
-        const el = document.createElement('div')
-        el.id = 'smoke-hud'
-        el.innerHTML = `<div class="role">${role}</div><div class="step" id="smoke-hud-step">warte…</div><div class="meta" id="smoke-hud-meta"></div>`
-        document.body.appendChild(el)
+      const installStyle = () => {
+        try {
+          const root = document.documentElement || document.head || document.body
+          if (!root) return false
+          if (document.querySelector('#smoke-hud-style')) return true
+          const style = document.createElement('style')
+          style.id = 'smoke-hud-style'
+          style.textContent = css
+          root.appendChild(style)
+          return true
+        } catch { return false }
       }
-      if (document.body) mount()
-      else document.addEventListener('DOMContentLoaded', mount)
+      const mount = () => {
+        try {
+          installStyle()
+          if (!document.body || document.getElementById('smoke-hud')) return
+          const el = document.createElement('div')
+          el.id = 'smoke-hud'
+          el.innerHTML = `<div class="role">${role}</div><div class="step" id="smoke-hud-step">warte…</div><div class="meta" id="smoke-hud-meta"></div>`
+          document.body.appendChild(el)
+        } catch (err) { /* HUD darf nie page-error werfen */ }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', mount, { once: true })
+      } else {
+        mount()
+      }
     }, { role })
   }
 
@@ -140,7 +156,7 @@ export class UiDriver {
     }
     const onPageError = (err) => {
       appendFileSync(errLog, JSON.stringify({ ts: Date.now(), message: err.message, stack: err.stack }) + '\n')
-      hardErr = new Error(`pageerror: ${err.message}`)
+      if (!this.ignorePageErrors) hardErr = new Error(`pageerror: ${err.message}`)
     }
     const onResponse = (res) => {
       if (res.status() >= 400) {
@@ -186,6 +202,13 @@ export class UiDriver {
     const baseUrl = ui.domain === 'app' ? this.appBaseUrl : this.marketingBaseUrl
     switch (ui.action) {
       case 'noop':
+        return
+      case 'wait':
+        await page.waitForTimeout(ui.ms ?? 1000)
+        return
+      case 'scrollBy':
+        await page.evaluate((y) => window.scrollBy({ top: y, behavior: 'smooth' }), ui.y ?? 300)
+        await page.waitForTimeout(800)
         return
       case 'navigate':
         await page.goto(new URL(ui.url, baseUrl).toString())

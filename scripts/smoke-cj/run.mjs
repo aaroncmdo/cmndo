@@ -14,7 +14,18 @@ import { DbWatcher } from './db-watcher.mjs'
 import { AssertionTrack } from './assertion-track.mjs'
 import { Reporter } from './reporter.mjs'
 import { seedReset } from './seed-reset.mjs'
-import { STEPS } from './assertion-map.mjs'
+import { STEPS as FULL_STEPS } from './assertion-map.mjs'
+import { STEPS as DEMO_STEPS } from './demo-map.mjs'
+
+function sliceSteps({ map, upto, only }) {
+  const base = map === 'demo' ? DEMO_STEPS : FULL_STEPS
+  if (only) return base.filter((s) => only.split(',').includes(s.id))
+  if (upto) {
+    const idx = base.findIndex((s) => s.id === upto)
+    return idx === -1 ? base : base.slice(0, idx + 1)
+  }
+  return base
+}
 
 loadEnv({ path: '.env.test' })
 loadEnv({ path: '.env.local' })
@@ -30,7 +41,7 @@ function parseArgs() {
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i]?.replace(/^--/, '')
     if (!k) continue
-    if (k === 'live' || k === 'pause') { args[k] = true; continue }
+    if (k === 'live' || k === 'pause' || k === 'skip-seed') { args[k] = true; continue }
     args[k] = argv[i + 1]
     i += 1
   }
@@ -56,6 +67,7 @@ function resolveDomains(base) {
 
 async function main() {
   const args = parseArgs()
+  const steps = sliceSteps({ map: args.map ?? 'full', upto: args.upto, only: args.only })
   const { marketing: marketingBaseUrl, app: appBaseUrl } = resolveDomains(args.base)
   const dateFolder = new Date().toISOString().slice(0, 10).split('-').reverse().join('.')
   const outDir = path.join('docs', dateFolder, 'smoke-claimondo-de', args.iter)
@@ -64,17 +76,23 @@ async function main() {
   console.log(`  Marketing: ${marketingBaseUrl}`)
   console.log(`  App:       ${appBaseUrl}`)
   console.log(`  Output:    ${outDir}`)
-  console.log(`  Steps:     ${STEPS.length}`)
+  console.log(`  Steps:     ${steps.length}${args.upto ? ` (upto ${args.upto})` : ''}${args.only ? ` (only ${args.only})` : ''}`)
   if (args.live) console.log('  → Browser bleibt sichtbar, SlowMo 400ms, Step-HUD oben rechts')
   if (args.pause) console.log('  → Pause zwischen Steps: Enter drücken')
   console.log()
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
-  )
+  const skipDb = args.map === 'demo' || args['skip-seed']
+  const noopTrack = {
+    start: async () => {},
+    runStep: async () => ({ ok: true }),
+    cancel: async () => {},
+  }
+  const supabase = skipDb
+    ? null
+    : createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
   const reporter = new Reporter({ outDir, iterName: args.iter })
+
   const ui = new UiDriver({
     marketingBaseUrl,
     appBaseUrl,
@@ -82,13 +100,14 @@ async function main() {
     supabaseAdminClient: supabase,
     live: args.live,
     pause: args.pause,
+    ignorePageErrors: args.map === 'demo',  // Marketing-Page hat fremde JS-Errors die uns nicht interessieren
   })
-  const db = new DbWatcher({
+  const db = skipDb ? noopTrack : new DbWatcher({
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
     serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
     outDir,
   })
-  const assert = new AssertionTrack({ supabase })
+  const assert = skipDb ? noopTrack : new AssertionTrack({ supabase })
 
   const tablesOfInterest = [
     'leads', 'faelle', 'flow_links', 'nachrichten', 'gutachter_termine',
@@ -96,13 +115,13 @@ async function main() {
   ]
 
   await ui.start()
-  await db.start(tablesOfInterest)
+  await db.start(skipDb ? undefined : tablesOfInterest)
   await assert.start()
 
   const orchestrator = new Orchestrator({
-    steps: STEPS,
+    steps: steps,
     tracks: { ui, db, assert },
-    seedReset,
+    seedReset: skipDb ? async () => {} : seedReset,
     reporter,
     live: args.live,
   })
