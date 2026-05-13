@@ -9,11 +9,13 @@ import { tokens } from '@/lib/design-tokens'
 import type { InputProps, InputSize, InputType } from './Input.types'
 
 const heightMap: Record<InputSize, number> = {
+  sm: 40,
   md: tokens.touchMin,
   lg: 52,
 }
 
 const fontSizeMap: Record<InputSize, number> = {
+  sm: 14,
   md: 16,
   lg: 16,
 }
@@ -46,6 +48,7 @@ export function Input({
   fullWidth = true,
   ariaLabel,
   autoFocus,
+  maxLength,
 }: InputProps) {
   const [focused, setFocused] = useState(false)
 
@@ -63,6 +66,7 @@ export function Input({
       editable={!disabled}
       autoFocus={autoFocus}
       accessibilityLabel={ariaLabel}
+      maxLength={maxLength}
       keyboardType={keyboardTypeMap[inputType] ?? 'default'}
       secureTextEntry={inputType === 'password'}
       onFocus={() => setFocused(true)}
