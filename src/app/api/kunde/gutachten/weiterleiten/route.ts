@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Email-Generierung via Resend, kein Tailwind.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 // AAR-432: POST /api/kunde/gutachten/weiterleiten
 // Erzeugt einen zeit­begrenzten Magic-Link (48h) zum Abruf des Gutachtens und
 // verschickt ihn per E-Mail an die vom Kunden angegebene Adresse. Rate-Limit

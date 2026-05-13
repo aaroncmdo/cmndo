@@ -1,3 +1,5 @@
+// Token-Audit-Skip: DiagPage rendert Crash-Magenta bewusst auffällig (vor Theme).
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 // AAR-100: Kunden-Portal Onboarding Page
 // CMM-14: alle async-Calls in try/catch — wenn was crashed, rendern
 // wir eine sichtbare Diagnose-Page direkt (Boundary greift nicht zuverlässig
