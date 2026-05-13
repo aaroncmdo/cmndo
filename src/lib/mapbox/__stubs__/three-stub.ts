@@ -1,8 +1,13 @@
 // Stub-Modul für three.js — wird genutzt bis das Paket installiert ist.
 // Feldmodus-3D-Features (hero-pin, sv-car-3d, weather-fx) sind WIP.
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// CMM-14 (14.05.26): Target muss eine Function sein damit `new stub()`
+// nicht „is not a constructor" wirft — Proxy.construct-Trap feuert nur
+// auf callable Targets, plain `{}` ist nicht callable. Mit function-Target
+// können sowohl `new stub()` (construct) als auch `stub(...)` (apply) und
+// `stub.Color` (get) abgefangen werden.
 const stub: any = new Proxy(
-  {},
+  function () {} as unknown as object,
   {
     get: () => stub,
     construct: () => ({}),
