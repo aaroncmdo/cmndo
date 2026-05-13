@@ -320,7 +320,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
           KEIN Fehler. Inline-Style schlägt die Stylesheet-Klasse. */}
       <div
         ref={containerRef}
-        style={{ position: 'absolute', inset: 0, background: 'var(--brand-surface-gradient)' }}
+        style={{ position: 'absolute', inset: 0, background: 'var(--brand-surface, #FFFFFF)' }}
       />
 
       {/* AAR-Diagnose: sichtbare Map-Fehlermeldung (nur wenn was schiefläuft) —
