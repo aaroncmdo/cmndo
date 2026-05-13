@@ -7,6 +7,7 @@ import {
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import {
   articleSchema, datasetSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
@@ -26,8 +27,9 @@ import {
 // TODO Aaron: eigene Daten aus Notion-DB einsetzen wo "Auswertung Claimondo"
 // markiert ist (Anzahl bearbeiteter Fälle, Erfolgsquote, ø Zugewinn).
 
+// AAR-879: Title auf 53 Zeichen gekürzt (vorher 89, SERP-Truncation-Risiko).
 export const metadata: Metadata = {
-  title: 'Schadensreport Kfz 2026 — Versicherungs-Kürzungen, BGH-Urteile, BVSK-Honorare',
+  title: 'Schadensreport Kfz 2026 — BGH-Urteile & BVSK-Honorare',
   description:
     'Datenreport zur Kfz-Schadensregulierung in Deutschland 2026. Durchschnittliche Kürzungen, BGH-Rechtsprechung, BVSK-Honorartabelle, regionale Unterschiede NRW.',
   alternates: { canonical: '/schadensreport-2026' },
@@ -135,6 +137,9 @@ export default function SchadensreportPage() {
             datePublished: datum,
             url: `${SITE_URL}/schadensreport-2026`,
             wordCount: 1800,
+            // AAR-879: BGH-Az. als citation-Array — AI-Engines erkennen den
+            // Artikel als belegte Primärquelle, nicht als Re-Statement.
+            citation: KUERZUNGEN_DATA.map((k) => `BGH ${k.bgh}`),
           }),
           datasetSchema({
             name: 'Kfz-Schadensregulierung Deutschland 2026',
@@ -242,30 +247,36 @@ export default function SchadensreportPage() {
             Die 8 häufigsten Kürzungspositionen + zugehörige BGH-Rechtsprechung
           </h2>
 
-          <div
-            className="mt-8 overflow-hidden rounded-3xl border border-white/60 bg-white/75 backdrop-blur-md"
-            style={{ WebkitBackdropFilter: 'blur(14px)' }}
-          >
-            <div className="hidden grid-cols-12 border-b border-claimondo-navy/10 px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-claimondo-ondo sm:grid">
-              <div className="col-span-3">Position</div>
-              <div className="col-span-4">Typische Kürzung</div>
-              <div className="col-span-2">BGH-Az.</div>
-              <div className="col-span-3">Kernaussage</div>
-            </div>
-            {KUERZUNGEN_DATA.map((k, i) => (
-              <article
-                key={k.position}
-                className={`grid grid-cols-1 gap-1 px-5 py-4 text-sm sm:grid-cols-12 sm:gap-3 ${
-                  i < KUERZUNGEN_DATA.length - 1 ? 'border-b border-claimondo-navy/5' : ''
-                }`}
-              >
-                <div className="col-span-3 font-semibold text-claimondo-navy">{k.position}</div>
-                <div className="col-span-4 text-claimondo-shield">{k.typischeKuerzung}</div>
-                <div className="col-span-2 font-mono text-xs text-claimondo-ondo">{k.bgh}</div>
-                <div className="col-span-3 text-xs leading-snug text-claimondo-shield">{k.bghKern}</div>
-              </article>
-            ))}
-          </div>
+          {/* AAR-879: Semantische <table> mit <caption> + scope-Attributen,
+              damit AI-Engines + Screen-Reader die Spalten/Zeilen-Beziehung
+              parsen. Vorher CSS-Grid in <article>-Blöcken — kein parsbares
+              Tabellen-Schema. */}
+          <DataTableContainer variant="plain" className="mt-8 overflow-hidden rounded-3xl border border-white/60 bg-white/75 backdrop-blur-md">
+            <Table>
+              <caption className="sr-only">
+                Die 8 häufigsten Versicherungs-Kürzungspositionen in Kfz-Schadensregulierung
+                mit zugehörigem BGH-Aktenzeichen und Kernaussage des Urteils.
+              </caption>
+              <Thead>
+                <Tr>
+                  <Th scope="col">Position</Th>
+                  <Th scope="col">Typische Kürzung</Th>
+                  <Th scope="col">BGH-Az.</Th>
+                  <Th scope="col">Kernaussage</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {KUERZUNGEN_DATA.map((k) => (
+                  <Tr key={k.position}>
+                    <Td className="font-semibold !text-claimondo-navy">{k.position}</Td>
+                    <Td>{k.typischeKuerzung}</Td>
+                    <Td className="font-mono text-xs !text-claimondo-ondo">{k.bgh}</Td>
+                    <Td className="text-xs">{k.bghKern}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
 
           <p className="mt-4 text-xs text-claimondo-ondo">
             Quellen: BGH-Urteilsdatenbank (bundesgerichtshof.de), BVSK e.V., ControlExpert-
@@ -365,22 +376,30 @@ export default function SchadensreportPage() {
             Werte unten sind Mittelwerte 2025/2026 für PKW-Schäden bundesweit.
           </p>
 
-          <div
-            className="mt-6 overflow-hidden rounded-3xl border border-white/60 bg-white/75 backdrop-blur-md"
-            style={{ WebkitBackdropFilter: 'blur(14px)' }}
-          >
-            {BVSK_HONORARSPANNEN.map((b, i) => (
-              <div
-                key={b.schadenshoehe}
-                className={`flex items-center justify-between px-5 py-3.5 text-sm ${
-                  i < BVSK_HONORARSPANNEN.length - 1 ? 'border-b border-claimondo-navy/5' : ''
-                }`}
-              >
-                <span className="font-semibold text-claimondo-navy">{b.schadenshoehe}</span>
-                <span className="font-mono text-claimondo-shield">{b.honorar}</span>
-              </div>
-            ))}
-          </div>
+          {/* AAR-879: BVSK-Honorartabelle als semantische <table>. */}
+          <DataTableContainer variant="plain" className="mt-6 overflow-hidden rounded-3xl border border-white/60 bg-white/75 backdrop-blur-md">
+            <Table>
+              <caption className="sr-only">
+                BVSK-Honorartabelle 2025/2026 — Sachverständigen-Honorar nach
+                Schadenshöhe (Wiederbeschaffungswert), bundesweite Mittelwerte für
+                PKW-Schäden.
+              </caption>
+              <Thead>
+                <Tr>
+                  <Th scope="col">Schadenshöhe</Th>
+                  <Th scope="col" className="text-right">Honorar (Ø)</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {BVSK_HONORARSPANNEN.map((b) => (
+                  <Tr key={b.schadenshoehe}>
+                    <Td className="font-semibold !text-claimondo-navy">{b.schadenshoehe}</Td>
+                    <Td className="font-mono text-right">{b.honorar}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
 
           <p
             className="mt-4 rounded-2xl border border-emerald-200/60 bg-emerald-50/80 px-4 py-3 text-sm leading-relaxed text-emerald-900"
