@@ -67,7 +67,7 @@ function BetreuerCard({
       </div>
       <Link
         href={`/kunde/faelle/${fallId}#chat`}
-        className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-[var(--brand-secondary)] text-white hover:bg-[#3a6290] transition-colors"
+        className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-[var(--brand-secondary)] text-white hover:bg-claimondo-shield transition-colors"
         aria-label={`Chat mit ${displayName} öffnen`}
         title="Chat öffnen"
       >
