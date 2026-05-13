@@ -67,10 +67,14 @@ export function SvToolsCard({
   async function handleFinSave() {
     setFinSaving(true)
     try {
-      await saveFinVinGutachter(fallId, finInput)
-      toast.success('FIN gespeichert. Vorschaden-Prüfung gestartet.')
-      setFinInput('')
-      router.refresh()
+      const res = await saveFinVinGutachter(fallId, finInput)
+      if (res?.error) {
+        toast.error(res.error)
+      } else {
+        toast.success('FIN gespeichert. Vorschaden-Prüfung gestartet.')
+        setFinInput('')
+        router.refresh()
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'FIN-Speicherung fehlgeschlagen')
     } finally {
@@ -120,10 +124,14 @@ export function SvToolsCard({
     setGutachtenUploading(true)
     try {
       const formData = new FormData(e.currentTarget)
-      await uploadGutachten(fallId, formData)
-      toast.success('Gutachten hochgeladen')
-      gutachtenFormRef.current?.reset()
-      router.refresh()
+      const res = await uploadGutachten(fallId, formData)
+      if (res?.error) {
+        toast.error(res.error)
+      } else {
+        toast.success('Gutachten hochgeladen')
+        gutachtenFormRef.current?.reset()
+        router.refresh()
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Gutachten-Upload fehlgeschlagen')
     } finally {
@@ -139,10 +147,14 @@ export function SvToolsCard({
       const formData = new FormData()
       formData.append('file', file)
       formData.append('kategorie', dateiKategorie)
-      await uploadDatei(fallId, formData)
-      toast.success(`"${file.name}" hochgeladen`)
-      if (dateiInputRef.current) dateiInputRef.current.value = ''
-      router.refresh()
+      const res = await uploadDatei(fallId, formData)
+      if (res?.error) {
+        toast.error(res.error)
+      } else {
+        toast.success(`"${file.name}" hochgeladen`)
+        if (dateiInputRef.current) dateiInputRef.current.value = ''
+        router.refresh()
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Datei-Upload fehlgeschlagen')
     } finally {

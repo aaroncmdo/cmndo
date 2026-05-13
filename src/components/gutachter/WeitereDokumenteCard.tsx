@@ -115,9 +115,13 @@ export default function WeitereDokumenteCard({
       fd.append('file', file)
       fd.append('kategorie', 'sonstiges')
       try {
-        await uploadDatei(fallId, fd)
-        if (inputRef.current) inputRef.current.value = ''
-        router.refresh()
+        const res = await uploadDatei(fallId, fd)
+        if (res?.error) {
+          setError(res.error)
+        } else {
+          if (inputRef.current) inputRef.current.value = ''
+          router.refresh()
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
       }
