@@ -22,6 +22,10 @@ type WeatherData = {
 function wEmoji(c: number): string {
   return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️'
 }
+// Token-Audit-Skip (dokumentierter Grund): Wetter-Banner visualisiert
+// LITERAL Himmelsfarben (Gewitter = nacht-blau-violett, Regen = stahlgrau,
+// Sonne = blau→sky). Die Farben sind Daten, nicht UI-Akzent — claimondo-*
+// würde semantische Information verlieren. Bewusster Tailwind-Default-Use.
 function wGrad(c: number): string {
   return c >= 95
     ? 'from-slate-900 to-indigo-900'

@@ -170,7 +170,7 @@ export default function SachverstaendigeList({
               const stadt = sv.standortAdresse ? sv.standortAdresse.split(',').slice(-2, -1)[0]?.trim() || sv.standortAdresse : '—'
 
               return (
-                <Tr key={sv.id} className="hover:bg-[#f0f4f8] transition-colors">
+                <Tr key={sv.id} className="hover:bg-claimondo-bg transition-colors">
                   <Td className={cellPad}>
                     <div className="flex items-center gap-2">
                       <KundeAvatar name={sv.name} size={28} tone="ondo-subtle" />

@@ -60,7 +60,7 @@ export default function PasswortAendernPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f2f3f7] px-5 relative overflow-hidden">
+    <div className="flex min-h-screen items-center justify-center bg-claimondo-bg px-5 relative overflow-hidden">
       {/* Ambient-Gradient Spotlights */}
       <div
         aria-hidden
@@ -102,7 +102,7 @@ export default function PasswortAendernPage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-4 py-3.5 rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-[#8a93a6] text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
+                className="w-full px-4 py-3.5 rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-claimondo-ondo/60 text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
               />
             </div>
 
@@ -118,7 +118,7 @@ export default function PasswortAendernPage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full px-4 py-3.5 rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-[#8a93a6] text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
+                className="w-full px-4 py-3.5 rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-claimondo-ondo/60 text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
               />
             </div>
 

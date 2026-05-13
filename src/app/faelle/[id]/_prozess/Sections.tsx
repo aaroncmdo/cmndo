@@ -665,7 +665,7 @@ export function AuszahlungSection() {
       </div>
 
       {isAdminSicht ? (
-        <div className="rounded-md border border-[#EBF1F8] bg-claimondo-bg p-3 space-y-2">
+        <div className="rounded-md border border-claimondo-ondo/[0.06] bg-claimondo-bg p-3 space-y-2">
           <h4 className="text-xs font-semibold text-claimondo-navy">Split (Admin-Sicht)</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="rounded border border-claimondo-border bg-white p-2 space-y-1">
@@ -705,7 +705,7 @@ export function AuszahlungSection() {
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-2 rounded-md border border-[#EBF1F8] bg-white p-2">
+          <div className="flex items-start gap-2 rounded-md border border-claimondo-ondo/[0.06] bg-white p-2">
             <EyeIcon className="w-3.5 h-3.5 text-claimondo-ondo mt-0.5 shrink-0" />
             <p className="text-[11px] text-claimondo-ondo">
               Sichtbarkeit: Kunde sieht nur Kunden-Betrag (<code>faelle_kunde_view</code>),

@@ -231,16 +231,20 @@ export const SCHADENS_URSACHE_LABELS: Record<string, string> = {
   kfz: 'Kfz-Schaden',
 }
 
+// Schadens-Ursache-Color-Map: pro Kategorie eindeutige visuelle Marke.
+// Strict-Token-Compliance: nur Claimondo-Tonleiter + Semantic (red/orange/amber).
+// Differenzierung über Tint-Stufen (claimondo-navy/10, claimondo-ondo/10, etc.)
+// statt freie Tailwind-Defaults.
 export const SCHADENS_URSACHE_COLORS: Record<string, string> = {
-  wasserschaden: 'bg-claimondo-ondo/5 text-claimondo-light-blue',
+  wasserschaden: 'bg-claimondo-light-blue/[0.20] text-claimondo-navy',
   sachbeschaedigung: 'bg-orange-50 text-orange-700',
   brand: 'bg-red-50 text-red-700',
-  einbruch: 'bg-purple-50 text-purple-700',
-  sturmschaden: 'bg-cyan-50 text-cyan-700',
-  vandalismus: 'bg-pink-50 text-pink-700',
+  einbruch: 'bg-claimondo-navy/[0.10] text-claimondo-navy',
+  sturmschaden: 'bg-claimondo-ondo/[0.10] text-claimondo-ondo',
+  vandalismus: 'bg-red-100 text-red-800',
   verschleiss: 'bg-amber-50 text-amber-700',
   sonstiges: 'bg-claimondo-bg text-claimondo-navy',
-  kfz: 'bg-claimondo-ondo/5 text-claimondo-light-blue',
+  kfz: 'bg-claimondo-shield/[0.15] text-claimondo-shield',
 }
 
 export function getUrsacheLabel(code: string | null | undefined): string {
@@ -326,7 +330,7 @@ export const MANDATSTYP_LABELS: Record<string, string> = {
 
 export const MANDATSTYP_COLORS: Record<string, string> = {
   claimondo: 'bg-claimondo-navy text-claimondo-light-blue',
-  'kanzlei-claimondo': 'bg-purple-950 text-purple-300',
+  'kanzlei-claimondo': 'bg-claimondo-shield text-claimondo-light-blue',
 }
 
 // ─── Helper: Label fuer beliebigen Status-Code ─────────────────────────────

@@ -120,7 +120,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label>
-              <select name="kategorie" defaultValue={(m.kategorie as string) ?? ''} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
+              <select name="kategorie" defaultValue={(m.kategorie as string) ?? ''} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield">
                 <option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option>
               </select>
             </div>
@@ -132,7 +132,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             <Field label="Eingestellt am" name="eingestellt_am" type="date" defaultValue={(m.eingestellt_am as string) ?? ''} />
             <div>
               <label className="text-sm text-claimondo-ondo mb-1 block">Aktiv</label>
-              <select name="aktiv" defaultValue={String(m.aktiv ?? true)} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]">
+              <select name="aktiv" defaultValue={String(m.aktiv ?? true)} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield">
                 <option value="true">Ja</option><option value="false">Nein</option>
               </select>
             </div>
@@ -208,7 +208,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
               value={twofaNeuePhone}
               onChange={(e) => setTwofaNeuePhone(e.target.value)}
               placeholder="Neue 2FA-Nummer (optional, z. B. +49 151 1234 5678)"
-              className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+              className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
             />
             <div className="flex gap-2 flex-wrap">
               <button

@@ -52,7 +52,7 @@ export async function FlowProgress({ current }: Props) {
                     ? 'bg-claimondo-navy border-claimondo-navy text-white scale-[1.04]'
                     : isCurrent
                       ? 'bg-claimondo-ondo border-claimondo-ondo text-white scale-[1.06] shadow-[0_0_0_6px_rgba(69,115,162,.16)]'
-                      : 'bg-white border-claimondo-navy/[0.10] text-[#8a93a6]',
+                      : 'bg-white border-claimondo-navy/[0.10] text-claimondo-ondo/60',
                 ].join(' ')}
               >
                 {isDone ? (
@@ -69,8 +69,8 @@ export async function FlowProgress({ current }: Props) {
                   isCurrent
                     ? 'font-semibold text-claimondo-navy'
                     : isDone
-                      ? 'font-medium text-[#4b5468]'
-                      : 'font-medium text-[#8a93a6]',
+                      ? 'font-medium text-claimondo-ondo/80'
+                      : 'font-medium text-claimondo-ondo/60',
                 ].join(' ')}
               >
                 {t(s.key)}

@@ -22,10 +22,10 @@ const SOURCE_COLOR: Record<TriggerSource, string> = {
   webhook: 'bg-claimondo-ondo/[0.10] text-claimondo-navy',
   cron: 'bg-amber-100 text-amber-800',
   ocr: 'bg-claimondo-bg text-claimondo-navy',
-  manual_admin: 'bg-[#EBF1F8] text-claimondo-navy',
+  manual_admin: 'bg-claimondo-ondo/[0.06] text-claimondo-navy',
   manual_kb: 'bg-green-100 text-green-800',
   manual_sv: 'bg-claimondo-navy/[0.10] text-claimondo-navy',
-  manual_kunde: 'bg-pink-100 text-pink-800',
+  manual_kunde: 'bg-claimondo-light-blue/[0.25] text-claimondo-navy',
 }
 
 function fmtValue(v: string | number | boolean | null): string {

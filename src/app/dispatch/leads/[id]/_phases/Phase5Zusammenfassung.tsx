@@ -455,8 +455,8 @@ export default function Phase5Zusammenfassung() {
             title={!waNummer ? 'Bitte WhatsApp-Nummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
             className={`flex items-center justify-center gap-2 py-3 rounded-xl text-white text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
               l.whatsapp_verfuegbar === true
-                ? 'bg-[#25D366] hover:bg-[#1fa855] ring-2 ring-emerald-300 shadow-md'
-                : 'bg-[#25D366] hover:bg-[#1fa855]'
+                ? 'bg-[#25D366] hover:brightness-95 ring-2 ring-emerald-300 shadow-md'
+                : 'bg-[#25D366] hover:brightness-95'
             }`}
           >
             <MessageSquareIcon className="w-4 h-4" />

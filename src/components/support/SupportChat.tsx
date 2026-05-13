@@ -201,7 +201,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
           <button
             type="button"
             onClick={reset}
-            className="w-full text-sm font-medium px-3 py-2 rounded-lg bg-claimondo-navy text-white hover:bg-[#12265a]"
+            className="w-full text-sm font-medium px-3 py-2 rounded-lg bg-claimondo-navy text-white hover:bg-claimondo-navy"
           >
             Neuen Fall melden
           </button>
@@ -224,7 +224,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
                 <button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="text-sm font-medium px-3 py-1.5 rounded-lg bg-claimondo-navy text-white hover:bg-[#12265a] disabled:opacity-40 inline-flex items-center gap-1.5"
+                  className="text-sm font-medium px-3 py-1.5 rounded-lg bg-claimondo-navy text-white hover:bg-claimondo-navy disabled:opacity-40 inline-flex items-center gap-1.5"
                 >
                   <SendIcon className="w-3.5 h-3.5" /> Senden
                 </button>

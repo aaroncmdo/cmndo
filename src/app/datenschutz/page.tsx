@@ -95,7 +95,7 @@ export default function DatenschutzPage() {
                   <Th className="!px-0 !py-2 !font-semibold text-left">Zweck</Th>
                 </Tr>
               </Thead>
-              <Tbody className="!divide-[#1E3A5F]/10">
+              <Tbody className="!divide-claimondo-shield/10">
                 <Tr>
                   <Td className="!px-0 !pr-4 !py-2 !text-inherit">Supabase Inc.</Td>
                   <Td className="!px-0 !pr-4 !py-2 !text-inherit">USA (Standard Contractual Clauses)</Td>

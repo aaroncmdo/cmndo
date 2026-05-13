@@ -329,7 +329,7 @@ export default function FokusChatPanel({
           type="button"
           onClick={() => doSend(input)}
           disabled={sending || !input.trim()}
-          className="p-2.5 rounded-lg bg-[var(--brand-primary)] hover:bg-[#1A2A55] text-white disabled:opacity-50"
+          className="p-2.5 rounded-lg bg-[var(--brand-primary)] hover:bg-claimondo-navy text-white disabled:opacity-50"
           aria-label="Senden"
         >
           {sending ? (

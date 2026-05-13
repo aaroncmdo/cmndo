@@ -321,7 +321,7 @@ export default function GutachterPartnerClient() {
 
           {/* Geschäft */}
           <div className="bg-white rounded-3xl shadow-claimondo-md p-6 space-y-4">
-            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">Geschäft <span className="text-xs font-normal text-[#8a93a6]">(optional)</span></h2>
+            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">Geschäft <span className="text-xs font-normal text-claimondo-ondo/60">(optional)</span></h2>
             <label className="block">
               <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Unternehmen / Büro</span>
               <Input {...inputF('firma')} size="sm" placeholder="Mustermann Sachverständigenbüro GmbH" ariaLabel="Unternehmen / Büro" />
@@ -360,7 +360,7 @@ export default function GutachterPartnerClient() {
               </>
             )}
           </button>
-          <p className="text-xs text-center text-[#8a93a6] leading-relaxed">
+          <p className="text-xs text-center text-claimondo-ondo/60 leading-relaxed">
             Mit dem Absenden bestätigst du, dass wir dich kontaktieren dürfen. Keine Datenweitergabe an Dritte.
           </p>
         </form>
@@ -374,7 +374,7 @@ export default function GutachterPartnerClient() {
                 {ortLabel && coord ? (
                   <p className="text-xs text-claimondo-ondo mt-0.5">{radiusKm} km um {ortLabel}</p>
                 ) : (
-                  <p className="text-xs text-[#8a93a6] mt-0.5">PLZ eingeben um Gebiet zu sehen</p>
+                  <p className="text-xs text-claimondo-ondo/60 mt-0.5">PLZ eingeben um Gebiet zu sehen</p>
                 )}
               </div>
               {coord && (
@@ -386,7 +386,7 @@ export default function GutachterPartnerClient() {
             </div>
             <div ref={mapContainer} style={{ height: 360 }} className="w-full" />
             {!MAPBOX_TOKEN && (
-              <div className="absolute inset-0 flex items-center justify-center bg-claimondo-bg text-sm text-[#8a93a6]">
+              <div className="absolute inset-0 flex items-center justify-center bg-claimondo-bg text-sm text-claimondo-ondo/60">
                 Karte nicht verfügbar (NEXT_PUBLIC_MAPBOX_TOKEN fehlt)
               </div>
             )}

@@ -160,7 +160,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
   return (
     <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border bg-gradient-to-br from-claimondo-navy to-[#1E3A5F] text-white">
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border bg-gradient-to-br from-claimondo-navy to-claimondo-shield text-white">
         <span className="shrink-0 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
           <SparklesIcon width={20} height={20} />
         </span>

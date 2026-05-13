@@ -88,7 +88,7 @@ export default function SmokeKanzleiButton({ fallId }: { fallId: string }) {
             type="button"
             onClick={resetLexDrive}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0e5be9] hover:bg-[#0a3fa0] text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#0e5be9] hover:bg-claimondo-navy text-white text-xs font-semibold px-3 py-1.5 disabled:opacity-50 transition-colors"
           >
             <HandshakeIcon className="w-3.5 h-3.5" />
             {pendingLex ? 'Setzt zurück…' : 'LexDrive + Vollmacht offen'}
