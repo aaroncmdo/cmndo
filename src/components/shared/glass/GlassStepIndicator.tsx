@@ -40,7 +40,7 @@ export function GlassStepIndicator({ current, total, className }: Props) {
               style={{
                 background:
                   state === 'active'
-                    ? 'linear-gradient(90deg, var(--brand-secondary, var(--claimondo-ondo)), var(--brand-shield, var(--claimondo-light-blue)))'
+                    ? 'linear-gradient(90deg, var(--brand-secondary, var(--claimondo-ondo)), var(--brand-sidebar-active, var(--claimondo-shield)))'
                     : state === 'done'
                       ? 'color-mix(in srgb, transparent 45%, var(--brand-secondary, var(--claimondo-ondo)))'
                       : 'color-mix(in srgb, transparent 75%, var(--brand-secondary, var(--claimondo-ondo)))',
