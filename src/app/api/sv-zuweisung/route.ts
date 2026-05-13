@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { emailSvZugewiesen } from '@/lib/email'
 import { haversineKm } from '@/lib/gps/geofence'
 // AAR-87: nachgelagerte Trigger
@@ -240,9 +241,12 @@ export async function POST(request: Request) {
     )
   }
 
-  // 7. offene_faelle beim SV um 1 erhöhen — NICHT bei org-pool routing
+  // 7. offene_faelle beim SV um 1 erhöhen — NICHT bei org-pool routing.
+  // increment_offene_faelle ist SECURITY DEFINER und EXECUTE wurde
+  // für anon/authenticated revoked (#953) — Aufruf via service_role.
   if (!orgPool) {
-    const { error: svUpdateErr } = await supabase.rpc('increment_offene_faelle', {
+    const admin = createAdminClient()
+    const { error: svUpdateErr } = await admin.rpc('increment_offene_faelle', {
       sv_id_param: bestSv.id,
     })
 
