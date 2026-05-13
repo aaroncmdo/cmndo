@@ -15,8 +15,8 @@ export type VorschadenAbrechnungsStatus = 'ja' | 'nein' | 'teilweise' | 'unbekan
 export async function setzeVorschadenAbrechnung(
   fallId: string,
   wert: VorschadenAbrechnungsStatus,
-): Promise<{ ok: boolean; error?: string }> {
-  if (!fallId) return { ok: false, error: 'fall_id fehlt' }
+): Promise<{ success: boolean; error?: string }> {
+  if (!fallId) return { success: false, error: 'fall_id fehlt' }
   const admin = createAdminClient()
 
   const { data: fall } = await admin
@@ -25,18 +25,18 @@ export async function setzeVorschadenAbrechnung(
     .eq('id', fallId)
     .single()
 
-  if (!fall?.claim_id) return { ok: false, error: 'Fall hat keinen verknüpften Claim' }
+  if (!fall?.claim_id) return { success: false, error: 'Fall hat keinen verknüpften Claim' }
 
   const { error } = await admin
     .from('claims')
     .update({ vorschaden_mit_vs_abgerechnet: wert })
     .eq('id', fall.claim_id as string)
 
-  if (error) return { ok: false, error: error.message }
+  if (error) return { success: false, error: error.message }
 
   revalidatePath(`/kunde/faelle/${fallId}`)
   revalidatePath(`/kunde/onboarding`)
-  return { ok: true }
+  return { success: true }
 }
 
 // AAR-323: Angereicherter Pflichtdokument-Eintrag für den Onboarding-Wizard.
