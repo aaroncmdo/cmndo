@@ -6,7 +6,7 @@
 // sind Implementation Detail.
 //
 // Modul-Karte:
-//   stammdaten.ts   — updateFallField, updateFall, updateSchadensAdresse, saveFinVin
+//   stammdaten.ts   — updateFallField, updateSchadensAdresse, saveFinVin
 //   dokumente.ts    — triggerFinCallForFall, markDokumentNachgereicht,
 //                     syncPflichtdokumenteForFall, requestCardentityTypBForFall,
 //                     uploadDatei, uploadPflichtdokument, uploadAnschlussschreiben
@@ -24,7 +24,6 @@
 
 export {
   updateFallField,
-  updateFall,
   updateSchadensAdresse,
   saveFinVin,
 } from './stammdaten'
