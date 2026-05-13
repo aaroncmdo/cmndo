@@ -187,7 +187,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
     }
   }
 
-  const inputCls = 'w-full bg-white border border-claimondo-border rounded-xl px-4 py-2.5 text-claimondo-navy text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo'
+  const inputCls = 'w-full bg-white border border-claimondo-border rounded-xl px-4 py-2.5 text-claimondo-navy text-sm placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo'
 
   return (
     <div className="glass-light border border-claimondo-border rounded-ios-md p-5">

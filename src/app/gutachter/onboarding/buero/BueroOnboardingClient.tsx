@@ -263,7 +263,7 @@ export default function BueroOnboardingClient({
                           defaultValue={std.anschrift}
                           placeholder="Adresse via Auswahl waehlen..."
                           onSelect={place => setStandortPlace(std.id, place)}
-                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                         {std.anschrift && (std.lat === null || std.lng === null) && (
                           <p className="text-[10px] text-amber-600 mt-1">

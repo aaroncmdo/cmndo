@@ -25,7 +25,7 @@ const TYPE_CONFIG: Record<string, { icon: typeof ArrowRightIcon; color: string }
   kommunikation: { icon: MessageSquareIcon, color: 'text-claimondo-ondo' },
   dokument: { icon: FileTextIcon, color: 'text-emerald-500' },
   task: { icon: CheckCircleIcon, color: 'text-amber-500' },
-  termin: { icon: CalendarIcon, color: 'text-purple-500' },
+  termin: { icon: CalendarIcon, color: 'text-claimondo-navy' },
   eskalation: { icon: AlertTriangleIcon, color: 'text-red-500' },
   notiz: { icon: ClockIcon, color: 'text-claimondo-ondo/70' },
 }

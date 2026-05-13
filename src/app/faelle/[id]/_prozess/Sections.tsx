@@ -525,7 +525,7 @@ export function NachbesichtigungSection() {
 
   return (
     <ProzessSectionCard
-      icon={<MapPinIcon className="w-4 h-4 text-violet-600" />}
+      icon={<MapPinIcon className="w-4 h-4 text-claimondo-navy" />}
       title="Nachbesichtigung"
       subtitle="Kunde wählt Termin im Portal; Konfrontations-Termin löst Dispatch-Lite (C12) aus"
     >
@@ -561,7 +561,7 @@ export function NachbesichtigungSection() {
                   type="button"
                   disabled={pending}
                   onClick={() => bestaetige(t)}
-                  className="px-2 py-1 rounded bg-violet-600 text-white text-[10px] font-medium hover:bg-violet-700 disabled:opacity-50"
+                  className="px-2 py-1 rounded bg-claimondo-navy text-white text-[10px] font-medium hover:bg-violet-700 disabled:opacity-50"
                 >
                   Bestätigen
                 </button>

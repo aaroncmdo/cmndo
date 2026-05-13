@@ -389,7 +389,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         onChange={e => setBezahltNotiz(e.target.value)}
                         placeholder="Notiz (optional)..."
                         rows={2}
-                        className="w-full bg-white border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
+                        className="w-full bg-white border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-emerald-300"
                       />
                       <div className="flex gap-2">
                         <button
@@ -426,7 +426,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         onChange={e => setStornoGrund(e.target.value)}
                         placeholder="z.B. Fall storniert, Fehl-Abrechnung..."
                         rows={2}
-                        className="w-full bg-white border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-red-300"
+                        className="w-full bg-white border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-red-300"
                       />
                       <div className="flex gap-2">
                         <button onClick={() => { setConfirmStorno(false); setStornoGrund('') }} disabled={pending}

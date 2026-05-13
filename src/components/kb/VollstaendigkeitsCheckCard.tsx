@@ -165,7 +165,7 @@ export default function VollstaendigkeitsCheckCard({
   return (
     <div className="rounded-2xl bg-white border border-violet-200 px-4 sm:px-6 py-5 space-y-4">
       <div className="flex items-start gap-3">
-        <FileTextIcon className="w-5 h-5 shrink-0 text-violet-600 mt-0.5" />
+        <FileTextIcon className="w-5 h-5 shrink-0 text-claimondo-navy mt-0.5" />
         <div className="flex-1">
           <p className="text-sm font-semibold text-violet-900">
             {istKorrekturEingereicht ? 'Korrigierte Version eingereicht' : 'Vollständigkeits-Check'}
@@ -203,7 +203,7 @@ export default function VollstaendigkeitsCheckCard({
           </p>
           {anlagen.filter((a) => a.istNachbesserung).map((a) => (
             <div key={a.id} className="flex items-center gap-2 text-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-claimondo-navy" />
               <span className="text-violet-900 flex-1 truncate">{a.filename}</span>
               <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-violet-700 hover:text-violet-900">
                 <DownloadIcon className="w-3 h-3" />
@@ -298,7 +298,7 @@ export default function VollstaendigkeitsCheckCard({
             <button
               onClick={handleFreigeben}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
             >
               {pending ? 'Wird freigegeben…' : 'Kanzleipaket freigeben'}
             </button>

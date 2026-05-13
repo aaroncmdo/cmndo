@@ -185,7 +185,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
                   setZentrumLng(place.lng)
                   setZentrumPlaceId(place.place_id)
                 }}
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
               />
             </div>
 

@@ -13,7 +13,7 @@ const MEDAL = ['text-amber-300', 'text-claimondo-ondo', 'text-orange-400']
 
 const TL_COLORS: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
   telefon: { bg: 'bg-claimondo-ondo/20', text: 'text-claimondo-shield', icon: <PhoneIcon className="w-4 h-4" /> },
-  video: { bg: 'bg-purple-500/20', text: 'text-purple-400', icon: <VideoIcon className="w-4 h-4" /> },
+  video: { bg: 'bg-claimondo-navy/20', text: 'text-purple-400', icon: <VideoIcon className="w-4 h-4" /> },
   task: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: <AlertTriangleIcon className="w-4 h-4" /> },
   gutachter: { bg: 'bg-orange-500/20', text: 'text-orange-400', icon: <CalendarIcon className="w-4 h-4" /> },
 }
@@ -72,7 +72,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
                   </div>
                   {item.meetLink && (
                     <a href={item.meetLink} target="_blank" rel="noopener noreferrer"
-                      className="text-[10px] bg-purple-600 hover:bg-purple-500 text-white px-2.5 py-1 rounded-lg font-medium shrink-0"
+                      className="text-[10px] bg-claimondo-navy hover:bg-claimondo-navy text-white px-2.5 py-1 rounded-lg font-medium shrink-0"
                       onClick={e => e.stopPropagation()}>
                       Meet
                     </a>

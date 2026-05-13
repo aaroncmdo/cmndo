@@ -98,7 +98,7 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
         value={notiz}
         onChange={e => setNotiz(e.target.value)}
         placeholder="Notiz"
-        className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-gray-400"
+        className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/60"
       />
 
       <div className="flex gap-2">

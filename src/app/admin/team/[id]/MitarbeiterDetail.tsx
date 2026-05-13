@@ -30,7 +30,11 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); setSaving(true); setMsg(null)
     try {
-      await updateMitarbeiter(new FormData(e.currentTarget))
+      const r = await updateMitarbeiter(new FormData(e.currentTarget))
+      if (!r.success) {
+        setMsg(r.error ?? 'Fehler')
+        return
+      }
       setMsg('Gespeichert'); router.refresh()
     } catch (err) { setMsg(err instanceof Error ? err.message : 'Fehler') }
     finally { setSaving(false) }

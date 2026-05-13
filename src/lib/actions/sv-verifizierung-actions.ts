@@ -38,25 +38,26 @@ async function requireGutachter() {
   return { supabase, userId: user.id, svId: sv.id, svFirmenname: sv.firmenname }
 }
 
-export async function uploadSaVorlage(formData: FormData): Promise<{
-  storage_path: string
-  status: 'ausstehend'
-}> {
+export type UploadSaVorlageResult =
+  | { ok: true; storage_path: string; status: 'ausstehend' }
+  | { ok: false; error: string }
+
+export async function uploadSaVorlage(formData: FormData): Promise<UploadSaVorlageResult> {
   const { userId, svId, svFirmenname } = await requireGutachter()
 
   const file = formData.get('sa_vorlage') as File | null
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
-  if (file.size > MAX_BYTES) throw new Error(`Datei zu groß (max ${MAX_MB} MB)`)
+  if (!file || file.size === 0) return { ok: false, error: 'Keine Datei ausgewählt' }
+  if (file.size > MAX_BYTES) return { ok: false, error: `Datei zu groß (max ${MAX_MB} MB)` }
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
   if (!ALLOWED_EXT.includes(ext as (typeof ALLOWED_EXT)[number])) {
-    throw new Error('Nur PDF erlaubt')
+    return { ok: false, error: 'Nur PDF erlaubt' }
   }
   if (!ALLOWED_MIME.includes(file.type as (typeof ALLOWED_MIME)[number])) {
     // Browser liefert manchmal application/octet-stream — akzeptieren nur
     // wenn die Datei-Endung stimmt. Wir haben ext oben schon geprüft.
     if (file.type && file.type !== 'application/octet-stream') {
-      throw new Error('MIME-Type ungültig — bitte PDF hochladen')
+      return { ok: false, error: 'MIME-Type ungültig — bitte PDF hochladen' }
     }
   }
 
@@ -77,7 +78,7 @@ export async function uploadSaVorlage(formData: FormData): Promise<{
   const { error: uploadErr } = await db.storage
     .from('fall-dokumente')
     .upload(path, file, { contentType: 'application/pdf', upsert: true })
-  if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
+  if (uploadErr) return { ok: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
   // SV-Row updaten: Status ausstehend, Path + Zeitstempel
   const { error: updErr } = await db
@@ -92,7 +93,7 @@ export async function uploadSaVorlage(formData: FormData): Promise<{
       sa_vorlage_admin_notiz: null,
     })
     .eq('id', svId)
-  if (updErr) throw new Error(`DB-Update fehlgeschlagen: ${updErr.message}`)
+  if (updErr) return { ok: false, error: `DB-Update fehlgeschlagen: ${updErr.message}` }
 
   // Admin-Task erzeugen (typ=sv_dokument_review, entity_type=gutachter)
   // Wird im Admin-Verifizierungs-Tab (W6) auto-resolved sobald Freigabe.
@@ -141,7 +142,7 @@ export async function uploadSaVorlage(formData: FormData): Promise<{
   revalidatePath('/gutachter/verifizierung')
   revalidatePath('/admin/aufgaben/alle')
 
-  return { storage_path: path, status: 'ausstehend' }
+  return { ok: true, storage_path: path, status: 'ausstehend' }
 }
 
 // AAR-647: Generische Upload-Action für alle SV-Pflicht-Slots aus dem Katalog

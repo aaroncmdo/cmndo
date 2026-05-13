@@ -538,7 +538,7 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
               <label className="text-sm text-claimondo-navy mb-1.5 block">Nachricht (optional)</label>
               <textarea value={nachricht} onChange={e => setNachricht(e.target.value)}
                 rows={3} placeholder="Besondere Wünsche, zusätzliche Standorte..."
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none" />
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none" />
             </div>
 
             <button onClick={handleSubmit} disabled={sending}

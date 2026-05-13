@@ -258,7 +258,7 @@ export default function ProfilClient({
                           defaultValue={standort.adresse}
                           placeholder="Büro-/Wohnadresse eingeben"
                           onSelect={onPlaceSelect}
-                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                       ) : (
                         <input
@@ -293,7 +293,7 @@ export default function ProfilClient({
                       placeholder="z.B. Ihr persönlicher Sachverständiger mit 15 Jahren Erfahrung"
                       rows={2}
                       maxLength={200}
-                      className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
+                      className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
                     />
                   </div>
 
@@ -829,7 +829,7 @@ const ROW_WRAPPER_CLS =
   'flex flex-col sm:flex-row gap-1 sm:gap-2 py-2 border-b border-claimondo-border/50'
 const ROW_LABEL_CLS = 'text-claimondo-ondo text-sm sm:w-36 sm:shrink-0 sm:pt-2'
 const ROW_INPUT_CLS =
-  'flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]'
+  'flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]'
 
 function EditRow({ label, name, defaultValue, type = 'text', placeholder }: {
   label: string; name: string; defaultValue: string; type?: string; placeholder?: string

@@ -154,7 +154,7 @@ export default function ClaimStepper({
                 className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 border border-violet-200 px-3 py-1 text-xs font-medium text-violet-700"
               >
                 {auftrag.typ === 'nachbesichtigung' ? 'Nachbesichtigung' : 'Stellungnahme'}
-                <span className="text-violet-500">· {SUBPHASE_LABEL[
+                <span className="text-claimondo-navy">· {SUBPHASE_LABEL[
                   auftrag.status === 'termin' ? 'termin'
                   : auftrag.status === 'besichtigung' ? 'besichtigung'
                   : 'gutachten'

@@ -61,8 +61,8 @@ const TYP_COLOR: Record<string, string> = {
   'kanzlei-anschlussschreiben': 'bg-green-50 text-green-600',
   'kanzlei-nachfrage': 'bg-emerald-50 text-emerald-600',
   'versicherung-kontakt': 'bg-claimondo-ondo/10 text-claimondo-ondo',
-  'kunde-rueckfrage': 'bg-violet-50 text-violet-600',
-  'sv-termin': 'bg-cyan-50 text-cyan-600',
+  'kunde-rueckfrage': 'bg-violet-50 text-claimondo-navy',
+  'sv-termin': 'bg-cyan-50 text-claimondo-ondo',
   'zahlung-pruefen': 'bg-amber-50 text-amber-600',
 }
 
@@ -224,7 +224,12 @@ export default function KanbanBoard({
     )
     startTransition(async () => {
       try {
-        await updateTaskStatus(draggableId, newStatus)
+        const r = await updateTaskStatus(draggableId, newStatus)
+        if (!r.success) {
+          setError(r.error ?? 'Statuswechsel fehlgeschlagen')
+          setLocalTasks(visibleTasks)
+          return
+        }
         router.refresh()
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Statuswechsel fehlgeschlagen')
@@ -238,7 +243,11 @@ export default function KanbanBoard({
     if (!confirm('Task wirklich löschen?')) return
     startTransition(async () => {
       try {
-        await deleteTask(taskId)
+        const r = await deleteTask(taskId)
+        if (!r.success) {
+          setError(r.error ?? 'Fehler')
+          return
+        }
         router.refresh()
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Fehler')
@@ -251,7 +260,11 @@ export default function KanbanBoard({
     setError(null)
     const formData = new FormData(e.currentTarget)
     try {
-      await createTask(formData)
+      const r = await createTask(formData)
+      if (!r.success) {
+        setError(r.error ?? 'Fehler')
+        return
+      }
       setDialogOpen(false)
       router.refresh()
     } catch (err) {
@@ -630,7 +643,7 @@ function NewTaskDialog({
                 name="titel"
                 required
                 placeholder="Aufgabe beschreiben..."
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
               />
             </div>
 
@@ -642,7 +655,7 @@ function NewTaskDialog({
                 name="beschreibung"
                 rows={3}
                 placeholder="Details..."
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-none"
               />
             </div>
 
