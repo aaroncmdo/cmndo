@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { Shield, Phone, ChevronLeft } from 'lucide-react'
 import { ClearFlowOnMount } from './ClearFlowOnMount'
 import PageHeader from '@/components/shared/PageHeader'
+import { SheetCard } from '@/components/shared/SheetCard'
 
 // AAR-469 C3: Abort-Screen bei Schuldfrage = eigenverantwortung. Freundliche
 // Sackgasse mit Kasko-Hinweis + 3 Tipps + Hotline-Verweis. FlowShell wird
@@ -32,7 +33,7 @@ export default async function SelbstverschuldenPage() {
         }}
       />
       <ClearFlowOnMount />
-      <div className="w-full max-w-2xl rounded-claimondo-sheet bg-white p-8 sm:p-10 shadow-sheet">
+      <SheetCard size="2xl" padding="md" animateIn={false} className="sm:p-10">
         <Shield className="mb-6 h-14 w-14 text-claimondo-ondo" aria-hidden />
         <PageHeader title={t('heading')} description={t('explanation')} size="lg" />
 
@@ -74,7 +75,7 @@ export default async function SelbstverschuldenPage() {
             {t('back_home')}
           </Link>
         </div>
-      </div>
+      </SheetCard>
     </div>
   )
 }

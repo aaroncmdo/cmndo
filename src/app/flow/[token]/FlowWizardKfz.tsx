@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import LegalDocPopover from '@/components/legal/LegalDocPopover'
+import { SheetCard } from '@/components/shared/SheetCard'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -341,7 +342,7 @@ export default function FlowWizardKfz({
       {/* Content */}
       <div className="flex-1 flex flex-col px-4 sm:px-5 pt-5 pb-32 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div key={currentStep.id} className="bg-white rounded-claimondo-sheet px-6 py-7 shadow-sheet animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]">
+          <SheetCard key={currentStep.id} size="full" padding="none" className="px-6 py-7">
 
             {/* ═══ SCHRITT 1: ZUSAMMENFASSUNG + DATENSCHUTZ ═══ */}
             {currentStep.id === 'zusammenfassung' && (
@@ -674,7 +675,7 @@ export default function FlowWizardKfz({
             )}
 
             {/* KFZ-125: Onboarding/Uploads ins Kunden-Portal verschoben */}
-          </div>
+          </SheetCard>
         </div>
 
         {/* Navigation — Schritt 1 (Zusammenfassung) hat Weiter-Button */}
