@@ -365,7 +365,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           <input type="text" value={text} onChange={e => setText(e.target.value)}
             placeholder="Nachricht schreiben..."
             // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
-            className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-xl px-4 py-3 text-base text-claimondo-navy placeholder-gray-400 focus:outline-none focus:border-claimondo-ondo" />
+            className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-xl px-4 py-3 text-base text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:border-claimondo-ondo" />
           <button type="submit" disabled={sending || !text.trim()}
             className="px-4 py-3 bg-claimondo-ondo hover:bg-claimondo-shield text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
             {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}

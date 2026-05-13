@@ -187,7 +187,7 @@ export default function EigeneKanzleiPaketCard({
           type="button"
           onClick={handleSend}
           disabled={pendingSave || pendingSend || !validEmail || !gutachtenFreigegeben}
-          className="inline-flex items-center gap-1.5 rounded-md bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-md bg-claimondo-navy hover:bg-violet-700 disabled:bg-violet-400 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
           title={
             !gutachtenFreigegeben
               ? 'Gutachten muss zuerst freigegeben sein'

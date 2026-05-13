@@ -40,7 +40,7 @@ function avatarColor(rolle: string | null, isOwn: boolean): string {
       return 'bg-claimondo-ondo text-white'
     case 'sachverstaendiger':
     case 'gutachter':
-      return 'bg-violet-600 text-white'
+      return 'bg-claimondo-navy text-white'
     case 'makler':
       return 'bg-amber-500 text-white'
     case 'system':

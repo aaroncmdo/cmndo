@@ -120,12 +120,12 @@ const THEME_AMBER: Theme = {
 }
 
 const THEME_BLUE: Theme = {
-  bg: 'bg-blue-500/20 backdrop-blur-2xl',
+  bg: 'bg-claimondo-ondo/20 backdrop-blur-2xl',
   border: 'border-blue-400/60',
   iconColor: 'text-white',
-  iconBg: 'bg-blue-600',
+  iconBg: 'bg-claimondo-ondo',
   title: 'text-white',
-  body: 'text-blue-50/90',
+  body: 'text-claimondo-light-blue/90',
 }
 
 // 2026-05-08 (Aaron-Brief): Standard-Abbiegungen (Maneuver) sollen NICHT
@@ -194,7 +194,7 @@ function LaneIndicator({ lanes }: { lanes: Array<{ active: boolean; directions: 
           <div
             key={i}
             className={`w-7 h-9 rounded-md flex items-center justify-center transition-all ${
-              lane.active ? 'bg-white text-blue-700 scale-105 shadow-md' : 'bg-white/20 text-white/40'
+              lane.active ? 'bg-white text-claimondo-navy scale-105 shadow-md' : 'bg-white/20 text-white/40'
             }`}
           >
             <Icon className="w-4 h-4" />
@@ -400,7 +400,7 @@ function RerouteCard({
         <button
           type="button"
           onClick={handleAccept}
-          className="flex-1 h-11 rounded-xl bg-white text-blue-700 text-sm font-semibold hover:bg-white/90 transition-colors"
+          className="flex-1 h-11 rounded-xl bg-white text-claimondo-navy text-sm font-semibold hover:bg-white/90 transition-colors"
         >
           Wechseln
         </button>

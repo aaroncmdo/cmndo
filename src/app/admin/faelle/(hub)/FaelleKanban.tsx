@@ -46,7 +46,7 @@ const COLUMNS = [
   { key: 'sv-zugewiesen', label: 'SV zugew.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo' },
   { key: 'sv-termin', label: 'Termin', color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo' },
   { key: 'besichtigung', label: 'Besichtigung', color: 'text-claimondo-navy', bg: 'bg-claimondo-ondo' },
-  { key: 'gutachten-eingegangen', label: 'Gutachten', color: 'text-violet-600', bg: 'bg-violet-500' },
+  { key: 'gutachten-eingegangen', label: 'Gutachten', color: 'text-claimondo-navy', bg: 'bg-claimondo-navy' },
   { key: 'filmcheck', label: 'QC', color: 'text-amber-600', bg: 'bg-amber-500' },
   { key: 'kanzlei-uebergeben', label: 'Kanzlei', color: 'text-green-600', bg: 'bg-green-500' },
   { key: 'anschlussschreiben', label: 'AS gesendet', color: 'text-green-600', bg: 'bg-green-400' },
@@ -163,7 +163,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
             ))}
           </div>
           <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suche..."
-            className="px-2 py-1 bg-white border border-claimondo-border rounded-lg text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-40 h-7" />
+            className="px-2 py-1 bg-white border border-claimondo-border rounded-lg text-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-40 h-7" />
         </div>
       </div>
 

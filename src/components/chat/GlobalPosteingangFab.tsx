@@ -319,7 +319,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Kunde oder Fall-Nr. suchen…"
                           autoFocus
-                          className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-claimondo-border rounded-ios-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40"
+                          className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-claimondo-border rounded-ios-sm placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40"
                         />
                       </div>
                     </div>

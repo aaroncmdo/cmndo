@@ -226,7 +226,7 @@ export default function GutachtenUploadBanner({
           dragOver ? colorDropDragOver : `bg-white ${colorDropBorder} ${colorDropHover}`
         }`}
       >
-        <UploadCloudIcon className={`w-6 h-6 mx-auto mb-2 ${istReject ? 'text-violet-600' : 'text-amber-600'}`} />
+        <UploadCloudIcon className={`w-6 h-6 mx-auto mb-2 ${istReject ? 'text-claimondo-navy' : 'text-amber-600'}`} />
         <p className={`text-sm font-medium ${colorText}`}>
           Dateien hierher ziehen oder klicken zum Auswählen
         </p>
@@ -273,7 +273,7 @@ export default function GutachtenUploadBanner({
                     f.status === 'error'
                       ? 'bg-red-500'
                       : f.status === 'deleting'
-                        ? 'bg-gray-400 animate-pulse'
+                        ? 'bg-claimondo-light-blue animate-pulse'
                         : 'bg-amber-500 animate-pulse'
                   }`}
                 />
@@ -301,7 +301,7 @@ export default function GutachtenUploadBanner({
           <button
             onClick={handleAbgeben}
             disabled={submitPending || pending}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
           >
             <SendIcon className="w-4 h-4" />
             {submitPending ? 'Wird abgegeben…' : 'Abgeben'}
