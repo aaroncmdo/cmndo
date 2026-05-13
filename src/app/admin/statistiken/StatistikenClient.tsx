@@ -689,7 +689,7 @@ export default function StatistikenClient({
                               const intensity = heatmapData.maxCount > 0 ? count / heatmapData.maxCount : 0
                               return (
                                 <Td key={gegner} className="!py-1.5 !px-2 text-center tabular-nums"
-                                  style={{ backgroundColor: count > 0 ? `rgba(69, 115, 162, ${0.1 + intensity * 0.7})` : 'transparent', color: intensity > 0.5 ? '#fff' : '#374151' }}
+                                  style={{ backgroundColor: count > 0 ? `rgba(69, 115, 162, ${0.1 + intensity * 0.7})` : 'transparent', color: intensity > 0.5 ? '#fff' : 'var(--brand-text-secondary, #374151)' }}
                                   title={count > 0 ? `${count} Fälle, Ø ${fmtEur(cell?.avgBetrag ?? 0)}` : ''}>
                                   {count > 0 ? count : '·'}
                                 </Td>

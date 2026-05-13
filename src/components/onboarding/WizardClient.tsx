@@ -259,7 +259,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
       }}>
         <div style={{
           width: 72, height: 72, borderRadius: '50%',
-          background: 'linear-gradient(135deg, #34C759, #1a7a35)',
+          background: 'linear-gradient(135deg, var(--brand-success, #34C759), var(--brand-success, #1a7a35))',
           display: 'grid', placeItems: 'center',
           margin: '0 auto 24px',
           boxShadow: '0 8px 24px rgba(52,199,89,.30)',
@@ -377,13 +377,13 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         <div
           className="rounded-[var(--glass-radius-pill)] px-[22px] py-[14px] [backdrop-filter:var(--glass-blur)] [-webkit-backdrop-filter:var(--glass-blur)]"
           style={{
-            background: 'color-mix(in srgb, white 78%, #F43F5E 22%)',
-            border: '1px solid color-mix(in srgb, white 60%, #F43F5E 30%)',
+            background: 'color-mix(in srgb, white 78%, var(--brand-danger, #F43F5E) 22%)',
+            border: '1px solid color-mix(in srgb, white 60%, var(--brand-danger, #F43F5E) 30%)',
             boxShadow: 'var(--glass-shadow)',
             fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
             fontSize: 13.5,
             fontWeight: 600,
-            color: '#9f1239',
+            color: 'var(--brand-danger, #9f1239)',
           }}
         >
           {error}

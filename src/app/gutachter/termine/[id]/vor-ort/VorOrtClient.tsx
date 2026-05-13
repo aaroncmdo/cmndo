@@ -315,7 +315,7 @@ export default function VorOrtClient({
               className="h-full rounded-full transition-all duration-300"
               style={{
                 width: `${progressPct}%`,
-                backgroundColor: progressPct === 100 ? '#10b981' : 'var(--brand-secondary)',
+                backgroundColor: progressPct === 100 ? 'var(--brand-success, #10b981)' : 'var(--brand-secondary)',
               }}
             />
           </div>

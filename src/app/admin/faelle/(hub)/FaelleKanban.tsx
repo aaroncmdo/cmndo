@@ -338,9 +338,9 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
                 className="relative inline-flex w-2 h-2 rounded-full"
                 style={{
                   backgroundColor:
-                    fall.mitteilung.prioritaet === 'dringend' ? '#dc2626'
-                    : fall.mitteilung.prioritaet === 'hoch' ? '#d97706'
-                    : '#4573A2',
+                    fall.mitteilung.prioritaet === 'dringend' ? 'var(--brand-danger, #dc2626)'
+                    : fall.mitteilung.prioritaet === 'hoch' ? 'var(--brand-warning, #d97706)'
+                    : 'var(--brand-secondary, #4573A2)',
                 }}
                 title={`Mitteilung: ${fall.mitteilung.titel}`}
                 aria-label="Offene Mitteilung"
@@ -349,9 +349,9 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
                   className="absolute inset-0 rounded-full animate-ping opacity-60"
                   style={{
                     backgroundColor:
-                      fall.mitteilung.prioritaet === 'dringend' ? '#dc2626'
-                      : fall.mitteilung.prioritaet === 'hoch' ? '#d97706'
-                      : '#4573A2',
+                      fall.mitteilung.prioritaet === 'dringend' ? 'var(--brand-danger, #dc2626)'
+                      : fall.mitteilung.prioritaet === 'hoch' ? 'var(--brand-warning, #d97706)'
+                      : 'var(--brand-secondary, #4573A2)',
                   }}
                 />
               </span>
@@ -386,13 +386,13 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
               className="rounded-md p-2"
               style={{
                 backgroundColor:
-                  fall.mitteilung.prioritaet === 'dringend' ? '#fef2f2'
-                  : fall.mitteilung.prioritaet === 'hoch' ? '#fffbeb'
-                  : '#f8f9fb',
+                  fall.mitteilung.prioritaet === 'dringend' ? 'var(--brand-danger-soft, #fef2f2)'
+                  : fall.mitteilung.prioritaet === 'hoch' ? 'var(--brand-warning-soft, #fffbeb)'
+                  : 'var(--brand-background, #f8f9fb)',
                 borderLeft: `3px solid ${
-                  fall.mitteilung.prioritaet === 'dringend' ? '#dc2626'
-                  : fall.mitteilung.prioritaet === 'hoch' ? '#d97706'
-                  : '#4573A2'
+                  fall.mitteilung.prioritaet === 'dringend' ? 'var(--brand-danger, #dc2626)'
+                  : fall.mitteilung.prioritaet === 'hoch' ? 'var(--brand-warning, #d97706)'
+                  : 'var(--brand-secondary, #4573A2)'
                 }`,
               }}
             >

@@ -292,7 +292,7 @@ function PreviewCard({
           type="button"
           onClick={onConfirm}
           style={{
-            background: '#1a7a35',
+            background: 'var(--brand-success, #1a7a35)',
             color: '#fff',
             border: 'none',
             borderRadius: 999,

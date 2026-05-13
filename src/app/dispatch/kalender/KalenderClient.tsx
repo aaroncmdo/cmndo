@@ -283,9 +283,9 @@ export default function KalenderClient({
                     active ? 'opacity-100' : 'opacity-40'
                   }`}
                   style={{
-                    backgroundColor: active ? col.bg : '#F8F9FB',
+                    backgroundColor: active ? col.bg : 'var(--brand-background, #F8F9FB)',
                     borderColor: col.border,
-                    color: active ? col.text : '#0D1B3E',
+                    color: active ? col.text : 'var(--brand-primary, #0D1B3E)',
                   }}
                 >
                   <span

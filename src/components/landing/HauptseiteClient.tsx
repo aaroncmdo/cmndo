@@ -570,7 +570,7 @@ function ProzessSection() {
           <div
             className="absolute left-[10%] right-[10%] top-6 hidden h-px lg:block"
             style={{
-              background: 'repeating-linear-gradient(90deg, #e4e7ef 0, #e4e7ef 8px, transparent 8px, transparent 14px)',
+              background: 'repeating-linear-gradient(90deg, var(--brand-border, #e4e7ef) 0, var(--brand-border, #e4e7ef) 8px, transparent 8px, transparent 14px)',
             }}
           />
           <div className="grid gap-8 lg:grid-cols-5">
