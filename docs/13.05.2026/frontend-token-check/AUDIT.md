@@ -149,10 +149,19 @@ Top-Files:
 
 Pattern: `<Td className="text-claimondo-ondo!">` — Caller-Override mit Token. Kein „Override gegen Token", sondern „Override gegen DataTable-Default mit Token". **Legitim**, könnte aber durch saubere DataTable-Defaults reduziert werden (eigener Refactor).
 
-### Empfehlung
+### Empfehlung — STATUS (13.05.2026 Abend)
 
-**Phase 1 (PR jetzt):** `aar-745f-hex-tokens-sweep.mjs` — die 9 Tabellen-Hex-Werte oben 1:1 ersetzen. **Kein visuelles Diff, reine Token-Hygiene.**
+**Phase 1 ✅ DONE** — PR #992 (Token-Sweep 745e+f, 327 Verstöße, violet/rose/purple/indigo + Hex-1:1).
 
-**Phase 2 (separater PR):** Inline-Style-Audit in Components (NICHT Email-Templates). ~85 Stellen, jeder Case-by-Case.
+**Phase 2 ✅ DONE** — PR #1005 (Inline-Style → `var(--brand-*, #fallback)`, 65 Stellen) + PR #1012 (undefinierte Brand-Vars + Status-Soft-Varianten) + PR #1016 (Token-Audit-Skip-Header an 15 Skip-Files).
 
-**Phase 3 (eigener Refactor):** Important-Suffix-Cleanup via DataTable-Default-Tuning.
+**Phase 3 ✅ DONE** — PR #1025 (Drift-Bremse `check:token-audit` + 10 verbleibende Hex-Reste) + PR #1030 (CI-Wire + AGENTS.md §branding-rules-Doku-Erweiterung).
+
+**Endzustand:**
+- `npm run check:token-audit` → ✓ 1613 Files, 0 Verstöße
+- CI-erzwungen ab Merge PR #1030 (vor Build)
+- 35 dokumentierte Brand-Hex-Ausnahmen in `src/lib/external-brand-colors.ts`
+- 17 `// Token-Audit-Skip:`-Header für legitime Ausnahmen (Email/PDF/Error-Boundary/Mapbox/SVG-Replikat)
+- Theme-System um `success-soft`/`warning-soft`/`danger-soft` Vars erweitert
+
+**Important-Suffix-Refactor (81 Stellen)** — NICHT angefasst, da legit Tailwind-v4-Override-Pattern mit Token-Werten. AGENTS.md §komponenten-set dokumentiert es als bewussten DataTable-Caller-Override. Eigener Refactor wäre ergonomisch (DataTable-Default-Tuning) aber nicht Token-Compliance.
