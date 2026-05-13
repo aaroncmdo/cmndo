@@ -63,7 +63,7 @@ export default function LexDriveCard({ qrSvg, qrUrl }: Props) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 8 }}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-              className="w-full max-w-sm rounded-2xl border border-claimondo-border bg-white shadow-2xl overflow-hidden"
+              className="w-full max-w-sm rounded-2xl border border-claimondo-border bg-white shadow-claimondo-lg overflow-hidden"
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
                 <p className="text-sm font-semibold text-claimondo-navy">LexDrive — Kontakt</p>

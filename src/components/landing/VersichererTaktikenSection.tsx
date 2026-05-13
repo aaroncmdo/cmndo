@@ -104,7 +104,7 @@ export function VersichererTaktikenSection() {
           </p>
         </div>
 
-        <div className="mt-12 overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md">
+        <div className="mt-12 overflow-x-auto rounded-ios-md border border-white/10 bg-white/[0.04] backdrop-blur-md">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="bg-white/[0.03]">
               <tr className="text-xs uppercase tracking-wider text-claimondo-light-blue">

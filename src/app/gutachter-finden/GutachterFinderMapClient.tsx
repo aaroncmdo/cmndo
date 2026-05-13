@@ -329,7 +329,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
           damit man ohne DevTools weiß was los ist. Bei 'error' wird die
           Original-Mapbox-Message verbatim angezeigt. */}
       {mapStatus !== 'ok' && (
-        <div className="absolute bottom-4 right-4 z-[6] max-w-[460px] rounded-xl bg-amber-50/95 border border-amber-200 px-4 py-3 text-[12.5px] text-amber-900 shadow-lg backdrop-blur-md">
+        <div className="absolute bottom-4 right-4 z-[6] max-w-[460px] rounded-ios-md bg-amber-50/95 border border-amber-200 px-4 py-3 text-[12.5px] text-amber-900 shadow-lg backdrop-blur-md">
           <strong className="block mb-0.5">Karte konnte nicht geladen werden</strong>
           {mapStatus === 'no-token' && (
             'NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt.'

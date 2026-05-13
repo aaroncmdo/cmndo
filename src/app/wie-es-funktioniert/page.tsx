@@ -224,9 +224,9 @@ export default function WieEsFunktioniertPage() {
             {SCHRITTE.map((s) => (
               <li
                 key={s.nr}
-                className="relative grid gap-4 rounded-3xl border border-claimondo-border bg-white p-7 shadow-claimondo-sm sm:grid-cols-[auto_1fr] sm:gap-7"
+                className="relative grid gap-4 rounded-ios-lg border border-claimondo-border bg-white p-7 shadow-claimondo-sm sm:grid-cols-[auto_1fr] sm:gap-7"
               >
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-claimondo-navy text-2xl font-extrabold text-white">
+                <div className="flex h-16 w-16 items-center justify-center rounded-ios-md bg-claimondo-navy text-2xl font-extrabold text-white">
                   {s.nr}
                 </div>
                 <div>
@@ -246,7 +246,7 @@ export default function WieEsFunktioniertPage() {
       {/* 5 — Berater-Quote */}
       <section className="bg-claimondo-navy py-16 text-white sm:py-20" aria-labelledby="wef-berater">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-[0.9fr_1.1fr]">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/10 shadow-claimondo-lg">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-ios-lg border border-white/10 shadow-claimondo-lg">
             <Image
               src="/marketing-landing-koeln/berater.png"
               alt="Persönlicher Claimondo-Berater am Telefon"
@@ -313,7 +313,7 @@ export default function WieEsFunktioniertPage() {
           </div>
           <div className="mt-10 space-y-3">
             {FAQS.map((f) => (
-              <details key={f.frage} className="group rounded-2xl border border-claimondo-border bg-claimondo-bg p-5">
+              <details key={f.frage} className="group rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between text-base font-bold text-claimondo-navy">
                   <span>{f.frage}</span>
                   <ChevronRight className="h-5 w-5 flex-shrink-0 text-claimondo-ondo transition-transform group-open:rotate-90" aria-hidden />

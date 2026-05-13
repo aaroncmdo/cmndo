@@ -117,7 +117,7 @@ export default function KundeAnfahrtCard({
           type="button"
           onClick={handleStart}
           disabled={isPending}
-          className="w-full inline-flex items-center justify-center gap-1.5 py-3 rounded-xl bg-claimondo-navy hover:bg-claimondo-navy text-white text-sm font-semibold disabled:opacity-50"
+          className="w-full inline-flex items-center justify-center gap-1.5 py-3 rounded-xl bg-claimondo-navy hover:bg-[var(--brand-primary-hover)] text-white text-sm font-semibold disabled:opacity-50"
         >
           {isPending ? (
             <Loader2Icon className="w-4 h-4 animate-spin" />

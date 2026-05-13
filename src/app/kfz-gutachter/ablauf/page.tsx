@@ -162,10 +162,10 @@ export default function AblaufPage() {
             return (
               <div
                 key={s.nr}
-                className={`flex flex-col gap-6 rounded-3xl border border-claimondo-border bg-claimondo-bg p-6 shadow-sm md:flex-row md:items-start ${i % 2 === 1 ? 'md:flex-row-reverse' : ''}`}
+                className={`flex flex-col gap-6 rounded-ios-lg border border-claimondo-border bg-claimondo-bg p-6 shadow-sm md:flex-row md:items-start ${i % 2 === 1 ? 'md:flex-row-reverse' : ''}`}
               >
                 <div className="flex-shrink-0">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-claimondo-ondo/10">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                     <Icon className="h-8 w-8 text-claimondo-ondo" />
                   </div>
                 </div>
@@ -191,7 +191,7 @@ export default function AblaufPage() {
           <h2 className="text-3xl font-extrabold text-claimondo-navy">Häufige Fragen zum Ablauf</h2>
           <div className="mt-8 space-y-3">
             {FAQS.map((f) => (
-              <details key={f.frage} className="group rounded-2xl border border-claimondo-border bg-white p-5">
+              <details key={f.frage} className="group rounded-ios-md border border-claimondo-border bg-white p-5">
                 <summary className="cursor-pointer list-none text-base font-bold text-claimondo-navy">
                   <span className="flex items-center justify-between">
                     {f.frage}
@@ -228,11 +228,11 @@ export default function AblaufPage() {
           <h2 className="text-3xl font-extrabold sm:text-4xl">Schaden gerade passiert?</h2>
           <p className="mt-4 text-white/70">In 5 Minuten gemeldet — Antwort unter 15 Minuten.</p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link href="/schaden-melden" className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-base font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90">
+            <Link href="/schaden-melden" className="inline-flex items-center gap-2 rounded-ios-md bg-white px-8 py-4 text-base font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90">
               Jetzt Schaden melden
               <ChevronRight className="h-5 w-5" />
             </Link>
-            <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
+            <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-ios-md border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
               <Phone className="h-5 w-5" />
               {PHONE_DISPLAY}
             </a>

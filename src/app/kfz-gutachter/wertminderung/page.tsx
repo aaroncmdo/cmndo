@@ -125,7 +125,7 @@ export default function WertminderungPage() {
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
             Faustregel-Tabelle nach Fahrzeugalter
           </h2>
-          <DataTableContainer variant="plain" className="mt-6 overflow-hidden rounded-2xl border border-claimondo-border bg-white shadow-sm">
+          <DataTableContainer variant="plain" className="mt-6 overflow-hidden rounded-ios-md border border-claimondo-border bg-white shadow-sm">
             <Table>
               <Thead>
                 <Tr>
@@ -201,7 +201,7 @@ export default function WertminderungPage() {
             ].map((s) => {
               const Icon = s.icon
               return (
-                <div key={s.titel} className="rounded-2xl border border-claimondo-border bg-claimondo-bg p-5">
+                <div key={s.titel} className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
                   <Icon className="h-6 w-6 text-claimondo-ondo" />
                   <h3 className="mt-3 text-base font-bold text-claimondo-navy">{s.titel}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{s.text}</p>
@@ -218,7 +218,7 @@ export default function WertminderungPage() {
           <h2 className="text-3xl font-extrabold text-claimondo-navy">Häufige Fragen zur Wertminderung</h2>
           <div className="mt-8 space-y-3">
             {FAQS.map((f) => (
-              <details key={f.frage} className="group rounded-2xl border border-claimondo-border bg-white p-5">
+              <details key={f.frage} className="group rounded-ios-md border border-claimondo-border bg-white p-5">
                 <summary className="cursor-pointer list-none text-base font-bold text-claimondo-navy">
                   <span className="flex items-center justify-between">
                     {f.frage}
@@ -255,11 +255,11 @@ export default function WertminderungPage() {
           <h2 className="text-3xl font-extrabold sm:text-4xl">Wertminderung gesichert holen</h2>
           <p className="mt-4 text-white/70">Ohne Gutachten ist die Wertminderung verloren. Wir berechnen + holen sie für Sie zurück.</p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link href="/schaden-melden" className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-base font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90">
+            <Link href="/schaden-melden" className="inline-flex items-center gap-2 rounded-ios-md bg-white px-8 py-4 text-base font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90">
               Schaden melden
               <ChevronRight className="h-5 w-5" />
             </Link>
-            <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
+            <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-ios-md border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
               <Phone className="h-5 w-5" />
               {PHONE_DISPLAY}
             </a>

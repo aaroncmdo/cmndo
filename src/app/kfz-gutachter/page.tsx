@@ -135,7 +135,7 @@ export default function KfzGutachterPillarPage() {
               </Link>
             </div>
           </div>
-          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-2xl">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-ios-lg shadow-2xl">
             <Image
               src="/brand/hero-unfall-frau.png"
               alt="Geschädigte nach Verkehrsunfall ruft Claimondo an, beschädigtes Fahrzeug im Hintergrund"
@@ -224,7 +224,7 @@ export default function KfzGutachterPillarPage() {
               <Link
                 key={t.href}
                 href={t.href}
-                className="group rounded-2xl border border-white/60 bg-white/70 p-6 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-[0_8px_24px_rgba(13,27,62,0.10)]"
+                className="group rounded-ios-md border border-white/60 bg-white/70 p-6 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-[0_8px_24px_rgba(13,27,62,0.10)]"
               >
                 <h3 className="text-xl font-extrabold text-claimondo-navy">{t.titel}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{t.lead}</p>
@@ -258,7 +258,7 @@ export default function KfzGutachterPillarPage() {
               <Link
                 key={s.slug}
                 href={`/kfz-gutachter/${s.slug}`}
-                className="group flex items-center justify-between rounded-2xl border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-md"
+                className="group flex items-center justify-between rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-md"
               >
                 <div>
                   <div className="flex items-center gap-2">
@@ -272,7 +272,7 @@ export default function KfzGutachterPillarPage() {
                 <ChevronRight className="h-5 w-5 text-claimondo-ondo transition-transform group-hover:translate-x-1" />
               </Link>
             ))}
-            <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-claimondo-border bg-claimondo-bg/50 p-5 text-center text-xs text-claimondo-ondo">
+            <div className="flex items-center justify-center rounded-ios-md border-2 border-dashed border-claimondo-border bg-claimondo-bg/50 p-5 text-center text-xs text-claimondo-ondo">
               Weitere Städte folgen — bundesweit verfügbar
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function KfzGutachterPillarPage() {
             {TOP_FAQ.map((f) => (
               <details
                 key={f.frage}
-                className="group rounded-2xl border border-white/60 bg-white/70 p-5 backdrop-blur-md shadow-glass-card transition-all hover:bg-white/85"
+                className="group rounded-ios-md border border-white/60 bg-white/70 p-5 backdrop-blur-md shadow-glass-card transition-all hover:bg-white/85"
               >
                 <summary className="cursor-pointer list-none text-base font-bold text-claimondo-navy">
                   <span className="flex items-center justify-between">

@@ -128,7 +128,7 @@ export default function ReTerminPickerClient({ token, vorname, kennzeichen, scha
         </section>
 
         {/* Sticky-Bottom-Bar mit Submit */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-claimondo-border p-4 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-claimondo-border p-4 shadow-claimondo-md">
           <div className="max-w-2xl mx-auto">
             {error && (
               <p className="text-sm text-red-600 mb-2">{error}</p>

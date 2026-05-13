@@ -174,7 +174,7 @@ export default function FaqClient() {
       <section className="py-12 sm:py-16" aria-label="Antworten">
         <div className="mx-auto max-w-3xl space-y-6 px-4 sm:px-6">
           {gefilterte.length === 0 && (
-            <div className="rounded-3xl border border-claimondo-border bg-white p-8 text-center text-sm text-claimondo-ondo">
+            <div className="rounded-ios-lg border border-claimondo-border bg-white p-8 text-center text-sm text-claimondo-ondo">
               Keine Antworten zu „{suche}". Versuchen Sie ein anderes Stichwort oder rufen
               Sie uns direkt an: <a href={`tel:${PHONE_E164}`} className="underline">{PHONE_DISPLAY}</a>.
             </div>
@@ -184,7 +184,7 @@ export default function FaqClient() {
             <div
               key={g.gruppe}
               id={gruppenSlug(g.gruppe)}
-              className="scroll-mt-20 rounded-3xl border border-claimondo-border bg-white p-6 shadow-claimondo-sm sm:p-7"
+              className="scroll-mt-20 rounded-ios-lg border border-claimondo-border bg-white p-6 shadow-claimondo-sm sm:p-7"
             >
               <h2 className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
                 {g.gruppe}

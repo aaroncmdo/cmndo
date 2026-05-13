@@ -234,7 +234,7 @@ export default async function UeberUnsPage() {
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <article
             id="definition"
-            className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
+            className="rounded-ios-lg border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
             style={{ WebkitBackdropFilter: 'blur(14px)' }}
             itemScope
             itemType="https://schema.org/Organization"
@@ -326,10 +326,10 @@ export default async function UeberUnsPage() {
               return (
                 <div
                   key={w.titel}
-                  className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg"
+                  className="rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-claimondo-ondo/12">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-ios-md bg-claimondo-ondo/12">
                     <Icon className="h-5 w-5 text-claimondo-ondo" />
                   </div>
                   <h3
@@ -351,7 +351,7 @@ export default async function UeberUnsPage() {
       {/* Team-Foto */}
       <section className="py-12">
         <div className="mx-auto max-w-4xl px-5 sm:px-6">
-          <div className="relative overflow-hidden rounded-3xl border border-white/60 shadow-[0_24px_64px_rgba(13,27,62,0.18)]">
+          <div className="relative overflow-hidden rounded-ios-lg border border-white/60 shadow-[0_24px_64px_rgba(13,27,62,0.18)]">
             <Image
               src="/brand/team-founders.png"
               alt="Aaron Sprafke (COO, links) und Nicolas Kitta (CEO, rechts) — die Gründer von Claimondo im Kölner Office"
@@ -373,7 +373,7 @@ export default async function UeberUnsPage() {
           {FOUNDERS.map((f) => (
             <article
               key={f.name}
-              className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-8"
+              className="rounded-ios-lg border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-8"
               style={{ WebkitBackdropFilter: 'blur(14px)' }}
               itemScope
               itemType="https://schema.org/Person"
@@ -414,7 +414,7 @@ export default async function UeberUnsPage() {
               </p>
 
               <blockquote
-                className="mt-6 flex gap-3 rounded-2xl px-4 py-3.5"
+                className="mt-6 flex gap-3 rounded-ios-md px-4 py-3.5"
                 style={{ background: 'rgba(69,115,162,0.06)', borderLeft: '3px solid var(--color-claimondo-light-blue)' }}
               >
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
@@ -445,7 +445,7 @@ export default async function UeberUnsPage() {
             {TRUST_BEWEISE.map((b) => (
               <div
                 key={b.titel}
-                className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
+                className="rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <h3
@@ -480,7 +480,7 @@ export default async function UeberUnsPage() {
             {ZAHLEN.map((z) => (
               <div
                 key={z.label}
-                className="rounded-2xl border border-white/60 bg-white/70 p-5 text-center shadow-[0_2px_12px_rgba(13,27,62,0.04)] backdrop-blur-md"
+                className="rounded-ios-md border border-white/60 bg-white/70 p-5 text-center shadow-[0_2px_12px_rgba(13,27,62,0.04)] backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(12px)' }}
               >
                 <div

@@ -160,7 +160,7 @@ export default function LoginClient({
             />
             <label htmlFor="remember" className="text-xs text-claimondo-ondo leading-tight">
               Angemeldet bleiben
-              <span className="block text-[10px] text-claimondo-ondo/70 mt-0.5">Nur auf privaten Geraeten verwenden</span>
+              <span className="block text-[10px] text-claimondo-ondo/70 mt-0.5">Nur auf privaten Geräten verwenden</span>
             </label>
           </div>
 

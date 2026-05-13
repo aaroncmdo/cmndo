@@ -153,7 +153,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
 
   if (uiMode === 'uploading') {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-12 text-center">
+      <div className="flex flex-col items-center gap-4 rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md p-12 text-center">
         <Loader2 className="h-8 w-8 animate-spin text-claimondo-ondo" />
         <div>
           <p className="font-semibold text-claimondo-navy">Wir lesen Ihren Fahrzeugschein aus …</p>
@@ -166,7 +166,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
   if (uiMode === 'idle') {
     return (
       <div className="space-y-6">
-        <div className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-6">
+        <div className="rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md p-6">
           <h2 className="mb-2 text-lg font-semibold text-claimondo-navy">
             Fahrzeugschein scannen
           </h2>
@@ -235,7 +235,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
   return (
     <form onSubmit={onSubmit} className="space-y-6" noValidate>
       {uiMode === 'preview' ? (
-        <div className="flex gap-3 rounded-lg border border-green-300 bg-green-50 p-4 text-sm text-green-900">
+        <div className="flex gap-3 rounded-ios-sm border border-green-300 bg-green-50 p-4 text-sm text-green-900">
           <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0" />
           <p>
             Fahrzeugschein ausgelesen{' '}
@@ -244,7 +244,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
           </p>
         </div>
       ) : (
-        <div className="flex gap-3 rounded-lg border border-claimondo-border bg-claimondo-bg p-4 text-sm text-claimondo-navy">
+        <div className="flex gap-3 rounded-ios-sm border border-claimondo-border bg-claimondo-bg p-4 text-sm text-claimondo-navy">
           <FileText className="mt-0.5 h-4 w-4 flex-shrink-0" />
           <p>
             Daten aus dem Fahrzeugschein (ZB1). Die Angaben finden Sie auf der
@@ -323,7 +323,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
 
       {/* Halter-Daten — nur wenn Fahrer ≠ Fahrzeughalter */}
       {!istFahrzeughalter && (
-        <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-4 space-y-4">
+        <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-4 space-y-4">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-claimondo-ondo" />
             <p className="text-sm font-semibold text-claimondo-navy">
@@ -347,7 +347,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
                 type="text"
                 value={ocrHalter.vorname}
                 onChange={(e) => setOcrHalter((p) => ({ ...p, vorname: e.target.value }))}
-                className="mt-1 w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+                className="mt-1 w-full rounded-ios-sm border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
               />
             </div>
             <div>
@@ -357,7 +357,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
                 type="text"
                 value={ocrHalter.nachname}
                 onChange={(e) => setOcrHalter((p) => ({ ...p, nachname: e.target.value }))}
-                className="mt-1 w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+                className="mt-1 w-full rounded-ios-sm border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
               />
             </div>
           </div>
@@ -368,7 +368,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
               type="text"
               value={ocrHalter.strasse}
               onChange={(e) => setOcrHalter((p) => ({ ...p, strasse: e.target.value }))}
-              className="mt-1 w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+              className="mt-1 w-full rounded-ios-sm border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -380,7 +380,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
                 maxLength={5}
                 value={ocrHalter.plz}
                 onChange={(e) => setOcrHalter((p) => ({ ...p, plz: e.target.value }))}
-                className="mt-1 w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+                className="mt-1 w-full rounded-ios-sm border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
               />
             </div>
             <div>
@@ -390,7 +390,7 @@ export function Schritt3Client({ leadId, istFahrzeughalter }: { leadId: string; 
                 type="text"
                 value={ocrHalter.stadt}
                 onChange={(e) => setOcrHalter((p) => ({ ...p, stadt: e.target.value }))}
-                className="mt-1 w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+                className="mt-1 w-full rounded-ios-sm border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
               />
             </div>
           </div>
