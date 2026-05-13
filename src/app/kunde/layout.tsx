@@ -32,6 +32,19 @@ import { generateCssVars } from '@/lib/branding/css-vars'
 export const dynamic = 'force-dynamic'
 
 export default async function KundeLayout({ children }: { children: React.ReactNode }) {
+  // 2026-05-14: PUBLIC-Pfad-Bypass — /kunde/re-termin/[token] ist per Spec
+  // (CMM-40) eine öffentliche Seite die per Magic-Link-Reminder aus
+  // /api/cron/no-show-timeout aufgerufen wird (vor Login). Der Layout-Auth-
+  // Gate führte dort zu /login-Redirect → Magic-Link-Empfänger landeten auf
+  // Login statt Slot-Picker. Routing unter /kunde/ bleibt aus historischen
+  // Gründen; nur die Auth wird hier übersprungen, kein Sidebar-Wrapper.
+  const hEarly = await headers()
+  const pathnameEarly = hEarly.get('x-pathname') ?? hEarly.get('x-next-url') ?? hEarly.get('x-invoke-path') ?? ''
+  const isPublicReTermin = pathnameEarly.includes('/kunde/re-termin/')
+  if (isPublicReTermin) {
+    return <>{children}</>
+  }
+
   // K5 / AAR-frontend-konsolidierung-p1: Auth + Rollen-Guard zentralisiert.
   const { supabase, user, profile } = await requirePortalAccess(['kunde'])
 
