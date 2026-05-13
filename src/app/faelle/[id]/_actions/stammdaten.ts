@@ -190,47 +190,14 @@ export async function updateFallField(
   return { success: true }
 }
 
-// AAR-684 Phase 2: drei weitere Stammdaten-Actions aus dem Monolith.
-// - updateFall: Bulk-Update mit blocked-fields-Filter (Status gesperrt)
+// AAR-684 Phase 2: zwei weitere Stammdaten-Actions aus dem Monolith.
 // - updateSchadensAdresse: dedizierte Adresse-Update-Action mit Timeline
 // - saveFinVin: FIN-Validierung + Cardentity-Enrichment-Trigger
-
-const BLOCKED_FIELDS = new Set(['id', 'status', 'created_at'])
-
-export async function updateFall(
-  fallId: string,
-  updates: Record<string, unknown>,
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
-
-  const safeUpdates: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(updates)) {
-    if (BLOCKED_FIELDS.has(k)) continue
-    safeUpdates[k] = v
-  }
-
-  if (Object.keys(safeUpdates).length === 0) return { success: true }
-  safeUpdates.updated_at = new Date().toISOString()
-
-  const { error } = await supabase.from('faelle').update(safeUpdates).eq('id', fallId)
-  if (error) return { success: false, error: error.message }
-
-  const changedFields = Object.keys(safeUpdates).filter(k => k !== 'updated_at')
-  if (changedFields.length > 0) {
-    await supabase.from('timeline').insert({
-      fall_id: fallId,
-      typ: 'system',
-      titel: 'Fall aktualisiert',
-      beschreibung: `Felder geaendert: ${changedFields.join(', ')}`,
-      erstellt_von: user.id,
-    })
-  }
-
-  revalidatePath(`/faelle/${fallId}`)
-  return { success: true }
-}
+//
+// 13.05.2026: updateFall (Bulk-Update mit BLOCKED_FIELDS-Filter) entfernt —
+// hatte 0 Caller in src/, Full-Patch-Pattern (siehe CMM-Phase-1.5 Sync-Bug-Fix
+// 20260513082948). Wer Bulk-Updates braucht: einzeln per updateFallField
+// oder eigene Action mit explizitem Field-Whitelist schreiben.
 
 export async function updateSchadensAdresse(
   fallId: string,
