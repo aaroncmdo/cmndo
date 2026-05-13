@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getStorageUrlBulk } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import FallakteShell from './FallakteShell'
 // CMM-33: Zentrale Pflichtdokumente-Section für Admin/KB im DokumenteTab.
@@ -251,12 +252,14 @@ export default async function FallaktePage({
   })
 
   // AAR-553: fall_dokumente → Legacy-Shape für DokumenteTab + systemDokumente
-  const dokumenteLegacy = (dokumente ?? []).map(d => ({
+  const dokUrlsLegacy = await getStorageUrlBulk(
+    supabase,
+    (dokumente ?? []).map(d => ({ bucket: 'fall-dokumente', path: (d.storage_path as string | null) ?? undefined })),
+  )
+  const dokumenteLegacy = (dokumente ?? []).map((d, i) => ({
     id: d.id as string,
     typ: (d.dokument_typ as string | null) ?? null,
-    datei_url: d.storage_path
-      ? supabase.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl
-      : null,
+    datei_url: dokUrlsLegacy[i],
     datei_name: (d.original_filename as string | null) ?? null,
     datei_groesse: (d.groesse_bytes as number | null) ?? null,
     created_at: (d.hochgeladen_am as string | null) ?? null,
@@ -384,16 +387,18 @@ export default async function FallaktePage({
     hochgeladen_am: string
   }
   const fallDokumenteRows = (fallDokumenteRaw ?? []) as unknown as FallDokumentRow[]
-  const publicUrlFor = (path: string): string | null => {
-    const { data } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
-    return data?.publicUrl ?? null
-  }
-  const unzugeordneteUploads = fallDokumenteRows
-    .filter((r) => r.dokument_typ === 'kunde-nachreichung' || r.dokument_typ === 'sonstiges')
-    .map((r) => ({
+  const unzugeordneteRows = fallDokumenteRows.filter(
+    (r) => r.dokument_typ === 'kunde-nachreichung' || r.dokument_typ === 'sonstiges',
+  )
+  const unzugeordneteUrls = await getStorageUrlBulk(
+    supabase,
+    unzugeordneteRows.map((r) => ({ bucket: 'fall-dokumente', path: r.storage_path })),
+  )
+  const unzugeordneteUploads = unzugeordneteRows
+    .map((r, i) => ({
       id: r.id,
       original_filename: r.original_filename,
-      previewUrl: publicUrlFor(r.storage_path),
+      previewUrl: unzugeordneteUrls[i],
       dokument_typ: r.dokument_typ,
       beschreibung: r.beschreibung,
       hochgeladen_am: r.hochgeladen_am,
@@ -405,20 +410,23 @@ export default async function FallaktePage({
   for (const p of (pflichtdokumente ?? []) as Array<{ dokument_typ: string; status: string }>) {
     if (p.status === 'hochgeladen') pflichtHochgeladenSlots.add(p.dokument_typ)
   }
-  const zuPruefendeUploads = fallDokumenteRows
-    .filter(
-      (r) =>
-        r.dokument_typ !== 'kunde-nachreichung' &&
-        r.dokument_typ !== 'sonstiges' &&
-        pflichtHochgeladenSlots.has(r.dokument_typ),
-    )
-    .map((r) => ({
-      id: r.id,
-      label: slotLabelMap.get(r.dokument_typ) ?? r.dokument_typ,
-      original_filename: r.original_filename,
-      previewUrl: publicUrlFor(r.storage_path),
-      hochgeladen_am: r.hochgeladen_am,
-    }))
+  const zuPruefendeRows = fallDokumenteRows.filter(
+    (r) =>
+      r.dokument_typ !== 'kunde-nachreichung' &&
+      r.dokument_typ !== 'sonstiges' &&
+      pflichtHochgeladenSlots.has(r.dokument_typ),
+  )
+  const zuPruefendeUrls = await getStorageUrlBulk(
+    supabase,
+    zuPruefendeRows.map((r) => ({ bucket: 'fall-dokumente', path: r.storage_path })),
+  )
+  const zuPruefendeUploads = zuPruefendeRows.map((r, i) => ({
+    id: r.id,
+    label: slotLabelMap.get(r.dokument_typ) ?? r.dokument_typ,
+    original_filename: r.original_filename,
+    previewUrl: zuPruefendeUrls[i],
+    hochgeladen_am: r.hochgeladen_am,
+  }))
 
   // Drag&Drop-Items: pflichtdokumente in Shape mit kategorie + sort_order.
   type PflichtSortRow = {
@@ -660,17 +668,23 @@ export default async function FallaktePage({
         .not('abgelehnt_am', 'is', null)
         .order('abgelehnt_am', { ascending: false })
       type DocRow = { id: string; dokument_typ: string; original_filename: string | null; storage_path: string }
-      const docList = ((dokRows ?? []) as DocRow[]).map((d) => ({
+      const dokRowsTyped = (dokRows ?? []) as DocRow[]
+      const abgelehnteRowsTyped = (abgelehnteRows ?? []) as DocRow[]
+      const [docUrls, abgelehnteUrls] = await Promise.all([
+        getStorageUrlBulk(adminCli, dokRowsTyped.map((d) => ({ bucket: 'fall-dokumente', path: d.storage_path }))),
+        getStorageUrlBulk(adminCli, abgelehnteRowsTyped.map((d) => ({ bucket: 'fall-dokumente', path: d.storage_path }))),
+      ])
+      const docList = dokRowsTyped.map((d, i) => ({
         id: d.id,
         filename: d.original_filename ?? 'Datei',
-        url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
+        url: docUrls[i] ?? '',
         istHaupt: d.dokument_typ === 'gutachten' && !d.storage_path.includes('/nachbesserung/'),
         istNachbesserung: d.storage_path.includes('/nachbesserung/'),
       }))
-      const abgelehnteDocList = ((abgelehnteRows ?? []) as DocRow[]).map((d) => ({
+      const abgelehnteDocList = abgelehnteRowsTyped.map((d, i) => ({
         id: d.id,
         filename: d.original_filename ?? 'Datei',
-        url: adminCli.storage.from('fall-dokumente').getPublicUrl(d.storage_path).data.publicUrl,
+        url: abgelehnteUrls[i] ?? '',
         istHaupt: false,
         istNachbesserung: false,
       }))

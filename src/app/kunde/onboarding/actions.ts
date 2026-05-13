@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { getSlotsFuerFall, type DokumentKatalogRow, type DokumentKategorie } from '@/lib/dokumente/katalog'
 import { buildKatalogContext } from '@/lib/dokumente/ruleEvaluator'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export type VorschadenAbrechnungsStatus = 'ja' | 'nein' | 'teilweise' | 'unbekannt'
 
@@ -342,7 +343,8 @@ export async function uploadKundenDokument(
       .upload(path, buffer, { contentType, upsert: false })
     if (upErr) return { success: false, error: upErr.message }
 
-    const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
+    const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
+    if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
 
     // AAR-324: Insert ohne pflichtdokumente-Update — das sind optionale Slots.
     // AAR-325-Trigger feuert auf uploaded_by_kunde=true → dokument-pruefen Task
@@ -569,7 +571,8 @@ export async function uploadPflichtdokument(
       .upload(path, buffer, { contentType, upsert: false })
     if (upErr) return { success: false, error: upErr.message }
 
-    const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
+    const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
+    if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
 
     // AAR-323: Slot-Typ aus pflichtdokumente laden, damit der
     // fall_dokumente-Eintrag den korrekten dokument_typ bekommt.
