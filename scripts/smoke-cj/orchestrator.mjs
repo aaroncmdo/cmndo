@@ -9,17 +9,19 @@ export const DEFAULT_BARRIER_MS = 3000
 export const MAX_RETRIES = 3
 
 export class Orchestrator extends EventEmitter {
-  constructor({ steps, tracks, seedReset, reporter }) {
+  constructor({ steps, tracks, seedReset, reporter, live = false }) {
     super()
     this.steps = steps              // Array<{ id, ui, expectedDbEvents, expectedStatusTransition, barrierMs }>
     this.tracks = tracks            // { ui, db, assert } — alle haben .runStep(step) + .cancel()
     this.seedReset = seedReset      // async () => void
     this.reporter = reporter        // { onStep, onDesync, onIterStart, onIterEnd }
+    this.live = live                // Live-Watch-Modus: kein Auto-Restart, halt bei Desync
+    this.maxRetries = live ? 0 : MAX_RETRIES
     this.retries = 0
   }
 
   async run() {
-    while (this.retries <= MAX_RETRIES) {
+    while (this.retries <= this.maxRetries) {
       this.reporter.onIterStart({ attempt: this.retries + 1 })
       try {
         await this.seedReset()
@@ -29,9 +31,15 @@ export class Orchestrator extends EventEmitter {
       } catch (err) {
         const desync = err.desync ?? null
         this.reporter.onIterEnd({ ok: false, attempt: this.retries + 1, desync, err })
+        if (this.live) {
+          console.error('\n=== DESYNC im Live-Modus ===')
+          console.error(JSON.stringify(desync, null, 2))
+          console.error('Browser bleibt offen — inspiziere den Zustand und drücke Ctrl+C zum Beenden.')
+          await new Promise(() => {})  // halt für ewig
+        }
         await this._cancelAll()
         this.retries += 1
-        if (this.retries > MAX_RETRIES) {
+        if (this.retries > this.maxRetries) {
           return { ok: false, reason: 'max-retries', lastDesync: desync }
         }
         // Restart von Step 0 nach Re-Seed
