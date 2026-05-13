@@ -109,7 +109,7 @@ function HeroSection() {
                 <span className="block">Unfall gehabt?</span>
                 <span
                   className="block text-[#F5F1E8]"
-                  style={{ textDecoration: 'underline', textDecorationColor: '#7BA3CC', textDecorationThickness: '2px', textUnderlineOffset: '6px' }}
+                  style={{ textDecoration: 'underline', textDecorationColor: 'var(--brand-secondary, #7BA3CC)', textDecorationThickness: '2px', textUnderlineOffset: '6px' }}
                 >
                   Wir regeln Ihren<br className="hidden sm:block" /> KFZ-Schaden.
                 </span>
@@ -746,7 +746,7 @@ function PortalSection() {
                   </div>
                 </div>
                 {/* Case card */}
-                <div className="rounded-xl border border-claimondo-border border-l-4 bg-white p-3.5" style={{ borderLeftColor: '#10b981' }}>
+                <div className="rounded-xl border border-claimondo-border border-l-4 bg-white p-3.5" style={{ borderLeftColor: 'var(--brand-success, #10b981)' }}>
                   <div className="mb-1 flex items-center justify-between">
                     <span className="font-mono text-[13px] font-bold text-claimondo-navy">K-AS-2024-0847</span>
                     <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">Aktiv</span>

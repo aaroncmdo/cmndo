@@ -127,7 +127,7 @@ export default function SchadensreportPage() {
   const datum = '2026-05-10'
 
   return (
-    <div className="min-h-screen" style={{ background: '#f8f9fb' }}>
+    <div className="min-h-screen bg-claimondo-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([

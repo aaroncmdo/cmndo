@@ -81,7 +81,7 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
                   className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
                   style={{ background: 'rgba(34,160,107,0.15)' }}
                 >
-                  <Check className="h-6 w-6" style={{ color: '#22A06B' }} />
+                  <Check className="h-6 w-6" style={{ color: 'var(--brand-success, #22A06B)' }} />
                 </div>
                 <h3
                   className="text-xl font-bold text-claimondo-navy"
