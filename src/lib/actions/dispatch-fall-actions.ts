@@ -435,8 +435,10 @@ export async function sendFlowLink(leadId: string): Promise<SendFlowLinkResult> 
   // KFZ-192: service_typ aus Lead in FlowLink kopieren
   const serviceTyp = (lead as Record<string, unknown>).service_typ as string ?? 'komplett'
 
-  // Create flow_links entry with unique token
-  const { data: flowLink, error: flowErr } = await supabase
+  // Create flow_links entry with unique token.
+  // RLS-Phase-1 (#3): flow_links default-deny für authenticated → service-client.
+  const svc = createServiceClient()
+  const { data: flowLink, error: flowErr } = await svc
     .from('flow_links')
     .insert({ lead_id: leadId, expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), service_typ: serviceTyp })
     .select('token')

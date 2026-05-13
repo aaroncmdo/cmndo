@@ -1,4 +1,5 @@
 ﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon, AlertCircleIcon, InboxIcon, CheckCircleIcon } from 'lucide-react'
 import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConstants'
@@ -9,6 +10,10 @@ export default async function DispatchDashboard() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return null
+  // RLS-Phase-1 (#3): flow_links wird default-deny für authenticated nach der
+  // Migration. Dispatch-Auth ist bereits via Layout-Guard `requirePortalAccess`
+  // sichergestellt — daher hier admin-Client für die Count-Query.
+  const admin = createAdminClient()
 
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
@@ -27,8 +32,9 @@ export default async function DispatchDashboard() {
       .eq('typ', 'rueckruf')
       .eq('status', 'offen')
       .not('lead_id', 'is', null),
-    // FlowLinks versendet heute — flow_links benutzt `erstellt_am`, nicht `created_at`
-    supabase
+    // FlowLinks versendet heute — flow_links benutzt `erstellt_am`, nicht `created_at`.
+    // RLS-Phase-1: via admin-Client weil flow_links default-deny für authenticated.
+    admin
       .from('flow_links')
       .select('*', { count: 'exact', head: true })
       .gte('erstellt_am', todayStart.toISOString()),
