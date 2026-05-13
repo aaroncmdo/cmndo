@@ -260,13 +260,17 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
     setSending(true); setError(null)
     try {
       const { sendNachricht } = await import('./actions')
-      await sendNachricht(fallId, text.trim(), 'chat_kb_kunde')
-      setMessages(prev => [...prev, {
-        id: crypto.randomUUID(), kanal: 'gruppe', sender_id: userId,
-        sender_rolle: 'kunde', nachricht: text.trim(), hat_anhang: false, anhang_url: null,
-        created_at: new Date().toISOString(),
-      }])
-      setText('')
+      const res = await sendNachricht(fallId, text.trim(), 'chat_kb_kunde')
+      if (!res.success) {
+        setError(res.error ?? 'Fehler beim Senden')
+      } else {
+        setMessages(prev => [...prev, {
+          id: crypto.randomUUID(), kanal: 'gruppe', sender_id: userId,
+          sender_rolle: 'kunde', nachricht: text.trim(), hat_anhang: false, anhang_url: null,
+          created_at: new Date().toISOString(),
+        }])
+        setText('')
+      }
     } catch (err) { setError(err instanceof Error ? err.message : 'Fehler beim Senden') }
     finally { setSending(false) }
   }
