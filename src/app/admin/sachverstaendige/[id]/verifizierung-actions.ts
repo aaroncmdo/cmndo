@@ -27,16 +27,16 @@ const ADMIN_UPLOADBARE_SLOTS = [
 async function requireAdmin() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { ok: false as const, error: 'Nicht angemeldet' }
+  if (!user) return { success: false as const, error: 'Nicht angemeldet' }
   const { data: me } = await supabase
     .from('profiles')
     .select('rolle')
     .eq('id', user.id)
     .maybeSingle()
   if (me?.rolle !== 'admin') {
-    return { ok: false as const, error: 'Nur Admins dürfen die Verifizierung bearbeiten.' }
+    return { success: false as const, error: 'Nur Admins dürfen die Verifizierung bearbeiten.' }
   }
-  return { ok: true as const, userId: user.id }
+  return { success: true as const, userId: user.id }
 }
 
 function revalidateBoth(svId: string) {
@@ -51,7 +51,7 @@ function revalidateBoth(svId: string) {
 
 export async function saVorlageFreigeben(svId: string): Promise<{ success: boolean; error?: string }> {
   const auth = await requireAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const db = createAdminClient()
   const { error } = await db
@@ -77,7 +77,7 @@ export async function saVorlageZurueckweisen(
   notiz: string,
 ): Promise<{ success: boolean; error?: string }> {
   const auth = await requireAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const trimmed = (notiz ?? '').trim()
   if (trimmed.length < 10) {
@@ -107,7 +107,7 @@ export async function saVorlageZurueckweisen(
 
 export async function tier2Freigeben(svId: string): Promise<{ success: boolean; error?: string }> {
   const auth = await requireAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const db = createAdminClient()
   const { error } = await db
@@ -134,7 +134,7 @@ export async function tier2DokumentNachfordern(
   fristIso: string,
 ): Promise<{ success: boolean; error?: string; pflichtdokId?: string }> {
   const auth = await requireAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const trimmed = (begruendung ?? '').trim()
   if (trimmed.length < 20) {
@@ -230,7 +230,7 @@ export async function svSperren(
   grund: string,
 ): Promise<{ success: boolean; error?: string }> {
   const auth = await requireAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const trimmed = (grund ?? '').trim()
   if (trimmed.length < 10) {
@@ -255,7 +255,7 @@ export async function svSperren(
 
 export async function svEntsperren(svId: string): Promise<{ success: boolean; error?: string }> {
   const auth = await requireAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const db = createAdminClient()
   const { error } = await db
@@ -293,7 +293,7 @@ export async function pflichtdokumentFreigeben(
   slotId: string,
 ): Promise<{ success: boolean; error?: string }> {
   const auth = await requireAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const db = createAdminClient()
   const { data: row, error: loadErr } = await db
@@ -323,7 +323,7 @@ export async function pflichtdokumentZurueckweisen(
   begruendung: string,
 ): Promise<{ success: boolean; error?: string }> {
   const auth = await requireAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const trimmed = (begruendung ?? '').trim()
   if (trimmed.length < 10) {
@@ -382,7 +382,7 @@ export async function dokumenteAlleFreigeben(
   svId: string,
 ): Promise<{ success: boolean; error?: string }> {
   const auth = await requireAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const db = createAdminClient()
   const { data: rows, error: loadErr } = await db
@@ -457,24 +457,24 @@ export async function dokumenteAlleFreigeben(
 export async function uploadAdminPflichtdokument(
   svId: string,
   formData: FormData,
-): Promise<{ ok: boolean; storage_path?: string; error?: string }> {
+): Promise<{ success: boolean; storage_path?: string; error?: string }> {
   const auth = await requireAdmin()
-  if (!auth.ok) return { ok: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const slotId = (formData.get('slot_id') as string | null)?.trim() ?? ''
   const file = formData.get('datei') as File | null
-  if (!slotId) return { ok: false, error: 'Kein Slot angegeben' }
+  if (!slotId) return { success: false, error: 'Kein Slot angegeben' }
   if (!ADMIN_UPLOADBARE_SLOTS.includes(slotId as typeof ADMIN_UPLOADBARE_SLOTS[number])) {
-    return { ok: false, error: `Slot "${slotId}" ist nicht admin-uploadbar` }
+    return { success: false, error: `Slot "${slotId}" ist nicht admin-uploadbar` }
   }
-  if (!file || file.size === 0) return { ok: false, error: 'Keine Datei ausgewählt' }
+  if (!file || file.size === 0) return { success: false, error: 'Keine Datei ausgewählt' }
 
   const supabase = await createClient()
   const slot = await getKatalogSlot(supabase, slotId)
-  if (!slot || !slot.aktiv) return { ok: false, error: `Unbekannter oder deaktivierter Slot: ${slotId}` }
+  if (!slot || !slot.aktiv) return { success: false, error: `Unbekannter oder deaktivierter Slot: ${slotId}` }
 
   const maxBytes = slot.max_mb * 1024 * 1024
-  if (file.size > maxBytes) return { ok: false, error: `Datei zu groß (max ${slot.max_mb} MB)` }
+  if (file.size > maxBytes) return { success: false, error: `Datei zu groß (max ${slot.max_mb} MB)` }
   if (
     slot.akzeptierte_mime_types.length > 0 &&
     file.type &&
@@ -482,7 +482,7 @@ export async function uploadAdminPflichtdokument(
     file.type !== 'application/octet-stream'
   ) {
     return {
-      ok: false,
+      success: false,
       error: `MIME-Type nicht erlaubt (erwartet: ${slot.akzeptierte_mime_types.join(', ')})`,
     }
   }
@@ -499,7 +499,7 @@ export async function uploadAdminPflichtdokument(
       contentType: file.type || 'application/octet-stream',
       upsert: true,
     })
-  if (uploadErr) return { ok: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
+  if (uploadErr) return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
   // Row upsert — wenn der SV bereits hochgeladen hatte, überschreiben
   // wir die Storage-Referenz damit „eine Wahrheit pro Slot".
@@ -521,7 +521,7 @@ export async function uploadAdminPflichtdokument(
         begruendung: null,
       })
       .eq('id', existing.id)
-    if (updErr) return { ok: false, error: `DB-Update fehlgeschlagen: ${updErr.message}` }
+    if (updErr) return { success: false, error: `DB-Update fehlgeschlagen: ${updErr.message}` }
   } else {
     const { error: insErr } = await db.from('pflichtdokumente').insert({
       sv_id: svId,
@@ -534,7 +534,7 @@ export async function uploadAdminPflichtdokument(
       angefordert_von_user_id: auth.userId,
       angefordert_am: new Date().toISOString(),
     })
-    if (insErr) return { ok: false, error: `DB-Insert fehlgeschlagen: ${insErr.message}` }
+    if (insErr) return { success: false, error: `DB-Insert fehlgeschlagen: ${insErr.message}` }
   }
 
   // Offene Review-Tasks für genau diesen SV+Slot schließen — wenn der SV
@@ -546,5 +546,5 @@ export async function uploadAdminPflichtdokument(
   )
 
   revalidateBoth(svId)
-  return { ok: true, storage_path: path }
+  return { success: true, storage_path: path }
 }
