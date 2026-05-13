@@ -6,12 +6,18 @@
 // sieht nur seine eigene Session. Staff-Rollen (Admin/KB/Dispatch) sehen
 // alle Sessions via sv_tages_session_staff_read Policy.
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type {
   SessionStatus,
   SvTagesSession,
 } from '@/lib/types/field-modus'
 import { computeTransitionPatch } from './field-state-machine'
+
+function revalidateFeldmodusRoutes() {
+  revalidatePath('/gutachter/heute')
+  revalidatePath('/gutachter/feldmodus')
+}
 
 function isoDate(datum: Date): string {
   return datum.toISOString().slice(0, 10)
@@ -80,6 +86,7 @@ export async function ensureTagesSession(
     })
     return null
   }
+  revalidateFeldmodusRoutes()
   return data as SvTagesSession
 }
 
@@ -126,6 +133,7 @@ export async function transitionTagesSession(
     )
     return null
   }
+  revalidateFeldmodusRoutes()
   return data as SvTagesSession
 }
 
