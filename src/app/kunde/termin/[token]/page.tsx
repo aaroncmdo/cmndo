@@ -40,7 +40,7 @@ export default async function KundeTerminPage({
   if (hoursUntil > 2 || hoursAfter > 4) {
     return (
       <div className="relative min-h-screen flex items-center justify-center bg-claimondo-bg px-6 overflow-hidden" style={{ background: 'radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,0.18), transparent 60%), radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,0.08), transparent 70%), #f2f3f7' }}>
-        <div className="max-w-md w-full text-center rounded-[36px] bg-white p-10 shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]">
+        <div className="max-w-md w-full text-center rounded-claimondo-sheet bg-white p-10 shadow-sheet animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]">
           <h1 className="text-2xl font-bold text-claimondo-navy tracking-[-.024em] mb-3" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>Link nicht mehr gültig</h1>
           <p className="text-[15px] text-[#4b5468] leading-relaxed">Dieser Tracking-Link ist nur rund um den Termin gültig.</p>
         </div>
@@ -60,7 +60,7 @@ export default async function KundeTerminPage({
       }
       return (
         <div className="relative min-h-screen flex items-center justify-center bg-claimondo-bg px-6 overflow-hidden" style={{ background: 'radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,0.18), transparent 60%), radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,0.08), transparent 70%), #f2f3f7' }}>
-          <div className="max-w-md w-full text-center rounded-[36px] bg-white p-10 shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]">
+          <div className="max-w-md w-full text-center rounded-claimondo-sheet bg-white p-10 shadow-sheet animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]">
             <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 grid place-items-center shadow-[0_8px_24px_rgba(52,199,89,.30)] animate-[popMark_.55s_cubic-bezier(.34,1.56,.64,1)_both]">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M20 6 9 17l-5-5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />

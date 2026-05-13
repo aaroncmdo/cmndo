@@ -79,7 +79,7 @@ export default function TerminCard({
             ? 'bg-amber-50 border-2 border-dashed border-amber-400 shadow-[0_2px_6px_rgba(15,30,68,.05)]'
             : termin.status === 'verlegt'
               ? 'bg-claimondo-border/30 border border-claimondo-border opacity-70 italic'
-              : 'bg-white border border-claimondo-border hover:border-claimondo-ondo hover:-translate-y-[1px] shadow-[0_1px_2px_rgba(15,30,68,.04),0_4px_12px_rgba(15,30,68,.04)] hover:shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)]'
+              : 'bg-white border border-claimondo-border hover:border-claimondo-ondo hover:-translate-y-[1px] shadow-[0_1px_2px_rgba(15,30,68,.04),0_4px_12px_rgba(15,30,68,.04)] hover:shadow-claimondo-md'
       }`}
       style={{ top: `${topPx}px`, minHeight: `${heightPx}px` }}
     >
@@ -126,7 +126,7 @@ export default function TerminCard({
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-[#3a6290] rounded-full px-3 py-1.5 font-semibold tracking-[-.005em] shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 hover:-translate-y-[1px]"
+          className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-[#3a6290] rounded-full px-3 py-1.5 font-semibold tracking-[-.005em] shadow-cta-ondo transition-all duration-200 hover:-translate-y-[1px]"
           onClick={(e) => e.stopPropagation()}
         >
           <NavigationIcon className="w-3 h-3" /> Route starten

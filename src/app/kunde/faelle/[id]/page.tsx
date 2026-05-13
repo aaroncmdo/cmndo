@@ -395,6 +395,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       getAlleAuftraege(admin, fall.id as string),
       getKanzleiFall(admin, fall.id as string),
     ])
+    // onboarding_complete lebt auf faelle (nicht leads) — direkt aus dem
+    // bereits geladenen fall-Objekt holen, um den 400-Fehler zu vermeiden.
     let leadInputForLifecycle: {
       sa_unterschrieben: boolean | null
       vollmacht_signiert_am: string | null
@@ -403,14 +405,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     if (fall.lead_id) {
       const { data: leadRow } = await admin
         .from('leads')
-        .select('sa_unterschrieben, vollmacht_signiert_am, onboarding_complete')
+        .select('sa_unterschrieben, vollmacht_signiert_am')
         .eq('id', fall.lead_id as string)
         .maybeSingle()
       if (leadRow) {
         leadInputForLifecycle = {
           sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
           vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
-          onboarding_complete: (leadRow.onboarding_complete as boolean | null) ?? null,
+          onboarding_complete: (fall.onboarding_complete as boolean | null) ?? null,
         }
       }
     }

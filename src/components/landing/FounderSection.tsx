@@ -78,7 +78,7 @@ export function FounderSection() {
           {FOUNDERS.map((f) => (
             <article
               key={f.name}
-              className="glass-card rounded-3xl p-6 shadow-[0_4px_20px_rgba(13,27,62,0.07)]"
+              className="glass-card rounded-3xl p-6 shadow-glass-card"
               itemScope
               itemType="https://schema.org/Person"
             >

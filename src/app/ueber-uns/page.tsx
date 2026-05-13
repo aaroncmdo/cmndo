@@ -189,7 +189,7 @@ export default async function UeberUnsPage() {
           }}
         />
         <div className="mx-auto max-w-3xl px-5 text-center sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
             <Sparkles className="h-3.5 w-3.5" />
             {t('hero.eyebrow')}
           </div>
@@ -211,7 +211,7 @@ export default async function UeberUnsPage() {
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <article
             id="definition"
-            className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md sm:p-10"
+            className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
             style={{ WebkitBackdropFilter: 'blur(14px)' }}
             itemScope
             itemType="https://schema.org/Organization"
@@ -303,7 +303,7 @@ export default async function UeberUnsPage() {
               return (
                 <div
                   key={w.titel}
-                  className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-[0_8px_28px_rgba(13,27,62,0.10)]"
+                  className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
                   <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-claimondo-ondo/12">
@@ -350,7 +350,7 @@ export default async function UeberUnsPage() {
           {FOUNDERS.map((f) => (
             <article
               key={f.name}
-              className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md sm:p-8"
+              className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-8"
               style={{ WebkitBackdropFilter: 'blur(14px)' }}
               itemScope
               itemType="https://schema.org/Person"
@@ -422,7 +422,7 @@ export default async function UeberUnsPage() {
             {TRUST_BEWEISE.map((b) => (
               <div
                 key={b.titel}
-                className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md"
+                className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <h3
@@ -514,7 +514,7 @@ export default async function UeberUnsPage() {
             </a>
             <Link
               href="/gutachter-finden"
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <MapPin className="h-5 w-5" />
               Gutachter finden

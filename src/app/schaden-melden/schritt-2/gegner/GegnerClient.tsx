@@ -79,7 +79,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
   return (
     <form onSubmit={onSubmit} className="space-y-6" noValidate>
       {/* Flags */}
-      <div className="rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-4">
+      <div className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-4">
         <div className="space-y-3">
           <Controller
             control={control}
@@ -199,7 +199,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
       </div>
 
       {/* Zeugen */}
-      <div className="rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-4">
+      <div className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-4">
         <div className="mb-3 flex items-center justify-between">
           <Label>Zeugen</Label>
           <Button
@@ -267,7 +267,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
         )}
       </div>
 
-      <div className="sticky bottom-4 flex items-center justify-end rounded-3xl border border-claimondo-border bg-white shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] p-4 shadow-[var(--shadow-claimondo-sm)]">
+      <div className="sticky bottom-4 flex items-center justify-end rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-4 shadow-[var(--shadow-claimondo-sm)]">
         <Button
           type="submit"
           tone="ondo"

@@ -116,7 +116,7 @@ export default async function DispatchDashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((s) => (
-          <Link key={s.label} href={s.href} className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] border border-claimondo-navy/[0.06] p-5 flex items-center gap-4 hover:-translate-y-[1px] hover:shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] transition-all duration-200">
+          <Link key={s.label} href={s.href} className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06] p-5 flex items-center gap-4 hover:-translate-y-[1px] hover:shadow-sheet transition-all duration-200">
             <div className={`w-11 h-11 rounded-lg ${s.bg} flex items-center justify-center`}>
               <s.icon className={`w-5 h-5 ${s.color}`} />
             </div>
@@ -129,7 +129,7 @@ export default async function DispatchDashboard() {
       </div>
 
       {/* Rückrufe-Timeline: chronologische Liste, Click → Rückrufe-Liste mit Auto-Open-Popover */}
-      <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] border border-claimondo-navy/[0.06]">
+      <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
         <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
           <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
             <PhoneIcon className="w-4 h-4 text-amber-600" />
@@ -197,7 +197,7 @@ export default async function DispatchDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live-Feed: Neueste Leads */}
-        <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] border border-claimondo-navy/[0.06]">
+        <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
           <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
             <h2 className="text-sm font-semibold text-claimondo-navy">Neueste Leads</h2>
             <Link href="/dispatch/leads" className="text-xs text-claimondo-ondo hover:underline">Alle anzeigen</Link>
@@ -224,7 +224,7 @@ export default async function DispatchDashboard() {
         </div>
 
         {/* Meine Tasks */}
-        <div className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] border border-claimondo-navy/[0.06]">
+        <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
           <div className="px-5 py-4 border-b border-claimondo-navy/[0.06]">
             <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
               <ClockIcon className="w-4 h-4 text-claimondo-ondo/70" />

@@ -23,7 +23,7 @@ export default function DatenschutzPage() {
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         {/* ENTWURF-Banner */}
-        <div className="mb-8 rounded-2xl border border-amber-200/80 bg-amber-50/90 px-5 py-3.5 text-sm font-semibold text-amber-900 shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] backdrop-blur-sm">
+        <div className="mb-8 rounded-2xl border border-amber-200/80 bg-amber-50/90 px-5 py-3.5 text-sm font-semibold text-amber-900 shadow-claimondo-md backdrop-blur-sm">
           ENTWURF &mdash; Diese Seite ist ein Entwurf. Anwalts-Review ausstehend.
         </div>
 
@@ -31,7 +31,7 @@ export default function DatenschutzPage() {
           <PageHeader title="Datenschutzerklärung" size="lg" />
         </div>
 
-        <div className="rounded-3xl bg-white p-7 sm:p-10 shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] space-y-8 text-claimondo-shield/90 leading-relaxed tracking-[-.005em]">
+        <div className="rounded-3xl bg-white p-7 sm:p-10 shadow-sheet space-y-8 text-claimondo-shield/90 leading-relaxed tracking-[-.005em]">
         {/* 1. Verantwortlicher */}
         <section>
           <h2 className="text-xl font-bold text-claimondo-navy tracking-[-.018em] mb-3">1. Verantwortlicher</h2>
