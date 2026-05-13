@@ -1,9 +1,14 @@
 import type { Metadata } from 'next'
+import { createAdminClient } from '@/lib/supabase/admin'
 import {
-  serviceSchema, breadcrumbsSchema,
-  jsonLdScript, GUTACHTER_LANDING_URL,
+  serviceSchema, breadcrumbsSchema, organizationSchema, faqPageSchema,
+  jsonLdScript, GUTACHTER_LANDING_URL, SITE_URL,
 } from '@/lib/seo/jsonld'
 import GutachterPartnerClient from './GutachterPartnerClient'
+import { PartnerContent, PARTNER_FAQ } from '@/components/gutachter-partner/PartnerContent'
+import { PartnerFooter } from '@/components/gutachter-partner/PartnerFooter'
+
+export const revalidate = 3600 // Warteliste-Zahl 1× pro Stunde aktualisieren
 
 export const metadata: Metadata = {
   title: 'Als Kfz-Sachverständiger Partner werden — Warteliste',
@@ -40,20 +45,36 @@ export const metadata: Metadata = {
   },
 }
 
-export default function GutachterPartnerPage() {
+async function getWartelisteAnzahl(): Promise<number> {
+  try {
+    const supabase = createAdminClient()
+    const { count } = await supabase
+      .from('sv_leads')
+      .select('id', { count: 'exact', head: true })
+    return count ?? 62
+  } catch {
+    return 62 // Fallback bei DB-Fehler — Zahl vom 13.05.2026
+  }
+}
+
+export default async function GutachterPartnerPage() {
+  const warteliste = await getWartelisteAnzahl()
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
+          organizationSchema(),
           serviceSchema({
             name: 'Claimondo SV-Partner-Netzwerk',
             description:
               'Kfz-Sachverständige tragen sich in das Claimondo-Netzwerk ein und erhalten Aufträge direkt ohne Eigenakquise. Über 89 DAT-Experten bundesweit.',
             url: `${GUTACHTER_LANDING_URL}/`,
           }),
+          faqPageSchema(PARTNER_FAQ),
           breadcrumbsSchema([
-            { name: 'Startseite', url: '/' },
+            { name: 'Startseite', url: SITE_URL },
             { name: 'Sachverständiger werden', url: `${GUTACHTER_LANDING_URL}/` },
           ]),
         ])}
@@ -62,6 +83,8 @@ export default function GutachterPartnerPage() {
         Als Kfz-Sachverständiger Claimondo-Partner werden — Warteliste eintragen
       </h1>
       <GutachterPartnerClient />
+      <PartnerContent warteliste={warteliste} />
+      <PartnerFooter />
     </>
   )
 }
