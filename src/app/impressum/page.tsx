@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 
 export const metadata: Metadata = {
-  title: 'Impressum | Claimondo',
+  title: 'Impressum',
 }
 
 export default function ImpressumPage() {

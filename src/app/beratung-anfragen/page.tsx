@@ -8,7 +8,7 @@ import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
-  title: 'Kostenlose Beratung anfragen — Kfz-Unfallschaden · Claimondo',
+  title: 'Kostenlose Beratung anfragen — Kfz-Unfallschaden',
   description:
     'Kostenlose Erstberatung zu Ihrem Kfz-Unfallschaden. Kein Callcenter — ein Fachmann meldet sich innerhalb von 15 Minuten. Telefon, WhatsApp oder E-Mail.',
   keywords: [
