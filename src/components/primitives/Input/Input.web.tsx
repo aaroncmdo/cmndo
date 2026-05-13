@@ -5,16 +5,14 @@
 
 import type { ChangeEvent } from 'react'
 import type { InputProps, InputSize } from './Input.types'
-import { tokens } from '@/lib/design-tokens'
 
-const heightMap: Record<InputSize, number> = {
-  md: tokens.touchMin, // 44
-  lg: 52,
-}
-
-const fontSizeMap: Record<InputSize, number> = {
-  md: 16,
-  lg: 16,
+// Size-Klassen als Tailwind-Tokens — keine Pixel-Inline-Styles.
+// sm = h-10/text-sm (40/14) · md = h-11/text-base (44/16, tokens.touchMin)
+// lg = h-[52px]/text-base (52/16 — Aaron-Custom-Größe).
+const sizeClassMap: Record<InputSize, string> = {
+  sm: 'h-10 text-sm py-2',
+  md: 'h-11 text-base py-3',
+  lg: 'h-[52px] text-base py-3.5',
 }
 
 export function Input({
@@ -32,6 +30,9 @@ export function Input({
   ariaLabel,
   className,
   autoFocus,
+  required,
+  maxLength,
+  pattern,
 }: InputProps) {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChangeText(e.target.value)
@@ -50,10 +51,14 @@ export function Input({
       name={name}
       aria-label={ariaLabel}
       autoFocus={autoFocus}
+      required={required}
+      maxLength={maxLength}
+      pattern={pattern}
       className={[
         fullWidth ? 'w-full' : '',
+        sizeClassMap[size],
         'bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-2xl px-4',
-        'text-claimondo-navy tracking-[-.01em]',
+        'text-claimondo-navy tracking-[-.01em] placeholder:text-[#8a93a6]',
         'transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]',
         'hover:bg-claimondo-navy/[0.08]',
         'focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo',
@@ -62,10 +67,6 @@ export function Input({
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{
-        height: heightMap[size],
-        fontSize: fontSizeMap[size],
-      }}
     />
   )
 }
