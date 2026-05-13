@@ -1,4 +1,7 @@
-# Live-Schema-/RLS-Audit — Claimondo-v2 (12.05.2026)
+# Live-Schema-/RLS-Audit — Claimondo-v2 (12.05.2026) · ✅ ABGESCHLOSSEN
+
+> **Status (13.05.2026):** Alle CRITICAL/HIGH/MEDIUM Items via Folge-Audit `docs/13.05.2026/db-rls-audit/AUDIT-2026-05-13-DONE.md` (11 PRs gemerged) bearbeitet. Verbleibend nur Storage-Schritt-D + Auth-Toggle + btree_gist (Audit §6).
+> Hinweis: Duplikat von `SECU/LIVE-SCHEMA-RLS-AUDIT-12.05.2026.md`.
 
 **Quelle:** Direkter Zugriff auf die Live-DB (Supabase Project `paizkjajbuxxksdoycev`, eu-west-2, Postgres 17.6) via MCP: `list_tables` (RLS-Status pro Tabelle), `get_advisors(security)` (201 Lints), `execute_sql` gegen `pg_policies`, `information_schema.role_table_grants` / `column_privileges`, `pg_trigger`, `pg_proc`, `storage.buckets` + `storage.objects`-Policies. Reine Lese-Analyse.
 
