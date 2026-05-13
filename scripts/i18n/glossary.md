@@ -48,6 +48,18 @@ Diese Begriffe sind juristisch/branchen-spezifisch und werden in deutschen Origi
 - **Datum** — wenn als String („10.05.2026") behalten wir das DE-Format weil rechtlicher Bezug. Wenn dynamisch gerendert: per `useFormatter()` mit Locale.
 - **Email/Telefon** — bleibt wie ist (Aaron@claimondo.de, +49…)
 
+## GEO (Generative Engine Optimization) — Übersetzungs-Regeln
+
+Marketing-Pages sollen in allen Sprachen von KI-Suchmaschinen (ChatGPT, Perplexity, Gemini, Copilot, Claude) zitiert werden können. Diese Regeln entstammen den Princeton-GEO-Studien — beim Übersetzen NICHT verwässern:
+
+- **Zitate & Quellen erhalten** (+40 % AI-Citation-Boost): Jeder §-Verweis, jedes BGH-Aktenzeichen, jede Statistik-Quelle muss 1:1 stehen bleiben. Niemals umformulieren wie „nach deutschem Recht" — immer „§249 BGB" konkret.
+- **Statistiken & Zahlen erhalten** (+37 %): „über 2.000 Fälle", „98 % Erfolgsquote", Datumsangaben — exakte Zahlen behalten, Tausender-Trennzeichen sprachgerecht (DE 2.000 / EN 2,000 / FR 2 000).
+- **Autoritativer Ton** (+25 %): keine relativierenden Füllwörter („vielleicht", „könnte"). Direkter Aussage-Stil. Auf Englisch: "We enforce", nicht "We help you to maybe enforce".
+- **Fachbegriffe behalten** (+18 %): Liste oben — niemals weichspülen. Lieber Klammer-Erklärung als „normalisierter" Ersatzbegriff.
+- **Entity-Konsistenz:** „Claimondo GmbH", „Hansaring 10, 50670 Köln" — Eigenname + Adresse bleiben in allen Sprachen identisch, auch in Arabisch (ggf. transliterieren in Klammern, aber Original beibehalten). Die Marke wird so von LLMs als kanonische Entity erkannt.
+- **Keine Keyword-Stuffing** (-10 % bei Verstoß): Niemals „Gutachter Gutachten Sachverständiger" aneinanderreihen wenn das Original es nicht tut. Natürlicher Satzfluss schlägt Keyword-Dichte.
+- **Antwort-zuerst-Struktur:** Hero-Headlines + FAQ-Antworten beginnen mit der Aussage, nicht mit einer Einleitung. „Wir setzen Ihre Ansprüche durch — auch gegen widerstrebende Versicherer." nicht „Es gibt viele Gründe warum…"
+
 ## Wenn unklar
 
 Bei Zweifel den Original-deutschen-Begriff in der Übersetzung als (Klammer-Hinweis) ergänzen. Beispiel:
