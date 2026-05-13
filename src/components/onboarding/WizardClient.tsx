@@ -5,6 +5,8 @@ import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
 import { finalizeGutachterFinderAnfrage } from './finalizeAnfrage'
 import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
+import { reserviereSlot } from '@/lib/onboarding/slots'
+import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 import type { SvMatchResult } from '@/lib/onboarding/svMatching'
 import type { OnboardingPhase, OnboardingFeld, ConditionalOn } from './types'
 import { TextField } from './fields/TextField'
@@ -163,6 +165,33 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
       const result = await saveOnboardingStep(anfrageId, currentPhase.phase_key, values, felder)
       if (!result.ok) { setError(result.error); return }
       setAnfrageId(result.anfrageId)
+
+      // 2026-05-13: Slot-Phase-Submit → reserviereSlot fire-and-forget.
+      // Idempotenz liegt in reserviereSlot selbst (vorheriger Termin wird
+      // auf 'abgelehnt' gesetzt bevor neuer eingefuegt wird). Fehler werden
+      // bewusst geschluckt — Reservierung ist Nice-to-have, finalize laeuft
+      // auch ohne. Cron slot-ttl-cleanup raeumt verwaiste auf.
+      const hatSlotFeld = felder.some(f => f.typ === 'slot')
+      const wunschtermin = values['wunschtermin']
+      if (hatSlotFeld && typeof wunschtermin === 'string' && wunschtermin.length > 0) {
+        const effSvId = preSelectedSvId ?? svMatch?.svId ?? null
+        const effSvLeadId = effSvId ? null : preSelectedSvLeadId
+        if (effSvId || effSvLeadId) {
+          const vonDate = new Date(wunschtermin)
+          if (!Number.isNaN(vonDate.getTime())) {
+            const bisDate = new Date(vonDate.getTime() + TERMIN_DAUER_MIN * 60_000)
+            reserviereSlot(
+              result.anfrageId,
+              effSvId ?? '',
+              vonDate.toISOString(),
+              bisDate.toISOString(),
+              effSvLeadId,
+            ).catch((err) => {
+              console.error('[WizardClient] reserviereSlot fehlgeschlagen:', err)
+            })
+          }
+        }
+      }
 
       if (phaseIdx >= totalPhases - 1) {
         sessionStorage.removeItem(STORAGE_KEY)
