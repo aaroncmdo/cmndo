@@ -5,6 +5,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
+import { TrustBlock } from '@/components/landing/TrustBlock'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, CONTACT_EMAIL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
@@ -301,6 +302,15 @@ export default function BeratungAnfragenPage() {
           </div>
         </div>
       </section>
+
+      <TrustBlock
+        stats={[
+          { wert: '< 15 Min', label: 'Antwortzeit Werktag' },
+          { wert: '0 €', label: 'Erstberatung' },
+          { wert: '89+', label: 'Sachverständige' },
+          { wert: 'Köln', label: 'Team-Standort' },
+        ]}
+      />
 
       <LandingFooter />
       <StickyCallBar quelle="Beratung anfragen" />
