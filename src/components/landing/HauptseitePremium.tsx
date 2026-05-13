@@ -5,6 +5,9 @@ import {
   serviceSchema, faqPageSchema, jsonLdScript,
   SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
+import { PortalMockupSection } from './sections/PortalMockupSection'
+import { WertminderungSandenDannerSection } from './sections/WertminderungSandenDannerSection'
+import { TeslaEAutoSection } from './sections/TeslaEAutoSection'
 
 // Hauptseiten-Premium-Layout für claimondo.de — basiert auf dem
 // Köln-Handoff-Prototype (IMPLEMENTIERUNGSPLAN.md, KfzGutachterKoelnLanding.tsx),
@@ -340,6 +343,9 @@ export function HauptseitePremium() {
         </div>
       </section>
 
+      {/* 5b — Portal-Mockup (Wie Uber) */}
+      <PortalMockupSection />
+
       {/* 6 — Prozess */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="prozess-heading">
         <div className="mx-auto max-w-6xl px-5">
@@ -367,6 +373,9 @@ export function HauptseitePremium() {
           </ol>
         </div>
       </section>
+
+      {/* 6b — Wertminderung Sanden/Danner-Tabelle */}
+      <WertminderungSandenDannerSection />
 
       {/* 7 — Einsatzgebiet */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="einsatzgebiet-heading">
@@ -465,6 +474,9 @@ export function HauptseitePremium() {
           </div>
         </div>
       </section>
+
+      {/* 8b — Tesla / E-Auto Spezial */}
+      <TeslaEAutoSection />
 
       {/* 9 — FAQ */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="faq-heading">
