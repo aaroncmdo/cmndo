@@ -23,9 +23,15 @@ export const REROUTE_FASTER_THRESHOLD_SEC = 120
 export const HAZARD_ON_ROUTE_RADIUS_M = 50
 
 /** Polling-Frequenz für den Reroute-Check während TbT aktiv ist.
- * 30 s + 60-s-Cache im directions-Module → Mapbox sieht ~1 Call/30 s,
- * aber nur einmal pro Cache-Window. */
-export const REROUTE_POLL_INTERVAL_MS = 30_000
+ * 60 s alignt mit dem 60-s-Cache im directions-Module → jeder Poll ist
+ * ein garantierter Cache-Miss (kein doppelter fresh-Fetch im selben Window).
+ * Mapbox-Quote-Impact: ~60 Calls/h pro aktiv fahrendem SV. */
+export const REROUTE_POLL_INTERVAL_MS = 60_000
+
+/** Innerhalb dieser Distanz zum aktuellen Stop wird kein Reroute mehr
+ * vorgeschlagen — das Akzeptanz-Window ist zu kurz und ein später Spur-
+ * Wechsel verwirrt mehr als er hilft. */
+export const REROUTE_MIN_DISTANCE_TO_STOP_M = 2000
 
 /** Wie lange der „Schnellere Route"-Toast offen bleibt bevor er sich
  * auto-akzeptiert. 10 s gibt dem SV Zeit zu reagieren ohne ihn aus dem
