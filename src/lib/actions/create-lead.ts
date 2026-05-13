@@ -5,6 +5,7 @@
 // promotion_code_id auf, erkennt Eigenverschulden → Disqualifikation.
 // Rückgabe immer { success: boolean; ... } — nie throw.
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { readPromoCookie, isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
@@ -119,6 +120,11 @@ export async function createLeadFromSchritt1(
       )
     }
   }
+
+  // Dispatch-Liste + Dashboard zeigen neue Leads
+  revalidatePath('/dispatch/leads')
+  revalidatePath('/dispatch/dashboard')
+  revalidatePath('/dispatch')
 
   return {
     success: true,

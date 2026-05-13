@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getSvBusySlots } from '@/lib/google-calendar/busy-slots'
 import { TERMIN_DAUER_MIN, TERMIN_PUFFER_MIN } from '@/lib/dispatch/termin-konstanten'
@@ -271,6 +272,12 @@ export async function reserviereSlot(
     return { ok: false, error: terminErr?.message ?? 'Termin-Insert fehlgeschlagen' }
   }
 
+  // SV-Heute/-Feldmodus zeigt neue Termine, Dispatch-Leads die Reservierung.
+  revalidatePath('/gutachter/heute')
+  revalidatePath('/gutachter/feldmodus')
+  revalidatePath('/dispatch/leads')
+  revalidatePath('/gutachter-finden')
+
   return { ok: true, terminId: terminData.id }
 }
 
@@ -293,6 +300,10 @@ export async function bestaetigeSlot(
     .from('gutachter_finder_anfragen')
     .update({ status: 'neu' })
     .eq('id', anfrageId)
+
+  revalidatePath('/gutachter/heute')
+  revalidatePath('/gutachter/feldmodus')
+  revalidatePath('/dispatch/leads')
 
   return { ok: true }
 }

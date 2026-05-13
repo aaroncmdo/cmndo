@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
@@ -8,6 +9,17 @@ import { calculateEtaMinutes } from '@/lib/eta/calculate-eta'
 import { sendCommunication } from '@/lib/communications/send'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { emitEvent } from '@/lib/notifications/emit'
+
+// Termin-Mutationen werden in 4 Portalen angezeigt (SV/Kunde/Admin/Dispatch).
+// Helper revalidiert alle relevanten Routen.
+function revalidateTerminRoutes(fallId: string) {
+  revalidatePath('/gutachter/heute')
+  revalidatePath('/gutachter/feldmodus')
+  revalidatePath(`/gutachter/fall/${fallId}`)
+  revalidatePath(`/kunde/faelle/${fallId}`)
+  revalidatePath(`/admin/faelle/${fallId}`)
+  revalidatePath(`/faelle/${fallId}`)
+}
 
 // KFZ-200: Server Actions für SV-Navigation, Vor-Ort-Modus, Begutachtung.
 
@@ -83,6 +95,8 @@ export async function startNavigation(
   } catch (err) {
     console.error('[AAR-501] emitEvent termin.sv_unterwegs failed:', err)
   }
+
+  revalidateTerminRoutes(termin.fall_id)
 
   return {
     success: true,
@@ -202,6 +216,17 @@ export async function updateLivePosition(
     return { success: true, distanceMeters, arrived: true }
   }
 
+  // Bei ETA-Reminder-Trigger revalidieren — sonst sieht Kunde den
+  // „SV ist fast da"-Banner nicht. High-Frequency-Polls ohne Reminder
+  // werden NICHT revalidiert (würde Cache thrashen).
+  if (
+    etaMinutes !== null &&
+    ((etaMinutes <= 15 && !termin.reminder_15min_sent_at) ||
+      (etaMinutes <= 5 && !termin.reminder_5min_sent_at))
+  ) {
+    revalidateTerminRoutes(termin.fall_id)
+  }
+
   return { success: true, distanceMeters: distanceMeters ?? undefined }
 }
 
@@ -278,6 +303,8 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
     console.error('[AAR-501] emitEvent termin.sv_angekommen failed:', err)
   }
 
+  revalidateTerminRoutes(termin.fall_id)
+
   return { success: true }
 }
 
@@ -302,7 +329,7 @@ export async function updateAuftragLive(
 
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, sv_id, sv_unterwegs_seit, sv_angekommen_am')
+    .select('id, sv_id, fall_id, sv_unterwegs_seit, sv_angekommen_am')
     .eq('id', terminId)
     .eq('sv_id', sv.id)
     .single()
@@ -315,10 +342,16 @@ export async function updateAuftragLive(
     sv_eta_letzte_berechnung: now,
   }
   if (etaMinuten != null) patch.sv_eta_minuten = etaMinuten
-  if (!termin.sv_unterwegs_seit) patch.sv_unterwegs_seit = now
+  const isFirstUnterwegs = !termin.sv_unterwegs_seit
+  if (isFirstUnterwegs) patch.sv_unterwegs_seit = now
 
   const { error } = await db.from('gutachter_termine').update(patch).eq('id', terminId)
   if (error) return { ok: false, error: error.message }
+
+  // Nur den einmaligen Übergang „SV losgefahren" revalidieren — high-frequency
+  // ETA-Polls würden sonst den Cache kontinuierlich invalidieren.
+  if (isFirstUnterwegs) revalidateTerminRoutes(termin.fall_id)
+
   return { ok: true }
 }
 
@@ -340,7 +373,7 @@ export async function markTerminDurchgefuehrt(
   const db = createAdminClient()
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, sv_id, sv_angekommen_am, durchgefuehrt_am')
+    .select('id, sv_id, fall_id, sv_angekommen_am, durchgefuehrt_am')
     .eq('id', terminId)
     .eq('sv_id', sv.id)
     .single()
@@ -353,6 +386,8 @@ export async function markTerminDurchgefuehrt(
     .from('gutachter_termine')
     .update({ durchgefuehrt_am: new Date().toISOString() })
     .eq('id', terminId)
+
+  revalidateTerminRoutes(termin.fall_id)
   return { ok: true }
 }
 
@@ -451,6 +486,8 @@ export async function completeBegutachtung(
   } catch (err) {
     console.error('[AAR-501] emitEvent termin.sv_abgeschlossen failed:', err)
   }
+
+  revalidateTerminRoutes(termin.fall_id)
 
   return { success: true }
 }
