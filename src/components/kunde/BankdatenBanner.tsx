@@ -21,7 +21,7 @@ export default function BankdatenBanner({
   fallId: string
   status: string
   bankdatenHinterlegt: boolean
-  saveBankdaten: (fallId: string, iban: string, bic: string, kontoinhaber: string) => Promise<void>
+  saveBankdaten: (fallId: string, iban: string, bic: string, kontoinhaber: string) => Promise<{ success: boolean; error?: string }>
 }) {
   const [pending, startTransition] = useTransition()
   const [showForm, setShowForm] = useState(false)
@@ -46,8 +46,12 @@ export default function BankdatenBanner({
     setError('')
     startTransition(async () => {
       try {
-        await saveBankdaten(fallId, cleanIban, bic.trim().toUpperCase(), kontoinhaber.trim())
-        setDone(true)
+        const res = await saveBankdaten(fallId, cleanIban, bic.trim().toUpperCase(), kontoinhaber.trim())
+        if (res.success) {
+          setDone(true)
+        } else {
+          setError(res.error ?? 'Fehler beim Speichern')
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Fehler beim Speichern')
       }

@@ -34,7 +34,8 @@ export default function FallWindowDropzone({ fallId }: { fallId: string }) {
         fd.append('file', file)
         fd.append('kategorie', 'sonstiges')
         try {
-          await uploadDatei(fallId, fd)
+          const res = await uploadDatei(fallId, fd)
+          if (res?.error) console.error('[FallWindowDropzone] Upload fehlgeschlagen:', res.error)
         } catch (err) {
           console.error('[FallWindowDropzone] Upload fehlgeschlagen:', err)
         }

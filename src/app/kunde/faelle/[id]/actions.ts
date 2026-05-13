@@ -20,15 +20,15 @@ export async function sendNachricht(
   // AAR-102/AAR-310: nachrichten.kanal CHECK akzeptiert nur die 5 neuen Werte.
   // Legacy 'portal-kunde-claimondo' → 'chat_kb_kunde', 'portal-kunde-gutachter' → 'chat_kunde_sv'.
   kanal: 'chat_kb_kunde' | 'chat_kunde_sv' = 'chat_kb_kunde',
-) {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
-  if (!nachricht.trim()) throw new Error('Nachricht darf nicht leer sein')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  if (!nachricht.trim()) return { success: false, error: 'Nachricht darf nicht leer sein' }
 
   const admin = createAdminClient()
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
-  if (!ownership.ok) throw new Error('Nicht autorisiert')
+  if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
   // KFZ-127: Chat-Routing — empfaenger_id auf den zugewiesenen KB setzen
   let empfaengerId: string | null = null
@@ -55,7 +55,7 @@ export async function sendNachricht(
     empfaenger_id: empfaengerId,
   })
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   // KFZ-129 / AAR-310: Benachrichtigung an empfaenger (KB oder SV).
   if (empfaengerId) {
@@ -71,23 +71,29 @@ export async function sendNachricht(
   }
 
   revalidatePath(`/kunde/faelle/${fallId}`)
+  return { success: true }
 }
 
 // KFZ-206: Bankdaten für Auszahlung
-export async function saveBankdaten(fallId: string, iban: string, bic: string, kontoinhaber: string) {
+export async function saveBankdaten(
+  fallId: string,
+  iban: string,
+  bic: string,
+  kontoinhaber: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
-  if (!ownership.ok) throw new Error('Nicht autorisiert')
+  if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
   const { error } = await admin.from('faelle').update({
     iban, bic: bic || null, kontoinhaber,
     bankdaten_hinterlegt_am: new Date().toISOString(),
   }).eq('id', fallId)
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   await supabase.from('timeline').insert({
     fall_id: fallId, typ: 'system', titel: 'Bankdaten hinterlegt',
@@ -95,20 +101,25 @@ export async function saveBankdaten(fallId: string, iban: string, bic: string, k
     erstellt_von: user.id,
   })
   revalidatePath(`/kunde/faelle/${fallId}`)
+  return { success: true }
 }
 
 // KFZ-206: Pflichtdokument hochladen (Kunden-Portal)
-export async function uploadPflichtdokumentKunde(fallId: string, pflichtdokumentId: string, formData: FormData) {
+export async function uploadPflichtdokumentKunde(
+  fallId: string,
+  pflichtdokumentId: string,
+  formData: FormData,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const file = formData.get('file') as File
-  if (!file || file.size === 0) throw new Error('Keine Datei')
+  if (!file || file.size === 0) return { success: false, error: 'Keine Datei' }
 
   const admin = createAdminClient()
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
-  if (!ownership.ok) throw new Error('Nicht autorisiert')
+  if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
   // Claim-Pfad wenn claim_id vorhanden, sonst Fallback auf Legacy-Pfad
   const { data: fall } = await admin
@@ -122,7 +133,7 @@ export async function uploadPflichtdokumentKunde(fallId: string, pflichtdokument
     ? `claim/${claimId}/kundendokumente/${Date.now()}.${ext}`
     : `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
   const { error: uploadErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
-  if (uploadErr) throw new Error(uploadErr.message)
+  if (uploadErr) return { success: false, error: uploadErr.message }
 
   const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
   const { data: pd } = await supabase
@@ -154,6 +165,7 @@ export async function uploadPflichtdokumentKunde(fallId: string, pflichtdokument
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
   })
   revalidatePath(`/kunde/faelle/${fallId}`)
+  return { success: true }
 }
 
 /**
