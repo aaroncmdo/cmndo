@@ -8,6 +8,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { EyeIcon, FileTextIcon, Loader2Icon, UploadIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { getStorageUrl } from '@/lib/storage/url'
 import { uploadAnschlussschreiben } from '../../../../app/faelle/[id]/_actions'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 
@@ -39,8 +40,12 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
         setUploading(false)
         return
       }
-      const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
-      const r = await uploadAnschlussschreiben(fallId, urlData.publicUrl, file.name)
+      const url = await getStorageUrl(supabase, 'fall-dokumente', path)
+      if (!url) {
+        setUploading(false)
+        return
+      }
+      const r = await uploadAnschlussschreiben(fallId, url, file.name)
       if (!r.success) {
         console.error('[AnschlussschreibenUploadBlock] uploadAnschlussschreiben:', r.error)
       }

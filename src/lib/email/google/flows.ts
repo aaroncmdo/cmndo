@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
 import { sendEmail } from './client'
 import { render } from '@react-email/render'
 // AAR-branding-rest: SV-Whitelabel für Kunden-gerichtete Mails (null = Claimondo)
@@ -373,8 +374,12 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
 
   async function attachFromStorage(d: Row, wunschdateiname: string): Promise<void> {
     if (!d.storage_path) return
-    const { data: pub } = db.storage.from('fall-dokumente').getPublicUrl(d.storage_path)
-    const url = pub.publicUrl
+    // Server-Fetch + Buffer-Embedding — URL nicht persistiert, kurze TTL reicht.
+    const url = await getStorageUrl(db, 'fall-dokumente', d.storage_path, { ttl: STORAGE_TTL.download })
+    if (!url) {
+      console.error('[AAR-kanzlei-portal] URL-Generierung fehlgeschlagen für', d.storage_path)
+      return
+    }
     try {
       const res = await fetch(url)
       if (!res.ok) {
@@ -408,11 +413,17 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
   }
 
   // Download-Links für alle Nicht-Attachment-Dokumente (+ auch die attachments,
-  // falls der Empfänger den Link bevorzugt)
-  const dokumenteLinks = dokumente
-    .filter((d) => d.storage_path)
-    .map((d) => {
-      const { data: pub } = db.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string)
+  // falls der Empfänger den Link bevorzugt). TTL 7d damit Anwälte/Kanzleien
+  // den Link auch nach Tagen noch öffnen können — wenn das in Praxis ein
+  // Leak-Risiko ist, ist der Folge-Schritt Auth-Proxy-Route (siehe Plan §C
+  // Option 2: /api/file/[token]/...).
+  const docsMitPath = dokumente.filter((d) => d.storage_path)
+  const dokumenteLinks = (await Promise.all(
+    docsMitPath.map(async (d) => {
+      const url = await getStorageUrl(db, 'fall-dokumente', d.storage_path as string, {
+        ttl: STORAGE_TTL.email,
+      })
+      if (!url) return null
       const typKey = (d.dokument_typ ?? d.kategorie ?? '').toLowerCase()
       const typLabel = TYP_LABEL[typKey] ?? (typKey || 'Dokument')
       const label = d.original_filename
@@ -425,10 +436,11 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
       return {
         id: d.id,
         label,
-        url: pub.publicUrl,
+        url,
         meta: meta || undefined,
       }
-    })
+    }),
+  )).filter((x): x is NonNullable<typeof x> => x !== null)
 
   const props = {
     fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
