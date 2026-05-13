@@ -53,10 +53,14 @@ export async function deleteFall(fallId: string): Promise<{ success: boolean; er
   }
 }
 
-export async function deactivateFall(fallId: string, grund: string, notiz: string) {
+export async function deactivateFall(
+  fallId: string,
+  grund: string,
+  notiz: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   await supabase.from('faelle').update({
     ist_aktiv: false, deaktiviert_am: new Date().toISOString(),
@@ -72,12 +76,15 @@ export async function deactivateFall(fallId: string, grund: string, notiz: strin
 
   revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
+  return { success: true }
 }
 
-export async function reactivateFall(fallId: string) {
+export async function reactivateFall(
+  fallId: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   await supabase.from('faelle').update({
     ist_aktiv: true, deaktiviert_am: null, deaktiviert_grund: null,
@@ -91,4 +98,5 @@ export async function reactivateFall(fallId: string) {
 
   revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/admin/faelle')
+  return { success: true }
 }

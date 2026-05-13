@@ -181,10 +181,13 @@ export async function uebergebeFallKlage(
 }
 
 // AAR-684 Phase 2: Eskalation — setzt vs_eskalationsstufe + Timeline.
-export async function eskalation(fallId: string, stufe: string) {
+export async function eskalation(
+  fallId: string,
+  stufe: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const stufeKey = stufe.toLowerCase()
   await supabase
@@ -201,4 +204,5 @@ export async function eskalation(fallId: string, stufe: string) {
   })
 
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }

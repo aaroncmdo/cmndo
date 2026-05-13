@@ -10,22 +10,27 @@ import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { createNotification } from '@/lib/notifications'
 import { emitEvent } from '@/lib/notifications/emit'
 
-export async function uploadGutachten(fallId: string, formData: FormData) {
+type ActionResult = { success?: boolean; error?: string }
+
+export async function uploadGutachten(
+  fallId: string,
+  formData: FormData,
+): Promise<ActionResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { error: 'Nicht angemeldet' }
 
   const file = formData.get('datei') as File
   const betrag = parseFloat(formData.get('betrag') as string)
 
-  if (!file || file.size === 0) throw new Error('Bitte eine PDF-Datei auswählen')
-  if (isNaN(betrag) || betrag <= 0) throw new Error('Bitte einen gültigen Betrag eingeben')
-  if (file.type !== 'application/pdf') throw new Error('Nur PDF-Dateien sind erlaubt')
+  if (!file || file.size === 0) return { error: 'Bitte eine PDF-Datei auswählen' }
+  if (isNaN(betrag) || betrag <= 0) return { error: 'Bitte einen gültigen Betrag eingeben' }
+  if (file.type !== 'application/pdf') return { error: 'Nur PDF-Dateien sind erlaubt' }
 
   // Verify the case belongs to this gutachter
   const sv = await getGutachterForUser(supabase, user.id, 'id')
 
-  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
+  if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
   const { data: fall } = await supabase
     .from('faelle')
@@ -34,7 +39,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
     .eq('sv_id', sv.id)
     .single()
 
-  if (!fall) throw new Error('Fall nicht gefunden')
+  if (!fall) return { error: 'Fall nicht gefunden' }
 
   // Upload PDF to storage
   const timestamp = Date.now()
@@ -44,7 +49,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
     .from('fall-dokumente')
     .upload(filePath, file)
 
-  if (uploadError) throw new Error(`Upload fehlgeschlagen: ${uploadError.message}`)
+  if (uploadError) return { error: `Upload fehlgeschlagen: ${uploadError.message}` }
 
   const { data: urlData } = supabase.storage
     .from('fall-dokumente')
@@ -65,7 +70,7 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   }).select('id').single()
 
-  if (docError) throw new Error(`Dokument-Eintrag fehlgeschlagen: ${docError.message}`)
+  if (docError) return { error: `Dokument-Eintrag fehlgeschlagen: ${docError.message}` }
 
   // Update gutachten data (status via state-machine separat)
   await supabase
@@ -232,21 +237,25 @@ export async function uploadGutachten(fallId: string, formData: FormData) {
   revalidatePath('/gutachter/faelle')
   revalidatePath('/gutachter')
   revalidatePath('/gutachter/abrechnung')
+  return { success: true }
 }
 
-export async function uploadDokument(fallId: string, formData: FormData) {
+export async function uploadDokument(
+  fallId: string,
+  formData: FormData,
+): Promise<ActionResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { error: 'Nicht angemeldet' }
 
   const file = formData.get('file') as File
   const pflichtdokumentId = formData.get('pflichtdokument_id') as string | null
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
+  if (!file || file.size === 0) return { error: 'Keine Datei ausgewählt' }
 
   // Verify the case belongs to this gutachter
   const sv = await getGutachterForUser(supabase, user.id, 'id')
 
-  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
+  if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
   const { data: fall } = await supabase
     .from('faelle')
@@ -255,7 +264,7 @@ export async function uploadDokument(fallId: string, formData: FormData) {
     .eq('sv_id', sv.id)
     .single()
 
-  if (!fall) throw new Error('Fall nicht gefunden')
+  if (!fall) return { error: 'Fall nicht gefunden' }
 
   // Upload file to storage (AAR-553: fall-dokumente-Bucket)
   const ext = file.name.split('.').pop() ?? 'bin'
@@ -265,7 +274,7 @@ export async function uploadDokument(fallId: string, formData: FormData) {
     .from('fall-dokumente')
     .upload(path, file)
 
-  if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
+  if (uploadErr) return { error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
   const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
 
@@ -318,7 +327,7 @@ export async function uploadDokument(fallId: string, formData: FormData) {
     sichtbar_fuer: sichtbarMap[kat] ?? ['admin', 'kundenbetreuer'],
   }).select('id').single()
 
-  if (insertErr) throw new Error(`Dokument-Eintrag fehlgeschlagen: ${insertErr.message}`)
+  if (insertErr) return { error: `Dokument-Eintrag fehlgeschlagen: ${insertErr.message}` }
 
   // AAR-501 N6: dokument.hochgeladen Event
   try {
@@ -359,16 +368,20 @@ export async function uploadDokument(fallId: string, formData: FormData) {
   })
 
   revalidatePath(`/gutachter/fall/${fallId}`)
+  return { success: true }
 }
 
-export async function saveFinVinGutachter(fallId: string, finVin: string) {
+export async function saveFinVinGutachter(
+  fallId: string,
+  finVin: string,
+): Promise<ActionResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { error: 'Nicht angemeldet' }
 
   // Verify this gutachter owns the case
   const sv = await getGutachterForUser(supabase, user.id, 'id')
-  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
+  if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
   const { data: fall } = await supabase
     .from('faelle')
@@ -376,11 +389,11 @@ export async function saveFinVinGutachter(fallId: string, finVin: string) {
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
-  if (!fall) throw new Error('Fall nicht gefunden')
+  if (!fall) return { error: 'Fall nicht gefunden' }
 
   const cleaned = finVin.trim().toUpperCase()
   if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(cleaned)) {
-    throw new Error('Ungueltige FIN. Muss 17 alphanumerische Zeichen lang sein.')
+    return { error: 'Ungültige FIN. Muss 17 alphanumerische Zeichen lang sein.' }
   }
 
   await supabase
@@ -412,22 +425,26 @@ export async function saveFinVinGutachter(fallId: string, finVin: string) {
   }).catch(() => {})
 
   revalidatePath(`/gutachter/fall/${fallId}`)
+  return { success: true }
 }
 
-export async function uploadDatei(fallId: string, formData: FormData) {
+export async function uploadDatei(
+  fallId: string,
+  formData: FormData,
+): Promise<ActionResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { error: 'Nicht angemeldet' }
 
   const file = formData.get('file') as File
   const kategorie = formData.get('kategorie') as string
-  if (!file || file.size === 0) throw new Error('Keine Datei ausgewählt')
-  if (!kategorie) throw new Error('Keine Kategorie angegeben')
+  if (!file || file.size === 0) return { error: 'Keine Datei ausgewählt' }
+  if (!kategorie) return { error: 'Keine Kategorie angegeben' }
 
   // Verify the case belongs to this gutachter
   const sv = await getGutachterForUser(supabase, user.id, 'id')
 
-  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
+  if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
   const { data: fall } = await supabase
     .from('faelle')
@@ -436,7 +453,7 @@ export async function uploadDatei(fallId: string, formData: FormData) {
     .eq('sv_id', sv.id)
     .single()
 
-  if (!fall) throw new Error('Fall nicht gefunden')
+  if (!fall) return { error: 'Fall nicht gefunden' }
 
   // Upload file to storage (AAR-553: fall-dokumente-Bucket)
   const ext = file.name.split('.').pop() ?? 'bin'
@@ -446,7 +463,7 @@ export async function uploadDatei(fallId: string, formData: FormData) {
     .from('fall-dokumente')
     .upload(path, file)
 
-  if (uploadErr) throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`)
+  if (uploadErr) return { error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
   // CMM-23 Aaron-Spec: ein Doku-Pool für alle Akten-Beteiligten. SV-Uploads
   // sind standardmäßig auch für den Kunden sichtbar — er soll an gleicher
@@ -475,7 +492,7 @@ export async function uploadDatei(fallId: string, formData: FormData) {
     sichtbar_fuer,
   })
 
-  if (insertErr) throw new Error(`Dokument-Eintrag fehlgeschlagen: ${insertErr.message}`)
+  if (insertErr) return { error: `Dokument-Eintrag fehlgeschlagen: ${insertErr.message}` }
 
   // Timeline entry
   await supabase.from('timeline').insert({
@@ -489,18 +506,22 @@ export async function uploadDatei(fallId: string, formData: FormData) {
   revalidatePath(`/gutachter/fall/${fallId}`)
   revalidatePath('/gutachter/faelle')
   revalidatePath('/gutachter')
+  return { success: true }
 }
 
 /**
  * KFZ-118: Gutachter lehnt Termin ab (via Portal-Button)
  */
-export async function declineTermin(fallId: string, grund: string) {
+export async function declineTermin(
+  fallId: string,
+  grund: string,
+): Promise<ActionResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { error: 'Nicht angemeldet' }
 
   const sv = await getGutachterForUser(supabase, user.id, 'id')
-  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
+  if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
   // Verify fall belongs to this gutachter
   const { data: fall } = await supabase
@@ -509,7 +530,7 @@ export async function declineTermin(fallId: string, grund: string) {
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
-  if (!fall) throw new Error('Fall nicht gefunden')
+  if (!fall) return { error: 'Fall nicht gefunden' }
 
   // 1. gutachter_termine → abgelehnt
   // KFZ-136: Termin-IDs vor dem Update holen fuer Reminder-Cancel
@@ -597,20 +618,24 @@ export async function declineTermin(fallId: string, grund: string) {
   revalidatePath('/gutachter/faelle')
   revalidatePath('/gutachter/kalender')
   revalidatePath('/gutachter')
+  return { success: true }
 }
 
-export async function sendChatNachricht(fallId: string, nachricht: string) {
+export async function sendChatNachricht(
+  fallId: string,
+  nachricht: string,
+): Promise<ActionResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { error: 'Nicht angemeldet' }
 
   const trimmed = nachricht.trim()
-  if (!trimmed) throw new Error('Nachricht darf nicht leer sein')
+  if (!trimmed) return { error: 'Nachricht darf nicht leer sein' }
 
   // Verify gutachter has SV profile
   const sv = await getGutachterForUser(supabase, user.id, 'id')
 
-  if (!sv) throw new Error('Kein Sachverständigen-Profil gefunden')
+  if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
   // Verify fall belongs to this gutachter
   const { data: fall } = await supabase
@@ -620,7 +645,7 @@ export async function sendChatNachricht(fallId: string, nachricht: string) {
     .eq('sv_id', sv.id)
     .single()
 
-  if (!fall) throw new Error('Fall nicht gefunden')
+  if (!fall) return { error: 'Fall nicht gefunden' }
 
   // Insert message
   const { error: insertErr } = await supabase.from('nachrichten').insert({
@@ -633,9 +658,10 @@ export async function sendChatNachricht(fallId: string, nachricht: string) {
     hat_anhang: false,
   })
 
-  if (insertErr) throw new Error(`Nachricht konnte nicht gesendet werden: ${insertErr.message}`)
+  if (insertErr) return { error: `Nachricht konnte nicht gesendet werden: ${insertErr.message}` }
 
   revalidatePath(`/gutachter/fall/${fallId}`)
+  return { success: true }
 }
 
 // ─── KFZ-181 Trigger 24: Termin stornieren ─────────────────────────────────
