@@ -131,7 +131,7 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
           id="password"
           autoComplete="new-password"
           {...register('password')}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 w-full rounded-ios-sm border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           aria-invalid={!!errors.password}
         />
         <p className="mt-1 text-xs text-claimondo-ondo">
@@ -148,7 +148,7 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
           id="password_confirm"
           autoComplete="new-password"
           {...register('password_confirm')}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 w-full rounded-ios-sm border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           aria-invalid={!!errors.password_confirm}
         />
         {errors.password_confirm && (
@@ -159,7 +159,7 @@ export function SignupClient({ lead }: { lead: LeadMeta }) {
       </div>
 
       {showMaklerBox && (
-        <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-4">
+        <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-4">
           <div className="flex items-start gap-3">
             <Info className="mt-0.5 h-5 w-5 shrink-0 text-claimondo-ondo" />
             <div className="flex-1">

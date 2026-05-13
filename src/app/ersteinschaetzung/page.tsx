@@ -171,7 +171,7 @@ export default function ErsteinschaetzungPage() {
       {/* Was Sie bekommen */}
       <section className="py-12">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="glass-card rounded-3xl p-8">
+          <div className="glass-card rounded-ios-lg p-8">
             <h2
               className="mb-6 text-2xl font-bold text-claimondo-navy"
               style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
@@ -183,7 +183,7 @@ export default function ErsteinschaetzungPage() {
                 const Icon = p.icon
                 return (
                   <li key={p.text} className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10">
+                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                       <Icon className="h-4 w-4 text-claimondo-ondo" />
                     </div>
                     <span className="text-base text-claimondo-shield">{p.text}</span>
@@ -210,11 +210,11 @@ export default function ErsteinschaetzungPage() {
               return (
                 <div
                   key={s.nr}
-                  className="flex items-start gap-6 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md sm:p-7"
+                  className="flex items-start gap-6 rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md sm:p-7"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
                   <div className="flex-shrink-0">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-claimondo-ondo/10">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                       <Icon className="h-7 w-7 text-claimondo-ondo" />
                     </div>
                   </div>
@@ -238,7 +238,7 @@ export default function ErsteinschaetzungPage() {
       {/* Ab 750 € Info-Box */}
       <section className="py-8">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="rounded-3xl border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6">
+          <div className="rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6">
             <h3 className="mb-2 font-bold text-claimondo-navy">
               Ab ca. 750 € Schaden: Gutachten statt Kostenvoranschlag
             </h3>

@@ -210,7 +210,7 @@ export default function SchadensreportPage() {
       <section className="pb-12 sm:pb-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <article
-            className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
+            className="rounded-ios-lg border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
             style={{ WebkitBackdropFilter: 'blur(14px)' }}
           >
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
@@ -252,7 +252,7 @@ export default function SchadensreportPage() {
               damit AI-Engines + Screen-Reader die Spalten/Zeilen-Beziehung
               parsen. Vorher CSS-Grid in <article>-Blöcken — kein parsbares
               Tabellen-Schema. */}
-          <DataTableContainer variant="plain" className="mt-8 overflow-hidden rounded-3xl border border-white/60 bg-white/75 backdrop-blur-md">
+          <DataTableContainer variant="plain" className="mt-8 overflow-hidden rounded-ios-lg border border-white/60 bg-white/75 backdrop-blur-md">
             <Table>
               <caption className="sr-only">
                 Die 8 häufigsten Versicherungs-Kürzungspositionen in Kfz-Schadensregulierung
@@ -317,7 +317,7 @@ export default function SchadensreportPage() {
             ].map((m) => (
               <div
                 key={m.label}
-                className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
+                className="rounded-ios-md border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <div
@@ -337,7 +337,7 @@ export default function SchadensreportPage() {
           </div>
 
           <div
-            className="mt-6 rounded-2xl border-l-4 border-claimondo-light-blue bg-claimondo-light-blue/10 p-5 text-sm leading-relaxed text-claimondo-shield"
+            className="mt-6 rounded-ios-md border-l-4 border-claimondo-light-blue bg-claimondo-light-blue/10 p-5 text-sm leading-relaxed text-claimondo-shield"
           >
             <p className="font-bold text-claimondo-navy">Schlüssel-Erkenntnis:</p>
             <p className="mt-1">
@@ -378,7 +378,7 @@ export default function SchadensreportPage() {
           </p>
 
           {/* AAR-879: BVSK-Honorartabelle als semantische <table>. */}
-          <DataTableContainer variant="plain" className="mt-6 overflow-hidden rounded-3xl border border-white/60 bg-white/75 backdrop-blur-md">
+          <DataTableContainer variant="plain" className="mt-6 overflow-hidden rounded-ios-lg border border-white/60 bg-white/75 backdrop-blur-md">
             <Table>
               <caption className="sr-only">
                 BVSK-Honorartabelle 2025/2026 — Sachverständigen-Honorar nach
@@ -403,7 +403,7 @@ export default function SchadensreportPage() {
           </DataTableContainer>
 
           <p
-            className="mt-4 rounded-2xl border border-emerald-200/60 bg-emerald-50/80 px-4 py-3 text-sm leading-relaxed text-emerald-900"
+            className="mt-4 rounded-ios-md border border-emerald-200/60 bg-emerald-50/80 px-4 py-3 text-sm leading-relaxed text-emerald-900"
           >
             <strong>Bei Fremdverschulden zahlen Geschädigte 0 €.</strong> Das Honorar wird per
             Sicherungsabtretung (§164 BGB) direkt mit der gegnerischen Versicherung
@@ -429,7 +429,7 @@ export default function SchadensreportPage() {
             {NRW_REGIONAL.map((r) => (
               <article
                 key={r.stadt}
-                className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
+                className="rounded-ios-lg border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <div className="mb-2 flex items-center gap-2">
@@ -489,7 +489,7 @@ export default function SchadensreportPage() {
             ].map((item) => (
               <li
                 key={item}
-                className="flex items-start gap-2 rounded-xl border border-claimondo-border/60 bg-white/40 px-3.5 py-2.5 text-xs leading-snug text-claimondo-shield"
+                className="flex items-start gap-2 rounded-ios-md border border-claimondo-border/60 bg-white/40 px-3.5 py-2.5 text-xs leading-snug text-claimondo-shield"
               >
                 <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-claimondo-light-blue" />
                 {item}

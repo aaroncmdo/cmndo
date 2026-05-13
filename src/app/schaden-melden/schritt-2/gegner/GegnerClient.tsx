@@ -79,7 +79,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
   return (
     <form onSubmit={onSubmit} className="space-y-6" noValidate>
       {/* Flags */}
-      <div className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-4">
+      <div className="rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md p-4">
         <div className="space-y-3">
           <Controller
             control={control}
@@ -117,7 +117,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
       </div>
 
       {fahrerflucht ? (
-        <div className="flex gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="flex gap-3 rounded-ios-sm border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
           <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
           <p>
             <strong>Polizei-Aktenzeichen</strong> wird zur Weiterverarbeitung
@@ -199,7 +199,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
       </div>
 
       {/* Zeugen */}
-      <div className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-4">
+      <div className="rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md p-4">
         <div className="mb-3 flex items-center justify-between">
           <Label>Zeugen</Label>
           <Button
@@ -225,7 +225,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
             {fields.map((f, i) => (
               <li
                 key={f.id}
-                className="grid grid-cols-1 gap-2 rounded-lg border border-claimondo-border bg-claimondo-bg p-3 sm:grid-cols-[1fr_1fr_auto]"
+                className="grid grid-cols-1 gap-2 rounded-ios-sm border border-claimondo-border bg-claimondo-bg p-3 sm:grid-cols-[1fr_1fr_auto]"
               >
                 <div>
                   <Input
@@ -267,7 +267,7 @@ export function GegnerClient({ leadId, versicherer }: Props) {
         )}
       </div>
 
-      <div className="sticky bottom-4 flex items-center justify-end rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-4 shadow-[var(--shadow-claimondo-sm)]">
+      <div className="sticky bottom-4 flex items-center justify-end rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md p-4 shadow-[var(--shadow-claimondo-sm)]">
         <Button
           type="submit"
           tone="ondo"

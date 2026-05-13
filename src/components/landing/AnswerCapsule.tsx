@@ -11,7 +11,7 @@ type Props = {
 
 export function AnswerCapsule({ children, quelle }: Props) {
   return (
-    <div className="my-6 rounded-2xl border-l-4 border-claimondo-ondo bg-claimondo-bg p-5 shadow-sm">
+    <div className="my-6 rounded-ios-md border-l-4 border-claimondo-ondo bg-claimondo-bg p-5 shadow-sm">
       {quelle && (
         <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-claimondo-ondo">
           Direkt-Antwort · {quelle}

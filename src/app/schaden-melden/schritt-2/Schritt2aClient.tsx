@@ -104,7 +104,7 @@ export function Schritt2aClient({ leadId }: { leadId: string }) {
         <div
           onClick={onSvgClick}
           role="presentation"
-          className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-4 [&_.zone:hover]:fill-[var(--claimondo-ondo)] [&_.zone:hover]:fill-opacity-20 [&_.zone]:cursor-pointer"
+          className="rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md p-4 [&_.zone:hover]:fill-[var(--claimondo-ondo)] [&_.zone:hover]:fill-opacity-20 [&_.zone]:cursor-pointer"
           dangerouslySetInnerHTML={{ __html: SVG_INLINE }}
           data-active-zone={activeBereich}
         />
@@ -130,7 +130,7 @@ export function Schritt2aClient({ leadId }: { leadId: string }) {
           />
         ))}
 
-        <div className="sticky bottom-4 flex items-center justify-between rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-4 shadow-[var(--shadow-claimondo-sm)]">
+        <div className="sticky bottom-4 flex items-center justify-between rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md p-4 shadow-[var(--shadow-claimondo-sm)]">
           <p className="text-sm text-claimondo-ondo">
             {fotos.length < MIN_FOTOS
               ? `Noch ${MIN_FOTOS - fotos.length} Foto${MIN_FOTOS - fotos.length === 1 ? '' : 's'} bis zum nächsten Schritt`
@@ -235,7 +235,7 @@ function BereichSection({
       ref={sectionRef}
       id={`bereich-${bereich}`}
       className={[
-        'scroll-mt-6 rounded-xl border p-5 transition',
+        'scroll-mt-6 rounded-ios-md border p-5 transition',
         isActive ? 'border-claimondo-ondo bg-claimondo-bg' : 'border-claimondo-border bg-white',
       ].join(' ')}
     >
@@ -258,7 +258,7 @@ function BereichSection({
       <div
         {...getRootProps()}
         className={[
-          'flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition',
+          'flex cursor-pointer flex-col items-center justify-center rounded-ios-sm border-2 border-dashed p-6 text-center transition',
           isDragActive
             ? 'border-claimondo-ondo bg-claimondo-ondo/5'
             : 'border-claimondo-border bg-white hover:border-claimondo-ondo',
@@ -277,7 +277,7 @@ function BereichSection({
           {bereichFotos.map((f) => (
             <div
               key={f.url}
-              className="group relative aspect-square overflow-hidden rounded-lg border border-claimondo-border"
+              className="group relative aspect-square overflow-hidden rounded-ios-sm border border-claimondo-border"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

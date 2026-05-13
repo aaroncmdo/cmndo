@@ -423,7 +423,7 @@ export default function OnboardingWizard({
 
       <div className="flex-1 flex flex-col px-5 pt-16 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
+          <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-claimondo-md">
             {/* Welcome */}
             {currentStep.id === 'welcome' && (
               <div>
@@ -841,7 +841,7 @@ function DokumentInfoOverlay({
       aria-label={`Hinweise zu ${label}`}
     >
       <div
-        className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 pb-8 sm:pb-6"
+        className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-claimondo-lg p-6 pb-8 sm:pb-6"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 mb-4">

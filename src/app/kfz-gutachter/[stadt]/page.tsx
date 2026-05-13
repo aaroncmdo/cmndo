@@ -350,7 +350,7 @@ export default async function KfzGutachterStadtPage({
             {BGH_URTEILE.map((u) => (
               <article
                 key={u.az}
-                className="rounded-2xl border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-claimondo-sm"
+                className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-claimondo-sm"
               >
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-claimondo-navy">
                   {u.az}
@@ -384,7 +384,7 @@ export default async function KfzGutachterStadtPage({
             {PROZESS_STEPS.map((step) => (
               <li
                 key={step.nr}
-                className="relative rounded-2xl border border-claimondo-border bg-white p-6 shadow-claimondo-sm"
+                className="relative rounded-ios-md border border-claimondo-border bg-white p-6 shadow-claimondo-sm"
               >
                 <span className="absolute -top-3 left-6 inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                   Schritt {step.nr}
@@ -415,7 +415,7 @@ export default async function KfzGutachterStadtPage({
             </h2>
           </div>
           <div className="mt-12 grid items-center gap-10 md:grid-cols-[1.2fr_1fr]">
-            <div className="overflow-hidden rounded-3xl border border-claimondo-border bg-claimondo-bg shadow-claimondo-sm">
+            <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg shadow-claimondo-sm">
               <Image
                 src="/marketing-landing-koeln/nrw-karte.png"
                 alt="Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, deutschlandweite Anbindung"
@@ -470,7 +470,7 @@ export default async function KfzGutachterStadtPage({
             {faqs.map((f) => (
               <details
                 key={f.frage}
-                className="group rounded-2xl border border-claimondo-border bg-white p-5"
+                className="group rounded-ios-md border border-claimondo-border bg-white p-5"
               >
                 <summary className="flex cursor-pointer list-none items-center justify-between text-base font-bold text-claimondo-navy">
                   <span>{f.frage}</span>

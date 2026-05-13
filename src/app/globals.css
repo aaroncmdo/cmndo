@@ -170,6 +170,21 @@ p, li, blockquote, article, .prose {
   --shadow-claimondo-md: 0 4px 6px -1px rgba(13, 27, 62, 0.06), 0 2px 4px -2px rgba(13, 27, 62, 0.04);
   --shadow-claimondo-lg: 0 10px 25px -5px rgba(13, 27, 62, 0.1), 0 8px 10px -6px rgba(13, 27, 62, 0.06);
 
+  /* 2026-05-13 Token-Audit: Hover- und Soft-Tint-Varianten für Brand-Primary
+     und Secondary. Werte matchen CLAIMONDO_DEFAULT_THEME aus
+     src/lib/branding/theme.ts — wenn resolveBrandTheme() läuft, werden diese
+     durch die Whitelabel-Werte überschrieben (via css-vars.ts). Auf
+     Marketing-Pages ohne Brand-Provider greifen diese Defaults.
+       --claimondo-navy-hover:  #1A2A55  (heller Navy-Hover für CTAs/Bubbles)
+       --claimondo-navy-soft:   #E8EDF5  (Light-Navy-Tint für Selected-Cards)
+       --claimondo-ondo-soft:   #EEF3F9  (Light-Ondo-Tint für Selected-Pills) */
+  --claimondo-navy-hover: #1A2A55;
+  --claimondo-navy-soft:  #E8EDF5;
+  --claimondo-ondo-soft:  #EEF3F9;
+  --brand-primary-hover: var(--brand-primary-hover-override, var(--claimondo-navy-hover));
+  --brand-primary-soft:  var(--brand-primary-soft-override,  var(--claimondo-navy-soft));
+  --brand-secondary-soft: var(--brand-secondary-soft-override, var(--claimondo-ondo-soft));
+
   /* AAR-745d (2026-05-13): Radius-Tokens passend zu src/lib/design-tokens.ts.
      `sheet` ist die Sonderform für rounded-[36px]-Sheets/Modals (7+ Stellen).
      Tailwind v4 generiert daraus rounded-claimondo-{sm,md,lg,sheet}. */
@@ -481,6 +496,34 @@ p, li, blockquote, article, .prose {
    entfernt, .glass-bg als Body-Surface bleibt hier. */
 .glass-bg {
   background: #f8f9fb;
+}
+
+/* 2026-05-13 Marketing-Glass-Cards: .glass-card und .glass-card-sm werden
+   auf Landing-Pages (ueber-uns, vorteile, faq, beratung-anfragen, makler,
+   kfz-gutachter, landing/FounderSection, landing/LandingSteps, landing/
+   LandingTrust) als Surface verwendet, waren aber nach AAR-727-Cleanup
+   nicht in globals.css enthalten — Browser hat sie still ignoriert. Werte
+   matchen die TAILWIND.md-Referenz aus dem Marketing-Köln-Handover. */
+.glass-card {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(248, 249, 251, 0.72) 60%,
+    rgba(228, 231, 239, 0.62) 100%);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 20px 60px rgba(13, 27, 62, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(13, 27, 62, 0.04);
+}
+.glass-card-sm {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(248, 249, 251, 0.70) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
 }
 
 /* ─── Droplet-UI: Tropfen-Animationen ───────────────────────────────────── */
