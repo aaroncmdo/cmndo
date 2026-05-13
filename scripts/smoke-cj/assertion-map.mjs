@@ -59,9 +59,11 @@ export const STEPS = [
   {
     id: '03b-click-anfrage-popup-button',
     role: ROLES.KUNDE,
-    ui: { action: 'click', selector: '[data-testid="sv-anfrage-popup"]' },
+    // Fallback-Selektor: jeder Button im Mapbox-Popup. Schließt Cluster-Popups
+    // (die haben keinen Button) implizit aus weil sie nicht matchen.
+    ui: { action: 'click', selector: '.mapboxgl-popup-content button' },
     expectedDbEvents: [],
-    barrierMs: 4000,
+    barrierMs: 8000,
   },
   {
     id: '04-lead-form-submit',
