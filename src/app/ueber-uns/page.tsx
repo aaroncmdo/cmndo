@@ -176,33 +176,56 @@ export default async function UeberUnsPage() {
 
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero — Glass mit Spotlights */}
-      <section className="relative isolate overflow-hidden py-16 sm:py-20">
+      {/* Hero — Navy Premium-Pattern (analog /, /vorteile, /wie-es-funktioniert, /faq) */}
+      <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="ueber-uns-hero">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
+          className="pointer-events-none absolute inset-0"
           style={{
             background: [
-              'radial-gradient(circle at 18% 12%, rgba(123,163,204,0.22), transparent 50%)',
-              'radial-gradient(circle at 82% 30%, rgba(69,115,162,0.14), transparent 45%)',
+              'radial-gradient(circle at 15% 20%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 85% 75%, rgba(123,163,204,0.18), transparent 50%)',
             ].join(', '),
           }}
         />
-        <div className="mx-auto max-w-3xl px-5 text-center sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
-            <Sparkles className="h-3.5 w-3.5" />
+        <div className="relative mx-auto max-w-3xl px-5 py-16 text-center sm:py-24">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md sm:text-sm">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {t('hero.eyebrow')}
           </div>
           <h1
-            className="text-balance text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
+            id="ueber-uns-hero"
+            className="mt-5 text-balance text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             {t('hero.headline')}{' '}
-            <span className="text-claimondo-ondo">{t('hero.headline_accent')}</span>
+            <span className="text-claimondo-light-blue">{t('hero.headline_accent')}</span>
           </h1>
-          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-balance text-base text-white/80 sm:text-lg">
             {t('hero.subline')}
           </p>
+        </div>
+      </section>
+
+      {/* Trust-Strip */}
+      <section className="border-y border-claimondo-border/60 bg-white" aria-label="Brand-Kennzahlen">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">2025</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">in Köln gegründet</div>
+          </div>
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">110+</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">DAT-Sachverständige</div>
+          </div>
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">72</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">Städte mit Premium-Page</div>
+          </div>
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">+33 %</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">durchgesetzter Anspruch Ø</div>
+          </div>
         </div>
       </section>
 
