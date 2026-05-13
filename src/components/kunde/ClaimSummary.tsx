@@ -163,7 +163,7 @@ export default function ClaimSummary({
         {/* Fahrzeug-Logo im Header — kompakt, dunkel */}
         <div
           className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, var(--brand-primary, #0D1B3E) 0%, var(--brand-primary-dark, #14254f) 100%)' }}
+          style={{ background: 'linear-gradient(135deg, var(--brand-primary, #0D1B3E) 0%, var(--brand-primary-active, #14254f) 100%)' }}
         >
           <FahrzeugRenderImage
             hersteller={data.fahrzeug_hersteller}

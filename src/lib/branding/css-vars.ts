@@ -70,10 +70,13 @@ export function generateCssVars(
     '--brand-sidebar-active': t.sidebarActive,
     '--brand-sidebar-hover': t.sidebarHover,
 
-    // V2 Status
+    // V2 Status (mit Soft-Varianten für Background-Pillen)
     '--brand-success': t.success,
+    '--brand-success-soft': t.successSoft,
     '--brand-warning': t.warning,
+    '--brand-warning-soft': t.warningSoft,
     '--brand-danger': t.danger,
+    '--brand-danger-soft': t.dangerSoft,
     '--brand-info': t.info,
   } as React.CSSProperties
 }
