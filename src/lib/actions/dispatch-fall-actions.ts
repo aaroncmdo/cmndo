@@ -744,10 +744,13 @@ async function convertLeadToFall(
     })
     .eq('id', leadId)
 
-  // 5b. KFZ-146: Alle verbundenen Daten (Calls, Tasks, Emails, Termine, Nachrichten, Dokumente) verlinken
+  // 5b. KFZ-146: Alle verbundenen Daten (Calls, Tasks, Emails, Termine, Nachrichten, Dokumente) verlinken.
+  // link_lead_data_to_fall ist SECURITY DEFINER und EXECUTE wurde für anon/authenticated
+  // revoked (#953) → service-role-Client zwingend.
   type LinkResult = { calls: number; tasks: number; emails: number; termine: number; nachrichten: number; dokumente: number }
   let linked: LinkResult = { calls: 0, tasks: 0, emails: 0, termine: 0, nachrichten: 0, dokumente: 0 }
-  const { data: linkData, error: linkErr } = await supabase.rpc('link_lead_data_to_fall', {
+  const service = createServiceClient()
+  const { data: linkData, error: linkErr } = await service.rpc('link_lead_data_to_fall', {
     p_lead_id: leadId,
     p_fall_id: fall.id,
   })

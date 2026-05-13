@@ -4,6 +4,7 @@
 // KFZ-120.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export async function deleteFall(fallId: string): Promise<{ success: boolean; error?: string }> {
@@ -23,13 +24,13 @@ export async function deleteFall(fallId: string): Promise<{ success: boolean; er
     const { data: fall, error: findErr } = await supabase.from('faelle').select('id').eq('id', fallId).single()
     if (findErr || !fall) return { success: false, error: 'Fall nicht gefunden' }
 
-    const { error: rpcErr } = await supabase.rpc('delete_fall_komplett', { p_fall_id: fallId })
+    // delete_fall_komplett ist SECURITY DEFINER und EXECUTE wurde für
+    // anon/authenticated revoked (#953) → admin-Client zwingend.
+    const admin = createAdminClient()
+    const { error: rpcErr } = await admin.rpc('delete_fall_komplett', { p_fall_id: fallId })
 
     if (rpcErr) {
       console.error('[deleteFall] RPC error, nutze Fallback:', rpcErr.message)
-
-      const { createAdminClient } = await import('@/lib/supabase/admin')
-      const admin = createAdminClient()
 
       const tables = [
         'lead_historie', 'pflichtdokumente', 'qc_checkliste', 'forderungspositionen',
