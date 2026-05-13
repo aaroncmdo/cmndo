@@ -9,6 +9,7 @@ import { createReklamation } from './actions'
 import { REKLAMATIONS_GRUENDE } from './constants'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
+import { liquidField } from '@/lib/styles/liquid-field'
 
 type Reklamation = {
   id: string
@@ -135,7 +136,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           <div>
             <label className="block text-xs font-medium text-claimondo-navy mb-1">Fall</label>
             <select value={form.fallId} onChange={e => setForm(f => ({ ...f, fallId: e.target.value }))}
-              className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-claimondo-md px-4 py-3 text-sm text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" required>
+              className={liquidField} required>
               <option value="">Bitte Fall wählen</option>
               {faelle.map(f => (
                 <option key={f.id} value={f.id}>
@@ -148,7 +149,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           <div>
             <label className="block text-xs font-medium text-claimondo-navy mb-1">Grund</label>
             <select value={form.grund} onChange={e => setForm(f => ({ ...f, grund: e.target.value }))}
-              className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-claimondo-md px-4 py-3 text-sm text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" required>
+              className={liquidField} required>
               <option value="">Bitte Grund wählen</option>
               {REKLAMATIONS_GRUENDE.map(g => (
                 <option key={g.value} value={g.value}>{g.label}</option>
@@ -161,7 +162,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
               Begründung <span className="text-claimondo-ondo/70">(min. 30 Zeichen, {form.begruendung.length}/30)</span>
             </label>
             <textarea value={form.begruendung} onChange={e => setForm(f => ({ ...f, begruendung: e.target.value }))}
-              rows={4} className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-claimondo-md px-4 py-3 text-sm text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo resize-none" required minLength={30} />
+              rows={4} className={`${liquidField} resize-none`} required minLength={30} />
           </div>
 
           {error && <p className="text-sm text-red-500 bg-red-50 p-2 rounded">{error}</p>}
