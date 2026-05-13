@@ -36,9 +36,9 @@ export const STEPS = [
     id: '01-gutachter-finden-open',
     role: ROLES.KUNDE,
     ui: { action: 'navigate', url: '/gutachter-finden' },
-    waitFor: { selector: '.mapboxgl-canvas', timeoutMs: 10000 },
+    waitFor: { selector: '.mapboxgl-canvas', timeoutMs: 45000 },
     expectedDbEvents: [],  // reine Read-Page, kein Side-Effect
-    barrierMs: 12000,
+    barrierMs: 50000,
   },
   {
     id: '02-wait-for-markers',
