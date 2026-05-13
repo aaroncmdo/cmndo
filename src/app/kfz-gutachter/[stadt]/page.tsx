@@ -9,6 +9,12 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
+import { FounderSection } from '@/components/landing/FounderSection'
+import { VersichererTaktikenSection } from '@/components/landing/VersichererTaktikenSection'
+import { SiebenFehlerSection } from '@/components/landing/SiebenFehlerSection'
+import { PortalMockupSection } from '@/components/landing/sections/PortalMockupSection'
+import { WertminderungSandenDannerSection } from '@/components/landing/sections/WertminderungSandenDannerSection'
+import { TeslaEAutoSection } from '@/components/landing/sections/TeslaEAutoSection'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
@@ -357,6 +363,12 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
+      {/* 5b — Portal-Mockup (Wie Uber) */}
+      <PortalMockupSection />
+
+      {/* 5c — Versicherer-Taktiken (Wissensdatenbank §2, §15) */}
+      <VersichererTaktikenSection />
+
       {/* 6 — Prozess */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="prozess-stadt-heading">
         <div className="mx-auto max-w-6xl px-5">
@@ -384,6 +396,12 @@ export default async function KfzGutachterStadtPage({
           </ol>
         </div>
       </section>
+
+      {/* 6b — Wertminderung Sanden/Danner-Tabelle */}
+      <WertminderungSandenDannerSection />
+
+      {/* 6c — 7 Fehler nach Unfall (Wissensdatenbank §12) */}
+      <SiebenFehlerSection />
 
       {/* 7 — Einsatzgebiet / Cross-City */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="einsatzgebiet-stadt-heading">
@@ -430,6 +448,12 @@ export default async function KfzGutachterStadtPage({
           </div>
         </div>
       </section>
+
+      {/* 7b — Tesla / E-Auto Spezial */}
+      <TeslaEAutoSection />
+
+      {/* 7c — Gründer Trust-Anker */}
+      <FounderSection />
 
       {/* 8 — FAQ */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="faq-stadt-heading">
