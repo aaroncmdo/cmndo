@@ -89,7 +89,7 @@ function fmtEuro(v: unknown): string | null {
 
 const KUERZUNGSTYP_LABEL: Record<string, { label: string; color: string }> = {
   technisch: { label: 'Technisch', color: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
-  argumentativ: { label: 'Argumentativ', color: 'bg-purple-50 text-purple-800 border-purple-200' },
+  argumentativ: { label: 'Argumentativ', color: 'bg-claimondo-ondo/[0.06] text-claimondo-navy border-claimondo-ondo/30' },
   gemischt: { label: 'Gemischt', color: 'bg-amber-50 text-amber-800 border-amber-200' },
 }
 
@@ -252,8 +252,8 @@ export function VsReaktionSection() {
 
       {/* Quote-Pfad */}
       {isQuote && (
-        <div className="rounded-md border border-purple-200 bg-purple-50 p-3 space-y-2">
-          <h4 className="text-xs font-semibold text-purple-900">VS quotiert</h4>
+        <div className="rounded-md border border-claimondo-ondo/30 bg-claimondo-ondo/[0.06] p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-claimondo-navy">VS quotiert</h4>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Info label="Quote (%)" value={quoteProzent} />
             <Info label="Geforderte Summe" value={fmtEuro(geforderteSumme)} />
@@ -279,7 +279,7 @@ export function VsReaktionSection() {
               >
                 Quote akzeptieren
               </button>
-              <p className="text-[11px] text-purple-700 self-center">
+              <p className="text-[11px] text-claimondo-navy self-center">
                 Ablehnen → öffnet Rüge-Vorbereitung (Phase-Header „Kanzlei-Paket einlesen&quot;).
               </p>
             </div>
@@ -546,13 +546,13 @@ export function NachbesichtigungSection() {
       </div>
 
       {vorschlaege.length > 0 && !terminAm && (
-        <div className="rounded-md border border-violet-200 bg-violet-50 p-3 space-y-2">
-          <h4 className="text-xs font-semibold text-violet-900">Termin-Vorschläge vom Kunden</h4>
+        <div className="rounded-md border border-claimondo-ondo/30 bg-claimondo-ondo/[0.06] p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-claimondo-navy">Termin-Vorschläge vom Kunden</h4>
           <ul className="space-y-1.5">
             {vorschlaege.map((t, i) => (
               <li
                 key={`${t.datum}-${t.uhrzeit}-${i}`}
-                className="flex items-center justify-between gap-2 text-[11px] bg-white border border-violet-100 rounded px-2 py-1.5"
+                className="flex items-center justify-between gap-2 text-[11px] bg-white border border-claimondo-ondo/20 rounded px-2 py-1.5"
               >
                 <span className="font-medium text-claimondo-navy">
                   {fmtDate(t.datum)} · {t.uhrzeit}
@@ -561,7 +561,7 @@ export function NachbesichtigungSection() {
                   type="button"
                   disabled={pending}
                   onClick={() => bestaetige(t)}
-                  className="px-2 py-1 rounded bg-claimondo-navy text-white text-[10px] font-medium hover:bg-violet-700 disabled:opacity-50"
+                  className="px-2 py-1 rounded bg-claimondo-navy text-white text-[10px] font-medium hover:bg-claimondo-navy disabled:opacity-50"
                 >
                   Bestätigen
                 </button>
@@ -579,7 +579,7 @@ export function NachbesichtigungSection() {
       )}
 
       {konfrontation === true && (
-        <div className="rounded-md bg-violet-50 border border-violet-200 p-2 text-[11px] text-violet-800">
+        <div className="rounded-md bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 p-2 text-[11px] text-claimondo-navy">
           Konfrontations-Termin aktiv — SV-Dispatch-Lite (AAR-561 C12) wurde
           ausgelöst. SV wurde benachrichtigt und kann in seiner Fallakte annehmen.
         </div>

@@ -83,10 +83,10 @@ export default async function KanzleiSlaStatusCard({ fallId }: { fallId: string 
             : 'violet'
           const toneCls =
             tone === 'rose'
-              ? 'border-rose-300 bg-rose-50 text-rose-900'
+              ? 'border-red-300 bg-red-50 text-red-900'
               : tone === 'amber'
                 ? 'border-amber-300 bg-amber-50 text-amber-900'
-                : 'border-violet-300 bg-violet-50 text-violet-900'
+                : 'border-claimondo-ondo/50 bg-claimondo-ondo/[0.06] text-claimondo-navy'
 
           const label = SLA_LABEL[sla.sla_typ] ?? sla.sla_typ
 

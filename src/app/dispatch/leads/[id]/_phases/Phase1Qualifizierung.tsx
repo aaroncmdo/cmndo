@@ -608,7 +608,7 @@ export default function Phase1Qualifizierung() {
               </>
             )}
             <label className={`flex items-center gap-1.5 text-[11px] cursor-pointer rounded-lg p-1.5 ${
-              isAuffahrunfall ? 'bg-rose-50 border border-rose-200 text-rose-900' : 'text-claimondo-navy'
+              isAuffahrunfall ? 'bg-red-50 border border-red-200 text-red-900' : 'text-claimondo-navy'
             }`}>
               <input type="checkbox" checked={draft.personenschaden_flag ?? false} onChange={e => setDraft(d => ({ ...d, personenschaden_flag: e.target.checked }))} className="w-3.5 h-3.5" />
               <UserPlusIcon className="w-3.5 h-3.5" />
@@ -656,7 +656,7 @@ export default function Phase1Qualifizierung() {
       {draft.personenschaden_flag === true && (
         <div className="space-y-2 border-t border-claimondo-border pt-4">
           <div className="flex items-center gap-2">
-            <UserPlusIcon className="w-4 h-4 text-rose-600" />
+            <UserPlusIcon className="w-4 h-4 text-red-600" />
             <h3 className="text-xs font-semibold text-claimondo-navy">
               Verletzte Personen
             </h3>

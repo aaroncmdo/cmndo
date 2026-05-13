@@ -148,7 +148,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
         {mode === 'reguliert' && (
           <div>
             <label className="block text-xs font-medium text-claimondo-navy mb-1">
-              Regulierungsbetrag (EUR) <span className="text-rose-600">*</span>
+              Regulierungsbetrag (EUR) <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
@@ -156,7 +156,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
               value={regulierungsBetrag}
               onChange={(e) => setRegulierungsBetrag(e.target.value)}
               placeholder="z.B. 4500.00"
-              className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             />
           </div>
         )}
@@ -164,12 +164,12 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
         {mode === 'abgelehnt' && (
           <div>
             <label className="block text-xs font-medium text-claimondo-navy mb-1">
-              Ablehnungsgrund <span className="text-rose-600">*</span>
+              Ablehnungsgrund <span className="text-red-600">*</span>
             </label>
             <select
               value={vsAblehnungsGrund}
               onChange={(e) => setVsAblehnungsGrund(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             >
               {ABLEHNUNGS_GRUENDE.map((g) => (
                 <option key={g.value} value={g.value}>{g.label}</option>
@@ -181,7 +181,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
         {/* Begründung — immer Pflicht */}
         <div>
           <label className="block text-xs font-medium text-claimondo-navy mb-1">
-            Begründung (Audit) <span className="text-rose-600">*</span>
+            Begründung (Audit) <span className="text-red-600">*</span>
           </label>
           <textarea
             value={grund}
@@ -193,7 +193,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
               : mode === 'storniert'  ? 'z.B. „Kunde wünscht Abbruch der Bearbeitung"'
               :                          'z.B. „Telefonat mit Frau Müller von Allianz, Az 123/456"'
             }
-            className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+            className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
           />
         </div>
 
@@ -228,12 +228,12 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
         </label>
 
         {/* Actions */}
-        <div className="flex gap-2 justify-end pt-2 border-t border-[#E2E8F3]">
+        <div className="flex gap-2 justify-end pt-2 border-t border-claimondo-border">
           <button
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="px-4 py-2 rounded-lg border border-[#E2E8F3] text-sm text-claimondo-light-blue hover:bg-claimondo-bg disabled:opacity-50"
+            className="px-4 py-2 rounded-lg border border-claimondo-border text-sm text-claimondo-light-blue hover:bg-claimondo-bg disabled:opacity-50"
           >
             Abbrechen
           </button>

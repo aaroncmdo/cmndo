@@ -156,7 +156,7 @@ export default function StammdatenAccordion({
                       <CheckCircle2Icon className="w-3.5 h-3.5" /> Ja
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-sm text-rose-700">
+                    <span className="inline-flex items-center gap-1 text-sm text-red-700">
                       <XCircleIcon className="w-3.5 h-3.5" /> Nein
                     </span>
                   )}

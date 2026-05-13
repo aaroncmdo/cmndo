@@ -287,7 +287,7 @@ export default function SvDispatchPanel({
           type="button"
           disabled={pending}
           onClick={handleCancel}
-          className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-claimondo-ondo hover:bg-[#3a6290] text-white disabled:opacity-50"
+          className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-claimondo-ondo hover:bg-claimondo-shield text-white disabled:opacity-50"
         >
           Termin schließen + neuen SV wählen
         </button>
@@ -455,7 +455,7 @@ export default function SvDispatchPanel({
             <button
               type="button"
               onClick={triggerSearch}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-claimondo-ondo hover:bg-[#3a6290] text-white text-sm font-medium"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium"
             >
               <SearchIcon className="w-4 h-4" />
               {loadError ? 'Erneut suchen' : 'Gutachter suchen'}
@@ -499,7 +499,7 @@ export default function SvDispatchPanel({
                   type="button"
                   onClick={triggerSearch}
                   disabled={pending || topLoading}
-                  className="text-[10px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
+                  className="text-[10px] text-claimondo-ondo hover:text-claimondo-shield flex items-center gap-1"
                 >
                   <RefreshCwIcon className="w-3 h-3" /> neu suchen
                 </button>

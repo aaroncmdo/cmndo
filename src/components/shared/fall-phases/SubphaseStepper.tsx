@@ -27,7 +27,7 @@ export function SubphaseStepper({
                 : sub.state === 'done'
                   ? 'text-[12px] text-claimondo-ondo'
                   : sub.state === 'blocked'
-                    ? 'text-[12px] font-medium text-rose-700'
+                    ? 'text-[12px] font-medium text-red-700'
                     : 'text-[12px] text-claimondo-ondo/70'
             }
           >

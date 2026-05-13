@@ -51,7 +51,7 @@ export function VersichererSelect({
   }, [open])
 
   const borderClass = error
-    ? 'border-rose-500 focus-within:border-rose-500'
+    ? 'border-red-500 focus-within:border-red-500'
     : 'border-claimondo-border focus-within:border-claimondo-ondo'
 
   return (
@@ -70,7 +70,7 @@ export function VersichererSelect({
         <span className="flex items-center gap-1">
           {selected ? (
             <X
-              className="h-4 w-4 cursor-pointer text-claimondo-ondo/70 hover:text-rose-500"
+              className="h-4 w-4 cursor-pointer text-claimondo-ondo/70 hover:text-red-500"
               role="button"
               aria-label="Auswahl entfernen"
               onClick={(e) => {

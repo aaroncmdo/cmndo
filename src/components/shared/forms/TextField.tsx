@@ -39,11 +39,11 @@ export function TextField({
       ) : null}
       <input
         id={fieldId}
-        className={`${INPUT_CLS} ${error ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-300/30' : ''} ${inputClassName ?? ''}`}
+        className={`${INPUT_CLS} ${error ? 'border-red-400 focus:border-red-400 focus:ring-red-300/30' : ''} ${inputClassName ?? ''}`}
         {...inputProps}
       />
       {error && error.trim() ? (
-        <span className="text-xs text-rose-700">{error}</span>
+        <span className="text-xs text-red-700">{error}</span>
       ) : hint ? (
         <span className="text-xs text-claimondo-shield">{hint}</span>
       ) : null}

@@ -225,7 +225,7 @@ export default function AuftragHeaderPanel({
                       istVerlegungWarn
                         ? 'text-amber-700'
                         : istQc
-                          ? 'text-violet-700'
+                          ? 'text-claimondo-navy'
                           : isCurrent
                             ? 'text-claimondo-navy'
                             : isDone
@@ -336,10 +336,10 @@ export default function AuftragHeaderPanel({
               <div className="min-w-0">
                 {istEigenerGegenvorschlag && fmtVorgeschlag ? (
                   <>
-                    <p className="text-sm font-semibold text-violet-900">
+                    <p className="text-sm font-semibold text-claimondo-navy">
                       Gegenvorschlag gesendet — {fmtVorgeschlag.datum}
                     </p>
-                    <p className="text-xs text-violet-700">
+                    <p className="text-xs text-claimondo-navy">
                       {fmtVorgeschlag.uhrzeit} Uhr · wartet auf Dispatcher-Entscheidung
                     </p>
                   </>

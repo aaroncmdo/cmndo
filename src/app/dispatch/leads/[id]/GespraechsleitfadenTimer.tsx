@@ -106,7 +106,7 @@ export default function GespraechsleitfadenTimer({
           </div>
         </div>
         <button type="button" disabled={pending} onClick={starte}
-          className="px-4 py-2 rounded-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-[#3a6290] disabled:opacity-50">
+          className="px-4 py-2 rounded-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50">
           {pending ? '...' : 'Gespräch starten'}
         </button>
       </div>

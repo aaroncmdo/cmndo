@@ -535,11 +535,11 @@ export default async function GutachterFallPage({
       )}
       {/* No-Show-Hinweis (faelle.no_show_count). */}
       {noShowCount > 0 && (
-        <div className="rounded-2xl border-2 border-rose-300 bg-rose-50 p-4">
-          <p className="text-sm font-semibold text-rose-900">
+        <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">
+          <p className="text-sm font-semibold text-red-900">
             {noShowCount === 1 ? 'Termin wurde verpasst' : `${noShowCount} Termine wurden verpasst`}
           </p>
-          <p className="text-xs text-rose-800 mt-1">
+          <p className="text-xs text-red-800 mt-1">
             Der Kunde war beim letzten Termin nicht vor Ort und hat keinen Bescheid gegeben. Plane Puffer für den
             Folgetermin ein und stimme dich ggf. mit dem Kundenbetreuer ab.
           </p>
@@ -571,9 +571,9 @@ export default async function GutachterFallPage({
         </div>
       )}
       {nachbesichtigungAktiv && (
-        <div className="rounded-2xl border-2 border-violet-300 bg-violet-50 p-4">
-          <p className="text-sm font-semibold text-violet-900">Nachbesichtigung mit dem Kunden</p>
-          <p className="text-xs text-violet-800 mt-1">
+        <div className="rounded-2xl border-2 border-claimondo-ondo/50 bg-claimondo-ondo/[0.06] p-4">
+          <p className="text-sm font-semibold text-claimondo-navy">Nachbesichtigung mit dem Kunden</p>
+          <p className="text-xs text-claimondo-navy mt-1">
             Eine erneute Besichtigung ist angefordert. Termin wird mit dem Kunden gemeinsam geplant.
           </p>
         </div>

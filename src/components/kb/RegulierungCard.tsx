@@ -82,7 +82,7 @@ export default function RegulierungCard({
           className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium ${
             status === 'auszahlung'
               ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-              : 'bg-violet-50 text-violet-800 border border-violet-200'
+              : 'bg-claimondo-ondo/[0.06] text-claimondo-navy border border-claimondo-ondo/30'
           }`}
         >
           {status === 'auszahlung' ? 'Auszahlung' : 'In Regulierung'}
@@ -114,7 +114,7 @@ export default function RegulierungCard({
               type="button"
               onClick={handleKontakt}
               disabled={pendingKontakt}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-medium px-3 py-2 transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-sm font-medium px-3 py-2 transition-colors"
             >
               <MailIcon className="w-4 h-4" />
               {pendingKontakt ? 'Wird gespeichert…' : 'VS-Kontakt erfasst'}

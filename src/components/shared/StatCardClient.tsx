@@ -26,7 +26,7 @@ const ICON_BG: Record<StatCardTone, string> = {
   ondo: 'bg-claimondo-ondo/10 text-claimondo-ondo',
   success: 'bg-emerald-50 text-emerald-600',
   warning: 'bg-amber-50 text-amber-600',
-  danger: 'bg-rose-50 text-rose-600',
+  danger: 'bg-red-50 text-red-600',
   neutral: 'bg-claimondo-bg text-claimondo-shield',
 }
 

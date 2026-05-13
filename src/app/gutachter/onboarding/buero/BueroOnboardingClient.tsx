@@ -457,7 +457,7 @@ function Field({
         required ? (
           <>
             {label}
-            <span className="ml-0.5 text-rose-500">*</span>
+            <span className="ml-0.5 text-red-500">*</span>
           </>
         ) : (
           label

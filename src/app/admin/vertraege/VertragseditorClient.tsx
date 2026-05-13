@@ -271,7 +271,7 @@ function SlotCard({
               />
               {/* Marker */}
               <Marker
-                color="bg-rose-500"
+                color="bg-red-500"
                 label="U"
                 top={pctTop(konfig.y)}
                 left={pctLeft(konfig.x)}

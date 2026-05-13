@@ -315,7 +315,7 @@ export default function Phase6StatusTracking({
                 type="button"
                 onClick={() => resend('email')}
                 disabled={resendPending || !l.email}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-claimondo-ondo text-white text-xs font-semibold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-claimondo-ondo text-white text-xs font-semibold hover:bg-claimondo-shield disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <MailIcon className="w-3.5 h-3.5" />
                 Email

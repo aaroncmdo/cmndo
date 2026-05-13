@@ -410,7 +410,7 @@ export default function TagesrouteSidebar({
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-[#3a6290] rounded-lg px-2.5 py-1.5 font-medium"
+                      className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-claimondo-shield rounded-lg px-2.5 py-1.5 font-medium"
                     >
                       <NavigationIcon className="w-3 h-3" /> Route starten
                     </a>

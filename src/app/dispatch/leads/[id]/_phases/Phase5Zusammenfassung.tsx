@@ -347,7 +347,7 @@ export default function Phase5Zusammenfassung() {
                 <button
                   type="button"
                   onClick={() => setPhase(r.jumpToPhase!)}
-                  className="text-claimondo-ondo hover:text-[#3a6290] p-1"
+                  className="text-claimondo-ondo hover:text-claimondo-shield p-1"
                   title={`Zu Phase ${r.jumpToPhase} springen`}
                 >
                   <PencilIcon className="w-3.5 h-3.5" />
@@ -487,7 +487,7 @@ export default function Phase5Zusammenfassung() {
             disabled={pending || !qualification.canSendFlowLink || !email.trim()}
             onClick={() => send('email')}
             title={!email.trim() ? 'Bitte Email-Adresse eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-claimondo-ondo text-white text-sm font-bold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-claimondo-ondo text-white text-sm font-bold hover:bg-claimondo-shield disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <MailIcon className="w-4 h-4" />
             {pending && sendStatus.kanal === 'email' ? 'Sende ...' : 'Email'}

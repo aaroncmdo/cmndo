@@ -62,7 +62,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
   const svTelefon = anfrage.sv_telefon ?? anfrage.sv_lead_telefon ?? null
   const svEmail = anfrage.sv_lead_email ?? null
   const istOffen = lokalerStatus === 'neu' || lokalerStatus === 'in_bearbeitung' || lokalerStatus === 'sv_kontaktiert'
-  const statusCfg = STATUS_LABEL[lokalerStatus] ?? { label: lokalerStatus, color: 'bg-[#f8f9fb] text-claimondo-ondo' }
+  const statusCfg = STATUS_LABEL[lokalerStatus] ?? { label: lokalerStatus, color: 'bg-claimondo-bg text-claimondo-ondo' }
 
   function wechsleStatus(neuerStatus: string) {
     setLokalerStatus(neuerStatus)
@@ -223,7 +223,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
               </button>
               <button
                 onClick={() => wechsleStatus('abgeschlossen')}
-                className="w-full flex items-center justify-center gap-2 text-sm text-claimondo-ondo border border-claimondo-border hover:bg-[#f8f9fb] px-4 py-2 rounded-ios-sm transition-colors"
+                className="w-full flex items-center justify-center gap-2 text-sm text-claimondo-ondo border border-claimondo-border hover:bg-claimondo-bg px-4 py-2 rounded-ios-sm transition-colors"
               >
                 <ClockIcon className="w-4 h-4" />
                 Abschließen

@@ -112,7 +112,7 @@ export function KanzleiWunschForm({
   }
 
   const containerCls = variant === 'card'
-    ? 'bg-white rounded-xl border border-[#E2E8F3] p-5 space-y-4'
+    ? 'bg-white rounded-xl border border-claimondo-border p-5 space-y-4'
     : 'space-y-4'
 
   return (
@@ -134,7 +134,7 @@ export function KanzleiWunschForm({
               className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                 checked
                   ? 'border-claimondo-ondo bg-claimondo-ondo/5'
-                  : 'border-[#E2E8F3] hover:bg-claimondo-bg'
+                  : 'border-claimondo-border hover:bg-claimondo-bg'
               }`}
             >
               <input
@@ -156,35 +156,35 @@ export function KanzleiWunschForm({
       </div>
 
       {wunsch === 'eigene_kanzlei' && (
-        <div className="bg-claimondo-bg rounded-lg p-3 space-y-2 border border-[#E2E8F3]">
+        <div className="bg-claimondo-bg rounded-lg p-3 space-y-2 border border-claimondo-border">
           <p className="text-xs font-medium text-claimondo-navy">Kontaktdaten der Kanzlei</p>
           <input
             type="text"
             value={eigeneName}
             onChange={(e) => setEigeneName(e.target.value)}
             placeholder="Kanzlei-Name *"
-            className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm bg-white"
+            className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm bg-white"
           />
           <input
             type="email"
             value={eigeneEmail}
             onChange={(e) => setEigeneEmail(e.target.value)}
             placeholder="Email"
-            className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm bg-white"
+            className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm bg-white"
           />
           <input
             type="tel"
             value={eigeneTelefon}
             onChange={(e) => setEigeneTelefon(e.target.value)}
             placeholder="Telefon"
-            className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm bg-white"
+            className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm bg-white"
           />
           <input
             type="text"
             value={eigeneKontakt}
             onChange={(e) => setEigeneKontakt(e.target.value)}
             placeholder="Ansprechpartner (optional)"
-            className="w-full px-3 py-2 rounded-lg border border-[#E2E8F3] text-sm bg-white"
+            className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm bg-white"
           />
           <p className="text-[11px] text-claimondo-light-blue">Email oder Telefon ist Pflicht.</p>
         </div>
