@@ -11,6 +11,7 @@ import {
   Users, MapPin, FileText, Scale, Monitor, Zap, Shield,
   MessageCircle, Star, Clock, Search,
 } from 'lucide-react'
+import { STAEDTE } from '@/app/kfz-gutachter/staedte'
 
 const PHONE_DISPLAY = '0221 25906530'
 const PHONE_TEL = '+4922125906530'
@@ -881,11 +882,11 @@ function ReviewsSection() {
 }
 
 // ── Section 10 — NRW Einsatzgebiet ───────────────────────────────────────────
-const STAEDTE = [
-  'Köln', 'Düsseldorf', 'Dortmund', 'Essen', 'Bonn',
-  'Aachen', 'Wuppertal', 'Bochum', 'Bielefeld', 'Münster',
-  'Krefeld', 'Duisburg', 'Leverkusen', 'Mönchengladbach',
-]
+// SEO/internes Linking: die Stadt-Chips verlinken zu den /kfz-gutachter/<slug>-
+// Landingpages (Quelle: src/app/kfz-gutachter/staedte.ts) — die Hauptseite ist
+// der wichtigste interne Link-Hub auf die lokalen Subpages. Gezeigt werden die
+// NRW-Städte; alle Standorte (inkl. bundesweit) hängen am /kfz-gutachter-Index.
+const NRW_STAEDTE = STAEDTE.filter((s) => s.bundesland === 'Nordrhein-Westfalen')
 
 function NrwSection() {
   return (
@@ -909,15 +910,24 @@ function NrwSection() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-2.5">
-              {STAEDTE.map((stadt, i) => (
-                <div
-                  key={stadt}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/6 px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-claimondo-ondo hover:bg-claimondo-ondo/25 cursor-default"
+              {NRW_STAEDTE.map((s) => (
+                <Link
+                  key={s.slug}
+                  href={`/kfz-gutachter/${s.slug}`}
+                  prefetch={false}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/6 px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-claimondo-ondo hover:bg-claimondo-ondo/25"
                 >
                   <MapPin className="h-3 w-3 text-claimondo-light-blue flex-shrink-0" />
-                  {stadt}
-                </div>
+                  {s.name}
+                </Link>
               ))}
+              <Link
+                href="/kfz-gutachter"
+                className="inline-flex items-center gap-1.5 rounded-full border border-claimondo-ondo/40 bg-claimondo-ondo/15 px-4 py-2 text-sm font-semibold text-claimondo-light-blue transition-colors hover:border-claimondo-ondo hover:bg-claimondo-ondo/25"
+              >
+                Alle Standorte
+                <ArrowRight className="h-3.5 w-3.5 flex-shrink-0" />
+              </Link>
             </div>
 
             <div className="mt-10 flex gap-8 border-t border-white/10 pt-8">
