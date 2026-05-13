@@ -224,7 +224,12 @@ export default function KanbanBoard({
     )
     startTransition(async () => {
       try {
-        await updateTaskStatus(draggableId, newStatus)
+        const r = await updateTaskStatus(draggableId, newStatus)
+        if (!r.success) {
+          setError(r.error ?? 'Statuswechsel fehlgeschlagen')
+          setLocalTasks(visibleTasks)
+          return
+        }
         router.refresh()
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Statuswechsel fehlgeschlagen')
@@ -238,7 +243,11 @@ export default function KanbanBoard({
     if (!confirm('Task wirklich löschen?')) return
     startTransition(async () => {
       try {
-        await deleteTask(taskId)
+        const r = await deleteTask(taskId)
+        if (!r.success) {
+          setError(r.error ?? 'Fehler')
+          return
+        }
         router.refresh()
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Fehler')
@@ -251,7 +260,11 @@ export default function KanbanBoard({
     setError(null)
     const formData = new FormData(e.currentTarget)
     try {
-      await createTask(formData)
+      const r = await createTask(formData)
+      if (!r.success) {
+        setError(r.error ?? 'Fehler')
+        return
+      }
       setDialogOpen(false)
       router.refresh()
     } catch (err) {
