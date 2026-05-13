@@ -104,6 +104,10 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
                 <button
                   key={tag.datum}
                   type="button"
+                  data-testid={`feld-${feld.feld_key}-tag-${tag.datum}`}
+                  data-feld={feld.feld_key}
+                  data-tag={tag.datum}
+                  data-frei={tag.frei}
                   disabled={disabled || !tag.frei}
                   onClick={() => tag.frei && onChange(makeValue(tag.datum, selectedTime || tag.slots[0]?.uhrzeit || ''))}
                   style={{
@@ -154,6 +158,9 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
                 <button
                   key={slot.uhrzeit}
                   type="button"
+                  data-testid={`feld-${feld.feld_key}-slot-${slot.uhrzeit}`}
+                  data-feld={feld.feld_key}
+                  data-slot={slot.uhrzeit}
                   disabled={disabled}
                   onClick={() => onChange(makeValue(selectedDate, slot.uhrzeit))}
                   style={{

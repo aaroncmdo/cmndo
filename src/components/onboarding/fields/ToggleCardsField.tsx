@@ -55,6 +55,10 @@ export function ToggleCardsField({ feld, value, onChange, disabled }: Props) {
             <button
               key={opt.value}
               type="button"
+              data-testid={`feld-${feld.feld_key}-opt-${opt.value}`}
+              data-feld={feld.feld_key}
+              data-value={opt.value}
+              data-active={isActive}
               disabled={disabled}
               onClick={() => onChange(opt.value)}
               className={
