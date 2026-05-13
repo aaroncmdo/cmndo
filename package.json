@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "check:component-set": "node scripts/check-component-set.mjs",
+    "check:tailwind-arbitrary": "node scripts/check-tailwind-arbitrary.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
