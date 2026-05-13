@@ -22,6 +22,7 @@ import {
   ClockIcon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { getStorageUrl } from '@/lib/storage/url'
 import { uploadPflichtdokument } from '../_actions'
 import {
   markDokumentNachgereicht,
@@ -201,8 +202,13 @@ export default function DokumenteTab({
       setUploading(null)
       return
     }
-    const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
-    const r = await uploadPflichtdokument(fallId, pflichtdokId, urlData.publicUrl)
+    const url = await getStorageUrl(supabase, 'fall-dokumente', path)
+    if (!url) {
+      setUploading(null)
+      toast.error('URL-Generierung fehlgeschlagen')
+      return
+    }
+    const r = await uploadPflichtdokument(fallId, pflichtdokId, url)
     if (!r.success) {
       console.error('[DokumenteTab] uploadPflichtdokument:', r.error)
     }

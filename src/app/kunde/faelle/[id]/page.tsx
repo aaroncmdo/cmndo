@@ -19,6 +19,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getStorageUrl, getStorageUrlBulk } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { FallPhasenPanel } from '@/components/shared/fall-phases'
@@ -167,10 +168,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       .is('geloescht_am', null)
       .is('abgelehnt_am', null)
       .order('hochgeladen_am')
-    const dokumente = (dokumenteRaw ?? []).map(d => ({
+    const dokUrls = await getStorageUrlBulk(
+      admin,
+      (dokumenteRaw ?? []).map(d => ({ bucket: 'fall-dokumente', path: d.storage_path as string })),
+    )
+    const dokumente = (dokumenteRaw ?? []).map((d, i) => ({
       id: d.id as string,
       typ: d.dokument_typ as string,
-      datei_url: admin.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl,
+      datei_url: dokUrls[i] ?? '',
       datei_name: (d.original_filename as string | null) ?? null,
       created_at: d.hochgeladen_am as string,
     }))
@@ -498,9 +503,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         .limit(1)
         .maybeSingle()
       if (gut?.storage_path) {
-        gutachtenUrlAusBucket = admin.storage
-          .from('fall-dokumente')
-          .getPublicUrl(gut.storage_path as string).data.publicUrl
+        gutachtenUrlAusBucket = (await getStorageUrl(admin, 'fall-dokumente', gut.storage_path as string)) ?? null
       }
     }
 

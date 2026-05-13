@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 
 export const metadata: Metadata = {
-  title: 'Allgemeine Geschäftsbedingungen | Claimondo',
+  title: 'Allgemeine Geschäftsbedingungen',
 }
 
 export default function AGBPage() {

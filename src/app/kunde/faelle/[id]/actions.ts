@@ -13,6 +13,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { bestaetigeTermin } from '@/lib/termine/bestaetigung'
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export async function sendNachricht(
   fallId: string,
@@ -135,7 +136,8 @@ export async function uploadPflichtdokumentKunde(
   const { error: uploadErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
   if (uploadErr) return { success: false, error: uploadErr.message }
 
-  const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
+  const publicUrl = await getStorageUrl(supabase, 'fall-dokumente', path)
+  if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
   const { data: pd } = await supabase
     .from('pflichtdokumente')
     .select('titel, dokument_typ')
@@ -145,7 +147,7 @@ export async function uploadPflichtdokumentKunde(
   const now = new Date().toISOString()
   await supabase.from('pflichtdokumente').update({
     status: 'hochgeladen',
-    datei_url: urlData.publicUrl,
+    datei_url: publicUrl,
     datei_name: file.name,
     hochgeladen_am: now,
   }).eq('id', pflichtdokumentId)

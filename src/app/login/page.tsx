@@ -1,5 +1,14 @@
-﻿import { login } from './actions'
+﻿import type { Metadata } from 'next'
+import { login } from './actions'
 import LoginClient from './LoginClient'
+
+export const metadata: Metadata = {
+  // AAR-878: absolute überschreibt das Layout-Template `%s | Claimondo`, damit
+  // der Browser-Tab schlicht „Login — Claimondo" statt „Login | Claimondo"
+  // zeigt. Indexierbarkeit bleibt aktiv (proxy.ts erlaubt /login explizit für
+  // Brand-Queries „Claimondo Login" — Konsolidierung vom 2026-05-12).
+  title: { absolute: 'Login — Claimondo' },
+}
 
 export default function LoginPage({
   searchParams,

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getStorageUrlBulk } from '@/lib/storage/url'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
@@ -364,12 +365,14 @@ export default async function GutachterFallPage({
     })
 
   // AAR-553: fall_dokumente → Legacy-Shape für FallDetailClient-Konsumenten
-  const dokumenteLegacy = (dokumente ?? []).map(d => ({
+  const dokUrlsLegacy = await getStorageUrlBulk(
+    supabase,
+    (dokumente ?? []).map(d => ({ bucket: 'fall-dokumente', path: (d.storage_path as string | null) ?? undefined })),
+  )
+  const dokumenteLegacy = (dokumente ?? []).map((d, i) => ({
     id: d.id as string,
     typ: (d.dokument_typ as string | null) ?? null,
-    datei_url: d.storage_path
-      ? supabase.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl
-      : null,
+    datei_url: dokUrlsLegacy[i],
     datei_name: (d.original_filename as string | null) ?? null,
     datei_groesse: (d.groesse_bytes as number | null) ?? null,
     kategorie: (d.kategorie as string | null) ?? null,
