@@ -59,8 +59,11 @@ export type BrandTheme = {
 
   // V2 Status (harmonisiert mit Primary)
   success?: string
+  successSoft?: string
   warning?: string
+  warningSoft?: string
   danger?: string
+  dangerSoft?: string
   info?: string
 
   // V2 Typography (AAR-421): Referenz auf ein Paar aus dem Font-Registry
@@ -121,8 +124,11 @@ export const CLAIMONDO_DEFAULT_THEME: BrandThemeV2 = {
   sidebarHover: 'rgba(255,255,255,0.08)',
   // Status
   success: '#10B981',
+  successSoft: '#ECFDF5',
   warning: '#F59E0B',
+  warningSoft: '#FFFBEB',
   danger: '#EF4444',
+  dangerSoft: '#FEF2F2',
   info: '#3B82F6',
   // Typography — null = Claimondo-Default (kanoo_1, Inter/Inter).
   fontPairId: null,
@@ -272,8 +278,11 @@ export function generateNeutrals(primaryHex: string): {
 // ein hochgesättigtes Logo keine stumpfen Status-Tags bekommt (und umgekehrt).
 export function generateStatus(primaryHex: string): {
   success: string
+  successSoft: string
   warning: string
+  warningSoft: string
   danger: string
+  dangerSoft: string
   info: string
 } {
   const { r, g, b } = hexToRgb(primaryHex)
@@ -289,10 +298,22 @@ export function generateStatus(primaryHex: string): {
     return rgbToHex(out.r, out.g, out.b)
   }
 
+  // Soft-Variante: gleicher Hue, niedrige Saturation (12%), hohe Lightness (96%).
+  // Ergibt einen blassen Tint für Background-Pillen (Card-BG zu success/warning/danger).
+  const softTint = (anchorHex: string) => {
+    const a = hexToRgb(anchorHex)
+    const { h: anchorH } = rgbToHsl(a.r, a.g, a.b)
+    const out = hslToRgb(anchorH, 12, 96)
+    return rgbToHex(out.r, out.g, out.b)
+  }
+
   return {
     success: harmonize(STATUS_COLOR_ANCHORS.success),
+    successSoft: softTint(STATUS_COLOR_ANCHORS.success),
     warning: harmonize(STATUS_COLOR_ANCHORS.warning),
+    warningSoft: softTint(STATUS_COLOR_ANCHORS.warning),
     danger: harmonize(STATUS_COLOR_ANCHORS.danger),
+    dangerSoft: softTint(STATUS_COLOR_ANCHORS.danger),
     info: harmonize(STATUS_COLOR_ANCHORS.info),
   }
 }
@@ -389,8 +410,11 @@ export function generateTheme(primaryHex: string): BrandThemeV2 {
     sidebarActive,
     sidebarHover,
     success: status.success,
+    successSoft: status.successSoft,
     warning: status.warning,
+    warningSoft: status.warningSoft,
     danger: status.danger,
+    dangerSoft: status.dangerSoft,
     info: status.info,
     // Font-Pair wird nicht aus der Primary-Farbe abgeleitet — Claude-Vision
     // (AAR-420) oder der User setzt das separat. Default null = kanoo_1.
