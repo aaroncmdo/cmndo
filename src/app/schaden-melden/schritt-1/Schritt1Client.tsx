@@ -207,24 +207,24 @@ export function Schritt1Client() {
       {voiceBanner ? (
         <div
           role="status"
-          className="rounded-md border border-claimondo-ondo/30 bg-claimondo-ondo/5 p-3 text-sm text-claimondo-navy"
+          className="rounded-ios-sm border border-claimondo-ondo/30 bg-claimondo-ondo/5 p-3 text-sm text-claimondo-navy"
         >
           {voiceBanner}
         </div>
       ) : null}
       {/* Mode-Toggle */}
-      <div className="flex gap-2 rounded-lg bg-claimondo-bg p-1">
+      <div className="flex gap-2 rounded-ios-sm bg-claimondo-bg p-1">
         <button
           type="button"
           aria-pressed="true"
-          className="flex-1 rounded-md bg-white px-4 py-2 text-sm font-semibold text-claimondo-navy shadow-sm"
+          className="flex-1 rounded-ios-sm bg-white px-4 py-2 text-sm font-semibold text-claimondo-navy shadow-sm"
         >
           Tippen
         </button>
         <button
           type="button"
           onClick={() => router.push('/schaden-melden/schritt-1/voice')}
-          className="flex-1 rounded-md px-4 py-2 text-sm font-medium text-claimondo-ondo hover:text-claimondo-navy"
+          className="flex-1 rounded-ios-sm px-4 py-2 text-sm font-medium text-claimondo-ondo hover:text-claimondo-navy"
         >
           Einsprechen
         </button>
@@ -335,7 +335,7 @@ export function Schritt1Client() {
                     aria-pressed={active}
                     onClick={() => field.onChange(opt.val)}
                     className={[
-                      'rounded-md border px-6 py-2 text-sm font-medium',
+                      'rounded-ios-sm border px-6 py-2 text-sm font-medium',
                       active
                         ? 'border-claimondo-ondo bg-claimondo-ondo text-white'
                         : 'border-claimondo-border bg-white text-claimondo-navy',
@@ -381,7 +381,7 @@ export function Schritt1Client() {
                   <label
                     key={v}
                     className={[
-                      'flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition',
+                      'flex cursor-pointer items-center gap-3 rounded-ios-sm border p-4 transition',
                       active
                         ? 'border-claimondo-ondo bg-claimondo-ondo/5'
                         : 'border-claimondo-border bg-white',
@@ -496,7 +496,7 @@ export function Schritt1Client() {
                 setValue('fahrzeug_standort_lng', place.lng, { shouldValidate: true })
                 setValue('fahrzeug_standort_place_id', place.place_id, { shouldValidate: true })
               }}
-              className="w-full bg-white border border-claimondo-border rounded-md px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
+              className="w-full bg-white border border-claimondo-border rounded-ios-sm px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-navy"
             />
             <p className="mt-1 text-xs text-claimondo-ondo">
               Wir nutzen die Adresse, um direkt einen Gutachter in deiner Nähe vorzuschlagen.
@@ -588,7 +588,7 @@ export function Schritt1Client() {
                   <label
                     key={String(v)}
                     className={[
-                      'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                      'flex cursor-pointer items-center gap-2 rounded-ios-sm border px-4 py-2.5 text-sm font-medium transition',
                       field.value === v
                         ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
                         : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
@@ -627,7 +627,7 @@ export function Schritt1Client() {
                   <label
                     key={String(v)}
                     className={[
-                      'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                      'flex cursor-pointer items-center gap-2 rounded-ios-sm border px-4 py-2.5 text-sm font-medium transition',
                       field.value === v
                         ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
                         : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
@@ -661,7 +661,7 @@ export function Schritt1Client() {
                   <label
                     key={String(v)}
                     className={[
-                      'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                      'flex cursor-pointer items-center gap-2 rounded-ios-sm border px-4 py-2.5 text-sm font-medium transition',
                       field.value === v
                         ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
                         : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
@@ -697,7 +697,7 @@ export function Schritt1Client() {
                       <label
                         key={String(v)}
                         className={[
-                          'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                          'flex cursor-pointer items-center gap-2 rounded-ios-sm border px-4 py-2.5 text-sm font-medium transition',
                           field.value === v
                             ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
                             : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
@@ -729,7 +729,7 @@ export function Schritt1Client() {
                       <label
                         key={String(v)}
                         className={[
-                          'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                          'flex cursor-pointer items-center gap-2 rounded-ios-sm border px-4 py-2.5 text-sm font-medium transition',
                           field.value === v
                             ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
                             : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
@@ -771,7 +771,7 @@ export function Schritt1Client() {
                     <label
                       key={v}
                       className={[
-                        'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                        'flex cursor-pointer items-center gap-2 rounded-ios-sm border px-4 py-2.5 text-sm font-medium transition',
                         field.value === v
                           ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
                           : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
@@ -806,7 +806,7 @@ export function Schritt1Client() {
                   <label
                     key={String(v)}
                     className={[
-                      'flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
+                      'flex cursor-pointer items-center gap-2 rounded-ios-sm border px-4 py-2.5 text-sm font-medium transition',
                       field.value === v
                         ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy'
                         : 'border-claimondo-border bg-white text-claimondo-ondo hover:border-claimondo-ondo/50',
@@ -874,7 +874,7 @@ export function Schritt1Client() {
       {serverError ? (
         <div
           role="alert"
-          className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          className="rounded-ios-sm border border-red-200 bg-red-50 p-3 text-sm text-red-700"
         >
           {serverError}
         </div>

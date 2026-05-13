@@ -297,7 +297,7 @@ export function HauptseitePremium() {
             {ANSPRUECHE.map((a) => (
               <article
                 key={a.titel}
-                className="rounded-2xl border border-claimondo-border bg-white p-6 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:shadow-claimondo-md"
+                className="rounded-ios-md border border-claimondo-border bg-white p-6 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:shadow-claimondo-md"
               >
                 <h3 className="text-lg font-bold text-claimondo-navy">{a.titel}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{a.text}</p>
@@ -327,7 +327,7 @@ export function HauptseitePremium() {
             {BGH_URTEILE.map((u) => (
               <article
                 key={u.az}
-                className="rounded-2xl border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-claimondo-sm"
+                className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-claimondo-sm"
               >
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-claimondo-navy">
                   {u.az}
@@ -361,7 +361,7 @@ export function HauptseitePremium() {
             {PROZESS_STEPS.map((s) => (
               <li
                 key={s.nr}
-                className="relative rounded-2xl border border-claimondo-border bg-white p-6 shadow-claimondo-sm"
+                className="relative rounded-ios-md border border-claimondo-border bg-white p-6 shadow-claimondo-sm"
               >
                 <span className="absolute -top-3 left-6 inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                   Schritt {s.nr}
@@ -389,7 +389,7 @@ export function HauptseitePremium() {
             </h2>
           </div>
           <div className="mt-12 grid items-center gap-10 md:grid-cols-[1.2fr_1fr]">
-            <div className="overflow-hidden rounded-3xl border border-claimondo-border bg-claimondo-bg shadow-claimondo-sm">
+            <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg shadow-claimondo-sm">
               <Image
                 src="/marketing-landing-koeln/nrw-karte.png"
                 alt="Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, mit Anbindung an weitere deutsche Großstädte"
@@ -430,7 +430,7 @@ export function HauptseitePremium() {
       {/* 8 — Berater */}
       <section className="bg-claimondo-navy py-16 text-white sm:py-20" aria-labelledby="berater-heading">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-[0.9fr_1.1fr]">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/10 shadow-claimondo-lg">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-ios-lg border border-white/10 shadow-claimondo-lg">
             <Image
               src="/marketing-landing-koeln/berater.png"
               alt="Persönlicher Claimondo-Berater am Telefon"
@@ -493,7 +493,7 @@ export function HauptseitePremium() {
             {FAQS.map((f) => (
               <details
                 key={f.frage}
-                className="group rounded-2xl border border-claimondo-border bg-claimondo-bg p-5"
+                className="group rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5"
               >
                 <summary className="flex cursor-pointer list-none items-center justify-between text-base font-bold text-claimondo-navy">
                   <span>{f.frage}</span>
@@ -554,7 +554,7 @@ function HeroLeadCard() {
       id="lead-form"
       action="/api/leads/home"
       method="POST"
-      className="rounded-3xl border border-white/60 bg-white/85 p-6 shadow-claimondo-lg backdrop-blur-xl sm:p-8"
+      className="rounded-ios-lg border border-white/60 bg-white/85 p-6 shadow-claimondo-lg backdrop-blur-xl sm:p-8"
       data-tracking="lead-form-hero"
     >
       <div className="mb-1 flex items-center gap-2">
@@ -601,7 +601,7 @@ function Field({ label, name, ...rest }: FieldProps) {
         id={id}
         name={name}
         {...rest}
-        className="w-full rounded-xl border border-claimondo-border bg-white/85 px-4 py-3 text-base transition-all focus:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/20"
+        className="w-full rounded-ios-md border border-claimondo-border bg-white/85 px-4 py-3 text-base transition-all focus:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/20"
       />
     </div>
   )

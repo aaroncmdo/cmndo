@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 // AAR-702: Kunden-Email nach SV-Gegenvorschlag — Magic-Link auf
 // /kunde-termin/<token> mit „Annehmen" + „Eigener Vorschlag"-CTAs.
 // Kein Login nötig — Token gilt 7 Tage.

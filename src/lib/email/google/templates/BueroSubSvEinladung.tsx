@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { EmailLayout, Heading, Paragraph, InfoTable, Button, Divider } from './layout'
 
 // Buero-Onboarding: Willkommens-Mail nach Vertrag-Unterzeichnung durch Buero-Inhaber

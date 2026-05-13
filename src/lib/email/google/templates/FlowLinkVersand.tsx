@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { EmailLayout, Heading, Paragraph, Button, InfoTable, APP_URL, ONDO, type EmailBrand } from './layout'
 
 // AAR-141 / W7: FlowLink-Versand per Email. Alternative zum Standard-WA-Versand

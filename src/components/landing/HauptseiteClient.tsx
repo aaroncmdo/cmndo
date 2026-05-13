@@ -130,7 +130,7 @@ function HeroSection() {
               <div className="flex flex-wrap items-stretch gap-4">
                 <a
                   href={`tel:${PHONE_TEL}`}
-                  className="inline-flex items-center gap-3 rounded-xl bg-white px-6 py-4 font-bold text-claimondo-navy shadow-xl transition-all hover:-translate-y-0.5 hover:shadow-2xl"
+                  className="inline-flex items-center gap-3 rounded-ios-md bg-white px-6 py-4 font-bold text-claimondo-navy shadow-xl transition-all hover:-translate-y-0.5 hover:shadow-2xl"
                 >
                   <Phone className="h-4 w-4 text-claimondo-ondo flex-shrink-0" />
                   <span>
@@ -140,7 +140,7 @@ function HeroSection() {
                 </a>
                 <Link
                   href="/schaden-melden"
-                  className="inline-flex items-center gap-3 rounded-xl border-2 border-white/30 px-6 py-4 font-semibold text-white/88 transition-all hover:border-white/70 hover:bg-white/10"
+                  className="inline-flex items-center gap-3 rounded-ios-md border-2 border-white/30 px-6 py-4 font-semibold text-white/88 transition-all hover:border-white/70 hover:bg-white/10"
                 >
                   <ChevronRight className="h-4 w-4 flex-shrink-0" />
                   <span>
@@ -189,7 +189,7 @@ function HeroSection() {
                   </div>
                 ))}
               </div>
-              <div className="mt-4 rounded-xl border border-emerald-500/15 bg-emerald-500/8 px-4 py-3">
+              <div className="mt-4 rounded-ios-md border border-emerald-500/15 bg-emerald-500/8 px-4 py-3">
                 <p className="text-sm font-semibold text-emerald-400">
                   Alles kostenlos — die Versicherung des Unfallverursachers zahlt.
                 </p>
@@ -248,7 +248,7 @@ function ZahlenSection() {
     <div className="relative z-10 mx-auto -mt-10 max-w-6xl px-5 sm:px-8">
       <FadeUp>
         <div
-          className="rounded-3xl border border-white/60 bg-white/75 p-8 shadow-[0_20px_48px_-8px_rgba(13,27,62,.12)] backdrop-blur-xl"
+          className="rounded-ios-lg border border-white/60 bg-white/75 p-8 shadow-[0_20px_48px_-8px_rgba(13,27,62,.12)] backdrop-blur-xl"
           style={{ WebkitBackdropFilter: 'saturate(180%) blur(20px)' }}
         >
           <div className="flex flex-col justify-between gap-6 border-b border-claimondo-navy/10 pb-7 sm:flex-row sm:items-start">
@@ -274,7 +274,7 @@ function ZahlenSection() {
             {ZAHLEN.map(({ zahl, label }, i) => (
               <FadeUp key={zahl} delay={i * 80}>
                 <div
-                  className="rounded-2xl border border-white/60 bg-white/65 px-5 py-5 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg"
+                  className="rounded-ios-md border border-white/60 bg-white/65 px-5 py-5 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
                   <div
@@ -340,8 +340,8 @@ function VersicherungSection() {
         <div className="grid gap-5 sm:grid-cols-2">
           {INFO_CARDS.map(({ icon: Icon, title, href, body }, i) => (
             <FadeUp key={title} delay={i * 80}>
-              <Link href={href} className="group flex flex-col gap-0 rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_1px_3px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
-                <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-xl bg-claimondo-ondo/[0.06]">
+              <Link href={href} className="group flex flex-col gap-0 rounded-ios-md border border-claimondo-border bg-white p-7 shadow-[0_1px_3px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
+                <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-ios-md bg-[#eef4fb]">
                   <Icon className="h-[18px] w-[18px] text-claimondo-ondo" />
                 </div>
                 <h3 className="mb-3 text-[17px] font-bold tracking-[-0.02em] text-claimondo-navy">
@@ -406,8 +406,8 @@ function UnterschiedSection() {
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {UNTERSCHIED_CARDS.map(({ icon: Icon, sub, title, body }, i) => (
             <FadeUp key={title} delay={i * 80}>
-              <div className="group flex flex-col rounded-2xl border border-claimondo-border bg-white p-6 shadow-[0_4px_12px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-claimondo-md border border-claimondo-ondo/15 bg-claimondo-ondo/10">
+              <div className="group flex flex-col rounded-ios-md border border-claimondo-border bg-white p-6 shadow-[0_4px_12px_rgba(13,27,62,.06)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-ios-md border border-claimondo-ondo/15 bg-claimondo-ondo/10">
                   <Icon className="h-6 w-6 text-claimondo-ondo" />
                 </div>
                 <p className="mb-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-claimondo-ondo">
@@ -463,7 +463,7 @@ function KiSection() {
             <div className="mt-9 flex flex-col items-start gap-3">
               <Link
                 href="/schaden-melden"
-                className="inline-flex items-center gap-2 rounded-xl bg-claimondo-ondo px-7 py-4 text-base font-semibold text-white transition-all hover:bg-claimondo-shield hover:translate-x-0.5"
+                className="inline-flex items-center gap-2 rounded-ios-md bg-claimondo-ondo px-7 py-4 text-base font-semibold text-white transition-all hover:bg-claimondo-shield hover:translate-x-0.5"
               >
                 Jetzt Schaden einschätzen lassen
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -492,13 +492,13 @@ function KiSection() {
               <div className="flex flex-col gap-4">
                 <div>
                   <p className="mb-1.5 text-xs font-semibold text-white/60">Kennzeichen</p>
-                  <div className="rounded-xl border border-white/12 bg-white/8 px-4 py-3 font-mono text-sm text-white/40">
+                  <div className="rounded-ios-md border border-white/12 bg-white/8 px-4 py-3 font-mono text-sm text-white/40">
                     z.B. K-AB 1234
                   </div>
                 </div>
                 <div>
                   <p className="mb-1.5 text-xs font-semibold text-white/60">Schadensbeschreibung</p>
-                  <div className="h-16 rounded-xl border border-white/12 bg-white/8 px-4 py-3 font-mono text-sm text-white/40">
+                  <div className="h-16 rounded-ios-md border border-white/12 bg-white/8 px-4 py-3 font-mono text-sm text-white/40">
                     Heckschaden durch Auffahrunfall…
                   </div>
                 </div>
@@ -524,7 +524,7 @@ function KiSection() {
                   </div>
                 ))}
               </div>
-              <div className="mt-4 flex items-center justify-between rounded-xl border border-emerald-500/15 bg-emerald-500/8 px-4 py-3">
+              <div className="mt-4 flex items-center justify-between rounded-ios-md border border-emerald-500/15 bg-emerald-500/8 px-4 py-3">
                 <span className="text-sm text-white/70">Geschätzter Gesamtanspruch</span>
                 <span className="font-mono text-xl font-bold text-emerald-400">4.400 – 5.700 €</span>
               </div>
@@ -570,7 +570,7 @@ function ProzessSection() {
           <div
             className="absolute left-[10%] right-[10%] top-6 hidden h-px lg:block"
             style={{
-              background: 'repeating-linear-gradient(90deg, #e4e7ef 0, #e4e7ef 8px, transparent 8px, transparent 14px)',
+              background: 'repeating-linear-gradient(90deg, var(--brand-border, #e4e7ef) 0, var(--brand-border, #e4e7ef) 8px, transparent 8px, transparent 14px)',
             }}
           />
           <div className="grid gap-8 lg:grid-cols-5">
@@ -597,14 +597,14 @@ function ProzessSection() {
 
         {/* CTA bar */}
         <FadeUp className="mt-12">
-          <div className="flex flex-col items-center justify-between gap-6 rounded-2xl bg-claimondo-navy px-8 py-8 sm:flex-row sm:px-10">
+          <div className="flex flex-col items-center justify-between gap-6 rounded-ios-md bg-claimondo-navy px-8 py-8 sm:flex-row sm:px-10">
             <div>
               <p className="text-xl font-extrabold tracking-[-0.02em] text-white">Bereit? Wir starten sofort.</p>
               <p className="mt-1 text-sm text-white/60">Kostenlos und unverbindlich — 0 € für Sie.</p>
             </div>
             <a
               href={`tel:${PHONE_TEL}`}
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-7 py-4 text-[15px] font-bold text-claimondo-navy shadow-[0_4px_16px_rgba(0,0,0,.12)] transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              className="inline-flex items-center gap-2 whitespace-nowrap rounded-ios-md bg-white px-7 py-4 text-[15px] font-bold text-claimondo-navy shadow-[0_4px_16px_rgba(0,0,0,.12)] transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
               Jetzt Erstberatung starten
               <ChevronRight className="h-4 w-4" />
@@ -622,7 +622,7 @@ function BeraterSection() {
     <section className="bg-white py-16">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <FadeUp>
-          <div className="mx-auto max-w-3xl rounded-2xl border border-claimondo-border bg-claimondo-bg px-8 py-8 sm:px-12">
+          <div className="mx-auto max-w-3xl rounded-ios-md border border-claimondo-border bg-claimondo-bg px-8 py-8 sm:px-12">
             <div className="flex flex-col items-center gap-8 sm:flex-row sm:flex-wrap">
               {/* Avatar placeholder */}
               <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-navy text-2xl font-extrabold text-white shadow-[0_4px_16px_rgba(13,27,62,.12)]">
@@ -655,7 +655,7 @@ function BeraterSection() {
               <div className="flex flex-shrink-0 flex-col gap-2.5">
                 <a
                   href={`tel:${PHONE_TEL}`}
-                  className="inline-flex items-center gap-2 rounded-xl bg-claimondo-navy px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-claimondo-shield whitespace-nowrap"
+                  className="inline-flex items-center gap-2 rounded-ios-md bg-claimondo-navy px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-claimondo-shield whitespace-nowrap"
                 >
                   <Phone className="h-3.5 w-3.5" /> Jetzt anrufen
                 </a>
@@ -701,7 +701,7 @@ function PortalSection() {
             <div className="mt-8 flex flex-col gap-6">
               {PORTAL_FEATURES.map(({ icon: Icon, title, sub }) => (
                 <div key={title} className="grid grid-cols-[40px_1fr] gap-3.5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-claimondo-ondo/[0.06]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-ios-md bg-[#eef4fb]">
                     <Icon className="h-[18px] w-[18px] text-claimondo-ondo" />
                   </div>
                   <div>
@@ -713,7 +713,7 @@ function PortalSection() {
             </div>
             <Link
               href="/schaden-melden"
-              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-claimondo-navy px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-claimondo-shield"
+              className="mt-8 inline-flex items-center gap-2 rounded-ios-md bg-claimondo-navy px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-claimondo-shield"
             >
               Jetzt Portal einrichten <ArrowRight className="h-4 w-4" />
             </Link>
@@ -722,7 +722,7 @@ function PortalSection() {
           {/* Right: Browser mockup */}
           <FadeUp delay={120}>
             <div
-              className="overflow-hidden rounded-2xl border border-claimondo-border shadow-[0_40px_80px_rgba(13,27,62,.15)]"
+              className="overflow-hidden rounded-ios-md border border-claimondo-border shadow-[0_40px_80px_rgba(13,27,62,.15)]"
               style={{ transform: 'perspective(900px) rotateY(-5deg) rotateX(2deg)', transition: 'transform .3s' }}
             >
               {/* Browser chrome */}
@@ -732,7 +732,7 @@ function PortalSection() {
                     <div key={c} className="h-2.5 w-2.5 rounded-full" style={{ background: c }} />
                   ))}
                 </div>
-                <div className="flex-1 rounded-md border border-claimondo-border bg-white px-3 py-1 text-center font-mono text-[11px] text-claimondo-ondo/70">
+                <div className="flex-1 rounded-ios-sm border border-claimondo-border bg-white px-3 py-1 text-center font-mono text-[11px] text-claimondo-ondo/70">
                   portal.claimondo.de
                 </div>
               </div>
@@ -746,7 +746,7 @@ function PortalSection() {
                   </div>
                 </div>
                 {/* Case card */}
-                <div className="rounded-xl border border-claimondo-border border-l-4 bg-white p-3.5" style={{ borderLeftColor: 'var(--brand-success, #10b981)' }}>
+                <div className="rounded-ios-md border border-claimondo-border border-l-4 bg-white p-3.5" style={{ borderLeftColor: '#10b981' }}>
                   <div className="mb-1 flex items-center justify-between">
                     <span className="font-mono text-[13px] font-bold text-claimondo-navy">K-AS-2024-0847</span>
                     <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">Aktiv</span>
@@ -776,7 +776,7 @@ function PortalSection() {
                     { label: 'Nächster Termin', val: '12.05.2026', sub: 'Gutachter vor Ort' },
                     { label: 'Geschätzter Anspruch', val: '6.200 €', sub: 'Inkl. Wertminderung' },
                   ].map(({ label, val, sub }) => (
-                    <div key={label} className="rounded-xl border border-claimondo-border bg-white p-3">
+                    <div key={label} className="rounded-ios-md border border-claimondo-border bg-white p-3">
                       <p className="font-mono text-[10px] uppercase tracking-[.1em] text-claimondo-ondo/70">{label}</p>
                       <p className="font-mono text-[13px] font-bold text-claimondo-navy">{val}</p>
                       <p className="text-[11px] text-claimondo-ondo/70">{sub}</p>
@@ -844,7 +844,7 @@ function ReviewsSection() {
         <div className="mt-12 grid gap-5 sm:grid-cols-3">
           {REVIEWS.map(({ initials, name, date, text, color }, i) => (
             <FadeUp key={name} delay={i * 80}>
-              <div className="flex h-full flex-col rounded-2xl border border-claimondo-border bg-white p-7 shadow-[0_4px_12px_rgba(13,27,62,.05)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
+              <div className="flex h-full flex-col rounded-ios-md border border-claimondo-border bg-white p-7 shadow-[0_4px_12px_rgba(13,27,62,.05)] transition-all hover:-translate-y-0.5 hover:shadow-claimondo-lg">
                 <div className="mb-3 flex items-center gap-3">
                   <div
                     className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-base font-bold text-white"
@@ -945,9 +945,9 @@ function NrwSection() {
           </FadeUp>
 
           <FadeUp delay={120}>
-            <div className="rounded-2xl border border-white/8 bg-white/4 p-6">
+            <div className="rounded-ios-md border border-white/8 bg-white/4 p-6">
               <div
-                className="flex h-60 items-center justify-center rounded-xl border border-white/8 bg-white/3"
+                className="flex h-60 items-center justify-center rounded-ios-md border border-white/8 bg-white/3"
                 style={{
                   backgroundImage: 'repeating-linear-gradient(-45deg, rgba(255,255,255,.02) 0, rgba(255,255,255,.02) 1px, transparent 0, transparent 50%) 0/8px 8px',
                 }}
@@ -1011,7 +1011,7 @@ function FaqSection() {
           {FAQS.map(({ q, a }, i) => (
             <FadeUp key={i} delay={i * 60}>
               <div
-                className={`overflow-hidden rounded-xl border transition-all ${
+                className={`overflow-hidden rounded-ios-md border transition-all ${
                   open === i ? 'border-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,.08)]' : 'border-claimondo-border'
                 } bg-white`}
               >
@@ -1058,14 +1058,14 @@ function PreFooterSection() {
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href={`tel:${PHONE_TEL}`}
-              className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-white px-8 py-4 text-base font-bold text-claimondo-navy shadow-[0_8px_24px_rgba(0,0,0,.15)] transition-all hover:-translate-y-0.5 hover:shadow-2xl sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2.5 rounded-ios-md bg-white px-8 py-4 text-base font-bold text-claimondo-navy shadow-[0_8px_24px_rgba(0,0,0,.15)] transition-all hover:-translate-y-0.5 hover:shadow-2xl sm:w-auto"
             >
               <Phone className="h-4 w-4" />
               Jetzt anrufen · {PHONE_DISPLAY}
             </a>
             <Link
               href="/schaden-melden"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-white/40 px-8 py-4 text-base font-semibold text-white transition-all hover:border-white hover:bg-white/10 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-ios-md border-2 border-white/40 px-8 py-4 text-base font-semibold text-white transition-all hover:border-white hover:bg-white/10 sm:w-auto"
             >
               Schaden online melden
               <ArrowRight className="h-4 w-4" />

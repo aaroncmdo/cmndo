@@ -46,7 +46,7 @@ export function StadtLeadFormClient({ stadtName, stadtSlug }: Props) {
     <form
       id="lead-form"
       onSubmit={handleSubmit}
-      className="rounded-3xl border border-white/60 bg-white/85 p-6 backdrop-blur-xl shadow-claimondo-lg sm:p-8"
+      className="rounded-ios-lg border border-white/60 bg-white/85 p-6 backdrop-blur-xl shadow-claimondo-lg sm:p-8"
       data-tracking="lead-form-hero"
       noValidate
     >
@@ -97,7 +97,7 @@ function Field({ label, name, ...rest }: FieldProps) {
         id={id}
         name={name}
         {...rest}
-        className="w-full rounded-xl border border-claimondo-border bg-white/85 px-4 py-3 text-base transition-all focus:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/20 disabled:cursor-not-allowed disabled:opacity-70"
+        className="w-full rounded-ios-md border border-claimondo-border bg-white/85 px-4 py-3 text-base transition-all focus:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/20 disabled:cursor-not-allowed disabled:opacity-70"
       />
     </div>
   )

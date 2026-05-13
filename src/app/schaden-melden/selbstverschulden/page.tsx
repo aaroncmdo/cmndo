@@ -53,7 +53,7 @@ export default async function SelbstverschuldenPage() {
           ))}
         </ul>
 
-        <div className="mt-8 rounded-2xl bg-claimondo-navy/[0.03] border border-claimondo-navy/[0.06] p-4">
+        <div className="mt-8 rounded-ios-md bg-claimondo-navy/[0.03] border border-claimondo-navy/[0.06] p-4">
           <p className="flex flex-wrap items-center gap-2 text-sm text-claimondo-navy">
             <Phone className="h-4 w-4 text-claimondo-ondo" aria-hidden />
             <span>{t('hotline_hint')}</span>

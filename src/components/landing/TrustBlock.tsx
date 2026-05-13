@@ -59,9 +59,9 @@ export function TrustBlock({
                 href={p.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-3 rounded-2xl border border-white/60 bg-white/70 px-4 py-3 shadow-glass-card backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo/40 hover:bg-white/90"
+                className="group flex items-center gap-3 rounded-ios-md border border-white/60 bg-white/70 px-4 py-3 shadow-glass-card backdrop-blur-md transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo/40 hover:bg-white/90"
               >
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                   <Icon className="h-5 w-5 text-claimondo-ondo" aria-hidden />
                 </div>
                 <div className="min-w-0">
@@ -81,7 +81,7 @@ export function TrustBlock({
             {stats.map((s) => (
               <div
                 key={s.label}
-                className="rounded-2xl border border-white/60 bg-white/60 p-4 text-center backdrop-blur-md"
+                className="rounded-ios-md border border-white/60 bg-white/60 p-4 text-center backdrop-blur-md"
               >
                 <div className="text-xl font-bold tracking-tight text-claimondo-navy sm:text-2xl">
                   {s.wert}

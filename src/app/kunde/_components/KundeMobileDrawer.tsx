@@ -67,7 +67,7 @@ export default function KundeMobileDrawer({
               LexDrive-Cards genug Atemraum bekommen. Vorher 88vw, das war
               auf 390px-Geräten zerquetscht. */}
           <div
-            className="absolute inset-0 bg-claimondo-navy flex flex-col shadow-2xl animate-slide-in-right"
+            className="absolute inset-0 bg-claimondo-navy flex flex-col shadow-claimondo-lg animate-slide-in-right"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">

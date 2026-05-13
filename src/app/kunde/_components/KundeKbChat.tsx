@@ -212,7 +212,7 @@ export default function KundeKbChat({
           let bubbleCls = ''
           let accentColor = ''
           if (ownMessage) {
-            bubbleCls = 'bg-gradient-to-br from-claimondo-navy to-claimondo-navy text-white rounded-[18px] rounded-br-md shadow-sm'
+            bubbleCls = 'bg-gradient-to-br from-claimondo-navy to-[var(--brand-primary-hover)] text-white rounded-[18px] rounded-br-md shadow-sm'
           } else if (sender?.rolle === 'kb') {
             bubbleCls = 'bg-claimondo-ondo/12 text-claimondo-navy rounded-[18px] rounded-bl-md shadow-sm'
             accentColor = '#4573A2'
@@ -354,7 +354,7 @@ export default function KundeKbChat({
                 <FileTextIcon className="w-4 h-4" />
               </button>
               {pickerOpen && (
-                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl border border-claimondo-border shadow-lg overflow-hidden z-10">
+                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl border border-claimondo-border shadow-claimondo-md overflow-hidden z-10">
                   <button
                     type="button"
                     onClick={() => {
@@ -403,7 +403,7 @@ export default function KundeKbChat({
           <button
             type="submit"
             disabled={pending || !input.trim()}
-            className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-claimondo-navy to-claimondo-navy hover:from-claimondo-navy hover:to-claimondo-navy text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+            className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-claimondo-navy to-[var(--brand-primary-hover)] hover:from-[var(--brand-primary-hover)] hover:to-claimondo-navy text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
             aria-label="Senden"
           >
             <SendIcon className="w-4 h-4" />

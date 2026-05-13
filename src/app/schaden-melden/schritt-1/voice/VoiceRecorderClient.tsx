@@ -242,30 +242,30 @@ export function VoiceRecorderClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2 rounded-lg bg-claimondo-bg p-1">
+      <div className="flex gap-2 rounded-ios-sm bg-claimondo-bg p-1">
         <button
           type="button"
           onClick={() => router.push('/schaden-melden/schritt-1')}
-          className="flex-1 rounded-md px-4 py-2 text-sm font-medium text-claimondo-ondo hover:text-claimondo-navy"
+          className="flex-1 rounded-ios-sm px-4 py-2 text-sm font-medium text-claimondo-ondo hover:text-claimondo-navy"
         >
           Tippen
         </button>
         <button
           type="button"
           aria-pressed="true"
-          className="flex-1 rounded-md bg-white px-4 py-2 text-sm font-semibold text-claimondo-navy shadow-sm"
+          className="flex-1 rounded-ios-sm bg-white px-4 py-2 text-sm font-semibold text-claimondo-navy shadow-sm"
         >
           Einsprechen
         </button>
       </div>
 
-      <div className="rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md p-6">
+      <div className="rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md p-6">
         <div className="flex flex-col items-center gap-4">
           <canvas
             ref={canvasRef}
             width={560}
             height={100}
-            className="h-24 w-full rounded-md bg-claimondo-bg"
+            className="h-24 w-full rounded-ios-sm bg-claimondo-bg"
             aria-hidden
           />
           <p className="text-sm tabular-nums text-claimondo-ondo">
@@ -284,7 +284,7 @@ export function VoiceRecorderClient() {
       {state.kind === 'error' ? (
         <div
           role="alert"
-          className="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"
+          className="flex items-start gap-3 rounded-ios-sm border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <div>
@@ -364,7 +364,7 @@ function RecorderControls({
 
 function UnsupportedFallback({ onSwitch }: { onSwitch: () => void }) {
   return (
-    <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
+    <div className="rounded-ios-md border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
       <p className="font-medium">Ihr Browser unterstützt keine Sprachaufnahme.</p>
       <p className="mt-2">
         Kein Problem — Sie können den Hergang stattdessen tippen.

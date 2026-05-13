@@ -63,7 +63,7 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
           onClick={() => !pending && setOpen(false)}
         >
           <div
-            className="relative w-full max-w-md rounded-t-3xl border border-white/40 bg-white/95 p-6 shadow-[0_24px_64px_rgba(13,27,62,0.30)] sm:rounded-3xl"
+            className="relative w-full max-w-md rounded-t-3xl border border-white/40 bg-white/95 p-6 shadow-[0_24px_64px_rgba(13,27,62,0.30)] sm:rounded-ios-lg"
             onClick={(e) => e.stopPropagation()}
             style={{ WebkitBackdropFilter: 'blur(24px)' }}
           >
@@ -123,7 +123,7 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     autoComplete="name"
-                    className="mt-1 w-full rounded-2xl border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
+                    className="mt-1 w-full rounded-ios-md border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
                     placeholder="Max Mustermann"
                   />
                 </div>
@@ -138,7 +138,7 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
                     value={telefon}
                     onChange={(e) => setTelefon(e.target.value)}
                     autoComplete="tel"
-                    className="mt-1 w-full rounded-2xl border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
+                    className="mt-1 w-full rounded-ios-md border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
                     placeholder="0151 …"
                   />
                 </div>
@@ -150,7 +150,7 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
                   <select
                     value={zeitfenster}
                     onChange={(e) => setZeitfenster(e.target.value)}
-                    className="mt-1 w-full rounded-2xl border border-claimondo-border bg-white px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:outline-none"
+                    className="mt-1 w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:outline-none"
                   >
                     <option>Schnellstmöglich</option>
                     <option>Heute Vormittag</option>
@@ -168,13 +168,13 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
                     value={nachricht}
                     onChange={(e) => setNachricht(e.target.value)}
                     rows={2}
-                    className="mt-1 w-full rounded-2xl border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
+                    className="mt-1 w-full rounded-ios-md border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
                     placeholder="Worum geht es?"
                   />
                 </div>
 
                 {error && (
-                  <p className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>
+                  <p className="rounded-ios-md bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>
                 )}
 
                 <button

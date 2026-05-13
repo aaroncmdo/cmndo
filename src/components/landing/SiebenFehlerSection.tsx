@@ -100,10 +100,10 @@ export function SiebenFehlerSection() {
             return (
               <li
                 key={f.nummer}
-                className="group relative flex flex-col rounded-2xl border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo/30 hover:bg-white"
+                className="group relative flex flex-col rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo/30 hover:bg-white"
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-navy text-base font-extrabold text-white">
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-ios-md bg-claimondo-navy text-base font-extrabold text-white">
                     {f.nummer}
                   </span>
                   <Icon

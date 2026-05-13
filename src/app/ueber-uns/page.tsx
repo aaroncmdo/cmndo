@@ -176,33 +176,56 @@ export default async function UeberUnsPage() {
 
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero — Glass mit Spotlights */}
-      <section className="relative isolate overflow-hidden py-16 sm:py-20">
+      {/* Hero — Navy Premium-Pattern (analog /, /vorteile, /wie-es-funktioniert, /faq) */}
+      <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="ueber-uns-hero">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
+          className="pointer-events-none absolute inset-0"
           style={{
             background: [
-              'radial-gradient(circle at 18% 12%, rgba(123,163,204,0.22), transparent 50%)',
-              'radial-gradient(circle at 82% 30%, rgba(69,115,162,0.14), transparent 45%)',
+              'radial-gradient(circle at 15% 20%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 85% 75%, rgba(123,163,204,0.18), transparent 50%)',
             ].join(', '),
           }}
         />
-        <div className="mx-auto max-w-3xl px-5 text-center sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
-            <Sparkles className="h-3.5 w-3.5" />
+        <div className="relative mx-auto max-w-3xl px-5 py-16 text-center sm:py-24">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md sm:text-sm">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {t('hero.eyebrow')}
           </div>
           <h1
-            className="text-balance text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
+            id="ueber-uns-hero"
+            className="mt-5 text-balance text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             {t('hero.headline')}{' '}
-            <span className="text-claimondo-ondo">{t('hero.headline_accent')}</span>
+            <span className="text-claimondo-light-blue">{t('hero.headline_accent')}</span>
           </h1>
-          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-balance text-base text-white/80 sm:text-lg">
             {t('hero.subline')}
           </p>
+        </div>
+      </section>
+
+      {/* Trust-Strip */}
+      <section className="border-y border-claimondo-border/60 bg-white" aria-label="Brand-Kennzahlen">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">2025</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">in Köln gegründet</div>
+          </div>
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">110+</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">DAT-Sachverständige</div>
+          </div>
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">72</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">Städte mit Premium-Page</div>
+          </div>
+          <div className="py-6 text-center">
+            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">+33 %</div>
+            <div className="mt-1 text-xs text-claimondo-ondo">durchgesetzter Anspruch Ø</div>
+          </div>
         </div>
       </section>
 
@@ -211,7 +234,7 @@ export default async function UeberUnsPage() {
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <article
             id="definition"
-            className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
+            className="rounded-ios-lg border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
             style={{ WebkitBackdropFilter: 'blur(14px)' }}
             itemScope
             itemType="https://schema.org/Organization"
@@ -303,10 +326,10 @@ export default async function UeberUnsPage() {
               return (
                 <div
                   key={w.titel}
-                  className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg"
+                  className="rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-claimondo-ondo/12">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-ios-md bg-claimondo-ondo/12">
                     <Icon className="h-5 w-5 text-claimondo-ondo" />
                   </div>
                   <h3
@@ -328,7 +351,7 @@ export default async function UeberUnsPage() {
       {/* Team-Foto */}
       <section className="py-12">
         <div className="mx-auto max-w-4xl px-5 sm:px-6">
-          <div className="relative overflow-hidden rounded-3xl border border-white/60 shadow-[0_24px_64px_rgba(13,27,62,0.18)]">
+          <div className="relative overflow-hidden rounded-ios-lg border border-white/60 shadow-[0_24px_64px_rgba(13,27,62,0.18)]">
             <Image
               src="/brand/team-founders.png"
               alt="Aaron Sprafke (COO, links) und Nicolas Kitta (CEO, rechts) — die Gründer von Claimondo im Kölner Office"
@@ -350,7 +373,7 @@ export default async function UeberUnsPage() {
           {FOUNDERS.map((f) => (
             <article
               key={f.name}
-              className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-8"
+              className="rounded-ios-lg border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-8"
               style={{ WebkitBackdropFilter: 'blur(14px)' }}
               itemScope
               itemType="https://schema.org/Person"
@@ -391,7 +414,7 @@ export default async function UeberUnsPage() {
               </p>
 
               <blockquote
-                className="mt-6 flex gap-3 rounded-2xl px-4 py-3.5"
+                className="mt-6 flex gap-3 rounded-ios-md px-4 py-3.5"
                 style={{ background: 'rgba(69,115,162,0.06)', borderLeft: '3px solid var(--color-claimondo-light-blue)' }}
               >
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
@@ -422,7 +445,7 @@ export default async function UeberUnsPage() {
             {TRUST_BEWEISE.map((b) => (
               <div
                 key={b.titel}
-                className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
+                className="rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <h3
@@ -457,7 +480,7 @@ export default async function UeberUnsPage() {
             {ZAHLEN.map((z) => (
               <div
                 key={z.label}
-                className="rounded-2xl border border-white/60 bg-white/70 p-5 text-center shadow-[0_2px_12px_rgba(13,27,62,0.04)] backdrop-blur-md"
+                className="rounded-ios-md border border-white/60 bg-white/70 p-5 text-center shadow-[0_2px_12px_rgba(13,27,62,0.04)] backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(12px)' }}
               >
                 <div

@@ -256,10 +256,10 @@ export default function VorteilePage() {
               return (
                 <article
                   key={v.titel}
-                  className="flex flex-col rounded-2xl border border-claimondo-border bg-white p-6 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:shadow-claimondo-md"
+                  className="flex flex-col rounded-ios-md border border-claimondo-border bg-white p-6 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:shadow-claimondo-md"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10">
+                    <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                       <Icon className="h-5 w-5 text-claimondo-ondo" aria-hidden />
                     </span>
                     <div>
@@ -308,7 +308,7 @@ export default function VorteilePage() {
           </div>
           <div className="mt-10 space-y-3">
             {FAQS.map((f) => (
-              <details key={f.frage} className="group rounded-2xl border border-claimondo-border bg-white p-5">
+              <details key={f.frage} className="group rounded-ios-md border border-claimondo-border bg-white p-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between text-base font-bold text-claimondo-navy">
                   <span>{f.frage}</span>
                   <ChevronRight className="h-5 w-5 flex-shrink-0 text-claimondo-ondo transition-transform group-open:rotate-90" aria-hidden />
