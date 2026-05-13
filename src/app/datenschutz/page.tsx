@@ -3,7 +3,7 @@ import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 export const metadata: Metadata = {
-  title: 'Datenschutzerklärung | Claimondo',
+  title: 'Datenschutzerklärung',
 }
 
 export default function DatenschutzPage() {

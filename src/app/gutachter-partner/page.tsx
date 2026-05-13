@@ -6,7 +6,7 @@ import {
 import GutachterPartnerClient from './GutachterPartnerClient'
 
 export const metadata: Metadata = {
-  title: 'Als Kfz-Sachverständiger Partner werden — Warteliste | Claimondo',
+  title: 'Als Kfz-Sachverständiger Partner werden — Warteliste',
   description:
     'Jetzt auf die Warteliste setzen: Bundesweites SV-Netzwerk von Claimondo. Aufträge direkt vermittelt, ohne Akquise. DAT-Experten, BVSK-Mitglieder und IHK-zertifizierte Gutachter willkommen.',
   keywords: [
