@@ -151,7 +151,14 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
       email,
       telefon: (anfrage.telefon as string | null) ?? null,
       kunde_id: userId,
-      schadentyp: (anfrage.schadentyp as string | null) ?? 'unbekannt',
+      // leads_schadentyp_check: nur spurwechsel|auffahrunfall|vorfahrtsverletzung|
+      // parkplatz|sonstiges. Anfrage-schadentyp default ist 'unbekannt' — wird auf
+      // 'sonstiges' gemappt, sonst CHECK-Violation.
+      schadentyp: (() => {
+        const ALLOWED = new Set(['spurwechsel', 'auffahrunfall', 'vorfahrtsverletzung', 'parkplatz', 'sonstiges'])
+        const val = (anfrage.schadentyp as string | null) ?? 'sonstiges'
+        return ALLOWED.has(val) ? val : 'sonstiges'
+      })(),
       schadens_hergang: (anfrage.schadenort as string | null) ?? null,
       // Standort aus GPS — Anfrage hatte schadenort_lat/lng, das ist auch
       // der Fahrzeug-Standort fuer den Self-Dispatch (Kunde wird abgeholt
@@ -171,13 +178,20 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
       halter_nachname: (anfrage.halter_nachname as string | null) ?? null,
       halter_strasse: (anfrage.halter_strasse as string | null) ?? null,
       halter_plz: (anfrage.halter_plz as string | null) ?? null,
-      // SA aus dem Z4-Screen — bereits unterzeichnet
-      sa_signatur_data_url: (anfrage.sa_signatur_data_url as string | null) ?? null,
-      sa_unterzeichnet_am: anfrage.sa_unterzeichnet_am,
+      // SA-Status: leads hat nur Flag-Spalten (sa_unterschrieben + sa_unterschrieben_am),
+      // KEINE data-URL-Spalte. Die Signatur-Datei selbst wird via signatureUrl
+      // an convertLeadToClaim weitergereicht und dort als Storage-Upload
+      // persistiert. (2026-05-13: vorher unbekannte Spalten sa_signatur_data_url
+      // / sa_unterzeichnet_am im leads-Insert → blockierte alle Konvertierungen).
+      sa_unterschrieben: !!anfrage.sa_unterzeichnet_am,
+      sa_unterschrieben_am: anfrage.sa_unterzeichnet_am,
       // Quelle markiert dass das aus dem Self-Dispatch kommt
       source_channel: 'gutachter_finder_self_dispatch',
       qualifizierungs_phase: 'erstkontakt',
-      status: 'qualifiziert',
+      // lead_status-Enum-Werte: neu | rueckruf | quali-offen | flow-gesendet |
+      // umgewandelt | umgewandelt-sv | disqualifiziert | kalt. 'qualifiziert'
+      // gab es nie — der Lead ist bereit für Quali → 'quali-offen'.
+      status: 'quali-offen',
       sprache: 'de',
     })
     .select('id')
@@ -217,7 +231,10 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
     triggerByUserId: userId,
     kundeUserIdOverride: userId,
     svIdFromTermin: (anfrage.zugeordneter_sv_id as string | null) ?? null,
-    signatureUrl: (anfrage.sa_signatur_data_url as string | null) ?? undefined,
+    signatureUrl:
+      (anfrage.unterschrift_data_url as string | null)
+      ?? (anfrage.sa_signatur_data_url as string | null)
+      ?? undefined,
   })
 
   if (!conv.ok) {
