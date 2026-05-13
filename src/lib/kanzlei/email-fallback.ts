@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Email-Fallback ohne Tailwind/CSS-Var-Support.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 // AAR-kanzlei Email-Fallback: Email mit Mandat-Stammdaten an die Kanzlei.
 //
 // Läuft PARALLEL zum Outbound-API-Push (push-mandat.ts), unabhängig davon

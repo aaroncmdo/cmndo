@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Error-Boundary lädt vor Tailwind/CSS-Vars.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 'use client'
 
 import { useEffect } from 'react'
