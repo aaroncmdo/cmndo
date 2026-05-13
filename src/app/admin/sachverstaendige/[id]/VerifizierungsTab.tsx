@@ -879,7 +879,7 @@ function AdminSlotUpload({
     fd.append('datei', file)
     startTransition(async () => {
       const res = await uploadAdminPflichtdokument(svId, fd)
-      if (!res.ok) setError(res.error ?? 'Upload fehlgeschlagen')
+      if (!res.success) setError(res.error ?? 'Upload fehlgeschlagen')
       if (inputRef.current) inputRef.current.value = ''
     })
   }

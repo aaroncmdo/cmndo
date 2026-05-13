@@ -82,18 +82,18 @@ async function buildOrgGeoFields(input: {
   return fields
 }
 
-async function ensureAdmin(): Promise<{ ok: true; user_id: string; admin_name: string } | { ok: false; error: string }> {
+async function ensureAdmin(): Promise<{ success: true; user_id: string; admin_name: string } | { success: false; error: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
   const { data: profile } = await supabase
     .from('profiles')
     .select('rolle, vorname, nachname')
     .eq('id', user.id)
     .single()
-  if (profile?.rolle !== 'admin') return { ok: false, error: 'Nur Admins koennen SVs anlegen' }
+  if (profile?.rolle !== 'admin') return { success: false, error: 'Nur Admins können SVs anlegen' }
   const admin_name = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || 'Admin'
-  return { ok: true, user_id: user.id, admin_name }
+  return { success: true, user_id: user.id, admin_name }
 }
 
 function paketKonfig(paket: AnlegePaket, override?: {
@@ -119,7 +119,7 @@ function paketKonfig(paket: AnlegePaket, override?: {
 
 export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boolean; error?: string; sv_id?: string; profile_id?: string; initial_password?: string }> {
   const auth = await ensureAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   if (!data.vorname || !data.nachname || !data.email || !data.steuernummer) {
     return { success: false, error: 'vorname, nachname, email, steuernummer sind Pflicht' }
@@ -280,7 +280,7 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
   sub_sv_ids?: string[]
 }> {
   const auth = await ensureAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   if (!data.buero_name || !data.inhaber_email) {
     return { success: false, error: 'Buero-Name und Inhaber-Email sind Pflicht' }
@@ -616,7 +616,7 @@ export async function anlegeSubSv(params: {
   schadenarten?: string[]
 }): Promise<{ success: boolean; error?: string; sv_id?: string }> {
   const auth = await ensureAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   if (!params.organisation_id || !params.sub_email || !params.sub_vorname || !params.sub_nachname) {
     return { success: false, error: 'organisation_id, email, vorname, nachname sind Pflicht' }
@@ -756,7 +756,7 @@ export async function anlegeSubSv(params: {
 
 export async function listBueroOrganisationen(): Promise<Array<{ id: string; name: string }>> {
   const auth = await ensureAdmin()
-  if (!auth.ok) return []
+  if (!auth.success) return []
 
   const adminDb = createAdminClient()
   const { data } = await adminDb.from('organisationen')
@@ -778,7 +778,7 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
   sub_sv_ids?: string[]
 }> {
   const auth = await ensureAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   if (!data.akademie_name?.trim() || !data.steuernummer?.trim()) {
     return { success: false, error: 'Akademie-Name und Steuernummer sind Pflicht' }
@@ -1058,7 +1058,7 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
   member_sv_ids?: string[]
 }> {
   const auth = await ensureAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   if (!data.name?.trim()) return { success: false, error: 'Community-Name ist Pflicht' }
   if (data.zentrum_lat === null || data.zentrum_lng === null) {
@@ -1263,7 +1263,7 @@ export async function listCommunities(): Promise<Array<{
   created_at: string
 }>> {
   const auth = await ensureAdmin()
-  if (!auth.ok) return []
+  if (!auth.success) return []
 
   const adminDb = createAdminClient()
   const { data: orgs } = await adminDb.from('organisationen')
@@ -1325,7 +1325,7 @@ export async function previewIsochrone(input: {
   radius_km: number
 }): Promise<IsochronePreviewResult> {
   const auth = await ensureAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   if (
     typeof input.lat !== 'number' ||
@@ -1381,7 +1381,7 @@ export type CheckEmailExistsResult =
  */
 export async function checkEmailExists(email: string): Promise<CheckEmailExistsResult> {
   const auth = await ensureAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const normalized = email.trim().toLowerCase()
   if (!normalized || !normalized.includes('@')) {
@@ -1442,7 +1442,7 @@ export async function renderWillkommenSvPreview(
   input: WelcomeMailPreviewInput,
 ): Promise<{ success: boolean; html?: string; subject?: string; error?: string }> {
   const auth = await ensureAdmin()
-  if (!auth.ok) return { success: false, error: auth.error }
+  if (!auth.success) return { success: false, error: auth.error }
 
   const cfg = paketKonfig(input.paket, {
     kontingent: input.paket_override_kontingent,
