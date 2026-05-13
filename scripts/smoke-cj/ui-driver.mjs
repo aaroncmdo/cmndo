@@ -290,6 +290,22 @@ export class UiDriver {
         }
         return
       }
+      case 'signCanvas': {
+        // Zeichne eine kleine Schlangenlinie auf das Canvas. SignatureField hört
+        // auf mousedown/move/up — wir simulieren das mit Playwright's mouse API.
+        await this._flashElement(page, ui.selector)
+        const box = await page.locator(ui.selector).boundingBox()
+        if (!box) throw new Error(`signCanvas: kein bbox für ${ui.selector}`)
+        const startX = box.x + 30
+        const y = box.y + box.height / 2
+        await page.mouse.move(startX, y)
+        await page.mouse.down()
+        for (let i = 1; i <= 6; i += 1) {
+          await page.mouse.move(startX + i * 40, y + (i % 2 === 0 ? -15 : 15), { steps: 4 })
+        }
+        await page.mouse.up()
+        return
+      }
       case 'uploadFile':
         await this._flashElement(page, ui.selector)
         await page.setInputFiles(ui.selector, ui.filePath)
