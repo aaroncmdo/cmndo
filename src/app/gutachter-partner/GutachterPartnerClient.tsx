@@ -349,7 +349,7 @@ export default function GutachterPartnerClient() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full flex items-center justify-center gap-2 bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold rounded-full py-3.5 text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
+            className="w-full flex items-center justify-center gap-2 bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold rounded-full py-3.5 text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
           >
             {pending ? (
               <LoaderIcon className="w-4 h-4 animate-spin" />

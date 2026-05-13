@@ -31,7 +31,7 @@ const TYP_META: Record<TerminTyp, { label: string; icon: typeof PhoneCallIcon; c
   kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
   gutachter: { label: 'Gutachter', icon: HardHatIcon, cls: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' },
-  kb_beratung: { label: 'KB-Beratung', icon: VideoIcon, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
+  kb_beratung: { label: 'KB-Beratung', icon: VideoIcon, cls: 'bg-claimondo-ondo/[0.06] text-claimondo-navy border-claimondo-ondo/30' },
 }
 
 const STATUS_CLS: Record<string, string> = {

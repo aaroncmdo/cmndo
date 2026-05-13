@@ -20,11 +20,11 @@ export const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   in_bearbeitung: { label: 'In Bearbeitung', color: 'bg-claimondo-ondo/20 text-claimondo-navy' },
   sv_kontaktiert: { label: 'SV kontaktiert', color: 'bg-claimondo-ondo/10 text-claimondo-ondo' },
   termin_bestaetigt: { label: 'Termin bestätigt', color: 'bg-green-100 text-green-700' },
-  abgeschlossen: { label: 'Abgeschlossen', color: 'bg-[#f8f9fb] text-claimondo-ondo' },
+  abgeschlossen: { label: 'Abgeschlossen', color: 'bg-claimondo-bg text-claimondo-ondo' },
   storniert: { label: 'Storniert', color: 'bg-red-50 text-red-500' },
 }
 
 export const STATUS_FALLBACK = {
   label: '',
-  color: 'bg-[#f8f9fb] text-claimondo-ondo',
+  color: 'bg-claimondo-bg text-claimondo-ondo',
 }

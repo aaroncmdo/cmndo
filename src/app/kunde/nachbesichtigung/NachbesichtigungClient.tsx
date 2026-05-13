@@ -80,7 +80,7 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
         <button
           disabled={pending || !selectedDate}
           onClick={handleSubmit}
-          className="w-full px-4 py-3 rounded-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-[#3a6290] disabled:opacity-50 transition-colors"
+          className="w-full px-4 py-3 rounded-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-claimondo-shield disabled:opacity-50 transition-colors"
         >
           {pending ? 'Wird gespeichert...' : 'Termin bestätigen'}
         </button>

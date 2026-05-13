@@ -70,7 +70,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
           <KPI icon={<BarChart3Icon className="w-4 h-4 text-green-400" />} label="Abgeschlossen" value={stats.abgeschlossen} />
           <KPI icon={<ClockIcon className="w-4 h-4 text-amber-400" />} label="Avg. Tage" value={stats.avgDays || '—'} />
         </>)}
-        <KPI icon={<BriefcaseIcon className="w-4 h-4 text-violet-400" />} label="Kapazitaet" value={`${stats.aktiveFaelle}/${(m.kapazitaet_max as number) ?? 100}`} />
+        <KPI icon={<BriefcaseIcon className="w-4 h-4 text-claimondo-ondo" />} label="Kapazitaet" value={`${stats.aktiveFaelle}/${(m.kapazitaet_max as number) ?? 100}`} />
       </div>
 
       {/* Performance History */}

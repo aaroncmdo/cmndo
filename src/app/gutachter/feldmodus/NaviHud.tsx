@@ -121,7 +121,7 @@ const THEME_AMBER: Theme = {
 
 const THEME_BLUE: Theme = {
   bg: 'bg-claimondo-ondo/20 backdrop-blur-2xl',
-  border: 'border-blue-400/60',
+  border: 'border-claimondo-ondo/60/60',
   iconColor: 'text-white',
   iconBg: 'bg-claimondo-ondo',
   title: 'text-white',

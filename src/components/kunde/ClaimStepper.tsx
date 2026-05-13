@@ -151,7 +151,7 @@ export default function ClaimStepper({
             {lifecycle.aktiveSideQuests.map((auftrag) => (
               <span
                 key={auftrag.id}
-                className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 border border-violet-200 px-3 py-1 text-xs font-medium text-violet-700"
+                className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 px-3 py-1 text-xs font-medium text-claimondo-navy"
               >
                 {auftrag.typ === 'nachbesichtigung' ? 'Nachbesichtigung' : 'Stellungnahme'}
                 <span className="text-claimondo-navy">· {SUBPHASE_LABEL[

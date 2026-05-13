@@ -63,7 +63,7 @@ export default function TagesvorbereitungButton() {
         Tagesvorbereitung CSV
       </button>
       {error && (
-        <span className="text-xs text-rose-700">{error}</span>
+        <span className="text-xs text-red-700">{error}</span>
       )}
     </div>
   )

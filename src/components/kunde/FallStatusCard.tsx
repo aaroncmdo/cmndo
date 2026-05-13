@@ -131,9 +131,9 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
   // Welle-7 in_bearbeitung: Feindetails via aktuelle_phase
   if (s === 'onboarding' || s === 'in_bearbeitung') {
     if (phase.includes('sv_unterwegs') || phase === 'sv_vor_ort')
-      return { icon: TruckIcon, title: 'Sachverständiger ist unterwegs', description: `${sv} ist auf dem Weg zu dir. Du wirst benachrichtigt wenn er gleich da ist.`, color: 'text-claimondo-navy', bg: 'bg-indigo-50', border: 'border-indigo-200' }
+      return { icon: TruckIcon, title: 'Sachverständiger ist unterwegs', description: `${sv} ist auf dem Weg zu dir. Du wirst benachrichtigt wenn er gleich da ist.`, color: 'text-claimondo-navy', bg: 'bg-claimondo-navy/[0.06]', border: 'border-claimondo-navy/20' }
     if (phase === 'begutachtung_abgeschlossen' || phase.includes('gutachten'))
-      return { icon: FileTextIcon, title: 'Gutachten wird geprüft', description: 'Das Gutachten wurde erstellt und wird jetzt geprüft. Sobald alles in Ordnung ist, geht es weiter.', color: 'text-claimondo-navy', bg: 'bg-violet-50', border: 'border-violet-200' }
+      return { icon: FileTextIcon, title: 'Gutachten wird geprüft', description: 'Das Gutachten wurde erstellt und wird jetzt geprüft. Sobald alles in Ordnung ist, geht es weiter.', color: 'text-claimondo-navy', bg: 'bg-claimondo-ondo/[0.06]', border: 'border-claimondo-ondo/30' }
     if (phase === 'termin_bestaetigt')
       return { icon: CalendarIcon, title: 'Dein Termin steht!', description: `${sv} kommt zum vereinbarten Termin. Halte dein Fahrzeug bereit.`, action: 'Termin verschieben? Ruf uns an.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', border: 'border-claimondo-border' }
     return { icon: CalendarIcon, title: 'Dein Termin wird vorbereitet', description: 'Wir suchen den besten Sachverständigen in deiner Nähe. Du wirst benachrichtigt sobald der Termin steht.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', border: 'border-claimondo-border' }
@@ -147,10 +147,10 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
     return { icon: CalendarIcon, title: 'Dein Termin steht!', description: `${sv} kommt zum vereinbarten Termin. Halte dein Fahrzeug bereit und stelle sicher, dass alle Schäden zugänglich sind.`, action: 'Termin verschieben? Ruf uns an.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', border: 'border-claimondo-border' }
 
   if (s === 'besichtigung' || s === 'begutachtung-laeuft')
-    return { icon: TruckIcon, title: 'Sachverständiger ist unterwegs', description: `${sv} ist auf dem Weg zu dir. Du wirst benachrichtigt wenn er gleich da ist.`, color: 'text-claimondo-navy', bg: 'bg-indigo-50', border: 'border-indigo-200' }
+    return { icon: TruckIcon, title: 'Sachverständiger ist unterwegs', description: `${sv} ist auf dem Weg zu dir. Du wirst benachrichtigt wenn er gleich da ist.`, color: 'text-claimondo-navy', bg: 'bg-claimondo-navy/[0.06]', border: 'border-claimondo-navy/20' }
 
   if (s === 'gutachten-eingegangen' || s === 'filmcheck' || s === 'qc-pruefung')
-    return { icon: FileTextIcon, title: 'Gutachten wird geprüft', description: 'Das Gutachten wurde erstellt und wird jetzt von unserem Qualitätsteam geprüft. Sobald alles in Ordnung ist, geht es weiter.', color: 'text-claimondo-navy', bg: 'bg-violet-50', border: 'border-violet-200' }
+    return { icon: FileTextIcon, title: 'Gutachten wird geprüft', description: 'Das Gutachten wurde erstellt und wird jetzt von unserem Qualitätsteam geprüft. Sobald alles in Ordnung ist, geht es weiter.', color: 'text-claimondo-navy', bg: 'bg-claimondo-ondo/[0.06]', border: 'border-claimondo-ondo/30' }
 
   if (s === 'kanzlei-uebergeben')
     return { icon: ShieldCheckIcon, title: 'Deine Akte ist bei der Kanzlei', description: `${fall.kanzlei_ansprechpartner_name ?? 'Die Partnerkanzlei'} prüft deinen Fall und erstellt das Anspruchsschreiben an die Versicherung.`, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' }

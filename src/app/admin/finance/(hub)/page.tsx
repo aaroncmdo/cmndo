@@ -195,7 +195,7 @@ function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfra
   const statusColors: Record<string, string> = {
     neu: 'bg-claimondo-ondo/5 text-claimondo-ondo',
     'in-bearbeitung': 'bg-amber-50 text-amber-600',
-    angeboten: 'bg-purple-50 text-claimondo-navy',
+    angeboten: 'bg-claimondo-ondo/[0.06] text-claimondo-navy',
     angenommen: 'bg-emerald-50 text-emerald-600',
     abgelehnt: 'bg-red-50 text-red-600',
   }
@@ -278,7 +278,7 @@ function KanzleiProvisionSection({
             <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
               Kanzlei-Provision (150&euro; / Vollmacht)
             </h2>
-            <StatusBadge colorCls="text-claimondo-navy bg-purple-50">
+            <StatusBadge colorCls="text-claimondo-navy bg-claimondo-ondo/[0.06]">
               Nur mandatstyp: kanzlei-claimondo
             </StatusBadge>
           </div>
@@ -293,11 +293,11 @@ function KanzleiProvisionSection({
                 <p className="text-claimondo-ondo text-xs mb-1">Provision gesamt</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{eur(provisionGesamt)}</p>
               </div>
-              <div className="text-center p-3 bg-purple-50 rounded-xl">
+              <div className="text-center p-3 bg-claimondo-ondo/[0.06] rounded-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Dieser Monat</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{vollmachtenMonat}</p>
               </div>
-              <div className="text-center p-3 bg-purple-50 rounded-xl">
+              <div className="text-center p-3 bg-claimondo-ondo/[0.06] rounded-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Provision Monat</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{eur(provisionMonat)}</p>
               </div>
@@ -715,7 +715,7 @@ export default async function FinancePage() {
               <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">MRR {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(mrr)}</span>
               <span className="bg-claimondo-ondo/5 text-claimondo-ondo px-2 py-0.5 rounded-full">{(aktiveSvs ?? []).length} SVs</span>
               {kanzleiVollmachtenDiesenMonat > 0 && (
-                <span className="bg-purple-50 text-claimondo-navy px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Vollmachten</span>
+                <span className="bg-claimondo-ondo/[0.06] text-claimondo-navy px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Vollmachten</span>
               )}
             </div>
           }

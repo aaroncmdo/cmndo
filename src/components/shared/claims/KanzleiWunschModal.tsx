@@ -90,12 +90,12 @@ export function KanzleiWunschModal({
           onSuccess={() => onClose(true)}
         />
 
-        <div className="border-t border-[#E2E8F3] pt-3">
+        <div className="border-t border-claimondo-border pt-3">
           <button
             type="button"
             onClick={handleSpaeterFragen}
             disabled={isPending}
-            className="w-full px-4 py-2 rounded-lg border border-[#E2E8F3] text-sm text-claimondo-light-blue hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
+            className="w-full px-4 py-2 rounded-lg border border-claimondo-border text-sm text-claimondo-light-blue hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
           >
             {isPending ? 'Wird gespeichert…' : 'Später fragen'}
           </button>

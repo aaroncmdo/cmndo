@@ -97,7 +97,7 @@ export default async function LeadPreiseVerteilungWidget() {
                         </div>
                         <div className="h-2 bg-claimondo-bg rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-[#4573A2] to-emerald-500 transition-all"
+                            className="h-full bg-gradient-to-r from-claimondo-ondo to-emerald-500 transition-all"
                             style={{ width: `${barWidth}%` }}
                           />
                         </div>

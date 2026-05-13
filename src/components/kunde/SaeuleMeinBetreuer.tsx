@@ -40,7 +40,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
         <div className="flex flex-col gap-2">
           <Link
             href="/kunde/chat"
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-[#3a6290] transition-colors"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-shield transition-colors"
           >
             <MessageSquareIcon className="w-4 h-4" />
             Chat öffnen

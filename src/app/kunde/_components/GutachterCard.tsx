@@ -142,7 +142,7 @@ export default function GutachterCard({
             </div>
             {unreadGruppe > 0 && (
               <span
-                className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none ring-2 ring-claimondo-navy"
+                className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none ring-2 ring-claimondo-navy"
                 aria-label={`${unreadGruppe} ungelesene Nachricht${unreadGruppe === 1 ? '' : 'en'}`}
               >
                 {unreadGruppe > 99 ? '99+' : unreadGruppe}

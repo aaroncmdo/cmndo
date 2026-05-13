@@ -117,7 +117,7 @@ export function KanzleiAnsprechpartnerBlock({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-[#3a6290] transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-shield transition-colors"
             >
               <MessageSquareIcon className="w-4 h-4" />
               WhatsApp öffnen
@@ -137,7 +137,7 @@ export function KanzleiAnsprechpartnerBlock({
         </div>
 
         {/* Phone + Email Direct-Links */}
-        <div className="flex flex-col gap-1 pt-2 border-t border-[#E2E8F3]">
+        <div className="flex flex-col gap-1 pt-2 border-t border-claimondo-border">
           {telefon && (
             <a
               href={`tel:${telefon}`}

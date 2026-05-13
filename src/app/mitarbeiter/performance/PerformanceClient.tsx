@@ -13,7 +13,7 @@ const MEDAL = ['text-amber-300', 'text-claimondo-ondo', 'text-orange-400']
 
 const TL_COLORS: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
   telefon: { bg: 'bg-claimondo-ondo/20', text: 'text-claimondo-shield', icon: <PhoneIcon className="w-4 h-4" /> },
-  video: { bg: 'bg-claimondo-navy/20', text: 'text-purple-400', icon: <VideoIcon className="w-4 h-4" /> },
+  video: { bg: 'bg-claimondo-navy/20', text: 'text-claimondo-ondo', icon: <VideoIcon className="w-4 h-4" /> },
   task: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: <AlertTriangleIcon className="w-4 h-4" /> },
   gutachter: { bg: 'bg-orange-500/20', text: 'text-orange-400', icon: <CalendarIcon className="w-4 h-4" /> },
 }
@@ -129,7 +129,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
         {/* Erreichbare Incentives */}
         <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
           <div className="px-5 py-4 border-b border-claimondo-border">
-            <h2 className="text-claimondo-navy font-semibold flex items-center gap-2"><GiftIcon className="w-4 h-4 text-violet-400" />Erreichbare Incentives</h2>
+            <h2 className="text-claimondo-navy font-semibold flex items-center gap-2"><GiftIcon className="w-4 h-4 text-claimondo-ondo" />Erreichbare Incentives</h2>
           </div>
           <div className="divide-y divide-claimondo-border/50">
             {incentives.map(inc => (

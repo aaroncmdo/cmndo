@@ -83,7 +83,7 @@ export default function PasswortVergessenPage() {
                   isLoading={loading}
                   loadingText="Wird gesendet..."
                   disabled={!email.trim()}
-                  className="w-full py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 active:scale-[0.98] transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] mt-1"
+                  className="w-full py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 active:scale-[0.98] transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] mt-1"
                 >
                   Reset-Link senden
                 </LoadingButton>

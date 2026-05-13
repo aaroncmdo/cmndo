@@ -370,7 +370,7 @@ export default function Phase2TerminServiceTyp() {
             type="button"
             disabled={pending}
             onClick={() => setPhase(3)}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-ondo text-white text-sm font-semibold tracking-[-.01em] px-5 py-3.5 min-h-12 shadow-cta-ondo transition-all duration-200 hover:bg-[#3a6291] hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40"
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-ondo text-white text-sm font-semibold tracking-[-.01em] px-5 py-3.5 min-h-12 shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-shield hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40"
           >
             Weiter zu Phase 4 →
           </button>

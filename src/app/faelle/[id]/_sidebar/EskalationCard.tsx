@@ -115,7 +115,7 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
           </p>
         </button>
       )}
-      {error && <p className="text-[10px] text-rose-600 mt-1">{error}</p>}
+      {error && <p className="text-[10px] text-red-600 mt-1">{error}</p>}
 
       {open && (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center px-4 py-6">

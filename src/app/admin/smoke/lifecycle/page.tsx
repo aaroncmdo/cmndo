@@ -95,7 +95,7 @@ export default async function SmokeLifecyclePage() {
         <form action={resetAction}>
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold px-4 py-2"
+            className="inline-flex items-center gap-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2"
           >
             <RefreshCcwIcon className="w-4 h-4" /> Reset alle Smoke-Fälle
           </button>

@@ -161,7 +161,7 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
           </button>
           <button
             onClick={() => wechsleStatus('abgeschlossen')}
-            className="flex items-center gap-1.5 text-xs text-claimondo-ondo border border-claimondo-border hover:bg-[#f8f9fb] px-3 py-1.5 rounded-full transition-colors"
+            className="flex items-center gap-1.5 text-xs text-claimondo-ondo border border-claimondo-border hover:bg-claimondo-bg px-3 py-1.5 rounded-full transition-colors"
           >
             <ClockIcon className="w-3.5 h-3.5" />
             Abschließen

@@ -54,8 +54,8 @@ function PanelHeader({
             }
             className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-colors ${
               mode === 'durchdenken'
-                ? 'bg-violet-50 text-violet-700 border-violet-200'
-                : 'bg-claimondo-bg text-claimondo-ondo border-[#e8eaf0] hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200'
+                ? 'bg-claimondo-ondo/[0.06] text-claimondo-navy border-claimondo-ondo/30'
+                : 'bg-claimondo-bg text-claimondo-ondo border-[#e8eaf0] hover:bg-claimondo-ondo/[0.06] hover:text-claimondo-navy hover:border-claimondo-ondo/30'
             }`}
             aria-pressed={mode === 'durchdenken'}
           >

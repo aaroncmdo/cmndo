@@ -16,7 +16,7 @@ export function TimelineFutureSection({ events, viewerRole }: Props) {
   if (events.length === 0) return null
 
   return (
-    <div className="border border-[#E2E8F3] rounded-2xl bg-gradient-to-br from-[#0D1B3E]/[0.03] to-[#7BA3CC]/[0.05] p-4 space-y-3">
+    <div className="border border-claimondo-border rounded-2xl bg-gradient-to-br from-claimondo-navy/[0.03] to-claimondo-light-blue/[0.05] p-4 space-y-3">
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center">
           <ClockIcon className="w-4 h-4 text-claimondo-ondo" />
