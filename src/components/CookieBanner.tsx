@@ -51,9 +51,9 @@ export function CookieBanner() {
       declineButtonText="Nur notwendige"
       enableDeclineButton
       cookieName="claimondo-cookie-consent"
-      style={{ background: '#0D1B3E', fontFamily: 'Montserrat' }}
+      style={{ background: 'var(--brand-primary, #0D1B3E)', fontFamily: 'Montserrat' }}
       buttonStyle={{
-        background: '#4573A2',
+        background: 'var(--brand-secondary, #4573A2)',
         color: '#fff',
         fontSize: '14px',
         borderRadius: '6px',
@@ -71,7 +71,7 @@ export function CookieBanner() {
     >
       Wir nutzen Cookies um die Funktionalität der Website zu gewährleisten
       und anonyme Nutzungs-Statistiken zu sammeln. Mehr Infos in unserer{' '}
-      <a href="/datenschutz" style={{ color: '#6AAEF0' }}>
+      <a href="/datenschutz" style={{ color: 'var(--brand-accent, #6AAEF0)' }}>
         Datenschutzerklärung
       </a>
       .

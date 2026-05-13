@@ -482,6 +482,8 @@ export async function terminGegenvorschlag({
             grund: grund || null,
             svName: svNameForMail,
             responseUrl,
+            // AAR-branding-rest: SV-Whitelabel wenn der SV verifiziert+branded ist
+            brand: svId ? await (await import('@/lib/branding/token-theme')).resolveEmailBranding({ svId }) : undefined,
           }
           const { render } = await import('@react-email/render')
           const { KundeTerminGegenvorschlagEmail, subject } = await import(
