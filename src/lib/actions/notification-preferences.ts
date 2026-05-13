@@ -5,6 +5,7 @@
 // RLS erlaubt nur self-Write — der server-seitige Supabase-Client nutzt den
 // authentifizierten User automatisch.
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { Channel, EventType } from '@/lib/notifications/types'
 
@@ -81,6 +82,14 @@ export async function updateNotificationPreferences(
     console.error('[updateNotificationPreferences] upsert failed', error)
     return { success: false, error: error.message }
   }
+
+  // Settings-Pages aller Rollen revalidieren — der Form steht in
+  // SV (/gutachter/profil), Kunde (/kunde/einstellungen) und Makler
+  // (/makler/einstellungen). Konservativ alle drei revalidieren.
+  revalidatePath('/gutachter/profil')
+  revalidatePath('/kunde/einstellungen')
+  revalidatePath('/makler/einstellungen')
+
   return { success: true }
 }
 
