@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { LogOutIcon } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
-import { SupportButton } from '@/components/support/SupportButton'
+// SupportButton: Dead-Import entfernt (AAR-prod-cj-fix-01) — wird im JSX nicht gerendert.
 import KundeNav from './_components/KundeNav'
 import KundenbetreuerCard from './_components/KundenbetreuerCard'
 import GutachterCard from './_components/GutachterCard'
@@ -84,8 +84,18 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // „Mein Fall" + linked direkt zur Detail-Page (kein Listen-Zwischenschritt).
   // Loader nutzt claim_parties + faelle.kunde_id + lead.email — derselbe Pfad
   // den Dashboard und Listen-Page nutzen, also einmalige Wahrheit.
-  const adminForNav = createAdminClient()
-  const navFaelle = await getKundeFaelle(adminForNav, user.id, user.email ?? null)
+  //
+  // AAR-prod-cj-fix-01: createAdminClient() wirft wenn SUPABASE_SERVICE_ROLE_KEY
+  // fehlt. In try/catch gewrappt — bei fehlendem Key rendert das Layout ohne
+  // Sidebar-Cards statt in den Root-Error-Boundary zu fallen.
+  let adminForNav: ReturnType<typeof createAdminClient> | null = null
+  let navFaelle: Awaited<ReturnType<typeof getKundeFaelle>> = []
+  try {
+    adminForNav = createAdminClient()
+    navFaelle = await getKundeFaelle(adminForNav, user.id, user.email ?? null)
+  } catch (err) {
+    console.error('[kunde/layout] adminForNav init fehlgeschlagen:', err)
+  }
   const singleFallId = navFaelle.length === 1 ? navFaelle[0].id : null
 
   // Kundenbetreuer-Card-Daten: KB des neusten aktiven Falls.
@@ -97,7 +107,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     avatarUrl: string | null
     rolle: string | null
   } | null = null
-  if (navFaelle.length > 0) {
+  if (adminForNav && navFaelle.length > 0) {
     const { data: kbFall } = await adminForNav
       .from('faelle')
       .select('id, kundenbetreuer_id')
@@ -133,7 +143,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     nachname: string | null
     avatarUrl: string | null
   } | null = null
-  if (navFaelle.length > 0) {
+  if (adminForNav && navFaelle.length > 0) {
     const { data: eskFall } = await adminForNav
       .from('faelle')
       .select('eskaliert_an_admin_id')
@@ -177,7 +187,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     googleAnzahl: number | null
     googleAktualisiertAm: string | null
   } | null = null
-  if (navFaelle.length > 0) {
+  if (adminForNav && navFaelle.length > 0) {
     const { data: svFall } = await adminForNav
       .from('faelle')
       .select('id, sv_id')
