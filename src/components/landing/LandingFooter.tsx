@@ -1,13 +1,23 @@
-import { getTranslations } from 'next-intl/server'
+'use client'
+
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
 // AAR-462 F4 → AAR-466 L3: 4-spaltiger Footer auf Navy.
 // 2026-05-09 Frontend-Audit: iOS-Glass-Pass — Schild-Logo + Wortmarke
 // statt Text-Logo, atmosphärische Spotlights für Tiefe, sanfte Hover-States
 // statt nur Color-Change. Subdomain-Hinweis "Gutachter werden" ergänzt.
+//
+// 13.05.2026 Fix Sentry-Issue JAVASCRIPT-NEXTJS-1: Component war zuvor
+// Server-Component (`async` + `getTranslations`) und wurde von FaqClient
+// (Client) als JSX-Child gerendert — Next.js wirft zur Runtime
+// „`getTranslations` is not supported in Client Components". Pattern auf
+// 'use client' + synchrones `useTranslations` umgestellt. Die 12 Server-
+// Page-Konsumenten dürfen Client-Components weiter rendern (Server-→Client-
+// Richtung ist erlaubt, nur umgekehrt geht's nicht).
 
-export async function LandingFooter() {
-  const t = await getTranslations('landing.footer')
+export function LandingFooter() {
+  const t = useTranslations('landing.footer')
   const year = new Date().getFullYear()
 
   return (
