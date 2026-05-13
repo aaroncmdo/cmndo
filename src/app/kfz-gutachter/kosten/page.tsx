@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { ChevronRight, Phone, Euro, ShieldCheck, FileText, AlertTriangle } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
@@ -261,6 +262,8 @@ export default function KostenPage() {
           </div>
         </div>
       </section>
+
+      <ReviewerByline datum="2026-05-13" />
 
       <LandingFooter />
       <StickyCallBar quelle="Kfz-Gutachter Kosten" />
