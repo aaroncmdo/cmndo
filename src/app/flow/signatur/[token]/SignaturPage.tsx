@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { CheckIcon, RotateCcwIcon } from 'lucide-react'
 import { confirmVollmacht } from '@/app/flow/[token]/actions'
+import { uploadFallSignatur } from '@/lib/actions/unterschrift-upload'
 
 // ─── Rechtstexte ──────────────────────────────────────────────────────────────
 
@@ -51,30 +52,19 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
       const supabase = createClient()
       const now = new Date().toISOString()
 
-      // Abtretung hochladen
-      const abtPath = `${fallId}/abtretung_${Date.now()}.png`
-      const { error: e1 } = await supabase.storage
-        .from('unterschriften')
-        .upload(abtPath, dataURLtoBlob(abtretungPng), { contentType: 'image/png' })
-      if (e1) throw new Error(e1.message)
-      const { data: { publicUrl: abtUrl } } = supabase.storage
-        .from('unterschriften').getPublicUrl(abtPath)
-
-      // Vollmacht hochladen
-      const volPath = `${fallId}/vollmacht_${Date.now()}.png`
-      const { error: e2 } = await supabase.storage
-        .from('unterschriften')
-        .upload(volPath, dataURLtoBlob(vollmachtPng), { contentType: 'image/png' })
-      if (e2) throw new Error(e2.message)
-      const { data: { publicUrl: volUrl } } = supabase.storage
-        .from('unterschriften').getPublicUrl(volPath)
+      // Upload läuft über Server-Action mit service_role (Batch 4) — Anon-Write
+      // auf `unterschriften` ist damit nicht mehr nötig und fällt mit Schritt D.
+      const abtRes = await uploadFallSignatur(fallId, abtretungPng, 'abtretung')
+      if (!abtRes.ok) throw new Error(abtRes.error)
+      const volRes = await uploadFallSignatur(fallId, vollmachtPng, 'vollmacht')
+      if (!volRes.ok) throw new Error(volRes.error)
 
       // Fall updaten
       const { error: e3 } = await supabase
         .from('faelle')
         .update({
-          abtretung_pdf: abtUrl,
-          vollmacht_pdf: volUrl,
+          abtretung_pdf: abtRes.url,
+          vollmacht_pdf: volRes.url,
           abtretung_signiert_am: now,
           vollmacht_signiert_am: now,
         })
@@ -311,13 +301,3 @@ function SignatureCanvas({
   )
 }
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
-function dataURLtoBlob(dataURL: string): Blob {
-  const [header, b64] = dataURL.split(',')
-  const mime = header.match(/:(.*?);/)?.[1] ?? 'image/png'
-  const bytes = atob(b64)
-  const arr = new Uint8Array(bytes.length)
-  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i)
-  return new Blob([arr], { type: mime })
-}
