@@ -106,6 +106,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.85,
     })),
+    // Google-Ads-Landing Köln — dedizierte Konversions-Page (Phase Maik Pramor)
+    {
+      url: `${SITE_URL}/kfz-gutachter-koeln`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
     // Recruiting-Subdomains — eigene kanonische URLs (claimondo.de/<pfad> 301t dorthin)
     {
       url: `${GUTACHTER_LANDING_URL}/`,
