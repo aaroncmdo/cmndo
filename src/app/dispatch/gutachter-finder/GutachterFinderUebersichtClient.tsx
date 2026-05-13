@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { PhoneIcon, CheckCircleIcon, ClockIcon, PenSquareIcon, UserIcon, MapPinIcon, CalendarIcon, FileSignatureIcon, AlertCircleIcon } from 'lucide-react'
+import { PhoneIcon, CheckCircleIcon, ClockIcon, PenSquareIcon, UserIcon, MapPinIcon, CalendarIcon, FileSignatureIcon, AlertCircleIcon, InboxIcon } from 'lucide-react'
 import type { GutachterFinderAnfrage } from './actions'
 import { aktualisiereAnfrageStatus } from './actions'
 import { STATUS_LABEL, STATUS_FALLBACK } from './constants'
+import EmptyState from '@/components/shared/EmptyState'
 
 function StatusBadge({ status }: { status: string }) {
   const cfg = STATUS_LABEL[status] ?? { label: status, color: STATUS_FALLBACK.color }
@@ -217,9 +218,11 @@ export default function GutachterFinderUebersichtClient({
       </div>
 
       {sichtbare.length === 0 ? (
-        <div className="bg-white rounded-ios-lg shadow-ios-md px-5 py-12 text-center text-sm text-claimondo-ondo/70">
-          {filter === 'offen' ? 'Keine offenen Anfragen' : 'Noch keine Anfragen'}
-        </div>
+        <EmptyState
+          icon={InboxIcon}
+          title={filter === 'offen' ? 'Keine offenen Anfragen' : 'Noch keine Anfragen'}
+          variant="compact"
+        />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {sichtbare.map((a) => (

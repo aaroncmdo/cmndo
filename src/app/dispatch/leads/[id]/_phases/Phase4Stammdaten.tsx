@@ -10,8 +10,14 @@ import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveStammdaten } from '../actions'
 import InlineField from './InlineField'
-// P2-T4.7: Schema-getriebener Renderer für Trivial-Felder (Halter-Block).
-// Weitere Sections folgen in Phase B/C.
+// P2-T4.7 (A+B ausgeliefert via PR #870/#871, Phase C minimal via Recon
+// docs/13.05.2026/p2-t4-7-c-recon.md):
+//   - Trivial-Felder (visibleWhen-fähig) werden via LeadSchemaFields gerendert.
+//   - Composite-Cluster (KennzeichenPartsField, CarQuery, Imagin-Lackfarbe,
+//     VersicherungField, GooglePlace-Adresse, KZ-Live-Flag, Button-Toggles)
+//     bleiben bewusst inline — Schmerz pro Cluster ist gering, Smoke-Risiko
+//     einer Vollmigration hoch. Bei tatsächlichem Pain-Punkt (z.B. Feld-
+//     Rename) Cluster reaktiv auf Composite-Component migrieren.
 import { LeadSchemaFields } from '@/components/shared/stammdaten/LeadSchemaFields'
 import { checkKZFlags } from '../_lib/gegner-kz-flags'
 import { useDispatchPhase } from '../_lib/phase-context'
