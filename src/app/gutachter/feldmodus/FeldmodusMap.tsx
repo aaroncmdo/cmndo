@@ -50,6 +50,7 @@ import {
   findHazardOnRoute,
   distanceToHazardM,
   REROUTE_POLL_INTERVAL_MS,
+  REROUTE_MIN_DISTANCE_TO_STOP_M,
   type ProposedReroute,
 } from '@/lib/mapbox'
 import type { NaviNotice } from './NaviHud'
@@ -845,12 +846,12 @@ export default function FeldmodusMap({
     return () => ctrl.abort()
   }, [svPosition, aktuellerStop])
 
-  // 2026-05-08 PR B2: Polling für schnellere Alternative.
-  // Nur aktiv wenn followSv (TbT-Modus) UND noch > 1 km zum Stop. Innerhalb
-  // 1 km macht Reroute keinen Sinn mehr (zu spät, würde nur verwirren).
-  // Alle 30 s mit bypassCache:true → Mapbox-Quote-Impact: max 120 Calls/h
-  // pro aktiv-fahrendem SV, davon greift der Großteil dank 60-s-Cache
-  // gegen denselben Cache-Key nicht durch.
+  // 2026-05-08 PR B2 / 2026-05-13 throttle: Polling für schnellere Alternative.
+  // Nur aktiv wenn followSv (TbT-Modus) UND Distanz zum Stop noch
+  // > REROUTE_MIN_DISTANCE_TO_STOP_M (2 km). Innerhalb dieser Distanz ist
+  // das Akzeptanz-Window zu kurz und ein später Spur-Wechsel verwirrt.
+  // Intervall = REROUTE_POLL_INTERVAL_MS (60 s), alignt mit dem 60-s-
+  // Directions-Cache → ~60 Mapbox-Calls/h pro aktiv fahrendem SV.
   useEffect(() => {
     if (!followSv) return
     if (!svPosition) return
@@ -869,7 +870,7 @@ export default function FeldmodusMap({
         const a = Math.sin(dLat / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(dLng / 2) ** 2
         return 2 * 6371000 * Math.asin(Math.sqrt(a))
       })()
-      if (distToStop < 1000) return
+      if (distToStop < REROUTE_MIN_DISTANCE_TO_STOP_M) return
 
       const { primary, alternatives } = await fetchDrivingRoute(
         [svPosition.lng, svPosition.lat],

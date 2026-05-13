@@ -6,6 +6,7 @@ import { ChevronRight, AlertTriangle, Search, Link2 } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { FAQ_GRUPPEN } from './faqs'
 
 // 2026-05-09 Frontend-Audit + GEO-Vorbereitung:
@@ -220,6 +221,8 @@ export default function FaqClient() {
           </div>
         </div>
       </section>
+
+      <ReviewerByline datum="2026-05-13" />
 
       <LandingFooter />
       <StickyCallBar quelle="FAQ" />

@@ -74,10 +74,23 @@ jobs:
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            set -e
+            set -euo pipefail
             mkdir -p /var/www/claimondo-v2-new
             tar -xzf /tmp/deploy.tar.gz -C /var/www/claimondo-v2-new
-            cp /var/www/claimondo-v2/.env.local /var/www/claimondo-v2-new/.env.local 2>/dev/null || true
+            # 13.05.2026 Prod-Fix: vorher `cp old/.env.local new/.env.local || true`
+            # — wenn das alte File fehlte (z. B. nach einem kaputten Deploy davor),
+            # schluckte das `|| true` den Fehler und das neue Verzeichnis hatte
+            # auch kein .env.local. Beim nächsten PM2-Start fehlte
+            # SUPABASE_SERVICE_ROLE_KEY → Kunde-Layout-Crash (Digest 3073205500).
+            # Stattdessen jetzt: Symlink auf den kanonischen Ort
+            # /etc/claimondo/.env.local (root:root, 600). Überlebt alle
+            # Verzeichnis-Rotations + kann nicht still verschwinden.
+            if [ ! -f /etc/claimondo/.env.local ]; then
+              echo "FATAL: /etc/claimondo/.env.local fehlt — Deploy abgebrochen, sonst startet Prod ohne SUPABASE_SERVICE_ROLE_KEY."
+              echo "Behebung: Aaron muss das File einmalig aus dem letzten guten Backup nach /etc/claimondo/.env.local kopieren (chmod 600, chown root:root)."
+              exit 1
+            fi
+            ln -sf /etc/claimondo/.env.local /var/www/claimondo-v2-new/.env.local
             rm -rf /var/www/claimondo-v2-old 2>/dev/null || true
             mv /var/www/claimondo-v2 /var/www/claimondo-v2-old 2>/dev/null || true
             mv /var/www/claimondo-v2-new /var/www/claimondo-v2
