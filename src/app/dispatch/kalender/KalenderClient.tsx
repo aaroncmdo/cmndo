@@ -196,7 +196,8 @@ export default function KalenderClient({
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-xl font-semibold text-claimondo-navy">Kalender</h1>
-          <p className="text-xs text-claimondo-ondo">
+          {/* suppressHydrationWarning: fmtDateLabel nutzt toLocaleDateString — UTC vs. Berlin → #418 */}
+          <p className="text-xs text-claimondo-ondo" suppressHydrationWarning>
             KW {getWeekNumber(weekStart)} · {fmtDateLabel(weekStart)} – {fmtDateLabel(addDays(weekStart, 4))}
           </p>
         </div>
@@ -307,7 +308,8 @@ export default function KalenderClient({
               key={d.toISOString()}
               className="border-b border-l border-claimondo-border bg-claimondo-bg/50 px-2 py-2 text-center"
             >
-              <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo">
+              {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin → React #418 */}
+              <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo" suppressHydrationWarning>
                 {d.toLocaleDateString('de-DE', { weekday: 'short' })}
               </p>
               <p className="text-sm font-semibold text-claimondo-navy">

@@ -134,7 +134,10 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                   <Td className="!text-claimondo-ondo text-xs">
                     {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
                   </Td>
-                  <Td className="!text-claimondo-ondo/70 text-xs">
+                  {/* suppressHydrationWarning: Datums-Formatierung via toLocaleDateString
+                      ist server-seitig UTC, client-seitig Europe/Berlin → #418-Mismatch.
+                      Der angezeigte Wert ist korrekt, nur das HTML-Attribut weicht ab. */}
+                  <Td className="!text-claimondo-ondo/70 text-xs" suppressHydrationWarning>
                     {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </Td>
                   <Td>
@@ -210,7 +213,8 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                     )}
                     <div className="flex items-center gap-1 mt-1.5">
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
-                      <span className="text-[9px] text-claimondo-ondo/70 ml-auto">
+                      {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin (#418) */}
+                      <span className="text-[9px] text-claimondo-ondo/70 ml-auto" suppressHydrationWarning>
                         {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                       </span>
                     </div>
