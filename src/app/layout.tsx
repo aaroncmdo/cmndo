@@ -1,4 +1,5 @@
 ﻿import type { Metadata } from "next";
+import Script from "next/script";
 import { Montserrat, Noto_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
@@ -145,6 +146,12 @@ export default async function RootLayout({
   const messages = await getMessages();
   const dir = locale === "ar" ? "rtl" : "ltr";
 
+  // GA4 + Google-Ads-Tracking — beide IDs teilen sich denselben gtag.js-Loader.
+  // Hinweis: noch nicht consent-gated; CookieBanner-Integration ist offen.
+  const ga4Id = process.env.NEXT_PUBLIC_GA4_ID;
+  const gadsId = process.env.NEXT_PUBLIC_GADS_ID;
+  const primaryGtagId = ga4Id ?? gadsId;
+
   return (
     <html
       lang={locale}
@@ -160,6 +167,23 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://cdn.imagin.studio" crossOrigin="" />
         <link rel="dns-prefetch" href="https://api.mapbox.com" />
         <link rel="dns-prefetch" href="https://cdn.imagin.studio" />
+        {primaryGtagId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${primaryGtagId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="gtag-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                ${ga4Id ? `gtag('config', ${JSON.stringify(ga4Id)});` : ''}
+                ${gadsId ? `gtag('config', ${JSON.stringify(gadsId)});` : ''}
+              `}
+            </Script>
+          </>
+        )}
       </head>
       <body className="min-h-full flex flex-col glass-bg">
         <script
