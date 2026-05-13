@@ -1065,15 +1065,13 @@ export default function Phase4Stammdaten() {
                 Nein
               </button>
             </div>
-            {l.hat_vorschaeden === true && (
-              <InlineField
-                label="Beschreibung"
-                value={l.vorschaeden_beschreibung}
-                fieldName="vorschaeden_beschreibung"
-                leadId={leadId}
-                placeholder="Welche Vorschäden? (Bereich / Schadenhöhe)"
-              />
-            )}
+            {/* P2-T4.7-B: Beschreibung via Schema-Renderer (visibleWhen
+                triggert auf hat_vorschaeden=true) statt inline-conditional. */}
+            <LeadSchemaFields
+              block="vorschaeden"
+              lead={l as unknown as Record<string, unknown>}
+              leadId={leadId}
+            />
           </div>
         </div>
 
@@ -1350,10 +1348,10 @@ export default function Phase4Stammdaten() {
             initialId={l.gegner_versicherung_id}
             initialName={l.gegner_versicherung}
           />
-          <InlineField
-            label="Schadennummer (optional)"
-            value={l.gegner_schadennummer}
-            fieldName="gegner_schadennummer"
+          {/* P2-T4.7-B: gegner_schadennummer via Schema-Renderer. */}
+          <LeadSchemaFields
+            block="gegner"
+            lead={l as unknown as Record<string, unknown>}
             leadId={leadId}
           />
           {/* CMM-26: Unfalldatum, Unfall-Uhrzeit und Unfallort sind in Phase 1
