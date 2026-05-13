@@ -202,7 +202,10 @@ export default function DokumenteTab({
       return
     }
     const { data: urlData } = supabase.storage.from('fall-dokumente').getPublicUrl(path)
-    await uploadPflichtdokument(fallId, pflichtdokId, urlData.publicUrl)
+    const r = await uploadPflichtdokument(fallId, pflichtdokId, urlData.publicUrl)
+    if (!r.success) {
+      console.error('[DokumenteTab] uploadPflichtdokument:', r.error)
+    }
     router.refresh()
     setUploading(null)
   }
