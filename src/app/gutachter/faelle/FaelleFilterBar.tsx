@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { SearchIcon, XIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { liquidFieldBase } from '@/lib/styles/liquid-field'
 
 // AAR-370: Filter um zwei fallübergreifende Slices erweitert —
 // „Mit offener Stellungnahme" (technische_stellungnahme_status='beauftragt')
@@ -96,7 +97,7 @@ export default function FaelleFilterBar({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Fall-Nr, Kunde oder Ort"
-            className="w-full pl-9 pr-8 py-3 rounded-claimondo-md border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-sm text-claimondo-navy tracking-[-.005em] placeholder:text-[#8a93a6] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
+            className={`w-full pl-9 pr-8 py-3 rounded-claimondo-md text-sm placeholder:text-[#8a93a6] ${liquidFieldBase}`}
           />
           {query && (
             <button

@@ -28,6 +28,7 @@ import {
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import LegalDocPopover from '@/components/legal/LegalDocPopover'
 import { SheetCard } from '@/components/shared/SheetCard'
+import { liquidFieldBase } from '@/lib/styles/liquid-field'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -738,7 +739,7 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full px-4 py-3.5 rounded-claimondo-md border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-base text-claimondo-navy tracking-[-.01em] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:border-claimondo-ondo focus:bg-white focus:shadow-focus-ondo transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+        className={`w-full px-4 py-3.5 rounded-claimondo-md text-base ${liquidFieldBase}`}
       />
     </div>
   )
