@@ -24,7 +24,10 @@ export async function startCall(opts: {
   fallId?: string
   leadId?: string
   telefon: string
-}): Promise<{ callId: string }> {
+}): Promise<
+  | { success: true; callId: string }
+  | { success: false; error: string }
+> {
   const { userId } = await requireAuth()
   const db = createAdminClient()
 
@@ -51,7 +54,7 @@ export async function startCall(opts: {
     gestartet_am: new Date().toISOString(),
   }).select('id').single()
 
-  if (error) throw new Error(error.message)
+  if (error || !call) return { success: false, error: error?.message ?? 'Call konnte nicht angelegt werden' }
 
   // Aircall Call starten (fire & forget — Update kommt via Webhook)
   if (aircallUserId > 0) {
@@ -59,23 +62,27 @@ export async function startCall(opts: {
       const { startOutboundCall } = await import('@/lib/aircall/client')
       const result = await startOutboundCall({ userId: aircallUserId, toNumber: opts.telefon })
       // Update mit echtem Aircall-ID
-      await db.from('calls').update({ aircall_call_id: String(result.id) }).eq('id', call!.id)
+      await db.from('calls').update({ aircall_call_id: String(result.id) }).eq('id', call.id)
     } catch (err) {
       console.error('[KFZ-143] Aircall startOutboundCall fehlgeschlagen:', err)
-      await db.from('calls').update({ status: 'failed' }).eq('id', call!.id)
+      await db.from('calls').update({ status: 'failed' }).eq('id', call.id)
     }
   }
 
   if (opts.fallId) revalidatePath(`/faelle/${opts.fallId}`)
-  return { callId: call!.id }
+  return { success: true, callId: call.id }
 }
 
 /** Call-Notiz speichern */
-export async function saveCallNotiz(callId: string, notiz: string): Promise<void> {
+export async function saveCallNotiz(
+  callId: string,
+  notiz: string,
+): Promise<{ success: boolean; error?: string }> {
   await requireAuth()
   const db = createAdminClient()
   const { error } = await db.from('calls').update({ notiz, updated_at: new Date().toISOString() }).eq('id', callId)
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
+  return { success: true }
 }
 
 /** Calls für einen Fall/Lead laden */
