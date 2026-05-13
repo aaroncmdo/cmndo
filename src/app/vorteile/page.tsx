@@ -1,171 +1,156 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
-  Euro,
-  Scale,
-  Zap,
-  Users,
-  Clock,
-  ShieldCheck,
-  ChevronRight,
-  CheckCircle2,
+  Phone, CheckCircle2, MessageCircle, ChevronRight, Euro, Scale,
+  ShieldCheck, Zap, Clock, Users,
 } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
-import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
+import { VersichererTaktikenSection } from '@/components/landing/VersichererTaktikenSection'
+import { SiebenFehlerSection } from '@/components/landing/SiebenFehlerSection'
+import { WertminderungSandenDannerSection } from '@/components/landing/sections/WertminderungSandenDannerSection'
+import { TeslaEAutoSection } from '@/components/landing/sections/TeslaEAutoSection'
+import { TrackingHooks } from '@/components/marketing/TrackingHooks'
+import {
+  serviceSchema, breadcrumbsSchema, faqPageSchema,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
+} from '@/lib/seo/jsonld'
+
+// /vorteile — Premium-Layout. Conversion-Page mit Fokus auf USPs + BGH-
+// Authority + Versicherer-Kürzungs-Konter + Wissensdatenbank-Tiefe.
+// Folgt der Köln-Handoff-Prototype-Design-Philosophie.
 
 export const metadata: Metadata = {
-  title: 'Vorteile von Claimondo — Bis zu 33 % mehr Schadensersatz',
+  title: 'Vorteile — Bis zu 33 % mehr Schadensersatz · Claimondo',
   description:
-    '0 € Eigenanteil, unabhängiger DAT-Sachverständiger, voller Anspruch nach §249 BGB durchgesetzt. Direktabrechnung kostet im Schnitt 33 %.',
+    '0 € Eigenanteil, unabhängiger DAT-Sachverständiger, volle Auszahlung nach §249 BGB. Direktabrechnung mit der Versicherung kostet im Schnitt 33 %. Sehen Sie, was Ihnen zusteht.',
   keywords: [
-    'Vorteile Kfz-Schaden',
-    'Wertminderung sichern',
-    'UPE-Aufschläge',
-    'Mehrwertsteuer §249 BGB',
-    'unabhängiger Gutachter',
-    'volle Schadenregulierung',
-    'Anwalt Verkehrsunfall',
-    'HIS-Datei Schaden',
+    'Vorteile Kfz-Schaden', 'unabhängiger Gutachter', 'Wertminderung sichern',
+    'UPE-Aufschläge', 'Mehrwertsteuer §249 BGB', 'Anwalt Verkehrsunfall',
+    'HIS-Datei Schaden', 'volle Schadensregulierung', 'Quotenvorrecht',
   ],
-  alternates: {
-    canonical: '/vorteile',
-  },
+  alternates: { canonical: '/vorteile' },
   openGraph: {
     type: 'website',
     locale: 'de_DE',
     siteName: 'Claimondo',
     url: `${SITE_URL}/vorteile`,
-    title: 'Vorteile — Bis zu 33 % mehr Schadensersatz',
+    title: 'Vorteile — Bis zu 33 % mehr Schadensersatz · Claimondo',
     description:
-      '0 € Eigenanteil, unabhängiger Gutachter, volle Auszahlung. Direktabrechnung mit dem Versicherer kostet im Schnitt 33 % der Schadenssumme.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Vorteile' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Vorteile — Bis zu 33 % mehr Schadensersatz',
-    description: '0 € Eigenanteil, unabhängiger Gutachter, volle Auszahlung.',
-    images: ['/og-default.png'],
+      '0 € Eigenanteil, unabhängiger Gutachter, voller Anspruch. Direktabrechnung mit der Versicherung kostet im Schnitt 33 %.',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Vorteile Claimondo' }],
   },
 }
+
+const KPIS = [
+  { wert: '+33 %', label: 'mehr Schadensersatz im Schnitt' },
+  { wert: '8 Mio. €+', label: 'durchgesetzte Ansprüche' },
+  { wert: '0 €', label: 'Eigenanteil bei unverschuldetem Unfall' },
+  { wert: '32 Tage', label: 'Ø bis zur Auszahlung' },
+] as const
 
 const VORTEILE = [
   {
     icon: Euro,
-    title: '0 € Kosten für Sie',
-    subtitle: 'Der Verursacher zahlt alles',
-    text: 'Bei einem unverschuldeten Unfall trägt die gegnerische Versicherung alle Kosten: Gutachten, Anwalt, Mietwagen, Abschleppkosten. Für Sie entstehen keine Ausgaben — und kein Risiko.',
+    titel: '0 € Kosten für Sie',
+    sub: 'Der Verursacher zahlt alles',
+    text: 'Bei unverschuldetem Unfall trägt die gegnerische Haftpflicht alle Kosten — Gutachten, Anwalt, Mietwagen, Abschleppung. Kein Vorschuss, kein Risiko, kein Eigenanteil.',
     punkte: [
-      'Gutachterkosten: 100 % übernommen',
-      'Anwaltskosten: komplett durch Gegner',
-      'Mietwagen bis zur Reparatur: gedeckt',
-      'Keine Vorleistung, kein Risiko',
+      'Gutachterkosten: 100 % übernommen (§249 BGB)',
+      'Anwaltskosten: komplett durch Gegnerseite',
+      'Mietwagen für die gesamte Reparaturdauer',
+      'Keine Vorleistung. Keine Bindung. Keine Kosten.',
     ],
   },
   {
     icon: Scale,
-    title: 'Unabhängige Gutachter',
-    subtitle: 'Nur Ihrem Interesse verpflichtet',
-    text: 'Unsere Gutachter arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Das bedeutet: Ihr Schaden wird vollständig und korrekt bewertet, nicht kleingerechnet.',
+    titel: 'Unabhängige DAT-Gutachter',
+    sub: 'Nur Ihrem Interesse verpflichtet',
+    text: 'Unsere Partner-Gutachter arbeiten unabhängig — nicht im Dienst einer Versicherung. Ihr Schaden wird vollständig und nach DAT-Standard bewertet, nicht über ControlExpert oder K-Expert kleingerechnet.',
     punkte: [
-      'Über 50 zertifizierte Partner-Gutachter',
-      'Keine Bindung an gegnerische Versicherung',
-      'Vollständige Schadensbewertung',
-      'Bericht nach DAT-Standard in 48 Stunden',
+      '110+ DAT-zertifizierte Partner-Gutachter',
+      'Keine Schadensteuerung — keine Versicherungsbindung',
+      'Vollständige Schadensbewertung inkl. Wertminderung',
+      'Gutachten in 5 Werktagen, Besichtigung in 48 h',
     ],
   },
   {
     icon: ShieldCheck,
-    title: 'Anwalt inklusive',
-    subtitle: 'Vollständige rechtliche Vertretung',
-    text: 'Unsere Partnerkanzlei übernimmt die gesamte Korrespondenz mit der Versicherung und kämpft für Ihren vollen Anspruch — bis zur letzten Cent-Differenz.',
+    titel: 'Anwalt LexDrive inklusive',
+    sub: 'Volle rechtliche Vertretung',
+    text: 'Unsere Partnerkanzlei LexDrive übernimmt die gesamte Korrespondenz mit der gegnerischen Versicherung und setzt jeden Anspruch durch — auch gegen Prüfberichte und Kürzungen.',
     punkte: [
-      'Erfahrene Verkehrsrechtsspezialisten',
-      'Direkter Kontakt, kein Call-Center',
-      'Schriftverkehr mit Versicherung übernommen',
-      'Notfalls gerichtliche Durchsetzung',
+      'Fachanwälte für Verkehrsrecht',
+      'Direkter Ansprechpartner — kein Call-Center',
+      'Schriftverkehr mit Versicherung komplett übernommen',
+      'Gerichtliche Durchsetzung wenn nötig — Gegenseite zahlt',
     ],
   },
   {
     icon: Zap,
-    title: 'Alles aus einer Hand',
-    subtitle: 'Ein Ansprechpartner für alles',
-    text: 'Kein Koordinieren zwischen Gutachter, Werkstatt und Anwalt. Claimondo orchestriert den gesamten Prozess. Sie bekommen regelmäßige Updates — und müssen sich um nichts kümmern.',
+    titel: 'Alles aus einer Hand',
+    sub: 'Ein Ansprechpartner für alles',
+    text: 'Kein Pingpong zwischen Gutachter, Werkstatt, Anwalt und Versicherung. Claimondo orchestriert den gesamten Ablauf — Sie bekommen Status-Updates per WhatsApp und im Live-Portal.',
     punkte: [
-      'Ein zentraler Ansprechpartner',
-      'Status-Updates per WhatsApp',
-      'Koordination aller Beteiligten',
+      'Persönlicher Schaden-Begleiter — 1 Nummer, 1 Mail',
+      'Live-Status im Browser & Push in der App',
+      'Koordination aller Beteiligten (SV, Anwalt, Werkstatt)',
       'Digitale Fallakte jederzeit einsehbar',
     ],
   },
   {
     icon: Clock,
-    title: 'Schnell & digital',
-    subtitle: 'Ohne Papierkram, ohne Wartezeit',
-    text: 'Schaden melden dauert 5 Minuten — per Handy, ohne Formulare. Gutachter kommt am nächsten Tag. Regulierung läuft im Hintergrund, während Sie wieder fahren.',
+    titel: 'Digital & schnell',
+    sub: 'Ohne Papierkram, ohne Wartezeit',
+    text: 'Schaden melden in 5 Minuten per Handy — keine Formulare, keine Anmeldung. Erster Rückruf unter 15 Minuten. Gutachter-Termin in der Regel am Folgetag.',
     punkte: [
-      'Schadenmeldung in 5 Minuten',
-      'Gutachtertermin oft am gleichen Tag',
-      'Bericht in 48 Stunden',
-      'Digitale Vollmacht — kein Papierkram',
+      'Schadenmeldung in unter 5 Minuten',
+      'Berater-Rückruf in <15 Min',
+      'Besichtigung in <48 h',
+      'Digitale Vollmacht — keine Unterschriften per Post',
     ],
   },
   {
     icon: Users,
-    title: 'Deutschlandweit',
-    subtitle: 'Überall für Sie da',
-    text: 'Egal ob Großstadt oder ländliche Region: unser Netzwerk aus über 50 Gutachtern deckt ganz Deutschland ab. Der nächste Gutachter ist meist wenige Kilometer entfernt.',
+    titel: 'Deutschlandweit verfügbar',
+    sub: '72 Städte · Schwerpunkt NRW',
+    text: 'Egal ob Köln, München, Berlin oder Schwerin: das Partner-Netzwerk deckt 72 deutsche Großstädte ab. Der nächste DAT-Gutachter ist meist wenige Kilometer entfernt.',
     punkte: [
-      '50+ Partner-Gutachter bundesweit',
+      '110+ DAT-Sachverständige bundesweit',
+      '72 indexierbare Stadt-Pages für lokales SEO',
       'Standortbasierte Zuweisung',
-      'Kurze Anfahrtswege',
-      'Ortskundige Experten',
+      'Ortskundige Experten in jeder Region',
     ],
   },
-]
+] as const
 
-const KUERZUNGEN = [
+const FAQS: Array<{ frage: string; antwort: string }> = [
   {
-    position: 'Stundenverrechnungssätze',
-    trick: 'Verweis auf billigere Partnerwerkstatt',
-    recht: 'BGH VI ZR 248/05 — freie Werkstattwahl',
+    frage: 'Was passiert, wenn die Versicherung das Gutachten kürzt?',
+    antwort:
+      'Versicherer kürzen über Prüfdienstleister (ControlExpert, K-Expert, DEKRA) typischerweise UPE-Aufschläge, Verbringung, Beilackierung und Wertminderung. BGH-fest sind diese Positionen erstattungsfähig (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff.). LexDrive holt die Kürzungen vollständig zurück — auch gerichtlich.',
   },
   {
-    position: 'UPE-Aufschläge',
-    trick: 'Als „nicht erstattungsfähig" abgestempelt',
-    recht: 'BGH VI ZR 65/18 — erstattungsfähig',
+    frage: 'Was bringt mir das Quotenvorrecht bei Mithaftung?',
+    antwort:
+      'Bei 50:50-Mithaftung zahlt die gegnerische Versicherung nur 50 %. Ihre eigene Kasko springt über das Quotenvorrecht ein und übernimmt bis zu 100 % der bevorrechtigten Positionen: Reparaturkosten, Wertminderung, Sachverständigenkosten, Abschleppkosten. Der Höherstufungsschaden kann anteilig bei der Gegenseite zurückgefordert werden.',
   },
   {
-    position: 'Verbringungskosten',
-    trick: 'Komplett gestrichen',
-    recht: 'BGH — vollständig erstattungsfähig',
+    frage: 'Was ist die merkantile Wertminderung?',
+    antwort:
+      'Auch nach perfekter Reparatur sinkt der Marktwert eines Unfallfahrzeugs — das ist die merkantile Wertminderung. Sie zahlt die gegnerische Versicherung nach Sanden/Danner-Formel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. BGH VI ZR 357/03 lehnt eine starre Altersgrenze ab.',
   },
   {
-    position: 'Beilackierungskosten',
-    trick: 'Ignoriert oder halbiert',
-    recht: 'BGH VI ZR 174/24 (2025) — gilt',
+    frage: 'Sind UPE-Aufschläge und Verbringungskosten wirklich erstattungsfähig?',
+    antwort:
+      'Ja — auch bei fiktiver Abrechnung. BGH VI ZR 65/18 hat UPE-Aufschläge bestätigt, BGH VI ZR 174/24 die Beilackierung. Versicherer kürzen trotzdem über Prüfberichte ohne Fahrzeugbesichtigung. Wir holen die Positionen anwaltlich zurück.',
   },
   {
-    position: 'Sachverständigenhonorar',
-    trick: 'Als „überhöht" abgelehnt',
-    recht: 'BGH — Honorar liegt beim Auftraggeber',
+    frage: 'Warum sollte ich nicht direkt mit der gegnerischen Versicherung sprechen?',
+    antwort:
+      'Weil sie ihren eigenen Gutachter (ControlExpert, K-Expert) ansetzt und systematisch kürzt. Im Schnitt 33 % weniger Schadensersatz. Sagen Sie höflich: „Vielen Dank, ich mache von meinem Recht Gebrauch, einen unabhängigen Sachverständigen und Fachanwalt meiner Wahl einzuschalten." — und melden den Schaden bei uns.',
   },
-  {
-    position: 'Wertminderung',
-    trick: 'Komplett ignoriert oder auf Null gesetzt',
-    recht: 'BGH VI ZR 357/03 — keine starre Altersgrenze',
-  },
-]
-
-const VERGLEICH = [
-  { punkt: 'Kosten für Sie', ohne: 'Gutachterkosten selbst zahlen', mit: '0 € — Gegner zahlt alles' },
-  { punkt: 'Gutachter', ohne: 'Versicherungs-Gutachter (nicht neutral)', mit: 'Unabhängiger Sachverständiger' },
-  { punkt: 'Anwalt', ohne: 'Selbst beauftragen & bezahlen', mit: 'Inklusive, kostenlos' },
-  { punkt: 'Aufwand', ohne: 'Stunden am Telefon & Formulare', mit: '5 Minuten — wir übernehmen den Rest' },
-  { punkt: 'Transparenz', ohne: 'Keine Statusinfos', mit: 'Live-Updates per WhatsApp' },
-  { punkt: 'Regulierung', ohne: 'Oft unvollständig', mit: '100 % Ihres Anspruchs' },
 ]
 
 export default function VorteilePage() {
@@ -175,221 +160,209 @@ export default function VorteilePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
           serviceSchema({
-            name: 'Vollständige Kfz-Schadensregulierung',
+            name: 'Vollständige Kfz-Schadensregulierung mit unabhängigem Sachverständigen',
             description:
-              'Von der Schadensaufnahme über Gutachten und Werkstatt bis zur Auszahlung — alles aus einer Hand, ohne Eigenanteil für unverschuldet Geschädigte (§249 BGB).',
+              'Unverschuldete Geschädigte erhalten mit Claimondo +33 % mehr Schadensersatz als bei Direktabrechnung. 0 € Eigenanteil, DAT-Gutachter + Anwalt LexDrive inklusive. Vollständige BGH-konforme Durchsetzung.',
             url: `${SITE_URL}/vorteile`,
           }),
+          faqPageSchema(FAQS),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Vorteile', url: '/vorteile' },
           ]),
         ])}
       />
+
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Header — Glass-Pass mit Spotlights wie Landing-Hero */}
-      <section className="relative isolate overflow-hidden py-16 text-center sm:py-20">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-          style={{
-            background: [
-              'radial-gradient(circle at 20% 15%, rgba(123,163,204,0.22), transparent 50%)',
-              'radial-gradient(circle at 85% 35%, rgba(69,115,162,0.14), transparent 45%)',
-            ].join(', '),
-          }}
-        />
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div
-            className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm"
-          >
-            Warum Claimondo?
-          </div>
-          <h1
-            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
-            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
-          >
-            Ihr Recht. Vollständig durchgesetzt.
-          </h1>
-          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
-            Kein Kompromiss, kein Papierkram, keine Kosten für Sie.
-          </p>
-        </div>
-      </section>
-
-      {/* Direkt-Antwort für AI-Suchmaschinen — was Claimondo konkret tut */}
-      <section className="pb-4 sm:pb-6">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <AnswerCapsule quelle="§249 BGB · BVSK-Honorartabelle">
-            <strong>Claimondo regelt Kfz-Unfallschäden vollständig digital:</strong> ein
-            unabhängiger DAT-zertifizierter Sachverständiger erstellt das Gutachten vor
-            Ort, eine Partnerkanzlei (LexDrive) setzt alle Schadenspositionen gegen die
-            gegnerische Haftpflichtversicherung durch — Reparatur, Wertminderung,
-            Nutzungsausfall, Mietwagen, Schmerzensgeld. Bei unverschuldetem Unfall trägt
-            die gegnerische Versicherung sämtliche Kosten gemäß §249 BGB. Eigenanteil 0 €.
-          </AnswerCapsule>
-        </div>
-      </section>
-
-      {/* Vorteile Grid — Glass-Cards */}
-      <section className="py-12 sm:py-16">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-4 sm:grid-cols-2 sm:gap-5 sm:px-6 lg:grid-cols-3">
-          {VORTEILE.map((v) => {
-            const Icon = v.icon
-            return (
-              <div
-                key={v.title}
-                className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg sm:p-7"
-                style={{ WebkitBackdropFilter: 'blur(14px)' }}
-              >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-claimondo-ondo/12">
-                  <Icon className="h-6 w-6 text-claimondo-ondo" />
-                </div>
-                <h2
-                  className="text-xl font-bold text-claimondo-navy"
-                  style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
-                >{v.title}</h2>
-                <p className="mt-0.5 text-sm font-semibold text-claimondo-light-blue">{v.subtitle}</p>
-                <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{v.text}</p>
-                <ul className="mt-5 space-y-2">
-                  {v.punkte.map((p) => (
-                    <li key={p} className="flex items-start gap-2 text-sm text-claimondo-ondo">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" />
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* Kürzungs-Aufklärung */}
-      <section className="bg-claimondo-navy py-20 text-white">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="text-center">
-            <div className="mb-3 text-sm font-semibold uppercase tracking-widest text-claimondo-light-blue">Was Sie nicht wissen sollen</div>
-            <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-              So kürzt die Versicherung Ihren Anspruch
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-white/60">
-              ControlExpert, K-Expert und DEKRA erstellen automatisierte Prüfberichte — <strong className="text-white">ohne Fahrzeugbesichtigung</strong>.
-              Positionen werden gestrichen, in der Hoffnung dass Sie nicht widersprechen.
-            </p>
-          </div>
-
-          {/* Direkt-Antwort: warum Versicherungen kürzen + welche BGH-Urteile dagegen stehen */}
-          <div
-            className="mx-auto mt-10 max-w-3xl rounded-2xl border-l-4 border-claimondo-light-blue p-5 text-[15px] leading-relaxed text-white/90"
-            style={{ background: 'rgba(123,163,204,0.10)' }}
-          >
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-claimondo-light-blue">
-              Direkt-Antwort · BGH VI ZR 65/18 · VI ZR 174/24 · VI ZR 119/04
-            </p>
-            <p>
-              <strong className="text-white">Versicherungen kürzen 8 von 10 Schadenspositionen systematisch</strong>{' '}
-              — UPE-Aufschläge, Verbringungskosten, Beilackierung und Wertminderung werden
-              standardmäßig auf null gesetzt, in der Hoffnung dass Geschädigte nicht
-              widersprechen. Der BGH stützt in mehreren Urteilen den Geschädigten:
-              UPE-Aufschläge sind erstattungsfähig (VI ZR 65/18), Beilackierung ebenso
-              (VI ZR 174/24), Stundenverrechnungssätze frei wählbar (VI ZR 119/04). Mit
-              anwaltlicher Vertretung lassen sich die Kürzungen in der Regel zurückholen.
-            </p>
-          </div>
-
-          <div className="mt-12 overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur">
-            <div className="grid grid-cols-3 border-b border-white/10 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white/40">
-              <div>Gekürzter Posten</div>
-              <div className="text-center">Versicherungs-Trick</div>
-              <div className="text-right">Ihr Recht (BGH)</div>
-            </div>
-            {KUERZUNGEN.map((k, i) => (
-              <div
-                key={k.position}
-                className={`grid grid-cols-3 items-center px-6 py-4 text-sm ${i < KUERZUNGEN.length - 1 ? 'border-b border-white/5' : ''}`}
-              >
-                <div className="font-semibold text-white">{k.position}</div>
-                <div className="text-center text-red-400">{k.trick}</div>
-                <div className="text-right text-emerald-400">{k.recht}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 rounded-3xl border border-amber-500/20 bg-amber-500/10 p-6 text-center">
-            <p className="text-lg font-semibold text-amber-200">
-              Im Schnitt verlieren Unfallbeteiligte{' '}
-              <span className="text-3xl font-black text-amber-400">33 %</span>{' '}
-              ihres Anspruchs — weil sie nicht widersprechen.
-            </p>
-            <p className="mt-2 text-sm text-amber-200/60">
-              Reales Beispiel: Gutachtenwert €11.900 → nach Versicherer-Kürzungen: €8.000 ausgezahlt. €3.900 verloren.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Vergleichstabelle */}
-      <section className="py-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <h2 className="mb-8 text-center text-3xl font-extrabold text-claimondo-navy">
-            Mit oder ohne Claimondo?
-          </h2>
-          <div className="overflow-hidden rounded-3xl border border-claimondo-border bg-white shadow-sm">
-            <div className="grid grid-cols-3 border-b border-claimondo-border bg-claimondo-bg px-6 py-3 text-xs font-bold uppercase tracking-wider text-claimondo-ondo">
-              <div>Was wird verglichen</div>
-              <div className="text-center text-red-500">Ohne Claimondo</div>
-              <div className="text-center text-emerald-600">Mit Claimondo</div>
-            </div>
-            {VERGLEICH.map((v, i) => (
-              <div
-                key={v.punkt}
-                className={`grid grid-cols-3 px-6 py-4 text-sm ${i < VERGLEICH.length - 1 ? 'border-b border-claimondo-border' : ''}`}
-              >
-                <div className="font-semibold text-claimondo-navy">{v.punkt}</div>
-                <div className="text-center text-red-500">{v.ohne}</div>
-                <div className="flex items-center justify-center gap-1 font-semibold text-emerald-700">
-                  <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span>{v.mit}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA — dunkle Sektion mit subtilen Spotlights */}
-      <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-center">
+      {/* 1 — Hero (kein Lead-Form, dual-CTA) */}
+      <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="vorteile-hero">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
           style={{
             background: [
-              'radial-gradient(circle at 20% 30%, rgba(69,115,162,0.30), transparent 55%)',
-              'radial-gradient(circle at 80% 70%, rgba(123,163,204,0.18), transparent 50%)',
+              'radial-gradient(circle at 15% 20%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 85% 75%, rgba(123,163,204,0.18), transparent 50%)',
             ].join(', '),
           }}
         />
-        <div className="relative mx-auto max-w-2xl px-4">
-          <h2
-            className="text-3xl font-bold text-white sm:text-4xl"
-            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
-          >
-            Überzeugt? Jetzt Schaden melden.
+        <div className="relative mx-auto max-w-5xl px-5 py-16 sm:py-24 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md">
+            §249 BGB · BVSK · BGH-Rechtsprechung
+          </div>
+          <h1 id="vorteile-hero" className="mx-auto mt-5 max-w-3xl text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
+            Bis zu <span className="text-claimondo-light-blue">33 % mehr Schadensersatz</span> — ohne Eigenanteil.
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
+            Direktabrechnung mit der gegnerischen Versicherung verschenkt im Schnitt
+            ein Drittel des Anspruchs. Wir holen ihn vollständig zurück —
+            mit DAT-Gutachter, Anwalt LexDrive und BGH-Rechtsprechung im Rücken.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/schaden-melden"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
+              data-tracking="cta-vorteile-melden"
+            >
+              Schaden online melden
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <a
+              href={`tel:${PHONE_E164}`}
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-7 py-4 text-base font-semibold text-white/90 backdrop-blur-sm transition-all hover:bg-white/10"
+              data-tracking="call-vorteile-hero"
+            >
+              <Phone className="h-5 w-5" aria-hidden />
+              {PHONE_DISPLAY}
+            </a>
+          </div>
+          <p className="mt-5 text-xs text-white/55">
+            Anonyme Beratung · Antwort &lt;15 Min · DSGVO-konform
+          </p>
+        </div>
+      </section>
+
+      {/* 2 — Trust-Strip */}
+      <section className="border-y border-claimondo-border/60 bg-white" aria-label="Kennzahlen">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
+          {KPIS.map((k) => (
+            <div key={k.label} className="py-6 text-center">
+              <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">{k.wert}</div>
+              <div className="mt-1 text-xs text-claimondo-ondo">{k.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3 — Die 6 Vorteile (Cards mit Bullets) */}
+      <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="vorteile-grid">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+              Was Sie konkret bekommen
+            </p>
+            <h2 id="vorteile-grid" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
+              Sechs Gründe, warum Claimondo +33 % rausholt.
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+              Jeder dieser Vorteile ist durch BGH-Rechtsprechung oder Branchen-Standard
+              abgesichert. Versicherer wissen das. Sie hoffen, dass Sie es nicht wissen.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {VORTEILE.map((v) => {
+              const Icon = v.icon
+              return (
+                <article
+                  key={v.titel}
+                  className="flex flex-col rounded-2xl border border-claimondo-border bg-white p-6 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:shadow-claimondo-md"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10">
+                      <Icon className="h-5 w-5 text-claimondo-ondo" aria-hidden />
+                    </span>
+                    <div>
+                      <h3 className="text-base font-bold leading-tight text-claimondo-navy">{v.titel}</h3>
+                      <p className="text-xs font-semibold text-claimondo-ondo">{v.sub}</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm leading-relaxed text-claimondo-shield">{v.text}</p>
+                  <ul className="mt-4 space-y-1.5">
+                    {v.punkte.map((p) => (
+                      <li key={p} className="flex items-start gap-2 text-xs text-claimondo-shield">
+                        <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-emerald-600" aria-hidden />
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 4 — Versicherer-Taktiken */}
+      <VersichererTaktikenSection />
+
+      {/* 5 — Wertminderung-Sanden/Danner */}
+      <WertminderungSandenDannerSection />
+
+      {/* 6 — Sieben Fehler vermeiden */}
+      <SiebenFehlerSection />
+
+      {/* 7 — Tesla / E-Auto */}
+      <TeslaEAutoSection />
+
+      {/* 8 — FAQ */}
+      <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="vorteile-faq">
+        <div className="mx-auto max-w-3xl px-5">
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+              Häufige Fragen zu Ihren Ansprüchen
+            </p>
+            <h2 id="vorteile-faq" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
+              Antworten in unter 60 Sekunden
+            </h2>
+          </div>
+          <div className="mt-10 space-y-3">
+            {FAQS.map((f) => (
+              <details key={f.frage} className="group rounded-2xl border border-claimondo-border bg-white p-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between text-base font-bold text-claimondo-navy">
+                  <span>{f.frage}</span>
+                  <ChevronRight className="h-5 w-5 flex-shrink-0 text-claimondo-ondo transition-transform group-open:rotate-90" aria-hidden />
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{f.antwort}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 9 — Bottom CTA */}
+      <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: [
+              'radial-gradient(circle at 20% 25%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 80% 75%, rgba(123,163,204,0.18), transparent 50%)',
+            ].join(', '),
+          }}
+        />
+        <div className="relative mx-auto max-w-3xl px-5 text-center">
+          <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
+            Bereit, das Drittel zurückzuholen, das Ihnen zusteht?
           </h2>
-          <p className="mt-3 text-lg text-white/65">5 Minuten. Kostenlos. Unverbindlich.</p>
-          <Link
-            href="/schaden-melden"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-8 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue hover:shadow-[0_12px_36px_rgba(123,163,204,0.50)] active:scale-[0.98]"
-          >
-            Schaden melden — 0 € Kosten
-            <ChevronRight className="h-5 w-5" />
-          </Link>
+          <p className="mt-4 text-white/75">
+            5 Minuten Online-Meldung. Rückruf in 15 Minuten. Geld in Ø 32 Tagen.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="/schaden-melden"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
+              data-tracking="cta-vorteile-bottom"
+            >
+              Jetzt Schaden melden
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <a
+              href="https://wa.me/4922125906530"
+              target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-semibold text-white/90 backdrop-blur-sm hover:border-white/50"
+              data-tracking="whatsapp-vorteile-bottom"
+            >
+              <MessageCircle className="h-5 w-5" aria-hidden />
+              WhatsApp
+            </a>
+          </div>
         </div>
       </section>
 
       <LandingFooter />
+      <TrackingHooks />
       <StickyCallBar quelle="Vorteile" />
     </div>
   )
