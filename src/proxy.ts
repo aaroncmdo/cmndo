@@ -17,6 +17,11 @@ const HOST_WWW = 'www.claimondo.de'
 const HOST_APP = 'app.claimondo.de'
 const HOST_GUTACHTER = 'gutachter.claimondo.de'
 const HOST_MAKLER = 'makler.claimondo.de'
+// 14.05.2026: Legacy-Subdomain, servierte historisch die gleiche Marketing-
+// App wie die Hauptdomain (Duplicate-Content-Risiko). Per Aaron-Entscheidung
+// (Indexing-Audit-Doc Option A) wird der gesamte Traffic 301 auf
+// claimondo.de redirected — eine Canonical-URL pro Marketing-Pfad.
+const HOST_KFZGUTACHTER_LEGACY = 'kfzgutachter.claimondo.de'
 
 // ─── Routen-Klassifizierung ─────────────────────────────────────────────
 // Portal-/App-Routen — gehören auf app.claimondo.de.
@@ -89,6 +94,16 @@ export async function proxy(request: NextRequest) {
   const hostname = request.headers.get('host') ?? ''
   const pathname = request.nextUrl.pathname
   const isApi = pathname.startsWith('/api/')
+
+  // ─── kfzgutachter.claimondo.de — Legacy-Subdomain → 301 auf Hauptdomain ─
+  // 14.05.2026 Indexing-Audit (siehe docs/13.05.2026/marketing-rework/
+  // INDEXIERUNG-SUBDOMAINS.md). Subdomain servierte exakte Duplikate der
+  // 90 Hauptdomain-URLs — SERP-Cannibalization-Risiko. Path bleibt erhalten,
+  // damit alte Backlinks/Bookmarks wie `kfzgutachter.claimondo.de/kfz-
+  // gutachter/koeln` → `claimondo.de/kfz-gutachter/koeln` resolven.
+  if (hostname === HOST_KFZGUTACHTER_LEGACY) {
+    return redirectToHost(request, HOST_MARKETING)
+  }
 
   // ─── Marketing-Subdomains (gutachter. / makler. — Prod + Staging) ─────
   const subdomainLandingPath = landingPathForHost(hostname)
