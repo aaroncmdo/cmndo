@@ -43,9 +43,12 @@ export async function POST(req: NextRequest) {
     const claimId = (auftrag as unknown as { faelle: { claim_id: string | null } }).faelle?.claim_id
     if (!claimId) return NextResponse.json({ error: 'Claim nicht gefunden' }, { status: 400 })
 
-    // Pfad-Whitelist: muss unter claim/<claimId>/gutachten/<auftragId>/[nachbesserung/]
-    const expectedPrefix = `claim/${claimId}/gutachten/${body.auftragId}/`
-    if (!body.storagePath.startsWith(expectedPrefix)) {
+    // AAR-862: Pfad-Whitelist auf claims/<claimId>/gutachten/<auftragId>/[nachbesserung/]
+    // Legacy `claim/` (Singular) wird während der Übergangs-Phase auch akzeptiert
+    // (Backfill-Job migriert alle alten Files, danach kann der Legacy-Check entfallen).
+    const expectedPrefix = `claims/${claimId}/gutachten/${body.auftragId}/`
+    const legacyPrefix = `claim/${claimId}/gutachten/${body.auftragId}/`
+    if (!body.storagePath.startsWith(expectedPrefix) && !body.storagePath.startsWith(legacyPrefix)) {
       return NextResponse.json({ error: 'Ungültiger Storage-Pfad' }, { status: 400 })
     }
 
