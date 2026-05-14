@@ -20,7 +20,7 @@ export async function getTermineToday(
       `id, start_zeit, status, fall_id, lead_id, sv_id,
        gps_lat_ankunft, gps_lng_ankunft,
        lead:leads(vorname, nachname, besichtigungsort_lat, besichtigungsort_lng, kunde_plz, halter_plz),
-       sv:sachverstaendige(standort_lat, standort_lng, profile:profiles(vorname, nachname)),
+       sv:sachverstaendige(standort_lat, standort_lng, profile:profiles!sachverstaendige_profile_id_fkey(vorname, nachname)),
        fall:faelle(fall_nummer)`,
     )
     .gte('start_zeit', startOfDay)

@@ -30,11 +30,13 @@ export async function getKarteSnapshot(
 ): Promise<KarteSnapshot> {
   const plzMap = await loadPlzMap(supabase)
 
-  const [leadsSnapshot, svs, termineResult] = await Promise.all([
-    getTriageLeads(supabase),
-    getActiveSVs(supabase, plzMap),
-    getTermineToday(supabase, plzMap),
-  ])
+  // Sequenziell — Parallel-Run führte zu 25P02 cascading transaction-aborts,
+  // weil supabase-js die Connection zwischen Promise.all-Calls teilt und ein
+  // Fehler in einem Query alle anderen poisoned. Bei drei Tabellen-Reads ist
+  // der Performance-Hit klein, aber das Debug-Bild ist viel sauberer.
+  const leadsSnapshot = await getTriageLeads(supabase)
+  const svs = await getActiveSVs(supabase, plzMap)
+  const termineResult = await getTermineToday(supabase, plzMap)
 
   return {
     leads: leadsSnapshot.pins,
