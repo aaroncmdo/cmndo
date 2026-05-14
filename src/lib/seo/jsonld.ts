@@ -57,7 +57,7 @@ export function organizationSchema() {
     image: `${SITE_URL}/claimondo-icon.svg`,
     slogan: 'Vollständige Schadensregulierung — auf Augenhöhe.',
     description:
-      'Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Über DAT-zertifizierte Sachverständige und die Partnerkanzlei LexDrive werden alle nach §249 BGB zustehenden Ansprüche durchgesetzt — kostenfrei für unverschuldet Geschädigte.',
+      'Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Über DAT-zertifizierte Sachverständige und eine Partnerkanzlei für Verkehrsrecht werden alle nach §249 BGB zustehenden Ansprüche durchgesetzt — kostenfrei für unverschuldet Geschädigte (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
     foundingDate: '2025',
     foundingLocation: {
       '@type': 'Place',
