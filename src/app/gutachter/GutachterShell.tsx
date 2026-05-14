@@ -370,7 +370,7 @@ export default function GutachterShell({
           floatingMode ? 'lg:fixed' : 'lg:relative'
         } ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } ${floatingMode ? 'py-3 px-3 gap-3 bg-transparent' : ''}`}
+        } ${floatingMode ? 'py-3 px-3 gap-3 bg-transparent' : 'backdrop-blur-xl backdrop-saturate-150'}`}
         style={floatingMode ? {
           color: 'var(--brand-text-on-primary)',
           transition: 'transform 200ms ease',
@@ -378,9 +378,14 @@ export default function GutachterShell({
           // Hintergrund-Tönung kommt durch das Wrapping-div in der Shell (das
           // hat backgroundColor: var(--brand-primary)).
         } : {
-          backgroundColor: 'var(--brand-sidebar-bg)',
+          // iOS-Glass: 80% Brand-Sidebar-BG + backdrop-blur via Tailwind-Klasse.
+          // color-mix erhält die Brand-Farbe und macht sie für blur durchlässig.
+          backgroundColor:
+            'color-mix(in srgb, var(--brand-sidebar-bg) 80%, transparent)',
           color: 'var(--brand-text-on-primary)',
           transition: 'transform 200ms ease',
+          borderRight:
+            '1px solid color-mix(in srgb, var(--brand-text-on-primary) 12%, transparent)',
         }}
       >
         <div className="px-5 py-5 border-b border-white/10">
