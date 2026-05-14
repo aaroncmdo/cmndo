@@ -67,12 +67,45 @@ p, li, blockquote, article, .prose {
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* AAR-460 F2 + AAR-glass-s0 (2026-05-12): Claimondo-Brand-Tokens auf
-     Brand-Resolver-Vars umgebogen. Wenn ein SV-/Kunde-Layout den
-     resolveBrandTheme()-Wrapper drumherum hat, propagieren --brand-*
-     Vars und Tailwind-Klassen wie `bg-claimondo-navy` greifen
-     transitiv auf das Brand-Theme statt auf statisches Claimondo.
-     Marketing-Pages ohne Provider behalten Claimondo via Fallback. */
+  /* ─────────────────────────────────────────────────────────────────────
+     WHITELABEL-BRAND-RESOLVER (AAR-460 F2 / AAR-glass-s0 / 2026-05-12)
+     ─────────────────────────────────────────────────────────────────────
+     Die Claimondo-Brand-Tokens (`bg-claimondo-navy`, `text-claimondo-ondo`,
+     `border-claimondo-border`, …) sind in Tailwind v4 hier in `@theme inline`
+     definiert. Jedes Token folgt einer 3-stufigen Fallback-Kette:
+
+         var(--brand-<rolle>, var(--claimondo-<token>))
+                  ↑                       ↑
+         dynamisch vom Brand-       statischer
+         Resolver gesetzt           Claimondo-Default
+         (Whitelabel-Theme)         (immer definiert in :root)
+
+     Wann greift welche Stufe?
+     • Marketing-Pages (`/`, `/ueber-uns`, `/faq`, …): kein Brand-Provider →
+       `--brand-*` ist undefined → Fallback auf `--claimondo-*` greift →
+       Claimondo-CI wird gerendert.
+     • SV-/Kunde-Portal mit aktivem Whitelabel-Theme: `resolveBrandTheme()`
+       setzt `--brand-*` auf einem Wrapper-Element (siehe
+       `src/lib/branding/css-vars.ts` + AGENTS.md §branding-rules) →
+       Tailwind-Klassen ziehen transitiv auf das Brand-Theme um.
+     • Magic-Link-Routen (`/flow/[token]`, `/upload/zb1/[token]`): Brand
+       wird per Token aufgelöst (`resolveBrandingFromUploadToken`) und auf
+       dem Layout-Wrapper gesetzt.
+
+     **Praxis-Regel:** Neuer Code nutzt immer die Tailwind-Klassen
+     (`bg-claimondo-navy`), niemals raw Hex (`bg-[#0D1B3E]`) — das CI-Skript
+     `npm run check:token-audit` blockt das. Für externe Marken-Hex
+     (WhatsApp, LinkedIn, …) siehe `src/lib/external-brand-colors.ts`.
+
+     **Mapping --brand-* ↔ Rolle:**
+     • brand-primary       → Haupt-Markenfarbe (Buttons, Header-BG)
+     • brand-secondary     → Sekundär-Akzent (Links, Hover-States)
+     • brand-sidebar-active→ Aktive Sidebar-Item-Indikator-Farbe
+     • brand-accent        → Helle Akzent-Farbe (Highlights, Badges)
+     • brand-background    → Page-BG-Farbe
+     • brand-surface       → Card-/Panel-BG
+     • brand-border        → Trennlinien, Input-Borders
+     ───────────────────────────────────────────────────────────────────── */
   --color-claimondo-navy: var(--brand-primary, var(--claimondo-navy));
   --color-claimondo-ondo: var(--brand-secondary, var(--claimondo-ondo));
   --color-claimondo-shield: var(--brand-sidebar-active, var(--claimondo-shield));
