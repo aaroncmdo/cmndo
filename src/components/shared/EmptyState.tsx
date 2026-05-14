@@ -5,7 +5,7 @@
 // "Event handlers cannot be passed to Client Component props" zur Laufzeit).
 
 import type { LucideIcon } from 'lucide-react'
-import { Icon } from '@/components/primitives'
+import { tokens } from '@/lib/design-tokens'
 import EmptyStateClient, { type EmptyStateAction } from './EmptyStateClient'
 
 export interface EmptyStateProps {
@@ -20,7 +20,7 @@ export interface EmptyStateProps {
 }
 
 export default function EmptyState({
-  icon,
+  icon: IconComp,
   title,
   description,
   action,
@@ -29,7 +29,13 @@ export default function EmptyState({
   className = '',
 }: EmptyStateProps) {
   const iconSize = variant === 'compact' ? 32 : 40
-  const iconNode = icon ? <Icon icon={icon} size={iconSize} color="lightBlue" /> : undefined
+  // 2026-05-14: LucideIcon direkt im Server-Wrapper aufrufen statt durch den
+  // Client-Side `<Icon>`-Primitive zu reichen — sonst geht die Function-Reference
+  // als prop an die Client-Boundary und Next.js wirft "Functions cannot be
+  // passed directly to Client Components" auf /kunde/faelle (CMM-14).
+  const iconNode = IconComp ? (
+    <IconComp size={iconSize} color={tokens.colors.lightBlue} />
+  ) : undefined
 
   const mergedActions: EmptyStateAction[] = actions ?? (action ? [action] : [])
 
