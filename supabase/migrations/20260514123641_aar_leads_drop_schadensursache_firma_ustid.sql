@@ -1,0 +1,41 @@
+-- AAR-Leads-Konsolidierung Stufe 0 — Dead-Felder droppen
+--
+-- Vertikaler Audit (docs/14.05.2026/leads-konsolidierung-audit/VERTIKAL-AUDIT.md)
+-- hat zwei tote leads-Spalten identifiziert:
+--
+--   • leads.schadensursache
+--     - Coverage: 0/27 Live-Leads
+--     - Keine schreibende Code-Stelle gefunden (kein Form-Input, keine
+--       Server-Action, keine OCR-Extraktion). Coverage 0 nicht zufällig.
+--     - Einzige Read-Stelle: dispatch-fall-actions.ts:632 mappt
+--       `schadens_ursache: lead.schadensursache ?? null` beim Lead→Fall-
+--       Convert — wegen 0% Coverage IMMER null, hat keine Wirkung.
+--     - Komment „AAR-548 D4: faelle.schadensursache gedropt — Einheitsfeld
+--       ist schadens_ursache" zeigt: faelle.schadensursache wurde bereits
+--       gedropped. leads.schadensursache ist die Legacy-Spalte die hängen
+--       blieb.
+--     - Faelle hat `schadens_ursache` (Unterstrich) als kanonisches Feld.
+--
+--   • leads.firma_ustid
+--     - Coverage: 0/27 Live-Leads
+--     - Keine schreibende Code-Stelle (kein UI-Input, keine Server-Action).
+--     - Einzige Read-Stelle: dispatch-fall-actions.ts:636 mappt
+--       `ust_id: lead.firma_ustid ?? null` beim Convert — IMMER null.
+--     - Plus lead-fall-mapping.ts:180 — Mapping-Eintrag der ins Leere zeigt.
+--
+-- Beide Drops sind zero-feature-loss: Es gibt keinen UI-Pfad der die Felder
+-- befüllt, keinen Renderer der sie anzeigt, keine Logik die von dem Wert
+-- abhängt. Die Read-Stellen liefern bereits null und werden im Begleit-PR
+-- gelöscht.
+--
+-- Verify pre-apply:
+--   SELECT count(*) FILTER (WHERE schadensursache IS NOT NULL) AS s,
+--          count(*) FILTER (WHERE firma_ustid IS NOT NULL) AS f,
+--          count(*) AS total FROM leads;
+--   → s=0, f=0, total=27
+--
+-- Verify post-apply: Spalten existieren nicht mehr; lead-fall-mapping +
+-- dispatch-fall-actions wurden im Begleit-PR entsprechend bereinigt.
+
+ALTER TABLE public.leads DROP COLUMN IF EXISTS schadensursache;
+ALTER TABLE public.leads DROP COLUMN IF EXISTS firma_ustid;
