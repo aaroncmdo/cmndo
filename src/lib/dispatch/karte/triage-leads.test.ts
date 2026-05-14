@@ -10,13 +10,12 @@ const base: RawLeadForKarte = {
   schadentyp: 'haftpflicht',
   besichtigungsort_lat: null,
   besichtigungsort_lng: null,
-  besichtigungsort_plz: null,
-  besichtigungsort_stadt: null,
   unfallort_lat: null,
   unfallort_lng: null,
-  unfallort_plz: null,
   kunde_plz: null,
   kunde_stadt: null,
+  halter_plz: null,
+  halter_stadt: null,
   created_at: '2026-05-14T10:00:00Z',
 }
 
@@ -25,9 +24,15 @@ const plzMap = new Map([
 ])
 
 describe('resolveLeadGeo', () => {
-  it('nutzt besichtigungsort_lat/lng wenn vorhanden', () => {
+  it('nutzt besichtigungsort_lat/lng wenn vorhanden — PLZ/Ort aus kunde_plz/kunde_stadt', () => {
     const result = resolveLeadGeo(
-      { ...base, besichtigungsort_lat: 50.1, besichtigungsort_lng: 8.7, besichtigungsort_plz: '60311', besichtigungsort_stadt: 'Frankfurt' },
+      {
+        ...base,
+        besichtigungsort_lat: 50.1,
+        besichtigungsort_lng: 8.7,
+        kunde_plz: '60311',
+        kunde_stadt: 'Frankfurt',
+      },
       plzMap,
     )
     expect(result.kind).toBe('pin')
@@ -41,7 +46,12 @@ describe('resolveLeadGeo', () => {
 
   it('fällt auf unfallort_lat/lng zurück wenn besichtigungsort fehlt', () => {
     const result = resolveLeadGeo(
-      { ...base, unfallort_lat: 48.13, unfallort_lng: 11.57, unfallort_plz: '80331' },
+      {
+        ...base,
+        unfallort_lat: 48.13,
+        unfallort_lng: 11.57,
+        kunde_plz: '80331',
+      },
       plzMap,
     )
     expect(result.kind).toBe('pin')
@@ -50,11 +60,8 @@ describe('resolveLeadGeo', () => {
     expect(result.pin.lat).toBe(48.13)
   })
 
-  it('fällt auf PLZ-Centroid zurück wenn keine lat/lng aber besichtigungsort_plz gemapped', () => {
-    const result = resolveLeadGeo(
-      { ...base, besichtigungsort_plz: '10115' },
-      plzMap,
-    )
+  it('fällt auf PLZ-Centroid zurück via kunde_plz', () => {
+    const result = resolveLeadGeo({ ...base, kunde_plz: '10115' }, plzMap)
     expect(result.kind).toBe('pin')
     if (result.kind !== 'pin') return
     expect(result.pin.geoSource).toBe('plz_centroid')
@@ -62,25 +69,12 @@ describe('resolveLeadGeo', () => {
     expect(result.pin.ort).toBe('Berlin')
   })
 
-  it('nutzt unfallort_plz wenn besichtigungsort_plz fehlt', () => {
-    const result = resolveLeadGeo(
-      { ...base, unfallort_plz: '10115' },
-      plzMap,
-    )
+  it('nutzt halter_plz wenn kunde_plz fehlt', () => {
+    const result = resolveLeadGeo({ ...base, halter_plz: '10115' }, plzMap)
     expect(result.kind).toBe('pin')
     if (result.kind !== 'pin') return
     expect(result.pin.geoSource).toBe('plz_centroid')
     expect(result.pin.plz).toBe('10115')
-  })
-
-  it('nutzt kunde_plz wenn alles andere fehlt', () => {
-    const result = resolveLeadGeo(
-      { ...base, kunde_plz: '10115' },
-      plzMap,
-    )
-    expect(result.kind).toBe('pin')
-    if (result.kind !== 'pin') return
-    expect(result.pin.geoSource).toBe('plz_centroid')
   })
 
   it('liefert "unlocalized" wenn keine Geo-Quelle greift', () => {
@@ -89,10 +83,22 @@ describe('resolveLeadGeo', () => {
   })
 
   it('liefert "unlocalized" wenn PLZ nicht in plzMap', () => {
-    const result = resolveLeadGeo(
-      { ...base, besichtigungsort_plz: '99999' },
-      plzMap,
-    )
+    const result = resolveLeadGeo({ ...base, kunde_plz: '99999' }, plzMap)
     expect(result.kind).toBe('unlocalized')
+  })
+
+  it('bevorzugt kunde_plz vor halter_plz im PLZ-Centroid-Fallback', () => {
+    const plzMapBoth = new Map([
+      ['10115', { plz: '10115', lat: 52.53, lng: 13.38, ort: 'Berlin' }],
+      ['80331', { plz: '80331', lat: 48.13, lng: 11.57, ort: 'München' }],
+    ])
+    const result = resolveLeadGeo(
+      { ...base, kunde_plz: '10115', halter_plz: '80331' },
+      plzMapBoth,
+    )
+    expect(result.kind).toBe('pin')
+    if (result.kind !== 'pin') return
+    expect(result.pin.plz).toBe('10115')
+    expect(result.pin.ort).toBe('Berlin')
   })
 })

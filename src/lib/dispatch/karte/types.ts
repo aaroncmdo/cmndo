@@ -1,3 +1,8 @@
+// AAR-894 — Types für Dispatcher-Karte v1 (Leads-Triage-Layer).
+// Reflektiert die echte DB-Schema: leads hat KEIN besichtigungsort_plz/stadt
+// und KEIN unfallort_plz (nur freitext-`unfallort` + lat/lng). Strukturierte
+// PLZ-Quellen sind kunde_plz und halter_plz.
+
 export type TriageLeadPin = {
   id: string
   vorname: string | null
@@ -35,13 +40,12 @@ export type RawLeadForKarte = {
   schadentyp: string | null
   besichtigungsort_lat: number | null
   besichtigungsort_lng: number | null
-  besichtigungsort_plz: string | null
-  besichtigungsort_stadt: string | null
   unfallort_lat: number | null
   unfallort_lng: number | null
-  unfallort_plz: string | null
   kunde_plz: string | null
   kunde_stadt: string | null
+  halter_plz: string | null
+  halter_stadt: string | null
   created_at: string | null
 }
 

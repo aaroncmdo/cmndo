@@ -33,8 +33,8 @@ export function resolveLeadGeo(
       kind: 'pin',
       pin: {
         ...baseFields,
-        plz: lead.besichtigungsort_plz,
-        ort: lead.besichtigungsort_stadt,
+        plz: lead.kunde_plz ?? lead.halter_plz,
+        ort: lead.kunde_stadt ?? lead.halter_stadt,
         lat: lead.besichtigungsort_lat,
         lng: lead.besichtigungsort_lng,
         geoSource: 'besichtigungsort',
@@ -50,8 +50,8 @@ export function resolveLeadGeo(
       kind: 'pin',
       pin: {
         ...baseFields,
-        plz: lead.unfallort_plz ?? lead.besichtigungsort_plz,
-        ort: lead.besichtigungsort_stadt,
+        plz: lead.kunde_plz ?? lead.halter_plz,
+        ort: lead.kunde_stadt ?? lead.halter_stadt,
         lat: lead.unfallort_lat,
         lng: lead.unfallort_lng,
         geoSource: 'unfallort',
@@ -59,8 +59,7 @@ export function resolveLeadGeo(
     }
   }
 
-  const plzCandidate =
-    lead.besichtigungsort_plz ?? lead.unfallort_plz ?? lead.kunde_plz
+  const plzCandidate = lead.kunde_plz ?? lead.halter_plz
   if (plzCandidate) {
     const hit = plzMap.get(plzCandidate)
     if (hit) {
@@ -69,7 +68,7 @@ export function resolveLeadGeo(
         pin: {
           ...baseFields,
           plz: plzCandidate,
-          ort: hit.ort ?? lead.besichtigungsort_stadt ?? lead.kunde_stadt,
+          ort: hit.ort ?? lead.kunde_stadt ?? lead.halter_stadt,
           lat: hit.lat,
           lng: hit.lng,
           geoSource: 'plz_centroid',
@@ -82,62 +81,33 @@ export function resolveLeadGeo(
     kind: 'unlocalized',
     lead: {
       ...baseFields,
-      plz: lead.besichtigungsort_plz ?? lead.unfallort_plz ?? lead.kunde_plz,
+      plz: lead.kunde_plz ?? lead.halter_plz,
     },
   }
 }
 
-const ACTIVE_AUFTRAG_STATES_TO_EXCLUDE = [
-  'storniert',
-  'abgelehnt',
-  'abgesagt',
-  'no_show',
-] as const
-
 /**
- * Lädt alle Leads im Triage-Backlog (kein aktiver Auftrag) für die
- * Dispatcher-Karte. Resolved Geo via Hybrid-Strategie.
+ * Lädt alle Leads im Triage-Backlog für die Dispatcher-Karte.
+ *
+ * Für v1 = Leads die noch nicht zu einem Fall konvertiert sind und nicht
+ * disqualifiziert wurden. Das deckt den Haupt-Backlog: Neue Leads die noch
+ * dispatcht werden müssen. Konvertierte Leads (Fall mit SV-Zuweisung) und
+ * die "SV hat abgelehnt, zurück in Dispatch"-Fälle werden via Fall-View
+ * gehandhabt und sind v2.
+ *
+ * Resolved Geo via Hybrid-Strategie (siehe resolveLeadGeo).
  */
 export async function getTriageLeads(
   supabase: SupabaseClient<Database>,
 ): Promise<TriageSnapshot> {
-  // 1) Lead-IDs mit AKTIVEM Auftrag (= NOT in Triage-Backlog).
-  // Hinweis: auftraege.lead_id existiert in der DB, aber noch nicht in den
-  // generierten Typen → expliziter any-Cast für die Abfrage.
-  const excludeFilter = `(${ACTIVE_AUFTRAG_STATES_TO_EXCLUDE
-    .map((s) => `"${s}"`)
-    .join(',')})`
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const auftraegeQuery = (supabase as any)
-    .from('auftraege')
-    .select('lead_id, status')
-    .not('lead_id', 'is', null)
-    .not('status', 'in', excludeFilter)
-
-  const { data: activeAuftraege, error: aErr } = await auftraegeQuery
-
-  if (aErr) {
-    console.error('[karte] auftraege query failed', aErr)
-    return { pins: [], unlocalized: [] }
-  }
-  const blockedLeadIds = new Set(
-    ((activeAuftraege ?? []) as Array<{ lead_id: string | null; status: string }>)
-      .map((row) => row.lead_id)
-      .filter((id): id is string => !!id),
-  )
-
-  // 2) Leads (nicht disqualifiziert, nicht konvertiert).
-  // besichtigungsort_plz, besichtigungsort_stadt, unfallort_plz existieren in der DB,
-  // sind aber noch nicht in den generierten Typen → expliziter any-Cast.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const leadsQuery = (supabase as any)
+  // 1) Leads (nicht disqualifiziert, nicht konvertiert).
+  const { data: leads, error: lErr } = await supabase
     .from('leads')
     .select(
       `id, vorname, nachname, firma_name, schadentyp,
-       besichtigungsort_lat, besichtigungsort_lng, besichtigungsort_plz, besichtigungsort_stadt,
-       unfallort_lat, unfallort_lng, unfallort_plz,
-       kunde_plz, kunde_stadt, created_at,
+       besichtigungsort_lat, besichtigungsort_lng,
+       unfallort_lat, unfallort_lng,
+       kunde_plz, kunde_stadt, halter_plz, halter_stadt, created_at,
        disqualifiziert, konvertiert_zu_fall_id`,
     )
     .or('disqualifiziert.is.null,disqualifiziert.eq.false')
@@ -145,37 +115,37 @@ export async function getTriageLeads(
     .order('created_at', { ascending: false })
     .limit(500)
 
-  const { data: leads, error: lErr } = await leadsQuery
-
   if (lErr) {
     console.error('[karte] leads query failed', lErr)
     return { pins: [], unlocalized: [] }
   }
 
-  const triageLeads = ((leads ?? []) as RawLeadForKarte[]).filter(
-    (l) => !blockedLeadIds.has(l.id),
-  )
-
-  // 3) PLZ-Map laden.
+  // 2) PLZ-Map laden. `ort` ist seit AAR-894 in der DB, aber noch nicht in
+  // den generierten Typen → über expliziten Select-String + Row-Cast holen.
   const { data: plzRows, error: pErr } = await supabase
     .from('plz_geo')
-    .select('plz, lat, lng')
+    .select('plz, lat, lng, ort' as 'plz, lat, lng')
 
   if (pErr) {
     console.error('[karte] plz_geo query failed', pErr)
   }
-  const plzMap = new Map(
-    (plzRows ?? []).map((r) => [
+  type PlzRowWithOrt = { plz: string; lat: number; lng: number; ort?: string | null }
+  const plzMap = new Map<string, PlzGeoRow>(
+    ((plzRows ?? []) as unknown as PlzRowWithOrt[]).map((r) => [
       r.plz,
-      // ort ist in der DB vorhanden, aber noch nicht in den generierten Typen
-      { plz: r.plz, lat: Number(r.lat), lng: Number(r.lng), ort: null as string | null },
+      {
+        plz: r.plz,
+        lat: Number(r.lat),
+        lng: Number(r.lng),
+        ort: r.ort ?? null,
+      },
     ]),
   )
 
-  // 4) Resolve jedes Lead.
+  // 3) Resolve jedes Lead.
   const pins: TriageLeadPin[] = []
   const unlocalized: UnlocalizedLead[] = []
-  for (const lead of triageLeads) {
+  for (const lead of (leads ?? []) as RawLeadForKarte[]) {
     const result = resolveLeadGeo(lead, plzMap)
     if (result.kind === 'pin') pins.push(result.pin)
     else unlocalized.push(result.lead)
