@@ -419,6 +419,41 @@ export default async function GutachterFallPage({
   // No-Show-Counter (faelle.no_show_count) für den rose-Banner „Termin(e) verpasst".
   const noShowCount = (fallClaim?.no_show_count as number | null) ?? 0
 
+  // SV-Gutachten-Verifikation: 6 wichtigste OCR-extrahierte Werte aus claims
+  // an die GutachtenCard durchreichen, damit der SV nach Upload prüfen kann
+  // ob die Pipeline die Geld-Zahlen korrekt erkannt hat.
+  let gutachtenWerte: {
+    gutachten_datum: string | null
+    reparaturkosten_netto: number | null
+    reparaturkosten_brutto: number | null
+    minderwert: number | null
+    wiederbeschaffungswert: number | null
+    restwert: number | null
+    nutzungsausfall_tage: number | null
+    gutachten_sv_honorar_brutto: number | null
+  } | null = null
+  if (claimIdForStorage) {
+    const { data: cw } = await supabase
+      .from('claims')
+      .select(
+        'gutachten_datum, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, gutachten_sv_honorar_brutto',
+      )
+      .eq('id', claimIdForStorage)
+      .maybeSingle()
+    if (cw) {
+      gutachtenWerte = {
+        gutachten_datum: (cw.gutachten_datum as string | null) ?? null,
+        reparaturkosten_netto: cw.reparaturkosten_netto !== null ? Number(cw.reparaturkosten_netto) : null,
+        reparaturkosten_brutto: cw.reparaturkosten_brutto !== null ? Number(cw.reparaturkosten_brutto) : null,
+        minderwert: cw.minderwert !== null ? Number(cw.minderwert) : null,
+        wiederbeschaffungswert: cw.wiederbeschaffungswert !== null ? Number(cw.wiederbeschaffungswert) : null,
+        restwert: cw.restwert !== null ? Number(cw.restwert) : null,
+        nutzungsausfall_tage: (cw.nutzungsausfall_tage as number | null) ?? null,
+        gutachten_sv_honorar_brutto: cw.gutachten_sv_honorar_brutto !== null ? Number(cw.gutachten_sv_honorar_brutto) : null,
+      }
+    }
+  }
+
   // CMM-32e: Abgelehnte Docs mit Kommentar für den SV — nur im Reject-Zustand laden.
   // SV sieht welche Dateien konkret beanstandet wurden + warum.
   let abgelehnteDocsInfo: { filename: string; kommentar: string | null }[] = []
@@ -644,6 +679,7 @@ export default async function GutachterFallPage({
       konfrontationTerminVorschlaege={terminVorschlaege}
       svId={(sv as { id: string }).id}
       svVorname={svVorname}
+      gutachtenWerte={gutachtenWerte}
     />
   )
 }
