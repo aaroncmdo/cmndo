@@ -74,15 +74,38 @@ export default async function FallaktePage({
   let claimStatus: string | null = null
   let claimPhase: string | null = null
   let claimKanzleiWunsch: string | null = null
+  // CMM-Brücke: claim-Subset für die Stammdaten-Sections (admin/KB-Sicht).
+  // Liest die fünf Spalten, deren Namen auf claims abweichen und vom
+  // Sync-Trigger (1.5a) nicht in faelle gespiegelt werden — UI fällt darauf
+  // zurück, wenn das faelle-Pendant leer ist (siehe lib/stammdaten/schema.ts).
+  let claimStammdatenFallback: Record<string, unknown> | null = null
   if (claimId) {
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, phase, kanzlei_wunsch')
+      .select('status, phase, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, ursache, gegner_aktenzeichen')
       .eq('id', claimId)
-      .maybeSingle()
-    claimStatus        = (claimRow?.status         as string | null) ?? null
-    claimPhase         = (claimRow?.phase          as string | null) ?? null
-    claimKanzleiWunsch = (claimRow?.kanzlei_wunsch as string | null) ?? null
+      .maybeSingle<{
+        status: string | null
+        phase: string | null
+        kanzlei_wunsch: string | null
+        schadenort_adresse: string | null
+        schadenort_plz: string | null
+        schadenort_ort: string | null
+        ursache: string | null
+        gegner_aktenzeichen: string | null
+      }>()
+    claimStatus        = claimRow?.status         ?? null
+    claimPhase         = claimRow?.phase          ?? null
+    claimKanzleiWunsch = claimRow?.kanzlei_wunsch ?? null
+    if (claimRow) {
+      claimStammdatenFallback = {
+        schadenort_adresse: claimRow.schadenort_adresse ?? null,
+        schadenort_plz:     claimRow.schadenort_plz     ?? null,
+        schadenort_ort:     claimRow.schadenort_ort     ?? null,
+        ursache:            claimRow.ursache            ?? null,
+        gegner_aktenzeichen: claimRow.gegner_aktenzeichen ?? null,
+      }
+    }
   }
   // userRolle für Timeline-Rolle und viele andere Stellen (Auth + RLS),
   // wird unten erneut für FallakteRolle-Cast verwendet.
@@ -833,6 +856,7 @@ export default async function FallaktePage({
         claimId={claimId}
         claimStatus={claimStatus}
         claimKanzleiWunsch={claimKanzleiWunsch}
+        claim={claimStammdatenFallback}
         kanzleiPaketPending={kanzleiPaketPending}
         timelineEvents={timelineEvents}
         futureEvents={futureEvents}
