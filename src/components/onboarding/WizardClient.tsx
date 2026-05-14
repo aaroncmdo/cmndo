@@ -60,7 +60,23 @@ interface Props {
   zb1Token?: string | null
 }
 
-const STORAGE_KEY = 'claimondo-wizard-state'
+// AAR-890: flowKey-scoped Storage damit parallele Wizards (gutachter-finden +
+// kunde-onboarding) sich nicht gegenseitig überschreiben. 7-Tage-TTL gegen
+// Zombie-Wizards die jemand vor Monaten begonnen hat. localStorage statt
+// sessionStorage damit Tab-Suspend auf Mobile keinen Datenverlust verursacht.
+const STORAGE_PREFIX = 'claimondo-wizard-state'
+const STORAGE_TTL_MS = 7 * 24 * 60 * 60 * 1000
+
+function storageKey(flowKey: string) {
+  return `${STORAGE_PREFIX}:${flowKey}`
+}
+
+type StoredWizardState = {
+  anfrageId: string | null
+  values: Record<string, unknown>
+  phaseKey: string | null
+  savedAt: number
+}
 
 export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Token }: Props) {
   const [phaseIdx, setPhaseIdx] = useState(0)
@@ -70,6 +86,11 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
   const [error, setError] = useState<string | null>(null)
   const [animKey, setAnimKey] = useState(0)
   const [svMatch, setSvMatch] = useState<Extract<SvMatchResult, { ok: true }> | null>(null)
+  // AAR-890: Restore-Banner-State. Wird beim Mount mit der saved-At-Zeit
+  // gesetzt wenn ein gültiger Stand aus localStorage geladen wurde, damit der
+  // User explizit "Fortsetzen / Neu starten" wählen kann.
+  const [restoredAt, setRestoredAt] = useState<number | null>(null)
+  const [hydrated, setHydrated] = useState(false)
   // 2026-05-11 → 2026-05-13: SV-Pre-Selection via DOM-Event. Event-Detail ist
   // jetzt { id, tier } — Tier 'premium' = sachverstaendige.id → svId,
   // Tier 'lead' = sv_leads.id → svLeadId. Alte String-Form (Tier 3) bleibt
@@ -105,28 +126,82 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     return () => document.removeEventListener('claimondo:select-sv', handleSelect)
   }, [])
 
-  // Resume-Support: anfrageId + werte aus sessionStorage laden
+  // AAR-890: Resume aus localStorage mit TTL-Check + flowKey-Scope. phase_key
+  // statt phase_idx damit Phasen-Reorder in der DB (funnel_v2/v3-Migrations)
+  // den User nicht auf einer fremden Phase landen lässt. prefilledValues hat
+  // Vorrang vor gespeicherten Values für explizit gesetzte Keys — der Loader
+  // soll bei Token-Wechsel oder URL-Param-Refresh gewinnen.
   useEffect(() => {
     try {
-      const raw = sessionStorage.getItem(STORAGE_KEY)
-      if (raw) {
-        const saved = JSON.parse(raw) as { anfrageId: string; values: Record<string, unknown>; phaseIdx: number }
-        if (saved.anfrageId) setAnfrageId(saved.anfrageId)
-        if (saved.values) setValues(saved.values)
-        if (typeof saved.phaseIdx === 'number') setPhaseIdx(saved.phaseIdx)
+      const raw = localStorage.getItem(storageKey(flowKey))
+      if (!raw) { setHydrated(true); return }
+      const saved = JSON.parse(raw) as Partial<StoredWizardState>
+      const savedAt = typeof saved.savedAt === 'number' ? saved.savedAt : 0
+      if (!savedAt || Date.now() - savedAt > STORAGE_TTL_MS) {
+        localStorage.removeItem(storageKey(flowKey))
+        setHydrated(true)
+        return
       }
+      if (saved.anfrageId) setAnfrageId(saved.anfrageId)
+      if (saved.values) {
+        // prefilledValues gewinnt für Keys die der Loader explizit gesetzt hat
+        setValues({ ...saved.values, ...(prefilledValues ?? {}) })
+      }
+      if (typeof saved.phaseKey === 'string' && saved.phaseKey.length > 0) {
+        const candidatePhases = visiblePhases(phases, { ...saved.values, ...(prefilledValues ?? {}) })
+        const idx = candidatePhases.findIndex(p => p.phase_key === saved.phaseKey)
+        if (idx >= 0) setPhaseIdx(idx)
+      }
+      setRestoredAt(savedAt)
     } catch {
       // ignore parse errors
+    } finally {
+      setHydrated(true)
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flowKey])
 
+  // Persist — erst nach Hydration damit der initial-Render mit prefilledValues
+  // nicht den Restore-Pfad überschreibt.
   useEffect(() => {
+    if (!hydrated) return
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ anfrageId, values, phaseIdx }))
+      const currentPhaseKey = visiblePhases(phases, values)[phaseIdx]?.phase_key ?? null
+      const payload: StoredWizardState = {
+        anfrageId,
+        values,
+        phaseKey: currentPhaseKey,
+        savedAt: Date.now(),
+      }
+      localStorage.setItem(storageKey(flowKey), JSON.stringify(payload))
     } catch {
       // ignore quota errors
     }
-  }, [anfrageId, values, phaseIdx])
+  }, [hydrated, anfrageId, values, phaseIdx, flowKey, phases])
+
+  // AAR-890: Browser-Back integriert eine Phase zurück, statt die Route zu
+  // verlassen. Wir pushen pro Phase einen History-State; popstate dekrementiert
+  // phaseIdx wenn möglich. Erste Phase = Browser-Back darf weg navigieren.
+  useEffect(() => {
+    if (!hydrated) return
+    function onPop() {
+      setPhaseIdx(i => (i > 0 ? i - 1 : 0))
+      setAnimKey(k => k + 1)
+      setError(null)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [hydrated])
+
+  function resetWizard() {
+    try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+    setAnfrageId(null)
+    setValues(prefilledValues ?? {})
+    setPhaseIdx(0)
+    setRestoredAt(null)
+    setError(null)
+    setAnimKey(k => k + 1)
+  }
 
   const currentPhases = visiblePhases(phases, values)
   const totalPhases = currentPhases.length
@@ -163,7 +238,17 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     setIsSaving(true)
     try {
       const result = await saveOnboardingStep(anfrageId, currentPhase.phase_key, values, felder)
-      if (!result.ok) { setError(result.error); return }
+      if (!result.ok) {
+        // AAR-890: Anfrage existiert nicht (mehr) — RLS oder DSGVO-Hard-Delete.
+        // Wizard resetten statt blind weiterklicken (silent data loss).
+        if (result.reason === 'anfrage_not_found') {
+          resetWizard()
+          setError('Deine vorherige Anfrage ist nicht mehr verfügbar. Bitte fülle die Felder noch einmal aus — danach landest du direkt auf der letzten Phase.')
+          return
+        }
+        setError(result.error)
+        return
+      }
       setAnfrageId(result.anfrageId)
 
       // 2026-05-13: Slot-Phase-Submit → reserviereSlot fire-and-forget.
@@ -194,7 +279,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
       }
 
       if (phaseIdx >= totalPhases - 1) {
-        sessionStorage.removeItem(STORAGE_KEY)
+        try { localStorage.removeItem(storageKey(flowKey)) } catch {}
         // SV-/Lead-Zuordnung auf GFA persistieren (fire-and-forget, unkritisch).
         // Priorität: Karten-Click (premium > lead) vor Auto-Geo-Matching.
         if (preSelectedSvId) {
@@ -235,6 +320,10 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
       }
       setPhaseIdx(i => i + 1)
       setAnimKey(k => k + 1)
+      // AAR-890: History-State pro Phase → Browser-Back navigiert eine Phase
+      // zurück (popstate-Listener oben). Wir nutzen pushState weil wir bewusst
+      // KEINE URL-Änderung wollen — der Wizard läuft auf einer Route.
+      try { window.history.pushState({ phaseIdx: phaseIdx + 1 }, '') } catch {}
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } finally {
       setIsSaving(false)
@@ -302,6 +391,14 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         animation: 'sheetIn .42s var(--wiz-ease-out) both',
       }}
     >
+      {/* AAR-890: Restore-Banner — zeigt sich nur wenn beim Mount ein nicht
+          abgelaufener Stand aus localStorage geladen wurde. Auto-Resume bleibt
+          Default, aber der User sieht explizit dass er fortgesetzt wurde und
+          kann mit "Neu starten" abbrechen wenn das nicht gewollt war. */}
+      {restoredAt && (
+        <RestoreBanner savedAt={restoredAt} onDismiss={() => setRestoredAt(null)} onReset={resetWizard} />
+      )}
+
       {/* AAR-glass-s1: Step-Indicator als kompakte Glass-Pill statt großer Card */}
       <GlassStepIndicator current={phaseIdx + 1} total={totalPhases} className="self-start" />
 
@@ -563,4 +660,51 @@ function FieldRenderer({
     default:
       return null
   }
+}
+
+// AAR-890: Restore-Banner. Wird über dem Wizard angezeigt wenn beim Mount ein
+// gültiger Stand aus localStorage geladen wurde. Fortsetzen = Banner schließen
+// (State ist schon hydratisiert), Neu starten = resetWizard() im Parent.
+function RestoreBanner({
+  savedAt,
+  onDismiss,
+  onReset,
+}: {
+  savedAt: number
+  onDismiss: () => void
+  onReset: () => void
+}) {
+  const zeit = new Date(savedAt).toLocaleTimeString('de-DE', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  return (
+    <GlassPill className="self-start gap-3 flex-wrap">
+      <span
+        className="text-[13px] font-semibold"
+        style={{
+          fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
+          color: 'var(--brand-primary, var(--claimondo-navy))',
+        }}
+      >
+        Fortschritt von {zeit} Uhr wiederhergestellt
+      </span>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="text-[12px] font-semibold underline-offset-2 hover:underline"
+        style={{ color: 'var(--brand-primary, var(--claimondo-navy))' }}
+      >
+        Fortsetzen
+      </button>
+      <button
+        type="button"
+        onClick={onReset}
+        className="text-[12px] font-semibold underline-offset-2 hover:underline"
+        style={{ color: '#9f1239' }}
+      >
+        Neu starten
+      </button>
+    </GlassPill>
+  )
 }
