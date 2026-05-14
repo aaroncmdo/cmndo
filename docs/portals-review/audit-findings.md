@@ -81,7 +81,7 @@ Fix: Vor Phase 4 Cron-Spalten-Audit, plus Cron-Update-Result auf modified-rows c
 - ✅ #513 — RLS-Bug `kunde_nachrichten_read` mit Legacy-Kanal-Namen (PR #513)
 - ✅ #515 — Unread-Badge auf Kunde-Cards (PR #515)
 - ✅ #517 — Google-Bewertung in Kunde-GutachterCard (PR #517)
-- ✅ #519 — CSS-Workaround `.w-[var()]` Tailwind-4-Bug (PR #519)
+- ✅ #519 — CSS-Workaround für leere `var(…)` Tailwind-4-Bug (PR #519)
 - ✅ #520 — Kennzeichen-Hydration-Stabilität (Star-Polygon-Precision)
 - ✅ #521 — SV-Mobile-Sidebar (`relative`-Class-Konflikt mit `fixed`)
 - ✅ #522 — Cookie-Banner versteckt in Portalen
