@@ -477,16 +477,7 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
         gewuenschter_radius_km: radius,
         nachricht: nachricht || null,
       })
-      // Create notification for admin
-      try {
-        await supabase.from('benachrichtigungen').insert({
-          typ: 'update',
-          titel: 'Individuelle Paket-Anfrage',
-          nachricht: `Gutachter hat ein individuelles Paket angefragt: ${faelle} Fälle, ${radius}km Radius`,
-          link: '/admin/finance',
-          empfaenger_rolle: 'admin',
-        })
-      } catch { /* benachrichtigungen table may not exist */ }
+      // AAR-888: Admin-Benachrichtigung über Server-Action statt Client-Insert (Folge-Ticket)
       setSent(true)
     } catch { /* */ }
     setSending(false)
