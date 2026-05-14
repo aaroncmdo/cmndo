@@ -25,7 +25,7 @@ import {
   CheckIcon,
   XIcon,
 } from 'lucide-react'
-import { useMitteilungen } from '@/components/mitteilungszentrale/useMitteilungen'
+import { useMitteilungenContext } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import type { Mitteilung, MitteilungKategorie } from '@/lib/mitteilungen/types'
 
 type Variant = 'dark' | 'light'
@@ -52,7 +52,10 @@ function fmtRelative(iso: string) {
 }
 
 export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) {
-  const { items, markAsRead } = useMitteilungen()
+  // AAR-892: Context-Hook statt direktem `useMitteilungen()` — Provider
+  // mountet die Source einmal pro Layout, beide Mobile+Desktop-Mounts
+  // teilen Daten + Realtime-Channel.
+  const { items, markAsRead } = useMitteilungenContext()
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<TabKey>('aktivitaet')
   const [flashing, setFlashing] = useState(false)

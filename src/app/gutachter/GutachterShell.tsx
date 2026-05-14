@@ -24,6 +24,7 @@ import {
   ShieldCheckIcon,
 } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
+import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { SupportButton } from '@/components/support/SupportButton'
 import { SupportSidebarPanel } from '@/components/support/SupportSidebarPanel'
@@ -298,6 +299,7 @@ export default function GutachterShell({
   }
 
   return (
+    <MitteilungenProvider>
     <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-primary, #0D1B3E)' }}>
       {/* Mobile overlay — ausgeblendet im Feldmodus */}
       {!isFeldmodus && sidebarOpen && (
@@ -552,5 +554,6 @@ export default function GutachterShell({
       {!isFeldmodus && <GlobalPosteingangFab currentUserId={userId} />}
       {!isFeldmodus && <SVSpotlight />}
     </div>
+    </MitteilungenProvider>
   )
 }

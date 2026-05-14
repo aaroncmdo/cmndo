@@ -2,6 +2,7 @@ import DispatchNav from './_components/DispatchNav'
 import RealtimeLeadAlert from './_components/RealtimeLeadAlert'
 import { PageContainer } from '@/components/PageContainer'
 import UpdatesNav from '@/components/shared/updates'
+import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 
 export default async function DispatchLayout({
@@ -14,6 +15,7 @@ export default async function DispatchLayout({
   const { user, initials } = await requirePortalAccess(['dispatch', 'admin'])
 
   return (
+    <MitteilungenProvider>
     <div className="h-screen bg-claimondo-bg relative overflow-hidden">
       <RealtimeLeadAlert />
       <DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />
@@ -38,5 +40,6 @@ export default async function DispatchLayout({
         </main>
       </div>
     </div>
+    </MitteilungenProvider>
   )
 }

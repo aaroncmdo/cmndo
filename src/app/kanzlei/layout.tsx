@@ -12,6 +12,7 @@ import { LogOutIcon } from 'lucide-react'
 import KanzleiNav from './_components/KanzleiNav'
 import TasksPill from '@/components/shared/TasksPill'
 import UpdatesNav from '@/components/shared/updates'
+import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 
 export default async function KanzleiLayout({
@@ -27,6 +28,7 @@ export default async function KanzleiLayout({
   // Content scrollt innen. Das Main hat keinen max-width-Cap mehr — sonst
   // entsteht rechts ein grauer Balken auf breiten Screens.
   return (
+    <MitteilungenProvider>
     <div className="h-screen bg-claimondo-bg flex flex-col overflow-hidden">
       <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
@@ -65,5 +67,6 @@ export default async function KanzleiLayout({
         </main>
       </div>
     </div>
+    </MitteilungenProvider>
   )
 }
