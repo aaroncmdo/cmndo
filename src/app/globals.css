@@ -499,6 +499,26 @@ p, li, blockquote, article, .prose {
   background: #f8f9fb;
 }
 
+/* 2026-05-14: Elegante Brand-Transition nach Theme-Save. Wird via
+   `[data-brand-transition="on"]` auf <body> aktiviert (gesetzt durch
+   BrandingEditor.handleSave + ein Sentinel auf der ziel-Seite). Alle
+   Children animieren Farbe/Hintergrund/Border/Shadow für ~1.2s mit iOS-
+   easing — der Wechsel von altem zu neuem Brand fließt sichtbar durch.
+   Nach ~1500ms wird das Attribut wieder entfernt, damit normales
+   Hover/Click nicht permanent transitioniert. */
+[data-brand-transition="on"] *,
+[data-brand-transition="on"] *::before,
+[data-brand-transition="on"] *::after {
+  transition:
+    background-color 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    color 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    border-color 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    fill 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    stroke 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    outline-color 1.2s cubic-bezier(0.32, 0.72, 0, 1) !important;
+}
+
 /* 2026-05-13 Marketing-Glass-Cards: .glass-card und .glass-card-sm werden
    auf Landing-Pages (ueber-uns, vorteile, faq, beratung-anfragen, makler,
    kfz-gutachter, landing/FounderSection, landing/LandingSteps, landing/
