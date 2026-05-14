@@ -196,8 +196,25 @@ function enforceWcag(primary: string): { primary: string; safe: boolean } {
  * geringfügig driftet — aber der Prompt ist strikt-JSON).
  */
 export async function extractBrandPalette(imageUrl: string): Promise<BrandPaletteExtraction> {
-  // 1) node-vibrant: 6 Kandidaten
-  const palette = await Vibrant.from(imageUrl).getPalette()
+  // 1) node-vibrant: 6 Kandidaten.
+  // 2026-05-14: Pre-Processing für transparente Logos (Auto-BG-Remove-Output).
+  // node-vibrant v4 entfernt die Custom-Filter-Funktion (addFilter erwartet nur
+  // noch einen pre-registrierten Filter-Name). Ohne Filter sieht Vibrant trans-
+  // parente Pixel als weiß/schwarz und liefert "NO_COLORS". Lösung: per sharp
+  // den Alpha-Channel gegen Schwarz flatten — opake Logo-Pixel behalten ihre
+  // Farbe, transparente Pixel werden #000000. Vibrant's eingebauter Default-
+  // Filter wirft Pixel mit R+G+B < ~9 raus, also wirken die Ex-Transparent-
+  // Pixel wie sie sollten: unsichtbar fürs Ranking.
+  const sharp = (await import('sharp')).default
+  const imgResp = await fetch(imageUrl)
+  if (!imgResp.ok) throw new Error(`Logo-Fetch fehlgeschlagen: HTTP ${imgResp.status}`)
+  const srcBuffer = Buffer.from(await imgResp.arrayBuffer())
+  const flatBuffer = await sharp(srcBuffer)
+    .flatten({ background: '#000000' })
+    .png()
+    .toBuffer()
+
+  const palette = await Vibrant.from(flatBuffer).getPalette()
   const rawSwatches: RawSwatch[] = [
     palette.Vibrant, palette.DarkVibrant, palette.LightVibrant,
     palette.Muted, palette.DarkMuted, palette.LightMuted,

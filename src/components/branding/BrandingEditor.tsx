@@ -91,8 +91,30 @@ export default function BrandingEditor({
     setError(null)
     setUploading(true)
     try {
+      // 2026-05-14: Auto-BG-Remove bei Raster-Logos. SVG (Vektor) und PNG mit
+      // bekannter Transparenz überspringen. @imgly läuft on-device im Browser
+      // (~25 MB Model, einmalig geladen). Result ersetzt die Quelldatei vor
+      // dem Upload, sodass die Farb-Extraktion saubere transparente Pixel
+      // bekommt und das Logo später in jeder Brand-Farbe gut sitzt.
+      let uploadFile = file
+      const isVector = file.type === 'image/svg+xml'
+      const isTiny = file.size < 5 * 1024
+      if (!isVector && !isTiny) {
+        try {
+          const { removeBackground } = await import('@imgly/background-removal')
+          const cleaned = await removeBackground(file)
+          uploadFile = new File([cleaned], file.name.replace(/\.[^.]+$/, '') + '-clean.png', {
+            type: 'image/png',
+          })
+        } catch (err) {
+          // Wenn BG-Remove scheitert (zB Model konnte nicht geladen werden):
+          // mit Original-File weitermachen statt komplett zu blocken.
+          console.warn('Background-Removal fehlgeschlagen, nutze Original:', err)
+        }
+      }
+
       const fd = new FormData()
-      fd.append('logo', file)
+      fd.append('logo', uploadFile)
       fd.append('scope', scope)
       const uploadRes = await fetch('/api/branding/upload', { method: 'POST', body: fd })
       const uploadJson = await uploadRes.json()
@@ -177,6 +199,16 @@ export default function BrandingEditor({
       setSaved(true)
       if (typeof window !== 'undefined') {
         localStorage.setItem('brand-just-changed', String(Date.now()))
+        // 2026-05-14: Sofortige in-place Transition. Globale CSS-Regel reagiert
+        // auf das data-Attribut und animiert alle Children-Farben für 1.2s.
+        // Auf dem Editor selbst greift das schon hier (LivePreview + Sidebar
+        // schalten sanft um). Beim nächsten Page-Load liest GutachterShell
+        // den localStorage-Flag und wiederholt die Animation für die volle
+        // App-Sicht (z.B. zurück auf /gutachter/heute).
+        document.body.setAttribute('data-brand-transition', 'on')
+        setTimeout(() => {
+          document.body.removeAttribute('data-brand-transition')
+        }, 1500)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Speichern')
