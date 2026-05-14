@@ -166,6 +166,17 @@ type Props = {
   /** CMM-36: Geo-Tracking — ID + Vorname des SVs für ETA-Anzeige */
   svId?: string | null
   svVorname?: string | null
+  /** AAR (14.05.2026): OCR-extrahierte Gutachten-Werte für SV-Verifikation. */
+  gutachtenWerte?: {
+    gutachten_datum: string | null
+    reparaturkosten_netto: number | null
+    reparaturkosten_brutto: number | null
+    minderwert: number | null
+    wiederbeschaffungswert: number | null
+    restwert: number | null
+    nutzungsausfall_tage: number | null
+    gutachten_sv_honorar_brutto: number | null
+  } | null
 }
 
 /** AAR-399: Lokaler Typ, passt zu DokumentenListe.SlotRow */
@@ -455,6 +466,7 @@ export default function FallDetailClient(props: Props) {
                 hochgeladen_am: d.hochgeladen_am,
               }))
           }
+          extracted={props.gutachtenWerte ?? null}
         />
       </div>
 
