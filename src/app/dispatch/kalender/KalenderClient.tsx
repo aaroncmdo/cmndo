@@ -57,8 +57,24 @@ const HOUR_START = 8
 const HOUR_END = 18
 const SLOT_PX = 14 // px pro 5-Min-Slot → 168px/h
 
+// 15.05.2026: Vor diesem Fix nutzte formatHHMM `d.getHours()` / `d.getMinutes()`
+// — beide lesen die Process-TZ (VPS-Node = UTC, Browser = Europe/Berlin) und
+// produzierten 2h-Versatz zwischen Server-Pre-Render und Client-Hydrate.
+// Folge: React #418 (text content mismatch) als pageerror auf
+// /dispatch/kalender, sobald ein Termin gerendert wurde. Die Datum-<p>-
+// Elemente waren bereits per `suppressHydrationWarning` defensiv markiert
+// (Z. 200, 313, 320), aber `block.timeLabel` (Z. 408) nicht — also schlug
+// der Mismatch dort durch.
+//
+// Fix: Intl.DateTimeFormat mit explicit `timeZone: 'Europe/Berlin'` → Berlin-
+// Wallclock unabhängig von der Host-TZ, deterministisch zwischen Server und
+// Client. Selbes Pattern wie `src/lib/format/datum.ts:formatUhrzeit`.
 function formatHHMM(d: Date): string {
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  return d.toLocaleTimeString('de-DE', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Europe/Berlin',
+  })
 }
 function fmtDateLabel(d: Date): string {
   return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })
