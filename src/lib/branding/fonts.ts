@@ -66,6 +66,45 @@ export const FONT_PAIRS: Record<string, FontPair> = {
     },
     preview: 'Sag es laut.',
   },
+  // 2026-05-14: Auto-affine Font-Pairs für KFZ-Branding (Aaron-Brief
+  // "Schriftarten die mehr auf 'auto' angelehnt sind"). Schmale, technische
+  // oder solide Sans-Serifs aus dem Werkstatt-/Motorsport-Vokabular.
+  racing_4: {
+    id: 'racing_4',
+    category: 'racing',
+    label: 'Werkstatt Industrial',
+    heading: { family: 'Saira Condensed', weights: [600, 800] },
+    body: { family: 'Inter', weights: [400, 500] },
+    cssStack: {
+      heading: `'Saira Condensed', ${SANS_FALLBACK}`,
+      body: `'Inter', ${SANS_FALLBACK}`,
+    },
+    preview: 'KFZ. Schmal. Direkt.',
+  },
+  racing_5: {
+    id: 'racing_5',
+    category: 'racing',
+    label: 'Tech Speed',
+    heading: { family: 'Rajdhani', weights: [600, 700] },
+    body: { family: 'Manrope', weights: [400, 500, 600] },
+    cssStack: {
+      heading: `'Rajdhani', ${SANS_FALLBACK}`,
+      body: `'Manrope', ${SANS_FALLBACK}`,
+    },
+    preview: 'Tachometer-tauglich.',
+  },
+  racing_6: {
+    id: 'racing_6',
+    category: 'racing',
+    label: 'Garage Solid',
+    heading: { family: 'Russo One', weights: [400] },
+    body: { family: 'Lato', weights: [400, 700] },
+    cssStack: {
+      heading: `'Russo One', ${SANS_FALLBACK}`,
+      body: `'Lato', ${SANS_FALLBACK}`,
+    },
+    preview: 'Solid Mechanical.',
+  },
 
   // ── Elegance (edel/klassisch) ──
   elegance_1: {

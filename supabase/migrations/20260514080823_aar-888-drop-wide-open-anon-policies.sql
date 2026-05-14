@@ -48,6 +48,7 @@ DROP POLICY IF EXISTS "System insert"                       ON public.benachrich
 -- ───────────────────────────────────────────────────────────────────────────
 
 DROP POLICY IF EXISTS "Profil erstellen" ON public.profiles;
+
 CREATE POLICY "Profil erstellen" ON public.profiles
   FOR INSERT TO authenticated
   WITH CHECK (id = auth.uid());

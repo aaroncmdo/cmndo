@@ -449,16 +449,19 @@ export async function uploadDatei(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, sv_id')
+    .select('id, sv_id, claim_id')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
 
   if (!fall) return { error: 'Fall nicht gefunden' }
+  // AAR-862: claim-zentrierter Pfad
+  const claimId = fall.claim_id as string
 
-  // Upload file to storage (AAR-553: fall-dokumente-Bucket)
+  // Upload file to storage (AAR-553/AAR-862: claims/{claim_id}/<segment>/...)
   const ext = file.name.split('.').pop() ?? 'bin'
-  const path = `gutachter-dateien/${fallId}/${Date.now()}.${ext}`
+  const segment = kategorie === 'gutachten' ? 'gutachten' : 'sv'
+  const path = `claims/${claimId}/${segment}/${Date.now()}.${ext}`
 
   const { error: uploadErr } = await supabase.storage
     .from('fall-dokumente')

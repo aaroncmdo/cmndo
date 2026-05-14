@@ -108,7 +108,8 @@ export default function GutachtenUploadBanner({
     // CMM-32e: bei aktivem Reject landet jede Datei in einem
     // nachbesserung/-Subfolder — sauber abgegrenzt, mehrfach-iterierbar.
     const subfolder = istReject ? 'nachbesserung/' : ''
-    const storagePath = `claim/${claimId}/gutachten/${auftragId}/${subfolder}${Date.now()}-${safeName}`
+    // AAR-862: claims/ (Plural)
+    const storagePath = `claims/${claimId}/gutachten/${auftragId}/${subfolder}${Date.now()}-${safeName}`
     // Direktupload — kein API-Body, umgeht Vercel-413-Limit
     const { error: upErr } = await supabase.storage
       .from('fall-dokumente')

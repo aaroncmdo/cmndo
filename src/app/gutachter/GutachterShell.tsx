@@ -30,6 +30,7 @@ import { SupportSidebarPanel } from '@/components/support/SupportSidebarPanel'
 import TasksPill from '@/components/shared/TasksPill'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
+import { FONT_PAIRS, CLAIMONDO_DEFAULT_FONT_PAIR_ID, buildGoogleFontsUrl } from '@/lib/branding/fonts'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 import SVSpotlight from './_components/SVSpotlight'
 import WeatherBanner from '@/components/shared/WeatherBanner'
@@ -171,6 +172,21 @@ export default function GutachterShell({
   // der Shell zur Verfügung ohne dass einzelne Consumer das Theme re-importieren.
   const themeVars = generateCssVars(theme, 'full')
 
+  // 2026-05-14: Brand-Font binding. Wenn brand_theme.fontPairId gesetzt ist,
+  // lade die Google-Fonts und setze --brand-font-heading / --brand-font-body
+  // als CSS-Vars auf den Shell-Wrapper. Sidebar + Header übernehmen das via
+  // `font-family: var(--brand-font-heading, inherit)` im JSX unten.
+  const fontPairId = (theme as { fontPairId?: string | null }).fontPairId
+    ?? CLAIMONDO_DEFAULT_FONT_PAIR_ID
+  const fontPair = useBrand ? (FONT_PAIRS[fontPairId] ?? FONT_PAIRS[CLAIMONDO_DEFAULT_FONT_PAIR_ID]) : null
+  const fontVars: React.CSSProperties = fontPair
+    ? ({
+        '--brand-font-heading': fontPair.cssStack.heading,
+        '--brand-font-body': fontPair.cssStack.body,
+      } as React.CSSProperties)
+    : {}
+  const fontHref = fontPair ? buildGoogleFontsUrl(fontPair) : null
+
   // CMM-32 P2 / AAR-864: --app-sidebar-width = Sidebar-Breite + lg-Padding
   // (256px Sidebar + 16px pl-4 = 272px). Damit startet ein portal-rendered
   // Modal (Modal.web.tsx) bündig am inneren Wrapper-Rand und überdeckt nur
@@ -298,7 +314,21 @@ export default function GutachterShell({
   }
 
   return (
-    <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-primary, #0D1B3E)' }}>
+    <div
+      className="h-screen flex overflow-hidden"
+      style={{
+        ...themeVars,
+        ...fontVars,
+        backgroundColor: 'var(--brand-primary, #0D1B3E)',
+        // Body-Text-Font auf den ganzen Shell — Headings (h1-h6) holen sich
+        // global den heading-stack via globals.css.
+        fontFamily: 'var(--brand-font-body, inherit)',
+      }}
+    >
+      {fontHref && (
+        // eslint-disable-next-line @next/next/no-css-tags
+        <link rel="stylesheet" href={fontHref} />
+      )}
       {/* Mobile overlay — ausgeblendet im Feldmodus */}
       {!isFeldmodus && sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />

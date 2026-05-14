@@ -116,13 +116,14 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
 </div>
 </body></html>`
 
-  // claim_id laden damit signiertes Dokument in den Claim-Bucket geht
+  // claim_id laden damit signiertes Dokument in den Claim-Ordner geht
   const { data: fallRow } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
   const claimId = (fallRow?.claim_id as string | null) ?? null
 
-  // Als HTML in Storage speichern — bevorzugt claim/{claimId}/signed/, Fallback sa-dokumente/
+  // AAR-862: claim-zentrierter Pfad (claims/{claim_id}/sa/...).
+  // Legacy-Fallback bleibt für Faelle ohne claim_id (sollte 0 sein — CMM-Migration ist durch).
   const path = claimId
-    ? `claim/${claimId}/signed/sicherungsabtretung_${Date.now()}.html`
+    ? `claims/${claimId}/sa/sicherungsabtretung_${Date.now()}.html`
     : `sa-dokumente/${fallId}/sicherungsabtretung_${Date.now()}.html`
   const blob = new Blob([html], { type: 'text/html' })
   await admin.storage.from('fall-dokumente').upload(path, blob, { contentType: 'text/html' })

@@ -136,7 +136,7 @@ export async function gutachtenAbgeben(
     .select('id, storage_path, hochgeladen_am, dokument_typ')
     .eq('fall_id', auftrag.fall_id)
     .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
-    .like('storage_path', `claim/${claimId}/gutachten/${auftragId}/%`)
+    .like('storage_path', `claims/${claimId}/gutachten/${auftragId}/%`)
     .is('geloescht_am', null)
     .order('hochgeladen_am', { ascending: false })
     .limit(1)

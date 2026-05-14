@@ -435,8 +435,9 @@ async function persistMerged({
 }): Promise<GeneratePflichtdokResult> {
   const outBytes = await pdfDoc.save()
   const ts = Date.now()
+  // AAR-862: claims/ (Plural), sa/-Segment
   const baseDir = claimId
-    ? `claim/${claimId}/signed`
+    ? `claims/${claimId}/sa`
     : `fall/${fallId}/signed`
   const outPath = `${baseDir}/${slotId}_${ts}.pdf`
 
