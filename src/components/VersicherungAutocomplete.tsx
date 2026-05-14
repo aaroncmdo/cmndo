@@ -164,7 +164,7 @@ export default function VersicherungAutocomplete({
       </div>
 
       {open && suggestions.length > 0 && (
-        <div className="absolute z-30 left-0 right-0 mt-0.5 bg-white border border-claimondo-border rounded-lg shadow-lg max-h-64 overflow-y-auto">
+        <div className="absolute z-30 left-0 right-0 mt-0.5 bg-white border border-claimondo-border rounded-ios-lg shadow-lg max-h-64 overflow-y-auto">
           {suggestions.map((s, i) => (
             <button
               key={s.id}

@@ -75,7 +75,7 @@ export function CardentityTypBButton({
     const vorhanden = state.vorschadenVorhanden === true
     return (
       <div
-        className={`rounded-lg border px-3 py-2 text-xs space-y-0.5 ${
+        className={`rounded-ios-lg border px-3 py-2 text-xs space-y-0.5 ${
           vorhanden ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'
         }`}
       >
@@ -109,7 +109,7 @@ export function CardentityTypBButton({
         type="button"
         onClick={trigger}
         disabled={pending}
-        className={`inline-flex items-center gap-1.5 ${padding} rounded-lg border border-claimondo-border bg-white text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-60 disabled:cursor-not-allowed`}
+        className={`inline-flex items-center gap-1.5 ${padding} rounded-ios-lg border border-claimondo-border bg-white text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-60 disabled:cursor-not-allowed`}
         title="Cardentity Typ-B kostet 15€ pro Abfrage. Sinnvoll bei konkretem Vorschadenverdacht."
       >
         {pending ? (

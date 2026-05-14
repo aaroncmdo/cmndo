@@ -112,7 +112,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-1">
+        <div className="rounded-ios-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-1">
           <p className="font-medium">Hinweis: Keine Auto-Side-Effects</p>
           <ul className="list-disc ml-4 space-y-0.5">
             <li>Keine WhatsApp-Benachrichtigung an Kunde/SV</li>
@@ -124,7 +124,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-claimondo-navy">Aktueller Status</label>
-          <div className="w-full rounded-md border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm font-mono text-claimondo-navy">
+          <div className="w-full rounded-ios-md border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm font-mono text-claimondo-navy">
             {currentStatus}
           </div>
         </div>
@@ -136,7 +136,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
           <select
             value={neuerStatus}
             onChange={(e) => setNeuerStatus(e.target.value as FallStatusValue | '')}
-            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+            className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
           >
             <option value="">– bitte wählen –</option>
             {ALLOWED_STATUS_VALUES.map((s) => (
@@ -157,7 +157,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
             onChange={(e) => setBegruendung(e.target.value)}
             rows={4}
             placeholder="Warum wird der Status manuell überschrieben? (z.B. Legacy-Migration, außergerichtliche Einigung, …)"
-            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+            className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
           />
           <p className="text-xs text-claimondo-ondo">
             {begruendung.trim().length} / min. 10 Zeichen —{' '}
@@ -187,7 +187,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
             type="button"
             onClick={() => handleOpenChange(false)}
             disabled={pending}
-            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
+            className="text-sm rounded-ios-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
           >
             Abbrechen
           </button>
@@ -195,7 +195,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
             type="button"
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="text-sm rounded-md bg-amber-700 text-white px-3 py-1.5 hover:bg-amber-800 disabled:opacity-50"
+            className="text-sm rounded-ios-md bg-amber-700 text-white px-3 py-1.5 hover:bg-amber-800 disabled:opacity-50"
           >
             {pending ? 'Wird überschrieben …' : 'Status überschreiben'}
           </button>

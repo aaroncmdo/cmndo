@@ -68,7 +68,7 @@ export default function KanbanBoardClient({ karten }: { karten: KanbanKarte[] })
           {spalten.map((s) => (
             <div
               key={s.nr}
-              className="w-72 shrink-0 rounded-xl border border-claimondo-border bg-white overflow-hidden flex flex-col"
+              className="w-72 shrink-0 rounded-ios-xl border border-claimondo-border bg-white overflow-hidden flex flex-col"
             >
               <div
                 className="px-3 py-2 border-b border-claimondo-border flex items-center justify-between"
@@ -126,7 +126,7 @@ function KanbanCard({
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   return (
-    <div className="rounded-lg border border-claimondo-border bg-white p-3 hover:border-claimondo-ondo hover:shadow-sm transition-all">
+    <div className="rounded-ios-lg border border-claimondo-border bg-white p-3 hover:border-claimondo-ondo hover:shadow-sm transition-all">
       <div className="flex items-start justify-between gap-2">
         <Link
           href={`/faelle/${karte.id}`}
@@ -157,7 +157,7 @@ function KanbanCard({
                 className="fixed inset-0 z-40"
                 onClick={() => setMenuOpen(false)}
               />
-              <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-lg border border-claimondo-border bg-white shadow-md overflow-hidden">
+              <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-ios-lg border border-claimondo-border bg-white shadow-md overflow-hidden">
                 <button
                   type="button"
                   onClick={() => {

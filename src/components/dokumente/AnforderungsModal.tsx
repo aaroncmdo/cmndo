@@ -115,7 +115,7 @@ export default function AnforderungsModal({
               <select
                 value={slotId}
                 onChange={(e) => setSlotId(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo bg-white"
+                className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-ios-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo bg-white"
                 disabled={pending}
               >
                 {slots.map((s) => (
@@ -141,7 +141,7 @@ export default function AnforderungsModal({
               rows={4}
               disabled={pending}
               placeholder="Bitte erläutern Sie warum Sie das Dokument brauchen (min. 20 Zeichen)"
-              className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+              className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-ios-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
             <p
               className={`mt-1 text-[10px] tabular-nums ${
@@ -161,13 +161,13 @@ export default function AnforderungsModal({
               onChange={(e) => setFrist(e.target.value)}
               disabled={pending}
               min={new Date().toISOString().slice(0, 10)}
-              className="px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+              className="px-3 py-2 text-sm border border-claimondo-border rounded-ios-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
             <p className="mt-1 text-[10px] text-claimondo-ondo/70">Default: heute + 14 Tage</p>
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+            <div className="rounded-ios-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
               <AlertCircleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -179,7 +179,7 @@ export default function AnforderungsModal({
             type="button"
             onClick={() => onOpenChange(false)}
             disabled={pending}
-            className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-claimondo-bg disabled:opacity-50"
+            className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-ios-md hover:bg-claimondo-bg disabled:opacity-50"
           >
             Abbrechen
           </button>
@@ -187,7 +187,7 @@ export default function AnforderungsModal({
             type="button"
             onClick={handleSubmit}
             disabled={pending || slots.length === 0 || !begruendungValid}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-claimondo-ondo rounded-md hover:bg-claimondo-shield disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-claimondo-ondo rounded-ios-md hover:bg-claimondo-shield disabled:opacity-50"
           >
             {pending && <Loader2Icon className="w-3 h-3 animate-spin" />}
             Beim Kunden anfordern

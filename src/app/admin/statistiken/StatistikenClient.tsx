@@ -477,23 +477,23 @@ export default function StatistikenClient({
             <PageHeader title="Statistiken" />
             <div className="flex items-center gap-3 flex-wrap">
               {/* Zeitraum */}
-              <div className="flex bg-claimondo-bg rounded-lg p-0.5">
+              <div className="flex bg-claimondo-bg rounded-ios-lg p-0.5">
                 {ZEITRAUM_OPTIONS.map(o => (
                   <button key={o.days} onClick={() => setZeitraum(o.days)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${zeitraum === o.days ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'}`}>
+                    className={`px-3 py-1.5 text-xs font-medium rounded-ios-md transition-colors ${zeitraum === o.days ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo hover:text-claimondo-navy'}`}>
                     {o.label}
                   </button>
                 ))}
               </div>
               {/* Kundenberater / Leadabarbeiter Toggle */}
               {(rolle === 'kundenbetreuer' || rolle === 'dispatch') && (
-                <div className="flex bg-claimondo-bg rounded-lg p-0.5">
+                <div className="flex bg-claimondo-bg rounded-ios-lg p-0.5">
                   <button onClick={() => setNurEigene(true)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${nurEigene ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'}`}>
+                    className={`px-3 py-1.5 text-xs font-medium rounded-ios-md transition-colors ${nurEigene ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'}`}>
                     Eigene
                   </button>
                   <button onClick={() => setNurEigene(false)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${!nurEigene ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'}`}>
+                    className={`px-3 py-1.5 text-xs font-medium rounded-ios-md transition-colors ${!nurEigene ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'}`}>
                     {rolle === 'dispatch' ? 'Team' : 'Alle Fälle'}
                   </button>
                 </div>
@@ -506,7 +506,7 @@ export default function StatistikenClient({
             {/* SV Filter */}
             {(rolle === 'admin' || rolle === 'sv_buero_inhaber' || rolle === 'akademie_verwalter') && svOptions.length > 1 && (
               <select value={filterSv} onChange={e => setFilterSv(e.target.value)}
-                className="px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-claimondo-ondo">
+                className="px-2.5 py-1.5 text-xs border border-claimondo-border rounded-ios-lg bg-white focus:outline-none focus:border-claimondo-ondo">
                 <option value="">Alle SVs</option>
                 {svOptions.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
               </select>
@@ -514,7 +514,7 @@ export default function StatistikenClient({
             {/* Versicherer Filter */}
             {versichererOptions.length > 0 && (
               <select value={filterVersicherer} onChange={e => setFilterVersicherer(e.target.value)}
-                className="px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-claimondo-ondo">
+                className="px-2.5 py-1.5 text-xs border border-claimondo-border rounded-ios-lg bg-white focus:outline-none focus:border-claimondo-ondo">
                 <option value="">Alle Versicherer</option>
                 {versichererOptions.map(v => <option key={v} value={v}>{v}</option>)}
               </select>
@@ -522,7 +522,7 @@ export default function StatistikenClient({
             {/* Region (PLZ) Filter */}
             <input type="text" value={filterPlz} onChange={e => setFilterPlz(e.target.value.replace(/\D/g, '').slice(0, 5))}
               placeholder="PLZ-Region" maxLength={5}
-              className="w-24 px-2.5 py-1.5 text-xs border border-claimondo-border rounded-lg bg-white focus:outline-none focus:border-claimondo-ondo" />
+              className="w-24 px-2.5 py-1.5 text-xs border border-claimondo-border rounded-ios-lg bg-white focus:outline-none focus:border-claimondo-ondo" />
             {(filterSv || filterVersicherer || filterPlz) && (
               <button onClick={() => { setFilterSv(''); setFilterVersicherer(''); setFilterPlz('') }}
                 className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo">Filter zurücksetzen</button>
@@ -705,7 +705,7 @@ export default function StatistikenClient({
 
               {/* Insight Box */}
               {gegnerFahrzeugData.length >= 2 && (
-                <div className="mt-4 bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-xl p-3">
+                <div className="mt-4 bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-ios-xl p-3">
                   <p className="text-xs text-claimondo-navy">
                     <span className="font-semibold text-claimondo-ondo">Insight:</span>{' '}
                     {gegnerFahrzeugData[0].count} Fälle ({Math.round((gegnerFahrzeugData[0].count / filtered.length) * 100)}%) haben {gegnerFahrzeugData[0].label} als Gegner.
@@ -724,7 +724,7 @@ export default function StatistikenClient({
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {potenzialeData.map(b => (
-                    <div key={b.metrik} className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
+                    <div key={b.metrik} className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4">
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="text-sm font-medium text-claimondo-navy pr-2">{b.beschreibung}</h4>
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${
@@ -785,7 +785,7 @@ export default function StatistikenClient({
                             {wasTunOpen === b.metrik ? 'Schließen' : 'Was tun?'}
                           </button>
                           {wasTunOpen === b.metrik && (
-                            <div className="mt-1.5 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                            <div className="mt-1.5 bg-amber-50 border border-amber-200 rounded-ios-lg p-2">
                               <p className="text-[11px] text-amber-800 leading-relaxed">{WAS_TUN_TIPS[b.metrik]}</p>
                             </div>
                           )}

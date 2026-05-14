@@ -45,7 +45,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
   return (
     <div className={`rounded-2xl border-2 ${config.border} ${config.bg} p-6 space-y-3`}>
       <div className="flex items-start gap-3">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${config.color} bg-white/80`}>
+        <div className={`w-10 h-10 rounded-ios-xl flex items-center justify-center shrink-0 ${config.color} bg-white/80`}>
           <config.icon className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
@@ -61,7 +61,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
 
       {/* AS Frist-Counter */}
       {s === 'anschlussschreiben' && fall.anschlussschreiben_am && (
-        <div className="bg-white/60 rounded-xl px-4 py-3">
+        <div className="bg-white/60 rounded-ios-xl px-4 py-3">
           <p className="text-xs text-claimondo-ondo">Versendet am {formatDatum(fall.anschlussschreiben_am)}</p>
           <p className="text-sm font-semibold text-claimondo-navy">
             Die Versicherung hat {Math.max(0, 14 - daysSince(fall.anschlussschreiben_am))} Tage Zeit zu antworten
@@ -75,7 +75,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
 
       {/* VS-Ablehnung Grund */}
       {(s === 'vs-abgelehnt' || s === 'abgelehnt') && fall.vs_ablehnungsgrund && (
-        <div className="bg-white/60 rounded-xl px-4 py-3">
+        <div className="bg-white/60 rounded-ios-xl px-4 py-3">
           <p className="text-xs text-claimondo-ondo">Ablehnungsgrund</p>
           <p className="text-sm text-claimondo-navy">{fall.vs_ablehnungsgrund}</p>
         </div>
@@ -83,7 +83,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
 
       {/* Storno Grund */}
       {s === 'storniert' && fall.storno_grund && (
-        <div className="bg-white/60 rounded-xl px-4 py-3">
+        <div className="bg-white/60 rounded-ios-xl px-4 py-3">
           <p className="text-xs text-claimondo-ondo">Grund</p>
           <p className="text-sm text-claimondo-navy">{fall.storno_grund}</p>
         </div>
@@ -95,7 +95,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
           href="https://g.page/claimondo/review"
           target="_blank"
           rel="noopener noreferrer"
-          className="block bg-white rounded-xl px-4 py-3 text-center hover:shadow-sm transition-shadow border border-amber-200"
+          className="block bg-white rounded-ios-xl px-4 py-3 text-center hover:shadow-sm transition-shadow border border-amber-200"
         >
           <p className="text-sm font-semibold text-amber-700">Zufrieden? Bewerte uns auf Google!</p>
           <p className="text-xs text-claimondo-ondo mt-0.5">Dein Feedback hilft anderen Geschädigten</p>

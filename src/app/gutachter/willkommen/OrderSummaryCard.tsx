@@ -98,7 +98,7 @@ export default function OrderSummaryCard({
         </p>
 
         {organisationName && !istBuero && (
-          <div className="mt-3 px-3 py-2 rounded-lg bg-claimondo-bg border border-claimondo-border text-[11px] text-claimondo-ondo">
+          <div className="mt-3 px-3 py-2 rounded-ios-lg bg-claimondo-bg border border-claimondo-border text-[11px] text-claimondo-ondo">
             Du gehoerst zu <strong>{organisationName}</strong>
           </div>
         )}
@@ -177,7 +177,7 @@ export default function OrderSummaryCard({
 
   // ─── compact variant (Vertrag-Step) ────────────────────────────────────
   return (
-    <div className={`bg-[var(--brand-secondary)]/5 border border-[var(--brand-secondary)]/20 rounded-xl p-5 ${className}`}>
+    <div className={`bg-[var(--brand-secondary)]/5 border border-[var(--brand-secondary)]/20 rounded-ios-xl p-5 ${className}`}>
       <p className="text-xs text-[var(--brand-primary)] uppercase tracking-wide font-semibold mb-3">
         Deine Bestellung
       </p>
@@ -190,7 +190,7 @@ export default function OrderSummaryCard({
         <Cell label="Abrechnung" value="Pay-per-Lead" />
       </div>
       {organisationName && !istBuero && (
-        <div className="mt-3 px-3 py-2 rounded-lg bg-white border border-claimondo-border text-[11px] text-claimondo-navy">
+        <div className="mt-3 px-3 py-2 rounded-ios-lg bg-white border border-claimondo-border text-[11px] text-claimondo-navy">
           Du gehoerst zu <strong>{organisationName}</strong>
         </div>
       )}

@@ -249,7 +249,7 @@ export default function RueckrufTerminPanel({
             value={datum}
             onChange={(e) => setDatum(e.target.value)}
             disabled={pending || loading}
-            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo disabled:opacity-60"
+            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-ios-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo disabled:opacity-60"
           />
         </div>
         <div>
@@ -260,7 +260,7 @@ export default function RueckrufTerminPanel({
             disabled={pending || loading}
             rows={3}
             placeholder="z.B. Kunde ab 14 Uhr erreichbar, fragt nach Kosten …"
-            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/40 disabled:opacity-60 resize-none"
+            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-ios-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/40 disabled:opacity-60 resize-none"
           />
         </div>
       </div>
@@ -269,7 +269,7 @@ export default function RueckrufTerminPanel({
         <button
           onClick={handleSave}
           disabled={pending || loading}
-          className="px-4 py-2 rounded-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium disabled:opacity-50 transition-colors"
+          className="px-4 py-2 rounded-ios-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium disabled:opacity-50 transition-colors"
         >
           {pending ? 'Speichert …' : 'Termin speichern'}
         </button>
@@ -289,7 +289,7 @@ export default function RueckrufTerminPanel({
           <button
             onClick={() => setErledigenOffen(true)}
             disabled={pending || loading}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-ios-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium disabled:opacity-50 transition-colors"
           >
             <CheckCircle2Icon className="w-3.5 h-3.5" />
             Rückruf erledigt
@@ -300,14 +300,14 @@ export default function RueckrufTerminPanel({
             )}
           </button>
         ) : (
-          <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-3 space-y-3">
+          <div className="rounded-ios-xl border border-claimondo-border bg-claimondo-bg p-3 space-y-3">
             {/* Ergebnis */}
             <div>
               <p className="text-[11px] font-medium text-claimondo-ondo mb-1.5">Ergebnis</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => setErgebnis('erreicht')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors border ${
                     ergebnis === 'erreicht'
                       ? 'bg-emerald-600 text-white border-emerald-600'
                       : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-emerald-50'
@@ -318,7 +318,7 @@ export default function RueckrufTerminPanel({
                 </button>
                 <button
                   onClick={() => setErgebnis('nicht_erreicht')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors border ${
                     ergebnis === 'nicht_erreicht'
                       ? 'bg-red-600 text-white border-red-600'
                       : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-red-50'
@@ -340,7 +340,7 @@ export default function RueckrufTerminPanel({
                 onChange={(e) => setErgebnisNotiz(e.target.value)}
                 rows={2}
                 placeholder="z.B. Kunde bestätigt Termin am Freitag …"
-                className="w-full bg-white border border-claimondo-border text-claimondo-navy text-xs rounded-lg px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/40 resize-none"
+                className="w-full bg-white border border-claimondo-border text-claimondo-navy text-xs rounded-ios-lg px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/40 resize-none"
               />
             </div>
 
@@ -354,7 +354,7 @@ export default function RueckrufTerminPanel({
                   type="datetime-local"
                   value={folgetermin}
                   onChange={(e) => setFolgetermin(e.target.value)}
-                  className="w-full bg-white border border-claimondo-border text-claimondo-navy text-xs rounded-lg px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+                  className="w-full bg-white border border-claimondo-border text-claimondo-navy text-xs rounded-ios-lg px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
                 />
               </div>
             )}
@@ -363,14 +363,14 @@ export default function RueckrufTerminPanel({
               <button
                 onClick={handleErledigenAbschicken}
                 disabled={pending}
-                className="px-4 py-1.5 rounded-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-xs font-medium disabled:opacity-50 transition-colors"
+                className="px-4 py-1.5 rounded-ios-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-xs font-medium disabled:opacity-50 transition-colors"
               >
                 {pending ? 'Speichert …' : 'Speichern'}
               </button>
               <button
                 onClick={() => { setErledigenOffen(false); setErgebnisNotiz(''); setFolgetermin('') }}
                 disabled={pending}
-                className="px-3 py-1.5 rounded-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
+                className="px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
               >
                 Abbrechen
               </button>
@@ -382,7 +382,7 @@ export default function RueckrufTerminPanel({
       {/* Dispatch fortsetzen */}
       <Link
         href={`/dispatch/leads/${leadId}`}
-        className="flex items-center justify-between gap-2 w-full rounded-xl border border-claimondo-border bg-claimondo-bg hover:border-claimondo-ondo hover:bg-white px-3 py-2.5 transition-colors group"
+        className="flex items-center justify-between gap-2 w-full rounded-ios-xl border border-claimondo-border bg-claimondo-bg hover:border-claimondo-ondo hover:bg-white px-3 py-2.5 transition-colors group"
       >
         <div>
           <p className="text-xs font-semibold text-claimondo-navy">Dispatch fortsetzen</p>
@@ -442,7 +442,7 @@ export default function RueckrufTerminPanel({
                 return (
                   <li
                     key={`${h.typ}-${h.id}`}
-                    className="flex items-start gap-2 rounded-xl bg-claimondo-bg border border-claimondo-border px-3 py-2"
+                    className="flex items-start gap-2 rounded-ios-xl bg-claimondo-bg border border-claimondo-border px-3 py-2"
                   >
                     <Icon className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${iconColor}`} />
                     <div className="flex-1 min-w-0">

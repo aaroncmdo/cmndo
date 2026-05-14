@@ -8,10 +8,10 @@ export default function AdminLoading() {
         {/* Header skeleton */}
         <div className="flex items-center justify-between">
           <div>
-            <div className="h-6 w-48 bg-claimondo-bg rounded-lg animate-pulse" />
-            <div className="h-4 w-32 bg-claimondo-bg/50 rounded-lg animate-pulse mt-2" />
+            <div className="h-6 w-48 bg-claimondo-bg rounded-ios-lg animate-pulse" />
+            <div className="h-4 w-32 bg-claimondo-bg/50 rounded-ios-lg animate-pulse mt-2" />
           </div>
-          <div className="h-10 w-36 bg-claimondo-bg rounded-xl animate-pulse" />
+          <div className="h-10 w-36 bg-claimondo-bg rounded-ios-xl animate-pulse" />
         </div>
         {/* KPI cards skeleton */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

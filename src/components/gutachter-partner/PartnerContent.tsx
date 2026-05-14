@@ -88,7 +88,7 @@ export function PartnerContent({ warteliste }: { warteliste: number }) {
           <ol className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {SCHRITTE.map((s, i) => (
               <li key={s.titel} className="bg-claimondo-bg rounded-2xl p-5 flex gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-claimondo-ondo/10 flex items-center justify-center text-claimondo-ondo">
+                <div className="flex-shrink-0 w-10 h-10 rounded-ios-xl bg-claimondo-ondo/10 flex items-center justify-center text-claimondo-ondo">
                   <s.icon className="w-5 h-5" />
                 </div>
                 <div>

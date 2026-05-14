@@ -38,10 +38,10 @@ export default function OrganisationenClient({ organisationen }: { organisatione
         description="Alle Büros und Akademien. Communities haben einen eigenen Bereich."
         icon={Building2Icon}
         actions={
-          <div className="inline-flex bg-claimondo-bg rounded-xl p-0.5 text-xs font-medium">
+          <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-xs font-medium">
             {(['alle', 'buero', 'akademie'] as const).map(f => (
               <button key={f} type="button" onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 rounded-lg transition-colors capitalize ${
+                className={`px-3 py-1.5 rounded-ios-lg transition-colors capitalize ${
                   filter === f ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
                 }`}>
                 {f === 'alle' ? `Alle (${organisationen.length})` : f === 'buero' ? `Büros (${organisationen.filter(o => o.typ === 'buero').length})` : `Akademien (${organisationen.filter(o => o.typ === 'akademie').length})`}

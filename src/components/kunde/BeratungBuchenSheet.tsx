@@ -162,7 +162,7 @@ export default function BeratungBuchenSheet({
                 <select
                   value={thema}
                   onChange={(e) => setThema(e.target.value)}
-                  className="w-full min-h-11 px-3 rounded-xl border-2 border-claimondo-border focus:border-claimondo-ondo focus:outline-none bg-white text-sm"
+                  className="w-full min-h-11 px-3 rounded-ios-xl border-2 border-claimondo-border focus:border-claimondo-ondo focus:outline-none bg-white text-sm"
                 >
                   {THEMEN.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
@@ -178,7 +178,7 @@ export default function BeratungBuchenSheet({
                   rows={3}
                   placeholder="z. B. ‚Ich habe eine Rückfrage zur Höhe der Regulierung'"
                   // AAR-452: text-base verhindert iOS-Autozoom beim Fokus
-                  className="w-full px-3 py-2 rounded-xl border-2 border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-base resize-none"
+                  className="w-full px-3 py-2 rounded-ios-xl border-2 border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-base resize-none"
                 />
                 <p className="mt-1 text-xs text-claimondo-ondo">{beschreibung.length}/200 Zeichen</p>
               </div>
@@ -189,7 +189,7 @@ export default function BeratungBuchenSheet({
                   <button
                     type="button"
                     onClick={() => setKanal('video')}
-                    className={`flex items-center justify-center gap-2 min-h-11 rounded-xl border-2 text-sm font-medium transition-all ${
+                    className={`flex items-center justify-center gap-2 min-h-11 rounded-ios-xl border-2 text-sm font-medium transition-all ${
                       kanal === 'video' ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo/60'
                     }`}
                   >
@@ -198,7 +198,7 @@ export default function BeratungBuchenSheet({
                   <button
                     type="button"
                     onClick={() => setKanal('telefon')}
-                    className={`flex items-center justify-center gap-2 min-h-11 rounded-xl border-2 text-sm font-medium transition-all ${
+                    className={`flex items-center justify-center gap-2 min-h-11 rounded-ios-xl border-2 text-sm font-medium transition-all ${
                       kanal === 'telefon' ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo/60'
                     }`}
                   >
@@ -217,7 +217,7 @@ export default function BeratungBuchenSheet({
                 </div>
               )}
               {loadErr && (
-                <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-900">
+                <div className="rounded-ios-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-900">
                   {loadErr}
                 </div>
               )}
@@ -244,7 +244,7 @@ export default function BeratungBuchenSheet({
                               setSelectedDatum(d)
                               setSelectedUhrzeit(null)
                             }}
-                            className={`flex flex-col items-center py-2 rounded-xl border-2 transition-all ${
+                            className={`flex flex-col items-center py-2 rounded-ios-xl border-2 transition-all ${
                               isSelected ? 'border-claimondo-ondo bg-claimondo-ondo/5' : 'border-claimondo-border hover:border-claimondo-ondo/60'
                             }`}
                           >
@@ -273,7 +273,7 @@ export default function BeratungBuchenSheet({
                               key={u}
                               type="button"
                               onClick={() => setSelectedUhrzeit(u)}
-                              className={`min-h-11 rounded-xl border-2 text-sm font-medium transition-all ${
+                              className={`min-h-11 rounded-ios-xl border-2 text-sm font-medium transition-all ${
                                 isSelected
                                   ? 'border-claimondo-ondo bg-claimondo-ondo text-white'
                                   : 'border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo/60'
@@ -293,7 +293,7 @@ export default function BeratungBuchenSheet({
 
           {step === 3 && selectedDatum && selectedUhrzeit && (
             <div className="space-y-4">
-              <div className="rounded-xl border-2 border-claimondo-ondo/30 bg-claimondo-ondo/5 p-4 space-y-2.5">
+              <div className="rounded-ios-xl border-2 border-claimondo-ondo/30 bg-claimondo-ondo/5 p-4 space-y-2.5">
                 <Row label="Thema" value={thema} />
                 {beschreibung.trim() && <Row label="Beschreibung" value={beschreibung} />}
                 <Row
@@ -307,7 +307,7 @@ export default function BeratungBuchenSheet({
                 {kbName && <Row label="Berater" value={kbName} />}
               </div>
               {bookErr && (
-                <div className="rounded-xl border-2 border-red-200 bg-red-50 p-3 text-sm text-red-900">
+                <div className="rounded-ios-xl border-2 border-red-200 bg-red-50 p-3 text-sm text-red-900">
                   {bookErr}
                 </div>
               )}
@@ -339,7 +339,7 @@ export default function BeratungBuchenSheet({
                 if (step === 1) handleClose()
                 else setStep((step - 1) as Step)
               }}
-              className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl text-sm font-medium text-claimondo-navy hover:bg-claimondo-bg transition-colors"
+              className="flex items-center gap-1.5 min-h-11 px-4 rounded-ios-xl text-sm font-medium text-claimondo-navy hover:bg-claimondo-bg transition-colors"
             >
               {step === 1 ? 'Abbrechen' : (<><ArrowLeftIcon className="w-4 h-4" /> Zurück</>)}
             </button>
@@ -347,7 +347,7 @@ export default function BeratungBuchenSheet({
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
+                className="flex items-center gap-1.5 min-h-11 px-4 rounded-ios-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
               >
                 Weiter <ArrowRightIcon className="w-4 h-4" />
               </button>
@@ -357,7 +357,7 @@ export default function BeratungBuchenSheet({
                 type="button"
                 onClick={() => setStep(3)}
                 disabled={!selectedDatum || !selectedUhrzeit}
-                className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1.5 min-h-11 px-4 rounded-ios-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Weiter <ArrowRightIcon className="w-4 h-4" />
               </button>
@@ -367,7 +367,7 @@ export default function BeratungBuchenSheet({
                 type="button"
                 onClick={handleBook}
                 disabled={isPending}
-                className="flex items-center gap-1.5 min-h-11 px-4 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-60 transition-colors"
+                className="flex items-center gap-1.5 min-h-11 px-4 rounded-ios-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-60 transition-colors"
               >
                 {isPending ? <LoaderIcon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
                 Termin bestätigen
@@ -380,7 +380,7 @@ export default function BeratungBuchenSheet({
             <button
               type="button"
               onClick={handleClose}
-              className="w-full min-h-11 rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
+              className="w-full min-h-11 rounded-ios-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
             >
               Schließen
             </button>

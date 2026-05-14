@@ -44,7 +44,7 @@ export default async function NachbesichtigungPickerPage({
         </div>
 
         {bereitsEingereicht ? (
-          <div className="bg-white rounded-xl border border-emerald-200 p-5 space-y-2">
+          <div className="bg-white rounded-ios-xl border border-emerald-200 p-5 space-y-2">
             <p className="text-sm font-semibold text-emerald-900">Termine bereits eingereicht</p>
             <p className="text-xs text-claimondo-ondo">
               Ihre Vorschläge sind eingegangen. Wir melden uns, sobald ein Termin mit dem

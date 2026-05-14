@@ -90,7 +90,7 @@ export function BeratungModal({ open, onClose, quelle = 'beratung-modal' }: Prop
             data-testid="beratung-modal-close"
             type="button"
             onClick={handleClose}
-            className="p-1 rounded-md hover:bg-claimondo-bg transition-colors"
+            className="p-1 rounded-ios-md hover:bg-claimondo-bg transition-colors"
             aria-label="Schließen"
           >
             <X className="w-5 h-5 text-claimondo-shield" />
@@ -125,7 +125,7 @@ export function BeratungModal({ open, onClose, quelle = 'beratung-modal' }: Prop
                 minLength={2}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-sm"
+                className="w-full px-4 py-2.5 rounded-ios-lg border border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-sm"
                 placeholder="Vor- und Nachname"
               />
             </div>
@@ -140,7 +140,7 @@ export function BeratungModal({ open, onClose, quelle = 'beratung-modal' }: Prop
                 minLength={5}
                 value={telefon}
                 onChange={(e) => setTelefon(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-sm"
+                className="w-full px-4 py-2.5 rounded-ios-lg border border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-sm"
                 placeholder="+49 ..."
               />
             </div>
@@ -153,7 +153,7 @@ export function BeratungModal({ open, onClose, quelle = 'beratung-modal' }: Prop
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-sm"
+                className="w-full px-4 py-2.5 rounded-ios-lg border border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-sm"
                 placeholder="name@beispiel.de"
               />
             </div>
@@ -170,7 +170,7 @@ export function BeratungModal({ open, onClose, quelle = 'beratung-modal' }: Prop
                       data-testid={`beratung-zeit-${opt.value}`}
                       data-active={active}
                       onClick={() => setZeitfenster(opt.value)}
-                      className={`px-3 py-2 rounded-lg border text-xs font-semibold transition-colors ${
+                      className={`px-3 py-2 rounded-ios-lg border text-xs font-semibold transition-colors ${
                         active
                           ? 'bg-claimondo-navy text-white border-claimondo-navy'
                           : 'bg-white text-claimondo-navy border-claimondo-border hover:border-claimondo-ondo'
@@ -191,13 +191,13 @@ export function BeratungModal({ open, onClose, quelle = 'beratung-modal' }: Prop
                 rows={3}
                 value={nachricht}
                 onChange={(e) => setNachricht(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-sm resize-none"
+                className="w-full px-4 py-2.5 rounded-ios-lg border border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-sm resize-none"
                 placeholder="Worum geht es? (optional)"
               />
             </div>
 
             {status === 'error' && errorMsg && (
-              <div className="px-3 py-2 rounded-lg bg-red-50 text-red-700 text-xs">{errorMsg}</div>
+              <div className="px-3 py-2 rounded-ios-lg bg-red-50 text-red-700 text-xs">{errorMsg}</div>
             )}
 
             <button

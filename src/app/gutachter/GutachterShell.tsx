@@ -388,7 +388,7 @@ export default function GutachterShell({
             {logoUrl ? (
               <Link href="/gutachter">
                 {useBrand ? (
-                  <span className="inline-flex items-center justify-center bg-white rounded-lg p-2 shadow-sm">
+                  <span className="inline-flex items-center justify-center bg-white rounded-ios-lg p-2 shadow-sm">
                     <img
                       src={logoUrl}
                       alt={firmenname ? `${firmenname} Logo` : 'Logo'}
@@ -429,7 +429,7 @@ export default function GutachterShell({
                       key={href}
                       href={href}
                       onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium ${
+                      className={`flex items-center gap-3 px-3 py-2 rounded-ios-xl text-sm font-medium ${
                         active ? 'text-white' : 'text-white/60 hover:text-white hover:bg-white/5'
                       }`}
                       style={{
@@ -474,7 +474,7 @@ export default function GutachterShell({
           <button
             type="button"
             onClick={() => setShowSupport(true)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors"
             aria-label="Hilfe und Support öffnen"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -483,7 +483,7 @@ export default function GutachterShell({
             Hilfe &amp; Support
           </button>
           <Link href="/gutachter/profil" onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors group">
+            className="flex items-center gap-3 px-3 py-2.5 rounded-ios-xl hover:bg-white/5 transition-colors group">
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
               style={{
@@ -505,12 +505,12 @@ export default function GutachterShell({
           <Link
             href="/gutachter/einstellungen"
             onClick={() => setSidebarOpen(false)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium text-claimondo-light-blue hover:text-white hover:bg-white/5 transition-colors"
           >
             <SettingsIcon className="w-4 h-4" /> Einstellungen
           </Link>
           <button onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-light-blue hover:text-red-400 hover:bg-white/5 transition-colors">
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium text-claimondo-light-blue hover:text-red-400 hover:bg-white/5 transition-colors">
             <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>
@@ -535,7 +535,7 @@ export default function GutachterShell({
               Claimondo-Schriftzug. Vorher war hier hardcoded "Claim ondo"
               auch für gebrandete SVs → Inkonsistenz Sidebar vs Mobile. */}
           {logoUrl && useBrand ? (
-            <Link href="/gutachter" className="inline-flex items-center justify-center bg-white rounded-lg p-1.5 shadow-sm">
+            <Link href="/gutachter" className="inline-flex items-center justify-center bg-white rounded-ios-lg p-1.5 shadow-sm">
               <img
                 src={logoUrl}
                 alt={firmenname ? `${firmenname} Logo` : 'Logo'}

@@ -123,7 +123,7 @@ export default function RueckrufSection({ leadId }: { leadId: string }) {
             type="datetime-local"
             value={datum}
             onChange={e => setDatum(e.target.value)}
-            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-ios-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
           />
         </div>
         <div>
@@ -133,7 +133,7 @@ export default function RueckrufSection({ leadId }: { leadId: string }) {
             value={notiz}
             onChange={e => setNotiz(e.target.value)}
             placeholder="z.B. Kunde ab 14 Uhr erreichbar"
-            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/60"
+            className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm rounded-ios-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/60"
           />
         </div>
       </div>
@@ -142,7 +142,7 @@ export default function RueckrufSection({ leadId }: { leadId: string }) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-claimondo-ondo hover:bg-claimondo-navy disabled:opacity-50 text-white text-sm font-medium rounded-xl px-4 py-2 transition-colors"
+          className="bg-claimondo-ondo hover:bg-claimondo-navy disabled:opacity-50 text-white text-sm font-medium rounded-ios-xl px-4 py-2 transition-colors"
         >
           {saving ? 'Speichert ...' : 'Termin speichern'}
         </button>
@@ -151,7 +151,7 @@ export default function RueckrufSection({ leadId }: { leadId: string }) {
           <button
             onClick={handleErledigt}
             disabled={saving}
-            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl px-4 py-2 transition-colors"
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-medium rounded-ios-xl px-4 py-2 transition-colors"
           >
             <CheckCircle2Icon className="w-3.5 h-3.5" />
             Rückruf erledigt

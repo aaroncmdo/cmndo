@@ -149,7 +149,7 @@ console.log(`✓ ${files.length} Files geprüft, keine Token-Audit-Verstöße.`)
 //
 // Baseline-Update: nach jedem Migration-Batch hier den neuen, niedrigeren
 // Wert eintragen und den Vorher-Wert im Kommentar dokumentieren.
-const RADII_BASELINE_OCCURRENCES = 2073
+const RADII_BASELINE_OCCURRENCES = 351
 const RADII_RE = /\brounded-(none|sm|md|lg|xl|2xl|3xl)\b/g
 
 let radiiOccurrences = 0

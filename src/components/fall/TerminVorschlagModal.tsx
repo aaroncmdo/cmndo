@@ -129,7 +129,7 @@ export default function TerminVorschlagModal({
               value={datetime}
               onChange={e => setDatetime(e.target.value)}
               required
-              className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             />
           </div>
 
@@ -141,7 +141,7 @@ export default function TerminVorschlagModal({
               rows={2}
               maxLength={200}
               placeholder="z.B. anderer Zeitpunkt passt besser ins Einsatzgebiet"
-              className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo resize-none"
+              className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo resize-none"
             />
           </div>
 
@@ -150,14 +150,14 @@ export default function TerminVorschlagModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="flex-1 py-2.5 rounded-xl text-sm text-claimondo-ondo hover:bg-claimondo-bg transition-colors"
+              className="flex-1 py-2.5 rounded-ios-xl text-sm text-claimondo-ondo hover:bg-claimondo-bg transition-colors"
             >
               Abbrechen
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
               {isPending && <Loader2Icon className="w-4 h-4 animate-spin" />}
               Gegenvorschlag senden

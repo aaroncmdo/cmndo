@@ -157,7 +157,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
   return (
     <div className="space-y-5">
       {/* BUG-95: Header in Claimondo-CI ohne Grün */}
-      <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-xl p-4 flex items-start gap-3">
+      <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-ios-xl p-4 flex items-start gap-3">
         <CheckCircle2Icon className="w-5 h-5 text-[var(--brand-text-secondary)] flex-shrink-0 mt-0.5" />
         <div className="text-sm text-[var(--brand-text-primary)]">
           <p className="font-semibold">Herzlichen Dank für Ihre Anzahlung!</p>
@@ -195,7 +195,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
               Live-Preview-Box) — der User hat Auto-CD, nichts anzupassen. */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-16 h-16 rounded-xl border border-claimondo-border bg-white flex items-center justify-center overflow-hidden">
+              <div className="w-16 h-16 rounded-ios-xl border border-claimondo-border bg-white flex items-center justify-center overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={logoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
               </div>
@@ -220,7 +220,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
       )}
 
       {error && (
-        <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+        <div className="px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
           {error}
         </div>
       )}
@@ -250,7 +250,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           type="button"
           onClick={onDone}
           disabled={uploading}
-          className="px-4 py-2.5 rounded-xl border border-claimondo-border text-[var(--brand-text-secondary)] text-sm hover:bg-claimondo-bg disabled:opacity-40"
+          className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-[var(--brand-text-secondary)] text-sm hover:bg-claimondo-bg disabled:opacity-40"
         >
           Später machen
         </button>
@@ -259,7 +259,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           loadingText="Wird hochgeladen ..."
           onClick={onDone}
           disabled={!logoUrl}
-          className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {logoUrl ? 'Weiter' : 'Bitte zuerst Logo hochladen'}
         </LoadingButton>

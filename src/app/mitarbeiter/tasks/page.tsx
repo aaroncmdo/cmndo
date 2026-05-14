@@ -38,7 +38,7 @@ export default async function MitarbeiterTasks({ searchParams }: {
       <div className="flex gap-2">
         {tabs.map(t => (
           <Link key={t.key} href={`/mitarbeiter/tasks?status=${t.key}`}
-            className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+            className={`text-xs font-medium px-3 py-1.5 rounded-ios-lg transition-colors ${
               status === t.key ? 'bg-claimondo-navy text-white' : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg'
             }`}>
             {t.label}

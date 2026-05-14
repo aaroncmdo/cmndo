@@ -418,7 +418,7 @@ export default function FallDetailClient(props: Props) {
         {!!fall.hat_vorschaeden && (
           <div className="rounded-2xl bg-amber-50/40 border border-amber-200 p-4">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-ios-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
                 <span className="text-lg">⚠️</span>
               </div>
               <div className="flex-1 min-w-0">

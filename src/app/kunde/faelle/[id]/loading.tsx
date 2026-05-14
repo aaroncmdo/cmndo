@@ -7,7 +7,7 @@ export default function KundeFallDetailLoading() {
         {/* Status badge + Titel */}
         <div className="space-y-2">
           <div className="h-5 w-24 bg-claimondo-bg rounded-full animate-pulse" />
-          <div className="h-6 w-48 bg-claimondo-bg rounded-lg animate-pulse" />
+          <div className="h-6 w-48 bg-claimondo-bg rounded-ios-lg animate-pulse" />
         </div>
         {/* Timeline */}
         <div className="space-y-3">

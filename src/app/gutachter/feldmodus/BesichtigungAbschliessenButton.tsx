@@ -69,7 +69,7 @@ export default function BesichtigungAbschliessenButton({
         onClick={handleClick}
         onBlur={() => setConfirming(false)}
         disabled={isPending}
-        className={`w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-colors ${
+        className={`w-full inline-flex items-center justify-center gap-2 py-3 rounded-ios-xl text-sm font-semibold transition-colors ${
           confirming
             ? 'bg-amber-500 hover:bg-amber-600 text-white'
             : 'bg-green-600 hover:bg-green-700 text-white'

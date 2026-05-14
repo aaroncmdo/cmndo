@@ -108,7 +108,7 @@ export default async function FaqBotAnalyseCard({ fallId }: { fallId: string }) 
 
       {analyse.empfohlene_naechste_schritte && (
         <div
-          className="rounded-xl p-3"
+          className="rounded-ios-xl p-3"
           style={{
             background:
               'color-mix(in srgb, var(--brand-primary, #4573A2) 6%, #ffffff)',

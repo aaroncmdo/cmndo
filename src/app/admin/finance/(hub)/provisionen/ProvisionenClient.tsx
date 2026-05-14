@@ -83,7 +83,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
             type="button"
             disabled={pending || kpi.confirmed === 0}
             onClick={handleMarkMonthPaid}
-            className="px-4 py-2 rounded-xl bg-claimondo-shield text-white text-sm font-medium hover:bg-claimondo-ondo disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+            className="px-4 py-2 rounded-ios-xl bg-claimondo-shield text-white text-sm font-medium hover:bg-claimondo-ondo disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
             title={
               kpi.confirmed === 0
                 ? 'Keine bestätigten Provisionen in diesem Monat'
@@ -99,7 +99,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
       <div className="flex gap-2 flex-wrap">
         {months.map(m => (
           <Link key={m} href={`/admin/finance/provisionen?monat=${m}`}
-            className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+            className={`text-xs font-medium px-3 py-1.5 rounded-ios-lg transition-colors ${
               monat === m ? 'bg-claimondo-navy text-white' : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg'
             }`}>
             {m}

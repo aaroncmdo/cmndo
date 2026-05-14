@@ -63,7 +63,7 @@ export default function RouteSidebar({
             onArrived={onArrived}
           />
         ) : (
-          <div className="rounded-xl bg-white/10 p-4 text-sm text-white/80">
+          <div className="rounded-ios-xl bg-white/10 p-4 text-sm text-white/80">
             Kein aktiver Stop.
           </div>
         )}

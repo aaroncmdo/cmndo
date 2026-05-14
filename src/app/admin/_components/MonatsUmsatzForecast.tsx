@@ -95,7 +95,7 @@ export default async function MonatsUmsatzForecast() {
 
           {/* Laufend vs. Geplant */}
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="p-4 bg-emerald-50 rounded-xl">
+            <div className="p-4 bg-emerald-50 rounded-ios-xl">
               <p className="text-[10px] text-emerald-700 uppercase tracking-wide font-semibold mb-1">
                 Laufend (bis heute)
               </p>
@@ -104,7 +104,7 @@ export default async function MonatsUmsatzForecast() {
                 Provision: {fmtEur(f.provisionLaufend)}
               </p>
             </div>
-            <div className="p-4 bg-claimondo-ondo/10 rounded-xl">
+            <div className="p-4 bg-claimondo-ondo/10 rounded-ios-xl">
               <p className="text-[10px] text-claimondo-shield uppercase tracking-wide font-semibold mb-1">
                 Geplant (Forecast Monatsende)
               </p>

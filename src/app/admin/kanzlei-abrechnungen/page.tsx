@@ -121,26 +121,26 @@ export default async function KanzleiAbrechnungenPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-sm p-4 border">
+        <div className="bg-white rounded-ios-xl shadow-sm p-4 border">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Offen</p>
           <p className="text-2xl font-bold text-yellow-600 mt-1">{offen}</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-4 border">
+        <div className="bg-white rounded-ios-xl shadow-sm p-4 border">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Bezahlt</p>
           <p className="text-2xl font-bold text-green-600 mt-1">{bezahlt}</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-4 border">
+        <div className="bg-white rounded-ios-xl shadow-sm p-4 border">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Ueberfaellig</p>
           <p className="text-2xl font-bold text-red-600 mt-1">{ueberfaellig}</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm p-4 border">
+        <div className="bg-white rounded-ios-xl shadow-sm p-4 border">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Offen gesamt</p>
           <p className="text-2xl font-bold text-claimondo-navy mt-1">{gesamtOffen.toFixed(2).replace('.', ',')} €</p>
         </div>
       </div>
 
       {/* Tabelle */}
-      <DataTableContainer variant="plain" className="bg-white rounded-xl shadow-sm overflow-hidden border">
+      <DataTableContainer variant="plain" className="bg-white rounded-ios-xl shadow-sm overflow-hidden border">
         <Table>
           <Thead className="text-sm normal-case !tracking-normal border-b">
             <Tr>

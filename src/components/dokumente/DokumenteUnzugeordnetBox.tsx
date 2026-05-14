@@ -32,7 +32,7 @@ export default function DokumenteUnzugeordnetBox({
   if (docs.length === 0) return null
 
   return (
-    <div className="bg-amber-50/40 border border-amber-200 rounded-xl overflow-hidden">
+    <div className="bg-amber-50/40 border border-amber-200 rounded-ios-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-amber-200/60 flex items-center justify-between">
         <h3 className="text-xs font-semibold text-amber-800 uppercase tracking-wider flex items-center gap-2">
           <InboxIcon className="w-3.5 h-3.5" />
@@ -85,7 +85,7 @@ export default function DokumenteUnzugeordnetBox({
                   setActiveDoc(doc)
                   setOpen(true)
                 }}
-                className="text-[10px] font-medium text-white bg-claimondo-ondo hover:bg-claimondo-shield px-2.5 py-1 rounded-md"
+                className="text-[10px] font-medium text-white bg-claimondo-ondo hover:bg-claimondo-shield px-2.5 py-1 rounded-ios-md"
               >
                 Zuordnen
               </button>

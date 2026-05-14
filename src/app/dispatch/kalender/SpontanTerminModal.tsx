@@ -169,13 +169,13 @@ export default function SpontanTerminModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-claimondo-navy/40 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl border border-claimondo-border shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-4 py-3 border-b border-claimondo-border sticky top-0 bg-white">
           <h2 className="text-sm font-semibold text-claimondo-navy">Spontan-Termin</h2>
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-lg hover:bg-claimondo-bg flex items-center justify-center"
+            className="w-7 h-7 rounded-ios-lg hover:bg-claimondo-bg flex items-center justify-center"
           >
             <XIcon className="w-4 h-4 text-claimondo-navy" />
           </button>
@@ -368,7 +368,7 @@ export default function SpontanTerminModal({
             type="button"
             onClick={onClose}
             disabled={pending}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg"
+            className="px-3 py-1.5 rounded-ios-lg text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg"
           >
             Abbrechen
           </button>
@@ -376,7 +376,7 @@ export default function SpontanTerminModal({
             type="button"
             onClick={submit}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-shield disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-shield disabled:opacity-50"
           >
             <CheckCircleIcon className="w-3.5 h-3.5" />
             {pending ? 'Lege an …' : 'Termin reservieren'}

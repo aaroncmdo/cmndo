@@ -156,7 +156,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
               value={regulierungsBetrag}
               onChange={(e) => setRegulierungsBetrag(e.target.value)}
               placeholder="z.B. 4500.00"
-              className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             />
           </div>
         )}
@@ -169,7 +169,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
             <select
               value={vsAblehnungsGrund}
               onChange={(e) => setVsAblehnungsGrund(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             >
               {ABLEHNUNGS_GRUENDE.map((g) => (
                 <option key={g.value} value={g.value}>{g.label}</option>
@@ -193,13 +193,13 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
               : mode === 'storniert'  ? 'z.B. „Kunde wünscht Abbruch der Bearbeitung"'
               :                          'z.B. „Telefonat mit Frau Müller von Allianz, Az 123/456"'
             }
-            className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+            className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
           />
         </div>
 
         {/* Storno-Confirm (Schutz vor versehentlichem Klick) */}
         {mode === 'storniert' && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs flex items-start gap-2">
+          <div className="bg-amber-50 border border-amber-200 rounded-ios-lg p-3 text-xs flex items-start gap-2">
             <AlertTriangleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
             <div className="flex-1 space-y-2">
               <p className="text-amber-900">
@@ -233,14 +233,14 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="px-4 py-2 rounded-lg border border-claimondo-border text-sm text-claimondo-light-blue hover:bg-claimondo-bg disabled:opacity-50"
+            className="px-4 py-2 rounded-ios-lg border border-claimondo-border text-sm text-claimondo-light-blue hover:bg-claimondo-bg disabled:opacity-50"
           >
             Abbrechen
           </button>
           <button
             type="submit"
             disabled={isPending}
-            className="px-4 py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-navy disabled:opacity-50"
+            className="px-4 py-2 rounded-ios-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-navy disabled:opacity-50"
           >
             {isPending ? 'Wird gespeichert…' : t.label}
           </button>

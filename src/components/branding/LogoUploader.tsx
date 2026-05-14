@@ -97,7 +97,7 @@ export default function LogoUploader({ logoUrl, uploading, onFile, onClear, disa
       ) : (
         <div className="border border-claimondo-border rounded-2xl p-4 bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-20 h-20 rounded-xl border border-claimondo-border bg-white flex items-center justify-center overflow-hidden">
+            <div className="w-20 h-20 rounded-ios-xl border border-claimondo-border bg-white flex items-center justify-center overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={logoUrl} alt="Aktuelles Logo" className="max-w-full max-h-full object-contain" />
             </div>

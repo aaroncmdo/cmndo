@@ -259,7 +259,7 @@ export default function KundeKbChat({
                 {fallNr && m.fall_id && (
                   <Link
                     href={`/kunde/faelle/${m.fall_id}`}
-                    className={`flex items-center gap-2 rounded-lg px-2 py-1.5 mb-1.5 transition-colors ${
+                    className={`flex items-center gap-2 rounded-ios-lg px-2 py-1.5 mb-1.5 transition-colors ${
                       ownMessage
                         ? 'bg-white/10 hover:bg-white/15 border-l-[3px] border-white/40'
                         : 'bg-claimondo-ondo/10 hover:bg-claimondo-ondo/15 border-l-[3px] border-claimondo-ondo'
@@ -318,7 +318,7 @@ export default function KundeKbChat({
         {/* Fall-Bezug Chip (nur wenn ein Fall ausgewaehlt) — wie WhatsApp-
             Reply-Preview, schwebt direkt ueber dem Input */}
         {selectedFall && (
-          <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-md bg-claimondo-navy/5 border-l-[3px] border-claimondo-navy pl-2 pr-1.5 py-1 text-[11px] text-claimondo-navy">
+          <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-ios-md bg-claimondo-navy/5 border-l-[3px] border-claimondo-navy pl-2 pr-1.5 py-1 text-[11px] text-claimondo-navy">
             <FileTextIcon className="w-3 h-3 text-claimondo-navy/70 shrink-0" />
             <span>Bezug: <span className="font-mono font-semibold">{selectedFall.fall_nummer ?? selectedFall.id.slice(0, 8)}</span></span>
             <button
@@ -354,7 +354,7 @@ export default function KundeKbChat({
                 <FileTextIcon className="w-4 h-4" />
               </button>
               {pickerOpen && (
-                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl border border-claimondo-border shadow-claimondo-md overflow-hidden z-10">
+                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-ios-xl border border-claimondo-border shadow-claimondo-md overflow-hidden z-10">
                   <button
                     type="button"
                     onClick={() => {

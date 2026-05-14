@@ -32,7 +32,7 @@ export function PhaseStep({
   const interactive = !!onClick
   const Wrapper: 'button' | 'div' = interactive ? 'button' : 'div'
 
-  const containerBase = 'flex items-start gap-3 rounded-lg transition-colors'
+  const containerBase = 'flex items-start gap-3 rounded-ios-lg transition-colors'
   const containerByVariant: Record<PhaseVariant, string> = {
     horizontal: 'flex-col items-center gap-2 px-3 py-2 text-center',
     vertical: 'px-3 py-2.5',

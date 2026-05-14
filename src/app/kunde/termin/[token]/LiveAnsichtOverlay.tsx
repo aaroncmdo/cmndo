@@ -144,7 +144,7 @@ export default function LiveAnsichtOverlay({
         <button
           type="button"
           onClick={onClose}
-          className="p-2 rounded-lg hover:bg-white/10"
+          className="p-2 rounded-ios-lg hover:bg-white/10"
           aria-label="Live-Ansicht schließen"
         >
           <XIcon className="w-5 h-5" />

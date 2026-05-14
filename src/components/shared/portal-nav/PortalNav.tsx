@@ -87,7 +87,7 @@ export function PortalNav({
 
   function renderDarkItem(item: PortalNavItem) {
     const active = isActive(item.href, item.exact)
-    const cls = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
+    const cls = `flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors duration-500 ${
       active ? 'bg-claimondo-shield text-white font-semibold' : 'text-claimondo-light-blue hover:bg-white/5 hover:text-white'
     }`
     if (item.external) {
@@ -114,7 +114,7 @@ export function PortalNav({
       <Link
         key={item.href}
         href={item.href}
-        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-500 ${
+        className={`flex items-center gap-2.5 px-3 py-2 rounded-ios-lg text-sm font-medium transition-colors duration-500 ${
           active ? 'bg-claimondo-ondo text-white' : 'text-claimondo-ondo hover:bg-claimondo-bg'
         }`}
       >
@@ -166,7 +166,7 @@ export function PortalNav({
           >
             {mobileItems.map((item) => {
               const active = isActive(item.href, item.exact)
-              const cls = `flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-2 py-1 rounded-xl transition-all ${
+              const cls = `flex flex-col items-center justify-center gap-0.5 min-w-[48px] min-h-[48px] px-2 py-1 rounded-ios-xl transition-all ${
                 active ? 'text-white bg-claimondo-shield' : 'text-claimondo-light-blue'
               }`
               if (item.external) {

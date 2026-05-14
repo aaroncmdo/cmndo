@@ -64,7 +64,7 @@ export default function QualiNummernFelder({
   }
 
   return (
-    <div className="rounded-xl border border-claimondo-ondo/20 bg-claimondo-ondo/5 px-4 py-3 space-y-3">
+    <div className="rounded-ios-xl border border-claimondo-ondo/20 bg-claimondo-ondo/5 px-4 py-3 space-y-3">
       <div className="flex items-center gap-2">
         <IdCardIcon className="w-4 h-4 text-claimondo-ondo" />
         <h3 className="text-sm font-semibold text-claimondo-navy">Quali-Nummern</h3>
@@ -79,7 +79,7 @@ export default function QualiNummernFelder({
               value={werte[f.key]}
               onChange={e => onChange(f.key, e.target.value)}
               placeholder={f.placeholder}
-              className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-claimondo-border bg-white focus:border-claimondo-ondo focus:outline-none focus:ring-1 focus:ring-claimondo-ondo/20"
+              className="mt-1 w-full px-3 py-2 text-sm rounded-ios-lg border border-claimondo-border bg-white focus:border-claimondo-ondo focus:outline-none focus:ring-1 focus:ring-claimondo-ondo/20"
             />
           </label>
         ))}

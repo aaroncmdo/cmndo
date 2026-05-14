@@ -160,7 +160,7 @@ export default function TagesrouteSidebar({
             <button
               type="button"
               onClick={onAddPrivatStop}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-claimondo-navy bg-white hover:bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1.5"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-claimondo-navy bg-white hover:bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-2 py-1.5"
               title="Privat-Termin als Tagesroute-Stop hinzufügen"
             >
               {/* 2026-05-08 Aaron-UI-Audit: Label „Stop" kollidierte
@@ -347,7 +347,7 @@ export default function TagesrouteSidebar({
 
                   {/* Vorschäden (Cardentity) */}
                   {t.hat_vorschaeden && (t.vorschaden_anzahl ?? 0) > 0 && (
-                    <div className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] flex items-start gap-1.5">
+                    <div className="rounded-ios-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] flex items-start gap-1.5">
                       <AlertTriangleIcon className="w-3 h-3 text-amber-700 shrink-0 mt-0.5" />
                       <div>
                         <p className="font-semibold text-amber-900">
@@ -364,7 +364,7 @@ export default function TagesrouteSidebar({
 
                   {/* Einzusammelnde Pflichtdokumente */}
                   {t.einzusammelnde_dokumente.length > 0 && (
-                    <div className="rounded-md border border-claimondo-border bg-white px-2 py-1.5 space-y-1">
+                    <div className="rounded-ios-md border border-claimondo-border bg-white px-2 py-1.5 space-y-1">
                       <div className="flex items-center gap-1.5 text-[11px] font-semibold text-claimondo-navy">
                         <FileTextIcon className="w-3 h-3" />
                         Einzusammeln vor Ort ({t.einzusammelnde_dokumente.length})
@@ -393,7 +393,7 @@ export default function TagesrouteSidebar({
 
                   {/* Briefing */}
                   {briefingKurz && (
-                    <div className="bg-white border border-claimondo-border rounded-lg p-2">
+                    <div className="bg-white border border-claimondo-border rounded-ios-lg p-2">
                       <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo mb-0.5">
                         Briefing
                       </p>
@@ -410,7 +410,7 @@ export default function TagesrouteSidebar({
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-claimondo-shield rounded-lg px-2.5 py-1.5 font-medium"
+                      className="inline-flex items-center gap-1 text-xs text-white bg-[color:var(--brand-primary,var(--brand-secondary))] hover:bg-claimondo-shield rounded-ios-lg px-2.5 py-1.5 font-medium"
                     >
                       <NavigationIcon className="w-3 h-3" /> Route starten
                     </a>
@@ -418,7 +418,7 @@ export default function TagesrouteSidebar({
                       <a
                         href={`tel:${t.kunde_telefon}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 text-xs text-claimondo-navy bg-white hover:bg-claimondo-bg border border-claimondo-border rounded-lg px-2.5 py-1.5 font-medium"
+                        className="inline-flex items-center gap-1 text-xs text-claimondo-navy bg-white hover:bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-2.5 py-1.5 font-medium"
                       >
                         <PhoneIcon className="w-3 h-3" /> Anrufen
                       </a>
@@ -427,12 +427,12 @@ export default function TagesrouteSidebar({
                       <Link
                         href={`/gutachter/fall/${t.fall_id}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-claimondo-navy rounded-lg px-2 py-1 font-medium"
+                        className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-claimondo-navy rounded-ios-lg px-2 py-1 font-medium"
                       >
                         <ExternalLinkIcon className="w-3 h-3" /> Fall öffnen
                       </Link>
                     ) : (
-                      <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
+                      <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg px-2 py-1">
                         SA ausstehend
                       </span>
                     )}

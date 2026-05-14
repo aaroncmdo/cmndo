@@ -70,7 +70,7 @@ export default function FallSidebar({
       />
 
       {/* Kunde Kurzinfo */}
-      <div className="bg-white rounded-xl border border-claimondo-border p-3 space-y-1">
+      <div className="bg-white rounded-ios-xl border border-claimondo-border p-3 space-y-1">
         <div className="flex items-center gap-2 text-xs font-semibold text-claimondo-navy">
           <UserIcon className="w-3.5 h-3.5 text-claimondo-ondo/70" /> Kunde
         </div>
@@ -88,7 +88,7 @@ export default function FallSidebar({
       </div>
 
       {/* Fahrzeug Kurzinfo */}
-      <div className="bg-white rounded-xl border border-claimondo-border p-3 space-y-1">
+      <div className="bg-white rounded-ios-xl border border-claimondo-border p-3 space-y-1">
         <p className="text-[9px] font-semibold text-claimondo-ondo uppercase">Fahrzeug</p>
         <p className="text-sm font-medium text-claimondo-navy">
           {[fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || '—'}

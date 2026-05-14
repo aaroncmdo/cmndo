@@ -279,7 +279,7 @@ export function NotificationPreferencesForm({
               type="time"
               value={quietStart}
               onChange={(e) => setQuietStart(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40"
+              className="mt-1 w-full rounded-ios-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40"
             />
           </label>
           <label className="block">
@@ -288,7 +288,7 @@ export function NotificationPreferencesForm({
               type="time"
               value={quietEnd}
               onChange={(e) => setQuietEnd(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40"
+              className="mt-1 w-full rounded-ios-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40"
             />
           </label>
           <label className="block">
@@ -297,7 +297,7 @@ export function NotificationPreferencesForm({
               type="text"
               value={timezone}
               readOnly
-              className="mt-1 w-full rounded-lg border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm text-claimondo-ondo"
+              className="mt-1 w-full rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm text-claimondo-ondo"
             />
           </label>
         </div>
@@ -321,7 +321,7 @@ export function NotificationPreferencesForm({
             return (
               <label
                 key={channel}
-                className="flex items-center gap-3 p-3 rounded-lg border border-claimondo-border bg-claimondo-bg hover:bg-white cursor-pointer"
+                className="flex items-center gap-3 p-3 rounded-ios-lg border border-claimondo-border bg-claimondo-bg hover:bg-white cursor-pointer"
               >
                 <input
                   type="checkbox"
@@ -347,7 +347,7 @@ export function NotificationPreferencesForm({
             {categories.map((cat) => (
               <div
                 key={cat.id}
-                className="rounded-xl border border-claimondo-border overflow-hidden"
+                className="rounded-ios-xl border border-claimondo-border overflow-hidden"
               >
                 <div className="px-4 py-2 bg-claimondo-bg border-b border-claimondo-border">
                   <h4 className="text-xs font-semibold text-claimondo-navy uppercase tracking-wider">
@@ -398,7 +398,7 @@ export function NotificationPreferencesForm({
         <button
           type="submit"
           disabled={isPending || saveState.status === 'saving'}
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
         >
           {isPending || saveState.status === 'saving' ? (
             <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -408,13 +408,13 @@ export function NotificationPreferencesForm({
           Speichern
         </button>
         {saveState.status === 'success' ? (
-          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1">
+          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-ios-lg px-2.5 py-1">
             <CheckCircle2Icon width={12} height={12} />
             Gespeichert
           </span>
         ) : null}
         {saveState.status === 'error' ? (
-          <span className="inline-flex items-center gap-1.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1">
+          <span className="inline-flex items-center gap-1.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg px-2.5 py-1">
             <AlertTriangleIcon width={12} height={12} />
             {saveState.msg ?? 'Fehler'}
           </span>
