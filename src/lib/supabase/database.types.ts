@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       abrechnung_positionen: {
@@ -1847,7 +1872,6 @@ export type Database = {
           abgeschlossen_am: string | null
           anzahl_beteiligte_total: number
           auslandskennzeichen: boolean | null
-          bkat_unfallart: string | null
           brn: string | null
           claim_nummer: string | null
           created_at: string
@@ -1961,10 +1985,8 @@ export type Database = {
           unfallskizze_svg: string | null
           unfallskizze_url: string | null
           updated_at: string
-          ursache: string | null
           vehicle_id: string | null
           verjaehrt_am: string | null
-          verursacher_user_id: string | null
           vorschaden_mit_vs_abgerechnet: string | null
           vorsteuerabzugsberechtigt: boolean
           vs_ablehnungs_grund: string | null
@@ -1976,7 +1998,6 @@ export type Database = {
           abgeschlossen_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
-          bkat_unfallart?: string | null
           brn?: string | null
           claim_nummer?: string | null
           created_at?: string
@@ -2090,10 +2111,8 @@ export type Database = {
           unfallskizze_svg?: string | null
           unfallskizze_url?: string | null
           updated_at?: string
-          ursache?: string | null
           vehicle_id?: string | null
           verjaehrt_am?: string | null
-          verursacher_user_id?: string | null
           vorschaden_mit_vs_abgerechnet?: string | null
           vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
@@ -2105,7 +2124,6 @@ export type Database = {
           abgeschlossen_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
-          bkat_unfallart?: string | null
           brn?: string | null
           claim_nummer?: string | null
           created_at?: string
@@ -2219,10 +2237,8 @@ export type Database = {
           unfallskizze_svg?: string | null
           unfallskizze_url?: string | null
           updated_at?: string
-          ursache?: string | null
           vehicle_id?: string | null
           verjaehrt_am?: string | null
-          verursacher_user_id?: string | null
           vorschaden_mit_vs_abgerechnet?: string | null
           vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
@@ -2285,13 +2301,6 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "claims_verursacher_user_id_fkey"
-            columns: ["verursacher_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -13611,7 +13620,6 @@ export type Database = {
       }
       v_claim_for_gast: {
         Row: {
-          bkat_unfallart: string | null
           created_at: string | null
           fahrerflucht: boolean | null
           gegner_versicherung_id: string | null
@@ -13635,7 +13643,6 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          bkat_unfallart?: string | null
           created_at?: string | null
           fahrerflucht?: boolean | null
           gegner_versicherung_id?: string | null
@@ -13659,7 +13666,6 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          bkat_unfallart?: string | null
           created_at?: string | null
           fahrerflucht?: boolean | null
           gegner_versicherung_id?: string | null
@@ -13697,7 +13703,6 @@ export type Database = {
           abgeschlossen_am: string | null
           anzahl_beteiligte_total: number | null
           auslandskennzeichen: boolean | null
-          bkat_unfallart: string | null
           claim_nummer: string | null
           created_at: string | null
           created_by_user_id: string | null
@@ -13762,11 +13767,9 @@ export type Database = {
           unfallskizze_svg: string | null
           unfallskizze_url: string | null
           updated_at: string | null
-          ursache: string | null
           vehicle_id: string | null
           vehicle_involvements: Json | null
           verjaehrt_am: string | null
-          verursacher_user_id: string | null
           vs_ablehnungs_grund: string | null
           vs_korrespondenz: Json | null
         }
@@ -13825,13 +13828,6 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "claims_verursacher_user_id_fkey"
-            columns: ["verursacher_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -14910,6 +14906,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       betreuungspaket: ["vollservice", "sv-only"],
