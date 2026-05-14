@@ -40,6 +40,7 @@
     "node_modules",
     "**/*.native.tsx",
     "**/*.native.ts",
-    "supabase/functions"
+    "supabase/functions",
+    "services"
   ]
 }

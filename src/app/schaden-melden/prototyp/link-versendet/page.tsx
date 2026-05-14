@@ -22,10 +22,11 @@ function maskEmail(email: string): string {
 export default async function LinkVersendetPage({
   searchParams,
 }: {
-  searchParams: Promise<{ email?: string }>
+  searchParams: Promise<{ email?: string; kanal?: string }>
 }) {
-  const { email } = await searchParams
+  const { email, kanal } = await searchParams
   const maskedEmail = email ? maskEmail(email) : null
+  const istWhatsApp = kanal === 'whatsapp'
 
   return (
     <div className="min-h-screen bg-claimondo-bg py-10">
@@ -38,9 +39,16 @@ export default async function LinkVersendetPage({
             <Mail className="h-7 w-7" aria-hidden />
           </div>
           <h2 className="text-xl font-semibold text-claimondo-navy">
-            Wir haben Ihnen einen Login-Link geschickt
+            {istWhatsApp
+              ? 'Wir haben Ihnen einen Login-Link per WhatsApp geschickt'
+              : 'Wir haben Ihnen einen Login-Link geschickt'}
           </h2>
-          {maskedEmail ? (
+          {istWhatsApp ? (
+            <p className="mt-2 text-sm text-claimondo-ondo">
+              Schauen Sie kurz in Ihren WhatsApp-Chat. Eine Kopie haben wir
+              zusätzlich per E-Mail an Ihre Adresse geschickt.
+            </p>
+          ) : maskedEmail ? (
             <p className="mt-2 text-sm text-claimondo-ondo">
               an <strong className="text-claimondo-navy">{maskedEmail}</strong>
             </p>

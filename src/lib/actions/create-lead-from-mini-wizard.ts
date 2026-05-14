@@ -16,14 +16,14 @@ import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { readPromoCookie, isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
 import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-wizard'
-import { sendMiniWizardMagicLink } from '@/lib/email/google/flows'
+import { dispatchMagicLink } from '@/lib/magic-link/dispatch-magic-link'
 
 type Result =
   | {
       success: true
       leadId: string
       redirectTo: string
-      kanal: 'email' | 'disqualifiziert'
+      kanal: 'whatsapp' | 'email' | 'disqualifiziert'
     }
   | { success: false; error: string }
 
@@ -111,12 +111,21 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
   const flowUrl = `${baseUrl}/flow/${flowLink.token as string}`
 
-  // Email-Versand (WhatsApp via Baileys kommt mit PR 1+2 der Strecke AAR-897)
-  const emailResult = await sendMiniWizardMagicLink(lead.id as string, flowUrl)
-  if (!emailResult.success) {
+  // AAR-899: Kanal-Switch via dispatchMagicLink (WA bevorzugt, Email-Fallback).
+  // Nutzt das existierende lib/whatsapp-Subsystem (availability + baileys-
+  // client) — wenn WA verfuegbar geht der Magic-Link per WhatsApp raus,
+  // sonst per Email. Lokal-Dev ohne BAILEYS_BASE_URL fallt sauber auf Email.
+  const dispatched = await dispatchMagicLink({
+    leadId: lead.id as string,
+    telefon: data.telefon,
+    email: data.email,
+    vorname: data.vorname || null,
+    flowUrl,
+  })
+  if (!dispatched.sent) {
     return {
       success: false,
-      error: `Magic-Link konnte nicht versendet werden: ${emailResult.error}`,
+      error: `Magic-Link konnte nicht versendet werden: ${dispatched.detail ?? 'unbekannter Fehler'}`,
     }
   }
 
@@ -130,14 +139,15 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
     })
     .eq('id', lead.id as string)
 
+  const kanalLabel = dispatched.kanal === 'whatsapp' ? 'WhatsApp' : 'Email'
   await admin
     .from('timeline')
     .insert({
       lead_id: lead.id as string,
       fall_id: null,
       typ: 'system',
-      titel: 'Mini-Wizard: Magic-Link per Email versendet',
-      beschreibung: `An ${data.email} — Schuldfrage: ${data.schuldfrage}, Unfallort: ${data.unfallort}`,
+      titel: `Mini-Wizard: Magic-Link per ${kanalLabel} versendet`,
+      beschreibung: `An ${dispatched.kanal === 'whatsapp' ? data.telefon : data.email} — Schuldfrage: ${data.schuldfrage}, Unfallort: ${data.unfallort}`,
     })
     .then(() => {}, () => {})
 
@@ -146,7 +156,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   return {
     success: true,
     leadId: lead.id as string,
-    redirectTo: `/schaden-melden/prototyp/link-versendet?email=${encodeURIComponent(data.email)}`,
-    kanal: 'email',
+    redirectTo: `/schaden-melden/prototyp/link-versendet?email=${encodeURIComponent(data.email)}&kanal=${dispatched.kanal}`,
+    kanal: dispatched.kanal === 'whatsapp' ? 'whatsapp' : 'email',
   }
 }
