@@ -61,7 +61,7 @@ export default async function AdminDsgvoLoeschauftraegePage() {
     <div className="w-full max-w-5xl px-4 py-6 mx-auto space-y-6">
       <PageHeader title="DSGVO Lösch-Anträge" size="lg" />
 
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+      <div className="rounded-ios-xl border border-amber-200 bg-amber-50 p-4">
         <div className="flex items-start gap-3">
           <ShieldAlertIcon width={18} height={18} className="text-amber-700 mt-0.5 shrink-0" />
           <div className="text-xs leading-relaxed text-amber-900">
@@ -81,7 +81,7 @@ export default async function AdminDsgvoLoeschauftraegePage() {
           Offen ({offene.length})
         </h2>
         {offene.length === 0 ? (
-          <div className="rounded-xl border border-claimondo-border bg-white p-6 text-center text-sm text-claimondo-ondo">
+          <div className="rounded-ios-xl border border-claimondo-border bg-white p-6 text-center text-sm text-claimondo-ondo">
             Keine offenen Anträge.
           </div>
         ) : (
@@ -98,7 +98,7 @@ export default async function AdminDsgvoLoeschauftraegePage() {
           Archiv ({archiv.length})
         </h2>
         {archiv.length === 0 ? (
-          <div className="rounded-xl border border-claimondo-border bg-white p-6 text-center text-sm text-claimondo-ondo">
+          <div className="rounded-ios-xl border border-claimondo-border bg-white p-6 text-center text-sm text-claimondo-ondo">
             Noch keine archivierten Anträge.
           </div>
         ) : (
@@ -117,7 +117,7 @@ function AntragRow({ auftrag, aktiv = false }: { auftrag: AuftragRow; aktiv?: bo
   const meta = STATUS_META[auftrag.status]
   const Icon = meta.icon
   return (
-    <li className="rounded-xl border border-claimondo-border bg-white p-4">
+    <li className="rounded-ios-xl border border-claimondo-border bg-white p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">

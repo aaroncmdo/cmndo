@@ -199,7 +199,7 @@ export default function PolygonEditor({
 
   if (error) {
     return (
-      <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+      <div className="rounded-ios-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700">
         Polygon-Editor konnte nicht geladen werden: {error}
       </div>
     )
@@ -207,7 +207,7 @@ export default function PolygonEditor({
 
   return (
     <div className="space-y-2">
-      <div ref={containerRef} className="w-full h-72 rounded-xl border border-claimondo-border overflow-hidden bg-claimondo-bg" />
+      <div ref={containerRef} className="w-full h-72 rounded-ios-xl border border-claimondo-border overflow-hidden bg-claimondo-bg" />
       <div className="flex items-center justify-between text-[10px] text-claimondo-ondo">
         <span>
           {hasPolygon
@@ -217,13 +217,13 @@ export default function PolygonEditor({
         <div className="flex gap-1">
           {!hasPolygon && (
             <button type="button" onClick={handleDraw}
-              className="flex items-center gap-1 px-2 py-1 rounded-md bg-claimondo-ondo/10 hover:bg-claimondo-ondo/20 text-claimondo-ondo">
+              className="flex items-center gap-1 px-2 py-1 rounded-ios-md bg-claimondo-ondo/10 hover:bg-claimondo-ondo/20 text-claimondo-ondo">
               <PenLineIcon className="w-3 h-3" /> Zeichnen
             </button>
           )}
           {hasPolygon && (
             <button type="button" onClick={handleClear}
-              className="flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 hover:bg-red-100 text-red-600">
+              className="flex items-center gap-1 px-2 py-1 rounded-ios-md bg-red-50 hover:bg-red-100 text-red-600">
               <Trash2Icon className="w-3 h-3" /> Loeschen
             </button>
           )}

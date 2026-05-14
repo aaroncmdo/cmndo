@@ -179,7 +179,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
   }
 
   return (
-    <div className="bg-white border border-claimondo-border rounded-xl p-4 space-y-3">
+    <div className="bg-white border border-claimondo-border rounded-ios-xl p-4 space-y-3">
       {/* AAR-schadentyp-clear: Header-Row mit Clear-Button oben rechts.
           Ersetzt den alten Bottom-„Schadentyp speichern"-Button — Auswahl
           speichert jetzt sofort per Click. Clear nur sichtbar wenn ein Typ
@@ -193,7 +193,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
             type="button"
             onClick={handleClear}
             disabled={pending}
-            className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-claimondo-border text-[10px] font-medium text-claimondo-ondo hover:bg-claimondo-bg hover:text-red-700 hover:border-red-200 disabled:opacity-40"
+            className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-ios-md border border-claimondo-border text-[10px] font-medium text-claimondo-ondo hover:bg-claimondo-bg hover:text-red-700 hover:border-red-200 disabled:opacity-40"
           >
             <XIcon className="w-3 h-3" />
             Clear
@@ -208,7 +208,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
             type="button"
             onClick={() => handleTypClick(o.value)}
             disabled={pending}
-            className={`px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-colors flex flex-col items-start gap-1 disabled:opacity-60 ${
+            className={`px-3 py-2.5 rounded-ios-lg text-xs font-medium text-left transition-colors flex flex-col items-start gap-1 disabled:opacity-60 ${
               typ === o.value ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-navy hover:bg-claimondo-border'
             }`}
           >
@@ -219,7 +219,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
       </div>
 
       {selected && cls && (
-        <div className={`border rounded-lg p-3 space-y-2 ${cls.wrap} ${cls.border}`}>
+        <div className={`border rounded-ios-lg p-3 space-y-2 ${cls.wrap} ${cls.border}`}>
           <div>
             <p className={`text-[10px] uppercase tracking-wider font-semibold ${cls.label} opacity-70`}>Für den MA</p>
             <p className="text-xs mt-0.5">{selected.beschreibung_ma}</p>
@@ -241,13 +241,13 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
           onChange={e => setFreitext(e.target.value)}
           onBlur={handleFreitextBlur}
           placeholder="Beschreibung (Pflicht — Kanzlei braucht den genauen Typ für das AS)..."
-          className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-xs h-20 resize-none"
+          className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-xs h-20 resize-none"
         />
       )}
 
       {/* AAR-83 + AAR-114: Kamera-Check bei Parkplatz ohne Kennzeichen */}
       {isParkplatzOhneKz && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-2">
+        <div className="bg-amber-50 border border-amber-200 rounded-ios-lg p-3 space-y-2">
           <p className="text-xs font-semibold text-amber-800">Kein Kennzeichen — Kamera-Check Pflicht</p>
           <p className="text-xs italic text-amber-800">
             „War auf dem Parkplatz eine Überwachungskamera vorhanden?"
@@ -262,7 +262,7 @@ export default function SchadentypPicker({ leadId, initialTyp, initialFreitext, 
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start justify-between gap-2">
+        <div className="bg-red-50 border border-red-200 rounded-ios-lg p-3 flex items-start justify-between gap-2">
           <div className="flex-1">
             <p className="text-xs font-semibold text-red-900">Speichern fehlgeschlagen</p>
             <p className="text-xs text-red-700 mt-0.5">{error}</p>

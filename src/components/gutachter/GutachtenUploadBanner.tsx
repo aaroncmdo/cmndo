@@ -199,7 +199,7 @@ export default function GutachtenUploadBanner({
             <div className="mt-2 space-y-1.5">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-navy">Beanstandete Dateien</p>
               {abgelehnteDocsInfo.map((d, i) => (
-                <div key={i} className="rounded-md bg-white/70 border border-claimondo-ondo/30 px-2.5 py-1.5">
+                <div key={i} className="rounded-ios-md bg-white/70 border border-claimondo-ondo/30 px-2.5 py-1.5">
                   <p className="text-xs font-medium text-claimondo-navy truncate">{d.filename}</p>
                   {d.kommentar && (
                     <p className="text-[11px] text-claimondo-navy mt-0.5">{d.kommentar}</p>
@@ -223,7 +223,7 @@ export default function GutachtenUploadBanner({
           handleFiles(e.dataTransfer.files)
         }}
         onClick={() => inputRef.current?.click()}
-        className={`rounded-xl border border-dashed cursor-pointer transition-colors px-4 py-6 text-center ${
+        className={`rounded-ios-xl border border-dashed cursor-pointer transition-colors px-4 py-6 text-center ${
           dragOver ? colorDropDragOver : `bg-white ${colorDropBorder} ${colorDropHover}`
         }`}
       >
@@ -302,7 +302,7 @@ export default function GutachtenUploadBanner({
           <button
             onClick={handleAbgeben}
             disabled={submitPending || pending}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-sm font-semibold px-4 py-2 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-sm font-semibold px-4 py-2 transition-colors"
           >
             <SendIcon className="w-4 h-4" />
             {submitPending ? 'Wird abgegeben…' : 'Abgeben'}

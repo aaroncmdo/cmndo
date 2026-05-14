@@ -61,7 +61,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
               const zeit = d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
               const style = TL_COLORS[item.typ] ?? TL_COLORS.task
               const content = (
-                <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-claimondo-bg/50 transition-colors">
+                <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-ios-xl hover:bg-claimondo-bg/50 transition-colors">
                   <span className="text-claimondo-ondo text-sm font-semibold tabular-nums w-12 shrink-0">{zeit}</span>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${style.bg} ${style.text} shrink-0`}>
                     {style.icon}
@@ -72,7 +72,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
                   </div>
                   {item.meetLink && (
                     <a href={item.meetLink} target="_blank" rel="noopener noreferrer"
-                      className="text-[10px] bg-claimondo-navy hover:bg-claimondo-navy text-white px-2.5 py-1 rounded-lg font-medium shrink-0"
+                      className="text-[10px] bg-claimondo-navy hover:bg-claimondo-navy text-white px-2.5 py-1 rounded-ios-lg font-medium shrink-0"
                       onClick={e => e.stopPropagation()}>
                       Meet
                     </a>

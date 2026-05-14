@@ -36,7 +36,7 @@ export function EventDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md hover:bg-claimondo-bg text-claimondo-ondo"
+            className="p-1 rounded-ios-md hover:bg-claimondo-bg text-claimondo-ondo"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4" />

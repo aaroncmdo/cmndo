@@ -34,7 +34,7 @@ export default function AuszahlungCard({ betrag, eingegangenAm, zahlungsweg }: P
   const eingegangen = !!eingegangenAm
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 space-y-2">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-4 space-y-2">
       <div className="flex items-center gap-2">
         <BanknoteIcon className="w-4 h-4 text-emerald-700" />
         <p className="text-sm font-semibold text-claimondo-navy">Ihre Auszahlung</p>

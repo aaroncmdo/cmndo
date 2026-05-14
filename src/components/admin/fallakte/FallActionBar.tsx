@@ -82,7 +82,7 @@ export function FallActionBar({
         <button
           type="button"
           onClick={() => setOverrideOpen(true)}
-          className="inline-flex items-center gap-1.5 text-xs font-medium rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 hover:bg-amber-100 text-amber-900"
+          className="inline-flex items-center gap-1.5 text-xs font-medium rounded-ios-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 hover:bg-amber-100 text-amber-900"
           title="Status manuell überschreiben (Admin-only, umgeht State-Machine)"
         >
           <AlertTriangleIcon className="w-3.5 h-3.5" />
@@ -92,7 +92,7 @@ export function FallActionBar({
       <button
         type="button"
         onClick={() => setPaketOpen(true)}
-        className="inline-flex items-center gap-1.5 text-xs font-medium rounded-md border border-claimondo-border bg-white px-2.5 py-1.5 hover:bg-claimondo-bg text-claimondo-navy"
+        className="inline-flex items-center gap-1.5 text-xs font-medium rounded-ios-md border border-claimondo-border bg-white px-2.5 py-1.5 hover:bg-claimondo-bg text-claimondo-navy"
       >
         <InboxIcon className="w-3.5 h-3.5" />
         Kanzlei-Paket einlesen
@@ -102,7 +102,7 @@ export function FallActionBar({
         <button
           type="button"
           onClick={() => setPhaseOverrideOpen(true)}
-          className="inline-flex items-center gap-1.5 text-xs font-medium rounded-md bg-claimondo-navy text-white px-2.5 py-1.5 hover:bg-claimondo-ondo"
+          className="inline-flex items-center gap-1.5 text-xs font-medium rounded-ios-md bg-claimondo-navy text-white px-2.5 py-1.5 hover:bg-claimondo-ondo"
           title="Subphase manuell überschreiben (Admin-only, umgeht Subphase-Resolver)"
         >
           Phase vorrücken
@@ -113,7 +113,7 @@ export function FallActionBar({
   )
 
   const triggerList = triggerOpen && (
-    <div className="bg-claimondo-bg border border-claimondo-border rounded-md px-3 py-2">
+    <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-md px-3 py-2">
       <PhaseTriggerList fields={result.trigger_fields} />
     </div>
   )

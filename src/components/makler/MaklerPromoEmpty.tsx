@@ -18,7 +18,7 @@ export function MaklerPromoEmpty({ firma }: { firma: string }) {
           Bitte wenden Sie sich an Ihren Claimondo-Kundenbetreuer, damit ein
           Code erzeugt wird.
         </p>
-        <div className="inline-flex items-start gap-2 text-xs text-claimondo-shield bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-left">
+        <div className="inline-flex items-start gap-2 text-xs text-claimondo-shield bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-left">
           <AlertCircleIcon
             width={14}
             height={14}

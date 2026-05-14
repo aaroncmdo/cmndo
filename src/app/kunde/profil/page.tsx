@@ -25,7 +25,7 @@ export default async function ProfilPage() {
   return (
     <div className="w-full px-4 py-6 max-w-xl mx-auto space-y-5">
       <PageHeader title="Mein Profil" size="lg" />
-      <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-3">
+      <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-5 space-y-3">
         <div><span className="text-sm text-claimondo-ondo">Name</span><p className="text-claimondo-navy font-medium">{name || '—'}</p></div>
         <div><span className="text-sm text-claimondo-ondo">E-Mail (Login)</span><p className="text-claimondo-navy">{profile?.email ?? user.email ?? '—'}</p></div>
       </div>
@@ -45,10 +45,10 @@ export default async function ProfilPage() {
       {/* AAR-500 N5: Einstieg in Einstellungen (Benachrichtigungs-Präferenzen) */}
       <Link
         href="/kunde/einstellungen"
-        className="flex items-center justify-between gap-3 bg-white rounded-xl border border-claimondo-border shadow-sm p-4 hover:border-claimondo-ondo"
+        className="flex items-center justify-between gap-3 bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-4 hover:border-claimondo-ondo"
       >
         <span className="flex items-center gap-3">
-          <span className="shrink-0 w-9 h-9 rounded-xl bg-claimondo-bg text-claimondo-ondo border border-claimondo-border flex items-center justify-center">
+          <span className="shrink-0 w-9 h-9 rounded-ios-xl bg-claimondo-bg text-claimondo-ondo border border-claimondo-border flex items-center justify-center">
             <BellIcon width={16} height={16} />
           </span>
           <span>

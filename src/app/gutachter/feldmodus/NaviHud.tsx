@@ -193,7 +193,7 @@ function LaneIndicator({ lanes }: { lanes: Array<{ active: boolean; directions: 
         return (
           <div
             key={i}
-            className={`w-7 h-9 rounded-md flex items-center justify-center transition-all ${
+            className={`w-7 h-9 rounded-ios-md flex items-center justify-center transition-all ${
               lane.active ? 'bg-white text-claimondo-navy scale-105 shadow-md' : 'bg-white/20 text-white/40'
             }`}
           >
@@ -243,7 +243,7 @@ function NoticeContent({ notice, theme }: { notice: NaviNotice; theme: Theme }) 
     case 'blitzer':
       return (
         <div className="flex items-center gap-4 px-5 py-4">
-          <div className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${theme.iconBg}`}>
+          <div className={`shrink-0 w-12 h-12 rounded-ios-xl flex items-center justify-center ${theme.iconBg}`}>
             <ZapIcon className={`w-6 h-6 ${theme.iconColor}`} />
           </div>
           <div className="flex-1 min-w-0">
@@ -268,7 +268,7 @@ function NoticeContent({ notice, theme }: { notice: NaviNotice; theme: Theme }) 
     case 'hazard':
       return (
         <div className="flex items-center gap-4 px-5 py-4">
-          <div className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${theme.iconBg}`}>
+          <div className={`shrink-0 w-12 h-12 rounded-ios-xl flex items-center justify-center ${theme.iconBg}`}>
             <ConstructionIcon className={`w-6 h-6 ${theme.iconColor}`} />
           </div>
           <div className="flex-1 min-w-0">
@@ -305,7 +305,7 @@ function NoticeContent({ notice, theme }: { notice: NaviNotice; theme: Theme }) 
     case 'maneuver':
       return (
         <div className="flex items-center gap-4 px-5 py-4">
-          <div className={`shrink-0 w-14 h-14 rounded-xl flex items-center justify-center ${theme.iconBg}`}>
+          <div className={`shrink-0 w-14 h-14 rounded-ios-xl flex items-center justify-center ${theme.iconBg}`}>
             <ManeuverIcon
               maneuverType={notice.maneuverType}
               modifier={notice.modifier}
@@ -374,7 +374,7 @@ function RerouteCard({
   return (
     <div>
       <div className="flex items-center gap-4 px-5 py-4">
-        <div className={`shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${theme.iconBg}`}>
+        <div className={`shrink-0 w-12 h-12 rounded-ios-xl flex items-center justify-center ${theme.iconBg}`}>
           {isHazard ? (
             <AlertTriangleIcon className={`w-6 h-6 ${theme.iconColor}`} />
           ) : (
@@ -400,14 +400,14 @@ function RerouteCard({
         <button
           type="button"
           onClick={handleAccept}
-          className="flex-1 h-11 rounded-xl bg-white text-claimondo-navy text-sm font-semibold hover:bg-white/90 transition-colors"
+          className="flex-1 h-11 rounded-ios-xl bg-white text-claimondo-navy text-sm font-semibold hover:bg-white/90 transition-colors"
         >
           Wechseln
         </button>
         <button
           type="button"
           onClick={handleDismiss}
-          className="flex-1 h-11 rounded-xl bg-white/15 text-white text-sm font-medium hover:bg-white/25 transition-colors"
+          className="flex-1 h-11 rounded-ios-xl bg-white/15 text-white text-sm font-medium hover:bg-white/25 transition-colors"
         >
           Bleiben
         </button>

@@ -65,7 +65,7 @@ export default async function EinstellungenPage() {
               className="group bg-white border border-claimondo-border rounded-2xl p-5 hover:border-claimondo-ondo hover:shadow-sm transition-all"
             >
               <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-xl ${s.iconBg} flex items-center justify-center shrink-0`}>
+                <div className={`w-10 h-10 rounded-ios-xl ${s.iconBg} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-5 h-5 ${s.iconColor}`} />
                 </div>
                 <div className="flex-1 min-w-0">

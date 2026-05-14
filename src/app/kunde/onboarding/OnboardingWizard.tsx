@@ -451,7 +451,7 @@ export default function OnboardingWizard({
                         </p>
 
                         {welcomeOcrResult && (
-                          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                          <div className="mt-3 rounded-ios-xl border border-emerald-200 bg-emerald-50 p-3">
                             <p className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
                               <CheckIcon className="h-3.5 w-3.5" />
                               {welcomeOcrResult.fieldsFound} Felder erkannt
@@ -489,7 +489,7 @@ export default function OnboardingWizard({
                           <p className="mt-2 text-xs text-amber-700">{welcomeOcrError}</p>
                         )}
 
-                        <label className="mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-xs font-semibold cursor-pointer active:scale-[0.98] transition-all">
+                        <label className="mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-ios-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-xs font-semibold cursor-pointer active:scale-[0.98] transition-all">
                           {welcomeOcrLoading ? (
                             <>
                               <RefreshCwIcon className="h-3.5 w-3.5 animate-spin" />
@@ -605,7 +605,7 @@ export default function OnboardingWizard({
                 )}
 
                 {/* Korrekturhinweis */}
-                <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
+                <div className="mt-5 rounded-ios-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
                   Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer
                   zurück — wir tragen Korrekturen für Sie ein.
                 </div>
@@ -683,7 +683,7 @@ export default function OnboardingWizard({
                 <div className="mt-5">
                   {fall?.id ? (
                     pflichtSlots.length === 0 ? (
-                      <p className="text-sm text-claimondo-ondo/70 text-center py-4 rounded-xl bg-claimondo-border/30">
+                      <p className="text-sm text-claimondo-ondo/70 text-center py-4 rounded-ios-xl bg-claimondo-border/30">
                         Keine Dokumente erforderlich — Sie sind fertig.
                       </p>
                     ) : (
@@ -695,7 +695,7 @@ export default function OnboardingWizard({
                       />
                     )
                   ) : (
-                    <p className="text-sm text-amber-700 text-center py-4 rounded-xl bg-amber-50 border border-amber-200">
+                    <p className="text-sm text-amber-700 text-center py-4 rounded-ios-xl bg-amber-50 border border-amber-200">
                       Fall wird vorbereitet — bitte einen Moment.
                     </p>
                   )}
@@ -722,7 +722,7 @@ export default function OnboardingWizard({
                     type="button"
                     onClick={handleAlleSpaeterNachreichen}
                     disabled={spaeterAlleLoading}
-                    className="mt-2 w-full min-h-12 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo hover:text-claimondo-navy text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
+                    className="mt-2 w-full min-h-12 py-3 rounded-ios-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo hover:text-claimondo-navy text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
                   >
                     {spaeterAlleLoading ? 'Wird gespeichert…' : 'Alle später nachreichen'}
                   </button>
@@ -879,7 +879,7 @@ function DokumentInfoOverlay({
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 w-full py-3 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white font-semibold text-sm active:scale-[0.98] transition-all"
+          className="mt-6 w-full py-3 rounded-ios-xl bg-claimondo-navy hover:bg-claimondo-shield text-white font-semibold text-sm active:scale-[0.98] transition-all"
         >
           Verstanden
         </button>

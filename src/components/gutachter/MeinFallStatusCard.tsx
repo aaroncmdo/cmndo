@@ -81,7 +81,7 @@ export default function MeinFallStatusCard(props: Props) {
 
       {/* Gutachten-Übersicht: geforderter Betrag + Link aufs PDF */}
       {(props.geforderterBetrag != null || props.gutachtenUrl) && (
-        <div className="rounded-xl bg-claimondo-bg border border-claimondo-border p-3 space-y-2">
+        <div className="rounded-ios-xl bg-claimondo-bg border border-claimondo-border p-3 space-y-2">
           {props.geforderterBetrag != null && (
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs text-claimondo-ondo flex items-center gap-1.5">
@@ -115,7 +115,7 @@ export default function MeinFallStatusCard(props: Props) {
               href={deepLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 w-full min-h-12 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-sm font-semibold transition-colors"
+              className="inline-flex items-center justify-center gap-2 w-full min-h-12 rounded-ios-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-sm font-semibold transition-colors"
             >
               <ExternalLinkIcon className="w-4 h-4" />
               Vorgang im LexDrive-Portal öffnen
@@ -124,7 +124,7 @@ export default function MeinFallStatusCard(props: Props) {
         }
         return (
           <div className="space-y-2">
-            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-ios-lg p-3">
               Aktenzeichen folgt sobald die Kanzlei das Mandat angenommen hat.
               Du erhältst dann hier den Direkt-Link zum Vorgang.
             </p>
@@ -143,7 +143,7 @@ export default function MeinFallStatusCard(props: Props) {
 
       {/* Auszahlungs-Detail */}
       {props.phase === 'auszahlung' && props.svHonorarBetrag != null && (
-        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 flex items-center justify-between">
+        <div className="rounded-ios-xl bg-emerald-50 border border-emerald-200 p-3 flex items-center justify-between">
           <span className="text-xs text-emerald-700 font-medium flex items-center gap-1.5">
             <EuroIcon className="w-3.5 h-3.5" /> Honorar
           </span>

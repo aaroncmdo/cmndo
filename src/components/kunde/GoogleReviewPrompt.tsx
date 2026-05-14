@@ -39,7 +39,7 @@ export default function GoogleReviewPrompt({ fallId, svName, googlePlaceId }: Pr
   return (
     <div className="rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3.5">
       <div className="flex items-start gap-3">
-        <div className="shrink-0 w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center mt-0.5">
+        <div className="shrink-0 w-8 h-8 rounded-ios-lg bg-amber-100 flex items-center justify-center mt-0.5">
           <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400" />
         </div>
         <div className="flex-1 min-w-0">
@@ -52,7 +52,7 @@ export default function GoogleReviewPrompt({ fallId, svName, googlePlaceId }: Pr
           <div className="flex items-center gap-2 mt-2.5">
             <button
               onClick={handleBewerten}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-ios-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
             >
               <ExternalLinkIcon className="w-3 h-3" />
               Jetzt bewerten

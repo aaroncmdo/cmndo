@@ -72,7 +72,7 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
             actions={
               <button
                 onClick={() => setCreateOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium rounded-xl transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium rounded-ios-xl transition-colors"
               >
                 <PlusIcon className="w-4 h-4" />
                 Neue Vorlage
@@ -82,7 +82,7 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
         </div>
 
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+          <div className="mb-4 px-4 py-3 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
             {error}
           </div>
         )}
@@ -183,7 +183,7 @@ function VorlageCard({
             value={inhalt}
             onChange={e => setInhalt(e.target.value)}
             rows={14}
-            className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+            className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
           />
         </div>
         <label className="flex items-center gap-2 text-sm text-claimondo-navy mb-3 cursor-pointer">
@@ -201,13 +201,13 @@ function VorlageCard({
             onClick={handleSave}
             isLoading={saving}
             loadingText="Speichern..."
-            className="px-4 py-2 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium disabled:opacity-40"
+            className="px-4 py-2 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium disabled:opacity-40"
           >
             Speichern
           </LoadingButton>
           <button
             onClick={onCancelEdit}
-            className="px-4 py-2 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
+            className="px-4 py-2 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
           >
             Abbrechen
           </button>
@@ -245,7 +245,7 @@ function VorlageCard({
               <button
                 onClick={onEdit}
                 disabled={isPending}
-                className="px-3 py-1.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-xs hover:bg-claimondo-bg"
+                className="px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-ondo text-xs hover:bg-claimondo-bg"
               >
                 Editieren
               </button>
@@ -253,7 +253,7 @@ function VorlageCard({
                 onClick={onAktivieren}
                 isLoading={isPending}
                 loadingText="..."
-                className="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-medium disabled:opacity-40"
+                className="px-3 py-1.5 rounded-ios-lg bg-green-600 hover:bg-green-700 text-white text-xs font-medium disabled:opacity-40"
               >
                 Aktivieren
               </LoadingButton>
@@ -264,7 +264,7 @@ function VorlageCard({
               onClick={onDeaktivieren}
               isLoading={isPending}
               loadingText="..."
-              className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs hover:bg-red-50 inline-flex items-center gap-1 disabled:opacity-40"
+              className="px-3 py-1.5 rounded-ios-lg border border-red-200 text-red-600 text-xs hover:bg-red-50 inline-flex items-center gap-1 disabled:opacity-40"
             >
               <XCircleIcon className="w-3 h-3" />
               Deaktivieren
@@ -326,7 +326,7 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
                 onChange={e => setInhalt(e.target.value)}
                 rows={16}
                 placeholder="<p>Vertragstext...</p>"
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
               />
             </div>
             <label className="flex items-center gap-2 text-sm text-claimondo-navy cursor-pointer">
@@ -341,14 +341,14 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
             {err && <p className="text-red-600 text-sm">{err}</p>}
           </div>
           <div className="px-5 py-4 border-t border-claimondo-border flex gap-2 justify-end">
-            <button onClick={onClose} className="px-4 py-2 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg">
+            <button onClick={onClose} className="px-4 py-2 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg">
               Abbrechen
             </button>
             <LoadingButton
               onClick={handleCreate}
               isLoading={saving}
               loadingText="Wird erstellt..."
-              className="px-4 py-2 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium disabled:opacity-40"
+              className="px-4 py-2 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium disabled:opacity-40"
             >
               Erstellen
             </LoadingButton>

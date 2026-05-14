@@ -62,14 +62,14 @@ export default function KundeAbschlussCard({
             href={gutachtenUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 bg-white border border-claimondo-border hover:border-claimondo-ondo rounded-xl px-3 py-2.5 text-sm font-medium text-claimondo-navy transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-white border border-claimondo-border hover:border-claimondo-ondo rounded-ios-xl px-3 py-2.5 text-sm font-medium text-claimondo-navy transition-colors"
           >
             <FileDownIcon className="w-4 h-4" />
             Gutachten (PDF)
           </a>
         ) : (
           <span
-            className="inline-flex items-center justify-center gap-2 bg-claimondo-border/30 border border-claimondo-border rounded-xl px-3 py-2.5 text-sm font-medium text-claimondo-ondo/60 cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 bg-claimondo-border/30 border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm font-medium text-claimondo-ondo/60 cursor-not-allowed"
             title="Gutachten-PDF noch nicht freigegeben"
           >
             <FileDownIcon className="w-4 h-4" />
@@ -79,7 +79,7 @@ export default function KundeAbschlussCard({
 
         <Link
           href={`/kunde/faelle/${fallId}#chat?reklamation=1`}
-          className="inline-flex items-center justify-center gap-2 bg-white border border-claimondo-border hover:border-amber-400 rounded-xl px-3 py-2.5 text-sm font-medium text-claimondo-navy transition-colors"
+          className="inline-flex items-center justify-center gap-2 bg-white border border-claimondo-border hover:border-amber-400 rounded-ios-xl px-3 py-2.5 text-sm font-medium text-claimondo-navy transition-colors"
         >
           <AlertCircleIcon className="w-4 h-4 text-amber-600" />
           Reklamation öffnen
@@ -90,7 +90,7 @@ export default function KundeAbschlussCard({
             href={googleReviewUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white rounded-ios-xl px-3 py-2.5 text-sm font-medium transition-colors"
           >
             <StarIcon className="w-4 h-4" />
             Bewerten
@@ -98,7 +98,7 @@ export default function KundeAbschlussCard({
         ) : (
           <Link
             href={`/kunde/faelle/${fallId}#bewerten`}
-            className="inline-flex items-center justify-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white rounded-ios-xl px-3 py-2.5 text-sm font-medium transition-colors"
           >
             <StarIcon className="w-4 h-4" />
             Bewerten

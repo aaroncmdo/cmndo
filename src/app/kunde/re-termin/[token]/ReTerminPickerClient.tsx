@@ -83,12 +83,12 @@ export default function ReTerminPickerClient({ token, vorname, kennzeichen, scha
           {(kennzeichen || schadensOrt) && (
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
               {kennzeichen && (
-                <span className="bg-white border border-claimondo-border rounded-md px-2 py-1 text-claimondo-ondo">
+                <span className="bg-white border border-claimondo-border rounded-ios-md px-2 py-1 text-claimondo-ondo">
                   Kennzeichen: <span className="font-medium text-claimondo-navy">{kennzeichen}</span>
                 </span>
               )}
               {schadensOrt && (
-                <span className="bg-white border border-claimondo-border rounded-md px-2 py-1 text-claimondo-ondo">
+                <span className="bg-white border border-claimondo-border rounded-ios-md px-2 py-1 text-claimondo-ondo">
                   Ort: <span className="font-medium text-claimondo-navy">{schadensOrt}</span>
                 </span>
               )}
@@ -98,12 +98,12 @@ export default function ReTerminPickerClient({ token, vorname, kennzeichen, scha
 
         <section className="space-y-3 mb-24">
           {tageGruppen.map((tag) => (
-            <div key={tag.tagLabel} className="bg-white rounded-xl border border-claimondo-border p-3">
+            <div key={tag.tagLabel} className="bg-white rounded-ios-xl border border-claimondo-border p-3">
               <h2 className="text-sm font-semibold text-claimondo-navy mb-2">{tag.tagLabel}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {tag.slots.map((s) => {
                   const isSelected = selectedIso === s.startIso
-                  const base = 'rounded-lg px-3 py-2 text-sm font-medium border transition-colors'
+                  const base = 'rounded-ios-lg px-3 py-2 text-sm font-medium border transition-colors'
                   const cls = !s.available
                     ? `${base} bg-claimondo-bg text-claimondo-ondo/40 border-claimondo-border line-through cursor-not-allowed`
                     : isSelected
@@ -137,7 +137,7 @@ export default function ReTerminPickerClient({ token, vorname, kennzeichen, scha
               type="button"
               disabled={!selectedIso || isPending}
               onClick={handleSubmit}
-              className="w-full py-3 rounded-lg bg-claimondo-navy text-white text-sm font-semibold disabled:opacity-40"
+              className="w-full py-3 rounded-ios-lg bg-claimondo-navy text-white text-sm font-semibold disabled:opacity-40"
             >
               {isPending ? 'Sende Vorschlag…' : selectedIso ? 'Termin vorschlagen' : 'Slot wählen'}
             </button>

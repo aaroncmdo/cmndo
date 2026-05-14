@@ -78,11 +78,11 @@ export default function PhoneVerificationModal({
               <input
                 type="tel" value={telefon} onChange={e => setTelefon(e.target.value)}
                 placeholder="+49 163 1234567"
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
               />
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button onClick={handleSendCode} disabled={pending}
-                className="w-full py-2.5 rounded-xl bg-claimondo-shield text-white text-sm font-semibold disabled:opacity-50">
+                className="w-full py-2.5 rounded-ios-xl bg-claimondo-shield text-white text-sm font-semibold disabled:opacity-50">
                 {pending ? 'Wird gesendet...' : 'Code senden'}
               </button>
             </div>
@@ -93,11 +93,11 @@ export default function PhoneVerificationModal({
                 type="text" inputMode="numeric" maxLength={6} value={code}
                 onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000" autoFocus
-                className="w-full text-center text-xl font-mono tracking-[0.4em] bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+                className="w-full text-center text-xl font-mono tracking-[0.4em] bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
               />
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button onClick={handleVerify} disabled={pending || code.length !== 6}
-                className="w-full py-2.5 rounded-xl bg-claimondo-shield text-white text-sm font-semibold disabled:opacity-50">
+                className="w-full py-2.5 rounded-ios-xl bg-claimondo-shield text-white text-sm font-semibold disabled:opacity-50">
                 {pending ? 'Wird geprüft...' : 'Verifizieren'}
               </button>
               <button onClick={() => { setStep('phone'); setCode(''); setError(null) }}

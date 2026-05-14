@@ -117,7 +117,7 @@ export default async function DashboardStats() {
             return (
               <div
                 key={i}
-                className="flex-1 bg-emerald-500/30 hover:bg-emerald-500/60 transition-colors rounded-sm"
+                className="flex-1 bg-emerald-500/30 hover:bg-emerald-500/60 transition-colors rounded-ios-sm"
                 style={{ height: `${h}%` }}
                 title={fmtEur(v)}
               />

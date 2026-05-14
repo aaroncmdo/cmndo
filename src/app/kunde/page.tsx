@@ -226,7 +226,7 @@ export default async function KundeStartseite() {
     return (
       <div className="w-full px-4 md:px-8 py-6">
         <div
-          className="rounded-xl border p-8 text-center shadow-sm"
+          className="rounded-ios-xl border p-8 text-center shadow-sm"
           style={{
             background: 'var(--brand-surface, #ffffff)',
             borderColor: 'var(--brand-border, #e5e7eb)',

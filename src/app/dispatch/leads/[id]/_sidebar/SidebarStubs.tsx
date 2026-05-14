@@ -87,7 +87,7 @@ export function DisqualifizierenButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl border border-red-200 bg-white text-red-600 text-xs font-medium hover:bg-red-50 transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2 rounded-ios-xl border border-red-200 bg-white text-red-600 text-xs font-medium hover:bg-red-50 transition-colors"
       >
         <AlertCircleIcon className="w-4 h-4" />
         Disqualifizieren
@@ -125,7 +125,7 @@ export function DisqualifizierenButton() {
                 value={freitext}
                 onChange={(e) => setFreitext(e.target.value)}
                 placeholder="Bitte Grund beschreiben ..."
-                className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm resize-none h-20"
+                className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-sm resize-none h-20"
               />
             )}
             {error && <p className="text-xs text-red-600">{error}</p>}
@@ -133,7 +133,7 @@ export function DisqualifizierenButton() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-sm text-claimondo-ondo hover:bg-claimondo-bg"
+                className="flex-1 px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm text-claimondo-ondo hover:bg-claimondo-bg"
               >
                 Abbrechen
               </button>
@@ -141,7 +141,7 @@ export function DisqualifizierenButton() {
                 type="button"
                 disabled={pending}
                 onClick={submit}
-                className="flex-1 px-3 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                className="flex-1 px-3 py-2 rounded-ios-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 disabled:opacity-50"
               >
                 {pending ? 'Speichern ...' : 'Disqualifizieren'}
               </button>
@@ -310,7 +310,7 @@ export function GespraechshilfePanel() {
   }
 
   return (
-    <details className="bg-white rounded-xl border border-claimondo-border p-3 group" open>
+    <details className="bg-white rounded-ios-xl border border-claimondo-border p-3 group" open>
       <summary className="text-xs font-semibold text-claimondo-navy flex items-center gap-2 cursor-pointer list-none">
         <BookOpenIcon className="w-4 h-4 text-claimondo-ondo" />
         <span>Gesprächshilfe — {hilfe.titel}</span>
@@ -411,7 +411,7 @@ export function EinwandKarten() {
     (e) => e.phasen.length === 0 || e.phasen.includes(currentPhase),
   )
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-3 space-y-1.5">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border p-3 space-y-1.5">
       <div className="flex items-center gap-2 text-xs font-semibold text-claimondo-navy mb-1">
         <MessageSquareWarningIcon className="w-4 h-4 text-amber-500" />
         <span>Einwand-Karten</span>
@@ -421,7 +421,7 @@ export function EinwandKarten() {
       </div>
       <div className="space-y-1">
         {relevante.map((e, i) => (
-          <details key={i} className="group rounded-lg border border-claimondo-border p-2 hover:border-amber-200">
+          <details key={i} className="group rounded-ios-lg border border-claimondo-border p-2 hover:border-amber-200">
             <summary className="text-[11px] font-medium text-claimondo-navy cursor-pointer list-none flex items-start gap-1">
               <ChevronDownIcon className="w-3 h-3 mt-0.5 text-claimondo-ondo/70 group-open:rotate-180 transition-transform shrink-0" />
               <span className="flex-1">{e.einwand}</span>

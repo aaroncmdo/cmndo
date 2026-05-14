@@ -20,8 +20,8 @@ export default function StopListItem({ stop, variant }: StopListItemProps) {
     <div
       className={
         erledigt
-          ? 'rounded-lg bg-white/5 p-3 text-xs text-claimondo-ondo/70 flex items-start gap-2'
-          : 'rounded-lg bg-white/10 p-3 text-xs text-white/80 flex items-start gap-2'
+          ? 'rounded-ios-lg bg-white/5 p-3 text-xs text-claimondo-ondo/70 flex items-start gap-2'
+          : 'rounded-ios-lg bg-white/10 p-3 text-xs text-white/80 flex items-start gap-2'
       }
     >
       <div className="flex flex-col items-center pt-0.5">

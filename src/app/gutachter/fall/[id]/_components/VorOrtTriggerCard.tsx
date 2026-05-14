@@ -29,7 +29,7 @@ export function VorOrtTriggerCard({ fallId, kundeName, kennzeichen, adresse, com
       <div className={`flex gap-2 ${compact ? 'h-full' : ''}`}>
         <button
           onClick={() => setShowPanel(true)}
-          className={`flex-1 bg-claimondo-navy hover:bg-claimondo-ondo text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
+          className={`flex-1 bg-claimondo-navy hover:bg-claimondo-ondo text-white font-medium rounded-ios-lg transition-colors flex items-center justify-center gap-2 ${
             compact ? 'text-xs px-3 h-full' : 'text-sm py-2.5'
           }`}
         >
@@ -41,7 +41,7 @@ export function VorOrtTriggerCard({ fallId, kundeName, kennzeichen, adresse, com
             href={mapsLink}
             target="_blank"
             rel="noopener noreferrer"
-            className={`bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
+            className={`bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-ios-lg transition-colors flex items-center justify-center gap-2 ${
               compact ? 'text-xs px-3 h-full' : 'text-sm px-4 py-2.5'
             }`}
           >

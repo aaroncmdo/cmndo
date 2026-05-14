@@ -58,7 +58,7 @@ export default function WelcomeMailPreviewModal({ open, input, onConfirm, onCanc
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-claimondo-border flex-shrink-0">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-claimondo-ondo/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-ios-xl bg-claimondo-ondo/10 flex items-center justify-center flex-shrink-0">
               <MailIcon className="w-5 h-5 text-claimondo-ondo" />
             </div>
             <div>
@@ -83,7 +83,7 @@ export default function WelcomeMailPreviewModal({ open, input, onConfirm, onCanc
           )}
           {error && (
             <div className="p-4">
-              <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+              <div className="px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
                 {error}
               </div>
             </div>
@@ -107,7 +107,7 @@ export default function WelcomeMailPreviewModal({ open, input, onConfirm, onCanc
             type="button"
             onClick={onCancel}
             disabled={saving}
-            className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
+            className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
           >
             Abbrechen
           </button>
@@ -117,7 +117,7 @@ export default function WelcomeMailPreviewModal({ open, input, onConfirm, onCanc
             isLoading={!!saving}
             loadingText="Wird angelegt…"
             disabled={loading || !!error}
-            className="px-5 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold disabled:opacity-40"
+            className="px-5 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold disabled:opacity-40"
           >
             Bestätigen + SV anlegen
           </LoadingButton>

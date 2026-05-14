@@ -73,7 +73,7 @@ export default function ExitSkript({ grund }: { grund: DisqualifikationsGrund })
   }
 
   return (
-    <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+    <div className="bg-red-50 border border-red-200 rounded-ios-xl p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <XCircleIcon className="w-5 h-5 text-red-600 shrink-0" />

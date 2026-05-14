@@ -162,7 +162,7 @@ export function MaklerAkteDetail({
           {kunde?.telefon ? (
             <a
               href={`tel:${kunde.telefon}`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white text-claimondo-navy text-sm font-semibold hover:bg-claimondo-light-blue/20"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-ios-lg bg-white text-claimondo-navy text-sm font-semibold hover:bg-claimondo-light-blue/20"
             >
               <PhoneIcon width={16} height={16} />
               Kunde anrufen
@@ -283,7 +283,7 @@ function QuickStat({
   valueClass?: string
 }) {
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-4">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border p-4">
       <div className="flex items-center justify-between mb-2">
         <span className="text-[11px] text-claimondo-ondo">{label}</span>
         <span className="text-claimondo-ondo">{icon}</span>

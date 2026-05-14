@@ -120,7 +120,7 @@ export default function AuftragCard(props: AuftragCardProps) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             {props.fall.kennzeichen && (
-              <span className="inline-flex items-center rounded-md border-2 border-claimondo-navy bg-white px-1.5 py-0.5 font-mono text-xs tracking-wide text-claimondo-navy">
+              <span className="inline-flex items-center rounded-ios-md border-2 border-claimondo-navy bg-white px-1.5 py-0.5 font-mono text-xs tracking-wide text-claimondo-navy">
                 {props.fall.kennzeichen}
               </span>
             )}
@@ -144,7 +144,7 @@ export default function AuftragCard(props: AuftragCardProps) {
 
       {/* CMM-32: Fahrzeug-Render-Vorschau */}
       {props.fall.fahrzeug_hersteller && (
-        <div className="relative z-10 flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/10 py-2 pointer-events-none">
+        <div className="relative z-10 flex items-center justify-center rounded-ios-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/10 py-2 pointer-events-none">
           <FahrzeugRenderImage
             hersteller={props.fall.fahrzeug_hersteller}
             modell={props.fall.fahrzeug_modell ?? null}
@@ -157,7 +157,7 @@ export default function AuftragCard(props: AuftragCardProps) {
 
       {/* CMM-24: Mitteilungs-Slot — gelber Badge bei offenen Doku-Anforderungen */}
       {(props.offeneDokumente ?? 0) > 0 && (
-        <div className="relative z-10 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium pointer-events-none">
+        <div className="relative z-10 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-ios-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium pointer-events-none">
           <AlertCircleIcon className="w-3.5 h-3.5 text-amber-600" />
           <span>
             {props.offeneDokumente}{' '}

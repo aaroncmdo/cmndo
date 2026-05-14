@@ -283,7 +283,7 @@ export default function MaklerPartnerWerdenPage() {
                 'Einverständnis des Kunden zur Datenweitergabe (DSGVO-konform)',
               ].map((p) => (
                 <li key={p} className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10">
+                  <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-ios-xl bg-claimondo-ondo/10">
                     <CheckCircle2 className="h-4 w-4 text-claimondo-ondo" />
                   </div>
                   <span className="text-sm leading-relaxed text-claimondo-shield">{p}</span>

@@ -80,7 +80,7 @@ export default function RerouteToast({ proposed, onAccept, onDismiss }: RerouteT
           <button
             type="button"
             onClick={onAccept}
-            className="flex-1 h-10 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
+            className="flex-1 h-10 rounded-ios-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
             style={{ backgroundColor: accentColor }}
           >
             Übernehmen
@@ -88,7 +88,7 @@ export default function RerouteToast({ proposed, onAccept, onDismiss }: RerouteT
           <button
             type="button"
             onClick={onDismiss}
-            className="flex-1 h-10 rounded-xl border border-claimondo-border text-claimondo-navy text-sm font-medium transition-colors hover:bg-claimondo-card"
+            className="flex-1 h-10 rounded-ios-xl border border-claimondo-border text-claimondo-navy text-sm font-medium transition-colors hover:bg-claimondo-card"
           >
             Behalten
           </button>

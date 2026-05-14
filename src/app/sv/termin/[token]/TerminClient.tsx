@@ -234,7 +234,7 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
       <div className="max-w-md w-full">
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-claimondo-navy flex items-center justify-center">
+            <div className="w-8 h-8 rounded-ios-lg bg-claimondo-navy flex items-center justify-center">
               <span className="text-white font-bold text-sm">C</span>
             </div>
             <span className="text-lg font-semibold text-claimondo-navy" style={{ fontFamily: 'Montserrat, sans-serif' }}>Claimondo</span>

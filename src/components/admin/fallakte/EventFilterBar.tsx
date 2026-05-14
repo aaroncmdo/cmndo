@@ -76,7 +76,7 @@ export function EventFilterBar({
           onChange={(e) =>
             onChange({ ...value, zeitraum: e.target.value as EventFilterState['zeitraum'] })
           }
-          className="text-xs border border-claimondo-border rounded-md px-2 py-1.5 bg-white text-claimondo-navy"
+          className="text-xs border border-claimondo-border rounded-ios-md px-2 py-1.5 bg-white text-claimondo-navy"
         >
           <option value="alle">Gesamter Zeitraum</option>
           <option value="7d">Letzte 7 Tage</option>
@@ -90,7 +90,7 @@ export function EventFilterBar({
             value={value.search}
             onChange={(e) => onChange({ ...value, search: e.target.value })}
             placeholder="Suche in Titeln, Beschreibungen…"
-            className="w-full text-xs border border-claimondo-border rounded-md pl-7 pr-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30"
+            className="w-full text-xs border border-claimondo-border rounded-ios-md pl-7 pr-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30"
           />
         </div>
         <span className="text-xs text-claimondo-ondo shrink-0">

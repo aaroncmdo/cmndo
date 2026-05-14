@@ -112,7 +112,7 @@ export default function TeamClient({
       </div>
 
       {actionMsg && (
-        <div className={`mb-4 px-3 py-2.5 rounded-xl text-sm border ${
+        <div className={`mb-4 px-3 py-2.5 rounded-ios-xl text-sm border ${
           actionMsg.kind === 'success'
             ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
             : 'bg-red-50 border-red-200 text-red-700'
@@ -171,7 +171,7 @@ export default function TeamClient({
                             value={assignTargets[l.id] ?? ''}
                             onChange={e => setAssignTargets(prev => ({ ...prev, [l.id]: e.target.value }))}
                             disabled={pending}
-                            className="text-xs bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand-secondary)]"
+                            className="text-xs bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--brand-secondary)]"
                           >
                             <option value="">Wählen...</option>
                             {eligibleTargets.map(s => (
@@ -183,7 +183,7 @@ export default function TeamClient({
                           <button
                             onClick={() => handleAssign(l.id)}
                             disabled={pending || !assignTargets[l.id]}
-                            className="p-1.5 rounded-lg bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] text-white disabled:opacity-40"
+                            className="p-1.5 rounded-ios-lg bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] text-white disabled:opacity-40"
                           >
                             <ArrowRightIcon className="w-3.5 h-3.5" />
                           </button>
@@ -250,7 +250,7 @@ export default function TeamClient({
                         <button
                           onClick={() => handleToggleSperre(s.id, isGesperrt)}
                           disabled={pending}
-                          className={`inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-md font-medium transition-colors disabled:opacity-40 ${
+                          className={`inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-ios-md font-medium transition-colors disabled:opacity-40 ${
                             isGesperrt
                               ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                               : 'bg-red-50 text-red-700 hover:bg-red-100'

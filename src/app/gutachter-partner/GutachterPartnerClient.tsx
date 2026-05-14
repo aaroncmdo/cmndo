@@ -343,7 +343,7 @@ export default function GutachterPartnerClient() {
           </div>
 
           {fehler && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{fehler}</p>
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-ios-xl px-4 py-3">{fehler}</p>
           )}
 
           <button

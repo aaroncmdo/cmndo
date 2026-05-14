@@ -340,9 +340,9 @@ export default function SvKalenderVergleichModal({
                 Lade Kalender + Routen …
               </p>
             )}
-            {error && <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg p-2">{error}</p>}
+            {error && <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg p-2">{error}</p>}
             {!loading && !error && data && !data.leadLat && (
-              <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2 mb-3">
+              <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-ios-lg p-2 mb-3">
                 Lead hat keinen Besichtigungsort mit Koordinaten — ETAs können nicht berechnet werden.
               </p>
             )}
@@ -385,7 +385,7 @@ export default function SvKalenderVergleichModal({
 
                 {/* Vor erstem Termin — Anfahrt zum SV */}
                 {randSlots.vor && (
-                  <div className="mb-2 flex items-center gap-2 text-[11px] text-claimondo-navy bg-claimondo-ondo/10 border border-claimondo-ondo/30 rounded-md px-2 py-1.5">
+                  <div className="mb-2 flex items-center gap-2 text-[11px] text-claimondo-navy bg-claimondo-ondo/10 border border-claimondo-ondo/30 rounded-ios-md px-2 py-1.5">
                     <NavigationIcon className="w-3 h-3" />
                     <span>
                       Tagesstart frei — bis zum 1. Termin um {fmtTime(randSlots.vor.bisIso)}
@@ -447,7 +447,7 @@ export default function SvKalenderVergleichModal({
                         onClick={handleSlotClick}
                         disabled={!l.reicht}
                         data-termin-block
-                        className={`absolute left-0 right-2 rounded-lg border-2 border-dashed flex items-center justify-center text-[10px] px-2 transition-colors ${
+                        className={`absolute left-0 right-2 rounded-ios-lg border-2 border-dashed flex items-center justify-center text-[10px] px-2 transition-colors ${
                           l.reicht
                             ? 'bg-claimondo-ondo/10 border-claimondo-ondo/40 text-claimondo-navy cursor-pointer hover:bg-claimondo-ondo/20 hover:border-claimondo-ondo/60'
                             : 'bg-red-50 border-red-300 text-red-700 cursor-not-allowed'
@@ -485,7 +485,7 @@ export default function SvKalenderVergleichModal({
                     const heightPx = Math.max(28, (Math.min(TOTAL_MIN, endMin) - Math.max(0, startMin)) * PX_PER_MIN)
                     return (
                       <div
-                        className="absolute left-0 right-2 rounded-lg border-2 border-claimondo-ondo bg-claimondo-ondo/85 text-white px-2 py-1.5 shadow-lg z-10"
+                        className="absolute left-0 right-2 rounded-ios-lg border-2 border-claimondo-ondo bg-claimondo-ondo/85 text-white px-2 py-1.5 shadow-lg z-10"
                         style={{ top, height: heightPx }}
                       >
                         <div className="flex items-center gap-1.5 text-[11px] font-semibold">
@@ -520,7 +520,7 @@ export default function SvKalenderVergleichModal({
                       <div
                         key={t.id}
                         data-termin-block
-                        className={`absolute left-0 right-2 rounded-lg border-2 px-2 py-1.5 shadow-sm overflow-hidden cursor-not-allowed ${
+                        className={`absolute left-0 right-2 rounded-ios-lg border-2 px-2 py-1.5 shadow-sm overflow-hidden cursor-not-allowed ${
                           istWunsch
                             ? 'bg-amber-300 border-amber-500'
                             : 'bg-amber-100 border-amber-400'
@@ -550,7 +550,7 @@ export default function SvKalenderVergleichModal({
 
                 {/* Nach letztem Termin — Restliche Zeit */}
                 {randSlots.nach && (
-                  <div className="mt-2 flex items-center gap-2 text-[11px] text-claimondo-navy bg-claimondo-ondo/10 border border-claimondo-ondo/30 rounded-md px-2 py-1.5">
+                  <div className="mt-2 flex items-center gap-2 text-[11px] text-claimondo-navy bg-claimondo-ondo/10 border border-claimondo-ondo/30 rounded-ios-md px-2 py-1.5">
                     <NavigationIcon className="w-3 h-3" />
                     <span>
                       Nach letztem Termin ab {fmtTime(randSlots.nach.vonIso)} frei
@@ -565,7 +565,7 @@ export default function SvKalenderVergleichModal({
 
                 {/* Wenn ganzer Tag leer */}
                 {termineHeute.length === 0 && (
-                  <div className="mt-3 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs text-emerald-800 flex items-center gap-2">
+                  <div className="mt-3 rounded-ios-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs text-emerald-800 flex items-center gap-2">
                     <NavigationIcon className="w-3 h-3" />
                     Ganzer Tag verfügbar
                     {activeTab.etaLeadZuBueroMin != null && (
@@ -611,7 +611,7 @@ export default function SvKalenderVergleichModal({
                         if (!e.target.value) return
                         setReserveDraft({ ...reserveDraft, startIso: new Date(e.target.value).toISOString() })
                       }}
-                      className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-xs rounded-lg px-2 py-1.5"
+                      className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-xs rounded-ios-lg px-2 py-1.5"
                     />
                   </div>
                   <div>
@@ -619,7 +619,7 @@ export default function SvKalenderVergleichModal({
                     <select
                       value={reserveDraft.dauerMin}
                       onChange={(e) => setReserveDraft({ ...reserveDraft, dauerMin: Number(e.target.value) })}
-                      className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-xs rounded-lg px-2 py-1.5"
+                      className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-xs rounded-ios-lg px-2 py-1.5"
                     >
                       <option value={30}>30 min</option>
                       <option value={45}>45 min</option>
@@ -630,7 +630,7 @@ export default function SvKalenderVergleichModal({
                 </div>
 
                 {reserveError && (
-                  <p className="text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-md px-2 py-1.5">
+                  <p className="text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-ios-md px-2 py-1.5">
                     {reserveError}
                   </p>
                 )}
@@ -640,7 +640,7 @@ export default function SvKalenderVergleichModal({
                     type="button"
                     disabled={reservePending}
                     onClick={() => setReserveDraft(null)}
-                    className="flex-1 px-3 py-2 rounded-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+                    className="flex-1 px-3 py-2 rounded-ios-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
                   >
                     Abbrechen
                   </button>
@@ -648,7 +648,7 @@ export default function SvKalenderVergleichModal({
                     type="button"
                     disabled={reservePending}
                     onClick={handleReserveBestaetigen}
-                    className="flex-1 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    className="flex-1 px-3 py-2 rounded-ios-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium disabled:opacity-50 flex items-center justify-center gap-1.5"
                   >
                     <CalendarPlusIcon className="w-3.5 h-3.5" />
                     {reservePending ? 'Reserviere …' : 'Reservieren'}

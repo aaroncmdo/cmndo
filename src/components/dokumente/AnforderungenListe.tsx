@@ -90,7 +90,7 @@ export default function AnforderungenListe({
   const [modalOpen, setModalOpen] = useState(false)
 
   return (
-    <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+    <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
         <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider flex items-center gap-2">
           <FileTextIcon className="w-3.5 h-3.5" /> Meine Anforderungen an den Kunden

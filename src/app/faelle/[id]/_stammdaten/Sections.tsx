@@ -151,7 +151,7 @@ function VersicherungStammdaten({ versicherungId }: { versicherungId: string | n
 
   if (!versicherungId) {
     return (
-      <div className="sm:col-span-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex items-start gap-1.5">
+      <div className="sm:col-span-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg px-3 py-2 flex items-start gap-1.5">
         <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
         Keine Stammdaten hinterlegt — Schaden-Hotline und BaFin-Nummer müssen
         recherchiert werden (Versicherung war Freitext-Eintrag, kein
@@ -170,7 +170,7 @@ function VersicherungStammdaten({ versicherungId }: { versicherungId: string | n
     )
   }
   return (
-    <div className="sm:col-span-2 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 space-y-1">
+    <div className="sm:col-span-2 bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 space-y-1">
       <p className="text-[10px] uppercase tracking-wider text-claimondo-navy font-semibold">
         Stammdaten (aus versicherungen-Tabelle)
       </p>
@@ -241,7 +241,7 @@ export function NutzungsausfallSection() {
       hint="Manueller Workflow — nur Kanzlei darf bei VS anfragen"
     >
       <div className="sm:col-span-2 space-y-3">
-        <div className="text-xs text-claimondo-ondo bg-amber-50 border border-amber-200 rounded-lg p-3">
+        <div className="text-xs text-claimondo-ondo bg-amber-50 border border-amber-200 rounded-ios-lg p-3">
           <p>
             Kunde hat{' '}
             {mietwagen && nutzungsausfall
@@ -271,7 +271,7 @@ export function NutzungsausfallSection() {
                 type="button"
                 disabled={!editable}
                 onClick={() => updateField('fahrzeug_fahrbereit', val)}
-                className={`px-3 py-1 rounded-md text-xs font-medium border ${
+                className={`px-3 py-1 rounded-ios-md text-xs font-medium border ${
                   selected
                     ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
                     : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-claimondo-bg'
@@ -405,7 +405,7 @@ export function ZeugenKontakteSection() {
         {zeugen.map((z, idx) => (
           <div
             key={idx}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-lg border border-claimondo-border bg-claimondo-bg"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-ios-lg border border-claimondo-border bg-claimondo-bg"
           >
             <input
               className="text-sm px-2 py-1 rounded bg-white border border-claimondo-border"
@@ -453,7 +453,7 @@ export function ZeugenKontakteSection() {
           <button
             type="button"
             onClick={addZeuge}
-            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white hover:bg-claimondo-shield transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white hover:bg-claimondo-shield transition-colors"
           >
             <PlusIcon className="w-3.5 h-3.5" /> Zeuge hinzufügen
           </button>

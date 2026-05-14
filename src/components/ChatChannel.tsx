@@ -50,7 +50,7 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
           if (isSystem) {
             return (
               <div key={m.id} className="flex justify-center">
-                <div className="bg-claimondo-bg border border-claimondo-light-blue/30 rounded-xl px-4 py-2 max-w-[85%]">
+                <div className="bg-claimondo-bg border border-claimondo-light-blue/30 rounded-ios-xl px-4 py-2 max-w-[85%]">
                   <p className="text-xs text-claimondo-navy text-center whitespace-pre-wrap">{m.nachricht}</p>
                   <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">{new Date(m.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
@@ -60,7 +60,7 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
 
           return (
             <div key={m.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[75%] px-3 py-2 rounded-xl text-sm ${isOwn ? 'bg-claimondo-shield text-white rounded-br-sm' : 'bg-claimondo-bg text-claimondo-navy rounded-bl-sm'}`}>
+              <div className={`max-w-[75%] px-3 py-2 rounded-ios-xl text-sm ${isOwn ? 'bg-claimondo-shield text-white rounded-br-sm' : 'bg-claimondo-bg text-claimondo-navy rounded-bl-sm'}`}>
                 {!isOwn && <p className="text-[10px] font-medium mb-0.5 opacity-70">{m.sender_rolle ?? ''}</p>}
                 <p className="whitespace-pre-wrap">{m.nachricht}</p>
                 <p className={`text-[9px] mt-1 ${isOwn ? 'text-claimondo-light-blue' : 'text-claimondo-ondo/70'}`}>{new Date(m.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
@@ -73,8 +73,8 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
       {!readOnly && (
         <div className="flex-shrink-0 border-t border-claimondo-border p-2 flex gap-2">
           <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
-            placeholder="Nachricht..." className="flex-1 bg-white border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
-          <button onClick={send} disabled={sending || !input.trim()} className="bg-claimondo-shield hover:bg-claimondo-ondo disabled:opacity-50 text-white p-2 rounded-lg"><SendIcon className="w-4 h-4" /></button>
+            placeholder="Nachricht..." className="flex-1 bg-white border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
+          <button onClick={send} disabled={sending || !input.trim()} className="bg-claimondo-shield hover:bg-claimondo-ondo disabled:opacity-50 text-white p-2 rounded-ios-lg"><SendIcon className="w-4 h-4" /></button>
         </div>
       )}
       {readOnly && <div className="flex-shrink-0 border-t border-claimondo-border p-2 text-center text-claimondo-ondo/70 text-xs">Nur Lesen — dieser Kanal ist zwischen Kunde und Gutachter</div>}

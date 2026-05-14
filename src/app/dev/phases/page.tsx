@@ -91,7 +91,7 @@ export default async function DevPhasesPage() {
               VARIANTEN.map((variant) => (
                 <article
                   key={`${rolle}-${variant}-${mock.id}`}
-                  className="bg-claimondo-card border border-claimondo-border rounded-xl p-4 shadow-[var(--shadow-claimondo-sm)]"
+                  className="bg-claimondo-card border border-claimondo-border rounded-ios-xl p-4 shadow-[var(--shadow-claimondo-sm)]"
                 >
                   <header className="flex items-center justify-between mb-3 pb-2 border-b border-claimondo-border">
                     <span className="text-[11px] uppercase tracking-wider text-claimondo-ondo/70">

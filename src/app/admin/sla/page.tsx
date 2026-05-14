@@ -36,21 +36,21 @@ export default async function SlaMonitoringPage() {
 
       {/* KPI-Boxen */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+        <div className="bg-red-50 border border-red-200 rounded-ios-xl p-4">
           <div className="flex items-center gap-2 text-red-700">
             <AlertTriangleIcon className="w-5 h-5" />
             <span className="text-xs font-semibold uppercase">Verletzt</span>
           </div>
           <p className="text-3xl font-bold text-red-900 mt-2">{breached.length}</p>
         </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-ios-xl p-4">
           <div className="flex items-center gap-2 text-amber-700">
             <ClockIcon className="w-5 h-5" />
             <span className="text-xs font-semibold uppercase">Risiko (&lt; 30 Min)</span>
           </div>
           <p className="text-3xl font-bold text-amber-900 mt-2">{atRisk.length}</p>
         </div>
-        <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
+        <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4">
           <div className="flex items-center gap-2 text-claimondo-ondo">
             <CheckCircleIcon className="w-5 h-5" />
             <span className="text-xs font-semibold uppercase">Offen</span>

@@ -55,7 +55,7 @@ export default function PwaInstallBanner() {
       </div>
       <button
         onClick={handleInstall}
-        className="flex items-center gap-1.5 bg-claimondo-ondo hover:bg-claimondo-light-blue text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors flex-shrink-0"
+        className="flex items-center gap-1.5 bg-claimondo-ondo hover:bg-claimondo-light-blue text-white px-3 py-2 rounded-ios-xl text-xs font-semibold transition-colors flex-shrink-0"
       >
         <DownloadIcon className="w-3.5 h-3.5" /> Installieren
       </button>

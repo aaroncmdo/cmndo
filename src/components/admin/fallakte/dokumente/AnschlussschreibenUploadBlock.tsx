@@ -59,7 +59,7 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
 
   return (
     <div
-      className={`rounded-xl border p-4 ${
+      className={`rounded-ios-xl border p-4 ${
         hasAS ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'
       }`}
     >
@@ -120,7 +120,7 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="flex items-center gap-2 bg-white hover:bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-xs font-medium px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 bg-white hover:bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-xs font-medium px-3 py-2 rounded-ios-lg transition-colors disabled:opacity-50"
           >
             {uploading ? (
               <Loader2Icon className="w-3.5 h-3.5 animate-spin" />

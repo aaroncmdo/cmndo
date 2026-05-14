@@ -148,7 +148,7 @@ export default function KundeAusfallEntschaedigungCard({
         </dl>
 
         {istUeberfaellig && (
-          <p className="text-xs text-red-800 bg-red-100 border border-red-200 rounded-lg p-2 flex items-start gap-2">
+          <p className="text-xs text-red-800 bg-red-100 border border-red-200 rounded-ios-lg p-2 flex items-start gap-2">
             <AlertCircleIcon className="w-4 h-4 shrink-0 mt-0.5" />
             <span>
               Der Mietwagen hätte spätestens am {formatDate(abgabeDatum)} abgegeben werden müssen.
@@ -157,7 +157,7 @@ export default function KundeAusfallEntschaedigungCard({
           </p>
         )}
 
-        <div className="rounded-lg bg-claimondo-bg border border-claimondo-border p-3 text-xs text-claimondo-ondo space-y-1.5">
+        <div className="rounded-ios-lg bg-claimondo-bg border border-claimondo-border p-3 text-xs text-claimondo-ondo space-y-1.5">
           <p className="font-medium text-claimondo-navy">Nach Rückgabe</p>
           <p>
             Bitte lade die Mietwagen-Rechnung in der Fallakte hoch. Wir leiten sie für dich an die
@@ -217,7 +217,7 @@ export default function KundeAusfallEntschaedigungCard({
         {formatEuro(tagessatz)} pro Tag
       </p>
 
-      <div className="rounded-lg bg-claimondo-bg border border-claimondo-border p-3 text-xs text-claimondo-ondo space-y-1.5">
+      <div className="rounded-ios-lg bg-claimondo-bg border border-claimondo-border p-3 text-xs text-claimondo-ondo space-y-1.5">
         <p className="font-medium text-claimondo-navy">Voraussetzungen</p>
         {totalschaden ? (
           <ul className="space-y-1 list-disc list-inside">

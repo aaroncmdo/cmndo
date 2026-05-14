@@ -419,7 +419,7 @@ export default function WillkommenClient({
           </div>
 
           <div className="bg-white border border-claimondo-border rounded-2xl p-6">
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3">
+            <div className="bg-amber-50 border border-amber-200 rounded-ios-xl p-5 flex items-start gap-3">
               <ClockIcon className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-amber-800">
                 <p className="font-semibold mb-1">Dein Inhaber muss noch die Anzahlung leisten.</p>
@@ -547,7 +547,7 @@ export default function WillkommenClient({
             <div className="space-y-5">
               {/* KFZ-152 Phase 3: Community-Banner wenn der User Mitglied einer Community ist */}
               {rolle === 'community_member' && organisation && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                <div className="bg-amber-50 border border-amber-200 rounded-ios-xl p-4 flex items-start gap-3">
                   <Building2Icon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-amber-800">
                     <p className="font-medium">Du bist Mitglied der Community <strong>{organisation.name}</strong>.</p>
@@ -560,7 +560,7 @@ export default function WillkommenClient({
               )}
 
               {/* Konditionen-Card */}
-              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-5">
+              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-ios-xl p-5">
                 <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Konditionen</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
@@ -580,7 +580,7 @@ export default function WillkommenClient({
               </div>
 
               {/* Stammdaten-Card (read-only) */}
-              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-5">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-5">
                 <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
@@ -602,7 +602,7 @@ export default function WillkommenClient({
           {currentKey === 'konditionen' && r === 'buero_inhaber' && (
             <div className="space-y-5">
               {/* Buero-Header */}
-              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-5">
+              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-ios-xl p-5">
                 <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-1">Du verwaltest</p>
                 <p className="text-base font-semibold text-claimondo-navy">
                   {organisation?.name ?? '—'} <span className="text-sm text-claimondo-ondo font-normal">mit {subSvs.length} {subSvs.length === 1 ? 'Standort' : 'Standorten'}</span>
@@ -611,7 +611,7 @@ export default function WillkommenClient({
 
               {/* Sub-Standort-Tabelle */}
               {subSvs.length > 0 ? (
-                <div className="border border-claimondo-border rounded-xl overflow-hidden">
+                <div className="border border-claimondo-border rounded-ios-xl overflow-hidden">
                   <div className="bg-claimondo-bg px-4 py-2.5 border-b border-claimondo-border">
                     <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wide">
                       Sub-Standorte ({subSvs.length})
@@ -642,13 +642,13 @@ export default function WillkommenClient({
                   </div>
                 </div>
               ) : (
-                <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+                <div className="px-4 py-3 rounded-ios-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
                   Es sind noch keine Sub-Standorte angelegt. Bitte aaron.sprafke@claimondo.de kontaktieren.
                 </div>
               )}
 
               {/* Gesamt-Anzahlung groß hervorgehoben */}
-              <div className="bg-[var(--brand-primary)] text-white rounded-xl p-5">
+              <div className="bg-[var(--brand-primary)] text-white rounded-ios-xl p-5">
                 <p className="text-xs text-white/70 uppercase tracking-wide">Gesamt-Anzahlung (alle Sub-Standorte)</p>
                 <p className="text-3xl font-bold mt-1">{fmtEur(gesamtAnzahlung)} <span className="text-sm font-normal text-white/70">netto</span></p>
                 <p className="text-[11px] text-white/70 mt-2">
@@ -658,7 +658,7 @@ export default function WillkommenClient({
               </div>
 
               {/* Inhaber-Stammdaten */}
-              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-5">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-5">
                 <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Inhaber-Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
@@ -679,7 +679,7 @@ export default function WillkommenClient({
             <div className="space-y-5">
               {/* Org-Hinweis */}
               {organisation && (
-                <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-5 flex items-start gap-3">
+                <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-ios-xl p-5 flex items-start gap-3">
                   <Building2Icon className="w-5 h-5 text-[var(--brand-primary)] flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-claimondo-navy">
                     <p>
@@ -692,7 +692,7 @@ export default function WillkommenClient({
               )}
 
               {/* Eigenes Paket */}
-              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-5">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-5">
                 <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Dein Paket</p>
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4">
                   <Kondition label="Paket" value={paketLabel} />
@@ -706,7 +706,7 @@ export default function WillkommenClient({
               </div>
 
               {/* Stammdaten */}
-              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-5">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-5">
                 <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-3">Deine Stammdaten</p>
                 <div className="space-y-2.5 text-sm">
                   <ReadRow icon={UserIcon} label="Name" value={fullName} />
@@ -741,7 +741,7 @@ export default function WillkommenClient({
 
               {/* Hinweis fuer Buero-Inhaber: stellvertretend fuer alle Sub-Standorte */}
               {r === 'buero_inhaber' && organisation && (
-                <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 flex items-start gap-3">
+                <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4 flex items-start gap-3">
                   <Building2Icon className="w-5 h-5 text-[var(--brand-secondary)] flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-claimondo-navy">
                     Du unterzeichnest stellvertretend fuer <strong>{organisation.name}</strong> und alle{' '}
@@ -751,7 +751,7 @@ export default function WillkommenClient({
               )}
 
               {/* Stammdaten kompakt — BUG-96: Firma + Steuernummer ergaenzt */}
-              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4">
                 <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-2">
                   Stammdaten
                 </p>
@@ -801,7 +801,7 @@ export default function WillkommenClient({
                   type="text"
                   value={unterschriftName}
                   onChange={e => setUnterschriftName(e.target.value)}
-                  className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                  className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                 />
               </div>
 
@@ -867,7 +867,7 @@ export default function WillkommenClient({
           {/* SCHRITT 1 — Sub-Mitarbeiter: nur Checkbox + Name (kein PDF, keine Sig) */}
           {currentKey === 'agb' && r === 'sub_mitarbeiter' && (
             <div className="space-y-5">
-              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 text-xs text-claimondo-ondo leading-relaxed">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4 text-xs text-claimondo-ondo leading-relaxed">
                 Bitte bestätige unsere{' '}
                 <Link href="/nutzungsbedingungen" target="_blank" className="text-[var(--brand-primary)] underline">Nutzungsbedingungen</Link>,
                 die <Link href="/agb" target="_blank" className="text-[var(--brand-primary)] underline">AGB</Link>{' '}
@@ -887,7 +887,7 @@ export default function WillkommenClient({
                   type="text"
                   value={unterschriftName}
                   onChange={e => setUnterschriftName(e.target.value)}
-                  className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                  className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                 />
               </div>
 
@@ -914,7 +914,7 @@ export default function WillkommenClient({
              ═══════════════════════════════════════════════════════════════ */}
           {currentKey === 'anzahlung' && r !== 'sub_mitarbeiter' && (
             <div className="space-y-4">
-              <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-secondary)]/20 rounded-xl p-4 flex items-start gap-3">
+              <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-secondary)]/20 rounded-ios-xl p-4 flex items-start gap-3">
                 <CheckCircle2Icon className="w-5 h-5 text-[var(--brand-secondary)] flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-[var(--brand-primary)]">
                   {r === 'buero_inhaber' ? (
@@ -926,7 +926,7 @@ export default function WillkommenClient({
               </div>
 
               {r === 'buero_inhaber' && gesamtAnzahlung <= 0 && (
-                <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+                <div className="px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
                   Es sind keine Sub-Standorte mit Anzahlungsbetrag vorhanden. Bitte aaron.sprafke@claimondo.de kontaktieren.
                 </div>
               )}
@@ -949,13 +949,13 @@ export default function WillkommenClient({
                 {/* Rechte Spalte: Embedded Stripe Checkout + Branding-Footer */}
                 <div className="space-y-3">
                   {!stripePublishableKey ? (
-                    <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+                    <div className="px-4 py-3 rounded-ios-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
                       Stripe-Konfiguration fehlt (STRIPE_PUBLISHABLE_KEY). Bitte aaron.sprafke@claimondo.de kontaktieren.
                     </div>
                   ) : error ? (
                     // AAR-509: Sichtbare Fehlermeldung + Retry-Button statt
                     // Endlos-Spinner, falls startStripeCheckout fehlschlägt.
-                    <div className="rounded-xl border border-red-200 bg-red-50 p-5 space-y-3">
+                    <div className="rounded-ios-xl border border-red-200 bg-red-50 p-5 space-y-3">
                       <div className="flex items-start gap-2">
                         <AlertTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                         <div className="text-sm text-red-800">
@@ -973,17 +973,17 @@ export default function WillkommenClient({
                         type="button"
                         onClick={retryCheckout}
                         disabled={saving}
-                        className="w-full py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-50"
+                        className="w-full py-2 rounded-ios-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-50"
                       >
                         {saving ? 'Wird geladen ...' : 'Erneut versuchen'}
                       </button>
                     </div>
                   ) : !clientSecret ? (
-                    <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-8 text-center text-sm text-claimondo-ondo">
+                    <div className="rounded-ios-xl border border-claimondo-border bg-claimondo-bg p-8 text-center text-sm text-claimondo-ondo">
                       Checkout wird geladen ...
                     </div>
                   ) : (
-                    <div className="rounded-xl border border-claimondo-border overflow-hidden bg-white">
+                    <div className="rounded-ios-xl border border-claimondo-border overflow-hidden bg-white">
                       <EmbeddedCheckoutProvider stripe={stripePromise} options={checkoutOptions}>
                         <EmbeddedCheckout />
                       </EmbeddedCheckoutProvider>
@@ -1053,7 +1053,7 @@ export default function WillkommenClient({
           {/* AAR-509: Anzahlungs-Step hat eigenes Error-UI mit Retry — sonst
               würde der Fehler doppelt erscheinen. */}
           {error && currentKey !== 'anzahlung' && (
-            <div className="mt-4 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+            <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
               {error}
             </div>
           )}
@@ -1071,7 +1071,7 @@ export default function WillkommenClient({
                   type="button"
                   onClick={() => setStep(step - 1)}
                   disabled={saving}
-                  className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
+                  className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
                 >
                   Zurück
                 </button>
@@ -1095,7 +1095,7 @@ export default function WillkommenClient({
                   (currentKey === 'vertrag' && r !== 'sub_mitarbeiter' && (!agbAccepted || !unterschriftName.trim() || !signaturePng)) ||
                   (currentKey === 'konditionen' && r === 'buero_inhaber' && subSvs.length === 0)
                 }
-                className="flex-1 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 py-2.5 rounded-ios-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {r === 'sub_mitarbeiter'
                   ? currentKey === 'konditionen'
@@ -1179,7 +1179,7 @@ function StammRow({ label, value, breakAll }: { label: string; value: string; br
 
 function KontaktHinweis() {
   return (
-    <div className="text-xs text-claimondo-ondo bg-amber-50 border border-amber-200 rounded-xl p-4">
+    <div className="text-xs text-claimondo-ondo bg-amber-50 border border-amber-200 rounded-ios-xl p-4">
       <strong>Stimmt etwas nicht?</strong> Schreib uns an{' '}
       <a href="mailto:aaron.sprafke@claimondo.de" className="text-[var(--brand-primary)] underline">
         aaron.sprafke@claimondo.de
