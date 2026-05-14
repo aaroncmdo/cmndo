@@ -531,8 +531,15 @@ p, li, blockquote, article, .prose {
    Die Pills nutzen einen leicht aufgehellten Brand-Sidebar-BG mit blur, damit
    sie sich vom Wrapper (var(--brand-primary)) sichtbar abheben aber dem Theme
    treu bleiben. */
-[data-sidebar-mode="floating"] > div:not([class*="absolute"]),
-[data-sidebar-mode="floating"] > nav {
+/* 2026-05-14 Fix: Selector MUSS auf aside[data-sidebar-mode="floating"]
+   gescoped sein. SidebarModeApplier setzt das Attribut auch auf <body>
+   (für body-level-Trigger der kunde-sidebar weiter unten) — ohne
+   aside-Prefix matcht der direkte div-/nav-Kind-Selector deshalb auch
+   den Page-Wrapper jeder Marketing-/Portal-Seite und packt ihm eine
+   navy Glass-Pill (Padding + Border-Radius + brand-sidebar-bg) drum
+   → zwei sichtbare blaue Streifen am Viewport-Rand. */
+aside[data-sidebar-mode="floating"] > div:not([class*="absolute"]),
+aside[data-sidebar-mode="floating"] > nav {
   /* 2026-05-14 v2: Echtes Glassmorphism — 55% Sidebar-BG (statt 90%) damit der
      backdrop-filter blur den Content/Map dahinter sichtbar weichzeichnet.
      Stärkerer Blur (22px) + inset-highlight für Liquid-Glass-Anmutung. */
@@ -546,12 +553,12 @@ p, li, blockquote, article, .prose {
     0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent),
     inset 0 1px 0 color-mix(in srgb, white 25%, transparent);
 }
-[data-sidebar-mode="floating"] > div:not([class*="absolute"]) {
+aside[data-sidebar-mode="floating"] > div:not([class*="absolute"]) {
   /* Eigene Border-Logik der ursprünglichen Cards (border-b etc.) zurücknehmen. */
   border-bottom: 1px solid color-mix(in srgb, white 22%, transparent) !important;
   border-top: 1px solid color-mix(in srgb, white 22%, transparent) !important;
 }
-[data-sidebar-mode="floating"] > nav {
+aside[data-sidebar-mode="floating"] > nav {
   flex: 1 1 auto;
   overflow-y: auto;
 }
