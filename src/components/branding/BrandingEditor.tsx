@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { SparklesIcon, Loader2Icon, CheckIcon, RotateCcwIcon, AlertTriangleIcon } from 'lucide-react'
 import {
   CLAIMONDO_DEFAULT_THEME,
@@ -90,6 +90,27 @@ export default function BrandingEditor({
   const [error, setError] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  // 2026-05-14: imgly Background-Removal Preload. Beim ersten Logo-Upload muss
+  // ein 88 MB Model + 12 MB WASM von staticimgly.com geladen werden — das
+  // dauert auch auf gutem Netz 20-40s. Statt den User darauf warten zu lassen
+  // starten wir den Download bereits beim Editor-Mount, sodass das Model
+  // wahrscheinlich schon im Browser-Cache liegt wenn der Upload-Click kommt.
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const mod = await import('@imgly/background-removal')
+        if (cancelled) return
+        await mod.preload({ model: 'isnet_fp16' })
+      } catch (err) {
+        // Preload-Fail ist nicht-blockierend — beim echten Upload greift der
+        // try/catch in handleFile und setzt die User-Message.
+        console.warn('[branding] imgly preload skipped:', err)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   const handleFile = useCallback(async (file: File) => {
     setError(null)
