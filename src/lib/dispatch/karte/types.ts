@@ -57,9 +57,9 @@ export type SVPin = {
   id: string
   vorname: string | null
   nachname: string | null
-  firma_name: string | null
+  firmenname: string | null
   paket: string | null
-  stadt: string | null
+  ort: string | null
   spezifikationen_top3: string[]
   bewertungs_durchschnitt: number | null
   bewertungs_anzahl: number | null
