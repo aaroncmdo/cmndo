@@ -146,6 +146,7 @@ function isPublicPath(pathname: string): boolean {
     pathname === '/sitemap.xml' ||
     pathname === '/robots.txt' ||
     pathname === '/llms.txt' ||
+    pathname === '/llms-full.txt' ||
     pathname === '/opengraph-image' ||
     pathname === '/manifest.json' ||
     pathname === '/favicon.ico'
