@@ -31,6 +31,7 @@ import { SupportSidebarPanel } from '@/components/support/SupportSidebarPanel'
 import TasksPill from '@/components/shared/TasksPill'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
+import { FONT_PAIRS, CLAIMONDO_DEFAULT_FONT_PAIR_ID, buildGoogleFontsUrl } from '@/lib/branding/fonts'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 import SVSpotlight from './_components/SVSpotlight'
 import WeatherBanner from '@/components/shared/WeatherBanner'
@@ -140,6 +141,27 @@ export default function GutachterShell({
   const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showSupport, setShowSupport] = useState(false)
+
+  // 2026-05-14: Floating-Sidebar-Pilot. Aaron will testen wie die Sidebar
+  // ohne durchgehenden Bar-Container aussieht — einzelne Glass-Pills für
+  // Logo, Nav-Gruppen, Profil. Aktivierbar via ?sidebar=floating (oder
+  // localStorage-Flag), damit der Vergleich gegen die klassische Bar leicht
+  // ist. Default bleibt klassisch.
+  const [floatingMode, setFloatingMode] = useState(false)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const url = new URL(window.location.href)
+    const param = url.searchParams.get('sidebar')
+    if (param === 'floating') {
+      setFloatingMode(true)
+      localStorage.setItem('sidebar-mode', 'floating')
+    } else if (param === 'bar') {
+      setFloatingMode(false)
+      localStorage.setItem('sidebar-mode', 'bar')
+    } else {
+      setFloatingMode(localStorage.getItem('sidebar-mode') === 'floating')
+    }
+  }, [pathname])
   // CMM-36: Geo-Tracking beim App-Öffnen starten
   useGeoPosition(svId ?? null)
   // AAR-245: Verwaltung nicht mehr collapsible — alle Sektionen flach +
@@ -172,6 +194,21 @@ export default function GutachterShell({
   // der Shell zur Verfügung ohne dass einzelne Consumer das Theme re-importieren.
   const themeVars = generateCssVars(theme, 'full')
 
+  // 2026-05-14: Brand-Font binding. Wenn brand_theme.fontPairId gesetzt ist,
+  // lade die Google-Fonts und setze --brand-font-heading / --brand-font-body
+  // als CSS-Vars auf den Shell-Wrapper. Sidebar + Header übernehmen das via
+  // `font-family: var(--brand-font-heading, inherit)` im JSX unten.
+  const fontPairId = (theme as { fontPairId?: string | null }).fontPairId
+    ?? CLAIMONDO_DEFAULT_FONT_PAIR_ID
+  const fontPair = useBrand ? (FONT_PAIRS[fontPairId] ?? FONT_PAIRS[CLAIMONDO_DEFAULT_FONT_PAIR_ID]) : null
+  const fontVars: React.CSSProperties = fontPair
+    ? ({
+        '--brand-font-heading': fontPair.cssStack.heading,
+        '--brand-font-body': fontPair.cssStack.body,
+      } as React.CSSProperties)
+    : {}
+  const fontHref = fontPair ? buildGoogleFontsUrl(fontPair) : null
+
   // CMM-32 P2 / AAR-864: --app-sidebar-width = Sidebar-Breite + lg-Padding
   // (256px Sidebar + 16px pl-4 = 272px). Damit startet ein portal-rendered
   // Modal (Modal.web.tsx) bündig am inneren Wrapper-Rand und überdeckt nur
@@ -193,21 +230,21 @@ export default function GutachterShell({
     }
   }, [])
 
-  // AAR-220 Fix 5: Einmalige 2s-Transition nach Logo-Upload.
-  const [brandTransitioning, setBrandTransitioning] = useState(false)
+  // AAR-220 Fix 5 / 2026-05-14: Einmalige 1.2s-Transition nach Logo-Upload.
+  // Statt einzelner inline-transitions auf Wrapper-divs jetzt globales
+  // data-brand-transition="on" auf <body> — eine globale CSS-Regel in
+  // globals.css animiert alle Children gleichzeitig (siehe dort).
   useEffect(() => {
     if (typeof window === 'undefined') return
     const flag = localStorage.getItem('brand-just-changed')
     if (!flag) return
-    // Flag löschen + Transition 2.5s aktiv halten (2s Transition + 0.5s Puffer).
     localStorage.removeItem('brand-just-changed')
-    setBrandTransitioning(true)
-    const t = setTimeout(() => setBrandTransitioning(false), 2500)
+    document.body.setAttribute('data-brand-transition', 'on')
+    const t = setTimeout(() => {
+      document.body.removeAttribute('data-brand-transition')
+    }, 1500)
     return () => clearTimeout(t)
   }, [])
-  const transitionStyle: React.CSSProperties = brandTransitioning
-    ? { transition: 'background-color 2s ease, color 2s ease, border-color 2s ease' }
-    : {}
 
   // AAR-809: Wetter-Fetch + Render → components/shared/WeatherBanner
 
@@ -300,7 +337,21 @@ export default function GutachterShell({
 
   return (
     <MitteilungenProvider>
-    <div className="h-screen flex overflow-hidden" style={{ ...themeVars, backgroundColor: 'var(--brand-primary, #0D1B3E)' }}>
+    <div
+      className="h-screen flex overflow-hidden"
+      style={{
+        ...themeVars,
+        ...fontVars,
+        backgroundColor: 'var(--brand-primary, #0D1B3E)',
+        // Body-Text-Font auf den ganzen Shell — Headings (h1-h6) holen sich
+        // global den heading-stack via globals.css.
+        fontFamily: 'var(--brand-font-body, inherit)',
+      }}
+    >
+      {fontHref && (
+        // eslint-disable-next-line @next/next/no-css-tags
+        <link rel="stylesheet" href={fontHref} />
+      )}
       {/* Mobile overlay — ausgeblendet im Feldmodus */}
       {!isFeldmodus && sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -313,17 +364,20 @@ export default function GutachterShell({
       {!isFeldmodus && <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
+        data-sidebar-mode={floatingMode ? 'floating' : 'bar'}
         className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-        style={{
+        } ${floatingMode ? 'py-3 px-3 gap-3 bg-transparent' : ''}`}
+        style={floatingMode ? {
+          color: 'var(--brand-text-on-primary)',
+          transition: 'transform 200ms ease',
+          // Wrapper komplett transparent — Items haben eigene Glass-BG.
+          // Hintergrund-Tönung kommt durch das Wrapping-div in der Shell (das
+          // hat backgroundColor: var(--brand-primary)).
+        } : {
           backgroundColor: 'var(--brand-sidebar-bg)',
           color: 'var(--brand-text-on-primary)',
-          // Transform-Transition (Sidebar-Slide) immer 200ms, Color-Transition
-          // nur bei frischem Brand-Change (einmalig 2s).
-          transition: brandTransitioning
-            ? 'background-color 2s ease, color 2s ease, transform 200ms ease'
-            : 'transform 200ms ease',
+          transition: 'transform 200ms ease',
         }}
       >
         <div className="px-5 py-5 border-b border-white/10">
@@ -380,9 +434,7 @@ export default function GutachterShell({
                       }`}
                       style={{
                         backgroundColor: active ? 'var(--brand-secondary)' : undefined,
-                        transition: brandTransitioning
-                          ? 'background-color 2s ease, color 500ms ease'
-                          : 'color 500ms ease',
+                        transition: 'color 500ms ease',
                       }}
                     >
                       <Icon className="w-5 h-5 shrink-0" />
@@ -437,7 +489,6 @@ export default function GutachterShell({
               style={{
                 backgroundColor: 'var(--brand-accent)',
                 color: 'var(--brand-text-on-primary)',
-                ...transitionStyle,
               }}
             >
               {toInitials(displayName)}
@@ -474,7 +525,6 @@ export default function GutachterShell({
           style={{
             backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 82%, transparent)',
             color: 'var(--brand-text-on-primary)',
-            ...transitionStyle,
           }}
         >
           <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-white/70 hover:text-white transition-colors" aria-label="Menü öffnen">

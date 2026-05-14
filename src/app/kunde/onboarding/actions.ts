@@ -296,12 +296,14 @@ export async function uploadKundenDokument(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, kunde_id')
+    .select('id, kunde_id, claim_id')
     .eq('id', fallId)
     .single()
   if (!fall || fall.kunde_id !== user.id) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
+  // AAR-862: claim-zentrierte Storage-Pfade
+  const claimId = fall.claim_id as string
 
   // Slot-Validation: wenn slotId gesetzt → muss 'kunde' in uploadbar_von sein.
   // Sonst könnte der Client durch Manipulation des slotId-Params Slots
@@ -331,10 +333,13 @@ export async function uploadKundenDokument(
     effektiverSlot = 'kunde-nachreichung'
   }
 
-  // Storage + Insert
+  // Storage + Insert — AAR-862: claim-zentrierter Pfad
   const ts = Date.now()
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-  const path = `kunde-uploads/${user.id}/${fallId}/${effektiverSlot}_${ts}_${safeName}`
+  const segment = effektiverSlot === 'kunde-nachreichung'
+    ? 'kunde-nachreichung'
+    : `pflicht/${effektiverSlot}`
+  const path = `claims/${claimId}/${segment}/${ts}_${safeName}`
 
   try {
     const buffer = Buffer.from(fileBase64.split(',').pop() ?? fileBase64, 'base64')
@@ -553,16 +558,26 @@ export async function uploadPflichtdokument(
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   // Ownership-Check: gehoert der Fall diesem Kunden?
-  const { data: fall } = await supabase.from('faelle').select('id, kunde_id, lead_id').eq('id', fallId).single()
+  const { data: fall } = await supabase.from('faelle').select('id, kunde_id, lead_id, claim_id').eq('id', fallId).single()
   if (!fall || fall.kunde_id !== user.id) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
+  // AAR-862: claim-zentrierte Storage-Pfade
+  const claimId = fall.claim_id as string
+
+  // AAR-862: Slot-Typ vorab laden, damit der Pfad das richtige pflicht/<slot>-Segment bekommt
+  const admin = createAdminClient()
+  const { data: pdPre } = await admin
+    .from('pflichtdokumente')
+    .select('dokument_typ')
+    .eq('id', pflichtdokumentId)
+    .single()
+  const slotForPath = pdPre?.dokument_typ ?? 'sonstiges'
 
   // Storage Upload via Admin
-  const admin = createAdminClient()
   const ts = Date.now()
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-  const path = `kunde-uploads/${user.id}/${fallId}/${ts}_${safeName}`
+  const path = `claims/${claimId}/pflicht/${slotForPath}/${ts}_${safeName}`
 
   try {
     const buffer = Buffer.from(fileBase64.split(',').pop() ?? fileBase64, 'base64')
@@ -574,14 +589,13 @@ export async function uploadPflichtdokument(
     const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
     if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
 
-    // AAR-323: Slot-Typ aus pflichtdokumente laden, damit der
-    // fall_dokumente-Eintrag den korrekten dokument_typ bekommt.
+    // AAR-323: Status-/URL-Status aus pflichtdokumente; dokument_typ schon vorab geladen.
     const { data: pd } = await admin
       .from('pflichtdokumente')
-      .select('dokument_typ, status, dokument_url')
+      .select('status, dokument_url')
       .eq('id', pflichtdokumentId)
       .single()
-    const slotTyp = pd?.dokument_typ ?? 'kunde-nachreichung'
+    const slotTyp = slotForPath
 
     // CMM-21: Multi-File-Upload — bei bereits gesetzter dokument_url die
     // bestehende behalten (sie zeigt aufs erste hochgeladene File als

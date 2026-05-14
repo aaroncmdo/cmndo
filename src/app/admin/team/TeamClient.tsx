@@ -10,9 +10,13 @@ import { Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 
 const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', dispatch: 'Dispatcher', kanzlei: 'Kanzlei' }
-const ROLLE_COLORS: Record<string, string> = { admin: 'bg-red-50 text-red-300', kundenbetreuer: 'bg-green-50 text-green-300', dispatch: 'bg-amber-50 text-amber-300', kanzlei: 'bg-claimondo-ondo/[0.06] text-claimondo-ondo/70' }
+// AAR-Visual-Audit 14.05.2026: Admin → claimondo-navy statt red-50. Admin ist
+// die privilegierte Rolle, nicht "danger" — semantisches Mismatch. Brand-Tone
+// passt besser. Kundenbetreuer/Dispatch/Kanzlei bleiben semantisch (Funktions-
+// Kategorie statt Severität).
+const ROLLE_COLORS: Record<string, string> = { admin: 'bg-claimondo-navy/[0.10] text-claimondo-navy', kundenbetreuer: 'bg-green-50 text-green-700', dispatch: 'bg-amber-50 text-amber-700', kanzlei: 'bg-claimondo-ondo/[0.06] text-claimondo-ondo' }
 const KAT_LABELS: Record<string, string> = { dispatch: 'Dispatch', kundenbetreuer: 'Kundenbetr.', admin: 'Admin', entwicklung: 'Entwicklung' }
-const KAT_COLORS: Record<string, string> = { dispatch: 'bg-amber-50 text-amber-300', kundenbetreuer: 'bg-green-50 text-green-300', admin: 'bg-red-50 text-red-300', entwicklung: 'bg-claimondo-ondo/5 text-claimondo-light-blue' }
+const KAT_COLORS: Record<string, string> = { dispatch: 'bg-amber-50 text-amber-700', kundenbetreuer: 'bg-green-50 text-green-700', admin: 'bg-claimondo-navy/[0.10] text-claimondo-navy', entwicklung: 'bg-claimondo-ondo/[0.06] text-claimondo-light-blue' }
 
 type Mitarbeiter = {
   id: string; email: string | null; vorname: string | null; nachname: string | null
@@ -70,10 +74,10 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         />
       </div>
 
-      <div className="flex gap-2 mb-4">
-        <Link href="/admin/team" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg">Übersicht</Link>
-        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
-        <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+        <Link href="/admin/team" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg whitespace-nowrap shrink-0">Übersicht</Link>
+        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
+        <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
       </div>
 
       {success && <div className="bg-green-50 border border-green-800 rounded-xl p-4 mb-4"><p className="text-green-300 text-sm">{success}</p></div>}
@@ -93,9 +97,9 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         </div>
       )}
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
         {['alle', 'dispatch', 'kundenbetreuer', 'admin', 'entwicklung'].map(k => (
-          <button key={k} onClick={() => setFilterKat(k)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${filterKat === k ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg/50 text-claimondo-ondo hover:text-claimondo-navy'}`}>
+          <button key={k} onClick={() => setFilterKat(k)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 ${filterKat === k ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg/50 text-claimondo-ondo hover:text-claimondo-navy'}`}>
             {k === 'alle' ? 'Alle' : KAT_LABELS[k] ?? k}
           </button>
         ))}

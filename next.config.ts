@@ -109,16 +109,10 @@ const nextConfig: NextConfig = {
         destination: '/gutachter/heute',
         permanent: true,
       },
-      // 14.05.26: identische Falle für /dispatch/karte — Server-Component-
-      // Stub (AAR-112) der zu /dispatch/sachverstaendige redirectet. Im
-      // dispatch-Walk triggerte das React #418 (Hydration-Mismatch) im
-      // AppRouter beim Karten→Kalender-Übergang. Selbe Ursache wie oben,
-      // selbe Lösung.
-      {
-        source: '/dispatch/karte',
-        destination: '/dispatch/sachverstaendige',
-        permanent: true,
-      },
+      // AAR-894 (14.05.26): /dispatch/karte ist jetzt eine echte Mapbox-Route
+      // (Leads-Triage-Layer). Der temporäre AAR-889-Stub-Redirect zu
+      // /dispatch/sachverstaendige wurde entfernt — die Route hat jetzt eine
+      // eigene page.tsx und braucht keinen Stub mehr.
       // AAR-338: Admin-Dispatch-Board gibt's nicht mehr als Admin-Layout —
       // /dispatch/* ist jetzt das einzige Dispatch-Frontend (Full-Screen).
       {
@@ -135,9 +129,13 @@ const nextConfig: NextConfig = {
         destination: '/admin/sachverstaendige',
         permanent: true,
       },
+      // AAR-889 (14.05.26): /admin/sv-onboarding zeigte vorher auf
+      // /admin/sachverstaendige/neu — der selbst ein RSC-Stub auf
+      // /anlegen war (Sweep-Eintrag unten). Direktes Ziel statt
+      // Redirect-Kette.
       {
         source: '/admin/sv-onboarding',
-        destination: '/admin/sachverstaendige/neu',
+        destination: '/admin/sachverstaendige/anlegen',
         permanent: true,
       },
       // AAR-530 (A6): Legacy-Redirects für die Hub-Konsolidierung aus
@@ -181,6 +179,36 @@ const nextConfig: NextConfig = {
         destination: '/faelle/:id',
         permanent: true,
       },
+      // AAR-889 (14.05.26): RSC-Redirect-Stubs Sweep. Alle hier gelisteten
+      // page.tsx-Stubs hatten exakt das Pattern aus dem CMM-14-Fix für
+      // /gutachter und /dispatch/karte oben — `export default function() {
+      // redirect('/woandershin') }` als Server-Component. Das triggert
+      // deterministisch React-#310/#418 im Next-AppRouter, sobald jemand
+      // auf der Stub-URL landet. Lösung wie gehabt: HTTP-301 via
+      // next.config.ts, page.tsx-File gelöscht.
+      //
+      // Source-Match ist überall exakt (kein `:path*`), weil unter den
+      // Stub-Pfaden Sub-Routen weiterleben sollen (z. B.
+      // /gutachter/termine/[id]/vor-ort, /admin/aufgaben/meine,
+      // /admin/aufgaben/alle, /kanzlei/dashboard, …).
+      //
+      // Static (7):
+      { source: '/admin/aufgaben', destination: '/admin/aufgaben/meine', permanent: true },
+      { source: '/admin/sachverstaendige/neu', destination: '/admin/sachverstaendige/anlegen', permanent: true },
+      { source: '/gutachter/mitteilungen', destination: '/gutachter/heute', permanent: true },
+      { source: '/gutachter/nachrichten', destination: '/gutachter/posteingang', permanent: true },
+      { source: '/gutachter/route', destination: '/gutachter/heute', permanent: true },
+      { source: '/gutachter/termine', destination: '/gutachter/kalender?view=liste', permanent: true },
+      { source: '/kanzlei', destination: '/kanzlei/dashboard', permanent: true },
+      // Dynamic Param-Stubs (2):
+      // AAR-713 Phase 1: Legacy /ablehnen/<token> → /sv/termin/<token>
+      // (vollständiger SV-Mini-Flow). Email-Clients lernen die neue URL
+      // über das 308.
+      { source: '/ablehnen/:token', destination: '/sv/termin/:token', permanent: true },
+      // AAR-kanzlei-portal PR 2b: /kanzlei/fall/[id] → /faelle/[id]. Die
+      // /faelle/layout.tsx erkennt Kanzlei-Rolle und rendert KanzleiNav-
+      // Shell; FALL_PERMISSIONS gated Edit-Actions auf READONLY.
+      { source: '/kanzlei/fall/:id', destination: '/faelle/:id', permanent: true },
     ]
   },
 };

@@ -1,10 +1,11 @@
 ﻿'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { UploadCloudIcon, XIcon, CheckCircle2Icon } from 'lucide-react'
-import { uploadSvLogo, uploadBueroLogo } from '@/lib/actions/branding-actions'
+import { UploadCloudIcon, XIcon, CheckCircle2Icon, SparklesIcon } from 'lucide-react'
+import { uploadSvLogo, uploadBueroLogo, applyBrandPreset } from '@/lib/actions/branding-actions'
 import { LoadingButton } from '@/components/ui/loading-button'
+import BrandPresetPicker from '@/components/branding/BrandPresetPicker'
 
 // KFZ-157 / AAR-220: Logo-Upload-Step im Willkommen-Wizard.
 //
@@ -28,6 +29,22 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // 2026-05-14: imgly Model preload bei Mount — kein 20-40s Wait beim ersten
+  // Upload-Click (88 MB Model + 12 MB WASM von staticimgly.com).
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const mod = await import('@imgly/background-removal')
+        if (cancelled) return
+        await mod.preload({ model: 'isnet_fp16' })
+      } catch (err) {
+        console.warn('[onboarding-branding] imgly preload skipped:', err)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
   const handleFile = useCallback(async (file: File) => {
     setError(null)
     if (file.size > 2 * 1024 * 1024) {
@@ -37,14 +54,36 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
 
     setUploading(true)
     try {
+      // 2026-05-14: Auto-BG-Remove auch hier (genau wie im BrandingEditor).
+      // Logo wird transparent — wirkt auf jeder Brand-Farbe gut. SVG + Mini-
+      // Files überspringen.
+      let uploadFile = file
+      const isVector = file.type === 'image/svg+xml'
+      const isTiny = file.size < 5 * 1024
+      if (!isVector && !isTiny) {
+        try {
+          console.info('[onboarding-branding] removing background…')
+          const mod = await import('@imgly/background-removal')
+          const cleaned = await mod.removeBackground(file)
+          console.info('[onboarding-branding] cleaned size=', cleaned.size)
+          uploadFile = new File(
+            [cleaned],
+            file.name.replace(/\.[^.]+$/, '') + '-clean.png',
+            { type: 'image/png' },
+          )
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err)
+          console.error('[onboarding-branding] BG-Remove fehlgeschlagen:', err)
+          setError(`Hintergrund-Entfernung übersprungen: ${msg.slice(0, 120)}. Original-Logo wird hochgeladen.`)
+        }
+      }
+
       const fd = new FormData()
-      fd.append('logo', file)
+      fd.append('logo', uploadFile)
       if (variant === 'buero_inhaber' && organisationId) {
         fd.append('organisation_id', organisationId)
       }
 
-      // AAR-220: uploadSvLogo/uploadBueroLogo generieren Theme + schreiben
-      // brand_theme JSONB direkt in die DB. Kein zusätzlicher Save-Call.
       const result = variant === 'buero_inhaber'
         ? await uploadBueroLogo(fd)
         : await uploadSvLogo(fd)
@@ -54,12 +93,39 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
         return
       }
       setLogoUrl(result.logo_url)
-      // Flag für die einmalige 2s-Brand-Transition (siehe GutachterShell).
+      // 2026-05-14: Direct in-place Transition statt warten auf Page-Reload.
+      // Globale CSS-Rule reagiert auf data-attribute (siehe globals.css).
       if (typeof window !== 'undefined') {
         localStorage.setItem('brand-just-changed', String(Date.now()))
+        document.body.setAttribute('data-brand-transition', 'on')
+        setTimeout(() => {
+          document.body.removeAttribute('data-brand-transition')
+        }, 1500)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+    } finally {
+      setUploading(false)
+    }
+  }, [variant, organisationId])
+
+  // 2026-05-14: Preset-Handler — wenn der SV kein eigenes Logo hat oder schnell
+  // etwas Standardes wählen will. Setzt brand_primary/secondary/accent +
+  // fontPairId direkt in die DB, lässt logo_url unverändert.
+  const handlePreset = useCallback(async (preset: { id: string }) => {
+    setError(null)
+    setUploading(true)
+    try {
+      const scope = variant === 'buero_inhaber' && organisationId ? 'org' : 'sv'
+      const result = await applyBrandPreset({ presetId: preset.id, scope })
+      if (!result.ok) {
+        setError(result.error ?? 'Preset konnte nicht angewendet werden')
+        return false
+      }
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Preset-Fehler')
+      return false
     } finally {
       setUploading(false)
     }
@@ -156,6 +222,24 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
       {error && (
         <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
           {error}
+        </div>
+      )}
+
+      {/* 2026-05-14: Preset-Picker — kuratierte Theme-Vorschläge für SVs ohne
+          Logo oder mit unkonkretem Logo. Klick auf eine Card schreibt Theme
+          direkt + globale Transition fadet die ganze App auf das neue Set. */}
+      {!logoUrl && (
+        <div className="space-y-3 pt-1">
+          <div className="flex items-center gap-2">
+            <SparklesIcon className="w-4 h-4 text-claimondo-ondo" />
+            <p className="text-sm font-semibold text-claimondo-navy">
+              Oder direkt eine Brand-Voreinstellung wählen
+            </p>
+          </div>
+          <p className="text-[11px] text-claimondo-shield">
+            Kuratierte KFZ-Themes mit passender Schriftart. Du kannst später jederzeit ein eigenes Logo hochladen.
+          </p>
+          <BrandPresetPicker onApply={handlePreset} />
         </div>
       )}
 

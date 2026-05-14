@@ -111,25 +111,28 @@ function isLikelyBackground(s: RawSwatch): boolean {
   return l >= 0.92 || l <= 0.08 || sat < 0.15
 }
 
-// AAR-455 Fix: Das alte Ranking (population*0.6 + saturation*0.4) ließ
-// Hintergrund-Farben (weißer Canvas, schwarzer PNG-Layer) die Primary
-// "gewinnen" wenn die Population-Differenz groß genug war — selbst bei
-// saturation=0 gewann Weiß gegen eine saturierte Markenfarbe mit kleiner
-// Population. Ergebnis: Primary wurde Weiß/Schwarz, WCAG-Cascade dunkelte
-// das auf Grau/Navy ab, Live-Vorschau wirkte wie Claimondo-Default.
+// 2026-05-14: Vibrancy-dominantes Ranking. Aaron-Brief „immer die knallige
+// Farbe" — bei KARpro (Anthrazit-Body + Gelb-Akzent) gewann das dunkle
+// Anthrazit weil es 70% der Pixel macht, obwohl es desaturiert ist. Knall-
+// Gelb (kleine Fläche, sat~0.95, L~0.55) ist aber das, was als Brand-Primary
+// wahrgenommen wird.
 //
-// Neue Logik: Brand-Swatches (nicht-Hintergrund) werden immer bevorzugt.
-// Fallback auf Hintergrund-Swatches nur wenn nichts anderes da ist. Das
-// Saturation-Gewicht innerhalb der Brand-Gruppe bleibt erhalten damit
-// kleine-aber-bunte Akzente den dominanten-aber-matten Body überholen.
+// Vibrancy = saturation × (1 - distanceFromMidLightness). Pure Schwarz/Weiß
+// haben distance=1 → vibrancy=0. Pure Mid-Sättigte Farben haben distance=0
+// → vibrancy=sat. Population als Tie-Breaker, nicht als Hauptfaktor.
 function rankByPopulationAndSaturation(swatches: RawSwatch[]): RawSwatch[] {
   if (swatches.length === 0) return []
   const brand = swatches.filter(s => !isLikelyBackground(s))
   const background = swatches.filter(isLikelyBackground)
   const maxPop = Math.max(...swatches.map(s => s.population)) || 1
 
-  const score = (s: RawSwatch) =>
-    (s.population / maxPop) * 0.6 + s.hsl[1] * 0.4
+  const score = (s: RawSwatch) => {
+    const [, sat, l] = s.hsl
+    const distFromMid = Math.abs(l - 0.5) // 0 bei mid, 0.5 bei extremen
+    const vibrancy = sat * (1 - distFromMid) // 0..0.5
+    // Vibrancy 70%, Population 30%. Tiebreak für gleich-knallige Brand-Vars.
+    return vibrancy * 0.7 + (s.population / maxPop) * 0.3
+  }
 
   const sortedBrand = [...brand].sort((a, b) => score(b) - score(a))
   const sortedBg = [...background].sort((a, b) => score(b) - score(a))
@@ -196,8 +199,25 @@ function enforceWcag(primary: string): { primary: string; safe: boolean } {
  * geringfügig driftet — aber der Prompt ist strikt-JSON).
  */
 export async function extractBrandPalette(imageUrl: string): Promise<BrandPaletteExtraction> {
-  // 1) node-vibrant: 6 Kandidaten
-  const palette = await Vibrant.from(imageUrl).getPalette()
+  // 1) node-vibrant: 6 Kandidaten.
+  // 2026-05-14: Pre-Processing für transparente Logos (Auto-BG-Remove-Output).
+  // node-vibrant v4 entfernt die Custom-Filter-Funktion (addFilter erwartet nur
+  // noch einen pre-registrierten Filter-Name). Ohne Filter sieht Vibrant trans-
+  // parente Pixel als weiß/schwarz und liefert "NO_COLORS". Lösung: per sharp
+  // den Alpha-Channel gegen Schwarz flatten — opake Logo-Pixel behalten ihre
+  // Farbe, transparente Pixel werden #000000. Vibrant's eingebauter Default-
+  // Filter wirft Pixel mit R+G+B < ~9 raus, also wirken die Ex-Transparent-
+  // Pixel wie sie sollten: unsichtbar fürs Ranking.
+  const sharp = (await import('sharp')).default
+  const imgResp = await fetch(imageUrl)
+  if (!imgResp.ok) throw new Error(`Logo-Fetch fehlgeschlagen: HTTP ${imgResp.status}`)
+  const srcBuffer = Buffer.from(await imgResp.arrayBuffer())
+  const flatBuffer = await sharp(srcBuffer)
+    .flatten({ background: '#000000' })
+    .png()
+    .toBuffer()
+
+  const palette = await Vibrant.from(flatBuffer).getPalette()
   const rawSwatches: RawSwatch[] = [
     palette.Vibrant, palette.DarkVibrant, palette.LightVibrant,
     palette.Muted, palette.DarkMuted, palette.LightMuted,

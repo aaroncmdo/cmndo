@@ -15,6 +15,8 @@ import { SiebenFehlerSection } from '@/components/landing/SiebenFehlerSection'
 import { PortalMockupSection } from '@/components/landing/sections/PortalMockupSection'
 import { WertminderungSandenDannerSection } from '@/components/landing/sections/WertminderungSandenDannerSection'
 import { TeslaEAutoSection } from '@/components/landing/sections/TeslaEAutoSection'
+import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
+import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
@@ -45,17 +47,6 @@ const HERO_BULLETS = [
   'Termin < 48 h vor Ort',
   'Live-Status im Portal',
   '+33 % mehr Schadensersatz',
-] as const
-
-const BGH_URTEILE = [
-  { az: 'BGH VI ZR 38/22 ff.', titel: 'Werkstattrisiko 2024',  text: '5 Leitentscheidungen 16.01.2024: Werkstattrisiko trägt die Versicherung.' },
-  { az: 'BGH VI ZR 65/18',     titel: 'UPE-Aufschläge',        text: 'UPE-Aufschläge auch bei fiktiver Abrechnung erstattungsfähig.' },
-  { az: 'BGH VI ZR 174/24',    titel: 'Beilackierung 2025',    text: 'Beilackierungskosten sind erstattungsfähiger Teil des Schadens.' },
-  { az: 'BGH VI ZR 53/09',     titel: 'Markenwerkstatt-Sätze', text: 'Unter 3 Jahren oder Scheckheft → Stundenverrechnung Markenwerkstatt.' },
-  { az: 'BGH VI ZR 119/04',    titel: 'Restwert regional',     text: 'Restwertbörsen überregional irrelevant — regionaler Markt zählt.' },
-  { az: 'BGH VI ZR 357/03',    titel: 'Wertminderung',         text: 'Merkantile Wertminderung auch bei älteren Fahrzeugen.' },
-  { az: 'BGH VI ZR 67/91',     titel: '130%-Regel',            text: 'Reparatur bis 130 % des Wiederbeschaffungswertes zulässig.' },
-  { az: 'BGH VI ZR 280/22',    titel: 'SV-Honorar-Risiko',     text: 'Auch überhöhte SV-Honorare gehen zu Lasten der Versicherung.' },
 ] as const
 
 const PROZESS_STEPS = [
@@ -295,16 +286,7 @@ export default async function KfzGutachterStadtPage({
       </section>
 
       {/* 3 — Trust-Strip */}
-      <section className="border-y border-claimondo-border/60 bg-white" aria-label="Kennzahlen">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
-          {KPIS.map((k) => (
-            <div key={k.label} className="py-6 text-center">
-              <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">{k.wert}</div>
-              <div className="mt-1 text-xs text-claimondo-ondo">{k.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <TrustStripSection kpis={[...KPIS]} />
 
       {/* 4 — Lokal-Block (stadt-spezifische Anker) */}
       <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="lokal-heading">
@@ -332,36 +314,10 @@ export default async function KfzGutachterStadtPage({
       </section>
 
       {/* 5 — BGH-Authority */}
-      <section className="bg-white py-16 sm:py-24" aria-labelledby="bgh-stadt-heading">
-        <div className="mx-auto max-w-6xl px-5">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Der BGH stützt Sie
-            </p>
-            <h2 id="bgh-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              8 BGH-Urteile, die Ihre Ansprüche absichern
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-              Höchstrichterliche Rechtsprechung von 1992 bis 2025 — bundeseinheitlich
-              auch {s.h1Anker} anwendbar. Versicherer kürzen trotzdem. Wir holen es zurück.
-            </p>
-          </div>
-          <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {BGH_URTEILE.map((u) => (
-              <article
-                key={u.az}
-                className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-claimondo-sm"
-              >
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-claimondo-navy">
-                  {u.az}
-                </span>
-                <h3 className="mt-3 text-base font-bold text-claimondo-navy">{u.titel}</h3>
-                <p className="mt-2 text-xs leading-relaxed text-claimondo-shield">{u.text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+      <BghAuthorityGrid
+        headingId="bgh-stadt-heading"
+        subline={` Bundeseinheitlich auch ${s.h1Anker} anwendbar. Versicherer kürzen trotzdem. Wir holen es zurück.`}
+      />
 
       {/* 5b — Portal-Mockup (Wie Uber) */}
       <PortalMockupSection />

@@ -10,6 +10,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { FounderSection } from '@/components/landing/FounderSection'
 import { SiebenFehlerSection } from '@/components/landing/SiebenFehlerSection'
 import { PortalMockupSection } from '@/components/landing/sections/PortalMockupSection'
+import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
@@ -198,16 +199,7 @@ export default function WieEsFunktioniertPage() {
       </section>
 
       {/* 2 — Trust-Strip (Zeit-KPIs) */}
-      <section className="border-y border-claimondo-border/60 bg-white" aria-label="Zeit-Kennzahlen">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
-          {KPIS.map((k) => (
-            <div key={k.label} className="py-6 text-center">
-              <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">{k.wert}</div>
-              <div className="mt-1 text-xs text-claimondo-ondo">{k.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <TrustStripSection kpis={[...KPIS]} ariaLabel="Zeit-Kennzahlen" />
 
       {/* 3 — Die 5 Schritte (ausführlich, alternierend) */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="wef-schritte">

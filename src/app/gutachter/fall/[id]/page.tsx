@@ -428,7 +428,7 @@ export default async function GutachterFallPage({
       .from('fall_dokumente')
       .select('original_filename, zurueckweisung_kommentar')
       .eq('fall_id', id)
-      .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
+      .like('storage_path', `claims/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
       .not('abgelehnt_am', 'is', null)
       .is('geloescht_am', null)
       .order('abgelehnt_am', { ascending: false })
@@ -448,7 +448,7 @@ export default async function GutachterFallPage({
       .select('id', { count: 'exact', head: true })
       .eq('fall_id', id)
       .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
-      .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
+      .like('storage_path', `claims/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
       .is('geloescht_am', null)
       .gt('hochgeladen_am', cutoff ?? '1970-01-01')
     abgebbareDokumenteAnzahl = count ?? 0
