@@ -1,9 +1,20 @@
 'use server'
 
+import { createHash } from 'node:crypto'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import type { OnboardingFeld, SaveOnboardingResult } from './types'
 
 const ALLOWED_TABLES = new Set<string>(['gutachter_finder_anfragen'])
+
+async function getClientIpHash(): Promise<string | null> {
+  const h = await headers()
+  const xff = h.get('x-forwarded-for')
+  const realIp = h.get('x-real-ip')
+  const raw = xff?.split(',')[0]?.trim() || realIp?.trim() || null
+  if (!raw) return null
+  return createHash('sha256').update(raw).digest('hex')
+}
 
 export async function saveOnboardingStep(
   anfrageId: string | null,
@@ -41,6 +52,28 @@ export async function saveOnboardingStep(
   let id = anfrageId
 
   if (!id) {
+    // AAR-915: Rate-Limit für anonyme Neu-Anfragen (max 5 / 1h pro IP).
+    // Greift nur beim INSERT — UPDATE-Pfad (Wizard-Weiterklicken auf
+    // bestehende Anfrage) bleibt unbegrenzt, sonst würde der Flow brechen.
+    const ipHash = await getClientIpHash()
+    if (ipHash) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: allowed, error: rlErr } = await (supabase as any).rpc(
+        'check_gfa_rate_limit',
+        { p_ip_hash: ipHash },
+      )
+      if (rlErr) {
+        console.error('[gfa-rate-limit] rpc failed', rlErr.message)
+        // Fail-open bei RPC-Fehler — Verfügbarkeit > Rate-Limit-Strenge
+      } else if (allowed === false) {
+        return {
+          ok: false,
+          error: 'Zu viele Anfragen von dieser Verbindung. Bitte später erneut versuchen.',
+          reason: 'rate_limited',
+        }
+      }
+    }
+
     // Shell-Datensatz anlegen — wird durch spätere Phase-Updates befüllt.
     // vorname/nachname/email sind NOT NULL → leere Strings als Platzhalter,
     // status='entwurf' signalisiert unvollständige Anfrage.

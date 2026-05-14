@@ -54,4 +54,4 @@ export type OnboardingPhase = {
 // dürfen keine Types/Konstanten exportieren (AAR-664 Crash-Pattern).
 export type SaveOnboardingResult =
   | { ok: true; anfrageId: string }
-  | { ok: false; error: string; reason?: 'anfrage_not_found' }
+  | { ok: false; error: string; reason?: 'anfrage_not_found' | 'rate_limited' }
