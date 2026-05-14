@@ -64,7 +64,7 @@ export default async function LinkVersendetPage({
               <li>Prüfen Sie den Spam-Ordner</li>
               <li>Der Link kann bis zu 2 Minuten brauchen</li>
               <li>
-                <Link href="/schaden-melden/prototyp" className="underline">
+                <Link href="/schaden-melden" className="underline">
                   Noch einmal von vorne anfangen
                 </Link>
               </li>

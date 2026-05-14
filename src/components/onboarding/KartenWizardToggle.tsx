@@ -16,7 +16,7 @@
 
 import { useState } from 'react'
 import { CalendarCheck, Mail } from 'lucide-react'
-import { MiniWizardClient } from '@/app/schaden-melden/prototyp/MiniWizardClient'
+import { MiniWizardClient } from '@/app/schaden-melden/MiniWizardClient'
 
 type Mode = 'voll' | 'mini'
 

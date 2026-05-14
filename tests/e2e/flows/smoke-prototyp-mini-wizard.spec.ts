@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
 import path from 'node:path'
 import fs from 'node:fs'
 
-// AAR-902 Prototyp-Smoke: Mini-Wizard auf /schaden-melden/prototyp.
+// AAR-902 Prototyp-Smoke: Mini-Wizard auf /schaden-melden.
 // Bestaetigt: Form ausfuellen -> Lead in DB -> flow_links-Token -> Magic-Link-
 // Email (im Dev-Server gelogged) -> Bestaetigungs-Page. Klick auf den Token
 // fuehrt zum existierenden /flow/[token]-Pfad (eigener Smoke).
@@ -57,7 +57,7 @@ test('Prototyp Mini-Wizard: Haftpflicht-Path → Magic-Link versendet', async ({
   })
   page.on('pageerror', (e) => console.log(`[BROWSER pageerror] ${e.message}`))
 
-  await page.goto('/schaden-melden/prototyp', { waitUntil: 'domcontentloaded' })
+  await page.goto('/schaden-melden', { waitUntil: 'domcontentloaded' })
   await dismissCookieBanner(page)
   await shot(page, 'wizard-leer')
 
@@ -75,11 +75,11 @@ test('Prototyp Mini-Wizard: Haftpflicht-Path → Magic-Link versendet', async ({
 
   await page.getByRole('button', { name: /login-link erhalten/i }).click()
 
-  await page.waitForURL(/\/schaden-melden\/prototyp\/link-versendet/, { timeout: 20_000 })
+  await page.waitForURL(/\/schaden-melden\/link-versendet/, { timeout: 20_000 })
   await page.waitForLoadState('networkidle').catch(() => {})
   await shot(page, 'bestaetigung-haftpflicht')
 
-  expect(page.url()).toContain('/schaden-melden/prototyp/link-versendet')
+  expect(page.url()).toContain('/schaden-melden/link-versendet')
   expect(await page.locator('body').textContent()).toMatch(/Login-Link/i)
 })
 
@@ -88,7 +88,7 @@ test('Prototyp Mini-Wizard: Selbstverschulden → Soft-Filter-Exit', async ({ pa
 
   page.on('pageerror', (e) => console.log(`[BROWSER pageerror] ${e.message}`))
 
-  await page.goto('/schaden-melden/prototyp', { waitUntil: 'domcontentloaded' })
+  await page.goto('/schaden-melden', { waitUntil: 'domcontentloaded' })
   await dismissCookieBanner(page)
 
   // Schuldfrage auf 'eigenverantwortung' aendern
@@ -103,7 +103,7 @@ test('Prototyp Mini-Wizard: Selbstverschulden → Soft-Filter-Exit', async ({ pa
 
   await page.getByRole('button', { name: /login-link erhalten/i }).click()
 
-  await page.waitForURL(/\/schaden-melden\/prototyp\/selbstverschulden/, { timeout: 20_000 })
+  await page.waitForURL(/\/schaden-melden\/selbstverschulden/, { timeout: 20_000 })
   await page.waitForLoadState('networkidle').catch(() => {})
   await shot(page, 'selbstverschulden-soft-filter')
 

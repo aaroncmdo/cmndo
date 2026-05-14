@@ -80,11 +80,11 @@ test('AARON-Strecke: /gutachter-finden Karten-Wizard → Magic-Link an Aaron', a
     .first()
     .click()
 
-  await page.waitForURL(/\/schaden-melden\/prototyp\/link-versendet/, { timeout: 20_000 })
+  await page.waitForURL(/\/schaden-melden\/link-versendet/, { timeout: 20_000 })
   await page.waitForLoadState('networkidle').catch(() => {})
   await shot(page, 'bestaetigung-magic-link-an-aaron')
 
-  expect(page.url()).toContain('/schaden-melden/prototyp/link-versendet')
+  expect(page.url()).toContain('/schaden-melden/link-versendet')
 
   console.log('\n========================================================')
   console.log(`[AARON-SMOKE] Run-ID: ${RUN_ID}`)

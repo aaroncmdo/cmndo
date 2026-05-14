@@ -84,7 +84,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
     return {
       success: true,
       leadId: lead.id as string,
-      redirectTo: '/schaden-melden/prototyp/selbstverschulden',
+      redirectTo: '/schaden-melden/selbstverschulden',
       kanal: 'disqualifiziert',
     }
   }
@@ -156,7 +156,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   return {
     success: true,
     leadId: lead.id as string,
-    redirectTo: `/schaden-melden/prototyp/link-versendet?email=${encodeURIComponent(data.email)}&kanal=${dispatched.kanal}`,
+    redirectTo: `/schaden-melden/link-versendet?email=${encodeURIComponent(data.email)}&kanal=${dispatched.kanal}`,
     kanal: dispatched.kanal === 'whatsapp' ? 'whatsapp' : 'email',
   }
 }

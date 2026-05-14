@@ -100,9 +100,9 @@ test('Schnell-Anfrage Submit → Magic-Link-Bestaetigung', async ({ page }) => {
     .getByRole('button', { name: /login-link erhalten/i })
     .first()
     .click()
-  await page.waitForURL(/\/schaden-melden\/prototyp\/link-versendet/, { timeout: 20_000 })
+  await page.waitForURL(/\/schaden-melden\/link-versendet/, { timeout: 20_000 })
   await page.waitForLoadState('networkidle').catch(() => {})
   await shot(page, '04-bestaetigung-mail-versendet')
 
-  expect(page.url()).toContain('/schaden-melden/prototyp/link-versendet')
+  expect(page.url()).toContain('/schaden-melden/link-versendet')
 })
