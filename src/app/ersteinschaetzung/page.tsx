@@ -7,6 +7,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
 import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
+import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
 export const metadata: Metadata = {
   title: 'KI-Ersteinschätzung — Ihr Kfz-Schaden in Sekunden bewertet',
@@ -166,26 +167,15 @@ export default function ErsteinschaetzungPage() {
       </section>
 
       {/* Trust-Strip */}
-      <section className="border-y border-claimondo-border/60 bg-white" aria-label="KI-Kennzahlen">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">&lt; 15 Min</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">bis zur Ersteinschätzung</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">0 €</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">Kosten · Unverbindlich</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">3 Fotos</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">+ Beschreibung reichen</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">§249 BGB</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">ab 750 € Gutachten-Anspruch</div>
-          </div>
-        </div>
-      </section>
+      <TrustStripSection
+        ariaLabel="KI-Kennzahlen"
+        kpis={[
+          { wert: '< 15 Min', label: 'bis zur Ersteinschätzung' },
+          { wert: '0 €', label: 'Kosten · Unverbindlich' },
+          { wert: '3 Fotos', label: '+ Beschreibung reichen' },
+          { wert: '§249 BGB', label: 'ab 750 € Gutachten-Anspruch' },
+        ]}
+      />
 
       {/* Direkt-Antwort */}
       <section className="pb-4 pt-2 sm:pb-6">
