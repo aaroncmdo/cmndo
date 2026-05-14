@@ -701,7 +701,7 @@ function RestoreBanner({
         type="button"
         onClick={onReset}
         className="text-[12px] font-semibold underline-offset-2 hover:underline"
-        style={{ color: '#9f1239' }}
+        style={{ color: 'var(--brand-danger, #9f1239)' }}
       >
         Neu starten
       </button>
