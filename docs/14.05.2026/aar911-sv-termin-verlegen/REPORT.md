@@ -48,34 +48,59 @@ In einem späteren Run-Versuch (Spec um Toast-/2FA-Detection erweitert + 8s-Wart
 |---|---|
 | 1 Login | Submit feuert, aber Button steht in `02a-direkt-nach-click.png` (8s nach Click) **immer noch** auf „Wird angemeldet…" — Spinner-Icon. `02-after-login.png` (nochmal 60s+ später) zeigt unverändert dieselbe Login-Page. Kein Toast-Error, kein 2FA-Field. |
 
-**Vermutung:** die Login-Server-Action gegen den Staging-Slot **hängt** oder antwortet sehr langsam für `aaron.sprafke@claimondo.de`. Andere Möglichkeiten:
+## Diagnose Run 2 (VPS-Inspektion 14.05.2026 21:03 UTC)
 
-- Server-Action wirft 500 ohne Toast-Pipe
-- Auth-Cookie wird gesetzt aber Client-Redirect-Trigger fehlt
-- nginx-Buffer-Issue (Memory `feedback_nginx_proxy_buffer.md` — 502 auf POST /login bei zu kleinem `proxy_buffer_size`)
+Live-Inspektion via `scripts/vps-ssh-exec.py` (Memory-Override `feedback_vps_claude_rolle.md`):
+
+**nginx error.log — bestätigt den Hänger:**
+```
+20:31:47 — POST /login → upstream prematurely closed connection
+20:52:26 — POST /login → upstream timed out (110: Connection timed out)
+20:52:27 — POST /login → upstream timed out
+20:59:46 — POST /login → upstream timed out
+```
+
+**Aber:** in den letzten 3 Minuten (21:00:10 - 21:03:01 UTC) zeigt `nginx access.log` **22 erfolgreiche** POST /login → HTTP **303 (Redirect)** vom selben Staging-Slot. Login funktioniert jetzt also einwandfrei.
+
+**PM2-Logs zeigen die Erklärung:** im out.log taucht `▲ Next.js 16.2.1 ✓ Ready in 0ms` ~14× hintereinander auf. Der Slot wurde mehrfach reloaded vor der aktuellen Instanz (`created at: 20:32:54`). Aaron's Smoke (Run 2) fiel zeitlich genau in diese Reload-/Warmup-Phase.
+
+**curl direkt auf VPS gegen `127.0.0.1:3001`:**
+- `/api/health` → 0.4s
+- GET `/login` → 0.02s
+- POST `/login` → 0.04s
+
+Server reagiert sofort, kein Hang, kein nginx-Buffer-Issue.
+
+## Auflösung
+
+**Cold-Start-Latenz nach PM2-Reload**, kein Code-Bug. Next.js + Turbopack braucht bei Erstaufruf einer Route die JIT-Compile-Zeit; während dieser ~30s antworten Server-Actions ggf. nicht innerhalb des nginx-Upstream-Timeouts (60s default). Bei häufigen Reloads (14× sichtbar) treten Cold-Starts wiederholt auf.
+
+**Konsequenz für Smoke-Strategie:** vor Run mind. einen Warmup-Hit (`GET /api/health` + `GET /login` + `GET /gutachter/kalender`) gegen den Slot fahren, damit die Login-Server-Action bereits JIT-compiled ist.
+
+Den Hänger als Befund in der REPORT zu listen war trotzdem richtig — die Telemetrie hat den Cold-Start-Edge-Case erst sichtbar gemacht.
 
 ## Befund
 
-**Zwei unabhängige Issues blockieren den Smoke:**
+**Zwei unabhängige Issues — eines davon bereits aufgelöst:**
 
-1. **Setup-Issue (Run 1):** Test-Aaron hat keine bestätigten Termine — selbst bei sauberem Login wäre der Modal-Flow nicht erreichbar
-2. **Login-Latenz/Hänger (Run 2):** der Login geht nicht mehr durch — Spinner-Stuck. Diagnose-Schritte:
-   - VPS PM2-Logs für `claimondo-v2-staging` (nach `[POST /login]`-Einträgen)
-   - nginx `error.log` auf „upstream sent too big header" o.ä.
-   - Sentry Server-Project nach Login-Action-Fehlern für die letzten Minuten
-   - Direkter `curl -i` gegen `https://app.staging.claimondo.de/login` mit Basic-Auth + Form-Body um zu sehen ob die Action-URL überhaupt antwortet
+1. **Setup-Issue (Run 1, weiterhin offen):** Test-Aaron hat keine bestätigten Termine — selbst bei sauberem Login wäre der Modal-Flow nicht erreichbar
+2. **Login-Latenz/Hänger (Run 2, aufgelöst):** war Cold-Start-Latenz nach PM2-Reload während Turbopack-JIT-Compile, kein Code-Bug. Slot ist inzwischen warm und Login funktioniert. Siehe „Diagnose Run 2" oben.
 
 ## Nächste Schritte
 
-### 1. Login-Hänger zuerst lösen (blockiert alles)
+### 1. (Optional) Smoke-Warmup-Hit einbauen
 
-- [ ] VPS-Logs auswerten: `ssh aaron@212.132.119.110 'pm2 logs claimondo-v2-staging --lines 200 --nostream'` + nach `[POST /login]` filtern
-- [ ] nginx-Logs: `sudo tail -200 /var/log/nginx/error.log` auf dem VPS — Memory `feedback_nginx_proxy_buffer.md` warnt vor 502 bei zu kleinem `proxy_buffer_size`
-- [ ] Sentry Server-Project auf Login-Action-Fehler der letzten Stunde prüfen
-- [ ] Falls nginx-Buffer schuld: PR mit `proxy_buffer_size 32k; proxy_buffers 8 32k;` für `app.staging.claimondo.de`-vhost
-- [ ] Falls Server-Action selbst hängt: lokal mit echten Staging-DB-Creds reproduzieren
+Cold-Start-Edge-Case verhindern. Spec könnte vor dem Login eine kurze Warmup-Sequence fahren:
 
-### 2. Sobald Login wieder geht — AAR-911-Setup nachziehen
+```ts
+await page.goto(`${BASE}/api/health`)
+await page.goto(`${BASE}/login`)
+// jetzt erst Form-Submit
+```
+
+Macht den Smoke robust gegen frische PM2-Reloads, ohne Server-Code zu ändern.
+
+### 2. AAR-911-Setup nachziehen (Setup-Issue, weiterhin offen)
 
 - [ ] Test-Auftrag in der Staging-DB anlegen für Test-Aaron (`aaron.sprafke@claimondo.de`):
   - Lead anlegen + zuweisen
