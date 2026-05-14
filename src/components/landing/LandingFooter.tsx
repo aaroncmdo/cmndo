@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
+import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
+
 // AAR-462 F4 → AAR-466 L3: 4-spaltiger Footer auf Navy.
 // 2026-05-09 Frontend-Audit: iOS-Glass-Pass — Schild-Logo + Wortmarke
 // statt Text-Logo, atmosphärische Spotlights für Tiefe, sanfte Hover-States
@@ -138,8 +140,8 @@ export function LandingFooter() {
             © {year} Claimondo GmbH. {t('rights')}
           </p>
           <div className="flex gap-4 text-sm text-white/70">
-            <a href="tel:+4922112345678" className="hover:text-white">
-              0221 123 456 78
+            <a href={`tel:${PHONE_E164}`} className="hover:text-white">
+              {PHONE_DISPLAY}
             </a>
             <a
               href="mailto:hallo@claimondo.de"

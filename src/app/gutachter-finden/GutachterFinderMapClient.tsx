@@ -49,8 +49,12 @@ const USER_LOCATION_ZOOM = 10.5
 // AAR-906: Marker-Colors über CSS-Vars (Whitelabel-fähig, Claimondo-Fallback).
 // Mapbox baut die Marker via innerHTML aus Template-Literals — `var()`-Strings
 // werden vom Browser beim Style-Resolution-Pass evaluiert.
-const COL_ONDO = 'var(--map-pin-accent, #4573A2)'
-const COL_NAVY = 'var(--map-pin-exact, #0D1B3E)'
+// Mapbox-Layer-Paint (fill-color, line-color) akzeptiert NUR raw color-strings,
+// keine CSS `var()`. Token-Audit-Skip-Header oben erlaubt diese hex literals.
+// Whitelabel-Branding läuft an anderer Stelle (var(--brand-*) in Tailwind-
+// Klassen + globals.css-Aliase auf claimondo-* Tokens).
+const COL_ONDO = '#4573A2'
+const COL_NAVY = '#0D1B3E'
 
 // Generischer Dead-Pin (Claimondo-Logo-Look) — nicht klickbar, kein Hover,
 // kein Popup. Wird für SVs mit paket!='standard' UND alle sv_leads

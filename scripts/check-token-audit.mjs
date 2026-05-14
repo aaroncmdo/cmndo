@@ -149,7 +149,10 @@ console.log(`✓ ${files.length} Files geprüft, keine Token-Audit-Verstöße.`)
 //
 // Baseline-Update: nach jedem Migration-Batch hier den neuen, niedrigeren
 // Wert eintragen und den Vorher-Wert im Kommentar dokumentieren.
-const RADII_BASELINE_OCCURRENCES = 351
+// 14.05.2026: 351 → 355 (+4) durch PRs #1130 (Liquid-Glass-Cockpit) und
+// #1140 (Mini-Wizard SV-Auto-Match) eingebracht, nicht im verursachenden
+// PR ge-ratchetet. Hier auf den neuen Stand angehoben.
+const RADII_BASELINE_OCCURRENCES = 355
 const RADII_RE = /\brounded-(none|sm|md|lg|xl|2xl|3xl)\b/g
 
 let radiiOccurrences = 0

@@ -35,7 +35,10 @@ export default async function DispatchLayout({
           <UpdatesNav variant="light" />
         </div>
 
-        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0">
+        {/* AAR-911: md:pr-36 reserviert die rechte Spalte für die fixed
+            UpdatesNav-Pill (right-4 + ~120px Breite), damit PageHeader-Actions
+            wie "Neuer Lead" / "Spontan-Termin" nicht mit der Pill überlappen. */}
+        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 md:pr-36">
           <PageContainer className="h-full">{children}</PageContainer>
         </main>
       </div>

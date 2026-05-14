@@ -337,7 +337,7 @@
   "ueber_uns": {
     "metadata": {
       "title": "Claimondo Hakkında — Köln'den Dijital Kfz Hasar Tazminatı",
-      "description": "2025'te Köln'de kurulan Kfz hasar tazminatı platformu. Kurucular: Nicolas Kitta (CEO) + Aaron Sprafke (COO). 89+ DAT-Partner, §249 BGB kapsamında ücretsiz."
+      "description": "2025'te Köln'de kurulan Kfz hasar tazminatı platformu. Kurucular: Nicolas Kitta (CEO) + Aaron Sprafke (COO). DAT sertifikalı ortak ağı, §249 BGB kapsamında ücretsiz (karşı tarafın sorumluluk sigortacısının onayına tabi)."
     },
     "hero": {
       "eyebrow": "Claimondo Hakkında",
@@ -359,8 +359,8 @@
       "p1_ceo_role": "(CEO) ve",
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
-      "p2": "Claimondo, tüm hasar tazminatı sürecini koordine eder: DAT sertifikalı bilirkişiler tarafından bağımsız bilirkişi raporu, LexDrive ortak hukuk bürosu aracılığıyla hukuki takip ve §249 BGB kapsamında hak edilen tüm taleplerin eksiksiz ödenmesi — onarım, değer kaybı, kullanım kaybı, kiralık araç, manevi tazminat. Kazada kusuru bulunmayan mağdurlar için hizmet ücretsizdir.",
-      "p3": "Ortak ağı şu anda Kuzey Ren-Westfalya'da 89+ DAT-Expert bilirkişiyi kapsamakta olup yaklaşık 460 bilirkişiyle ülke genelinde ölçeklenme planlanmaktadır. Randevular genellikle 48 saat içinde alınabilmektedir. Bağımsız bilirkişi talep hakkının yasal dayanağı §249 BGB ve süregelen BGH içtihadıdır (özellikle VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+      "p2": "Claimondo, tüm hasar tazminatı sürecini koordine eder: DAT sertifikalı bilirkişiler tarafından bağımsız bilirkişi raporu, trafik hukukunda uzmanlaşmış ortak hukuk bürosu aracılığıyla hukuki takip ve §249 BGB kapsamında hak edilen tüm taleplerin eksiksiz ödenmesi — onarım, değer kaybı, kullanım kaybı, kiralık araç, manevi tazminat. Kazada kusuru bulunmayan mağdurlar için hizmet ücretsizdir (karşı tarafın sorumluluk sigortacısının onayına tabi).",
+      "p3": "Ortak ağı, kamuya açık DAT dizinindeki DAT sertifikalı bilirkişilerden oluşur; Kuzey Ren-Westfalya odaklı olup ülke genelinde ulaşılabilir. Randevular genellikle 48 saat içinde alınabilmektedir. Bağımsız bilirkişi talep hakkının yasal dayanağı §249 BGB ve süregelen BGH içtihadıdır (özellikle VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     }
   },
   "gutachter_finder": {
@@ -466,7 +466,7 @@
       "voll_badge": "Önerilen",
       "voll_heading": "Tam olarak tazmin ettirin",
       "voll_li1": "Bağımsız bilirkişi tüm hasar kalemlerini belgeler",
-      "voll_li2": "Yılda 2.000+ dava deneyimli uzman avukat, 30 gün içinde talep gönderir",
+      "voll_li2": "Trafik hukukunda uzman avukat, BGH'ye uygun olarak 30 gün içinde talep gönderir",
       "voll_li3": "Tüm iletişimi biz üstleniriz",
       "voll_kostenlos": "Size 0 € — sigorta avukat + bilirkişi ücretini öder",
       "beispiel_label": "Örnek · 4.800 € hasar miktarı",

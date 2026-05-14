@@ -239,8 +239,8 @@ export default function OgImage() {
           {/* Stats-Leiste */}
           <div style={{ display: 'flex', gap: 40, marginBottom: 36 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontSize: 36, fontWeight: 800, color: 'white', fontFamily: 'system-ui', lineHeight: 1 }}>89+</span>
-              <span style={{ fontSize: 14, color: '#4573A2', fontFamily: 'system-ui' }}>DAT-Experten</span>
+              <span style={{ fontSize: 36, fontWeight: 800, color: 'white', fontFamily: 'system-ui', lineHeight: 1 }}>DAT</span>
+              <span style={{ fontSize: 14, color: '#4573A2', fontFamily: 'system-ui' }}>zertifiziertes Netzwerk</span>
             </div>
             <div style={{ width: 1, height: 52, background: 'rgba(69,115,162,0.25)', display: 'flex', alignSelf: 'center' }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

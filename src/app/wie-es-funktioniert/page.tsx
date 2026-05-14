@@ -24,7 +24,7 @@ import {
 export const metadata: Metadata = {
   title: 'Wie es funktioniert — Vom Unfall zur Auszahlung in 5 Schritten · Claimondo',
   description:
-    'In 5 Schritten von der Unfallmeldung zur Auszahlung — Ø 32 Tage. Berater-Rückruf <15 Min, DAT-Gutachter <48 h vor Ort, LexDrive-Anwalt setzt Ansprüche durch, live im Portal verfolgbar.',
+    'In 5 Schritten von der Unfallmeldung zur Auszahlung — Ø 32 Tage. Berater-Rückruf <15 Min, DAT-Gutachter <48 h vor Ort, Partnerkanzlei für Verkehrsrecht-Anwalt setzt Ansprüche durch, live im Portal verfolgbar.',
   keywords: [
     'Kfz-Schaden melden', 'Unfallschaden online', 'Schadensregulierung Ablauf',
     'Gutachter Termin online', 'digitale Schadensregulierung', 'Schadenakte Portal',
@@ -61,7 +61,7 @@ const SCHRITTE = [
     nr: 2,
     titel: 'Ihr Berater meldet sich',
     text: 'Persönlicher Rückruf in unter 15 Minuten. Ein fester Ansprechpartner für den gesamten Fall — kein Call-Center.',
-    detail: 'Er klärt mit Ihnen Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet 33 % Verlust.',
+    detail: 'Er klärt mit Ihnen Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet die typischen 30–40 % Prüfdienst-Kürzung (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).',
   },
   {
     nr: 3,
@@ -71,9 +71,9 @@ const SCHRITTE = [
   },
   {
     nr: 4,
-    titel: 'LexDrive setzt Ansprüche durch',
+    titel: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch',
     text: 'Unsere Partnerkanzlei übernimmt die gesamte Korrespondenz mit der gegnerischen Versicherung — auch gegen Prüfberichte und Kürzungen.',
-    detail: 'Gegen ControlExpert-/K-Expert-Kürzungen schreibt LexDrive zurück mit Verweis auf BGH VI ZR 65/18 (UPE), VI ZR 174/24 (Beilackierung), VI ZR 38/22 ff. (Werkstattrisiko). Notfalls Klage vor dem zuständigen Landgericht — Gegenseite zahlt.',
+    detail: 'Gegen ControlExpert-/K-Expert-Kürzungen schreibt Partnerkanzlei für Verkehrsrecht zurück mit Verweis auf BGH VI ZR 65/18 (UPE), VI ZR 174/24 (Beilackierung), VI ZR 38/22 ff. (Werkstattrisiko). Notfalls Klage vor dem zuständigen Landgericht — Gegenseite zahlt.',
   },
   {
     nr: 5,
@@ -92,12 +92,12 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Muss ich mit der gegnerischen Versicherung sprechen?',
     antwort:
-      'Nein, und Sie sollten es auch nicht. Sobald Sie den Schaden bei uns melden, übernimmt LexDrive die gesamte Kommunikation. Falls die gegnerische Versicherung Sie kontaktiert: einfach an uns weiterleiten.',
+      'Nein, und Sie sollten es auch nicht. Sobald Sie den Schaden bei uns melden, übernimmt Partnerkanzlei für Verkehrsrecht die gesamte Kommunikation. Falls die gegnerische Versicherung Sie kontaktiert: einfach an uns weiterleiten.',
   },
   {
     frage: 'Was passiert, wenn die Versicherung mein Gutachten ablehnt?',
     antwort:
-      'Das kommt häufig vor. ControlExpert / K-Expert erstellen Prüfberichte ohne Fahrzeugbesichtigung und kürzen systematisch UPE, Verbringung und Wertminderung. LexDrive antwortet mit BGH-Refs (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff.) und holt die Kürzungen vollständig zurück. Bei Bedarf gerichtlich — Gegenseite zahlt auch die Anwalts- und Prozesskosten.',
+      'Das kommt häufig vor. ControlExpert / K-Expert erstellen Prüfberichte ohne Fahrzeugbesichtigung und kürzen systematisch UPE, Verbringung und Wertminderung. Partnerkanzlei für Verkehrsrecht antwortet mit BGH-Refs (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff.) und holt die Kürzungen vollständig zurück. Bei Bedarf gerichtlich — Gegenseite zahlt auch die Anwalts- und Prozesskosten.',
   },
   {
     frage: 'Kann ich den Fortschritt selbst verfolgen?',
@@ -107,7 +107,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Muss ich in Vorleistung gehen?',
     antwort:
-      'Nein. Sicherungsabtretung gemäß §164 BGB überträgt den Anspruch in Höhe des Gutachterhonorars direkt an den Sachverständigen — der rechnet mit der Versicherung ab. Reparatur über die Werkstatt läuft analog. Bei unverschuldetem Unfall zahlen Sie 0 € Eigenanteil.',
+      'Nein. Sicherungsabtretung gemäß §164 BGB überträgt den Anspruch in Höhe des Gutachterhonorars direkt an den Sachverständigen — der rechnet mit der Versicherung ab. Reparatur über die Werkstatt läuft analog. Bei unverschuldetem Unfall zahlen Sie 0 € Eigenanteil (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
   },
   {
     frage: 'Was, wenn ich nicht in NRW wohne?',
@@ -125,7 +125,7 @@ export default function WieEsFunktioniertPage() {
           serviceSchema({
             name: 'Vollständige Kfz-Schadensregulierung in 5 Schritten',
             description:
-              'Vom unverschuldeten Unfall zur Auszahlung in durchschnittlich 32 Tagen. Berater-Rückruf <15 Min, DAT-Gutachter <48 h, LexDrive-Anwalt setzt Ansprüche durch. Live verfolgbar im Portal.',
+              'Vom unverschuldeten Unfall zur Auszahlung in durchschnittlich 32 Tagen. Berater-Rückruf <15 Min, DAT-Gutachter <48 h, Partnerkanzlei für Verkehrsrecht-Anwalt setzt Ansprüche durch. Live verfolgbar im Portal.',
             url: `${SITE_URL}/wie-es-funktioniert`,
           }),
           {

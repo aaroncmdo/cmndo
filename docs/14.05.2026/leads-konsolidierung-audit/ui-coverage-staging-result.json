@@ -1,0 +1,89 @@
+{
+  "admin": {
+    "found": [
+      "Gutachten-OCR (Datum)",
+      "Gutachten-OCR (FIN)",
+      "Gutachten-OCR (Lohnsatz)",
+      "Gutachten-OCR (SV-Honorar)",
+      "Gutachten-OCR (Kalkulationssystem)",
+      "Reparatur-Brutto",
+      "Reparatur-Netto",
+      "Minderwert",
+      "Nutzungsausfall-Tage",
+      "Polizei-Aktenzeichen",
+      "Gegner-VS-Nummer",
+      "Unfall-Konstellation",
+      "Finanzierung-Leasing",
+      "Finanzierung-Vertragsnr",
+      "Finanzierungsgeber-Adresse"
+    ],
+    "missing": [
+      "Gutachten-OCR (Materialkosten)",
+      "Gutachten-OCR (Mietwagen)",
+      "Restwert",
+      "Wiederbeschaffungswert",
+      "Schadensort-Adresse",
+      "Schadensort-PLZ",
+      "Gegner-Aktenzeichen",
+      "Ursache-Text"
+    ]
+  },
+  "sv": {
+    "found": [
+      "Gutachten-OCR (SV-Honorar)",
+      "Gutachten-OCR (Kalkulationssystem)",
+      "Nutzungsausfall-Tage",
+      "Unfall-Konstellation"
+    ],
+    "missing": [
+      "Gutachten-OCR (Datum)",
+      "Gutachten-OCR (FIN)",
+      "Gutachten-OCR (Lohnsatz)",
+      "Gutachten-OCR (Materialkosten)",
+      "Gutachten-OCR (Mietwagen)",
+      "Reparatur-Brutto",
+      "Reparatur-Netto",
+      "Minderwert",
+      "Restwert",
+      "Wiederbeschaffungswert",
+      "Schadensort-Adresse",
+      "Schadensort-PLZ",
+      "Polizei-Aktenzeichen",
+      "Gegner-VS-Nummer",
+      "Gegner-Aktenzeichen",
+      "Ursache-Text",
+      "Finanzierung-Leasing",
+      "Finanzierung-Vertragsnr",
+      "Finanzierungsgeber-Adresse"
+    ]
+  },
+  "kunde": {
+    "found": [
+      "Gutachten-OCR (Kalkulationssystem)",
+      "Nutzungsausfall-Tage",
+      "Unfall-Konstellation"
+    ],
+    "missing": [
+      "Gutachten-OCR (Datum)",
+      "Gutachten-OCR (FIN)",
+      "Gutachten-OCR (Lohnsatz)",
+      "Gutachten-OCR (Materialkosten)",
+      "Gutachten-OCR (Mietwagen)",
+      "Gutachten-OCR (SV-Honorar)",
+      "Reparatur-Brutto",
+      "Reparatur-Netto",
+      "Minderwert",
+      "Restwert",
+      "Wiederbeschaffungswert",
+      "Schadensort-Adresse",
+      "Schadensort-PLZ",
+      "Polizei-Aktenzeichen",
+      "Gegner-VS-Nummer",
+      "Gegner-Aktenzeichen",
+      "Ursache-Text",
+      "Finanzierung-Leasing",
+      "Finanzierung-Vertragsnr",
+      "Finanzierungsgeber-Adresse"
+    ]
+  }
+}

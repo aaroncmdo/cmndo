@@ -1123,12 +1123,32 @@ export async function signSAandCreateFall(
       (async () => {
         try {
           const { findBestSV } = await import('@/lib/dispatch/findBestSV')
-          await findBestSV({
+          const candidates = await findBestSV({
             fallLat: Number(fallLat),
             fallLng: Number(fallLng),
             terminDatum: (lead.gutachter_termin as string | undefined) ?? undefined,
           })
-        } catch (err) { console.error('[AAR-85] Dispatch-Matching:', err) }
+          // AAR-908 Gap 2: wenn ein Best-SV-Match vorliegt und der Fall noch
+          // keinen SV hat, weisen wir den Top-Candidate direkt zu. Dadurch
+          // sieht der Kunde im /flow/[token] Step 2 nicht "wir suchen einen
+          // SV" sondern den realen SV. SLA-Reminder + sv_termin-Insert
+          // bleibt Dispatcher-Sache (manueller Termin-Vorschlag).
+          const topSv = candidates?.[0]
+          if (topSv?.svId) {
+            const { data: currentFall } = await admin
+              .from('faelle')
+              .select('sv_id')
+              .eq('id', fall.id)
+              .single()
+            if (!currentFall?.sv_id) {
+              await admin
+                .from('faelle')
+                .update({ sv_id: topSv.svId, updated_at: new Date().toISOString() })
+                .eq('id', fall.id)
+              console.log('[AAR-908] Auto-SV-Match', { fallId: fall.id, svId: topSv.svId, score: topSv.score })
+            }
+          }
+        } catch (err) { console.error('[AAR-85/908] Dispatch-Matching:', err) }
       })()
     )
   }

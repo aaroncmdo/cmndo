@@ -13,6 +13,7 @@ import { useEffect } from 'react'
 import { ExternalLinkIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useFloatingSidebar } from '@/lib/branding/use-floating-sidebar'
 
 // CMM-32 P2: --app-sidebar-width auf <html> setzen, damit Portal-rendered
 // Modals (Modal.web.tsx) ihren Backdrop nur über den Content-Bereich legen
@@ -78,6 +79,9 @@ export function PortalNav({
   className = '',
 }: Props) {
   const pathname = usePathname()
+  const floatingMode = useFloatingSidebar()
+  // Sidebar bleibt w-56 (224 px) in beiden Modi — Floating-Pills sitzen mit
+  // py-3 px-3 INNERHALB der Sidebar-Breite, kein Layout-Offset nötig.
   useSidebarWidthVar('224px')
 
   function isActive(href: string, exact?: boolean) {
@@ -128,21 +132,38 @@ export function PortalNav({
   if (variant === 'dark') {
     return (
       <>
+        {/* 2026-05-14: Dark-Variant erbt floating-Pills via data-sidebar-mode
+            (CSS in globals.css). Floating-Default app-weit (Hook merkt die
+            Bar-Opt-out-Präferenz in localStorage). */}
         <aside
           role="navigation"
           aria-label={ariaLabel ?? 'Portal-Navigation'}
-          className={`hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 bg-claimondo-navy ${className}`}
+          data-sidebar-mode={floatingMode ? 'floating' : 'bar'}
+          className={`hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 ${
+            floatingMode ? 'bg-transparent py-3 px-3 gap-3' : 'bg-claimondo-navy'
+          } ${className}`}
         >
-          {headerSlot && <div className="px-5 py-5">{headerSlot}</div>}
+          {headerSlot && <div className={floatingMode ? '' : 'px-5 py-5'}>{headerSlot}</div>}
 
-          <nav className="flex-1 px-3 overflow-y-auto">
+          <nav className={`flex-1 ${floatingMode ? '' : 'px-3'} overflow-y-auto`}>
             {sections.map((section, i) => (
               <div
                 key={section.label ?? i}
-                className={`space-y-0.5 ${i > 0 ? 'pt-3 mt-3 border-t border-white/10' : 'pb-4'}`}
+                className={`space-y-0.5 ${
+                  !floatingMode && i > 0 ? 'pt-3 mt-3 border-t border-white/10' : ''
+                } ${!floatingMode && i === 0 ? 'pb-4' : ''}`}
               >
                 {section.label && (
-                  <p className="px-3 pt-1 pb-1 text-[10px] uppercase tracking-wider text-claimondo-light-blue/70 font-semibold">
+                  <p
+                    className={`px-3 pt-1 pb-1 text-[10px] uppercase tracking-wider font-semibold ${
+                      floatingMode ? '' : 'text-claimondo-light-blue/70'
+                    }`}
+                    style={
+                      floatingMode
+                        ? { color: 'var(--brand-sidebar-text, #7BA3CC)', opacity: 0.6 }
+                        : undefined
+                    }
+                  >
                     {section.label}
                   </p>
                 )}
@@ -152,7 +173,7 @@ export function PortalNav({
           </nav>
 
           {footerSlot && (
-            <div className="px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
+            <div className={floatingMode ? 'space-y-2' : 'px-3 pb-4 space-y-2 border-t border-white/10 pt-3'}>
               {footerSlot}
             </div>
           )}
@@ -161,8 +182,25 @@ export function PortalNav({
         {mobileItems && mobileItems.length > 0 && (
           <nav
             aria-label="Mobile Navigation"
-            className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-dark shadow-ios-md"
-            style={{ paddingTop: 8, paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
+            data-sidebar-mode={floatingMode ? 'floating' : 'bar'}
+            className={`md:hidden fixed left-3 right-3 z-50 flex justify-around items-center ${
+              floatingMode ? 'bottom-3 rounded-2xl' : 'bottom-0 left-0 right-0 glass-dark shadow-ios-md'
+            }`}
+            style={{
+              paddingTop: 8,
+              paddingBottom: floatingMode ? 8 : 'calc(8px + env(safe-area-inset-bottom))',
+              ...(floatingMode
+                ? {
+                    backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg, #0D1B3E) 55%, transparent)',
+                    backdropFilter: 'saturate(180%) blur(22px)',
+                    WebkitBackdropFilter: 'saturate(180%) blur(22px)',
+                    border: '1px solid color-mix(in srgb, white 22%, transparent)',
+                    boxShadow:
+                      '0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg, #0D1B3E) 45%, transparent), inset 0 1px 0 color-mix(in srgb, white 25%, transparent)',
+                    marginBottom: 'env(safe-area-inset-bottom)',
+                  }
+                : {}),
+            }}
           >
             {mobileItems.map((item) => {
               const active = isActive(item.href, item.exact)
@@ -190,16 +228,38 @@ export function PortalNav({
     )
   }
 
-  // light variant
+  // light variant — Kanzlei/Mitarbeiter (Claimondo-Bg statt Navy-Sidebar)
   return (
     <aside
       role="navigation"
       aria-label={ariaLabel ?? 'Portal-Navigation'}
-      className={`w-56 shrink-0 border-r border-claimondo-border bg-white overflow-y-auto ${className}`}
+      data-sidebar-mode={floatingMode ? 'floating-light' : 'bar'}
+      className={`w-56 shrink-0 overflow-y-auto ${
+        floatingMode ? 'bg-transparent p-3 space-y-3' : 'border-r border-claimondo-border bg-white'
+      } ${className}`}
     >
-      <div className="flex flex-col gap-0.5 p-3">
+      <div
+        className={`flex flex-col gap-0.5 ${floatingMode ? '' : 'p-3'}`}
+        style={
+          floatingMode
+            ? {
+                backgroundColor: 'color-mix(in srgb, white 65%, transparent)',
+                backdropFilter: 'saturate(180%) blur(22px)',
+                WebkitBackdropFilter: 'saturate(180%) blur(22px)',
+                border: '1px solid color-mix(in srgb, var(--claimondo-border) 70%, transparent)',
+                borderRadius: 18,
+                padding: '12px 14px',
+                boxShadow:
+                  '0 14px 36px color-mix(in srgb, var(--claimondo-navy) 12%, transparent), inset 0 1px 0 rgba(255,255,255,0.75)',
+              }
+            : undefined
+        }
+      >
         {sections.map((section, i) => (
-          <div key={section.label ?? i} className={i > 0 ? 'pt-3 mt-3 border-t border-claimondo-border' : ''}>
+          <div
+            key={section.label ?? i}
+            className={!floatingMode && i > 0 ? 'pt-3 mt-3 border-t border-claimondo-border' : ''}
+          >
             {section.label && (
               <p className="px-3 pt-1 pb-2 text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold">
                 {section.label}

@@ -25,7 +25,7 @@ import {
 import { STAEDTE, getStadtBySlug, type Stadt } from '../staedte'
 import { StadtLeadFormClient } from './StadtLeadFormClient'
 
-// /kfz-gutachter/[stadt] — Premium-Layout für alle 72 Städte.
+// /kfz-gutachter/[stadt] — Premium-Layout für alle SEO-Stadt-Routes.
 // Eine Section-Komposition, viele Consumer (AGENTS.md §3 Redundanz-Check).
 // Stadt-spezifisch: H1, Hero-Pill, JSON-LD LocalBusiness (geo, areaServed),
 // Lokal-Block (Landgericht, Kammer, PLZ, BVSK), FAQ-Mix, Cross-City-Pills.
@@ -35,25 +35,32 @@ export async function generateStaticParams() {
   return STAEDTE.map((s) => ({ stadt: s.slug }))
 }
 
+// AAR-UWG-Fix 14.05.2026: KPI-Block bleibt, wird aber per `methodikNote`
+// mit Aggregator-Hinweis versehen (UWG-konform). Konkrete Zahlen werden
+// per Aaron-TODO aus Supabase nachgeschärft.
 const KPIS = [
-  { wert: '2.000+', label: 'erfolgreich abgewickelte Fälle' },
+  { wert: '2.000+', label: 'vermittelte Schadensfälle' },
   { wert: '8 Mio. €+', label: 'Schadensersatz durchgesetzt' },
   { wert: '32 Tage', label: 'Ø bis zur Auszahlung' },
   { wert: '< 15 Min', label: 'bis zum ersten Rückruf' },
 ] as const
 
+const KPI_METHODIK =
+  'Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten ' +
+  'Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.'
+
 const HERO_BULLETS = [
   'DAT-zertifizierte Gutachter',
   'Termin < 48 h vor Ort',
   'Live-Status im Portal',
-  '+33 % mehr Schadensersatz',
+  'BGH-konform durchgesetzt',
 ] as const
 
 const PROZESS_STEPS = [
   { nr: 1, titel: 'Schaden melden',         text: '3 Felder, ohne Anmeldung. Online oder telefonisch.' },
   { nr: 2, titel: 'Berater meldet sich',    text: 'Persönlicher Rückruf in unter 15 Minuten.' },
   { nr: 3, titel: 'DAT-Gutachter vor Ort',  text: 'In unter 48 Stunden besichtigt — meist am Folgetag.' },
-  { nr: 4, titel: 'Anwalt aktiv',           text: 'LexDrive setzt Ansprüche durch — auch gegen Kürzungen.' },
+  { nr: 4, titel: 'Anwalt aktiv',           text: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen.' },
   { nr: 5, titel: 'Geld auf dem Konto',     text: 'Ø 32 Tage. Live im Portal verfolgbar.' },
 ] as const
 
@@ -67,7 +74,7 @@ export async function generateMetadata({
   if (!s) return { title: 'Stadt nicht gefunden' }
 
   const title = `Kfz-Gutachter ${s.name} — Unabhängig & kostenfrei nach Unfall · Claimondo`
-  const description = `Unabhängiger Kfz-Sachverständiger ${s.h1Anker} nach Verkehrsunfall. ${s.partnerSVs} DAT-Expert-Partner in der Region, Termin in unter 48 h, 0 € für unverschuldet Geschädigte (§249 BGB). Honorar nach BVSK ${s.bvskHonorarSpanne}.`
+  const description = `Unabhängiger Kfz-Sachverständiger ${s.h1Anker} nach Verkehrsunfall. DAT-zertifizierte Partner-Sachverständige aus dem Netzwerk, Termin in unter 48 h, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Honorar nach BVSK ${s.bvskHonorarSpanne}.`
 
   return {
     title,
@@ -102,11 +109,11 @@ function buildStadtFaq(s: Stadt) {
     },
     {
       frage: `Wo finde ich einen unabhängigen Kfz-Sachverständigen ${s.h1Anker}?`,
-      antwort: `Claimondo vermittelt ${s.h1Anker} an DAT-zertifizierte Partner-Gutachter mit lokaler Expertise. Sie melden den Schaden online (5 Min, ohne Anmeldung) — wir matchen Sie mit dem nächstgelegenen freien Sachverständigen. Termin vor Ort in unter 48 Stunden. Aktuell ${s.partnerSVs} Partner-SV in der Region ${s.name} (PLZ ${s.plzPrefix}).`,
+      antwort: `Claimondo vermittelt ${s.h1Anker} an DAT-zertifizierte Partner-Gutachter mit lokaler Expertise. Sie melden den Schaden online (5 Min, ohne Anmeldung) — wir matchen Sie mit dem nächstgelegenen freien Sachverständigen aus dem DAT-Partner-Netzwerk. Termin vor Ort in unter 48 Stunden. Verfügbar in ${s.name} (PLZ ${s.plzPrefix}) und im umliegenden ${s.bundesland}.`,
     },
     {
       frage: `Welches Gericht ist bei Streitigkeiten zuständig ${s.h1Anker}?`,
-      antwort: `Für Schadensregulierungs-Streitigkeiten ${s.h1Anker} ist erstinstanzlich das ${s.lokal.landgericht} zuständig. Geht eine Versicherung gerichtlich gegen ein Gutachten vor oder kürzt unrechtmäßig, klagt unsere Partnerkanzlei LexDrive in der Regel vor diesem Gericht. Bei Erfolg trägt die Gegenseite Anwalts- und Prozesskosten. Sie zahlen 0 €.`,
+      antwort: `Für Schadensregulierungs-Streitigkeiten ${s.h1Anker} ist erstinstanzlich das ${s.lokal.landgericht} zuständig. Geht eine Versicherung gerichtlich gegen ein Gutachten vor oder kürzt unrechtmäßig, klagt unsere Partnerkanzlei für Verkehrsrecht in der Regel vor diesem Gericht. Bei Erfolg trägt die Gegenseite Anwalts- und Prozesskosten. Sie zahlen 0 € (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
     },
     {
       frage: 'Was passiert, wenn die Versicherung das Gutachten kürzt?',
@@ -161,7 +168,7 @@ export default async function KfzGutachterStadtPage({
             telephone: PHONE_E164,
             priceRange: '€€',
             serviceType: 'Kfz-Schadensgutachten',
-            description: `Unabhängige DAT-zertifizierte Kfz-Sachverständige für Unfallschäden ${s.h1Anker}. ${s.partnerSVs} Partner-Gutachter, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte (§249 BGB).`,
+            description: `Unabhängige DAT-zertifizierte Kfz-Sachverständige für Unfallschäden ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
             areaServed: {
               '@type': 'City',
               name: s.name,
@@ -171,7 +178,7 @@ export default async function KfzGutachterStadtPage({
           },
           serviceSchema({
             name: `Kfz-Gutachter-Vermittlung ${s.name}`,
-            description: `Vermittlung an unabhängige DAT-zertifizierte Kfz-Sachverständige ${s.h1Anker}. ${s.partnerSVs} Partner-Gutachter, Termin <48 h, 0 € für unverschuldet Geschädigte.`,
+            description: `Vermittlung an unabhängige DAT-zertifizierte Kfz-Sachverständige ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin <48 h, 0 € für unverschuldet Geschädigte nach §249 BGB.`,
             url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
           }),
           {
@@ -238,7 +245,7 @@ export default async function KfzGutachterStadtPage({
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              {s.partnerSVs} Gutachter aktuell {s.h1Anker} verfügbar
+              DAT-Sachverständige aktuell {s.h1Anker} verfügbar
             </div>
             <h1 id="hero-heading" className="mt-5 text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
               Unfall gehabt?<br />
@@ -286,7 +293,7 @@ export default async function KfzGutachterStadtPage({
       </section>
 
       {/* 3 — Trust-Strip */}
-      <TrustStripSection kpis={[...KPIS]} />
+      <TrustStripSection kpis={[...KPIS]} methodikNote={KPI_METHODIK} />
 
       {/* 4 — Lokal-Block (stadt-spezifische Anker) */}
       <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="lokal-heading">
@@ -305,7 +312,7 @@ export default async function KfzGutachterStadtPage({
               <strong>Anwaltskammer:</strong> {s.lokal.kammer}.{' '}
               <strong>PLZ-Gebiet:</strong> {s.plzPrefix} (rund {s.bevoelkerung} Einwohner,{' '}
               Bundesland {s.bundesland}). Bei gerichtlichen Auseinandersetzungen mit
-              Versicherern klagt unsere Partnerkanzlei LexDrive vor dem{' '}
+              Versicherern klagt unsere Partnerkanzlei für Verkehrsrecht vor dem{' '}
               {s.lokal.landgericht} — dort kennen die Kammern. Honorar-Spanne nach BVSK:{' '}
               <strong>{s.bvskHonorarSpanne}</strong> (skaliert mit Schadenshöhe).
             </AnswerCapsule>
@@ -367,7 +374,7 @@ export default async function KfzGutachterStadtPage({
               Vor Ort — bundesweit
             </p>
             <h2 id="einsatzgebiet-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              110+ DAT-Sachverständige · Schwerpunkt NRW · 72 Städte
+              DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · bundesweit
             </h2>
           </div>
           <div className="mt-12 grid items-center gap-10 md:grid-cols-[1.2fr_1fr]">
@@ -390,14 +397,14 @@ export default async function KfzGutachterStadtPage({
                     href={`/kfz-gutachter/${c.slug}`}
                     className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo transition-colors hover:border-claimondo-ondo hover:text-claimondo-navy"
                   >
-                    {c.name} · {c.partnerSVs} SV
+                    {c.name}
                   </Link>
                 ))}
                 <Link
                   href="/kfz-gutachter"
                   className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield"
                 >
-                  Alle 72 Städte →
+                  Alle Einsatz-Städte →
                 </Link>
               </div>
             </div>

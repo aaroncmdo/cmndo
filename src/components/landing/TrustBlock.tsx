@@ -1,7 +1,7 @@
 import { ShieldCheck, Award, Scale } from 'lucide-react'
 
 // AAR-883: Shared Trust-Block für Conversion-Pages. Drei Partner-Pillars
-// (DAT, BVSK, LexDrive) + optionale Stat-Strip. Schließt CORE-EEAT-R-
+// (DAT, BVSK, Partnerkanzlei für Verkehrsrecht) + optionale Stat-Strip. Schließt CORE-EEAT-R-
 // Dimension auf Pages mit Trust-Lücke (vorher unter 70 im 13.05.2026-Audit).
 //
 // Bewusst kein aggregateRating — wird erst hinzugefügt wenn echte
@@ -13,7 +13,7 @@ import { ShieldCheck, Award, Scale } from 'lucide-react'
 type Stat = { wert: string; label: string }
 
 type Props = {
-  /** Optionale Stat-Zeile unter den Partner-Pills (z. B. „89+ DAT-Partner"). */
+  /** Optionale Stat-Zeile unter den Partner-Pills (z. B. „DAT-Partner-Netzwerk"). */
   stats?: Stat[]
   /** Heading über dem Block. Default: „Mit anerkannten Partnern". */
   heading?: string
@@ -34,9 +34,9 @@ const PARTNER = [
   },
   {
     icon: Scale,
-    title: 'LexDrive',
-    subtitle: 'Partnerkanzlei Verkehrsrecht',
-    url: 'https://lexdrive.de/',
+    title: 'Fachanwalt-Netzwerk',
+    subtitle: 'Partnerkanzlei für Verkehrsrecht',
+    url: 'https://claimondo.de/ueber-uns#partner',
   },
 ] as const
 

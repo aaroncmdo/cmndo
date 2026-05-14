@@ -164,6 +164,18 @@ p, li, blockquote, article, .prose {
   --claimondo-card: #ffffff;
   --claimondo-border: #e4e7ef;
 
+  /* 2026-05-14: Brand-Sidebar-Defaults für Portale ohne Whitelabel-Theme
+     (Admin, Dispatch, Kanzlei, Mitarbeiter — sie nutzen Claimondo-CI). Damit
+     greifen die Floating-Glass-Pill-Regeln (data-sidebar-mode="floating") auch
+     dort. Whitelabel-Portale (Gutachter, Kunde, Magic-Links) überschreiben
+     diese Werte via inline-style aus generateCssVars(theme). */
+  --brand-sidebar-bg: var(--claimondo-navy);
+  --brand-sidebar-text: var(--claimondo-light-blue);
+  --brand-sidebar-active: var(--claimondo-shield);
+  --brand-primary: var(--claimondo-navy);
+  --brand-secondary: var(--claimondo-ondo);
+  --brand-accent: var(--claimondo-light-blue);
+
   /* AAR-460 F2: Claimondo-Shadow-Tokens — bewusst mit Navy-Tint
      statt neutralem Grau. Seit AAR-745d (2026-05-13) im @theme-Block
      auch als Tailwind-Utilities verfügbar: `shadow-claimondo-sm/md/lg`. */
@@ -521,22 +533,71 @@ p, li, blockquote, article, .prose {
    treu bleiben. */
 [data-sidebar-mode="floating"] > div:not([class*="absolute"]),
 [data-sidebar-mode="floating"] > nav {
-  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 90%, transparent);
-  backdrop-filter: saturate(180%) blur(14px);
-  -webkit-backdrop-filter: saturate(180%) blur(14px);
-  border: 1px solid color-mix(in srgb, white 12%, transparent);
+  /* 2026-05-14 v2: Echtes Glassmorphism — 55% Sidebar-BG (statt 90%) damit der
+     backdrop-filter blur den Content/Map dahinter sichtbar weichzeichnet.
+     Stärkerer Blur (22px) + inset-highlight für Liquid-Glass-Anmutung. */
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  border: 1px solid color-mix(in srgb, white 22%, transparent);
   border-radius: 18px;
   padding: 12px 14px;
-  box-shadow: 0 10px 30px color-mix(in srgb, var(--brand-sidebar-bg) 38%, transparent);
+  box-shadow:
+    0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 25%, transparent);
 }
 [data-sidebar-mode="floating"] > div:not([class*="absolute"]) {
   /* Eigene Border-Logik der ursprünglichen Cards (border-b etc.) zurücknehmen. */
-  border-bottom: 1px solid color-mix(in srgb, white 12%, transparent) !important;
-  border-top: 1px solid color-mix(in srgb, white 12%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, white 22%, transparent) !important;
+  border-top: 1px solid color-mix(in srgb, white 22%, transparent) !important;
 }
 [data-sidebar-mode="floating"] > nav {
   flex: 1 1 auto;
   overflow-y: auto;
+}
+
+/* 2026-05-14: Brand-Heading-Font-Cascade in der Sidebar — Logo-Text und
+   Firmenname tragen die gewählte Racing-/Auto-Schrift. Nav-Item-Labels +
+   Section-Headers bekommen den Cascade per inline-style in GutachterShell. */
+aside[role="navigation"] > div:first-child a,
+aside[role="navigation"] > div:first-child p {
+  font-family: var(--brand-font-heading, inherit);
+  letter-spacing: -0.01em;
+}
+
+/* 2026-05-14: Body-Level-Trigger für Kunde-Layout-Sidebar (kunde-sidebar) —
+   die hat kein eigenes data-sidebar-mode-Attribut (Server-Component). Wenn
+   <body data-sidebar-mode="floating"> gesetzt ist (durch SidebarModeApplier
+   im Root-Layout), werden ihre direkten Children genauso zu Liquid-Glass-
+   Pills wie bei Gutachter/Admin/Dispatch. */
+body[data-sidebar-mode="floating"] aside.kunde-sidebar {
+  background-color: transparent !important;
+  padding: 12px;
+  gap: 12px;
+}
+body[data-sidebar-mode="floating"] aside.kunde-sidebar > * {
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  border: 1px solid color-mix(in srgb, white 22%, transparent);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow:
+    0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 25%, transparent);
+}
+body[data-sidebar-mode="floating"] aside.kunde-sidebar > nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+/* Mobile-Header (Gutachter + Kunde): im Floating-Mode auch als Glass-Bar mit
+   bottom-rounded statt klassischem opaken Header. Hebt sich von der darunter-
+   liegenden Content-Bar ab, statt sie zu „abschließen". */
+body[data-sidebar-mode="floating"] header.glass-branded {
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 60%, transparent) !important;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
 
 /* 2026-05-14: Elegante Brand-Transition nach Theme-Save. Wird via

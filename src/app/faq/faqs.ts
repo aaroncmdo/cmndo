@@ -20,7 +20,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Was verliere ich, wenn ich einfach "Geld nehme" ohne Gutachter?',
         antwort:
-          'Im Schnitt 33 % Ihres Anspruchs. Ein reales Beispiel aus der Praxis: Gutachtenwert 11.900 € → nach Versicherer-Kürzungen bleiben nur 8.000 € übrig. Verloren gehen: Mehrwertsteuer (§249 Abs. 2 BGB), UPE-Aufschläge, Verbringungskosten, Beilackierung — und häufig die komplette Wertminderung. Dazu das HIS-Risiko: Wer ohne Reparaturrechnung kassiert und später wieder einen Schaden hat, riskiert die vollständige Ablehnung durch den Versicherer.',
+          'Typischerweise 30–40 % Ihres Anspruchs — so lautet die quotierte Bandbreite von Versicherer-Prüfdienst-Kürzungen laut NDR-Reportage „Prüfdienstleister" (2022), Verbraucherzentrale-Auswertungen und BGH-Leitentscheidungen (VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24). Beispiel aus der Praxis: Gutachtenwert 11.900 € → nach Versicherer-Kürzungen bleiben rund 8.000 € übrig. Verloren gehen: Mehrwertsteuer (§249 Abs. 2 BGB), UPE-Aufschläge, Verbringungskosten, Beilackierung — und häufig die komplette Wertminderung. Dazu das HIS-Risiko: Wer ohne Reparaturrechnung kassiert und später wieder einen Schaden hat, riskiert die vollständige Ablehnung durch den Versicherer.',
       },
       {
         frage: 'Muss ich in Vorleistung gehen?',
@@ -175,7 +175,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Brauche ich wirklich einen Anwalt? Geht das nicht direkt mit der Versicherung?',
         antwort:
-          'Sie können direkt mit der Versicherung reden — verlieren dabei aber im Schnitt 33% Ihres Anspruchs. Versicherungen kürzen Wertminderung, UPE-Aufschläge, Verbringungskosten und mehr. Ein Anwalt kennt diese Taktiken. Da die Anwaltskosten bei Fremdverschulden vollständig die Gegenseite trägt, ist die Rechnung einfach: 0 € Risiko, 33% mehr Auszahlung. Ein Anwalt lohnt sich praktisch immer.',
+          'Sie können direkt mit der Versicherung reden — verlieren dabei aber typischerweise 30–40 % Ihres Anspruchs durch Prüfdienst-Kürzungen (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Versicherungen kürzen Wertminderung, UPE-Aufschläge, Verbringungskosten und mehr. Ein Anwalt kennt diese Taktiken. Da die Anwaltskosten bei Fremdverschulden vollständig die Gegenseite trägt, ist die Rechnung einfach: 0 € Risiko (nach §249 BGB, vorbehaltlich Anerkenntnis), BGH-konforme Maximalansprüche. Ein Anwalt lohnt sich praktisch immer.',
       },
       {
         frage: 'Was kostet mich der Anwalt?',
@@ -255,7 +255,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Verliere ich durch das Quotenvorrecht meinen Schadenfreiheitsrabatt?',
         antwort:
-          'Nicht automatisch. Der Beitragsanstieg durch Kasko-Nutzung (Höherstufungsschaden) ist als Folgeschaden gegen die Gegenseite geltend zu machen — quotenanteilig. Bei 50:50 trägt die Gegenseite 50 % der lebenslangen Mehrbeiträge. Bei 70:30 entsprechend mehr. Unser Anwalt LexDrive berechnet das durch und fordert es zurück.',
+          'Nicht automatisch. Der Beitragsanstieg durch Kasko-Nutzung (Höherstufungsschaden) ist als Folgeschaden gegen die Gegenseite geltend zu machen — quotenanteilig. Bei 50:50 trägt die Gegenseite 50 % der lebenslangen Mehrbeiträge. Bei 70:30 entsprechend mehr. Unsere Partnerkanzlei für Verkehrsrecht berechnet das durch und fordert es zurück.',
       },
     ],
   },
@@ -285,7 +285,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Was, wenn der Versicherer trotzdem auf dem überregionalen Restwert besteht?',
         antwort:
-          'Dann schreibt LexDrive zurück mit BGH VI ZR 119/04 und den 3 regionalen Angeboten aus dem Gutachten. In 95 % der Fälle akzeptiert die Versicherung die regionalen Werte. Im Streitfall klagen wir vor dem zuständigen Landgericht — die Rechtsprechung ist eindeutig auf Ihrer Seite.',
+          'Dann schreibt die Partnerkanzlei für Verkehrsrecht zurück mit BGH VI ZR 119/04 und den 3 regionalen Angeboten aus dem Gutachten. In der Regel akzeptiert die Versicherung daraufhin die regionalen Werte. Im Streitfall klagen wir vor dem zuständigen Landgericht — die Rechtsprechung ist eindeutig auf Ihrer Seite.',
       },
     ],
   },

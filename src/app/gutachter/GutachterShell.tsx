@@ -32,6 +32,8 @@ import TasksPill from '@/components/shared/TasksPill'
 import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { FONT_PAIRS, CLAIMONDO_DEFAULT_FONT_PAIR_ID, buildGoogleFontsUrl } from '@/lib/branding/fonts'
+import { useFloatingSidebar } from '@/lib/branding/use-floating-sidebar'
+import GutachterMobileTabBar from './GutachterMobileTabBar'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 import SVSpotlight from './_components/SVSpotlight'
 import WeatherBanner from '@/components/shared/WeatherBanner'
@@ -139,29 +141,20 @@ export default function GutachterShell({
   // Feldmodus übernimmt den vollen Viewport — Sidebar + FAB ausblenden damit
   // sie nicht über der Mapbox-Karte rendern (Sidebar hat lg:z-[1100] > z-50).
   const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
+  // 2026-05-14 Mobile-Cockpit: /heute (+ Index /gutachter) ist der Map-First-
+  // Cockpit-Screen — dort soll die Map unter die Header-Capsule bluten, also
+  // KEIN top-padding auf <main>. Alle anderen Routen (List-Views, Detail-
+  // Pages) brauchen pt = floating-header-Höhe damit der Content nicht
+  // dahinter verschwindet, und sie zeigen KEINE schwebende Wetter-Capsule
+  // (auf Listen ist Wetter Lärm — Cockpit-Information gehört auf /heute).
+  const isCockpitRoute = pathname === '/gutachter' || pathname === '/gutachter/heute'
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showSupport, setShowSupport] = useState(false)
 
-  // 2026-05-14: Floating-Sidebar-Pilot. Aaron will testen wie die Sidebar
-  // ohne durchgehenden Bar-Container aussieht — einzelne Glass-Pills für
-  // Logo, Nav-Gruppen, Profil. Aktivierbar via ?sidebar=floating (oder
-  // localStorage-Flag), damit der Vergleich gegen die klassische Bar leicht
-  // ist. Default bleibt klassisch.
-  const [floatingMode, setFloatingMode] = useState(false)
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const url = new URL(window.location.href)
-    const param = url.searchParams.get('sidebar')
-    if (param === 'floating') {
-      setFloatingMode(true)
-      localStorage.setItem('sidebar-mode', 'floating')
-    } else if (param === 'bar') {
-      setFloatingMode(false)
-      localStorage.setItem('sidebar-mode', 'bar')
-    } else {
-      setFloatingMode(localStorage.getItem('sidebar-mode') === 'floating')
-    }
-  }, [pathname])
+  // 2026-05-14: Floating-Sidebar via shared Hook — gleiche Präferenz gilt
+  // app-weit (Admin/Dispatch/Kanzlei/Kunde via PortalNav/KundeLayout). Opt-out
+  // über ?sidebar=bar.
+  const floatingMode = useFloatingSidebar()
   // CMM-36: Geo-Tracking beim App-Öffnen starten
   useGeoPosition(svId ?? null)
   // AAR-245: Verwaltung nicht mehr collapsible — alle Sektionen flach +
@@ -338,11 +331,15 @@ export default function GutachterShell({
   return (
     <MitteilungenProvider>
     <div
-      className="h-screen flex overflow-hidden"
+      /* 2026-05-14 Mobile-Cockpit: BG bleibt brand-primary nur auf lg+ (rahmt
+         die Desktop-Card-Sidebar). Auf Mobile setzen wir bg-claimondo-bg —
+         dann gibt es keinen sichtbaren brand-Rahmen mehr um die Map/Content;
+         die Glass-Header-Capsule + Tab-Bar tragen die Brand-Identität,
+         Hintergrund bleibt visuell ruhig. */
+      className="h-screen flex overflow-hidden bg-claimondo-bg lg:bg-[var(--brand-primary)]"
       style={{
         ...themeVars,
         ...fontVars,
-        backgroundColor: 'var(--brand-primary, #0D1B3E)',
         // Body-Text-Font auf den ganzen Shell — Headings (h1-h6) holen sich
         // global den heading-stack via globals.css.
         fontFamily: 'var(--brand-font-body, inherit)',
@@ -361,11 +358,17 @@ export default function GutachterShell({
           Background- und Border-Farben, damit Logo-Upload nicht ruckartig
           umschaltet. Im Feldmodus komplett ausgeblendet (Karte braucht
           vollen Viewport, Sidebar hat lg:z-[1100] > FeldmodusLayout z-50). */}
+      {/* 2026-05-14: Im Floating-Mode wird die Sidebar `lg:fixed` damit der
+          Main-Content sie unterläuft — erst dann hat backdrop-filter blur
+          überhaupt Content zum Weichzeichnen (z. B. Map auf /heute). Im Bar-
+          Mode bleibt sie `lg:relative` (Flex-Spalte, Solid-BG). */}
       {!isFeldmodus && <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
         data-sidebar-mode={floatingMode ? 'floating' : 'bar'}
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:z-[1100] ${
+          floatingMode ? 'lg:fixed' : 'lg:relative'
+        } ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } ${floatingMode ? 'py-3 px-3 gap-3 bg-transparent' : ''}`}
         style={floatingMode ? {
@@ -413,11 +416,21 @@ export default function GutachterShell({
         </div>
 
         {/* AAR-222: Gruppierte Nav mit Section-Headers + Badge-Counter
-            für Aufträge / Nachrichten. */}
+            für Aufträge / Nachrichten. 2026-05-14: Inaktive Items + Section-
+            Headers in --brand-secondary („ondo"-Tönung) statt grau, kleiner
+            (13px) und in der Brand-Heading-Schrift für konsistente Racing-/
+            Auto-Anmutung. Active bleibt weiß für Hervorhebung. */}
         <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
           {NAV_SECTIONS.map(section => (
             <div key={section.title}>
-              <p className="px-3 mb-1.5 text-[10px] uppercase tracking-wider text-white/40 font-semibold">
+              <p
+                className="px-3 mb-1.5 text-[10px] uppercase tracking-wider font-semibold"
+                style={{
+                  color: 'var(--brand-sidebar-text)',
+                  opacity: 0.6,
+                  fontFamily: 'var(--brand-font-heading, inherit)',
+                }}
+              >
                 {section.title}
               </p>
               <div className="space-y-0.5">
@@ -429,11 +442,13 @@ export default function GutachterShell({
                       key={href}
                       href={href}
                       onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-ios-xl text-sm font-medium ${
-                        active ? 'text-white' : 'text-white/60 hover:text-white hover:bg-white/5'
+                      className={`flex items-center gap-3 px-3 py-2 rounded-ios-xl text-[13px] font-medium ${
+                        active ? 'text-white' : 'hover:bg-white/5'
                       }`}
                       style={{
                         backgroundColor: active ? 'var(--brand-secondary)' : undefined,
+                        color: active ? '#FFFFFF' : 'var(--brand-sidebar-text)',
+                        fontFamily: 'var(--brand-font-heading, inherit)',
                         transition: 'color 500ms ease',
                       }}
                     >
@@ -470,11 +485,19 @@ export default function GutachterShell({
           userName={displayName}
         />
 
+        {/* 2026-05-14: Footer-Pill. Vorher nutzten H&S/Einstellungen/Abmelden
+            `text-claimondo-navy`/`text-claimondo-light-blue` — die mappen aber
+            auf var(--brand-primary)/var(--brand-accent), was bei knall-bunten
+            Brands (KARpro-Gelb) auf weißem Button-BG unsichtbar wird. Fix:
+            für den weißen H&S-Knopf hardcoded --brand-text-primary (immer
+            dunkel laut Theme-Generator), für die Inverted-Links die gleiche
+            "ondo"-Tönung wie die Nav-Items oben. */}
         <div className="mt-auto px-3 py-3 border-t border-white/10 space-y-2">
           <button
             type="button"
             onClick={() => setShowSupport(true)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium bg-white hover:bg-claimondo-bg transition-colors"
+            style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
             aria-label="Hilfe und Support öffnen"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -495,9 +518,17 @@ export default function GutachterShell({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-semibold truncate">{displayName}</p>
-              <p className="text-claimondo-light-blue text-xs">Sachverständiger</p>
+              <p
+                className="text-xs"
+                style={{ color: 'var(--brand-sidebar-text)' }}
+              >
+                Sachverständiger
+              </p>
             </div>
-            <UserIcon className="w-4 h-4 text-claimondo-light-blue group-hover:text-white shrink-0" />
+            <UserIcon
+              className="w-4 h-4 group-hover:text-white shrink-0"
+              style={{ color: 'var(--brand-sidebar-text)' }}
+            />
           </Link>
           {/* AAR-720: Einstellungen-Knopf unter Profil — Hub für Kalender,
               später weitere Konfigurations-Bereiche (Benachrichtigungen,
@@ -505,37 +536,49 @@ export default function GutachterShell({
           <Link
             href="/gutachter/einstellungen"
             onClick={() => setSidebarOpen(false)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium text-claimondo-light-blue hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium hover:text-white hover:bg-white/5 transition-colors"
+            style={{ color: 'var(--brand-sidebar-text)' }}
           >
             <SettingsIcon className="w-4 h-4" /> Einstellungen
           </Link>
           <button onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium text-claimondo-light-blue hover:text-red-400 hover:bg-white/5 transition-colors">
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium hover:text-red-400 hover:bg-white/5 transition-colors"
+            style={{ color: 'var(--brand-sidebar-text)' }}
+          >
             <LogOutIcon className="w-4 h-4" /> Abmelden
           </button>
         </div>
       </aside>}
 
-      <div className="flex-1 flex flex-col min-w-0 h-screen">
+      <div
+        className={`flex-1 flex flex-col min-w-0 h-screen ${
+          floatingMode ? 'lg:pl-64' : ''
+        }`}
+      >
         {/* Mobile Header (nur Hamburger + Logo, Glocke ist im Wetter-Banner) */}
         {/* AAR-211 + AAR-220: Header nutzt Theme-Sidebar-Bg (gleicher Look wie
             Sidebar-Hintergrund) mit sanfter 1.5s Color-Transition. */}
-        <header
-          className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0 glass-branded shadow-ios-md"
+        {/* 2026-05-14 Mobile-Cockpit-Header: schlanke Floating-Capsule statt
+            klassischer top-Bar. Brand-Logo links, Updates-Glocke rechts.
+            Hamburger entfällt — die neue Tab-Bar unten hat einen „Mehr"-Tab
+            der den Drawer öffnet. */}
+        <div
+          className="lg:hidden fixed left-3 right-3 z-40 flex items-center justify-between gap-3"
           style={{
-            backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 82%, transparent)',
+            top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+            backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent)',
+            backdropFilter: 'saturate(180%) blur(22px)',
+            WebkitBackdropFilter: 'saturate(180%) blur(22px)',
+            border: '1px solid color-mix(in srgb, white 22%, transparent)',
+            borderRadius: 22,
+            padding: '8px 14px',
             color: 'var(--brand-text-on-primary)',
+            boxShadow:
+              '0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent), inset 0 1px 0 color-mix(in srgb, white 25%, transparent)',
           }}
         >
-          <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-white/70 hover:text-white transition-colors" aria-label="Menü öffnen">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
-          </button>
-          {/* AAR-220 Audit: Mobile-Header zeigt branded Logo (mit weißem
-              Container, ohne Filter) wenn Custom-Branding aktiv — sonst
-              Claimondo-Schriftzug. Vorher war hier hardcoded "Claim ondo"
-              auch für gebrandete SVs → Inkonsistenz Sidebar vs Mobile. */}
           {logoUrl && useBrand ? (
-            <Link href="/gutachter" className="inline-flex items-center justify-center bg-white rounded-ios-lg p-1.5 shadow-sm">
+            <Link href="/gutachter" className="inline-flex items-center justify-center bg-white rounded-ios-lg p-1 shadow-sm">
               <img
                 src={logoUrl}
                 alt={firmenname ? `${firmenname} Logo` : 'Logo'}
@@ -551,19 +594,23 @@ export default function GutachterShell({
               />
             </Link>
           ) : (
-            <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
+            <Link
+              href="/gutachter"
+              className="text-base font-bold tracking-tight"
+              style={{ fontFamily: 'var(--brand-font-heading, inherit)' }}
+            >
+              <span className="text-white">Claim</span>
+              <span style={{ color: 'var(--brand-sidebar-text, #7BA3CC)' }}>ondo</span>
+            </Link>
           )}
-          {/* AAR-252: Glocke im Mobile-Header — war vorher nur im Wetter-
-              Banner, das aber bei SVs ohne standort_lat nicht rendert. */}
           <UpdatesNav variant="dark" />
-        </header>
+        </div>
 
-        {/* AAR-864 Polish: beide Wrapper (Wetter + Content) öffnen sich nach
-            rechts (rounded-r-none, kein right-padding) und schließen links
-            bündig zur Sidebar mit gleichem Abstand ab (pl-2 sm:pl-3 lg:pl-4
-            + rounded-l-2xl). Der navy-Hintergrund des Outer-Containers zieht
-            sich rechts durch. */}
-        <div className="pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4">
+        {/* Desktop: WeatherBanner als Section direkt unter Topbar mit Trailing-
+            Slot (Outbox + UpdatesNav). Mobile: nicht hier rendern — die
+            floating Header-Capsule führt UpdatesNav, und ein eigenes
+            kompaktes Weather-Element (siehe unten) overlayed über der Map. */}
+        <div className="hidden lg:block lg:pl-4 lg:pt-4">
           <WeatherBanner
             standortLat={standortLat ?? null}
             standortLng={standortLng ?? null}
@@ -576,15 +623,53 @@ export default function GutachterShell({
           />
         </div>
 
-        <div className="flex-1 pl-2 sm:pl-3 lg:pl-4 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4 overflow-hidden">
+        {/* Mobile-Wetter-Capsule: NUR auf /heute (Cockpit-Route). Auf List-
+            Views (Aufträge, Fälle, Kalender) ist Wetter Kontext-Lärm. */}
+        {isCockpitRoute && (
+          <div
+            className="lg:hidden fixed right-3 z-30 max-w-[60vw] pointer-events-none"
+            style={{ top: 'calc(env(safe-area-inset-top, 0px) + 84px)' }}
+          >
+            <div className="pointer-events-auto">
+              <WeatherBanner
+                standortLat={standortLat ?? null}
+                standortLng={standortLng ?? null}
+                className="relative px-3 py-2 flex items-center gap-3 rounded-2xl border border-white/20 shadow-[0_14px_36px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.25)]"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* 2026-05-14 Mobile-Cockpit-Refactor: auf Desktop bleibt der gerundete
+            BG-Wrapper (Sidebar-Card-Look), auf Mobile (< lg) bekommt der Main
+            keinerlei Chrome — Pages bleeden bis an die Viewport-Ränder, sodass
+            die Karte auf /heute echt fullbleed wird und die neue Floating-
+            Tab-Bar (unten) sowie der dünne Header (oben) als Glass-Layer
+            darüber schweben. */}
+        <div className="flex-1 lg:pl-4 lg:pt-4 lg:pb-4 overflow-hidden">
           <main
             id="main-content"
             role="main"
-            className="h-full overflow-y-auto rounded-l-2xl rounded-r-none bg-claimondo-bg shadow-sm p-2 sm:p-3 lg:p-4"
+            className={`h-full overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+96px)] lg:pb-0 lg:rounded-l-2xl lg:rounded-r-none lg:bg-claimondo-bg lg:shadow-sm lg:p-4 ${
+              isCockpitRoute ? '' : 'pt-[calc(env(safe-area-inset-top,0px)+76px)] px-3 lg:px-0 lg:pt-0'
+            }`}
           >
             {children}
           </main>
         </div>
+
+        {/* Mobile-Cockpit-Tab-Bar — primäre Navigation in 5 Glass-Tabs unten.
+            Drawer öffnen via „Mehr"-Tab für Sekundär-Items (Abrechnung,
+            Vertrag, Statistiken, Einstellungen, Abmelden). */}
+        {!isFeldmodus && (
+          <GutachterMobileTabBar
+            onOpenDrawer={() => setSidebarOpen(true)}
+            badges={{
+              auftraege: badgeCounts.auftraege,
+              kalender: badgeCounts.neueTermine,
+            }}
+          />
+        )}
       </div>
       {/* AAR-864: Portal-Root für Modals im SV-Portal. position:fixed mit
           left=256px (Sidebar-Breite) damit der Backdrop nur den Content-

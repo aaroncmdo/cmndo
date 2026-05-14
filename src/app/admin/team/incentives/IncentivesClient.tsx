@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { GiftIcon, UsersIcon, TrophyIcon, PlusIcon, ToggleLeftIcon, ToggleRightIcon } from 'lucide-react'
 import { createIncentive, toggleIncentive } from '../actions'
 import PageHeader from '@/components/shared/PageHeader'
-import { Modal } from '@/components/primitives'
+import { Button, Modal } from '@/components/primitives'
 
 type Incentive = {
   id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string
@@ -67,9 +67,13 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
         description={`${aktive.length} aktiv · ${inaktive.length} inaktiv`}
         icon={GiftIcon}
         actions={
-          <button onClick={() => { setShowDialog(true); setError(null) }} className="flex items-center gap-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium px-4 py-2.5 rounded-ios-xl transition-colors">
-            <PlusIcon className="w-4 h-4" /> Neues Incentive
-          </button>
+          <Button
+            tone="navy"
+            onPress={() => { setShowDialog(true); setError(null) }}
+            iconLeft={<PlusIcon className="w-4 h-4" />}
+          >
+            Neues Incentive
+          </Button>
         }
       />
 
@@ -164,8 +168,10 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
           </div>
           {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-ios-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-ios-xl transition-colors">Abbrechen</button>
-            <button type="submit" disabled={loading} className="flex-1 bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium py-2.5 rounded-ios-xl transition-colors disabled:opacity-50">{loading ? 'Erstelle...' : 'Erstellen'}</button>
+            <Button tone="ghost" fullWidth onPress={() => setShowDialog(false)}>Abbrechen</Button>
+            <Button tone="navy" fullWidth type="submit" disabled={loading}>
+              {loading ? 'Erstelle...' : 'Erstellen'}
+            </Button>
           </div>
         </form>
       </Modal>

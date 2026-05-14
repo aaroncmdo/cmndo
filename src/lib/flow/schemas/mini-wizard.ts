@@ -16,7 +16,8 @@ export const miniWizardSchema = z.object({
     .string()
     .trim()
     .regex(/^\+?[0-9 /()\-]{6,20}$/, 'Ungültiges Telefon-Format'),
-  vorname: z.string().trim().max(50).optional().or(z.literal('')),
+  vorname: z.string().trim().min(1, 'Vorname ist erforderlich').max(50),
+  nachname: z.string().trim().min(1, 'Nachname ist erforderlich').max(50),
   dsgvo_consent: z.literal(true, {
     error: 'DSGVO-Einwilligung ist erforderlich',
   }),

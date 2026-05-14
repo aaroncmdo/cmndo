@@ -27,7 +27,7 @@ async function requireGutachter() {
  * nach erfolgreicher Stripe-Anzahlung.
  */
 export type UploadLogoResult =
-  | { ok: true; logo_url: string; brand_primary: string; brand_secondary: string }
+  | { ok: true; logo_url: string; brand_primary: string; brand_secondary: string; brand_accent: string }
   | { ok: false; error: string }
 
 export async function uploadSvLogo(formData: FormData): Promise<UploadLogoResult> {
@@ -37,37 +37,81 @@ export async function uploadSvLogo(formData: FormData): Promise<UploadLogoResult
   if (!file || file.size === 0) return { ok: false, error: 'Keine Datei ausgewählt' }
   if (file.size > 2 * 1024 * 1024) return { ok: false, error: 'Datei zu groß (max 2 MB)' }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
-  if (!['png', 'jpg', 'jpeg', 'svg', 'webp'].includes(ext)) {
-    return { ok: false, error: 'Nur PNG, JPG, SVG oder WebP erlaubt' }
+  const rawExt = file.name.split('.').pop()?.toLowerCase() ?? 'png'
+  if (!['png', 'jpg', 'jpeg', 'svg', 'webp', 'avif'].includes(rawExt)) {
+    return { ok: false, error: 'Nur PNG, JPG, SVG, WebP oder AVIF erlaubt' }
+  }
+
+  // 2026-05-14: Onboarding-Pfad nutzt denselben Chroma-Key-BG-Remover wie
+  // /api/branding/upload (server-bg-remove.ts). Für SVG wird der Helper über-
+  // sprungen (Vektor), für alle Raster-Formate normalisiert er auf PNG mit
+  // sauberem Alpha — fronius/gall-Style Logos kommen so brandfähig in den
+  // Bucket.
+  let uploadBuffer: File | Buffer = file
+  let uploadContentType = file.type
+  let uploadExt = rawExt
+  if (file.type !== 'image/svg+xml') {
+    try {
+      const { stripSolidBackground } = await import('@/lib/branding/server-bg-remove')
+      const srcBuffer = Buffer.from(await file.arrayBuffer())
+      const result = await stripSolidBackground(srcBuffer)
+      uploadBuffer = result.cleaned
+      uploadContentType = result.contentType
+      uploadExt = result.ext
+      if (result.applied && result.bgColor) {
+        console.info(
+          `[KFZ-157] chroma-key applied — BG rgb(${result.bgColor.r},${result.bgColor.g},${result.bgColor.b})`,
+        )
+      }
+    } catch (err) {
+      console.warn('[KFZ-157] sharp post-process übersprungen:', err)
+    }
   }
 
   // AAR-218: Admin-Client für Storage — Identität oben bereits verifiziert.
   const db = createAdminClient()
-  const path = `${svId}/${Date.now()}.${ext}`
+  const path = `${svId}/${Date.now()}.${uploadExt}`
   const { error: uploadErr } = await db.storage
     .from('gutachter-logos')
-    .upload(path, file, { contentType: file.type, upsert: true })
+    .upload(path, uploadBuffer, { contentType: uploadContentType, upsert: true })
   if (uploadErr) return { ok: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
   const { data: urlData } = db.storage.from('gutachter-logos').getPublicUrl(path)
   const logoUrl = urlData.publicUrl
 
-  // Server-side Farb-Extraction via node-vibrant
+  // 2026-05-14: V2-Extraktion (extractBrandPalette) statt V1 (extractTwoColors).
+  // V2 nutzt Vibrancy-Ranking (knallige Logo-Farbe gewinnt) + sharp-flatten für
+  // transparente PNGs (Auto-BG-Remove-Output) + max-deltaE für secondary (=
+  // der gedeckte Logo-Ton, gut lesbar als Text). Aaron-Brief 14.05.: "knallige
+  // farbe wählen und ein setz daraus generieren, das aber auch die weniger
+  // knallige farbe enthält für schriften".
   let brand_primary = '#1E3A5F'
   let brand_secondary = '#4573A2'
+  let brand_accent = '#7BA3CC'
+  let recommendedFontCategory: 'racing' | 'elegance' | 'kanoo' = 'kanoo'
   try {
-    const { extractTwoColors } = await import('@/lib/branding/extract-colors')
-    const colors = await extractTwoColors(logoUrl)
-    brand_primary = colors.primary
-    brand_secondary = colors.secondary
+    const { extractBrandPalette } = await import('@/lib/branding/extract-colors')
+    const palette = await extractBrandPalette(logoUrl)
+    brand_primary = palette.primary
+    brand_secondary = palette.secondary
+    brand_accent = palette.accent
+    recommendedFontCategory = palette.recommendedFontCategory
   } catch (err) {
     console.error('[KFZ-157] Color-Extraction fehlgeschlagen, Defaults verwendet:', err)
   }
 
-  // AAR-220: Vollständiges Theme aus primary ableiten + zusätzlich speichern.
+  // AAR-220: Vollständiges Theme aus primary ableiten + extrahierte Sekundär-
+  // und Akzent-Farben überschreiben (sonst würden generateTheme()-Derivate
+  // gewinnen, die aus dem Logo extrahierten Werte aber sind authentischer).
   const { generateTheme } = await import('@/lib/branding/theme')
-  const theme = generateTheme(brand_primary)
+  const { DEFAULT_FONT_PER_CATEGORY } = await import('@/lib/branding/fonts')
+  const baseTheme = generateTheme(brand_primary)
+  const theme = {
+    ...baseTheme,
+    secondary: brand_secondary,
+    accent: brand_accent,
+    fontPairId: DEFAULT_FONT_PER_CATEGORY[recommendedFontCategory],
+  }
 
   // Speichern + use_custom_branding aktivieren (das Logo wird ja jetzt
   // genutzt — sonst koennten wir uns die ganze Extraktion sparen).
@@ -75,7 +119,7 @@ export async function uploadSvLogo(formData: FormData): Promise<UploadLogoResult
     logo_url: logoUrl,
     brand_primary,
     brand_secondary,
-    brand_accent: theme.accent,
+    brand_accent,
     brand_theme: theme,
     brand_extracted_at: new Date().toISOString(),
     use_custom_branding: true,
@@ -84,7 +128,7 @@ export async function uploadSvLogo(formData: FormData): Promise<UploadLogoResult
 
   revalidatePath('/gutachter')
   revalidatePath('/gutachter/willkommen')
-  return { ok: true, logo_url: logoUrl, brand_primary, brand_secondary }
+  return { ok: true, logo_url: logoUrl, brand_primary, brand_secondary, brand_accent }
 }
 
 /**
@@ -115,43 +159,72 @@ export async function uploadBueroLogo(formData: FormData): Promise<UploadLogoRes
   if (!file || file.size === 0) return { ok: false, error: 'Keine Datei ausgewählt' }
   if (file.size > 2 * 1024 * 1024) return { ok: false, error: 'Datei zu groß (max 2 MB)' }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
-  if (!['png', 'jpg', 'jpeg', 'svg', 'webp'].includes(ext)) {
-    return { ok: false, error: 'Nur PNG, JPG, SVG oder WebP erlaubt' }
+  const rawExt = file.name.split('.').pop()?.toLowerCase() ?? 'png'
+  if (!['png', 'jpg', 'jpeg', 'svg', 'webp', 'avif'].includes(rawExt)) {
+    return { ok: false, error: 'Nur PNG, JPG, SVG, WebP oder AVIF erlaubt' }
+  }
+
+  // 2026-05-14: Server-Chroma-Key auch im Büro-Upload (siehe uploadSvLogo).
+  let uploadBuffer: File | Buffer = file
+  let uploadContentType = file.type
+  let uploadExt = rawExt
+  if (file.type !== 'image/svg+xml') {
+    try {
+      const { stripSolidBackground } = await import('@/lib/branding/server-bg-remove')
+      const srcBuffer = Buffer.from(await file.arrayBuffer())
+      const result = await stripSolidBackground(srcBuffer)
+      uploadBuffer = result.cleaned
+      uploadContentType = result.contentType
+      uploadExt = result.ext
+    } catch (err) {
+      console.warn('[KFZ-157 buero] sharp post-process übersprungen:', err)
+    }
   }
 
   // AAR-218: Storage-Upload via Admin-Client. Pfad: org/<id>/... damit
   // Büro- und SV-Logos sich nicht beißen.
-  const path = `org/${organisation_id}/${Date.now()}.${ext}`
+  const path = `org/${organisation_id}/${Date.now()}.${uploadExt}`
   const { error: uploadErr } = await db.storage
     .from('gutachter-logos')
-    .upload(path, file, { contentType: file.type, upsert: true })
+    .upload(path, uploadBuffer, { contentType: uploadContentType, upsert: true })
   if (uploadErr) return { ok: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
   const { data: urlData } = db.storage.from('gutachter-logos').getPublicUrl(path)
   const logoUrl = urlData.publicUrl
 
+  // 2026-05-14: V2-Extraktion (siehe uploadSvLogo Kommentar).
   let brand_primary = '#1E3A5F'
   let brand_secondary = '#4573A2'
+  let brand_accent = '#7BA3CC'
+  let recommendedFontCategory: 'racing' | 'elegance' | 'kanoo' = 'kanoo'
   try {
-    const { extractTwoColors } = await import('@/lib/branding/extract-colors')
-    const colors = await extractTwoColors(logoUrl)
-    brand_primary = colors.primary
-    brand_secondary = colors.secondary
+    const { extractBrandPalette } = await import('@/lib/branding/extract-colors')
+    const palette = await extractBrandPalette(logoUrl)
+    brand_primary = palette.primary
+    brand_secondary = palette.secondary
+    brand_accent = palette.accent
+    recommendedFontCategory = palette.recommendedFontCategory
   } catch (err) {
     console.error('[KFZ-157] Buero-Color-Extraction fehlgeschlagen, Defaults verwendet:', err)
   }
 
-  // AAR-220: Theme ableiten + auf Org und Inhaber-SV speichern.
+  // AAR-220: Theme ableiten — extrahierte Sekundär/Akzent gewinnen vs. derive.
   const { generateTheme: genTheme } = await import('@/lib/branding/theme')
-  const theme = genTheme(brand_primary)
+  const { DEFAULT_FONT_PER_CATEGORY: fontMap } = await import('@/lib/branding/fonts')
+  const baseTheme = genTheme(brand_primary)
+  const theme = {
+    ...baseTheme,
+    secondary: brand_secondary,
+    accent: brand_accent,
+    fontPairId: fontMap[recommendedFontCategory],
+  }
 
   // Auf Org speichern → Sub-SVs erben das Branding via Layout-Lookup
   const { error } = await db.from('organisationen').update({
     logo_url: logoUrl,
     brand_primary,
     brand_secondary,
-    brand_accent: theme.accent,
+    brand_accent,
     brand_theme: theme,
     brand_extracted_at: new Date().toISOString(),
     use_custom_branding: true,
@@ -164,7 +237,7 @@ export async function uploadBueroLogo(formData: FormData): Promise<UploadLogoRes
     logo_url: logoUrl,
     brand_primary,
     brand_secondary,
-    brand_accent: theme.accent,
+    brand_accent,
     brand_theme: theme,
     brand_extracted_at: new Date().toISOString(),
     use_custom_branding: true,
@@ -172,7 +245,7 @@ export async function uploadBueroLogo(formData: FormData): Promise<UploadLogoRes
 
   revalidatePath('/gutachter')
   revalidatePath('/gutachter/willkommen')
-  return { ok: true, logo_url: logoUrl, brand_primary, brand_secondary }
+  return { ok: true, logo_url: logoUrl, brand_primary, brand_secondary, brand_accent }
 }
 
 /**

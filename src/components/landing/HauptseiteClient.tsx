@@ -207,7 +207,7 @@ function HeroSection() {
             <div className="flex flex-wrap items-center gap-6 border-t border-white/12 pt-6 pb-2">
               {[
                 { icon: '🛡', text: 'Offizieller DAT-Partner', bold: true },
-                { icon: '📍', text: '110+ Gutachter in NRW' },
+                { icon: '📍', text: 'DAT-Gutachter-Netzwerk in NRW' },
                 { icon: '⭐', text: '5,0 Google Bewertungen' },
               ].map(({ icon, text, bold }, i) => (
                 <div key={i} className="flex items-center gap-2">
@@ -237,7 +237,7 @@ function HeroSection() {
 // als "accent" gemeint, wurden aber als Background-Util angewendet — Cards waren
 // vollflächig ondo/navy/light-blue eingefärbt. Jetzt Glass-Pattern wie der Hero.
 const ZAHLEN = [
-  { zahl: '2.000+', label: 'Erfolgreich durchgesetzte Fälle' },
+  { zahl: '2.000+', label: 'Vermittelte Schadensfälle (Aggregat)' },
   { zahl: '8 Mio. €+', label: 'Schadenssumme erwirkt' },
   { zahl: '32 Tage', label: 'Ø Abwicklungsdauer' },
   { zahl: '< 15 Min', label: 'WhatsApp-Antwortzeit' },
@@ -371,7 +371,7 @@ const UNTERSCHIED_CARDS = [
   {
     icon: MapPin,
     sub: 'NRW-weit',
-    title: '110+ DAT-Gutachter in NRW',
+    title: 'DAT-Gutachter-Netzwerk in NRW',
     body: 'Geprüfte Sachverständige innerhalb von Stunden bei Ihnen. KI-gestützte Vorabkalkulation bereits vor dem Ortstermin.',
   },
   {
@@ -932,7 +932,7 @@ function NrwSection() {
 
             <div className="mt-10 flex gap-8 border-t border-white/10 pt-8">
               {[
-                { n: '110+', l: 'Gutachter in NRW' },
+                { n: 'DAT', l: 'Gutachter-Netzwerk NRW' },
                 { n: '< 24h', l: 'Ø Reaktionszeit' },
                 { n: '18 Mio.', l: 'Einwohner erreicht' },
               ].map(({ n, l }) => (
@@ -960,7 +960,7 @@ function NrwSection() {
                 </div>
               </div>
               <p className="mt-3 text-center font-mono text-[11px] tracking-[.08em] text-white/30">
-                110+ Gutachter · Gesamtes NRW abgedeckt
+                DAT-Gutachter-Netzwerk · Gesamtes NRW abgedeckt
               </p>
             </div>
           </FadeUp>
@@ -982,7 +982,7 @@ const FAQS = [
   },
   {
     q: 'Wie schnell ist ein Gutachter bei mir?',
-    a: 'In den meisten Fällen innerhalb von 24 Stunden nach Ihrer Meldung. Unser Netz aus 110+ Gutachtern in NRW ermöglicht schnelle Einsätze ohne lange Wartezeiten.',
+    a: 'In den meisten Fällen innerhalb von 24 Stunden nach Ihrer Meldung. Unser DAT-Gutachter-Netzwerk in NRW ermöglicht schnelle Einsätze ohne lange Wartezeiten.',
   },
   {
     q: 'Was passiert, wenn die Versicherung kürzt oder blockiert?',

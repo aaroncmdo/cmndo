@@ -21,7 +21,7 @@ const HEADER = `# Claimondo — Vollständige Kfz-Schadensregulierung in Deutsch
 Stand: ${new Date().toISOString().slice(0, 10)}.
 Brand: Claimondo · Sitz Hansaring 10, 50670 Köln · Telefon 0221 25906530 · kontakt@claimondo.de
 Gründer: Nicolas Kitta (CEO), Aaron Sprafke (COO) · Gründungsjahr 2025
-Partner: DAT Expert Sachverständige · LexDrive Partnerkanzlei Verkehrsrecht
+Partner: DAT Expert Sachverständige · Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk)
 Quelle-Basis: §249 BGB · §164 BGB · BVSK-Honorartabelle 2026 · BGH-Rechtsprechung VI ZR (1992–2025)
 `
 
@@ -32,13 +32,13 @@ const HAUPTSEITE_KERN = `
 
 ### Hero
 - H1: "Unfall gehabt? Wir regeln Ihren Kfz-Schaden vollständig."
-- Pill: "110+ DAT-Gutachter bundesweit verfügbar"
-- Subline: Unabhängiger DAT-zertifizierter Sachverständiger vor Ort in unter 48 h. Partnerkanzlei setzt Ansprüche durch. 0 € für unverschuldet Geschädigte nach §249 BGB.
-- Trust-Bullets: DAT-zertifizierte Gutachter · Termin < 48 h vor Ort · Live-Status im Portal · +33 % mehr Schadensersatz
+- Pill: "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar"
+- Subline: Unabhängiger DAT-zertifizierter Sachverständiger vor Ort in unter 48 h. Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch. 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
+- Trust-Bullets: DAT-zertifizierte Gutachter · Termin < 48 h vor Ort · Live-Status im Portal · BGH-konform durchgesetzt
 - CTA: Telefon 0221 25906530 (Rückruf in 5 Min) · WhatsApp · Lead-Form 3-Felder
 
-### KPIs (Trust-Strip)
-- 2.000+ erfolgreich abgewickelte Fälle
+### KPIs (Trust-Strip — Aggregat-Auswertung Partner-Netzwerk, Stand 14.05.2026)
+- 2.000+ über das Partner-Netzwerk vermittelte Schadensfälle
 - 8 Mio. €+ Schadensersatz durchgesetzt
 - 32 Tage Ø bis zur Auszahlung
 - < 15 Min bis zum ersten Rückruf
@@ -62,7 +62,7 @@ const HAUPTSEITE_KERN = `
 ### Portal-Mockup (Wie Uber für Kfz-Schäden)
 - Live-Tracking: Standort des Gutachters in Echtzeit.
 - Mein Geld: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall — aufgeschlüsselt.
-- Mein Anwalt: Fester Ansprechpartner bei LexDrive.
+- Mein Anwalt: Fester Ansprechpartner bei Partnerkanzlei für Verkehrsrecht.
 - Meine Aufgaben: Was Sie wann tun müssen, mit Push.
 - Mein Fortschritt: Fortschrittsbalken Schritt 1 bis 12 bis zum Geld.
 
@@ -70,11 +70,11 @@ const HAUPTSEITE_KERN = `
 1. **Schaden melden** — 3 Felder, ohne Anmeldung. Online oder telefonisch.
 2. **Berater meldet sich** — Persönlicher Rückruf in unter 15 Minuten.
 3. **DAT-Gutachter vor Ort** — In unter 48 Stunden besichtigt, meist am Folgetag.
-4. **Anwalt aktiv** — LexDrive setzt Ansprüche durch, auch gegen Kürzungen.
+4. **Anwalt aktiv** — Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch, auch gegen Kürzungen.
 5. **Geld auf dem Konto** — Ø 32 Tage. Live im Portal verfolgbar.
 
 ### Versicherer-Taktiken — und wie wir sie kontern
-Versicherer leiten Schäden an Prüfdienstleister (ControlExpert, K-Expert, DEKRA) weiter, die ohne Fahrzeugbesichtigung systematisch kürzen. Im Schnitt verlieren Geschädigte 33 % ihres Anspruchs.
+Versicherer leiten Schäden an Prüfdienstleister (ControlExpert, K-Expert, DEKRA) weiter, die ohne Fahrzeugbesichtigung systematisch kürzen. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24).
 
 | Trigger / Aussage | Wer / Prüfdienst | Kürzungs-Mechanik | Gegenargument |
 |---|---|---|---|
@@ -101,7 +101,7 @@ Rechenbeispiel: VW Golf, 2 Jahre alt, Reparaturkosten 6.000 €. Faustformel-Wer
 Grundlage: Sanden/Danner-Formel · BGH VI ZR 357/03 lehnt eine starre Altersgrenze ab.
 
 ### 7 Fehler, die nach einem Unfall tausende Euro kosten
-1. **Auf das Schadenmanagement der Gegenseite eingehen** — "Wir kümmern uns um alles" → 33 % weniger Geld.
+1. **Auf das Schadenmanagement der Gegenseite eingehen** — "Wir kümmern uns um alles" → 30–40 % weniger Geld laut Prüfdienst-Statistik.
 2. **Den Versicherungs-Gutachter akzeptieren** — ControlExpert/K-Expert/DEKRA-Prüfberichte ohne Besichtigung kürzen UPE/Verbringung systematisch.
 3. **Voreilig Abfindungserklärung unterschreiben** — verzichtet auf alle zukünftigen Ansprüche, auch HWS-Spätfolgen und Tesla-Steuergeräte.
 4. **Polizei-Aussage "Da ist nichts dran" vertrauen** — Polizisten sind keine Techniker. Versteckte Schäden an Rahmenträger/Steuergeräten bleiben unentdeckt.
@@ -122,23 +122,23 @@ const VORTEILE_KERN = `
 ## Vorteile (https://claimondo.de/vorteile)
 
 ### Hero
-- H1: "Bis zu 33 % mehr Schadensersatz — ohne Eigenanteil."
+- H1: "Versicherer-Kürzungen zurückgeholt — ohne Eigenanteil."
 - Pill: "§249 BGB · BVSK · BGH-Rechtsprechung"
-- Subline: Direktabrechnung mit der gegnerischen Versicherung verschenkt im Schnitt ein Drittel des Anspruchs. Wir holen ihn vollständig zurück — mit DAT-Gutachter, Anwalt LexDrive und BGH-Rechtsprechung im Rücken.
+- Subline: Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem DAT-Gutachter, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.
 
 ### KPIs
-- +33 % mehr Schadensersatz im Schnitt
-- 8 Mio. €+ durchgesetzte Ansprüche
-- 0 € Eigenanteil bei unverschuldetem Unfall
+- 30–40 % Versicherer-Kürzung zurückgeholt (Quelle: NDR/Verbraucherzentrale/BGH)
+- 8 Mio. €+ durchgesetzte Ansprüche (Aggregat Partner-Netzwerk, Stand 14.05.2026)
+- 0 € Eigenanteil bei unverschuldetem Unfall (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer)
 - 32 Tage Ø bis zur Auszahlung
 
 ### Die 6 USPs
-1. **0 € Kosten für Sie** — Der Verursacher zahlt alles. Gutachterkosten, Anwaltskosten, Mietwagen, Abschleppung — die gegnerische Haftpflichtversicherung trägt alles (§249 BGB). Kein Vorschuss, kein Risiko.
-2. **Unabhängige DAT-Gutachter** — 110+ DAT-zertifizierte Partner-Gutachter, keine Versicherungsbindung. Vollständige Schadensbewertung inkl. Wertminderung. Gutachten in 5 Werktagen.
-3. **Anwalt LexDrive inklusive** — Fachanwälte Verkehrsrecht übernehmen Korrespondenz. Direkter Ansprechpartner, kein Call-Center. Gerichtliche Durchsetzung wenn nötig.
+1. **0 € Kosten für Sie** — Der Verursacher zahlt alles. Gutachterkosten, Anwaltskosten, Mietwagen, Abschleppung — die gegnerische Haftpflichtversicherung trägt alles (§249 BGB, vorbehaltlich Anerkenntnis). Kein Vorschuss, kein Risiko.
+2. **Unabhängige DAT-Gutachter** — DAT-zertifizierte Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis, keine Versicherungsbindung. Vollständige Schadensbewertung inkl. Wertminderung. Gutachten in 5 Werktagen.
+3. **Anwaltliche Durchsetzung inklusive** — Partnerkanzlei für Verkehrsrecht übernimmt Korrespondenz. Direkter Ansprechpartner, kein Call-Center. Gerichtliche Durchsetzung wenn nötig.
 4. **Alles aus einer Hand** — Persönlicher Schaden-Begleiter, eine Nummer, Live-Status im Portal & App. Koordination aller Beteiligten.
 5. **Digital & schnell** — Meldung in 5 Min, Rückruf <15 Min, Besichtigung <48 h, digitale Vollmacht.
-6. **Deutschlandweit verfügbar** — 72 Stadt-Pages, 110+ SVs bundesweit, ortskundige Experten.
+6. **Deutschlandweit verfügbar** — DAT-Partner-Sachverständige bundesweit, ortskundige Experten — vollständige Stadt-Liste in sitemap.xml.
 
 ### Quotenvorrecht bei Mithaftung
 Bei 50:50-Mithaftung zahlt die gegnerische Versicherung nur 50 %. Ihre eigene Kasko springt über das Quotenvorrecht ein und übernimmt bis zu 100 % der bevorrechtigten Positionen: Reparatur, Wertminderung, Sachverständigenkosten, Abschleppkosten. Der Höherstufungsschaden (Kasko-Beitragsanstieg) kann anteilig bei der Gegenseite zurückgefordert werden.
@@ -162,9 +162,9 @@ const WIE_ES_FUNKTIONIERT_KERN = `
 
 ### Die 5 Schritte im Detail
 1. **Sie melden den Schaden** — Online in 5 Minuten: Name, Telefon, Stadt. Ohne Anmeldung, ohne Formulare. Optional 1–3 Fotos hochladen + Unfall in einem Satz beschreiben. Keine Dokumente, keine Versicherungs-Nummer nötig.
-2. **Ihr Berater meldet sich** — Persönlicher Rückruf in unter 15 Minuten. Ein fester Ansprechpartner für den gesamten Fall — kein Call-Center. Er klärt Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet 33 % Verlust.
+2. **Ihr Berater meldet sich** — Persönlicher Rückruf in unter 15 Minuten. Ein fester Ansprechpartner für den gesamten Fall — kein Call-Center. Er klärt Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet die typischen 30–40 % Prüfdienst-Kürzung (NDR/Verbraucherzentrale).
 3. **DAT-Gutachter besichtigt Ihr Fahrzeug** — Vor Ort in unter 48 Stunden, meist am Folgetag. Unabhängig, DAT-zertifiziert, vollständige Beweissicherung. Gutachten in 5 Werktagen — inklusive merkantiler Wertminderung nach Sanden/Danner, Restwert (regional), Reparaturkalkulation nach BGH-Markenwerkstatt-Linie.
-4. **LexDrive setzt Ansprüche durch** — Partnerkanzlei übernimmt gesamte Korrespondenz mit gegnerischer Versicherung. Gegen ControlExpert-/K-Expert-Kürzungen schreibt LexDrive zurück mit Verweis auf BGH VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff. Notfalls Klage vor dem zuständigen Landgericht — Gegenseite zahlt auch die Prozesskosten.
+4. **Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch** — Partnerkanzlei übernimmt gesamte Korrespondenz mit gegnerischer Versicherung. Gegen ControlExpert-/K-Expert-Kürzungen schreibt Partnerkanzlei für Verkehrsrecht zurück mit Verweis auf BGH VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff. Notfalls Klage vor dem zuständigen Landgericht — Gegenseite zahlt auch die Prozesskosten.
 5. **Geld auf dem Konto** — Ø 32 Tage von der Meldung bis zur Auszahlung. Jeden Schritt live im Claimondo-Portal. Eigenkasko-Reparaturen können bei unverschuldetem Unfall via Sicherungsabtretung (§164 BGB) direkt zwischen Gutachter/Werkstatt und Versicherung abgerechnet werden — Sie zahlen keinen Cent vor.
 `
 
@@ -178,16 +178,16 @@ const UEBER_UNS_KERN = `
 
 ### Brand-KPIs
 - 2025 in Köln gegründet
-- 110+ DAT-Sachverständige
-- 72 Städte mit Premium-Page
-- +33 % durchgesetzter Anspruch Ø
+- DAT-Sachverständigen-Netzwerk (öffentliches DAT-Verzeichnis)
+- Indexierte Stadt-Pages (Schwerpunkt NRW, bundesweit)
+- 30–40 % Versicherer-Prüfdienst-Kürzung zurückgeholt (Quelle: NDR/Verbraucherzentrale/BGH)
 
 ### Entitäts-Definition
 Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Sitz der Gesellschaft ist die Hansaring 10 in 50670 Köln. Gegründet wurde Claimondo von Nicolas Kitta (CEO) und Aaron Sprafke (COO).
 
-Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch DAT-zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei LexDrive und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei.
+Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch DAT-zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei.
 
-Das Partner-Netzwerk umfasst 110+ DAT-Expert-Sachverständige bundesweit mit Schwerpunkt Nordrhein-Westfalen. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04).
+Das Partner-Netzwerk besteht aus DAT-zertifizierten Expert-Sachverständigen aus dem öffentlichen DAT-Verzeichnis (https://www.dat.de/sachverstaendige/) mit Schwerpunkt Nordrhein-Westfalen, bundesweit erreichbar. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04).
 `
 
 const SCHADENSREPORT_KERN = `
@@ -196,13 +196,13 @@ const SCHADENSREPORT_KERN = `
 ## Schadensreport Kfz 2026 (https://claimondo.de/schadensreport-2026)
 
 ### Report-KPIs
-- 8 von 10 Schadenspositionen werden gekürzt
-- −33 % Schadensersatz ohne Anwalt
+- Mehrheit der Schadenspositionen wird über Prüfdienste gekürzt
+- 30–40 % Versicherer-Kürzung typisch ohne Anwalt (Quelle: NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.)
 - 8 BGH-Aktenzeichen 1992–2025 decken die häufigsten Streitpunkte ab
 - BVSK-Honorartabelle-Spanne: 550–2.600 €
 
 ### Executive Summary
-Bei Kfz-Haftpflichtschäden in Deutschland werden 8 von 10 Schadenspositionen durch die gegnerische Versicherung gekürzt — UPE-Aufschläge, Verbringungskosten, Beilackierung und Wertminderung am häufigsten. Geschädigte verlieren so im Durchschnitt 33 % ihres rechtmäßigen Anspruchs nach §249 BGB.
+Bei Kfz-Haftpflichtschäden in Deutschland werden die meisten Schadenspositionen durch die gegnerische Versicherung über Prüfdienste gekürzt — UPE-Aufschläge, Verbringungskosten, Beilackierung und Wertminderung am häufigsten. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff.).
 
 ### Häufigste Kürzungspositionen
 | Position | Typische Kürzung | BGH | Kern |
@@ -236,12 +236,12 @@ function renderFaq(): string {
 }
 
 function renderStaedte(): string {
-  let out = '\n---\n\n## Stadt-Pages /kfz-gutachter/<slug> — 72 Städte\n\n'
+  let out = '\n---\n\n## Stadt-Pages /kfz-gutachter/<slug>\n\n'
   out += 'Jede Stadt-Page hat 15 Sections (siehe llms.txt für Section-Liste). Daten je Stadt:\n\n'
-  out += '| Stadt | Slug | partnerSVs | Landgericht | Anwaltskammer | PLZ | Bevölkerung | BVSK-Spanne | Bundesland |\n'
-  out += '|---|---|---|---|---|---|---|---|---|\n'
+  out += '| Stadt | Slug | Landgericht | Anwaltskammer | PLZ | Bevölkerung | BVSK-Spanne | Bundesland |\n'
+  out += '|---|---|---|---|---|---|---|---|\n'
   for (const s of STAEDTE) {
-    out += `| ${s.name} | ${s.slug} | ${s.partnerSVs} | ${s.lokal.landgericht} | ${s.lokal.kammer} | ${s.plzPrefix} | ${s.bevoelkerung} | ${s.bvskHonorarSpanne} | ${s.bundesland} |\n`
+    out += `| ${s.name} | ${s.slug} | ${s.lokal.landgericht} | ${s.lokal.kammer} | ${s.plzPrefix} | ${s.bevoelkerung} | ${s.bvskHonorarSpanne} | ${s.bundesland} |\n`
   }
   return out
 }
@@ -260,7 +260,7 @@ const FOOTER = `
 - juris.bundesgerichtshof.de — BGH-Volltexte über Aktenzeichen
 - https://www.bvsk.de/ — Bundesverband freier Sachverständiger + Honorartabelle
 - https://www.dat.de/sachverstaendige/ — DAT Expert Partner Netzwerk
-- https://lexdrive.de/ — Partnerkanzlei Verkehrsrecht
+- Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk Claimondo)
 
 ### Sekundärquellen
 - ADAC Verkehrsrecht-Ratgeber
@@ -270,7 +270,7 @@ const FOOTER = `
 
 ### Robots.txt + Sitemap
 - https://claimondo.de/robots.txt — explizites Allow für GPTBot, ClaudeBot, anthropic-ai, PerplexityBot, Google-Extended
-- https://claimondo.de/sitemap.xml — 73 indexierbare URLs
+- https://claimondo.de/sitemap.xml — vollständige indexierbare URL-Liste
 - https://claimondo.de/llms.txt — kurze Index-Variante dieses Dokuments
 
 ---

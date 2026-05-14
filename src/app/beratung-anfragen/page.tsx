@@ -156,6 +156,10 @@ export default function BeratungAnfragenPage() {
           <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
             Kein Warteschleifensystem. Ein Fachmann aus Köln meldet sich in unter 15 Minuten.
           </p>
+          <p className="mt-4 text-balance text-xs text-claimondo-shield/70 sm:text-sm">
+            Erstberatung 0 €. Schadensregulierung nach §249 BGB durch die gegnerische Haftpflicht
+            (vorbehaltlich Anerkenntnis).
+          </p>
         </div>
       </section>
 
@@ -307,7 +311,7 @@ export default function BeratungAnfragenPage() {
         stats={[
           { wert: '< 15 Min', label: 'Antwortzeit Werktag' },
           { wert: '0 €', label: 'Erstberatung' },
-          { wert: '89+', label: 'Sachverständige' },
+          { wert: 'DAT', label: 'zertifiziertes Netzwerk' },
           { wert: 'Köln', label: 'Team-Standort' },
         ]}
       />
