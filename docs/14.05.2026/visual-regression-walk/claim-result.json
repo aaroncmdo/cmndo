@@ -1,0 +1,51 @@
+[
+  {
+    "label": "01-admin-faelle-liste",
+    "hasError": false,
+    "violet": 0,
+    "rose": 0,
+    "purple": 0
+  },
+  {
+    "label": "02-fallakte-default",
+    "hasError": false,
+    "violet": 0,
+    "rose": 0,
+    "purple": 0
+  },
+  {
+    "label": "03-tab-bersicht",
+    "hasError": false,
+    "violet": 0,
+    "rose": 0,
+    "purple": 0
+  },
+  {
+    "label": "04-tab-prozess",
+    "hasError": false,
+    "violet": 0,
+    "rose": 0,
+    "purple": 0
+  },
+  {
+    "label": "05-tab-dokumente",
+    "hasError": false,
+    "violet": 0,
+    "rose": 0,
+    "purple": 0
+  },
+  {
+    "label": "06-tab-kommunikation",
+    "hasError": false,
+    "violet": 0,
+    "rose": 0,
+    "purple": 0
+  },
+  {
+    "label": "07-tab-kanzlei",
+    "hasError": false,
+    "violet": 0,
+    "rose": 0,
+    "purple": 0
+  }
+]
