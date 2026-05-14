@@ -65,6 +65,10 @@ export async function POST(req: Request) {
         console.info(
           `[branding/upload] chroma-key applied — BG rgb(${result.bgColor.r},${result.bgColor.g},${result.bgColor.b})`,
         )
+      } else {
+        console.info(
+          `[branding/upload] chroma-key skipped — kein uniform-near-white/black/light BG erkannt (Logo durchgereicht)`,
+        )
       }
     } catch (err) {
       console.warn('[branding/upload] sharp post-process übersprungen:', err)
