@@ -60,6 +60,7 @@ export function MiniWizardClient() {
       email: '',
       telefon: '',
       vorname: '',
+      nachname: '',
       dsgvo_consent: false as unknown as true,
     },
   })
@@ -157,27 +158,45 @@ export function MiniWizardClient() {
         </legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <Label htmlFor="vorname">Vorname (optional)</Label>
+            <Label htmlFor="vorname">Vorname</Label>
             <Input
               id="vorname"
               autoComplete="given-name"
               placeholder="Max"
               {...register('vorname')}
+              aria-invalid={!!errors.vorname}
             />
-          </div>
-          <div>
-            <Label htmlFor="telefon">Telefon</Label>
-            <Input
-              id="telefon"
-              type="tel"
-              autoComplete="tel"
-              placeholder="+49 221 1234567"
-              {...register('telefon')}
-            />
-            {errors.telefon ? (
-              <p className="mt-1 text-sm text-red-600">{errors.telefon.message}</p>
+            {errors.vorname ? (
+              <p className="mt-1 text-sm text-red-600">{errors.vorname.message}</p>
             ) : null}
           </div>
+          <div>
+            <Label htmlFor="nachname">Nachname</Label>
+            <Input
+              id="nachname"
+              autoComplete="family-name"
+              placeholder="Mustermann"
+              {...register('nachname')}
+              aria-invalid={!!errors.nachname}
+            />
+            {errors.nachname ? (
+              <p className="mt-1 text-sm text-red-600">{errors.nachname.message}</p>
+            ) : null}
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="telefon">Telefon</Label>
+          <Input
+            id="telefon"
+            type="tel"
+            autoComplete="tel"
+            placeholder="+49 221 1234567"
+            {...register('telefon')}
+            aria-invalid={!!errors.telefon}
+          />
+          {errors.telefon ? (
+            <p className="mt-1 text-sm text-red-600">{errors.telefon.message}</p>
+          ) : null}
         </div>
         <div>
           <Label htmlFor="email">E-Mail</Label>
