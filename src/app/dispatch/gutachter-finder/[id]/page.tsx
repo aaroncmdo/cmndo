@@ -48,7 +48,7 @@ export default async function GutachterFinderDetailPage({
       sa_signatur_data_url, sa_unterzeichnet_am, status, erstellt_am, fall_id,
       zugeordneter_sv:sachverstaendige(
         id, firmenname,
-        profiles(anzeigename, telefon)
+        profiles!sachverstaendige_profile_id_fkey(anzeigename, telefon)
       ),
       sv_lead:sv_leads(id, name, telefon, email)
     `)
