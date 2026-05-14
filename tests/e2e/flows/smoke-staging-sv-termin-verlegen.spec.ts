@@ -150,14 +150,16 @@ test('AAR-911: SV verlegt einen bestätigten Termin', async ({ browser }) => {
     await shoot(page, '06-modal-grund.png')
   }
 
-  // 7) Submit
-  const submit = page.getByRole('button', { name: /verlegung.{0,3}beantragen|beantragen/i }).last()
+  // 7) Submit — Button heißt im Modal "Vorschlag senden"
+  // (siehe src/components/gutachter/TerminVerlegenModal.tsx)
+  const submit = page.getByRole('button', { name: /vorschlag senden|verlegung.{0,3}beantragen/i }).last()
   await expect(submit).toBeEnabled({ timeout: 5_000 })
   await submit.click()
   await page.waitForTimeout(3000)
   await shoot(page, '07-nach-submit.png')
 
-  // 8) Banner-Check
+  // 8) Banner-Check — nach Submit zeigt AuftragHeaderPanel
+  // "Verlegung beantragt — Bestätigung ausstehend"
   const banner = page.getByText(/verlegung beantragt|bestätigung ausstehend/i).first()
   const bannerVisible = await banner.isVisible().catch(() => false)
   console.log(`[8] Banner sichtbar: ${bannerVisible}`)
