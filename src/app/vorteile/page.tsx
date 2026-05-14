@@ -11,6 +11,7 @@ import { VersichererTaktikenSection } from '@/components/landing/VersichererTakt
 import { SiebenFehlerSection } from '@/components/landing/SiebenFehlerSection'
 import { WertminderungSandenDannerSection } from '@/components/landing/sections/WertminderungSandenDannerSection'
 import { TeslaEAutoSection } from '@/components/landing/sections/TeslaEAutoSection'
+import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
@@ -224,16 +225,7 @@ export default function VorteilePage() {
       </section>
 
       {/* 2 — Trust-Strip */}
-      <section className="border-y border-claimondo-border/60 bg-white" aria-label="Kennzahlen">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
-          {KPIS.map((k) => (
-            <div key={k.label} className="py-6 text-center">
-              <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">{k.wert}</div>
-              <div className="mt-1 text-xs text-claimondo-ondo">{k.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <TrustStripSection kpis={[...KPIS]} />
 
       {/* 3 — Die 6 Vorteile (Cards mit Bullets) */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="vorteile-grid">

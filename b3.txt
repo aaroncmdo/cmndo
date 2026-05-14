@@ -1,0 +1,104 @@
+﻿
+> claimondo-v2@0.1.0 build
+> next build
+
+node.exe : ⚠ Warning: Next.js 
+inferred your workspace root, 
+but it may not be correct.
+In Zeile:1 Zeichen:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (⚠ Warning  
+  : Next...not be correct.:   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+ We detected multiple 
+lockfiles and selected the 
+directory of C:\Users\Aaron Sp
+rafke\stampit-app\stampit-app\
+claimondo-v2\package-lock.json
+ as the root directory.
+ To silence this warning, set 
+`turbopack.root` in your 
+Next.js config, or consider 
+removing one of the lockfiles 
+if it's not needed.
+   See https://nextjs.org/docs
+/app/api-reference/config/next
+-config-js/turbopack#root-dire
+ctory for more information.
+ Detected additional 
+lockfiles: 
+   * C:\Users\Aaron Sprafke\st
+ampit-app\stampit-app\claimond
+o-v2\.claude\worktrees\koeln-p
+remium-stadt-rework\package-lo
+ck.json
+
+▲ Next.js 16.2.1 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  · clientTraceMetadata
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 69s
+  Running next.config.js provided runAfterProductionCompile ...
+✓ Completed runAfterProductionCompile in 874ms
+  Running TypeScript ...
+  Finished TypeScript in 110s ...
+  Collecting page data using 21 workers ...
+⚠ Using edge runtime on a 
+page currently disables 
+static generation for that 
+page
+  Generating static pages using 21 workers (0/236) ...
+  Generating static pages using 21 workers (59/236) 
+  Generating static pages using 21 workers (118/236) 
+  Generating static pages using 21 workers (177/236) 
+✓ Generating static pages using 21 workers (236/236) in 1983ms
+  Finalizing page optimization ...
+unhandledRejection Error: 
+EBUSY: resource busy or 
+locked, copyfile 
+'C:\Users\Aaron Sprafke\stampi
+t-app\stampit-app\claimondo-v2
+\.claude\worktrees\koeln-premi
+um-stadt-rework\.next\server\i
+nterception-route-rewrite-mani
+fest.js' -> 'C:\Users\Aaron Sp
+rafke\stampit-app\stampit-app\
+claimondo-v2\.claude\worktrees
+\koeln-premium-stadt-rework\.n
+ext\standalone\.claude\worktre
+es\koeln-premium-stadt-rework\
+.next\server\interception-rout
+e-rewrite-manifest.js'
+    at ignore-listed frames {
+  errno: -4082,
+  code: 'EBUSY',
+  syscall: 'copyfile',
+  path: 'C:\\Users\\Aaron Spra
+fke\\stampit-app\\stampit-app\
+\claimondo-v2\\.claude\\worktr
+ees\\koeln-premium-stadt-rewor
+k\\.next\\server\\interception
+-route-rewrite-manifest.js',
+  dest: 'C:\\Users\\Aaron Spra
+fke\\stampit-app\\stampit-app\
+\claimondo-v2\\.claude\\worktr
+ees\\koeln-premium-stadt-rewor
+k\\.next\\standalone\\.claude\
+\worktrees\\koeln-premium-stad
+t-rework\\.next\\server\\inter
+ception-route-rewrite-manifest
+.js'
+}
