@@ -29,7 +29,7 @@ Spec: `tests/e2e/flows/smoke-staging-sv-termin-verlegen.spec.ts` (E2E gegen Stag
 | 7 | „Verlegung beantragen" submit |
 | 8 | Banner-Check |
 
-## Ergebnis (Pre-Test-Run gegen Staging)
+## Ergebnis Run 1 (vor Login-Diagnose-Erweiterung)
 
 | Schritt | Erwartung | Ist | Status |
 |---|---|---|---|
@@ -38,20 +38,51 @@ Spec: `tests/e2e/flows/smoke-staging-sv-termin-verlegen.spec.ts` (E2E gegen Stag
 | 3 `/gutachter/kalender?view=liste` | Liste mit Fall-Links | **Keine Fall-Links** — Test-SV hat keine Termine | ⚠️ |
 | 4-8 | Modal + Submit + Banner | nicht erreicht — Smoke endet bei Schritt 3 mit `[WARN]` | ⏸️ |
 
-Sichtbar in `03-kalender-liste.png` + `03b-keine-faelle.png`: der Test-SV-Account (Test-Aaron) hat keine bestätigten Termine in `/gutachter/kalender`, weshalb das Smoke vor dem eigentlichen Modal-Flow abbricht.
+Sichtbar in `03-kalender-liste.png` + `03b-keine-faelle.png`: der Test-Aaron-Account hatte zum Zeitpunkt des ersten Runs keine bestätigten Termine in `/gutachter/kalender`.
+
+## Ergebnis Run 2 (nach Login-Diagnose-Erweiterung)
+
+In einem späteren Run-Versuch (Spec um Toast-/2FA-Detection erweitert + 8s-Wartepause direkt nach Submit + `02a-direkt-nach-click.png`) zeigt sich ein **zweiter, separater Befund**:
+
+| Schritt | Beobachtung |
+|---|---|
+| 1 Login | Submit feuert, aber Button steht in `02a-direkt-nach-click.png` (8s nach Click) **immer noch** auf „Wird angemeldet…" — Spinner-Icon. `02-after-login.png` (nochmal 60s+ später) zeigt unverändert dieselbe Login-Page. Kein Toast-Error, kein 2FA-Field. |
+
+**Vermutung:** die Login-Server-Action gegen den Staging-Slot **hängt** oder antwortet sehr langsam für `aaron.sprafke@claimondo.de`. Andere Möglichkeiten:
+
+- Server-Action wirft 500 ohne Toast-Pipe
+- Auth-Cookie wird gesetzt aber Client-Redirect-Trigger fehlt
+- nginx-Buffer-Issue (Memory `feedback_nginx_proxy_buffer.md` — 502 auf POST /login bei zu kleinem `proxy_buffer_size`)
 
 ## Befund
 
-**Setup-Issue, kein Code-Bug:** Test-Aaron-Account hat keine Test-Daten. Damit AAR-911 verifiziert werden kann, muss vor dem Smoke ein Test-Auftrag mit bestätigtem Termin für den Test-Aaron-SV existieren.
+**Zwei unabhängige Issues blockieren den Smoke:**
+
+1. **Setup-Issue (Run 1):** Test-Aaron hat keine bestätigten Termine — selbst bei sauberem Login wäre der Modal-Flow nicht erreichbar
+2. **Login-Latenz/Hänger (Run 2):** der Login geht nicht mehr durch — Spinner-Stuck. Diagnose-Schritte:
+   - VPS PM2-Logs für `claimondo-v2-staging` (nach `[POST /login]`-Einträgen)
+   - nginx `error.log` auf „upstream sent too big header" o.ä.
+   - Sentry Server-Project nach Login-Action-Fehlern für die letzten Minuten
+   - Direkter `curl -i` gegen `https://app.staging.claimondo.de/login` mit Basic-Auth + Form-Body um zu sehen ob die Action-URL überhaupt antwortet
 
 ## Nächste Schritte
+
+### 1. Login-Hänger zuerst lösen (blockiert alles)
+
+- [ ] VPS-Logs auswerten: `ssh aaron@212.132.119.110 'pm2 logs claimondo-v2-staging --lines 200 --nostream'` + nach `[POST /login]` filtern
+- [ ] nginx-Logs: `sudo tail -200 /var/log/nginx/error.log` auf dem VPS — Memory `feedback_nginx_proxy_buffer.md` warnt vor 502 bei zu kleinem `proxy_buffer_size`
+- [ ] Sentry Server-Project auf Login-Action-Fehler der letzten Stunde prüfen
+- [ ] Falls nginx-Buffer schuld: PR mit `proxy_buffer_size 32k; proxy_buffers 8 32k;` für `app.staging.claimondo.de`-vhost
+- [ ] Falls Server-Action selbst hängt: lokal mit echten Staging-DB-Creds reproduzieren
+
+### 2. Sobald Login wieder geht — AAR-911-Setup nachziehen
 
 - [ ] Test-Auftrag in der Staging-DB anlegen für Test-Aaron (`aaron.sprafke@claimondo.de`):
   - Lead anlegen + zuweisen
   - Termin auf `bestaetigt` setzen
   - Datum in der Zukunft (mind. 24h voraus, damit „Verlegen"-Button aktiv ist)
 - [ ] Alternativ: `aar-cj-iter3-smoke` / `cj-smoke-framework`-Seeder ausfuehren — der legt Smoke-Fälle inkl. Termine an (siehe `docs/12.05.2026/cj-smoke-iteration-3/`)
-- [ ] Smoke neu fahren — erwartet: Steps 4-8 alle grün, Banner sichtbar
+- [ ] Smoke neu fahren — erwartet: Steps 1-8 alle grün, Banner sichtbar
 
 ## Hardening der Spec (in diesem Commit gefixt)
 
