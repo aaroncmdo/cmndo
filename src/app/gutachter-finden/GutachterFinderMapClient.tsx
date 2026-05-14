@@ -24,18 +24,17 @@ import { useEffect, useRef, useState } from 'react'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import type { Map as MapboxMap, Marker, Popup } from 'mapbox-gl'
 import { ChevronUp } from 'lucide-react'
-import type { SvLead, AktiverSV } from '@/lib/actions/gutachter-finder-actions'
+import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
 // AAR-glass-s1: Liquid-Glass-Design-System (siehe
 // docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md).
 import { GlassPill, BeratungVereinbarenButton } from '@/components/shared/glass'
 
 type Props = {
-  /** Tier-3 Lead-Partner (sv_leads). Werden als kleine graue Marker
-   * ohne Iso-Halo dargestellt — Fallback wenn kein Tier-1 die Region deckt. */
-  svLeads: SvLead[]
-  /** Tier-1 Pro/Premium-SVs mit Calendar-Sync. Werden mit Iso-Halo + Premium-
-   * Marker dargestellt — die "richtigen" Partner. */
-  aktiveSVs?: AktiverSV[]
+  /** Tier-3 Lead-Partner (sv_leads). Dead-Pins, nicht klickbar, kein Popup. */
+  svLeads: SvLeadPublic[]
+  /** Tier-1 SVs (sachverstaendige). paket='standard' = klickbar mit anonymem
+   * Profil-Popup. Andere Pakete = Dead-Pin wie Tier-3. */
+  aktiveSVs?: AktiverSVPublic[]
   /** Server-Component-Rendered DynamicWizard für die Sidebar. */
   wizardSlot: React.ReactNode
 }
@@ -52,6 +51,124 @@ const USER_LOCATION_ZOOM = 10.5
 // werden vom Browser beim Style-Resolution-Pass evaluiert.
 const COL_ONDO = 'var(--map-pin-accent, #4573A2)'
 const COL_NAVY = 'var(--map-pin-exact, #0D1B3E)'
+
+// Generischer Dead-Pin (Claimondo-Logo-Look) — nicht klickbar, kein Hover,
+// kein Popup. Wird für SVs mit paket!='standard' UND alle sv_leads
+// (Tier-3 Excel-Imports) verwendet. Zweck: zeigt Marker-Dichte ohne SV-Identität.
+function addDeadPin(
+  map: MapboxMap,
+  store: Marker[],
+  lng: number,
+  lat: number,
+) {
+  const el = document.createElement('div')
+  // pointer-events:none + cursor:default → kein Klick, kein Hand-Cursor.
+  // Mapbox propagiert Klicks dann an die Karte (Pan/Zoom) statt an den Pin.
+  el.style.pointerEvents = 'none'
+  el.style.cursor = 'default'
+  el.setAttribute('aria-hidden', 'true')
+  el.innerHTML = `
+    <div class="sv-deadpin" style="width:18px;height:18px;display:grid;place-items:center;border-radius:50%;background:${COL_NAVY};box-shadow:0 2px 6px rgba(13,27,62,0.30);border:2px solid #fff">
+      <span style="font-family:Montserrat,system-ui,sans-serif;font-size:9px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.02em">C</span>
+    </div>
+  `
+  const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+    .setLngLat([lng, lat])
+    .addTo(map)
+  store.push(marker)
+}
+
+// Klickbarer Avatar-Marker für SVs mit paket='standard'. Öffnet ein
+// anonymisiertes Profil-Popup (Region, Sterne, Specs, Vorname-Initiale).
+function addClickableMarker(
+  map: MapboxMap,
+  store: Marker[],
+  sv: AktiverSVPublic,
+) {
+  const initiale = sv.vorname_initiale ?? '·'
+  const el = document.createElement('div')
+  el.style.cursor = 'pointer'
+  el.innerHTML = `
+    <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom">
+      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${COL_ONDO};background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:15px;font-weight:800;color:${COL_NAVY};box-shadow:0 6px 18px rgba(13,27,62,0.22);position:relative">
+        ${initiale}
+        <div style="position:absolute;bottom:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#34C759;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
+      </div>
+    </div>
+  `
+
+  // Privacy-Popup: nur Region + Sterne + Top-3-Specs + Wizard-CTA.
+  // KEIN Firmenname, KEINE Adresse, KEIN Telefon/Email, KEIN Vor-/Nachname.
+  const stadt = sv.stadt ?? 'Ihrer Region'
+  const sterneRow =
+    sv.bewertungs_durchschnitt && sv.bewertungs_anzahl
+      ? `
+        <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:11.5px;color:${COL_NAVY};font-weight:600">
+          <span style="color:#F3C053;font-size:13px;line-height:1">★</span>
+          <span>${sv.bewertungs_durchschnitt.toFixed(1)} <span style="color:#6b7280;font-weight:500">(${sv.bewertungs_anzahl} Bewertungen)</span></span>
+        </div>
+      `
+      : ''
+  const specsRow =
+    sv.spezifikationen_top3.length > 0
+      ? `
+        <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">
+          ${sv.spezifikationen_top3
+            .map(
+              (s) =>
+                `<span style="padding:2px 8px;border-radius:999px;background:rgba(69,115,162,0.08);color:${COL_NAVY};font-size:10.5px;font-weight:600;letter-spacing:-.01em">${escapeHtml(s)}</span>`,
+            )
+            .join('')}
+        </div>
+      `
+      : ''
+  const popupHTML = `
+    <div style="padding:14px 16px;font-family:Montserrat,system-ui,sans-serif;min-width:240px;max-width:280px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:${COL_ONDO};display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">${initiale}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12.5px;font-weight:700;color:${COL_NAVY};line-height:1.25;letter-spacing:-.01em">Sachverständiger in ${escapeHtml(stadt)}</div>
+          <div style="font-size:10.5px;color:#6b7280;margin-top:1px;font-weight:500">DAT-zertifiziert · BVSK</div>
+        </div>
+      </div>
+      ${sterneRow}
+      ${specsRow}
+      <button
+        data-testid="sv-anfrage-popup"
+        data-sv-id="${sv.id}"
+        onclick="document.dispatchEvent(new CustomEvent('claimondo:open-wizard', { detail: { svId: '${sv.id}' } }))"
+        style="margin-top:12px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12.5px;font-weight:600;padding:9px 12px;cursor:pointer;letter-spacing:-.01em"
+      >
+        Über Wizard anfragen →
+      </button>
+    </div>
+  `
+  const popup = new mapboxgl.Popup({ offset: 24, closeButton: true, maxWidth: '280px' }).setHTML(popupHTML)
+  const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+    .setLngLat([sv.standort_lng, sv.standort_lat])
+    .setPopup(popup)
+    .addTo(map)
+  store.push(marker)
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => {
+    switch (c) {
+      case '&':
+        return '&amp;'
+      case '<':
+        return '&lt;'
+      case '>':
+        return '&gt;'
+      case '"':
+        return '&quot;'
+      case "'":
+        return '&#39;'
+      default:
+        return c
+    }
+  })
+}
 
 export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }: Props) {
   const mapRef = useRef<MapboxMap | null>(null)
@@ -143,14 +260,16 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
       // Verlust. Falls wieder gewünscht: korrekte interpolate-Syntax nutzen
       // (['interpolate', ['linear'], input, stop1_in, stop1_out, stop2_in, ...]).
 
-      // 2026-05-12 Plan v3 Backlog: Iso-Halos NUR für Tier-1 (echte SVs aus
-      // sachverstaendige). Tier-3 (sv_leads) bleibt ohne Iso — zu viele Marker
-      // sonst und Iso ist nicht echte Verfügbarkeit, sondern Standard-25km.
+      // 2026-05-12 Plan v3 Backlog: Iso-Halos für Tier-1.
+      // Aaron 14.05.2026: nur für paket='standard' (= klickbare SVs) — Pakete
+      // != standard sind Dead-Pins, ihre Iso-Halo würde Identifikations-
+      // Hinweise geben (nur 1 SV mit Halo in Region X → öffentliche Suche
+      // findet ihn). Tier-3 sv_leads bleiben ohne Iso.
       const tier1Features = aktiveSVs
-        .filter((s) => s.isochrone_polygon && s.standort_lat != null && s.standort_lng != null)
+        .filter((s) => s.paket === 'standard' && s.isochrone_polygon)
         .map((s) => ({
           type: 'Feature' as const,
-          properties: { id: s.id, name: s.firmenname ?? '', tier: 'pro' },
+          properties: { id: s.id, tier: 'standard' },
           geometry: s.isochrone_polygon as GeoJSON.Polygon,
         }))
 
@@ -183,99 +302,37 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         })
       }
 
-      // ─── Tier-1 Marker (echte SVs) — Premium-Look ──────────────────
+      // ─── Tier-1 Marker ─────────────────────────────────────────────
+      // Aaron 14.05.2026: Privacy-Refactor. SVs mit paket='standard' werden
+      // als klickbarer Avatar-Marker mit anonymem Profil-Popup gerendert
+      // (Region, Sterne, Specs, Vorname-Initiale). Alle anderen Pakete +
+      // sv_leads sind Dead-Pins ohne Klick/Hover/Popup — generischer
+      // Claimondo-Pin, der nur die Marker-Dichte zeigt ohne den SV preis-
+      // zugeben. Buchung läuft ausschließlich über den Wizard (Sidebar).
       aktiveSVs.forEach((sv) => {
-        if (sv.standort_lat == null || sv.standort_lng == null) return
-        const name = sv.firmenname ?? ''
-        const initials = name.split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'SV'
-        const el = document.createElement('div')
-        el.style.cursor = 'pointer'
-        // Premium-Look: groesserer Kreis, ondo Ring, Gold-Akzent-Badge
-        el.innerHTML = `
-          <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom">
-            <div style="width:44px;height:44px;border-radius:50%;border:3px solid ${COL_ONDO};background:linear-gradient(135deg,#fff 60%,rgba(243,192,83,0.12));display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:14px;font-weight:800;color:${COL_NAVY};box-shadow:0 6px 18px rgba(13,27,62,0.22);position:relative">
-              ${initials}
-              <div style="position:absolute;bottom:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:#34C759;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
-              <div style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#F3C053;border:2px solid #fff;display:grid;place-items:center;font-size:9px;font-weight:900;color:${COL_NAVY}">★</div>
-            </div>
-            <div style="margin-top:4px;padding:2px 8px;border-radius:999px;background:${COL_NAVY};color:#fff;font-family:Inter,Montserrat,sans-serif;font-size:10px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;box-shadow:0 2px 8px rgba(13,27,62,0.30)">
-              Pro
-            </div>
-          </div>
-        `
-
-        const popupHTML = `
-          <div style="padding:14px 16px;font-family:Montserrat,system-ui,sans-serif;min-width:220px;max-width:280px">
-            <div style="display:inline-block;padding:2px 8px;border-radius:999px;background:#F3C053;color:${COL_NAVY};font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">★ Premium-Partner</div>
-            <div style="font-size:13px;font-weight:700;color:${COL_NAVY};line-height:1.3;letter-spacing:-.01em">${name}</div>
-            <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:11px;color:#10b981;font-weight:600">
-              <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block"></span>
-              Verfügbar mit Kalender-Sync
-            </div>
-            <button data-testid="sv-anfrage-popup" data-sv-id="${sv.id}" data-sv-tier="premium" onclick="document.dispatchEvent(new CustomEvent('claimondo:select-sv', { detail: { id: '${sv.id}', tier: 'premium' } }))" style="margin-top:10px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px 12px;cursor:pointer;letter-spacing:-.01em">
-              Diesen Premium-Gutachter anfragen
-            </button>
-          </div>
-        `
-        const popup = new mapboxgl.Popup({ offset: 28, closeButton: true, maxWidth: '280px' }).setHTML(popupHTML)
-        const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-          .setLngLat([sv.standort_lng, sv.standort_lat])
-          .setPopup(popup)
-          .addTo(map)
-        markersRef.current.push(marker)
+        if (sv.paket === 'standard') {
+          addClickableMarker(map, markersRef.current, sv)
+        } else {
+          addDeadPin(map, markersRef.current, sv.standort_lng, sv.standort_lat)
+        }
       })
 
-      // ─── Tier-3 Marker (Lead-Partner) — kleiner, grau, ohne Iso ───
+      // ─── Tier-3 sv_leads — immer Dead-Pin ────────────────────────────
       svLeads.forEach((sv) => {
-        const initials = (sv.firma ?? sv.name).split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
-        const el = document.createElement('div')
-        el.style.cursor = 'pointer'
-        // Tier-3-Look: kleiner Kreis, neutraler Border, kein Gold-Akzent
-        el.innerHTML = `
-          <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom;opacity:0.92">
-            <div style="width:32px;height:32px;border-radius:50%;border:2px solid #8a93a6;background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:11px;font-weight:700;color:#4b5468;box-shadow:0 2px 8px rgba(13,27,62,0.12);position:relative">
-              ${initials}
-            </div>
-            <div style="margin-top:3px;padding:1px 6px;border-radius:999px;background:rgba(13,27,62,0.70);color:#fff;font-family:Inter,Montserrat,sans-serif;font-size:9px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;backdrop-filter:blur(8px)">
-              ${sv.ort ?? ''}
-            </div>
-          </div>
-        `
-
-        const popupHTML = `
-          <div style="padding:14px 16px;font-family:Montserrat,system-ui,sans-serif;min-width:220px;max-width:280px">
-            <div style="font-size:13px;font-weight:700;color:${COL_NAVY};line-height:1.3;letter-spacing:-.01em">${sv.firma ?? sv.name}</div>
-            <div style="font-size:11px;color:#6b7280;margin-top:3px">${sv.adresse}</div>
-            <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:11px;color:#10b981;font-weight:600">
-              <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block"></span>
-              Verfügbar in Ihrer Region
-            </div>
-            <button data-testid="sv-anfrage-popup" data-sv-id="${sv.id}" data-sv-tier="lead" onclick="document.dispatchEvent(new CustomEvent('claimondo:select-sv', { detail: { id: '${sv.id}', tier: 'lead' } }))" style="margin-top:10px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:8px 12px;cursor:pointer;letter-spacing:-.01em">
-              Diesen Gutachter anfragen
-            </button>
-          </div>
-        `
-
-        const popup = new mapboxgl.Popup({ offset: 26, closeButton: true, maxWidth: '280px' }).setHTML(popupHTML)
-
-        const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-          .setLngLat([sv.lng, sv.lat])
-          .setPopup(popup)
-          .addTo(map)
-
-        markersRef.current.push(marker)
+        addDeadPin(map, markersRef.current, sv.lng, sv.lat)
       })
     })
 
-    // SV-Auswahl-Event abfangen (vom Popup-Button)
-    function handleSelect(e: Event) {
-      const ce = e as CustomEvent<string>
-      setHoveredId(ce.detail)
+    // Popup-CTA "Über Wizard anfragen →" feuert claimondo:open-wizard. Wir
+    // scrollen die Sidebar zum Anfang und öffnen das Mobile-Bottom-Sheet —
+    // KEIN direkter Kontakt-Pfad, keine Identität preisgegeben.
+    function handleOpenWizard(e: Event) {
+      const ce = e as CustomEvent<{ svId?: string }>
+      if (ce.detail?.svId) setHoveredId(ce.detail.svId)
       sidebarScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
-      // Auf Mobile das Bottom-Sheet auch öffnen
       setMobileSheetOpen(true)
     }
-    document.addEventListener('claimondo:select-sv', handleSelect)
+    document.addEventListener('claimondo:open-wizard', handleOpenWizard)
 
     // 2026-05-12 Aaron-Smoke: Beim Page-Load Geolocation anfragen. Bei
     // Allow: Map zoomt zum User, Header-Badge wechselt auf "in Ihrer
@@ -300,7 +357,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     return () => {
       window.clearTimeout(loadTimeout)
       resizeObs.disconnect()
-      document.removeEventListener('claimondo:select-sv', handleSelect)
+      document.removeEventListener('claimondo:open-wizard', handleOpenWizard)
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
       popupRef.current?.remove()
@@ -400,15 +457,13 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
               <span className="sm:hidden">
                 {svLeads.length + aktiveSVs.length} SVs {userLocation ? 'in Ihrer Nähe' : 'verfügbar'}
               </span>
-              {/* Voll ab sm */}
+              {/* Voll ab sm — Aaron 14.05.2026: kein "Premium-Partner"-Wording
+                  mehr (Privacy-Refactor: paket-Detail wird nicht preisgegeben).
+                  Einheitliche Sachverständigen-Zählung. */}
               <span className="hidden sm:inline">
                 {userLocation
-                  ? aktiveSVs.length > 0
-                    ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} Sachverständige in Ihrer Nähe`
-                    : `${svLeads.length} Sachverständige in Ihrer Nähe`
-                  : aktiveSVs.length > 0
-                    ? `${aktiveSVs.length} Premium-Partner + ${svLeads.length} weitere Sachverständige bundesweit`
-                    : `${svLeads.length} Sachverständige bundesweit verfügbar`}
+                  ? `${svLeads.length + aktiveSVs.length} Sachverständige in Ihrer Nähe`
+                  : `${svLeads.length + aktiveSVs.length} Sachverständige bundesweit verfügbar`}
               </span>
             </span>
           </GlassPill>
