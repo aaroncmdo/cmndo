@@ -10,9 +10,13 @@ import { Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 
 const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', dispatch: 'Dispatcher', kanzlei: 'Kanzlei' }
-const ROLLE_COLORS: Record<string, string> = { admin: 'bg-red-50 text-red-300', kundenbetreuer: 'bg-green-50 text-green-300', dispatch: 'bg-amber-50 text-amber-300', kanzlei: 'bg-claimondo-ondo/[0.06] text-claimondo-ondo/70' }
+// AAR-Visual-Audit 14.05.2026: Admin → claimondo-navy statt red-50. Admin ist
+// die privilegierte Rolle, nicht "danger" — semantisches Mismatch. Brand-Tone
+// passt besser. Kundenbetreuer/Dispatch/Kanzlei bleiben semantisch (Funktions-
+// Kategorie statt Severität).
+const ROLLE_COLORS: Record<string, string> = { admin: 'bg-claimondo-navy/[0.10] text-claimondo-navy', kundenbetreuer: 'bg-green-50 text-green-700', dispatch: 'bg-amber-50 text-amber-700', kanzlei: 'bg-claimondo-ondo/[0.06] text-claimondo-ondo' }
 const KAT_LABELS: Record<string, string> = { dispatch: 'Dispatch', kundenbetreuer: 'Kundenbetr.', admin: 'Admin', entwicklung: 'Entwicklung' }
-const KAT_COLORS: Record<string, string> = { dispatch: 'bg-amber-50 text-amber-300', kundenbetreuer: 'bg-green-50 text-green-300', admin: 'bg-red-50 text-red-300', entwicklung: 'bg-claimondo-ondo/5 text-claimondo-light-blue' }
+const KAT_COLORS: Record<string, string> = { dispatch: 'bg-amber-50 text-amber-700', kundenbetreuer: 'bg-green-50 text-green-700', admin: 'bg-claimondo-navy/[0.10] text-claimondo-navy', entwicklung: 'bg-claimondo-ondo/[0.06] text-claimondo-light-blue' }
 
 type Mitarbeiter = {
   id: string; email: string | null; vorname: string | null; nachname: string | null
