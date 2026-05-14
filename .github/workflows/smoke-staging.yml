@@ -1,0 +1,59 @@
+name: Smoke → Staging (Customer-Journey)
+
+# Läuft automatisch nach erfolgreichem Staging-Deploy + manuell via Tab.
+# Hittet app.staging.claimondo.de Basic-Auth, durchklickt Marketing →
+# GutachterFinder → Kunde-Portal → Dispatch-Portal und fängt pageerror /
+# Stop-on-Fail-Bedingungen. Artefakte (Screenshots + Reports) werden bei
+# jedem Run hochgeladen, auch bei Erfolg.
+
+on:
+  workflow_run:
+    workflows: ["Deploy → VPS (staging.app.claimondo.de)"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    # workflow_run feuert auch bei deploy-Fail — wir wollen nur bei success.
+    # workflow_dispatch lässt conclusion leer → fällt auf "always run".
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Playwright + Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run Smoke
+        env:
+          SMOKE_BASIC_AUTH_USER: ${{ secrets.SMOKE_BASIC_AUTH_USER }}
+          SMOKE_BASIC_AUTH_PASS: ${{ secrets.SMOKE_BASIC_AUTH_PASS }}
+          SMOKE_KUNDE_EMAIL: ${{ secrets.SMOKE_KUNDE_EMAIL }}
+          SMOKE_KUNDE_PASS: ${{ secrets.SMOKE_KUNDE_PASS }}
+          SMOKE_DISPATCH_EMAIL: ${{ secrets.SMOKE_DISPATCH_EMAIL }}
+          SMOKE_DISPATCH_PASS: ${{ secrets.SMOKE_DISPATCH_PASS }}
+          SMOKE_SCREENSHOT_BASE: ${{ github.workspace }}/smoke-artifacts/run-${{ github.run_id }}
+        run: node scripts/smoke-cj-iter3-v2.mjs
+
+      - name: Upload Screenshots + Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-staging-run-${{ github.run_id }}
+          path: smoke-artifacts/run-${{ github.run_id }}/
+          retention-days: 14
+          if-no-files-found: warn
