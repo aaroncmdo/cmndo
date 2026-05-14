@@ -122,16 +122,32 @@ export async function getTriageLeads(
 
   // 2) PLZ-Map laden. `ort` ist seit AAR-894 in der DB, aber noch nicht in
   // den generierten Typen → über expliziten Select-String + Row-Cast holen.
-  const { data: plzRows, error: pErr } = await supabase
-    .from('plz_geo')
-    .select('plz, lat, lng, ort' as 'plz, lat, lng')
+  // AAR-912: paginiert (Supabase PostgREST cappt bei 1000 pro Page; plz_geo
+  // hat ~10.823 Einträge → ohne Pagination fallen Leads mit hoher PLZ in
+  // unlocalized).
+  type PlzRowWithOrt = { plz: string; lat: number; lng: number; ort?: string | null }
+  const PAGE = 1000
+  let plzRows: PlzRowWithOrt[] = []
+  let pErr: { message: string } | null = null
+  for (let page = 0; page < 15; page++) {
+    const res = await supabase
+      .from('plz_geo')
+      .select('plz, lat, lng, ort' as 'plz, lat, lng')
+      .range(page * PAGE, page * PAGE + PAGE - 1)
+    if (res.error) {
+      pErr = res.error
+      break
+    }
+    const chunk = (res.data ?? []) as unknown as PlzRowWithOrt[]
+    plzRows = plzRows.concat(chunk)
+    if (chunk.length < PAGE) break
+  }
 
   if (pErr) {
     console.error('[karte] plz_geo query failed', pErr)
   }
-  type PlzRowWithOrt = { plz: string; lat: number; lng: number; ort?: string | null }
   const plzMap = new Map<string, PlzGeoRow>(
-    ((plzRows ?? []) as unknown as PlzRowWithOrt[]).map((r) => [
+    plzRows.map((r) => [
       r.plz,
       {
         plz: r.plz,
