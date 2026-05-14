@@ -73,7 +73,6 @@ export default async function OnboardingPage({
   }
 
   const { step } = await searchParams
-  if (profile?.onboarding_completed_at && !step) redirect('/kunde')
 
   type FallRow = {
     id: string
@@ -87,12 +86,13 @@ export default async function OnboardingPage({
     hat_vorschaeden: boolean | null
     lead_id: string | null
     besichtigungsort_adresse: string | null
+    onboarding_complete: boolean | null
   } | null
   let fall: FallRow = null
   try {
     const { data, error } = await supabase
       .from('v_faelle_mit_aktuellem_termin')
-      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse')
+      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse, onboarding_complete')
       .eq('kunde_id', user.id)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -101,6 +101,21 @@ export default async function OnboardingPage({
     fall = data as FallRow
   } catch (err) {
     return <DiagPage stage="fall-load" error={err} />
+  }
+
+  // 2026-05-14: Redirect-Loop-Fix. Vorher knallte /kunde ↔ /kunde/onboarding
+  // in eine Endlos-Schleife: /kunde redirected wenn fall.onboarding_complete
+  // false ist, /kunde/onboarding redirected wenn profile.onboarding_completed_at
+  // gesetzt ist. Wenn BEIDE Bedingungen wahr sind (User hat Account-Onboarding
+  // gemacht, neuer Fall braucht Wizard), bouncen die Seiten ewig.
+  //
+  // Logik jetzt: Redirect zu /kunde nur wenn das Account-Onboarding fertig IST
+  // UND es entweder keinen Fall gibt ODER der Fall sein per-Fall-Onboarding
+  // auch erledigt hat. Explizites step= bleibt als Override (für Direct-Link
+  // auf einzelne Wizard-Steps z.B. aus Notion).
+  const fallNeedsOnboarding = fall?.onboarding_complete === false
+  if (profile?.onboarding_completed_at && !step && !fallNeedsOnboarding) {
+    redirect('/kunde')
   }
 
   let svName: string | null = null
